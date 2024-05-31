@@ -36,6 +36,7 @@ import no.nav.familie.tilbake.common.exceptionhandler.SperretKravgrunnlagFeil
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
+import no.nav.familie.tilbake.historikkinnslag.HistorikkinnslagRepository
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.kravgrunnlag.batch.GammelKravgrunnlagService
 import no.nav.familie.tilbake.kravgrunnlag.batch.GammelKravgrunnlagTask
@@ -91,6 +92,9 @@ internal class GammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var stegService: StegService
 
+    @Autowired
+    private lateinit var historikkinnslagRepository: HistorikkinnslagRepository
+
     private val mockHentKravgrunnlagService: HentKravgrunnlagService = mockk()
 
     private lateinit var historikkService: HistorikkService
@@ -104,12 +108,12 @@ internal class GammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        mottattXMl = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
+        mottattXMl = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
         xmlMottatt = xmlMottattRepository.insert(Testdata.økonomiXmlMottatt.copy(melding = mottattXMl))
         mottattXmlId = xmlMottatt.id
 
         val kafkaProducer: KafkaProducer = mockk()
-        historikkService = HistorikkService(behandlingRepository, fagsakRepository, brevSporingRepository, kafkaProducer)
+        historikkService = HistorikkService(behandlingRepository, brevSporingRepository, historikkinnslagRepository)
         gammelKravgrunnlagService =
             GammelKravgrunnlagService(
                 behandlingRepository,
@@ -127,7 +131,6 @@ internal class GammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             GammelKravgrunnlagTask(gammelKravgrunnlagService, hentFagsystemsbehandlingService)
 
         every { kafkaProducer.sendHentFagsystemsbehandlingRequest(any(), any()) } returns Unit
-        every { kafkaProducer.sendHistorikkinnslag(any(), any(), any()) } returns Unit
     }
 
     @AfterEach
@@ -204,9 +207,9 @@ internal class GammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any()) } returns hentetKravgrunnlag
 
         fagsakRepository.insert(Testdata.fagsak.copy(eksternFagsakId = xmlMottatt.eksternFagsakId))
-        behandlingRepository.insert(Testdata.behandling)
-        behandlingskontrollService.fortsettBehandling(Testdata.behandling.id)
-        stegService.håndterSteg(Testdata.behandling.id)
+        val lagretBehandling = behandlingRepository.insert(Testdata.lagBehandling())
+        behandlingskontrollService.fortsettBehandling(lagretBehandling.id)
+        stegService.håndterSteg(lagretBehandling.id)
 
         gammelKravgrunnlagTask.doTask(lagTask())
 

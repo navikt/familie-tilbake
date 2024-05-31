@@ -32,8 +32,8 @@ internal class VarselServiceTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun setup() {
-        behandling = Testdata.behandling
-        kravgrunnlag = Testdata.kravgrunnlag431
+        behandling = Testdata.lagBehandling()
+        kravgrunnlag = Testdata.lagKravgrunnlag(behandling.id)
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(behandling)
     }

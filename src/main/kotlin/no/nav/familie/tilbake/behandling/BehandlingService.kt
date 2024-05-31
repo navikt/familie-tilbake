@@ -1,8 +1,6 @@
 package no.nav.familie.tilbake.behandling
 
 import no.nav.familie.kontrakter.felles.Fagsystem
-import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
-import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør.VEDTAKSLØSNING
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Brevmottaker
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandling
@@ -26,6 +24,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingstype.TILBAKEKREVING
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
 import no.nav.familie.tilbake.behandling.domain.Fagsystemskonsekvens
+import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
@@ -44,6 +43,7 @@ import no.nav.familie.tilbake.dokumentbestilling.henleggelse.SendHenleggelsesbre
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerMapper
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
 import no.nav.familie.tilbake.dokumentbestilling.varsel.SendVarselbrevTask
+import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET
@@ -52,6 +52,7 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.task.HentKravgrunnlagTask
 import no.nav.familie.tilbake.micrometer.TellerService
+import no.nav.familie.tilbake.oppgave.OppgaveService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangService
@@ -85,6 +86,7 @@ class BehandlingService(
     private val integrasjonerClient: IntegrasjonerClient,
     private val validerBehandlingService: ValiderBehandlingService,
     private val featureToggleService: FeatureToggleService,
+    private val oppgaveService: OppgaveService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -339,7 +341,7 @@ class BehandlingService(
             when (behandlingsresultatstype) {
                 Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT,
                 Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
-                -> VEDTAKSLØSNING
+                -> Aktør.VEDTAKSLØSNING
 
                 else -> Aktør.SAKSBEHANDLER
             }
@@ -423,6 +425,15 @@ class BehandlingService(
     }
 
     @Transactional
+    fun oppdaterSaksbehandlingtype(
+        behandlingId: UUID,
+        saksbehandlingstype: Saksbehandlingstype,
+    ) {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        behandlingRepository.update(behandling.copy(saksbehandlingstype = Saksbehandlingstype.ORDINÆR))
+    }
+
+    @Transactional
     fun byttBehandlendeEnhet(
         behandlingId: UUID,
         byttEnhetDto: ByttEnhetDto,
@@ -470,8 +481,8 @@ class BehandlingService(
         logOppretterBehandling(erAutomatiskOgFeatureTogglePå, opprettTilbakekrevingRequest)
 
         val fagsak = finnEllerOpprettFagsak(opprettTilbakekrevingRequest)
-        val behandling = lagreBehandling(opprettTilbakekrevingRequest, fagsak)
-        historikkTaskService.lagHistorikkTask(behandling.id, BEHANDLING_OPPRETTET, VEDTAKSLØSNING)
+        val behandling = lagreBehandling(opprettTilbakekrevingRequest, fagsak, erAutomatiskOgFeatureTogglePå)
+        historikkTaskService.lagHistorikkTask(behandling.id, BEHANDLING_OPPRETTET, Aktør.VEDTAKSLØSNING)
         behandlingskontrollService.fortsettBehandling(behandling.id)
         stegService.håndterSteg(behandling.id)
 
@@ -521,6 +532,7 @@ class BehandlingService(
     private fun lagreBehandling(
         opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
         fagsak: Fagsak,
+        erAutomatiskOgFeatureTogglePå: Boolean,
     ): Behandling {
         val ansvarligsaksbehandler =
             integrasjonerClient.hentSaksbehandler(opprettTilbakekrevingRequest.saksbehandlerIdent)
@@ -530,6 +542,7 @@ class BehandlingService(
                 opprettTilbakekrevingRequest.fagsystem,
                 fagsak,
                 ansvarligsaksbehandler,
+                erAutomatiskOgFeatureTogglePå,
             )
         behandlingRepository.insert(behandling)
         return behandling

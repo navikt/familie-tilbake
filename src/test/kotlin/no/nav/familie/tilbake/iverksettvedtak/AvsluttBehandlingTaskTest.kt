@@ -1,7 +1,6 @@
 package no.nav.familie.tilbake.iverksettvedtak
 
 import io.kotest.matchers.shouldBe
-import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
@@ -17,6 +16,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.iverksettvedtak.task.AvsluttBehandlingTask
@@ -48,7 +48,7 @@ internal class AvsluttBehandlingTaskTest : OppslagSpringRunnerTest() {
     @BeforeEach
     fun init() {
         fagsak = Testdata.fagsak
-        behandling = Testdata.behandling
+        behandling = Testdata.lagBehandling()
         behandlingId = behandling.id
         fagsakRepository.insert(fagsak)
         behandlingRepository.insert(behandling)

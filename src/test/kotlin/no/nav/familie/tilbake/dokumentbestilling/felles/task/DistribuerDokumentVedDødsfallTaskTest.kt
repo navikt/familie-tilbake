@@ -43,7 +43,7 @@ internal class DistribuerDokumentVedDødsfallTaskTest : OppslagSpringRunnerTest(
 
     @BeforeEach
     fun init() {
-        behandling = Testdata.behandling
+        behandling = Testdata.lagBehandling()
         behandlingId = behandling.id
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(behandling)

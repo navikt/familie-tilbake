@@ -41,7 +41,7 @@
         <sonar.coverage.exclusions>**/config/FlywayConfig.kt</sonar.coverage.exclusions>
         <!--suppress UnresolvedMavenProperty Ligger som secret i github-->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
-        <spring.cloud-contract>4.1.1</spring.cloud-contract>
+        <spring.cloud-contract>4.1.2</spring.cloud-contract>
         <springdoc.version>2.5.0</springdoc.version>
         <testcontainers.version>1.19.7</testcontainers.version>
         <tjenestespesifikasjoner.version>2618.0448179</tjenestespesifikasjoner.version>

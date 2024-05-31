@@ -5,7 +5,6 @@ import io.mockk.mockk
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
-import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.data.Testdata.lagFeilBeløp
 import no.nav.familie.tilbake.data.Testdata.lagYtelBeløp
@@ -19,8 +18,7 @@ import java.util.UUID
 
 internal class OppgavePrioritetServiceTest {
     val kravgrunnlagRepository = mockk<KravgrunnlagRepository>()
-    val featureToggleService = mockk<FeatureToggleService>()
-    val oppgavePrioritetService = OppgavePrioritetService(kravgrunnlagRepository, featureToggleService)
+    val oppgavePrioritetService = OppgavePrioritetService(kravgrunnlagRepository)
 
     @Test
     fun `skal gi prioritet LAV for feilutbetaling på 9999`() {
@@ -89,6 +87,6 @@ internal class OppgavePrioritetServiceTest {
                     ),
             )
 
-        return Testdata.kravgrunnlag431.copy(perioder = setOf(periode))
+        return Testdata.lagKravgrunnlag(Testdata.lagBehandling().id).copy(perioder = setOf(periode))
     }
 }

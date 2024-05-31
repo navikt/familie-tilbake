@@ -91,7 +91,7 @@ class DistribusjonshåndteringServiceTest {
             featureToggleService = featureToggleService,
         )
 
-    private val behandling = Testdata.behandling
+    private val behandling = Testdata.lagBehandling()
     private val fagsak = Testdata.fagsak
     private val personinfoBruker = Personinfo(fagsak.bruker.ident, LocalDate.now(), navn = "brukernavn")
     private val brukerAdresse = Adresseinfo(personinfoBruker.ident, personinfoBruker.navn)
@@ -112,7 +112,7 @@ class DistribusjonshåndteringServiceTest {
         } returns vergeAdresse
         every { eksterneDataForBrevService.hentSaksbehandlernavn(any()) } returns behandling.ansvarligSaksbehandler
         every { eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(any()) } returns behandling.ansvarligSaksbehandler
-        every { brevsporingService.finnSisteVarsel(any()) } returns Testdata.brevsporing
+        every { brevsporingService.finnSisteVarsel(any()) } returns Testdata.lagBrevsporing(behandling.id)
         every { featureToggleService.isEnabled(any()) } returns false
     }
 

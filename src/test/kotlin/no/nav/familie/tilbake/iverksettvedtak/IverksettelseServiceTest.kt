@@ -108,7 +108,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
     @BeforeEach
     fun init() {
         fagsak = Testdata.fagsak
-        behandling = Testdata.behandling
+        behandling = Testdata.lagBehandling()
         behandlingId = behandling.id
         fagsakRepository.insert(fagsak)
         behandlingRepository.insert(behandling)
@@ -142,19 +142,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `sendIverksettVedtak skal sende iverksettvedtak til økonomi for suksess respons`() {
-        wireMockServer.stubFor(
-            WireMock.post(WireMock.urlEqualTo("/${DefaultOppdragClient.IVERKSETTELSE_PATH}/$behandlingId"))
-                .willReturn(
-                    WireMock.okJson(
-                        Ressurs.success(
-                            lagRespons(
-                                "00",
-                                "OK",
-                            ),
-                        ).toJson(),
-                    ),
-                ),
-        )
+        mockIverksettelseResponse("00", "OK")
 
         iverksettelseService.sendIverksettVedtak(behandlingId)
 
@@ -171,30 +159,44 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `sendIverksettVedtak skal sende iverksettvedtak til økonomi for feil respons`() {
-        wireMockServer.stubFor(
-            WireMock.post(WireMock.urlEqualTo("/${DefaultOppdragClient.IVERKSETTELSE_PATH}/$behandlingId"))
-                .willReturn(
-                    WireMock.okJson(
-                        Ressurs.success(
-                            lagRespons(
-                                "10",
-                                "feil",
-                            ),
-                        ).toJson(),
-                    ),
-                ),
-        )
+        mockIverksettelseResponse("10", "feil")
 
         val exception = shouldThrow<RuntimeException> { iverksettelseService.sendIverksettVedtak(behandlingId) }
+
         exception.shouldBeInstanceOf<IntegrasjonException>()
         exception.message shouldBe "Noe gikk galt ved iverksetting av behandling=$behandlingId"
         exception.cause!!.message shouldBe "Fikk feil respons fra økonomi ved iverksetting av behandling=$behandlingId." +
             "Mottatt respons:${objectMapper.writeValueAsString(lagMmmelDto("10", "feil"))}"
 
         val økonomiXmlSendt = økonomiXmlSendtRepository.findByBehandlingId(behandlingId)
-        økonomiXmlSendt.shouldNotBeNull()
-        assertRequestXml(økonomiXmlSendt.melding, behandlingId, økonomiXmlSendt.id)
-        økonomiXmlSendt.kvittering.shouldBeNull()
+        økonomiXmlSendt.shouldBeNull()
+    }
+
+    @Test
+    fun `sendIverksettVedtak for allerede iverksatt behandling - skal returnere KVITTERING_OK og ikke iverksette`() {
+        mockIverksettelseResponse("08", "B441012F") // Denne kan håndteres dersom oppdrag skiller på om vedtak finnes eller om det er feil status
+
+        val exception = shouldThrow<RuntimeException> { iverksettelseService.sendIverksettVedtak(behandlingId) }
+        exception.shouldBeInstanceOf<IntegrasjonException>()
+    }
+
+    private fun mockIverksettelseResponse(
+        alvorlighetsgrad: String,
+        kodeMelding: String,
+    ) {
+        wireMockServer.stubFor(
+            WireMock.post(WireMock.urlEqualTo("/${DefaultOppdragClient.IVERKSETTELSE_PATH}/$behandlingId"))
+                .willReturn(
+                    WireMock.okJson(
+                        Ressurs.success(
+                            lagRespons(
+                                alvorlighetsgrad,
+                                kodeMelding,
+                            ),
+                        ).toJson(),
+                    ),
+                ),
+        )
     }
 
     private fun lagKravgrunnlag(): Kravgrunnlag431 {

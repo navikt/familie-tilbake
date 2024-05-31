@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.dokumentbestilling.felles.task
 import io.kotest.matchers.collections.shouldHaveSingleElement
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
@@ -18,6 +17,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.MANUELL_TIL
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.VERGE
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
+import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.iverksettvedtak.task.AvsluttBehandlingTask
@@ -51,7 +51,7 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        behandling = Testdata.behandling
+        behandling = Testdata.lagBehandling()
         behandlingId = behandling.id
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(behandling)

@@ -1,7 +1,6 @@
 package no.nav.familie.tilbake.oppgave
 
 import io.kotest.assertions.throwables.shouldNotThrow
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.CapturingSlot
 import io.mockk.clearMocks
@@ -18,9 +17,10 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.data.Testdata.behandling
+import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.data.Testdata.fagsak
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.person.PersonService
@@ -53,10 +53,12 @@ class OppgaveServiceTest {
         )
 
     private lateinit var oppgaveService: OppgaveService
+    private lateinit var behandling: Behandling
 
     @BeforeEach
     fun setUp() {
         clearMocks(integrasjonerClient)
+        behandling = Testdata.lagBehandling()
         oppgaveService =
             OppgaveService(
                 behandlingRepository,
@@ -205,22 +207,17 @@ class OppgaveServiceTest {
         fun `skal ikke legge godkjenneVedtak oppgaver i EF-Sak-50-mappe når det allerede finnes en`() {
             every { integrasjonerClient.finnMapper("4489") } returns finnMappeResponseDto
             every { integrasjonerClient.finnOppgaver(any()) } returns FinnOppgaveResponseDto(1L, listOf(Oppgave()))
+            oppgaveService.opprettOppgave(
+                behandling.id,
+                Oppgavetype.GodkjenneVedtak,
+                "4483",
+                "",
+                LocalDate.now().plusDays(5),
+                "bob",
+                OppgavePrioritet.NORM,
+            )
 
-            val exception =
-                shouldThrow<RuntimeException> {
-                    oppgaveService.opprettOppgave(
-                        behandling.id,
-                        Oppgavetype.GodkjenneVedtak,
-                        "4483",
-                        "",
-                        LocalDate.now().plusDays(5),
-                        "bob",
-                        OppgavePrioritet.NORM,
-                    )
-                }
-            exception.message shouldBe "Det finnes allerede en oppgave ${Oppgavetype.GodkjenneVedtak} " +
-                "for behandling ${behandling.id} og finnes ikke noen ferdigstilleoppgaver. " +
-                "Eksisterende oppgaven ${Oppgavetype.GodkjenneVedtak} må lukke først."
+            verify(exactly = 0) { integrasjonerClient.opprettOppgave(any()) }
         }
 
         @Test

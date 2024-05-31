@@ -251,8 +251,8 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
                 Behandlingsstegsinfo(FORELDELSE, UTFØRT),
             ),
         )
-
         kravgrunnlagRepository.insert(lagKravgrunnlag(behandling.id))
+
         behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
@@ -279,6 +279,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+
         behandlingsstegstilstand.size shouldBe 3
         val sisteStegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandlingsstegstilstand)
         sisteStegstilstand.shouldNotBeNull()
@@ -472,7 +473,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagBehandlingsstegstilstand(stegMetadata: Set<Behandlingsstegsinfo>) {
-        stegMetadata.map {
+        stegMetadata.forEach {
             behandlingsstegstilstandRepository.insert(
                 Behandlingsstegstilstand(
                     behandlingId = behandling.id,

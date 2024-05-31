@@ -31,8 +31,8 @@ internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
     @BeforeEach
     fun init() {
         fagsak = Testdata.fagsak
-        behandling = Testdata.behandling
-        faktaFeilutbetaling = Testdata.faktaFeilutbetaling
+        behandling = Testdata.lagBehandling()
+        faktaFeilutbetaling = Testdata.lagFaktaFeilutbetaling(behandling.id)
         fagsakRepository.insert(fagsak)
         behandlingRepository.insert(behandling)
     }

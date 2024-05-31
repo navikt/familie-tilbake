@@ -5,6 +5,8 @@ import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.ValiderBrevmottakerService
+import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
@@ -85,8 +87,9 @@ class StegService(
         }
     }
 
+    @Deprecated("Skal bruke håndterStegAutomatisk. Kan fjernes når den er testet OK")
     @Transactional
-    fun håndterStegAutomatisk(behandlingId: UUID) {
+    fun håndterStegAutomatiskGAMMEL(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.erSaksbehandlingAvsluttet) {
             throw Feil("Behandling med id=$behandlingId er allerede ferdig behandlet")
@@ -116,6 +119,34 @@ class StegService(
     }
 
     @Transactional
+    fun håndterStegAutomatisk(behandlingId: UUID) {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
+
+        håndterStegAutomatisk(behandling, aktivtBehandlingssteg)
+    }
+
+    @Transactional
+    fun håndterStegAutomatisk(
+        behandling: Behandling,
+        aktivtBehandlingssteg: Behandlingssteg,
+    ) {
+        validerAtBehandlingIkkeErAvsluttet(behandling)
+        validerAtUtomatiskBehandlingIkkeErEøs(behandling)
+        validerAtBehandlingIkkeErPåVent(behandlingId = behandling.id, erBehandlingPåVent = behandlingskontrollService.erBehandlingPåVent(behandling.id), behandledeSteg = aktivtBehandlingssteg.name)
+        validerAtBehandlingErAutomatisk(behandling)
+
+        if (aktivtBehandlingssteg != Behandlingssteg.AVSLUTTET) {
+            hentStegInstans(aktivtBehandlingssteg).utførStegAutomatisk(behandling.id)
+
+            if (aktivtBehandlingssteg != Behandlingssteg.IVERKSETT_VEDTAK) {
+                val nesteSteg = hentAktivBehandlingssteg(behandling.id)
+                håndterStegAutomatisk(behandling, nesteSteg)
+            }
+        }
+    }
+
+    @Transactional
     fun gjenopptaSteg(behandlingId: UUID) {
         var aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
 
@@ -127,6 +158,21 @@ class StegService(
             Behandlingssteg.BREVMOTTAKER, Behandlingssteg.VERGE -> hentStegInstans(aktivtBehandlingssteg).utførSteg(behandlingId)
             else -> return
         }
+    }
+
+    @Transactional
+    fun angreSendTilBeslutter(behandling: Behandling) {
+        val behandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandling.id)
+
+        if (behandlingsstegstilstand?.behandlingssteg != Behandlingssteg.FATTE_VEDTAK) {
+            throw Feil("Kan ikke angre send til beslutter når behandlingen er i steg ${behandlingsstegstilstand?.behandlingssteg}")
+        }
+
+        if (behandling.status != Behandlingsstatus.FATTER_VEDTAK) {
+            throw Feil("Kan ikke angre send til beslutter når behandlingen har status ${behandling.status}")
+        }
+
+        behandlingskontrollService.behandleStegPåNytt(behandling.id, Behandlingssteg.FORESLÅ_VEDTAK)
     }
 
     fun kanAnsvarligSaksbehandlerOppdateres(

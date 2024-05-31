@@ -88,7 +88,7 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        mottattXMl = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
+        mottattXMl = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
         xmlMottatt = xmlMottattRepository.insert(Testdata.økonomiXmlMottatt.copy(melding = mottattXMl))
         mottattXmlId = xmlMottatt.id
 
@@ -120,7 +120,7 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
     @Test
     fun `doTask skal kaste exception når det allerede finnes en behandling på samme fagsak`() {
         fagsakRepository.insert(Testdata.fagsak.copy(eksternFagsakId = xmlMottatt.eksternFagsakId))
-        behandlingRepository.insert(Testdata.behandling)
+        behandlingRepository.insert(Testdata.lagBehandling())
 
         val exception = shouldThrow<UgyldigKravgrunnlagFeil> { hentFagsystemsbehandlingTask.doTask(lagTask()) }
         exception.message shouldBe "Kravgrunnlag med $mottattXmlId er ugyldig." +
