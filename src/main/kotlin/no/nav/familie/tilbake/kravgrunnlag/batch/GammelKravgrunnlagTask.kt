@@ -26,7 +26,7 @@ class GammelKravgrunnlagTask(
 
     @Transactional
     override fun doTask(task: Task) {
-        logger.info("HåndterGammelKravgrunnlagTask prosesserer med id=${task.id} og metadata ${task.metadata}")
+        logger.info("GammelKravgrunnlagTask prosesserer med id=${task.id} og metadata ${task.metadata}")
         val mottattXmlId = UUID.fromString(task.payload)
         val mottattXml = gammelKravgrunnlagService.hentFrakobletKravgrunnlagNullable(mottattXmlId)
         if (mottattXml == null) {

@@ -41,7 +41,7 @@ class HentFagsystemsbehandlingTask(
 
     @Transactional
     override fun onCompletion(task: Task) {
-        logger.info("Oppretter HåndterGammelKravgrunnlagTask for mottattXmlId=${task.payload}")
+        logger.info("Oppretter GammelKravgrunnlagTask for mottattXmlId=${task.payload}")
         taskService.save(
             Task(
                 type = GammelKravgrunnlagTask.TYPE,
