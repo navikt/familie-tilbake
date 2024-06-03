@@ -11,6 +11,7 @@ import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
+import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -97,7 +98,7 @@ class OppgaveService(
         fristForFerdigstillelse: LocalDate,
         saksbehandler: String?,
         prioritet: OppgavePrioritet,
-    ): OppgaveResponse {
+    ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsakId = behandling.fagsakId
         val fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
@@ -106,10 +107,11 @@ class OppgaveService(
         // Sjekk om oppgave allerede finnes for behandling
         val (_, finnOppgaveRespons) = finnOppgave(behandling, oppgavetype, fagsak)
         if (finnOppgaveRespons.oppgaver.isNotEmpty() && !finnesFerdigstillOppgaveForBehandling(behandlingId, oppgavetype)) {
-            throw Feil(
+            logger.info(
                 "Det finnes allerede en oppgave $oppgavetype for behandling $behandlingId og " +
                     "finnes ikke noen ferdigstilleoppgaver. Eksisterende oppgaven $oppgavetype må lukke først.",
             )
+            return
         }
 
         val opprettOppgave =
@@ -139,11 +141,17 @@ class OppgaveService(
                 prioritet = prioritet,
             )
 
-        val opprettetOppgaveId = integrasjonerClient.opprettOppgave(opprettOppgave)
-
+        val oppgaveResponse = integrasjonerClient.opprettOppgave(opprettOppgave)
         antallOppgaveTyper[oppgavetype]!!.increment()
+        logger.info("Ny oppgave (id=${oppgaveResponse.oppgaveId}, type=$oppgavetype, frist=$fristForFerdigstillelse) opprettet for behandling $behandlingId")
+    }
 
-        return opprettetOppgaveId
+    fun hentOppgaveSomIkkeErFerdigstilt(
+        oppgavetype: Oppgavetype,
+        behandling: Behandling,
+    ): Oppgave? {
+        val (_, finnOppgaveResponse) = finnOppgave(behandling, oppgavetype, fagsakRepository.findByIdOrThrow(behandling.fagsakId))
+        return finnOppgaveResponse.oppgaver.singleOrNull { it.status != StatusEnum.FERDIGSTILT }
     }
 
     private fun finnAktuellMappe(

@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.api.dto
 
+import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
@@ -40,6 +41,7 @@ data class BehandlingDto(
     val harManuelleBrevmottakere: Boolean,
     val manuelleBrevmottakere: List<ManuellBrevmottakerResponsDto>,
     val begrunnelseForTilbakekreving: String?,
+    val saksbehandlingstype: Saksbehandlingstype,
 )
 
 data class BehandlingsstegsinfoDto(

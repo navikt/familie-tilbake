@@ -228,7 +228,7 @@ class KravgrunnlagService(
         } else {
             val beskrivelse =
                 "Behandling er tatt av vent, " +
-                    "men revurderingsvedtaksdato er mindre enn $FRIST_DATO_GRENSE dager fra dagens dato." +
+                    "men revurderingsvedtaksdato er mindre enn $FRIST_DATO_GRENSE dager fra dagens dato. " +
                     "Fristen settes derfor $FRIST_DATO_GRENSE dager fra revurderingsvedtaksdato " +
                     "for å sikre at behandlingen har mottatt oppdatert kravgrunnlag"
             oppgaveTaskService.oppdaterOppgaveTask(
