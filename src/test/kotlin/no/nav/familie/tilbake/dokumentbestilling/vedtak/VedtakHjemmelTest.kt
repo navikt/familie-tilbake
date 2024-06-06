@@ -442,9 +442,9 @@ class VedtakHjemmelTest {
                 periode = periode,
                 vilkårsvurderingsresultat = resultat,
                 begrunnelse = "foo",
-                aktsomhet = aktsomhet,
+                aktsomhet = setOf(aktsomhet),
             )
 
-        return setOf(vurderingPeriode.copy(aktsomhet = aktsomhet))
+        return setOf(vurderingPeriode.copy(aktsomhet = setOf(aktsomhet)))
     }
 }

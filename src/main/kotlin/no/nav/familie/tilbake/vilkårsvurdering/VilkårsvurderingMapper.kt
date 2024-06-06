@@ -107,7 +107,7 @@ object VilkårsvurderingMapper {
                     begrunnelse = it.begrunnelse,
                     vilkårsvurderingsresultat = it.vilkårsvurderingsresultat,
                     godTro = tilDomeneGodTro(it.godTroDto),
-                    aktsomhet = tilDomeneAktsomhet(it.aktsomhetDto, fagsystem),
+                    aktsomhet = tilDomeneAktsomhet(it.aktsomhetDto, fagsystem)?.let { setOf(it) } ?: setOf(),
                 )
             }.toSet()
         return Vilkårsvurdering(
@@ -120,7 +120,7 @@ object VilkårsvurderingMapper {
         return VurdertVilkårsvurderingsresultatDto(
             vilkårsvurderingsresultat = vilkårsvurderingsperiode.vilkårsvurderingsresultat,
             godTro = tilGodTroDto(vilkårsvurderingsperiode.godTro),
-            aktsomhet = tilAktsomhetDto(vilkårsvurderingsperiode.aktsomhet),
+            aktsomhet = tilAktsomhetDto(vilkårsvurderingsperiode.aktsomhetVerdi),
         )
     }
 

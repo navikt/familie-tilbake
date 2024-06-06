@@ -163,9 +163,11 @@ class TilbakekrevingsberegningVilkårTest {
             val vilkårsvurdering =
                 vilkårsvurderingsperiode.copy(
                     aktsomhet =
-                        VilkårsvurderingAktsomhet(
-                            aktsomhet = Aktsomhet.FORSETT,
-                            begrunnelse = "foo",
+                        setOf(
+                            VilkårsvurderingAktsomhet(
+                                aktsomhet = Aktsomhet.FORSETT,
+                                begrunnelse = "foo",
+                            ),
                         ),
                 )
 
@@ -193,10 +195,12 @@ class TilbakekrevingsberegningVilkårTest {
             val vilkårsvurdering =
                 forstodBurdeForståttVurdering.copy(
                     aktsomhet =
-                        VilkårsvurderingAktsomhet(
-                            aktsomhet = Aktsomhet.FORSETT,
-                            begrunnelse = "foo",
-                            ileggRenter = true,
+                        setOf(
+                            VilkårsvurderingAktsomhet(
+                                aktsomhet = Aktsomhet.FORSETT,
+                                begrunnelse = "foo",
+                                ileggRenter = true,
+                            ),
                         ),
                 )
 
@@ -224,10 +228,12 @@ class TilbakekrevingsberegningVilkårTest {
             val vilkårsvurdering =
                 forstodBurdeForståttVurdering.copy(
                     aktsomhet =
-                        VilkårsvurderingAktsomhet(
-                            aktsomhet = Aktsomhet.FORSETT,
-                            begrunnelse = "foo",
-                            ileggRenter = false,
+                        setOf(
+                            VilkårsvurderingAktsomhet(
+                                aktsomhet = Aktsomhet.FORSETT,
+                                begrunnelse = "foo",
+                                ileggRenter = false,
+                            ),
                         ),
                 )
 
@@ -252,9 +258,11 @@ class TilbakekrevingsberegningVilkårTest {
             val vilkårsvurdering =
                 vilkårsvurderingsperiode.copy(
                     aktsomhet =
-                        VilkårsvurderingAktsomhet(
-                            aktsomhet = Aktsomhet.FORSETT,
-                            begrunnelse = "foo",
+                        setOf(
+                            VilkårsvurderingAktsomhet(
+                                aktsomhet = Aktsomhet.FORSETT,
+                                begrunnelse = "foo",
+                            ),
                         ),
                 )
             val grunnlagPeriodeMedSkattProsent =
@@ -288,9 +296,11 @@ class TilbakekrevingsberegningVilkårTest {
             val vilkårsvurdering =
                 vilkårsvurderingsperiode.copy(
                     aktsomhet =
-                        VilkårsvurderingAktsomhet(
-                            aktsomhet = Aktsomhet.FORSETT,
-                            begrunnelse = "foo",
+                        setOf(
+                            VilkårsvurderingAktsomhet(
+                                aktsomhet = Aktsomhet.FORSETT,
+                                begrunnelse = "foo",
+                            ),
                         ),
                 )
             val grunnlagPeriodeMedSkattProsent =
@@ -324,9 +334,11 @@ class TilbakekrevingsberegningVilkårTest {
             val vilkårsvurdering =
                 vilkårsvurderingsperiode.copy(
                     aktsomhet =
-                        VilkårsvurderingAktsomhet(
-                            aktsomhet = Aktsomhet.FORSETT,
-                            begrunnelse = "foo",
+                        setOf(
+                            VilkårsvurderingAktsomhet(
+                                aktsomhet = Aktsomhet.FORSETT,
+                                begrunnelse = "foo",
+                            ),
                         ),
                 )
 
@@ -389,11 +401,13 @@ class TilbakekrevingsberegningVilkårTest {
             val vilkårsvurdering =
                 vilkårsvurderingsperiode.copy(
                     aktsomhet =
-                        VilkårsvurderingAktsomhet(
-                            aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
-                            begrunnelse = "foo",
-                            særligeGrunnerTilReduksjon = false,
-                            ileggRenter = true,
+                        setOf(
+                            VilkårsvurderingAktsomhet(
+                                aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
+                                begrunnelse = "foo",
+                                særligeGrunnerTilReduksjon = false,
+                                ileggRenter = true,
+                            ),
                         ),
                 )
 
@@ -419,12 +433,14 @@ class TilbakekrevingsberegningVilkårTest {
             val vilkårsvurdering =
                 vilkårsvurderingsperiode.copy(
                     aktsomhet =
-                        VilkårsvurderingAktsomhet(
-                            aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
-                            begrunnelse = "foo",
-                            særligeGrunnerTilReduksjon = true,
-                            ileggRenter = true,
-                            andelTilbakekreves = BigDecimal.valueOf(70),
+                        setOf(
+                            VilkårsvurderingAktsomhet(
+                                aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
+                                begrunnelse = "foo",
+                                særligeGrunnerTilReduksjon = true,
+                                ileggRenter = true,
+                                andelTilbakekreves = BigDecimal.valueOf(70),
+                            ),
                         ),
                 )
 
@@ -452,12 +468,14 @@ class TilbakekrevingsberegningVilkårTest {
             val vilkårsvurdering =
                 vilkårsvurderingsperiode.copy(
                     aktsomhet =
-                        VilkårsvurderingAktsomhet(
-                            aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
-                            begrunnelse = "foo",
-                            særligeGrunnerTilReduksjon = true,
-                            ileggRenter = false,
-                            andelTilbakekreves = BigDecimal.valueOf(70),
+                        setOf(
+                            VilkårsvurderingAktsomhet(
+                                aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
+                                begrunnelse = "foo",
+                                særligeGrunnerTilReduksjon = true,
+                                ileggRenter = false,
+                                andelTilbakekreves = BigDecimal.valueOf(70),
+                            ),
                         ),
                 )
 
@@ -483,12 +501,14 @@ class TilbakekrevingsberegningVilkårTest {
             val vilkårsvurdering =
                 vilkårsvurderingsperiode.copy(
                     aktsomhet =
-                        VilkårsvurderingAktsomhet(
-                            aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
-                            begrunnelse = "foo",
-                            særligeGrunnerTilReduksjon = true,
-                            ileggRenter = false,
-                            andelTilbakekreves = BigDecimal("0.01"),
+                        setOf(
+                            VilkårsvurderingAktsomhet(
+                                aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
+                                begrunnelse = "foo",
+                                særligeGrunnerTilReduksjon = true,
+                                ileggRenter = false,
+                                andelTilbakekreves = BigDecimal("0.01"),
+                            ),
                         ),
                 )
 
@@ -516,12 +536,14 @@ class TilbakekrevingsberegningVilkårTest {
             val vilkårsvurdering =
                 vilkårsvurderingsperiode.copy(
                     aktsomhet =
-                        VilkårsvurderingAktsomhet(
-                            aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
-                            begrunnelse = "foo",
-                            særligeGrunnerTilReduksjon = true,
-                            ileggRenter = false,
-                            manueltSattBeløp = manueltSattBeløp,
+                        setOf(
+                            VilkårsvurderingAktsomhet(
+                                aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
+                                begrunnelse = "foo",
+                                særligeGrunnerTilReduksjon = true,
+                                ileggRenter = false,
+                                manueltSattBeløp = manueltSattBeløp,
+                            ),
                         ),
                     godTro = null,
                 )
@@ -551,12 +573,14 @@ class TilbakekrevingsberegningVilkårTest {
             val vilkårsvurdering =
                 vilkårsvurderingsperiode.copy(
                     aktsomhet =
-                        VilkårsvurderingAktsomhet(
-                            aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
-                            begrunnelse = "foo",
-                            særligeGrunnerTilReduksjon = true,
-                            ileggRenter = true,
-                            manueltSattBeløp = manueltSattBeløp,
+                        setOf(
+                            VilkårsvurderingAktsomhet(
+                                aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
+                                begrunnelse = "foo",
+                                særligeGrunnerTilReduksjon = true,
+                                ileggRenter = true,
+                                manueltSattBeløp = manueltSattBeløp,
+                            ),
                         ),
                 )
 
@@ -590,11 +614,13 @@ class TilbakekrevingsberegningVilkårTest {
             val vilkårsvurdering =
                 vilkårsvurderingsperiode.copy(
                     aktsomhet =
-                        VilkårsvurderingAktsomhet(
-                            aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
-                            begrunnelse = "foo",
-                            særligeGrunnerTilReduksjon = false,
-                            tilbakekrevSmåbeløp = false,
+                        setOf(
+                            VilkårsvurderingAktsomhet(
+                                aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
+                                begrunnelse = "foo",
+                                særligeGrunnerTilReduksjon = false,
+                                tilbakekrevSmåbeløp = false,
+                            ),
                         ),
                 )
 

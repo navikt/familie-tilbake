@@ -203,8 +203,8 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
         vilkårsvurdering.perioder.shouldHaveSingleElement {
             Constants.AUTOMATISK_SAKSBEHANDLING_BEGRUNNELSE == it.begrunnelse &&
                 Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT == it.vilkårsvurderingsresultat &&
-                it.aktsomhet != null && it.aktsomhet!!.aktsomhet == Aktsomhet.SIMPEL_UAKTSOMHET
-            !it.aktsomhet!!.tilbakekrevSmåbeløp
+                it.aktsomhetVerdi != null && it.aktsomhetVerdi!!.aktsomhet == Aktsomhet.SIMPEL_UAKTSOMHET
+            !it.aktsomhetVerdi!!.tilbakekrevSmåbeløp
         }
 
         vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandling.id).shouldBeNull()

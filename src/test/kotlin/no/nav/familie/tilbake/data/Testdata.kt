@@ -280,7 +280,7 @@ object Testdata {
             periode = Månedsperiode(LocalDate.now(), LocalDate.now().plusDays(1)),
             vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
             begrunnelse = "testverdi",
-            aktsomhet = vilkårsvurderingAktsomhet,
+            aktsomhet = setOf(vilkårsvurderingAktsomhet),
             godTro = vilkårsvurderingGodTro,
         )
 

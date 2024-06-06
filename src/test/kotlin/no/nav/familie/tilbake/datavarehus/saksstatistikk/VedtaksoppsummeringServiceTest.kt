@@ -243,7 +243,7 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
                 periode = periode,
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
                 begrunnelse = "vilkår begrunnelse",
-                aktsomhet = vilkårVurderingAktsomhet,
+                aktsomhet = setOf(vilkårVurderingAktsomhet),
             )
         val vilkårVurdering = Testdata.lagVilkårsvurdering(behandling.id).copy(perioder = setOf(vilkårVurderingPeriode))
 

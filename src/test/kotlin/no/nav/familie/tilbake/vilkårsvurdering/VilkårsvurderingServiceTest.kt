@@ -590,11 +590,11 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         vurdertPeriode.periode shouldBe Månedsperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 2))
         vurdertPeriode.begrunnelse shouldBe "Vilkårsvurdering begrunnelse"
 
-        vurdertPeriode.aktsomhet.shouldNotBeNull()
+        vurdertPeriode.aktsomhetVerdi.shouldNotBeNull()
         vurdertPeriode.godTro.shouldBeNull()
         vurdertPeriode.vilkårsvurderingsresultat shouldBe Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT
 
-        val aktsomhet = vurdertPeriode.aktsomhet
+        val aktsomhet = vurdertPeriode.aktsomhetVerdi
         aktsomhet.shouldNotBeNull()
         aktsomhet.aktsomhet shouldBe Aktsomhet.SIMPEL_UAKTSOMHET
         aktsomhet.begrunnelse shouldBe "Aktsomhet begrunnelse"

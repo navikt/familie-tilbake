@@ -31,7 +31,7 @@ internal object TilbakekrevingsberegningVilkår {
         val renter = beregnRenter && finnRenter(vilkårVurdering)
         val andel: BigDecimal? = finnAndelAvBeløp(vilkårVurdering)
         val manueltBeløp: BigDecimal? = finnManueltSattBeløp(vilkårVurdering)
-        val ignoreresPgaLavtBeløp = false == vilkårVurdering.aktsomhet?.tilbakekrevSmåbeløp
+        val ignoreresPgaLavtBeløp = false == vilkårVurdering.aktsomhetVerdi?.tilbakekrevSmåbeløp
         val beløpUtenRenter: BigDecimal =
             if (ignoreresPgaLavtBeløp) {
                 BigDecimal.ZERO
@@ -118,7 +118,7 @@ internal object TilbakekrevingsberegningVilkår {
     }
 
     private fun finnRenter(vurdering: Vilkårsvurderingsperiode): Boolean {
-        val aktsomhet: VilkårsvurderingAktsomhet? = vurdering.aktsomhet
+        val aktsomhet: VilkårsvurderingAktsomhet? = vurdering.aktsomhetVerdi
         if (aktsomhet != null) {
             val erForsett: Boolean = Aktsomhet.FORSETT == aktsomhet.aktsomhet
             return erForsett && (aktsomhet.ileggRenter == null || aktsomhet.ileggRenter) ||
@@ -128,7 +128,7 @@ internal object TilbakekrevingsberegningVilkår {
     }
 
     private fun finnAndelAvBeløp(vurdering: Vilkårsvurderingsperiode): BigDecimal? {
-        val aktsomhet: VilkårsvurderingAktsomhet? = vurdering.aktsomhet
+        val aktsomhet: VilkårsvurderingAktsomhet? = vurdering.aktsomhetVerdi
         val godTro: VilkårsvurderingGodTro? = vurdering.godTro
         if (aktsomhet != null) {
             return finnAndelForAktsomhet(aktsomhet)
@@ -149,7 +149,7 @@ internal object TilbakekrevingsberegningVilkår {
     }
 
     private fun finnManueltSattBeløp(vurdering: Vilkårsvurderingsperiode): BigDecimal? {
-        val aktsomhet: VilkårsvurderingAktsomhet? = vurdering.aktsomhet
+        val aktsomhet: VilkårsvurderingAktsomhet? = vurdering.aktsomhetVerdi
         val godTro: VilkårsvurderingGodTro? = vurdering.godTro
         if (aktsomhet != null) {
             return aktsomhet.manueltSattBeløp
@@ -160,8 +160,8 @@ internal object TilbakekrevingsberegningVilkår {
     }
 
     private fun finnVurdering(vurdering: Vilkårsvurderingsperiode): Vurdering {
-        if (vurdering.aktsomhet != null) {
-            return vurdering.aktsomhet.aktsomhet
+        if (vurdering.aktsomhetVerdi != null) {
+            return vurdering.aktsomhetVerdi.aktsomhet
         }
         if (vurdering.godTro != null) {
             return AnnenVurdering.GOD_TRO

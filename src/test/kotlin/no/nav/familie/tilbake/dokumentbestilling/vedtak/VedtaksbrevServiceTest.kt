@@ -59,7 +59,6 @@ import org.apache.commons.lang3.RandomStringUtils
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.jdbc.repository.query.Query
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -328,14 +327,12 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         exception.message shouldBe "Oppsummeringstekst er for lang for behandling ${behandling.id}"
     }
 
-
-
     @Test
     fun `lagreFriteksterFraSaksbehandler skal ikke lagre når fritekst mangler for ANNET særliggrunner begrunnelse`() {
         lagFakta()
-        //val aktsomheterFør = vilkårsvurderingRepository.finnAktsomhet()
+        // val aktsomheterFør = vilkårsvurderingRepository.finnAktsomhet()
         lagVilkårsvurdering()
-       // val aktsomheterEtter = vilkårsvurderingRepository.finnAktsomhet()
+        // val aktsomheterEtter = vilkårsvurderingRepository.finnAktsomhet()
 
 //        // TODO: Slett denne!!!!
 //        @Query("select vilkarsvurdering_aktsomhet_id from vilkarsvurdering_serlig_grunn")
@@ -344,7 +341,6 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 //        // TODO: Slett denne!!!!
 //        @Query("select * from vilkarsvurdering_serlig_grunn")
 //        fun finnAktsomhet2(): List<Vilkårsvurdering>
-
 
         val exception =
             shouldThrow<RuntimeException> {
@@ -683,7 +679,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
                 periode = Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 3)),
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
                 begrunnelse = "Vilkårsvurdering begrunnelse",
-                aktsomhet = aktsomhet,
+                aktsomhet = setOf(aktsomhet),
             )
         vilkårsvurderingService.deaktiverEksisterendeVilkårsvurdering(behandlingId)
         vilkårsvurderingRepository.insert(

@@ -93,8 +93,8 @@ class VedtaksoppsummeringService(
                 tom = periode.periode.tomDato,
                 hendelsestype = faktaperiode.hendelsestype.name,
                 hendelsesundertype = faktaperiode.hendelsesundertype.name,
-                harBruktSjetteLedd = periode.aktsomhet?.tilbakekrevSmåbeløp == false,
-                aktsomhet = periode.aktsomhet?.aktsomhet,
+                harBruktSjetteLedd = periode.aktsomhetVerdi?.tilbakekrevSmåbeløp == false,
+                aktsomhet = periode.aktsomhetVerdi?.aktsomhet,
                 vilkårsresultat = UtvidetVilkårsresultat.valueOf(periode.vilkårsvurderingsresultat.name),
                 særligeGrunner = hentSærligGrunner(periode),
                 feilutbetaltBeløp = beregningsresultatsperiode.feilutbetaltBeløp,
@@ -134,10 +134,10 @@ class VedtaksoppsummeringService(
     }
 
     private fun hentSærligGrunner(periodeEntitet: Vilkårsvurderingsperiode): SærligeGrunner? {
-        if (periodeEntitet.aktsomhet?.vilkårsvurderingSærligeGrunner?.isEmpty() == false) {
+        if (periodeEntitet.aktsomhetVerdi?.vilkårsvurderingSærligeGrunner?.isEmpty() == false) {
             val særligeGrunner =
-                periodeEntitet.aktsomhet.vilkårsvurderingSærligeGrunner.map(VilkårsvurderingSærligGrunn::særligGrunn)
-            return SærligeGrunner(periodeEntitet.aktsomhet.særligeGrunnerTilReduksjon, særligeGrunner)
+                periodeEntitet.aktsomhetVerdi.vilkårsvurderingSærligeGrunner.map(VilkårsvurderingSærligGrunn::særligGrunn)
+            return SærligeGrunner(periodeEntitet.aktsomhetVerdi.særligeGrunnerTilReduksjon, særligeGrunner)
         }
         return null
     }

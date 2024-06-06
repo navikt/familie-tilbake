@@ -66,13 +66,13 @@ object VedtakHjemmel {
 
     private fun erRenterBenyttet(vilkårPerioder: Set<Vilkårsvurderingsperiode>): Boolean {
         return vilkårPerioder.any {
-            it.aktsomhet?.ileggRenter == true || erForsettOgAlltidRenter(it)
+            it.aktsomhetVerdi?.ileggRenter == true || erForsettOgAlltidRenter(it)
         }
     }
 
     private fun erForsettOgAlltidRenter(v: Vilkårsvurderingsperiode): Boolean {
         return Vilkårsvurderingsresultat_MED_FORSETT_ALLTID_RENTER.contains(v.vilkårsvurderingsresultat) &&
-            Aktsomhet.FORSETT == v.aktsomhet?.aktsomhet
+            Aktsomhet.FORSETT == v.aktsomhetVerdi?.aktsomhet
     }
 
     private fun heleVurderingPgaSmåbeløp(
@@ -80,7 +80,7 @@ object VedtakHjemmel {
         vilkårPerioder: Set<Vilkårsvurderingsperiode>,
     ): Boolean {
         return Vedtaksresultat.INGEN_TILBAKEBETALING == vedtakResultatType &&
-            vilkårPerioder.any { false == it.aktsomhet?.tilbakekrevSmåbeløp }
+            vilkårPerioder.any { false == it.aktsomhetVerdi?.tilbakekrevSmåbeløp }
     }
 
     private fun erTilleggsfristBenyttet(foreldelse: VurdertForeldelse?): Boolean {

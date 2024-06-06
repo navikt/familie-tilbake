@@ -435,9 +435,11 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
                     begrunnelse = "foo",
                     vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
                     aktsomhet =
-                        VilkårsvurderingAktsomhet(
-                            aktsomhet = Aktsomhet.FORSETT,
-                            begrunnelse = "foo",
+                        setOf(
+                            VilkårsvurderingAktsomhet(
+                                aktsomhet = Aktsomhet.FORSETT,
+                                begrunnelse = "foo",
+                            ),
                         ),
                 )
             }.toSet()

@@ -166,8 +166,8 @@ object VedtaksbrevFritekstValidator {
         validerPåkrevetFritekster: Boolean,
     ) {
         vilkårsvurdering.perioder.filter {
-            it.aktsomhet?.vilkårsvurderingSærligeGrunner != null &&
-                it.aktsomhet.vilkårsvurderingSærligeGrunner
+            it.aktsomhetVerdi?.vilkårsvurderingSærligeGrunner != null &&
+                it.aktsomhetVerdi.vilkårsvurderingSærligeGrunner
                     .any { særligGrunn -> SærligGrunn.ANNET == særligGrunn.særligGrunn }
         }.forEach {
             val perioder =
