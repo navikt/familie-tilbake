@@ -59,6 +59,7 @@ import org.apache.commons.lang3.RandomStringUtils
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.jdbc.repository.query.Query
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -327,10 +328,24 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         exception.message shouldBe "Oppsummeringstekst er for lang for behandling ${behandling.id}"
     }
 
+
+
     @Test
     fun `lagreFriteksterFraSaksbehandler skal ikke lagre når fritekst mangler for ANNET særliggrunner begrunnelse`() {
         lagFakta()
+        //val aktsomheterFør = vilkårsvurderingRepository.finnAktsomhet()
         lagVilkårsvurdering()
+       // val aktsomheterEtter = vilkårsvurderingRepository.finnAktsomhet()
+
+//        // TODO: Slett denne!!!!
+//        @Query("select vilkarsvurdering_aktsomhet_id from vilkarsvurdering_serlig_grunn")
+//        fun finnAktsomhet(): List<String>
+//
+//        // TODO: Slett denne!!!!
+//        @Query("select * from vilkarsvurdering_serlig_grunn")
+//        fun finnAktsomhet2(): List<Vilkårsvurdering>
+
+
         val exception =
             shouldThrow<RuntimeException> {
                 vedtaksbrevService.lagreFriteksterFraSaksbehandler(
