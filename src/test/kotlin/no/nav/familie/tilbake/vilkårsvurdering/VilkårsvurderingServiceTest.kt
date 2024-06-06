@@ -591,7 +591,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         vurdertPeriode.begrunnelse shouldBe "Vilkårsvurdering begrunnelse"
 
         vurdertPeriode.aktsomhetVerdi.shouldNotBeNull()
-        vurdertPeriode.godTro.shouldBeNull()
+        vurdertPeriode.godTroVerdi.shouldBeNull()
         vurdertPeriode.vilkårsvurderingsresultat shouldBe Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT
 
         val aktsomhet = vurdertPeriode.aktsomhetVerdi

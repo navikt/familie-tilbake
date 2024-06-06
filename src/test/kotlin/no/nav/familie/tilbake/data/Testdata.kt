@@ -281,7 +281,7 @@ object Testdata {
             vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
             begrunnelse = "testverdi",
             aktsomhet = setOf(vilkårsvurderingAktsomhet),
-            godTro = vilkårsvurderingGodTro,
+            godTro = setOf(vilkårsvurderingGodTro),
         )
 
     fun lagVilkårsvurdering(behandlingId: UUID) =

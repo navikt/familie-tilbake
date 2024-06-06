@@ -437,7 +437,7 @@ class VedtaksbrevgeneratorService(
         val foreldelsePeriode = finnForeldelsePeriode(foreldelse, periode)
         val vilkårsvurdering = vilkårPerioder.firstOrNull { it.periode.inneholder(periode) }
         val vilkårsvurderingAktsomhet = vilkårsvurdering?.aktsomhetVerdi
-        val godTro = vilkårsvurdering?.godTro
+        val godTro = vilkårsvurdering?.godTroVerdi
         val beløpSomErIBehold = godTro?.beløpSomErIBehold
         val aktsomhetsresultat =
             when {

@@ -152,7 +152,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id).copy(perioder = setOf(kravgrunnlagsperiode432)))
         vilkårsvurderingRepository.insert(
             Testdata.lagVilkårsvurdering(behandling.id)
-                .copy(perioder = setOf(Testdata.vilkårsperiode.copy(periode = Månedsperiode(YearMonth.of(2023, 3), YearMonth.of(2023, 4)), godTro = null))),
+                .copy(perioder = setOf(Testdata.vilkårsperiode.copy(periode = Månedsperiode(YearMonth.of(2023, 3), YearMonth.of(2023, 4)), godTro = setOf()))),
         )
         faktaRepository.insert(
             Testdata.lagFaktaFeilutbetaling(behandling.id).copy(

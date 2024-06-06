@@ -34,16 +34,15 @@ data class Vilkårsvurderingsperiode(
     @Column("vilkarsvurderingsresultat")
     val vilkårsvurderingsresultat: Vilkårsvurderingsresultat,
     val begrunnelse: String,
-    @MappedCollection(idColumn = "vilkarsvurderingsperiode_id")
     val aktsomhet: Set<VilkårsvurderingAktsomhet> = setOf(),
-    @MappedCollection(idColumn = "vilkarsvurderingsperiode_id")
-    val godTro: VilkårsvurderingGodTro? = null,
+    val godTro: Set<VilkårsvurderingGodTro> = setOf(),
     @Version
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar(),
 ) {
     val aktsomhetVerdi = aktsomhet.firstOrNull()
+    val godTroVerdi = godTro.firstOrNull()
 }
 
 @Table("vilkarsvurdering_god_tro")

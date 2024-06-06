@@ -1012,7 +1012,7 @@ CREATE INDEX ON vilkarsvurderingsperiode (vilkarsvurderingsresultat);
 CREATE TABLE vilkarsvurdering_aktsomhet (
     id                            UUID PRIMARY KEY,
     versjon                       BIGINT                              NOT NULL,
-    vilkarsvurderingsperiode_id   UUID                                NOT NULL REFERENCES vilkarsvurderingsperiode,
+    vilkarsvurderingsperiode   UUID                                NOT NULL REFERENCES vilkarsvurderingsperiode,
     aktsomhet                     VARCHAR                             NOT NULL,
     ilegg_renter                  BOOLEAN,
     andel_tilbakekreves           NUMERIC(5, 2),
@@ -1031,7 +1031,7 @@ CREATE TABLE vilkarsvurdering_aktsomhet (
 COMMENT ON TABLE vilkarsvurdering_aktsomhet
     IS 'Videre vurderinger når det er vurdert at bruker ikke mottok beløp i god tro';
 
-COMMENT ON COLUMN vilkarsvurdering_aktsomhet.vilkarsvurderingsperiode_id
+COMMENT ON COLUMN vilkarsvurdering_aktsomhet.vilkarsvurderingsperiode
     IS 'Fk:vilkårsperiode';
 
 COMMENT ON COLUMN vilkarsvurdering_aktsomhet.aktsomhet
@@ -1058,7 +1058,7 @@ COMMENT ON COLUMN vilkarsvurdering_aktsomhet.tilbakekrev_smabelop
 COMMENT ON COLUMN vilkarsvurdering_aktsomhet.serlige_grunner_begrunnelse
     IS 'Beskrivelse av særlig grunner';
 
-CREATE INDEX ON vilkarsvurdering_aktsomhet (vilkarsvurderingsperiode_id);
+CREATE INDEX ON vilkarsvurdering_aktsomhet (vilkarsvurderingsperiode);
 
 CREATE INDEX ON vilkarsvurdering_aktsomhet (aktsomhet);
 
@@ -1093,7 +1093,7 @@ CREATE INDEX ON vilkarsvurdering_serlig_grunn (serlig_grunn);
 CREATE TABLE vilkarsvurdering_god_tro (
     id                          UUID PRIMARY KEY,
     versjon                     BIGINT                              NOT NULL,
-    vilkarsvurderingsperiode_id UUID                                NOT NULL REFERENCES vilkarsvurderingsperiode,
+    vilkarsvurderingsperiode UUID                                NOT NULL REFERENCES vilkarsvurderingsperiode,
     belop_er_i_behold           BOOLEAN                             NOT NULL,
     belop_tilbakekreves         BIGINT,
     begrunnelse                 VARCHAR                             NOT NULL,
@@ -1106,7 +1106,7 @@ CREATE TABLE vilkarsvurdering_god_tro (
 COMMENT ON TABLE vilkarsvurdering_god_tro
     IS 'Videre vurderinger når det er vurdert at bruker mottok feilutbetaling i god tro';
 
-COMMENT ON COLUMN vilkarsvurdering_god_tro.vilkarsvurderingsperiode_id
+COMMENT ON COLUMN vilkarsvurdering_god_tro.vilkarsvurderingsperiode
     IS 'Fk:vilkarsvurderingsperiode';
 
 COMMENT ON COLUMN vilkarsvurdering_god_tro.belop_er_i_behold
@@ -1118,7 +1118,7 @@ COMMENT ON COLUMN vilkarsvurdering_god_tro.belop_tilbakekreves
 COMMENT ON COLUMN vilkarsvurdering_god_tro.begrunnelse
     IS 'Beskrivelse av god tro vilkår';
 
-CREATE INDEX ON vilkarsvurdering_god_tro (vilkarsvurderingsperiode_id);
+CREATE INDEX ON vilkarsvurdering_god_tro (vilkarsvurderingsperiode);
 
 CREATE TABLE fakta_feilutbetaling (
     id            UUID PRIMARY KEY,

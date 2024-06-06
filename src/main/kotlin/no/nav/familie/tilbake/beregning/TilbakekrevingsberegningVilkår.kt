@@ -129,7 +129,7 @@ internal object TilbakekrevingsberegningVilkår {
 
     private fun finnAndelAvBeløp(vurdering: Vilkårsvurderingsperiode): BigDecimal? {
         val aktsomhet: VilkårsvurderingAktsomhet? = vurdering.aktsomhetVerdi
-        val godTro: VilkårsvurderingGodTro? = vurdering.godTro
+        val godTro: VilkårsvurderingGodTro? = vurdering.godTroVerdi
         if (aktsomhet != null) {
             return finnAndelForAktsomhet(aktsomhet)
         } else if (godTro != null && !godTro.beløpErIBehold) {
@@ -150,7 +150,7 @@ internal object TilbakekrevingsberegningVilkår {
 
     private fun finnManueltSattBeløp(vurdering: Vilkårsvurderingsperiode): BigDecimal? {
         val aktsomhet: VilkårsvurderingAktsomhet? = vurdering.aktsomhetVerdi
-        val godTro: VilkårsvurderingGodTro? = vurdering.godTro
+        val godTro: VilkårsvurderingGodTro? = vurdering.godTroVerdi
         if (aktsomhet != null) {
             return aktsomhet.manueltSattBeløp
         } else if (godTro != null) {
@@ -163,7 +163,7 @@ internal object TilbakekrevingsberegningVilkår {
         if (vurdering.aktsomhetVerdi != null) {
             return vurdering.aktsomhetVerdi.aktsomhet
         }
-        if (vurdering.godTro != null) {
+        if (vurdering.godTroVerdi != null) {
             return AnnenVurdering.GOD_TRO
         }
         throw IllegalArgumentException("VVurdering skal peke til GodTro-entiet eller Aktsomhet-entitet")

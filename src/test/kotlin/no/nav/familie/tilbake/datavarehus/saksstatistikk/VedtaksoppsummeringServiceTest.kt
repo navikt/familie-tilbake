@@ -262,7 +262,7 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
                 periode = periode,
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
                 begrunnelse = "vilkår begrunnelse",
-                godTro = vilkårVurderingGodTro,
+                godTro = setOf(vilkårVurderingGodTro),
             )
         val vilkårsvurdering = Testdata.lagVilkårsvurdering(behandling.id).copy(perioder = setOf(vilkårVurderingPeriode))
         vilkårsvurderingRepository.insert(vilkårsvurdering)

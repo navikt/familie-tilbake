@@ -62,12 +62,12 @@ class TilbakekrevingsberegningVilkårTest {
 
             val vilkårsvurdering =
                 vilkårsvurderingsperiode.copy(
-                    godTro =
+                    godTro = setOf(
                         VilkårsvurderingGodTro(
                             beløpErIBehold = true,
                             beløpTilbakekreves = manueltBeløp,
                             begrunnelse = "foo",
-                        ),
+                        )),
                 )
 
             val resultat: Beregningsresultatsperiode =
@@ -92,11 +92,11 @@ class TilbakekrevingsberegningVilkårTest {
         fun `beregn skalkreve tilbake ingenting når det er god tro og beløp ikke er i_behold`() {
             val vilkårsvurdering =
                 vilkårsvurderingsperiode.copy(
-                    godTro =
+                    godTro = setOf(
                         VilkårsvurderingGodTro(
                             beløpErIBehold = false,
                             begrunnelse = "foo",
-                        ),
+                        )),
                 )
 
             val resultat: Beregningsresultatsperiode =
@@ -121,12 +121,12 @@ class TilbakekrevingsberegningVilkårTest {
             val beløpTilbakekreves = BigDecimal.valueOf(8991)
             val vilkårsvurdering =
                 vilkårsvurderingsperiode.copy(
-                    godTro =
+                    godTro = setOf(
                         VilkårsvurderingGodTro(
                             beløpErIBehold = true,
                             beløpTilbakekreves = beløpTilbakekreves,
                             begrunnelse = "foo",
-                        ),
+                        )),
                 )
             val grunnlagPeriodeMedSkattProsent =
                 GrunnlagsperiodeMedSkatteprosent(
@@ -545,7 +545,7 @@ class TilbakekrevingsberegningVilkårTest {
                                 manueltSattBeløp = manueltSattBeløp,
                             ),
                         ),
-                    godTro = null,
+                    godTro = setOf(),
                 )
 
             val resultat: Beregningsresultatsperiode =
