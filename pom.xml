@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.0</version>
+        <version>3.2.6</version>
     </parent>
 
     <properties>
@@ -47,6 +47,8 @@
         <tjenestespesifikasjoner.version>2618.0448179</tjenestespesifikasjoner.version>
         <familie-tjenestespesifikasjoner.version>1.0_20230808160403_18dbb48</familie-tjenestespesifikasjoner.version>
         <prosessering-core.version>2.20240214140223_83c31de</prosessering-core.version>
+        <!-- Slett denne versjonen når issuen med spring jdbc er løst - 3.3.1?-->
+        <utdatert.spring.data.version>3.1.11</utdatert.spring.data.version>
     </properties>
 
 
@@ -201,10 +203,31 @@
             <artifactId>postgresql</artifactId>
             <version>42.7.3</version>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jdbc</artifactId>
+            <version>${utdatert.spring.data.version}</version>
         </dependency>
+        <!-- Slett de påfølgende avhengighetene når issuen nedenfor er løst -->
+        <!-- https://github.com/spring-projects/spring-data-relational/issues/1692 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+            <version>${utdatert.spring.data.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-jdbc</artifactId>
+            <version>${utdatert.spring.data.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-relational</artifactId>
+            <version>${utdatert.spring.data.version}</version>
+        </dependency>
+        <!--- Slett det ovenfor når spring data jdbc issuen er løst -->
+
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
