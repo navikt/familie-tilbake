@@ -121,7 +121,7 @@ object BehandlingMapper {
             støtterManuelleBrevmottakere = støtterManuelleBrevmottakere,
             manuelleBrevmottakere = manuelleBrevmottakere.map { ManuellBrevmottakerMapper.tilRespons(it) },
             begrunnelseForTilbakekreving = behandling.begrunnelseForTilbakekreving,
-            saksbehandlingstype = behandling.saksbehandlingstype
+            saksbehandlingstype = behandling.saksbehandlingstype,
         )
     }
 
