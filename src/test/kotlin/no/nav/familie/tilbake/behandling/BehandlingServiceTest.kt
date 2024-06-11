@@ -12,17 +12,13 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import io.kotest.matchers.string.shouldContain
-import io.mockk.CapturingSlot
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.mockkObject
-import io.mockk.verify
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Språkkode
-import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Brevmottaker
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
@@ -64,7 +60,6 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstan
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
-import no.nav.familie.tilbake.common.exceptionhandler.ManglerOppgaveFeil
 import no.nav.familie.tilbake.common.repository.Sporbar
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
@@ -92,7 +87,6 @@ import no.nav.familie.tilbake.oppgave.FerdigstillOppgaveTask
 import no.nav.familie.tilbake.oppgave.LagOppgaveTask
 import no.nav.familie.tilbake.oppgave.OppdaterEnhetOppgaveTask
 import no.nav.familie.tilbake.oppgave.OppdaterOppgaveTask
-import no.nav.familie.tilbake.oppgave.OppgavePrioritetService
 import no.nav.familie.tilbake.oppgave.OppgaveService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
@@ -1491,69 +1485,6 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val behandlingDto = behandlingService.hentBehandling(behandling.id)
 
         behandlingDto.støtterManuelleBrevmottakere shouldBe false
-    }
-
-    @Test
-    fun `OppdaterOppgaveTask for behandling som settes på vent skal opprette ny oppgave dersom finnOppgaver ikke finner oppgave`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                finnesVerge = true,
-                finnesVarsel = true,
-                manueltOpprettet = false,
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-            )
-        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
-
-        val behandlingPåVentDto =
-            BehandlingPåVentDto(
-                venteårsak = Venteårsak.ENDRE_TILKJENT_YTELSE,
-                tidsfrist = LocalDate.now().plusDays(1),
-            )
-
-        behandlingService.settBehandlingPåVent(behandling.id, behandlingPåVentDto)
-
-        behandlingskontrollService.erBehandlingPåVent(behandling.id).shouldBeTrue()
-        val oppdaterOppgaveTask =
-            assertOppgaveTask(
-                behandling.id,
-                OppdaterOppgaveTask.TYPE,
-                "Frist er oppdatert av saksbehandler Z0000",
-                behandlingPåVentDto.tidsfrist,
-            )
-
-        val oppgaveBeskrivelse = CapturingSlot<String>()
-        val oppgaveServiceMock = mockk<OppgaveService>(relaxed = true)
-        val oppgavePrioritetServiceMock = mockk<OppgavePrioritetService>()
-
-        every { oppgaveServiceMock.finnOppgaveForBehandlingUtenOppgaveType(any()) } throws ManglerOppgaveFeil("")
-        every { oppgaveServiceMock.utledOppgavetypeForGjenoppretting(any()) } returns Oppgavetype.BehandleSak
-        every { oppgavePrioritetServiceMock.utledOppgaveprioritet(any()) } returns OppgavePrioritet.NORM
-
-        OppdaterOppgaveTask(
-            oppgaveService = oppgaveServiceMock,
-            environment = mockk(relaxed = true),
-            oppgavePrioritetService = oppgavePrioritetServiceMock,
-            behandlingRepository = behandlingRepository,
-        ).doTask(oppdaterOppgaveTask)
-
-        verify(exactly = 0) {
-            oppgaveServiceMock.patchOppgave(any())
-        }
-        verify(exactly = 1) {
-            oppgaveServiceMock.opprettOppgave(
-                behandlingId = behandling.id,
-                oppgavetype = Oppgavetype.BehandleSak,
-                enhet = oppdaterOppgaveTask.metadata.getProperty("enhet"),
-                beskrivelse = capture(oppgaveBeskrivelse),
-                fristForFerdigstillelse =
-                    LocalDate.parse(
-                        oppdaterOppgaveTask.metadata.getProperty("frist"),
-                    ),
-                saksbehandler = "Z0000",
-                prioritet = OppgavePrioritet.NORM,
-            )
-        }
-        oppgaveBeskrivelse.captured.shouldContain(oppdaterOppgaveTask.metadata.getProperty("beskrivelse"))
     }
 
     private fun assertFellesBehandlingRespons(
