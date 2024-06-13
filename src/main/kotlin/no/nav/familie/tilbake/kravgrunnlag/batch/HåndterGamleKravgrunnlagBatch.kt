@@ -36,70 +36,72 @@ class HåndterGamleKravgrunnlagBatch(
     @Scheduled(cron = "\${CRON_HÅNDTER_GAMMEL_KRAVGRUNNLAG}")
     @Transactional
     fun utfør() {
+        if(erLederEllerLokaltMiljø()) {
+            logger.info("Starter HåndterGamleKravgrunnlagBatch..")
+
+            logger.info("Henter kravgrunnlag som er eldre enn $ALDERSGRENSE_I_UKER uker")
+
+            val frakobletKravgrunnlag =
+                mottattXmlService.hentFrakobletKravgrunnlag(
+                    beregnBestemtDato(BARNETRYGD),
+                    beregnBestemtDato(BARNETILSYN),
+                    beregnBestemtDato(OVERGANGSSTØNAD),
+                    beregnBestemtDato(SKOLEPENGER),
+                    beregnBestemtDato(KONTANTSTØTTE),
+                )
+
+            val frakobletKravgrunnlagGruppertPåEksternFagsakId = frakobletKravgrunnlag.groupBy { it.eksternFagsakId }
+
+            if (frakobletKravgrunnlagGruppertPåEksternFagsakId.isEmpty()) {
+                logger.info("Det finnes ingen kravgrunnlag som er eldre enn $ALDERSGRENSE_I_UKER uker fra dagens dato")
+                logger.info("Stopper HåndterGamleKravgrunnlagBatch..")
+                return
+            }
+
+            logger.info(
+                "Det finnes ${frakobletKravgrunnlag.size} kravgrunnlag som er eldre enn " +
+                        "$ALDERSGRENSE_I_UKER uker fra dagens dato",
+            )
+
+            val taskerMedStatus =
+                taskService.finnTasksMedStatus(
+                    RELEVANTE_TASK_STATUSER,
+                    Pageable.unpaged(),
+                )
+
+            frakobletKravgrunnlagGruppertPåEksternFagsakId.forEach { (_, kravgrunnlagerPåFagsak) ->
+
+                val kravgrunnlagSortertEtterKontrollfelt = sorterKravgrunnlagPåKontrollfelt(kravgrunnlagerPåFagsak)
+
+                kravgrunnlagSortertEtterKontrollfelt.forEachIndexed { index, kravgrunnlagPåFagsak ->
+
+                    val finnesAlleredeTaskPåKravgrunnlag = finnesAlleredeTaskForKravgrunnlag(taskerMedStatus, kravgrunnlagPåFagsak)
+
+                    if (!finnesAlleredeTaskPåKravgrunnlag) {
+                        taskService.save(opprettSpredtTaskForKravgrunnlagBasertPåIndex(index, kravgrunnlagPåFagsak))
+                    } else {
+                        logger.info(
+                            "Det finnes allerede en feilet HåndterGammelKravgrunnlagTask " +
+                                    "eller HentFagsystemsbehandlingTask " +
+                                    "på det samme kravgrunnlaget med id ${kravgrunnlagPåFagsak.id}",
+                        )
+                    }
+                }
+            }
+
+            logger.info("Stopper HåndterGamleKravgrunnlagBatch..")
+        }
+    }
+
+    private fun erLederEllerLokaltMiljø(): Boolean {
         val erLeader = LeaderClient.isLeader() == true
 
         val erLokaltMiljø =
             environment.activeProfiles.any {
                 it.contains("local") || it.contains("integrasjonstest")
             }
+        return erLeader || erLokaltMiljø
 
-        if (!erLeader && !erLokaltMiljø) {
-            return
-        }
-
-        logger.info("Starter HåndterGamleKravgrunnlagBatch..")
-
-        logger.info("Henter kravgrunnlag som er eldre enn $ALDERSGRENSE_I_UKER uker")
-
-        val frakobletKravgrunnlag =
-            mottattXmlService.hentFrakobletKravgrunnlag(
-                beregnBestemtDato(BARNETRYGD),
-                beregnBestemtDato(BARNETILSYN),
-                beregnBestemtDato(OVERGANGSSTØNAD),
-                beregnBestemtDato(SKOLEPENGER),
-                beregnBestemtDato(KONTANTSTØTTE),
-            )
-
-        val frakobletKravgrunnlagGruppertPåEksternFagsakId = frakobletKravgrunnlag.groupBy { it.eksternFagsakId }
-
-        if (frakobletKravgrunnlagGruppertPåEksternFagsakId.isEmpty()) {
-            logger.info("Det finnes ingen kravgrunnlag som er eldre enn $ALDERSGRENSE_I_UKER uker fra dagens dato")
-            logger.info("Stopper HåndterGamleKravgrunnlagBatch..")
-            return
-        }
-
-        logger.info(
-            "Det finnes ${frakobletKravgrunnlag.size} kravgrunnlag som er eldre enn " +
-                "$ALDERSGRENSE_I_UKER uker fra dagens dato",
-        )
-
-        val taskerMedStatus =
-            taskService.finnTasksMedStatus(
-                RELEVANTE_TASK_STATUSER,
-                Pageable.unpaged(),
-            )
-
-        frakobletKravgrunnlagGruppertPåEksternFagsakId.forEach { (_, kravgrunnlagerPåFagsak) ->
-
-            val kravgrunnlagSortertEtterKontrollfelt = sorterKravgrunnlagPåKontrollfelt(kravgrunnlagerPåFagsak)
-
-            kravgrunnlagSortertEtterKontrollfelt.forEachIndexed { index, kravgrunnlagPåFagsak ->
-
-                val finnesAlleredeTaskPåKravgrunnlag = finnesAlleredeTaskForKravgrunnlag(taskerMedStatus, kravgrunnlagPåFagsak)
-
-                if (!finnesAlleredeTaskPåKravgrunnlag) {
-                    taskService.save(opprettSpredtTaskForKravgrunnlagBasertPåIndex(index, kravgrunnlagPåFagsak))
-                } else {
-                    logger.info(
-                        "Det finnes allerede en feilet HåndterGammelKravgrunnlagTask " +
-                            "eller HentFagsystemsbehandlingTask " +
-                            "på det samme kravgrunnlaget med id ${kravgrunnlagPåFagsak.id}",
-                    )
-                }
-            }
-        }
-
-        logger.info("Stopper HåndterGamleKravgrunnlagBatch..")
     }
 
     private fun beregnBestemtDato(ytelsestype: Ytelsestype): LocalDate {
