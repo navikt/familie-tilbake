@@ -4,7 +4,6 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.common.repository.InsertUpdateRepository
 import no.nav.familie.tilbake.common.repository.RepositoryInterface
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
-import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottattIdOgYtelse
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
@@ -42,8 +41,8 @@ interface ØkonomiXmlMottattRepository : RepositoryInterface<ØkonomiXmlMottatt,
     // language=PostgreSQL
     @Query(
         """ 
-        SELECT oko.id, oko.ytelsestype
-        FROM okonomi_xml_mottatt oko
+        SELECT *
+        FROM okonomi_xml_mottatt 
         WHERE CASE (ytelsestype)
                     WHEN 'BARNETRYGD' THEN opprettet_tid < :barnetrygdBestemtDato
                     WHEN 'BARNETILSYN' THEN opprettet_tid < :barnetilsynBestemtDato
@@ -53,11 +52,11 @@ interface ØkonomiXmlMottattRepository : RepositoryInterface<ØkonomiXmlMottatt,
                END
       """,
     )
-    fun hentFrakobletGamleMottattXmlIds(
+    fun hentFrakobletKravgrunnlag(
         barnetrygdBestemtDato: LocalDate,
         barnetilsynBestemtDato: LocalDate,
         overgangsstonadbestemtdato: LocalDate,
         skolePengerBestemtDato: LocalDate,
         kontantstottebestemtdato: LocalDate,
-    ): List<ØkonomiXmlMottattIdOgYtelse>
+    ): List<ØkonomiXmlMottatt>
 }

@@ -1,6 +1,10 @@
 server:
   port: 9093
 
+spring:
+  datasource:
+    hikari:
+      initialization-fail-timeout: 10000
 
 prosessering:
   enabled: false
