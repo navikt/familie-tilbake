@@ -70,8 +70,14 @@ class HåndterGamleKravgrunnlagBatch(
 
         logger.info(
             "Det finnes ${frakobletKravgrunnlag.size} kravgrunnlag som er eldre enn " +
-                    "$ALDERSGRENSE_I_UKER uker fra dagens dato",
+                "$ALDERSGRENSE_I_UKER uker fra dagens dato",
         )
+
+        val taskerMedStatus =
+            taskService.finnTasksMedStatus(
+                RELEVANTE_TASK_STATUSER,
+                Pageable.unpaged(),
+            )
 
         frakobletKravgrunnlagGruppertPåEksternFagsakId.forEach { (_, kravgrunnlagerPåFagsak) ->
 
@@ -79,15 +85,15 @@ class HåndterGamleKravgrunnlagBatch(
 
             kravgrunnlagSortertEtterKontrollfelt.forEachIndexed { index, kravgrunnlagPåFagsak ->
 
-                val finnesAlleredeTaskPåKravgrunnlag = finnesAlleredeTaskForKravgrunnlag(kravgrunnlagPåFagsak)
+                val finnesAlleredeTaskPåKravgrunnlag = finnesAlleredeTaskForKravgrunnlag(taskerMedStatus, kravgrunnlagPåFagsak)
 
                 if (!finnesAlleredeTaskPåKravgrunnlag) {
                     taskService.save(opprettSpredtTaskForKravgrunnlagBasertPåIndex(index, kravgrunnlagPåFagsak))
                 } else {
                     logger.info(
                         "Det finnes allerede en feilet HåndterGammelKravgrunnlagTask " +
-                                "eller HentFagsystemsbehandlingTask " +
-                                "på det samme kravgrunnlaget med id ${kravgrunnlagPåFagsak.id}",
+                            "eller HentFagsystemsbehandlingTask " +
+                            "på det samme kravgrunnlaget med id ${kravgrunnlagPåFagsak.id}",
                     )
                 }
             }
@@ -106,20 +112,14 @@ class HåndterGamleKravgrunnlagBatch(
             LocalDate.parse(kontrollfelt, KONTROLLFELT_DATE_TIME_FORMATTER)
         }
 
-    private fun finnesAlleredeTaskForKravgrunnlag(kravgrunnlag: ØkonomiXmlMottatt): Boolean {
-        val taskerMedStatus = taskService.finnTasksMedStatus(
-            listOf(
-                Status.FEILET,
-                Status.KLAR_TIL_PLUKK,
-                Status.MANUELL_OPPFØLGING,
-            ),
-            Pageable.unpaged(),
-        )
-        return taskerMedStatus.any {
+    private fun finnesAlleredeTaskForKravgrunnlag(
+        taskerMedStatus: List<Task>,
+        kravgrunnlag: ØkonomiXmlMottatt,
+    ) =
+        taskerMedStatus.any {
             val harRiktigType = it.type == GammelKravgrunnlagTask.TYPE || it.type == HentFagsystemsbehandlingTask.TYPE
             it.payload == kravgrunnlag.id.toString() && harRiktigType
         }
-    }
 
     private fun opprettSpredtTaskForKravgrunnlagBasertPåIndex(
         index: Int,
@@ -132,17 +132,24 @@ class HåndterGamleKravgrunnlagBatch(
             type = HentFagsystemsbehandlingTask.TYPE,
             payload = kravgrunnlagPåFagsak.id.toString(),
             properties =
-            Properties().apply {
-                setProperty(
-                    PropertyName.FAGSYSTEM,
-                    FagsystemUtil.hentFagsystemFraYtelsestype(kravgrunnlagPåFagsak.ytelsestype).name,
-                )
-            },
+                Properties().apply {
+                    setProperty(
+                        PropertyName.FAGSYSTEM,
+                        FagsystemUtil.hentFagsystemFraYtelsestype(kravgrunnlagPåFagsak.ytelsestype).name,
+                    )
+                },
         ).medTriggerTid(triggerTid)
     }
 
     companion object {
         val KONTROLLFELT_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS")
+
+        val RELEVANTE_TASK_STATUSER =
+            listOf(
+                Status.FEILET,
+                Status.KLAR_TIL_PLUKK,
+                Status.MANUELL_OPPFØLGING,
+            )
 
         val ALDERSGRENSE_I_UKER =
             mapOf<Ytelsestype, Long>(
