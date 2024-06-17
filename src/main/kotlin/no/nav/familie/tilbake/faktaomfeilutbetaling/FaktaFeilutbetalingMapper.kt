@@ -5,8 +5,10 @@ import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
 import no.nav.familie.tilbake.api.dto.FeilutbetalingsperiodeDto
+import no.nav.familie.tilbake.api.dto.VurderingAvBrukersUttalelseDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
+import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.VurderingAvBrukersUttalelse
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import java.math.BigDecimal
@@ -43,7 +45,17 @@ object FaktaFeilutbetalingMapper {
             totaltFeilutbetaltBeløp = logiskePerioder.sumOf(LogiskPeriode::feilutbetaltBeløp),
             totalFeilutbetaltPeriode = utledTotalFeilutbetaltPeriode(logiskePerioder),
             kravgrunnlagReferanse = kravgrunnlag.referanse,
+            vurderingAvBrukersUttalelse = tilDto(faktaFeilutbetaling?.vurderingAvBrukersUttalelse),
         )
+    }
+
+    fun tilDto(vurderingAvBrukersUttalelse: VurderingAvBrukersUttalelse?): VurderingAvBrukersUttalelseDto {
+        return vurderingAvBrukersUttalelse?.let {
+            VurderingAvBrukersUttalelseDto(
+                harBrukerUttaltSeg = it.harBrukerUttaltSeg,
+                beskrivelse = it.beskrivelse,
+            )
+        } ?: VurderingAvBrukersUttalelseDto.ikkeVurdert()
     }
 
     private fun hentFeilutbetaltePerioder(

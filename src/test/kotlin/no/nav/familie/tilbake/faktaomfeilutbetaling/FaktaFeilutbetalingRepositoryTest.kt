@@ -10,6 +10,8 @@ import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
+import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.HarBrukerUttaltSeg
+import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.VurderingAvBrukersUttalelse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -78,6 +80,20 @@ internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
             faktaFeilutbetaling,
             FaktaFeilutbetaling::sporbar,
             FaktaFeilutbetaling::versjon,
+        )
+    }
+
+    @Test
+    fun `skal ta med vurdering av brukers uttalelse i fakta feilutbetaling`() {
+        val vurderingAvBrukersUttalelse = VurderingAvBrukersUttalelse(harBrukerUttaltSeg = HarBrukerUttaltSeg.JA, beskrivelse = "Hurra")
+        faktaFeilutbetalingRepository.insert(faktaFeilutbetaling.copy(vurderingAvBrukersUttalelse = vurderingAvBrukersUttalelse))
+
+        val lagretVurderingAvBrukersUttalelse = faktaFeilutbetalingRepository.findByIdOrThrow(faktaFeilutbetaling.id).vurderingAvBrukersUttalelse ?: error("Mangler brukers uttalelse vurdering")
+
+        lagretVurderingAvBrukersUttalelse.shouldBeEqualToComparingFieldsExcept(
+            vurderingAvBrukersUttalelse,
+            VurderingAvBrukersUttalelse::sporbar,
+            VurderingAvBrukersUttalelse::versjon,
         )
     }
 }

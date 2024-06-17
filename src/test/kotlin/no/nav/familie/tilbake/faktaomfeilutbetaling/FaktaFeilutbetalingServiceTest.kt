@@ -1,18 +1,25 @@
 package no.nav.familie.tilbake.faktaomfeilutbetaling
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.string.shouldContain
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
+import no.nav.familie.tilbake.api.dto.BehandlingsstegFaktaDto
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
+import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingsperiodeDto
+import no.nav.familie.tilbake.api.dto.VurderingAvBrukersUttalelseDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
-import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetalingsperiode
+import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.HarBrukerUttaltSeg
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
@@ -109,6 +116,74 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `hentFaktaomfeilutbetaling med vurdering av brukers uttalslse`() {
+        val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        val oppdatertBehandling = lagretBehandling.copy(varsler = emptySet())
+        behandlingRepository.update(oppdatertBehandling)
+        lagFaktaomfeilutbetaling(behandlingId = oppdatertBehandling.id, vurderingAvBrukersUttalelse = VurderingAvBrukersUttalelseDto(harBrukerUttaltSeg = HarBrukerUttaltSeg.NEI, beskrivelse = null))
+
+        val faktaFeilutbetalingDto = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId = oppdatertBehandling.id)
+
+        faktaFeilutbetalingDto.begrunnelse shouldBe "Fakta begrunnelse"
+        faktaFeilutbetalingDto.varsletBeløp.shouldBeNull()
+        assertFagsystemsbehandling(faktaFeilutbetalingDto, behandling)
+        assertFeilutbetaltePerioder(
+            faktaFeilutbetalingDto = faktaFeilutbetalingDto,
+            hendelsestype = Hendelsestype.ANNET,
+            hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
+        )
+        faktaFeilutbetalingDto.vurderingAvBrukersUttalelse shouldNotBe null
+        faktaFeilutbetalingDto.vurderingAvBrukersUttalelse?.harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.NEI
+        faktaFeilutbetalingDto.vurderingAvBrukersUttalelse?.beskrivelse shouldBe null
+    }
+
+    @Test
+    fun `oppdatering av fakta skal lage gi en ny rad i databasen mens den gamle er deaktivert`() {
+        val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        val oppdatertBehandling = lagretBehandling.copy(varsler = emptySet())
+        behandlingRepository.update(oppdatertBehandling)
+        val brukersUttalelseInitiell = VurderingAvBrukersUttalelseDto(harBrukerUttaltSeg = HarBrukerUttaltSeg.JA, beskrivelse = "Hurra")
+        lagFaktaomfeilutbetaling(behandlingId = oppdatertBehandling.id, vurderingAvBrukersUttalelse = brukersUttalelseInitiell)
+        val brukersUttalelseEndret = VurderingAvBrukersUttalelseDto(harBrukerUttaltSeg = HarBrukerUttaltSeg.NEI, beskrivelse = null)
+        lagFaktaomfeilutbetaling(behandlingId = oppdatertBehandling.id, vurderingAvBrukersUttalelse = brukersUttalelseEndret, hendelsestype = Hendelsestype.BOR_MED_SØKER)
+
+        val alle = faktaFeilutbetalingRepository.findAll().filter { it.behandlingId == oppdatertBehandling.id }
+        alle shouldHaveSize 2
+
+        val aktiv = alle.first { it.aktiv }
+        aktiv.vurderingAvBrukersUttalelse?.harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.NEI
+        aktiv.vurderingAvBrukersUttalelse?.beskrivelse shouldBe null
+        aktiv.vurderingAvBrukersUttalelse?.aktiv shouldBe true
+        aktiv.perioder.first().hendelsestype shouldBe Hendelsestype.BOR_MED_SØKER
+
+        val inaktiv = alle.first { !it.aktiv }
+        inaktiv.vurderingAvBrukersUttalelse?.harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.JA
+        inaktiv.vurderingAvBrukersUttalelse?.beskrivelse shouldBe "Hurra"
+        inaktiv.vurderingAvBrukersUttalelse?.aktiv shouldBe false
+        inaktiv.perioder.first().hendelsestype shouldBe Hendelsestype.ANNET
+    }
+
+    @Test
+    fun `skal validere vurdering av brukers uttalelse`() {
+        val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        val oppdatertBehandling = lagretBehandling.copy(varsler = emptySet())
+        behandlingRepository.update(oppdatertBehandling)
+        val behandlingId = oppdatertBehandling.id
+        val ugyldigVerdiBeskrivelseMangler =
+            shouldThrow<Feil> {
+                val manglerBeskrivelse = VurderingAvBrukersUttalelseDto(harBrukerUttaltSeg = HarBrukerUttaltSeg.JA, beskrivelse = null)
+                lagFaktaomfeilutbetaling(behandlingId = behandlingId, vurderingAvBrukersUttalelse = manglerBeskrivelse)
+            }
+        ugyldigVerdiBeskrivelseMangler.message shouldContain "Mangler beskrivelse på vurdering av brukers uttalelse"
+        val ugyldiVerdiBeskrivelseSkalVæreTom =
+            shouldThrow<Feil> {
+                val ugyldigBeskrivelse = VurderingAvBrukersUttalelseDto(harBrukerUttaltSeg = HarBrukerUttaltSeg.NEI, beskrivelse = "Skal være null")
+                lagFaktaomfeilutbetaling(behandlingId = behandlingId, vurderingAvBrukersUttalelse = ugyldigBeskrivelse)
+            }
+        ugyldiVerdiBeskrivelseSkalVæreTom.message shouldContain "Skal ikke ha beskrivelse når bruker ikke har uttalt seg"
+    }
+
+    @Test
     fun `hentFaktaomfeilutbetaling skal hente fakta om feilutbetaling første gang for en gitt behandling`() {
         val faktaFeilutbetalingDto = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId = behandling.id)
 
@@ -122,20 +197,24 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
         )
     }
 
-    private fun lagFaktaomfeilutbetaling(behandlingId: UUID) {
+    private fun lagFaktaomfeilutbetaling(
+        behandlingId: UUID,
+        vurderingAvBrukersUttalelse: VurderingAvBrukersUttalelseDto? = null,
+        hendelsestype: Hendelsestype = Hendelsestype.ANNET,
+    ) {
         val faktaPerioder =
-            FaktaFeilutbetalingsperiode(
-                periode = periode,
-                hendelsestype = Hendelsestype.ANNET,
+            FaktaFeilutbetalingsperiodeDto(
+                periode = periode.toDatoperiode(),
+                hendelsestype = hendelsestype,
                 hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
             )
         val faktaFeilutbetaling =
-            FaktaFeilutbetaling(
-                behandlingId = behandlingId,
+            BehandlingsstegFaktaDto(
                 begrunnelse = "Fakta begrunnelse",
-                perioder = setOf(faktaPerioder),
+                feilutbetaltePerioder = listOf(faktaPerioder),
+                vurderingAvBrukersUttalelse = vurderingAvBrukersUttalelse,
             )
-        faktaFeilutbetalingRepository.insert(faktaFeilutbetaling)
+        faktaFeilutbetalingService.lagreFaktaomfeilutbetaling(behandlingId, faktaFeilutbetaling)
     }
 
     private fun assertFagsystemsbehandling(

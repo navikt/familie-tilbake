@@ -39,6 +39,7 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.H
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVedtaksbrevsperiode
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVurderinger
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
+import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.HarBrukerUttaltSeg
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
@@ -207,11 +208,17 @@ class VedtaksbrevgeneratorService(
                 visHjemmelForRenter = true,
                 klagebehandling,
             ) // sannsynligvis hjemmel
+
+        val fakta =
+            vedtaksbrevgrunnlag.faktaFeilutbetaling
+                ?: error("Vedtaksbrev mangler fakta for behandling: ${vedtaksbrevgrunnlag.behandling.id}")
+
         val perioder: List<HbVedtaksbrevsperiode> =
             lagHbVedtaksbrevPerioder(
                 vedtaksbrevgrunnlag,
                 beregningsresultat,
                 perioderFritekst,
+                fakta,
             )
         val hbTotalresultat: HbTotalresultat =
             lagHbTotalresultat(beregningsresultat.vedtaksresultat, beregningsresultat)
@@ -256,6 +263,7 @@ class VedtaksbrevgeneratorService(
                 konfigurasjon = HbKonfigurasjon(klagefristIUker = klagefristIUker),
                 datoer = HbVedtaksbrevDatoer(perioder),
                 søker = utledSøker(personinfo),
+                harBrukerUttaltSeg = fakta.vurderingAvBrukersUttalelse?.harBrukerUttaltSeg ?: HarBrukerUttaltSeg.IKKE_VURDERT,
             )
         return HbVedtaksbrevsdata(vedtaksbrevFelles, perioder)
     }
@@ -297,10 +305,8 @@ class VedtaksbrevgeneratorService(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
         beregningsresultat: Beregningsresultat,
         perioderFritekst: List<PeriodeMedTekstDto>,
+        fakta: FaktaFeilutbetaling,
     ): List<HbVedtaksbrevsperiode> {
-        val fakta =
-            vedtaksbrevgrunnlag.faktaFeilutbetaling
-                ?: error("Vedtaksbrev mangler fakta for behandling: ${vedtaksbrevgrunnlag.behandling.id}")
         return if (vedtaksbrevgrunnlag.utledVedtaksbrevstype() == Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT) {
             emptyList()
         } else {
