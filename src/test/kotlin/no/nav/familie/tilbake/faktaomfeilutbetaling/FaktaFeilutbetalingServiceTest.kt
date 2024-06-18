@@ -116,7 +116,7 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `hentFaktaomfeilutbetaling med vurdering av brukers uttalslse`() {
+    fun `hentFaktaomfeilutbetaling med vurdering av brukers uttalelse`() {
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
         val oppdatertBehandling = lagretBehandling.copy(varsler = emptySet())
         behandlingRepository.update(oppdatertBehandling)
@@ -133,12 +133,12 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
             hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
         )
         faktaFeilutbetalingDto.vurderingAvBrukersUttalelse shouldNotBe null
-        faktaFeilutbetalingDto.vurderingAvBrukersUttalelse?.harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.NEI
-        faktaFeilutbetalingDto.vurderingAvBrukersUttalelse?.beskrivelse shouldBe null
+        faktaFeilutbetalingDto.vurderingAvBrukersUttalelse.harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.NEI
+        faktaFeilutbetalingDto.vurderingAvBrukersUttalelse.beskrivelse shouldBe null
     }
 
     @Test
-    fun `oppdatering av fakta skal lage gi en ny rad i databasen mens den gamle er deaktivert`() {
+    fun `oppdatering av fakta skal lage en ny rad i databasen mens den gamle er deaktivert`() {
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
         val oppdatertBehandling = lagretBehandling.copy(varsler = emptySet())
         behandlingRepository.update(oppdatertBehandling)

@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.faktaomfeilutbetaling
 
-import io.kotest.matchers.equality.shouldBeEqualToComparingFieldsExcept
+import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -45,7 +45,7 @@ internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretFaktaFeilutbetaling = faktaFeilutbetalingRepository.findByIdOrThrow(faktaFeilutbetaling.id)
 
-        lagretFaktaFeilutbetaling.shouldBeEqualToComparingFieldsExcept(
+        lagretFaktaFeilutbetaling.shouldBeEqualToIgnoringFields(
             faktaFeilutbetaling,
             FaktaFeilutbetaling::sporbar,
             FaktaFeilutbetaling::versjon,
@@ -62,7 +62,7 @@ internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
         faktaFeilutbetalingRepository.update(oppdatertFaktaFeilutbetaling)
 
         lagretFaktaFeilutbetaling = faktaFeilutbetalingRepository.findByIdOrThrow(faktaFeilutbetaling.id)
-        lagretFaktaFeilutbetaling.shouldBeEqualToComparingFieldsExcept(
+        lagretFaktaFeilutbetaling.shouldBeEqualToIgnoringFields(
             oppdatertFaktaFeilutbetaling,
             FaktaFeilutbetaling::sporbar,
             FaktaFeilutbetaling::versjon,
@@ -76,7 +76,7 @@ internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
 
         val findByBehandlingId = faktaFeilutbetalingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
 
-        findByBehandlingId?.shouldBeEqualToComparingFieldsExcept(
+        findByBehandlingId?.shouldBeEqualToIgnoringFields(
             faktaFeilutbetaling,
             FaktaFeilutbetaling::sporbar,
             FaktaFeilutbetaling::versjon,
@@ -90,7 +90,7 @@ internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretVurderingAvBrukersUttalelse = faktaFeilutbetalingRepository.findByIdOrThrow(faktaFeilutbetaling.id).vurderingAvBrukersUttalelse ?: error("Mangler brukers uttalelse vurdering")
 
-        lagretVurderingAvBrukersUttalelse.shouldBeEqualToComparingFieldsExcept(
+        lagretVurderingAvBrukersUttalelse.shouldBeEqualToIgnoringFields(
             vurderingAvBrukersUttalelse,
             VurderingAvBrukersUttalelse::sporbar,
             VurderingAvBrukersUttalelse::versjon,
