@@ -47,7 +47,7 @@ class AutomatiskSaksbehandlingTask(
             behandling.aktivFagsystemsbehandling.tilbakekrevingsvalg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK
         ) {
             throw Feil(
-                "Behandler ikke feilutbetalinger under 4x rettsgebyr automatisk da featuretoggle for dette er skrudd av " +
+                "Behandler ikke feilutbetalinger under 4 rettsgebyr automatisk da featuretoggle for dette er skrudd av " +
                     "(${FeatureToggleConfig.AUTOMATISK_BEHANDLE_TILBAKEKREVING_UNDER_4X_RETTSGEBYR})",
             )
         }

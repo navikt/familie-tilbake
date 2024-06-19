@@ -53,10 +53,10 @@ object Constants {
         )
 
     const val AUTOMATISK_SAKSBEHANDLING_BEGRUNNELSE = "Automatisk satt verdi"
-    const val AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_FAKTA_BEGRUNNELSE = "Automatisk behandling av tilbakekreving under 4 ganger rettsgebyr. Ingen tilbakekreving."
-    const val AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_FORELDELSE_BEGRUNNELSE = "Automatisk behandlet under 4 ganger rettsgebyr på foreldet periode. Ikke relevant."
-    const val AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_BEGRUNNELSE = "Automatisk behandlet. Feilutbetaling under 4 ganger rettsgebyr. Beløpet skal ikke tilbakebetales."
-    const val AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_AKTSOMHET_BEGRUNNELSE = "Automatisk behandlet. Feilutbetaling under 4 ganger rettsgebyr. Bruker har ikke handlet forsettlig eller grovt uaktsomt."
+    const val AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_FAKTA_BEGRUNNELSE = "Automatisk behandling av tilbakekreving under 4 rettsgebyr. Ingen tilbakekreving."
+    const val AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_FORELDELSE_BEGRUNNELSE = "Automatisk behandlet under 4 rettsgebyr på foreldet periode. Ikke relevant."
+    const val AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_BEGRUNNELSE = "Automatisk behandlet. Feilutbetaling under 4 rettsgebyr. Beløpet skal ikke tilbakebetales."
+    const val AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_AKTSOMHET_BEGRUNNELSE = "Automatisk behandlet. Feilutbetaling under 4 rettsgebyr. Bruker har ikke handlet forsettlig eller grovt uaktsomt."
 
     fun hentAutomatiskSaksbehandlingBegrunnelse(behandling: Behandling): String =
         when (behandling.saksbehandlingstype) {
