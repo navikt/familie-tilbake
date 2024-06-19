@@ -97,7 +97,7 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
     }
 
     @Test
-    fun `Skal knytte kravgrunnlag til åpen behandling under 4x rettsgebyr og behandles automatisk`() {
+    fun `Skal knytte kravgrunnlag til åpen behandling under 4 rettsgebyr og behandles automatisk`() {
         lagGrunnlagssteg()
 
         val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_EF_under_4x_rettsgebyr.xml")
