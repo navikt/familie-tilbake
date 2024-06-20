@@ -27,7 +27,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-// Denne kontrollen inneholder tjenester som kun brukes av forvaltningsteam via swagger. Frontend bør ikke kalle disse tjenestene.
+// Denne kontrolleren inneholder tjenester som kun brukes av forvaltningsteam via swagger. Frontend skal ikke kalle disse tjenestene.
 
 @RestController
 @RequestMapping("/api/forvaltning")
