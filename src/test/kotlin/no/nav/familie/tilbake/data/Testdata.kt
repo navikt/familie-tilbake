@@ -375,6 +375,7 @@ object Testdata {
             varsler = setOf(varsel),
             verger = setOf(verge),
             vedtaksbrevOppsummering = lagVedtaksbrevsoppsummering(behandling.id),
+            saksbehandlingstype = behandling.saksbehandlingstype,
         )
 
     fun lagVedtaksbrevgrunnlag(behandling: Behandling) =
