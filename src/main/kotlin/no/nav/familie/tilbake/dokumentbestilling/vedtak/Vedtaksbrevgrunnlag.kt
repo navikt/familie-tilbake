@@ -2,7 +2,16 @@ package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
-import no.nav.familie.tilbake.behandling.domain.*
+import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
+import no.nav.familie.tilbake.behandling.domain.Behandlingstype
+import no.nav.familie.tilbake.behandling.domain.Behandlingsårsak
+import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
+import no.nav.familie.tilbake.behandling.domain.Bruker
+import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
+import no.nav.familie.tilbake.behandling.domain.Institusjon
+import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
+import no.nav.familie.tilbake.behandling.domain.Varsel
+import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager

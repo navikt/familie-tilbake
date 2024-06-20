@@ -36,7 +36,7 @@ class HåndterGamleKravgrunnlagBatch(
     @Scheduled(cron = "\${CRON_HÅNDTER_GAMMEL_KRAVGRUNNLAG}")
     @Transactional
     fun utfør() {
-        if(erLederEllerLokaltMiljø()) {
+        if (erLederEllerLokaltMiljø()) {
             logger.info("Starter HåndterGamleKravgrunnlagBatch..")
 
             logger.info("Henter kravgrunnlag som er eldre enn $ALDERSGRENSE_I_UKER uker")
@@ -60,7 +60,7 @@ class HåndterGamleKravgrunnlagBatch(
 
             logger.info(
                 "Det finnes ${frakobletKravgrunnlag.size} kravgrunnlag som er eldre enn " +
-                        "$ALDERSGRENSE_I_UKER uker fra dagens dato",
+                    "$ALDERSGRENSE_I_UKER uker fra dagens dato",
             )
 
             val taskerMedStatus =
@@ -82,8 +82,8 @@ class HåndterGamleKravgrunnlagBatch(
                     } else {
                         logger.info(
                             "Det finnes allerede en feilet HåndterGammelKravgrunnlagTask " +
-                                    "eller HentFagsystemsbehandlingTask " +
-                                    "på det samme kravgrunnlaget med id ${kravgrunnlagPåFagsak.id}",
+                                "eller HentFagsystemsbehandlingTask " +
+                                "på det samme kravgrunnlaget med id ${kravgrunnlagPåFagsak.id}",
                         )
                     }
                 }
@@ -101,7 +101,6 @@ class HåndterGamleKravgrunnlagBatch(
                 it.contains("local") || it.contains("integrasjonstest")
             }
         return erLeader || erLokaltMiljø
-
     }
 
     private fun beregnBestemtDato(ytelsestype: Ytelsestype): LocalDate {

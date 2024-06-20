@@ -24,5 +24,4 @@ class FeatureToggleController(
     fun featureToggles(): Ressurs<Map<String, Boolean>> {
         return Ressurs.success(funksjonsbrytere.associateWith { featureToggleService.isEnabled(it) })
     }
-
 }
