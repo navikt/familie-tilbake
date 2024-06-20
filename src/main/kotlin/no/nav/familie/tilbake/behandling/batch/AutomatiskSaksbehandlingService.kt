@@ -70,14 +70,15 @@ class AutomatiskSaksbehandlingService(
     fun settSaksbehandlingstypeTilAutomatiskHvisOrdinær(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
 
-        if(behandling.saksbehandlingstype == Saksbehandlingstype.ORDINÆR){
-            behandlingRepository.update(
-                behandling.copy(
-                    saksbehandlingstype = Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP,
-                    ansvarligSaksbehandler = "VL",
-                ),
-            )
-        }
+        if (behandling.saksbehandlingstype == Saksbehandlingstype.ORDINÆR)
+            {
+                behandlingRepository.update(
+                    behandling.copy(
+                        saksbehandlingstype = Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP,
+                        ansvarligSaksbehandler = "VL",
+                    ),
+                )
+            }
     }
 
     @Transactional

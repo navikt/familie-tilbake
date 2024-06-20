@@ -44,9 +44,10 @@ class AutomatiskSaksbehandlingTask(
         automatiskSaksbehandlingService.behandleAutomatisk(behandlingId)
     }
 
-
-
-    private fun validerOmAutomatiskBehandlingUnder4RettsgebyrErMulig(behandlingId: UUID, behandling: Behandling) {
+    private fun validerOmAutomatiskBehandlingUnder4RettsgebyrErMulig(
+        behandlingId: UUID,
+        behandling: Behandling,
+    ) {
         if (kravgrunnlagService.sumFeilutbetalingsbeløpForBehandlingId(behandlingId) > Constants.FIRE_X_RETTSGEBYR &&
             behandling.saksbehandlingstype == Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR
         ) {
@@ -58,7 +59,7 @@ class AutomatiskSaksbehandlingTask(
         ) {
             throw Feil(
                 "Behandler ikke feilutbetalinger under 4 rettsgebyr automatisk da featuretoggle for dette er skrudd av " +
-                        "(${FeatureToggleConfig.AUTOMATISK_BEHANDLE_TILBAKEKREVING_UNDER_4X_RETTSGEBYR})",
+                    "(${FeatureToggleConfig.AUTOMATISK_BEHANDLE_TILBAKEKREVING_UNDER_4X_RETTSGEBYR})",
             )
         }
     }
