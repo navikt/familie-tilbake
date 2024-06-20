@@ -1,7 +1,6 @@
 package no.nav.familie.tilbake.behandling.batch
 
 import no.nav.familie.kontrakter.felles.Regelverk
-import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
@@ -68,20 +67,17 @@ class AutomatiskSaksbehandlingService(
     }
 
     @Transactional
-    fun oppdaterBehandling(behandlingId: UUID) {
+    fun settSaksbehandlingstypeTilAutomatiskHvisOrdinær(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        val saksbehandlingstype =
-            if (behandling.aktivFagsystemsbehandling.tilbakekrevingsvalg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK) {
-                Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR
-            } else {
-                Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP
-            }
-        behandlingRepository.update(
-            behandling.copy(
-                saksbehandlingstype = saksbehandlingstype,
-                ansvarligSaksbehandler = "VL",
-            ),
-        )
+
+        if(behandling.saksbehandlingstype == Saksbehandlingstype.ORDINÆR){
+            behandlingRepository.update(
+                behandling.copy(
+                    saksbehandlingstype = Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP,
+                    ansvarligSaksbehandler = "VL",
+                ),
+            )
+        }
     }
 
     @Transactional

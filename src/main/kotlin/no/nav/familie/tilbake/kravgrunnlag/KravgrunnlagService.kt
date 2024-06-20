@@ -1,7 +1,6 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
@@ -121,7 +120,7 @@ class KravgrunnlagService(
         }
 
         stegService.håndterSteg(behandling.id) // Kjører automatisk frem til fakta-steg = KLAR
-        if (behandling.aktivFagsystemsbehandling.tilbakekrevingsvalg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK) {
+        if (behandling.saksbehandlingstype == Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR) {
             if (skalBehandlesAutomatisk(kravgrunnlag431, behandling)) {
                 taskService.save(AutomatiskSaksbehandlingTask.opprettTask(behandling.id, fagsystem))
             } else {

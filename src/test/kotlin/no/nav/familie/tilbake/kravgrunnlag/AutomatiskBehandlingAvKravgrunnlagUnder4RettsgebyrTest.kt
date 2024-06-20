@@ -31,7 +31,6 @@ import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.iverksettvedtak.task.SendØkonomiTilbakekrevingsvedtakTask
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
 import no.nav.familie.tilbake.oppgave.LagOppgaveTask
-import no.nav.familie.tilbake.oppgave.OppdaterOppgaveTask
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
@@ -78,9 +77,6 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
     @Autowired
     private lateinit var featureToggleService: FeatureToggleService
 
-    @Autowired
-    private lateinit var oppdaterOppgaveTask: OppdaterOppgaveTask
-
     private lateinit var behandlingId: UUID
 
     @BeforeEach
@@ -88,7 +84,7 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
         val fagsak = Testdata.fagsak
         val behandling = Testdata.lagBehandling()
         val copyFagsystemsbehandling = behandling.fagsystemsbehandling.first().copy(tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK, eksternId = "1")
-        val automatiskBehandling = behandling.copy(fagsystemsbehandling = setOf(copyFagsystemsbehandling))
+        val automatiskBehandling = behandling.copy(saksbehandlingstype = Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR, fagsystemsbehandling = setOf(copyFagsystemsbehandling))
         val fagsakOvergangsstønad = fagsak.copy(ytelsestype = Ytelsestype.OVERGANGSSTØNAD)
         fagsakRepository.insert(fagsakOvergangsstønad)
         behandlingId = behandlingRepository.insert(automatiskBehandling).id
