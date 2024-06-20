@@ -3,13 +3,13 @@ package no.nav.familie.tilbake.dokumentbestilling.felles.task
 import io.kotest.matchers.collections.shouldHaveSingleElement
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
@@ -17,6 +17,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.MANUELL_TIL
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.VERGE
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
+import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.iverksettvedtak.task.AvsluttBehandlingTask
@@ -42,14 +43,16 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var lagreBrevsporingTask: LagreBrevsporingTask
 
-    private val behandling = Testdata.behandling
-    private val behandlingId = behandling.id
+    private lateinit var behandling: Behandling
+    private lateinit var behandlingId: UUID
 
     private val dokumentId: String = "testverdi"
     private val journalpostId: String = "testverdi"
 
     @BeforeEach
     fun init() {
+        behandling = Testdata.lagBehandling()
+        behandlingId = behandling.id
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(behandling)
     }

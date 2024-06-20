@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.behandling.steg
 
-import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegForeldelseDto
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
@@ -8,6 +7,7 @@ import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
+import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
@@ -75,21 +75,21 @@ class Foreldelsessteg(
     @Transactional
     override fun utførStegAutomatisk(behandlingId: UUID) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORELDELSE} steg og behandler automatisk..")
-        if (!harGrunnlagForeldetPeriode(behandlingId)) {
-            utførSteg(behandlingId)
-            return
-        }
-        foreldelseService.lagreFastForeldelseForAutomatiskSaksbehandling(behandlingId)
-        lagHistorikkinnslag(behandlingId, Aktør.VEDTAKSLØSNING)
+        if (harGrunnlagForeldetPeriode(behandlingId)) {
+            foreldelseService.lagreFastForeldelseForAutomatiskSaksbehandling(behandlingId)
+            lagHistorikkinnslag(behandlingId, Aktør.VEDTAKSLØSNING)
 
-        behandlingskontrollService.oppdaterBehandlingsstegStatus(
-            behandlingId,
-            Behandlingsstegsinfo(
-                Behandlingssteg.FORELDELSE,
-                Behandlingsstegstatus.UTFØRT,
-            ),
-        )
-        behandlingskontrollService.fortsettBehandling(behandlingId)
+            behandlingskontrollService.oppdaterBehandlingsstegStatus(
+                behandlingId,
+                Behandlingsstegsinfo(
+                    Behandlingssteg.FORELDELSE,
+                    Behandlingsstegstatus.UTFØRT,
+                ),
+            )
+            behandlingskontrollService.fortsettBehandling(behandlingId)
+        } else {
+            utførSteg(behandlingId)
+        }
     }
 
     @Transactional

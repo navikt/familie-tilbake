@@ -7,8 +7,8 @@ import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottattArkiv
-import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottattIdOgYtelse
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.math.BigInteger
 import java.time.LocalDate
@@ -84,14 +84,14 @@ class ØkonomiXmlMottattService(
         return kravgrunnlagXmlListe
     }
 
-    fun hentFrakobletGamleMottattXmlIds(
+    fun hentFrakobletKravgrunnlag(
         barnetrygdBestemtDato: LocalDate,
         barnetilsynBestemtDato: LocalDate,
         overgangsstønadBestemtDato: LocalDate,
         skolePengerBestemtDato: LocalDate,
         kontantStøtteBestemtDato: LocalDate,
-    ): List<ØkonomiXmlMottattIdOgYtelse> {
-        return mottattXmlRepository.hentFrakobletGamleMottattXmlIds(
+    ): List<ØkonomiXmlMottatt> {
+        return mottattXmlRepository.hentFrakobletKravgrunnlag(
             barnetrygdBestemtDato = barnetrygdBestemtDato,
             barnetilsynBestemtDato = barnetilsynBestemtDato,
             overgangsstonadbestemtdato = overgangsstønadBestemtDato,
@@ -102,6 +102,10 @@ class ØkonomiXmlMottattService(
 
     fun hentMottattKravgrunnlag(mottattXmlId: UUID): ØkonomiXmlMottatt {
         return mottattXmlRepository.findByIdOrThrow(mottattXmlId)
+    }
+
+    fun hentMottattKravgrunnlagNullable(mottattXmlId: UUID): ØkonomiXmlMottatt? {
+        return mottattXmlRepository.findByIdOrNull(mottattXmlId)
     }
 
     fun oppdaterMottattXml(mottattXml: ØkonomiXmlMottatt) {

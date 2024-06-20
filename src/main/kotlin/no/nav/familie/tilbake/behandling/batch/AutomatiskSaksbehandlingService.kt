@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.behandling.batch
 
 import no.nav.familie.kontrakter.felles.Regelverk
+import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
@@ -13,6 +14,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
+import no.nav.familie.unleash.UnleashService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -38,6 +40,7 @@ class AutomatiskSaksbehandlingService(
     private val alderGrenseSkolepenger: Long,
     @Value("\${AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_KONTANTSTØTTE}")
     private val alderGrenseKontantstøtte: Long,
+    private val unleashService: UnleashService,
 ) {
     fun hentAlleBehandlingerSomKanBehandleAutomatisk(): List<Behandling> {
         val behandlinger =
@@ -67,11 +70,15 @@ class AutomatiskSaksbehandlingService(
     @Transactional
     fun oppdaterBehandling(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val saksbehandlingstype =
+            if (behandling.aktivFagsystemsbehandling.tilbakekrevingsvalg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK) {
+                Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR
+            } else {
+                Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP
+            }
         behandlingRepository.update(
             behandling.copy(
-                saksbehandlingstype =
-                    Saksbehandlingstype
-                        .AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP,
+                saksbehandlingstype = saksbehandlingstype,
                 ansvarligSaksbehandler = "VL",
             ),
         )
@@ -79,7 +86,11 @@ class AutomatiskSaksbehandlingService(
 
     @Transactional
     fun behandleAutomatisk(behandlingId: UUID) {
-        stegService.håndterStegAutomatisk(behandlingId)
+        if (unleashService.isEnabled("familie-tilbake.bruk-ny-haandterStegAutomatisk")) {
+            stegService.håndterStegAutomatisk(behandlingId)
+        } else {
+            stegService.håndterStegAutomatiskGAMMEL(behandlingId)
+        }
     }
 
     private val aldersgrenseIUker =

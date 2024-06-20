@@ -23,7 +23,7 @@ internal class OppdaterAnsvarligSaksbehandlerTaskTest {
     private val fagsakRepository: FagsakRepository = mockk(relaxed = true)
     private val mockOppgaveService: OppgaveService = mockk(relaxed = true)
     private val oppgavePrioritetService = mockk<OppgavePrioritetService>()
-    private val behandling: Behandling = Testdata.behandling
+    private lateinit var behandling: Behandling
 
     private val oppdaterAnsvarligSaksbehandlerTask =
         OppdaterAnsvarligSaksbehandlerTask(mockOppgaveService, behandlingRepository, oppgavePrioritetService)
@@ -31,8 +31,9 @@ internal class OppdaterAnsvarligSaksbehandlerTaskTest {
     @BeforeEach
     fun init() {
         clearMocks(mockOppgaveService)
+        behandling = Testdata.lagBehandling()
         every { fagsakRepository.findByIdOrThrow(Testdata.fagsak.id) } returns Testdata.fagsak
-        every { behandlingRepository.findByIdOrThrow(Testdata.behandling.id) } returns Testdata.behandling
+        every { behandlingRepository.findByIdOrThrow(behandling.id) } returns behandling
         every { oppgavePrioritetService.utledOppgaveprioritet(any(), any()) } returns OppgavePrioritet.NORM
     }
 

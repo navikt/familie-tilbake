@@ -21,7 +21,7 @@ spring:
       ignoreIfProd:
   datasource:
     hikari:
-      maximum-pool-size: 4
+      maximum-pool-size: 20
       connection-test-query: "select 1"
       max-lifetime: 30000
       minimum-idle: 1
@@ -44,7 +44,6 @@ no.nav.security.jwt:
   issuer.azuread:
     discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
     accepted_audience: ${AZURE_APP_CLIENT_ID}
-    cookie_name: azure_token
   client:
     registration:
       familie-integrasjoner:

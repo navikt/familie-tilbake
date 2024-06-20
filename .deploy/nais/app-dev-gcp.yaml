@@ -28,8 +28,9 @@ spec:
     enabled: true
     path: /internal/prometheus
   observability:
-    tracing:
+    autoInstrumentation:
       enabled: true
+      runtime: java
   vault:
     enabled: false
   gcp: # Database
@@ -93,8 +94,10 @@ spec:
         - application: familie-prosessering-lokal
           namespace: teamfamilie
           cluster: dev-gcp
+        - application: familie-tilbake-frontend-lokal
+          namespace: teamfamilie
+          cluster: dev-gcp
     outbound:
-      rules:
       external:
         - host: teamfamilie-unleash-api.nav.cloud.nais.io
         - host: familie-integrasjoner.dev-fss-pub.nais.io
@@ -118,15 +121,5 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: dev
-    - name: OTEL_METRICS_EXPORTER
-      value: prometheus
-    - name: OTEL_LOGS_EXPORTER
-      value: none
-    - name: OTEL_TRACES_EXPORTER
-      value: otlp
-    - name: OTEL_EXPORTER_METRICS_ENABLED
-      value: "false"
-    - name: OTEL_METRICS_EXEMPLAR_FILTER
-      value: ALWAYS_ON
   kafka:
     pool: nav-dev

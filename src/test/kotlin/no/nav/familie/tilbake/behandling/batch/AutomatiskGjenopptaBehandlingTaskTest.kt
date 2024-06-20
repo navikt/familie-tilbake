@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.behandling.batch
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.matchers.booleans.shouldBeTrue
 import no.nav.familie.kontrakter.felles.Fagsystem
-import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
@@ -16,6 +15,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
@@ -48,17 +48,17 @@ internal class AutomatiskGjenopptaBehandlingTaskTest : OppslagSpringRunnerTest()
     @Test
     fun `skal gjenoppta behandling som venter på varsel og har allerede fått kravgrunnlag til FAKTA steg`() {
         fagsakRepository.insert(Testdata.fagsak)
-        val behandling = behandlingRepository.insert(Testdata.behandling.copy(status = Behandlingsstatus.UTREDES))
+        val behandling = behandlingRepository.insert(Testdata.lagBehandling().copy(status = Behandlingsstatus.UTREDES))
         val tidsfrist = LocalDate.now().minusWeeks(4)
         behandlingsstegstilstandRepository.insert(
-            Testdata.behandlingsstegstilstand.copy(
+            Testdata.lagBehandlingsstegstilstand(behandling.id).copy(
                 behandlingssteg = Behandlingssteg.VARSEL,
                 behandlingsstegsstatus = Behandlingsstegstatus.VENTER,
                 venteårsak = Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
                 tidsfrist = tidsfrist,
             ),
         )
-        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
 
         shouldNotThrow<RuntimeException> { automatiskGjenopptaBehandlingTask.doTask(lagTask(behandling.id)) }
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
@@ -90,10 +90,10 @@ internal class AutomatiskGjenopptaBehandlingTaskTest : OppslagSpringRunnerTest()
     @Test
     fun `skal gjenoppta behandling som venter på varsel og har ikke fått kravgrunnlag til GRUNNLAG steg`() {
         fagsakRepository.insert(Testdata.fagsak)
-        val behandling = behandlingRepository.insert(Testdata.behandling.copy(status = Behandlingsstatus.UTREDES))
+        val behandling = behandlingRepository.insert(Testdata.lagBehandling().copy(status = Behandlingsstatus.UTREDES))
         val tidsfrist = LocalDate.now().minusWeeks(4)
         behandlingsstegstilstandRepository.insert(
-            Testdata.behandlingsstegstilstand.copy(
+            Testdata.lagBehandlingsstegstilstand(behandling.id).copy(
                 behandlingssteg = Behandlingssteg.VARSEL,
                 behandlingsstegsstatus = Behandlingsstegstatus.VENTER,
                 venteårsak = Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
@@ -147,17 +147,17 @@ internal class AutomatiskGjenopptaBehandlingTaskTest : OppslagSpringRunnerTest()
     @Test
     fun `skal gjenoppta behandling som venter på avvent dokumentasjon`() {
         fagsakRepository.insert(Testdata.fagsak)
-        val behandling = behandlingRepository.insert(Testdata.behandling.copy(status = Behandlingsstatus.UTREDES))
+        val behandling = behandlingRepository.insert(Testdata.lagBehandling().copy(status = Behandlingsstatus.UTREDES))
         val tidsfrist = LocalDate.now().minusWeeks(1)
         behandlingsstegstilstandRepository.insert(
-            Testdata.behandlingsstegstilstand.copy(
+            Testdata.lagBehandlingsstegstilstand(behandling.id).copy(
                 behandlingssteg = Behandlingssteg.VILKÅRSVURDERING,
                 behandlingsstegsstatus = Behandlingsstegstatus.VENTER,
                 venteårsak = Venteårsak.AVVENTER_DOKUMENTASJON,
                 tidsfrist = tidsfrist,
             ),
         )
-        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
         shouldNotThrow<RuntimeException> { automatiskGjenopptaBehandlingTask.doTask(lagTask(behandling.id)) }
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)

@@ -8,12 +8,9 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.runs
 import io.mockk.verify
 import no.nav.familie.kontrakter.felles.Fagsystem
-import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import no.nav.familie.kontrakter.felles.tilbakekreving.ManuellAdresseInfo
 import no.nav.familie.kontrakter.felles.tilbakekreving.MottakerType.DØDSBO
@@ -34,6 +31,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
+import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
@@ -99,7 +97,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
     @BeforeEach
     fun init() {
         fagsakRepository.insert(Testdata.fagsak)
-        behandling = behandlingRepository.insert(Testdata.behandling)
+        behandling = behandlingRepository.insert(Testdata.lagBehandling())
 
         manuellBrevmottakerService =
             ManuellBrevmottakerService(
@@ -122,7 +120,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                 tittel = any(),
                 beskrivelse = any(),
             )
-        } just runs
+        } returns mockk()
 
         every { mockPdlClient.hentPersoninfo(any(), any()) } returns Personinfo("12345678901", LocalDate.MIN, "Eldar")
         every { mockIntegrasjonerClient.validerOrganisasjon(any()) } returns true
@@ -260,7 +258,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `opprettBrevmottakerSteg skal ikke opprette steg når behandling er på vent`() {
-        val behandling = behandlingRepository.findByIdOrThrow(Testdata.behandling.id)
+        val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         lagBehandlingsstegstilstand(behandling.id, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
 
         behandlingskontrollService.settBehandlingPåVent(
@@ -275,7 +273,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `fjernManuelleBrevmottakereOgTilbakeførSteg skal fjerne brevmottakere og tilbakeføre steget`() {
-        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
         lagBehandlingsstegstilstand(behandling.id, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
 
         manuellBrevmottakerService.opprettBrevmottakerSteg(behandling.id)

@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.historikkinnslag
 
-import no.nav.familie.kontrakter.felles.historikkinnslag.Historikkinnslagstype
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 
 private const val VARSELBREV_TEKST = "Varselbrev tilbakebetaling"
@@ -20,6 +19,7 @@ enum class TilbakekrevingHistorikkinnslagstype(
     VERGE_FJERNET(tittel = "Verge fjernet"),
     BEHANDLING_SENDT_TIL_BESLUTTER(tittel = "Sendt til beslutter"),
     BEHANDLING_SENDT_TILBAKE_TIL_SAKSBEHANDLER(tittel = "Vedtak underkjent"),
+    ANGRE_SEND_TIL_BESLUTTER(tittel = "Angre send til beslutter"),
     VEDTAK_FATTET(tittel = "Vedtak fattet", tekst = "Resultat: "),
     BEHANDLING_AVSLUTTET(tittel = "Behandling avsluttet"),
     BEHANDLING_HENLAGT(tittel = "Behandling henlagt", tekst = "Årsak: "),

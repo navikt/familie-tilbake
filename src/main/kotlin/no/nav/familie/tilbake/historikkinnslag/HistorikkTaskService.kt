@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.historikkinnslag
 
-import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.FagsakService

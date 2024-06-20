@@ -36,6 +36,9 @@ I brev {{{dato fagsaksvedtaksdato}}} {{#if gjelderDødsfall}}sendte vi{{else}}fi
 {{>brev-ytelse-endret}}{{#if gjelderDødsfall}}Det feilutbetalte beløpet må ikke betales tilbake.{{else}}Du må ikke betale tilbake det du har fått for mye.{{/if}}
 {{/if}}
 {{/if}}
+{{#if (eq harBrukerUttaltSeg "NEI")}}
+{{#if gjelderDødsfall}}Dere{{else}}Du{{/if}} har ikke uttalt {{#if gjelderDødsfall}}dere{{else}}deg{{/if}} om feilutbetalingen.
+{{/if}}
 {{#if fritekstoppsummering}}
 {{{fritekstoppsummering}}}
 {{/if}}

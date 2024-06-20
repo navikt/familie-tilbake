@@ -90,10 +90,11 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
     private lateinit var automatiskSaksbehandlingTask: AutomatiskSaksbehandlingTask
 
     private val fagsak: Fagsak = Testdata.fagsak
-    private val behandling: Behandling = Testdata.behandling
+    private lateinit var behandling: Behandling
 
     @BeforeEach
     fun init() {
+        behandling = Testdata.lagBehandling()
         fagsakRepository.insert(fagsak)
         val fagsystemsbehandling =
             behandling.aktivFagsystemsbehandling.copy(
@@ -115,7 +116,7 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
             )
 
         val kravgrunnlag =
-            Testdata.kravgrunnlag431
+            Testdata.lagKravgrunnlag(behandling.id)
                 .copy(
                     kontrollfelt = "2019-11-22-19.09.31.458065",
                     perioder =
@@ -189,7 +190,7 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
 
         val faktaFeilutbetaling = faktaFeilutbetalingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
         faktaFeilutbetaling.shouldNotBeNull()
-        faktaFeilutbetaling.begrunnelse shouldBe Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE
+        faktaFeilutbetaling.begrunnelse shouldBe Constants.AUTOMATISK_SAKSBEHANDLING_BEGRUNNELSE
         faktaFeilutbetaling.perioder.shouldHaveSingleElement {
             Hendelsestype.ANNET == it.hendelsestype &&
                 Hendelsesundertype.ANNET_FRITEKST == it.hendelsesundertype
@@ -200,7 +201,7 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
         vilkårsvurdering.shouldNotBeNull()
         vilkårsvurdering.perioder.shouldHaveSingleElement {
-            Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE == it.begrunnelse &&
+            Constants.AUTOMATISK_SAKSBEHANDLING_BEGRUNNELSE == it.begrunnelse &&
                 Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT == it.vilkårsvurderingsresultat &&
                 it.aktsomhet != null && it.aktsomhet!!.aktsomhet == Aktsomhet.SIMPEL_UAKTSOMHET
             !it.aktsomhet!!.tilbakekrevSmåbeløp

@@ -16,6 +16,8 @@ import no.nav.familie.tilbake.api.dto.SærligGrunnDto
 import no.nav.familie.tilbake.api.dto.VilkårsvurderingsperiodeDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
@@ -69,8 +71,8 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
     @Autowired
     private lateinit var iverksettelseService: IverksettelseService
 
-    private val fagsak = Testdata.fagsak
-    private val behandling = Testdata.behandling
+    private lateinit var fagsak: Fagsak
+    private lateinit var behandling: Behandling
 
     private val perioder =
         listOf(
@@ -82,6 +84,8 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
 
     @BeforeEach
     fun init() {
+        behandling = Testdata.lagBehandling()
+        fagsak = Testdata.fagsak
         fagsakRepository.insert(fagsak)
         behandlingRepository.insert(behandling)
 

@@ -15,6 +15,7 @@ data class FaktaFeilutbetaling(
     val begrunnelse: String?,
     @MappedCollection(idColumn = "fakta_feilutbetaling_id")
     val perioder: Set<FaktaFeilutbetalingsperiode> = setOf(),
+    val vurderingAvBrukersUttalelse: VurderingAvBrukersUttalelse? = null,
     @Version
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)

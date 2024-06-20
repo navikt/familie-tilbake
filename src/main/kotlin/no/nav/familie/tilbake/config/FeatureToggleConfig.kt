@@ -27,6 +27,9 @@ class FeatureToggleConfig(
 
         const val IKKE_VALIDER_SÆRLIG_GRUNNET_ANNET_FRITEKST =
             "familie-tilbake.ikke-valider-saerlig-grunnet-annet-fritekst"
+
+        const val AUTOMATISK_BEHANDLE_TILBAKEKREVING_UNDER_4X_RETTSGEBYR = "familie-tilbake.automatisk-behandle-under-4x-rettsgebyr"
+        const val VURDERING_AV_BRUKERS_UTTALELSE = "familie-tilbake.bruker.har.uttalt.seg"
     }
 }
 

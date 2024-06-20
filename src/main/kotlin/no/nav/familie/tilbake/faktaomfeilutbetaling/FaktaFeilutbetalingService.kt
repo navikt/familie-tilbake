@@ -3,13 +3,19 @@ package no.nav.familie.tilbake.faktaomfeilutbetaling
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFaktaDto
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
+import no.nav.familie.tilbake.api.dto.VurderingAvBrukersUttalelseDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.Constants
+import no.nav.familie.tilbake.config.Constants.hentAutomatiskSaksbehandlingBegrunnelse
+import no.nav.familie.tilbake.config.FeatureToggleConfig
+import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetalingsperiode
+import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.HarBrukerUttaltSeg
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
+import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.VurderingAvBrukersUttalelse
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -20,6 +26,7 @@ class FaktaFeilutbetalingService(
     private val behandlingRepository: BehandlingRepository,
     private val faktaFeilutbetalingRepository: FaktaFeilutbetalingRepository,
     private val kravgrunnlagRepository: KravgrunnlagRepository,
+    private val featureToggleService: FeatureToggleService,
 ) {
     @Transactional(readOnly = true)
     fun hentFaktaomfeilutbetaling(behandlingId: UUID): FaktaFeilutbetalingDto {
@@ -30,9 +37,7 @@ class FaktaFeilutbetalingService(
             .tilRespons(
                 faktaFeilutbetaling = faktaFeilutbetaling,
                 kravgrunnlag = kravgrunnlag,
-                revurderingsvedtaksdato = behandling.aktivFagsystemsbehandling.revurderingsvedtaksdato,
-                varsletData = behandling.aktivtVarsel,
-                fagsystemsbehandling = behandling.aktivFagsystemsbehandling,
+                behandling = behandling,
             )
     }
 
@@ -41,6 +46,7 @@ class FaktaFeilutbetalingService(
         behandlingId: UUID,
         behandlingsstegFaktaDto: BehandlingsstegFaktaDto,
     ) {
+        validerVurderingAvBrukersUttalelse(behandlingsstegFaktaDto.vurderingAvBrukersUttalelse)
         deaktiverEksisterendeFaktaOmFeilutbetaling(behandlingId)
 
         val feilutbetaltePerioder: Set<FaktaFeilutbetalingsperiode> =
@@ -57,8 +63,26 @@ class FaktaFeilutbetalingService(
                 behandlingId = behandlingId,
                 perioder = feilutbetaltePerioder,
                 begrunnelse = behandlingsstegFaktaDto.begrunnelse,
+                vurderingAvBrukersUttalelse =
+                    behandlingsstegFaktaDto.vurderingAvBrukersUttalelse?.let {
+                        VurderingAvBrukersUttalelse(harBrukerUttaltSeg = it.harBrukerUttaltSeg, beskrivelse = it.beskrivelse)
+                    },
             ),
         )
+    }
+
+    private fun validerVurderingAvBrukersUttalelse(vurderingAvBrukersUttalelse: VurderingAvBrukersUttalelseDto?) {
+        vurderingAvBrukersUttalelse?.let {
+            if (!featureToggleService.isEnabled(FeatureToggleConfig.VURDERING_AV_BRUKERS_UTTALELSE) && it.harBrukerUttaltSeg != HarBrukerUttaltSeg.IKKE_VURDERT) {
+                throw Feil("Feature toggle for vurdering av brukers uttalelse er ikke skrudd på")
+            }
+
+            if (it.harBrukerUttaltSeg == HarBrukerUttaltSeg.JA && it.beskrivelse.isNullOrBlank()) {
+                throw Feil("Mangler beskrivelse på vurdering av brukers uttalelse")
+            } else if (it.harBrukerUttaltSeg == HarBrukerUttaltSeg.NEI && !it.beskrivelse.isNullOrBlank()) {
+                throw Feil("Skal ikke ha beskrivelse når bruker ikke har uttalt seg")
+            }
+        }
     }
 
     @Transactional
@@ -71,11 +95,12 @@ class FaktaFeilutbetalingService(
                     hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
                 )
             }.toSet()
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         faktaFeilutbetalingRepository.insert(
             FaktaFeilutbetaling(
                 behandlingId = behandlingId,
                 perioder = feilutbetaltePerioder,
-                begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE,
+                begrunnelse = hentAutomatiskSaksbehandlingBegrunnelse(behandling),
             ),
         )
     }
@@ -87,7 +112,7 @@ class FaktaFeilutbetalingService(
     @Transactional
     fun deaktiverEksisterendeFaktaOmFeilutbetaling(behandlingId: UUID) {
         faktaFeilutbetalingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)?.copy(aktiv = false)?.let {
-            faktaFeilutbetalingRepository.update(it)
+            faktaFeilutbetalingRepository.update(it.copy(vurderingAvBrukersUttalelse = it.vurderingAvBrukersUttalelse?.copy(aktiv = false)))
         }
     }
 }
