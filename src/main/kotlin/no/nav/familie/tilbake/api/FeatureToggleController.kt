@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.api
 
+import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.tilbake.config.FeatureToggleConfig
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -20,8 +21,8 @@ class FeatureToggleController(
         )
 
     @GetMapping
-    fun sjekkAlle(): Map<String, Boolean> {
-        return funksjonsbrytere.associateWith { featureToggleService.isEnabled(it) }
+    fun featureToggles(): Ressurs<Map<String, Boolean>> {
+        return Ressurs.success(funksjonsbrytere.associateWith { featureToggleService.isEnabled(it) })
     }
 
 }
