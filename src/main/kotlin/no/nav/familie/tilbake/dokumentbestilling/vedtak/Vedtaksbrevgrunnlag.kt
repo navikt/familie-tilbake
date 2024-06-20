@@ -1,17 +1,8 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
 import no.nav.familie.kontrakter.felles.Fagsystem
-import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
-import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
-import no.nav.familie.tilbake.behandling.domain.Behandlingstype
-import no.nav.familie.tilbake.behandling.domain.Behandlingsårsak
-import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
-import no.nav.familie.tilbake.behandling.domain.Bruker
-import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
-import no.nav.familie.tilbake.behandling.domain.Institusjon
-import no.nav.familie.tilbake.behandling.domain.Varsel
-import no.nav.familie.tilbake.behandling.domain.Verge
+import no.nav.familie.tilbake.behandling.domain.*
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
@@ -118,7 +109,7 @@ data class Vedtaksbrevgrunnlag(
     fun utledVedtaksbrevstype(): Vedtaksbrevstype {
         return if (erTilbakekrevingRevurderingHarÅrsakFeilutbetalingBortfalt()) {
             Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT
-        } else if (behandling.fagsystemsbehandling.first { it.aktiv }.tilbakekrevingsvalg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK) {
+        } else if (behandling.saksbehandlingstype == Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR) {
             Vedtaksbrevstype.AUTOMATISK_4X_RETTSGEBYR
         } else {
             Vedtaksbrevstype.ORDINÆR
@@ -146,6 +137,7 @@ data class Vedtaksbrevbehandling(
     val avsluttetDato: LocalDate? = null,
     val behandlendeEnhet: String,
     val behandlendeEnhetsNavn: String,
+    val saksbehandlingstype: Saksbehandlingstype,
     @MappedCollection(idColumn = "behandling_id")
     val verger: Set<Verge> = setOf(),
     @MappedCollection(idColumn = "behandling_id")

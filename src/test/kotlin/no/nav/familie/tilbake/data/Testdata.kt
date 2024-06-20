@@ -7,18 +7,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.avstemming.domain.Avstemmingsfil
-import no.nav.familie.tilbake.behandling.domain.Behandling
-import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
-import no.nav.familie.tilbake.behandling.domain.Behandlingstype
-import no.nav.familie.tilbake.behandling.domain.Behandlingsvedtak
-import no.nav.familie.tilbake.behandling.domain.Behandlingsårsak
-import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
-import no.nav.familie.tilbake.behandling.domain.Bruker
-import no.nav.familie.tilbake.behandling.domain.Fagsak
-import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
-import no.nav.familie.tilbake.behandling.domain.Varsel
-import no.nav.familie.tilbake.behandling.domain.Varselsperiode
-import no.nav.familie.tilbake.behandling.domain.Verge
+import no.nav.familie.tilbake.behandling.domain.*
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
@@ -375,6 +364,7 @@ object Testdata {
             varsler = setOf(varsel),
             verger = setOf(verge),
             vedtaksbrevOppsummering = lagVedtaksbrevsoppsummering(behandling.id),
+            saksbehandlingstype = behandling.saksbehandlingstype,
         )
 
     fun lagVedtaksbrevgrunnlag(behandling: Behandling) =
