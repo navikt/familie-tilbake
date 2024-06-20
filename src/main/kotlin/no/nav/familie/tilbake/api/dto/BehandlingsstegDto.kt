@@ -74,6 +74,7 @@ data class BehandlingsstegFaktaDto(
     val feilutbetaltePerioder: List<FaktaFeilutbetalingsperiodeDto>,
     @Size(max = 1500, message = "begrunnelse er for lang")
     val begrunnelse: String,
+    val vurderingAvBrukersUttalelse: VurderingAvBrukersUttalelseDto? = null,
 ) : BehandlingsstegDto() {
     override fun getSteg(): String {
         return STEGNAVN
