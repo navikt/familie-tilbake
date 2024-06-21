@@ -31,6 +31,7 @@ import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.iverksettvedtak.task.SendØkonomiTilbakekrevingsvedtakTask
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
 import no.nav.familie.tilbake.oppgave.LagOppgaveTask
+import no.nav.familie.tilbake.oppgave.OppdaterOppgaveTask
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
@@ -77,6 +78,9 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
     @Autowired
     private lateinit var featureToggleService: FeatureToggleService
 
+    @Autowired
+    private lateinit var oppdaterOppgaveTask: OppdaterOppgaveTask
+
     private lateinit var behandlingId: UUID
 
     @BeforeEach
@@ -93,7 +97,7 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
     }
 
     @Test
-    fun `Skal knytte kravgrunnlag til åpen behandling under 4x rettsgebyr og behandles automatisk`() {
+    fun `Skal knytte kravgrunnlag til åpen behandling under 4 rettsgebyr og behandles automatisk`() {
         lagGrunnlagssteg()
 
         val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_EF_under_4x_rettsgebyr.xml")

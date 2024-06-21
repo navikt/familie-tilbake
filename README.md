@@ -1,5 +1,5 @@
 # familie-tilbake
-Applikasjon for tilbakekreving av barnetrygd og enslig forsørger
+Applikasjon for tilbakekreving av barnetrygd, kontantstøtte og enslig forsørger
 
 ## Maven-oppsett
 Så lenge vi bruker en spesialversjon av openhtmltopdf må du legge inn ny server i `~/.m2/settings.xml`-fila lokalt:
@@ -14,14 +14,13 @@ Så lenge vi bruker en spesialversjon av openhtmltopdf må du legge inn ny serve
 Bygging gjøres med `mvn verify`.
 
 ## Kjøring lokalt
-For å kjøre opp appen lokalt kan en kjøre `LauncherLocalPostgress.kt`, eller `LauncherLocal.kt` om du ikke vil kjøre opp 
+For å kjøre opp appen lokalt kan en kjøre `LauncherLocalPostgres.kt`, eller `LauncherLocal.kt` om du ikke vil kjøre opp 
 databasen selv. Begge krever at du har logget deg på gcloud `gcloud auth login` og at du er på Naisdevice.  
 Appen tilgjengeliggjøres da på `localhost:8030`.
 
 ### Lokale avhengigheter
 For å teste tilbakekreving lokalt må du mest sannsynlig også sette opp disse repoene
 * [Familie-tilbake-frontend](https://github.com/navikt/familie-tilbake-frontend)
-* [Familie-historikk](https://github.com/navikt/familie-historikk) for å få historikk til frontenden
 * [Familie-tilbake-e2e](https://github.com/navikt/familie-tilbake-e2e) for å sette opp behandlinger
 
 ### Database

@@ -322,7 +322,7 @@ object Testdata {
             referanse = "testverdi",
             eksternKravgrunnlagId = BigInteger.ZERO,
             vedtakId = BigInteger.ZERO,
-            kontrollfelt = "testverdi",
+            kontrollfelt = "2023-07-12-22.53.47.806186",
         )
 
     val økonomiXmlMottattArkiv =
@@ -375,6 +375,7 @@ object Testdata {
             varsler = setOf(varsel),
             verger = setOf(verge),
             vedtaksbrevOppsummering = lagVedtaksbrevsoppsummering(behandling.id),
+            saksbehandlingstype = behandling.saksbehandlingstype,
         )
 
     fun lagVedtaksbrevgrunnlag(behandling: Behandling) =

@@ -2,15 +2,8 @@ package no.nav.familie.tilbake.kravgrunnlag
 
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.shouldBe
-import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
 import io.mockk.spyk
-import io.mockk.verify
-import no.nav.familie.kontrakter.felles.Applikasjon
-import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
-import no.nav.familie.kontrakter.felles.historikkinnslag.Historikkinnslagstype
-import no.nav.familie.kontrakter.felles.historikkinnslag.OpprettHistorikkinnslagRequest
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -28,7 +21,10 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
+import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
+import no.nav.familie.tilbake.historikkinnslag.HistorikkinnslagRepository
+import no.nav.familie.tilbake.historikkinnslag.Historikkinnslagstype
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.integration.kafka.DefaultKafkaProducer
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
@@ -64,6 +60,9 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var stegService: StegService
 
+    @Autowired
+    private lateinit var historikkinnslagRepository: HistorikkinnslagRepository
+
     private lateinit var kafkaProducer: KafkaProducer
     private lateinit var historikkService: HistorikkService
     private lateinit var oppdragClient: OppdragClient
@@ -72,9 +71,6 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
     private lateinit var fagsak: Fagsak
     private lateinit var behandling: Behandling
-
-    private val behandlingSlot = slot<UUID>()
-    private val historikkinnslagSlot = slot<OpprettHistorikkinnslagRequest>()
 
     @BeforeEach
     fun init() {
@@ -88,12 +84,10 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val kafkaTemplate: KafkaTemplate<String, String> = mockk()
         kafkaProducer = spyk(DefaultKafkaProducer(kafkaTemplate))
-        historikkService = HistorikkService(behandlingRepository, fagsakRepository, brevsporingRepository, kafkaProducer)
+        historikkService = HistorikkService(behandlingRepository, brevsporingRepository, historikkinnslagRepository)
         oppdragClient = MockOppdragClient(kravgrunnlagRepository, mottattXmlRepository)
         hentKravgrunnlagService = HentKravgrunnlagService(kravgrunnlagRepository, oppdragClient, historikkService)
         hentKravgrunnlagTask = HentKravgrunnlagTask(behandlingRepository, hentKravgrunnlagService, stegService)
-
-        every { kafkaProducer.sendHistorikkinnslag(any(), any(), any()) } returns Unit
     }
 
     @Test
@@ -113,18 +107,13 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         hentKravgrunnlagTask.doTask(lagTask(revurdering.id))
         kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(revurdering.id).shouldBeTrue()
 
-        verify { kafkaProducer.sendHistorikkinnslag(capture(behandlingSlot), any(), capture(historikkinnslagSlot)) }
-        behandlingSlot.captured shouldBe revurdering.id
+        val historikkinnslagBehandling = historikkinnslagRepository.findByBehandlingId(revurdering.id).single()
 
-        val historikkinnslagRequest = historikkinnslagSlot.captured
-        historikkinnslagRequest.type shouldBe Historikkinnslagstype.HENDELSE
-        historikkinnslagRequest.behandlingId shouldBe revurdering.eksternBrukId.toString()
-        historikkinnslagRequest.eksternFagsakId shouldBe fagsak.eksternFagsakId
-        historikkinnslagRequest.aktør shouldBe Aktør.VEDTAKSLØSNING
-        historikkinnslagRequest.aktørIdent shouldBe Constants.BRUKER_ID_VEDTAKSLØSNINGEN
-        historikkinnslagRequest.applikasjon shouldBe Applikasjon.FAMILIE_TILBAKE
-        historikkinnslagRequest.tittel shouldBe TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_HENT.tittel
-        historikkinnslagRequest.opprettetTidspunkt.toLocalDate() shouldBe LocalDate.now()
+        historikkinnslagBehandling.type shouldBe Historikkinnslagstype.HENDELSE
+        historikkinnslagBehandling.behandlingId shouldBe revurdering.id
+        historikkinnslagBehandling.aktør shouldBe Aktør.VEDTAKSLØSNING
+        historikkinnslagBehandling.opprettetAv shouldBe Constants.BRUKER_ID_VEDTAKSLØSNINGEN
+        historikkinnslagBehandling.tittel shouldBe TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_HENT.tittel
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(revurdering.id)
         behandlingsstegstilstand.any {

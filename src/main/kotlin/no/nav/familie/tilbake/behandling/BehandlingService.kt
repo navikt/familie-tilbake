@@ -1,8 +1,6 @@
 package no.nav.familie.tilbake.behandling
 
 import no.nav.familie.kontrakter.felles.Fagsystem
-import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
-import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør.VEDTAKSLØSNING
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Brevmottaker
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandling
@@ -45,6 +43,7 @@ import no.nav.familie.tilbake.dokumentbestilling.henleggelse.SendHenleggelsesbre
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerMapper
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
 import no.nav.familie.tilbake.dokumentbestilling.varsel.SendVarselbrevTask
+import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET
@@ -53,6 +52,7 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.task.HentKravgrunnlagTask
 import no.nav.familie.tilbake.micrometer.TellerService
+import no.nav.familie.tilbake.oppgave.OppgaveService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangService
@@ -86,6 +86,7 @@ class BehandlingService(
     private val integrasjonerClient: IntegrasjonerClient,
     private val validerBehandlingService: ValiderBehandlingService,
     private val featureToggleService: FeatureToggleService,
+    private val oppgaveService: OppgaveService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -340,7 +341,7 @@ class BehandlingService(
             when (behandlingsresultatstype) {
                 Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT,
                 Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
-                -> VEDTAKSLØSNING
+                -> Aktør.VEDTAKSLØSNING
 
                 else -> Aktør.SAKSBEHANDLER
             }
@@ -480,12 +481,12 @@ class BehandlingService(
         logOppretterBehandling(erAutomatiskOgFeatureTogglePå, opprettTilbakekrevingRequest)
 
         val fagsak = finnEllerOpprettFagsak(opprettTilbakekrevingRequest)
-        val behandling = lagreBehandling(opprettTilbakekrevingRequest, fagsak)
-        historikkTaskService.lagHistorikkTask(behandling.id, BEHANDLING_OPPRETTET, VEDTAKSLØSNING)
+        val behandling = lagreBehandling(opprettTilbakekrevingRequest, fagsak, erAutomatiskOgFeatureTogglePå)
+        historikkTaskService.lagHistorikkTask(behandling.id, BEHANDLING_OPPRETTET, Aktør.VEDTAKSLØSNING)
         behandlingskontrollService.fortsettBehandling(behandling.id)
         stegService.håndterSteg(behandling.id)
 
-        håndterBrevmottakere(opprettTilbakekrevingRequest.manuelleBrevmottakere, behandling, fagsystem, fagsak)
+        opprettBehandleBrevmottakerSteg(opprettTilbakekrevingRequest.manuelleBrevmottakere, behandling, fagsystem, fagsak)
 
         // kjør FinnGrunnlagTask for å finne og koble grunnlag med behandling
         taskService.save(
@@ -531,6 +532,7 @@ class BehandlingService(
     private fun lagreBehandling(
         opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
         fagsak: Fagsak,
+        erAutomatiskOgFeatureTogglePå: Boolean,
     ): Behandling {
         val ansvarligsaksbehandler =
             integrasjonerClient.hentSaksbehandler(opprettTilbakekrevingRequest.saksbehandlerIdent)
@@ -540,12 +542,13 @@ class BehandlingService(
                 opprettTilbakekrevingRequest.fagsystem,
                 fagsak,
                 ansvarligsaksbehandler,
+                erAutomatiskOgFeatureTogglePå,
             )
         behandlingRepository.insert(behandling)
         return behandling
     }
 
-    private fun håndterBrevmottakere(
+    private fun opprettBehandleBrevmottakerSteg(
         brevmottakere: Set<Brevmottaker>,
         behandling: Behandling,
         fagsystem: Fagsystem,
@@ -555,7 +558,9 @@ class BehandlingService(
         if (manuelleBrevmottakere.isNotEmpty()) {
             logger.info("Lagrer ${manuelleBrevmottakere.size} manuell(e) brevmottaker(e) oversendt fra $fagsystem-sak")
             manuellBrevmottakerRepository.insertAll(manuelleBrevmottakere)
-            håndterBrevmottakerSteg(behandling, fagsak)
+            if (sjekkOmManuelleBrevmottakereErStøttet(behandling, fagsak)) {
+                behandlingskontrollService.behandleBrevmottakerSteg(behandling.id)
+            }
         }
     }
 
@@ -625,16 +630,46 @@ class BehandlingService(
             behandlingRepository.finnÅpenTilbakekrevingsrevurdering(behandling.id) == null
     }
 
-    private fun håndterBrevmottakerSteg(
-        behandling: Behandling,
-        fagsak: Fagsak,
-    ) {
-        if (sjekkOmManuelleBrevmottakereErStøttet(
-                behandling = behandling,
-                fagsak = fagsak,
+    @Transactional
+    fun angreSendTilBeslutter(behandlingId: UUID) {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        validerKanAngreSendTilBeslutter(behandling)
+
+        historikkTaskService.lagHistorikkTask(
+            behandling.id,
+            TilbakekrevingHistorikkinnslagstype.ANGRE_SEND_TIL_BESLUTTER,
+            Aktør.SAKSBEHANDLER,
+        )
+
+        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, Oppgavetype.GodkjenneVedtak.name)
+        oppgaveTaskService.opprettOppgaveTask(behandling, Oppgavetype.BehandleSak)
+
+        stegService.angreSendTilBeslutter(behandling)
+    }
+
+    private fun validerKanAngreSendTilBeslutter(behandling: Behandling) {
+        val innloggetSaksbehandler = ContextService.hentSaksbehandler()
+        val saksbehandlerSendtTilBeslutter = behandling.ansvarligSaksbehandler
+
+        if (saksbehandlerSendtTilBeslutter != innloggetSaksbehandler) {
+            throw Feil(
+                "Prøver å angre på at behandling id=${behandling.id} er sendt til beslutter, men er ikke ansvarlig saksbehandler på behandlingen.",
+                frontendFeilmelding = "Kan kun angre send til beslutter dersom du er saksbehandler på vedtaket.",
+                httpStatus = HttpStatus.BAD_REQUEST,
             )
-        ) {
-            behandlingskontrollService.behandleBrevmottakerSteg(behandling.id)
+        }
+
+        val godkjenneVedtakOppgave =
+            oppgaveService.hentOppgaveSomIkkeErFerdigstilt(
+                oppgavetype = Oppgavetype.GodkjenneVedtak,
+                behandling = behandling,
+            ) ?: throw Feil("Systemet har ikke rukket å opprette godkjenne vedtak oppgaven ennå, kan ikke angre send til beslutter", frontendFeilmelding = "Systemet har ikke rukket å opprette godkjenne vedtak oppgaven enda. Prøv igjen om litt.", httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
+
+        val tilordnetRessurs = godkjenneVedtakOppgave.tilordnetRessurs
+        val oppgaveErTilordnetEnAnnenSaksbehandler =
+            tilordnetRessurs != null && tilordnetRessurs != innloggetSaksbehandler
+        if (oppgaveErTilordnetEnAnnenSaksbehandler) {
+            throw Feil("Kan ikke angre send til beslutter, oppgaven er plukket av $tilordnetRessurs", frontendFeilmelding = "Kan ikke angre send til beslutter, oppgaven er plukket av $tilordnetRessurs", httpStatus = HttpStatus.BAD_REQUEST)
         }
     }
 

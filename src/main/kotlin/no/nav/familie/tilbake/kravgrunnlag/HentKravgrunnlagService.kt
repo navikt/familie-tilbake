@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
-import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
+import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.integration.økonomi.OppdragClient
