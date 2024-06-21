@@ -1,5 +1,8 @@
 {{~#* inline "evt-renter-utsagn" ~}}{{#if totalresultat.totaltRentebeløp}} Dette beløpet er med renter.{{/if}}{{~/inline~}}
 {{~#* inline "tilbakebetaling" ~}}
+{{~#* inline "PronomenDereDu"~}}{{#or gjelderDødsfall institusjon}}De{{else}}Du{{/or}}{{~/inline~}}
+{{~#* inline "PronomenDereDeg"~}}{{#or gjelderDødsfall institusjon}}dykk{{else}}deg{{/or}}{{~/inline~}}
+
 {{#if totalresultat.harSkattetrekk}}
 {{#if gjelderDødsfall}}Utestående beløp{{else}}Beløpet du skuldar{{/if}} før skatt er {{{kroner totalresultat.totaltTilbakekrevesBeløpMedRenter}}}. Dette er {{#if (eq totalresultat.hovedresultat "FULL_TILBAKEBETALING")}}heile{{else}}delar av{{/if}} det feilutbetalte beløpet.{{>evt-renter-utsagn}}
 
@@ -36,8 +39,9 @@ I brev {{{dato  fagsaksvedtaksdato}}} {{#if gjelderDødsfall}}sende vi{{else}}fe
 {{>brev-ytelse-endret}}{{#if gjelderDødsfall}}Det feilutbetalte beløpet må ikkje betalast tilbake.{{else}}Du må ikkje betale tilbake det du har fått for mykje.{{/if}}
 {{/if}}
 {{/if}}
+
 {{#if (eq harBrukerUttaltSeg "NEI")}}
-{{#if gjelderDødsfall}}De{{else}}Du{{/if}} har ikkje uttalt {{#if gjelderDødsfall}}dykk{{else}}deg{{/if}} om feilutbetalinga.
+{{> PronomenDereDu}} har ikkje uttalt {{> PronomenDereDeg}} om feilutbetalinga.
 {{/if}}
 {{#if fritekstoppsummering}}
 {{{fritekstoppsummering}}}
