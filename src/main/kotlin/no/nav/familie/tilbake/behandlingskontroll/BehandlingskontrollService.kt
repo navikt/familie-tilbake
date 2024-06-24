@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.behandlingskontroll
 
-import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
@@ -19,6 +18,7 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
+import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
@@ -354,9 +354,10 @@ class BehandlingskontrollService(
             return lagBehandlingsstegsinfo(avbruttSteg.behandlingssteg, KLAR)
         }
 
+        // Finn sisteUtførteSteg. Dersom tidspunkt for to steg er likt, bruk den med høyest sekvensnummer.
         val sisteUtførteSteg =
             stegstilstand.filter { Behandlingsstegstatus.erStegUtført(it.behandlingsstegsstatus) }
-                .maxByOrNull { it.sporbar.endret.endretTid }!!.behandlingssteg
+                .maxWithOrNull(compareBy({ it.sporbar.endret.endretTid }, { it.behandlingssteg.sekvens }))!!.behandlingssteg
 
         if (Behandlingssteg.VARSEL == sisteUtførteSteg) {
             return håndterOmSisteUtførteStegErVarsel(behandling)

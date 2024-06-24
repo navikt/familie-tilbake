@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.kravgrunnlag.batch
 
-import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandling
@@ -22,6 +21,7 @@ import no.nav.familie.tilbake.common.exceptionhandler.KravgrunnlagIkkeFunnetFeil
 import no.nav.familie.tilbake.common.exceptionhandler.SperretKravgrunnlagFeil
 import no.nav.familie.tilbake.common.exceptionhandler.UgyldigKravgrunnlagFeil
 import no.nav.familie.tilbake.config.Constants
+import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.HentKravgrunnlagService
@@ -44,7 +44,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
-class HåndterGamleKravgrunnlagService(
+class GammelKravgrunnlagService(
     private val behandlingRepository: BehandlingRepository,
     private val kravgrunnlagRepository: KravgrunnlagRepository,
     private val behandlingService: BehandlingService,
@@ -115,7 +115,7 @@ class HåndterGamleKravgrunnlagService(
         task: Task,
     ) {
         logger.info("Håndterer kravgrunnlag med kravgrunnlagId=${mottattXml.eksternKravgrunnlagId}")
-        val hentetData: Pair<DetaljertKravgrunnlagDto, Boolean> =
+        val (hentetKravgrunnlag, kravgrunnlagErSperret) =
             try {
                 hentKravgrunnlagFraØkonomi(mottattXml)
             } catch (e: KravgrunnlagIkkeFunnetFeil) {
@@ -132,8 +132,6 @@ class HåndterGamleKravgrunnlagService(
                     throw e
                 }
             }
-        val hentetKravgrunnlag = hentetData.first
-        val erSperret = hentetData.second
 
         arkiverKravgrunnlag(mottattXml.id)
 
@@ -169,7 +167,7 @@ class HåndterGamleKravgrunnlagService(
         )
 
         stegService.håndterSteg(behandlingId)
-        if (erSperret) {
+        if (kravgrunnlagErSperret) {
             logger.info(
                 "Hentet kravgrunnlag med kravgrunnlagId=${hentetKravgrunnlag.kravgrunnlagId} " +
                     "til behandling=$behandlingId er sperret. Venter behandlingen på ny kravgrunnlag fra økonomi",

@@ -47,7 +47,13 @@ data class Kravgrunnlag431(
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar(),
-)
+) {
+    fun sumFeilutbetaling(): BigDecimal {
+        return perioder.sumOf { periode ->
+            periode.beløp.filter { beløp -> beløp.klassetype == Klassetype.FEIL }.sumOf { it.nyttBeløp }
+        }
+    }
+}
 
 data class Kravgrunnlagsperiode432(
     @Id

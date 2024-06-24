@@ -24,6 +24,7 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.H
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbSærligeGrunner
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVedtaksbrevsperiode
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVurderinger
+import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.HarBrukerUttaltSeg
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
@@ -250,6 +251,7 @@ class DokumentasjonsgeneratorPeriodeSærligeGrunner {
             søker = HbPerson(navn = "Søker Søkersen"),
             datoer = datoer,
             vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
+            harBrukerUttaltSeg = HarBrukerUttaltSeg.NEI,
         )
     }
 

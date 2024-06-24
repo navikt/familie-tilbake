@@ -14,6 +14,7 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbTotalre
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVarsel
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevFelles
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
+import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.HarBrukerUttaltSeg
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -278,6 +279,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
                 erFeilutbetaltBeløpKorrigertNed = medKorrigertBeløp,
                 totaltFeilutbetaltBeløp = BigDecimal.valueOf(1000),
                 behandling = behandling,
+                harBrukerUttaltSeg = HarBrukerUttaltSeg.JA,
             )
         val vedtakStart: String = FellesTekstformaterer.lagDeltekst(felles, VEDTAK_START)
         prettyPrint(

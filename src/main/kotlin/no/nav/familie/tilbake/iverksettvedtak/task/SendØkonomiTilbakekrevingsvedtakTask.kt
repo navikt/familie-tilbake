@@ -4,7 +4,6 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
-import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
@@ -27,7 +26,6 @@ class SendØkonomiTilbakekrevingsvedtakTask(
     private val iverksettelseService: IverksettelseService,
     private val taskService: TaskService,
     private val behandlingskontrollService: BehandlingskontrollService,
-    private val behandlingRepository: BehandlingRepository,
 ) : AsyncTaskStep {
     private val log = LoggerFactory.getLogger(this::class.java)
 

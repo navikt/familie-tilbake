@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.config
 
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
@@ -52,15 +53,15 @@ object Constants {
         )
 
     const val AUTOMATISK_SAKSBEHANDLING_BEGRUNNELSE = "Automatisk satt verdi"
-    const val AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_FAKTA_BEGRUNNELSE = "Automatisk behandling av tilbakekreving under 4 ganger rettsgebyr. Ingen tilbakekreving."
-    const val AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_FORELDELSE_BEGRUNNELSE = "Automatisk behandlet under 4 ganger rettsgebyr på foreldet periode. Ikke relevant."
-    const val AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_BEGRUNNELSE = "Automatisk behandlet. Feilutbetaling under 4 ganger rettsgebyr. Beløpet skal ikke tilbakebetales."
-    const val AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_AKTSOMHET_BEGRUNNELSE = "Automatisk behandlet. Feilutbetaling under 4 ganger rettsgebyr. Bruker har ikke handlet forsettlig eller grovt uaktsomt."
+    const val AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_FAKTA_BEGRUNNELSE = "Automatisk behandling av tilbakekreving under 4 rettsgebyr. Ingen tilbakekreving."
+    const val AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_FORELDELSE_BEGRUNNELSE = "Automatisk behandlet under 4 rettsgebyr på foreldet periode. Ikke relevant."
+    const val AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_BEGRUNNELSE = "Automatisk behandlet. Feilutbetaling under 4 rettsgebyr. Beløpet skal ikke tilbakebetales."
+    const val AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_AKTSOMHET_BEGRUNNELSE = "Automatisk behandlet. Feilutbetaling under 4 rettsgebyr. Bruker har ikke handlet forsettlig eller grovt uaktsomt."
 
-    fun hentAutomatiskSaksbehandlingBegrunnelse(saksbehandlingstype: Saksbehandlingstype): String =
-        when (saksbehandlingstype) {
+    fun hentAutomatiskSaksbehandlingBegrunnelse(behandling: Behandling): String =
+        when (behandling.saksbehandlingstype) {
             Saksbehandlingstype.ORDINÆR -> throw Feil("Kan ikke utlede automatisk saksbehandlingsbegrunnelse for ordinære saker")
-            Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR -> AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_FAKTA_BEGRUNNELSE
+            Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR -> behandling.begrunnelseForTilbakekreving ?: AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_FAKTA_BEGRUNNELSE
             Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP -> AUTOMATISK_SAKSBEHANDLING_BEGRUNNELSE
         }
 

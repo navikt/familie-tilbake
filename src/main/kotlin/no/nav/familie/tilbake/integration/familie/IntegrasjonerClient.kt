@@ -4,6 +4,7 @@ import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Fil
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokdist.DistribuerJournalpostRequest
@@ -244,8 +245,20 @@ class IntegrasjonerClient(
         maxAttempts = 3,
         backoff = Backoff(delayExpression = "5000"),
     )
-    fun sjekkTilgangTilPersoner(personIdenter: List<String>): List<Tilgang> {
-        return postForEntity(tilgangssjekkUri, personIdenter)
+    fun sjekkTilgangTilPersoner(
+        personIdenter: List<String>,
+        tema: Tema,
+    ): List<Tilgang> {
+        val httpHeaders =
+            HttpHeaders().also {
+                it.set(HEADER_NAV_TEMA, tema.name)
+            }
+
+        return postForEntity(
+            uri = tilgangssjekkUri,
+            payload = personIdenter,
+            httpHeaders = httpHeaders,
+        )
     }
 
     fun hentJournalposterForBruker(journalposterForBrukerRequest: JournalposterForBrukerRequest): List<Journalpost> {
@@ -255,6 +268,10 @@ class IntegrasjonerClient(
         )
 
         return postForEntity<Ressurs<List<Journalpost>>>(hentJournalpostUri(), journalposterForBrukerRequest).getDataOrThrow()
+    }
+
+    companion object {
+        private const val HEADER_NAV_TEMA = "Nav-Tema"
     }
 }
 

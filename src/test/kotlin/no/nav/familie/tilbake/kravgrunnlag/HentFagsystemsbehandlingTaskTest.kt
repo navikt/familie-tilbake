@@ -25,9 +25,9 @@ import no.nav.familie.tilbake.common.exceptionhandler.UgyldigKravgrunnlagFeil
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
+import no.nav.familie.tilbake.kravgrunnlag.batch.GammelKravgrunnlagService
+import no.nav.familie.tilbake.kravgrunnlag.batch.GammelKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.batch.HentFagsystemsbehandlingTask
-import no.nav.familie.tilbake.kravgrunnlag.batch.HåndterGamleKravgrunnlagService
-import no.nav.familie.tilbake.kravgrunnlag.batch.HåndterGammelKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -74,7 +74,7 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
 
     private val mockHentKravgrunnlagService: HentKravgrunnlagService = mockk()
 
-    private lateinit var håndterGamleKravgrunnlagService: HåndterGamleKravgrunnlagService
+    private lateinit var gammelKravgrunnlagService: GammelKravgrunnlagService
     private lateinit var hentFagsystemsbehandlingService: HentFagsystemsbehandlingService
     private lateinit var hentFagsystemsbehandlingTask: HentFagsystemsbehandlingTask
 
@@ -88,12 +88,12 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        mottattXMl = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
+        mottattXMl = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
         xmlMottatt = xmlMottattRepository.insert(Testdata.økonomiXmlMottatt.copy(melding = mottattXMl))
         mottattXmlId = xmlMottatt.id
 
-        håndterGamleKravgrunnlagService =
-            HåndterGamleKravgrunnlagService(
+        gammelKravgrunnlagService =
+            GammelKravgrunnlagService(
                 behandlingRepository,
                 kravgrunnlagRepository,
                 behandlingService,
@@ -107,7 +107,7 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
         val kafkaProducer: KafkaProducer = mockk()
         hentFagsystemsbehandlingService = spyk(HentFagsystemsbehandlingService(requestSendtRepository, kafkaProducer))
         hentFagsystemsbehandlingTask =
-            HentFagsystemsbehandlingTask(håndterGamleKravgrunnlagService, hentFagsystemsbehandlingService, taskService)
+            HentFagsystemsbehandlingTask(gammelKravgrunnlagService, hentFagsystemsbehandlingService, taskService)
 
         every { kafkaProducer.sendHentFagsystemsbehandlingRequest(any(), any()) } returns Unit
     }
@@ -157,7 +157,7 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
         hentFagsystemsbehandlingTask.onCompletion(lagTask())
 
         taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET)).shouldHaveSingleElement {
-            it.type == HåndterGammelKravgrunnlagTask.TYPE &&
+            it.type == GammelKravgrunnlagTask.TYPE &&
                 it.payload == xmlMottatt.id.toString()
         }
     }
