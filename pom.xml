@@ -27,7 +27,7 @@
         <felles.version>3.20240515152313_9dd5659</felles.version>
         <!-- kotest.properties kan antakelig fjernes i versjon 6, for autoscan blir default false -->
         <kotest.version>5.9.1</kotest.version>
-        <token-validation-spring.version>4.1.4</token-validation-spring.version>
+        <token-validation-spring.version>5.0.1</token-validation-spring.version>
         <okhttp3.version>4.9.1</okhttp3.version><!-- Inntil videre nødvendig for token-validation-spring-test-->
         <openhtmltopdf.version>pdfbox2-65c2c5010f84b2daa5821971c9c68cd330463830</openhtmltopdf.version>
         <jakarta.xml.bind-api.version>4.0.1</jakarta.xml.bind-api.version>
