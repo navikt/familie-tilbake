@@ -611,7 +611,6 @@ class TekstformatererVedtaksbrevTest {
             generertBrev shouldBe fasit
         }
 
-
         @Test
         fun `skal generere vedtaksbrev for OS og bruker har ikke uttalt seg`() {
             val vedtaksbrevData =
@@ -634,7 +633,7 @@ class TekstformatererVedtaksbrevTest {
                             ),
                         konfigurasjon = HbKonfigurasjon(klagefristIUker = 6),
                         vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
-                        harBrukerUttaltSeg = HarBrukerUttaltSeg.NEI
+                        harBrukerUttaltSeg = HarBrukerUttaltSeg.NEI,
                     )
             val perioder =
                 listOf(
