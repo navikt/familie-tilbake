@@ -12,7 +12,7 @@ data class PdlHentPersonResponse<T>(
 data class PdlPerson(val person: PdlPersonData?)
 
 data class PdlPersonData(
-    @JsonProperty("foedsel") val fødsel: List<PdlFødselsDato>,
+    @JsonProperty("foedselsdato") val fødsel: List<PdlFødselsDato>,
     val navn: List<PdlNavn>,
     @JsonProperty("kjoenn") val kjønn: List<PdlKjønn>,
     @JsonProperty("doedsfall") val dødsfall: List<PdlDødsfall> = emptyList(),
