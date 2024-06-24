@@ -1,7 +1,6 @@
 package no.nav.familie.tilbake.oppgave
 
 import io.kotest.assertions.throwables.shouldNotThrow
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.CapturingSlot
 import io.mockk.clearMocks
@@ -208,22 +207,17 @@ class OppgaveServiceTest {
         fun `skal ikke legge godkjenneVedtak oppgaver i EF-Sak-50-mappe når det allerede finnes en`() {
             every { integrasjonerClient.finnMapper("4489") } returns finnMappeResponseDto
             every { integrasjonerClient.finnOppgaver(any()) } returns FinnOppgaveResponseDto(1L, listOf(Oppgave()))
+            oppgaveService.opprettOppgave(
+                behandling.id,
+                Oppgavetype.GodkjenneVedtak,
+                "4483",
+                "",
+                LocalDate.now().plusDays(5),
+                "bob",
+                OppgavePrioritet.NORM,
+            )
 
-            val exception =
-                shouldThrow<RuntimeException> {
-                    oppgaveService.opprettOppgave(
-                        behandling.id,
-                        Oppgavetype.GodkjenneVedtak,
-                        "4483",
-                        "",
-                        LocalDate.now().plusDays(5),
-                        "bob",
-                        OppgavePrioritet.NORM,
-                    )
-                }
-            exception.message shouldBe "Det finnes allerede en oppgave ${Oppgavetype.GodkjenneVedtak} " +
-                "for behandling ${behandling.id} og finnes ikke noen ferdigstilleoppgaver. " +
-                "Eksisterende oppgaven ${Oppgavetype.GodkjenneVedtak} må lukke først."
+            verify(exactly = 0) { integrasjonerClient.opprettOppgave(any()) }
         }
 
         @Test

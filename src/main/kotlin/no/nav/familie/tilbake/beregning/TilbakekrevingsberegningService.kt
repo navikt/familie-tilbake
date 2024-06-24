@@ -17,6 +17,8 @@ import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.FeatureToggleConfig.Companion.BRUK_6_DESIMALER_I_SKATTEBEREGNING
 import no.nav.familie.tilbake.config.FeatureToggleService
+import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingMapper
+import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.foreldelse.VurdertForeldelseRepository
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
@@ -38,6 +40,7 @@ class TilbakekrevingsberegningService(
     private val vurdertForeldelseRepository: VurdertForeldelseRepository,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val behandlingRepository: BehandlingRepository,
+    private val faktaFeilutbetalingService: FaktaFeilutbetalingService,
     private val featureToggleService: FeatureToggleService,
 ) {
     fun hentBeregningsresultat(behandlingId: UUID): BeregningsresultatDto {
@@ -54,9 +57,12 @@ class TilbakekrevingsberegningService(
                     tilbakekrevesBeløpEtterSkatt = it.tilbakekrevingsbeløpEtterSkatt,
                 )
             }
+        val vurderingAvBrukersUttalelse = faktaFeilutbetalingService.hentAktivFaktaOmFeilutbetaling(behandlingId)?.vurderingAvBrukersUttalelse
+
         return BeregningsresultatDto(
             beregningsresultatsperioder = beregningsresultatsperioder,
             vedtaksresultat = beregningsresultat.vedtaksresultat,
+            vurderingAvBrukersUttalelse = FaktaFeilutbetalingMapper.tilDto(vurderingAvBrukersUttalelse),
         )
     }
 

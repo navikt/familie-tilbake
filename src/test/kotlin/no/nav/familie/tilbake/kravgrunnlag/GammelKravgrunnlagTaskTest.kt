@@ -38,8 +38,8 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.HistorikkinnslagRepository
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
-import no.nav.familie.tilbake.kravgrunnlag.batch.HåndterGamleKravgrunnlagService
-import no.nav.familie.tilbake.kravgrunnlag.batch.HåndterGammelKravgrunnlagTask
+import no.nav.familie.tilbake.kravgrunnlag.batch.GammelKravgrunnlagService
+import no.nav.familie.tilbake.kravgrunnlag.batch.GammelKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -49,7 +49,7 @@ import org.springframework.data.repository.findByIdOrNull
 import java.time.LocalDate
 import java.util.UUID
 
-internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
+internal class GammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -98,9 +98,9 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     private val mockHentKravgrunnlagService: HentKravgrunnlagService = mockk()
 
     private lateinit var historikkService: HistorikkService
-    private lateinit var håndterGamleKravgrunnlagService: HåndterGamleKravgrunnlagService
+    private lateinit var gammelKravgrunnlagService: GammelKravgrunnlagService
     private lateinit var hentFagsystemsbehandlingService: HentFagsystemsbehandlingService
-    private lateinit var håndterGammelKravgrunnlagTask: HåndterGammelKravgrunnlagTask
+    private lateinit var gammelKravgrunnlagTask: GammelKravgrunnlagTask
 
     private var xmlMottatt: ØkonomiXmlMottatt = Testdata.økonomiXmlMottatt
     private lateinit var mottattXMl: String
@@ -114,8 +114,8 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val kafkaProducer: KafkaProducer = mockk()
         historikkService = HistorikkService(behandlingRepository, brevSporingRepository, historikkinnslagRepository)
-        håndterGamleKravgrunnlagService =
-            HåndterGamleKravgrunnlagService(
+        gammelKravgrunnlagService =
+            GammelKravgrunnlagService(
                 behandlingRepository,
                 kravgrunnlagRepository,
                 behandlingService,
@@ -127,8 +127,8 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                 historikkService,
             )
         hentFagsystemsbehandlingService = spyk(HentFagsystemsbehandlingService(requestSendtRepository, kafkaProducer))
-        håndterGammelKravgrunnlagTask =
-            HåndterGammelKravgrunnlagTask(håndterGamleKravgrunnlagService, hentFagsystemsbehandlingService)
+        gammelKravgrunnlagTask =
+            GammelKravgrunnlagTask(gammelKravgrunnlagService, hentFagsystemsbehandlingService)
 
         every { kafkaProducer.sendHentFagsystemsbehandlingRequest(any(), any()) } returns Unit
     }
@@ -147,7 +147,7 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                 eksternId = xmlMottatt.referanse,
             ),
         )
-        val exception = shouldThrow<RuntimeException> { håndterGammelKravgrunnlagTask.doTask(lagTask()) }
+        val exception = shouldThrow<RuntimeException> { gammelKravgrunnlagTask.doTask(lagTask()) }
         exception.message shouldBe "HentFagsystemsbehandling respons-en har ikke mottatt fra fagsystem for " +
             "eksternFagsakId=${xmlMottatt.eksternFagsakId},ytelsestype=${xmlMottatt.ytelsestype}," +
             "eksternId=${xmlMottatt.referanse}.Task-en kan kjøre på nytt manuelt når respons-en er mottatt."
@@ -169,7 +169,7 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any()) } returns hentetKravgrunnlag
 
-        håndterGammelKravgrunnlagTask.doTask(lagTask())
+        gammelKravgrunnlagTask.doTask(lagTask())
 
         val behandling =
             behandlingRepository.finnÅpenTilbakekrevingsbehandling(
@@ -211,7 +211,7 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         behandlingskontrollService.fortsettBehandling(lagretBehandling.id)
         stegService.håndterSteg(lagretBehandling.id)
 
-        håndterGammelKravgrunnlagTask.doTask(lagTask())
+        gammelKravgrunnlagTask.doTask(lagTask())
 
         val behandling =
             behandlingRepository.finnÅpenTilbakekrevingsbehandling(
@@ -245,7 +245,7 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any()) } throws
             SperretKravgrunnlagFeil("Hentet kravgrunnlag er sperret")
 
-        håndterGammelKravgrunnlagTask.doTask(lagTask())
+        gammelKravgrunnlagTask.doTask(lagTask())
         val behandling =
             behandlingRepository.finnÅpenTilbakekrevingsbehandling(
                 xmlMottatt.ytelsestype,
@@ -279,7 +279,7 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any()) } throws
             IntegrasjonException("Kravgrunnlag finnes ikke i økonomi")
 
-        val exception = shouldThrow<RuntimeException> { håndterGammelKravgrunnlagTask.doTask(lagTask()) }
+        val exception = shouldThrow<RuntimeException> { gammelKravgrunnlagTask.doTask(lagTask()) }
         exception.message shouldBe "Kravgrunnlag finnes ikke i økonomi"
     }
 
@@ -319,7 +319,7 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             KravgrunnlagIkkeFunnetFeil(melding = "Noe gikk galt")
 
         val task = lagTask()
-        håndterGammelKravgrunnlagTask.doTask(task)
+        gammelKravgrunnlagTask.doTask(task)
 
         val arkiverteKravgrunnlag =
             økonomiXmlMottattService.hentArkiverteMottattXml(xmlMottatt.eksternFagsakId, xmlMottatt.ytelsestype)
@@ -329,7 +329,7 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagTask(): Task {
-        return taskService.save(Task(type = HåndterGammelKravgrunnlagTask.TYPE, payload = mottattXmlId.toString()))
+        return taskService.save(Task(type = GammelKravgrunnlagTask.TYPE, payload = mottattXmlId.toString()))
     }
 
     private fun lagHentFagsystemsbehandlingRespons(xmlMottatt: ØkonomiXmlMottatt): String {

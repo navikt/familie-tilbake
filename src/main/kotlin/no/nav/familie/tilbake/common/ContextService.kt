@@ -6,6 +6,8 @@ import no.nav.familie.tilbake.config.RolleConfig
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.InnloggetBrukertilgang
 import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
+import no.nav.security.token.support.core.context.TokenValidationContext
+import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import org.springframework.http.HttpStatus
 
@@ -17,10 +19,10 @@ object ContextService {
     }
 
     fun hentPåloggetSaksbehandler(defaultverdi: String?): String {
-        return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
+        return Result.runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
             .fold(
                 onSuccess = {
-                    return it.getClaims("azuread")?.get("NAVident")?.toString()
+                    return it.getAzureadClaimsOrNull()?.get("NAVident")?.toString()
                         ?: defaultverdi
                         ?: throw Feil("Ingen defaultverdi for bruker ved maskinelt oppslag")
                 },
@@ -28,11 +30,21 @@ object ContextService {
             )
     }
 
+    // TODO Fjern hack for midlertidig simulere oppførsel fra tidligere versjon av no.nav.security.token.support.core
+    @Deprecated("Ikke bruk! kommer til å byttes ut med versjon som kaster exception ved manglende issuer claims i neste versjon av tilbake")
+    private fun TokenValidationContext.getAzureadClaimsOrNull(): JwtTokenClaims? {
+        return try {
+            this.getClaims("azuread")
+        } catch (e: IllegalArgumentException) {
+            null
+        }
+    }
+
     fun hentSaksbehandlerNavn(strict: Boolean = false): String {
-        return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
+        return Result.runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
             .fold(
                 onSuccess = {
-                    it.getClaims("azuread")?.get("name")?.toString()
+                    it.getAzureadClaimsOrNull()?.get("name")?.toString()
                         ?: if (strict) error("Finner ikke navn i azuread token") else SYSTEM_NAVN
                 },
                 onFailure = { if (strict) error("Finner ikke navn på innlogget bruker") else SYSTEM_NAVN },
@@ -40,7 +52,7 @@ object ContextService {
     }
 
     private fun hentGrupper(): List<String> {
-        return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
+        return Result.runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
             .fold(
                 onSuccess = {
                     @Suppress("UNCHECKED_CAST")
@@ -164,7 +176,7 @@ object ContextService {
     }
 
     fun erMaskinTilMaskinToken(): Boolean {
-        val claims = SpringTokenValidationContextHolder().tokenValidationContext.getClaims("azuread")
+        val claims = SpringTokenValidationContextHolder().getTokenValidationContext().getClaims("azuread")
         return claims.get("oid") != null &&
             claims.get("oid") == claims.get("sub") &&
             claims.getAsList("roles").contains("access_as_application")

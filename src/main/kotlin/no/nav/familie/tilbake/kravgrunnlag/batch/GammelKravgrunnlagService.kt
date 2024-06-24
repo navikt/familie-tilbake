@@ -44,7 +44,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
-class HåndterGamleKravgrunnlagService(
+class GammelKravgrunnlagService(
     private val behandlingRepository: BehandlingRepository,
     private val kravgrunnlagRepository: KravgrunnlagRepository,
     private val behandlingService: BehandlingService,
@@ -115,7 +115,7 @@ class HåndterGamleKravgrunnlagService(
         task: Task,
     ) {
         logger.info("Håndterer kravgrunnlag med kravgrunnlagId=${mottattXml.eksternKravgrunnlagId}")
-        val hentetData: Pair<DetaljertKravgrunnlagDto, Boolean> =
+        val (hentetKravgrunnlag, kravgrunnlagErSperret) =
             try {
                 hentKravgrunnlagFraØkonomi(mottattXml)
             } catch (e: KravgrunnlagIkkeFunnetFeil) {
@@ -132,8 +132,6 @@ class HåndterGamleKravgrunnlagService(
                     throw e
                 }
             }
-        val hentetKravgrunnlag = hentetData.first
-        val erSperret = hentetData.second
 
         arkiverKravgrunnlag(mottattXml.id)
 
@@ -169,7 +167,7 @@ class HåndterGamleKravgrunnlagService(
         )
 
         stegService.håndterSteg(behandlingId)
-        if (erSperret) {
+        if (kravgrunnlagErSperret) {
             logger.info(
                 "Hentet kravgrunnlag med kravgrunnlagId=${hentetKravgrunnlag.kravgrunnlagId} " +
                     "til behandling=$behandlingId er sperret. Venter behandlingen på ny kravgrunnlag fra økonomi",

@@ -4,20 +4,22 @@ import no.nav.familie.tilbake.common.repository.Sporbar
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
 import org.springframework.data.relational.core.mapping.Embedded
-import org.springframework.data.relational.core.mapping.MappedCollection
 import java.util.UUID
 
-data class FaktaFeilutbetaling(
+data class VurderingAvBrukersUttalelse(
     @Id
     val id: UUID = UUID.randomUUID(),
-    val behandlingId: UUID,
+    val harBrukerUttaltSeg: HarBrukerUttaltSeg,
+    val beskrivelse: String?,
     val aktiv: Boolean = true,
-    val begrunnelse: String?,
-    @MappedCollection(idColumn = "fakta_feilutbetaling_id")
-    val perioder: Set<FaktaFeilutbetalingsperiode> = setOf(),
-    val vurderingAvBrukersUttalelse: VurderingAvBrukersUttalelse? = null,
     @Version
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar(),
 )
+
+enum class HarBrukerUttaltSeg {
+    JA,
+    NEI,
+    IKKE_VURDERT,
+}

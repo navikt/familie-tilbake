@@ -8,6 +8,7 @@ import java.math.BigDecimal
 data class BeregningsresultatDto(
     val beregningsresultatsperioder: List<BeregningsresultatsperiodeDto>,
     val vedtaksresultat: Vedtaksresultat,
+    val vurderingAvBrukersUttalelse: VurderingAvBrukersUttalelseDto,
 )
 
 data class BeregningsresultatsperiodeDto(

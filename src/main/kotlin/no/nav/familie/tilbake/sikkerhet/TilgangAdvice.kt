@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.sikkerhet
 
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -114,6 +115,7 @@ class TilgangAdvice(
                 )
                 logAccess(rolletilgangssjekk, fagsak, behandling)
             }
+
             HenteParam.YTELSESTYPE_OG_EKSTERN_FAGSAK_ID -> {
                 val ytelsestype = Ytelsestype.valueOf(requestBody.first().toString())
                 val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype)
@@ -128,6 +130,7 @@ class TilgangAdvice(
                 )
                 logAccess(rolletilgangssjekk, fagsak)
             }
+
             HenteParam.FAGSYSTEM_OG_EKSTERN_FAGSAK_ID -> {
                 val fagsystem = Fagsystem.valueOf(requestBody.first().toString())
                 val eksternFagsakId = requestBody[1].toString()
@@ -141,6 +144,7 @@ class TilgangAdvice(
                 )
                 logAccess(rolletilgangssjekk, fagsak)
             }
+
             HenteParam.MOTTATT_XML_ID -> {
                 val mottattXmlId = requestBody.first() as UUID
                 val økonomiXmlMottatt = økonomiXmlMottattRepository.findByIdOrThrow(mottattXmlId)
@@ -152,6 +156,7 @@ class TilgangAdvice(
                     handling = rolletilgangssjekk.handling,
                 )
             }
+
             HenteParam.EKSTERN_KRAVGRUNNLAG_ID -> {
                 val eksternKravgrunnlagId = requestBody.first() as BigInteger
                 val økonomiXmlMottatt = økonomiXmlMottattRepository.findByEksternKravgrunnlagId(eksternKravgrunnlagId)
@@ -171,6 +176,7 @@ class TilgangAdvice(
                     handling = rolletilgangssjekk.handling,
                 )
             }
+
             else -> {
                 kastTilgangssjekkException(rolletilgangssjekk.handling)
             }
@@ -203,6 +209,7 @@ class TilgangAdvice(
                 )
                 logAccess(rolletilgangssjekk, fagsak, behandling)
             }
+
             eksternBrukIdFraRequest != null -> {
                 val eksternBrukId: UUID = eksternBrukIdFraRequest.getter.call(requestBody) as UUID
                 val fagsak = fagsakRepository.finnFagsakForEksternBrukId(eksternBrukId)
@@ -215,6 +222,7 @@ class TilgangAdvice(
                 )
                 logAccess(rolletilgangssjekk, fagsak)
             }
+
             fagsystemFraRequest != null && eksternFagsakIdFraRequest != null -> {
                 val fagsystem = fagsystemFraRequest.getter.call(requestBody) as Fagsystem
                 val eksternFagsakId = eksternFagsakIdFraRequest.getter.call(requestBody).toString()
@@ -228,6 +236,7 @@ class TilgangAdvice(
                 )
                 logAccess(rolletilgangssjekk, fagsak)
             }
+
             ytelsestypeFraRequest != null && eksternFagsakIdFraRequest != null -> {
                 val ytelsestype = Ytelsestype.valueOf(ytelsestypeFraRequest.getter.call(requestBody).toString())
                 val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype)
@@ -242,6 +251,7 @@ class TilgangAdvice(
                 )
                 logAccess(rolletilgangssjekk, fagsak)
             }
+
             ytelsestypeFraRequest != null -> {
                 val ytelsestype = Ytelsestype.valueOf(ytelsestypeFraRequest.getter.call(requestBody).toString())
 
@@ -252,6 +262,7 @@ class TilgangAdvice(
                     handling = rolletilgangssjekk.handling,
                 )
             }
+
             else -> {
                 kastTilgangssjekkException(rolletilgangssjekk.handling)
             }
@@ -317,7 +328,9 @@ class TilgangAdvice(
         handling: String,
     ) {
         val personerIBehandlingen = fagsak?.bruker?.ident?.let { listOf(it) } ?: return
-        val tilganger = integrasjonerClient.sjekkTilgangTilPersoner(personerIBehandlingen)
+        val fagsakSystem = fagsak.fagsystem
+
+        val tilganger = integrasjonerClient.sjekkTilgangTilPersoner(personerIBehandlingen, fagsakSystem.tilTema())
         if (tilganger.any { !it.harTilgang }) {
             throw Feil(
                 message = "${ContextService.hentSaksbehandler()} har ikke tilgang til person i $handling",
@@ -326,6 +339,14 @@ class TilgangAdvice(
             )
         }
     }
+
+    private fun Fagsystem.tilTema() =
+        when (this) {
+            Fagsystem.BA -> Tema.BAR
+            Fagsystem.KONT, Fagsystem.KS -> Tema.KON
+            Fagsystem.EF -> Tema.ENF
+            Fagsystem.IT01 -> throw Feil("Fagsystem $this støttes ikke")
+        }
 
     private fun validateFagsystem(
         fagsystem: Tilgangskontrollsfagsystem,
