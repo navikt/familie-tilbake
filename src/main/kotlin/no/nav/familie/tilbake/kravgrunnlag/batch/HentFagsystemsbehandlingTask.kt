@@ -19,7 +19,7 @@ import java.util.UUID
     triggerTidVedFeilISekunder = 60 * 5L,
 )
 class HentFagsystemsbehandlingTask(
-    private val håndterGamleKravgrunnlagService: HåndterGamleKravgrunnlagService,
+    private val gammelKravgrunnlagService: GammelKravgrunnlagService,
     private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
     private val taskService: TaskService,
 ) : AsyncTaskStep {
@@ -28,10 +28,10 @@ class HentFagsystemsbehandlingTask(
     override fun doTask(task: Task) {
         logger.info("HentFagsystemsbehandlingTask prosesserer med id=${task.id} og metadata ${task.metadata}")
         val mottattXmlId = UUID.fromString(task.payload)
-        val mottattXml = håndterGamleKravgrunnlagService.hentFrakobletKravgrunnlag(mottattXmlId)
+        val mottattXml = gammelKravgrunnlagService.hentFrakobletKravgrunnlag(mottattXmlId)
         task.metadata["eksternFagsakId"] = mottattXml.eksternFagsakId
 
-        håndterGamleKravgrunnlagService.sjekkOmDetFinnesEnAktivBehandling(mottattXml)
+        gammelKravgrunnlagService.sjekkOmDetFinnesEnAktivBehandling(mottattXml)
         hentFagsystemsbehandlingService.sendHentFagsystemsbehandlingRequest(
             eksternFagsakId = mottattXml.eksternFagsakId,
             ytelsestype = mottattXml.ytelsestype,
@@ -41,10 +41,10 @@ class HentFagsystemsbehandlingTask(
 
     @Transactional
     override fun onCompletion(task: Task) {
-        logger.info("Oppretter HåndterGammelKravgrunnlagTask for mottattXmlId=${task.payload}")
+        logger.info("Oppretter GammelKravgrunnlagTask for mottattXmlId=${task.payload}")
         taskService.save(
             Task(
-                type = HåndterGammelKravgrunnlagTask.TYPE,
+                type = GammelKravgrunnlagTask.TYPE,
                 payload = task.payload,
                 properties = task.metadata,
             ).medTriggerTid(LocalDateTime.now().plusSeconds(60)),

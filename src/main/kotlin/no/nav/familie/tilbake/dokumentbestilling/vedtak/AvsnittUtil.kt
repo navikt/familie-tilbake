@@ -40,7 +40,7 @@ internal object AvsnittUtil {
             when (vedtaksbrevFelles.vedtaksbrevstype) {
                 Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT ->
                     "vedtak/fritekstFeilutbetalingBortfalt/fritekstFeilutbetalingBortfalt_start"
-                Vedtaksbrevstype.ORDINÆR -> "vedtak/vedtak_start"
+                Vedtaksbrevstype.ORDINÆR, Vedtaksbrevstype.AUTOMATISK_4X_RETTSGEBYR -> "vedtak/vedtak_start"
             }
         return FellesTekstformaterer.lagDeltekst(vedtaksbrevFelles, filsti)
     }

@@ -107,7 +107,7 @@ object Testdata {
 
     val behandlingsresultat = Behandlingsresultat(behandlingsvedtak = behandlingsvedtak)
 
-    val behandling =
+    fun lagBehandling() =
         Behandling(
             fagsakId = fagsak.id,
             type = Behandlingstype.TILBAKEKREVING,
@@ -123,15 +123,16 @@ object Testdata {
             varsler = setOf(varsel),
             verger = setOf(verge),
             eksternBrukId = UUID.randomUUID(),
+            begrunnelseForTilbakekreving = null,
         )
 
-    val revurdering =
+    fun lagRevurdering(originalBehandlingId: UUID) =
         Behandling(
             fagsakId = fagsak.id,
             årsaker =
                 setOf(
                     Behandlingsårsak(
-                        originalBehandlingId = behandling.id,
+                        originalBehandlingId = originalBehandlingId,
                         type = Behandlingsårsakstype.REVURDERING_KLAGE_KA,
                     ),
                 ),
@@ -146,24 +147,19 @@ object Testdata {
             varsler = emptySet(),
             verger = setOf(verge.copy(id = UUID.randomUUID())),
             eksternBrukId = UUID.randomUUID(),
+            begrunnelseForTilbakekreving = null,
         )
 
-    val behandlingsårsak =
-        Behandlingsårsak(
-            type = Behandlingsårsakstype.REVURDERING_KLAGE_KA,
-            originalBehandlingId = behandling.id,
-        )
-
-    val behandlingsstegstilstand =
+    fun lagBehandlingsstegstilstand(behandlingId: UUID) =
         Behandlingsstegstilstand(
-            behandlingId = behandling.id,
+            behandlingId = behandlingId,
             behandlingssteg = Behandlingssteg.FAKTA,
             behandlingsstegsstatus = Behandlingsstegstatus.KLAR,
         )
 
-    val totrinnsvurdering =
+    fun lagTotrinnsvurdering(behandlingId: UUID) =
         Totrinnsvurdering(
-            behandlingId = behandling.id,
+            behandlingId = behandlingId,
             behandlingssteg = Behandlingssteg.FAKTA,
             godkjent = true,
             begrunnelse = "testverdi",
@@ -178,9 +174,9 @@ object Testdata {
             oppdagelsesdato = LocalDate.now(),
         )
 
-    val vurdertForeldelse =
+    fun lagVurdertForeldelse(behandlingId: UUID) =
         VurdertForeldelse(
-            behandlingId = behandling.id,
+            behandlingId = behandlingId,
             foreldelsesperioder = setOf(foreldelsesperiode),
         )
 
@@ -227,9 +223,9 @@ object Testdata {
             månedligSkattebeløp = BigDecimal("123.11"),
         )
 
-    val kravgrunnlag431 =
+    fun lagKravgrunnlag(behandlingId: UUID) =
         Kravgrunnlag431(
-            behandlingId = behandling.id,
+            behandlingId = behandlingId,
             vedtakId = BigInteger.ZERO,
             kravstatuskode = Kravstatuskode.NYTT,
             fagområdekode = Fagområdekode.EFOG,
@@ -288,9 +284,9 @@ object Testdata {
             godTro = vilkårsvurderingGodTro,
         )
 
-    val vilkårsvurdering =
+    fun lagVilkårsvurdering(behandlingId: UUID) =
         Vilkårsvurdering(
-            behandlingId = behandling.id,
+            behandlingId = behandlingId,
             perioder = setOf(vilkårsperiode),
         )
 
@@ -301,11 +297,11 @@ object Testdata {
             hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
         )
 
-    val faktaFeilutbetaling =
+    fun lagFaktaFeilutbetaling(behandlingId: UUID) =
         FaktaFeilutbetaling(
             begrunnelse = "testverdi",
             aktiv = true,
-            behandlingId = behandling.id,
+            behandlingId = behandlingId,
             perioder =
                 setOf(
                     FaktaFeilutbetalingsperiode(
@@ -326,7 +322,7 @@ object Testdata {
             referanse = "testverdi",
             eksternKravgrunnlagId = BigInteger.ZERO,
             vedtakId = BigInteger.ZERO,
-            kontrollfelt = "testverdi",
+            kontrollfelt = "2023-07-12-22.53.47.806186",
         )
 
     val økonomiXmlMottattArkiv =
@@ -337,38 +333,38 @@ object Testdata {
             ytelsestype = Ytelsestype.BARNETRYGD,
         )
 
-    val vedtaksbrevsoppsummering =
+    fun lagVedtaksbrevsoppsummering(behandlingId: UUID) =
         Vedtaksbrevsoppsummering(
-            behandlingId = behandling.id,
+            behandlingId = behandlingId,
             oppsummeringFritekst = "testverdi",
         )
 
-    val vedtaksbrevsperiode =
+    fun lagVedtaksbrevsperiode(behandlingId: UUID) =
         Vedtaksbrevsperiode(
-            behandlingId = behandling.id,
+            behandlingId = behandlingId,
             periode = Månedsperiode(LocalDate.now(), LocalDate.now()),
             fritekst = "testverdi",
             fritekststype = Friteksttype.FAKTA,
         )
 
-    val økonomiXmlSendt =
+    fun lagØkonomiXmlSendt(behandlingId: UUID) =
         ØkonomiXmlSendt(
-            behandlingId = behandling.id,
+            behandlingId = behandlingId,
             melding = "testverdi",
             kvittering = "testverdi",
         )
 
-    val brevsporing =
+    fun lagBrevsporing(behandlingId: UUID) =
         Brevsporing(
-            behandlingId = behandling.id,
+            behandlingId = behandlingId,
             journalpostId = "testverdi",
             dokumentId = "testverdi",
             brevtype = Brevtype.VARSEL,
         )
 
-    val vedtaksbrevbehandling =
+    fun lagVedtaksbrevbehandling(behandling: Behandling) =
         Vedtaksbrevbehandling(
-            id = fagsak.id,
+            id = behandling.fagsakId,
             type = Behandlingstype.TILBAKEKREVING,
             ansvarligSaksbehandler = "saksbehandler",
             ansvarligBeslutter = "beslutter",
@@ -378,17 +374,18 @@ object Testdata {
             resultater = setOf(behandlingsresultat),
             varsler = setOf(varsel),
             verger = setOf(verge),
-            vedtaksbrevOppsummering = vedtaksbrevsoppsummering,
+            vedtaksbrevOppsummering = lagVedtaksbrevsoppsummering(behandling.id),
+            saksbehandlingstype = behandling.saksbehandlingstype,
         )
 
-    val vedtaksbrevgrunnlag =
+    fun lagVedtaksbrevgrunnlag(behandling: Behandling) =
         Vedtaksbrevgrunnlag(
             id = behandling.id,
             bruker = bruker,
             eksternFagsakId = "testverdi",
             fagsystem = Fagsystem.BA,
             ytelsestype = Ytelsestype.BARNETRYGD,
-            behandlinger = setOf(vedtaksbrevbehandling),
+            behandlinger = setOf(lagVedtaksbrevbehandling(behandling)),
         )
 
     fun lagFeilBeløp(feilutbetaling: BigDecimal): Kravgrunnlagsbeløp433 {

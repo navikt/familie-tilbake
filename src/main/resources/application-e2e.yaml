@@ -2,7 +2,6 @@ no.nav.security.jwt:
   issuer.azuread:
     discoveryurl: http://mock-oauth2-server:1111/v2.0/.well-known/openid-configuration
     accepted_audience: api://${TILBAKE_CLIENT_ID}/.default
-    cookie_name: azure_token
   client:
     registration:
       familie-integrasjoner:
@@ -87,12 +86,14 @@ CREDENTIAL_PASSWORD:
 API_SCOPE: api://${TILBAKE_CLIENT_ID}/.default
 
 prosessering:
+  continuousRunning:
+    enabled: true
   fixedDelayString:
     in:
-      milliseconds: 2500
+      milliseconds: 1000
 
 unleash:
-  enabled: true
+  enabled: false
 
 NAIS_APP_NAME: familie-klage
 UNLEASH_SERVER_API_URL: http://localhost:4242/api

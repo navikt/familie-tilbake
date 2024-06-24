@@ -41,7 +41,7 @@ class DokumentbehandlingService(
             behandlingRepository.update(behandling.copy(ansvarligSaksbehandler = ansvarligSaksbehandler))
         }
         if (Dokumentmalstype.VARSEL == maltype || Dokumentmalstype.KORRIGERT_VARSEL == maltype) {
-            håndterManueltSendVarsel(behandling, maltype, fritekst)
+            opprettSendManueltVarselbrevTaskOgSettPåVent(behandling, maltype, fritekst)
         } else if (Dokumentmalstype.INNHENT_DOKUMENTASJON == maltype) {
             håndterInnhentDokumentasjon(behandling, fritekst)
         }
@@ -61,7 +61,7 @@ class DokumentbehandlingService(
         return dokument
     }
 
-    private fun håndterManueltSendVarsel(
+    private fun opprettSendManueltVarselbrevTaskOgSettPåVent(
         behandling: Behandling,
         maltype: Dokumentmalstype,
         fritekst: String,

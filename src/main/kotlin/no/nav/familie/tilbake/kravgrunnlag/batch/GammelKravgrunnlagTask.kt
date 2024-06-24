@@ -12,13 +12,13 @@ import java.util.UUID
 
 @Service
 @TaskStepBeskrivelse(
-    taskStepType = HåndterGammelKravgrunnlagTask.TYPE,
+    taskStepType = GammelKravgrunnlagTask.TYPE,
     beskrivelse = "Håndter frakoblet gammel kravgrunnlag som er eldre enn en bestemt dato",
     maxAntallFeil = 3,
     triggerTidVedFeilISekunder = 60 * 5L,
 )
-class HåndterGammelKravgrunnlagTask(
-    private val håndterGamleKravgrunnlagService: HåndterGamleKravgrunnlagService,
+class GammelKravgrunnlagTask(
+    private val gammelKravgrunnlagService: GammelKravgrunnlagService,
     private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
 ) :
     AsyncTaskStep {
@@ -26,9 +26,14 @@ class HåndterGammelKravgrunnlagTask(
 
     @Transactional
     override fun doTask(task: Task) {
-        logger.info("HåndterGammelKravgrunnlagTask prosesserer med id=${task.id} og metadata ${task.metadata}")
+        logger.info("GammelKravgrunnlagTask prosesserer med id=${task.id} og metadata ${task.metadata}")
         val mottattXmlId = UUID.fromString(task.payload)
-        val mottattXml = håndterGamleKravgrunnlagService.hentFrakobletKravgrunnlag(mottattXmlId)
+        val mottattXml = gammelKravgrunnlagService.hentFrakobletKravgrunnlagNullable(mottattXmlId)
+        if (mottattXml == null) {
+            logger.warn("MottattXml med id=$mottattXmlId finnes ikke. Task-en blir avbrutt.")
+            return
+        }
+
         val eksternFagsakId = mottattXml.eksternFagsakId
         val ytelsestype = mottattXml.ytelsestype
         val eksternId = mottattXml.referanse
@@ -57,7 +62,7 @@ class HåndterGammelKravgrunnlagTask(
                     "Feiler med $feilMelding",
             )
         }
-        håndterGamleKravgrunnlagService.håndter(hentFagsystemsbehandlingRespons.hentFagsystemsbehandling!!, mottattXml, task)
+        gammelKravgrunnlagService.håndter(hentFagsystemsbehandlingRespons.hentFagsystemsbehandling!!, mottattXml, task)
     }
 
     companion object {

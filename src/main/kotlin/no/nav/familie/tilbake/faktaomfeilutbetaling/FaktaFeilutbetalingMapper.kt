@@ -5,25 +5,24 @@ import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
 import no.nav.familie.tilbake.api.dto.FeilutbetalingsperiodeDto
-import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
-import no.nav.familie.tilbake.behandling.domain.Varsel
+import no.nav.familie.tilbake.api.dto.VurderingAvBrukersUttalelseDto
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
+import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.VurderingAvBrukersUttalelse
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import java.math.BigDecimal
-import java.time.LocalDate
 import java.time.YearMonth
 
 object FaktaFeilutbetalingMapper {
     fun tilRespons(
         faktaFeilutbetaling: FaktaFeilutbetaling?,
         kravgrunnlag: Kravgrunnlag431,
-        revurderingsvedtaksdato: LocalDate,
-        varsletData: Varsel?,
-        fagsystemsbehandling: Fagsystemsbehandling,
+        behandling: Behandling,
     ): FaktaFeilutbetalingDto {
         val logiskePerioder =
             LogiskPeriodeUtil.utledLogiskPeriode(KravgrunnlagUtil.finnFeilutbetalingPrPeriode(kravgrunnlag))
+        val fagsystemsbehandling = behandling.aktivFagsystemsbehandling
         val feilutbetaltePerioder =
             hentFeilutbetaltePerioder(
                 faktaFeilutbetaling = faktaFeilutbetaling,
@@ -38,14 +37,25 @@ object FaktaFeilutbetalingMapper {
             )
 
         return FaktaFeilutbetalingDto(
-            varsletBeløp = varsletData?.varselbeløp,
-            revurderingsvedtaksdato = revurderingsvedtaksdato,
-            begrunnelse = faktaFeilutbetaling?.begrunnelse ?: "",
+            varsletBeløp = behandling.aktivtVarsel?.varselbeløp,
+            revurderingsvedtaksdato = fagsystemsbehandling.revurderingsvedtaksdato,
+            begrunnelse = utledBegrunnelse(faktaFeilutbetaling?.begrunnelse, behandling.begrunnelseForTilbakekreving),
             faktainfo = faktainfo,
             feilutbetaltePerioder = feilutbetaltePerioder,
             totaltFeilutbetaltBeløp = logiskePerioder.sumOf(LogiskPeriode::feilutbetaltBeløp),
             totalFeilutbetaltPeriode = utledTotalFeilutbetaltPeriode(logiskePerioder),
+            kravgrunnlagReferanse = kravgrunnlag.referanse,
+            vurderingAvBrukersUttalelse = tilDto(faktaFeilutbetaling?.vurderingAvBrukersUttalelse),
         )
+    }
+
+    fun tilDto(vurderingAvBrukersUttalelse: VurderingAvBrukersUttalelse?): VurderingAvBrukersUttalelseDto {
+        return vurderingAvBrukersUttalelse?.let {
+            VurderingAvBrukersUttalelseDto(
+                harBrukerUttaltSeg = it.harBrukerUttaltSeg,
+                beskrivelse = it.beskrivelse,
+            )
+        } ?: VurderingAvBrukersUttalelseDto.ikkeVurdert()
     }
 
     private fun hentFeilutbetaltePerioder(
@@ -82,5 +92,12 @@ object FaktaFeilutbetalingMapper {
             totalPeriodeTom = if (totalPeriodeTom == null || totalPeriodeTom < periode.tom) periode.tom else totalPeriodeTom
         }
         return Datoperiode(totalPeriodeFom!!, totalPeriodeTom!!)
+    }
+
+    private fun utledBegrunnelse(
+        tidligereBegrunnelse: String?,
+        begrunnelseForTilbakekreving: String?,
+    ): String {
+        return tidligereBegrunnelse ?: begrunnelseForTilbakekreving ?: ""
     }
 }

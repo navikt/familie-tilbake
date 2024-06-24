@@ -5,11 +5,14 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaks
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
 
 internal object TekstformatererVedtaksbrev {
-    fun lagVedtaksbrevsfritekst(vedtaksbrevsdata: HbVedtaksbrevsdata): String {
+    fun lagVedtaksbrevsfritekst(
+        vedtaksbrevsdata: HbVedtaksbrevsdata,
+    ): String {
         return when (vedtaksbrevsdata.felles.vedtaksbrevstype) {
             Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT ->
                 lagVedtaksbrev("vedtak/fritekstFeilutbetalingBortfalt/fritekstFeilutbetalingBortfalt", vedtaksbrevsdata)
             Vedtaksbrevstype.ORDINÆR -> lagVedtaksbrev("vedtak/vedtak", vedtaksbrevsdata)
+            Vedtaksbrevstype.AUTOMATISK_4X_RETTSGEBYR -> lagVedtaksbrev("vedtak/vedtak_feilutbetaling_under_4x_rettsgebyr", vedtaksbrevsdata)
         }
     }
 

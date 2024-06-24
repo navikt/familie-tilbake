@@ -28,6 +28,7 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.H
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbSærligeGrunner
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVedtaksbrevsperiode
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVurderinger
+import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.HarBrukerUttaltSeg
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
@@ -89,6 +90,7 @@ class TekstformatererVedtaksbrevTest {
             totaltFeilutbetaltBeløp = BigDecimal.valueOf(10000),
             vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
             ansvarligBeslutter = "Ansvarlig Beslutter",
+            harBrukerUttaltSeg = HarBrukerUttaltSeg.JA,
         )
 
     @Nested
@@ -606,6 +608,57 @@ class TekstformatererVedtaksbrevTest {
             val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(data)
 
             val fasit = les("/vedtaksbrev/OS_forsett.txt")
+            generertBrev shouldBe fasit
+        }
+
+        @Test
+        fun `skal generere vedtaksbrev for OS og bruker har ikke uttalt seg`() {
+            val vedtaksbrevData =
+                felles
+                    .copy(
+                        fagsaksvedtaksdato = LocalDate.now(),
+                        totalresultat =
+                            HbTotalresultat(
+                                hovedresultat = Vedtaksresultat.FULL_TILBAKEBETALING,
+                                totaltTilbakekrevesBeløp = BigDecimal(10000),
+                                totaltTilbakekrevesBeløpMedRenter = BigDecimal(11000),
+                                totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal(7011),
+                                totaltRentebeløp = BigDecimal(1000),
+                            ),
+                        hjemmel = HbHjemmel("Folketrygdloven § 22-15"),
+                        varsel =
+                            HbVarsel(
+                                varsletBeløp = BigDecimal(10000),
+                                varsletDato = LocalDate.of(2020, 4, 4),
+                            ),
+                        konfigurasjon = HbKonfigurasjon(klagefristIUker = 6),
+                        vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
+                        harBrukerUttaltSeg = HarBrukerUttaltSeg.NEI,
+                    )
+            val perioder =
+                listOf(
+                    HbVedtaksbrevsperiode(
+                        januar,
+                        HbKravgrunnlag.forFeilutbetaltBeløp(BigDecimal(10000)),
+                        HbFakta(
+                            Hendelsestype.ENSLIG_FORSØRGER,
+                            Hendelsesundertype.BARN_FLYTTET,
+                        ),
+                        HbVurderinger(
+                            foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
+                            vilkårsvurderingsresultat =
+                                Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
+                            aktsomhetsresultat = Aktsomhet.FORSETT,
+                        ),
+                        HbResultatTestBuilder.forTilbakekrevesBeløpOgRenter(10000, 1000),
+                        true,
+                    ),
+                )
+            val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)
+
+            val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(data)
+
+            val fasit = les("/vedtaksbrev/OS_forsett_bruker_har_ikke_uttalt_seg.txt")
             generertBrev shouldBe fasit
         }
 

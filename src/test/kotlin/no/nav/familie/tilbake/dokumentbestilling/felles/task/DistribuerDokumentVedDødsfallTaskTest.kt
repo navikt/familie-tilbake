@@ -11,6 +11,7 @@ import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDateTime
 import java.util.Properties
+import java.util.UUID
 
 internal class DistribuerDokumentVedDødsfallTaskTest : OppslagSpringRunnerTest() {
     @Autowired
@@ -36,11 +38,13 @@ internal class DistribuerDokumentVedDødsfallTaskTest : OppslagSpringRunnerTest(
     @Autowired
     private lateinit var distribuerDokumentVedDødsfallTask: DistribuerDokumentVedDødsfallTask
 
-    private val behandling = Testdata.behandling
-    private val behandlingId = behandling.id
+    private lateinit var behandling: Behandling
+    private lateinit var behandlingId: UUID
 
     @BeforeEach
     fun init() {
+        behandling = Testdata.lagBehandling()
+        behandlingId = behandling.id
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(behandling)
     }

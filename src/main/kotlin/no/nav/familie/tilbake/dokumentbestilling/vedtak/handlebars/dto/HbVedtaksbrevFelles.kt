@@ -4,6 +4,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmottagerUtil
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.BaseDokument
+import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.HarBrukerUttaltSeg
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -22,6 +23,7 @@ data class HbVedtaksbrevFelles(
     val erFeilutbetaltBeløpKorrigertNed: Boolean = false,
     val totaltFeilutbetaltBeløp: BigDecimal,
     val datoer: HbVedtaksbrevDatoer? = null,
+    val harBrukerUttaltSeg: HarBrukerUttaltSeg,
 ) : BaseDokument(
         brevmetadata.ytelsestype,
         brevmetadata.språkkode,

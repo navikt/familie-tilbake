@@ -44,7 +44,7 @@ internal class PdfBrevServiceTest {
         val brevdata = lagBrevdata()
 
         pdfBrevService.sendBrev(
-            Testdata.behandling,
+            Testdata.lagBehandling(),
             Testdata.fagsak,
             brevtype = Brevtype.VARSEL,
             brevdata,
@@ -69,7 +69,7 @@ internal class PdfBrevServiceTest {
         every { taskService.save(capture(slot)) } returns mockk()
         val brevdata = lagBrevdata()
 
-        pdfBrevService.sendBrev(Testdata.behandling, Testdata.fagsak, brevtype = Brevtype.VEDTAK, brevdata)
+        pdfBrevService.sendBrev(Testdata.lagBehandling(), Testdata.fagsak, brevtype = Brevtype.VEDTAK, brevdata)
 
         val task = slot.captured
 
@@ -86,7 +86,7 @@ internal class PdfBrevServiceTest {
         every { taskService.save(capture(slot)) } returns mockk()
         val brevdata = lagBrevdata()
 
-        pdfBrevService.sendBrev(Testdata.behandling, Testdata.fagsak, brevtype = Brevtype.HENLEGGELSE, brevdata)
+        pdfBrevService.sendBrev(Testdata.lagBehandling(), Testdata.fagsak, brevtype = Brevtype.HENLEGGELSE, brevdata)
 
         val task = slot.captured
 
@@ -106,7 +106,7 @@ internal class PdfBrevServiceTest {
                 metadata = this.metadata.copy(institusjon = Institusjon("876543210", "Foo & Bar AS"))
             }
 
-        pdfBrevService.sendBrev(Testdata.behandling, Testdata.fagsak, brevtype = Brevtype.HENLEGGELSE, brevdata)
+        pdfBrevService.sendBrev(Testdata.lagBehandling(), Testdata.fagsak, brevtype = Brevtype.HENLEGGELSE, brevdata)
 
         val task = slot.captured
 
@@ -132,7 +132,7 @@ internal class PdfBrevServiceTest {
                     behandlingstype = Behandlingstype.TILBAKEKREVING,
                     gjelderDødsfall = false,
                 ),
-            overskrift = "",
+            overskrift = "Overskrift",
             mottager = Brevmottager.BRUKER,
             brevtekst = "",
         )

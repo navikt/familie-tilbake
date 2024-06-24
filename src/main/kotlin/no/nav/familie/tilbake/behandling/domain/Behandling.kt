@@ -45,6 +45,8 @@ data class Behandling(
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar(),
     val regelverk: Regelverk? = null,
+    @Column("begrunnelse_for_tilbakekreving")
+    val begrunnelseForTilbakekreving: String?,
 ) {
     val erAvsluttet get() = Behandlingsstatus.AVSLUTTET == status
 
@@ -195,4 +197,8 @@ enum class Behandlingstype {
 enum class Saksbehandlingstype {
     ORDINÆR,
     AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP,
+    AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR,
+    ;
+
+    fun erAutomatisk() = this == AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP || this == AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR
 }

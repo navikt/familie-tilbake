@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.integration.kafka
 
-import no.nav.familie.kontrakter.felles.historikkinnslag.OpprettHistorikkinnslagRequest
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRequest
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
@@ -15,12 +14,6 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 
 interface KafkaProducer {
-    fun sendHistorikkinnslag(
-        behandlingId: UUID,
-        key: String,
-        request: OpprettHistorikkinnslagRequest,
-    )
-
     fun sendSaksdata(
         behandlingId: UUID,
         request: Behandlingstilstand,
@@ -38,17 +31,9 @@ interface KafkaProducer {
 }
 
 @Service
-@Profile("!integrasjonstest & !e2e")
+@Profile("!integrasjonstest & !e2e & !local")
 class DefaultKafkaProducer(private val kafkaTemplate: KafkaTemplate<String, String>) : KafkaProducer {
     private val log = LoggerFactory.getLogger(this::class.java)
-
-    override fun sendHistorikkinnslag(
-        behandlingId: UUID,
-        key: String,
-        request: OpprettHistorikkinnslagRequest,
-    ) {
-        sendKafkamelding(behandlingId, KafkaConfig.HISTORIKK_TOPIC, key, request)
-    }
 
     override fun sendSaksdata(
         behandlingId: UUID,
@@ -96,16 +81,8 @@ class DefaultKafkaProducer(private val kafkaTemplate: KafkaTemplate<String, Stri
 }
 
 @Service
-@Profile("e2e", "integrasjonstest")
+@Profile("e2e", "integrasjonstest", "local")
 class E2EKafkaProducer : KafkaProducer {
-    override fun sendHistorikkinnslag(
-        behandlingId: UUID,
-        key: String,
-        request: OpprettHistorikkinnslagRequest,
-    ) {
-        logger.info("Skipper sending av historikkinnslag for behandling $behandlingId fordi kafka ikke er enablet")
-    }
-
     override fun sendSaksdata(
         behandlingId: UUID,
         request: Behandlingstilstand,

@@ -9,6 +9,11 @@
             <username>${GITHUB_USERNAME}</username>
             <password>${GITHUB_TOKEN}</password>
         </server>
+        <server>
+            <id>at.datenwort.openhtmltopdf</id>
+            <username>${GITHUB_USERNAME}</username>
+            <password>${GITHUB_TOKEN}</password>
+        </server>
     </servers>
 
 </settings>

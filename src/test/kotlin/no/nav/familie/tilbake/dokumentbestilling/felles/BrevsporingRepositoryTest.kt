@@ -26,12 +26,13 @@ internal class BrevsporingRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
-    private val brevsporing = Testdata.brevsporing
+    private lateinit var brevsporing: Brevsporing
 
     @BeforeEach
     fun init() {
         fagsakRepository.insert(Testdata.fagsak)
-        behandlingRepository.insert(Testdata.behandling)
+        val behandling = behandlingRepository.insert(Testdata.lagBehandling())
+        brevsporing = Testdata.lagBrevsporing(behandling.id)
     }
 
     @Test
@@ -71,7 +72,7 @@ internal class BrevsporingRepositoryTest : OppslagSpringRunnerTest() {
 
         val funnetBrevsporing =
             brevsporingRepository.findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(
-                Testdata.behandling.id,
+                brevsporing.behandlingId,
                 Brevtype.VARSEL,
             )
 

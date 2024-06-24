@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
@@ -26,7 +27,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-// Denne kontrollen inneholder tjenester som kun brukes av forvaltningsteam via swagger. Frontend bør ikke kalle disse tjenestene.
+// Denne kontrolleren inneholder tjenester som kun brukes av forvaltningsteam via swagger. Frontend skal ikke kalle disse tjenestene.
 
 @RestController
 @RequestMapping("/api/forvaltning")
@@ -160,8 +161,26 @@ class ForvaltningController(
     fun hentForvaltningsinfo(
         @PathVariable ytelsestype: Ytelsestype,
         @PathVariable eksternFagsakId: String,
-    ): Ressurs<List<Forvaltningsinfo>> {
+    ): Ressurs<List<Behandlingsinfo>> {
         return Ressurs.success(forvaltningService.hentForvaltningsinfo(ytelsestype, eksternFagsakId))
+    }
+
+    @Operation(summary = "Hent ikke arkiverte kravgrunnlag")
+    @GetMapping(
+        path = ["/ytelsestype/{ytelsestype}/fagsak/{eksternFagsakId}/ikke-arkivert-kravgrunnlag"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    @Rolletilgangssjekk(
+        Behandlerrolle.FORVALTER,
+        "Henter ikke arkiverte kravgrunnlag",
+        AuditLoggerEvent.NONE,
+        HenteParam.YTELSESTYPE_OG_EKSTERN_FAGSAK_ID,
+    )
+    fun hentKravgrunnlagsinfo(
+        @PathVariable ytelsestype: Ytelsestype,
+        @PathVariable eksternFagsakId: String,
+    ): Ressurs<List<Kravgrunnlagsinfo>> {
+        return Ressurs.success(forvaltningService.hentIkkeArkiverteKravgrunnlag(ytelsestype, eksternFagsakId))
     }
 
     @Operation(summary = "Oppretter FinnGammelBehandlingUtenOppgaveTask som logger ut gamle behandlinger uten åpen oppgave")
@@ -218,12 +237,20 @@ class ForvaltningController(
     }
 }
 
-data class Forvaltningsinfo(
-    val eksternKravgrunnlagId: BigInteger,
+data class Behandlingsinfo(
+    val eksternKravgrunnlagId: BigInteger?,
     val kravgrunnlagId: UUID?,
     val kravgrunnlagKravstatuskode: String?,
-    val mottattXmlId: UUID?,
     val eksternId: String,
     val opprettetTid: LocalDateTime,
     val behandlingId: UUID?,
+    val behandlingstatus: Behandlingsstatus?,
+)
+
+data class Kravgrunnlagsinfo(
+    val eksternKravgrunnlagId: BigInteger,
+    val kravgrunnlagKravstatuskode: String,
+    val mottattXmlId: UUID?,
+    val eksternId: String,
+    val opprettetTid: LocalDateTime,
 )

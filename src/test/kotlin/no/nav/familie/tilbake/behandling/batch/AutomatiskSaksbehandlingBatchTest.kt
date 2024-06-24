@@ -57,7 +57,7 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
     private lateinit var automatiskSaksbehandlingBatch: AutomatiskSaksbehandlingBatch
 
     private val fagsak: Fagsak = Testdata.fagsak
-    private val behandling: Behandling = Testdata.behandling
+    private val behandling: Behandling = Testdata.lagBehandling()
 
     @BeforeEach
     fun init() {
@@ -82,7 +82,7 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
             )
 
         val kravgrunnlag =
-            Testdata.kravgrunnlag431
+            Testdata.lagKravgrunnlag(behandling.id)
                 .copy(
                     kontrollfelt = "2019-11-22-19.09.31.458065",
                     perioder =
@@ -144,7 +144,7 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
                         .OPPRETT_TILBAKEKREVING_MED_VARSEL,
             )
         behandlingRepository.update(behandling.copy(fagsystemsbehandling = setOf(fagsystemsbehandling)))
-        brevsporingRepository.insert(Testdata.brevsporing)
+        brevsporingRepository.insert(Testdata.lagBrevsporing(behandling.id))
 
         automatiskSaksbehandlingBatch.behandleAutomatisk()
         taskService.findAll().any {
