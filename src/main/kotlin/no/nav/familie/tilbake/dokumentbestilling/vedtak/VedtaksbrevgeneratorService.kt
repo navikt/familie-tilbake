@@ -344,7 +344,6 @@ class VedtaksbrevgeneratorService(
     private fun utledSøker(personinfo: Personinfo): HbPerson {
         return HbPerson(
             navn = WordUtils.capitalizeFully(personinfo.navn, ' ', '-'),
-            dødsdato = null,
         )
     }
 

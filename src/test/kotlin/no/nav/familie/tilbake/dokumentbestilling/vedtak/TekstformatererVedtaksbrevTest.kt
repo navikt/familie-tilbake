@@ -280,7 +280,6 @@ class TekstformatererVedtaksbrevTest {
                     søker =
                         HbPerson(
                             navn = "Søker Søkersen",
-                            dødsdato = LocalDate.of(2018, 3, 1),
                         ),
                     hjemmel = HbHjemmel("Folketrygdloven § 22-15"),
                     datoer = HbVedtaksbrevDatoer(perioder = perioder),
@@ -430,7 +429,6 @@ class TekstformatererVedtaksbrevTest {
                     søker =
                         HbPerson(
                             navn = "Søker Søkersen",
-                            dødsdato = LocalDate.of(2018, 3, 1),
                         ),
                     hjemmel = HbHjemmel("Folketrygdloven § 22-15"),
                     varsel =
@@ -717,7 +715,6 @@ class TekstformatererVedtaksbrevTest {
                         søker =
                             HbPerson(
                                 navn = "Søker Søkersen",
-                                dødsdato = LocalDate.of(2018, 3, 1),
                             ),
                         datoer = HbVedtaksbrevDatoer(perioder = perioder),
                     )
@@ -786,7 +783,6 @@ class TekstformatererVedtaksbrevTest {
                         søker =
                             HbPerson(
                                 navn = "Søker Søkersen",
-                                dødsdato = LocalDate.of(2018, 3, 1),
                             ),
                         datoer = HbVedtaksbrevDatoer(perioder = perioder),
                     )
@@ -853,7 +849,6 @@ class TekstformatererVedtaksbrevTest {
                         søker =
                             HbPerson(
                                 navn = "Søker Søkersen",
-                                dødsdato = LocalDate.of(2018, 3, 1),
                             ),
                         datoer = HbVedtaksbrevDatoer(perioder = perioder),
                     )
@@ -922,7 +917,6 @@ class TekstformatererVedtaksbrevTest {
                         søker =
                             HbPerson(
                                 navn = "Søker Søkersen",
-                                dødsdato = LocalDate.of(2018, 3, 1),
                             ),
                         datoer = HbVedtaksbrevDatoer(perioder = perioder),
                     )
@@ -1168,7 +1162,6 @@ class TekstformatererVedtaksbrevTest {
                         søker =
                             HbPerson(
                                 navn = "Søker Søkersen",
-                                dødsdato = LocalDate.of(2018, 3, 1),
                             ),
                         vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
                         datoer = HbVedtaksbrevDatoer(perioder = perioder),
@@ -1233,7 +1226,6 @@ class TekstformatererVedtaksbrevTest {
                         søker =
                             HbPerson(
                                 navn = "Søker Søkersen",
-                                dødsdato = LocalDate.of(2018, 3, 1),
                             ),
                         vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
                         datoer = HbVedtaksbrevDatoer(perioder = perioder),
