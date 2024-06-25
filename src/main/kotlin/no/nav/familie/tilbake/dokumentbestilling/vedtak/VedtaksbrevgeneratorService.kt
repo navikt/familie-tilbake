@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
-import com.github.jknack.handlebars.internal.text.WordUtils
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
@@ -48,6 +47,7 @@ import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
+import org.apache.commons.text.WordUtils
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
