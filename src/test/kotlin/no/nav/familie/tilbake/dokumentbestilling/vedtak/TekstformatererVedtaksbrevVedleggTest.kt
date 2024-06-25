@@ -190,7 +190,6 @@ class TekstformatererVedtaksbrevVedleggTest {
             søker =
                 HbPerson(
                     navn = "Søker Søkersen",
-                    dødsdato = LocalDate.of(2018, 3, 1),
                 ),
             fagsaksvedtaksdato = LocalDate.now(),
             behandling = HbBehandling(),
