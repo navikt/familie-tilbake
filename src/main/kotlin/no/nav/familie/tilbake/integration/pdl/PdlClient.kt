@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.integration.pdl
 
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.PdlConfig
@@ -143,13 +144,4 @@ class PdlClient(
             else -> error("Ugyldig fagsystem=${fagsystem.navn}")
         }
     }
-}
-
-/**
- * TODO : Fjern når versjon 3 av kontrakter blir tatt i bruk.
- */
-private enum class Tema(val fagsaksystem: String, val behandlingsnummer: String) {
-    BAR("BA", "B284"),
-    ENF("EF", "B288"),
-    KON("KONT", "B278"),
 }
