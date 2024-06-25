@@ -18,6 +18,7 @@ import org.apache.commons.lang3.builder.DiffBuilder
 import org.apache.commons.lang3.builder.ToStringStyle
 import java.io.StringReader
 import java.math.BigDecimal
+import java.math.BigInteger
 import java.util.SortedMap
 import javax.xml.XMLConstants
 import javax.xml.validation.SchemaFactory
@@ -89,7 +90,7 @@ object KravgrunnlagUtil {
                 .append("kodeFagomraade", mottattKravgrunnlag.kodeFagomraade, hentetKravgrunnlag.kodeFagomraade)
                 .append("fagsystemId", mottattKravgrunnlag.fagsystemId, hentetKravgrunnlag.fagsystemId)
                 .append("datoVedtakFagsystem", mottattKravgrunnlag.datoVedtakFagsystem, hentetKravgrunnlag.datoVedtakFagsystem)
-                .append("vedtakIdOmgjort", mottattKravgrunnlag.vedtakIdOmgjort, hentetKravgrunnlag.vedtakIdOmgjort)
+                .append("vedtakIdOmgjort", mottattKravgrunnlag.vedtakIdOmgjort ?: BigInteger.ZERO, hentetKravgrunnlag.vedtakIdOmgjort ?: BigInteger.ZERO)
                 .append("vedtakGjelderId", mottattKravgrunnlag.vedtakGjelderId, hentetKravgrunnlag.vedtakGjelderId)
                 .append("typeGjelderId", mottattKravgrunnlag.typeGjelderId, hentetKravgrunnlag.typeGjelderId)
                 .append("utbetalesTilId", mottattKravgrunnlag.utbetalesTilId, hentetKravgrunnlag.utbetalesTilId)
