@@ -147,7 +147,7 @@ class ForvaltningController(
         behandling: BehandlingDto,
         behandlerRolle: Behandlerrolle
     ) {
-        if ((!erAnsvarligSaksbehandler(behandling) && behandlerRolle == Behandlerrolle.SAKSBEHANDLER) || behandlerRolle != Behandlerrolle.FORVALTER) {
+        if (!erAnsvarligSaksbehandler(behandling, behandlerRolle)) {
             throw Feil(
                 message =
                 "${ContextService.hentSaksbehandler()} med rolle $behandlerRolle " +
@@ -158,7 +158,7 @@ class ForvaltningController(
         }
     }
 
-    private fun erAnsvarligSaksbehandler(behandling: BehandlingDto) = ContextService.hentSaksbehandler() == behandling.ansvarligSaksbehandler
+    private fun erAnsvarligSaksbehandler(behandling: BehandlingDto, behandlerRolle: Behandlerrolle) = ContextService.hentSaksbehandler() == behandling.ansvarligSaksbehandler && (behandlerRolle == Behandlerrolle.SAKSBEHANDLER || behandlerRolle == Behandlerrolle.BESLUTTER)
 
     @Operation(summary = "Annuler kravgrunnlag")
     @PutMapping(
