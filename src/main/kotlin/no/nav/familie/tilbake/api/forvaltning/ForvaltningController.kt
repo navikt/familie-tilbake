@@ -138,17 +138,24 @@ class ForvaltningController(
         val behandling = behandlingService.hentBehandling(behandlingId)
         val fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId)
         val behandlerRolle = tilgangService.finnBehandlerrolle(fagsystem) ?: error("Kunne ikke finne behandlerrolle")
-        if (!erAnsvarligSaksbehandler(behandling) && behandlerRolle == Behandlerrolle.VEILEDER) {
+        validerBehandlerrolle(behandling, behandlerRolle)
+        forvaltningService.flyttBehandlingsstegTilbakeTilFakta(behandlingId)
+        return Ressurs.success("OK")
+    }
+
+    private fun validerBehandlerrolle(
+        behandling: BehandlingDto,
+        behandlerRolle: Behandlerrolle
+    ) {
+        if ((!erAnsvarligSaksbehandler(behandling) && behandlerRolle == Behandlerrolle.SAKSBEHANDLER) || behandlerRolle != Behandlerrolle.FORVALTER) {
             throw Feil(
                 message =
-                    "${ContextService.hentSaksbehandler()} med rolle $behandlerRolle " +
-                        "har ikke tilgang til å kalle 'flyttBehandlingTilFakta'. Krever rollen VEILEDER som ansvarlig saksbehandler eller FORVALTER.",
+                "${ContextService.hentSaksbehandler()} med rolle $behandlerRolle " +
+                    "har ikke tilgang til å kalle 'flyttBehandlingTilFakta'. Krever rollen VEILEDER som ansvarlig saksbehandler eller FORVALTER.",
                 frontendFeilmelding = "Du har ikke tilgang til å sette behandling tilbake til faktasteget.",
                 httpStatus = HttpStatus.FORBIDDEN,
             )
         }
-        forvaltningService.flyttBehandlingsstegTilbakeTilFakta(behandlingId)
-        return Ressurs.success("OK")
     }
 
     private fun erAnsvarligSaksbehandler(behandling: BehandlingDto) = ContextService.hentSaksbehandler() == behandling.ansvarligSaksbehandler
