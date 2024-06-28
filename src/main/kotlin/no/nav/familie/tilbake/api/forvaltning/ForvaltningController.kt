@@ -145,20 +145,23 @@ class ForvaltningController(
 
     private fun validerBehandlerrolle(
         behandling: BehandlingDto,
-        behandlerRolle: Behandlerrolle
+        behandlerRolle: Behandlerrolle,
     ) {
         if (!erAnsvarligSaksbehandler(behandling, behandlerRolle) || behandlerRolle != Behandlerrolle.FORVALTER) {
             throw Feil(
                 message =
-                "${ContextService.hentSaksbehandler()} med rolle $behandlerRolle " +
-                    "har ikke tilgang til å kalle 'flyttBehandlingTilFakta'. Krever rollen VEILEDER som ansvarlig saksbehandler eller FORVALTER.",
+                    "${ContextService.hentSaksbehandler()} med rolle $behandlerRolle " +
+                        "har ikke tilgang til å kalle 'flyttBehandlingTilFakta'. Krever rollen SAKSBEHANDLER/BESLUTTER som ansvarlig saksbehandler, eller rollen FORVALTER.",
                 frontendFeilmelding = "Du har ikke tilgang til å sette behandling tilbake til faktasteget.",
                 httpStatus = HttpStatus.FORBIDDEN,
             )
         }
     }
 
-    private fun erAnsvarligSaksbehandler(behandling: BehandlingDto, behandlerRolle: Behandlerrolle) = ContextService.hentSaksbehandler() == behandling.ansvarligSaksbehandler && (behandlerRolle == Behandlerrolle.SAKSBEHANDLER || behandlerRolle == Behandlerrolle.BESLUTTER)
+    private fun erAnsvarligSaksbehandler(
+        behandling: BehandlingDto,
+        behandlerRolle: Behandlerrolle,
+    ) = ContextService.hentSaksbehandler() == behandling.ansvarligSaksbehandler && (behandlerRolle == Behandlerrolle.SAKSBEHANDLER || behandlerRolle == Behandlerrolle.BESLUTTER)
 
     @Operation(summary = "Annuler kravgrunnlag")
     @PutMapping(
