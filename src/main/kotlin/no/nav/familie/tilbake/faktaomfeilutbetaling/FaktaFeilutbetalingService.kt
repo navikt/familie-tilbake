@@ -20,6 +20,7 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
+import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 
 @Service
 class FaktaFeilutbetalingService(
@@ -39,6 +40,23 @@ class FaktaFeilutbetalingService(
                 kravgrunnlag = kravgrunnlag,
                 behandling = behandling,
             )
+    }
+
+    @Transactional(readOnly = true)
+    fun hentInaktivFaktaomfeilutbetaling(behandlingId: UUID): List<FaktaFeilutbetalingDto> {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val faktaFeilutbetaling: List<FaktaFeilutbetaling> = faktaFeilutbetalingRepository.findByBehandlingId(behandlingId)
+        val alleKravgrunnlag: List<Kravgrunnlag431> = kravgrunnlagRepository.findByBehandlingId(behandlingId)
+
+        // TODO; Bør ha en slags timestamp
+        return faktaFeilutbetaling.map {gjeldendeFakta ->
+            val kravgrunnlag = alleKravgrunnlag.sortedBy { it.sporbar.opprettetTid }.filter { !it.sperret && !it.avsluttet }.last { it.sporbar.opprettetTid <= gjeldendeFakta.sporbar.opprettetTid }
+            FaktaFeilutbetalingMapper.tilRespons(
+                faktaFeilutbetaling = gjeldendeFakta,
+                kravgrunnlag = kravgrunnlag,
+                behandling = behandling,
+            )
+        }
     }
 
     @Transactional
@@ -107,6 +125,10 @@ class FaktaFeilutbetalingService(
 
     fun hentAktivFaktaOmFeilutbetaling(behandlingId: UUID): FaktaFeilutbetaling? {
         return faktaFeilutbetalingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
+    }
+
+    fun hentAlleFaktaOmFeilutbetaling(behandlingId: UUID): List<FaktaFeilutbetaling> {
+        return faktaFeilutbetalingRepository.findByBehandlingId(behandlingId)
     }
 
     @Transactional
