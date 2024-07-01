@@ -97,7 +97,7 @@ class FaktaFeilutbetalingService(
 
             if (it.harBrukerUttaltSeg == HarBrukerUttaltSeg.JA && it.beskrivelse.isNullOrBlank()) {
                 throw Feil("Mangler beskrivelse på vurdering av brukers uttalelse")
-            } else if (it.harBrukerUttaltSeg == HarBrukerUttaltSeg.NEI && !it.beskrivelse.isNullOrBlank()) {
+            } else if (it.harBrukerUttaltSeg != HarBrukerUttaltSeg.JA && !it.beskrivelse.isNullOrBlank()) {
                 throw Feil("Skal ikke ha beskrivelse når bruker ikke har uttalt seg")
             }
         }
