@@ -32,6 +32,7 @@ data class BehandlingDto(
     val kanRevurderingOpprettes: Boolean = false,
     val harVerge: Boolean,
     val kanEndres: Boolean,
+    val kanSetteTilbakeTilFakta: Boolean,
     val varselSendt: Boolean,
     val behandlingsstegsinfo: List<BehandlingsstegsinfoDto>,
     val fagsystemsbehandlingId: String,

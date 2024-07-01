@@ -4,7 +4,12 @@ import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.tilbake.api.dto.BehandlingDto
+import no.nav.familie.tilbake.behandling.BehandlingService
+import no.nav.familie.tilbake.behandling.FagsakService
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
+import no.nav.familie.tilbake.common.ContextService
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
@@ -12,7 +17,9 @@ import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.HenteParam
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
+import no.nav.familie.tilbake.sikkerhet.TilgangService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -37,6 +44,9 @@ class ForvaltningController(
     private val forvaltningService: ForvaltningService,
     private val oppgaveTaskService: OppgaveTaskService,
     private val behandlingTilstandService: BehandlingTilstandService,
+    private val behandlingService: BehandlingService,
+    private val tilgangService: TilgangService,
+    private val fagsakService: FagsakService,
 ) {
     @Operation(summary = "Hent korrigert kravgrunnlag")
     @PutMapping(
@@ -117,7 +127,7 @@ class ForvaltningController(
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     @Rolletilgangssjekk(
-        Behandlerrolle.FORVALTER,
+        Behandlerrolle.VEILEDER,
         "Flytter behandling tilbake til Fakta",
         AuditLoggerEvent.UPDATE,
         HenteParam.BEHANDLING_ID,
@@ -125,9 +135,33 @@ class ForvaltningController(
     fun flyttBehandlingTilFakta(
         @PathVariable behandlingId: UUID,
     ): Ressurs<String> {
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        val fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId)
+        val behandlerRolle = tilgangService.finnBehandlerrolle(fagsystem) ?: error("Kunne ikke finne behandlerrolle")
+        validerBehandlerrolle(behandling, behandlerRolle)
         forvaltningService.flyttBehandlingsstegTilbakeTilFakta(behandlingId)
         return Ressurs.success("OK")
     }
+
+    private fun validerBehandlerrolle(
+        behandling: BehandlingDto,
+        behandlerRolle: Behandlerrolle,
+    ) {
+        if (!erAnsvarligSaksbehandler(behandling, behandlerRolle) || behandlerRolle != Behandlerrolle.FORVALTER) {
+            throw Feil(
+                message =
+                    "${ContextService.hentSaksbehandler()} med rolle $behandlerRolle " +
+                        "har ikke tilgang til å kalle 'flyttBehandlingTilFakta'. Krever rollen SAKSBEHANDLER/BESLUTTER som ansvarlig saksbehandler, eller rollen FORVALTER.",
+                frontendFeilmelding = "Du har ikke tilgang til å sette behandling tilbake til faktasteget.",
+                httpStatus = HttpStatus.FORBIDDEN,
+            )
+        }
+    }
+
+    private fun erAnsvarligSaksbehandler(
+        behandling: BehandlingDto,
+        behandlerRolle: Behandlerrolle,
+    ) = ContextService.hentSaksbehandler() == behandling.ansvarligSaksbehandler && (behandlerRolle == Behandlerrolle.SAKSBEHANDLER || behandlerRolle == Behandlerrolle.BESLUTTER)
 
     @Operation(summary = "Annuler kravgrunnlag")
     @PutMapping(
