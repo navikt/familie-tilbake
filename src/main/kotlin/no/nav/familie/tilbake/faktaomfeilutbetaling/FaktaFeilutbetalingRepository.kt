@@ -12,5 +12,7 @@ interface FaktaFeilutbetalingRepository :
     InsertUpdateRepository<FaktaFeilutbetaling> {
     fun findByBehandlingIdAndAktivIsTrue(behandlingId: UUID): FaktaFeilutbetaling?
 
+    fun findByBehandlingId(behandlingId: UUID): List<FaktaFeilutbetaling>
+
     fun findFaktaFeilutbetalingByBehandlingIdAndAktivIsTrue(behandlingId: UUID): FaktaFeilutbetaling
 }
