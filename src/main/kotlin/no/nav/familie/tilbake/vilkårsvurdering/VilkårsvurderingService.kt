@@ -50,7 +50,7 @@ class VilkårsvurderingService(
     fun hentInaktivVilkårsvurdering(behandlingId: UUID): List<VurdertVilkårsvurderingDto> {
         val alleFakta = faktaFeilutbetalingService.hentAlleFaktaOmFeilutbetaling(behandlingId).sortedBy { it.sporbar.opprettetTid }
         val alleKravgrunnlag = kravgrunnlagRepository.findByBehandlingId(behandlingId).sortedBy { it.sporbar.opprettetTid }
-        val alleVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId).sortedBy { it.sporbar.opprettetTid }
+        val alleVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId).sortedBy { it.sporbar.opprettetTid }.filter { !it.aktiv }
         val alleForeldelser = foreldelseService.hentAlleForeldelser(behandlingId).sortedBy { it.sporbar.opprettetTid }
         return alleVilkårsvurderinger.map { vilkårsvurdering ->
             val faktaOmFeilutbetaling: FaktaFeilutbetaling = alleFakta.last { it.sporbar.opprettetTid < vilkårsvurdering.sporbar.opprettetTid }

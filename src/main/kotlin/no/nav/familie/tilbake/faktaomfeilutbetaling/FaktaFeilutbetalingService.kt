@@ -45,10 +45,9 @@ class FaktaFeilutbetalingService(
     @Transactional(readOnly = true)
     fun hentInaktivFaktaomfeilutbetaling(behandlingId: UUID): List<FaktaFeilutbetalingDto> {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        val faktaFeilutbetaling: List<FaktaFeilutbetaling> = faktaFeilutbetalingRepository.findByBehandlingId(behandlingId)
+        val faktaFeilutbetaling: List<FaktaFeilutbetaling> = faktaFeilutbetalingRepository.findByBehandlingId(behandlingId).filter { !it.aktiv }
         val alleKravgrunnlag: List<Kravgrunnlag431> = kravgrunnlagRepository.findByBehandlingId(behandlingId)
 
-        // TODO; Bør ha en slags timestamp
         return faktaFeilutbetaling.map {gjeldendeFakta ->
             val kravgrunnlag = alleKravgrunnlag.sortedBy { it.sporbar.opprettetTid }.filter { !it.sperret && !it.avsluttet }.last { it.sporbar.opprettetTid <= gjeldendeFakta.sporbar.opprettetTid }
             FaktaFeilutbetalingMapper.tilRespons(
