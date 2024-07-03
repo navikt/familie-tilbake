@@ -197,7 +197,7 @@ class BehandlingService(
         val varselSendt = brevsporingService.erVarselSendt(behandlingId)
         val kanBehandlingHenlegges: Boolean = kanHenleggeBehandling(behandling)
         val kanEndres: Boolean = kanBehandlingEndres(behandling, fagsak.fagsystem)
-        val kanSetteBehandlingTilbakeTilFakta = kanSetteBehandlingTilbakeTilFakta(behandling, tilgangService.finnBehandlerrolle(fagsak.fagsystem) ?: error("Kunne ikke finne Behandlerrolle"))
+        val kanSetteBehandlingTilbakeTilFakta = kanSetteBehandlingTilbakeTilFakta(behandling, finnBehandlerrolle(fagsak))
         val kanRevurderingOpprettes: Boolean =
             tilgangService.tilgangTilÅOppretteRevurdering(fagsak.fagsystem) && kanRevurderingOpprettes(behandling)
         val støtterManuelleBrevmottakere =
@@ -226,6 +226,8 @@ class BehandlingService(
             støtterManuelleBrevmottakere,
         )
     }
+
+    private fun finnBehandlerrolle(fagsak: Fagsak) = tilgangService.finnBehandlerrolle(fagsak.fagsystem) ?: throw Feil("Kunne ikke finne Behandlerrolle")
 
     @Transactional
     fun settBehandlingPåVent(
