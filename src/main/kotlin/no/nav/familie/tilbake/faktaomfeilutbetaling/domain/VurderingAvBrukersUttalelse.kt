@@ -21,5 +21,6 @@ data class VurderingAvBrukersUttalelse(
 enum class HarBrukerUttaltSeg {
     JA,
     NEI,
+    IKKE_AKTUELT,
     IKKE_VURDERT,
 }
