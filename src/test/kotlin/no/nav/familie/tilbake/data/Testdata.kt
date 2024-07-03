@@ -107,13 +107,16 @@ object Testdata {
 
     val behandlingsresultat = Behandlingsresultat(behandlingsvedtak = behandlingsvedtak)
 
-    fun lagBehandling() =
+    fun lagBehandling(
+        fagsakId: UUID = fagsak.id,
+        ansvarligSaksbehandler: String = "saksbehandler",
+    ) =
         Behandling(
-            fagsakId = fagsak.id,
+            fagsakId = fagsakId,
             type = Behandlingstype.TILBAKEKREVING,
             opprettetDato = LocalDate.now(),
             avsluttetDato = null,
-            ansvarligSaksbehandler = "saksbehandler",
+            ansvarligSaksbehandler = ansvarligSaksbehandler,
             ansvarligBeslutter = "beslutter",
             behandlendeEnhet = "testverdi",
             behandlendeEnhetsNavn = "testverdi",

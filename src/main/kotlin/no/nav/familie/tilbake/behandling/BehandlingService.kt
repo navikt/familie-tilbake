@@ -628,8 +628,8 @@ class BehandlingService(
     private fun kanSetteBehandlingTilbakeTilFakta(
         behandling: Behandling,
         behandlerRolle: Behandlerrolle,
-    ) = (Behandlingsstatus.UTREDES == behandling.status)
-        && ContextService.hentSaksbehandler() == behandling.ansvarligSaksbehandler &&
+    ) = (Behandlingsstatus.UTREDES == behandling.status) &&
+        ContextService.hentSaksbehandler() == behandling.ansvarligSaksbehandler &&
         (behandlerRolle == Behandlerrolle.SAKSBEHANDLER || behandlerRolle == Behandlerrolle.BESLUTTER)
 
     private fun kanRevurderingOpprettes(behandling: Behandling): Boolean {

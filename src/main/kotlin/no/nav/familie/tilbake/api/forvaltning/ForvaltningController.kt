@@ -147,7 +147,7 @@ class ForvaltningController(
         behandling: BehandlingDto,
         behandlerRolle: Behandlerrolle,
     ) {
-        if (!erAnsvarligSaksbehandler(behandling, behandlerRolle) || behandlerRolle != Behandlerrolle.FORVALTER) {
+        if (!erAnsvarligSaksbehandler(behandling, behandlerRolle) && behandlerRolle != Behandlerrolle.FORVALTER) {
             throw Feil(
                 message =
                     "${ContextService.hentSaksbehandler()} med rolle $behandlerRolle " +
