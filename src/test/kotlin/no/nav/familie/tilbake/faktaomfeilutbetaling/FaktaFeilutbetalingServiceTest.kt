@@ -181,6 +181,13 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
                 lagFaktaomfeilutbetaling(behandlingId = behandlingId, vurderingAvBrukersUttalelse = ugyldigBeskrivelse)
             }
         ugyldiVerdiBeskrivelseSkalVæreTom.message shouldContain "Skal ikke ha beskrivelse når bruker ikke har uttalt seg"
+
+        val ugyldiVerdiBeskrivelseSkalVæreTomHvisIkkeAktuelt =
+            shouldThrow<Feil> {
+                val ugyldigBeskrivelse = VurderingAvBrukersUttalelseDto(harBrukerUttaltSeg = HarBrukerUttaltSeg.IKKE_AKTUELT, beskrivelse = "Skal være null")
+                lagFaktaomfeilutbetaling(behandlingId = behandlingId, vurderingAvBrukersUttalelse = ugyldigBeskrivelse)
+            }
+        ugyldiVerdiBeskrivelseSkalVæreTomHvisIkkeAktuelt.message shouldContain "Skal ikke ha beskrivelse når bruker ikke har uttalt seg"
     }
 
     @Test
