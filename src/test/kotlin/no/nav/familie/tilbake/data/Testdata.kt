@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.data
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Fil
 import no.nav.familie.kontrakter.felles.Månedsperiode
-import no.nav.familie.kontrakter.felles.klage.BehandlingStatus
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
@@ -112,7 +111,7 @@ object Testdata {
     fun lagBehandling(
         fagsakId: UUID = fagsak.id,
         ansvarligSaksbehandler: String = "saksbehandler",
-        behandlingStatus: Behandlingsstatus = Behandlingsstatus.UTREDES
+        behandlingStatus: Behandlingsstatus = Behandlingsstatus.UTREDES,
     ) =
         Behandling(
             fagsakId = fagsakId,

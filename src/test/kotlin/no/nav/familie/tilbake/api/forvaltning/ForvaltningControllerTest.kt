@@ -128,7 +128,10 @@ class ForvaltningControllerTest : OppslagSpringRunnerTest() {
         )
     }
 
-    private fun opprettTestdata(saksbehandler: String = "saksbehandler", behandlingStatus: Behandlingsstatus = Behandlingsstatus.UTREDES): UUID {
+    private fun opprettTestdata(
+        saksbehandler: String = "saksbehandler",
+        behandlingStatus: Behandlingsstatus = Behandlingsstatus.UTREDES,
+    ): UUID {
         val fagsak =
             Fagsak(
                 ytelsestype = Ytelsestype.BARNETRYGD,

@@ -7,7 +7,6 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.FagsakService
-import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
@@ -150,10 +149,11 @@ class ForvaltningController(
             throw Feil(
                 message = "Behandling er ikke under utredning, og kan derfor ikke flyttes tilbake til fakta",
                 frontendFeilmelding = "Behandling er ikke under utredning, og kan derfor ikke flyttes tilbake til fakta",
-                httpStatus = HttpStatus.FORBIDDEN
+                httpStatus = HttpStatus.FORBIDDEN,
             )
         }
     }
+
     private fun validerBehandlerrolle(
         behandling: BehandlingDto,
         behandlerRolle: Behandlerrolle,
