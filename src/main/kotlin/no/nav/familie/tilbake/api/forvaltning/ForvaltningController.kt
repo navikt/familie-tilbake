@@ -128,7 +128,7 @@ class ForvaltningController(
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     @Rolletilgangssjekk(
-        Behandlerrolle.VEILEDER,
+        Behandlerrolle.VEILEDER, // Veileder som laveste nivå for videre validering av rolle i metoden
         "Flytter behandling tilbake til Fakta",
         AuditLoggerEvent.UPDATE,
         HenteParam.BEHANDLING_ID,
