@@ -7,6 +7,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
@@ -107,6 +108,16 @@ class ForvaltningControllerTest : OppslagSpringRunnerTest() {
         assertEquals(HttpStatus.FORBIDDEN, response.statusCode)
     }
 
+    @Test
+    fun `skal ikke kunne sette behandling tilbake til fakta når behandling ikke er under utredning`() {
+        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any()) }
+            .returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.ENSLIG_FORELDER to Behandlerrolle.VEILEDER)))
+        every { ContextService.hentSaksbehandler() } returns "ansvarligSaksbehandler"
+
+        val response = flyttBehandlingTilFakta(opprettTestdata("ansvarligSaksbehandler", Behandlingsstatus.FATTER_VEDTAK))
+        assertEquals(HttpStatus.FORBIDDEN, response.statusCode)
+    }
+
     private fun flyttBehandlingTilFakta(
         behandlingId: UUID,
     ): ResponseEntity<String> {
@@ -117,7 +128,7 @@ class ForvaltningControllerTest : OppslagSpringRunnerTest() {
         )
     }
 
-    private fun opprettTestdata(saksbehandler: String = "saksbehandler"): UUID {
+    private fun opprettTestdata(saksbehandler: String = "saksbehandler", behandlingStatus: Behandlingsstatus = Behandlingsstatus.UTREDES): UUID {
         val fagsak =
             Fagsak(
                 ytelsestype = Ytelsestype.BARNETRYGD,
@@ -125,7 +136,7 @@ class ForvaltningControllerTest : OppslagSpringRunnerTest() {
                 eksternFagsakId = "testverdi",
                 bruker = Bruker(ident = "32132132111"),
             )
-        val behandling = Testdata.lagBehandling(fagsakId = fagsak.id, ansvarligSaksbehandler = saksbehandler)
+        val behandling = Testdata.lagBehandling(fagsakId = fagsak.id, ansvarligSaksbehandler = saksbehandler, behandlingStatus = behandlingStatus)
         fagsakRepository.insert(fagsak)
         behandlingRepository.insert(behandling)
         behandlingsstegstilstandRepository

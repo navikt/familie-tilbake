@@ -3,12 +3,14 @@ package no.nav.familie.tilbake.data
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Fil
 import no.nav.familie.kontrakter.felles.Månedsperiode
+import no.nav.familie.kontrakter.felles.klage.BehandlingStatus
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.avstemming.domain.Avstemmingsfil
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
+import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsvedtak
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsak
@@ -110,9 +112,11 @@ object Testdata {
     fun lagBehandling(
         fagsakId: UUID = fagsak.id,
         ansvarligSaksbehandler: String = "saksbehandler",
+        behandlingStatus: Behandlingsstatus = Behandlingsstatus.UTREDES
     ) =
         Behandling(
             fagsakId = fagsakId,
+            status = behandlingStatus,
             type = Behandlingstype.TILBAKEKREVING,
             opprettetDato = LocalDate.now(),
             avsluttetDato = null,
