@@ -43,7 +43,7 @@
         <sonar.login>${SONAR_LOGIN}</sonar.login>
         <spring.cloud-contract>4.1.3</spring.cloud-contract>
         <springdoc.version>2.5.0</springdoc.version>
-        <testcontainers.version>1.19.8</testcontainers.version>
+        <testcontainers.version>1.20.0</testcontainers.version>
         <tjenestespesifikasjoner.version>2633.1685ed5</tjenestespesifikasjoner.version>
         <familie-tjenestespesifikasjoner.version>1.0_20240610135831_de4c522</familie-tjenestespesifikasjoner.version>
         <prosessering-core.version>2.20240603145215_c56e179</prosessering-core.version>
