@@ -7,10 +7,7 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
-import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -32,7 +29,7 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyTaskTest {
     val oppgaveService: OppgaveService = mockk()
     val oppgavePrioritetService: OppgavePrioritetService = mockk()
 
-    val ferdigstillEksisterendeOppgaverOgOpprettNyTask = FerdigstillEksisterendeOppgaverOgOpprettNyTask(
+    val ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask = FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask(
         behandlingRepository = behandlingRepository,
         fagsakRepository = fagsakRepository,
         oppgaveService = oppgaveService,
@@ -41,7 +38,7 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyTaskTest {
 
     @AfterEach
     fun afterEach() {
-        clearAllMocks()
+        clearAllMocks(answers = false)
     }
 
     @Test
@@ -50,7 +47,7 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyTaskTest {
         // Arrange
         every { behandlingRepository.findByIdOrThrow(any()) } returns behandling
         every { fagsakRepository.findByIdOrThrow(any()) } returns Testdata.fagsak
-        every { oppgaveService.finnOppgave(any(), any(), any()) } returns Pair(FinnOppgaveRequest(tema = Tema.BAR), FinnOppgaveResponseDto(1, listOf(Oppgave(oppgavetype = Oppgavetype.GodkjenneVedtak.name))))
+        every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns Oppgave(oppgavetype = Oppgavetype.GodkjenneVedtak.name)
         every { oppgaveService.ferdigstillOppgave(any(), any()) } just runs
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any(), any()) } just runs
         every { oppgavePrioritetService.utledOppgaveprioritet(any()) } returns OppgavePrioritet.NORM
@@ -61,12 +58,11 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyTaskTest {
         val fristSlot = slot<LocalDate>()
         val frist = LocalDate.now()
         // Act
-        ferdigstillEksisterendeOppgaverOgOpprettNyTask.doTask(Task(
-            type = FerdigstillEksisterendeOppgaverOgOpprettNyTask.TYPE,
+        ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask.doTask(Task(
+            type = FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask.TYPE,
             payload = objectMapper.writeValueAsString(
-                FerdigstillEksisterendeOppgaverOgOpprettNyTask.FerdigstillEksisterendeOppgaverOgOpprettNyDto(
+                FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask.FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveDto(
                     behandlingId = behandling.id,
-                    ønsketÅpenOppgavetype = Oppgavetype.BehandleSak,
                     beskrivelse = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse,
                     frist = frist
                 ))
@@ -91,22 +87,20 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyTaskTest {
     }
 
     @Test
-    fun `doTask - skal verken ferdigstille eller opprette noen ny oppgave, men oppdatere eksisterende dersom oppgaven allerde eksisterer`() {
+    fun `doTask - skal ikke ferdigstille dersom det ikke finnes noen åpen GodkjenneVedtak-oppgaven`() {
         val behandling = lagBehandling()
         // Arrange
         every { behandlingRepository.findByIdOrThrow(any()) } returns behandling
         every { fagsakRepository.findByIdOrThrow(any()) } returns Testdata.fagsak
-        every { oppgaveService.finnOppgave(any(), any(), any()) } returns Pair(FinnOppgaveRequest(tema = Tema.BAR), FinnOppgaveResponseDto(1, listOf(Oppgave(oppgavetype = Oppgavetype.BehandleSak.name))))
+        every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns null
+        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any(), any()) } just runs
         every { oppgavePrioritetService.utledOppgaveprioritet(any()) } returns OppgavePrioritet.NORM
-        every { oppgaveService.patchOppgave(any()) } returns mockk()
-
         // Act
-        ferdigstillEksisterendeOppgaverOgOpprettNyTask.doTask(Task(
-            type = FerdigstillEksisterendeOppgaverOgOpprettNyTask.TYPE,
+        ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask.doTask(Task(
+            type = FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask.TYPE,
             payload = objectMapper.writeValueAsString(
-                FerdigstillEksisterendeOppgaverOgOpprettNyTask.FerdigstillEksisterendeOppgaverOgOpprettNyDto(
+                FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask.FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveDto(
                     behandlingId = behandling.id,
-                    ønsketÅpenOppgavetype = Oppgavetype.BehandleSak,
                     beskrivelse = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse,
                     frist = LocalDate.now()
                 ))
@@ -114,7 +108,6 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyTaskTest {
 
         // Assert
         verify (exactly = 0) {oppgaveService.ferdigstillOppgave(any(), any())}
-        verify(exactly = 0) {oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any(), any())}
-        verify(exactly = 1) { oppgaveService.patchOppgave(any()) }
+        verify(exactly = 1) {oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any(), any())}
     }
 }

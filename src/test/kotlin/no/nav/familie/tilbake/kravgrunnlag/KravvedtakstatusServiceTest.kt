@@ -57,7 +57,7 @@ class KravvedtakstatusServiceTest {
         every { behandlingskontrollService.tilbakehoppBehandlingssteg(any(), any()) } just runs
         every { historikkTaskService.lagHistorikkTask(any(), any(), any(), any(), any(), any(), any()) } just runs
         every { oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(any()) } returns Oppgave(oppgavetype = Oppgavetype.GodkjenneVedtak.name)
-        every { oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNy(any(), any(), any(), any()) } just runs
+        every { oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgave(any(), any(), any()) } just runs
         every { oppgaveTaskService.oppdaterOppgaveTask(any(), any(), any(), any()) } just runs
     }
 
@@ -77,50 +77,35 @@ class KravvedtakstatusServiceTest {
 
         // Assert
         verify(exactly = 0) { oppgaveTaskService.oppdaterOppgaveTask(any(), any(), any()) }
-        verify(exactly = 1) { oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNy(any(), any(), any(), any()) }
+        verify(exactly = 1) { oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgave(any(), any(), any()) }
     }
 
     @ParameterizedTest
     @EnumSource(value = Behandlingssteg::class, mode = EnumSource.Mode.EXCLUDE, names = ["VARSEL"])
     fun `håndterSperMeldingMedBehandling - skal oppdatere oppgave dersom nåværende oppgave er BehandleSak, så lenge behandlingen ikke står på behandlingsteg VARSEL`(behandlingssteg: Behandlingssteg) {
         // Arrange
-        val behandling = lagBehandling()
-        val kravgrunnlag = mockk<Kravgrunnlag431>(relaxed = true)
-
-        every { kravgrunnlagRepository.update(any()) } returns kravgrunnlag
-        every { behandlingskontrollService.tilbakehoppBehandlingssteg(any(), any()) } just runs
-        every { historikkTaskService.lagHistorikkTask(any(), any(), any(), any(), any(), any(), any()) } just runs
         every { behandlingskontrollService.finnAktivtSteg(any()) } returns behandlingssteg
         every { oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(any()) } returns Oppgave(oppgavetype = Oppgavetype.BehandleSak.name)
-        every { oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNy(any(), any(), any(), any()) } just runs
 
         // Act
         kravvedtakstatusService.håndterSperMeldingMedBehandling(behandlingId = behandling.id, kravgrunnlag431 = kravgrunnlag)
 
         // Assert
         verify(exactly = 1) { oppgaveTaskService.oppdaterOppgaveTask(any(), any(), any()) }
-        verify(exactly = 0) { oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNy(any(), any(), any(), any()) }
+        verify(exactly = 0) { oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgave(any(), any(), any()) }
     }
 
     @ParameterizedTest
     @EnumSource(value = Behandlingssteg::class, mode = EnumSource.Mode.INCLUDE, names = ["VARSEL"])
     fun `håndterSperMeldingMedBehandling - skal verken opprette tasken FerdigstillEksisterendeOppgaverOgOpprettNyTask eller oppdatere nåværende oppgave, så lenge behandlingen står på behandlingsteg VARSEL`(behandlingssteg: Behandlingssteg) {
         // Arrange
-        val behandling = lagBehandling()
-        val kravgrunnlag = mockk<Kravgrunnlag431>(relaxed = true)
-
-        every { kravgrunnlagRepository.update(any()) } returns kravgrunnlag
-        every { behandlingskontrollService.tilbakehoppBehandlingssteg(any(), any()) } just runs
-        every { historikkTaskService.lagHistorikkTask(any(), any(), any(), any(), any(), any(), any()) } just runs
         every { behandlingskontrollService.finnAktivtSteg(any()) } returns behandlingssteg
-        every { oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(any()) } returns Oppgave(oppgavetype = Oppgavetype.GodkjenneVedtak.name)
-        every { oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNy(any(), any(), any(), any()) } just runs
 
         // Act
         kravvedtakstatusService.håndterSperMeldingMedBehandling(behandlingId = behandling.id, kravgrunnlag431 = kravgrunnlag)
 
         // Assert
         verify(exactly = 0) { oppgaveTaskService.oppdaterOppgaveTask(any(), any(), any()) }
-        verify(exactly = 0) { oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNy(any(), any(), any(), any()) }
+        verify(exactly = 0) { oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgave(any(), any(), any()) }
     }
 }
