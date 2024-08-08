@@ -6,10 +6,12 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
 import java.math.BigDecimal
+import java.time.LocalDateTime
 
 data class VurdertVilkårsvurderingDto(
     val perioder: List<VurdertVilkårsvurderingsperiodeDto>,
     val rettsgebyr: Long,
+    val opprettetTid: LocalDateTime?
 )
 
 data class VurdertVilkårsvurderingsperiodeDto(

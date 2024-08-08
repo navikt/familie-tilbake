@@ -40,6 +40,10 @@ class ForeldelseService(
         return foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
     }
 
+    fun hentAlleForeldelser(behandlingId: UUID): List<VurdertForeldelse> {
+        return foreldelseRepository.findByBehandlingId(behandlingId)
+    }
+
     fun erPeriodeForeldet(
         behandlingId: UUID,
         periode: Månedsperiode,
