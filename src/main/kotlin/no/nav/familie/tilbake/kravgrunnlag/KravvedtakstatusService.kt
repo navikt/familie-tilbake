@@ -189,7 +189,7 @@ class KravvedtakstatusService(
                     frist = tidsfrist,
                 )
             } else {
-                oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNy(behandlingId = behandlingId, oppgavetype = Oppgavetype.BehandleSak, beskrivelse = venteårsak.beskrivelse, frist = tidsfrist)
+                oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNy(behandlingId = behandlingId, ønsketÅpenOppgavetype = Oppgavetype.BehandleSak, beskrivelse = venteårsak.beskrivelse, frist = tidsfrist)
             }
         }
     }

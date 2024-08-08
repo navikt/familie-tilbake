@@ -6,7 +6,6 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
-import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.FagsakService
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.common.ContextService
@@ -203,14 +202,14 @@ class OppgaveTaskService(
     }
 
     @Transactional
-    fun ferdigstillEksisterendeOppgaverOgOpprettNy(behandlingId: UUID, oppgavetype: Oppgavetype, beskrivelse: String, frist: LocalDate?) {
+    fun ferdigstillEksisterendeOppgaverOgOpprettNy(behandlingId: UUID, ønsketÅpenOppgavetype: Oppgavetype, beskrivelse: String, frist: LocalDate?) {
         taskService.save(
             Task(
                 type = FerdigstillEksisterendeOppgaverOgOpprettNyTask.TYPE,
                 payload = objectMapper.writeValueAsString(
                     FerdigstillEksisterendeOppgaverOgOpprettNyTask.FerdigstillEksisterendeOppgaverOgOpprettNyDto(
                         behandlingId = behandlingId,
-                        oppgavetype = oppgavetype,
+                        ønsketÅpenOppgavetype = ønsketÅpenOppgavetype,
                         beskrivelse = beskrivelse,
                         frist = frist
                     )

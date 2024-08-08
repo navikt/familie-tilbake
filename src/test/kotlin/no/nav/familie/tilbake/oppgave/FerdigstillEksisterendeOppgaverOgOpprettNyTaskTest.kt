@@ -45,7 +45,7 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyTaskTest {
     }
 
     @Test
-    fun `doTask - skal ferdigstille alle tasker som ikke er av typen BehandleSak og opprette ny oppgave av type BehandleSak dersom den ikke eksisterer`() {
+    fun `doTask - skal ferdigstille alle åpne tasker og opprette ny oppgave dersom den ikke eksisterer`() {
         val behandling = lagBehandling()
         // Arrange
         every { behandlingRepository.findByIdOrThrow(any()) } returns behandling
@@ -66,7 +66,7 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyTaskTest {
             payload = objectMapper.writeValueAsString(
                 FerdigstillEksisterendeOppgaverOgOpprettNyTask.FerdigstillEksisterendeOppgaverOgOpprettNyDto(
                     behandlingId = behandling.id,
-                    oppgavetype = Oppgavetype.BehandleSak,
+                    ønsketÅpenOppgavetype = Oppgavetype.BehandleSak,
                     beskrivelse = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse,
                     frist = frist
                 ))
@@ -91,12 +91,14 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyTaskTest {
     }
 
     @Test
-    fun `doTask - skal verken ferdigstille eller opprette noen ny oppgave dersom det kun eksisterer en oppgave av type BehandleSak`() {
+    fun `doTask - skal verken ferdigstille eller opprette noen ny oppgave, men oppdatere eksisterende dersom oppgaven allerde eksisterer`() {
         val behandling = lagBehandling()
         // Arrange
         every { behandlingRepository.findByIdOrThrow(any()) } returns behandling
         every { fagsakRepository.findByIdOrThrow(any()) } returns Testdata.fagsak
         every { oppgaveService.finnOppgave(any(), any(), any()) } returns Pair(FinnOppgaveRequest(tema = Tema.BAR), FinnOppgaveResponseDto(1, listOf(Oppgave(oppgavetype = Oppgavetype.BehandleSak.name))))
+        every { oppgavePrioritetService.utledOppgaveprioritet(any()) } returns OppgavePrioritet.NORM
+        every { oppgaveService.patchOppgave(any()) } returns mockk()
 
         // Act
         ferdigstillEksisterendeOppgaverOgOpprettNyTask.doTask(Task(
@@ -104,7 +106,7 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyTaskTest {
             payload = objectMapper.writeValueAsString(
                 FerdigstillEksisterendeOppgaverOgOpprettNyTask.FerdigstillEksisterendeOppgaverOgOpprettNyDto(
                     behandlingId = behandling.id,
-                    oppgavetype = Oppgavetype.BehandleSak,
+                    ønsketÅpenOppgavetype = Oppgavetype.BehandleSak,
                     beskrivelse = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse,
                     frist = LocalDate.now()
                 ))
@@ -113,5 +115,6 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyTaskTest {
         // Assert
         verify (exactly = 0) {oppgaveService.ferdigstillOppgave(any(), any())}
         verify(exactly = 0) {oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any(), any())}
+        verify(exactly = 1) { oppgaveService.patchOppgave(any()) }
     }
 }

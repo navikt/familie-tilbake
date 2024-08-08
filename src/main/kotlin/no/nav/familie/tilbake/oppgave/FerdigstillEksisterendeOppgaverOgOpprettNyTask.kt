@@ -32,8 +32,9 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyTask(
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val (_, finnOppgaverResponse) = oppgaveService.finnOppgave(behandling = behandling, oppgavetype = null, fagsak = fagsak)
 
-        val oppgaverUtenomBehandleSak = finnOppgaverResponse.oppgaver.filter { it.oppgavetype !== Oppgavetype.BehandleSak.name }
-        val behandleSakOppgave = finnOppgaverResponse.oppgaver.singleOrNull { it.oppgavetype == Oppgavetype.BehandleSak.name }
+        val ønsketÅpenOppgavetype = ferdigstillEksisterendeOppgaverOgOpprettNyDto.ønsketÅpenOppgavetype
+        val oppgaverUtenomBehandleSak = finnOppgaverResponse.oppgaver.filter { it.oppgavetype !== ønsketÅpenOppgavetype.name }
+        val behandleSakOppgave = finnOppgaverResponse.oppgaver.singleOrNull { it.oppgavetype == ønsketÅpenOppgavetype.name }
 
         oppgaverUtenomBehandleSak.forEach { oppgave ->
             oppgaveService.ferdigstillOppgave(
@@ -41,17 +42,25 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyTask(
                 oppgavetype = oppgave.oppgavetype?.let { Oppgavetype.valueOf(it) },
             )
         }
+
+        val prioritet = oppgavePrioritetService.utledOppgaveprioritet(behandling.id)
+        val frist = ferdigstillEksisterendeOppgaverOgOpprettNyDto.frist ?: LocalDate.now()
         if (behandleSakOppgave == null) {
-            val prioritet = oppgavePrioritetService.utledOppgaveprioritet(behandling.id)
             oppgaveService.opprettOppgave(
                 behandlingId = behandling.id,
                 oppgavetype = Oppgavetype.BehandleSak,
                 enhet = behandling.behandlendeEnhet,
                 beskrivelse = ferdigstillEksisterendeOppgaverOgOpprettNyDto.beskrivelse,
-                fristForFerdigstillelse = ferdigstillEksisterendeOppgaverOgOpprettNyDto.frist ?: LocalDate.now(),
+                fristForFerdigstillelse = frist,
                 saksbehandler = null,
                 prioritet = prioritet
             )
+        } else {
+            oppgaveService.patchOppgave(behandleSakOppgave.copy(
+                beskrivelse = ferdigstillEksisterendeOppgaverOgOpprettNyDto.beskrivelse,
+                fristFerdigstillelse = frist.toString(),
+                prioritet = prioritet
+            ))
         }
     }
 
@@ -59,5 +68,5 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyTask(
         const val TYPE = "ferdigstillEksisterendeOppgaverOgOpprettNyTask"
     }
 
-    data class FerdigstillEksisterendeOppgaverOgOpprettNyDto(val behandlingId: UUID, val oppgavetype: Oppgavetype, val beskrivelse: String, val frist: LocalDate?)
+    data class FerdigstillEksisterendeOppgaverOgOpprettNyDto(val behandlingId: UUID, val ønsketÅpenOppgavetype: Oppgavetype, val beskrivelse: String, val frist: LocalDate?)
 }
