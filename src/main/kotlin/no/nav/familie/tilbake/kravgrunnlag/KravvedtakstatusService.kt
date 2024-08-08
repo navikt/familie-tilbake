@@ -182,14 +182,15 @@ class KravvedtakstatusService(
         val aktivtBehandlingssteg = behandlingskontrollService.finnAktivtSteg(behandlingId)
         if (aktivtBehandlingssteg?.let { it != Behandlingssteg.VARSEL } == true) {
             val oppgave = oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
-            if (oppgave.oppgavetype == Oppgavetype.BehandleSak.name) {
+            val behandleSakOppgavetyper = listOf(Oppgavetype.BehandleSak.name, Oppgavetype.BehandleUnderkjentVedtak.name)
+            if (behandleSakOppgavetyper.contains(oppgave.oppgavetype)) {
                 oppgaveTaskService.oppdaterOppgaveTask(
                     behandlingId = behandlingId,
                     beskrivelse = venteårsak.beskrivelse,
                     frist = tidsfrist,
                 )
             } else {
-                oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNy(behandlingId = behandlingId, ønsketÅpenOppgavetype = Oppgavetype.BehandleSak, beskrivelse = venteårsak.beskrivelse, frist = tidsfrist)
+                oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgave(behandlingId = behandlingId, beskrivelse = venteårsak.beskrivelse, frist = tidsfrist)
             }
         }
     }
