@@ -24,7 +24,7 @@
         <kotlin.version>2.0.0</kotlin.version>
         <common-java-modules.version>2.2021.09.17_07.09-67428a6422cc</common-java-modules.version>
         <kontrakter.version>3.0_20240607101709_d35e18c</kontrakter.version>
-        <felles.version>3.20240624143824_64bf8f2</felles.version>
+        <felles.version>3.20240806111424_fff2930</felles.version>
         <!-- kotest.properties kan antakelig fjernes i versjon 6, for autoscan blir default false -->
         <kotest.version>5.9.1</kotest.version>
         <token-validation-spring.version>5.0.1</token-validation-spring.version>
