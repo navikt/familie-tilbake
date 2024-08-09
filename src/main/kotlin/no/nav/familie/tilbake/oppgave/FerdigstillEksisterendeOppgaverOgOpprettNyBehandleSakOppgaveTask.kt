@@ -44,7 +44,7 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask(
             oppgavetype = Oppgavetype.BehandleSak,
             enhet = behandling.behandlendeEnhet,
             beskrivelse = payload.beskrivelse,
-            fristForFerdigstillelse = payload.frist ?: LocalDate.now(),
+            fristForFerdigstillelse = payload.frist,
             saksbehandler = null,
             prioritet = prioritet
         )
@@ -54,5 +54,5 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask(
         const val TYPE = "ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakTask"
     }
 
-    data class FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveDto(val behandlingId: UUID, val beskrivelse: String, val frist: LocalDate?)
+    data class FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveDto(val behandlingId: UUID, val beskrivelse: String, val frist: LocalDate)
 }
