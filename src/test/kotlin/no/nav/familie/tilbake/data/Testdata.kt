@@ -9,6 +9,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.avstemming.domain.Avstemmingsfil
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
+import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsvedtak
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsak
@@ -107,13 +108,18 @@ object Testdata {
 
     val behandlingsresultat = Behandlingsresultat(behandlingsvedtak = behandlingsvedtak)
 
-    fun lagBehandling() =
+    fun lagBehandling(
+        fagsakId: UUID = fagsak.id,
+        ansvarligSaksbehandler: String = "saksbehandler",
+        behandlingStatus: Behandlingsstatus = Behandlingsstatus.UTREDES,
+    ) =
         Behandling(
-            fagsakId = fagsak.id,
+            fagsakId = fagsakId,
+            status = behandlingStatus,
             type = Behandlingstype.TILBAKEKREVING,
             opprettetDato = LocalDate.now(),
             avsluttetDato = null,
-            ansvarligSaksbehandler = "saksbehandler",
+            ansvarligSaksbehandler = ansvarligSaksbehandler,
             ansvarligBeslutter = "beslutter",
             behandlendeEnhet = "testverdi",
             behandlendeEnhetsNavn = "testverdi",

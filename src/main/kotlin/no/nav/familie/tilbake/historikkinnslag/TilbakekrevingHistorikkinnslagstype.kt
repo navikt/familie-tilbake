@@ -24,7 +24,7 @@ enum class TilbakekrevingHistorikkinnslagstype(
     BEHANDLING_AVSLUTTET(tittel = "Behandling avsluttet"),
     BEHANDLING_HENLAGT(tittel = "Behandling henlagt", tekst = "Årsak: "),
     ENDRET_ENHET(tittel = "Endret enhet", tekst = "Ny enhet: "),
-    BEHANDLING_FLYTTET_MED_FORVALTNING(tittel = "Problem i forvaltning", tekst = "Behandling flyttet tilbake til Fakta"),
+    BEHANDLING_FLYTTET_MED_FORVALTNING(tittel = "Behandling flyttet tilbake til Fakta", tekst = "Behandling flyttet tilbake til Fakta"),
     BREVMOTTAKER_LAGT_TIL("Brevmottaker er lagt til"),
     BREVMOTTAKER_ENDRET("Brevmottaker er endret"),
     BREVMOTTAKER_FJERNET("Brevmottaker er fjernet"),

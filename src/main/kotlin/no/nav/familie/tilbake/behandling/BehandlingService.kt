@@ -197,6 +197,7 @@ class BehandlingService(
         val varselSendt = brevsporingService.erVarselSendt(behandlingId)
         val kanBehandlingHenlegges: Boolean = kanHenleggeBehandling(behandling)
         val kanEndres: Boolean = kanBehandlingEndres(behandling, fagsak.fagsystem)
+        val kanSetteBehandlingTilbakeTilFakta = kanSetteBehandlingTilbakeTilFakta(behandling, finnBehandlerrolle(fagsak))
         val kanRevurderingOpprettes: Boolean =
             tilgangService.tilgangTilÅOppretteRevurdering(fagsak.fagsystem) && kanRevurderingOpprettes(behandling)
         val støtterManuelleBrevmottakere =
@@ -216,6 +217,7 @@ class BehandlingService(
             erBehandlingPåVent,
             kanBehandlingHenlegges,
             kanEndres,
+            kanSetteBehandlingTilbakeTilFakta,
             kanRevurderingOpprettes,
             behandlingsstegsinfoer,
             varselSendt,
@@ -224,6 +226,8 @@ class BehandlingService(
             støtterManuelleBrevmottakere,
         )
     }
+
+    private fun finnBehandlerrolle(fagsak: Fagsak) = tilgangService.finnBehandlerrolle(fagsak.fagsystem) ?: throw Feil("Kunne ikke finne Behandlerrolle")
 
     @Transactional
     fun settBehandlingPåVent(
@@ -622,6 +626,13 @@ class BehandlingService(
             else -> false
         }
     }
+
+    private fun kanSetteBehandlingTilbakeTilFakta(
+        behandling: Behandling,
+        behandlerRolle: Behandlerrolle,
+    ) = (Behandlingsstatus.UTREDES == behandling.status) &&
+        ContextService.hentSaksbehandler() == behandling.ansvarligSaksbehandler &&
+        (behandlerRolle == Behandlerrolle.SAKSBEHANDLER || behandlerRolle == Behandlerrolle.BESLUTTER)
 
     private fun kanRevurderingOpprettes(behandling: Behandling): Boolean {
         return behandling.erAvsluttet &&
