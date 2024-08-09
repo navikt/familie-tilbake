@@ -41,7 +41,7 @@ class ValiderBehandlingService(
         // hvis toggelen KAN_OPPRETTE_BEH_MED_EKSTERNID_SOM_HAR_AVSLUTTET_TBK er på,
         // sjekker ikke om det finnes en avsluttet tilbakekreving for eksternId
         if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_OPPRETTE_BEH_MED_EKSTERNID_SOM_HAR_AVSLUTTET_TBK)) {
-            val avsluttetBehandlinger = behandlingRepository.finnAvsluttetTilbakekrevingsbehandlinger(request.eksternId)
+            val avsluttetBehandlinger = behandlingRepository.finnAvsluttetTilbakekrevingsbehandlinger(request.eksternId, request.fagsystem)
             if (avsluttetBehandlinger.isNotEmpty()) {
                 val sisteAvsluttetBehandling: Behandling = avsluttetBehandlinger.first()
                 val erSisteBehandlingHenlagt: Boolean =
