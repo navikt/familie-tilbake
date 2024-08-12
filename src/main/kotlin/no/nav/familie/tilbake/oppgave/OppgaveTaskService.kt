@@ -202,18 +202,23 @@ class OppgaveTaskService(
     }
 
     @Transactional
-    fun ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgave(behandlingId: UUID, beskrivelse: String, frist: LocalDate) {
+    fun ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgave(
+        behandlingId: UUID,
+        beskrivelse: String,
+        frist: LocalDate,
+    ) {
         taskService.save(
             Task(
                 type = FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask.TYPE,
-                payload = objectMapper.writeValueAsString(
-                    FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask.FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveDto(
-                        behandlingId = behandlingId,
-                        beskrivelse = beskrivelse,
-                        frist = frist
-                    )
-                )
-            )
+                payload =
+                    objectMapper.writeValueAsString(
+                        FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask.FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveDto(
+                            behandlingId = behandlingId,
+                            beskrivelse = beskrivelse,
+                            frist = frist,
+                        ),
+                    ),
+            ),
         )
     }
 }
