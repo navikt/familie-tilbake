@@ -1,5 +1,7 @@
 package no.nav.familie.tilbake.forvaltning
 
+import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
@@ -34,6 +36,7 @@ import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEventPublishe
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattService
 import no.nav.familie.tilbake.micrometer.TellerService
+import no.nav.familie.tilbake.oppgave.OppgaveService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -61,6 +64,7 @@ class ForvaltningService(
     private val tellerService: TellerService,
     private val taskService: TaskService,
     private val endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher,
+    private val oppgaveService: OppgaveService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
@@ -251,6 +255,15 @@ class ForvaltningService(
                 opprettetTid = xml.sporbar.opprettetTid,
             )
         }
+    }
+
+    fun hentBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave(fagsystem: Fagsystem): List<UUID> {
+        val behandlingerMedTilbakeførtFatteVedtakSteg = behandlingRepository.hentÅpneBehandlingerMedTilbakeførtFatteVedtakSteg(fagsystem)
+        return behandlingerMedTilbakeførtFatteVedtakSteg.filter {
+            val aktivOppgave = oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(it.id)
+            val aktivtSteg = behandlingskontrollService.finnAktivtSteg(it.id)
+            aktivtSteg != null && aktivtSteg.sekvens < Behandlingssteg.FATTE_VEDTAK.sekvens && aktivOppgave.oppgavetype == Oppgavetype.GodkjenneVedtak.name
+        }.map { it.id }
     }
 
     private fun sjekkOmBehandlingErAvsluttet(behandling: Behandling) {
