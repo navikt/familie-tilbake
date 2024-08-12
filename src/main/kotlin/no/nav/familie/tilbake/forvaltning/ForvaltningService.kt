@@ -260,7 +260,7 @@ class ForvaltningService(
     fun hentBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave(fagsystem: Fagsystem): List<UUID> {
         val behandlingerMedTilbakeførtFatteVedtakSteg = behandlingRepository.hentÅpneBehandlingerMedTilbakeførtFatteVedtakSteg(fagsystem)
         return behandlingerMedTilbakeførtFatteVedtakSteg.filter {
-            val aktivOppgave =         oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(it.id)
+            val aktivOppgave = oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(it.id)
             val aktivtSteg = behandlingskontrollService.finnAktivtSteg(it.id)
             aktivtSteg != null && aktivtSteg.sekvens < Behandlingssteg.FATTE_VEDTAK.sekvens && aktivOppgave.oppgavetype == Oppgavetype.GodkjenneVedtak.name
         }.map { it.id }
