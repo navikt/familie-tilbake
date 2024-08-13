@@ -40,7 +40,9 @@ class FinnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgaveTas
         }.map { it.id }
 
         if (behandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave.isNotEmpty()) {
-            secureLogger.info(objectMapper.writeValueAsString(behandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave))
+            secureLogger.info("Behandlinger som mangler oppgave eller har feil åpen oppgave for fagsystem ${fagsystem}: ${objectMapper.writeValueAsString(behandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave)}")
+        } else {
+            secureLogger.info("Ingen behandlinger for fagsystem ${fagsystem} mangler oppgave eller har feil åpen oppgave.")
         }
     }
 
