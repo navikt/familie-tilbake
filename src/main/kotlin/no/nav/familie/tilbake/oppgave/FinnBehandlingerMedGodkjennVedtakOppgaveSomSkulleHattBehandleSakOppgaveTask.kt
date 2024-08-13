@@ -48,7 +48,7 @@ class FinnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgaveTas
 
     private fun Behandlingssteg?.erPåStegFørFatteVedtak(): Boolean = this != null && this.sekvens < Behandlingssteg.FATTE_VEDTAK.sekvens
 
-    private fun Oppgave?.erNullEllerGodkjenneVedtak(): Boolean = this == null || this.oppgavetype == Oppgavetype.GodkjenneVedtak.name
+    private fun Oppgave?.erNullEllerGodkjenneVedtak(): Boolean = this == null || this.oppgavetype == Oppgavetype.GodkjenneVedtak.value
 
     companion object {
         const val TYPE = "finnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave"
