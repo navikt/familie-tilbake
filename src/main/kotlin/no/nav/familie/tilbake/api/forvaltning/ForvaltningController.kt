@@ -238,13 +238,8 @@ class ForvaltningController(
 
     @Operation(summary = "Henter behandlinger med åpen GodkjennVedtak-oppgave som burde hatt åpen BehandleSak-oppgave")
     @GetMapping(
-        path = ["/hentBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave"],
+        path = ["/hentBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave/{fagsystem}"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
-    )
-    @Rolletilgangssjekk(
-        Behandlerrolle.FORVALTER,
-        "Henter behandlinger med åpen GodkjennVedtak-oppgave som burde hatt åpen BehandleSak-oppgave",
-        AuditLoggerEvent.NONE,
     )
     fun hentBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave(@PathVariable fagsystem: Fagsystem): Ressurs<List<UUID>> {
         return Ressurs.success(forvaltningService.hentBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave(fagsystem))
