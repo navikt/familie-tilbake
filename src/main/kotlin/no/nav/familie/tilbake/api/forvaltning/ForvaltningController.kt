@@ -236,13 +236,13 @@ class ForvaltningController(
         }
     }
 
-    @Operation(summary = "Henter behandlinger med åpen GodkjennVedtak-oppgave som burde hatt åpen BehandleSak-oppgave")
+    @Operation(summary = "Henter behandlinger med åpen GodkjennVedtak-oppgave eller ingen oppgave, som burde hatt åpen BehandleSak-oppgave")
     @GetMapping(
-        path = ["/hentBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave/{fagsystem}"],
+        path = ["/finnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave/{fagsystem}"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    fun hentBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave(@PathVariable fagsystem: Fagsystem): Ressurs<List<UUID>> {
-        return Ressurs.success(forvaltningService.hentBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave(fagsystem))
+    fun finnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave(@PathVariable fagsystem: Fagsystem) {
+        oppgaveTaskService.finnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave(fagsystem)
     }
 
 }
