@@ -241,8 +241,8 @@ class ForvaltningController(
         path = ["/hentBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave/{fagsystem}"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    fun hentBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave(@PathVariable fagsystem: Fagsystem): Ressurs<List<UUID>> {
-        return Ressurs.success(forvaltningService.hentBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave(fagsystem))
+    fun hentBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave(@PathVariable fagsystem: Fagsystem) {
+        oppgaveTaskService.finnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave(fagsystem)
     }
 
 }
