@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.forvaltning
 
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Status
@@ -22,6 +23,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.common.exceptionhandler.ManglerOppgaveFeil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.SendVedtaksbrevTask
@@ -260,11 +262,19 @@ class ForvaltningService(
     fun hentBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave(fagsystem: Fagsystem): List<UUID> {
         val behandlingerMedTilbakeførtFatteVedtakSteg = behandlingRepository.hentÅpneBehandlingerMedTilbakeførtFatteVedtakSteg(fagsystem)
         return behandlingerMedTilbakeførtFatteVedtakSteg.filter {
-            val aktivOppgave = oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(it.id)
+            val aktivOppgave = try {
+                oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(it.id)
+            } catch (e: ManglerOppgaveFeil) {
+                null
+            }
             val aktivtSteg = behandlingskontrollService.finnAktivtSteg(it.id)
-            aktivtSteg != null && aktivtSteg.sekvens < Behandlingssteg.FATTE_VEDTAK.sekvens && aktivOppgave.oppgavetype == Oppgavetype.GodkjenneVedtak.name
+            aktivtSteg.erPåStegFørFatteVedtak() && aktivOppgave.erNullEllerGodkjenneVedtak()
         }.map { it.id }
     }
+
+    private fun Behandlingssteg?.erPåStegFørFatteVedtak(): Boolean = this != null && this.sekvens < Behandlingssteg.FATTE_VEDTAK.sekvens
+
+    private fun Oppgave?.erNullEllerGodkjenneVedtak(): Boolean = this == null || this.oppgavetype == Oppgavetype.GodkjenneVedtak.name
 
     private fun sjekkOmBehandlingErAvsluttet(behandling: Behandling) {
         if (behandling.erAvsluttet) {
