@@ -221,4 +221,14 @@ class OppgaveTaskService(
             ),
         )
     }
+
+    @Transactional
+    fun finnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave(fagsystem: Fagsystem) {
+        taskService.save(
+            Task(
+                type = FinnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgaveTask.TYPE,
+                payload = fagsystem.name,
+            ),
+        )
+    }
 }

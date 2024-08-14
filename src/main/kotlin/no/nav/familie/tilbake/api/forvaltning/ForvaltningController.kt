@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 // Denne kontrolleren inneholder tjenester som kun brukes av forvaltningsteam via swagger. Frontend skal ikke kalle disse tjenestene.
@@ -278,6 +279,30 @@ class ForvaltningController(
     ) {
         behandlingIder.forEach { behandlingID ->
             behandlingTilstandService.opprettSendingAvBehandlingenManuellt(behandlingId = behandlingID)
+        }
+    }
+
+    @Operation(summary = "Henter behandlinger med åpen GodkjennVedtak-oppgave eller ingen oppgave, som burde hatt åpen BehandleSak-oppgave")
+    @GetMapping(
+        path = ["/finnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave/{fagsystem}"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun finnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave(
+        @PathVariable fagsystem: Fagsystem,
+    ) {
+        oppgaveTaskService.finnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave(fagsystem)
+    }
+
+    @Operation(summary = "Ferdigstiller åpen GodkjenneVedtak-oppgave og oppretter BehandleSak-oppgave for behandlinger")
+    @PostMapping(
+        path = ["/ferdigstillGodkjenneVedtakOppgaveOgOpprettBehandleSakOppgave"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun ferdigstillGodkjenneVedtakOppgaveOgOpprettBehandleSakOppgave(
+        @RequestBody behandlingIder: List<UUID>,
+    ) {
+        behandlingIder.forEach {
+            oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgave(it, "--- Opprettet av familie-tilbake ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n", LocalDate.now())
         }
     }
 }

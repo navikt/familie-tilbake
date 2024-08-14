@@ -44,7 +44,7 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask(
             enhet = behandling.behandlendeEnhet,
             beskrivelse = payload.beskrivelse,
             fristForFerdigstillelse = payload.frist,
-            saksbehandler = null,
+            saksbehandler = behandling.ansvarligSaksbehandler,
             prioritet = prioritet,
         )
     }
