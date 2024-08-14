@@ -248,7 +248,7 @@ class OppgaveService(
         }
     }
 
-    private fun finnOppgave(
+    fun finnOppgave(
         behandling: Behandling,
         oppgavetype: Oppgavetype?,
         fagsak: Fagsak,
