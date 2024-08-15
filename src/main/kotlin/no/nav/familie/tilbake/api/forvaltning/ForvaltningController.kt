@@ -242,7 +242,9 @@ class ForvaltningController(
         path = ["/finnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave/{fagsystem}"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    fun finnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave(@PathVariable fagsystem: Fagsystem) {
+    fun finnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave(
+        @PathVariable fagsystem: Fagsystem,
+    ) {
         oppgaveTaskService.finnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave(fagsystem)
     }
 
@@ -251,12 +253,13 @@ class ForvaltningController(
         path = ["/ferdigstillGodkjenneVedtakOppgaveOgOpprettBehandleSakOppgave"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    fun ferdigstillGodkjenneVedtakOppgaveOgOpprettBehandleSakOppgave(@RequestBody behandlingIder: List<UUID>) {
+    fun ferdigstillGodkjenneVedtakOppgaveOgOpprettBehandleSakOppgave(
+        @RequestBody behandlingIder: List<UUID>,
+    ) {
         behandlingIder.forEach {
             oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgave(it, "--- Opprettet av familie-tilbake ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n", LocalDate.now())
         }
     }
-
 }
 
 data class Behandlingsinfo(
