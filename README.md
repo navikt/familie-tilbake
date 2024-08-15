@@ -18,6 +18,8 @@ For å kjøre opp appen lokalt kan en kjøre `LauncherLocalPostgres.kt`, eller `
 databasen selv. Begge krever at du har logget deg på gcloud `gcloud auth login` og at du er på Naisdevice.  
 Appen tilgjengeliggjøres da på `localhost:8030`.
 
+Det opprettes en dummy behandling ved oppstart, link til behandling skrives i console på formen (søk på "dummy-behandling"). Linken vil se slik ut: http://localhost:8000/fagsystem/EF/fagsak/1234567/behandling/{generertBehandlingId}
+
 ### Lokale avhengigheter
 For å teste tilbakekreving lokalt må du mest sannsynlig også sette opp disse repoene
 * [Familie-tilbake-frontend](https://github.com/navikt/familie-tilbake-frontend)
