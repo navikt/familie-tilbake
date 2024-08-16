@@ -45,19 +45,28 @@ class IntegrasjonerClientConfig {
                     ArkiverDokumentResponse(
                         "jpUkjentDødsbo",
                         false,
-                        listOf(no.nav.familie.kontrakter.felles.dokarkiv.DokumentInfo("id")),
+                        listOf(
+                            no.nav.familie.kontrakter.felles.dokarkiv
+                                .DokumentInfo("id"),
+                        ),
                     )
                 "04098203010" ->
                     ArkiverDokumentResponse(
                         "jpUkjentDødsbo",
                         false,
-                        listOf(no.nav.familie.kontrakter.felles.dokarkiv.DokumentInfo("id")),
+                        listOf(
+                            no.nav.familie.kontrakter.felles.dokarkiv
+                                .DokumentInfo("id"),
+                        ),
                     )
                 else ->
                     ArkiverDokumentResponse(
                         "jpId",
                         false,
-                        listOf(no.nav.familie.kontrakter.felles.dokarkiv.DokumentInfo("id")),
+                        listOf(
+                            no.nav.familie.kontrakter.felles.dokarkiv
+                                .DokumentInfo("id"),
+                        ),
                     )
             }
         }
@@ -297,7 +306,5 @@ class IntegrasjonerClientConfig {
         return integrasjonerClient
     }
 
-    fun readMockfileFromResources(): ByteArray {
-        return javaClass.getResource("/mockpdf/mocktest.pdf").readBytes()
-    }
+    fun readMockfileFromResources(): ByteArray = javaClass.getResource("/mockpdf/mocktest.pdf").readBytes()
 }

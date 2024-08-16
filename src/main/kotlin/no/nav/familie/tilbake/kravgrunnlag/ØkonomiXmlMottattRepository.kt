@@ -13,7 +13,9 @@ import java.util.UUID
 
 @Repository
 @Transactional
-interface ØkonomiXmlMottattRepository : RepositoryInterface<ØkonomiXmlMottatt, UUID>, InsertUpdateRepository<ØkonomiXmlMottatt> {
+interface ØkonomiXmlMottattRepository :
+    RepositoryInterface<ØkonomiXmlMottatt, UUID>,
+    InsertUpdateRepository<ØkonomiXmlMottatt> {
     fun findByEksternKravgrunnlagIdAndVedtakId(
         eksternKravgrunnlagId: BigInteger,
         vedtakId: BigInteger,

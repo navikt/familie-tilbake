@@ -104,19 +104,18 @@ class Vilkårsvurderingssteg(
         )
     }
 
-    override fun getBehandlingssteg(): Behandlingssteg {
-        return VILKÅRSVURDERING
-    }
+    override fun getBehandlingssteg(): Behandlingssteg = VILKÅRSVURDERING
 
     @EventListener
     fun deaktiverEksisterendeVilkårsvurdering(endretKravgrunnlagEvent: EndretKravgrunnlagEvent) {
         vilkårsvurderingService.deaktiverEksisterendeVilkårsvurdering(endretKravgrunnlagEvent.behandlingId)
     }
 
-    private fun harAllePerioderForeldet(behandlingId: UUID): Boolean {
-        return foreldelseService.hentAktivVurdertForeldelse(behandlingId)
-            ?.foreldelsesperioder?.all { it.erForeldet() } ?: false
-    }
+    private fun harAllePerioderForeldet(behandlingId: UUID): Boolean =
+        foreldelseService
+            .hentAktivVurdertForeldelse(behandlingId)
+            ?.foreldelsesperioder
+            ?.all { it.erForeldet() } ?: false
 
     private fun lagHistorikkinnslag(
         behandlingId: UUID,

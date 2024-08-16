@@ -47,7 +47,5 @@ class IverksettVedtakssteg(
         utførSteg(behandlingId)
     }
 
-    override fun getBehandlingssteg(): Behandlingssteg {
-        return Behandlingssteg.IVERKSETT_VEDTAK
-    }
+    override fun getBehandlingssteg(): Behandlingssteg = Behandlingssteg.IVERKSETT_VEDTAK
 }

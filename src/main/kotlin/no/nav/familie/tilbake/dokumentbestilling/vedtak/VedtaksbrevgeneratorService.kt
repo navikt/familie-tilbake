@@ -224,7 +224,11 @@ class VedtaksbrevgeneratorService(
             lagHbTotalresultat(beregningsresultat.vedtaksresultat, beregningsresultat)
         val hbBehandling: HbBehandling = lagHbBehandling(vedtaksbrevgrunnlag)
         val varsletBeløp = vedtaksbrevgrunnlag.varsletBeløp
-        val varsletDato = vedtaksbrevgrunnlag.sisteVarsel?.sporbar?.opprettetTid?.toLocalDate()
+        val varsletDato =
+            vedtaksbrevgrunnlag.sisteVarsel
+                ?.sporbar
+                ?.opprettetTid
+                ?.toLocalDate()
         val ansvarligBeslutter =
             if (vedtaksbrevgrunnlag.aktivtSteg in
                 setOf(
@@ -271,43 +275,40 @@ class VedtaksbrevgeneratorService(
     private fun utledEffektForBruker(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
         beregningsresultat: Beregningsresultat,
-    ): VedtakHjemmel.EffektForBruker {
-        return if (vedtaksbrevgrunnlag.erRevurdering) {
+    ): VedtakHjemmel.EffektForBruker =
+        if (vedtaksbrevgrunnlag.erRevurdering) {
             hentEffektForBruker(vedtaksbrevgrunnlag, beregningsresultat.totaltTilbakekrevesMedRenter)
         } else {
             VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK
         }
-    }
 
     private fun lagHbTotalresultat(
         vedtakResultatType: Vedtaksresultat,
         beregningsresultat: Beregningsresultat,
-    ): HbTotalresultat {
-        return HbTotalresultat(
+    ): HbTotalresultat =
+        HbTotalresultat(
             vedtakResultatType,
             beregningsresultat.totaltTilbakekrevesUtenRenter,
             beregningsresultat.totaltTilbakekrevesMedRenter,
             beregningsresultat.totaltTilbakekrevesBeløpMedRenterUtenSkatt,
             beregningsresultat.totaltRentebeløp,
         )
-    }
 
-    private fun lagHbBehandling(vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag): HbBehandling {
-        return HbBehandling(
+    private fun lagHbBehandling(vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag): HbBehandling =
+        HbBehandling(
             erRevurdering = vedtaksbrevgrunnlag.erRevurdering,
             erRevurderingEtterKlage = vedtaksbrevgrunnlag.erRevurderingEtterKlage,
             erRevurderingEtterKlageNfp = vedtaksbrevgrunnlag.erRevurderingEtterKlageNfp,
             originalBehandlingsdatoFagsakvedtak = vedtaksbrevgrunnlag.finnOriginalBehandlingVedtaksdato(),
         )
-    }
 
     private fun lagHbVedtaksbrevPerioder(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
         beregningsresultat: Beregningsresultat,
         perioderFritekst: List<PeriodeMedTekstDto>,
         fakta: FaktaFeilutbetaling,
-    ): List<HbVedtaksbrevsperiode> {
-        return if (vedtaksbrevgrunnlag.utledVedtaksbrevstype() == Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT) {
+    ): List<HbVedtaksbrevsperiode> =
+        if (vedtaksbrevgrunnlag.utledVedtaksbrevstype() == Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT) {
             emptyList()
         } else {
             beregningsresultat.beregningsresultatsperioder.mapIndexed { index, it ->
@@ -321,7 +322,6 @@ class VedtaksbrevgeneratorService(
                 )
             }
         }
-    }
 
     private fun hentEffektForBruker(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
@@ -341,11 +341,10 @@ class VedtaksbrevgeneratorService(
         }
     }
 
-    private fun utledSøker(personinfo: Personinfo): HbPerson {
-        return HbPerson(
+    private fun utledSøker(personinfo: Personinfo): HbPerson =
+        HbPerson(
             navn = WordUtils.capitalizeFully(personinfo.navn, ' ', '-'),
         )
-    }
 
     private fun lagMetadataForVedtaksbrev(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
@@ -414,24 +413,23 @@ class VedtaksbrevgeneratorService(
         )
     }
 
-    private fun utledKravgrunnlag(resultatPeriode: Beregningsresultatsperiode): HbKravgrunnlag {
-        return HbKravgrunnlag(
+    private fun utledKravgrunnlag(resultatPeriode: Beregningsresultatsperiode): HbKravgrunnlag =
+        HbKravgrunnlag(
             resultatPeriode.riktigYtelsesbeløp,
             resultatPeriode.utbetaltYtelsesbeløp,
             resultatPeriode.feilutbetaltBeløp,
         )
-    }
 
     private fun utledFakta(
         periode: Månedsperiode,
         fakta: FaktaFeilutbetaling,
         fritekst: PeriodeMedTekstDto?,
-    ): HbFakta {
-        return fakta.perioder.first { it.periode.inneholder(periode) }
+    ): HbFakta =
+        fakta.perioder
+            .first { it.periode.inneholder(periode) }
             .let {
                 HbFakta(it.hendelsestype, it.hendelsesundertype, fritekst?.faktaAvsnitt)
             }
-    }
 
     private fun utledVurderinger(
         periode: Månedsperiode,
@@ -503,26 +501,24 @@ class VedtaksbrevgeneratorService(
     private fun finnForeldelsePeriode(
         foreldelse: VurdertForeldelse?,
         periode: Månedsperiode,
-    ): Foreldelsesperiode? {
-        return if (foreldelse == null) {
+    ): Foreldelsesperiode? =
+        if (foreldelse == null) {
             null
         } else {
             foreldelse.foreldelsesperioder
                 .firstOrNull { p -> p.periode.inneholder(periode) }
                 ?: error("Fant ikke VurdertForeldelse-periode som omslutter periode $periode")
         }
-    }
 
     private fun finnTittelVedtaksbrev(
         ytelsesnavn: String,
         tilbakekreves: Boolean,
-    ): String {
-        return if (tilbakekreves) {
+    ): String =
+        if (tilbakekreves) {
             TITTEL_VEDTAK_TILBAKEBETALING + ytelsesnavn
         } else {
             TITTEL_VEDTAK_INGEN_TILBAKEBETALING + ytelsesnavn
         }
-    }
 
     companion object {
         private const val TITTEL_VEDTAK_TILBAKEBETALING = "Vedtak tilbakebetaling "

@@ -128,7 +128,8 @@ object VedtaksbrevFritekstValidator {
         avsnittMedPerioder: List<PeriodeMedTekstDto>,
         validerPåkrevetFritekster: Boolean,
     ) {
-        faktaFeilutbetaling.perioder.filter { Hendelsesundertype.ANNET_FRITEKST == it.hendelsesundertype }
+        faktaFeilutbetaling.perioder
+            .filter { Hendelsesundertype.ANNET_FRITEKST == it.hendelsesundertype }
             .forEach { faktaFeilutbetalingsperiode ->
                 val perioder =
                     finnFritekstPerioder(
@@ -165,36 +166,36 @@ object VedtaksbrevFritekstValidator {
         vedtaksbrevFritekstPerioder: List<Vedtaksbrevsperiode>,
         validerPåkrevetFritekster: Boolean,
     ) {
-        vilkårsvurdering.perioder.filter {
-            it.aktsomhet?.vilkårsvurderingSærligeGrunner != null &&
-                it.aktsomhet.vilkårsvurderingSærligeGrunner
-                    .any { særligGrunn -> SærligGrunn.ANNET == særligGrunn.særligGrunn }
-        }.forEach {
-            val perioder =
-                finnFritekstPerioder(
-                    vedtaksbrevFritekstPerioder,
-                    it.periode,
-                    Friteksttype.SÆRLIGE_GRUNNER_ANNET,
-                )
+        vilkårsvurdering.perioder
+            .filter {
+                it.aktsomhet?.vilkårsvurderingSærligeGrunner != null &&
+                    it.aktsomhet.vilkårsvurderingSærligeGrunner
+                        .any { særligGrunn -> SærligGrunn.ANNET == særligGrunn.særligGrunn }
+            }.forEach {
+                val perioder =
+                    finnFritekstPerioder(
+                        vedtaksbrevFritekstPerioder,
+                        it.periode,
+                        Friteksttype.SÆRLIGE_GRUNNER_ANNET,
+                    )
 
-            if (perioder.isEmpty() && validerPåkrevetFritekster) {
-                throw Feil(
-                    message = "Mangler ANNET Særliggrunner fritekst for ${it.periode}",
-                    frontendFeilmelding = "Mangler ANNET Særliggrunner fritekst for ${it.periode} ",
-                    httpStatus = HttpStatus.BAD_REQUEST,
-                )
+                if (perioder.isEmpty() && validerPåkrevetFritekster) {
+                    throw Feil(
+                        message = "Mangler ANNET Særliggrunner fritekst for ${it.periode}",
+                        frontendFeilmelding = "Mangler ANNET Særliggrunner fritekst for ${it.periode} ",
+                        httpStatus = HttpStatus.BAD_REQUEST,
+                    )
+                }
             }
-        }
     }
 
     private fun finnFritekstPerioder(
         vedtaksbrevFritekstPerioder: List<Vedtaksbrevsperiode>,
         vurdertPeriode: Månedsperiode,
         friteksttype: Friteksttype,
-    ): List<Vedtaksbrevsperiode> {
-        return vedtaksbrevFritekstPerioder.filter {
+    ): List<Vedtaksbrevsperiode> =
+        vedtaksbrevFritekstPerioder.filter {
             friteksttype == it.fritekststype &&
                 vurdertPeriode.inneholder(it.periode)
         }
-    }
 }

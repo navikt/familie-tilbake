@@ -125,8 +125,8 @@ object BehandlingMapper {
         )
     }
 
-    private fun tilBehandlingstegsinfoDto(behandlingsstegsinfoListe: List<Behandlingsstegsinfo>): List<BehandlingsstegsinfoDto> {
-        return behandlingsstegsinfoListe.map {
+    private fun tilBehandlingstegsinfoDto(behandlingsstegsinfoListe: List<Behandlingsstegsinfo>): List<BehandlingsstegsinfoDto> =
+        behandlingsstegsinfoListe.map {
             BehandlingsstegsinfoDto(
                 behandlingssteg = it.behandlingssteg,
                 behandlingsstegstatus = it.behandlingsstegstatus,
@@ -134,14 +134,14 @@ object BehandlingMapper {
                 tidsfrist = it.tidsfrist,
             )
         }
-    }
 
     private fun tilDomeneVarsel(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Set<Varsel> {
         return opprettTilbakekrevingRequest.varsel?.let {
             val varselsperioder =
-                it.perioder.map { periode ->
-                    Varselsperiode(fom = periode.fom, tom = periode.tom)
-                }.toSet()
+                it.perioder
+                    .map { periode ->
+                        Varselsperiode(fom = periode.fom, tom = periode.tom)
+                    }.toSet()
             return setOf(
                 Varsel(
                     varseltekst = it.varseltekst,
@@ -187,8 +187,8 @@ object BehandlingMapper {
         )
     }
 
-    fun tilVedtakForFagsystem(behandlinger: List<Behandling>): List<no.nav.familie.kontrakter.felles.klage.FagsystemVedtak> {
-        return behandlinger
+    fun tilVedtakForFagsystem(behandlinger: List<Behandling>): List<no.nav.familie.kontrakter.felles.klage.FagsystemVedtak> =
+        behandlinger
             .filter { it.erAvsluttet }
             .filter { it.sisteResultat?.erBehandlingFastsatt() ?: false }
             .map {
@@ -204,17 +204,15 @@ object BehandlingMapper {
                     regelverk = it.regelverk,
                 )
             }
-    }
 
-    private fun mapType(behandling: Behandling): no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype {
-        return when (behandling.type) {
+    private fun mapType(behandling: Behandling): no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype =
+        when (behandling.type) {
             Behandlingstype.TILBAKEKREVING -> TILBAKEKREVING
             Behandlingstype.REVURDERING_TILBAKEKREVING -> REVURDERING_TILBAKEKREVING
         }
-    }
 
-    private fun mapStatus(behandling: Behandling): no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus {
-        return when (behandling.status) {
+    private fun mapStatus(behandling: Behandling): no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus =
+        when (behandling.status) {
             Behandlingsstatus.AVSLUTTET -> no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus.AVSLUTTET
             Behandlingsstatus.UTREDES -> no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus.UTREDES
             Behandlingsstatus.FATTER_VEDTAK -> no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus.FATTER_VEDTAK
@@ -222,7 +220,6 @@ object BehandlingMapper {
                 no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus.IVERKSETTER_VEDTAK
             Behandlingsstatus.OPPRETTET -> no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus.OPPRETTET
         }
-    }
 
     private fun mapÅrsak(behandling: Behandling): no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsårsakstype? {
         if (behandling.årsaker.isEmpty()) return null
@@ -237,8 +234,8 @@ object BehandlingMapper {
         }
     }
 
-    private fun mapResultat(resultat: Behandlingsresultat?): no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype? {
-        return when (resultat?.type) {
+    private fun mapResultat(resultat: Behandlingsresultat?): no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype? =
+        when (resultat?.type) {
             Behandlingsresultatstype.DELVIS_TILBAKEBETALING -> DELVIS_TILBAKEBETALING
             Behandlingsresultatstype.FULL_TILBAKEBETALING -> FULL_TILBAKEBETALING
             Behandlingsresultatstype.INGEN_TILBAKEBETALING -> INGEN_TILBAKEBETALING
@@ -253,7 +250,6 @@ object BehandlingMapper {
             null,
             -> null
         }
-    }
 
     fun tilDomeneBehandlingRevurdering(
         originalBehandling: Behandling,
@@ -293,9 +289,7 @@ object BehandlingMapper {
         )
     }
 
-    private fun kopiFagsystemskonsekvenser(originalKonsekvenser: Set<Fagsystemskonsekvens>): Set<Fagsystemskonsekvens> {
-        return originalKonsekvenser.map { Fagsystemskonsekvens(konsekvens = it.konsekvens) }.toSet()
-    }
+    private fun kopiFagsystemskonsekvenser(originalKonsekvenser: Set<Fagsystemskonsekvens>): Set<Fagsystemskonsekvens> = originalKonsekvenser.map { Fagsystemskonsekvens(konsekvens = it.konsekvens) }.toSet()
 
     private fun kopiVerge(originalBehandling: Behandling): Verge? {
         val verge = originalBehandling.aktivVerge

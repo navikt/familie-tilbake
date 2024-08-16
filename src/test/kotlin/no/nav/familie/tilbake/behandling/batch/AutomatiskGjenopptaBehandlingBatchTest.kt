@@ -46,10 +46,12 @@ internal class AutomatiskGjenopptaBehandlingBatchTest : OppslagSpringRunnerTest(
         )
         shouldNotThrow<RuntimeException> { automatiskGjenopptaBehandlingBatch.automatiskGjenopptaBehandling() }
 
-        taskService.findAll().any {
-            it.type == AutomatiskGjenopptaBehandlingTask.TYPE &&
-                it.payload == behandling.id.toString()
-        }.shouldBeTrue()
+        taskService
+            .findAll()
+            .any {
+                it.type == AutomatiskGjenopptaBehandlingTask.TYPE &&
+                    it.payload == behandling.id.toString()
+            }.shouldBeTrue()
     }
 
     @Test
@@ -67,9 +69,11 @@ internal class AutomatiskGjenopptaBehandlingBatchTest : OppslagSpringRunnerTest(
         )
         shouldNotThrow<RuntimeException> { automatiskGjenopptaBehandlingBatch.automatiskGjenopptaBehandling() }
 
-        taskService.findAll().any {
-            it.type == AutomatiskGjenopptaBehandlingTask.TYPE &&
-                it.payload == behandling.id.toString()
-        }.shouldBeTrue()
+        taskService
+            .findAll()
+            .any {
+                it.type == AutomatiskGjenopptaBehandlingTask.TYPE &&
+                    it.payload == behandling.id.toString()
+            }.shouldBeTrue()
     }
 }

@@ -120,7 +120,8 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         )
 
         val tilbakekrevingsperioder =
-            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            vedtakBeregningService
+                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
@@ -171,7 +172,8 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         )
 
         val tilbakekrevingsperioder =
-            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            vedtakBeregningService
+                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
@@ -220,7 +222,8 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         )
 
         val tilbakekrevingsperioder =
-            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            vedtakBeregningService
+                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
@@ -268,7 +271,8 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         )
 
         val tilbakekrevingsperioder =
-            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            vedtakBeregningService
+                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
@@ -318,7 +322,8 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         )
 
         val tilbakekrevingsperioder =
-            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            vedtakBeregningService
+                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
@@ -368,7 +373,8 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         )
 
         val tilbakekrevingsperioder =
-            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            vedtakBeregningService
+                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
@@ -440,7 +446,8 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         )
 
         val tilbakekrevingsperioder =
-            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            vedtakBeregningService
+                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
@@ -484,7 +491,8 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         lagAktsomhetVilkårsvurdering(listOf(perioder[1]), Aktsomhet.GROV_UAKTSOMHET)
 
         val tilbakekrevingsperioder =
-            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            vedtakBeregningService
+                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
@@ -557,7 +565,8 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         )
 
         val tilbakekrevingsperioder =
-            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            vedtakBeregningService
+                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 3
@@ -672,7 +681,8 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         )
 
         val tilbakekrevingsperioder =
-            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            vedtakBeregningService
+                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 7
@@ -865,7 +875,8 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         )
 
         val tilbakekrevingsperioder =
-            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            vedtakBeregningService
+                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 7
@@ -1007,7 +1018,8 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         )
 
         val tilbakekrevingsperioder =
-            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            vedtakBeregningService
+                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.size shouldBe 1
         shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder) }
@@ -1042,7 +1054,8 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         )
 
         val tilbakekrevingsperioder =
-            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            vedtakBeregningService
+                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.size shouldBe 3
         shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder) }
@@ -1086,7 +1099,8 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         )
 
         val tilbakekrevingsperioder =
-            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            vedtakBeregningService
+                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.size shouldBe 3
         shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder) }
@@ -1132,7 +1146,8 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, BehandlingsstegVilkårsvurderingDto(listOf(aktsomhetPeriode)))
 
         val tilbakekrevingsperioder =
-            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            vedtakBeregningService
+                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 7
@@ -1296,7 +1311,8 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, BehandlingsstegVilkårsvurderingDto(listOf(aktsomhetPeriode)))
 
         val tilbakekrevingsperioder =
-            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            vedtakBeregningService
+                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
@@ -1398,7 +1414,8 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         )
 
         val tilbakekrevingsperioder =
-            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            vedtakBeregningService
+                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 4
@@ -1509,7 +1526,8 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, BehandlingsstegVilkårsvurderingDto(listOf(aktsomhetPeriode)))
 
         val tilbakekrevingsperioder =
-            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            vedtakBeregningService
+                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 4
@@ -1652,8 +1670,8 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         perioder: List<Månedsperiode>,
         månedligSkattBeløp: BigDecimal,
         kravgrunnlagsbeløpene: List<Kravgrunnlagsbeløp>,
-    ): Kravgrunnlag431 {
-        return Kravgrunnlag431(
+    ): Kravgrunnlag431 =
+        Kravgrunnlag431(
             behandlingId = behandling.id,
             vedtakId = BigInteger.ZERO,
             kravstatuskode = Kravstatuskode.NYTT,
@@ -1672,35 +1690,34 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
             saksbehandlerId = "testverdi",
             perioder = lagKravgrunnlagsperiode(perioder, månedligSkattBeløp, kravgrunnlagsbeløpene),
         )
-    }
 
     private fun lagKravgrunnlagsperiode(
         perioder: List<Månedsperiode>,
         månedligSkattBeløp: BigDecimal,
         kravgrunnlagsbeløpene: List<Kravgrunnlagsbeløp>,
-    ): Set<Kravgrunnlagsperiode432> {
-        return perioder.map {
-            Kravgrunnlagsperiode432(
-                periode = it,
-                månedligSkattebeløp = månedligSkattBeløp,
-                beløp = lagKravgrunnlagsbeløp(kravgrunnlagsbeløpene),
-            )
-        }.toSet()
-    }
+    ): Set<Kravgrunnlagsperiode432> =
+        perioder
+            .map {
+                Kravgrunnlagsperiode432(
+                    periode = it,
+                    månedligSkattebeløp = månedligSkattBeløp,
+                    beløp = lagKravgrunnlagsbeløp(kravgrunnlagsbeløpene),
+                )
+            }.toSet()
 
-    private fun lagKravgrunnlagsbeløp(kravgrunnlagsbeløpene: List<Kravgrunnlagsbeløp>): Set<Kravgrunnlagsbeløp433> {
-        return kravgrunnlagsbeløpene.map {
-            Kravgrunnlagsbeløp433(
-                klassekode = Klassekode.BATR,
-                klassetype = it.klassetype,
-                opprinneligUtbetalingsbeløp = it.opprinneligUtbetalingsbeløp,
-                nyttBeløp = it.nyttBeløp,
-                tilbakekrevesBeløp = it.tilbakekrevesBeløp,
-                uinnkrevdBeløp = it.uinnkrevdBeløp,
-                skatteprosent = it.skatteprosent,
-            )
-        }.toSet()
-    }
+    private fun lagKravgrunnlagsbeløp(kravgrunnlagsbeløpene: List<Kravgrunnlagsbeløp>): Set<Kravgrunnlagsbeløp433> =
+        kravgrunnlagsbeløpene
+            .map {
+                Kravgrunnlagsbeløp433(
+                    klassekode = Klassekode.BATR,
+                    klassetype = it.klassetype,
+                    opprinneligUtbetalingsbeløp = it.opprinneligUtbetalingsbeløp,
+                    nyttBeløp = it.nyttBeløp,
+                    tilbakekrevesBeløp = it.tilbakekrevesBeløp,
+                    uinnkrevdBeløp = it.uinnkrevdBeløp,
+                    skatteprosent = it.skatteprosent,
+                )
+            }.toSet()
 
     private fun assertBeløp(
         beløp: Tilbakekrevingsbeløp,

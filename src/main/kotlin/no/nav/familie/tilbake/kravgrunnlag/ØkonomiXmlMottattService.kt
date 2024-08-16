@@ -23,8 +23,8 @@ class ØkonomiXmlMottattService(
         kravgrunnlagXml: String,
         kravgrunnlag: DetaljertKravgrunnlagDto,
         ytelsestype: Ytelsestype,
-    ): ØkonomiXmlMottatt {
-        return mottattXmlRepository.insert(
+    ): ØkonomiXmlMottatt =
+        mottattXmlRepository.insert(
             ØkonomiXmlMottatt(
                 melding = kravgrunnlagXml,
                 kravstatuskode = Kravstatuskode.fraKode(kravgrunnlag.kodeStatusKrav),
@@ -36,14 +36,11 @@ class ØkonomiXmlMottattService(
                 kontrollfelt = kravgrunnlag.kontrollfelt,
             ),
         )
-    }
 
     fun hentMottattKravgrunnlag(
         eksternKravgrunnlagId: BigInteger,
         vedtakId: BigInteger,
-    ): List<ØkonomiXmlMottatt> {
-        return mottattXmlRepository.findByEksternKravgrunnlagIdAndVedtakId(eksternKravgrunnlagId, vedtakId)
-    }
+    ): List<ØkonomiXmlMottatt> = mottattXmlRepository.findByEksternKravgrunnlagIdAndVedtakId(eksternKravgrunnlagId, vedtakId)
 
     fun arkiverEksisterendeGrunnlag(kravgrunnlag: DetaljertKravgrunnlagDto) {
         val eksisterendeKravgrunnlag: List<ØkonomiXmlMottatt> =
@@ -90,23 +87,18 @@ class ØkonomiXmlMottattService(
         overgangsstønadBestemtDato: LocalDate,
         skolePengerBestemtDato: LocalDate,
         kontantStøtteBestemtDato: LocalDate,
-    ): List<ØkonomiXmlMottatt> {
-        return mottattXmlRepository.hentFrakobletKravgrunnlag(
+    ): List<ØkonomiXmlMottatt> =
+        mottattXmlRepository.hentFrakobletKravgrunnlag(
             barnetrygdBestemtDato = barnetrygdBestemtDato,
             barnetilsynBestemtDato = barnetilsynBestemtDato,
             overgangsstonadbestemtdato = overgangsstønadBestemtDato,
             skolePengerBestemtDato = skolePengerBestemtDato,
             kontantstottebestemtdato = kontantStøtteBestemtDato,
         )
-    }
 
-    fun hentMottattKravgrunnlag(mottattXmlId: UUID): ØkonomiXmlMottatt {
-        return mottattXmlRepository.findByIdOrThrow(mottattXmlId)
-    }
+    fun hentMottattKravgrunnlag(mottattXmlId: UUID): ØkonomiXmlMottatt = mottattXmlRepository.findByIdOrThrow(mottattXmlId)
 
-    fun hentMottattKravgrunnlagNullable(mottattXmlId: UUID): ØkonomiXmlMottatt? {
-        return mottattXmlRepository.findByIdOrNull(mottattXmlId)
-    }
+    fun hentMottattKravgrunnlagNullable(mottattXmlId: UUID): ØkonomiXmlMottatt? = mottattXmlRepository.findByIdOrNull(mottattXmlId)
 
     fun oppdaterMottattXml(mottattXml: ØkonomiXmlMottatt) {
         mottattXmlRepository.update(mottattXml)
@@ -135,7 +127,5 @@ class ØkonomiXmlMottattService(
     fun hentArkiverteMottattXml(
         eksternFagsakId: String,
         ytelsestype: Ytelsestype,
-    ): List<ØkonomiXmlMottattArkiv> {
-        return mottattXmlArkivRepository.findByEksternFagsakIdAndYtelsestype(eksternFagsakId, ytelsestype)
-    }
+    ): List<ØkonomiXmlMottattArkiv> = mottattXmlArkivRepository.findByEksternFagsakIdAndYtelsestype(eksternFagsakId, ytelsestype)
 }

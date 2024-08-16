@@ -5,7 +5,9 @@ import org.springframework.stereotype.Component
 import java.util.UUID
 
 @Component
-class EndretPersonIdentEventPublisher(val applicationEventPublisher: ApplicationEventPublisher) {
+class EndretPersonIdentEventPublisher(
+    val applicationEventPublisher: ApplicationEventPublisher,
+) {
     fun fireEvent(
         nyIdent: String,
         fagsakId: UUID,

@@ -33,14 +33,13 @@ data class ManuellBrevmottaker(
 ) {
     override fun toString(): String = "${javaClass.simpleName}(id=$id,behandlingId=$behandlingId)"
 
-    fun hasManuellAdresse(): Boolean {
-        return !(
+    fun hasManuellAdresse(): Boolean =
+        !(
             adresselinje1.isNullOrBlank() ||
                 postnummer.isNullOrBlank() ||
                 poststed.isNullOrBlank() ||
                 landkode.isNullOrBlank()
         )
-    }
 
     val erTilleggsmottaker get() = type == MottakerType.VERGE || type == MottakerType.FULLMEKTIG
 }

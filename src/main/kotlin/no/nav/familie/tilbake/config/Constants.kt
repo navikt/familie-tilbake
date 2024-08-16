@@ -23,7 +23,8 @@ object Constants {
     fun brukersSvarfrist(): LocalDate = LocalDate.now().plus(brukersSvarfrist)
 
     fun saksbehandlersTidsfrist(): LocalDate =
-        LocalDate.now()
+        LocalDate
+            .now()
             .plusWeeks(Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING.defaultVenteTidIUker)
 
     const val KRAVGRUNNLAG_XML_ROOT_ELEMENT: String = "urn:detaljertKravgrunnlagMelding"
@@ -33,7 +34,10 @@ object Constants {
     val rettsgebyr = rettsgebyrForDato.filter { it.gyldigFra <= LocalDate.now() }.maxByOrNull { it.gyldigFra }!!.beløp
     val FIRE_X_RETTSGEBYR = rettsgebyr * 4
 
-    private class Datobeløp(val gyldigFra: LocalDate, val beløp: Long)
+    private class Datobeløp(
+        val gyldigFra: LocalDate,
+        val beløp: Long,
+    )
 
     const val BRUKER_ID_VEDTAKSLØSNINGEN = "VL"
 
@@ -42,13 +46,16 @@ object Constants {
             Ytelsestype.BARNETRYGD to BigDecimal.valueOf(500),
             Ytelsestype.BARNETILSYN to BigDecimal.valueOf(rettsgebyr).multiply(BigDecimal(0.5)),
             Ytelsestype.OVERGANGSSTØNAD to
-                BigDecimal.valueOf(rettsgebyr)
+                BigDecimal
+                    .valueOf(rettsgebyr)
                     .multiply(BigDecimal(0.5)),
             Ytelsestype.SKOLEPENGER to
-                BigDecimal.valueOf(rettsgebyr)
+                BigDecimal
+                    .valueOf(rettsgebyr)
                     .multiply(BigDecimal(0.5)),
             Ytelsestype.KONTANTSTØTTE to
-                BigDecimal.valueOf(rettsgebyr)
+                BigDecimal
+                    .valueOf(rettsgebyr)
                     .multiply(BigDecimal(0.5)),
         )
 

@@ -159,7 +159,8 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
             Aktør.VEDTAKSLØSNING,
             Brevtype.VEDTAK,
         )
-        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET))
+        taskService
+            .finnTasksMedStatus(listOf(Status.UBEHANDLET))
             .shouldHaveSingleElement {
                 it.type == LagHistorikkinnslagTask.TYPE &&
                     TilbakekrevingHistorikkinnslagstype.VEDTAKSBREV_SENDT.tekst == it.metadata["beskrivelse"]
@@ -179,7 +180,8 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
             Aktør.VEDTAKSLØSNING,
             Brevtype.VEDTAK,
         )
-        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET))
+        taskService
+            .finnTasksMedStatus(listOf(Status.UBEHANDLET))
             .shouldHaveSingleElement {
                 it.type == LagHistorikkinnslagTask.TYPE &&
                     TilbakekrevingHistorikkinnslagstype.VEDTAKSBREV_SENDT.tekst == it.metadata["beskrivelse"]
@@ -192,7 +194,8 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
         lagreBrevsporingTask.onCompletion(opprettTask(behandlingId, Brevtype.VEDTAK, brevmottager = MANUELL_TILLEGGSMOTTAKER))
         lagreBrevsporingTask.onCompletion(opprettTask(behandlingId, Brevtype.VEDTAK, brevmottager = VERGE))
 
-        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET))
+        taskService
+            .finnTasksMedStatus(listOf(Status.UBEHANDLET))
             .single { it.type == AvsluttBehandlingTask.TYPE }
             .also { it.metadata["mottager"] shouldBe Brevmottager.BRUKER.name }
     }
@@ -202,8 +205,8 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
         brevtype: Brevtype,
         ansvarligSaksbehandler: String? = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
         brevmottager: Brevmottager = Brevmottager.BRUKER,
-    ): Task {
-        return Task(
+    ): Task =
+        Task(
             type = LagreBrevsporingTask.TYPE,
             payload = behandlingId.toString(),
             properties =
@@ -215,7 +218,6 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
                     this["ansvarligSaksbehandler"] = ansvarligSaksbehandler
                 },
         )
-    }
 
     private fun assertBrevsporing(brevtype: Brevtype) {
         val brevsporing =

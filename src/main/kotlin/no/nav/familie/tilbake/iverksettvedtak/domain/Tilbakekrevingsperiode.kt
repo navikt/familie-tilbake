@@ -24,7 +24,9 @@ data class Tilbakekrevingsbeløp(
     val kodeResultat: KodeResultat,
 )
 
-enum class KodeResultat(val kode: String) {
+enum class KodeResultat(
+    val kode: String,
+) {
     FORELDET("FORELDET"),
     FEILREGISTRERT("FEILREGISTRERT"),
     INGEN_TILBAKEKREVING("INGEN_TILBAKEKREV"),

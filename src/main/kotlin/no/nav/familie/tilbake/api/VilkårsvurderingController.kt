@@ -21,7 +21,9 @@ import java.util.UUID
 @RequestMapping("/api/behandling/")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class VilkårsvurderingController(val vilkårsvurderingService: VilkårsvurderingService) {
+class VilkårsvurderingController(
+    val vilkårsvurderingService: VilkårsvurderingService,
+) {
     @Operation(summary = "Hent vilkårsvurdering")
     @GetMapping(
         path = ["{behandlingId}/vilkarsvurdering/v1"],
@@ -35,7 +37,5 @@ class VilkårsvurderingController(val vilkårsvurderingService: Vilkårsvurderin
     )
     fun hentVurdertVilkårsvurdering(
         @PathVariable("behandlingId") behandlingId: UUID,
-    ): Ressurs<VurdertVilkårsvurderingDto> {
-        return Ressurs.success(vilkårsvurderingService.hentVilkårsvurdering(behandlingId))
-    }
+    ): Ressurs<VurdertVilkårsvurderingDto> = Ressurs.success(vilkårsvurderingService.hentVilkårsvurdering(behandlingId))
 }

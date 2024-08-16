@@ -48,15 +48,16 @@ object ForeldelseMapper {
         vurdertForeldetPerioder: List<ForeldelsesperiodeDto>,
     ): VurdertForeldelse {
         val foreldelsesperioder: Set<Foreldelsesperiode> =
-            vurdertForeldetPerioder.map {
-                Foreldelsesperiode(
-                    periode = Månedsperiode(it.periode.fom, it.periode.tom),
-                    foreldelsesvurderingstype = it.foreldelsesvurderingstype,
-                    begrunnelse = it.begrunnelse,
-                    foreldelsesfrist = it.foreldelsesfrist,
-                    oppdagelsesdato = it.oppdagelsesdato,
-                )
-            }.toSet()
+            vurdertForeldetPerioder
+                .map {
+                    Foreldelsesperiode(
+                        periode = Månedsperiode(it.periode.fom, it.periode.tom),
+                        foreldelsesvurderingstype = it.foreldelsesvurderingstype,
+                        begrunnelse = it.begrunnelse,
+                        foreldelsesfrist = it.foreldelsesfrist,
+                        oppdagelsesdato = it.oppdagelsesdato,
+                    )
+                }.toSet()
         return VurdertForeldelse(behandlingId = behandlingId, foreldelsesperioder = foreldelsesperioder)
     }
 }

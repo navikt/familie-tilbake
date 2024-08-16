@@ -629,8 +629,8 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         klassetype: Klassetype,
         nyttBeløp: BigDecimal,
         opprinneligUtbetalingsbeløp: BigDecimal,
-    ): Kravgrunnlagsbeløp433 {
-        return Kravgrunnlagsbeløp433(
+    ): Kravgrunnlagsbeløp433 =
+        Kravgrunnlagsbeløp433(
             id = UUID.randomUUID(),
             klassetype = klassetype,
             klassekode = Klassekode.BATR,
@@ -643,7 +643,6 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
             årsakskode = "testverdi",
             skyldkode = "testverdi",
         )
-    }
 
     private fun assertAktiviteter(aktiviteter: List<AktivitetDto>) {
         aktiviteter.shouldNotBeEmpty()
@@ -681,8 +680,8 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
     private fun lagVilkårsvurderingMedGodTro(
         perioder: List<Datoperiode>,
         beløpTilbakekreves: BigDecimal? = null,
-    ): BehandlingsstegVilkårsvurderingDto {
-        return BehandlingsstegVilkårsvurderingDto(
+    ): BehandlingsstegVilkårsvurderingDto =
+        BehandlingsstegVilkårsvurderingDto(
             vilkårsvurderingsperioder =
                 perioder.map {
                     VilkårsvurderingsperiodeDto(
@@ -698,7 +697,6 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                     )
                 },
         )
-    }
 
     private fun lagForeldese(vararg foreldelsesvurderingstyper: Foreldelsesvurderingstype) {
         val foreldelsesperioder =

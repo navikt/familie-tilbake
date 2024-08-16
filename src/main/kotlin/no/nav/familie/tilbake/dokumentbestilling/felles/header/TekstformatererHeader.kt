@@ -8,8 +8,8 @@ object TekstformatererHeader {
     fun lagHeader(
         brevmetadata: Brevmetadata,
         overskrift: String,
-    ): String {
-        return lagHeader(
+    ): String =
+        lagHeader(
             HeaderData(
                 språkkode = brevmetadata.språkkode,
                 person = Person(brevmetadata.sakspartsnavn, brevmetadata.sakspartId),
@@ -17,9 +17,6 @@ object TekstformatererHeader {
                 institusjon = if (brevmetadata.institusjon != null) Institusjon(brevmetadata.institusjon.organisasjonsnummer, sanitize(brevmetadata.institusjon.navn)) else null,
             ),
         )
-    }
 
-    private fun lagHeader(data: HeaderData): String {
-        return FellesTekstformaterer.lagBrevtekst(data, "header")
-    }
+    private fun lagHeader(data: HeaderData): String = FellesTekstformaterer.lagBrevtekst(data, "header")
 }

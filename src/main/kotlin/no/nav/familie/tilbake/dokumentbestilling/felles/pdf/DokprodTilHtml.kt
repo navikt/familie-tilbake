@@ -94,10 +94,10 @@ object DokprodTilHtml {
         return s.replace(utf8nonBreakingSpace.toRegex(), htmlNonBreakingSpace)
     }
 
-    private fun ekstraLinjeskiftFørHilsing(s: String): String {
-        return s.replace("<p>Med vennlig hilsen", "<p class=\"hilsen\">Med vennlig hilsen")
+    private fun ekstraLinjeskiftFørHilsing(s: String): String =
+        s
+            .replace("<p>Med vennlig hilsen", "<p class=\"hilsen\">Med vennlig hilsen")
             .replace("<p>Med venleg helsing", "<p class=\"hilsen\">Med venleg helsing")
-    }
 }
 
 fun sanitize(name: String): String {

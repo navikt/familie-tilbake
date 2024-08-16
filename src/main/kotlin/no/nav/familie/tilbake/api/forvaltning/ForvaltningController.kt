@@ -162,9 +162,7 @@ class ForvaltningController(
     fun hentForvaltningsinfo(
         @PathVariable ytelsestype: Ytelsestype,
         @PathVariable eksternFagsakId: String,
-    ): Ressurs<List<Behandlingsinfo>> {
-        return Ressurs.success(forvaltningService.hentForvaltningsinfo(ytelsestype, eksternFagsakId))
-    }
+    ): Ressurs<List<Behandlingsinfo>> = Ressurs.success(forvaltningService.hentForvaltningsinfo(ytelsestype, eksternFagsakId))
 
     @Operation(summary = "Hent ikke arkiverte kravgrunnlag")
     @GetMapping(
@@ -180,9 +178,7 @@ class ForvaltningController(
     fun hentKravgrunnlagsinfo(
         @PathVariable ytelsestype: Ytelsestype,
         @PathVariable eksternFagsakId: String,
-    ): Ressurs<List<Kravgrunnlagsinfo>> {
-        return Ressurs.success(forvaltningService.hentIkkeArkiverteKravgrunnlag(ytelsestype, eksternFagsakId))
-    }
+    ): Ressurs<List<Kravgrunnlagsinfo>> = Ressurs.success(forvaltningService.hentIkkeArkiverteKravgrunnlag(ytelsestype, eksternFagsakId))
 
     @Operation(summary = "Oppretter FinnGammelBehandlingUtenOppgaveTask som logger ut gamle behandlinger uten åpen oppgave")
     @PostMapping(
@@ -242,7 +238,9 @@ class ForvaltningController(
         path = ["/finnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave/{fagsystem}"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    fun finnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave(@PathVariable fagsystem: Fagsystem) {
+    fun finnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave(
+        @PathVariable fagsystem: Fagsystem,
+    ) {
         oppgaveTaskService.finnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave(fagsystem)
     }
 
@@ -251,12 +249,13 @@ class ForvaltningController(
         path = ["/ferdigstillGodkjenneVedtakOppgaveOgOpprettBehandleSakOppgave"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    fun ferdigstillGodkjenneVedtakOppgaveOgOpprettBehandleSakOppgave(@RequestBody behandlingIder: List<UUID>) {
+    fun ferdigstillGodkjenneVedtakOppgaveOgOpprettBehandleSakOppgave(
+        @RequestBody behandlingIder: List<UUID>,
+    ) {
         behandlingIder.forEach {
             oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgave(it, "--- Opprettet av familie-tilbake ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n", LocalDate.now())
         }
     }
-
 }
 
 data class Behandlingsinfo(

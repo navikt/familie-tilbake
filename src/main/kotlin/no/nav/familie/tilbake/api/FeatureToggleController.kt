@@ -21,7 +21,5 @@ class FeatureToggleController(
         )
 
     @GetMapping
-    fun featureToggles(): Ressurs<Map<String, Boolean>> {
-        return Ressurs.success(funksjonsbrytere.associateWith { featureToggleService.isEnabled(it) })
-    }
+    fun featureToggles(): Ressurs<Map<String, Boolean>> = Ressurs.success(funksjonsbrytere.associateWith { featureToggleService.isEnabled(it) })
 }

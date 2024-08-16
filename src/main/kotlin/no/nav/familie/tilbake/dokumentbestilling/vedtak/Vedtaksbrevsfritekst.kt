@@ -77,27 +77,22 @@ object Vedtaksbrevsfritekst {
         }
     }
 
-    private fun utledFritekstTypeFakta(underType: Hendelsesundertype): FritekstType {
-        return if (underType in VedtaksbrevFritekstKonfigurasjon.UNDERTYPER_MED_PÅKREVD_FRITEKST) {
+    private fun utledFritekstTypeFakta(underType: Hendelsesundertype): FritekstType =
+        if (underType in VedtaksbrevFritekstKonfigurasjon.UNDERTYPER_MED_PÅKREVD_FRITEKST) {
             FritekstType.PÅKREVET
         } else {
             FritekstType.VALGFRI
         }
-    }
 
     @JvmOverloads fun markerValgfriFritekst(
         fritekst: String?,
         underavsnittstype: Underavsnittstype? = null,
-    ): String {
-        return markerFritekst(FritekstType.VALGFRI, fritekst, underavsnittstype)
-    }
+    ): String = markerFritekst(FritekstType.VALGFRI, fritekst, underavsnittstype)
 
     fun markerPåkrevetFritekst(
         fritekst: String?,
         underavsnittstype: Underavsnittstype?,
-    ): String {
-        return markerFritekst(FritekstType.PÅKREVET, fritekst, underavsnittstype)
-    }
+    ): String = markerFritekst(FritekstType.PÅKREVET, fritekst, underavsnittstype)
 
     private fun markerFritekst(
         fritekstType: FritekstType,
@@ -114,25 +109,18 @@ object Vedtaksbrevsfritekst {
         }
     }
 
-    fun erFritekstStart(tekst: String): Boolean {
-        return tekst.startsWith(FRITEKST_MARKERING_START) || tekst.startsWith(FRITEKST_PÅKREVET_MARKERING_START)
-    }
+    fun erFritekstStart(tekst: String): Boolean = tekst.startsWith(FRITEKST_MARKERING_START) || tekst.startsWith(FRITEKST_PÅKREVET_MARKERING_START)
 
-    fun erFritekstPåkrevetStart(tekst: String): Boolean {
-        return tekst.startsWith(FRITEKST_PÅKREVET_MARKERING_START)
-    }
+    fun erFritekstPåkrevetStart(tekst: String): Boolean = tekst.startsWith(FRITEKST_PÅKREVET_MARKERING_START)
 
-    fun fjernFritekstmarkering(tekst: String): String {
-        return when {
+    fun fjernFritekstmarkering(tekst: String): String =
+        when {
             tekst.startsWith(FRITEKST_MARKERING_START) -> tekst.substring(FRITEKST_MARKERING_START.length)
             tekst.startsWith(FRITEKST_PÅKREVET_MARKERING_START) -> tekst.substring(FRITEKST_PÅKREVET_MARKERING_START.length)
             else -> throw IllegalArgumentException("Utvikler-feil: denne metoden skal bare brukes på fritekstmarkering-start")
         }
-    }
 
-    fun erFritekstSlutt(tekst: String): Boolean {
-        return FRITEKST_MARKERING_SLUTT == tekst
-    }
+    fun erFritekstSlutt(tekst: String): Boolean = FRITEKST_MARKERING_SLUTT == tekst
 
     enum class FritekstType {
         VALGFRI,

@@ -673,9 +673,12 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val additionalParameters = mapOf("NAVident" to behandlerNavn, "groups" to gruppeNavn)
         val calendar = Calendar.getInstance()
         calendar.add(Calendar.SECOND, 60)
-        return Jwts.builder().setExpiration(calendar.time)
+        return Jwts
+            .builder()
+            .setExpiration(calendar.time)
             .setIssuer("azuread")
-            .addClaims(additionalParameters).compact()
+            .addClaims(additionalParameters)
+            .compact()
     }
 
     private fun opprettRequestContext(
@@ -688,7 +691,8 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
 
         RequestContextHolder.setRequestAttributes(ServletRequestAttributes(mockHttpServletRequest))
         val tokenValidationContext = TokenValidationContext(mapOf("azuread" to JwtToken(token)))
-        RequestContextHolder.currentRequestAttributes()
+        RequestContextHolder
+            .currentRequestAttributes()
             .setAttribute(SpringTokenValidationContextHolder::class.java.name, tokenValidationContext, 0)
     }
 }

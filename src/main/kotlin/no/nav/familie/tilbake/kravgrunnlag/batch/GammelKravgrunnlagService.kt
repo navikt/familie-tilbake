@@ -57,13 +57,9 @@ class GammelKravgrunnlagService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun hentFrakobletKravgrunnlag(mottattXmlId: UUID): ØkonomiXmlMottatt {
-        return økonomiXmlMottattService.hentMottattKravgrunnlag(mottattXmlId)
-    }
+    fun hentFrakobletKravgrunnlag(mottattXmlId: UUID): ØkonomiXmlMottatt = økonomiXmlMottattService.hentMottattKravgrunnlag(mottattXmlId)
 
-    fun hentFrakobletKravgrunnlagNullable(mottattXmlId: UUID): ØkonomiXmlMottatt? {
-        return økonomiXmlMottattService.hentMottattKravgrunnlagNullable(mottattXmlId)
-    }
+    fun hentFrakobletKravgrunnlagNullable(mottattXmlId: UUID): ØkonomiXmlMottatt? = økonomiXmlMottattService.hentMottattKravgrunnlagNullable(mottattXmlId)
 
     fun sjekkOmDetFinnesEnAktivBehandling(mottattXml: ØkonomiXmlMottatt) {
         val eksternFagsakId = mottattXml.eksternFagsakId
@@ -183,8 +179,8 @@ class GammelKravgrunnlagService(
         økonomiXmlMottattService.slettMottattXml(mottattXmlId)
     }
 
-    private fun hentKravgrunnlagFraØkonomi(mottattXml: ØkonomiXmlMottatt): Pair<DetaljertKravgrunnlagDto, Boolean> {
-        return try {
+    private fun hentKravgrunnlagFraØkonomi(mottattXml: ØkonomiXmlMottatt): Pair<DetaljertKravgrunnlagDto, Boolean> =
+        try {
             hentKravgrunnlagService.hentKravgrunnlagFraØkonomi(
                 mottattXml.eksternKravgrunnlagId!!,
                 KodeAksjon.HENT_KORRIGERT_KRAVGRUNNLAG,
@@ -193,7 +189,6 @@ class GammelKravgrunnlagService(
             logger.warn(e.melding)
             KravgrunnlagUtil.unmarshalKravgrunnlag(mottattXml.melding) to true
         }
-    }
 
     fun opprettBehandlingFraKravgrunnlag(
         hentetKravgrunnlag: DetaljertKravgrunnlagDto,
@@ -203,7 +198,8 @@ class GammelKravgrunnlagService(
             lagOpprettBehandlingsrequest(
                 eksternFagsakId = hentetKravgrunnlag.fagsystemId,
                 ytelsestype =
-                    Fagområdekode.fraKode(hentetKravgrunnlag.kodeFagomraade)
+                    Fagområdekode
+                        .fraKode(hentetKravgrunnlag.kodeFagomraade)
                         .ytelsestype,
                 eksternId = hentetKravgrunnlag.referanse,
                 fagsystemsbehandlingData = fagsystemsbehandlingData,
@@ -216,8 +212,8 @@ class GammelKravgrunnlagService(
         ytelsestype: Ytelsestype,
         eksternId: String,
         fagsystemsbehandlingData: HentFagsystemsbehandling,
-    ): OpprettTilbakekrevingRequest {
-        return OpprettTilbakekrevingRequest(
+    ): OpprettTilbakekrevingRequest =
+        OpprettTilbakekrevingRequest(
             fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype),
             ytelsestype = ytelsestype,
             eksternFagsakId = eksternFagsakId,
@@ -235,7 +231,6 @@ class GammelKravgrunnlagService(
             varsel = null,
             begrunnelseForTilbakekreving = null,
         )
-    }
 
     private fun sperKravgrunnlag(behandlingId: UUID) {
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
@@ -249,7 +244,8 @@ class GammelKravgrunnlagService(
                     behandlingsstegstatus = Behandlingsstegstatus.VENTER,
                     venteårsak = venteårsak,
                     tidsfrist =
-                        LocalDate.now()
+                        LocalDate
+                            .now()
                             .plusWeeks(venteårsak.defaultVenteTidIUker),
                 ),
             )
@@ -262,14 +258,13 @@ class GammelKravgrunnlagService(
         )
     }
 
-    private fun setFaktainfo(faktainfo: Faktainfo): Faktainfo {
-        return Faktainfo(
+    private fun setFaktainfo(faktainfo: Faktainfo): Faktainfo =
+        Faktainfo(
             revurderingsresultat = faktainfo.revurderingsresultat,
             revurderingsårsak = faktainfo.revurderingsårsak,
             tilbakekrevingsvalg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
             konsekvensForYtelser = faktainfo.konsekvensForYtelser,
         )
-    }
 
     private fun sjekkDiff(
         arkivertXml: ØkonomiXmlMottattArkiv,

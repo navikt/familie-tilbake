@@ -45,8 +45,7 @@ class SendHenleggelsesbrevTask(
                 type = TYPE,
                 payload = objectMapper.writeValueAsString(SendBrevTaskdata(behandlingId, fritekst)),
                 properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) },
-            )
-                .medTriggerTid(LocalDateTime.now().plusSeconds(15))
+            ).medTriggerTid(LocalDateTime.now().plusSeconds(15))
 
         const val TYPE = "distribuerHenleggelsesbrev"
     }

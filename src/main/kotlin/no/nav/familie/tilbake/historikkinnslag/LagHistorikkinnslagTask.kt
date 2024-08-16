@@ -16,7 +16,9 @@ import java.util.UUID
     beskrivelse = "Lag historikkinnslag og sender det til kafka",
     triggerTidVedFeilISekunder = 60 * 5L,
 )
-class LagHistorikkinnslagTask(private val historikkService: HistorikkService) : AsyncTaskStep {
+class LagHistorikkinnslagTask(
+    private val historikkService: HistorikkService,
+) : AsyncTaskStep {
     private val log = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {

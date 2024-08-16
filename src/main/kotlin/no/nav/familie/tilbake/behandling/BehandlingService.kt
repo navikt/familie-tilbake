@@ -97,7 +97,8 @@ class BehandlingService(
 
         if (opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg ===
             Tilbakekrevingsvalg
-                .OPPRETT_TILBAKEKREVING_MED_VARSEL && !behandling.manueltOpprettet
+                .OPPRETT_TILBAKEKREVING_MED_VARSEL &&
+            !behandling.manueltOpprettet
         ) {
             val sendVarselbrev =
                 Task(
@@ -571,13 +572,15 @@ class BehandlingService(
         if (Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT == behandlingsresultatstype) {
             return true
         } else if (TILBAKEKREVING == behandling.type) {
-            return !behandling.erAvsluttet && (
-                !behandling.manueltOpprettet &&
-                    behandling.opprettetTidspunkt <
-                    LocalDate.now()
-                        .atStartOfDay()
-                        .minusDays(opprettelseDagerBegrensning)
-            ) &&
+            return !behandling.erAvsluttet &&
+                (
+                    !behandling.manueltOpprettet &&
+                        behandling.opprettetTidspunkt <
+                        LocalDate
+                            .now()
+                            .atStartOfDay()
+                            .minusDays(opprettelseDagerBegrensning)
+                ) &&
                 !kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)
         }
         return true
@@ -586,12 +589,11 @@ class BehandlingService(
     private fun kanSendeHenleggelsesbrev(
         behandling: Behandling,
         behandlingsresultatstype: Behandlingsresultatstype,
-    ): Boolean {
-        return when (behandling.type) {
+    ): Boolean =
+        when (behandling.type) {
             TILBAKEKREVING -> brevsporingService.erVarselSendt(behandling.id)
             REVURDERING_TILBAKEKREVING -> Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_MED_BREV == behandlingsresultatstype
         }
-    }
 
     private fun sjekkOmBehandlingAlleredeErAvsluttet(behandling: Behandling) {
         if (behandling.erSaksbehandlingAvsluttet) {
@@ -623,12 +625,11 @@ class BehandlingService(
         }
     }
 
-    private fun kanRevurderingOpprettes(behandling: Behandling): Boolean {
-        return behandling.erAvsluttet &&
+    private fun kanRevurderingOpprettes(behandling: Behandling): Boolean =
+        behandling.erAvsluttet &&
             !Behandlingsresultat.ALLE_HENLEGGELSESKODER.contains(behandling.sisteResultat?.type) &&
             kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id) &&
             behandlingRepository.finnÅpenTilbakekrevingsrevurdering(behandling.id) == null
-    }
 
     @Transactional
     fun angreSendTilBeslutter(behandlingId: UUID) {

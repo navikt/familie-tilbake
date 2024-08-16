@@ -7,27 +7,20 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbr
 internal object TekstformatererVedtaksbrev {
     fun lagVedtaksbrevsfritekst(
         vedtaksbrevsdata: HbVedtaksbrevsdata,
-    ): String {
-        return when (vedtaksbrevsdata.felles.vedtaksbrevstype) {
+    ): String =
+        when (vedtaksbrevsdata.felles.vedtaksbrevstype) {
             Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT ->
                 lagVedtaksbrev("vedtak/fritekstFeilutbetalingBortfalt/fritekstFeilutbetalingBortfalt", vedtaksbrevsdata)
             Vedtaksbrevstype.ORDINÆR -> lagVedtaksbrev("vedtak/vedtak", vedtaksbrevsdata)
             Vedtaksbrevstype.AUTOMATISK_4X_RETTSGEBYR -> lagVedtaksbrev("vedtak/vedtak_feilutbetaling_under_4x_rettsgebyr", vedtaksbrevsdata)
         }
-    }
 
     private fun lagVedtaksbrev(
         mal: String,
         vedtaksbrevsdata: HbVedtaksbrevsdata,
-    ): String {
-        return FellesTekstformaterer.lagBrevtekst(vedtaksbrevsdata, mal)
-    }
+    ): String = FellesTekstformaterer.lagBrevtekst(vedtaksbrevsdata, mal)
 
-    fun lagVedtaksbrevsvedleggHtml(vedtaksbrevsdata: HbVedtaksbrevsdata): String {
-        return FellesTekstformaterer.lagBrevtekst(vedtaksbrevsdata, "vedtak/vedlegg")
-    }
+    fun lagVedtaksbrevsvedleggHtml(vedtaksbrevsdata: HbVedtaksbrevsdata): String = FellesTekstformaterer.lagBrevtekst(vedtaksbrevsdata, "vedtak/vedlegg")
 
-    fun lagVedtaksbrevsoverskrift(vedtaksbrevsdata: HbVedtaksbrevsdata): String {
-        return FellesTekstformaterer.lagBrevtekst(vedtaksbrevsdata, "vedtak/vedtak_overskrift")
-    }
+    fun lagVedtaksbrevsoverskrift(vedtaksbrevsdata: HbVedtaksbrevsdata): String = FellesTekstformaterer.lagBrevtekst(vedtaksbrevsdata, "vedtak/vedtak_overskrift")
 }

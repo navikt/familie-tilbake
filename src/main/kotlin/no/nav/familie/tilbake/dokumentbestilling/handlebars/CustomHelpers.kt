@@ -125,9 +125,7 @@ class StorBokstavHelper : Helper<String> {
     override fun apply(
         context: String,
         options: Options?,
-    ): Any {
-        return StringUtils.capitalize(context)
-    }
+    ): Any = StringUtils.capitalize(context)
 }
 
 class KroneFormattererMedTusenskille : Helper<Any> {

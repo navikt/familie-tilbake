@@ -43,7 +43,8 @@ class TotrinnService(
         val eksisterendeTotrinnsvurdering = totrinnsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
         eksisterendeTotrinnsvurdering.forEach { totrinnsvurderingRepository.update(it.copy(aktiv = false)) }
 
-        totrinnsvurderinger.filter { finnOmStegKanBesluttes(it.behandlingssteg, behandlingsstegstilstand) }
+        totrinnsvurderinger
+            .filter { finnOmStegKanBesluttes(it.behandlingssteg, behandlingsstegstilstand) }
             .forEach {
                 totrinnsvurderingRepository.insert(
                     Totrinnsvurdering(
@@ -82,9 +83,7 @@ class TotrinnService(
         }
     }
 
-    fun finnesUnderkjenteStegITotrinnsvurdering(behandlingId: UUID): Boolean {
-        return totrinnsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId).any { !it.godkjent }
-    }
+    fun finnesUnderkjenteStegITotrinnsvurdering(behandlingId: UUID): Boolean = totrinnsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId).any { !it.godkjent }
 
     @Transactional
     fun oppdaterAnsvarligBeslutter(behandlingId: UUID) {
@@ -101,23 +100,23 @@ class TotrinnService(
     private fun finnOmStegKanBesluttes(
         behandlingssteg: Behandlingssteg,
         behandlingsstegstilstand: List<Behandlingsstegstilstand>,
-    ): Boolean {
-        return behandlingsstegstilstand.any {
+    ): Boolean =
+        behandlingsstegstilstand.any {
             behandlingssteg == it.behandlingssteg &&
                 it.behandlingssteg.kanBesluttes &&
                 it.behandlingsstegsstatus != Behandlingsstegstatus.AUTOUTFØRT
         }
-    }
 
     private fun validerOmAlleBesluttendeStegFinnes(
         totrinnsvurderinger: List<VurdertTotrinnDto>,
         behandlingsstegstilstand: List<Behandlingsstegstilstand>,
     ) {
         val stegSomBørVurderes: List<Behandlingssteg> =
-            behandlingsstegstilstand.filter {
-                it.behandlingssteg.kanBesluttes &&
-                    it.behandlingsstegsstatus != Behandlingsstegstatus.AUTOUTFØRT
-            }.map { it.behandlingssteg }
+            behandlingsstegstilstand
+                .filter {
+                    it.behandlingssteg.kanBesluttes &&
+                        it.behandlingsstegsstatus != Behandlingsstegstatus.AUTOUTFØRT
+                }.map { it.behandlingssteg }
 
         val vurderteSteg: List<Behandlingssteg> = totrinnsvurderinger.map { it.behandlingssteg }
         val manglendeSteg = stegSomBørVurderes.minus(vurderteSteg)

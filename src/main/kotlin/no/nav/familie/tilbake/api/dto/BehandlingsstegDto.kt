@@ -34,10 +34,10 @@ abstract class BehandlingsstegDto protected constructor() {
 }
 
 @JsonTypeName(BehandlingsstegVergeDto.STEGNAVN)
-data class BehandlingsstegVergeDto(val verge: VergeDto) : BehandlingsstegDto() {
-    override fun getSteg(): String {
-        return STEGNAVN
-    }
+data class BehandlingsstegVergeDto(
+    val verge: VergeDto,
+) : BehandlingsstegDto() {
+    override fun getSteg(): String = STEGNAVN
 
     companion object {
         const val STEGNAVN = "VERGE"
@@ -45,10 +45,10 @@ data class BehandlingsstegVergeDto(val verge: VergeDto) : BehandlingsstegDto() {
 }
 
 @JsonTypeName(BehandlingsstegBrevmottakerDto.STEGNAVN)
-data class BehandlingsstegBrevmottakerDto(val brevmottakerstegDto: BrevmottakerstegDto) : BehandlingsstegDto() {
-    override fun getSteg(): String {
-        return STEGNAVN
-    }
+data class BehandlingsstegBrevmottakerDto(
+    val brevmottakerstegDto: BrevmottakerstegDto,
+) : BehandlingsstegDto() {
+    override fun getSteg(): String = STEGNAVN
 
     companion object {
         const val STEGNAVN = "BREVMOTTAKER"
@@ -76,9 +76,7 @@ data class BehandlingsstegFaktaDto(
     val begrunnelse: String,
     val vurderingAvBrukersUttalelse: VurderingAvBrukersUttalelseDto? = null,
 ) : BehandlingsstegDto() {
-    override fun getSteg(): String {
-        return STEGNAVN
-    }
+    override fun getSteg(): String = STEGNAVN
 
     companion object {
         const val STEGNAVN = "FAKTA"
@@ -92,10 +90,10 @@ data class FaktaFeilutbetalingsperiodeDto(
 )
 
 @JsonTypeName(BehandlingsstegForeldelseDto.STEGNAVN)
-data class BehandlingsstegForeldelseDto(val foreldetPerioder: List<ForeldelsesperiodeDto>) : BehandlingsstegDto() {
-    override fun getSteg(): String {
-        return STEGNAVN
-    }
+data class BehandlingsstegForeldelseDto(
+    val foreldetPerioder: List<ForeldelsesperiodeDto>,
+) : BehandlingsstegDto() {
+    override fun getSteg(): String = STEGNAVN
 
     companion object {
         const val STEGNAVN = "FORELDELSE"
@@ -112,11 +110,10 @@ data class ForeldelsesperiodeDto(
 )
 
 @JsonTypeName(BehandlingsstegVilkårsvurderingDto.STEGNAVN)
-data class BehandlingsstegVilkårsvurderingDto(val vilkårsvurderingsperioder: List<VilkårsvurderingsperiodeDto>) :
-    BehandlingsstegDto() {
-    override fun getSteg(): String {
-        return STEGNAVN
-    }
+data class BehandlingsstegVilkårsvurderingDto(
+    val vilkårsvurderingsperioder: List<VilkårsvurderingsperiodeDto>,
+) : BehandlingsstegDto() {
+    override fun getSteg(): String = STEGNAVN
 
     companion object {
         const val STEGNAVN = "VILKÅRSVURDERING"
@@ -159,10 +156,10 @@ data class SærligGrunnDto(
 )
 
 @JsonTypeName(BehandlingsstegForeslåVedtaksstegDto.STEGNAVN)
-data class BehandlingsstegForeslåVedtaksstegDto(val fritekstavsnitt: FritekstavsnittDto) : BehandlingsstegDto() {
-    override fun getSteg(): String {
-        return STEGNAVN
-    }
+data class BehandlingsstegForeslåVedtaksstegDto(
+    val fritekstavsnitt: FritekstavsnittDto,
+) : BehandlingsstegDto() {
+    override fun getSteg(): String = STEGNAVN
 
     companion object {
         const val STEGNAVN = "FORESLÅ_VEDTAK"
@@ -178,10 +175,10 @@ data class FritekstavsnittDto(
 )
 
 @JsonTypeName(BehandlingsstegFatteVedtaksstegDto.STEGNAVN)
-data class BehandlingsstegFatteVedtaksstegDto(val totrinnsvurderinger: List<VurdertTotrinnDto>) : BehandlingsstegDto() {
-    override fun getSteg(): String {
-        return STEGNAVN
-    }
+data class BehandlingsstegFatteVedtaksstegDto(
+    val totrinnsvurderinger: List<VurdertTotrinnDto>,
+) : BehandlingsstegDto() {
+    override fun getSteg(): String = STEGNAVN
 
     companion object {
         const val STEGNAVN = "FATTE_VEDTAK"

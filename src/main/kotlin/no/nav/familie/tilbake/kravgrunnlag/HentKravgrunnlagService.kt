@@ -33,9 +33,7 @@ class HentKravgrunnlagService(
         return oppdragClient.hentKravgrunnlag(kravgrunnlagId, lagRequest(kravgrunnlagId, kodeAksjon))
     }
 
-    fun hentTilbakekrevingskravgrunnlag(behandlingId: UUID): Kravgrunnlag431 {
-        return kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
-    }
+    fun hentTilbakekrevingskravgrunnlag(behandlingId: UUID): Kravgrunnlag431 = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
 
     @Transactional
     fun lagreHentetKravgrunnlag(

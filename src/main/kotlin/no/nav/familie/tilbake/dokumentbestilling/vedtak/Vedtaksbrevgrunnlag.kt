@@ -91,46 +91,48 @@ data class Vedtaksbrevgrunnlag(
 
     val aktivtSteg
         get() =
-            behandling.behandlingsstegstilstander.firstOrNull {
-                Behandlingsstegstatus.erStegAktiv(it.behandlingsstegsstatus)
-            }?.behandlingssteg
+            behandling.behandlingsstegstilstander
+                .firstOrNull {
+                    Behandlingsstegstatus.erStegAktiv(it.behandlingsstegsstatus)
+                }?.behandlingssteg
 
     val sisteVarsel
         get() =
-            behandling.brevsporing.filter { it.brevtype in setOf(Brevtype.VARSEL, Brevtype.KORRIGERT_VARSEL) }
+            behandling.brevsporing
+                .filter { it.brevtype in setOf(Brevtype.VARSEL, Brevtype.KORRIGERT_VARSEL) }
                 .maxByOrNull { it.sporbar.opprettetTid }
 
-    fun finnOriginalBehandlingVedtaksdato(): LocalDate? {
-        return if (erRevurdering) {
+    fun finnOriginalBehandlingVedtaksdato(): LocalDate? =
+        if (erRevurdering) {
             val behandlingÅrsak = behandling.årsaker.first()
             behandlingÅrsak.originalBehandlingId
                 ?: error("Mangler originalBehandlingId for behandling: ${behandling.id}")
 
-            behandlinger.first {
-                it.id == behandlingÅrsak.originalBehandlingId
-            }.sisteResultat?.behandlingsvedtak?.vedtaksdato
+            behandlinger
+                .first {
+                    it.id == behandlingÅrsak.originalBehandlingId
+                }.sisteResultat
+                ?.behandlingsvedtak
+                ?.vedtaksdato
                 ?: error("Mangler vedtaksdato for original behandling med id : ${behandlingÅrsak.originalBehandlingId}")
         } else {
             null
         }
-    }
 
-    fun utledVedtaksbrevstype(): Vedtaksbrevstype {
-        return if (erTilbakekrevingRevurderingHarÅrsakFeilutbetalingBortfalt()) {
+    fun utledVedtaksbrevstype(): Vedtaksbrevstype =
+        if (erTilbakekrevingRevurderingHarÅrsakFeilutbetalingBortfalt()) {
             Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT
         } else if (behandling.saksbehandlingstype == Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR) {
             Vedtaksbrevstype.AUTOMATISK_4X_RETTSGEBYR
         } else {
             Vedtaksbrevstype.ORDINÆR
         }
-    }
 
-    private fun erTilbakekrevingRevurderingHarÅrsakFeilutbetalingBortfalt(): Boolean {
-        return Behandlingstype.REVURDERING_TILBAKEKREVING == behandling.type &&
+    private fun erTilbakekrevingRevurderingHarÅrsakFeilutbetalingBortfalt(): Boolean =
+        Behandlingstype.REVURDERING_TILBAKEKREVING == behandling.type &&
             behandling.årsaker.any {
                 Behandlingsårsakstype.REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT == it.type
             }
-    }
 }
 
 /**

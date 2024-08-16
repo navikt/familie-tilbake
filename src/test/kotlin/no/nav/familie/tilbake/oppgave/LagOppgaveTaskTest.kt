@@ -160,8 +160,8 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
         )
     }
 
-    private fun lagTask(opprettetAv: String? = null): Task {
-        return Task(
+    private fun lagTask(opprettetAv: String? = null): Task =
+        Task(
             type = LagOppgaveTask.TYPE,
             payload = behandling.id.toString(),
             properties =
@@ -173,5 +173,4 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
                     }
                 },
         )
-    }
 }

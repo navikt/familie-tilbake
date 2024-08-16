@@ -73,20 +73,17 @@ class HentFagsystemsbehandlingService(
         eksternFagsakId: String,
         ytelsestype: Ytelsestype,
         eksternId: String,
-    ): HentFagsystemsbehandlingRequestSendt? {
-        return requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(
+    ): HentFagsystemsbehandlingRequestSendt? =
+        requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(
             eksternFagsakId,
             ytelsestype,
             eksternId,
         )
-    }
 
     @Transactional
     fun fjernHentFagsystemsbehandlingRequest(requestId: UUID) {
         requestSendtRepository.deleteById(requestId)
     }
 
-    fun lesRespons(respons: String): HentFagsystemsbehandlingRespons {
-        return objectMapper.readValue(respons, HentFagsystemsbehandlingRespons::class.java)
-    }
+    fun lesRespons(respons: String): HentFagsystemsbehandlingRespons = objectMapper.readValue(respons, HentFagsystemsbehandlingRespons::class.java)
 }

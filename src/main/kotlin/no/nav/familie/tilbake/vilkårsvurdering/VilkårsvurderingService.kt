@@ -50,11 +50,13 @@ class VilkårsvurderingService(
                 .forEach { perioder.add(it.periode) }
         } else {
             // Ikke foreldet perioder uten perioder som allerede vurdert i vilkårsvurdering
-            vurdertForeldelse.foreldelsesperioder.filter { !it.erForeldet() }
+            vurdertForeldelse.foreldelsesperioder
+                .filter { !it.erForeldet() }
                 .filter { !erPeriodeAlleredeVurdert(vilkårsvurdering, it.periode) }
                 .forEach { perioder.add(it.periode) }
             // foreldet perioder
-            vurdertForeldelse.foreldelsesperioder.filter { it.erForeldet() }
+            vurdertForeldelse.foreldelsesperioder
+                .filter { it.erForeldet() }
                 .forEach { foreldetPerioderMedBegrunnelse[it.periode] = it.begrunnelse }
         }
         return VilkårsvurderingMapper.tilRespons(
@@ -132,7 +134,5 @@ class VilkårsvurderingService(
     private fun erPeriodeAlleredeVurdert(
         vilkårsvurdering: Vilkårsvurdering?,
         periode: Månedsperiode,
-    ): Boolean {
-        return vilkårsvurdering?.perioder?.any { periode.inneholder(it.periode) } == true
-    }
+    ): Boolean = vilkårsvurdering?.perioder?.any { periode.inneholder(it.periode) } == true
 }

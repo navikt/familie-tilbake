@@ -145,11 +145,12 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
         ytelsestypeSlot.captured shouldBe xmlMottatt.ytelsestype
         eksternIdSlot.captured shouldBe xmlMottatt.referanse
 
-        requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(
-            xmlMottatt.eksternFagsakId,
-            xmlMottatt.ytelsestype,
-            xmlMottatt.referanse,
-        ).shouldNotBeNull()
+        requestSendtRepository
+            .findByEksternFagsakIdAndYtelsestypeAndEksternId(
+                xmlMottatt.eksternFagsakId,
+                xmlMottatt.ytelsestype,
+                xmlMottatt.referanse,
+            ).shouldNotBeNull()
     }
 
     @Test
@@ -162,7 +163,5 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
         }
     }
 
-    private fun lagTask(): Task {
-        return taskService.save(Task(type = HentFagsystemsbehandlingTask.TYPE, payload = mottattXmlId.toString()))
-    }
+    private fun lagTask(): Task = taskService.save(Task(type = HentFagsystemsbehandlingTask.TYPE, payload = mottattXmlId.toString()))
 }

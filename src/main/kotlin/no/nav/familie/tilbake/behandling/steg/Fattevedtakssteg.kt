@@ -123,7 +123,5 @@ class Fattevedtakssteg(
         )
     }
 
-    override fun getBehandlingssteg(): Behandlingssteg {
-        return Behandlingssteg.FATTE_VEDTAK
-    }
+    override fun getBehandlingssteg(): Behandlingssteg = Behandlingssteg.FATTE_VEDTAK
 }

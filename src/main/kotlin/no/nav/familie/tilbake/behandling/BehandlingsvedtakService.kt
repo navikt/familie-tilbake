@@ -56,11 +56,10 @@ class BehandlingsvedtakService(
         return behandlingRepository.update(behandling.copy(resultater = setOf(oppdatertBehandlingsresultat)))
     }
 
-    private fun utledBehandlingsresultatstype(vedtaksresultat: Vedtaksresultat): Behandlingsresultatstype {
-        return when (vedtaksresultat) {
+    private fun utledBehandlingsresultatstype(vedtaksresultat: Vedtaksresultat): Behandlingsresultatstype =
+        when (vedtaksresultat) {
             Vedtaksresultat.INGEN_TILBAKEBETALING -> Behandlingsresultatstype.INGEN_TILBAKEBETALING
             Vedtaksresultat.DELVIS_TILBAKEBETALING -> Behandlingsresultatstype.DELVIS_TILBAKEBETALING
             Vedtaksresultat.FULL_TILBAKEBETALING -> Behandlingsresultatstype.FULL_TILBAKEBETALING
         }
-    }
 }

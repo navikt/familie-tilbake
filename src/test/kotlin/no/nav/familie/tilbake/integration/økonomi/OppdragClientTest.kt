@@ -156,18 +156,17 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
                 urlEqualTo(
                     "/${DefaultOppdragClient.HENT_KRAVGRUNNLAG_PATH}/$kravgrunnlagId",
                 ),
-            )
-                .willReturn(
-                    okJson(
-                        Ressurs.success(
+            ).willReturn(
+                okJson(
+                    Ressurs
+                        .success(
                             lagHentKravgrunnlagRespons(
                                 "00",
                                 "OK",
                             ),
-                        )
-                            .toJson(),
-                    ),
+                        ).toJson(),
                 ),
+            ),
         )
         val hentKravgrunnlag = oppdragClient.hentKravgrunnlag(kravgrunnlagId, hentKravgrunnlagRequest)
 
@@ -181,18 +180,17 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
                 urlEqualTo(
                     "/${DefaultOppdragClient.HENT_KRAVGRUNNLAG_PATH}/$kravgrunnlagId",
                 ),
-            )
-                .willReturn(
-                    okJson(
-                        Ressurs.success(
+            ).willReturn(
+                okJson(
+                    Ressurs
+                        .success(
                             lagHentKravgrunnlagRespons(
                                 "00",
                                 "B420010I",
                             ),
-                        )
-                            .toJson(),
-                    ),
+                        ).toJson(),
                 ),
+            ),
         )
         val exception =
             shouldThrow<RuntimeException> {
@@ -214,18 +212,17 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
                 urlEqualTo(
                     "/${DefaultOppdragClient.HENT_KRAVGRUNNLAG_PATH}/$kravgrunnlagId",
                 ),
-            )
-                .willReturn(
-                    okJson(
-                        Ressurs.success(
+            ).willReturn(
+                okJson(
+                    Ressurs
+                        .success(
                             lagHentKravgrunnlagRespons(
                                 "00",
                                 "B420012I",
                             ),
-                        )
-                            .toJson(),
-                    ),
+                        ).toJson(),
                 ),
+            ),
         )
         val exception =
             shouldThrow<RuntimeException> {
@@ -243,8 +240,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
                 urlEqualTo(
                     "/${DefaultOppdragClient.HENT_KRAVGRUNNLAG_PATH}/$kravgrunnlagId",
                 ),
-            )
-                .willReturn(serviceUnavailable().withStatusMessage("Couldn't send message")),
+            ).willReturn(serviceUnavailable().withStatusMessage("Couldn't send message")),
         )
         val exception =
             shouldThrow<RuntimeException> {

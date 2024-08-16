@@ -35,9 +35,7 @@ class FagsakService(
     private val personService: PersonService,
     private val organisasjonService: OrganisasjonService,
 ) {
-    fun hentFagsak(fagsakId: UUID): Fagsak {
-        return fagsakRepository.findByIdOrThrow(fagsakId)
-    }
+    fun hentFagsak(fagsakId: UUID): Fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
 
     @Transactional(readOnly = true)
     fun hentFagsak(
@@ -73,22 +71,17 @@ class FagsakService(
     fun finnFagsak(
         fagsystem: Fagsystem,
         eksternFagsakId: String,
-    ): Fagsak? {
-        return fagsakRepository.findByFagsystemAndEksternFagsakId(
+    ): Fagsak? =
+        fagsakRepository.findByFagsystemAndEksternFagsakId(
             fagsystem = fagsystem,
             eksternFagsakId = eksternFagsakId,
         )
-    }
 
     @Transactional
-    fun finnFagsystem(fagsakId: UUID): Fagsystem {
-        return fagsakRepository.findByIdOrThrow(fagsakId).fagsystem
-    }
+    fun finnFagsystem(fagsakId: UUID): Fagsystem = fagsakRepository.findByIdOrThrow(fagsakId).fagsystem
 
     @Transactional
-    fun finnFagsystemForBehandlingId(behandlingId: UUID): Fagsystem {
-        return fagsakRepository.finnFagsakForBehandlingId(behandlingId).fagsystem
-    }
+    fun finnFagsystemForBehandlingId(behandlingId: UUID): Fagsystem = fagsakRepository.finnFagsakForBehandlingId(behandlingId).fagsystem
 
     @Transactional
     fun opprettFagsak(
@@ -199,17 +192,17 @@ class FagsakService(
         }
         val kravgrunnlagsreferanse = kravgrunnlagene.first().referanse
         val harAlledeMottattForespørselen: Boolean =
-            taskService.finnTasksMedStatus(
-                listOf(
-                    Status.UBEHANDLET,
-                    Status.BEHANDLER,
-                    Status.KLAR_TIL_PLUKK,
-                    Status.PLUKKET,
-                    Status.FEILET,
-                ),
-                Pageable.unpaged(),
-            )
-                .any {
+            taskService
+                .finnTasksMedStatus(
+                    listOf(
+                        Status.UBEHANDLET,
+                        Status.BEHANDLER,
+                        Status.KLAR_TIL_PLUKK,
+                        Status.PLUKKET,
+                        Status.FEILET,
+                    ),
+                    Pageable.unpaged(),
+                ).any {
                     OpprettBehandlingManueltTask.TYPE == it.type &&
                         eksternFagsakId == it.metadata.getProperty("eksternFagsakId") &&
                         ytelsestype.kode == it.metadata.getProperty("ytelsestype")

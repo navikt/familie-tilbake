@@ -26,7 +26,9 @@ import java.util.UUID
 @RequestMapping("/api/behandling/")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class BeregningController(val tilbakekrevingsberegningService: TilbakekrevingsberegningService) {
+class BeregningController(
+    val tilbakekrevingsberegningService: TilbakekrevingsberegningService,
+) {
     @Operation(summary = "Beregn feilutbetalt beløp for nye delte perioder")
     @PostMapping(
         path = ["{behandlingId}/beregn/v1"],
@@ -42,9 +44,7 @@ class BeregningController(val tilbakekrevingsberegningService: Tilbakekrevingsbe
         @PathVariable("behandlingId") behandlingId: UUID,
         @Valid @RequestBody
         perioder: List<Datoperiode>,
-    ): Ressurs<BeregnetPerioderDto> {
-        return Ressurs.success(tilbakekrevingsberegningService.beregnBeløp(behandlingId, perioder))
-    }
+    ): Ressurs<BeregnetPerioderDto> = Ressurs.success(tilbakekrevingsberegningService.beregnBeløp(behandlingId, perioder))
 
     @Operation(summary = "Hent beregningsresultat")
     @GetMapping(
@@ -59,7 +59,5 @@ class BeregningController(val tilbakekrevingsberegningService: Tilbakekrevingsbe
     )
     fun hentBeregningsresultat(
         @PathVariable("behandlingId") behandlingId: UUID,
-    ): Ressurs<BeregningsresultatDto> {
-        return Ressurs.success(tilbakekrevingsberegningService.hentBeregningsresultat(behandlingId))
-    }
+    ): Ressurs<BeregningsresultatDto> = Ressurs.success(tilbakekrevingsberegningService.hentBeregningsresultat(behandlingId))
 }

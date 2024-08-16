@@ -41,7 +41,8 @@ object VilkårsvurderingMapper {
     ): VurdertVilkårsvurderingDto {
         // allerede behandlet perioder uten perioder som er foreldet
         val vilkårsvurdertePerioder =
-            vilkårsvurdering?.perioder
+            vilkårsvurdering
+                ?.perioder
                 ?.filter { it.periode !in foreldetPerioderMedBegrunnelse }
                 ?.map {
                     VurdertVilkårsvurderingsperiodeDto(
@@ -101,28 +102,28 @@ object VilkårsvurderingMapper {
         fagsystem: Fagsystem,
     ): Vilkårsvurdering {
         val vilkårsvurderingsperiode =
-            vilkårsvurderingsperioder.map {
-                Vilkårsvurderingsperiode(
-                    periode = Månedsperiode(it.periode.fom, it.periode.tom),
-                    begrunnelse = it.begrunnelse,
-                    vilkårsvurderingsresultat = it.vilkårsvurderingsresultat,
-                    godTro = tilDomeneGodTro(it.godTroDto),
-                    aktsomhet = tilDomeneAktsomhet(it.aktsomhetDto, fagsystem),
-                )
-            }.toSet()
+            vilkårsvurderingsperioder
+                .map {
+                    Vilkårsvurderingsperiode(
+                        periode = Månedsperiode(it.periode.fom, it.periode.tom),
+                        begrunnelse = it.begrunnelse,
+                        vilkårsvurderingsresultat = it.vilkårsvurderingsresultat,
+                        godTro = tilDomeneGodTro(it.godTroDto),
+                        aktsomhet = tilDomeneAktsomhet(it.aktsomhetDto, fagsystem),
+                    )
+                }.toSet()
         return Vilkårsvurdering(
             behandlingId = behandlingId,
             perioder = vilkårsvurderingsperiode,
         )
     }
 
-    private fun tilVilkårsvurderingsresultatDto(vilkårsvurderingsperiode: Vilkårsvurderingsperiode): VurdertVilkårsvurderingsresultatDto {
-        return VurdertVilkårsvurderingsresultatDto(
+    private fun tilVilkårsvurderingsresultatDto(vilkårsvurderingsperiode: Vilkårsvurderingsperiode): VurdertVilkårsvurderingsresultatDto =
+        VurdertVilkårsvurderingsresultatDto(
             vilkårsvurderingsresultat = vilkårsvurderingsperiode.vilkårsvurderingsresultat,
             godTro = tilGodTroDto(vilkårsvurderingsperiode.godTro),
             aktsomhet = tilAktsomhetDto(vilkårsvurderingsperiode.aktsomhet),
         )
-    }
 
     private fun tilGodTroDto(vilkårsvurderingGodTro: VilkårsvurderingGodTro?): VurdertGodTroDto? {
         if (vilkårsvurderingGodTro != null) {
@@ -196,18 +197,20 @@ object VilkårsvurderingMapper {
         }
 
     private fun tilSærligGrunnerDomene(særligGrunner: List<SærligGrunnDto>?): Set<VilkårsvurderingSærligGrunn> =
-        særligGrunner?.map {
-            VilkårsvurderingSærligGrunn(
-                særligGrunn = it.særligGrunn,
-                begrunnelse = it.begrunnelse,
-            )
-        }?.toSet() ?: emptySet()
+        særligGrunner
+            ?.map {
+                VilkårsvurderingSærligGrunn(
+                    særligGrunn = it.særligGrunn,
+                    begrunnelse = it.begrunnelse,
+                )
+            }?.toSet() ?: emptySet()
 
     private fun beregnFeilutbetaltBeløp(
         kravgrunnlag431: Kravgrunnlag431,
         periode: Månedsperiode,
     ): BigDecimal =
-        KravgrunnlagsberegningUtil.beregnFeilutbetaltBeløp(kravgrunnlag431, periode)
+        KravgrunnlagsberegningUtil
+            .beregnFeilutbetaltBeløp(kravgrunnlag431, periode)
             .setScale(0, RoundingMode.HALF_UP)
 
     private fun hentHendelsestype(
@@ -279,10 +282,9 @@ object VilkårsvurderingMapper {
     private fun utledIleggRenter(
         ileggRenter: Boolean?,
         fagsystem: Fagsystem,
-    ): Boolean? {
-        return when {
+    ): Boolean? =
+        when {
             ileggRenter != null && listOf(Fagsystem.BA, Fagsystem.KONT).contains(fagsystem) -> false
             else -> ileggRenter
         }
-    }
 }

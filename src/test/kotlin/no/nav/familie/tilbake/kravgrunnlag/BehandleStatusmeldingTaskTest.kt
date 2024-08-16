@@ -180,12 +180,14 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         val venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT, venteårsak.beskrivelse)
-        taskService.findAll().none {
-            it.type == OppdaterOppgaveTask.TYPE &&
-                it.payload == behandling.id.toString() &&
-                it.metadata["beskrivelse"] == venteårsak.beskrivelse &&
-                it.metadata["frist"] == LocalDate.now().plusWeeks(venteårsak.defaultVenteTidIUker).toString()
-        }.shouldBeTrue()
+        taskService
+            .findAll()
+            .none {
+                it.type == OppdaterOppgaveTask.TYPE &&
+                    it.payload == behandling.id.toString() &&
+                    it.metadata["beskrivelse"] == venteårsak.beskrivelse &&
+                    it.metadata["frist"] == LocalDate.now().plusWeeks(venteårsak.defaultVenteTidIUker).toString()
+            }.shouldBeTrue()
     }
 
     @Test
@@ -448,45 +450,47 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
     private fun opprettTask(
         xml: String,
         taskType: String,
-    ): Task {
-        return taskService.save(
+    ): Task =
+        taskService.save(
             Task(
                 type = taskType,
                 payload = xml,
             ),
         )
-    }
 
     private fun assertHistorikkTask(
         historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
         beskrivelse: String? = null,
     ) {
-        taskService.finnTasksMedStatus(
-            listOf(
-                Status.KLAR_TIL_PLUKK,
-                Status.UBEHANDLET,
-                Status.BEHANDLER,
-                Status.FERDIG,
-            ),
-            page = Pageable.unpaged(),
-        ).any {
-            LagHistorikkinnslagTask.TYPE == it.type &&
-                historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
-                Aktør.VEDTAKSLØSNING.name == it.metadata["aktør"] &&
-                beskrivelse == it.metadata["beskrivelse"] &&
-                behandling.id.toString() == it.payload
-        }.shouldBeTrue()
+        taskService
+            .finnTasksMedStatus(
+                listOf(
+                    Status.KLAR_TIL_PLUKK,
+                    Status.UBEHANDLET,
+                    Status.BEHANDLER,
+                    Status.FERDIG,
+                ),
+                page = Pageable.unpaged(),
+            ).any {
+                LagHistorikkinnslagTask.TYPE == it.type &&
+                    historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
+                    Aktør.VEDTAKSLØSNING.name == it.metadata["aktør"] &&
+                    beskrivelse == it.metadata["beskrivelse"] &&
+                    behandling.id.toString() == it.payload
+            }.shouldBeTrue()
     }
 
     private fun assertOppgaveTask(
         beskrivelse: String,
         fristTid: LocalDate,
     ) {
-        taskService.findAll().any {
-            it.type == OppdaterOppgaveTask.TYPE &&
-                it.payload == behandling.id.toString() &&
-                it.metadata["beskrivelse"] == beskrivelse &&
-                it.metadata["frist"] == fristTid.toString()
-        }.shouldBeTrue()
+        taskService
+            .findAll()
+            .any {
+                it.type == OppdaterOppgaveTask.TYPE &&
+                    it.payload == behandling.id.toString() &&
+                    it.metadata["beskrivelse"] == beskrivelse &&
+                    it.metadata["frist"] == fristTid.toString()
+            }.shouldBeTrue()
     }
 }

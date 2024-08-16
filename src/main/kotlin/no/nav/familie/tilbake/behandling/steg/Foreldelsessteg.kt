@@ -116,9 +116,7 @@ class Foreldelsessteg(
         historikkTaskService.lagHistorikkTask(behandlingId, TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, aktør)
     }
 
-    override fun getBehandlingssteg(): Behandlingssteg {
-        return Behandlingssteg.FORELDELSE
-    }
+    override fun getBehandlingssteg(): Behandlingssteg = Behandlingssteg.FORELDELSE
 
     @EventListener
     fun deaktiverEksisterendeVurdertForeldelse(endretKravgrunnlagEvent: EndretKravgrunnlagEvent) {

@@ -108,7 +108,8 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `korrigerKravgrunnlag skal ikke hente korrigert kravgrunnlag når behandling er avsluttet`() {
         behandlingRepository.update(
-            behandlingRepository.findByIdOrThrow(behandling.id)
+            behandlingRepository
+                .findByIdOrThrow(behandling.id)
                 .copy(status = Behandlingsstatus.AVSLUTTET),
         )
 
@@ -160,16 +161,18 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         forvaltningService.arkiverMottattKravgrunnlag(økonomiXmlMottatt.id)
 
         økonomiXmlMottattRepository.existsById(økonomiXmlMottatt.id).shouldBeFalse()
-        økonomiXmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(
-            økonomiXmlMottatt.eksternFagsakId,
-            økonomiXmlMottatt.ytelsestype,
-        ).shouldNotBeEmpty()
+        økonomiXmlMottattArkivRepository
+            .findByEksternFagsakIdAndYtelsestype(
+                økonomiXmlMottatt.eksternFagsakId,
+                økonomiXmlMottatt.ytelsestype,
+            ).shouldNotBeEmpty()
     }
 
     @Test
     fun `tvingHenleggBehandling skal ikke henlegge behandling når behandling er avsluttet`() {
         behandlingRepository.update(
-            behandlingRepository.findByIdOrThrow(behandling.id)
+            behandlingRepository
+                .findByIdOrThrow(behandling.id)
                 .copy(status = Behandlingsstatus.AVSLUTTET),
         )
 
@@ -208,10 +211,11 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
                 Aktør.SAKSBEHANDLER.name == it.metadata.getProperty("aktør") &&
                 TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT.name == it.metadata.getProperty("historikkinnslagstype")
         }
-        tasker.any {
-            SendSakshendelseTilDvhTask.TASK_TYPE == it.type &&
-                behandling.id.toString() == it.payload
-        }.shouldBeTrue()
+        tasker
+            .any {
+                SendSakshendelseTilDvhTask.TASK_TYPE == it.type &&
+                    behandling.id.toString() == it.payload
+            }.shouldBeTrue()
         tasker.shouldHaveSingleElement {
             FerdigstillOppgaveTask.TYPE == it.type &&
                 behandling.id.toString() == it.payload
@@ -221,7 +225,8 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `flyttBehandlingsstegTilbakeTilFakta skal ikke flytte behandlingssteg når behandling er avsluttet`() {
         behandlingRepository.update(
-            behandlingRepository.findByIdOrThrow(behandling.id)
+            behandlingRepository
+                .findByIdOrThrow(behandling.id)
                 .copy(status = Behandlingsstatus.AVSLUTTET),
         )
 
@@ -235,16 +240,18 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `flyttBehandlingsstegTilbakeTilFakta skal flytte behandlingssteg til FAKTA når behandling er i IVERKSETT_VEDTAK steg`() {
         behandlingRepository.update(
-            behandlingRepository.findByIdOrThrow(behandling.id)
+            behandlingRepository
+                .findByIdOrThrow(behandling.id)
                 .copy(status = Behandlingsstatus.IVERKSETTER_VEDTAK),
         )
         kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
         behandlingsstegstilstandRepository
             .update(
-                behandlingsstegstilstandRepository.findByBehandlingIdAndBehandlingssteg(
-                    behandling.id,
-                    Behandlingssteg.GRUNNLAG,
-                )!!
+                behandlingsstegstilstandRepository
+                    .findByBehandlingIdAndBehandlingssteg(
+                        behandling.id,
+                        Behandlingssteg.GRUNNLAG,
+                    )!!
                     .copy(behandlingsstegsstatus = Behandlingsstegstatus.UTFØRT),
             )
 
@@ -328,7 +335,8 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
             kravgrunnlag.copy(
                 fagsystemId = fagsak.eksternFagsakId,
                 fagområdekode =
-                    Fagområdekode.values()
+                    Fagområdekode
+                        .values()
                         .first { it.ytelsestype == fagsak.ytelsestype },
             ),
         )
@@ -390,10 +398,11 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         behandlingssteg: Behandlingssteg,
         behandlingsstegstatus: Behandlingsstegstatus,
     ) {
-        behandlingsstegstilstand.any {
-            behandlingssteg == it.behandlingssteg &&
-                behandlingsstegstatus == it.behandlingsstegsstatus
-        }.shouldBeTrue()
+        behandlingsstegstilstand
+            .any {
+                behandlingssteg == it.behandlingssteg &&
+                    behandlingsstegstatus == it.behandlingsstegsstatus
+            }.shouldBeTrue()
     }
 
     private fun lagBehandlingssteg(

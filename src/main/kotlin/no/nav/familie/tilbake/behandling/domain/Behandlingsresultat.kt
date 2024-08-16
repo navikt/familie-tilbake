@@ -37,9 +37,7 @@ data class Behandlingsresultat(
             )
     }
 
-    fun erBehandlingHenlagt(): Boolean {
-        return ALLE_HENLEGGELSESKODER.contains(type)
-    }
+    fun erBehandlingHenlagt(): Boolean = ALLE_HENLEGGELSESKODER.contains(type)
 
     fun erBehandlingFastsatt(): Boolean = ALLE_FASTSATTKODER.contains(type)
 
@@ -68,7 +66,9 @@ enum class Iverksettingsstatus {
     IVERKSATT,
 }
 
-enum class Behandlingsresultatstype(val navn: String) {
+enum class Behandlingsresultatstype(
+    val navn: String,
+) {
     IKKE_FASTSATT("Ikke fastsatt"),
     HENLAGT_FEILOPPRETTET("Henlagt, søknaden er feilopprettet"),
     HENLAGT_FEILOPPRETTET_MED_BREV("Feilaktig opprettet - med henleggelsesbrev"),

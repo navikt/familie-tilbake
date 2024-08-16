@@ -5,7 +5,9 @@ import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import java.math.BigDecimal
 import java.time.LocalDate
 
-data class VurdertForeldelseDto(val foreldetPerioder: List<VurdertForeldelsesperiodeDto>)
+data class VurdertForeldelseDto(
+    val foreldetPerioder: List<VurdertForeldelsesperiodeDto>,
+)
 
 data class VurdertForeldelsesperiodeDto(
     val periode: Datoperiode,

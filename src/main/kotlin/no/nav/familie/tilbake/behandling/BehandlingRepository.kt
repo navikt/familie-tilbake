@@ -14,7 +14,9 @@ import java.util.UUID
 
 @Repository
 @Transactional
-interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUpdateRepository<Behandling> {
+interface BehandlingRepository :
+    RepositoryInterface<Behandling, UUID>,
+    InsertUpdateRepository<Behandling> {
     // language=PostgreSQL
     @Query(
         """
@@ -112,7 +114,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
             JOIN behandling b ON bst.behandling_id = b.id
             JOIN fagsak f ON b.fagsak_id = f.id
             WHERE f.fagsystem = :fagsystem AND bst.behandlingssteg = 'FATTE_VEDTAK' AND bst.behandlingsstegsstatus = 'TILBAKEFØRT' AND b.status != 'AVSLUTTET'
-        """
+        """,
     )
     fun hentÅpneBehandlingerMedTilbakeførtFatteVedtakSteg(fagsystem: Fagsystem): List<Behandling>
 }

@@ -7,7 +7,9 @@ import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import org.springframework.stereotype.Service
 
 @Service
-class OrganisasjonService(private val integrasjonerClient: IntegrasjonerClient) {
+class OrganisasjonService(
+    private val integrasjonerClient: IntegrasjonerClient,
+) {
     fun mapTilInstitusjonDto(orgnummer: String): InstitusjonDto {
         val organisasjon = hentOrganisasjon(orgnummer)
         return InstitusjonDto(organisasjonsnummer = orgnummer, navn = organisasjon.navn)

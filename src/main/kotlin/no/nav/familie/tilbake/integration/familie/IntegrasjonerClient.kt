@@ -39,49 +39,59 @@ import java.net.URI
 class IntegrasjonerClient(
     @Qualifier("azure") restOperations: RestOperations,
     private val integrasjonerConfig: IntegrasjonerConfig,
-) :
-    AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
+) : AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
     override val pingUri: URI =
-        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri).path(IntegrasjonerConfig.PATH_PING).build().toUri()
+        UriComponentsBuilder
+            .fromUri(integrasjonerConfig.integrasjonUri)
+            .path(IntegrasjonerConfig.PATH_PING)
+            .build()
+            .toUri()
 
     private val arkiverUri: URI =
-        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+        UriComponentsBuilder
+            .fromUri(integrasjonerConfig.integrasjonUri)
             .pathSegment(IntegrasjonerConfig.PATH_ARKIVER)
             .build()
             .toUri()
 
     private val distribuerUri: URI =
-        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+        UriComponentsBuilder
+            .fromUri(integrasjonerConfig.integrasjonUri)
             .pathSegment(IntegrasjonerConfig.PATH_DISTRIBUER)
             .build()
             .toUri()
 
     private val sftpUri: URI =
-        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+        UriComponentsBuilder
+            .fromUri(integrasjonerConfig.integrasjonUri)
             .pathSegment(IntegrasjonerConfig.PATH_SFTP)
             .build()
             .toUri()
 
     private val tilgangssjekkUri =
-        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+        UriComponentsBuilder
+            .fromUri(integrasjonerConfig.integrasjonUri)
             .pathSegment(IntegrasjonerConfig.PATH_TILGANGSSJEKK)
             .build()
             .toUri()
 
     private fun hentSaksbehandlerUri(id: String) =
-        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+        UriComponentsBuilder
+            .fromUri(integrasjonerConfig.integrasjonUri)
             .pathSegment(IntegrasjonerConfig.PATH_SAKSBEHANDLER, id)
             .build()
             .toUri()
 
     private val opprettOppgaveUri =
-        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+        UriComponentsBuilder
+            .fromUri(integrasjonerConfig.integrasjonUri)
             .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, "opprett")
             .build()
             .toUri()
 
     private fun patchOppgaveUri(oppgave: Oppgave) =
-        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+        UriComponentsBuilder
+            .fromUri(integrasjonerConfig.integrasjonUri)
             .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, oppgave.id!!.toString(), "oppdater")
             .build()
             .toUri()
@@ -91,38 +101,44 @@ class IntegrasjonerClient(
         nyEnhet: String,
         fjernMappeFraOppgave: Boolean,
     ) =
-        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+        UriComponentsBuilder
+            .fromUri(integrasjonerConfig.integrasjonUri)
             .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, oppgaveId.toString(), "enhet", nyEnhet)
             .queryParam("fjernMappeFraOppgave", fjernMappeFraOppgave)
             .build()
             .toUri()
 
     private val finnoppgaverUri =
-        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+        UriComponentsBuilder
+            .fromUri(integrasjonerConfig.integrasjonUri)
             .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, "v4")
             .build()
             .toUri()
 
     private fun ferdigstillOppgaveUri(oppgaveId: Long) =
-        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+        UriComponentsBuilder
+            .fromUri(integrasjonerConfig.integrasjonUri)
             .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, oppgaveId.toString(), "ferdigstill")
             .build()
             .toUri()
 
     private fun hentOrganisasjonUri(organisasjonsnummer: String) =
-        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+        UriComponentsBuilder
+            .fromUri(integrasjonerConfig.integrasjonUri)
             .pathSegment(IntegrasjonerConfig.PATH_ORGANISASJON, organisasjonsnummer)
             .build()
             .toUri()
 
     private fun validerOrganisasjonUri(organisasjonsnummer: String) =
-        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+        UriComponentsBuilder
+            .fromUri(integrasjonerConfig.integrasjonUri)
             .pathSegment(IntegrasjonerConfig.PATH_ORGANISASJON, organisasjonsnummer, "valider")
             .build()
             .toUri()
 
     private fun hentJournalpostUri() =
-        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+        UriComponentsBuilder
+            .fromUri(integrasjonerConfig.integrasjonUri)
             .pathSegment(IntegrasjonerConfig.PATH_JOURNALPOST)
             .build()
             .toUri()
@@ -131,19 +147,22 @@ class IntegrasjonerClient(
         journalpostId: String,
         dokumentInfoId: String,
     ) =
-        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+        UriComponentsBuilder
+            .fromUri(integrasjonerConfig.integrasjonUri)
             .pathSegment(IntegrasjonerConfig.PATH_HENTDOKUMENT, journalpostId, dokumentInfoId)
             .build()
             .toUri()
 
     private fun hentNavkontorUri(enhetsId: String) =
-        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+        UriComponentsBuilder
+            .fromUri(integrasjonerConfig.integrasjonUri)
             .pathSegment(IntegrasjonerConfig.PATH_NAVKONTOR, enhetsId)
             .build()
             .toUri()
 
     private fun finnMapperUri(enhetNr: String): URI =
-        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+        UriComponentsBuilder
+            .fromUri(integrasjonerConfig.integrasjonUri)
             .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, "mappe", "finn", enhetNr)
             .build()
             .toUri()
@@ -179,30 +198,21 @@ class IntegrasjonerClient(
     fun hentDokument(
         dokumentInfoId: String,
         journalpostId: String,
-    ): ByteArray {
-        return getForEntity<Ressurs<ByteArray>>(hentJournalpostHentDokumentUri(journalpostId, dokumentInfoId)).getDataOrThrow()
-    }
+    ): ByteArray = getForEntity<Ressurs<ByteArray>>(hentJournalpostHentDokumentUri(journalpostId, dokumentInfoId)).getDataOrThrow()
 
-    fun hentOrganisasjon(organisasjonsnummer: String): Organisasjon {
-        return getForEntity<Ressurs<Organisasjon>>(hentOrganisasjonUri(organisasjonsnummer)).getDataOrThrow()
-    }
+    fun hentOrganisasjon(organisasjonsnummer: String): Organisasjon = getForEntity<Ressurs<Organisasjon>>(hentOrganisasjonUri(organisasjonsnummer)).getDataOrThrow()
 
-    fun validerOrganisasjon(organisasjonsnummer: String): Boolean {
-        return try {
+    fun validerOrganisasjon(organisasjonsnummer: String): Boolean =
+        try {
             getForEntity<Ressurs<Boolean>>(validerOrganisasjonUri(organisasjonsnummer)).data == true
         } catch (e: Exception) {
             log.error("Organisasjonsnummeret $organisasjonsnummer er ikke gyldig. Feiler med ${e.message}")
             false
         }
-    }
 
-    fun hentSaksbehandler(id: String): Saksbehandler {
-        return getForEntity<Ressurs<Saksbehandler>>(hentSaksbehandlerUri(id)).getDataOrThrow()
-    }
+    fun hentSaksbehandler(id: String): Saksbehandler = getForEntity<Ressurs<Saksbehandler>>(hentSaksbehandlerUri(id)).getDataOrThrow()
 
-    fun opprettOppgave(opprettOppgave: OpprettOppgaveRequest): OppgaveResponse {
-        return postForEntity<Ressurs<OppgaveResponse>>(opprettOppgaveUri, opprettOppgave).getDataOrThrow()
-    }
+    fun opprettOppgave(opprettOppgave: OpprettOppgaveRequest): OppgaveResponse = postForEntity<Ressurs<OppgaveResponse>>(opprettOppgaveUri, opprettOppgave).getDataOrThrow()
 
     fun patchOppgave(patchOppgave: Oppgave): OppgaveResponse {
         val uri = patchOppgaveUri(patchOppgave)
@@ -218,9 +228,7 @@ class IntegrasjonerClient(
         return patchForEntity<Ressurs<OppgaveResponse>>(uri, "", HttpHeaders().medContentTypeJsonUTF8()).getDataOrThrow()
     }
 
-    fun finnOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {
-        return postForEntity<Ressurs<FinnOppgaveResponseDto>>(finnoppgaverUri, finnOppgaveRequest).getDataOrThrow()
-    }
+    fun finnOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto = postForEntity<Ressurs<FinnOppgaveResponseDto>>(finnoppgaverUri, finnOppgaveRequest).getDataOrThrow()
 
     fun ferdigstillOppgave(oppgaveId: Long) {
         patchForEntity<Ressurs<OppgaveResponse>>(ferdigstillOppgaveUri(oppgaveId), "")
@@ -232,9 +240,7 @@ class IntegrasjonerClient(
         return respons.getDataOrThrow()
     }
 
-    fun hentNavkontor(enhetsId: String): NavKontorEnhet {
-        return getForEntity<Ressurs<NavKontorEnhet>>(hentNavkontorUri(enhetsId)).getDataOrThrow()
-    }
+    fun hentNavkontor(enhetsId: String): NavKontorEnhet = getForEntity<Ressurs<NavKontorEnhet>>(hentNavkontorUri(enhetsId)).getDataOrThrow()
 
     /*
      * Sjekker personene i behandlingen er egen ansatt, kode 6 eller kode 7. Og om saksbehandler har rettigheter til å behandle

@@ -177,8 +177,8 @@ class DokumentasjonsgeneratorVedtaksslutt {
         medVerge: Boolean,
         feilutbetaltBeløpBortfalt: Boolean,
         erRevurdering: Boolean,
-    ): HbVedtaksbrevFelles {
-        return HbVedtaksbrevFelles(
+    ): HbVedtaksbrevFelles =
+        HbVedtaksbrevFelles(
             brevmetadata = lagMetadata(ytelsetype, språkkode, medVerge),
             fagsaksvedtaksdato = LocalDate.now(),
             totalresultat =
@@ -223,7 +223,6 @@ class DokumentasjonsgeneratorVedtaksslutt {
                 ),
             harBrukerUttaltSeg = HarBrukerUttaltSeg.JA,
         )
-    }
 
     private fun lagMetadata(
         ytelsestype: Ytelsestype,
@@ -253,8 +252,8 @@ class DokumentasjonsgeneratorVedtaksslutt {
         return listOf(lagPeriode(PERIODE1))
     }
 
-    private fun lagPeriode(periode: Datoperiode): HbVedtaksbrevsperiode {
-        return HbVedtaksbrevsperiode(
+    private fun lagPeriode(periode: Datoperiode): HbVedtaksbrevsperiode =
+        HbVedtaksbrevsperiode(
             periode = periode,
             kravgrunnlag = HbKravgrunnlag(feilutbetaltBeløp = BigDecimal.valueOf(1000)),
             fakta = HbFakta(Hendelsestype.ANNET, Hendelsesundertype.ANNET_FRITEKST),
@@ -274,7 +273,6 @@ class DokumentasjonsgeneratorVedtaksslutt {
                 ),
             førstePeriode = true,
         )
-    }
 
     private fun overskrift(
         flerePerioder: Boolean,
@@ -283,25 +281,23 @@ class DokumentasjonsgeneratorVedtaksslutt {
         medVerge: Boolean,
         feilutbetaltBeløpBortfalt: Boolean,
         erRevurdering: Boolean,
-    ): String {
-        return (
-            "*[ " + (if (flerePerioder) "flere perioder" else "en periode") +
-                " - " + (if (medSkattetrekk) "med skattetrekk" else "uten skattetrekk") +
-                " - " + (if (flereLovhjemler) "flere lovhjemmel" else "en lovhjemmel") +
-                " - " + (if (medVerge) "med verge" else "uten verge") +
-                " - " + (if (feilutbetaltBeløpBortfalt) "feilutbetalt beløp bortfalt" else "ordinær") +
-                (if (erRevurdering) " - revurdering" else "") +
-                " ]*"
-        )
-    }
+    ): String = (
+        "*[ " + (if (flerePerioder) "flere perioder" else "en periode") +
+            " - " + (if (medSkattetrekk) "med skattetrekk" else "uten skattetrekk") +
+            " - " + (if (flereLovhjemler) "flere lovhjemmel" else "en lovhjemmel") +
+            " - " + (if (medVerge) "med verge" else "uten verge") +
+            " - " + (if (feilutbetaltBeløpBortfalt) "feilutbetalt beløp bortfalt" else "ordinær") +
+            (if (erRevurdering) " - revurdering" else "") +
+            " ]*"
+    )
 
-    private fun prettyprint(s: String): String {
-        return s.replace("{venstrejustert}", "")
+    private fun prettyprint(s: String): String =
+        s
+            .replace("{venstrejustert}", "")
             .replace("{høyrejustert}", "\t\t")
             .replace("4 uker", "<klagefrist> uker")
             .replace("4 veker", "<klagefrist> veker")
             .replace("(_.+)".toRegex(), "\n*$1*")
-    }
 
     companion object {
         private val PERIODE1 = Datoperiode(YearMonth.of(2019, 1), YearMonth.of(2019, 1))

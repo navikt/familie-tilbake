@@ -85,12 +85,11 @@ class KravvedtakstatusService(
     private fun finnÅpenBehandling(
         ytelsestype: Ytelsestype,
         fagsystemId: String,
-    ): Behandling? {
-        return behandlingRepository.finnÅpenTilbakekrevingsbehandling(
+    ): Behandling? =
+        behandlingRepository.finnÅpenTilbakekrevingsbehandling(
             ytelsestype = ytelsestype,
             eksternFagsakId = fagsystemId,
         )
-    }
 
     private fun håndterStatusmeldingerUtenBehandling(
         kravgrunnlagXmlListe: List<ØkonomiXmlMottatt>,

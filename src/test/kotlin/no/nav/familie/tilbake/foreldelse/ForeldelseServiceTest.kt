@@ -278,12 +278,11 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
         fom: LocalDate,
         tom: LocalDate,
         foreldelsesvurderingstype: Foreldelsesvurderingstype,
-    ): ForeldelsesperiodeDto {
-        return ForeldelsesperiodeDto(
+    ): ForeldelsesperiodeDto =
+        ForeldelsesperiodeDto(
             periode = Datoperiode(fom, tom),
             begrunnelse = "foreldelses begrunnelse",
             foreldelsesvurderingstype = foreldelsesvurderingstype,
             foreldelsesfrist = LocalDate.of(2017, 2, 28),
         )
-    }
 }

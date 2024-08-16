@@ -173,14 +173,13 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
             )
     }
 
-    private fun opprettTask(kravgrunnlagXml: String): Task {
-        return taskService.save(
+    private fun opprettTask(kravgrunnlagXml: String): Task =
+        taskService.save(
             Task(
                 type = BehandleKravgrunnlagTask.TYPE,
                 payload = kravgrunnlagXml,
             ),
         )
-    }
 
     private fun assertFakta() {
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
@@ -201,10 +200,25 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
         vilkårsvurdering.perioder.size shouldBe 1
         vilkårsvurdering.perioder.first().foreldet shouldBe false // Vil alltid være satt til ikke foreldet ved automatisk behandling
         vilkårsvurdering.perioder.first().begrunnelse shouldBe AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_BEGRUNNELSE
-        vilkårsvurdering.perioder.first().vilkårsvurderingsresultatInfo?.vilkårsvurderingsresultat shouldBe Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT
-        vilkårsvurdering.perioder.first().vilkårsvurderingsresultatInfo?.aktsomhet?.tilbakekrevSmåbeløp shouldBe false
-        vilkårsvurdering.perioder.first().vilkårsvurderingsresultatInfo?.aktsomhet?.aktsomhet shouldBe Aktsomhet.SIMPEL_UAKTSOMHET
-        vilkårsvurdering.perioder.first().vilkårsvurderingsresultatInfo?.aktsomhet?.begrunnelse shouldBe AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_AKTSOMHET_BEGRUNNELSE
+        vilkårsvurdering.perioder
+            .first()
+            .vilkårsvurderingsresultatInfo
+            ?.vilkårsvurderingsresultat shouldBe Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT
+        vilkårsvurdering.perioder
+            .first()
+            .vilkårsvurderingsresultatInfo
+            ?.aktsomhet
+            ?.tilbakekrevSmåbeløp shouldBe false
+        vilkårsvurdering.perioder
+            .first()
+            .vilkårsvurderingsresultatInfo
+            ?.aktsomhet
+            ?.aktsomhet shouldBe Aktsomhet.SIMPEL_UAKTSOMHET
+        vilkårsvurdering.perioder
+            .first()
+            .vilkårsvurderingsresultatInfo
+            ?.aktsomhet
+            ?.begrunnelse shouldBe AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_AKTSOMHET_BEGRUNNELSE
     }
 
     private fun assertAtVedtaksbrevTaskErFullført() {

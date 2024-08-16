@@ -11,7 +11,9 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-class Varselssteg(private val behandlingskontrollService: BehandlingskontrollService) : IBehandlingssteg {
+class Varselssteg(
+    private val behandlingskontrollService: BehandlingskontrollService,
+) : IBehandlingssteg {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
@@ -36,7 +38,5 @@ class Varselssteg(private val behandlingskontrollService: BehandlingskontrollSer
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }
 
-    override fun getBehandlingssteg(): Behandlingssteg {
-        return Behandlingssteg.VARSEL
-    }
+    override fun getBehandlingssteg(): Behandlingssteg = Behandlingssteg.VARSEL
 }

@@ -84,9 +84,7 @@ class TekstformatererVedtaksbrevVedleggTest {
         generertBrev shouldBe fasit
     }
 
-    private fun getVedtaksbrevData(språkkode: Språkkode): HbVedtaksbrevsdata {
-        return getVedtaksbrevData(språkkode, 33001, 30001, 20002, 0, 20002 - 16015)
-    }
+    private fun getVedtaksbrevData(språkkode: Språkkode): HbVedtaksbrevsdata = getVedtaksbrevData(språkkode, 33001, 30001, 20002, 0, 20002 - 16015)
 
     private fun getVedtaksbrevData(
         språkkode: Språkkode = Språkkode.NB,

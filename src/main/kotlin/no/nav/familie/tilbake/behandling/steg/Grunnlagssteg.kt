@@ -49,7 +49,5 @@ class Grunnlagssteg(
         logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.GRUNNLAG} steg")
     }
 
-    override fun getBehandlingssteg(): Behandlingssteg {
-        return Behandlingssteg.GRUNNLAG
-    }
+    override fun getBehandlingssteg(): Behandlingssteg = Behandlingssteg.GRUNNLAG
 }

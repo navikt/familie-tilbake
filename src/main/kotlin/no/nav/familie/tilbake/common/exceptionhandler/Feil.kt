@@ -2,7 +2,10 @@ package no.nav.familie.tilbake.common.exceptionhandler
 
 import org.springframework.http.HttpStatus
 
-data class ApiFeil(val feil: String, val httpStatus: HttpStatus) : RuntimeException()
+data class ApiFeil(
+    val feil: String,
+    val httpStatus: HttpStatus,
+) : RuntimeException()
 
 class Feil(
     message: String,
@@ -14,16 +17,30 @@ class Feil(
         this(message, null, httpStatus, throwable)
 }
 
-class ManglerOppgaveFeil(val melding: String) : RuntimeException(melding)
+class ManglerOppgaveFeil(
+    val melding: String,
+) : RuntimeException(melding)
 
-class ManglerTilgang(val melding: String) : RuntimeException(melding)
+class ManglerTilgang(
+    val melding: String,
+) : RuntimeException(melding)
 
-class UgyldigKravgrunnlagFeil(val melding: String) : RuntimeException(melding)
+class UgyldigKravgrunnlagFeil(
+    val melding: String,
+) : RuntimeException(melding)
 
-class UkjentravgrunnlagFeil(val melding: String) : RuntimeException(melding)
+class UkjentravgrunnlagFeil(
+    val melding: String,
+) : RuntimeException(melding)
 
-class UgyldigStatusmeldingFeil(val melding: String) : RuntimeException(melding)
+class UgyldigStatusmeldingFeil(
+    val melding: String,
+) : RuntimeException(melding)
 
-class SperretKravgrunnlagFeil(val melding: String) : IntegrasjonException(melding)
+class SperretKravgrunnlagFeil(
+    val melding: String,
+) : IntegrasjonException(melding)
 
-class KravgrunnlagIkkeFunnetFeil(val melding: String) : IntegrasjonException(melding)
+class KravgrunnlagIkkeFunnetFeil(
+    val melding: String,
+) : IntegrasjonException(melding)

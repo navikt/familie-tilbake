@@ -8,9 +8,7 @@ object BeløpsberegningUtil {
     fun beregnBeløpPerMåned(
         beløp: BigDecimal,
         kravgrunnlagsperiode: Månedsperiode,
-    ): BigDecimal {
-        return beløp.divide(BigDecimal.valueOf(kravgrunnlagsperiode.lengdeIHeleMåneder()), 2, RoundingMode.HALF_UP)
-    }
+    ): BigDecimal = beløp.divide(BigDecimal.valueOf(kravgrunnlagsperiode.lengdeIHeleMåneder()), 2, RoundingMode.HALF_UP)
 
     fun beregnBeløp(
         vurderingsperiode: Månedsperiode,
