@@ -35,6 +35,9 @@ CREATE DATABASE "familie-tilbake";
 \l (til å verifisere om databasen er opprettet)
 ```
 
+Når `docker run --name familie-tilbake-postgres -e POSTGRES_PASSWORD=test -d -p 5432:5432 postgres` gir feilmelding om at det allerede finnes en container med id `_ID_` må du kjøre:
+`docker start _ID_`
+
 ### Secrets
 Secrets hentes automatisk. Dette krever at du har logget deg på gcloud `gcloud auth login` og at du er på Naisdevice.
 
