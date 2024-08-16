@@ -35,7 +35,7 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask(
         godkjennVedtakOppgave?.let {
             oppgaveService.ferdigstillOppgave(
                 behandlingId = behandling.id,
-                oppgavetype = it.oppgavetype?.let { oppgavetype -> Oppgavetype.valueOf(oppgavetype) },
+                oppgavetype = Oppgavetype.GodkjenneVedtak,
             )
         }
 
