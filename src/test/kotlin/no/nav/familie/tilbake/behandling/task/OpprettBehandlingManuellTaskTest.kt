@@ -80,7 +80,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
 
     private val eksternFagsakId = "testverdi"
     private val ytelsestype = Ytelsestype.BARNETRYGD
-    private val eksternId = "testverdi"
+    private val eksternId = UUID.randomUUID().toString()
     private val ansvarligSaksbehandler = "Z0000"
 
     @BeforeEach

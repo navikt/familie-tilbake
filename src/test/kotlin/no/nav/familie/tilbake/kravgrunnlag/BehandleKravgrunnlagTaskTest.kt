@@ -706,7 +706,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                 BigInteger.ZERO,
                 BigInteger.ZERO,
             )
-        assertOkoXmlMottattData(mottattKravgrunnlagListe, kravgrunnlagXml, Kravstatuskode.NYTT, "0", "2021-03-02-18.50.15.236315")
+        assertOkoXmlMottattData(mottattKravgrunnlagListe, kravgrunnlagXml, Kravstatuskode.NYTT, "3bfda9a8-49f6-4c0d-aedd-d844a038c2ad", "2021-03-02-18.50.15.236315")
 
         mottattXmlArkivRepository.findAll().toList().shouldBeEmpty()
     }

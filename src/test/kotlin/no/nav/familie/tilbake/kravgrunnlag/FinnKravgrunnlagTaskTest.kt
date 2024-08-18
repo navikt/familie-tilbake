@@ -252,7 +252,7 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                 fagsystem = Fagsystem.BA,
                 eksternFagsakId = eksternFagsakId,
                 personIdent = "321321322",
-                eksternId = "0",
+                eksternId = UUID.randomUUID().toString(),
                 manueltOpprettet = false,
                 språkkode = Språkkode.NB,
                 enhetId = "8020",

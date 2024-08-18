@@ -367,7 +367,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         behandlingRepository.update(lagretBehandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
         val kontantstøtteOpprettTilbakekrevingRequest =
-            opprettTilbakekrevingRequest.copy(fagsystem = Fagsystem.KONT, ytelsestype = KONTANTSTØTTE)
+            opprettTilbakekrevingRequest.copy(fagsystem = Fagsystem.KONT, ytelsestype = KONTANTSTØTTE, eksternId = UUID.randomUUID().toString())
 
         val opprettetBehandling =
             behandlingService.opprettBehandling(

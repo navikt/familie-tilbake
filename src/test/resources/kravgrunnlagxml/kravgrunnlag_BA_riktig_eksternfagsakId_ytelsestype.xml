@@ -17,7 +17,7 @@
         <urn:enhetBehandl>8020</urn:enhetBehandl>
         <urn:kontrollfelt>2021-03-02-18.50.15.236315</urn:kontrollfelt>
         <urn:saksbehId>K231B433</urn:saksbehId>
-        <urn:referanse>0</urn:referanse>
+        <urn:referanse>3bfda9a8-49f6-4c0d-aedd-d844a038c2ad</urn:referanse>
         <urn:tilbakekrevingsPeriode>
             <urn:periode>
                 <mmel:fom>2020-08-01</mmel:fom>

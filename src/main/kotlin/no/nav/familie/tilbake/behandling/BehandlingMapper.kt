@@ -36,6 +36,7 @@ import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerMapper
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
+import java.util.UUID
 
 object BehandlingMapper {
     fun tilDomeneBehandling(
@@ -67,6 +68,7 @@ object BehandlingMapper {
             behandlendeEnhet = opprettTilbakekrevingRequest.enhetId,
             behandlendeEnhetsNavn = opprettTilbakekrevingRequest.enhetsnavn,
             manueltOpprettet = opprettTilbakekrevingRequest.manueltOpprettet,
+            eksternBrukId = UUID.fromString(opprettTilbakekrevingRequest.eksternId),
             fagsystemsbehandling = setOf(fagsystemsbehandling),
             varsler = varsler,
             verger = verger,
