@@ -104,4 +104,15 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     """,
     )
     fun finnAlleBehandlingerKlarForGjenoppta(dagensdato: LocalDate): List<Behandling>
+
+    // language=PostgreSQL
+    @Query(
+        """
+            SELECT b.* FROM behandlingsstegstilstand bst
+            JOIN behandling b ON bst.behandling_id = b.id
+            JOIN fagsak f ON b.fagsak_id = f.id
+            WHERE f.fagsystem = :fagsystem AND bst.behandlingssteg = 'FATTE_VEDTAK' AND bst.behandlingsstegsstatus = 'TILBAKEFØRT' AND b.status != 'AVSLUTTET'
+        """
+    )
+    fun hentÅpneBehandlingerMedTilbakeførtFatteVedtakSteg(fagsystem: Fagsystem): List<Behandling>
 }
