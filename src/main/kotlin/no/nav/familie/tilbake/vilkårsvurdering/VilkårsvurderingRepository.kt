@@ -13,5 +13,6 @@ interface VilkårsvurderingRepository :
     RepositoryInterface<Vilkårsvurdering, UUID>,
     InsertUpdateRepository<Vilkårsvurdering> {
     fun findByBehandlingIdAndAktivIsTrue(behandlingId: UUID): Vilkårsvurdering?
+
     fun findByBehandlingId(behandlingId: UUID): List<Vilkårsvurdering>
 }

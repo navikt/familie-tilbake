@@ -37,9 +37,7 @@ class VilkårsvurderingController(
     )
     fun hentVurdertVilkårsvurdering(
         @PathVariable("behandlingId") behandlingId: UUID,
-    ): Ressurs<VurdertVilkårsvurderingDto> {
-        return Ressurs.success(vilkårsvurderingService.hentVilkårsvurdering(behandlingId))
-    }
+    ): Ressurs<VurdertVilkårsvurderingDto> = Ressurs.success(vilkårsvurderingService.hentVilkårsvurdering(behandlingId))
 
     @Operation(summary = "Hent inaktive vilkårsvurderinger")
     @GetMapping(
@@ -54,7 +52,5 @@ class VilkårsvurderingController(
     )
     fun hentInaktivVilkårsvurdering(
         @PathVariable("behandlingId") behandlingId: UUID,
-    ): Ressurs<List<VurdertVilkårsvurderingDto>> {
-        return Ressurs.success(vilkårsvurderingService.hentInaktivVilkårsvurdering(behandlingId))
-    }
+    ): Ressurs<List<VurdertVilkårsvurderingDto>> = Ressurs.success(vilkårsvurderingService.hentInaktivVilkårsvurdering(behandlingId))
 }

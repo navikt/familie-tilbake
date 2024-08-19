@@ -40,9 +40,7 @@ class FaktaFeilutbetalingController(
         @NotNull
         @PathVariable("behandlingId")
         behandlingId: UUID,
-    ): Ressurs<FaktaFeilutbetalingDto> {
-        return Ressurs.success(faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId))
-    }
+    ): Ressurs<FaktaFeilutbetalingDto> = Ressurs.success(faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId))
 
     @Operation(summary = "Hent inaktive fakta om feilutbetalinger")
     @GetMapping(
@@ -59,7 +57,5 @@ class FaktaFeilutbetalingController(
         @NotNull
         @PathVariable("behandlingId")
         behandlingId: UUID,
-    ): Ressurs<List<FaktaFeilutbetalingDto>> {
-        return Ressurs.success(faktaFeilutbetalingService.hentInaktivFaktaomfeilutbetaling(behandlingId))
-    }
+    ): Ressurs<List<FaktaFeilutbetalingDto>> = Ressurs.success(faktaFeilutbetalingService.hentInaktivFaktaomfeilutbetaling(behandlingId))
 }

@@ -11,7 +11,7 @@ import java.time.LocalDateTime
 data class VurdertVilkårsvurderingDto(
     val perioder: List<VurdertVilkårsvurderingsperiodeDto>,
     val rettsgebyr: Long,
-    val opprettetTid: LocalDateTime?
+    val opprettetTid: LocalDateTime?,
 )
 
 data class VurdertVilkårsvurderingsperiodeDto(

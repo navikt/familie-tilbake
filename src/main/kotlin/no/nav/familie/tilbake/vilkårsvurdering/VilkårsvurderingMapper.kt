@@ -93,7 +93,7 @@ object VilkårsvurderingMapper {
         return VurdertVilkårsvurderingDto(
             perioder = samletPerioder.sortedBy { it.periode.fom },
             rettsgebyr = Constants.rettsgebyr,
-            opprettetTid = vilkårsvurdering?.sporbar?.opprettetTid
+            opprettetTid = vilkårsvurdering?.sporbar?.opprettetTid,
         )
     }
 
