@@ -37,5 +37,24 @@ class VilkårsvurderingController(
     )
     fun hentVurdertVilkårsvurdering(
         @PathVariable("behandlingId") behandlingId: UUID,
-    ): Ressurs<VurdertVilkårsvurderingDto> = Ressurs.success(vilkårsvurderingService.hentVilkårsvurdering(behandlingId))
+    ): Ressurs<VurdertVilkårsvurderingDto> {
+        return Ressurs.success(vilkårsvurderingService.hentVilkårsvurdering(behandlingId))
+    }
+
+    @Operation(summary = "Hent inaktive vilkårsvurderinger")
+    @GetMapping(
+        path = ["{behandlingId}/vilkarsvurdering/inaktiv"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    @Rolletilgangssjekk(
+        Behandlerrolle.VEILEDER,
+        "Henter inaktive vilkårsvurderinger for en gitt behandling",
+        AuditLoggerEvent.ACCESS,
+        HenteParam.BEHANDLING_ID,
+    )
+    fun hentInaktivVilkårsvurdering(
+        @PathVariable("behandlingId") behandlingId: UUID,
+    ): Ressurs<List<VurdertVilkårsvurderingDto>> {
+        return Ressurs.success(vilkårsvurderingService.hentInaktivVilkårsvurdering(behandlingId))
+    }
 }

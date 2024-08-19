@@ -117,6 +117,28 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `skal hente inaktive fakta om feilutbetalinger`() {
+        val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        lagFaktaomfeilutbetaling(behandlingId = lagretBehandling.id, hendelsestype = Hendelsestype.SATSER)
+        lagFaktaomfeilutbetaling(behandlingId = lagretBehandling.id, hendelsestype = Hendelsestype.DØDSFALL)
+        lagFaktaomfeilutbetaling(behandlingId = lagretBehandling.id, hendelsestype = Hendelsestype.INNTEKT)
+
+        val faktaFeilutbetalinger = faktaFeilutbetalingService.hentInaktivFaktaomfeilutbetaling(behandlingId = lagretBehandling.id)
+
+        faktaFeilutbetalinger shouldHaveSize 2
+        assertFeilutbetaltePerioder(
+            faktaFeilutbetalingDto = faktaFeilutbetalinger.first(),
+            hendelsestype = Hendelsestype.SATSER,
+            hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
+        )
+        assertFeilutbetaltePerioder(
+            faktaFeilutbetalingDto = faktaFeilutbetalinger.last(),
+            hendelsestype = Hendelsestype.DØDSFALL,
+            hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
+        )
+    }
+
+    @Test
     fun `hentFaktaomfeilutbetaling med vurdering av brukers uttalelse`() {
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
         val oppdatertBehandling = lagretBehandling.copy(varsler = emptySet())
