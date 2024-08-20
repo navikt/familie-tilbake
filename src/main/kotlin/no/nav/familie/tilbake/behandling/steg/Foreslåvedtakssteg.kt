@@ -4,6 +4,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegForeslåVedtaksstegDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
@@ -32,6 +33,7 @@ import java.util.UUID
 @Service
 class Foreslåvedtakssteg(
     private val behandlingRepository: BehandlingRepository,
+    private val fagsakRepository: FagsakRepository,
     private val behandlingskontrollService: BehandlingskontrollService,
     private val vedtaksbrevService: VedtaksbrevService,
     private val oppgaveTaskService: OppgaveTaskService,
@@ -134,13 +136,27 @@ class Foreslåvedtakssteg(
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }
 
+
+    // Her vet vi ikke hvorvidt vi skal ferdigstille en BehandleSak- eller en BehandleUnderkjentVedtak-oppgave.
+    // Må derfor sjekke hva slags oppgave som ligger åpen og ferdigstille denne.
     private fun ferdigstillOppgave(behandlingId: UUID) {
-        val oppgavetype =
-            when (totrinnService.finnesUnderkjenteStegITotrinnsvurdering(behandlingId)) {
-                true -> Oppgavetype.BehandleUnderkjentVedtak
-                false -> Oppgavetype.BehandleSak
-            }
-        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId = behandlingId, oppgavetype = oppgavetype.name)
+        val muligeOppgavetyper = mapOf(
+            Oppgavetype.BehandleSak.value to Oppgavetype.BehandleSak,
+            Oppgavetype.BehandleUnderkjentVedtak.value to Oppgavetype.BehandleUnderkjentVedtak
+        )
+
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val fagsak = fagsakRepository.finnFagsakForBehandlingId(behandlingId)
+
+        val (_, finnOppgaveResponse) = oppgaveService.finnOppgave(behandling = behandling, oppgavetype = null, fagsak = fagsak)
+        val oppgave = finnOppgaveResponse.oppgaver.singleOrNull { muligeOppgavetyper.containsKey(it.oppgavetype) }
+
+        if (oppgave != null) {
+            val oppgavetype = muligeOppgavetyper.getValue(oppgave.oppgavetype!!)
+            oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId = behandlingId, oppgavetype = oppgavetype.name)
+        } else {
+            logger.warn("Finnes ingen ${Oppgavetype.BehandleSak.name} eller ${Oppgavetype.BehandleUnderkjentVedtak.name} -oppgave å ferdigstille for behandling ${behandlingId}")
+        }
     }
 
     private fun opprettGodkjennevedtakOppgave(behandlingId: UUID) {
