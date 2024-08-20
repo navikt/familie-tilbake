@@ -12,17 +12,17 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants.hentAutomatiskVilkårsvurderingAktsomhetBegrunnelse
 import no.nav.familie.tilbake.config.Constants.hentAutomatiskVilkårsvurderingBegrunnelse
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
+import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
+import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
-import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
-import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
-import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 
 @Service
 class VilkårsvurderingService(
@@ -65,7 +65,7 @@ class VilkårsvurderingService(
         vurdertForeldelse: VurdertForeldelse?,
         faktaOmFeilutbetaling: FaktaFeilutbetaling,
         vilkårsvurdering: Vilkårsvurdering?,
-        kravgrunnlag431: Kravgrunnlag431
+        kravgrunnlag431: Kravgrunnlag431,
     ): VurdertVilkårsvurderingDto {
         val perioder = mutableListOf<Månedsperiode>()
         val foreldetPerioderMedBegrunnelse = mutableMapOf<Månedsperiode, String>()
@@ -91,7 +91,6 @@ class VilkårsvurderingService(
             kravgrunnlag431 = kravgrunnlag431,
         )
     }
-
 
     @Transactional
     fun lagreVilkårsvurdering(

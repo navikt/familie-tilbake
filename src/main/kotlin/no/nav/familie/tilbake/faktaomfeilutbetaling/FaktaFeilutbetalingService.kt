@@ -17,10 +17,10 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.VurderingAvBrukersUttalelse
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
-import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 
 @Service
 class FaktaFeilutbetalingService(
@@ -48,7 +48,7 @@ class FaktaFeilutbetalingService(
         val faktaFeilutbetaling: List<FaktaFeilutbetaling> = faktaFeilutbetalingRepository.findByBehandlingId(behandlingId).filter { !it.aktiv }
         val alleKravgrunnlag: List<Kravgrunnlag431> = kravgrunnlagRepository.findByBehandlingId(behandlingId)
 
-        return faktaFeilutbetaling.map {gjeldendeFakta ->
+        return faktaFeilutbetaling.map { gjeldendeFakta ->
             val kravgrunnlag = alleKravgrunnlag.sortedBy { it.sporbar.opprettetTid }.filter { !it.sperret && !it.avsluttet }.last { it.sporbar.opprettetTid <= gjeldendeFakta.sporbar.opprettetTid }
             FaktaFeilutbetalingMapper.tilRespons(
                 faktaFeilutbetaling = gjeldendeFakta,

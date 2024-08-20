@@ -24,25 +24,27 @@ import org.springframework.stereotype.Service
 class FinnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgaveTask(
     val behandlingRepository: BehandlingRepository,
     val oppgaveService: OppgaveService,
-    val behandlingskontrollService: BehandlingskontrollService
-): AsyncTaskStep {
+    val behandlingskontrollService: BehandlingskontrollService,
+) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val fagsystem = Fagsystem.valueOf(task.payload)
         val behandlingerMedTilbakeførtFatteVedtakSteg = behandlingRepository.hentÅpneBehandlingerMedTilbakeførtFatteVedtakSteg(fagsystem)
-        val behandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave = behandlingerMedTilbakeførtFatteVedtakSteg.filter {
-            val aktivOppgave = try {
-                oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(it.id)
-            } catch (e: ManglerOppgaveFeil) {
-                null
-            }
-            val aktivtSteg = behandlingskontrollService.finnAktivtSteg(it.id)
-            aktivtSteg.erPåStegFørFatteVedtak() && aktivOppgave.erNullEllerGodkjenneVedtak()
-        }.map { it.id }
+        val behandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave =
+            behandlingerMedTilbakeførtFatteVedtakSteg.filter {
+                val aktivOppgave =
+                    try {
+                        oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(it.id)
+                    } catch (e: ManglerOppgaveFeil) {
+                        null
+                    }
+                val aktivtSteg = behandlingskontrollService.finnAktivtSteg(it.id)
+                aktivtSteg.erPåStegFørFatteVedtak() && aktivOppgave.erNullEllerGodkjenneVedtak()
+            }.map { it.id }
 
         if (behandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave.isNotEmpty()) {
-            secureLogger.info("Behandlinger som mangler oppgave eller har feil åpen oppgave for fagsystem ${fagsystem}: ${objectMapper.writeValueAsString(behandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave)}")
+            secureLogger.info("Behandlinger som mangler oppgave eller har feil åpen oppgave for fagsystem $fagsystem: ${objectMapper.writeValueAsString(behandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave)}")
         } else {
-            secureLogger.info("Ingen behandlinger for fagsystem ${fagsystem} mangler oppgave eller har feil åpen oppgave.")
+            secureLogger.info("Ingen behandlinger for fagsystem $fagsystem mangler oppgave eller har feil åpen oppgave.")
         }
     }
 
