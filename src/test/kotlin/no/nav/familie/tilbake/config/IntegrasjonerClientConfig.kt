@@ -279,7 +279,7 @@ class IntegrasjonerClientConfig {
                 } else {
                     FinnOppgaveResponseDto(
                         antallTreffTotalt = 1,
-                        oppgaver = listOf(Oppgave(id = 1, oppgavetype = Oppgavetype.BehandleSak.name)),
+                        oppgaver = listOf(Oppgave(id = 1, oppgavetype = Oppgavetype.BehandleSak.value)),
                     )
                 }
             }

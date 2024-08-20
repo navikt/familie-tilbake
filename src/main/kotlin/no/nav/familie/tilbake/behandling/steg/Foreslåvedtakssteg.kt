@@ -4,6 +4,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegForeslåVedtaksstegDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
@@ -20,7 +21,6 @@ import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagsty
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEvent
 import no.nav.familie.tilbake.oppgave.OppgaveService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
-import no.nav.familie.tilbake.totrinn.TotrinnService
 import org.slf4j.LoggerFactory
 import org.springframework.context.event.EventListener
 import org.springframework.http.HttpStatus
@@ -32,10 +32,10 @@ import java.util.UUID
 @Service
 class Foreslåvedtakssteg(
     private val behandlingRepository: BehandlingRepository,
+    private val fagsakRepository: FagsakRepository,
     private val behandlingskontrollService: BehandlingskontrollService,
     private val vedtaksbrevService: VedtaksbrevService,
     private val oppgaveTaskService: OppgaveTaskService,
-    private val totrinnService: TotrinnService,
     private val historikkTaskService: HistorikkTaskService,
     private val oppgaveService: OppgaveService,
 ) : IBehandlingssteg {
@@ -67,7 +67,7 @@ class Foreslåvedtakssteg(
 
         flyttBehandlingVidere(behandlingId)
 
-        ferdigstillOppgave(behandlingId)
+        ferdigstillOppgave(behandling)
         opprettGodkjennevedtakOppgave(behandlingId)
 
         historikkTaskService.lagHistorikkTask(
@@ -93,7 +93,7 @@ class Foreslåvedtakssteg(
         // lukker BehandleSak oppgave og oppretter GodkjenneVedtak oppgave
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.saksbehandlingstype != Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR) {
-            ferdigstillOppgave(behandlingId)
+            ferdigstillOppgave(behandling)
             opprettGodkjennevedtakOppgave(behandlingId)
             historikkTaskService.lagHistorikkTask(
                 behandlingId = behandlingId,
@@ -134,13 +134,26 @@ class Foreslåvedtakssteg(
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }
 
-    private fun ferdigstillOppgave(behandlingId: UUID) {
-        val oppgavetype =
-            when (totrinnService.finnesUnderkjenteStegITotrinnsvurdering(behandlingId)) {
-                true -> Oppgavetype.BehandleUnderkjentVedtak
-                false -> Oppgavetype.BehandleSak
-            }
-        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId = behandlingId, oppgavetype = oppgavetype.name)
+
+    // Her vet vi ikke hvorvidt vi skal ferdigstille en BehandleSak- eller en BehandleUnderkjentVedtak-oppgave.
+    // Må derfor sjekke hva slags oppgave som ligger åpen og ferdigstille denne.
+    private fun ferdigstillOppgave(behandling: Behandling) {
+        val muligeOppgavetyper = mapOf(
+            Oppgavetype.BehandleSak.value to Oppgavetype.BehandleSak,
+            Oppgavetype.BehandleUnderkjentVedtak.value to Oppgavetype.BehandleUnderkjentVedtak
+        )
+
+        val fagsak = fagsakRepository.finnFagsakForBehandlingId(behandling.id)
+
+        val (_, finnOppgaveResponse) = oppgaveService.finnOppgave(behandling = behandling, oppgavetype = null, fagsak = fagsak)
+        val oppgave = finnOppgaveResponse.oppgaver.singleOrNull { muligeOppgavetyper.containsKey(it.oppgavetype) }
+
+        if (oppgave != null) {
+            val oppgavetype = muligeOppgavetyper.getValue(oppgave.oppgavetype!!)
+            oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId = behandling.id, oppgavetype = oppgavetype.name)
+        } else {
+            logger.warn("Finnes ingen ${Oppgavetype.BehandleSak.name} eller ${Oppgavetype.BehandleUnderkjentVedtak.name} -oppgave å ferdigstille for behandling ${behandling.id}")
+        }
     }
 
     private fun opprettGodkjennevedtakOppgave(behandlingId: UUID) {
