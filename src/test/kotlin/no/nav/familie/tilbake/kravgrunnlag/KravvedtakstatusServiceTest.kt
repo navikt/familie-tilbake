@@ -85,7 +85,7 @@ class KravvedtakstatusServiceTest {
     fun `håndterSperMeldingMedBehandling - skal oppdatere oppgave dersom nåværende oppgave er BehandleSak, så lenge behandlingen ikke står på behandlingsteg VARSEL`(behandlingssteg: Behandlingssteg) {
         // Arrange
         every { behandlingskontrollService.finnAktivtSteg(any()) } returns behandlingssteg
-        every { oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(any()) } returns Oppgave(oppgavetype = Oppgavetype.BehandleSak.name)
+        every { oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(any()) } returns Oppgave(oppgavetype = Oppgavetype.BehandleSak.value)
 
         // Act
         kravvedtakstatusService.håndterSperMeldingMedBehandling(behandlingId = behandling.id, kravgrunnlag431 = kravgrunnlag)
