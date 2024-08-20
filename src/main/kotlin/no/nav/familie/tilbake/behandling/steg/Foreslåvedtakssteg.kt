@@ -21,7 +21,6 @@ import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagsty
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEvent
 import no.nav.familie.tilbake.oppgave.OppgaveService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
-import no.nav.familie.tilbake.totrinn.TotrinnService
 import org.slf4j.LoggerFactory
 import org.springframework.context.event.EventListener
 import org.springframework.http.HttpStatus
@@ -37,7 +36,6 @@ class Foreslåvedtakssteg(
     private val behandlingskontrollService: BehandlingskontrollService,
     private val vedtaksbrevService: VedtaksbrevService,
     private val oppgaveTaskService: OppgaveTaskService,
-    private val totrinnService: TotrinnService,
     private val historikkTaskService: HistorikkTaskService,
     private val oppgaveService: OppgaveService,
 ) : IBehandlingssteg {
@@ -95,7 +93,7 @@ class Foreslåvedtakssteg(
         // lukker BehandleSak oppgave og oppretter GodkjenneVedtak oppgave
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.saksbehandlingstype != Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR) {
-            ferdigstillOppgave(behandlingId)
+            ferdigstillOppgave(behandling)
             opprettGodkjennevedtakOppgave(behandlingId)
             historikkTaskService.lagHistorikkTask(
                 behandlingId = behandlingId,
