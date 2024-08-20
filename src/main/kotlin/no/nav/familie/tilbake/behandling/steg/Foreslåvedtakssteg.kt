@@ -69,7 +69,7 @@ class Foreslåvedtakssteg(
 
         flyttBehandlingVidere(behandlingId)
 
-        ferdigstillOppgave(behandlingId)
+        ferdigstillOppgave(behandling)
         opprettGodkjennevedtakOppgave(behandlingId)
 
         historikkTaskService.lagHistorikkTask(
@@ -139,23 +139,22 @@ class Foreslåvedtakssteg(
 
     // Her vet vi ikke hvorvidt vi skal ferdigstille en BehandleSak- eller en BehandleUnderkjentVedtak-oppgave.
     // Må derfor sjekke hva slags oppgave som ligger åpen og ferdigstille denne.
-    private fun ferdigstillOppgave(behandlingId: UUID) {
+    private fun ferdigstillOppgave(behandling: Behandling) {
         val muligeOppgavetyper = mapOf(
             Oppgavetype.BehandleSak.value to Oppgavetype.BehandleSak,
             Oppgavetype.BehandleUnderkjentVedtak.value to Oppgavetype.BehandleUnderkjentVedtak
         )
 
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        val fagsak = fagsakRepository.finnFagsakForBehandlingId(behandlingId)
+        val fagsak = fagsakRepository.finnFagsakForBehandlingId(behandling.id)
 
         val (_, finnOppgaveResponse) = oppgaveService.finnOppgave(behandling = behandling, oppgavetype = null, fagsak = fagsak)
         val oppgave = finnOppgaveResponse.oppgaver.singleOrNull { muligeOppgavetyper.containsKey(it.oppgavetype) }
 
         if (oppgave != null) {
             val oppgavetype = muligeOppgavetyper.getValue(oppgave.oppgavetype!!)
-            oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId = behandlingId, oppgavetype = oppgavetype.name)
+            oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId = behandling.id, oppgavetype = oppgavetype.name)
         } else {
-            logger.warn("Finnes ingen ${Oppgavetype.BehandleSak.name} eller ${Oppgavetype.BehandleUnderkjentVedtak.name} -oppgave å ferdigstille for behandling ${behandlingId}")
+            logger.warn("Finnes ingen ${Oppgavetype.BehandleSak.name} eller ${Oppgavetype.BehandleUnderkjentVedtak.name} -oppgave å ferdigstille for behandling ${behandling.id}")
         }
     }
 
