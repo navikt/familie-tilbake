@@ -35,18 +35,19 @@ class KravvedtakstatusServiceTest {
     private val historikkTaskService: HistorikkTaskService = mockk()
     private val oppgaveTaskService: OppgaveTaskService = mockk()
     private val oppgaveService: OppgaveService = mockk()
-    private val kravvedtakstatusService = KravvedtakstatusService(
-        kravgrunnlagRepository = kravgrunnlagRepository,
-        behandlingRepository = behandlingRepository,
-        mottattXmlService = mottattXmlService,
-        stegService = stegService,
-        tellerService = tellerService,
-        behandlingskontrollService = behandlingskontrollService,
-        behandlingService = behandlingService,
-        historikkTaskService = historikkTaskService,
-        oppgaveTaskService = oppgaveTaskService,
-        oppgaveService = oppgaveService
-    )
+    private val kravvedtakstatusService =
+        KravvedtakstatusService(
+            kravgrunnlagRepository = kravgrunnlagRepository,
+            behandlingRepository = behandlingRepository,
+            mottattXmlService = mottattXmlService,
+            stegService = stegService,
+            tellerService = tellerService,
+            behandlingskontrollService = behandlingskontrollService,
+            behandlingService = behandlingService,
+            historikkTaskService = historikkTaskService,
+            oppgaveTaskService = oppgaveTaskService,
+            oppgaveService = oppgaveService,
+        )
 
     val behandling = lagBehandling()
     val kravgrunnlag = mockk<Kravgrunnlag431>(relaxed = true)

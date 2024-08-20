@@ -19,7 +19,7 @@ data class FaktaFeilutbetalingDto(
     val faktainfo: Faktainfo,
     val kravgrunnlagReferanse: String,
     val vurderingAvBrukersUttalelse: VurderingAvBrukersUttalelseDto,
-    val opprettetTid: LocalDateTime? = null
+    val opprettetTid: LocalDateTime? = null,
 ) {
     val gjelderDødsfall get() = feilutbetaltePerioder.any { it.hendelsestype == Hendelsestype.DØDSFALL }
 }
