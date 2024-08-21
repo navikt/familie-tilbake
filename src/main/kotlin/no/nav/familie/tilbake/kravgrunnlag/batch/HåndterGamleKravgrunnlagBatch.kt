@@ -39,7 +39,7 @@ class HåndterGamleKravgrunnlagBatch(
         if (erLederEllerLokaltMiljø()) {
             logger.info("Starter HåndterGamleKravgrunnlagBatch..")
 
-            logger.info("Henter kravgrunnlag som er eldre enn $ALDERSGRENSE_I_UKER uker")
+            logger.info("Henter kravgrunnlag som er eldre enn $ALDERSGRENSE_I_DAGER uker")
 
             val frakobletKravgrunnlag =
                 mottattXmlService.hentFrakobletKravgrunnlag(
@@ -50,17 +50,17 @@ class HåndterGamleKravgrunnlagBatch(
                     beregnBestemtDato(KONTANTSTØTTE),
                 )
 
-            val frakobletKravgrunnlagGruppertPåEksternFagsakId = frakobletKravgrunnlag.groupBy { it.eksternFagsakId }
+            val frakobletKravgrunnlagGruppertPåEksternFagsakId = frakobletKravgrunnlag.groupBy { Pair(it.eksternFagsakId, it.ytelsestype) }
 
             if (frakobletKravgrunnlagGruppertPåEksternFagsakId.isEmpty()) {
-                logger.info("Det finnes ingen kravgrunnlag som er eldre enn $ALDERSGRENSE_I_UKER uker fra dagens dato")
+                logger.info("Det finnes ingen kravgrunnlag som er eldre enn $ALDERSGRENSE_I_DAGER dager fra dagens dato")
                 logger.info("Stopper HåndterGamleKravgrunnlagBatch..")
                 return
             }
 
             logger.info(
                 "Det finnes ${frakobletKravgrunnlag.size} kravgrunnlag som er eldre enn " +
-                    "$ALDERSGRENSE_I_UKER uker fra dagens dato",
+                    "$ALDERSGRENSE_I_DAGER dager fra dagens dato",
             )
 
             val taskerMedStatus =
@@ -104,7 +104,7 @@ class HåndterGamleKravgrunnlagBatch(
     }
 
     private fun beregnBestemtDato(ytelsestype: Ytelsestype): LocalDate {
-        return LocalDate.now().minusWeeks(ALDERSGRENSE_I_UKER.getValue(ytelsestype))
+        return LocalDate.now().minusDays(ALDERSGRENSE_I_DAGER.getValue(ytelsestype))
     }
 
     private fun sorterKravgrunnlagPåKontrollfelt(kravgrunnlagerPåFagsak: List<ØkonomiXmlMottatt>) =
@@ -152,13 +152,13 @@ class HåndterGamleKravgrunnlagBatch(
                 Status.MANUELL_OPPFØLGING,
             )
 
-        val ALDERSGRENSE_I_UKER =
+        val ALDERSGRENSE_I_DAGER =
             mapOf<Ytelsestype, Long>(
-                BARNETRYGD to 8,
-                BARNETILSYN to 8,
-                OVERGANGSSTØNAD to 8,
-                SKOLEPENGER to 8,
-                KONTANTSTØTTE to 8,
+                BARNETRYGD to 56,
+                BARNETILSYN to 56,
+                OVERGANGSSTØNAD to 56,
+                SKOLEPENGER to 56,
+                KONTANTSTØTTE to 1,
             )
     }
 }
