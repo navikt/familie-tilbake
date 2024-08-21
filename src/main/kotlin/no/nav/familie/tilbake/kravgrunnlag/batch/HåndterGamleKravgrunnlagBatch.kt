@@ -39,7 +39,7 @@ class HåndterGamleKravgrunnlagBatch(
         if (erLederEllerLokaltMiljø()) {
             logger.info("Starter HåndterGamleKravgrunnlagBatch..")
 
-            logger.info("Henter kravgrunnlag som er eldre enn $ALDERSGRENSE_I_DAGER uker")
+            logger.info("Henter kravgrunnlag som er eldre enn $ALDERSGRENSE_I_DAGER dager")
 
             val frakobletKravgrunnlag =
                 mottattXmlService.hentFrakobletKravgrunnlag(
@@ -50,9 +50,9 @@ class HåndterGamleKravgrunnlagBatch(
                     beregnBestemtDato(KONTANTSTØTTE),
                 )
 
-            val frakobletKravgrunnlagGruppertPåEksternFagsakId = frakobletKravgrunnlag.groupBy { Pair(it.eksternFagsakId, it.ytelsestype) }
+            val frakobletKravgrunnlagGruppertPåEksternFagsakIdOgYtelsetype = frakobletKravgrunnlag.groupBy { Pair(it.eksternFagsakId, it.ytelsestype) }
 
-            if (frakobletKravgrunnlagGruppertPåEksternFagsakId.isEmpty()) {
+            if (frakobletKravgrunnlagGruppertPåEksternFagsakIdOgYtelsetype.isEmpty()) {
                 logger.info("Det finnes ingen kravgrunnlag som er eldre enn $ALDERSGRENSE_I_DAGER dager fra dagens dato")
                 logger.info("Stopper HåndterGamleKravgrunnlagBatch..")
                 return
@@ -69,9 +69,9 @@ class HåndterGamleKravgrunnlagBatch(
                     Pageable.unpaged(),
                 )
 
-            frakobletKravgrunnlagGruppertPåEksternFagsakId.forEach { (_, kravgrunnlagerPåFagsak) ->
+            frakobletKravgrunnlagGruppertPåEksternFagsakIdOgYtelsetype.forEach { (_, kravgrunnlagForFagsak) ->
 
-                val kravgrunnlagSortertEtterKontrollfelt = sorterKravgrunnlagPåKontrollfelt(kravgrunnlagerPåFagsak)
+                val kravgrunnlagSortertEtterKontrollfelt = sorterKravgrunnlagPåKontrollfelt(kravgrunnlagForFagsak)
 
                 kravgrunnlagSortertEtterKontrollfelt.forEachIndexed { index, kravgrunnlagPåFagsak ->
 
