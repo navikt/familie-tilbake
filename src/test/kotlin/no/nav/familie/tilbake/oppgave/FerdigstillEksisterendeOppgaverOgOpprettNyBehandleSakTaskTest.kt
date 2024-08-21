@@ -29,12 +29,13 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakTaskTest {
     val oppgaveService: OppgaveService = mockk()
     val oppgavePrioritetService: OppgavePrioritetService = mockk()
 
-    val ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask = FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask(
-        behandlingRepository = behandlingRepository,
-        fagsakRepository = fagsakRepository,
-        oppgaveService = oppgaveService,
-        oppgavePrioritetService = oppgavePrioritetService
-    )
+    val ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask =
+        FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask(
+            behandlingRepository = behandlingRepository,
+            fagsakRepository = fagsakRepository,
+            oppgaveService = oppgaveService,
+            oppgavePrioritetService = oppgavePrioritetService,
+        )
 
     @AfterEach
     fun afterEach() {
@@ -58,29 +59,35 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakTaskTest {
         val fristSlot = slot<LocalDate>()
         val frist = LocalDate.now()
         // Act
-        ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask.doTask(Task(
-            type = FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask.TYPE,
-            payload = objectMapper.writeValueAsString(
-                FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask.FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveDto(
-                    behandlingId = behandling.id,
-                    beskrivelse = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse,
-                    frist = frist
-                ))
-        ))
+        ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask.doTask(
+            Task(
+                type = FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask.TYPE,
+                payload =
+                    objectMapper.writeValueAsString(
+                        FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask.FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveDto(
+                            behandlingId = behandling.id,
+                            beskrivelse = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse,
+                            frist = frist,
+                        ),
+                    ),
+            ),
+        )
 
         // Assert
-        verify (exactly = 1) {oppgaveService.ferdigstillOppgave(any(), capture(oppgavetypeFerdigstillSlot))}
+        verify(exactly = 1) { oppgaveService.ferdigstillOppgave(any(), capture(oppgavetypeFerdigstillSlot)) }
         assertThat(oppgavetypeFerdigstillSlot.captured).isEqualTo(Oppgavetype.GodkjenneVedtak)
 
-        verify(exactly = 1) {oppgaveService.opprettOppgave(
-            behandlingId = any(),
-            oppgavetype = capture(oppgavetypeOpprettSlot),
-            enhet = any(),
-            beskrivelse = capture(beskrivelseSlot),
-            fristForFerdigstillelse = capture(fristSlot),
-            saksbehandler = any(),
-            prioritet = any()
-        )}
+        verify(exactly = 1) {
+            oppgaveService.opprettOppgave(
+                behandlingId = any(),
+                oppgavetype = capture(oppgavetypeOpprettSlot),
+                enhet = any(),
+                beskrivelse = capture(beskrivelseSlot),
+                fristForFerdigstillelse = capture(fristSlot),
+                saksbehandler = any(),
+                prioritet = any(),
+            )
+        }
         assertThat(oppgavetypeOpprettSlot.captured).isEqualTo(Oppgavetype.BehandleSak)
         assertThat(beskrivelseSlot.captured).isEqualTo(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse)
         assertThat(fristSlot.captured).isEqualTo(frist)
@@ -96,18 +103,22 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakTaskTest {
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any(), any()) } just runs
         every { oppgavePrioritetService.utledOppgaveprioritet(any()) } returns OppgavePrioritet.NORM
         // Act
-        ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask.doTask(Task(
-            type = FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask.TYPE,
-            payload = objectMapper.writeValueAsString(
-                FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask.FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveDto(
-                    behandlingId = behandling.id,
-                    beskrivelse = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse,
-                    frist = LocalDate.now()
-                ))
-        ))
+        ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask.doTask(
+            Task(
+                type = FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask.TYPE,
+                payload =
+                    objectMapper.writeValueAsString(
+                        FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask.FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveDto(
+                            behandlingId = behandling.id,
+                            beskrivelse = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse,
+                            frist = LocalDate.now(),
+                        ),
+                    ),
+            ),
+        )
 
         // Assert
-        verify (exactly = 0) {oppgaveService.ferdigstillOppgave(any(), any())}
-        verify(exactly = 1) {oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any(), any())}
+        verify(exactly = 0) { oppgaveService.ferdigstillOppgave(any(), any()) }
+        verify(exactly = 1) { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any(), any()) }
     }
 }

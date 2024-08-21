@@ -35,18 +35,19 @@ class KravvedtakstatusServiceTest {
     private val historikkTaskService: HistorikkTaskService = mockk()
     private val oppgaveTaskService: OppgaveTaskService = mockk()
     private val oppgaveService: OppgaveService = mockk()
-    private val kravvedtakstatusService = KravvedtakstatusService(
-        kravgrunnlagRepository = kravgrunnlagRepository,
-        behandlingRepository = behandlingRepository,
-        mottattXmlService = mottattXmlService,
-        stegService = stegService,
-        tellerService = tellerService,
-        behandlingskontrollService = behandlingskontrollService,
-        behandlingService = behandlingService,
-        historikkTaskService = historikkTaskService,
-        oppgaveTaskService = oppgaveTaskService,
-        oppgaveService = oppgaveService
-    )
+    private val kravvedtakstatusService =
+        KravvedtakstatusService(
+            kravgrunnlagRepository = kravgrunnlagRepository,
+            behandlingRepository = behandlingRepository,
+            mottattXmlService = mottattXmlService,
+            stegService = stegService,
+            tellerService = tellerService,
+            behandlingskontrollService = behandlingskontrollService,
+            behandlingService = behandlingService,
+            historikkTaskService = historikkTaskService,
+            oppgaveTaskService = oppgaveTaskService,
+            oppgaveService = oppgaveService,
+        )
 
     val behandling = lagBehandling()
     val kravgrunnlag = mockk<Kravgrunnlag431>(relaxed = true)
@@ -85,7 +86,7 @@ class KravvedtakstatusServiceTest {
     fun `håndterSperMeldingMedBehandling - skal oppdatere oppgave dersom nåværende oppgave er BehandleSak, så lenge behandlingen ikke står på behandlingsteg VARSEL`(behandlingssteg: Behandlingssteg) {
         // Arrange
         every { behandlingskontrollService.finnAktivtSteg(any()) } returns behandlingssteg
-        every { oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(any()) } returns Oppgave(oppgavetype = Oppgavetype.BehandleSak.name)
+        every { oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(any()) } returns Oppgave(oppgavetype = Oppgavetype.BehandleSak.value)
 
         // Act
         kravvedtakstatusService.håndterSperMeldingMedBehandling(behandlingId = behandling.id, kravgrunnlag431 = kravgrunnlag)

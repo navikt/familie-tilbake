@@ -4,7 +4,6 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
-import io.kotest.matchers.collections.shouldContainOnly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
@@ -372,7 +371,6 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         godTroDto.beløpTilbakekreves.shouldBeNull()
     }
 
-
     @Test
     fun `skal hente inaktiv vilkårsvurdering`() {
         val behandlingsstegVilkårsvurderingDto =
@@ -401,9 +399,9 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         inaktiveVilkårsvurderinger.last().perioder.first().vilkårsvurderingsresultatInfo?.vilkårsvurderingsresultat shouldBe Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT
         inaktiveVilkårsvurderinger.last().perioder.first().vilkårsvurderingsresultatInfo?.aktsomhet?.begrunnelse shouldBe "Aktsomhet begrunnelse"
         inaktiveVilkårsvurderinger.last().perioder.first().vilkårsvurderingsresultatInfo?.aktsomhet?.særligeGrunner?.shouldHaveSize(1)
-        inaktiveVilkårsvurderinger.last().perioder.first().vilkårsvurderingsresultatInfo?.aktsomhet?.særligeGrunner?.first()?.særligGrunn shouldBe  SærligGrunn.GRAD_AV_UAKTSOMHET
-
+        inaktiveVilkårsvurderinger.last().perioder.first().vilkårsvurderingsresultatInfo?.aktsomhet?.særligeGrunner?.first()?.særligGrunn shouldBe SærligGrunn.GRAD_AV_UAKTSOMHET
     }
+
     @Test
     fun `hentVilkårsvurdering skal hente foreldelse perioder som endret til IKKE_FORELDET`() {
         // en periode med FORELDET og andre er IKKE_FORELDET

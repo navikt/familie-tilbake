@@ -24,8 +24,7 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask(
     val fagsakRepository: FagsakRepository,
     val oppgaveService: OppgaveService,
     val oppgavePrioritetService: OppgavePrioritetService,
-): AsyncTaskStep {
-
+) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val payload = objectMapper.readValue(task.payload, FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveDto::class.java)
         val behandling = behandlingRepository.findByIdOrThrow(payload.behandlingId)
@@ -46,7 +45,7 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask(
             beskrivelse = payload.beskrivelse,
             fristForFerdigstillelse = payload.frist,
             saksbehandler = behandling.ansvarligSaksbehandler,
-            prioritet = prioritet
+            prioritet = prioritet,
         )
     }
 
