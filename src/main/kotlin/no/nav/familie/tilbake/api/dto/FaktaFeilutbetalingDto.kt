@@ -7,6 +7,7 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class FaktaFeilutbetalingDto(
     val varsletBeløp: Long? = null,
@@ -18,6 +19,7 @@ data class FaktaFeilutbetalingDto(
     val faktainfo: Faktainfo,
     val kravgrunnlagReferanse: String,
     val vurderingAvBrukersUttalelse: VurderingAvBrukersUttalelseDto,
+    val opprettetTid: LocalDateTime? = null,
 ) {
     val gjelderDødsfall get() = feilutbetaltePerioder.any { it.hendelsestype == Hendelsestype.DØDSFALL }
 }

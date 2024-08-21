@@ -182,7 +182,7 @@ class KravvedtakstatusService(
         val aktivtBehandlingssteg = behandlingskontrollService.finnAktivtSteg(behandlingId)
         if (aktivtBehandlingssteg?.let { it != Behandlingssteg.VARSEL } == true) {
             val oppgave = oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
-            val behandleSakOppgavetyper = listOf(Oppgavetype.BehandleSak.name, Oppgavetype.BehandleUnderkjentVedtak.name)
+            val behandleSakOppgavetyper = listOf(Oppgavetype.BehandleSak.value, Oppgavetype.BehandleUnderkjentVedtak.value)
             if (behandleSakOppgavetyper.contains(oppgave.oppgavetype)) {
                 oppgaveTaskService.oppdaterOppgaveTask(
                     behandlingId = behandlingId,

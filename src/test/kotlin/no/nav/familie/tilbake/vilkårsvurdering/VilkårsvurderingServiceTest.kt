@@ -4,6 +4,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -368,6 +369,37 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         godTroDto.beløpErIBehold.shouldBeTrue()
         godTroDto.begrunnelse shouldBe "God tro begrunnelse"
         godTroDto.beløpTilbakekreves.shouldBeNull()
+    }
+
+    @Test
+    fun `skal hente inaktiv vilkårsvurdering`() {
+        val behandlingsstegVilkårsvurderingDto =
+            lagVilkårsvurderingMedGodTro(perioder = listOf(Datoperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 2))))
+        vilkårsvurderingService.lagreVilkårsvurdering(
+            behandlingId = behandling.id,
+            behandlingsstegVilkårsvurderingDto = behandlingsstegVilkårsvurderingDto,
+        )
+
+        val oppdatertVilkårsvurderingDto = lagVilkårsvurderingMedSimpelAktsomhet(særligGrunn = SærligGrunnDto(SærligGrunn.GRAD_AV_UAKTSOMHET))
+        val oppdatertVilkårsvurderingDtoNavsFeil = lagVilkårsvurderingMedSimpelAktsomhet(særligGrunn = SærligGrunnDto(SærligGrunn.HELT_ELLER_DELVIS_NAVS_FEIL))
+        vilkårsvurderingService.lagreVilkårsvurdering(
+            behandlingId = behandling.id,
+            behandlingsstegVilkårsvurderingDto = oppdatertVilkårsvurderingDto,
+        )
+        vilkårsvurderingService.lagreVilkårsvurdering(
+            behandlingId = behandling.id,
+            behandlingsstegVilkårsvurderingDto = oppdatertVilkårsvurderingDtoNavsFeil,
+        )
+
+        val inaktiveVilkårsvurderinger = vilkårsvurderingService.hentInaktivVilkårsvurdering(behandling.id)
+        inaktiveVilkårsvurderinger.size shouldBe 2
+        inaktiveVilkårsvurderinger.first().perioder.first().vilkårsvurderingsresultatInfo?.vilkårsvurderingsresultat shouldBe Vilkårsvurderingsresultat.GOD_TRO
+        inaktiveVilkårsvurderinger.first().perioder.first().vilkårsvurderingsresultatInfo?.godTro?.begrunnelse shouldBe "God tro begrunnelse"
+
+        inaktiveVilkårsvurderinger.last().perioder.first().vilkårsvurderingsresultatInfo?.vilkårsvurderingsresultat shouldBe Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT
+        inaktiveVilkårsvurderinger.last().perioder.first().vilkårsvurderingsresultatInfo?.aktsomhet?.begrunnelse shouldBe "Aktsomhet begrunnelse"
+        inaktiveVilkårsvurderinger.last().perioder.first().vilkårsvurderingsresultatInfo?.aktsomhet?.særligeGrunner?.shouldHaveSize(1)
+        inaktiveVilkårsvurderinger.last().perioder.first().vilkårsvurderingsresultatInfo?.aktsomhet?.særligeGrunner?.first()?.særligGrunn shouldBe SærligGrunn.GRAD_AV_UAKTSOMHET
     }
 
     @Test

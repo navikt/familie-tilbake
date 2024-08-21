@@ -37,7 +37,7 @@ class TestdataInitializer : ApplicationListener<ContextRefreshedEvent> {
             fagsystem = Fagsystem.EF,
             eksternFagsakId = "1234567",
             personIdent = "321321322",
-            eksternId = "f5ed9439-54da-4f50-8457-534c417e3430", // Brukes ikke - det blir generert ny UUID
+            eksternId = "f5ed9439-54da-4f50-8457-534c417e3430",
             manueltOpprettet = false,
             språkkode = Språkkode.NB,
             enhetId = "8020",

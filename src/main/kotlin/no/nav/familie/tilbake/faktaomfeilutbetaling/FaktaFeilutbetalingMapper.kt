@@ -46,6 +46,7 @@ object FaktaFeilutbetalingMapper {
             totalFeilutbetaltPeriode = utledTotalFeilutbetaltPeriode(logiskePerioder),
             kravgrunnlagReferanse = kravgrunnlag.referanse,
             vurderingAvBrukersUttalelse = tilDto(faktaFeilutbetaling?.vurderingAvBrukersUttalelse),
+            opprettetTid = faktaFeilutbetaling?.sporbar?.opprettetTid,
         )
     }
 

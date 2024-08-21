@@ -41,4 +41,23 @@ class FaktaFeilutbetalingController(val faktaFeilutbetalingService: FaktaFeilutb
     ): Ressurs<FaktaFeilutbetalingDto> {
         return Ressurs.success(faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId))
     }
+
+    @Operation(summary = "Hent inaktive fakta om feilutbetalinger")
+    @GetMapping(
+        path = ["/behandling/{behandlingId}/fakta/inaktiv"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    @Rolletilgangssjekk(
+        Behandlerrolle.VEILEDER,
+        "Henter inaktive fakta om feilutbetaling for en gitt behandling",
+        AuditLoggerEvent.ACCESS,
+        HenteParam.BEHANDLING_ID,
+    )
+    fun hentInaktivFaktaomfeilutbetaling(
+        @NotNull
+        @PathVariable("behandlingId")
+        behandlingId: UUID,
+    ): Ressurs<List<FaktaFeilutbetalingDto>> {
+        return Ressurs.success(faktaFeilutbetalingService.hentInaktivFaktaomfeilutbetaling(behandlingId))
+    }
 }
