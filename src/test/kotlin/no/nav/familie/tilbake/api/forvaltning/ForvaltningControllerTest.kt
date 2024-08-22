@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.api.forvaltning
 
 import io.mockk.every
 import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
@@ -20,6 +21,7 @@ import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.InnloggetBrukertilgang
 import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -46,6 +48,11 @@ class ForvaltningControllerTest : OppslagSpringRunnerTest() {
     fun init() {
         mockkObject(ContextService)
         headers.setBearerAuth(lokalTestToken())
+    }
+
+    @AfterEach
+    fun afterEach() {
+        unmockkObject(ContextService)
     }
 
     @Test
