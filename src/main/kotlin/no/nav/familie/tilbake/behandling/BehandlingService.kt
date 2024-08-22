@@ -630,11 +630,27 @@ class BehandlingService(
     private fun kanSetteBehandlingTilbakeTilFakta(
         behandling: Behandling,
         behandlerRolle: Behandlerrolle,
-    ) = behandlingKanSettesTilbakeTilFakta(behandling) &&
-        ContextService.hentSaksbehandler() == behandling.ansvarligSaksbehandler &&
+    ): Boolean {
+        return behandlingUtredesOgErIkkePåVent(behandling) &&
+            harInnloggetBrukerTilgangTilÅSetteTilbakeTilFakta(behandling.ansvarligSaksbehandler, behandlerRolle)
+    }
+
+    private fun harInnloggetBrukerTilgangTilÅSetteTilbakeTilFakta(
+        ansvarligSaksbehandler: String,
+        behandlerRolle: Behandlerrolle,
+    ) = erAnsvarligSaksbehandler(ansvarligSaksbehandler, behandlerRolle) || erForvalter(behandlerRolle)
+
+    private fun erForvalter(behandlerRolle: Behandlerrolle): Boolean {
+        return behandlerRolle == Behandlerrolle.FORVALTER
+    }
+
+    private fun erAnsvarligSaksbehandler(
+        ansvarligSaksbehandler: String,
+        behandlerRolle: Behandlerrolle,
+    ) = ContextService.hentSaksbehandler() == ansvarligSaksbehandler &&
         (behandlerRolle == Behandlerrolle.SAKSBEHANDLER || behandlerRolle == Behandlerrolle.BESLUTTER)
 
-    private fun behandlingKanSettesTilbakeTilFakta(behandling: Behandling) = (Behandlingsstatus.UTREDES == behandling.status) && !behandlingskontrollService.erBehandlingPåVent(behandling.id)
+    private fun behandlingUtredesOgErIkkePåVent(behandling: Behandling) = Behandlingsstatus.UTREDES == behandling.status && !behandlingskontrollService.erBehandlingPåVent(behandling.id)
 
     private fun kanRevurderingOpprettes(behandling: Behandling): Boolean {
         return behandling.erAvsluttet &&
@@ -693,3 +709,5 @@ class BehandlingService(
         ): Boolean = fagsak.institusjon == null && !behandling.harVerge
     }
 }
+
+
