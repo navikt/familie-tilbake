@@ -16,7 +16,6 @@ class Feil(
         this(message, null, httpStatus, throwable)
 }
 
-
 @OptIn(ExperimentalContracts::class)
 inline fun feilHvis(
     boolean: Boolean,

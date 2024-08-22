@@ -61,7 +61,7 @@ class ForvaltningControllerTest : OppslagSpringRunnerTest() {
             .returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.ENSLIG_FORELDER to Behandlerrolle.BESLUTTER)))
         every { ContextService.hentSaksbehandler() } returns "ansvarligSaksbehandler"
 
-        val response = flyttBehandlingTilFakta(opprettTestdata(saksbehandler = "ansvarligSaksbehandler", behandlingsstegsstatus= Behandlingsstegstatus.KLAR))
+        val response = flyttBehandlingTilFakta(opprettTestdata(saksbehandler = "ansvarligSaksbehandler", behandlingsstegsstatus = Behandlingsstegstatus.KLAR))
         assertEquals(HttpStatus.OK, response.statusCode)
     }
 
@@ -91,7 +91,7 @@ class ForvaltningControllerTest : OppslagSpringRunnerTest() {
             .returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.ENSLIG_FORELDER to Behandlerrolle.SAKSBEHANDLER)))
         every { ContextService.hentSaksbehandler() } returns "ansvarligSaksbehandler"
 
-        val response = flyttBehandlingTilFakta(opprettTestdata(saksbehandler = "ansvarligSaksbehandler", behandlingsstegsstatus= Behandlingsstegstatus.KLAR))
+        val response = flyttBehandlingTilFakta(opprettTestdata(saksbehandler = "ansvarligSaksbehandler", behandlingsstegsstatus = Behandlingsstegstatus.KLAR))
         assertEquals(HttpStatus.OK, response.statusCode)
     }
 
@@ -111,7 +111,7 @@ class ForvaltningControllerTest : OppslagSpringRunnerTest() {
             .returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.ENSLIG_FORELDER to Behandlerrolle.FORVALTER)))
         every { ContextService.hentSaksbehandler() } returns "ansvarligSaksbehandler"
 
-        val response = flyttBehandlingTilFakta(opprettTestdata(saksbehandler = "ikkeAnsvarligSaksbehandler", behandlingsstegsstatus= Behandlingsstegstatus.KLAR))
+        val response = flyttBehandlingTilFakta(opprettTestdata(saksbehandler = "ikkeAnsvarligSaksbehandler", behandlingsstegsstatus = Behandlingsstegstatus.KLAR))
         assertEquals(HttpStatus.OK, response.statusCode)
     }
 
@@ -148,7 +148,7 @@ class ForvaltningControllerTest : OppslagSpringRunnerTest() {
     private fun opprettTestdata(
         saksbehandler: String = "saksbehandler",
         behandlingStatus: Behandlingsstatus = Behandlingsstatus.UTREDES,
-        behandlingsstegsstatus: Behandlingsstegstatus = Behandlingsstegstatus.VENTER
+        behandlingsstegsstatus: Behandlingsstegstatus = Behandlingsstegstatus.VENTER,
     ): UUID {
         val fagsak =
             Fagsak(
