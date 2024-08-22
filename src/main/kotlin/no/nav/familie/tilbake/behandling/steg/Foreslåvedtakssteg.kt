@@ -134,14 +134,14 @@ class Foreslåvedtakssteg(
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }
 
-
     // Her vet vi ikke hvorvidt vi skal ferdigstille en BehandleSak- eller en BehandleUnderkjentVedtak-oppgave.
     // Må derfor sjekke hva slags oppgave som ligger åpen og ferdigstille denne.
     private fun ferdigstillOppgave(behandling: Behandling) {
-        val muligeOppgavetyper = mapOf(
-            Oppgavetype.BehandleSak.value to Oppgavetype.BehandleSak,
-            Oppgavetype.BehandleUnderkjentVedtak.value to Oppgavetype.BehandleUnderkjentVedtak
-        )
+        val muligeOppgavetyper =
+            mapOf(
+                Oppgavetype.BehandleSak.value to Oppgavetype.BehandleSak,
+                Oppgavetype.BehandleUnderkjentVedtak.value to Oppgavetype.BehandleUnderkjentVedtak,
+            )
 
         val fagsak = fagsakRepository.finnFagsakForBehandlingId(behandling.id)
 
