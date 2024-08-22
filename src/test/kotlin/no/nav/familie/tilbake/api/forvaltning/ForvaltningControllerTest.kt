@@ -61,8 +61,18 @@ class ForvaltningControllerTest : OppslagSpringRunnerTest() {
             .returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.ENSLIG_FORELDER to Behandlerrolle.BESLUTTER)))
         every { ContextService.hentSaksbehandler() } returns "ansvarligSaksbehandler"
 
-        val response = flyttBehandlingTilFakta(opprettTestdata("ansvarligSaksbehandler"))
+        val response = flyttBehandlingTilFakta(opprettTestdata(saksbehandler = "ansvarligSaksbehandler", behandlingsstegsstatus= Behandlingsstegstatus.KLAR))
         assertEquals(HttpStatus.OK, response.statusCode)
+    }
+
+    @Test
+    fun `Ikke mulig å sette behandling på vent tilbake til fakta`() {
+        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any()) }
+            .returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.ENSLIG_FORELDER to Behandlerrolle.BESLUTTER)))
+        every { ContextService.hentSaksbehandler() } returns "ansvarligSaksbehandler"
+
+        val response = flyttBehandlingTilFakta(opprettTestdata("ansvarligSaksbehandler"))
+        assertEquals(HttpStatus.FORBIDDEN, response.statusCode)
     }
 
     @Test
@@ -81,7 +91,7 @@ class ForvaltningControllerTest : OppslagSpringRunnerTest() {
             .returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.ENSLIG_FORELDER to Behandlerrolle.SAKSBEHANDLER)))
         every { ContextService.hentSaksbehandler() } returns "ansvarligSaksbehandler"
 
-        val response = flyttBehandlingTilFakta(opprettTestdata("ansvarligSaksbehandler"))
+        val response = flyttBehandlingTilFakta(opprettTestdata(saksbehandler = "ansvarligSaksbehandler", behandlingsstegsstatus= Behandlingsstegstatus.KLAR))
         assertEquals(HttpStatus.OK, response.statusCode)
     }
 
@@ -101,7 +111,7 @@ class ForvaltningControllerTest : OppslagSpringRunnerTest() {
             .returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.ENSLIG_FORELDER to Behandlerrolle.FORVALTER)))
         every { ContextService.hentSaksbehandler() } returns "ansvarligSaksbehandler"
 
-        val response = flyttBehandlingTilFakta(opprettTestdata("ikkeAnsvarligSaksbehandler"))
+        val response = flyttBehandlingTilFakta(opprettTestdata(saksbehandler = "ikkeAnsvarligSaksbehandler", behandlingsstegsstatus= Behandlingsstegstatus.KLAR))
         assertEquals(HttpStatus.OK, response.statusCode)
     }
 
@@ -138,6 +148,7 @@ class ForvaltningControllerTest : OppslagSpringRunnerTest() {
     private fun opprettTestdata(
         saksbehandler: String = "saksbehandler",
         behandlingStatus: Behandlingsstatus = Behandlingsstatus.UTREDES,
+        behandlingsstegsstatus: Behandlingsstegstatus = Behandlingsstegstatus.VENTER
     ): UUID {
         val fagsak =
             Fagsak(
@@ -154,7 +165,7 @@ class ForvaltningControllerTest : OppslagSpringRunnerTest() {
                 Behandlingsstegstilstand(
                     behandlingId = behandling.id,
                     behandlingssteg = Behandlingssteg.FAKTA,
-                    behandlingsstegsstatus = Behandlingsstegstatus.VENTER,
+                    behandlingsstegsstatus = behandlingsstegsstatus,
                     tidsfrist = LocalDate.now().plusWeeks(3),
                     venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
                 ),

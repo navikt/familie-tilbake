@@ -8,8 +8,10 @@ import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.FagsakService
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
+import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.common.exceptionhandler.feilHvis
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
@@ -48,6 +50,7 @@ class ForvaltningController(
     private val behandlingService: BehandlingService,
     private val tilgangService: TilgangService,
     private val fagsakService: FagsakService,
+    private val behandlingskontrollService: BehandlingskontrollService,
 ) {
     @Operation(summary = "Hent korrigert kravgrunnlag")
     @PutMapping(
@@ -137,7 +140,8 @@ class ForvaltningController(
         @PathVariable behandlingId: UUID,
     ): Ressurs<String> {
         val behandling = behandlingService.hentBehandling(behandlingId)
-        validerBehandlingUtredes(behandling)
+
+        validerBehandlingKanSettesTilbakeTilFakta(behandling)
         val fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId)
         val behandlerRolle = tilgangService.finnBehandlerrolle(fagsystem) ?: error("Kunne ikke finne behandlerrolle")
         validerBehandlerrolle(behandling, behandlerRolle)
@@ -145,13 +149,12 @@ class ForvaltningController(
         return Ressurs.success("OK")
     }
 
-    private fun validerBehandlingUtredes(behandling: BehandlingDto) {
-        if (behandling.status != Behandlingsstatus.UTREDES) {
-            throw Feil(
-                message = "Behandling er ikke under utredning, og kan derfor ikke flyttes tilbake til fakta",
-                frontendFeilmelding = "Behandling er ikke under utredning, og kan derfor ikke flyttes tilbake til fakta",
-                httpStatus = HttpStatus.FORBIDDEN,
-            )
+    private fun validerBehandlingKanSettesTilbakeTilFakta(behandling: BehandlingDto) {
+        feilHvis(behandlingskontrollService.erBehandlingPåVent(behandling.behandlingId), HttpStatus.FORBIDDEN) {
+            "Behandling er på vent og kan derfor ikke flyttes tilbake til fakta"
+        }
+        feilHvis(behandling.status != Behandlingsstatus.UTREDES, HttpStatus.FORBIDDEN) {
+            "Behandling er ikke under utredning, og kan derfor ikke flyttes tilbake til fakta"
         }
     }
 
