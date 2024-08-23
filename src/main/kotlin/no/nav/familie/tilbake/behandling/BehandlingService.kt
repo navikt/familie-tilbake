@@ -709,5 +709,3 @@ class BehandlingService(
         ): Boolean = fagsak.institusjon == null && !behandling.harVerge
     }
 }
-
-
