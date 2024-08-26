@@ -30,6 +30,12 @@ class HentFagsystemsbehandlingResponsConsumer(private val fagsystemsbehandlingSe
     ) {
         logger.info("Fagsystemsbehandlingsdata er mottatt i kafka med key=${consumerRecord.key()}")
         secureLogger.info("Fagsystemsbehandlingsdata er mottatt i kafka $consumerRecord")
+        if (consumerRecord.key().toString() == "19527f36-bc9b-494a-b8f1-f54c3dc5e968") {
+            logger.error("Skipper melding med key 19527f36-bc9b-494a-b8f1-f54c3dc5e968")
+            latch.countDown()
+            ack.acknowledge()
+            return
+        }
 
         val requestId = UUID.fromString(consumerRecord.key())
         val data: String = consumerRecord.value()
