@@ -197,6 +197,7 @@ class BehandlingService(
         val varselSendt = brevsporingService.erVarselSendt(behandlingId)
         val kanBehandlingHenlegges: Boolean = kanHenleggeBehandling(behandling)
         val kanEndres: Boolean = kanBehandlingEndres(behandling, fagsak.fagsystem)
+        val kanSetteBehandlingTilbakeTilFakta = kanSetteBehandlingTilbakeTilFakta(behandling, finnBehandlerrolle(fagsak))
         val kanRevurderingOpprettes: Boolean =
             tilgangService.tilgangTilÅOppretteRevurdering(fagsak.fagsystem) && kanRevurderingOpprettes(behandling)
         val støtterManuelleBrevmottakere =
@@ -216,6 +217,7 @@ class BehandlingService(
             erBehandlingPåVent,
             kanBehandlingHenlegges,
             kanEndres,
+            kanSetteBehandlingTilbakeTilFakta,
             kanRevurderingOpprettes,
             behandlingsstegsinfoer,
             varselSendt,
@@ -224,6 +226,8 @@ class BehandlingService(
             støtterManuelleBrevmottakere,
         )
     }
+
+    private fun finnBehandlerrolle(fagsak: Fagsak) = tilgangService.finnBehandlerrolle(fagsak.fagsystem) ?: throw Feil("Kunne ikke finne Behandlerrolle")
 
     @Transactional
     fun settBehandlingPåVent(
@@ -622,6 +626,31 @@ class BehandlingService(
             else -> false
         }
     }
+
+    private fun kanSetteBehandlingTilbakeTilFakta(
+        behandling: Behandling,
+        behandlerRolle: Behandlerrolle,
+    ): Boolean {
+        return behandlingUtredesOgErIkkePåVent(behandling) &&
+            harInnloggetBrukerTilgangTilÅSetteTilbakeTilFakta(behandling.ansvarligSaksbehandler, behandlerRolle)
+    }
+
+    private fun harInnloggetBrukerTilgangTilÅSetteTilbakeTilFakta(
+        ansvarligSaksbehandler: String,
+        behandlerRolle: Behandlerrolle,
+    ) = erAnsvarligSaksbehandler(ansvarligSaksbehandler, behandlerRolle) || erForvalter(behandlerRolle)
+
+    private fun erForvalter(behandlerRolle: Behandlerrolle): Boolean {
+        return behandlerRolle == Behandlerrolle.FORVALTER
+    }
+
+    private fun erAnsvarligSaksbehandler(
+        ansvarligSaksbehandler: String,
+        behandlerRolle: Behandlerrolle,
+    ) = ContextService.hentSaksbehandler() == ansvarligSaksbehandler &&
+        (behandlerRolle == Behandlerrolle.SAKSBEHANDLER || behandlerRolle == Behandlerrolle.BESLUTTER)
+
+    private fun behandlingUtredesOgErIkkePåVent(behandling: Behandling) = Behandlingsstatus.UTREDES == behandling.status && !behandlingskontrollService.erBehandlingPåVent(behandling.id)
 
     private fun kanRevurderingOpprettes(behandling: Behandling): Boolean {
         return behandling.erAvsluttet &&

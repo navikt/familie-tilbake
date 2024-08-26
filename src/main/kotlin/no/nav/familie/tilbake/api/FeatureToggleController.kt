@@ -18,6 +18,7 @@ class FeatureToggleController(
     private val funksjonsbrytere =
         setOf(
             FeatureToggleConfig.KAN_SE_HISTORISKE_VURDERINGER,
+            FeatureToggleConfig.SAKSBEHANDLER_KAN_RESETTE_BEHANDLING,
         )
 
     @GetMapping

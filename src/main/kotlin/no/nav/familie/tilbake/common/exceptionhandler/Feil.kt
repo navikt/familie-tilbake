@@ -1,6 +1,8 @@
 package no.nav.familie.tilbake.common.exceptionhandler
 
 import org.springframework.http.HttpStatus
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 
 data class ApiFeil(val feil: String, val httpStatus: HttpStatus) : RuntimeException()
 
@@ -12,6 +14,20 @@ class Feil(
 ) : RuntimeException(message, throwable) {
     constructor(message: String, throwable: Throwable?, httpStatus: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR) :
         this(message, null, httpStatus, throwable)
+}
+
+@OptIn(ExperimentalContracts::class)
+inline fun feilHvis(
+    boolean: Boolean,
+    httpStatus: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+    lazyMessage: () -> String,
+) {
+    contract {
+        returns() implies !boolean
+    }
+    if (boolean) {
+        throw Feil(message = lazyMessage(), frontendFeilmelding = lazyMessage(), httpStatus)
+    }
 }
 
 class ManglerOppgaveFeil(val melding: String) : RuntimeException(melding)
