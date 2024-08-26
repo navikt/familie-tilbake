@@ -19,6 +19,7 @@ class FeatureToggleController(
         setOf(
             FeatureToggleConfig.VURDERING_AV_BRUKERS_UTTALELSE,
             FeatureToggleConfig.KAN_SE_HISTORISKE_VURDERINGER,
+            FeatureToggleConfig.SAKSBEHANDLER_KAN_RESETTE_BEHANDLING,
         )
 
     @GetMapping
