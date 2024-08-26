@@ -15,7 +15,7 @@ class FeatureToggleMockConfig {
         val mockFeatureToggleService: FeatureToggleService = mockk()
         val defaultValue = slot<Boolean>()
         every { mockFeatureToggleService.isEnabled(any<String>()) } answers {
-            firstArg<String>() == FeatureToggleConfig.VURDERING_AV_BRUKERS_UTTALELSE
+            false
         }
         every { mockFeatureToggleService.isEnabled(any(), capture(defaultValue)) } answers {
             defaultValue.captured

@@ -29,7 +29,6 @@ class FeatureToggleConfig(
             "familie-tilbake.ikke-valider-saerlig-grunnet-annet-fritekst"
 
         const val AUTOMATISK_BEHANDLE_TILBAKEKREVING_UNDER_4X_RETTSGEBYR = "familie-tilbake.automatisk-behandle-under-4x-rettsgebyr"
-        const val VURDERING_AV_BRUKERS_UTTALELSE = "familie-tilbake.bruker.har.uttalt.seg"
         const val KAN_SE_HISTORISKE_VURDERINGER = "familie-tilbake.se-historiske-vurderinger"
 
         const val SAKSBEHANDLER_KAN_RESETTE_BEHANDLING = "familie-tilbake-frontend.saksbehandler.kan.resette.behandling"

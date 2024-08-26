@@ -8,8 +8,6 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants.hentAutomatiskSaksbehandlingBegrunnelse
-import no.nav.familie.tilbake.config.FeatureToggleConfig
-import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetalingsperiode
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.HarBrukerUttaltSeg
@@ -27,7 +25,6 @@ class FaktaFeilutbetalingService(
     private val behandlingRepository: BehandlingRepository,
     private val faktaFeilutbetalingRepository: FaktaFeilutbetalingRepository,
     private val kravgrunnlagRepository: KravgrunnlagRepository,
-    private val featureToggleService: FeatureToggleService,
 ) {
     @Transactional(readOnly = true)
     fun hentFaktaomfeilutbetaling(behandlingId: UUID): FaktaFeilutbetalingDto {
@@ -90,10 +87,6 @@ class FaktaFeilutbetalingService(
 
     private fun validerVurderingAvBrukersUttalelse(vurderingAvBrukersUttalelse: VurderingAvBrukersUttalelseDto?) {
         vurderingAvBrukersUttalelse?.let {
-            if (!featureToggleService.isEnabled(FeatureToggleConfig.VURDERING_AV_BRUKERS_UTTALELSE) && it.harBrukerUttaltSeg != HarBrukerUttaltSeg.IKKE_VURDERT) {
-                throw Feil("Feature toggle for vurdering av brukers uttalelse er ikke skrudd på")
-            }
-
             if (it.harBrukerUttaltSeg == HarBrukerUttaltSeg.JA && it.beskrivelse.isNullOrBlank()) {
                 throw Feil("Mangler beskrivelse på vurdering av brukers uttalelse")
             } else if (it.harBrukerUttaltSeg != HarBrukerUttaltSeg.JA && !it.beskrivelse.isNullOrBlank()) {
