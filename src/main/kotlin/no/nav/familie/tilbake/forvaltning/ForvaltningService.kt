@@ -20,6 +20,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.common.exceptionhandler.feilHvis
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.SendVedtaksbrevTask
@@ -254,12 +255,8 @@ class ForvaltningService(
     }
 
     private fun sjekkOmBehandlingErAvsluttet(behandling: Behandling) {
-        if (behandling.erAvsluttet) {
-            throw Feil(
-                "Behandling med id=${behandling.id} er allerede ferdig behandlet.",
-                frontendFeilmelding = "Behandling med id=${behandling.id} er allerede ferdig behandlet.",
-                httpStatus = HttpStatus.BAD_REQUEST,
-            )
+        feilHvis(behandling.erAvsluttet, HttpStatus.BAD_REQUEST) {
+            "Behandling med id=${behandling.id} er allerede ferdig behandlet."
         }
     }
 }
