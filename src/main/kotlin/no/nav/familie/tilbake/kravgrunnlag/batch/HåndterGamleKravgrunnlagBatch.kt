@@ -158,7 +158,7 @@ class HåndterGamleKravgrunnlagBatch(
                 BARNETILSYN to 56,
                 OVERGANGSSTØNAD to 56,
                 SKOLEPENGER to 56,
-                KONTANTSTØTTE to 1,
+                KONTANTSTØTTE to 56,
             )
     }
 }
