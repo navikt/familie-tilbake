@@ -6,14 +6,18 @@ import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldNotContain
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.familie.kontrakter.felles.Datoperiode
+import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.tilbakekreving.MottakerType
+import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.FritekstavsnittDto
 import no.nav.familie.tilbake.api.dto.HentForhåndvisningVedtaksbrevPdfDto
@@ -24,7 +28,12 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsak
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
 import no.nav.familie.tilbake.behandling.domain.Fagsak
+import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandling.domain.Verge
+import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
@@ -119,6 +128,9 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
     private lateinit var manuellBrevmottakerRepository: ManuellBrevmottakerRepository
 
+    @Autowired
+    private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
+
     @BeforeEach
     fun init() {
         spyPdfBrevService = spyk(pdfBrevService)
@@ -207,6 +219,43 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         brevtypeSlot.captured shouldBe Brevtype.VEDTAK
         brevdataSlot.captured.overskrift shouldBe "Du må betale tilbake barnetrygden"
     }
+
+    @Test
+    fun `sendVedtaksbrev skal ikke ha besluttersignatur for behandling uten beslutter (under 4 rettsgebyr)`() {
+        val behandlingSlot = slot<Behandling>()
+        val brevdataSlot = slot<Brevdata>()
+
+        val efFagsak = fagsak.copy(fagsystem = Fagsystem.EF, ytelsestype = Ytelsestype.OVERGANGSSTØNAD)
+        fagsakRepository.update(efFagsak)
+
+        val under4rettsgebyrbehandling = behandling.copy(saksbehandlingstype = Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR, verger = emptySet())
+        behandlingRepository.update(under4rettsgebyrbehandling)
+
+        // setter behandlingsstegstilstand for ikke få falsk positiv. En behandlingsbrev som ikke er besluttet vil heller ikke ha besluttersignatur
+        behandlingsstegstilstandRepository.insert(lagBehandlingstegtilstandIverksetter(under4rettsgebyrbehandling))
+
+        vedtaksbrevService.sendVedtaksbrev(under4rettsgebyrbehandling)
+
+        verify {
+            spyPdfBrevService.sendBrev(
+                behandling = capture(behandlingSlot),
+                fagsak = any(),
+                brevtype = any(),
+                data = capture(brevdataSlot),
+            )
+        }
+
+        behandlingSlot.captured shouldBe under4rettsgebyrbehandling
+        brevdataSlot.captured.brevtekst shouldNotContain "{venstrejustert}Bob Burger{høyrejustert}Bob Burger"
+        brevdataSlot.captured.brevtekst shouldContain "{venstrejustert}Bob Burger{høyrejustert}"
+    }
+
+    private fun lagBehandlingstegtilstandIverksetter(under4rettsgebyrbehandling: Behandling) =
+        Behandlingsstegstilstand(
+            behandlingId = under4rettsgebyrbehandling.id,
+            behandlingssteg = Behandlingssteg.IVERKSETT_VEDTAK,
+            behandlingsstegsstatus = Behandlingsstegstatus.KLAR,
+        )
 
     @Test
     fun `sendVedtaksbrev til organisasjon skal sette orgnr som mottakerident i brevdata`() {
