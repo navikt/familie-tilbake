@@ -265,11 +265,18 @@ class VedtaksbrevgeneratorService(
 
     private fun hentAnsvarligBeslutterNavn(vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag) = eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(vedtaksbrevgrunnlag.behandling.ansvarligBeslutter)
 
-    private fun erAutomatiskIkkeInnkrevning(vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag) = vedtaksbrevgrunnlag.behandling.saksbehandlingstype == Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR
+    private fun saksbehandlingstypeHarBeslutter(vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag) = when(vedtaksbrevgrunnlag.behandling.saksbehandlingstype){
+        Saksbehandlingstype.ORDINÆR -> true
+        Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR -> false
+        Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP -> false
+    }
 
     private fun harAnsvarligBeslutter(vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag) =
-        !erAutomatiskIkkeInnkrevning(vedtaksbrevgrunnlag) &&
-            vedtaksbrevgrunnlag.aktivtSteg in
+        !saksbehandlingstypeHarBeslutter(vedtaksbrevgrunnlag) &&
+            erBesluttet(vedtaksbrevgrunnlag)
+
+    private fun erBesluttet(vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag) =
+        vedtaksbrevgrunnlag.aktivtSteg in
             setOf(
                 Behandlingssteg.FATTE_VEDTAK,
                 Behandlingssteg.IVERKSETT_VEDTAK,

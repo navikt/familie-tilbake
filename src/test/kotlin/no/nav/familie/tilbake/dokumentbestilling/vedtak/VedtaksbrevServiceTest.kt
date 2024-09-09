@@ -231,7 +231,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         val under4rettsgebyrbehandling = behandling.copy(saksbehandlingstype = Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR, verger = emptySet())
         behandlingRepository.update(under4rettsgebyrbehandling)
 
-        // setter behandlingsstegstilstand for ikke få falsk positiv. En behandlingsbrev som ikke er besluttet vil heller ikke ha besluttersignatur
+        // setter behandlingsstegstilstand for ikke få falsk positiv. Et brev som ikke er besluttet vil heller ikke ha besluttersignatur (f.eks. forhåndsvisning)
         behandlingsstegstilstandRepository.insert(lagBehandlingstegtilstandIverksetter(under4rettsgebyrbehandling))
 
         vedtaksbrevService.sendVedtaksbrev(under4rettsgebyrbehandling)
