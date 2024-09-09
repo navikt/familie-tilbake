@@ -29,7 +29,7 @@
         <kotest.version>5.9.1</kotest.version>
         <token-validation-spring.version>5.0.5</token-validation-spring.version>
         <okhttp3.version>4.9.1</okhttp3.version><!-- Inntil videre nødvendig for token-validation-spring-test-->
-        <openhtmltopdf.version>1.1.4</openhtmltopdf.version>
+        <openhtmltopdf.version>pdfbox2-65c2c5010f84b2daa5821971c9c68cd330463830</openhtmltopdf.version>
         <jakarta.xml.bind-api.version>4.0.1</jakarta.xml.bind-api.version>
         <jaxb-impl.version>4.0.5</jaxb-impl.version>
         <verapdf.version>1.26.1</verapdf.version>
