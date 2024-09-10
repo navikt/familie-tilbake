@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.api.dto.HenleggelsesbrevFritekstDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -21,6 +22,7 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.micrometer.TellerService
+import no.nav.familie.tilbake.oppgave.OppgaveService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.tilbakekreving.status.v1.KravOgVedtakstatus
 import org.springframework.stereotype.Service
@@ -39,6 +41,7 @@ class KravvedtakstatusService(
     private val behandlingService: BehandlingService,
     private val historikkTaskService: HistorikkTaskService,
     private val oppgaveTaskService: OppgaveTaskService,
+    private val oppgaveService: OppgaveService,
 ) {
     @Transactional
     fun håndterMottattStatusmelding(statusmeldingXml: String) {
@@ -178,11 +181,17 @@ class KravvedtakstatusService(
         // oppgave oppdateres ikke dersom behandling venter på varsel
         val aktivtBehandlingssteg = behandlingskontrollService.finnAktivtSteg(behandlingId)
         if (aktivtBehandlingssteg?.let { it != Behandlingssteg.VARSEL } == true) {
-            oppgaveTaskService.oppdaterOppgaveTask(
-                behandlingId = behandlingId,
-                beskrivelse = venteårsak.beskrivelse,
-                frist = tidsfrist,
-            )
+            val oppgave = oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
+            val behandleSakOppgavetyper = listOf(Oppgavetype.BehandleSak.value, Oppgavetype.BehandleUnderkjentVedtak.value)
+            if (behandleSakOppgavetyper.contains(oppgave.oppgavetype)) {
+                oppgaveTaskService.oppdaterOppgaveTask(
+                    behandlingId = behandlingId,
+                    beskrivelse = venteårsak.beskrivelse,
+                    frist = tidsfrist,
+                )
+            } else {
+                oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgave(behandlingId = behandlingId, beskrivelse = venteårsak.beskrivelse, frist = tidsfrist)
+            }
         }
     }
 }

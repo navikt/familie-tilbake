@@ -17,6 +17,7 @@ import no.nav.familie.kontrakter.felles.journalpost.RelevantDato
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
@@ -278,7 +279,7 @@ class IntegrasjonerClientConfig {
                 } else {
                     FinnOppgaveResponseDto(
                         antallTreffTotalt = 1,
-                        oppgaver = listOf(Oppgave(id = 1)),
+                        oppgaver = listOf(Oppgave(id = 1, oppgavetype = Oppgavetype.BehandleSak.value)),
                     )
                 }
             }

@@ -12,12 +12,18 @@ import no.nav.familie.tilbake.api.dto.ByttEnhetDto
 import no.nav.familie.tilbake.api.dto.HenleggelsesbrevFritekstDto
 import no.nav.familie.tilbake.api.dto.OpprettRevurderingDto
 import no.nav.familie.tilbake.behandling.BehandlingService
+import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.steg.StegService
+import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
+import no.nav.familie.tilbake.common.ContextService
+import no.nav.familie.tilbake.common.exceptionhandler.feilHvis
+import no.nav.familie.tilbake.forvaltning.ForvaltningService
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.HenteParam
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -36,6 +42,8 @@ import java.util.UUID
 class BehandlingController(
     private val behandlingService: BehandlingService,
     private val stegService: StegService,
+    private val forvaltningService: ForvaltningService,
+    private val behandlingskontrollService: BehandlingskontrollService,
 ) {
     @Operation(summary = "Opprett tilbakekrevingsbehandling automatisk, kan kalles av fagsystem, batch")
     @PostMapping(
@@ -220,5 +228,44 @@ class BehandlingController(
     ): Ressurs<String> {
         behandlingService.angreSendTilBeslutter(behandlingId)
         return Ressurs.success("OK")
+    }
+
+    @Operation(summary = "Flytt behandling tilbake til fakta")
+    @PutMapping(
+        path = ["{behandlingId}/flytt-behandling-til-fakta"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    @Rolletilgangssjekk(
+        Behandlerrolle.SAKSBEHANDLER,
+        "Flytter behandling tilbake til Fakta",
+        AuditLoggerEvent.UPDATE,
+        HenteParam.BEHANDLING_ID,
+    )
+    fun flyttBehandlingTilFakta(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<String> {
+        validerKanSetteBehandlingTilbakeTilFakta(behandlingId)
+        forvaltningService.flyttBehandlingsstegTilbakeTilFakta(behandlingId)
+        return Ressurs.success("OK")
+    }
+
+    private fun validerKanSetteBehandlingTilbakeTilFakta(behandlingId: UUID) {
+        feilHvis(!erAnsvarligSaksbehandler(behandlingId), HttpStatus.FORBIDDEN) {
+            "Kun ansvarlig saksbehandler kan flytte behandling tilbake til fakta"
+        }
+        feilHvis(behandlingskontrollService.erBehandlingPåVent(behandlingId), HttpStatus.FORBIDDEN) {
+            "Behandling er på vent og kan derfor ikke flyttes tilbake til fakta"
+        }
+        val behandlingstatus = behandlingService.hentBehandling(behandlingId).status
+        feilHvis(behandlingstatus != Behandlingsstatus.UTREDES, HttpStatus.FORBIDDEN) {
+            "Behandling er ikke under utredning, og kan derfor ikke flyttes tilbake til fakta"
+        }
+    }
+
+    private fun erAnsvarligSaksbehandler(
+        behandlingId: UUID,
+    ): Boolean {
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        return ContextService.hentSaksbehandler() == behandling.ansvarligSaksbehandler
     }
 }

@@ -31,7 +31,6 @@ jobs:
         run: mvn -B --no-transfer-progress package --settings .m2/maven-settings.xml -DtrimStackTrace=false --file pom.xml -Dchangelist= -Dsha1=-$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7)
       - uses: nais/docker-build-push@v0
         id: docker-push
-        if: github.triggering_actor != 'dependabot[bot]'
         with:
           team: teamfamilie
           tag: latest

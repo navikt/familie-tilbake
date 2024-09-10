@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.1</version>
+        <version>3.3.3</version>
     </parent>
 
     <properties>
@@ -21,19 +21,19 @@
         <java.version>21</java.version>
         <jvmTarget>21</jvmTarget>
         <main-class>no.nav.familie.tilbake.LauncherKt</main-class>
-        <kotlin.version>2.0.0</kotlin.version>
+        <kotlin.version>2.0.20</kotlin.version>
         <common-java-modules.version>2.2021.09.17_07.09-67428a6422cc</common-java-modules.version>
-        <kontrakter.version>3.0_20240607101709_d35e18c</kontrakter.version>
-        <felles.version>3.20240624143824_64bf8f2</felles.version>
+        <kontrakter.version>3.0_20240906070327_03089ba</kontrakter.version>
+        <felles.version>3.20240806111424_fff2930</felles.version>
         <!-- kotest.properties kan antakelig fjernes i versjon 6, for autoscan blir default false -->
         <kotest.version>5.9.1</kotest.version>
-        <token-validation-spring.version>5.0.1</token-validation-spring.version>
+        <token-validation-spring.version>5.0.5</token-validation-spring.version>
         <okhttp3.version>4.9.1</okhttp3.version><!-- Inntil videre nødvendig for token-validation-spring-test-->
         <openhtmltopdf.version>pdfbox2-65c2c5010f84b2daa5821971c9c68cd330463830</openhtmltopdf.version>
         <jakarta.xml.bind-api.version>4.0.1</jakarta.xml.bind-api.version>
         <jaxb-impl.version>4.0.5</jaxb-impl.version>
         <verapdf.version>1.26.1</verapdf.version>
-        <mockk.version>1.13.11</mockk.version>
+        <mockk.version>1.13.12</mockk.version>
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
@@ -41,12 +41,12 @@
         <sonar.coverage.exclusions>**/config/FlywayConfig.kt</sonar.coverage.exclusions>
         <!--suppress UnresolvedMavenProperty Ligger som secret i github-->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
-        <spring.cloud-contract>4.1.3</spring.cloud-contract>
-        <springdoc.version>2.5.0</springdoc.version>
-        <testcontainers.version>1.19.8</testcontainers.version>
+        <spring.cloud-contract>4.1.4</spring.cloud-contract>
+        <springdoc.version>2.6.0</springdoc.version>
+        <testcontainers.version>1.20.1</testcontainers.version>
         <tjenestespesifikasjoner.version>2633.1685ed5</tjenestespesifikasjoner.version>
-        <familie-tjenestespesifikasjoner.version>1.0_20240610135831_de4c522</familie-tjenestespesifikasjoner.version>
-        <prosessering-core.version>2.20240603145215_c56e179</prosessering-core.version>
+        <familie-tjenestespesifikasjoner.version>1.0_20240729135316_1bd0ab3</familie-tjenestespesifikasjoner.version>
+        <prosessering-core.version>2.20240902084316_04f17df</prosessering-core.version>
     </properties>
 
 
@@ -180,7 +180,7 @@
         <dependency>
             <groupId>com.ibm.mq</groupId>
             <artifactId>com.ibm.mq.jakarta.client</artifactId>
-            <version>9.4.0.0</version>
+            <version>9.4.0.5</version>
         </dependency>
         <dependency>
             <groupId>jakarta.jms</groupId>
@@ -199,7 +199,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.7.3</version>
+            <version>42.7.4</version>
         </dependency>
 
         <dependency>
@@ -213,7 +213,7 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
-            <version>10.15.0</version>
+            <version>10.17.3</version>
             <scope>runtime</scope>
         </dependency>
 
@@ -330,7 +330,7 @@
         <dependency> <!-- Overstyrer versjon default i spring pga sikkerhetshull https://security.snyk.io/package/maven/org.yaml:snakeyaml -->
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>2.2</version>
+            <version>2.3</version>
         </dependency>
         <!-- Test -->
         <dependency>
@@ -390,7 +390,7 @@
         <dependency>
             <groupId>org.wiremock</groupId>
             <artifactId>wiremock</artifactId>
-            <version>3.8.0</version>
+            <version>3.9.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>

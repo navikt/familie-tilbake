@@ -53,12 +53,15 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     // language=PostgreSQL
     @Query(
         """
-            SELECT beh.* FROM behandling beh JOIN fagsystemsbehandling fag ON fag.behandling_id= beh.id 
-            WHERE fag.ekstern_id=:eksternId AND fag.aktiv=TRUE 
+            SELECT beh.* FROM behandling beh JOIN fagsystemsbehandling fsb ON fsb.behandling_id= beh.id  JOIN fagsak fs ON fs.id= beh.fagsak_id
+            WHERE fsb.ekstern_id=:eksternId AND fsb.aktiv=TRUE AND fs.fagsystem=:fagsystem
             AND beh.type='TILBAKEKREVING' AND beh.status='AVSLUTTET' ORDER BY beh.opprettet_tid DESC
     """,
     )
-    fun finnAvsluttetTilbakekrevingsbehandlinger(eksternId: String): List<Behandling>
+    fun finnAvsluttetTilbakekrevingsbehandlinger(
+        eksternId: String,
+        fagsystem: Fagsystem,
+    ): List<Behandling>
 
     @Query(
         """
@@ -101,4 +104,15 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     """,
     )
     fun finnAlleBehandlingerKlarForGjenoppta(dagensdato: LocalDate): List<Behandling>
+
+    // language=PostgreSQL
+    @Query(
+        """
+            SELECT b.* FROM behandlingsstegstilstand bst
+            JOIN behandling b ON bst.behandling_id = b.id
+            JOIN fagsak f ON b.fagsak_id = f.id
+            WHERE f.fagsystem = :fagsystem AND bst.behandlingssteg = 'FATTE_VEDTAK' AND bst.behandlingsstegsstatus = 'TILBAKEFØRT' AND b.status != 'AVSLUTTET'
+        """,
+    )
+    fun hentÅpneBehandlingerMedTilbakeførtFatteVedtakSteg(fagsystem: Fagsystem): List<Behandling>
 }
