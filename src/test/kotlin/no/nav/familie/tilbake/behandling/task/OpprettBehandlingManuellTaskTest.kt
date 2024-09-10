@@ -259,8 +259,8 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
         fagsak.institusjon!!.organisasjonsnummer shouldBe "987654321"
     }
 
-    private fun lagTask(): Task {
-        return Task(
+    private fun lagTask(): Task =
+        Task(
             type = OpprettBehandlingManueltTask.TYPE,
             payload = "",
             properties =
@@ -271,7 +271,6 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
                     setProperty("ansvarligSaksbehandler", ansvarligSaksbehandler)
                 },
         )
-    }
 
     private fun lagHentFagsystemsbehandlingRespons(
         erInstitusjon: Boolean = false,

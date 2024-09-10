@@ -178,21 +178,19 @@ class HenleggelsesbrevService(
         )
     }
 
-    private fun lagHenleggelsesbrev(dokument: Henleggelsesbrevsdokument): Fritekstbrevsdata {
-        return Fritekstbrevsdata(
+    private fun lagHenleggelsesbrev(dokument: Henleggelsesbrevsdokument): Fritekstbrevsdata =
+        Fritekstbrevsdata(
             TekstformatererHenleggelsesbrev.lagOverskrift(dokument.brevmetadata),
             TekstformatererHenleggelsesbrev.lagFritekst(dokument),
             dokument.brevmetadata,
         )
-    }
 
-    private fun lagRevurderingHenleggelsebrev(dokument: Henleggelsesbrevsdokument): Fritekstbrevsdata {
-        return Fritekstbrevsdata(
+    private fun lagRevurderingHenleggelsebrev(dokument: Henleggelsesbrevsdokument): Fritekstbrevsdata =
+        Fritekstbrevsdata(
             TekstformatererHenleggelsesbrev.lagRevurderingsoverskrift(dokument.brevmetadata),
             TekstformatererHenleggelsesbrev.lagRevurderingsfritekst(dokument),
             dokument.brevmetadata,
         )
-    }
 
     companion object {
         private const val TITTEL_HENLEGGELSESBREV = "Informasjon om at tilbakekrevingssaken er henlagt"

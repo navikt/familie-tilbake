@@ -22,7 +22,9 @@ import java.util.UUID
 @RequestMapping("/api")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class FaktaFeilutbetalingController(val faktaFeilutbetalingService: FaktaFeilutbetalingService) {
+class FaktaFeilutbetalingController(
+    val faktaFeilutbetalingService: FaktaFeilutbetalingService,
+) {
     @Operation(summary = "Hent fakta om feilutbetaling")
     @GetMapping(
         path = ["/behandling/{behandlingId}/fakta/v1"],
@@ -38,9 +40,7 @@ class FaktaFeilutbetalingController(val faktaFeilutbetalingService: FaktaFeilutb
         @NotNull
         @PathVariable("behandlingId")
         behandlingId: UUID,
-    ): Ressurs<FaktaFeilutbetalingDto> {
-        return Ressurs.success(faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId))
-    }
+    ): Ressurs<FaktaFeilutbetalingDto> = Ressurs.success(faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId))
 
     @Operation(summary = "Hent inaktive fakta om feilutbetalinger")
     @GetMapping(
@@ -57,7 +57,5 @@ class FaktaFeilutbetalingController(val faktaFeilutbetalingService: FaktaFeilutb
         @NotNull
         @PathVariable("behandlingId")
         behandlingId: UUID,
-    ): Ressurs<List<FaktaFeilutbetalingDto>> {
-        return Ressurs.success(faktaFeilutbetalingService.hentInaktivFaktaomfeilutbetaling(behandlingId))
-    }
+    ): Ressurs<List<FaktaFeilutbetalingDto>> = Ressurs.success(faktaFeilutbetalingService.hentInaktivFaktaomfeilutbetaling(behandlingId))
 }

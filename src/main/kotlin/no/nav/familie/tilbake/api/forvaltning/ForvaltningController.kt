@@ -162,9 +162,7 @@ class ForvaltningController(
     fun hentForvaltningsinfo(
         @PathVariable ytelsestype: Ytelsestype,
         @PathVariable eksternFagsakId: String,
-    ): Ressurs<List<Behandlingsinfo>> {
-        return Ressurs.success(forvaltningService.hentForvaltningsinfo(ytelsestype, eksternFagsakId))
-    }
+    ): Ressurs<List<Behandlingsinfo>> = Ressurs.success(forvaltningService.hentForvaltningsinfo(ytelsestype, eksternFagsakId))
 
     @Operation(summary = "Hent ikke arkiverte kravgrunnlag")
     @GetMapping(
@@ -180,9 +178,7 @@ class ForvaltningController(
     fun hentKravgrunnlagsinfo(
         @PathVariable ytelsestype: Ytelsestype,
         @PathVariable eksternFagsakId: String,
-    ): Ressurs<List<Kravgrunnlagsinfo>> {
-        return Ressurs.success(forvaltningService.hentIkkeArkiverteKravgrunnlag(ytelsestype, eksternFagsakId))
-    }
+    ): Ressurs<List<Kravgrunnlagsinfo>> = Ressurs.success(forvaltningService.hentIkkeArkiverteKravgrunnlag(ytelsestype, eksternFagsakId))
 
     @Operation(summary = "Oppretter FinnGammelBehandlingUtenOppgaveTask som logger ut gamle behandlinger uten åpen oppgave")
     @PostMapping(

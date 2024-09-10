@@ -62,8 +62,7 @@ class AvstemmingTask(
                 type = TYPE,
                 payload = dato.plusDays(1).toString(),
                 properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, task.fagsystem()) },
-            )
-                .medTriggerTid(dato.plusDays(2).atTime(8, 0))
+            ).medTriggerTid(dato.plusDays(2).atTime(8, 0))
         taskService.save(nesteAvstemming)
     }
 

@@ -31,8 +31,7 @@ import java.time.LocalDate
 class PdlClient(
     private val pdlConfig: PdlConfig,
     @Qualifier("azureClientCredential") restTemplate: RestOperations,
-) :
-    AbstractPingableRestClient(restTemplate, "pdl.personinfo") {
+) : AbstractPingableRestClient(restTemplate, "pdl.personinfo") {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
     fun hentPersoninfo(
@@ -122,12 +121,11 @@ class PdlClient(
         )
     }
 
-    private fun httpHeaders(tema: Tema): HttpHeaders {
-        return HttpHeaders().apply {
+    private fun httpHeaders(tema: Tema): HttpHeaders =
+        HttpHeaders().apply {
             add("Tema", tema.name)
             add("behandlingsnummer", tema.behandlingsnummer)
         }
-    }
 
     override val pingUri: URI
         get() = pdlConfig.pdlUri
@@ -136,12 +134,11 @@ class PdlClient(
         operations.optionsForAllow(pingUri)
     }
 
-    private fun mapTilTema(fagsystem: Fagsystem): Tema {
-        return when (fagsystem) {
+    private fun mapTilTema(fagsystem: Fagsystem): Tema =
+        when (fagsystem) {
             Fagsystem.EF -> Tema.ENF
             Fagsystem.KONT -> Tema.KON
             Fagsystem.BA -> Tema.BAR
             else -> error("Ugyldig fagsystem=${fagsystem.navn}")
         }
-    }
 }

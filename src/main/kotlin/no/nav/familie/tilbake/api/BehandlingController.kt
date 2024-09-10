@@ -103,9 +103,7 @@ class BehandlingController(
     )
     fun hentBehandling(
         @PathVariable("behandlingId") behandlingId: UUID,
-    ): Ressurs<BehandlingDto> {
-        return Ressurs.success(behandlingService.hentBehandling(behandlingId))
-    }
+    ): Ressurs<BehandlingDto> = Ressurs.success(behandlingService.hentBehandling(behandlingId))
 
     @Operation(summary = "Utfør behandlingssteg og fortsett behandling til neste steg")
     @PostMapping(

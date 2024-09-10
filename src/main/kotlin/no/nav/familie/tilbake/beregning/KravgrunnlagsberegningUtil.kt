@@ -37,18 +37,17 @@ object KravgrunnlagsberegningUtil {
     fun fordelKravgrunnlagBeløpPåPerioder(
         kravgrunnlag: Kravgrunnlag431,
         vurderingsperioder: List<Månedsperiode>,
-    ): Map<Månedsperiode, FordeltKravgrunnlagsbeløp> {
-        return vurderingsperioder.associateWith {
+    ): Map<Månedsperiode, FordeltKravgrunnlagsbeløp> =
+        vurderingsperioder.associateWith {
             FordeltKravgrunnlagsbeløp(
                 beregnBeløp(kravgrunnlag, it, feilutbetaltYtelsesbeløputleder),
                 beregnBeløp(kravgrunnlag, it, utbetaltYtelsesbeløputleder),
                 beregnBeløp(kravgrunnlag, it, riktigYteslesbeløputleder),
             )
         }
-    }
 
-    fun summerKravgrunnlagBeløpForPerioder(kravgrunnlag: Kravgrunnlag431): Map<Månedsperiode, FordeltKravgrunnlagsbeløp> {
-        return kravgrunnlag.perioder.associate {
+    fun summerKravgrunnlagBeløpForPerioder(kravgrunnlag: Kravgrunnlag431): Map<Månedsperiode, FordeltKravgrunnlagsbeløp> =
+        kravgrunnlag.perioder.associate {
             it.periode to
                 FordeltKravgrunnlagsbeløp(
                     feilutbetaltYtelsesbeløputleder(it),
@@ -56,14 +55,11 @@ object KravgrunnlagsberegningUtil {
                     riktigYteslesbeløputleder(it),
                 )
         }
-    }
 
     fun beregnFeilutbetaltBeløp(
         kravgrunnlag: Kravgrunnlag431,
         vurderingsperiode: Månedsperiode,
-    ): BigDecimal {
-        return beregnBeløp(kravgrunnlag, vurderingsperiode, feilutbetaltYtelsesbeløputleder)
-    }
+    ): BigDecimal = beregnBeløp(kravgrunnlag, vurderingsperiode, feilutbetaltYtelsesbeløputleder)
 
     fun validatePerioder(perioder: List<Datoperiode>) {
         val perioderSomIkkeErHeleMåneder =

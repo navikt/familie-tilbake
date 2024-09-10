@@ -60,7 +60,8 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(behandling)
         val kravgrunnlag =
-            Testdata.lagKravgrunnlag(behandling.id)
+            Testdata
+                .lagKravgrunnlag(behandling.id)
                 .copy(
                     perioder =
                         setOf(

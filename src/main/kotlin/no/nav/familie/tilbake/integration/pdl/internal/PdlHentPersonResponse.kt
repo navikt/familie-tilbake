@@ -9,7 +9,9 @@ data class PdlHentPersonResponse<T>(
     override val extensions: PdlExtensions?,
 ) : PdlBaseResponse(errors, extensions)
 
-data class PdlPerson(val person: PdlPersonData?)
+data class PdlPerson(
+    val person: PdlPersonData?,
+)
 
 data class PdlPersonData(
     @JsonProperty("foedselsdato") val fødsel: List<PdlFødselsDato>,
@@ -28,19 +30,20 @@ data class PdlError(
     val extensions: PdlErrorExtensions?,
 )
 
-data class PdlErrorExtensions(val code: String?)
+data class PdlErrorExtensions(
+    val code: String?,
+)
 
 data class PdlNavn(
     val fornavn: String,
     val mellomnavn: String? = null,
     val etternavn: String,
 ) {
-    fun fulltNavn(): String {
-        return when (mellomnavn) {
+    fun fulltNavn(): String =
+        when (mellomnavn) {
             null -> "$fornavn $etternavn"
             else -> "$fornavn $mellomnavn $etternavn"
         }
-    }
 }
 
 data class PdlKjønn(

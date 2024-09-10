@@ -55,7 +55,8 @@ class AutomatiskSaksbehandlingService(
                 )
             val sumNyttBeløp: BigDecimal =
                 kravgrunnlag.perioder.sumOf { periode ->
-                    periode.beløp.filter { beløp -> beløp.klassetype == Klassetype.FEIL }
+                    periode.beløp
+                        .filter { beløp -> beløp.klassetype == Klassetype.FEIL }
                         .sumOf(Kravgrunnlagsbeløp433::nyttBeløp)
                 }
 

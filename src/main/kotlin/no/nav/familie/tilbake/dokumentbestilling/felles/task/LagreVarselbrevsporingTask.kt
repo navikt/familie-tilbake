@@ -16,7 +16,9 @@ import java.util.UUID
     beskrivelse = "Lagrer varselbrev",
     triggerTidVedFeilISekunder = 60 * 5L,
 )
-class LagreVarselbrevsporingTask(private val varselService: VarselService) : AsyncTaskStep {
+class LagreVarselbrevsporingTask(
+    private val varselService: VarselService,
+) : AsyncTaskStep {
     private val log = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {

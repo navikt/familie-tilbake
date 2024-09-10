@@ -123,16 +123,15 @@ class DokumentasjonsgeneratorPeriodeFakta {
         }
     }
 
-    private fun lagFaktatekster(felles: HbVedtaksbrevFelles): Map<HendelseMedUndertype, String> {
-        return getFeilutbetalingsårsaker(felles.brevmetadata.ytelsestype).associateWith {
+    private fun lagFaktatekster(felles: HbVedtaksbrevFelles): Map<HendelseMedUndertype, String> =
+        getFeilutbetalingsårsaker(felles.brevmetadata.ytelsestype).associateWith {
             val periode: HbVedtaksbrevsperiode = lagPeriodeBuilder(it)
             val data = HbVedtaksbrevPeriodeOgFelles(felles, periode)
             FellesTekstformaterer.lagDeltekst(data, AvsnittUtil.PARTIAL_PERIODE_FAKTA)
         }
-    }
 
-    private fun lagPeriodeBuilder(undertype: HendelseMedUndertype): HbVedtaksbrevsperiode {
-        return HbVedtaksbrevsperiode(
+    private fun lagPeriodeBuilder(undertype: HendelseMedUndertype): HbVedtaksbrevsperiode =
+        HbVedtaksbrevsperiode(
             periode = januar,
             vurderinger =
                 HbVurderinger(
@@ -157,7 +156,6 @@ class DokumentasjonsgeneratorPeriodeFakta {
             grunnbeløp = HbGrunnbeløp(BigDecimal.TEN, "120"),
             førstePeriode = true,
         )
-    }
 
     private fun lagFelles(
         ytelsestype: Ytelsestype,
@@ -201,8 +199,8 @@ class DokumentasjonsgeneratorPeriodeFakta {
     private fun lagMetadata(
         ytelsestype: Ytelsestype,
         språkkode: Språkkode,
-    ): Brevmetadata {
-        return Brevmetadata(
+    ): Brevmetadata =
+        Brevmetadata(
             sakspartId = "",
             sakspartsnavn = "",
             mottageradresse = Adresseinfo("01020312345", "Bob"),
@@ -213,15 +211,15 @@ class DokumentasjonsgeneratorPeriodeFakta {
             ytelsestype = ytelsestype,
             gjelderDødsfall = false,
         )
-    }
 
     private fun getFeilutbetalingsårsaker(ytelseType: Ytelsestype): List<HendelseMedUndertype> {
         val hendelseTyper: Set<Hendelsestype> = HendelsestypePerYtelsestype.getHendelsestyper(ytelseType)
         val hendelseUndertypePrHendelsestype = HendelsesundertypePerHendelsestype.HIERARKI
         val resultat: List<HendelseMedUndertype> =
-            hendelseTyper.map {
-                hendelseUndertypePrHendelsestype[it]?.map { undertype -> HendelseMedUndertype(it, undertype) } ?: listOf()
-            }.flatten()
+            hendelseTyper
+                .map {
+                    hendelseUndertypePrHendelsestype[it]?.map { undertype -> HendelseMedUndertype(it, undertype) } ?: listOf()
+                }.flatten()
         return resultat
     }
 }

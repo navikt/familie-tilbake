@@ -30,16 +30,17 @@ class FinnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgaveTas
         val fagsystem = Fagsystem.valueOf(task.payload)
         val behandlingerMedTilbakeførtFatteVedtakSteg = behandlingRepository.hentÅpneBehandlingerMedTilbakeførtFatteVedtakSteg(fagsystem)
         val behandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave =
-            behandlingerMedTilbakeførtFatteVedtakSteg.filter {
-                val aktivOppgave =
-                    try {
-                        oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(it.id)
-                    } catch (e: ManglerOppgaveFeil) {
-                        null
-                    }
-                val aktivtSteg = behandlingskontrollService.finnAktivtSteg(it.id)
-                aktivtSteg.erPåStegFørFatteVedtak() && aktivOppgave.erNullEllerGodkjenneVedtak()
-            }.map { it.id }
+            behandlingerMedTilbakeførtFatteVedtakSteg
+                .filter {
+                    val aktivOppgave =
+                        try {
+                            oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(it.id)
+                        } catch (e: ManglerOppgaveFeil) {
+                            null
+                        }
+                    val aktivtSteg = behandlingskontrollService.finnAktivtSteg(it.id)
+                    aktivtSteg.erPåStegFørFatteVedtak() && aktivOppgave.erNullEllerGodkjenneVedtak()
+                }.map { it.id }
 
         if (behandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave.isNotEmpty()) {
             secureLogger.info("Behandlinger som mangler oppgave eller har feil åpen oppgave for fagsystem $fagsystem: ${objectMapper.writeValueAsString(behandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave)}")

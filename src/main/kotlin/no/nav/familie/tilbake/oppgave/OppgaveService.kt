@@ -185,17 +185,13 @@ class OppgaveService(
         return Regex(pattern, RegexOption.IGNORE_CASE)
     }
 
-    fun patchOppgave(patchOppgave: Oppgave): OppgaveResponse {
-        return integrasjonerClient.patchOppgave(patchOppgave)
-    }
+    fun patchOppgave(patchOppgave: Oppgave): OppgaveResponse = integrasjonerClient.patchOppgave(patchOppgave)
 
     fun tilordneOppgaveNyEnhet(
         oppgaveId: Long,
         nyEnhet: String,
         fjernMappeFraOppgave: Boolean,
-    ): OppgaveResponse {
-        return integrasjonerClient.tilordneOppgaveNyEnhet(oppgaveId, nyEnhet, fjernMappeFraOppgave)
-    }
+    ): OppgaveResponse = integrasjonerClient.tilordneOppgaveNyEnhet(oppgaveId, nyEnhet, fjernMappeFraOppgave)
 
     fun ferdigstillOppgave(
         behandlingId: UUID,
@@ -268,23 +264,21 @@ class OppgaveService(
         eksternbrukBehandlingID: String,
         fagsystem: String,
         beskrivelse: String? = null,
-    ): String {
-        return if (beskrivelse != null) {
+    ): String =
+        if (beskrivelse != null) {
             beskrivelse + "\n"
         } else {
             ""
         } + "--- Opprettet av familie-tilbake ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n" +
             "https://${lagFamilieTilbakeFrontendUrl()}/fagsystem/$fagsystem/fagsak/$eksternFagsakId/behandling/" +
             eksternbrukBehandlingID
-    }
 
-    private fun lagFamilieTilbakeFrontendUrl(): String {
-        return if (environment.activeProfiles.contains("prod")) {
+    private fun lagFamilieTilbakeFrontendUrl(): String =
+        if (environment.activeProfiles.contains("prod")) {
             "familietilbakekreving.intern.nav.no"
         } else {
             "familie-tilbake-frontend.intern.dev.nav.no"
         }
-    }
 
     private fun finnesFerdigstillOppgaveForBehandling(
         behandlingId: UUID,

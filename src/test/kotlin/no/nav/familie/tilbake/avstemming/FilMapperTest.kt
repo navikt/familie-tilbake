@@ -11,7 +11,8 @@ class FilMapperTest {
     fun `tilFlatfil skal liste ut med forventet format for datoer og tall skal multipliseres med 100`() {
         val avstemmingsfil = FilMapper(listOf(testRad()))
 
-        avstemmingsfil.tilFlatfil()
+        avstemmingsfil
+            .tilFlatfil()
             .decodeToString() shouldBe FORVENTET_HEADER + "familie-tilbake;1234;12345678901;20191231;BA;1000;200;800;100;"
     }
 
@@ -41,12 +42,13 @@ class FilMapperTest {
                     ),
                 ),
             )
-        avstemmingsfil.tilFlatfil()
+        avstemmingsfil
+            .tilFlatfil()
             .decodeToString() shouldBe FORVENTET_HEADER + "familie-tilbake;1234;12345678901;20191231;BA;0;0;0;0;Omgjoring0"
     }
 
-    private fun testRad(): Rad {
-        return Rad(
+    private fun testRad(): Rad =
+        Rad(
             avsender = "familie-tilbake",
             vedtakId = "1234",
             fnr = "12345678901",
@@ -58,7 +60,6 @@ class FilMapperTest {
             renter = BigDecimal.valueOf(100),
             erOmgjøringTilIngenTilbakekreving = false,
         )
-    }
 
     companion object {
         private const val FORVENTET_HEADER =

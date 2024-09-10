@@ -1476,9 +1476,11 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         behandling.behandlendeEnhet shouldBe "4806"
         behandling.behandlendeEnhetsNavn shouldBe "Mock NAV Drammen"
 
-        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET)).any {
-            it.type == OppdaterEnhetOppgaveTask.TYPE && "Endret tildelt enhet: 4806" == it.metadata["beskrivelse"] && "4806" == it.metadata["enhetId"]
-        }.shouldBeTrue()
+        taskService
+            .finnTasksMedStatus(listOf(Status.UBEHANDLET))
+            .any {
+                it.type == OppdaterEnhetOppgaveTask.TYPE && "Endret tildelt enhet: 4806" == it.metadata["beskrivelse"] && "4806" == it.metadata["enhetId"]
+            }.shouldBeTrue()
         assertHistorikkTask(
             behandling.id,
             TilbakekrevingHistorikkinnslagstype.ENDRET_ENHET,
@@ -1589,10 +1591,11 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         behandlingsstegstatus: Behandlingsstegstatus,
         venteårsak: Venteårsak? = null,
     ) {
-        behandlingsstegstilstand.any {
-            it.behandlingssteg == behandlingssteg && it.behandlingsstegsstatus == behandlingsstegstatus
-            it.venteårsak == venteårsak
-        }.shouldBeTrue()
+        behandlingsstegstilstand
+            .any {
+                it.behandlingssteg == behandlingssteg && it.behandlingsstegsstatus == behandlingsstegstatus
+                it.venteårsak == venteårsak
+            }.shouldBeTrue()
     }
 
     private fun assertFagsak(
@@ -1655,8 +1658,14 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
             varsel.varseltekst shouldBe it.varseltekst
             varsel.varselbeløp.toBigDecimal() shouldBe it.sumFeilutbetaling
             varsel.perioder.size shouldBe it.perioder.size
-            varsel.perioder.toList().first().fom shouldBe it.perioder.first().fom
-            varsel.perioder.toList().first().tom shouldBe it.perioder.first().tom
+            varsel.perioder
+                .toList()
+                .first()
+                .fom shouldBe it.perioder.first().fom
+            varsel.perioder
+                .toList()
+                .first()
+                .tom shouldBe it.perioder.first().tom
         }
     }
 
@@ -1752,9 +1761,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         )
     }
 
-    private fun lagOpprettRevurderingDto(originalBehandlingId: UUID): OpprettRevurderingDto {
-        return OpprettRevurderingDto(BARNETRYGD, originalBehandlingId, Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR)
-    }
+    private fun lagOpprettRevurderingDto(originalBehandlingId: UUID): OpprettRevurderingDto = OpprettRevurderingDto(BARNETRYGD, originalBehandlingId, Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR)
 
     private fun assertAnsvarligSaksbehandler(behandling: Behandling) {
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
@@ -1768,15 +1775,19 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         aktør: Aktør,
         tekst: String? = null,
     ) {
-        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET)).any {
-            LagHistorikkinnslagTask.TYPE == it.type && historikkinnslagstype.name == it.metadata["historikkinnslagstype"] && aktør.name == it.metadata["aktør"] && behandlingId.toString() == it.payload && tekst == it.metadata["beskrivelse"]
-        }.shouldBeTrue()
+        taskService
+            .finnTasksMedStatus(listOf(Status.UBEHANDLET))
+            .any {
+                LagHistorikkinnslagTask.TYPE == it.type && historikkinnslagstype.name == it.metadata["historikkinnslagstype"] && aktør.name == it.metadata["aktør"] && behandlingId.toString() == it.payload && tekst == it.metadata["beskrivelse"]
+            }.shouldBeTrue()
     }
 
     private fun assertFinnKravgrunnlagTask(behandlingId: UUID) {
-        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET)).any {
-            FinnKravgrunnlagTask.TYPE == it.type && behandlingId.toString() == it.payload
-        }.shouldBeTrue()
+        taskService
+            .finnTasksMedStatus(listOf(Status.UBEHANDLET))
+            .any {
+                FinnKravgrunnlagTask.TYPE == it.type && behandlingId.toString() == it.payload
+            }.shouldBeTrue()
     }
 
     private fun assertOppgaveTask(

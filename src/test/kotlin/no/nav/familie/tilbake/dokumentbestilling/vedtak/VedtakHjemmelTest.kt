@@ -43,7 +43,8 @@ class VedtakHjemmelTest {
         vurderingPerioder: Set<Vilkårsvurderingsperiode>,
     ): Vedtaksbrevgrunnlag {
         val behandling =
-            Testdata.lagVedtaksbrevbehandling(Testdata.lagBehandling())
+            Testdata
+                .lagVedtaksbrevbehandling(Testdata.lagBehandling())
                 .copy(
                     vurderteForeldelser = vurdertForeldelse?.let { setOf(it) } ?: setOf(),
                     vilkårsvurdering = setOf(Testdata.lagVilkårsvurdering(Testdata.lagBehandling().id).copy(perioder = vurderingPerioder)),
@@ -426,9 +427,7 @@ class VedtakHjemmelTest {
     private fun aktsomhet(
         periode: Månedsperiode,
         oppsett: (VilkårsvurderingAktsomhet) -> VilkårsvurderingAktsomhet,
-    ): Set<Vilkårsvurderingsperiode> {
-        return aktsomhet(Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT, periode, oppsett)
-    }
+    ): Set<Vilkårsvurderingsperiode> = aktsomhet(Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT, periode, oppsett)
 
     private fun aktsomhet(
         resultat: Vilkårsvurderingsresultat,

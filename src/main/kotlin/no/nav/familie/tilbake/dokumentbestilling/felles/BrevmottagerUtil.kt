@@ -26,35 +26,32 @@ object BrevmottagerUtil {
     fun getVergenavn(
         verge: DomainVerge?,
         adresseinfo: Adresseinfo,
-    ): String {
-        return if (Vergetype.ADVOKAT == verge?.type) {
+    ): String =
+        if (Vergetype.ADVOKAT == verge?.type) {
             adresseinfo.annenMottagersNavn!! // Når verge er advokat, viser vi verge navn som "Virksomhet navn v/ verge navn"
         } else {
             verge?.navn ?: ""
         }
-    }
 
     fun getVergenavn(
         verge: VergeDto?,
         adresseinfo: Adresseinfo,
-    ): String {
-        return if (Vergetype.ADVOKAT == verge?.vergetype) {
+    ): String =
+        if (Vergetype.ADVOKAT == verge?.vergetype) {
             adresseinfo.annenMottagersNavn!! // Når verge er advokat, viser vi verge navn som "Virksomhet navn v/ verge navn"
         } else {
             verge?.navn ?: ""
         }
-    }
 
     fun utledBrevmottager(
         behandling: Behandling,
         fagsak: Fagsak,
-    ): Brevmottager {
-        return if (behandling.harVerge) {
+    ): Brevmottager =
+        if (behandling.harVerge) {
             Brevmottager.VERGE
         } else if (fagsak.institusjon != null) {
             Brevmottager.INSTITUSJON
         } else {
             Brevmottager.BRUKER
         }
-    }
 }

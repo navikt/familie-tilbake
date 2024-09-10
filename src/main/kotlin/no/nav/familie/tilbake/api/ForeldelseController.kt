@@ -21,7 +21,9 @@ import java.util.UUID
 @RequestMapping("/api/behandling/")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class ForeldelseController(val foreldelseService: ForeldelseService) {
+class ForeldelseController(
+    val foreldelseService: ForeldelseService,
+) {
     @Operation(summary = "Hent foreldelsesinformasjon")
     @GetMapping(
         path = ["{behandlingId}/foreldelse/v1"],
@@ -35,7 +37,5 @@ class ForeldelseController(val foreldelseService: ForeldelseService) {
     )
     fun hentVurdertForeldelse(
         @PathVariable("behandlingId") behandlingId: UUID,
-    ): Ressurs<VurdertForeldelseDto> {
-        return Ressurs.success(foreldelseService.hentVurdertForeldelse(behandlingId))
-    }
+    ): Ressurs<VurdertForeldelseDto> = Ressurs.success(foreldelseService.hentVurdertForeldelse(behandlingId))
 }

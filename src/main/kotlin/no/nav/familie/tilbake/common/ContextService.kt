@@ -14,12 +14,11 @@ import org.springframework.http.HttpStatus
 object ContextService {
     private const val SYSTEM_NAVN = "System"
 
-    fun hentSaksbehandler(): String {
-        return hentPåloggetSaksbehandler(Constants.BRUKER_ID_VEDTAKSLØSNINGEN)
-    }
+    fun hentSaksbehandler(): String = hentPåloggetSaksbehandler(Constants.BRUKER_ID_VEDTAKSLØSNINGEN)
 
     fun hentPåloggetSaksbehandler(defaultverdi: String?): String {
-        return Result.runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
+        return Result
+            .runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
             .fold(
                 onSuccess = {
                     return it.getAzureadClaimsOrNull()?.get("NAVident")?.toString()
@@ -32,16 +31,16 @@ object ContextService {
 
     // TODO Fjern hack for midlertidig simulere oppførsel fra tidligere versjon av no.nav.security.token.support.core
     @Deprecated("Ikke bruk! kommer til å byttes ut med versjon som kaster exception ved manglende issuer claims i neste versjon av tilbake")
-    private fun TokenValidationContext.getAzureadClaimsOrNull(): JwtTokenClaims? {
-        return try {
+    private fun TokenValidationContext.getAzureadClaimsOrNull(): JwtTokenClaims? =
+        try {
             this.getClaims("azuread")
         } catch (e: IllegalArgumentException) {
             null
         }
-    }
 
-    fun hentSaksbehandlerNavn(strict: Boolean = false): String {
-        return Result.runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
+    fun hentSaksbehandlerNavn(strict: Boolean = false): String =
+        Result
+            .runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
             .fold(
                 onSuccess = {
                     it.getAzureadClaimsOrNull()?.get("name")?.toString()
@@ -49,10 +48,10 @@ object ContextService {
                 },
                 onFailure = { if (strict) error("Finner ikke navn på innlogget bruker") else SYSTEM_NAVN },
             )
-    }
 
-    private fun hentGrupper(): List<String> {
-        return Result.runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
+    private fun hentGrupper(): List<String> =
+        Result
+            .runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
             .fold(
                 onSuccess = {
                     @Suppress("UNCHECKED_CAST")
@@ -60,7 +59,6 @@ object ContextService {
                 },
                 onFailure = { emptyList() },
             )
-    }
 
     fun hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(
         rolleConfig: RolleConfig,

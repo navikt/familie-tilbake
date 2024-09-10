@@ -16,8 +16,8 @@ object TilbakekrevingsvedtakMarshaller {
     fun marshall(
         behandlingId: UUID,
         request: TilbakekrevingsvedtakRequest,
-    ): String {
-        return try {
+    ): String =
+        try {
             val marshaller = context.createMarshaller()
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, false)
             val stringWriter = StringWriter()
@@ -27,19 +27,17 @@ object TilbakekrevingsvedtakMarshaller {
         } catch (e: JAXBException) {
             throw Feil("Kunne ikke marshalle TilbakekrevingsvedtakRequest for behandlingId=$behandlingId", e)
         }
-    }
 
     fun unmarshall(
         xml: String,
         behandlingId: UUID,
         xmlId: UUID,
-    ): TilbakekrevingsvedtakRequest {
-        return try {
+    ): TilbakekrevingsvedtakRequest =
+        try {
             val unmarshaller: Unmarshaller = context.createUnmarshaller()
 
             (unmarshaller.unmarshal(StringReader(xml)) as TilbakekrevingsvedtakRequest)
         } catch (e: JAXBException) {
             throw Feil("Kunne ikke unmarshalle requestXml=$xml med id=$xmlId for behandling=$behandlingId", e)
         }
-    }
 }

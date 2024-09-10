@@ -16,7 +16,9 @@ import java.util.UUID
 
 @Service
 @Profile("!e2e & !integrasjonstest")
-class KravgrunnlagMottaker(private val taskService: TaskService) {
+class KravgrunnlagMottaker(
+    private val taskService: TaskService,
+) {
     private val log = LoggerFactory.getLogger(this::class.java)
     private val secureLog = LoggerFactory.getLogger("secureLogger")
 

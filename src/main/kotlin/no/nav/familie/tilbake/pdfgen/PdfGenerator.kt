@@ -17,12 +17,11 @@ class PdfGenerator {
     companion object {
         private val FONT_CACHE: MutableMap<String, ByteArray?> = HashMap()
 
-        private fun lagBodyStartTag(dokumentvariant: Dokumentvariant): String {
-            return when (dokumentvariant) {
+        private fun lagBodyStartTag(dokumentvariant: Dokumentvariant): String =
+            when (dokumentvariant) {
                 Dokumentvariant.ENDELIG -> "<body>"
                 Dokumentvariant.UTKAST -> "<body class=\"utkast\">"
             }
-        }
 
         init {
             XRLog.setLoggingEnabled(true)
@@ -64,28 +63,26 @@ class PdfGenerator {
         val htmlDocument = appendHtmlMetadata(htmlContent, DocFormat.PDF, dokumentvariant, dokumenttittel)
         val builder = PdfRendererBuilder()
         try {
-            builder.useFont(
-                fontSupplier("SourceSansPro-Regular.ttf"),
-                "Source Sans Pro",
-                400,
-                BaseRendererBuilder.FontStyle.NORMAL,
-                true,
-            )
+            builder
                 .useFont(
+                    fontSupplier("SourceSansPro-Regular.ttf"),
+                    "Source Sans Pro",
+                    400,
+                    BaseRendererBuilder.FontStyle.NORMAL,
+                    true,
+                ).useFont(
                     fontSupplier("SourceSansPro-Bold.ttf"),
                     "Source Sans Pro",
                     700,
                     BaseRendererBuilder.FontStyle.OBLIQUE,
                     true,
-                )
-                .useFont(
+                ).useFont(
                     fontSupplier("SourceSansPro-It.ttf"),
                     "Source Sans Pro",
                     400,
                     BaseRendererBuilder.FontStyle.ITALIC,
                     true,
-                )
-                .useColorProfile(FileStructureUtil.colorProfile)
+                ).useColorProfile(FileStructureUtil.colorProfile)
                 .useSVGDrawer(BatikSVGDrawer())
                 .usePdfAConformance(PdfRendererBuilder.PdfAConformance.PDFA_2_A)
                 .usePdfUaAccessbility(true)
@@ -135,7 +132,5 @@ class PdfGenerator {
         return FSSupplier { ByteArrayInputStream(bytes) }
     }
 
-    private fun hentCss(format: DocFormat): String {
-        return FileStructureUtil.readResourceAsString("formats/" + format.name.lowercase(Locale.getDefault()) + "/style.css")
-    }
+    private fun hentCss(format: DocFormat): String = FileStructureUtil.readResourceAsString("formats/" + format.name.lowercase(Locale.getDefault()) + "/style.css")
 }

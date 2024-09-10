@@ -63,7 +63,5 @@ object HendelsestypePerYtelsestype {
                 ),
         )
 
-    fun getHendelsestyper(ytelsestype: Ytelsestype): Set<Hendelsestype> {
-        return HIERARKI[ytelsestype] ?: error("Ikke-støttet ytelsestype: $ytelsestype")
-    }
+    fun getHendelsestyper(ytelsestype: Ytelsestype): Set<Hendelsestype> = HIERARKI[ytelsestype] ?: error("Ikke-støttet ytelsestype: $ytelsestype")
 }

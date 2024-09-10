@@ -20,8 +20,7 @@ import java.util.UUID
 class GammelKravgrunnlagTask(
     private val gammelKravgrunnlagService: GammelKravgrunnlagService,
     private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
-) :
-    AsyncTaskStep {
+) : AsyncTaskStep {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional

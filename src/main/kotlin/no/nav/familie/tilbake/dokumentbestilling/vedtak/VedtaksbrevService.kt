@@ -115,7 +115,8 @@ class VedtaksbrevService(
 
     @Transactional
     fun deaktiverEksisterendeVedtaksbrevdata(behandlingId: UUID) {
-        vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)
+        vedtaksbrevsoppsummeringRepository
+            .findByBehandlingId(behandlingId)
             ?.let { vedtaksbrevsoppsummeringRepository.deleteById(it.id) }
         vedtaksbrevsperiodeRepository.findByBehandlingId(behandlingId).forEach { vedtaksbrevsperiodeRepository.deleteById(it.id) }
     }

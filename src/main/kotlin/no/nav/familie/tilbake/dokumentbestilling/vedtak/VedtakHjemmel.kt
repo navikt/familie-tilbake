@@ -64,34 +64,29 @@ object VedtakHjemmel {
         return HbHjemmel(hjemmelstekst, hjemmelstekst.contains("og"))
     }
 
-    private fun erRenterBenyttet(vilkårPerioder: Set<Vilkårsvurderingsperiode>): Boolean {
-        return vilkårPerioder.any {
+    private fun erRenterBenyttet(vilkårPerioder: Set<Vilkårsvurderingsperiode>): Boolean =
+        vilkårPerioder.any {
             it.aktsomhet?.ileggRenter == true || erForsettOgAlltidRenter(it)
         }
-    }
 
-    private fun erForsettOgAlltidRenter(v: Vilkårsvurderingsperiode): Boolean {
-        return Vilkårsvurderingsresultat_MED_FORSETT_ALLTID_RENTER.contains(v.vilkårsvurderingsresultat) &&
+    private fun erForsettOgAlltidRenter(v: Vilkårsvurderingsperiode): Boolean =
+        Vilkårsvurderingsresultat_MED_FORSETT_ALLTID_RENTER.contains(v.vilkårsvurderingsresultat) &&
             Aktsomhet.FORSETT == v.aktsomhet?.aktsomhet
-    }
 
     private fun heleVurderingPgaSmåbeløp(
         vedtakResultatType: Vedtaksresultat,
         vilkårPerioder: Set<Vilkårsvurderingsperiode>,
-    ): Boolean {
-        return Vedtaksresultat.INGEN_TILBAKEBETALING == vedtakResultatType &&
+    ): Boolean =
+        Vedtaksresultat.INGEN_TILBAKEBETALING == vedtakResultatType &&
             vilkårPerioder.any { false == it.aktsomhet?.tilbakekrevSmåbeløp }
-    }
 
-    private fun erTilleggsfristBenyttet(foreldelse: VurdertForeldelse?): Boolean {
-        return foreldelse?.foreldelsesperioder?.any { it.foreldelsesvurderingstype == Foreldelsesvurderingstype.TILLEGGSFRIST }
+    private fun erTilleggsfristBenyttet(foreldelse: VurdertForeldelse?): Boolean =
+        foreldelse?.foreldelsesperioder?.any { it.foreldelsesvurderingstype == Foreldelsesvurderingstype.TILLEGGSFRIST }
             ?: false
-    }
 
-    private fun erNoeSattTilVanligForeldet(foreldelse: VurdertForeldelse?): Boolean {
-        return foreldelse?.foreldelsesperioder?.any { it.foreldelsesvurderingstype == Foreldelsesvurderingstype.FORELDET }
+    private fun erNoeSattTilVanligForeldet(foreldelse: VurdertForeldelse?): Boolean =
+        foreldelse?.foreldelsesperioder?.any { it.foreldelsesvurderingstype == Foreldelsesvurderingstype.FORELDET }
             ?: false
-    }
 
     private fun join(
         elementer: List<Hjemler>,
@@ -111,7 +106,10 @@ object VedtakHjemmel {
         ENDRET_TIL_UGUNST_FOR_BRUKER,
     }
 
-    private enum class Hjemler(bokmål: String, nynorsk: String) {
+    private enum class Hjemler(
+        bokmål: String,
+        nynorsk: String,
+    ) {
         FOLKETRYGD_22_15("folketrygdloven § 22-15", "folketrygdlova § 22-15"),
         FOLKETRYGD_22_15_SJETTE("folketrygdloven § 22-15 sjette ledd", "folketrygdlova § 22-15 sjette ledd"),
         FOLKETRYGD_22_15_OG_22_17_A("folketrygdloven §§ 22-15 og 22-17 a", "folketrygdlova §§ 22-15 og 22-17 a"),
@@ -129,8 +127,6 @@ object VedtakHjemmel {
                 Språkkode.NN to nynorsk,
             )
 
-        fun hjemmelTekst(språkkode: Språkkode): String? {
-            return hjemmelTekster.getOrDefault(språkkode, hjemmelTekster[Språkkode.NB])
-        }
+        fun hjemmelTekst(språkkode: Språkkode): String? = hjemmelTekster.getOrDefault(språkkode, hjemmelTekster[Språkkode.NB])
     }
 }

@@ -36,22 +36,18 @@ class ForeldelseService(
         return ForeldelseMapper.tilRespons(feilutbetaltePerioder, kravgrunnlag, vurdertForeldelse)
     }
 
-    fun hentAktivVurdertForeldelse(behandlingId: UUID): VurdertForeldelse? {
-        return foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
-    }
+    fun hentAktivVurdertForeldelse(behandlingId: UUID): VurdertForeldelse? = foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
 
-    fun hentAlleForeldelser(behandlingId: UUID): List<VurdertForeldelse> {
-        return foreldelseRepository.findByBehandlingId(behandlingId)
-    }
+    fun hentAlleForeldelser(behandlingId: UUID): List<VurdertForeldelse> = foreldelseRepository.findByBehandlingId(behandlingId)
 
     fun erPeriodeForeldet(
         behandlingId: UUID,
         periode: Månedsperiode,
-    ): Boolean {
-        return hentAktivVurdertForeldelse(behandlingId)?.foreldelsesperioder
+    ): Boolean =
+        hentAktivVurdertForeldelse(behandlingId)
+            ?.foreldelsesperioder
             ?.any { periode == it.periode && it.erForeldet() }
             ?: false
-    }
 
     @Transactional
     fun lagreVurdertForeldelse(

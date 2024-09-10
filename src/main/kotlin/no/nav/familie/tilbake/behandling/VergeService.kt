@@ -128,8 +128,8 @@ class VergeService(
         }
     }
 
-    private fun tilDomene(vergeDto: VergeDto): Verge {
-        return Verge(
+    private fun tilDomene(vergeDto: VergeDto): Verge =
+        Verge(
             ident = vergeDto.ident,
             orgNr = vergeDto.orgNr,
             aktiv = true,
@@ -138,15 +138,13 @@ class VergeService(
             kilde = Applikasjon.FAMILIE_TILBAKE.name,
             begrunnelse = vergeDto.begrunnelse,
         )
-    }
 
-    private fun tilRespons(verge: Verge): VergeDto {
-        return VergeDto(
+    private fun tilRespons(verge: Verge): VergeDto =
+        VergeDto(
             ident = verge.ident,
             orgNr = verge.orgNr,
             type = verge.type,
             navn = verge.navn,
             begrunnelse = verge.begrunnelse,
         )
-    }
 }

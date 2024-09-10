@@ -60,8 +60,8 @@ internal class PubliserJournalpostTaskTest : OppslagSpringRunnerTest() {
         opprettetTask.metadata["dødsboUkjentAdresse"] shouldBe null
     }
 
-    private fun opprettTask(journalpostId: String): Task {
-        return Task(
+    private fun opprettTask(journalpostId: String): Task =
+        Task(
             type = PubliserJournalpostTask.TYPE,
             payload = objectMapper.writeValueAsString(PubliserJournalpostTaskData(UUID.randomUUID(), manuellAdresse = null)),
             properties =
@@ -72,7 +72,6 @@ internal class PubliserJournalpostTaskTest : OppslagSpringRunnerTest() {
                     this["distribusjonstidspunkt"] = Distribusjonstidspunkt.KJERNETID.name
                 },
         )
-    }
 
     private fun assertDistribuerDokumentVedDødsfallTask() {
         taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET)).shouldHaveSingleElement {

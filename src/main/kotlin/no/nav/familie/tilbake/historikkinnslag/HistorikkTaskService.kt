@@ -45,9 +45,8 @@ class HistorikkTaskService(
         triggerTid?.let { taskService.save(task.medTriggerTid(triggerTid)) } ?: taskService.save(task)
     }
 
-    private fun fjernNewlinesFraString(tekst: String): String {
-        return tekst
+    private fun fjernNewlinesFraString(tekst: String): String =
+        tekst
             .replace("\r", "")
             .replace("\n", " ")
-    }
 }

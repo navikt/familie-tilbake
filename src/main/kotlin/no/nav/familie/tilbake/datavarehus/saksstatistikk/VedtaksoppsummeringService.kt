@@ -80,8 +80,8 @@ class VedtaksoppsummeringService(
         behandlingId: UUID,
         beregningsresultat: Beregningsresultat,
         vilkårsvurdering: Vilkårsvurdering,
-    ): List<VedtakPeriode> {
-        return vilkårsvurdering.perioder.map { periode ->
+    ): List<VedtakPeriode> =
+        vilkårsvurdering.perioder.map { periode ->
             val beregningsresultatsperiode: Beregningsresultatsperiode =
                 beregningsresultat.beregningsresultatsperioder.first { it.periode == periode.periode }
             val faktaFeilutbetaling =
@@ -102,14 +102,13 @@ class VedtaksoppsummeringService(
                 rentebeløp = beregningsresultatsperiode.rentebeløp,
             )
         }
-    }
 
     private fun hentForeldelsePerioder(
         behandlingId: UUID,
         beregningsresultat: Beregningsresultat,
         vurdertForeldelse: VurdertForeldelse,
-    ): List<VedtakPeriode> {
-        return vurdertForeldelse.foreldelsesperioder.mapNotNull { periode ->
+    ): List<VedtakPeriode> =
+        vurdertForeldelse.foreldelsesperioder.mapNotNull { periode ->
             if (periode.erForeldet()) {
                 val resultatPeriode: Beregningsresultatsperiode =
                     beregningsresultat.beregningsresultatsperioder.first { it.periode == periode.periode }
@@ -131,7 +130,6 @@ class VedtaksoppsummeringService(
                 null
             }
         }
-    }
 
     private fun hentSærligGrunner(periodeEntitet: Vilkårsvurderingsperiode): SærligeGrunner? {
         if (periodeEntitet.aktsomhet?.vilkårsvurderingSærligeGrunner?.isEmpty() == false) {

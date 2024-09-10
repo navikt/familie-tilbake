@@ -172,17 +172,14 @@ class VarselbrevService(
         )
     }
 
-    private fun utledBrevmottager(request: ForhåndsvisVarselbrevRequest): Brevmottager {
-        return if (request.verge != null) {
+    private fun utledBrevmottager(request: ForhåndsvisVarselbrevRequest): Brevmottager =
+        if (request.verge != null) {
             Brevmottager.VERGE
         } else if (request.institusjon != null) {
             Brevmottager.INSTITUSJON
         } else {
             Brevmottager.BRUKER
         }
-    }
 
-    private fun mapFeilutbetaltePerioder(varsel: Varsel?): List<Datoperiode> {
-        return varsel?.perioder?.map { Datoperiode(it.fom, it.tom) } ?: emptyList()
-    }
+    private fun mapFeilutbetaltePerioder(varsel: Varsel?): List<Datoperiode> = varsel?.perioder?.map { Datoperiode(it.fom, it.tom) } ?: emptyList()
 }

@@ -32,7 +32,9 @@ interface KafkaProducer {
 
 @Service
 @Profile("!integrasjonstest & !e2e & !local")
-class DefaultKafkaProducer(private val kafkaTemplate: KafkaTemplate<String, String>) : KafkaProducer {
+class DefaultKafkaProducer(
+    private val kafkaTemplate: KafkaTemplate<String, String>,
+) : KafkaProducer {
     private val log = LoggerFactory.getLogger(this::class.java)
 
     override fun sendSaksdata(
@@ -64,19 +66,20 @@ class DefaultKafkaProducer(private val kafkaTemplate: KafkaTemplate<String, Stri
     ) {
         val melding = objectMapper.writeValueAsString(request)
         val producerRecord = ProducerRecord(topic, key, melding)
-        kotlin.runCatching {
-            val callback = kafkaTemplate.send(producerRecord).get()
-            log.info(
-                "Melding på topic $topic for $behandlingId med $key er sendt. " +
-                    "Fikk offset ${callback?.recordMetadata?.offset()}",
-            )
-        }.onFailure {
-            val feilmelding =
-                "Melding på topic $topic kan ikke sendes for $behandlingId med $key. " +
-                    "Feiler med ${it.message}"
-            log.warn(feilmelding)
-            throw Feil(message = feilmelding)
-        }
+        kotlin
+            .runCatching {
+                val callback = kafkaTemplate.send(producerRecord).get()
+                log.info(
+                    "Melding på topic $topic for $behandlingId med $key er sendt. " +
+                        "Fikk offset ${callback?.recordMetadata?.offset()}",
+                )
+            }.onFailure {
+                val feilmelding =
+                    "Melding på topic $topic kan ikke sendes for $behandlingId med $key. " +
+                        "Feiler med ${it.message}"
+                log.warn(feilmelding)
+                throw Feil(message = feilmelding)
+            }
     }
 }
 

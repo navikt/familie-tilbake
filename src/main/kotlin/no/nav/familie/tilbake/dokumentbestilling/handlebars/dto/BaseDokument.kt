@@ -140,7 +140,14 @@ open class BaseDokument(
     @Suppress("unused") // Handlebars
     val ytelseUrl = ytelsesinfo.url
 
-    private class Ytelsesinfo(val url: String, val navn: Map<Språkkode, Ytelsesnavn>)
+    private class Ytelsesinfo(
+        val url: String,
+        val navn: Map<Språkkode, Ytelsesnavn>,
+    )
 
-    private class Ytelsesnavn(val ubestemt: String, val bestemt: String, val eiendomsform: String)
+    private class Ytelsesnavn(
+        val ubestemt: String,
+        val bestemt: String,
+        val eiendomsform: String,
+    )
 }

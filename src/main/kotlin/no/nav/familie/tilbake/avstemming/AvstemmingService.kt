@@ -77,9 +77,7 @@ class AvstemmingService(
     private fun erFørstegangsvedtakUtenTilbakekreving(
         behandling: Behandling,
         oppsummering: TilbakekrevingsvedtakOppsummering,
-    ): Boolean {
-        return behandling.type == Behandlingstype.TILBAKEKREVING && oppsummering.harIngenTilbakekreving()
-    }
+    ): Boolean = behandling.type == Behandlingstype.TILBAKEKREVING && oppsummering.harIngenTilbakekreving()
 
     private fun lagAvstemmingsradForVedtaket(
         behandling: Behandling,
@@ -101,16 +99,12 @@ class AvstemmingService(
         )
     }
 
-    private fun padOrganisasjonsnummer(institusjon: Institusjon): String {
-        return "00" + institusjon.organisasjonsnummer
-    }
+    private fun padOrganisasjonsnummer(institusjon: Institusjon): String = "00" + institusjon.organisasjonsnummer
 
     private fun erOmgjøringTilIngenTilbakekreving(
         oppsummering: TilbakekrevingsvedtakOppsummering,
         behandling: Behandling,
-    ): Boolean {
-        return behandling.type == Behandlingstype.REVURDERING_TILBAKEKREVING && oppsummering.harIngenTilbakekreving()
-    }
+    ): Boolean = behandling.type == Behandlingstype.REVURDERING_TILBAKEKREVING && oppsummering.harIngenTilbakekreving()
 
     private fun oppsummer(sendtMelding: ØkonomiXmlSendt): TilbakekrevingsvedtakOppsummering {
         val xml: String = sendtMelding.melding

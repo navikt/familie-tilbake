@@ -92,12 +92,11 @@ class BrevmetadataUtil(
 
     fun lagBrevmetadataForMottakerTilForhåndsvisning(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
-    ): Pair<Brevmetadata?, Brevmottager> {
-        return lagBrevmetadataForMottakerTilForhåndsvisning(
+    ): Pair<Brevmetadata?, Brevmottager> =
+        lagBrevmetadataForMottakerTilForhåndsvisning(
             behandlingId = vedtaksbrevgrunnlag.behandling.id,
             vedtaksbrevgrunnlag = vedtaksbrevgrunnlag,
         )
-    }
 
     fun lagBrevmetadataForMottakerTilForhåndsvisning(
         behandlingId: UUID,
@@ -140,8 +139,8 @@ class BrevmetadataUtil(
     private fun hentAnsvarligSaksbehandlerNavn(
         persistertSaksbehandlerId: String,
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag?,
-    ): String {
-        return when {
+    ): String =
+        when {
             vedtaksbrevgrunnlag?.aktivtSteg == Behandlingssteg.FORESLÅ_VEDTAK ->
                 eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(persistertSaksbehandlerId)
 
@@ -153,7 +152,6 @@ class BrevmetadataUtil(
 
             else -> ""
         }
-    }
 }
 
 private val Brevmottager.MANUELL

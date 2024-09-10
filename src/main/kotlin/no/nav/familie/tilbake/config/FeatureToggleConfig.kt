@@ -13,9 +13,7 @@ class FeatureToggleConfig(
     @Value("\${NAIS_CLUSTER_NAME}") private val clusterName: String,
 ) {
     @Bean
-    fun strategies(): List<Strategy> {
-        return listOf(ByClusterStrategy(clusterName))
-    }
+    fun strategies(): List<Strategy> = listOf(ByClusterStrategy(clusterName))
 
     companion object {
         const val KAN_OPPRETTE_BEH_MED_EKSTERNID_SOM_HAR_AVSLUTTET_TBK =
@@ -37,20 +35,20 @@ class FeatureToggleConfig(
 
 @Service
 @Profile("!integrasjonstest")
-class FeatureToggleService(val unleashService: UnleashService) {
-    fun isEnabled(toggleId: String): Boolean {
-        return unleashService.isEnabled(toggleId, false)
-    }
+class FeatureToggleService(
+    val unleashService: UnleashService,
+) {
+    fun isEnabled(toggleId: String): Boolean = unleashService.isEnabled(toggleId, false)
 
     fun isEnabled(
         toggleId: String,
         defaultValue: Boolean,
-    ): Boolean {
-        return unleashService.isEnabled(toggleId, defaultValue)
-    }
+    ): Boolean = unleashService.isEnabled(toggleId, defaultValue)
 }
 
-class ByClusterStrategy(private val clusterName: String) : Strategy {
+class ByClusterStrategy(
+    private val clusterName: String,
+) : Strategy {
     override fun isEnabled(parameters: MutableMap<String, String>): Boolean {
         if (parameters.isEmpty()) return false
         return parameters["cluster"]?.contains(clusterName) ?: false

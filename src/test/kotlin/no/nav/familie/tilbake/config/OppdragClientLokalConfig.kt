@@ -19,7 +19,5 @@ class OppdragClientLokalConfig(
 ) {
     @Bean
     @Primary
-    fun oppdragClient(): OppdragClient {
-        return MockOppdragClient(kravgrunnlagRepository, økonomiXmlMottattRepository)
-    }
+    fun oppdragClient(): OppdragClient = MockOppdragClient(kravgrunnlagRepository, økonomiXmlMottattRepository)
 }

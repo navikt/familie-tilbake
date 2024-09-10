@@ -1,6 +1,8 @@
 package no.nav.familie.tilbake.sikkerhet
 
-enum class Behandlerrolle(val nivå: Int) {
+enum class Behandlerrolle(
+    val nivå: Int,
+) {
     SYSTEM(5),
     BESLUTTER(4),
     SAKSBEHANDLER(3),
@@ -8,4 +10,6 @@ enum class Behandlerrolle(val nivå: Int) {
     VEILEDER(1),
 }
 
-class InnloggetBrukertilgang(val tilganger: Map<Tilgangskontrollsfagsystem, Behandlerrolle>)
+class InnloggetBrukertilgang(
+    val tilganger: Map<Tilgangskontrollsfagsystem, Behandlerrolle>,
+)

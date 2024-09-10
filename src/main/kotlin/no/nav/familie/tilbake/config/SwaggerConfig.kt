@@ -22,14 +22,14 @@ class SwaggerConfig(
     val apiScope: String,
 ) {
     @Bean
-    fun tilbakekrevingApi(): OpenAPI {
-        return OpenAPI().info(Info().title("Tilbakekreving API").version("v1"))
+    fun tilbakekrevingApi(): OpenAPI =
+        OpenAPI()
+            .info(Info().title("Tilbakekreving API").version("v1"))
             .components(Components().addSecuritySchemes("oauth2", securitySchemes()))
             .addSecurityItem(SecurityRequirement().addList("oauth2", listOf("read", "write")))
-    }
 
-    private fun securitySchemes(): SecurityScheme {
-        return SecurityScheme()
+    private fun securitySchemes(): SecurityScheme =
+        SecurityScheme()
             .name("oauth2")
             .type(SecurityScheme.Type.OAUTH2)
             .scheme("oauth2")
@@ -37,10 +37,10 @@ class SwaggerConfig(
             .flows(
                 OAuthFlows()
                     .authorizationCode(
-                        OAuthFlow().authorizationUrl(authorizationUrl)
+                        OAuthFlow()
+                            .authorizationUrl(authorizationUrl)
                             .tokenUrl(tokenUrl)
                             .scopes(Scopes().addString(apiScope, "read,write")),
                     ),
             )
-    }
 }

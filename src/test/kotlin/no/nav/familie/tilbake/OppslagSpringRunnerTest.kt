@@ -96,25 +96,22 @@ abstract class OppslagSpringRunnerTest {
 
     protected fun lokalTestToken(): String = mockOAuth2Server.issueToken("issuer1", audience = "aud-localhost").serialize()
 
-    protected fun localhost(uri: String): String {
-        return LOCALHOST + getPort() + uri
-    }
+    protected fun localhost(uri: String): String = LOCALHOST + getPort() + uri
 
     fun readXml(fileName: String): String {
         val url = requireNotNull(this::class.java.getResource(fileName)) { "fil med filnavn=$fileName finnes ikke" }
         return url.readText()
     }
 
-    fun readKravgrunnlagXmlMedIkkeForeldetDato(fileName: String): String {
-        return readXml(fileName).konverterDatoIXMLTilIkkeForeldet()
-    }
+    fun readKravgrunnlagXmlMedIkkeForeldetDato(fileName: String): String = readXml(fileName).konverterDatoIXMLTilIkkeForeldet()
 
     private fun resetWiremockServers() {
         applicationContext.getBeansOfType(WireMockServer::class.java).values.forEach(WireMockServer::resetRequests)
     }
 
     private fun clearCaches() {
-        cacheManager.cacheNames.mapNotNull { cacheManager.getCache(it) }
+        cacheManager.cacheNames
+            .mapNotNull { cacheManager.getCache(it) }
             .forEach { it.clear() }
     }
 
@@ -157,8 +154,7 @@ abstract class OppslagSpringRunnerTest {
             Meldingstelling::class,
             ManuellBrevmottaker::class,
             Historikkinnslag::class,
-        )
-            .reversed()
+        ).reversed()
             .forEach {
                 try {
                     jdbcAggregateOperations.deleteAll(it.java)
@@ -171,9 +167,7 @@ abstract class OppslagSpringRunnerTest {
             }
     }
 
-    protected fun getPort(): String {
-        return port.toString()
-    }
+    protected fun getPort(): String = port.toString()
 
     companion object {
         private const val LOCALHOST = "http://localhost:"

@@ -14,7 +14,9 @@ import java.util.UUID
 
 @Repository
 @Transactional
-interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUpdateRepository<Behandling> {
+interface BehandlingRepository :
+    RepositoryInterface<Behandling, UUID>,
+    InsertUpdateRepository<Behandling> {
     // language=PostgreSQL
     @Query(
         """

@@ -23,4 +23,9 @@ class VersionController {
     }
 }
 
-data class Info(val appImage: String, val appName: String, val namespace: String, val clusterName: String)
+data class Info(
+    val appImage: String,
+    val appName: String,
+    val namespace: String,
+    val clusterName: String,
+)

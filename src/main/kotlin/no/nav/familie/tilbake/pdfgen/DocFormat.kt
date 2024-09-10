@@ -8,7 +8,5 @@ enum class DocFormat {
     EMAIL,
     ;
 
-    override fun toString(): String {
-        return name.lowercase(Locale.getDefault())
-    }
+    override fun toString(): String = name.lowercase(Locale.getDefault())
 }

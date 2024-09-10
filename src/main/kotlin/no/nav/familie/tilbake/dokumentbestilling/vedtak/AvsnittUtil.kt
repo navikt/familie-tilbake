@@ -45,11 +45,10 @@ internal object AvsnittUtil {
         return FellesTekstformaterer.lagDeltekst(vedtaksbrevFelles, filsti)
     }
 
-    private fun lagPerioderavsnitt(vedtaksbrevsdata: HbVedtaksbrevsdata): List<Avsnitt> {
-        return vedtaksbrevsdata.perioder.map {
+    private fun lagPerioderavsnitt(vedtaksbrevsdata: HbVedtaksbrevsdata): List<Avsnitt> =
+        vedtaksbrevsdata.perioder.map {
             lagPeriodeAvsnitt(HbVedtaksbrevPeriodeOgFelles(vedtaksbrevsdata.felles, it))
         }
-    }
 
     private fun lagAvsluttendeAvsnitt(vedtaksbrevsdata: HbVedtaksbrevsdata): Avsnitt {
         val tekst = FellesTekstformaterer.lagDeltekst(vedtaksbrevsdata, "vedtak/vedtak_slutt")
@@ -170,20 +169,14 @@ internal object AvsnittUtil {
         return lokaltAvsnitt.copy(underavsnittsliste = lokaltAvsnitt.underavsnittsliste + underavsnitt)
     }
 
-    private fun fjernFormattering(linje: String): String {
-        return linje.removePrefix("{venstrejustert}").replace("{høyrejustert}", "\t\t\t")
-    }
+    private fun fjernFormattering(linje: String): String = linje.removePrefix("{venstrejustert}").replace("{høyrejustert}", "\t\t\t")
 
     private fun parseUnderavsnittstype(tekst: String): Underavsnittstype? {
         val rest = Vedtaksbrevsfritekst.fjernFritekstmarkering(tekst)
         return Underavsnittstype.values().firstOrNull { it.name == rest }
     }
 
-    private fun erOverskrift(tekst: String): Boolean {
-        return tekst.startsWith("_")
-    }
+    private fun erOverskrift(tekst: String): Boolean = tekst.startsWith("_")
 
-    private fun fjernOverskriftFormattering(tekst: String): String {
-        return tekst.removePrefix("__").removePrefix("_")
-    }
+    private fun fjernOverskriftFormattering(tekst: String): String = tekst.removePrefix("__").removePrefix("_")
 }

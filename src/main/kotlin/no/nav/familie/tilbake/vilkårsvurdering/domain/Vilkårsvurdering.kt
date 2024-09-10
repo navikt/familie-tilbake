@@ -116,7 +116,9 @@ data class VilkårsvurderingSærligGrunn(
     val sporbar: Sporbar = Sporbar(),
 )
 
-enum class SærligGrunn(val navn: String) {
+enum class SærligGrunn(
+    val navn: String,
+) {
     GRAD_AV_UAKTSOMHET("Graden av uaktsomhet hos den kravet retter seg mot"),
     HELT_ELLER_DELVIS_NAVS_FEIL("Om feilen helt eller delvis kan tilskrives NAV"),
     STØRRELSE_BELØP("Størrelsen på feilutbetalt beløp"),
@@ -128,18 +130,24 @@ interface Vurdering {
     val navn: String
 }
 
-enum class Aktsomhet(override val navn: String) : Vurdering {
+enum class Aktsomhet(
+    override val navn: String,
+) : Vurdering {
     FORSETT("Forsett"),
     GROV_UAKTSOMHET("Grov uaktsomhet"),
     SIMPEL_UAKTSOMHET("Simpel uaktsomhet"),
 }
 
-enum class AnnenVurdering(override val navn: String) : Vurdering {
+enum class AnnenVurdering(
+    override val navn: String,
+) : Vurdering {
     GOD_TRO("Handlet i god tro"),
     FORELDET("Foreldet"),
 }
 
-enum class Vilkårsvurderingsresultat(val navn: String) {
+enum class Vilkårsvurderingsresultat(
+    val navn: String,
+) {
     FORSTO_BURDE_FORSTÅTT("Ja, mottaker forsto eller burde forstått at utbetalingen skyldtes en feil (1. ledd, 1. punkt)"),
     MANGELFULLE_OPPLYSNINGER_FRA_BRUKER(
         "Ja, mottaker har forårsaket feilutbetalingen ved forsett " +

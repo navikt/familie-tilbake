@@ -297,8 +297,8 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
     private fun lagMetadata(
         ytelsestype: Ytelsestype,
         språkkode: Språkkode,
-    ): Brevmetadata {
-        return Brevmetadata(
+    ): Brevmetadata =
+        Brevmetadata(
             sakspartId = "",
             sakspartsnavn = "",
             mottageradresse = Adresseinfo("01020312345", "Bob"),
@@ -309,7 +309,6 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
             ytelsestype = ytelsestype,
             gjelderDødsfall = false,
         )
-    }
 
     private fun prettyPrint(
         tilbakebetaling: Vedtaksresultat,

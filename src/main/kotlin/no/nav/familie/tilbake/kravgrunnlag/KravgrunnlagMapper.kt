@@ -18,8 +18,8 @@ object KravgrunnlagMapper {
     fun tilKravgrunnlag431(
         kravgrunnlag: DetaljertKravgrunnlagDto,
         behandlingId: UUID,
-    ): Kravgrunnlag431 {
-        return Kravgrunnlag431(
+    ): Kravgrunnlag431 =
+        Kravgrunnlag431(
             behandlingId = behandlingId,
             vedtakId = kravgrunnlag.vedtakId,
             omgjortVedtakId = kravgrunnlag.vedtakIdOmgjort,
@@ -42,33 +42,32 @@ object KravgrunnlagMapper {
             eksternKravgrunnlagId = kravgrunnlag.kravgrunnlagId,
             perioder = tilKravgrunnlagsperiode(kravgrunnlag.tilbakekrevingsPeriode),
         )
-    }
 
-    private fun tilKravgrunnlagsperiode(perioder: List<DetaljertKravgrunnlagPeriodeDto>): Set<Kravgrunnlagsperiode432> {
-        return perioder.map {
-            Kravgrunnlagsperiode432(
-                periode = Månedsperiode(it.periode.fom, it.periode.tom),
-                månedligSkattebeløp = it.belopSkattMnd,
-                beløp = tilKravgrunnlagsbeløp(it.tilbakekrevingsBelop),
-            )
-        }.toSet()
-    }
+    private fun tilKravgrunnlagsperiode(perioder: List<DetaljertKravgrunnlagPeriodeDto>): Set<Kravgrunnlagsperiode432> =
+        perioder
+            .map {
+                Kravgrunnlagsperiode432(
+                    periode = Månedsperiode(it.periode.fom, it.periode.tom),
+                    månedligSkattebeløp = it.belopSkattMnd,
+                    beløp = tilKravgrunnlagsbeløp(it.tilbakekrevingsBelop),
+                )
+            }.toSet()
 
-    private fun tilKravgrunnlagsbeløp(beløpPosteringer: List<DetaljertKravgrunnlagBelopDto>): Set<Kravgrunnlagsbeløp433> {
-        return beløpPosteringer.map {
-            val klassetype = Klassetype.fraKode(it.typeKlasse.value())
-            Kravgrunnlagsbeløp433(
-                klassetype = klassetype,
-                klassekode = Klassekode.fraKode(it.kodeKlasse, klassetype),
-                opprinneligUtbetalingsbeløp = it.belopOpprUtbet,
-                nyttBeløp = it.belopNy,
-                tilbakekrevesBeløp = it.belopTilbakekreves,
-                uinnkrevdBeløp = it.belopUinnkrevd,
-                skatteprosent = it.skattProsent,
-                resultatkode = it.kodeResultat,
-                årsakskode = it.kodeAArsak,
-                skyldkode = it.kodeSkyld,
-            )
-        }.toSet()
-    }
+    private fun tilKravgrunnlagsbeløp(beløpPosteringer: List<DetaljertKravgrunnlagBelopDto>): Set<Kravgrunnlagsbeløp433> =
+        beløpPosteringer
+            .map {
+                val klassetype = Klassetype.fraKode(it.typeKlasse.value())
+                Kravgrunnlagsbeløp433(
+                    klassetype = klassetype,
+                    klassekode = Klassekode.fraKode(it.kodeKlasse, klassetype),
+                    opprinneligUtbetalingsbeløp = it.belopOpprUtbet,
+                    nyttBeløp = it.belopNy,
+                    tilbakekrevesBeløp = it.belopTilbakekreves,
+                    uinnkrevdBeløp = it.belopUinnkrevd,
+                    skatteprosent = it.skattProsent,
+                    resultatkode = it.kodeResultat,
+                    årsakskode = it.kodeAArsak,
+                    skyldkode = it.kodeSkyld,
+                )
+            }.toSet()
 }

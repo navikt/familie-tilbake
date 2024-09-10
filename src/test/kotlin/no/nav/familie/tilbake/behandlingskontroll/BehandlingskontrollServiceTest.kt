@@ -176,7 +176,10 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         aktivtstegstilstand.behandlingsstegsstatus shouldBe VENTER
         assertBehandlingsstatus(behandling.id, Behandlingsstatus.UTREDES)
         aktivtstegstilstand.venteårsak shouldBe Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
-        aktivtstegstilstand.tidsfrist shouldBe oppdatertKravgrunnlag.sporbar.endret.endretTid.plusWeeks(4).toLocalDate()
+        aktivtstegstilstand.tidsfrist shouldBe
+            oppdatertKravgrunnlag.sporbar.endret.endretTid
+                .plusWeeks(4)
+                .toLocalDate()
     }
 
     @Test
@@ -486,27 +489,25 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         }
     }
 
-    private fun lagFagsystemsbehandling(tilbakekrevingsvalg: Tilbakekrevingsvalg): Fagsystemsbehandling {
-        return Fagsystemsbehandling(
+    private fun lagFagsystemsbehandling(tilbakekrevingsvalg: Tilbakekrevingsvalg): Fagsystemsbehandling =
+        Fagsystemsbehandling(
             eksternId = "123",
             tilbakekrevingsvalg = tilbakekrevingsvalg,
             resultat = "testverdi",
             årsak = "testverdi",
             revurderingsvedtaksdato = LocalDate.now().minusDays(1),
         )
-    }
 
     private fun lagBehandlingsstegsinfo(
         behandlingssteg: Behandlingssteg,
         venteårsak: Venteårsak,
-    ): Behandlingsstegsinfo {
-        return Behandlingsstegsinfo(
+    ): Behandlingsstegsinfo =
+        Behandlingsstegsinfo(
             behandlingssteg = behandlingssteg,
             behandlingsstegstatus = VENTER,
             venteårsak = venteårsak,
             tidsfrist = behandling.opprettetDato.plusWeeks(venteårsak.defaultVenteTidIUker),
         )
-    }
 
     private fun assertBehandlingsstatus(
         behandlingId: UUID,

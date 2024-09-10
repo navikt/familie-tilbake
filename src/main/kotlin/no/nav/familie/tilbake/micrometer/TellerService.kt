@@ -65,15 +65,16 @@ class TellerService(
         fagsak: Fagsak,
         brevtype: Brevtype,
     ) {
-        Metrics.counter(
-            "Brevteller",
-            Tags.of(
-                "fagsystem",
-                fagsak.fagsystem.name,
-                "brevtype",
-                brevtype.name,
-            ),
-        ).increment()
+        Metrics
+            .counter(
+                "Brevteller",
+                Tags.of(
+                    "fagsystem",
+                    fagsak.fagsystem.name,
+                    "brevtype",
+                    brevtype.name,
+                ),
+            ).increment()
     }
 
     fun tellVedtak(
@@ -88,14 +89,15 @@ class TellerService(
                 behandlingsresultatstype.name
             }
 
-        Metrics.counter(
-            "Vedtaksteller",
-            Tags.of(
-                "fagsystem",
-                fagsak.fagsystem.name,
-                "vedtakstype",
-                vedtakstype,
-            ),
-        ).increment()
+        Metrics
+            .counter(
+                "Vedtaksteller",
+                Tags.of(
+                    "fagsystem",
+                    fagsak.fagsystem.name,
+                    "vedtakstype",
+                    vedtakstype,
+                ),
+            ).increment()
     }
 }

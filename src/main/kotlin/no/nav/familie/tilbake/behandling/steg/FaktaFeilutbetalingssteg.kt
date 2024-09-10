@@ -80,9 +80,7 @@ class FaktaFeilutbetalingssteg(
         )
     }
 
-    override fun getBehandlingssteg(): Behandlingssteg {
-        return Behandlingssteg.FAKTA
-    }
+    override fun getBehandlingssteg(): Behandlingssteg = Behandlingssteg.FAKTA
 
     @EventListener
     fun deaktiverEksisterendeFaktaOmFeilutbetaling(endretKravgrunnlagEvent: EndretKravgrunnlagEvent) {

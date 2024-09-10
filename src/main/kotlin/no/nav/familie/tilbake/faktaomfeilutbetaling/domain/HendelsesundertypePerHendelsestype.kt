@@ -197,7 +197,5 @@ object HendelsesundertypePerHendelsestype {
                 ),
         )
 
-    fun getHendelsesundertyper(hendelsestype: Hendelsestype): Set<Hendelsesundertype> {
-        return HIERARKI[hendelsestype] ?: error("Ikke-støttet hendelseType: $hendelsestype")
-    }
+    fun getHendelsesundertyper(hendelsestype: Hendelsestype): Set<Hendelsesundertype> = HIERARKI[hendelsestype] ?: error("Ikke-støttet hendelseType: $hendelsestype")
 }

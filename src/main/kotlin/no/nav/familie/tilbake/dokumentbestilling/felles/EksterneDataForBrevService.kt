@@ -19,9 +19,7 @@ class EksterneDataForBrevService(
     fun hentPerson(
         ident: String,
         fagsystem: Fagsystem,
-    ): Personinfo {
-        return personService.hentPersoninfo(ident, fagsystem)
-    }
+    ): Personinfo = personService.hentPersoninfo(ident, fagsystem)
 
     fun hentSaksbehandlernavn(id: String): String {
         val saksbehandler = integrasjonerClient.hentSaksbehandler(id)
@@ -34,27 +32,24 @@ class EksterneDataForBrevService(
         return saksbehandler.fornavn + " " + saksbehandler.etternavn
     }
 
-    private fun hentAdresse(personinfo: Personinfo): Adresseinfo {
-        return Adresseinfo(personinfo.ident, personinfo.navn)
-    }
+    private fun hentAdresse(personinfo: Personinfo): Adresseinfo = Adresseinfo(personinfo.ident, personinfo.navn)
 
     fun hentAdresse(
         personinfo: Personinfo,
         brevmottager: Brevmottager,
         verge: Verge?,
         fagsystem: Fagsystem,
-    ): Adresseinfo {
-        return verge?.let { hentAdresse(it.type, it.orgNr, it.navn, personinfo, brevmottager, it.ident, fagsystem) }
+    ): Adresseinfo =
+        verge?.let { hentAdresse(it.type, it.orgNr, it.navn, personinfo, brevmottager, it.ident, fagsystem) }
             ?: hentAdresse(personinfo)
-    }
 
     fun hentAdresse(
         personinfo: Personinfo,
         brevmottager: Brevmottager,
         vergeDto: VergeDto?,
         fagsystem: Fagsystem,
-    ): Adresseinfo {
-        return vergeDto?.let {
+    ): Adresseinfo =
+        vergeDto?.let {
             hentAdresse(
                 it.vergetype,
                 it.organisasjonsnummer,
@@ -65,7 +60,6 @@ class EksterneDataForBrevService(
                 fagsystem,
             )
         } ?: hentAdresse(personinfo)
-    }
 
     private fun hentAdresse(
         vergeType: Vergetype,

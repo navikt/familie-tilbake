@@ -34,7 +34,8 @@ class PubliserJournalpostTask(
 
         val journalpostId = task.metadata.getProperty("journalpostId")
         val (behandlingId, manuellAdresse) =
-            objectMapper.readValue(task.payload, PubliserJournalpostTaskData::class.java)
+            objectMapper
+                .readValue(task.payload, PubliserJournalpostTaskData::class.java)
                 .let { it.behandlingId to it.manuellAdresse }
 
         prøvDistribuerJournalpost(journalpostId, task, behandlingId, manuellAdresse)

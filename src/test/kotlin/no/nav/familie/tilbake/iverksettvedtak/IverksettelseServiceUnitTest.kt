@@ -72,8 +72,20 @@ class IverksettelseServiceUnitTest {
         val tilbakekrevingsperioder = requestSlot.captured.tilbakekrevingsvedtak.tilbakekrevingsperiode
 
         assertThat(tilbakekrevingsperioder).hasSize(2)
-        assertThat(tilbakekrevingsperioder.first().tilbakekrevingsbelop.first().kodeResultat).isEqualTo(DELVIS_TILBAKEKREVING.kode)
-        assertThat(tilbakekrevingsperioder.last().tilbakekrevingsbelop.first().kodeResultat).isEqualTo(FULL_TILBAKEKREVING.kode)
+        assertThat(
+            tilbakekrevingsperioder
+                .first()
+                .tilbakekrevingsbelop
+                .first()
+                .kodeResultat,
+        ).isEqualTo(DELVIS_TILBAKEKREVING.kode)
+        assertThat(
+            tilbakekrevingsperioder
+                .last()
+                .tilbakekrevingsbelop
+                .first()
+                .kodeResultat,
+        ).isEqualTo(FULL_TILBAKEKREVING.kode)
     }
 
     @Test
@@ -86,8 +98,20 @@ class IverksettelseServiceUnitTest {
         val tilbakekrevingsperioder = requestSlot.captured.tilbakekrevingsvedtak.tilbakekrevingsperiode
 
         assertThat(tilbakekrevingsperioder).hasSize(2)
-        assertThat(tilbakekrevingsperioder.first().tilbakekrevingsbelop.first().kodeResultat).isEqualTo(DELVIS_TILBAKEKREVING.kode)
-        assertThat(tilbakekrevingsperioder.last().tilbakekrevingsbelop.first().kodeResultat).isEqualTo(DELVIS_TILBAKEKREVING.kode)
+        assertThat(
+            tilbakekrevingsperioder
+                .first()
+                .tilbakekrevingsbelop
+                .first()
+                .kodeResultat,
+        ).isEqualTo(DELVIS_TILBAKEKREVING.kode)
+        assertThat(
+            tilbakekrevingsperioder
+                .last()
+                .tilbakekrevingsbelop
+                .first()
+                .kodeResultat,
+        ).isEqualTo(DELVIS_TILBAKEKREVING.kode)
     }
 
     private fun settOppMockDataSomGirUriktigDelvisTilbakekrevingForEnPeriode(): CapturingSlot<TilbakekrevingsvedtakRequest> {

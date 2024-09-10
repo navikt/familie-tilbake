@@ -41,8 +41,8 @@ object KravgrunnlagUtil {
         return feilutbetalingPrPeriode.toSortedMap(Comparator.comparing(Månedsperiode::fom).thenComparing(Månedsperiode::tom))
     }
 
-    fun unmarshalKravgrunnlag(kravgrunnlagXML: String): DetaljertKravgrunnlagDto {
-        return try {
+    fun unmarshalKravgrunnlag(kravgrunnlagXML: String): DetaljertKravgrunnlagDto =
+        try {
             val jaxbUnmarshaller: Unmarshaller = jaxbContext.createUnmarshaller()
 
             // satt xsd for å validere mottatt xml
@@ -55,10 +55,9 @@ object KravgrunnlagUtil {
         } catch (e: JAXBException) {
             throw UgyldigKravgrunnlagFeil(melding = "Mottatt kravgrunnlagXML er ugyldig! Den feiler med $e")
         }
-    }
 
-    fun unmarshalStatusmelding(statusmeldingXml: String): KravOgVedtakstatus {
-        return try {
+    fun unmarshalStatusmelding(statusmeldingXml: String): KravOgVedtakstatus =
+        try {
             val jaxbUnmarshaller: Unmarshaller = statusmeldingJaxbContext.createUnmarshaller()
 
             // satt xsd for å validere mottatt xml
@@ -71,12 +70,10 @@ object KravgrunnlagUtil {
         } catch (e: JAXBException) {
             throw UgyldigKravgrunnlagFeil(melding = "Mottatt statusmeldingXML er ugyldig! Den feiler med $e")
         }
-    }
 
-    fun tilYtelsestype(fagområdekode: String): Ytelsestype {
-        return Ytelsestype.values().firstOrNull { it.kode == fagområdekode }
+    fun tilYtelsestype(fagområdekode: String): Ytelsestype =
+        Ytelsestype.values().firstOrNull { it.kode == fagområdekode }
             ?: throw IllegalArgumentException("Ukjent Ytelsestype for $fagområdekode")
-    }
 
     fun sammenlignKravgrunnlag(
         mottattKravgrunnlag: DetaljertKravgrunnlagDto,
@@ -109,15 +106,18 @@ object KravgrunnlagUtil {
         val perioder = mottattPerioder.zip(hentetPerioder)
         perioder.forEach {
             val periode = konvertPeriode(it.first)
-            builder.append("periode", periode, konvertPeriode(it.second))
+            builder
+                .append("periode", periode, konvertPeriode(it.second))
                 .append("belopSkattMnd", it.first.belopSkattMnd, it.second.belopSkattMnd)
 
             val beløper =
-                it.first.tilbakekrevingsBelop.sortedBy { beløp -> beløp.typeKlasse }
+                it.first.tilbakekrevingsBelop
+                    .sortedBy { beløp -> beløp.typeKlasse }
                     .zip(it.second.tilbakekrevingsBelop.sortedBy { beløp -> beløp.typeKlasse })
 
             beløper.forEach { beløp ->
-                builder.append("kodeKlasse", beløp.first.kodeKlasse, beløp.second.kodeKlasse)
+                builder
+                    .append("kodeKlasse", beløp.first.kodeKlasse, beløp.second.kodeKlasse)
                     .append("kodeKlasse", beløp.first.kodeKlasse, beløp.second.kodeKlasse)
                     .append("$periode->belopOpprUtbet", beløp.first.belopOpprUtbet, beløp.second.belopOpprUtbet)
                     .append("$periode->belopNy", beløp.first.belopNy, beløp.second.belopNy)
@@ -126,17 +126,14 @@ object KravgrunnlagUtil {
                         "$periode->belopTilbakekreves",
                         beløp.first.belopTilbakekreves,
                         beløp.second.belopTilbakekreves,
-                    )
-                    .append("$periode->skattProsent", beløp.first.skattProsent, beløp.second.skattProsent)
+                    ).append("$periode->skattProsent", beløp.first.skattProsent, beløp.second.skattProsent)
             }
         }
 
         return differanseBuilder.append(builder.build().toString()).toString()
     }
 
-    private fun konvertPeriode(periodeDto: DetaljertKravgrunnlagPeriodeDto): Månedsperiode {
-        return Månedsperiode(periodeDto.periode.fom, periodeDto.periode.tom)
-    }
+    private fun konvertPeriode(periodeDto: DetaljertKravgrunnlagPeriodeDto): Månedsperiode = Månedsperiode(periodeDto.periode.fom, periodeDto.periode.tom)
 
     private fun sammenlignPerioder(
         mottattPerioder: List<DetaljertKravgrunnlagPeriodeDto>,

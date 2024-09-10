@@ -21,7 +21,9 @@ import java.util.UUID
 @RequestMapping("/api/behandlinger")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class HistorikkController(private val historikkService: HistorikkService) {
+class HistorikkController(
+    private val historikkService: HistorikkService,
+) {
     @GetMapping(
         "/{behandlingId}/historikk",
         produces = [MediaType.APPLICATION_JSON_VALUE],
@@ -36,7 +38,8 @@ class HistorikkController(private val historikkService: HistorikkService) {
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<List<HistorikkinnslagDto?>> {
         val historikkInnslagDtoSortertEtterOpprettetTidspunkt =
-            historikkService.hentHistorikkinnslag(behandlingId)
+            historikkService
+                .hentHistorikkinnslag(behandlingId)
                 .map { it.tilDto() }
                 .sortedBy { it.opprettetTid }
 

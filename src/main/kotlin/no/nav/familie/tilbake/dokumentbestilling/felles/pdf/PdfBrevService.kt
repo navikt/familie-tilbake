@@ -154,13 +154,12 @@ class PdfBrevService(
         return "${behandling.eksternBrukId}_${brevtype.name.lowercase()}_${mottager.name.lowercase()}_$callId"
     }
 
-    private fun mapBrevtypeTilDokumentkategori(brevtype: Brevtype): Dokumentkategori {
-        return if (Brevtype.VEDTAK === brevtype) {
+    private fun mapBrevtypeTilDokumentkategori(brevtype: Brevtype): Dokumentkategori =
+        if (Brevtype.VEDTAK === brevtype) {
             Dokumentkategori.VEDTAKSBREV
         } else {
             Dokumentkategori.BREV
         }
-    }
 
     private fun lagHtml(data: Brevdata): String {
         val header = lagHeader(data)
@@ -168,24 +167,20 @@ class PdfBrevService(
         return header + innholdHtml + data.vedleggHtml
     }
 
-    private fun lagInnhold(data: Brevdata): String {
-        return DokprodTilHtml.dokprodInnholdTilHtml(data.brevtekst)
-    }
+    private fun lagInnhold(data: Brevdata): String = DokprodTilHtml.dokprodInnholdTilHtml(data.brevtekst)
 
-    private fun lagHeader(data: Brevdata): String {
-        return TekstformatererHeader.lagHeader(
+    private fun lagHeader(data: Brevdata): String =
+        TekstformatererHeader.lagHeader(
             brevmetadata = data.metadata,
             overskrift = data.overskrift,
         )
-    }
 
-    private fun utledDistribusjonstype(brevtype: Brevtype): Distribusjonstype {
-        return when (brevtype) {
+    private fun utledDistribusjonstype(brevtype: Brevtype): Distribusjonstype =
+        when (brevtype) {
             Brevtype.VARSEL, Brevtype.KORRIGERT_VARSEL, Brevtype.INNHENT_DOKUMENTASJON -> Distribusjonstype.VIKTIG
             Brevtype.VEDTAK -> Distribusjonstype.VEDTAK
             Brevtype.HENLEGGELSE -> Distribusjonstype.ANNET
         }
-    }
 
     private val distribusjonstidspunkt = Distribusjonstidspunkt.KJERNETID.name
 
