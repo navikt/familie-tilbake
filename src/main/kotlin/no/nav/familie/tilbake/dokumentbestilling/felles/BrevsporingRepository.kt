@@ -10,7 +10,9 @@ import java.util.UUID
 
 @Repository
 @Transactional
-interface BrevsporingRepository : RepositoryInterface<Brevsporing, UUID>, InsertUpdateRepository<Brevsporing> {
+interface BrevsporingRepository :
+    RepositoryInterface<Brevsporing, UUID>,
+    InsertUpdateRepository<Brevsporing> {
     fun findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(
         behandlingId: UUID,
         brevtype: Brevtype,

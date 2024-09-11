@@ -128,13 +128,12 @@ class BehandlingControllerTest : OppslagSpringRunnerTest() {
 
     private fun flyttBehandlingTilFakta(
         behandlingId: UUID,
-    ): ResponseEntity<String> {
-        return restTemplate.exchange(
+    ): ResponseEntity<String> =
+        restTemplate.exchange(
             localhost("/api/behandling/$behandlingId/flytt-behandling-til-fakta"),
             HttpMethod.PUT,
             HttpEntity<String>(headers),
         )
-    }
 
     private fun opprettTestdata(
         saksbehandler: String = "saksbehandler",

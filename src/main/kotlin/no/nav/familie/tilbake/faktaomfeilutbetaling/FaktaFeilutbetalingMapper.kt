@@ -50,20 +50,19 @@ object FaktaFeilutbetalingMapper {
         )
     }
 
-    fun tilDto(vurderingAvBrukersUttalelse: VurderingAvBrukersUttalelse?): VurderingAvBrukersUttalelseDto {
-        return vurderingAvBrukersUttalelse?.let {
+    fun tilDto(vurderingAvBrukersUttalelse: VurderingAvBrukersUttalelse?): VurderingAvBrukersUttalelseDto =
+        vurderingAvBrukersUttalelse?.let {
             VurderingAvBrukersUttalelseDto(
                 harBrukerUttaltSeg = it.harBrukerUttaltSeg,
                 beskrivelse = it.beskrivelse,
             )
         } ?: VurderingAvBrukersUttalelseDto.ikkeVurdert()
-    }
 
     private fun hentFeilutbetaltePerioder(
         faktaFeilutbetaling: FaktaFeilutbetaling?,
         logiskePerioder: List<LogiskPeriode>,
-    ): List<FeilutbetalingsperiodeDto> {
-        return faktaFeilutbetaling?.perioder?.map {
+    ): List<FeilutbetalingsperiodeDto> =
+        faktaFeilutbetaling?.perioder?.map {
             FeilutbetalingsperiodeDto(
                 periode = it.periode.toDatoperiode(),
                 feilutbetaltBeløp = hentFeilutbetaltBeløp(logiskePerioder, it.periode),
@@ -76,14 +75,11 @@ object FaktaFeilutbetalingMapper {
                 feilutbetaltBeløp = it.feilutbetaltBeløp,
             )
         }
-    }
 
     private fun hentFeilutbetaltBeløp(
         logiskePerioder: List<LogiskPeriode>,
         faktaPeriode: Månedsperiode,
-    ): BigDecimal {
-        return logiskePerioder.first { faktaPeriode == it.periode }.feilutbetaltBeløp
-    }
+    ): BigDecimal = logiskePerioder.first { faktaPeriode == it.periode }.feilutbetaltBeløp
 
     private fun utledTotalFeilutbetaltPeriode(perioder: List<LogiskPeriode>): Datoperiode {
         var totalPeriodeFom: YearMonth? = null
@@ -98,7 +94,5 @@ object FaktaFeilutbetalingMapper {
     private fun utledBegrunnelse(
         tidligereBegrunnelse: String?,
         begrunnelseForTilbakekreving: String?,
-    ): String {
-        return tidligereBegrunnelse ?: begrunnelseForTilbakekreving ?: ""
-    }
+    ): String = tidligereBegrunnelse ?: begrunnelseForTilbakekreving ?: ""
 }

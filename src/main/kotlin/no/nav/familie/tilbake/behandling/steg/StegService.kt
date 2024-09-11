@@ -213,8 +213,7 @@ class StegService(
         return aktivtBehandlingssteg
     }
 
-    private fun hentStegInstans(behandlingssteg: Behandlingssteg): IBehandlingssteg {
-        return steg.singleOrNull { it.getBehandlingssteg() == behandlingssteg }
+    private fun hentStegInstans(behandlingssteg: Behandlingssteg): IBehandlingssteg =
+        steg.singleOrNull { it.getBehandlingssteg() == behandlingssteg }
             ?: error("Finner ikke behandlingssteg $behandlingssteg")
-    }
 }

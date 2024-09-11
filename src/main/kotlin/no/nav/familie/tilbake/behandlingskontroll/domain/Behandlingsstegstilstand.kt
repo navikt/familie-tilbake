@@ -81,14 +81,15 @@ enum class Behandlingssteg(
             throw IllegalArgumentException("Behandlingssteg finnes ikke med sekvens=$sekvens")
         }
 
-        fun fraNavn(navn: String): Behandlingssteg {
-            return values().firstOrNull { it.name == navn }
+        fun fraNavn(navn: String): Behandlingssteg =
+            values().firstOrNull { it.name == navn }
                 ?: throw IllegalArgumentException("Ukjent Behandlingssteg $navn")
-        }
     }
 }
 
-enum class Behandlingsstegstatus(private val beskrivelse: String) {
+enum class Behandlingsstegstatus(
+    private val beskrivelse: String,
+) {
     VENTER("Steget er satt på vent, f.eks. venter på brukertilbakemelding eller kravgrunnlag"),
     KLAR("Klar til saksbehandling"),
     UTFØRT("Steget er ferdig utført"),
@@ -101,17 +102,16 @@ enum class Behandlingsstegstatus(private val beskrivelse: String) {
         val aktiveStegStatuser = listOf(VENTER, KLAR)
         private val utførteStegStatuser = listOf(UTFØRT, AUTOUTFØRT)
 
-        fun erStegAktiv(status: Behandlingsstegstatus): Boolean {
-            return aktiveStegStatuser.contains(status)
-        }
+        fun erStegAktiv(status: Behandlingsstegstatus): Boolean = aktiveStegStatuser.contains(status)
 
-        fun erStegUtført(status: Behandlingsstegstatus): Boolean {
-            return utførteStegStatuser.contains(status)
-        }
+        fun erStegUtført(status: Behandlingsstegstatus): Boolean = utførteStegStatuser.contains(status)
     }
 }
 
-enum class Venteårsak(val defaultVenteTidIUker: Long, val beskrivelse: String) {
+enum class Venteårsak(
+    val defaultVenteTidIUker: Long,
+    val beskrivelse: String,
+) {
     VENT_PÅ_BRUKERTILBAKEMELDING(3, "Venter på tilbakemelding fra bruker"),
     VENT_PÅ_TILBAKEKREVINGSGRUNNLAG(4, "Venter på kravgrunnlag fra økonomi"),
     AVVENTER_DOKUMENTASJON(0, "Avventer dokumentasjon"),
@@ -121,12 +121,8 @@ enum class Venteårsak(val defaultVenteTidIUker: Long, val beskrivelse: String) 
     ;
 
     companion object {
-        fun venterPåBruker(venteårsak: Venteårsak?): Boolean {
-            return venteårsak in listOf(VENT_PÅ_BRUKERTILBAKEMELDING, UTVIDET_TILSVAR_FRIST, AVVENTER_DOKUMENTASJON)
-        }
+        fun venterPåBruker(venteårsak: Venteårsak?): Boolean = venteårsak in listOf(VENT_PÅ_BRUKERTILBAKEMELDING, UTVIDET_TILSVAR_FRIST, AVVENTER_DOKUMENTASJON)
 
-        fun venterPåØkonomi(venteårsak: Venteårsak?): Boolean {
-            return venteårsak in listOf(VENT_PÅ_TILBAKEKREVINGSGRUNNLAG, VENT_PÅ_MULIG_MOTREGNING)
-        }
+        fun venterPåØkonomi(venteårsak: Venteårsak?): Boolean = venteårsak in listOf(VENT_PÅ_TILBAKEKREVINGSGRUNNLAG, VENT_PÅ_MULIG_MOTREGNING)
     }
 }

@@ -393,13 +393,50 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
 
         val inaktiveVilkårsvurderinger = vilkårsvurderingService.hentInaktivVilkårsvurdering(behandling.id)
         inaktiveVilkårsvurderinger.size shouldBe 2
-        inaktiveVilkårsvurderinger.first().perioder.first().vilkårsvurderingsresultatInfo?.vilkårsvurderingsresultat shouldBe Vilkårsvurderingsresultat.GOD_TRO
-        inaktiveVilkårsvurderinger.first().perioder.first().vilkårsvurderingsresultatInfo?.godTro?.begrunnelse shouldBe "God tro begrunnelse"
+        inaktiveVilkårsvurderinger
+            .first()
+            .perioder
+            .first()
+            .vilkårsvurderingsresultatInfo
+            ?.vilkårsvurderingsresultat shouldBe Vilkårsvurderingsresultat.GOD_TRO
+        inaktiveVilkårsvurderinger
+            .first()
+            .perioder
+            .first()
+            .vilkårsvurderingsresultatInfo
+            ?.godTro
+            ?.begrunnelse shouldBe "God tro begrunnelse"
 
-        inaktiveVilkårsvurderinger.last().perioder.first().vilkårsvurderingsresultatInfo?.vilkårsvurderingsresultat shouldBe Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT
-        inaktiveVilkårsvurderinger.last().perioder.first().vilkårsvurderingsresultatInfo?.aktsomhet?.begrunnelse shouldBe "Aktsomhet begrunnelse"
-        inaktiveVilkårsvurderinger.last().perioder.first().vilkårsvurderingsresultatInfo?.aktsomhet?.særligeGrunner?.shouldHaveSize(1)
-        inaktiveVilkårsvurderinger.last().perioder.first().vilkårsvurderingsresultatInfo?.aktsomhet?.særligeGrunner?.first()?.særligGrunn shouldBe SærligGrunn.GRAD_AV_UAKTSOMHET
+        inaktiveVilkårsvurderinger
+            .last()
+            .perioder
+            .first()
+            .vilkårsvurderingsresultatInfo
+            ?.vilkårsvurderingsresultat shouldBe Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT
+        inaktiveVilkårsvurderinger
+            .last()
+            .perioder
+            .first()
+            .vilkårsvurderingsresultatInfo
+            ?.aktsomhet
+            ?.begrunnelse shouldBe "Aktsomhet begrunnelse"
+        inaktiveVilkårsvurderinger
+            .last()
+            .perioder
+            .first()
+            .vilkårsvurderingsresultatInfo
+            ?.aktsomhet
+            ?.særligeGrunner
+            ?.shouldHaveSize(1)
+        inaktiveVilkårsvurderinger
+            .last()
+            .perioder
+            .first()
+            .vilkårsvurderingsresultatInfo
+            ?.aktsomhet
+            ?.særligeGrunner
+            ?.first()
+            ?.særligGrunn shouldBe SærligGrunn.GRAD_AV_UAKTSOMHET
     }
 
     @Test
@@ -661,8 +698,8 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         klassetype: Klassetype,
         nyttBeløp: BigDecimal,
         opprinneligUtbetalingsbeløp: BigDecimal,
-    ): Kravgrunnlagsbeløp433 {
-        return Kravgrunnlagsbeløp433(
+    ): Kravgrunnlagsbeløp433 =
+        Kravgrunnlagsbeløp433(
             id = UUID.randomUUID(),
             klassetype = klassetype,
             klassekode = Klassekode.BATR,
@@ -675,7 +712,6 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
             årsakskode = "testverdi",
             skyldkode = "testverdi",
         )
-    }
 
     private fun assertAktiviteter(aktiviteter: List<AktivitetDto>) {
         aktiviteter.shouldNotBeEmpty()
@@ -713,8 +749,8 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
     private fun lagVilkårsvurderingMedGodTro(
         perioder: List<Datoperiode>,
         beløpTilbakekreves: BigDecimal? = null,
-    ): BehandlingsstegVilkårsvurderingDto {
-        return BehandlingsstegVilkårsvurderingDto(
+    ): BehandlingsstegVilkårsvurderingDto =
+        BehandlingsstegVilkårsvurderingDto(
             vilkårsvurderingsperioder =
                 perioder.map {
                     VilkårsvurderingsperiodeDto(
@@ -730,7 +766,6 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                     )
                 },
         )
-    }
 
     private fun lagForeldese(vararg foreldelsesvurderingstyper: Foreldelsesvurderingstype) {
         val foreldelsesperioder =

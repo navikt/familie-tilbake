@@ -23,7 +23,5 @@ object TekstformatererVarselbrev {
         return FellesTekstformaterer.lagBrevtekst(Brevoverskriftsdata(brevmetadata), filsti)
     }
 
-    fun lagVarselbrevsvedleggHtml(vedleggsdata: Vedleggsdata): String {
-        return FellesTekstformaterer.lagBrevtekst(vedleggsdata, "varsel/vedlegg")
-    }
+    fun lagVarselbrevsvedleggHtml(vedleggsdata: Vedleggsdata): String = FellesTekstformaterer.lagBrevtekst(vedleggsdata, "varsel/vedlegg")
 }

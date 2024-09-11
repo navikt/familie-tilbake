@@ -94,7 +94,5 @@ class PdlClientTest {
         exception.message shouldBe "Feil ved oppslag på person: Person ikke funnet"
     }
 
-    private fun readFile(filnavn: String): String {
-        return this::class.java.getResource("/pdl/json/$filnavn").readText()
-    }
+    private fun readFile(filnavn: String): String = this::class.java.getResource("/pdl/json/$filnavn").readText()
 }

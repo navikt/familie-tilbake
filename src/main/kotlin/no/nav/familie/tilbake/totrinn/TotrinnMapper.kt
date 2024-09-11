@@ -29,8 +29,9 @@ object TotrinnMapper {
     }
 
     private fun hentStegSomGjelderForTotrinn(behandlingsstegstilstand: List<Behandlingsstegstilstand>) =
-        behandlingsstegstilstand.filter {
-            it.behandlingssteg.kanBesluttes &&
-                it.behandlingsstegsstatus != Behandlingsstegstatus.AUTOUTFØRT
-        }.map { Totrinnsstegsinfo(behandlingssteg = it.behandlingssteg) }
+        behandlingsstegstilstand
+            .filter {
+                it.behandlingssteg.kanBesluttes &&
+                    it.behandlingsstegsstatus != Behandlingsstegstatus.AUTOUTFØRT
+            }.map { Totrinnsstegsinfo(behandlingssteg = it.behandlingssteg) }
 }

@@ -72,9 +72,7 @@ internal object TilbakekrevingsberegningVilkår {
     private fun beregnRentebeløp(
         beløp: BigDecimal,
         renter: Boolean,
-    ): BigDecimal {
-        return if (renter) beløp.multiply(RENTEFAKTOR).setScale(0, RoundingMode.DOWN) else BigDecimal.ZERO
-    }
+    ): BigDecimal = if (renter) beløp.multiply(RENTEFAKTOR).setScale(0, RoundingMode.DOWN) else BigDecimal.ZERO
 
     private fun beregnSkattBeløp(
         periode: Månedsperiode,
@@ -95,7 +93,8 @@ internal object TilbakekrevingsberegningVilkår {
                 val scale = if (bruk6desimalerISkatteberegning) 6 else 4
                 val delTilbakekrevesBeløp: BigDecimal = grunnlagPeriodeMedSkattProsent.tilbakekrevingsbeløp.multiply(andel)
                 val beregnetSkattBeløp =
-                    delTilbakekrevesBeløp.multiply(grunnlagPeriodeMedSkattProsent.skatteprosent)
+                    delTilbakekrevesBeløp
+                        .multiply(grunnlagPeriodeMedSkattProsent.skatteprosent)
                         .divide(BigDecimal.valueOf(100), scale, RoundingMode.HALF_UP)
                 skattBeløp = skattBeløp.add(beregnetSkattBeløp).setScale(0, RoundingMode.DOWN)
             }
@@ -121,8 +120,10 @@ internal object TilbakekrevingsberegningVilkår {
         val aktsomhet: VilkårsvurderingAktsomhet? = vurdering.aktsomhet
         if (aktsomhet != null) {
             val erForsett: Boolean = Aktsomhet.FORSETT == aktsomhet.aktsomhet
-            return erForsett && (aktsomhet.ileggRenter == null || aktsomhet.ileggRenter) ||
-                aktsomhet.ileggRenter != null && aktsomhet.ileggRenter
+            return erForsett &&
+                (aktsomhet.ileggRenter == null || aktsomhet.ileggRenter) ||
+                aktsomhet.ileggRenter != null &&
+                aktsomhet.ileggRenter
         }
         return false
     }
@@ -138,15 +139,14 @@ internal object TilbakekrevingsberegningVilkår {
         return null
     }
 
-    private fun finnAndelForAktsomhet(aktsomhet: VilkårsvurderingAktsomhet): BigDecimal? {
-        return if (Aktsomhet.SIMPEL_UAKTSOMHET == aktsomhet.aktsomhet && !aktsomhet.tilbakekrevSmåbeløp) {
+    private fun finnAndelForAktsomhet(aktsomhet: VilkårsvurderingAktsomhet): BigDecimal? =
+        if (Aktsomhet.SIMPEL_UAKTSOMHET == aktsomhet.aktsomhet && !aktsomhet.tilbakekrevSmåbeløp) {
             BigDecimal.ZERO
         } else if (Aktsomhet.FORSETT == aktsomhet.aktsomhet || !aktsomhet.særligeGrunnerTilReduksjon) {
             HUNDRE_PROSENT
         } else {
             aktsomhet.andelTilbakekreves
         }
-    }
 
     private fun finnManueltSattBeløp(vurdering: Vilkårsvurderingsperiode): BigDecimal? {
         val aktsomhet: VilkårsvurderingAktsomhet? = vurdering.aktsomhet

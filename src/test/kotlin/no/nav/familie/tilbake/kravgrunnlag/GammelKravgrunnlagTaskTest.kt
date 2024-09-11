@@ -184,10 +184,11 @@ internal class GammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         assertSteg(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
 
         xmlMottattRepository.findByIdOrNull(mottattXmlId).shouldBeNull()
-        xmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(
-            xmlMottatt.eksternFagsakId,
-            xmlMottatt.ytelsestype,
-        ).shouldNotBeNull()
+        xmlMottattArkivRepository
+            .findByEksternFagsakIdAndYtelsestype(
+                xmlMottatt.eksternFagsakId,
+                xmlMottatt.ytelsestype,
+            ).shouldNotBeNull()
     }
 
     @Test
@@ -222,10 +223,11 @@ internal class GammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id).shouldBeTrue()
 
         xmlMottattRepository.findByIdOrNull(mottattXmlId).shouldBeNull()
-        xmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(
-            xmlMottatt.eksternFagsakId,
-            xmlMottatt.ytelsestype,
-        ).shouldNotBeNull()
+        xmlMottattArkivRepository
+            .findByEksternFagsakIdAndYtelsestype(
+                xmlMottatt.eksternFagsakId,
+                xmlMottatt.ytelsestype,
+            ).shouldNotBeNull()
     }
 
     @Test
@@ -258,10 +260,11 @@ internal class GammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         assertSteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.VENTER)
 
         xmlMottattRepository.findByIdOrNull(mottattXmlId).shouldBeNull()
-        xmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(
-            xmlMottatt.eksternFagsakId,
-            xmlMottatt.ytelsestype,
-        ).shouldNotBeNull()
+        xmlMottattArkivRepository
+            .findByEksternFagsakIdAndYtelsestype(
+                xmlMottatt.eksternFagsakId,
+                xmlMottatt.ytelsestype,
+            ).shouldNotBeNull()
     }
 
     @Test
@@ -328,9 +331,7 @@ internal class GammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         arkiverteKravgrunnlag.shouldHaveSingleElement { it.melding == mottattXMl }
     }
 
-    private fun lagTask(): Task {
-        return taskService.save(Task(type = GammelKravgrunnlagTask.TYPE, payload = mottattXmlId.toString()))
-    }
+    private fun lagTask(): Task = taskService.save(Task(type = GammelKravgrunnlagTask.TYPE, payload = mottattXmlId.toString()))
 
     private fun lagHentFagsystemsbehandlingRespons(xmlMottatt: ØkonomiXmlMottatt): String {
         val fagsystemsbehandling =

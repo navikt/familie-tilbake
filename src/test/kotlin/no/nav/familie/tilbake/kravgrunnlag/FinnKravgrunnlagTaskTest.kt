@@ -291,9 +291,10 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         behandlingssteg: Behandlingssteg,
         behandlingsstegstatus: Behandlingsstegstatus,
     ) {
-        behandlingsstegstilstand.any {
-            it.behandlingssteg == behandlingssteg &&
-                it.behandlingsstegsstatus == behandlingsstegstatus
-        }.shouldBeTrue()
+        behandlingsstegstilstand
+            .any {
+                it.behandlingssteg == behandlingssteg &&
+                    it.behandlingsstegsstatus == behandlingsstegstatus
+            }.shouldBeTrue()
     }
 }

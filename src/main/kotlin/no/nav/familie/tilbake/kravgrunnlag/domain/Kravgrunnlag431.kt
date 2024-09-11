@@ -48,11 +48,10 @@ data class Kravgrunnlag431(
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar(),
 ) {
-    fun sumFeilutbetaling(): BigDecimal {
-        return perioder.sumOf { periode ->
+    fun sumFeilutbetaling(): BigDecimal =
+        perioder.sumOf { periode ->
             periode.beløp.filter { beløp -> beløp.klassetype == Klassetype.FEIL }.sumOf { it.nyttBeløp }
         }
-    }
 }
 
 data class Kravgrunnlagsperiode432(
@@ -119,8 +118,8 @@ data class Kravgrunnlagsbeløp433(
             this.årsakskode == that.årsakskode
     }
 
-    override fun hashCode(): Int {
-        return Objects.hash(
+    override fun hashCode(): Int =
+        Objects.hash(
             klassekode,
             klassetype,
             nyttBeløp,
@@ -132,10 +131,11 @@ data class Kravgrunnlagsbeløp433(
             skyldkode,
             årsakskode,
         )
-    }
 }
 
-enum class Klassekode(val aktivitet: String) {
+enum class Klassekode(
+    val aktivitet: String,
+) {
     KL_KODE_FEIL_BA(""),
     KL_KODE_FEIL_EFOG(""),
     KL_KODE_FEIL_PEN(""),
@@ -172,7 +172,9 @@ enum class Klassekode(val aktivitet: String) {
     }
 }
 
-enum class Klassetype(val navn: String) {
+enum class Klassetype(
+    val navn: String,
+) {
     FEIL("Feilkonto"),
     JUST("Justeringskonto"),
     SKAT("Skatt"),
@@ -181,9 +183,8 @@ enum class Klassetype(val navn: String) {
     ;
 
     companion object {
-        fun fraKode(kode: String): Klassetype {
-            return values().firstOrNull { it.name == kode }
+        fun fraKode(kode: String): Klassetype =
+            values().firstOrNull { it.name == kode }
                 ?: throw IllegalArgumentException("Ukjent Klassetype $kode")
-        }
     }
 }

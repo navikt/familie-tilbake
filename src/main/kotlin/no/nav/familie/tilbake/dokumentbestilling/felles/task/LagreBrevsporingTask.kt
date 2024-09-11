@@ -114,15 +114,14 @@ class LagreBrevsporingTask(
         fun utledAktør(
             brevtype: Brevtype,
             ansvarligSaksbehandler: String?,
-        ): Aktør {
-            return when {
+        ): Aktør =
+            when {
                 brevtype == Brevtype.INNHENT_DOKUMENTASJON -> Aktør.SAKSBEHANDLER
                 brevtype == Brevtype.KORRIGERT_VARSEL -> Aktør.SAKSBEHANDLER
                 !ansvarligSaksbehandler.isNullOrEmpty() && ansvarligSaksbehandler != Constants.BRUKER_ID_VEDTAKSLØSNINGEN ->
                     Aktør.SAKSBEHANDLER
                 else -> Aktør.VEDTAKSLØSNING
             }
-        }
 
         const val TYPE = "lagreBrevsporing"
     }

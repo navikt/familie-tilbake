@@ -18,7 +18,9 @@ import java.util.UUID
     taskStepType = SendSakshendelseTilDvhTask.TASK_TYPE,
     beskrivelse = "Sending av sakshendelser til datavarehus",
 )
-class SendSakshendelseTilDvhTask(private val kafkaProducer: KafkaProducer) : AsyncTaskStep {
+class SendSakshendelseTilDvhTask(
+    private val kafkaProducer: KafkaProducer,
+) : AsyncTaskStep {
     private val log = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {

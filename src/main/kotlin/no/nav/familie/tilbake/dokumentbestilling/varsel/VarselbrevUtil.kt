@@ -120,8 +120,8 @@ class VarselbrevUtil(
         fritekst: String?,
         feilutbetalingsfakta: FaktaFeilutbetalingDto,
         varsel: Varsel?,
-    ): Varselbrevsdokument {
-        return Varselbrevsdokument(
+    ): Varselbrevsdokument =
+        Varselbrevsdokument(
             brevmetadata = metadata,
             beløp = feilutbetalingsfakta.totaltFeilutbetaltBeløp.toLong(),
             revurderingsvedtaksdato = feilutbetalingsfakta.revurderingsvedtaksdato,
@@ -132,7 +132,6 @@ class VarselbrevUtil(
             varsletDato = varsel?.sporbar?.opprettetTid?.toLocalDate(),
             varsletBeløp = varsel?.varselbeløp,
         )
-    }
 
     private fun sammenstillInfoFraSimuleringForVedlegg(
         varselbrevsdokument: Varselbrevsdokument,
@@ -193,8 +192,8 @@ class VarselbrevUtil(
         varselbrevsdokument: Varselbrevsdokument,
         fagsystemsbehandlingId: String?,
         varsletTotalbeløp: Long,
-    ): String {
-        return if (varselbrevsdokument.harVedlegg) {
+    ): String =
+        if (varselbrevsdokument.harVedlegg) {
             if (fagsystemsbehandlingId == null) {
                 error(
                     "fagsystemsbehandlingId mangler for forhåndsvisning av varselbrev. " +
@@ -208,19 +207,17 @@ class VarselbrevUtil(
         } else {
             ""
         }
-    }
 
     fun lagVedlegg(
         varselbrevsdokument: Varselbrevsdokument,
         behandlingId: UUID,
-    ): String {
-        return if (varselbrevsdokument.harVedlegg) {
+    ): String =
+        if (varselbrevsdokument.harVedlegg) {
             val vedleggsdata = sammenstillInfoFraKravgrunnlag(varselbrevsdokument, behandlingId)
             TekstformatererVarselbrev.lagVarselbrevsvedleggHtml(vedleggsdata)
         } else {
             ""
         }
-    }
 
     private fun validerKorrektTotalbeløp(
         feilutbetaltePerioder: List<FeilutbetaltPeriode>,
@@ -240,19 +237,14 @@ class VarselbrevUtil(
     private fun getTittelForVarselbrev(
         ytelsesnavn: String,
         erKorrigert: Boolean,
-    ): String {
-        return if (erKorrigert) {
+    ): String =
+        if (erKorrigert) {
             TITTEL_KORRIGERT_VARSEL_TILBAKEBETALING + ytelsesnavn
         } else {
             TITTEL_VARSEL_TILBAKEBETALING + ytelsesnavn
         }
-    }
 
-    private fun mapFeilutbetaltePerioder(feilutbetaltePerioderDto: FeilutbetaltePerioderDto): List<Datoperiode> {
-        return feilutbetaltePerioderDto.perioder.map { Datoperiode(it.fom, it.tom) }
-    }
+    private fun mapFeilutbetaltePerioder(feilutbetaltePerioderDto: FeilutbetaltePerioderDto): List<Datoperiode> = feilutbetaltePerioderDto.perioder.map { Datoperiode(it.fom, it.tom) }
 
-    private fun mapFeilutbetaltePerioder(feilutbetalingsfakta: FaktaFeilutbetalingDto): List<Datoperiode> {
-        return feilutbetalingsfakta.feilutbetaltePerioder.map { Datoperiode(it.periode.fom, it.periode.tom) }
-    }
+    private fun mapFeilutbetaltePerioder(feilutbetalingsfakta: FaktaFeilutbetalingDto): List<Datoperiode> = feilutbetalingsfakta.feilutbetaltePerioder.map { Datoperiode(it.periode.fom, it.periode.tom) }
 }

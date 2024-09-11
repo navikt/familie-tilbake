@@ -28,7 +28,9 @@ import java.util.UUID
 @RequestMapping("/api/brevmottaker/manuell")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class ManuellBrevmottakerController(private val manuellBrevmottakerService: ManuellBrevmottakerService) {
+class ManuellBrevmottakerController(
+    private val manuellBrevmottakerService: ManuellBrevmottakerService,
+) {
     @Operation(summary = "Legger til brevmottaker manuelt")
     @PostMapping(
         path = ["/{behandlingId}"],
@@ -63,13 +65,13 @@ class ManuellBrevmottakerController(private val manuellBrevmottakerService: Manu
     )
     fun hentManuellBrevmottakere(
         @PathVariable behandlingId: UUID,
-    ): Ressurs<List<ManuellBrevmottakerResponsDto>> {
-        return Ressurs
+    ): Ressurs<List<ManuellBrevmottakerResponsDto>> =
+        Ressurs
             .success(
-                manuellBrevmottakerService.hentBrevmottakere(behandlingId)
+                manuellBrevmottakerService
+                    .hentBrevmottakere(behandlingId)
                     .map { ManuellBrevmottakerMapper.tilRespons(it) },
             )
-    }
 
     @Operation(summary = "Oppdaterer manuell brevmottaker")
     @PutMapping(

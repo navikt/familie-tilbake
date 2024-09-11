@@ -188,7 +188,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
             behandlingsstegstatus = Behandlingsstegstatus.VENTER,
         )
 
-        behandlingRepository.findByIdOrThrow(behandlingId)
+        behandlingRepository
+            .findByIdOrThrow(behandlingId)
             .copy(regelverk = Regelverk.EØS)
             .also { behandlingRepository.update(it) }
 
@@ -676,8 +677,10 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         val behandlingsvedtak = behandlingsresultat.behandlingsvedtak
         behandlingsvedtak.shouldNotBeNull()
         behandlingsvedtak.iverksettingsstatus shouldBe Iverksettingsstatus.UNDER_IVERKSETTING
-        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET))
-            .any { it.type == SendØkonomiTilbakekrevingsvedtakTask.TYPE }.shouldBeTrue()
+        taskService
+            .finnTasksMedStatus(listOf(Status.UBEHANDLET))
+            .any { it.type == SendØkonomiTilbakekrevingsvedtakTask.TYPE }
+            .shouldBeTrue()
     }
 
     @Test
@@ -707,7 +710,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         totrinnsvurderinger.shouldNotBeEmpty()
         totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.FAKTA && !it.godkjent }.shouldBeTrue()
         totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.FORELDELSE }.shouldBeFalse()
-        totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.VILKÅRSVURDERING && !it.godkjent }
+        totrinnsvurderinger
+            .any { it.behandlingssteg == Behandlingssteg.VILKÅRSVURDERING && !it.godkjent }
             .shouldBeTrue()
         totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.FORESLÅ_VEDTAK && !it.godkjent }.shouldBeTrue()
 
@@ -825,7 +829,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingsstatus(behandlingId, Behandlingsstatus.UTREDES)
         aktivtBehandlingsstegstilstand.venteårsak shouldBe Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
         aktivtBehandlingsstegstilstand.tidsfrist shouldBe
-            LocalDate.now()
+            LocalDate
+                .now()
                 .plusWeeks(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.defaultVenteTidIUker)
         assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
     }
@@ -869,7 +874,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         aktivtBehandlingsstegstilstand.behandlingsstegsstatus shouldBe Behandlingsstegstatus.VENTER
         aktivtBehandlingsstegstilstand.venteårsak shouldBe Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
         aktivtBehandlingsstegstilstand.tidsfrist shouldBe
-            LocalDate.now()
+            LocalDate
+                .now()
                 .plusWeeks(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.defaultVenteTidIUker)
     }
 
@@ -921,7 +927,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
         val behandlingsstegDto =
             BehandlingsstegForeslåVedtaksstegDto(FritekstavsnittDto(perioderMedTekst = emptyList()))
-        stegService.kanAnsvarligSaksbehandlerOppdateres(behandlingId, behandlingsstegDto)
+        stegService
+            .kanAnsvarligSaksbehandlerOppdateres(behandlingId, behandlingsstegDto)
             .shouldBeTrue()
     }
 
@@ -934,7 +941,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
 
         val behandlingsstegDto = lagBehandlingsstegFatteVedtaksstegDto(godkjent = false)
-        stegService.kanAnsvarligSaksbehandlerOppdateres(behandlingId, behandlingsstegDto)
+        stegService
+            .kanAnsvarligSaksbehandlerOppdateres(behandlingId, behandlingsstegDto)
             .shouldBeFalse()
     }
 
@@ -947,7 +955,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
 
         val behandlingsstegDto = lagBehandlingsstegFatteVedtaksstegDto(godkjent = true)
-        stegService.kanAnsvarligSaksbehandlerOppdateres(behandlingId, behandlingsstegDto)
+        stegService
+            .kanAnsvarligSaksbehandlerOppdateres(behandlingId, behandlingsstegDto)
             .shouldBeFalse()
     }
 
@@ -964,7 +973,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                     LocalDate.of(2021, 1, 31),
                 ),
             )
-        stegService.kanAnsvarligSaksbehandlerOppdateres(behandlingId, behandlingsstegDto)
+        stegService
+            .kanAnsvarligSaksbehandlerOppdateres(behandlingId, behandlingsstegDto)
             .shouldBeTrue()
     }
 
@@ -998,8 +1008,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         )
     }
 
-    private fun lagBehandlingsstegVilkårsvurderingDto(periode: Datoperiode): BehandlingsstegVilkårsvurderingDto {
-        return BehandlingsstegVilkårsvurderingDto(
+    private fun lagBehandlingsstegVilkårsvurderingDto(periode: Datoperiode): BehandlingsstegVilkårsvurderingDto =
+        BehandlingsstegVilkårsvurderingDto(
             listOf(
                 VilkårsvurderingsperiodeDto(
                     periode,
@@ -1013,10 +1023,9 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                 ),
             ),
         )
-    }
 
-    private fun lagBehandlingsstegFatteVedtaksstegDto(godkjent: Boolean): BehandlingsstegFatteVedtaksstegDto {
-        return BehandlingsstegFatteVedtaksstegDto(
+    private fun lagBehandlingsstegFatteVedtaksstegDto(godkjent: Boolean): BehandlingsstegFatteVedtaksstegDto =
+        BehandlingsstegFatteVedtaksstegDto(
             listOf(
                 VurdertTotrinnDto(
                     behandlingssteg = Behandlingssteg.FAKTA,
@@ -1040,7 +1049,6 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                 ),
             ),
         )
-    }
 
     private fun assertBehandlingssteg(
         behandlingsstegstilstand: List<Behandlingsstegstilstand>,
@@ -1089,17 +1097,17 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         forventet: Int = 1,
     ) {
         val taskene =
-            taskService.finnTasksMedStatus(
-                status =
-                    listOf(
-                        Status.KLAR_TIL_PLUKK,
-                        Status.UBEHANDLET,
-                        Status.BEHANDLER,
-                        Status.FERDIG,
-                    ),
-                page = Pageable.unpaged(),
-            )
-                .filter { tasktype == it.type }
+            taskService
+                .finnTasksMedStatus(
+                    status =
+                        listOf(
+                            Status.KLAR_TIL_PLUKK,
+                            Status.UBEHANDLET,
+                            Status.BEHANDLER,
+                            Status.FERDIG,
+                        ),
+                    page = Pageable.unpaged(),
+                ).filter { tasktype == it.type }
 
         taskene.size shouldBe forventet
     }
@@ -1108,19 +1116,20 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
         aktør: Aktør,
     ) {
-        taskService.finnTasksMedStatus(
-            listOf(
-                Status.KLAR_TIL_PLUKK,
-                Status.UBEHANDLET,
-                Status.BEHANDLER,
-                Status.FERDIG,
-            ),
-            page = Pageable.unpaged(),
-        ).any {
-            LagHistorikkinnslagTask.TYPE == it.type &&
-                historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
-                aktør.name == it.metadata["aktør"] &&
-                behandlingId.toString() == it.payload
-        }.shouldBeTrue()
+        taskService
+            .finnTasksMedStatus(
+                listOf(
+                    Status.KLAR_TIL_PLUKK,
+                    Status.UBEHANDLET,
+                    Status.BEHANDLER,
+                    Status.FERDIG,
+                ),
+                page = Pageable.unpaged(),
+            ).any {
+                LagHistorikkinnslagTask.TYPE == it.type &&
+                    historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
+                    aktør.name == it.metadata["aktør"] &&
+                    behandlingId.toString() == it.payload
+            }.shouldBeTrue()
     }
 }

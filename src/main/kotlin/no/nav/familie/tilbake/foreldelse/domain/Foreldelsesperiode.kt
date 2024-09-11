@@ -22,12 +22,12 @@ data class Foreldelsesperiode(
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar(),
 ) {
-    fun erForeldet(): Boolean {
-        return Foreldelsesvurderingstype.FORELDET == foreldelsesvurderingstype
-    }
+    fun erForeldet(): Boolean = Foreldelsesvurderingstype.FORELDET == foreldelsesvurderingstype
 }
 
-enum class Foreldelsesvurderingstype(val navn: String) {
+enum class Foreldelsesvurderingstype(
+    val navn: String,
+) {
     IKKE_VURDERT("Perioden er ikke vurdert"),
     FORELDET("Perioden er foreldet"),
     IKKE_FORELDET("Perioden er ikke foreldet"),

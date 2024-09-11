@@ -71,7 +71,5 @@ class Vergessteg(
         )
     }
 
-    override fun getBehandlingssteg(): Behandlingssteg {
-        return Behandlingssteg.VERGE
-    }
+    override fun getBehandlingssteg(): Behandlingssteg = Behandlingssteg.VERGE
 }

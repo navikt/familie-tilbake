@@ -74,20 +74,18 @@ data class Behandling(
     val endretTidspunkt: LocalDateTime
         get() = sporbar.endret.endretTid
 
-    fun utledVedtaksbrevstype(): Vedtaksbrevstype {
-        return if (erTilbakekrevingRevurderingHarÅrsakFeilutbetalingBortfalt()) {
+    fun utledVedtaksbrevstype(): Vedtaksbrevstype =
+        if (erTilbakekrevingRevurderingHarÅrsakFeilutbetalingBortfalt()) {
             Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT
         } else {
             Vedtaksbrevstype.ORDINÆR
         }
-    }
 
-    private fun erTilbakekrevingRevurderingHarÅrsakFeilutbetalingBortfalt(): Boolean {
-        return Behandlingstype.REVURDERING_TILBAKEKREVING == this.type &&
+    private fun erTilbakekrevingRevurderingHarÅrsakFeilutbetalingBortfalt(): Boolean =
+        Behandlingstype.REVURDERING_TILBAKEKREVING == this.type &&
             this.årsaker.any {
                 Behandlingsårsakstype.REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT == it.type
             }
-    }
 }
 
 data class Fagsystemsbehandling(
@@ -173,7 +171,9 @@ data class Behandlingsårsak(
     val sporbar: Sporbar = Sporbar(),
 )
 
-enum class Behandlingsårsakstype(val navn: String) {
+enum class Behandlingsårsakstype(
+    val navn: String,
+) {
     REVURDERING_KLAGE_NFP("Revurdering NFP omgjør vedtak basert på klage"),
     REVURDERING_KLAGE_KA("Revurdering etter KA-behandlet klage"),
     REVURDERING_OPPLYSNINGER_OM_VILKÅR("Nye opplysninger om vilkårsvurdering"),
@@ -181,7 +181,9 @@ enum class Behandlingsårsakstype(val navn: String) {
     REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT("Feilutbetalt beløp helt eller delvis bortfalt"),
 }
 
-enum class Behandlingsstatus(val kode: String) {
+enum class Behandlingsstatus(
+    val kode: String,
+) {
     AVSLUTTET("AVSLU"),
     FATTER_VEDTAK("FVED"),
     IVERKSETTER_VEDTAK("IVED"),

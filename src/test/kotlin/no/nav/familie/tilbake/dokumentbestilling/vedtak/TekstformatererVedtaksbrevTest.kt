@@ -1320,8 +1320,8 @@ class TekstformatererVedtaksbrevTest {
         private fun lagFritekstVedtaksbrevData(
             ytelsestype: Ytelsestype,
             hovedresultat: Vedtaksresultat,
-        ): HbVedtaksbrevsdata {
-            return HbVedtaksbrevsdata(
+        ): HbVedtaksbrevsdata =
+            HbVedtaksbrevsdata(
                 felles.copy(
                     brevmetadata =
                         brevmetadata.copy(
@@ -1340,7 +1340,6 @@ class TekstformatererVedtaksbrevTest {
                 ),
                 emptyList(),
             )
-        }
     }
 
     @Nested
@@ -1386,15 +1385,14 @@ class TekstformatererVedtaksbrevTest {
             ytelsestype: Ytelsestype,
             hovedresultat: Vedtaksresultat,
             språkkode: Språkkode,
-        ): HbVedtaksbrevsdata {
-            return HbVedtaksbrevsdata(
+        ): HbVedtaksbrevsdata =
+            HbVedtaksbrevsdata(
                 felles.copy(
                     brevmetadata = brevmetadata.copy(språkkode = språkkode, ytelsestype = ytelsestype),
                     totalresultat = felles.totalresultat.copy(hovedresultat = hovedresultat),
                 ),
                 emptyList(),
             )
-        }
     }
 
     @Nested

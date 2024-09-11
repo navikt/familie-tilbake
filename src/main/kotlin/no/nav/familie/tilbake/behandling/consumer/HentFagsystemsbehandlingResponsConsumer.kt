@@ -13,7 +13,9 @@ import java.util.concurrent.CountDownLatch
 
 @Service
 @Profile("!integrasjonstest & !e2e")
-class HentFagsystemsbehandlingResponsConsumer(private val fagsystemsbehandlingService: HentFagsystemsbehandlingService) {
+class HentFagsystemsbehandlingResponsConsumer(
+    private val fagsystemsbehandlingService: HentFagsystemsbehandlingService,
+) {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 

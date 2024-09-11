@@ -137,7 +137,8 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
         vararg unntattUnikhet: HendelseMedUndertype,
     ) {
         val tekstTilHendelsestyper = TreeMap<String, MutableSet<HendelseMedUndertype>>()
-        verdier.filter { (key, _) -> key !in unntattUnikhet }
+        verdier
+            .filter { (key, _) -> key !in unntattUnikhet }
             .forEach { (key, value) ->
                 if (tekstTilHendelsestyper.containsKey(value)) {
                     tekstTilHendelsestyper[value]!!.add(key)
@@ -148,9 +149,11 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
                 }
             }
         val feilmelding =
-            tekstTilHendelsestyper.filter { (_, value) -> value.size > 1 }.map { (key, value) ->
-                """$value mapper alle til "$key"""
-            }.joinToString("\n")
+            tekstTilHendelsestyper
+                .filter { (_, value) -> value.size > 1 }
+                .map { (key, value) ->
+                    """$value mapper alle til "$key"""
+                }.joinToString("\n")
 
         if (feilmelding.isNotEmpty()) {
             throw AssertionError(feilmelding)
@@ -171,8 +174,8 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
         return resultat
     }
 
-    private fun lagPeriodeBuilder(fakta: HbFakta): HbVedtaksbrevsperiode {
-        return HbVedtaksbrevsperiode(
+    private fun lagPeriodeBuilder(fakta: HbFakta): HbVedtaksbrevsperiode =
+        HbVedtaksbrevsperiode(
             periode = januar,
             kravgrunnlag =
                 HbKravgrunnlag(
@@ -197,7 +200,6 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
                 ),
             førstePeriode = true,
         )
-    }
 
     private fun lagFellesBuilder(
         språkkode: Språkkode,
@@ -238,11 +240,12 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
             harBrukerUttaltSeg = HarBrukerUttaltSeg.JA,
         )
 
-    private fun getFeilutbetalingsårsaker(ytelsestype: Ytelsestype): List<HendelseMedUndertype> {
-        return HendelsestypePerYtelsestype.getHendelsestyper(ytelsestype).map { hendelsestype ->
-            HendelsesundertypePerHendelsestype.getHendelsesundertyper(hendelsestype).map { hendelsesundertype ->
-                HendelseMedUndertype(hendelsestype, hendelsesundertype)
-            }
-        }.flatten()
-    }
+    private fun getFeilutbetalingsårsaker(ytelsestype: Ytelsestype): List<HendelseMedUndertype> =
+        HendelsestypePerYtelsestype
+            .getHendelsestyper(ytelsestype)
+            .map { hendelsestype ->
+                HendelsesundertypePerHendelsestype.getHendelsesundertyper(hendelsestype).map { hendelsesundertype ->
+                    HendelseMedUndertype(hendelsestype, hendelsesundertype)
+                }
+            }.flatten()
 }

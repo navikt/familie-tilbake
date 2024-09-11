@@ -16,6 +16,4 @@ fun String.konverterDatoIXMLTilIkkeForeldet(): String {
     return muterbarXml
 }
 
-fun LocalDate.lagDatoIkkeForeldet(): LocalDate {
-    return withYear(LocalDate.now().year.minus(1))
-}
+fun LocalDate.lagDatoIkkeForeldet(): LocalDate = withYear(LocalDate.now().year.minus(1))

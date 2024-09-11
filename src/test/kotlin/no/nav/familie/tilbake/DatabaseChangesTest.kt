@@ -19,7 +19,12 @@ class DatabaseChangesTest {
         if (Files.walk(resourcesPath).anyMatch { it.toFile().isDirectory && it.fileName.toString() != "migration" }) {
             throw RuntimeException("Fant directory med annet navn enn migration")
         }
-        val migreringsscript = Files.walk(resourcesPath).map { it.fileName.toString() }.filter { it.endsWith(".sql") }.toList()
+        val migreringsscript =
+            Files
+                .walk(resourcesPath)
+                .map { it.fileName.toString() }
+                .filter { it.endsWith(".sql") }
+                .toList()
         if (migreringsscript.isEmpty()) {
             throw RuntimeException("Fant ikke noen migreringsscript")
         }

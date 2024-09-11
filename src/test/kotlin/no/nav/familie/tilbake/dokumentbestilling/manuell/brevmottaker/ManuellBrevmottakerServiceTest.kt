@@ -223,7 +223,9 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
             manuellBrevmottakerService.fjernBrevmottaker(behandling.id, dbManuellBrevmottaker.id)
         }
 
-        manuellBrevmottakerService.hentBrevmottakere(behandling.id).filter { it.navn.equals("John Doe") }
+        manuellBrevmottakerService
+            .hentBrevmottakere(behandling.id)
+            .filter { it.navn.equals("John Doe") }
             .shouldBeEmpty()
 
         verify(exactly = 1) {

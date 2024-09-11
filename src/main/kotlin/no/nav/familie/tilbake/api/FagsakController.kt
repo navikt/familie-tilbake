@@ -26,7 +26,9 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class FagsakController(private val fagsakService: FagsakService) {
+class FagsakController(
+    private val fagsakService: FagsakService,
+) {
     @Operation(summary = "Hent fagsak informasjon med bruker og behandlinger")
     @GetMapping(
         path = ["/fagsystem/{fagsystem}/fagsak/{eksternFagsakId}/v1"],
@@ -41,9 +43,7 @@ class FagsakController(private val fagsakService: FagsakService) {
     fun hentFagsak(
         @PathVariable fagsystem: Fagsystem,
         @PathVariable eksternFagsakId: String,
-    ): Ressurs<FagsakDto> {
-        return Ressurs.success(fagsakService.hentFagsak(fagsystem, eksternFagsakId))
-    }
+    ): Ressurs<FagsakDto> = Ressurs.success(fagsakService.hentFagsak(fagsystem, eksternFagsakId))
 
     @Operation(summary = "Sjekk om det finnes en åpen tilbakekrevingsbehandling")
     @GetMapping(
@@ -59,14 +59,13 @@ class FagsakController(private val fagsakService: FagsakService) {
     fun finnesÅpenTilbakekrevingsbehandling(
         @PathVariable fagsystem: Fagsystem,
         @PathVariable eksternFagsakId: String,
-    ): Ressurs<FinnesBehandlingResponse> {
-        return Ressurs.success(
+    ): Ressurs<FinnesBehandlingResponse> =
+        Ressurs.success(
             fagsakService.finnesÅpenTilbakekrevingsbehandling(
                 fagsystem = fagsystem,
                 eksternFagsakId = eksternFagsakId,
             ),
         )
-    }
 
     @Operation(summary = "Sjekk om det er mulig å opprette behandling manuelt")
     @GetMapping(
@@ -82,9 +81,7 @@ class FagsakController(private val fagsakService: FagsakService) {
     fun kanBehandlingOpprettesManuelt(
         @PathVariable ytelsestype: Ytelsestype,
         @PathVariable eksternFagsakId: String,
-    ): Ressurs<KanBehandlingOpprettesManueltRespons> {
-        return Ressurs.success(fagsakService.kanBehandlingOpprettesManuelt(eksternFagsakId, ytelsestype))
-    }
+    ): Ressurs<KanBehandlingOpprettesManueltRespons> = Ressurs.success(fagsakService.kanBehandlingOpprettesManuelt(eksternFagsakId, ytelsestype))
 
     @Operation(summary = "Hent behandlinger, kalles av fagsystem")
     @GetMapping(
@@ -100,9 +97,7 @@ class FagsakController(private val fagsakService: FagsakService) {
     fun hentBehandlingerForFagsystem(
         @PathVariable fagsystem: Fagsystem,
         @PathVariable eksternFagsakId: String,
-    ): Ressurs<List<Behandling>> {
-        return Ressurs.success(fagsakService.hentBehandlingerForFagsak(fagsystem, eksternFagsakId))
-    }
+    ): Ressurs<List<Behandling>> = Ressurs.success(fagsakService.hentBehandlingerForFagsak(fagsystem, eksternFagsakId))
 
     @Operation(summary = "Hent behandlinger, kalles av fagsystem")
     @GetMapping(
@@ -118,7 +113,5 @@ class FagsakController(private val fagsakService: FagsakService) {
     fun hentVedtakForFagsystem(
         @PathVariable fagsystem: Fagsystem,
         @PathVariable eksternFagsakId: String,
-    ): Ressurs<List<FagsystemVedtak>> {
-        return Ressurs.success(fagsakService.hentVedtakForFagsak(fagsystem, eksternFagsakId))
-    }
+    ): Ressurs<List<FagsystemVedtak>> = Ressurs.success(fagsakService.hentVedtakForFagsak(fagsystem, eksternFagsakId))
 }

@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class BehandlingManuellOpprettelseService(private val behandlingService: BehandlingService) {
+class BehandlingManuellOpprettelseService(
+    private val behandlingService: BehandlingService,
+) {
     @Transactional
     fun opprettBehandlingManuell(
         eksternFagsakId: String,
@@ -34,8 +36,8 @@ class BehandlingManuellOpprettelseService(private val behandlingService: Behandl
         eksternId: String,
         fagsystemsbehandlingData: HentFagsystemsbehandling,
         ansvarligSaksbehandler: String,
-    ): OpprettTilbakekrevingRequest {
-        return OpprettTilbakekrevingRequest(
+    ): OpprettTilbakekrevingRequest =
+        OpprettTilbakekrevingRequest(
             fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype),
             ytelsestype = ytelsestype,
             eksternFagsakId = eksternFagsakId,
@@ -54,5 +56,4 @@ class BehandlingManuellOpprettelseService(private val behandlingService: Behandl
             institusjon = fagsystemsbehandlingData.institusjon,
             begrunnelseForTilbakekreving = null,
         )
-    }
 }

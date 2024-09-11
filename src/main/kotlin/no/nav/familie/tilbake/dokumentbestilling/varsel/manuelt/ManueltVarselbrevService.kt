@@ -190,11 +190,10 @@ class ManueltVarselbrevService(
     private fun getTittelForVarselbrev(
         ytelsesnavn: String,
         erKorrigert: Boolean,
-    ): String {
-        return if (erKorrigert) {
+    ): String =
+        if (erKorrigert) {
             VarselbrevUtil.TITTEL_KORRIGERT_VARSEL_TILBAKEBETALING + ytelsesnavn
         } else {
             VarselbrevUtil.TITTEL_VARSEL_TILBAKEBETALING + ytelsesnavn
         }
-    }
 }

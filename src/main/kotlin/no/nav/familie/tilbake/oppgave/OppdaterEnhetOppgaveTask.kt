@@ -18,7 +18,9 @@ import java.util.UUID
     beskrivelse = "Oppdaterer enhet på oppgave",
     triggerTidVedFeilISekunder = 300L,
 )
-class OppdaterEnhetOppgaveTask(private val oppgaveService: OppgaveService) : AsyncTaskStep {
+class OppdaterEnhetOppgaveTask(
+    private val oppgaveService: OppgaveService,
+) : AsyncTaskStep {
     private val log = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {

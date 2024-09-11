@@ -27,7 +27,5 @@ enum class Brevtype {
     INNHENT_DOKUMENTASJON,
     ;
 
-    fun gjelderVarsel(): Boolean {
-        return this in setOf(VARSEL, KORRIGERT_VARSEL)
-    }
+    fun gjelderVarsel(): Boolean = this in setOf(VARSEL, KORRIGERT_VARSEL)
 }

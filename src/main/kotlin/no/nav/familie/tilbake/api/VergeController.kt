@@ -23,7 +23,9 @@ import java.util.UUID
 @RequestMapping("/api/behandling/v1/{behandlingId}/verge", produces = [MediaType.APPLICATION_JSON_VALUE])
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class VergeController(private val vergeService: VergeService) {
+class VergeController(
+    private val vergeService: VergeService,
+) {
     @Operation(summary = "Opprett verge steg på behandling")
     @PostMapping
     @Rolletilgangssjekk(
@@ -64,7 +66,5 @@ class VergeController(private val vergeService: VergeService) {
     )
     fun hentVerge(
         @PathVariable("behandlingId") behandlingId: UUID,
-    ): Ressurs<VergeDto?> {
-        return Ressurs.success(vergeService.hentVerge(behandlingId))
-    }
+    ): Ressurs<VergeDto?> = Ressurs.success(vergeService.hentVerge(behandlingId))
 }

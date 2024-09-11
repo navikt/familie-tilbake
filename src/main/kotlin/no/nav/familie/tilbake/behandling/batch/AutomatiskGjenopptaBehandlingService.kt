@@ -27,9 +27,7 @@ class AutomatiskGjenopptaBehandlingService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun hentAlleBehandlingerKlarForGjenoppta(): List<Behandling> {
-        return behandlingRepository.finnAlleBehandlingerKlarForGjenoppta(dagensdato = LocalDate.now())
-    }
+    fun hentAlleBehandlingerKlarForGjenoppta(): List<Behandling> = behandlingRepository.finnAlleBehandlingerKlarForGjenoppta(dagensdato = LocalDate.now())
 
     @Transactional
     fun gjenopptaBehandling(behandlingId: UUID) {

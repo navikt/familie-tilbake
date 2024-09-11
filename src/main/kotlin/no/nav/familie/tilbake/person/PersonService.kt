@@ -35,12 +35,13 @@ class PersonService(
         fagsystem: Fagsystem,
     ): List<String> {
         val adresseBeskyttelseBolk = pdlClient.hentAdressebeskyttelseBolk(personIdenter, fagsystem)
-        return adresseBeskyttelseBolk.filter { (_, person) ->
-            person.adressebeskyttelse.any { adressebeskyttelse ->
-                adressebeskyttelse.gradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG ||
-                    adressebeskyttelse.gradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND
-            }
-        }.map { it.key }
+        return adresseBeskyttelseBolk
+            .filter { (_, person) ->
+                person.adressebeskyttelse.any { adressebeskyttelse ->
+                    adressebeskyttelse.gradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG ||
+                        adressebeskyttelse.gradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND
+                }
+            }.map { it.key }
     }
 
     fun hentAktørId(
@@ -48,7 +49,10 @@ class PersonService(
         fagsystem: Fagsystem,
     ): List<String> {
         val hentIdenter = pdlClient.hentIdenter(personIdent, fagsystem)
-        return hentIdenter.data.pdlIdenter!!.identer.filter { it.gruppe == "AKTORID" }.map { it.ident }
+        return hentIdenter.data.pdlIdenter!!
+            .identer
+            .filter { it.gruppe == "AKTORID" }
+            .map { it.ident }
     }
 
     fun hentAktivAktørId(

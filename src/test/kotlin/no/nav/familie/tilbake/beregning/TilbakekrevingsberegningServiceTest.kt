@@ -429,18 +429,19 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         vararg perioder: Månedsperiode,
     ) {
         val vurderingsperioder =
-            perioder.map {
-                Vilkårsvurderingsperiode(
-                    periode = Månedsperiode(it.fom, it.tom),
-                    begrunnelse = "foo",
-                    vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
-                    aktsomhet =
-                        VilkårsvurderingAktsomhet(
-                            aktsomhet = Aktsomhet.FORSETT,
-                            begrunnelse = "foo",
-                        ),
-                )
-            }.toSet()
+            perioder
+                .map {
+                    Vilkårsvurderingsperiode(
+                        periode = Månedsperiode(it.fom, it.tom),
+                        begrunnelse = "foo",
+                        vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
+                        aktsomhet =
+                            VilkårsvurderingAktsomhet(
+                                aktsomhet = Aktsomhet.FORSETT,
+                                begrunnelse = "foo",
+                            ),
+                    )
+                }.toSet()
         val vurdering =
             Vilkårsvurdering(
                 behandlingId = behandlingId,
@@ -494,15 +495,12 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         periode: Månedsperiode,
         skattMnd: Int,
         beløp: Set<Kravgrunnlagsbeløp433> = setOf(),
-    ): Kravgrunnlagsperiode432 {
-        return Kravgrunnlagsperiode432(
+    ): Kravgrunnlagsperiode432 =
+        Kravgrunnlagsperiode432(
             periode = periode,
             månedligSkattebeløp = BigDecimal.valueOf(skattMnd.toLong()),
             beløp = beløp,
         )
-    }
 
-    private fun lagGrunnlag(perioder: Set<Kravgrunnlagsperiode432>): Kravgrunnlag431 {
-        return Testdata.lagKravgrunnlag(behandling.id).copy(perioder = perioder)
-    }
+    private fun lagGrunnlag(perioder: Set<Kravgrunnlagsperiode432>): Kravgrunnlag431 = Testdata.lagKravgrunnlag(behandling.id).copy(perioder = perioder)
 }

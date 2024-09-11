@@ -15,7 +15,9 @@ import java.util.UUID
     beskrivelse = "Ferdigstiller oppgave for behandling",
     triggerTidVedFeilISekunder = 60 * 5L,
 )
-class FerdigstillOppgaveTask(private val oppgaveService: OppgaveService) : AsyncTaskStep {
+class FerdigstillOppgaveTask(
+    private val oppgaveService: OppgaveService,
+) : AsyncTaskStep {
     private val log = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {

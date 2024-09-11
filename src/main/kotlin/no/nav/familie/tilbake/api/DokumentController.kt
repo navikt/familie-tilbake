@@ -76,9 +76,7 @@ class DokumentController(
     fun hentForhåndsvisningVarselbrev(
         @Valid @RequestBody
         forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest,
-    ): ByteArray {
-        return varselbrevService.hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest)
-    }
+    ): ByteArray = varselbrevService.hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest)
 
     @Operation(summary = "Forhåndsvis henleggelsesbrev")
     @PostMapping(
@@ -89,9 +87,7 @@ class DokumentController(
     fun hentForhåndsvisningHenleggelsesbrev(
         @Valid @RequestBody
         dto: ForhåndsvisningHenleggelsesbrevDto,
-    ): Ressurs<ByteArray> {
-        return Ressurs.success(henleggelsesbrevService.hentForhåndsvisningHenleggelsesbrev(dto.behandlingId, dto.fritekst))
-    }
+    ): Ressurs<ByteArray> = Ressurs.success(henleggelsesbrevService.hentForhåndsvisningHenleggelsesbrev(dto.behandlingId, dto.fritekst))
 
     @Operation(summary = "Forhåndsvis vedtaksbrev")
     @PostMapping(
@@ -102,9 +98,7 @@ class DokumentController(
     fun hentForhåndsvisningVedtaksbrev(
         @Valid @RequestBody
         dto: HentForhåndvisningVedtaksbrevPdfDto,
-    ): Ressurs<ByteArray> {
-        return Ressurs.success(vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(dto))
-    }
+    ): Ressurs<ByteArray> = Ressurs.success(vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(dto))
 
     @Operation(summary = "Hent vedtaksbrevtekst")
     @GetMapping(
@@ -114,9 +108,7 @@ class DokumentController(
     @Rolletilgangssjekk(Behandlerrolle.VEILEDER, "Henter vedtaksbrevtekst", AuditLoggerEvent.ACCESS, HenteParam.BEHANDLING_ID)
     fun hentVedtaksbrevtekst(
         @PathVariable behandlingId: UUID,
-    ): Ressurs<List<Avsnitt>> {
-        return Ressurs.success(vedtaksbrevService.hentVedtaksbrevSomTekst(behandlingId))
-    }
+    ): Ressurs<List<Avsnitt>> = Ressurs.success(vedtaksbrevService.hentVedtaksbrevSomTekst(behandlingId))
 
     @Operation(summary = "Lagre utkast av vedtaksbrev")
     @PostMapping(

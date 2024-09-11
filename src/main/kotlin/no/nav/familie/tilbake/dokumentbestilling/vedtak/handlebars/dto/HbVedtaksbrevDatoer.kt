@@ -24,10 +24,11 @@ class HbVedtaksbrevDatoer(
         private fun getFørsteDagForHendelsesundertype(
             perioder: List<HbVedtaksbrevsperiode>,
             vararg hendelsesundertyper: Hendelsesundertype,
-        ): LocalDate? {
-            return perioder.firstOrNull {
-                hendelsesundertyper.contains(it.fakta.hendelsesundertype)
-            }?.periode?.fom
-        }
+        ): LocalDate? =
+            perioder
+                .firstOrNull {
+                    hendelsesundertyper.contains(it.fakta.hendelsesundertype)
+                }?.periode
+                ?.fom
     }
 }

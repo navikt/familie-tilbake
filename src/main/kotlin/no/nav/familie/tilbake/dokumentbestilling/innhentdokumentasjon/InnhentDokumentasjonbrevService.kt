@@ -146,13 +146,12 @@ class InnhentDokumentasjonbrevService(
         )
     }
 
-    private fun getTittel(brevmottager: Brevmottager): String {
-        return if (Brevmottager.VERGE == brevmottager) {
+    private fun getTittel(brevmottager: Brevmottager): String =
+        if (Brevmottager.VERGE == brevmottager) {
             TITTEL_INNHENTDOKUMENTASJONBREV_HISTORIKKINNSLAG_TIL_VERGE
         } else {
             TITTEL_INNHENTDOKUMENTASJONBREV_HISTORIKKINNSLAG
         }
-    }
 
     companion object {
         const val TITTEL_INNHENTDOKUMENTASJONBREV_HISTORIKKINNSLAG = "Innhent dokumentasjon Tilbakekreving"

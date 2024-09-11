@@ -20,4 +20,7 @@ data class HbVedtaksbrevsperiode(
     }
 }
 
-data class HbGrunnbeløp(val grunnbeløpGanger6: BigDecimal?, val tekst6GangerGrunnbeløp: String?)
+data class HbGrunnbeløp(
+    val grunnbeløpGanger6: BigDecimal?,
+    val tekst6GangerGrunnbeløp: String?,
+)

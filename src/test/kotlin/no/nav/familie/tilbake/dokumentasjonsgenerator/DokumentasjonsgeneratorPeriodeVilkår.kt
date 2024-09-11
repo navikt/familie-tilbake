@@ -320,8 +320,8 @@ class DokumentasjonsgeneratorPeriodeVilkår {
     private fun lagMetadata(
         ytelsestype: Ytelsestype,
         språkkode: Språkkode,
-    ): Brevmetadata {
-        return Brevmetadata(
+    ): Brevmetadata =
+        Brevmetadata(
             sakspartId = "",
             sakspartsnavn = "",
             mottageradresse = Adresseinfo("01020312345", "Bob"),
@@ -332,7 +332,6 @@ class DokumentasjonsgeneratorPeriodeVilkår {
             ytelsestype = ytelsestype,
             gjelderDødsfall = false,
         )
-    }
 
     private fun overskrift(
         resultat: Vilkårsvurderingsresultat,
@@ -341,23 +340,22 @@ class DokumentasjonsgeneratorPeriodeVilkår {
         fritekst: Boolean,
         pengerIBehold: Boolean,
         foreldelsevurdering: Foreldelsesvurderingstype,
-    ): String {
-        return (
-            "*[ ${hentVilkårresultatOverskriftDel(resultat)}" +
-                (if (vurdering != null) " - " + vurdering.navn else "") +
-                (if (fritekst) " - med fritekst" else " - uten fritekst") +
-                hentVIlkårsvurderingOverskriftDel(foreldelsevurdering) +
-                (if (pengerIBehold) " - penger i behold" else "") +
-                (if (lavtBeløp) " - lavt beløp" else "") +
-                " ]*"
-        )
-    }
+    ): String = (
+        "*[ ${hentVilkårresultatOverskriftDel(resultat)}" +
+            (if (vurdering != null) " - " + vurdering.navn else "") +
+            (if (fritekst) " - med fritekst" else " - uten fritekst") +
+            hentVIlkårsvurderingOverskriftDel(foreldelsevurdering) +
+            (if (pengerIBehold) " - penger i behold" else "") +
+            (if (lavtBeløp) " - lavt beløp" else "") +
+            " ]*"
+    )
 
     private fun prettyprint(
         vilkårTekst: String,
         overskrift: String,
-    ): String {
-        return vilkårTekst.replace("__.+".toRegex(), overskrift)
+    ): String =
+        vilkårTekst
+            .replace("__.+".toRegex(), overskrift)
             .replace(" 4\u00A0321\u00A0kroner", " <4 rettsgebyr> kroner")
             .replace(" 2\u00A0999\u00A0kroner", " <foreldet beløp> kroner")
             .replace(" 3\u00A0999\u00A0kroner", " <beløp i behold> kroner")
@@ -365,7 +363,6 @@ class DokumentasjonsgeneratorPeriodeVilkår {
             .replace("31. januar 2019", "<periode slutt>")
             .replace("1. mars 2019", "<oppdagelsesdato>")
             .replace("1. desember 2019", "<foreldelsesfrist>")
-    }
 
     companion object {
         private val vilkårResultat =
@@ -392,8 +389,8 @@ class DokumentasjonsgeneratorPeriodeVilkår {
         private val OPPDAGELSES_DATO = LocalDate.of(2019, 3, 1)
     }
 
-    private fun hentVilkårresultatOverskriftDel(resultat: Vilkårsvurderingsresultat): String {
-        return when (resultat) {
+    private fun hentVilkårresultatOverskriftDel(resultat: Vilkårsvurderingsresultat): String =
+        when (resultat) {
             Vilkårsvurderingsresultat.UDEFINERT -> "Foreldelse"
             Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT -> "Forsto/Burde forstått"
             Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER -> "Feilaktive opplysninger"
@@ -401,15 +398,13 @@ class DokumentasjonsgeneratorPeriodeVilkår {
             Vilkårsvurderingsresultat.GOD_TRO -> "God tro"
             else -> throw IllegalArgumentException("Vilkårsvurderingsresultat ikke støttet. Resultat: $resultat")
         }
-    }
 
-    private fun hentVIlkårsvurderingOverskriftDel(foreldelsevurdering: Foreldelsesvurderingstype): String {
-        return when (foreldelsevurdering) {
+    private fun hentVIlkårsvurderingOverskriftDel(foreldelsevurdering: Foreldelsesvurderingstype): String =
+        when (foreldelsevurdering) {
             Foreldelsesvurderingstype.IKKE_VURDERT -> " - automatisk vurdert"
             Foreldelsesvurderingstype.IKKE_FORELDET -> " - ikke foreldet"
             Foreldelsesvurderingstype.FORELDET -> " - foreldet"
             Foreldelsesvurderingstype.TILLEGGSFRIST -> " - med tilleggsfrist"
             else -> throw IllegalArgumentException("Foreldelsesvurderingstype ikke støttet. Type: $foreldelsevurdering")
         }
-    }
 }

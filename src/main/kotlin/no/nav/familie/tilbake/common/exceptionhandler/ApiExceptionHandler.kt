@@ -15,9 +15,7 @@ class ApiExceptionHandler {
     private val logger = LoggerFactory.getLogger(ApiExceptionHandler::class.java)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
-    private fun rootCause(throwable: Throwable): String {
-        return NestedExceptionUtils.getMostSpecificCause(throwable).javaClass.simpleName
-    }
+    private fun rootCause(throwable: Throwable): String = NestedExceptionUtils.getMostSpecificCause(throwable).javaClass.simpleName
 
     @ExceptionHandler(Throwable::class)
     fun handleThrowable(throwable: Throwable): ResponseEntity<Ressurs<Nothing>> {
@@ -30,9 +28,7 @@ class ApiExceptionHandler {
     }
 
     @ExceptionHandler(ApiFeil::class)
-    fun handleThrowable(feil: ApiFeil): ResponseEntity<Ressurs<Nothing>> {
-        return ResponseEntity.status(feil.httpStatus).body(Ressurs.failure(frontendFeilmelding = feil.feil))
-    }
+    fun handleThrowable(feil: ApiFeil): ResponseEntity<Ressurs<Nothing>> = ResponseEntity.status(feil.httpStatus).body(Ressurs.failure(frontendFeilmelding = feil.feil))
 
     @ExceptionHandler(Feil::class)
     fun handleThrowable(feil: Feil): ResponseEntity<Ressurs<Nothing>> {
@@ -57,7 +53,8 @@ class ApiExceptionHandler {
     fun handleThrowable(feil: IntegrasjonException): ResponseEntity<Ressurs<Nothing>> {
         secureLogger.error("Feil i integrasjoner har oppstått: uri={} data={}", feil.uri, feil.data, feil)
         logger.error("Feil i integrasjoner har oppstått exception=${rootCause(feil)}")
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(Ressurs.failure(frontendFeilmelding = feil.message, error = feil.cause))
     }
 
@@ -76,7 +73,8 @@ class ApiExceptionHandler {
             feilMelding.append(";")
         }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
             .body(Ressurs.failure(errorMessage = feilMelding.toString(), frontendFeilmelding = feilMelding.toString()))
     }
 
@@ -84,7 +82,8 @@ class ApiExceptionHandler {
     fun handleThrowable(feil: UgyldigKravgrunnlagFeil): ResponseEntity<Ressurs<Nothing>> {
         secureLogger.error("En håndtert feil har oppstått - ${feil.melding}", feil)
         logger.info("En håndtert feil har oppstått - ${feil.melding}")
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(Ressurs.failure(frontendFeilmelding = feil.message))
     }
 
@@ -92,7 +91,8 @@ class ApiExceptionHandler {
     fun handleThrowable(feil: UgyldigStatusmeldingFeil): ResponseEntity<Ressurs<Nothing>> {
         secureLogger.error("En håndtert feil har oppstått - ${feil.melding}", feil)
         logger.info("En håndtert feil har oppstått - ${feil.melding}")
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(Ressurs.failure(frontendFeilmelding = feil.message))
     }
 }

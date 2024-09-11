@@ -113,7 +113,8 @@ internal class OppdaterFaktainfoTaskTest : OppslagSpringRunnerTest() {
         shouldNotThrowAny { oppdaterFaktainfoTask.doTask(lagTask(eksternId = behandling.aktivFagsystemsbehandling.eksternId)) }
         val oppdatertBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
         oppdatertBehandling.endretTidspunkt.isEqual(behandling.endretTidspunkt)
-        oppdatertBehandling.aktivFagsystemsbehandling.sporbar.endret.endretTid.isEqual(behandling.aktivFagsystemsbehandling.sporbar.endret.endretTid)
+        oppdatertBehandling.aktivFagsystemsbehandling.sporbar.endret.endretTid
+            .isEqual(behandling.aktivFagsystemsbehandling.sporbar.endret.endretTid)
     }
 
     private fun lagRespons(eksternId: String): HentFagsystemsbehandlingRespons {
@@ -139,8 +140,8 @@ internal class OppdaterFaktainfoTaskTest : OppslagSpringRunnerTest() {
         return HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = hentFagsystemsbehandling)
     }
 
-    private fun lagTask(eksternId: String = "1"): Task {
-        return Task(
+    private fun lagTask(eksternId: String = "1"): Task =
+        Task(
             type = OppdaterFaktainfoTask.TYPE,
             payload = "",
             properties =
@@ -150,5 +151,4 @@ internal class OppdaterFaktainfoTaskTest : OppslagSpringRunnerTest() {
                     setProperty("eksternId", eksternId)
                 },
         )
-    }
 }

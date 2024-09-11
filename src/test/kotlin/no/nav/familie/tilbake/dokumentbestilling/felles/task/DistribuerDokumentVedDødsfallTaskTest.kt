@@ -73,7 +73,8 @@ internal class DistribuerDokumentVedDødsfallTaskTest : OppslagSpringRunnerTest(
         distribuerDokumentVedDødsfallTask.doTask(
             opprettTask("jpUkjentDødsbo").copy(
                 opprettetTid =
-                    LocalDateTime.now()
+                    LocalDateTime
+                        .now()
                         .minusMonths(7),
             ),
         )
@@ -83,8 +84,8 @@ internal class DistribuerDokumentVedDødsfallTaskTest : OppslagSpringRunnerTest(
         )
     }
 
-    private fun opprettTask(journalpostId: String): Task {
-        return Task(
+    private fun opprettTask(journalpostId: String): Task =
+        Task(
             type = DistribuerDokumentVedDødsfallTask.TYPE,
             payload = behandling.id.toString(),
             properties =
@@ -98,7 +99,6 @@ internal class DistribuerDokumentVedDødsfallTaskTest : OppslagSpringRunnerTest(
                     this["ansvarligSaksbehandler"] = Constants.BRUKER_ID_VEDTAKSLØSNINGEN
                 },
         )
-    }
 
     private fun assertHistorikkTask(
         historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,

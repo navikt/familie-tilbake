@@ -116,21 +116,22 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         historikkinnslagBehandling.tittel shouldBe TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_HENT.tittel
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(revurdering.id)
-        behandlingsstegstilstand.any {
-            Behandlingssteg.GRUNNLAG == it.behandlingssteg &&
-                Behandlingsstegstatus.UTFØRT == it.behandlingsstegsstatus
-        }.shouldBeTrue()
+        behandlingsstegstilstand
+            .any {
+                Behandlingssteg.GRUNNLAG == it.behandlingssteg &&
+                    Behandlingsstegstatus.UTFØRT == it.behandlingsstegsstatus
+            }.shouldBeTrue()
 
-        behandlingsstegstilstand.any {
-            Behandlingssteg.FAKTA == it.behandlingssteg &&
-                Behandlingsstegstatus.KLAR == it.behandlingsstegsstatus
-        }.shouldBeTrue()
+        behandlingsstegstilstand
+            .any {
+                Behandlingssteg.FAKTA == it.behandlingssteg &&
+                    Behandlingsstegstatus.KLAR == it.behandlingsstegsstatus
+            }.shouldBeTrue()
     }
 
-    private fun lagTask(behandlingId: UUID): Task {
-        return Task(
+    private fun lagTask(behandlingId: UUID): Task =
+        Task(
             type = HentKravgrunnlagTask.TYPE,
             payload = behandlingId.toString(),
         )
-    }
 }

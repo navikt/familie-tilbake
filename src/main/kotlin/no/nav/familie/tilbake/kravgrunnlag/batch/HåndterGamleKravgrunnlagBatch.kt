@@ -103,9 +103,7 @@ class HåndterGamleKravgrunnlagBatch(
         return erLeader || erLokaltMiljø
     }
 
-    private fun beregnBestemtDato(ytelsestype: Ytelsestype): LocalDate {
-        return LocalDate.now().minusDays(ALDERSGRENSE_I_DAGER.getValue(ytelsestype))
-    }
+    private fun beregnBestemtDato(ytelsestype: Ytelsestype): LocalDate = LocalDate.now().minusDays(ALDERSGRENSE_I_DAGER.getValue(ytelsestype))
 
     private fun sorterKravgrunnlagPåKontrollfelt(kravgrunnlagerPåFagsak: List<ØkonomiXmlMottatt>) =
         kravgrunnlagerPåFagsak.sortedBy {
