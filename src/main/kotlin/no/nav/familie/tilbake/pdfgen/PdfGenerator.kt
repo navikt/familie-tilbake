@@ -136,15 +136,14 @@ class PdfGenerator {
         return pdfontSupplier(font)
     }
 
-    private fun pdfontSupplier(font: TrueTypeFont): PDFontSupplier {
-        return PDFontSupplier(
+    private fun pdfontSupplier(font: TrueTypeFont): PDFontSupplier =
+        PDFontSupplier(
             PDType0Font.load(
                 PDDocument(),
                 font,
                 true,
             ),
         )
-    }
 
     private fun hentCss(format: DocFormat): String = FileStructureUtil.readResourceAsString("formats/" + format.name.lowercase(Locale.getDefault()) + "/style.css")
 }
