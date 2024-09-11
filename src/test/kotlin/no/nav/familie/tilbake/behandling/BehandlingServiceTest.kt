@@ -425,7 +425,6 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 6,
                 integrasjonerClient,
                 validerBehandlingService,
-                featureToggleService,
                 oppgaveService,
             )
         justRun { validerBehandlingService.validerOpprettBehandling(any()) }
@@ -489,7 +488,6 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 6,
                 integrasjonerClient,
                 validerBehandlingService,
-                featureToggleService,
                 oppgaveService,
             )
         justRun { validerBehandlingService.validerOpprettBehandling(any()) }

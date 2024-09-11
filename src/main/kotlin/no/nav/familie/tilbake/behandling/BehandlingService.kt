@@ -34,8 +34,6 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.FeatureToggleConfig
-import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingService
@@ -85,7 +83,6 @@ class BehandlingService(
     private val opprettelseDagerBegrensning: Long,
     private val integrasjonerClient: IntegrasjonerClient,
     private val validerBehandlingService: ValiderBehandlingService,
-    private val featureToggleService: FeatureToggleService,
     private val oppgaveService: OppgaveService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
@@ -479,14 +476,12 @@ class BehandlingService(
         validerBehandlingService.validerOpprettBehandling(opprettTilbakekrevingRequest)
 
         val fagsystem = opprettTilbakekrevingRequest.fagsystem
-        val erAutomatiskOgFeatureTogglePå =
-            opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK &&
-                featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_BEHANDLE_TILBAKEKREVING_UNDER_4X_RETTSGEBYR)
+        val tilbakekrevingsvalgErAutomatisk = opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK
 
-        logOppretterBehandling(erAutomatiskOgFeatureTogglePå, opprettTilbakekrevingRequest)
+        logOppretterBehandling(tilbakekrevingsvalgErAutomatisk, opprettTilbakekrevingRequest)
 
         val fagsak = finnEllerOpprettFagsak(opprettTilbakekrevingRequest)
-        val behandling = lagreBehandling(opprettTilbakekrevingRequest, fagsak, erAutomatiskOgFeatureTogglePå)
+        val behandling = lagreBehandling(opprettTilbakekrevingRequest, fagsak, tilbakekrevingsvalgErAutomatisk)
         historikkTaskService.lagHistorikkTask(behandling.id, BEHANDLING_OPPRETTET, Aktør.VEDTAKSLØSNING)
         behandlingskontrollService.fortsettBehandling(behandling.id)
         stegService.håndterSteg(behandling.id)
@@ -502,7 +497,7 @@ class BehandlingService(
             ),
         )
 
-        if (!erAutomatiskOgFeatureTogglePå) {
+        if (!tilbakekrevingsvalgErAutomatisk) {
             oppgaveTaskService.opprettOppgaveTask(behandling, Oppgavetype.BehandleSak)
         }
 
