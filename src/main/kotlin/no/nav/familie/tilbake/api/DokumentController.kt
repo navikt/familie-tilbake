@@ -15,10 +15,12 @@ import no.nav.familie.tilbake.dokumentbestilling.henleggelse.HenleggelsesbrevSer
 import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevService
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.Avsnitt
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevService
+import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.HenteParam
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
+import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
@@ -38,6 +40,8 @@ class DokumentController(
     private val henleggelsesbrevService: HenleggelsesbrevService,
     private val vedtaksbrevService: VedtaksbrevService,
     private val lagreUtkastVedtaksbrevService: LagreUtkastVedtaksbrevService,
+    private val faktaFeilutbetalingService: FaktaFeilutbetalingService,
+    private val vilkårsVurderingService: VilkårsvurderingService,
 ) {
     @Operation(summary = "Bestill brevsending")
     @PostMapping("/bestill")
@@ -142,5 +146,7 @@ class DokumentController(
     )
     fun erPerioderLike(
         @PathVariable behandlingId: UUID,
-    ): Ressurs<Boolean> = Ressurs.success(false)
+    ): Ressurs<Boolean> {
+        return Ressurs.success(faktaFeilutbetalingService.sjekkOmFaktaPerioderErLike(behandlingId) &&  vilkårsVurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandlingId))
+    }
 }
