@@ -81,12 +81,13 @@ internal class IntegrasjonerClientTest {
                 .willReturn(okJson(success("id").toJson())),
         )
         // Vil gi resultat
-        integrasjonerClient.distribuerJournalpost(
-            "3216354",
-            Fagsystem.EF,
-            Distribusjonstype.VIKTIG,
-            Distribusjonstidspunkt.KJERNETID,
-        ).shouldNotBeNull()
+        integrasjonerClient
+            .distribuerJournalpost(
+                "3216354",
+                Fagsystem.EF,
+                Distribusjonstype.VIKTIG,
+                Distribusjonstidspunkt.KJERNETID,
+            ).shouldNotBeNull()
     }
 
     @Test

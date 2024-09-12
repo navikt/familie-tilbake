@@ -71,9 +71,7 @@ class IverksettelseService(
         behandlingId: UUID,
         requestXml: String,
         kvittering: String?,
-    ): ØkonomiXmlSendt {
-        return økonomiXmlSendtRepository.insert(ØkonomiXmlSendt(behandlingId = behandlingId, melding = requestXml, kvittering = kvittering))
-    }
+    ): ØkonomiXmlSendt = økonomiXmlSendtRepository.insert(ØkonomiXmlSendt(behandlingId = behandlingId, melding = requestXml, kvittering = kvittering))
 
     private fun lagIveksettelseRequest(
         ansvarligSaksbehandler: String,
@@ -95,8 +93,8 @@ class IverksettelseService(
         return request.apply { tilbakekrevingsvedtak = vedtak }
     }
 
-    private fun lagVedtaksperiode(beregnetPerioder: List<Tilbakekrevingsperiode>): List<TilbakekrevingsperiodeDto> {
-        return beregnetPerioder.map {
+    private fun lagVedtaksperiode(beregnetPerioder: List<Tilbakekrevingsperiode>): List<TilbakekrevingsperiodeDto> =
+        beregnetPerioder.map {
             val tilbakekrevingsperiode = TilbakekrevingsperiodeDto()
             tilbakekrevingsperiode.apply {
                 val periode = PeriodeDto()
@@ -107,10 +105,9 @@ class IverksettelseService(
                 tilbakekrevingsbelop.addAll(lagVedtaksbeløp(it.beløp))
             }
         }
-    }
 
-    private fun lagVedtaksbeløp(beregnetBeløper: List<Tilbakekrevingsbeløp>): List<TilbakekrevingsbelopDto> {
-        return beregnetBeløper.map {
+    private fun lagVedtaksbeløp(beregnetBeløper: List<Tilbakekrevingsbeløp>): List<TilbakekrevingsbelopDto> =
+        beregnetBeløper.map {
             val tilbakekrevingsbeløp = TilbakekrevingsbelopDto()
             tilbakekrevingsbeløp.apply {
                 kodeKlasse = it.klassekode.name
@@ -126,10 +123,9 @@ class IverksettelseService(
                 }
             }
         }
-    }
 
-    private fun utledKodeResultat(tilbakekrevingsbeløp: Tilbakekrevingsbeløp): String {
-        return if (harSattDelvisTilbakekrevingMenKreverTilbakeFulltBeløp(tilbakekrevingsbeløp)) {
+    private fun utledKodeResultat(tilbakekrevingsbeløp: Tilbakekrevingsbeløp): String =
+        if (harSattDelvisTilbakekrevingMenKreverTilbakeFulltBeløp(tilbakekrevingsbeløp)) {
             secureLogger.warn(
                 """Fant tilbakekrevingsperiode med delvis tilbakekreving hvor vi krever tilbake hele beløpet.
                 | Økonomi krever trolig at vi setter full tilbakekreving. 
@@ -145,7 +141,6 @@ class IverksettelseService(
         } else {
             tilbakekrevingsbeløp.kodeResultat.kode
         }
-    }
 
     private fun harSattDelvisTilbakekrevingMenKreverTilbakeFulltBeløp(tilbakekrevingsbeløp: Tilbakekrevingsbeløp) =
         tilbakekrevingsbeløp.kodeResultat == KodeResultat.DELVIS_TILBAKEKREVING && tilbakekrevingsbeløp.uinnkrevdBeløp == BigDecimal.ZERO
@@ -169,7 +164,8 @@ class IverksettelseService(
         val beregnetSkattBeløp = beregnetPerioder.sumOf { it.beløp.sumOf { beløp -> beløp.skattBeløp } }
 
         if (totalTilbakekrevingsbeløpUtenRenter != beregnetTotatlTilbakekrevingsbeløpUtenRenter ||
-            totalRenteBeløp != beregnetTotalRenteBeløp || totalSkatteBeløp != beregnetSkattBeløp
+            totalRenteBeløp != beregnetTotalRenteBeløp ||
+            totalSkatteBeløp != beregnetSkattBeløp
         ) {
             throw Feil(
                 message =

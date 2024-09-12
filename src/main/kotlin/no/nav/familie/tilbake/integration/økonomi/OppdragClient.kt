@@ -73,29 +73,44 @@ interface OppdragClient {
 class DefaultOppdragClient(
     @Qualifier("azure") restOperations: RestOperations,
     @Value("\${FAMILIE_OPPDRAG_URL}") private val familieOppdragUrl: URI,
-) :
-    AbstractPingableRestClient(restOperations, "familie.oppdrag"), OppdragClient {
+) : AbstractPingableRestClient(restOperations, "familie.oppdrag"),
+    OppdragClient {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     override val pingUri: URI =
-        UriComponentsBuilder.fromUri(familieOppdragUrl)
-            .path(PING_PATH).build().toUri()
+        UriComponentsBuilder
+            .fromUri(familieOppdragUrl)
+            .path(PING_PATH)
+            .build()
+            .toUri()
 
     private fun iverksettelseUri(behandlingId: UUID): URI =
-        UriComponentsBuilder.fromUri(familieOppdragUrl)
-            .pathSegment(IVERKSETTELSE_PATH, behandlingId.toString()).build().toUri()
+        UriComponentsBuilder
+            .fromUri(familieOppdragUrl)
+            .pathSegment(IVERKSETTELSE_PATH, behandlingId.toString())
+            .build()
+            .toUri()
 
     private fun hentKravgrunnlagUri(kravgrunnlagId: BigInteger): URI =
-        UriComponentsBuilder.fromUri(familieOppdragUrl)
-            .pathSegment(HENT_KRAVGRUNNLAG_PATH, kravgrunnlagId.toString()).build().toUri()
+        UriComponentsBuilder
+            .fromUri(familieOppdragUrl)
+            .pathSegment(HENT_KRAVGRUNNLAG_PATH, kravgrunnlagId.toString())
+            .build()
+            .toUri()
 
     private fun annulerKravgrunnlagUri(kravgrunnlagId: BigInteger): URI =
-        UriComponentsBuilder.fromUri(familieOppdragUrl)
-            .pathSegment(ANNULER_KRAVGRUNNLAG_PATH, kravgrunnlagId.toString()).build().toUri()
+        UriComponentsBuilder
+            .fromUri(familieOppdragUrl)
+            .pathSegment(ANNULER_KRAVGRUNNLAG_PATH, kravgrunnlagId.toString())
+            .build()
+            .toUri()
 
     private val hentFeilutbetalingerFraSimuleringUri: URI =
-        UriComponentsBuilder.fromUri(familieOppdragUrl)
-            .pathSegment(HENT_FEILUTBETALINGER_PATH).build().toUri()
+        UriComponentsBuilder
+            .fromUri(familieOppdragUrl)
+            .pathSegment(HENT_FEILUTBETALINGER_PATH)
+            .build()
+            .toUri()
 
     override fun iverksettVedtak(
         behandlingId: UUID,
@@ -107,8 +122,7 @@ class DefaultOppdragClient(
                 postForEntity<Ressurs<TilbakekrevingsvedtakResponse>>(
                     uri = iverksettelseUri(behandlingId),
                     payload = tilbakekrevingsvedtakRequest,
-                )
-                    .getDataOrThrow()
+                ).getDataOrThrow()
             if (!erResponsOk(respons.mmel)) {
                 logger.error(
                     "Fikk feil respons fra økonomi ved iverksetting av behandling=$behandlingId." +
@@ -144,8 +158,7 @@ class DefaultOppdragClient(
                 postForEntity<Ressurs<KravgrunnlagHentDetaljResponse>>(
                     uri = hentKravgrunnlagUri(kravgrunnlagId),
                     payload = hentKravgrunnlagRequest,
-                )
-                    .getDataOrThrow()
+                ).getDataOrThrow()
             validerHentKravgrunnlagRespons(respons.mmel, kravgrunnlagId)
             logger.info("Mottatt respons: ${lagRespons(respons.mmel)} fra økonomi til kravgrunnlagId=$kravgrunnlagId.")
             return respons.detaljertkravgrunnlag
@@ -174,8 +187,7 @@ class DefaultOppdragClient(
                 postForEntity<Ressurs<KravgrunnlagAnnulerResponse>>(
                     uri = annulerKravgrunnlagUri(eksternKravgrunnlagId),
                     payload = kravgrunnlagAnnulerRequest,
-                )
-                    .getDataOrThrow()
+                ).getDataOrThrow()
             if (!erResponsOk(respons.mmel)) {
                 logger.error(
                     "Fikk feil respons fra økonomi ved annulering " +
@@ -211,8 +223,7 @@ class DefaultOppdragClient(
             return postForEntity<Ressurs<FeilutbetalingerFraSimulering>>(
                 uri = hentFeilutbetalingerFraSimuleringUri,
                 payload = request,
-            )
-                .getDataOrThrow()
+            ).getDataOrThrow()
         } catch (exception: Exception) {
             logger.error(
                 "Feilutbetalinger kan ikke hentes fra simulering for for ytelsestype=${request.ytelsestype}, " +
@@ -246,21 +257,13 @@ class DefaultOppdragClient(
         }
     }
 
-    private fun erResponsOk(mmelDto: MmelDto): Boolean {
-        return mmelDto.alvorlighetsgrad in setOf("00", "04")
-    }
+    private fun erResponsOk(mmelDto: MmelDto): Boolean = mmelDto.alvorlighetsgrad in setOf("00", "04")
 
-    private fun erKravgrunnlagSperret(mmelDto: MmelDto): Boolean {
-        return KODE_MELDING_SPERRET_KRAVGRUNNLAG == mmelDto.kodeMelding
-    }
+    private fun erKravgrunnlagSperret(mmelDto: MmelDto): Boolean = KODE_MELDING_SPERRET_KRAVGRUNNLAG == mmelDto.kodeMelding
 
-    private fun erKravgrunnlagIkkeFinnes(mmelDto: MmelDto): Boolean {
-        return KODE_MELDING_KRAVGRUNNLAG_IKKE_FINNES == mmelDto.kodeMelding
-    }
+    private fun erKravgrunnlagIkkeFinnes(mmelDto: MmelDto): Boolean = KODE_MELDING_KRAVGRUNNLAG_IKKE_FINNES == mmelDto.kodeMelding
 
-    private fun lagRespons(mmelDto: MmelDto): String {
-        return objectMapper.writeValueAsString(mmelDto)
-    }
+    private fun lagRespons(mmelDto: MmelDto): String = objectMapper.writeValueAsString(mmelDto)
 
     companion object {
         const val KODE_MELDING_SPERRET_KRAVGRUNNLAG = "B420012I"
@@ -355,7 +358,8 @@ class MockOppdragClient(
                 typeGjelderId = TypeGjelderDto.PERSON
                 utbetalesTilId = eksisterendeKravgrunnlag?.utbetalesTilId ?: "1234"
                 typeUtbetId = TypeGjelderDto.PERSON
-                kontrollfelt = eksisterendeKravgrunnlag?.kontrollfelt ?: LocalDateTime.now()
+                kontrollfelt = eksisterendeKravgrunnlag?.kontrollfelt ?: LocalDateTime
+                    .now()
                     .format(DateTimeFormatter.ofPattern("YYYY-MM-dd-HH.mm.ss.SSSSSS"))
                 referanse = eksisterendeKravgrunnlag?.referanse ?: "0"
                 tilbakekrevingsPeriode.addAll(mapPeriode(eksisterendeKravgrunnlag?.perioder!!))
@@ -370,8 +374,8 @@ class MockOppdragClient(
         return mmelDto
     }
 
-    private fun mapPeriode(perioder: Set<Kravgrunnlagsperiode432>): List<DetaljertKravgrunnlagPeriodeDto> {
-        return perioder.map {
+    private fun mapPeriode(perioder: Set<Kravgrunnlagsperiode432>): List<DetaljertKravgrunnlagPeriodeDto> =
+        perioder.map {
             DetaljertKravgrunnlagPeriodeDto().apply {
                 periode =
                     PeriodeDto().apply {
@@ -382,10 +386,9 @@ class MockOppdragClient(
                 tilbakekrevingsBelop.addAll(mapBeløp(it.beløp))
             }
         }
-    }
 
-    private fun mapBeløp(beløper: Set<Kravgrunnlagsbeløp433>): List<DetaljertKravgrunnlagBelopDto> {
-        return beløper.map {
+    private fun mapBeløp(beløper: Set<Kravgrunnlagsbeløp433>): List<DetaljertKravgrunnlagBelopDto> =
+        beløper.map {
             DetaljertKravgrunnlagBelopDto().apply {
                 kodeKlasse = it.klassekode.name
                 typeKlasse = TypeKlasseDto.fromValue(it.klassetype.name)
@@ -396,16 +399,14 @@ class MockOppdragClient(
                 skattProsent = it.skatteprosent
             }
         }
-    }
 
-    private fun lagRespons(mmelDto: MmelDto): String {
-        return objectMapper.writeValueAsString(mmelDto)
-    }
+    private fun lagRespons(mmelDto: MmelDto): String = objectMapper.writeValueAsString(mmelDto)
 
     private fun hentMottattKravgrunnlag(eksternKravgrunnlagId: BigInteger): Kravgrunnlag431? {
         val mottattXml =
             økonomiXmlMottattRepository
-                .findByEksternKravgrunnlagId(eksternKravgrunnlagId)?.melding
+                .findByEksternKravgrunnlagId(eksternKravgrunnlagId)
+                ?.melding
         return mottattXml?.let {
             KravgrunnlagMapper.tilKravgrunnlag431(
                 KravgrunnlagUtil.unmarshalKravgrunnlag(it),

@@ -146,12 +146,11 @@ class KravgrunnlagService(
     private fun finnÅpenBehandling(
         ytelsestype: Ytelsestype,
         fagsystemId: String,
-    ): Behandling? {
-        return behandlingRepository.finnÅpenTilbakekrevingsbehandling(
+    ): Behandling? =
+        behandlingRepository.finnÅpenTilbakekrevingsbehandling(
             ytelsestype = ytelsestype,
             eksternFagsakId = fagsystemId,
         )
-    }
 
     fun lagreKravgrunnlag(
         kravgrunnlag431: Kravgrunnlag431,

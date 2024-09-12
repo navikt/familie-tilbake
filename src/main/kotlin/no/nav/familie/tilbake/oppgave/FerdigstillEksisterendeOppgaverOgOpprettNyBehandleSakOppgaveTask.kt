@@ -53,5 +53,9 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask(
         const val TYPE = "ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakTask"
     }
 
-    data class FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveDto(val behandlingId: UUID, val beskrivelse: String, val frist: LocalDate)
+    data class FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveDto(
+        val behandlingId: UUID,
+        val beskrivelse: String,
+        val frist: LocalDate,
+    )
 }

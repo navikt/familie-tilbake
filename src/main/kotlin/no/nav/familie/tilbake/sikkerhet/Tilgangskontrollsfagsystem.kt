@@ -3,7 +3,9 @@ package no.nav.familie.tilbake.sikkerhet
 import no.nav.familie.kontrakter.felles.Fagsystem
 
 // Denne enum-en brukes kun for tilgangskontroll
-enum class Tilgangskontrollsfagsystem(val kode: String) {
+enum class Tilgangskontrollsfagsystem(
+    val kode: String,
+) {
     BARNETRYGD("BA"),
     ENSLIG_FORELDER("EF"),
     KONTANTSTØTTE("KONT"),

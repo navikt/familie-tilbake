@@ -10,9 +10,7 @@ class TilbakekrevingsvedtakOppsummering(
     val renter: BigDecimal,
     val skatt: BigDecimal,
 ) {
-    fun harIngenTilbakekreving(): Boolean {
-        return tilbakekrevesBruttoUtenRenter.signum() == 0
-    }
+    fun harIngenTilbakekreving(): Boolean = tilbakekrevesBruttoUtenRenter.signum() == 0
 
     companion object {
         fun oppsummer(tilbakekrevingsvedtak: TilbakekrevingsvedtakDto): TilbakekrevingsvedtakOppsummering {

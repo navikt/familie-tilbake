@@ -65,9 +65,7 @@ object FellesTekstformaterer {
         return TEMPLATE_CACHE[språkstøttetFilsti]!!
     }
 
-    private fun opprettTemplate(språkstøttetFilsti: String): Template {
-        return opprettHandlebarsKonfigurasjon().compile(språkstøttetFilsti)
-    }
+    private fun opprettTemplate(språkstøttetFilsti: String): Template = opprettHandlebarsKonfigurasjon().compile(språkstøttetFilsti)
 
     private fun opprettTemplateFraPartials(vararg partials: String): Template {
         val partialString = partials.joinToString("") { "{{> $it}}\n" }
@@ -81,22 +79,22 @@ object FellesTekstformaterer {
     private fun applyTemplate(
         data: Any,
         template: Template,
-    ): String {
-        return try {
+    ): String =
+        try {
             // Går via JSON for å
             // 1. tilrettelegger for å flytte generering til PDF etc til ekstern applikasjon
             // 2. ha egen navngiving på variablene i template for enklere å lese template
             // 3. unngår at template feiler når variable endrer navn
             val jsonNode: JsonNode = OM.valueToTree(data)
             val context =
-                Context.newBuilder(jsonNode)
+                Context
+                    .newBuilder(jsonNode)
                     .resolver(JsonNodeValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, MapValueResolver.INSTANCE)
                     .build()
             template.apply(context).trim()
         } catch (e: IOException) {
             throw IllegalStateException("Feil ved tekstgenerering.")
         }
-    }
 
     private fun opprettHandlebarsKonfigurasjon(): Handlebars {
         val loader =
@@ -126,7 +124,5 @@ object FellesTekstformaterer {
     private fun lagSpråkstøttetFilsti(
         filsti: String,
         språkkode: Språkkode,
-    ): String {
-        return String.format("%s/%s", språkkode.name.lowercase(Locale.getDefault()), filsti)
-    }
+    ): String = String.format("%s/%s", språkkode.name.lowercase(Locale.getDefault()), filsti)
 }

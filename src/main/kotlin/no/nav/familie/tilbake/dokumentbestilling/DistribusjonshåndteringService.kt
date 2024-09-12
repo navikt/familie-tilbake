@@ -90,8 +90,8 @@ class DistribusjonshåndteringService(
             fagsak: Fagsak,
             erManuelleMottakereStøttet: Boolean,
             manueltRegistrerteMottakere: Set<ManuellBrevmottaker>,
-        ): Pair<Brevmottaker, Brevmottaker?> {
-            return if (erManuelleMottakereStøttet) {
+        ): Pair<Brevmottaker, Brevmottaker?> =
+            if (erManuelleMottakereStøttet) {
                 require(manueltRegistrerteMottakere.all { it.behandlingId == behandling.id })
 
                 val (manuellBrukeradresse, manuellTilleggsmottaker) =
@@ -109,15 +109,18 @@ class DistribusjonshåndteringService(
                     second = tilleggsmottaker?.let { BrevmottagerType(it) },
                 )
             }
-        }
     }
 }
 
 sealed interface Brevmottaker
 
-class BrevmottagerType(val mottaker: Brevmottager) : Brevmottaker
+class BrevmottagerType(
+    val mottaker: Brevmottager,
+) : Brevmottaker
 
-class ManuellBrevmottakerType(val mottaker: ManuellBrevmottaker) : Brevmottaker
+class ManuellBrevmottakerType(
+    val mottaker: ManuellBrevmottaker,
+) : Brevmottaker
 
 val Brevmottaker?.navn: String?
     get() = if (this is ManuellBrevmottakerType) mottaker.navn else null

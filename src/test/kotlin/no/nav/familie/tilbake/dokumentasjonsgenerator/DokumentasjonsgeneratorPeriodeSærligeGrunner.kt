@@ -255,8 +255,8 @@ class DokumentasjonsgeneratorPeriodeSærligeGrunner {
         )
     }
 
-    private fun lagMetadata(språkkode: Språkkode): Brevmetadata {
-        return Brevmetadata(
+    private fun lagMetadata(språkkode: Språkkode): Brevmetadata =
+        Brevmetadata(
             sakspartId = "",
             sakspartsnavn = "",
             mottageradresse = Adresseinfo("01020312345", "Bob"),
@@ -267,14 +267,13 @@ class DokumentasjonsgeneratorPeriodeSærligeGrunner {
             ytelsestype = Ytelsestype.BARNETRYGD,
             gjelderDødsfall = false,
         )
-    }
 
     private fun prettyPrint(
         s: String,
         overskrift: String,
-    ): String {
-        return s.replace("__Er det særlige grunner til å redusere beløpet?", overskrift)
+    ): String =
+        s
+            .replace("__Er det særlige grunner til å redusere beløpet?", overskrift)
             .replace("__Er det særlege grunnar til å redusere beløpet?", overskrift)
             .replace(" 500\u00A0kroner", " <kravbeløp> kroner")
-    }
 }

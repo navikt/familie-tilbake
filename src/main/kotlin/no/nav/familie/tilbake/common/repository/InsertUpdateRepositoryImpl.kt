@@ -5,24 +5,18 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
 @Component
-class InsertUpdateRepositoryImpl<T : Any>(val entityOperations: JdbcAggregateOperations) : InsertUpdateRepository<T> {
+class InsertUpdateRepositoryImpl<T : Any>(
+    val entityOperations: JdbcAggregateOperations,
+) : InsertUpdateRepository<T> {
     @Transactional
-    override fun insert(t: T): T {
-        return entityOperations.insert(t)
-    }
+    override fun insert(t: T): T = entityOperations.insert(t)
 
     @Transactional
-    override fun insertAll(list: List<T>): List<T> {
-        return list.map(this::insert)
-    }
+    override fun insertAll(list: List<T>): List<T> = list.map(this::insert)
 
     @Transactional
-    override fun update(t: T): T {
-        return entityOperations.update(t)
-    }
+    override fun update(t: T): T = entityOperations.update(t)
 
     @Transactional
-    override fun updateAll(list: List<T>): List<T> {
-        return list.map(this::update)
-    }
+    override fun updateAll(list: List<T>): List<T> = list.map(this::update)
 }

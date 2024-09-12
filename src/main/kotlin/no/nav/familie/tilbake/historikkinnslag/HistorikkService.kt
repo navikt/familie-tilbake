@@ -69,8 +69,8 @@ class HistorikkService(
         behandling: Behandling,
         historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
         beskrivelse: String?,
-    ): String? {
-        return when (historikkinnslagstype) {
+    ): String? =
+        when (historikkinnslagstype) {
             BEHANDLING_PÅ_VENT -> historikkinnslagstype.tekst + beskrivelse
             VEDTAK_FATTET -> behandling.sisteResultat?.type?.let { historikkinnslagstype.tekst + it.navn }
             BEHANDLING_HENLAGT -> {
@@ -89,14 +89,13 @@ class HistorikkService(
             BREVMOTTAKER_ENDRET, BREVMOTTAKER_LAGT_TIL, BREVMOTTAKER_FJERNET -> beskrivelse
             else -> historikkinnslagstype.tekst
         }
-    }
 
     private fun hentAktørIdent(
         behandling: Behandling,
         aktør: Aktør,
         beslutter: String?,
-    ): String {
-        return when (aktør) {
+    ): String =
+        when (aktør) {
             Aktør.VEDTAKSLØSNING -> Constants.BRUKER_ID_VEDTAKSLØSNINGEN
             Aktør.SAKSBEHANDLER -> behandling.ansvarligSaksbehandler
             Aktør.BESLUTTER ->
@@ -104,7 +103,6 @@ class HistorikkService(
                     ?: beslutter
                     ?: error("Beslutter mangler ident for behandling: ${behandling.id}")
         }
-    }
 
     private fun hentBrevdata(
         behandling: Behandling,

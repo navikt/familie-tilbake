@@ -193,12 +193,13 @@ class ManuellBrevmottakerService(
     private fun hentPersonEllerOrganisasjonNavnFraRegister(
         dto: ManuellBrevmottakerRequestDto,
         behandlingId: UUID,
-    ): String? {
-        return dto.personIdent?.let {
-            pdlClient.hentPersoninfo(
-                ident = it,
-                fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId),
-            ).navn
+    ): String? =
+        dto.personIdent?.let {
+            pdlClient
+                .hentPersoninfo(
+                    ident = it,
+                    fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId),
+                ).navn
         } ?: dto.organisasjonsnummer?.let {
             if (!integrasjonerClient.validerOrganisasjon(it)) {
                 throw Feil(
@@ -208,16 +209,14 @@ class ManuellBrevmottakerService(
             }
             integrasjonerClient.hentOrganisasjon(it).navn + if (dto.navn.isNotBlank()) " v/ ${dto.navn}" else ""
         }
-    }
 }
 
-private fun findAdresseType(brevmottaker: ManuellBrevmottaker): AdresseType {
-    return when {
+private fun findAdresseType(brevmottaker: ManuellBrevmottaker): AdresseType =
+    when {
         brevmottaker.landkode == "NO" && brevmottaker.type != BRUKER_MED_UTENLANDSK_ADRESSE -> norskPostadresse
         brevmottaker.landkode != "NO" && brevmottaker.type == BRUKER_MED_UTENLANDSK_ADRESSE -> utenlandskPostadresse
         else -> throw Feil("landkode stemmer ikke overens med type for brevmottaker ${brevmottaker.id}")
     }
-}
 
 fun List<ManuellBrevmottaker>.toManuelleAdresser(): List<ManuellAdresse> =
     this.mapNotNull { manuellBrevmottaker ->

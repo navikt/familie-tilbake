@@ -86,8 +86,8 @@ internal class OppdaterAnsvarligSaksbehandlerTaskTest {
         verify(exactly = 0) { mockOppgaveService.patchOppgave(any()) }
     }
 
-    private fun lagTask(opprettetAv: String? = null): Task {
-        return Task(
+    private fun lagTask(opprettetAv: String? = null): Task =
+        Task(
             type = OppdaterAnsvarligSaksbehandlerTask.TYPE,
             payload = behandling.id.toString(),
             properties =
@@ -99,5 +99,4 @@ internal class OppdaterAnsvarligSaksbehandlerTaskTest {
                     }
                 },
         )
-    }
 }

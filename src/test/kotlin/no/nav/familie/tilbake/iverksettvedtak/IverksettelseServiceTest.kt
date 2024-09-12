@@ -185,15 +185,17 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
         kodeMelding: String,
     ) {
         wireMockServer.stubFor(
-            WireMock.post(WireMock.urlEqualTo("/${DefaultOppdragClient.IVERKSETTELSE_PATH}/$behandlingId"))
+            WireMock
+                .post(WireMock.urlEqualTo("/${DefaultOppdragClient.IVERKSETTELSE_PATH}/$behandlingId"))
                 .willReturn(
                     WireMock.okJson(
-                        Ressurs.success(
-                            lagRespons(
-                                alvorlighetsgrad,
-                                kodeMelding,
-                            ),
-                        ).toJson(),
+                        Ressurs
+                            .success(
+                                lagRespons(
+                                    alvorlighetsgrad,
+                                    kodeMelding,
+                                ),
+                            ).toJson(),
                     ),
                 ),
         )
@@ -216,17 +218,18 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
             )
 
         val kravgrunnlagsperioder =
-            perioder.map {
-                Kravgrunnlagsperiode432(
-                    periode = it,
-                    månedligSkattebeløp = BigDecimal.ZERO,
-                    beløp =
-                        setOf(
-                            feilPostering.copy(id = UUID.randomUUID()),
-                            ytelPostering.copy(id = UUID.randomUUID()),
-                        ),
-                )
-            }.toSet()
+            perioder
+                .map {
+                    Kravgrunnlagsperiode432(
+                        periode = it,
+                        månedligSkattebeløp = BigDecimal.ZERO,
+                        beløp =
+                            setOf(
+                                feilPostering.copy(id = UUID.randomUUID()),
+                                ytelPostering.copy(id = UUID.randomUUID()),
+                            ),
+                    )
+                }.toSet()
 
         val kravgrunnlag =
             Kravgrunnlag431(
@@ -259,8 +262,8 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
         nyttBeløp: BigDecimal = BigDecimal.ZERO,
         utbetaltBeløp: BigDecimal = BigDecimal.ZERO,
         tilbakekrevesBeløp: BigDecimal = BigDecimal.ZERO,
-    ): Kravgrunnlagsbeløp433 {
-        return Kravgrunnlagsbeløp433(
+    ): Kravgrunnlagsbeløp433 =
+        Kravgrunnlagsbeløp433(
             klassetype = klassetype,
             klassekode = klassekode,
             nyttBeløp = nyttBeløp,
@@ -268,7 +271,6 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
             tilbakekrevesBeløp = tilbakekrevesBeløp,
             skatteprosent = BigDecimal.ZERO,
         )
-    }
 
     private fun lagVilkårsvurdering() {
         val vilkårsperioder =
@@ -391,14 +393,15 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
         skattBeløp: BigDecimal = BigDecimal.ZERO,
         kodeResultat: KodeResultat? = null,
     ) {
-        beløpene.any {
-            klassekode.name == it.kodeKlasse &&
-                nyttBeløp == it.belopNy &&
-                utbetaltBeløp == it.belopOpprUtbet &&
-                tilbakekrevesBeløp == it.belopTilbakekreves &&
-                uinnkrevdBeløp == it.belopUinnkrevd
-            skattBeløp == it.belopSkatt
-        }.shouldBeTrue()
+        beløpene
+            .any {
+                klassekode.name == it.kodeKlasse &&
+                    nyttBeløp == it.belopNy &&
+                    utbetaltBeløp == it.belopOpprUtbet &&
+                    tilbakekrevesBeløp == it.belopTilbakekreves &&
+                    uinnkrevdBeløp == it.belopUinnkrevd
+                skattBeløp == it.belopSkatt
+            }.shouldBeTrue()
 
         beløpene.any {
             kodeResultat?.kode == it.kodeResultat &&

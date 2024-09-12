@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service
     beskrivelse = "Håndter mottatt kravgrunnlag fra oppdrag",
     triggerTidVedFeilISekunder = 60 * 5L,
 )
-class BehandleKravgrunnlagTask(private val kravgrunnlagService: KravgrunnlagService) : AsyncTaskStep {
+class BehandleKravgrunnlagTask(
+    private val kravgrunnlagService: KravgrunnlagService,
+) : AsyncTaskStep {
     private val log = LoggerFactory.getLogger(this::class.java)
     private val secureLog = LoggerFactory.getLogger("secureLogger")
 

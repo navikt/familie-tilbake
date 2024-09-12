@@ -1,28 +1,31 @@
 package no.nav.familie.tilbake.pdfgen
 
-import com.openhtmltopdf.extend.FSSupplier
 import com.openhtmltopdf.outputdevice.helper.BaseRendererBuilder
+import com.openhtmltopdf.pdfboxout.PDFontSupplier
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder
 import com.openhtmltopdf.slf4j.Slf4jLogger
 import com.openhtmltopdf.svgsupport.BatikSVGDrawer
 import com.openhtmltopdf.util.XRLog
 import no.nav.familie.tilbake.pdfgen.validering.PdfaValidator
-import java.io.ByteArrayInputStream
+import org.apache.fontbox.ttf.TTFParser
+import org.apache.fontbox.ttf.TrueTypeFont
+import org.apache.pdfbox.io.RandomAccessReadBuffer
+import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.pdmodel.font.PDType0Font
+import org.springframework.core.io.ClassPathResource
 import java.io.ByteArrayOutputStream
 import java.io.IOException
-import java.io.InputStream
 import java.util.Locale
 
 class PdfGenerator {
     companion object {
-        private val FONT_CACHE: MutableMap<String, ByteArray?> = HashMap()
+        private val FONT_CACHE: MutableMap<String, TrueTypeFont> = HashMap()
 
-        private fun lagBodyStartTag(dokumentvariant: Dokumentvariant): String {
-            return when (dokumentvariant) {
+        private fun lagBodyStartTag(dokumentvariant: Dokumentvariant): String =
+            when (dokumentvariant) {
                 Dokumentvariant.ENDELIG -> "<body>"
                 Dokumentvariant.UTKAST -> "<body class=\"utkast\">"
             }
-        }
 
         init {
             XRLog.setLoggingEnabled(true)
@@ -64,31 +67,29 @@ class PdfGenerator {
         val htmlDocument = appendHtmlMetadata(htmlContent, DocFormat.PDF, dokumentvariant, dokumenttittel)
         val builder = PdfRendererBuilder()
         try {
-            builder.useFont(
-                fontSupplier("SourceSansPro-Regular.ttf"),
-                "Source Sans Pro",
-                400,
-                BaseRendererBuilder.FontStyle.NORMAL,
-                true,
-            )
+            builder
                 .useFont(
+                    fontSupplier("SourceSansPro-Regular.ttf"),
+                    "Source Sans Pro",
+                    400,
+                    BaseRendererBuilder.FontStyle.NORMAL,
+                    true,
+                ).useFont(
                     fontSupplier("SourceSansPro-Bold.ttf"),
                     "Source Sans Pro",
                     700,
                     BaseRendererBuilder.FontStyle.OBLIQUE,
                     true,
-                )
-                .useFont(
+                ).useFont(
                     fontSupplier("SourceSansPro-It.ttf"),
                     "Source Sans Pro",
                     400,
                     BaseRendererBuilder.FontStyle.ITALIC,
                     true,
-                )
-                .useColorProfile(FileStructureUtil.colorProfile)
+                ).useColorProfile(FileStructureUtil.colorProfile)
                 .useSVGDrawer(BatikSVGDrawer())
                 .usePdfAConformance(PdfRendererBuilder.PdfAConformance.PDFA_2_A)
-                .usePdfUaAccessbility(true)
+                .usePdfUaAccessibility(true)
                 .withHtmlContent(htmlDocument, "")
                 .toStream(outputStream)
                 .useFastMode()
@@ -125,17 +126,24 @@ class PdfGenerator {
             "</html>"
     }
 
-    private fun fontSupplier(fontName: String): FSSupplier<InputStream> {
+    private fun fontSupplier(fontName: String): PDFontSupplier {
         if (FONT_CACHE.containsKey(fontName)) {
-            val bytes = FONT_CACHE[fontName]
-            return FSSupplier { ByteArrayInputStream(bytes) }
+            val font = FONT_CACHE[fontName] ?: error("Kunne ikke finne font i cache")
+            return pdfontSupplier(font)
         }
-        val bytes = FileStructureUtil.readResource("fonts/$fontName")
-        FONT_CACHE[fontName] = bytes
-        return FSSupplier { ByteArrayInputStream(bytes) }
+        val font = TTFParser().parse(RandomAccessReadBuffer(ClassPathResource("/fonts/$fontName").inputStream)).also { it.isEnableGsub = false }
+        FONT_CACHE[fontName] = font
+        return pdfontSupplier(font)
     }
 
-    private fun hentCss(format: DocFormat): String {
-        return FileStructureUtil.readResourceAsString("formats/" + format.name.lowercase(Locale.getDefault()) + "/style.css")
-    }
+    private fun pdfontSupplier(font: TrueTypeFont): PDFontSupplier =
+        PDFontSupplier(
+            PDType0Font.load(
+                PDDocument(),
+                font,
+                true,
+            ),
+        )
+
+    private fun hentCss(format: DocFormat): String = FileStructureUtil.readResourceAsString("formats/" + format.name.lowercase(Locale.getDefault()) + "/style.css")
 }

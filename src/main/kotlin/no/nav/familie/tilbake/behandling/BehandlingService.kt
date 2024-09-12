@@ -34,8 +34,6 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.FeatureToggleConfig
-import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingService
@@ -85,7 +83,6 @@ class BehandlingService(
     private val opprettelseDagerBegrensning: Long,
     private val integrasjonerClient: IntegrasjonerClient,
     private val validerBehandlingService: ValiderBehandlingService,
-    private val featureToggleService: FeatureToggleService,
     private val oppgaveService: OppgaveService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
@@ -97,7 +94,8 @@ class BehandlingService(
 
         if (opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg ===
             Tilbakekrevingsvalg
-                .OPPRETT_TILBAKEKREVING_MED_VARSEL && !behandling.manueltOpprettet
+                .OPPRETT_TILBAKEKREVING_MED_VARSEL &&
+            !behandling.manueltOpprettet
         ) {
             val sendVarselbrev =
                 Task(
@@ -478,14 +476,12 @@ class BehandlingService(
         validerBehandlingService.validerOpprettBehandling(opprettTilbakekrevingRequest)
 
         val fagsystem = opprettTilbakekrevingRequest.fagsystem
-        val erAutomatiskOgFeatureTogglePå =
-            opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK &&
-                featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_BEHANDLE_TILBAKEKREVING_UNDER_4X_RETTSGEBYR)
+        val tilbakekrevingsvalgErAutomatisk = opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK
 
-        logOppretterBehandling(erAutomatiskOgFeatureTogglePå, opprettTilbakekrevingRequest)
+        logOppretterBehandling(tilbakekrevingsvalgErAutomatisk, opprettTilbakekrevingRequest)
 
         val fagsak = finnEllerOpprettFagsak(opprettTilbakekrevingRequest)
-        val behandling = lagreBehandling(opprettTilbakekrevingRequest, fagsak, erAutomatiskOgFeatureTogglePå)
+        val behandling = lagreBehandling(opprettTilbakekrevingRequest, fagsak, tilbakekrevingsvalgErAutomatisk)
         historikkTaskService.lagHistorikkTask(behandling.id, BEHANDLING_OPPRETTET, Aktør.VEDTAKSLØSNING)
         behandlingskontrollService.fortsettBehandling(behandling.id)
         stegService.håndterSteg(behandling.id)
@@ -501,7 +497,7 @@ class BehandlingService(
             ),
         )
 
-        if (!erAutomatiskOgFeatureTogglePå) {
+        if (!tilbakekrevingsvalgErAutomatisk) {
             oppgaveTaskService.opprettOppgaveTask(behandling, Oppgavetype.BehandleSak)
         }
 
@@ -575,13 +571,15 @@ class BehandlingService(
         if (Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT == behandlingsresultatstype) {
             return true
         } else if (TILBAKEKREVING == behandling.type) {
-            return !behandling.erAvsluttet && (
-                !behandling.manueltOpprettet &&
-                    behandling.opprettetTidspunkt <
-                    LocalDate.now()
-                        .atStartOfDay()
-                        .minusDays(opprettelseDagerBegrensning)
-            ) &&
+            return !behandling.erAvsluttet &&
+                (
+                    !behandling.manueltOpprettet &&
+                        behandling.opprettetTidspunkt <
+                        LocalDate
+                            .now()
+                            .atStartOfDay()
+                            .minusDays(opprettelseDagerBegrensning)
+                ) &&
                 !kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)
         }
         return true
@@ -590,12 +588,11 @@ class BehandlingService(
     private fun kanSendeHenleggelsesbrev(
         behandling: Behandling,
         behandlingsresultatstype: Behandlingsresultatstype,
-    ): Boolean {
-        return when (behandling.type) {
+    ): Boolean =
+        when (behandling.type) {
             TILBAKEKREVING -> brevsporingService.erVarselSendt(behandling.id)
             REVURDERING_TILBAKEKREVING -> Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_MED_BREV == behandlingsresultatstype
         }
-    }
 
     private fun sjekkOmBehandlingAlleredeErAvsluttet(behandling: Behandling) {
         if (behandling.erSaksbehandlingAvsluttet) {
@@ -630,19 +627,16 @@ class BehandlingService(
     private fun kanSetteBehandlingTilbakeTilFakta(
         behandling: Behandling,
         behandlerRolle: Behandlerrolle,
-    ): Boolean {
-        return behandlingUtredesOgErIkkePåVent(behandling) &&
+    ): Boolean =
+        behandlingUtredesOgErIkkePåVent(behandling) &&
             harInnloggetBrukerTilgangTilÅSetteTilbakeTilFakta(behandling.ansvarligSaksbehandler, behandlerRolle)
-    }
 
     private fun harInnloggetBrukerTilgangTilÅSetteTilbakeTilFakta(
         ansvarligSaksbehandler: String,
         behandlerRolle: Behandlerrolle,
     ) = erAnsvarligSaksbehandler(ansvarligSaksbehandler, behandlerRolle) || erForvalter(behandlerRolle)
 
-    private fun erForvalter(behandlerRolle: Behandlerrolle): Boolean {
-        return behandlerRolle == Behandlerrolle.FORVALTER
-    }
+    private fun erForvalter(behandlerRolle: Behandlerrolle): Boolean = behandlerRolle == Behandlerrolle.FORVALTER
 
     private fun erAnsvarligSaksbehandler(
         ansvarligSaksbehandler: String,
@@ -652,12 +646,11 @@ class BehandlingService(
 
     private fun behandlingUtredesOgErIkkePåVent(behandling: Behandling) = Behandlingsstatus.UTREDES == behandling.status && !behandlingskontrollService.erBehandlingPåVent(behandling.id)
 
-    private fun kanRevurderingOpprettes(behandling: Behandling): Boolean {
-        return behandling.erAvsluttet &&
+    private fun kanRevurderingOpprettes(behandling: Behandling): Boolean =
+        behandling.erAvsluttet &&
             !Behandlingsresultat.ALLE_HENLEGGELSESKODER.contains(behandling.sisteResultat?.type) &&
             kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id) &&
             behandlingRepository.finnÅpenTilbakekrevingsrevurdering(behandling.id) == null
-    }
 
     @Transactional
     fun angreSendTilBeslutter(behandlingId: UUID) {

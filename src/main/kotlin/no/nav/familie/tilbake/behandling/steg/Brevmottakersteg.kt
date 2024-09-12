@@ -59,7 +59,5 @@ class Brevmottakersteg(
         )
     }
 
-    override fun getBehandlingssteg(): Behandlingssteg {
-        return Behandlingssteg.BREVMOTTAKER
-    }
+    override fun getBehandlingssteg(): Behandlingssteg = Behandlingssteg.BREVMOTTAKER
 }

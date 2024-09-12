@@ -160,10 +160,16 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
         fagsak = fagsakRepository.insert(Testdata.fagsak)
         behandling = behandlingRepository.insert(Testdata.lagBehandling().copy(avsluttetDato = LocalDate.now()))
-        val kravgrunnlagsperiode432 = Testdata.lagKravgrunnlag(behandling.id).perioder.first().copy(periode = Månedsperiode(YearMonth.of(2023, 3), YearMonth.of(2023, 4)))
+        val kravgrunnlagsperiode432 =
+            Testdata
+                .lagKravgrunnlag(behandling.id)
+                .perioder
+                .first()
+                .copy(periode = Månedsperiode(YearMonth.of(2023, 3), YearMonth.of(2023, 4)))
         kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id).copy(perioder = setOf(kravgrunnlagsperiode432)))
         vilkårsvurderingRepository.insert(
-            Testdata.lagVilkårsvurdering(behandling.id)
+            Testdata
+                .lagVilkårsvurdering(behandling.id)
                 .copy(perioder = setOf(Testdata.vilkårsperiode.copy(periode = Månedsperiode(YearMonth.of(2023, 3), YearMonth.of(2023, 4)), godTro = null))),
         )
         faktaRepository.insert(
@@ -282,7 +288,9 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
             )
         }
         brevdataSlot.last().mottager shouldBe Brevmottager.MANUELL_TILLEGGSMOTTAKER
-        brevdataSlot.last().metadata.mottageradresse.ident shouldBe orgNr
+        brevdataSlot
+            .last()
+            .metadata.mottageradresse.ident shouldBe orgNr
     }
 
     @Test

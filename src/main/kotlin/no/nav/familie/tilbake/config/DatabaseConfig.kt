@@ -29,25 +29,20 @@ import javax.sql.DataSource
 @EnableJdbcRepositories("no.nav.familie.tilbake", "no.nav.familie.prosessering")
 class DatabaseConfig : AbstractJdbcConfiguration() {
     @Bean
-    fun operations(dataSource: DataSource): NamedParameterJdbcOperations {
-        return NamedParameterJdbcTemplate(dataSource)
-    }
+    fun operations(dataSource: DataSource): NamedParameterJdbcOperations = NamedParameterJdbcTemplate(dataSource)
 
     @Bean
-    fun transactionManager(dataSource: DataSource): PlatformTransactionManager {
-        return DataSourceTransactionManager(dataSource)
-    }
+    fun transactionManager(dataSource: DataSource): PlatformTransactionManager = DataSourceTransactionManager(dataSource)
 
     @Bean
-    fun auditSporbarEndret(): AuditorAware<Endret> {
-        return AuditorAware {
+    fun auditSporbarEndret(): AuditorAware<Endret> =
+        AuditorAware {
             Optional.of(Endret())
         }
-    }
 
     @Bean
-    override fun jdbcCustomConversions(): JdbcCustomConversions {
-        return JdbcCustomConversions(
+    override fun jdbcCustomConversions(): JdbcCustomConversions =
+        JdbcCustomConversions(
             listOf(
                 KravstatuskodeLesConverter(),
                 KravstatuskodeSkrivConverter(),
@@ -57,38 +52,31 @@ class DatabaseConfig : AbstractJdbcConfiguration() {
                 PropertiesWrapperTilStringConverter(),
             ),
         )
-    }
 
     @ReadingConverter
     class KravstatuskodeLesConverter : Converter<String, Kravstatuskode> {
-        override fun convert(kode: String): Kravstatuskode {
-            return Kravstatuskode.fraKode(kode)
-        }
+        override fun convert(kode: String): Kravstatuskode = Kravstatuskode.fraKode(kode)
     }
 
     @WritingConverter
     class KravstatuskodeSkrivConverter : Converter<Kravstatuskode, String> {
-        override fun convert(kravstatuskode: Kravstatuskode): String {
-            return kravstatuskode.kode
-        }
+        override fun convert(kravstatuskode: Kravstatuskode): String = kravstatuskode.kode
     }
 
     @WritingConverter
     class YearMonthTilLocalDateConverter : Converter<YearMonth?, LocalDate> {
-        override fun convert(yearMonth: YearMonth): LocalDate {
-            return yearMonth.let {
+        override fun convert(yearMonth: YearMonth): LocalDate =
+            yearMonth.let {
                 LocalDate.of(it.year, it.month, 1)
             }
-        }
     }
 
     @ReadingConverter
     class LocalDateTilYearMonthConverter : Converter<Date, YearMonth> {
-        override fun convert(date: Date): YearMonth {
-            return date.let {
+        override fun convert(date: Date): YearMonth =
+            date.let {
                 val localDate = date.toLocalDate()
                 YearMonth.of(localDate.year, localDate.month)
             }
-        }
     }
 }

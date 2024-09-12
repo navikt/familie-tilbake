@@ -95,7 +95,11 @@ class ForvaltningService(
         sjekkOmBehandlingErAvsluttet(behandling)
 
         val kravgrunnlagId =
-            kravgrunnlagRepository.findByBehandlingId(behandling.id).filter { it.aktiv }.first().eksternKravgrunnlagId
+            kravgrunnlagRepository
+                .findByBehandlingId(behandling.id)
+                .filter { it.aktiv }
+                .first()
+                .eksternKravgrunnlagId
         val hentetKravgrunnlag =
             hentKravgrunnlagService.hentKravgrunnlagFraØkonomi(
                 kravgrunnlagId,

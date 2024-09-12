@@ -19,7 +19,5 @@ object FileStructureUtil {
         }
     }
 
-    fun readResourceAsString(location: String): String {
-        return String(readResource(location), StandardCharsets.UTF_8)
-    }
+    fun readResourceAsString(location: String): String = String(readResource(location), StandardCharsets.UTF_8)
 }

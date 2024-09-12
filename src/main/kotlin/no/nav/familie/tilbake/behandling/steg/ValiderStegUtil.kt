@@ -13,7 +13,7 @@ fun validerAtBehandlingIkkeErAvsluttet(behandling: Behandling) {
 }
 
 fun validerAtUtomatiskBehandlingIkkeErEøs(behandling: Behandling) {
-    if (behandling.regelverk == Regelverk.EØS) {
+    if (behandling.regelverk == Regelverk.EØS && behandling.saksbehandlingstype != Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR) {
         throw Feil("Behandling med id=${behandling.id} behandles etter EØS-regelverket, og skal dermed ikke behandles automatisk.")
     }
 }

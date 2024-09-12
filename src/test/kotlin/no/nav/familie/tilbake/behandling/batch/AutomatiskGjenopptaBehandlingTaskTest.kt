@@ -62,29 +62,35 @@ internal class AutomatiskGjenopptaBehandlingTaskTest : OppslagSpringRunnerTest()
 
         shouldNotThrow<RuntimeException> { automatiskGjenopptaBehandlingTask.doTask(lagTask(behandling.id)) }
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
-        behandlingsstegstilstand.any {
-            it.behandlingssteg == Behandlingssteg.VARSEL &&
-                it.behandlingsstegsstatus == Behandlingsstegstatus.UTFØRT
-        }.shouldBeTrue()
-        behandlingsstegstilstand.any {
-            it.behandlingssteg == Behandlingssteg.FAKTA &&
-                it.behandlingsstegsstatus == Behandlingsstegstatus.KLAR
-        }.shouldBeTrue()
+        behandlingsstegstilstand
+            .any {
+                it.behandlingssteg == Behandlingssteg.VARSEL &&
+                    it.behandlingsstegsstatus == Behandlingsstegstatus.UTFØRT
+            }.shouldBeTrue()
+        behandlingsstegstilstand
+            .any {
+                it.behandlingssteg == Behandlingssteg.FAKTA &&
+                    it.behandlingsstegsstatus == Behandlingsstegstatus.KLAR
+            }.shouldBeTrue()
 
-        taskService.findAll().any {
-            it.type == LagHistorikkinnslagTask.TYPE &&
-                it.payload == behandling.id.toString() &&
-                it.metadata["historikkinnslagstype"] == TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT.name &&
-                it.metadata["aktør"] == Aktør.VEDTAKSLØSNING.name
-        }.shouldBeTrue()
+        taskService
+            .findAll()
+            .any {
+                it.type == LagHistorikkinnslagTask.TYPE &&
+                    it.payload == behandling.id.toString() &&
+                    it.metadata["historikkinnslagstype"] == TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT.name &&
+                    it.metadata["aktør"] == Aktør.VEDTAKSLØSNING.name
+            }.shouldBeTrue()
 
-        taskService.findAll().any {
-            it.type == OppdaterOppgaveTask.TYPE &&
-                it.payload == behandling.id.toString() &&
-                it.metadata["beskrivelse"] == "Behandling er tatt av vent automatisk" &&
-                it.metadata["frist"] == tidsfrist.toString() &&
-                it.metadata["saksbehandler"] == "VL"
-        }.shouldBeTrue()
+        taskService
+            .findAll()
+            .any {
+                it.type == OppdaterOppgaveTask.TYPE &&
+                    it.payload == behandling.id.toString() &&
+                    it.metadata["beskrivelse"] == "Behandling er tatt av vent automatisk" &&
+                    it.metadata["frist"] == tidsfrist.toString() &&
+                    it.metadata["saksbehandler"] == "VL"
+            }.shouldBeTrue()
     }
 
     @Test
@@ -103,45 +109,55 @@ internal class AutomatiskGjenopptaBehandlingTaskTest : OppslagSpringRunnerTest()
         shouldNotThrow<RuntimeException> { automatiskGjenopptaBehandlingTask.doTask(lagTask(behandling.id)) }
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
-        behandlingsstegstilstand.any {
-            it.behandlingssteg == Behandlingssteg.VARSEL &&
-                it.behandlingsstegsstatus == Behandlingsstegstatus.UTFØRT
-        }.shouldBeTrue()
-        behandlingsstegstilstand.any {
-            it.behandlingssteg == Behandlingssteg.GRUNNLAG &&
-                it.behandlingsstegsstatus == Behandlingsstegstatus.VENTER &&
-                it.venteårsak == Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
-        }.shouldBeTrue()
+        behandlingsstegstilstand
+            .any {
+                it.behandlingssteg == Behandlingssteg.VARSEL &&
+                    it.behandlingsstegsstatus == Behandlingsstegstatus.UTFØRT
+            }.shouldBeTrue()
+        behandlingsstegstilstand
+            .any {
+                it.behandlingssteg == Behandlingssteg.GRUNNLAG &&
+                    it.behandlingsstegsstatus == Behandlingsstegstatus.VENTER &&
+                    it.venteårsak == Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
+            }.shouldBeTrue()
 
-        taskService.findAll().any {
-            it.type == LagHistorikkinnslagTask.TYPE &&
-                it.payload == behandling.id.toString() &&
-                it.metadata["historikkinnslagstype"] == TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT.name &&
-                it.metadata["aktør"] == Aktør.VEDTAKSLØSNING.name
-        }.shouldBeTrue()
+        taskService
+            .findAll()
+            .any {
+                it.type == LagHistorikkinnslagTask.TYPE &&
+                    it.payload == behandling.id.toString() &&
+                    it.metadata["historikkinnslagstype"] == TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT.name &&
+                    it.metadata["aktør"] == Aktør.VEDTAKSLØSNING.name
+            }.shouldBeTrue()
 
-        taskService.findAll().any {
-            it.type == LagHistorikkinnslagTask.TYPE &&
-                it.payload == behandling.id.toString() &&
-                it.metadata["historikkinnslagstype"] == TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT.name &&
-                it.metadata["aktør"] == Aktør.VEDTAKSLØSNING.name
-        }.shouldBeTrue()
+        taskService
+            .findAll()
+            .any {
+                it.type == LagHistorikkinnslagTask.TYPE &&
+                    it.payload == behandling.id.toString() &&
+                    it.metadata["historikkinnslagstype"] == TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT.name &&
+                    it.metadata["aktør"] == Aktør.VEDTAKSLØSNING.name
+            }.shouldBeTrue()
 
-        taskService.findAll().any {
-            it.type == OppdaterOppgaveTask.TYPE &&
-                it.payload == behandling.id.toString() &&
-                it.metadata["beskrivelse"] == "Behandling er tatt av vent automatisk" &&
-                it.metadata["frist"] == tidsfrist.toString() &&
-                it.metadata["saksbehandler"] == "VL"
-        }.shouldBeTrue()
+        taskService
+            .findAll()
+            .any {
+                it.type == OppdaterOppgaveTask.TYPE &&
+                    it.payload == behandling.id.toString() &&
+                    it.metadata["beskrivelse"] == "Behandling er tatt av vent automatisk" &&
+                    it.metadata["frist"] == tidsfrist.toString() &&
+                    it.metadata["saksbehandler"] == "VL"
+            }.shouldBeTrue()
 
         val venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
-        taskService.findAll().any {
-            it.type == OppdaterOppgaveTask.TYPE &&
-                it.payload == behandling.id.toString() &&
-                it.metadata["beskrivelse"] == venteårsak.beskrivelse
-            it.metadata["frist"] == LocalDate.now().plusWeeks(venteårsak.defaultVenteTidIUker).toString()
-        }.shouldBeTrue()
+        taskService
+            .findAll()
+            .any {
+                it.type == OppdaterOppgaveTask.TYPE &&
+                    it.payload == behandling.id.toString() &&
+                    it.metadata["beskrivelse"] == venteårsak.beskrivelse
+                it.metadata["frist"] == LocalDate.now().plusWeeks(venteårsak.defaultVenteTidIUker).toString()
+            }.shouldBeTrue()
     }
 
     @Test
@@ -161,26 +177,31 @@ internal class AutomatiskGjenopptaBehandlingTaskTest : OppslagSpringRunnerTest()
         shouldNotThrow<RuntimeException> { automatiskGjenopptaBehandlingTask.doTask(lagTask(behandling.id)) }
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
-        behandlingsstegstilstand.any {
-            it.behandlingssteg == Behandlingssteg.VILKÅRSVURDERING &&
-                it.behandlingsstegsstatus == Behandlingsstegstatus.KLAR
-            it.venteårsak == null && it.tidsfrist == null
-        }.shouldBeTrue()
+        behandlingsstegstilstand
+            .any {
+                it.behandlingssteg == Behandlingssteg.VILKÅRSVURDERING &&
+                    it.behandlingsstegsstatus == Behandlingsstegstatus.KLAR
+                it.venteårsak == null && it.tidsfrist == null
+            }.shouldBeTrue()
 
-        taskService.findAll().any {
-            it.type == LagHistorikkinnslagTask.TYPE &&
-                it.payload == behandling.id.toString() &&
-                it.metadata["historikkinnslagstype"] == TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT.name &&
-                it.metadata["aktør"] == Aktør.VEDTAKSLØSNING.name
-        }.shouldBeTrue()
+        taskService
+            .findAll()
+            .any {
+                it.type == LagHistorikkinnslagTask.TYPE &&
+                    it.payload == behandling.id.toString() &&
+                    it.metadata["historikkinnslagstype"] == TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT.name &&
+                    it.metadata["aktør"] == Aktør.VEDTAKSLØSNING.name
+            }.shouldBeTrue()
 
-        taskService.findAll().any {
-            it.type == OppdaterOppgaveTask.TYPE &&
-                it.payload == behandling.id.toString() &&
-                it.metadata["beskrivelse"] == "Behandling er tatt av vent automatisk" &&
-                it.metadata["frist"] == tidsfrist.toString() &&
-                it.metadata["saksbehandler"] == "VL"
-        }.shouldBeTrue()
+        taskService
+            .findAll()
+            .any {
+                it.type == OppdaterOppgaveTask.TYPE &&
+                    it.payload == behandling.id.toString() &&
+                    it.metadata["beskrivelse"] == "Behandling er tatt av vent automatisk" &&
+                    it.metadata["frist"] == tidsfrist.toString() &&
+                    it.metadata["saksbehandler"] == "VL"
+            }.shouldBeTrue()
     }
 
     private fun lagTask(behandlingId: UUID) =

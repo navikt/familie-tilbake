@@ -116,7 +116,8 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
             )
 
         val kravgrunnlag =
-            Testdata.lagKravgrunnlag(behandling.id)
+            Testdata
+                .lagKravgrunnlag(behandling.id)
                 .copy(
                     kontrollfelt = "2019-11-22-19.09.31.458065",
                     perioder =
@@ -203,7 +204,8 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
         vilkårsvurdering.perioder.shouldHaveSingleElement {
             Constants.AUTOMATISK_SAKSBEHANDLING_BEGRUNNELSE == it.begrunnelse &&
                 Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT == it.vilkårsvurderingsresultat &&
-                it.aktsomhet != null && it.aktsomhet!!.aktsomhet == Aktsomhet.SIMPEL_UAKTSOMHET
+                it.aktsomhet != null &&
+                it.aktsomhet!!.aktsomhet == Aktsomhet.SIMPEL_UAKTSOMHET
             !it.aktsomhet!!.tilbakekrevSmåbeløp
         }
 
@@ -213,27 +215,25 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
     private fun lagBehandlingsstegstilstand(
         behandlingssteg: Behandlingssteg,
         behandlingsstegstatus: Behandlingsstegstatus,
-    ): Behandlingsstegstilstand {
-        return Behandlingsstegstilstand(
+    ): Behandlingsstegstilstand =
+        Behandlingsstegstilstand(
             behandlingId = behandling.id,
             behandlingssteg = behandlingssteg,
             behandlingsstegsstatus = behandlingsstegstatus,
         )
-    }
 
-    private fun lagTask(): Task {
-        return Task(type = AutomatiskSaksbehandlingTask.TYPE, payload = behandling.id.toString())
-    }
+    private fun lagTask(): Task = Task(type = AutomatiskSaksbehandlingTask.TYPE, payload = behandling.id.toString())
 
     private fun assertBehandlingsstegstilstand(
         behandlingsstegstilstand: List<Behandlingsstegstilstand>,
         behandlingssteg: Behandlingssteg,
         behandlingsstegstatus: Behandlingsstegstatus,
     ) {
-        behandlingsstegstilstand.any {
-            behandlingssteg == it.behandlingssteg &&
-                behandlingsstegstatus == it.behandlingsstegsstatus
-        }.shouldBeTrue()
+        behandlingsstegstilstand
+            .any {
+                behandlingssteg == it.behandlingssteg &&
+                    behandlingsstegstatus == it.behandlingsstegsstatus
+            }.shouldBeTrue()
     }
 
     private fun mockTaskExecution() {

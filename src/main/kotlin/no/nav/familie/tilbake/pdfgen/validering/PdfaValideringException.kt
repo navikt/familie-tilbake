@@ -12,7 +12,8 @@ class PdfaValideringException : RuntimeException {
     companion object {
         private fun formater(result: ValidationResult): String {
             val feilmeldinger: List<String> =
-                result.testAssertions.stream()
+                result.testAssertions
+                    .stream()
                     .filter { ta -> ta.status !== TestAssertion.Status.PASSED }
                     .map { ta -> ta.status.toString() + ":" + ta.message }
                     .collect(Collectors.toList())

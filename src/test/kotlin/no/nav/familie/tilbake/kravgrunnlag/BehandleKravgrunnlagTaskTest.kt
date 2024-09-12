@@ -139,10 +139,11 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         assertPerioder(kravgrunnlag)
         assertBeløp(kravgrunnlag)
 
-        mottattXmlRepository.findByEksternKravgrunnlagIdAndVedtakId(
-            kravgrunnlag.eksternKravgrunnlagId,
-            kravgrunnlag.vedtakId,
-        ).shouldBeEmpty()
+        mottattXmlRepository
+            .findByEksternKravgrunnlagIdAndVedtakId(
+                kravgrunnlag.eksternKravgrunnlagId,
+                kravgrunnlag.vedtakId,
+            ).shouldBeEmpty()
         mottattXmlArkivRepository.findAll().toList().shouldNotBeEmpty()
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
@@ -173,7 +174,8 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                 årsak = "testverdi",
             )
         behandlingRepository.update(
-            behandlingRepository.findByIdOrThrow(behandling.id)
+            behandlingRepository
+                .findByIdOrThrow(behandling.id)
                 .copy(fagsystemsbehandling = setOf(fagsystemsbehandling)),
         )
         lagGrunnlagssteg()
@@ -191,10 +193,11 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         assertPerioder(kravgrunnlag)
         assertBeløp(kravgrunnlag)
 
-        mottattXmlRepository.findByEksternKravgrunnlagIdAndVedtakId(
-            kravgrunnlag.eksternKravgrunnlagId,
-            kravgrunnlag.vedtakId,
-        ).shouldBeEmpty()
+        mottattXmlRepository
+            .findByEksternKravgrunnlagIdAndVedtakId(
+                kravgrunnlag.eksternKravgrunnlagId,
+                kravgrunnlag.vedtakId,
+            ).shouldBeEmpty()
         mottattXmlArkivRepository.findAll().toList().shouldNotBeEmpty()
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
@@ -235,10 +238,11 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         assertPerioder(kravgrunnlag)
         assertBeløp(kravgrunnlag)
 
-        mottattXmlRepository.findByEksternKravgrunnlagIdAndVedtakId(
-            kravgrunnlag.eksternKravgrunnlagId,
-            kravgrunnlag.vedtakId,
-        ).shouldBeEmpty()
+        mottattXmlRepository
+            .findByEksternKravgrunnlagIdAndVedtakId(
+                kravgrunnlag.eksternKravgrunnlagId,
+                kravgrunnlag.vedtakId,
+            ).shouldBeEmpty()
         mottattXmlArkivRepository.findAll().toList().shouldNotBeEmpty()
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
@@ -325,10 +329,11 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         assertPerioder(kravgrunnlag)
         assertBeløp(kravgrunnlag)
 
-        mottattXmlRepository.findByEksternKravgrunnlagIdAndVedtakId(
-            kravgrunnlag.eksternKravgrunnlagId,
-            kravgrunnlag.vedtakId,
-        ).shouldBeEmpty()
+        mottattXmlRepository
+            .findByEksternKravgrunnlagIdAndVedtakId(
+                kravgrunnlag.eksternKravgrunnlagId,
+                kravgrunnlag.vedtakId,
+            ).shouldBeEmpty()
         mottattXmlArkivRepository.findAll().toList().shouldNotBeEmpty()
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
@@ -415,10 +420,11 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         assertPerioder(kravgrunnlag)
         assertBeløp(kravgrunnlag)
 
-        mottattXmlRepository.findByEksternKravgrunnlagIdAndVedtakId(
-            kravgrunnlag.eksternKravgrunnlagId,
-            kravgrunnlag.vedtakId,
-        ).shouldBeEmpty()
+        mottattXmlRepository
+            .findByEksternKravgrunnlagIdAndVedtakId(
+                kravgrunnlag.eksternKravgrunnlagId,
+                kravgrunnlag.vedtakId,
+            ).shouldBeEmpty()
         mottattXmlArkivRepository.findAll().toList().shouldNotBeEmpty()
 
         behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
@@ -531,10 +537,11 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         assertPerioder(kravgrunnlag)
         assertBeløp(kravgrunnlag)
 
-        mottattXmlRepository.findByEksternKravgrunnlagIdAndVedtakId(
-            kravgrunnlag.eksternKravgrunnlagId,
-            kravgrunnlag.vedtakId,
-        ).shouldBeEmpty()
+        mottattXmlRepository
+            .findByEksternKravgrunnlagIdAndVedtakId(
+                kravgrunnlag.eksternKravgrunnlagId,
+                kravgrunnlag.vedtakId,
+            ).shouldBeEmpty()
         mottattXmlArkivRepository.findAll().toList().shouldNotBeEmpty()
 
         behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
@@ -732,14 +739,13 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         mottattXmlArkivRepository.findAll().toList().shouldNotBeEmpty()
     }
 
-    private fun opprettTask(kravgrunnlagXml: String): Task {
-        return taskService.save(
+    private fun opprettTask(kravgrunnlagXml: String): Task =
+        taskService.save(
             Task(
                 type = BehandleKravgrunnlagTask.TYPE,
                 payload = kravgrunnlagXml,
             ),
         )
-    }
 
     private fun assertOkoXmlMottattData(
         mottattKravgrunnlagListe: List<ØkonomiXmlMottatt>,
@@ -793,56 +799,67 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         behandlingssteg: Behandlingssteg,
         behandlingsstegstatus: Behandlingsstegstatus,
     ) {
-        behandlingsstegstilstand.any {
-            behandlingssteg == it.behandlingssteg &&
-                behandlingsstegstatus == it.behandlingsstegsstatus
-        }.shouldBeTrue()
+        behandlingsstegstilstand
+            .any {
+                behandlingssteg == it.behandlingssteg &&
+                    behandlingsstegstatus == it.behandlingsstegsstatus
+            }.shouldBeTrue()
     }
 
     private fun assertHistorikkTask(
         historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
         aktør: Aktør,
     ) {
-        taskService.findAll().any {
-            LagHistorikkinnslagTask.TYPE == it.type &&
-                historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
-                aktør.name == it.metadata["aktør"] &&
-                behandling.id.toString() == it.payload
-        }.shouldBeTrue()
+        taskService
+            .findAll()
+            .any {
+                LagHistorikkinnslagTask.TYPE == it.type &&
+                    historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
+                    aktør.name == it.metadata["aktør"] &&
+                    behandling.id.toString() == it.payload
+            }.shouldBeTrue()
     }
 
     private fun assertOppdaterFaktainfoTask(referanse: String) {
-        taskService.findAll().any {
-            OppdaterFaktainfoTask.TYPE == it.type &&
-                fagsak.eksternFagsakId == it.metadata["eksternFagsakId"] &&
-                fagsak.ytelsestype.name == it.metadata["ytelsestype"] &&
-                referanse == it.metadata["eksternId"]
-        }.shouldBeTrue()
+        taskService
+            .findAll()
+            .any {
+                OppdaterFaktainfoTask.TYPE == it.type &&
+                    fagsak.eksternFagsakId == it.metadata["eksternFagsakId"] &&
+                    fagsak.ytelsestype.name == it.metadata["ytelsestype"] &&
+                    referanse == it.metadata["eksternId"]
+            }.shouldBeTrue()
     }
 
     private fun assertOppgaveTask(
         beskrivelse: String,
         fristDato: LocalDate,
     ) {
-        taskService.findAll().any {
-            OppdaterOppgaveTask.TYPE == it.type &&
-                behandling.id.toString() == it.payload
-            beskrivelse == it.metadata["beskrivelse"] &&
-                fristDato.toString() == it.metadata["frist"]
-        }.shouldBeTrue()
+        taskService
+            .findAll()
+            .any {
+                OppdaterOppgaveTask.TYPE == it.type &&
+                    behandling.id.toString() == it.payload
+                beskrivelse == it.metadata["beskrivelse"] &&
+                    fristDato.toString() == it.metadata["frist"]
+            }.shouldBeTrue()
     }
 
     private fun assertOpprettOppdaterPrioritetTask() {
-        taskService.findAll().any {
-            OppdaterPrioritetTask.TYPE == it.type &&
-                behandling.id.toString() == it.payload
-        }.shouldBeTrue()
+        taskService
+            .findAll()
+            .any {
+                OppdaterPrioritetTask.TYPE == it.type &&
+                    behandling.id.toString() == it.payload
+            }.shouldBeTrue()
     }
 
     private fun assertIkkeOpprettOppdaterPrioritetTask() {
-        taskService.findAll().any {
-            OppdaterPrioritetTask.TYPE == it.type &&
-                behandling.id.toString() == it.payload
-        }.shouldBeFalse()
+        taskService
+            .findAll()
+            .any {
+                OppdaterPrioritetTask.TYPE == it.type &&
+                    behandling.id.toString() == it.payload
+            }.shouldBeFalse()
     }
 }

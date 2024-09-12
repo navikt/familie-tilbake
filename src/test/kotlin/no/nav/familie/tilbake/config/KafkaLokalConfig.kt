@@ -48,33 +48,29 @@ class KafkaLokalConfig(
     }
 
     @Bean
-    fun hentFagsystemsbehandlingRequestTopic(): NewTopic {
-        return TopicBuilder.name(KafkaConfig.HENT_FAGSYSTEMSBEHANDLING_REQUEST_TOPIC)
+    fun hentFagsystemsbehandlingRequestTopic(): NewTopic =
+        TopicBuilder
+            .name(KafkaConfig.HENT_FAGSYSTEMSBEHANDLING_REQUEST_TOPIC)
             .partitions(1)
-            .replicas(1).build()
-    }
+            .replicas(1)
+            .build()
 
     @Bean
-    fun hentFagsystemsbehandlingResponsTopic(): NewTopic {
-        return TopicBuilder.name(KafkaConfig.HENT_FAGSYSTEMSBEHANDLING_RESPONS_TOPIC)
+    fun hentFagsystemsbehandlingResponsTopic(): NewTopic =
+        TopicBuilder
+            .name(KafkaConfig.HENT_FAGSYSTEMSBEHANDLING_RESPONS_TOPIC)
             .partitions(1)
-            .replicas(1).build()
-    }
+            .replicas(1)
+            .build()
 
     @Bean
-    fun producerFactory(): ProducerFactory<String, String> {
-        return DefaultKafkaProducerFactory(producerConfigs())
-    }
+    fun producerFactory(): ProducerFactory<String, String> = DefaultKafkaProducerFactory(producerConfigs())
 
     @Bean
-    fun kafkaTemplate(): KafkaTemplate<String, String> {
-        return KafkaTemplate(producerFactory())
-    }
+    fun kafkaTemplate(): KafkaTemplate<String, String> = KafkaTemplate(producerFactory())
 
     @Bean
-    fun consumerFactory(): ConsumerFactory<String, String> {
-        return DefaultKafkaConsumerFactory(consumerConfigs())
-    }
+    fun consumerFactory(): ConsumerFactory<String, String> = DefaultKafkaConsumerFactory(consumerConfigs())
 
     @Bean
     fun concurrentKafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, String> {

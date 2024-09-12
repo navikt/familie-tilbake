@@ -9,7 +9,5 @@ class OppgaveServiceTestConfig {
     @Bean
     @Profile("mock-oppgave")
     @Primary
-    fun mockArbeidsfordelingService(): OppgaveService {
-        return mockk(relaxed = true)
-    }
+    fun mockArbeidsfordelingService(): OppgaveService = mockk(relaxed = true)
 }

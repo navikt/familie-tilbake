@@ -13,9 +13,7 @@ class FeatureToggleConfig(
     @Value("\${NAIS_CLUSTER_NAME}") private val clusterName: String,
 ) {
     @Bean
-    fun strategies(): List<Strategy> {
-        return listOf(ByClusterStrategy(clusterName))
-    }
+    fun strategies(): List<Strategy> = listOf(ByClusterStrategy(clusterName))
 
     companion object {
         const val KAN_OPPRETTE_BEH_MED_EKSTERNID_SOM_HAR_AVSLUTTET_TBK =
@@ -28,7 +26,6 @@ class FeatureToggleConfig(
         const val IKKE_VALIDER_SÆRLIG_GRUNNET_ANNET_FRITEKST =
             "familie-tilbake.ikke-valider-saerlig-grunnet-annet-fritekst"
 
-        const val AUTOMATISK_BEHANDLE_TILBAKEKREVING_UNDER_4X_RETTSGEBYR = "familie-tilbake.automatisk-behandle-under-4x-rettsgebyr"
         const val KAN_SE_HISTORISKE_VURDERINGER = "familie-tilbake.se-historiske-vurderinger"
 
         const val SAKSBEHANDLER_KAN_RESETTE_BEHANDLING = "familie-tilbake-frontend.saksbehandler.kan.resette.behandling"
@@ -37,20 +34,20 @@ class FeatureToggleConfig(
 
 @Service
 @Profile("!integrasjonstest")
-class FeatureToggleService(val unleashService: UnleashService) {
-    fun isEnabled(toggleId: String): Boolean {
-        return unleashService.isEnabled(toggleId, false)
-    }
+class FeatureToggleService(
+    val unleashService: UnleashService,
+) {
+    fun isEnabled(toggleId: String): Boolean = unleashService.isEnabled(toggleId, false)
 
     fun isEnabled(
         toggleId: String,
         defaultValue: Boolean,
-    ): Boolean {
-        return unleashService.isEnabled(toggleId, defaultValue)
-    }
+    ): Boolean = unleashService.isEnabled(toggleId, defaultValue)
 }
 
-class ByClusterStrategy(private val clusterName: String) : Strategy {
+class ByClusterStrategy(
+    private val clusterName: String,
+) : Strategy {
     override fun isEnabled(parameters: MutableMap<String, String>): Boolean {
         if (parameters.isEmpty()) return false
         return parameters["cluster"]?.contains(clusterName) ?: false

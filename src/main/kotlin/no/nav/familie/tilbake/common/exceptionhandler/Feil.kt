@@ -4,7 +4,10 @@ import org.springframework.http.HttpStatus
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
-data class ApiFeil(val feil: String, val httpStatus: HttpStatus) : RuntimeException()
+data class ApiFeil(
+    val feil: String,
+    val httpStatus: HttpStatus,
+) : RuntimeException()
 
 class Feil(
     message: String,
@@ -30,16 +33,30 @@ inline fun feilHvis(
     }
 }
 
-class ManglerOppgaveFeil(val melding: String) : RuntimeException(melding)
+class ManglerOppgaveFeil(
+    val melding: String,
+) : RuntimeException(melding)
 
-class ManglerTilgang(val melding: String) : RuntimeException(melding)
+class ManglerTilgang(
+    val melding: String,
+) : RuntimeException(melding)
 
-class UgyldigKravgrunnlagFeil(val melding: String) : RuntimeException(melding)
+class UgyldigKravgrunnlagFeil(
+    val melding: String,
+) : RuntimeException(melding)
 
-class UkjentravgrunnlagFeil(val melding: String) : RuntimeException(melding)
+class UkjentravgrunnlagFeil(
+    val melding: String,
+) : RuntimeException(melding)
 
-class UgyldigStatusmeldingFeil(val melding: String) : RuntimeException(melding)
+class UgyldigStatusmeldingFeil(
+    val melding: String,
+) : RuntimeException(melding)
 
-class SperretKravgrunnlagFeil(val melding: String) : IntegrasjonException(melding)
+class SperretKravgrunnlagFeil(
+    val melding: String,
+) : IntegrasjonException(melding)
 
-class KravgrunnlagIkkeFunnetFeil(val melding: String) : IntegrasjonException(melding)
+class KravgrunnlagIkkeFunnetFeil(
+    val melding: String,
+) : IntegrasjonException(melding)

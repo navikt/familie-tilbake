@@ -37,9 +37,7 @@ class JournalføringService(
     fun hentDokument(
         journalpostId: String,
         dokumentInfoId: String,
-    ): ByteArray {
-        return integrasjonerClient.hentDokument(dokumentInfoId, journalpostId)
-    }
+    ): ByteArray = integrasjonerClient.hentDokument(dokumentInfoId, journalpostId)
 
     fun hentJournalposter(behandlingId: UUID): List<Journalpost> {
         val behandling = behandlingRepository.findById(behandlingId).orElseThrow()
@@ -179,8 +177,8 @@ class JournalføringService(
     private fun velgDokumenttype(
         fagsak: Fagsak,
         dokumentkategori: Dokumentkategori,
-    ): Dokumenttype {
-        return if (dokumentkategori == Dokumentkategori.VEDTAKSBREV) {
+    ): Dokumenttype =
+        if (dokumentkategori == Dokumentkategori.VEDTAKSBREV) {
             when (fagsak.ytelsestype) {
                 Ytelsestype.BARNETRYGD -> Dokumenttype.BARNETRYGD_TILBAKEKREVING_VEDTAK
                 Ytelsestype.OVERGANGSSTØNAD -> Dokumenttype.OVERGANGSSTØNAD_TILBAKEKREVING_VEDTAK
@@ -197,9 +195,6 @@ class JournalføringService(
                 Ytelsestype.KONTANTSTØTTE -> Dokumenttype.KONTANTSTØTTE_TILBAKEKREVING_BREV
             }
         }
-    }
 
-    private fun hentTema(fagsystem: Fagsystem): Tema {
-        return Tema.valueOf(fagsystem.tema)
-    }
+    private fun hentTema(fagsystem: Fagsystem): Tema = Tema.valueOf(fagsystem.tema)
 }

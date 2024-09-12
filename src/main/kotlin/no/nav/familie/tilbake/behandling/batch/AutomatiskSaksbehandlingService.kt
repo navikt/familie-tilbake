@@ -13,7 +13,6 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
-import no.nav.familie.unleash.UnleashService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -39,7 +38,6 @@ class AutomatiskSaksbehandlingService(
     private val alderGrenseSkolepenger: Long,
     @Value("\${AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_KONTANTSTØTTE}")
     private val alderGrenseKontantstøtte: Long,
-    private val unleashService: UnleashService,
 ) {
     fun hentAlleBehandlingerSomKanBehandleAutomatisk(): List<Behandling> {
         val behandlinger =
@@ -55,7 +53,8 @@ class AutomatiskSaksbehandlingService(
                 )
             val sumNyttBeløp: BigDecimal =
                 kravgrunnlag.perioder.sumOf { periode ->
-                    periode.beløp.filter { beløp -> beløp.klassetype == Klassetype.FEIL }
+                    periode.beløp
+                        .filter { beløp -> beløp.klassetype == Klassetype.FEIL }
                         .sumOf(Kravgrunnlagsbeløp433::nyttBeløp)
                 }
 
@@ -82,11 +81,7 @@ class AutomatiskSaksbehandlingService(
 
     @Transactional
     fun behandleAutomatisk(behandlingId: UUID) {
-        if (unleashService.isEnabled("familie-tilbake.bruk-ny-haandterStegAutomatisk")) {
-            stegService.håndterStegAutomatisk(behandlingId)
-        } else {
-            stegService.håndterStegAutomatiskGAMMEL(behandlingId)
-        }
+        stegService.håndterStegAutomatisk(behandlingId)
     }
 
     private val aldersgrenseIUker =

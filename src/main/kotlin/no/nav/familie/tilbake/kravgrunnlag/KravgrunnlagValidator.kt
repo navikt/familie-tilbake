@@ -117,7 +117,8 @@ object KravgrunnlagValidator {
     private fun validerSkatt(kravgrunnlag: DetaljertKravgrunnlagDto) {
         val grupppertPåMåned: Map<YearMonth, List<DetaljertKravgrunnlagPeriodeDto>> =
             kravgrunnlag.tilbakekrevingsPeriode
-                .groupBy { tilMåned(it.periode) }.toMap()
+                .groupBy { tilMåned(it.periode) }
+                .toMap()
 
         for ((key, value) in grupppertPåMåned) {
             validerSkattForPeriode(key, value, kravgrunnlag.kravgrunnlagId)
@@ -229,15 +230,9 @@ object KravgrunnlagValidator {
         }
     }
 
-    private fun tilMåned(periode: PeriodeDto): YearMonth {
-        return YearMonth.of(periode.fom.year, periode.fom.month)
-    }
+    private fun tilMåned(periode: PeriodeDto): YearMonth = YearMonth.of(periode.fom.year, periode.fom.month)
 
-    private fun finnesFeilutbetalingspostering(typeKlasse: TypeKlasseDto): Boolean {
-        return Klassetype.FEIL.name == typeKlasse.value()
-    }
+    private fun finnesFeilutbetalingspostering(typeKlasse: TypeKlasseDto): Boolean = Klassetype.FEIL.name == typeKlasse.value()
 
-    private fun finnesYtelsespostering(typeKlasse: TypeKlasseDto): Boolean {
-        return Klassetype.YTEL.name == typeKlasse.value()
-    }
+    private fun finnesYtelsespostering(typeKlasse: TypeKlasseDto): Boolean = Klassetype.YTEL.name == typeKlasse.value()
 }

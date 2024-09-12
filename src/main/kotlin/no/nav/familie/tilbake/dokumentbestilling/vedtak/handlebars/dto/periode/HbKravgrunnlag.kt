@@ -9,8 +9,6 @@ class HbKravgrunnlag(
     val feilutbetaltBeløp: BigDecimal,
 ) {
     companion object {
-        fun forFeilutbetaltBeløp(feilutbetaltBeløp: BigDecimal): HbKravgrunnlag {
-            return HbKravgrunnlag(feilutbetaltBeløp = feilutbetaltBeløp)
-        }
+        fun forFeilutbetaltBeløp(feilutbetaltBeløp: BigDecimal): HbKravgrunnlag = HbKravgrunnlag(feilutbetaltBeløp = feilutbetaltBeløp)
     }
 }

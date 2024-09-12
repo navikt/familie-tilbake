@@ -25,7 +25,10 @@ class VarselService(
                 val perioder = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId).feilutbetaltePerioder
                 perioder.map { Varselsperiode(fom = it.periode.fom, tom = it.periode.tom) }.toSet()
             } else {
-                behandling.aktivtVarsel?.perioder?.map { Varselsperiode(fom = it.fom, tom = it.tom) }?.toSet()
+                behandling.aktivtVarsel
+                    ?.perioder
+                    ?.map { Varselsperiode(fom = it.fom, tom = it.tom) }
+                    ?.toSet()
                     ?: error("Aktivt varsel har ikke med varselsperioder")
             }
 

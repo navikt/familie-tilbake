@@ -1,9 +1,9 @@
 package no.nav.familie.tilbake.avstemming
 
-class FilMapper(private val rader: List<Rad>) {
-    fun tilFlatfil(): ByteArray {
-        return (HEADER + rader.joinToString(SKILLETEGN_RADER) { it.toCsvString() }).toByteArray()
-    }
+class FilMapper(
+    private val rader: List<Rad>,
+) {
+    fun tilFlatfil(): ByteArray = (HEADER + rader.joinToString(SKILLETEGN_RADER) { it.toCsvString() }).toByteArray()
 
     companion object {
         private const val SKILLETEGN_RADER = "\n"

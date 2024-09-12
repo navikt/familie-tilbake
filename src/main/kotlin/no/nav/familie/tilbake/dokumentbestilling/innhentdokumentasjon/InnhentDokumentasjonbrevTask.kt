@@ -71,8 +71,7 @@ class InnhentDokumentasjonbrevTask(
                 type = TYPE,
                 payload = objectMapper.writeValueAsString(InnhentDokumentasjonbrevTaskdata(behandlingId, fritekst)),
                 properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) },
-            )
-                .medTriggerTid(LocalDateTime.now().plusSeconds(15))
+            ).medTriggerTid(LocalDateTime.now().plusSeconds(15))
 
         const val TYPE = "brev.sendInnhentDokumentasjon"
     }

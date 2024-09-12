@@ -9,7 +9,9 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface FagsakRepository : RepositoryInterface<Fagsak, UUID>, InsertUpdateRepository<Fagsak> {
+interface FagsakRepository :
+    RepositoryInterface<Fagsak, UUID>,
+    InsertUpdateRepository<Fagsak> {
     @Query("""SELECT f.* FROM fagsak f JOIN behandling b ON b.fagsak_id = f.id WHERE b.id = :behandlingId""")
     fun finnFagsakForBehandlingId(behandlingId: UUID): Fagsak
 

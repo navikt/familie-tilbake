@@ -186,7 +186,5 @@ class Foreslåvedtakssteg(
         }
     }
 
-    override fun getBehandlingssteg(): Behandlingssteg {
-        return Behandlingssteg.FORESLÅ_VEDTAK
-    }
+    override fun getBehandlingssteg(): Behandlingssteg = Behandlingssteg.FORESLÅ_VEDTAK
 }

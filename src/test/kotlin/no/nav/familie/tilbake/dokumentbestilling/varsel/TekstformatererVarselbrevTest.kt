@@ -339,14 +339,13 @@ class TekstformatererVarselbrevTest {
         return listOf(periode1, periode2)
     }
 
-    private fun lagFeilutbetalingerMedKunEnPeriode(): List<Datoperiode> {
-        return listOf(
+    private fun lagFeilutbetalingerMedKunEnPeriode(): List<Datoperiode> =
+        listOf(
             Datoperiode(
                 LocalDate.of(2019, 3, 3),
                 LocalDate.of(2020, 3, 3),
             ),
         )
-    }
 
     private fun les(filnavn: String): String? {
         javaClass.getResourceAsStream(filnavn).use { resource ->
@@ -357,7 +356,5 @@ class TekstformatererVarselbrevTest {
         }
     }
 
-    private fun lagAdresseinfo(): Adresseinfo {
-        return Adresseinfo("123456", "Test")
-    }
+    private fun lagAdresseinfo(): Adresseinfo = Adresseinfo("123456", "Test")
 }

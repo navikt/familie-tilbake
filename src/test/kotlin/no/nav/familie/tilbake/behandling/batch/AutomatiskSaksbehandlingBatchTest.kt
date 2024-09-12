@@ -82,7 +82,8 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
             )
 
         val kravgrunnlag =
-            Testdata.lagKravgrunnlag(behandling.id)
+            Testdata
+                .lagKravgrunnlag(behandling.id)
                 .copy(
                     kontrollfelt = "2019-11-22-19.09.31.458065",
                     perioder =
@@ -124,14 +125,18 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
     @Test
     fun `behandleAutomatisk skal ikke opprette tasker for EØS-behandlinger`() {
         val behandling =
-            behandlingRepository.findByIdOrThrow(behandling.id).copy(regelverk = Regelverk.EØS)
+            behandlingRepository
+                .findByIdOrThrow(behandling.id)
+                .copy(regelverk = Regelverk.EØS)
                 .also { behandlingRepository.update(it) }
 
         automatiskSaksbehandlingBatch.behandleAutomatisk()
-        taskService.findAll().any {
-            it.type == AutomatiskSaksbehandlingTask.TYPE &&
-                it.payload == behandling.id.toString()
-        }.shouldBeFalse()
+        taskService
+            .findAll()
+            .any {
+                it.type == AutomatiskSaksbehandlingTask.TYPE &&
+                    it.payload == behandling.id.toString()
+            }.shouldBeFalse()
     }
 
     @Test
@@ -147,10 +152,12 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
         brevsporingRepository.insert(Testdata.lagBrevsporing(behandling.id))
 
         automatiskSaksbehandlingBatch.behandleAutomatisk()
-        taskService.findAll().any {
-            it.type == AutomatiskSaksbehandlingTask.TYPE &&
-                it.payload == behandling.id.toString()
-        }.shouldBeFalse()
+        taskService
+            .findAll()
+            .any {
+                it.type == AutomatiskSaksbehandlingTask.TYPE &&
+                    it.payload == behandling.id.toString()
+            }.shouldBeFalse()
     }
 
     @Test
@@ -162,42 +169,51 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
         )
 
         automatiskSaksbehandlingBatch.behandleAutomatisk()
-        taskService.findAll().any {
-            it.type == AutomatiskSaksbehandlingTask.TYPE &&
-                it.payload == behandling.id.toString()
-        }.shouldBeFalse()
+        taskService
+            .findAll()
+            .any {
+                it.type == AutomatiskSaksbehandlingTask.TYPE &&
+                    it.payload == behandling.id.toString()
+            }.shouldBeFalse()
     }
 
     @Test
     fun `behandleAutomatisk skal ikke opprette tasker når behandlingens kravgrunnlag som ikke er gammel enn begrensning`() {
         kravgrunnlagRepository.update(
-            kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
+            kravgrunnlagRepository
+                .findByBehandlingIdAndAktivIsTrue(behandling.id)
                 .copy(
                     kontrollfelt =
-                        LocalDateTime.now()
+                        LocalDateTime
+                            .now()
                             .format(DateTimeFormatter.ofPattern("YYYY-MM-dd-HH.mm.ss.SSSSSS")),
                 ),
         )
 
         automatiskSaksbehandlingBatch.behandleAutomatisk()
-        taskService.findAll().any {
-            it.type == AutomatiskSaksbehandlingTask.TYPE &&
-                it.payload == behandling.id.toString()
-        }.shouldBeFalse()
+        taskService
+            .findAll()
+            .any {
+                it.type == AutomatiskSaksbehandlingTask.TYPE &&
+                    it.payload == behandling.id.toString()
+            }.shouldBeFalse()
     }
 
     @Test
     fun `behandleAutomatisk skal ikke opprette tasker når behandlingens kravgrunnlag har feilbeløp mer enn begrensning`() {
         kravgrunnlagRepository.update(
-            kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
+            kravgrunnlagRepository
+                .findByBehandlingIdAndAktivIsTrue(behandling.id)
                 .copy(perioder = setOf(Testdata.kravgrunnlagsperiode432)),
         )
 
         automatiskSaksbehandlingBatch.behandleAutomatisk()
-        taskService.findAll().any {
-            it.type == AutomatiskSaksbehandlingTask.TYPE &&
-                it.payload == behandling.id.toString()
-        }.shouldBeFalse()
+        taskService
+            .findAll()
+            .any {
+                it.type == AutomatiskSaksbehandlingTask.TYPE &&
+                    it.payload == behandling.id.toString()
+            }.shouldBeFalse()
     }
 
     @Test
@@ -206,21 +222,22 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
         taskService.save(taskService.findById(task.id).copy(status = Status.FEILET))
 
         automatiskSaksbehandlingBatch.behandleAutomatisk()
-        taskService.findAll().any {
-            it.type == AutomatiskSaksbehandlingTask.TYPE &&
-                it.payload == behandling.id.toString()
-            it.status != Status.FEILET
-        }.shouldBeFalse()
+        taskService
+            .findAll()
+            .any {
+                it.type == AutomatiskSaksbehandlingTask.TYPE &&
+                    it.payload == behandling.id.toString()
+                it.status != Status.FEILET
+            }.shouldBeFalse()
     }
 
     private fun lagBehandlingsstegstilstand(
         behandlingssteg: Behandlingssteg,
         behandlingsstegstatus: Behandlingsstegstatus,
-    ): Behandlingsstegstilstand {
-        return Behandlingsstegstilstand(
+    ): Behandlingsstegstilstand =
+        Behandlingsstegstilstand(
             behandlingId = behandling.id,
             behandlingssteg = behandlingssteg,
             behandlingsstegsstatus = behandlingsstegstatus,
         )
-    }
 }

@@ -64,13 +64,14 @@ class FaktaFeilutbetalingService(
         deaktiverEksisterendeFaktaOmFeilutbetaling(behandlingId)
 
         val feilutbetaltePerioder: Set<FaktaFeilutbetalingsperiode> =
-            behandlingsstegFaktaDto.feilutbetaltePerioder.map {
-                FaktaFeilutbetalingsperiode(
-                    periode = Månedsperiode(it.periode.fom, it.periode.tom),
-                    hendelsestype = it.hendelsestype,
-                    hendelsesundertype = it.hendelsesundertype,
-                )
-            }.toSet()
+            behandlingsstegFaktaDto.feilutbetaltePerioder
+                .map {
+                    FaktaFeilutbetalingsperiode(
+                        periode = Månedsperiode(it.periode.fom, it.periode.tom),
+                        hendelsestype = it.hendelsestype,
+                        hendelsesundertype = it.hendelsesundertype,
+                    )
+                }.toSet()
 
         faktaFeilutbetalingRepository.insert(
             FaktaFeilutbetaling(
@@ -98,13 +99,15 @@ class FaktaFeilutbetalingService(
     @Transactional
     fun lagreFastFaktaForAutomatiskSaksbehandling(behandlingId: UUID) {
         val feilutbetaltePerioder =
-            hentFaktaomfeilutbetaling(behandlingId).feilutbetaltePerioder.map {
-                FaktaFeilutbetalingsperiode(
-                    periode = it.periode.toMånedsperiode(),
-                    hendelsestype = Hendelsestype.ANNET,
-                    hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
-                )
-            }.toSet()
+            hentFaktaomfeilutbetaling(behandlingId)
+                .feilutbetaltePerioder
+                .map {
+                    FaktaFeilutbetalingsperiode(
+                        periode = it.periode.toMånedsperiode(),
+                        hendelsestype = Hendelsestype.ANNET,
+                        hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
+                    )
+                }.toSet()
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         faktaFeilutbetalingRepository.insert(
             FaktaFeilutbetaling(
@@ -115,13 +118,9 @@ class FaktaFeilutbetalingService(
         )
     }
 
-    fun hentAktivFaktaOmFeilutbetaling(behandlingId: UUID): FaktaFeilutbetaling? {
-        return faktaFeilutbetalingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
-    }
+    fun hentAktivFaktaOmFeilutbetaling(behandlingId: UUID): FaktaFeilutbetaling? = faktaFeilutbetalingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
 
-    fun hentAlleFaktaOmFeilutbetaling(behandlingId: UUID): List<FaktaFeilutbetaling> {
-        return faktaFeilutbetalingRepository.findByBehandlingId(behandlingId)
-    }
+    fun hentAlleFaktaOmFeilutbetaling(behandlingId: UUID): List<FaktaFeilutbetaling> = faktaFeilutbetalingRepository.findByBehandlingId(behandlingId)
 
     @Transactional
     fun deaktiverEksisterendeFaktaOmFeilutbetaling(behandlingId: UUID) {

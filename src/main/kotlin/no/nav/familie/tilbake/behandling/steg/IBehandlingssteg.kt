@@ -6,24 +6,16 @@ import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import java.util.UUID
 
 interface IBehandlingssteg {
-    fun utførSteg(behandlingId: UUID) {
-        throw Feil(message = "Implementasjon mangler, er i default method implementasjon for $behandlingId")
-    }
+    fun utførSteg(behandlingId: UUID): Unit = throw Feil(message = "Implementasjon mangler, er i default method implementasjon for $behandlingId")
 
     fun utførSteg(
         behandlingId: UUID,
         behandlingsstegDto: BehandlingsstegDto,
-    ) {
-        throw Feil(message = "Implementasjon mangler, er i default method implementasjon for $behandlingId")
-    }
+    ): Unit = throw Feil(message = "Implementasjon mangler, er i default method implementasjon for $behandlingId")
 
-    fun utførStegAutomatisk(behandlingId: UUID) {
-        throw Feil(message = "Implementasjon mangler, er i default method implementasjon for $behandlingId")
-    }
+    fun utførStegAutomatisk(behandlingId: UUID): Unit = throw Feil(message = "Implementasjon mangler, er i default method implementasjon for $behandlingId")
 
-    fun gjenopptaSteg(behandlingId: UUID) {
-        throw Feil(message = "Implementasjon mangler, er i default method implementasjon for $behandlingId")
-    }
+    fun gjenopptaSteg(behandlingId: UUID): Unit = throw Feil(message = "Implementasjon mangler, er i default method implementasjon for $behandlingId")
 
     fun getBehandlingssteg(): Behandlingssteg
 }

@@ -54,6 +54,12 @@ data class VurdertSærligGrunnDto(
     val begrunnelse: String? = null,
 )
 
-data class RedusertBeløpDto(val trekk: Boolean, val beløp: BigDecimal)
+data class RedusertBeløpDto(
+    val trekk: Boolean,
+    val beløp: BigDecimal,
+)
 
-data class AktivitetDto(val aktivitet: String, val beløp: BigDecimal)
+data class AktivitetDto(
+    val aktivitet: String,
+    val beløp: BigDecimal,
+)
