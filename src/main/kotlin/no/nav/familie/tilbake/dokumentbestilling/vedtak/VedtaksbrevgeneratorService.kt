@@ -225,7 +225,11 @@ class VedtaksbrevgeneratorService(
             lagHbTotalresultat(beregningsresultat.vedtaksresultat, beregningsresultat)
         val hbBehandling: HbBehandling = lagHbBehandling(vedtaksbrevgrunnlag)
         val varsletBeløp = vedtaksbrevgrunnlag.varsletBeløp
-        val varsletDato = vedtaksbrevgrunnlag.sisteVarsel?.sporbar?.opprettetTid?.toLocalDate()
+        val varsletDato =
+            vedtaksbrevgrunnlag.sisteVarsel
+                ?.sporbar
+                ?.opprettetTid
+                ?.toLocalDate()
         val ansvarligBeslutter = finnAnsvarligBeslutter(vedtaksbrevgrunnlag)
         val erFeilutbetaltBeløpKorrigertNed =
             varsletBeløp != null && beregningsresultat.totaltFeilutbetaltBeløp < varsletBeløp
