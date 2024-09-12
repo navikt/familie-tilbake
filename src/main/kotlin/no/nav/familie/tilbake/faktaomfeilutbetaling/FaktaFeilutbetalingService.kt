@@ -86,6 +86,15 @@ class FaktaFeilutbetalingService(
         )
     }
 
+    @Transactional
+    fun sjekkOmFaktaPerioderErLike(
+        behandlingId: UUID,
+    ): Boolean {
+        val faktaFeilutbetaling = faktaFeilutbetalingRepository.findFaktaFeilutbetalingByBehandlingIdAndAktivIsTrue(behandlingId)
+        val førstePeriode = faktaFeilutbetaling.perioder.first()
+        return faktaFeilutbetaling.perioder.all { it.hendelsestype == førstePeriode.hendelsestype && it.hendelsesundertype == førstePeriode.hendelsesundertype }
+    }
+
     private fun validerVurderingAvBrukersUttalelse(vurderingAvBrukersUttalelse: VurderingAvBrukersUttalelseDto?) {
         vurderingAvBrukersUttalelse?.let {
             if (it.harBrukerUttaltSeg == HarBrukerUttaltSeg.JA && it.beskrivelse.isNullOrBlank()) {

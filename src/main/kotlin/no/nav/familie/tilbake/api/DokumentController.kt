@@ -128,4 +128,19 @@ class DokumentController(
         lagreUtkastVedtaksbrevService.lagreUtkast(behandlingId, fritekstavsnitt)
         return Ressurs.success("OK")
     }
+
+    @Operation(summary = "Sjekker om periode er like og kan sammenslås")
+    @PostMapping(
+        "/sjekk-likhet-perioder/{behandlingId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    @Rolletilgangssjekk(
+        Behandlerrolle.SAKSBEHANDLER,
+        "Sjekker om perioder er like - unntatt dato og beløp",
+        AuditLoggerEvent.UPDATE,
+        HenteParam.BEHANDLING_ID,
+    )
+    fun erPerioderLike(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<Boolean> = Ressurs.success(false)
 }
