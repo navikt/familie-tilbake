@@ -2,7 +2,7 @@ package no.nav.familie.tilbake.kravgrunnlag
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import io.mockk.every
+import no.nav.familie.kontrakter.felles.Regelverk
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Task
@@ -21,8 +21,6 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.Constants.AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_AKTSOMHET_BEGRUNNELSE
 import no.nav.familie.tilbake.config.Constants.AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_BEGRUNNELSE
-import no.nav.familie.tilbake.config.FeatureToggleConfig
-import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.task.PubliserJournalpostTask
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.SendVedtaksbrevTask
@@ -74,22 +72,17 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
     @Autowired
     private lateinit var vilkårsvurderingService: VilkårsvurderingService
 
-    @Autowired
-    private lateinit var featureToggleService: FeatureToggleService
-
     private lateinit var behandlingId: UUID
 
     @BeforeEach
     fun init() {
         val fagsak = Testdata.fagsak
-        val behandling = Testdata.lagBehandling()
+        val behandling = Testdata.lagBehandling().copy(regelverk = Regelverk.EØS)
         val copyFagsystemsbehandling = behandling.fagsystemsbehandling.first().copy(tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK, eksternId = "1")
         val automatiskBehandling = behandling.copy(saksbehandlingstype = Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR, fagsystemsbehandling = setOf(copyFagsystemsbehandling))
         val fagsakOvergangsstønad = fagsak.copy(ytelsestype = Ytelsestype.OVERGANGSSTØNAD)
         fagsakRepository.insert(fagsakOvergangsstønad)
         behandlingId = behandlingRepository.insert(automatiskBehandling).id
-
-        every { featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_BEHANDLE_TILBAKEKREVING_UNDER_4X_RETTSGEBYR) } returns true
     }
 
     @Test

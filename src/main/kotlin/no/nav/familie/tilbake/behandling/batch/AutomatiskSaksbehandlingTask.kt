@@ -10,8 +10,6 @@ import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
-import no.nav.familie.tilbake.config.FeatureToggleConfig
-import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagService
 import org.slf4j.LoggerFactory
@@ -30,7 +28,6 @@ class AutomatiskSaksbehandlingTask(
     private val automatiskSaksbehandlingService: AutomatiskSaksbehandlingService,
     private val kravgrunnlagService: KravgrunnlagService,
     private val behandlingRepository: BehandlingRepository,
-    private val featureToggleService: FeatureToggleService,
 ) : AsyncTaskStep {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -52,15 +49,6 @@ class AutomatiskSaksbehandlingTask(
             behandling.saksbehandlingstype == Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR
         ) {
             throw Feil("Skal ikke behandle beløp over 4x rettsgebyr automatisk")
-        }
-
-        if (!featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_BEHANDLE_TILBAKEKREVING_UNDER_4X_RETTSGEBYR) &&
-            behandling.saksbehandlingstype == Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR
-        ) {
-            throw Feil(
-                "Behandler ikke feilutbetalinger under 4 rettsgebyr automatisk da featuretoggle for dette er skrudd av " +
-                    "(${FeatureToggleConfig.AUTOMATISK_BEHANDLE_TILBAKEKREVING_UNDER_4X_RETTSGEBYR})",
-            )
         }
     }
 
