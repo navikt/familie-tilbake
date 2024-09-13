@@ -61,7 +61,7 @@ class TestdataInitializer : ApplicationListener<ContextRefreshedEvent> {
             val behandling = behandlingRepository.finnNyesteTilbakekrevingsbehandlingForYtelsestypeAndEksternFagsakId(opprettTilbakekrevingRequest.ytelsestype, opprettTilbakekrevingRequest.eksternFagsakId)
             logger.info("Opprettet dummy-behandling. Hvis frontend kjøres lokalt kan du gå til: http://localhost:8000/fagsystem/${opprettTilbakekrevingRequest.fagsystem}/fagsak/${opprettTilbakekrevingRequest.eksternFagsakId}/behandling/${behandling?.eksternBrukId}")
 
-            val mottattXml = readXml("/kravgrunnlagxml/kravgrunnlag_EF_over_4x_rettsgebyr.xml")
+            val mottattXml = readXml("/kravgrunnlagxml/kravgrunnlag_lokal_kjøring.xml")
 
             kravgrunnlagService.håndterMottattKravgrunnlag(mottattXml.replace("<urn:fagsystemId>testverdi</urn:fagsystemId>", "<urn:fagsystemId>1234567</urn:fagsystemId>"))
         } else {
