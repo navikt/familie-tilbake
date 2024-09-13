@@ -146,7 +146,9 @@ class DokumentController(
     )
     fun erPerioderLike(
         @PathVariable behandlingId: UUID,
-    ): Ressurs<Boolean> {
-        return Ressurs.success(faktaFeilutbetalingService.sjekkOmFaktaPerioderErLike(behandlingId) &&  vilkårsVurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandlingId))
-    }
+    ): Ressurs<Boolean> =
+        Ressurs.success(
+            faktaFeilutbetalingService.sjekkOmFaktaPerioderErLike(behandlingId) &&
+                vilkårsVurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandlingId),
+        )
 }
