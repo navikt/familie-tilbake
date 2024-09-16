@@ -6,6 +6,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.api.dto.HentForhåndvisningVedtaksbrevPdfDto
 import no.nav.familie.tilbake.api.dto.PeriodeMedTekstDto
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsak
+import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultat
@@ -229,19 +230,7 @@ class VedtaksbrevgeneratorService(
                 ?.sporbar
                 ?.opprettetTid
                 ?.toLocalDate()
-        val ansvarligBeslutter =
-            if (vedtaksbrevgrunnlag.aktivtSteg in
-                setOf(
-                    Behandlingssteg.FATTE_VEDTAK,
-                    Behandlingssteg.IVERKSETT_VEDTAK,
-                    Behandlingssteg.AVSLUTTET,
-                )
-            ) {
-                eksterneDataForBrevService
-                    .hentPåloggetSaksbehandlernavnMedDefault(vedtaksbrevgrunnlag.behandling.ansvarligBeslutter)
-            } else {
-                null
-            }
+        val ansvarligBeslutter = finnAnsvarligBeslutter(vedtaksbrevgrunnlag)
         val erFeilutbetaltBeløpKorrigertNed =
             varsletBeløp != null && beregningsresultat.totaltFeilutbetaltBeløp < varsletBeløp
 
@@ -271,6 +260,32 @@ class VedtaksbrevgeneratorService(
             )
         return HbVedtaksbrevsdata(vedtaksbrevFelles, perioder)
     }
+
+    private fun finnAnsvarligBeslutter(vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag) =
+        when {
+            harAnsvarligBeslutter(vedtaksbrevgrunnlag) -> hentAnsvarligBeslutterNavn(vedtaksbrevgrunnlag)
+            else -> null
+        }
+
+    private fun hentAnsvarligBeslutterNavn(vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag) = eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(vedtaksbrevgrunnlag.behandling.ansvarligBeslutter)
+
+    private fun saksbehandlingstypeHarBeslutter(vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag) =
+        when (vedtaksbrevgrunnlag.behandling.saksbehandlingstype) {
+            Saksbehandlingstype.ORDINÆR -> true
+            Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR -> false
+            Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP -> false
+        }
+
+    private fun harAnsvarligBeslutter(vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag) =
+        saksbehandlingstypeHarBeslutter(vedtaksbrevgrunnlag) && erBesluttet(vedtaksbrevgrunnlag)
+
+    private fun erBesluttet(vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag) =
+        vedtaksbrevgrunnlag.aktivtSteg in
+            setOf(
+                Behandlingssteg.FATTE_VEDTAK,
+                Behandlingssteg.IVERKSETT_VEDTAK,
+                Behandlingssteg.AVSLUTTET,
+            )
 
     private fun utledEffektForBruker(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
