@@ -133,7 +133,7 @@ class DokumentController(
         return Ressurs.success("OK")
     }
 
-    @Operation(summary = "Sjekker om periode er like og kan sammenslås")
+    @Operation(summary = "Sjekker om perioder er like - unntatt dato og beløp")
     @PostMapping(
         "/sjekk-likhet-perioder/{behandlingId}",
         produces = [MediaType.APPLICATION_JSON_VALUE],

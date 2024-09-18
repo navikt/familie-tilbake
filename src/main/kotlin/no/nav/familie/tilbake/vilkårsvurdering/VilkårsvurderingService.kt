@@ -163,10 +163,15 @@ class VilkårsvurderingService(
     fun sjekkOmVilkårsvurderingPerioderErLike(
         behandlingId: UUID,
     ): Boolean {
-        val vikårsvurdering = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
-        val førstePeriode = vikårsvurdering?.perioder?.first()
+        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
+        val førstePeriode = vilkårsvurdering?.perioder?.first()
         return if (førstePeriode != null) {
-            vikårsvurdering?.perioder?.all { it.aktsomhet == førstePeriode.aktsomhet && it.godTro == førstePeriode.godTro && it.vilkårsvurderingsresultat == førstePeriode.vilkårsvurderingsresultat && it.begrunnelse == førstePeriode.begrunnelse } ?: false
+            vilkårsvurdering.perioder.all {
+                it.aktsomhet?.erLik(førstePeriode.aktsomhet) == true &&
+                    it.godTro == førstePeriode.godTro &&
+                    it.vilkårsvurderingsresultat == førstePeriode.vilkårsvurderingsresultat &&
+                    it.begrunnelse == førstePeriode.begrunnelse
+            }
         } else {
             false
         }

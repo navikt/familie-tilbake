@@ -101,6 +101,19 @@ data class VilkårsvurderingAktsomhet(
         get() = Aktsomhet.GROV_UAKTSOMHET == aktsomhet || Aktsomhet.SIMPEL_UAKTSOMHET == aktsomhet && this.tilbakekrevSmåbeløp
 
     val særligeGrunner get() = vilkårsvurderingSærligeGrunner.map(VilkårsvurderingSærligGrunn::særligGrunn)
+
+    fun erLik(vilkårsvurderingAktsomhet: VilkårsvurderingAktsomhet?) =
+        aktsomhet == vilkårsvurderingAktsomhet?.aktsomhet &&
+            ileggRenter == vilkårsvurderingAktsomhet.ileggRenter &&
+            manueltSattBeløp?.toInt() == vilkårsvurderingAktsomhet.manueltSattBeløp?.toInt() &&
+            begrunnelse == vilkårsvurderingAktsomhet.begrunnelse &&
+            særligeGrunnerTilReduksjon == vilkårsvurderingAktsomhet.særligeGrunnerTilReduksjon &&
+            tilbakekrevSmåbeløp == vilkårsvurderingAktsomhet.tilbakekrevSmåbeløp &&
+            særligeGrunnerTilReduksjonErLik(vilkårsvurderingAktsomhet.vilkårsvurderingSærligeGrunner)
+
+    fun særligeGrunnerTilReduksjonErLik(vilkårsvurderingSærligeGrunner: Set<VilkårsvurderingSærligGrunn>) =
+        vilkårsvurderingSærligeGrunner.map { it.særligGrunn } == vilkårsvurderingSærligeGrunner.map { it.særligGrunn } &&
+            vilkårsvurderingSærligeGrunner.map { it.begrunnelse } == vilkårsvurderingSærligeGrunner.map { it.begrunnelse }
 }
 
 @Table("vilkarsvurdering_serlig_grunn")
