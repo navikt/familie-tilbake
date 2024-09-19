@@ -36,13 +36,17 @@ import no.nav.familie.tilbake.foreldelse.VurdertForeldelseRepository
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
+import no.nav.familie.tilbake.iverksettvedtak.VilkårsvurderingsPeriodeDomainUtil.lagVilkårsvurderingAktsomhet
+import no.nav.familie.tilbake.iverksettvedtak.VilkårsvurderingsPeriodeDomainUtil.lagVilkårsvurderingsperiode
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -679,6 +683,56 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         særligGrunner.shouldNotBeNull()
         særligGrunner.any { SærligGrunn.GRAD_AV_UAKTSOMHET == it.særligGrunn }.shouldBeTrue()
         særligGrunner.all { it.begrunnelse == null }.shouldBeTrue()
+    }
+
+    @Test
+    fun `er vilkårsperioder like - skal være ulike og returnere false`() {
+        val vilkårsvurdering =
+            Vilkårsvurdering(
+                id = UUID.randomUUID(),
+                behandlingId = behandling.id,
+                aktiv = true,
+                perioder =
+                    setOf(
+                        lagVilkårsvurderingsperiode(
+                            periode = Månedsperiode(YearMonth.of(2024, 1), YearMonth.of(2024, 5)),
+                        ),
+                        lagVilkårsvurderingsperiode(
+                            periode = Månedsperiode(YearMonth.of(2024, 1), YearMonth.of(2024, 5)),
+                            begrunnelse = "annen begrunnelse",
+                        ),
+                    ),
+            )
+
+        vilkårsvurderingRepository.insert(vilkårsvurdering)
+
+        val erLike = vilkårsvurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandling.id)
+        Assertions.assertFalse(erLike)
+    }
+
+    @Test
+    fun `sjekk er vilkårsperioder like uten dato og beløp - skal være like og returnere true`() {
+        val vilkårsvurdering =
+            Vilkårsvurdering(
+                id = UUID.randomUUID(),
+                behandlingId = behandling.id,
+                aktiv = true,
+                perioder =
+                    setOf(
+                        lagVilkårsvurderingsperiode(
+                            periode = Månedsperiode(YearMonth.of(2024, 1), YearMonth.of(2024, 3)),
+                            aktsomhet = lagVilkårsvurderingAktsomhet(andelTilbakekreves = BigDecimal(100)),
+                        ),
+                        lagVilkårsvurderingsperiode(
+                            periode = Månedsperiode(YearMonth.of(2024, 4), YearMonth.of(2024, 5)),
+                        ),
+                    ),
+            )
+
+        vilkårsvurderingRepository.insert(vilkårsvurdering)
+
+        val erLike = vilkårsvurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandling.id)
+        Assertions.assertTrue(erLike)
     }
 
     private fun lagBehandlingsstegstilstand(

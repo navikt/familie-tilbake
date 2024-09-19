@@ -11,6 +11,7 @@ import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants.hentAutomatiskVilkårsvurderingAktsomhetBegrunnelse
 import no.nav.familie.tilbake.config.Constants.hentAutomatiskVilkårsvurderingBegrunnelse
+import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
@@ -32,6 +33,7 @@ class VilkårsvurderingService(
     val behandlingRepository: BehandlingRepository,
     val foreldelseService: ForeldelseService,
     val faktaFeilutbetalingService: FaktaFeilutbetalingService,
+    private val faktaFeilutbetalingRepository: FaktaFeilutbetalingRepository,
 ) {
     fun hentVilkårsvurdering(behandlingId: UUID): VurdertVilkårsvurderingDto {
         val faktaOmFeilutbetaling =
@@ -154,6 +156,24 @@ class VilkårsvurderingService(
     fun deaktiverEksisterendeVilkårsvurdering(behandlingId: UUID) {
         vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)?.copy(aktiv = false)?.let {
             vilkårsvurderingRepository.update(it)
+        }
+    }
+
+    @Transactional
+    fun sjekkOmVilkårsvurderingPerioderErLike(
+        behandlingId: UUID,
+    ): Boolean {
+        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
+        val førstePeriode = vilkårsvurdering?.perioder?.first()
+        return if (førstePeriode != null) {
+            vilkårsvurdering.perioder.all {
+                it.aktsomhet?.erLik(førstePeriode.aktsomhet) == true &&
+                    it.godTro == førstePeriode.godTro &&
+                    it.vilkårsvurderingsresultat == førstePeriode.vilkårsvurderingsresultat &&
+                    it.begrunnelse == førstePeriode.begrunnelse
+            }
+        } else {
+            false
         }
     }
 
