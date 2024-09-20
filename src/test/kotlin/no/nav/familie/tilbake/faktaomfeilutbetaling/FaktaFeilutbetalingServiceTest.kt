@@ -125,7 +125,7 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
         lagFaktaomfeilutbetaling(behandlingId = lagretBehandling.id, hendelsestype = Hendelsestype.DØDSFALL)
         lagFaktaomfeilutbetaling(behandlingId = lagretBehandling.id, hendelsestype = Hendelsestype.INNTEKT)
 
-        val faktaFeilutbetalinger = faktaFeilutbetalingService.hentInaktivFaktaomfeilutbetaling(behandlingId = lagretBehandling.id)
+        val faktaFeilutbetalinger = faktaFeilutbetalingService.hentInaktivFaktaomfeilutbetaling(behandlingId = lagretBehandling.id).sortedBy { it.opprettetTid }
 
         faktaFeilutbetalinger shouldHaveSize 2
         assertFeilutbetaltePerioder(
