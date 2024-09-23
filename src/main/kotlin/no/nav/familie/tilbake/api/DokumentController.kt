@@ -97,8 +97,8 @@ class DokumentController(
     @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Forhåndsviser brev", AuditLoggerEvent.ACCESS)
     fun hentForhåndsvisningVedtaksbrev(
         @Valid @RequestBody
-        dto: HentForhåndvisningVedtaksbrevPdfDto,
-    ): Ressurs<ByteArray> = Ressurs.success(vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(dto))
+        hentForhåndsvisningVedtaksbrevRequest: HentForhåndvisningVedtaksbrevPdfDto,
+    ): Ressurs<ByteArray> = Ressurs.success(vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(hentForhåndsvisningVedtaksbrevRequest))
 
     @Operation(summary = "Hent vedtaksbrevtekst")
     @GetMapping(
@@ -108,7 +108,7 @@ class DokumentController(
     @Rolletilgangssjekk(Behandlerrolle.VEILEDER, "Henter vedtaksbrevtekst", AuditLoggerEvent.ACCESS, HenteParam.BEHANDLING_ID)
     fun hentVedtaksbrevtekst(
         @PathVariable behandlingId: UUID,
-    ): Ressurs<List<Avsnitt>> = Ressurs.success(vedtaksbrevService.hentVedtaksbrevSomTekst(behandlingId))
+    ): Ressurs<List<Avsnitt>> = Ressurs.success(vedtaksbrevService.hentVedtaksbrevSomTekst(behandlingId, true))
 
     @Operation(summary = "Lagre utkast av vedtaksbrev")
     @PostMapping(

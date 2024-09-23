@@ -10,4 +10,5 @@ class HentForhåndvisningVedtaksbrevPdfDto(
     var oppsummeringstekst: String? = null,
     @Size(max = 100, message = "For mange perioder") @Valid
     var perioderMedTekst: List<PeriodeMedTekstDto>,
+    var slåSammenPerioder: Boolean = true,
 )

@@ -37,23 +37,26 @@ class VedtaksbrevService(
         val vedtaksbrevgrunnlag = vedtaksbrevgrunnlagService.hentVedtaksbrevgrunnlag(behandling.id)
 
         distribusjonshåndteringService.sendBrev(behandling, Brevtype.VEDTAK) { brevmottaker, brevmetadata ->
-            vedtaksbrevgeneratorService.genererVedtaksbrevForSending(vedtaksbrevgrunnlag, brevmottaker, brevmetadata)
+            vedtaksbrevgeneratorService.genererVedtaksbrevForSending(vedtaksbrevgrunnlag, brevmottaker, brevmetadata, skalSammenslåPerioder = true)
         }
     }
 
-    fun hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(dto: HentForhåndvisningVedtaksbrevPdfDto): ByteArray {
-        val vedtaksbrevgrunnlag = vedtaksbrevgrunnlagService.hentVedtaksbrevgrunnlag(dto.behandlingId)
-        val brevdata = vedtaksbrevgeneratorService.genererVedtaksbrevForForhåndsvisning(vedtaksbrevgrunnlag, dto)
+    fun hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(hentForhåndvisningVedtaksbrevPdfDto: HentForhåndvisningVedtaksbrevPdfDto): ByteArray {
+        val vedtaksbrevgrunnlag = vedtaksbrevgrunnlagService.hentVedtaksbrevgrunnlag(hentForhåndvisningVedtaksbrevPdfDto.behandlingId)
+        val brevdata = vedtaksbrevgeneratorService.genererVedtaksbrevForForhåndsvisning(vedtaksbrevgrunnlag, hentForhåndvisningVedtaksbrevPdfDto)
 
         return pdfBrevService.genererForhåndsvisning(brevdata)
     }
 
-    fun hentVedtaksbrevSomTekst(behandlingId: UUID): List<Avsnitt> {
+    fun hentVedtaksbrevSomTekst(
+        behandlingId: UUID,
+        skalSammenslåPerioder: Boolean = false,
+    ): List<Avsnitt> {
         val vedtaksbrevgrunnlag = vedtaksbrevgrunnlagService.hentVedtaksbrevgrunnlag(behandlingId)
 
         val hbVedtaksbrevsdata = vedtaksbrevgeneratorService.genererVedtaksbrevsdataTilVisningIFrontendSkjema(vedtaksbrevgrunnlag)
         val hovedoverskrift = TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(hbVedtaksbrevsdata)
-        return AvsnittUtil.lagVedtaksbrevDeltIAvsnitt(hbVedtaksbrevsdata, hovedoverskrift)
+        return AvsnittUtil.lagVedtaksbrevDeltIAvsnitt(hbVedtaksbrevsdata, hovedoverskrift, skalSammenslåPerioder)
     }
 
     @Transactional

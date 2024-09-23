@@ -63,13 +63,14 @@ class VedtaksbrevgeneratorService(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
         brevmottager: Brevmottager,
         forhåndsgenerertMetadata: Brevmetadata? = null,
+        skalSammenslåPerioder: Boolean,
     ): Brevdata {
         val vedtaksbrevsdata = hentDataForVedtaksbrev(vedtaksbrevgrunnlag, brevmottager, forhåndsgenerertMetadata)
         val hbVedtaksbrevsdata: HbVedtaksbrevsdata = vedtaksbrevsdata.vedtaksbrevsdata
         val data =
             Fritekstbrevsdata(
                 TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(hbVedtaksbrevsdata),
-                TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(hbVedtaksbrevsdata),
+                TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(hbVedtaksbrevsdata, skalSammenslåPerioder),
                 vedtaksbrevsdata.metadata,
             )
         val vedleggHtml =
@@ -89,15 +90,15 @@ class VedtaksbrevgeneratorService(
 
     fun genererVedtaksbrevForForhåndsvisning(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
-        dto: HentForhåndvisningVedtaksbrevPdfDto,
+        hentForhåndvisningVedtaksbrevPdfDto: HentForhåndvisningVedtaksbrevPdfDto,
     ): Brevdata {
         val (brevmetadata, brevmottager) =
             brevmetadataUtil.lagBrevmetadataForMottakerTilForhåndsvisning(vedtaksbrevgrunnlag)
         val vedtaksbrevsdata =
             hentDataForVedtaksbrev(
                 vedtaksbrevgrunnlag,
-                dto.oppsummeringstekst,
-                dto.perioderMedTekst,
+                hentForhåndvisningVedtaksbrevPdfDto.oppsummeringstekst,
+                hentForhåndvisningVedtaksbrevPdfDto.perioderMedTekst,
                 brevmottager,
                 brevmetadata,
             )
@@ -114,7 +115,7 @@ class VedtaksbrevgeneratorService(
             mottager = brevmottager,
             metadata = vedtaksbrevsdata.metadata,
             overskrift = TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(hbVedtaksbrevsdata),
-            brevtekst = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(hbVedtaksbrevsdata),
+            brevtekst = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(hbVedtaksbrevsdata, hentForhåndvisningVedtaksbrevPdfDto.slåSammenPerioder),
             vedleggHtml = vedleggHtml,
         )
     }
