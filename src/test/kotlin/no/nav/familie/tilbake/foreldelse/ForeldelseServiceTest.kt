@@ -274,6 +274,36 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
         vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldNotBeNull()
     }
 
+    @Test
+    fun `sjekk likhet på foreldelsesperioder`() {
+        val likForeldelsesperiode =
+            lagForeldelsesperiode(
+                LocalDate.of(2017, 1, 1),
+                LocalDate.of(2017, 3, 31),
+                Foreldelsesvurderingstype.FORELDET,
+            )
+        val likForeldelsesperiode2 =
+            lagForeldelsesperiode(
+                LocalDate.of(2017, 4, 1),
+                LocalDate.of(2017, 4, 30),
+                Foreldelsesvurderingstype.FORELDET,
+            )
+        foreldelseService.lagreVurdertForeldelse(behandling.id, BehandlingsstegForeldelseDto(listOf(likForeldelsesperiode, likForeldelsesperiode2)))
+        vilkårsvurderingRepository.insert(Testdata.lagVilkårsvurdering(behandling.id))
+
+        foreldelseService.sjekkOmForeldelsePerioderErLike(behandling.id) shouldBe true
+
+        val ulikForeldelsesperiode =
+            lagForeldelsesperiode(
+                LocalDate.of(2017, 5, 1),
+                LocalDate.of(2017, 5, 31),
+                Foreldelsesvurderingstype.IKKE_FORELDET,
+            )
+        foreldelseService.lagreVurdertForeldelse(behandling.id, BehandlingsstegForeldelseDto(listOf(likForeldelsesperiode, likForeldelsesperiode2, ulikForeldelsesperiode)))
+
+        foreldelseService.sjekkOmForeldelsePerioderErLike(behandling.id) shouldBe false
+    }
+
     private fun lagForeldelsesperiode(
         fom: LocalDate,
         tom: LocalDate,

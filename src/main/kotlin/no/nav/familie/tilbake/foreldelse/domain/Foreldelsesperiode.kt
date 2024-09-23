@@ -23,6 +23,12 @@ data class Foreldelsesperiode(
     val sporbar: Sporbar = Sporbar(),
 ) {
     fun erForeldet(): Boolean = Foreldelsesvurderingstype.FORELDET == foreldelsesvurderingstype
+
+    fun erLik(andrePeriode: Foreldelsesperiode): Boolean =
+        foreldelsesvurderingstype == andrePeriode.foreldelsesvurderingstype &&
+            begrunnelse == andrePeriode.begrunnelse &&
+            foreldelsesfrist == andrePeriode.foreldelsesfrist &&
+            oppdagelsesdato == andrePeriode.oppdagelsesdato
 }
 
 enum class Foreldelsesvurderingstype(

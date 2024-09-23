@@ -100,4 +100,13 @@ class ForeldelseService(
             vilkårsvurderingRepository.update(vilkårsvurdering)
         }
     }
+
+    fun sjekkOmForeldelsePerioderErLike(behandlingId: UUID): Boolean {
+        val vurdertForeldelse: VurdertForeldelse? = foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
+        val førstePeriode = vurdertForeldelse?.foreldelsesperioder?.firstOrNull() ?: return false
+
+        return vurdertForeldelse.foreldelsesperioder.all {
+            it.erLik(førstePeriode)
+        }
+    }
 }

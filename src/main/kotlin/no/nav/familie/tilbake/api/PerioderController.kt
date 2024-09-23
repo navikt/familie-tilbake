@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.api
 import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
+import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.HenteParam
@@ -22,6 +23,7 @@ import java.util.UUID
 class PerioderController(
     private val faktaFeilutbetalingService: FaktaFeilutbetalingService,
     private val vilkårsVurderingService: VilkårsvurderingService,
+    private val foreldelseService: ForeldelseService,
 ) {
     @Operation(summary = "Sjekker om perioder er like - unntatt dato og beløp")
     @GetMapping(
@@ -39,6 +41,7 @@ class PerioderController(
     ): Ressurs<Boolean> =
         Ressurs.success(
             faktaFeilutbetalingService.sjekkOmFaktaPerioderErLike(behandlingId) &&
+                foreldelseService.sjekkOmForeldelsePerioderErLike(behandlingId) &&
                 vilkårsVurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandlingId),
         )
 }
