@@ -35,9 +35,8 @@ class VedtaksbrevService(
         behandling: Behandling,
     ) {
         val vedtaksbrevgrunnlag = vedtaksbrevgrunnlagService.hentVedtaksbrevgrunnlag(behandling.id)
-
         distribusjonshåndteringService.sendBrev(behandling, Brevtype.VEDTAK) { brevmottaker, brevmetadata ->
-            vedtaksbrevgeneratorService.genererVedtaksbrevForSending(vedtaksbrevgrunnlag, brevmottaker, brevmetadata, skalSammenslåPerioder = true)
+            vedtaksbrevgeneratorService.genererVedtaksbrevForSending(vedtaksbrevgrunnlag, brevmottaker, brevmetadata)
         }
     }
 
@@ -122,5 +121,16 @@ class VedtaksbrevService(
             .findByBehandlingId(behandlingId)
             ?.let { vedtaksbrevsoppsummeringRepository.deleteById(it.id) }
         vedtaksbrevsperiodeRepository.findByBehandlingId(behandlingId).forEach { vedtaksbrevsperiodeRepository.deleteById(it.id) }
+    }
+
+    @Transactional
+    fun oppdaterSkalSammenslåPerioder(
+        behandlingId: UUID,
+        skalSammenslåPerioder: Boolean,
+    ) {
+        val vedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)
+        if (vedtaksbrevsoppsummering != null) {
+            vedtaksbrevsoppsummeringRepository.update(vedtaksbrevsoppsummering.copy(skalSammenslåPerioder = skalSammenslåPerioder))
+        }
     }
 }

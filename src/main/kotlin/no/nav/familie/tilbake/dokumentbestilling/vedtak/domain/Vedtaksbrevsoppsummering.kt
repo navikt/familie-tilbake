@@ -11,6 +11,7 @@ data class Vedtaksbrevsoppsummering(
     val id: UUID = UUID.randomUUID(),
     val behandlingId: UUID,
     val oppsummeringFritekst: String?,
+    val skalSammenslåPerioder: Boolean,
     @Version
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)

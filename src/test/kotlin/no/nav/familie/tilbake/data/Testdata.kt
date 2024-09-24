@@ -343,6 +343,7 @@ object Testdata {
         Vedtaksbrevsoppsummering(
             behandlingId = behandlingId,
             oppsummeringFritekst = "testverdi",
+            skalSammenslåPerioder = false,
         )
 
     fun lagVedtaksbrevsperiode(behandlingId: UUID) =

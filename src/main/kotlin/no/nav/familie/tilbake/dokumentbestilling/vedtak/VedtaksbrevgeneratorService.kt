@@ -63,10 +63,15 @@ class VedtaksbrevgeneratorService(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
         brevmottager: Brevmottager,
         forhåndsgenerertMetadata: Brevmetadata? = null,
-        skalSammenslåPerioder: Boolean,
     ): Brevdata {
         val vedtaksbrevsdata = hentDataForVedtaksbrev(vedtaksbrevgrunnlag, brevmottager, forhåndsgenerertMetadata)
         val hbVedtaksbrevsdata: HbVedtaksbrevsdata = vedtaksbrevsdata.vedtaksbrevsdata
+
+        val skalSammenslåPerioder =
+            vedtaksbrevgrunnlag.behandlinger
+                .first { it.id == vedtaksbrevgrunnlag.behandling.id }
+                .vedtaksbrevOppsummering
+                ?.skalSammenslåPerioder ?: false
         val data =
             Fritekstbrevsdata(
                 TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(hbVedtaksbrevsdata),
