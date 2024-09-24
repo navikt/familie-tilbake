@@ -1,5 +1,10 @@
 {{> nb/vedtak/vedtak_felles}}
 {{> nb/vedtak/vedtak_start}}
+_Perioder som er feilutbetalt
+{{#each perioder }}
+    - Fra og med {{{dato periode.fom}}} til og med {{{dato periode.tom}}}
+{{/each}}
+
 {{#with perioder.[0] as |periode|}}
 {{> nb/vedtak/periode_fakta perioder=periode}}
 {{> nb/vedtak/periode_foreldelse perioder=periode}}
