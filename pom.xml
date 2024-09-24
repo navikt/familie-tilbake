@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.3</version>
+        <version>3.3.4</version>
     </parent>
 
     <properties>
@@ -23,13 +23,13 @@
         <main-class>no.nav.familie.tilbake.LauncherKt</main-class>
         <kotlin.version>2.0.20</kotlin.version>
         <common-java-modules.version>2.2021.09.17_07.09-67428a6422cc</common-java-modules.version>
-        <kontrakter.version>3.0_20240906070327_03089ba</kontrakter.version>
-        <felles.version>3.20240806111424_fff2930</felles.version>
+        <kontrakter.version>3.0_20240919121839_57daa74</kontrakter.version>
+        <felles.version>3.20240913110742_adb42f8</felles.version>
         <!-- kotest.properties kan antakelig fjernes i versjon 6, for autoscan blir default false -->
         <kotest.version>5.9.1</kotest.version>
         <token-validation-spring.version>5.0.5</token-validation-spring.version>
         <okhttp3.version>4.9.1</okhttp3.version><!-- Inntil videre nødvendig for token-validation-spring-test-->
-        <openhtmltopdf.version>1.1.21</openhtmltopdf.version>
+        <openhtmltopdf.version>1.1.22</openhtmltopdf.version>
         <jakarta.xml.bind-api.version>4.0.1</jakarta.xml.bind-api.version>
         <jaxb-impl.version>4.0.5</jaxb-impl.version>
         <verapdf.version>1.26.1</verapdf.version>
@@ -207,7 +207,7 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
-            <version>10.17.3</version>
+            <version>10.18.0</version>
             <scope>runtime</scope>
         </dependency>
 
