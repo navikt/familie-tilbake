@@ -21,6 +21,7 @@ import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagsty
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEvent
 import no.nav.familie.tilbake.oppgave.OppgaveService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
+import no.nav.familie.tilbake.totrinn.TotrinnsvurderingRepository
 import org.slf4j.LoggerFactory
 import org.springframework.context.event.EventListener
 import org.springframework.http.HttpStatus
@@ -38,6 +39,7 @@ class Foreslåvedtakssteg(
     private val oppgaveTaskService: OppgaveTaskService,
     private val historikkTaskService: HistorikkTaskService,
     private val oppgaveService: OppgaveService,
+    private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
 ) : IBehandlingssteg {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -163,8 +165,18 @@ class Foreslåvedtakssteg(
                 behandling = behandling,
                 oppgavetype = Oppgavetype.GodkjenneVedtak,
                 opprettetAv = ContextService.hentSaksbehandlerNavn(),
+                saksbehandler = finnTidligereBeslutter(behandlingId),
             )
         }
+    }
+
+    private fun finnTidligereBeslutter(behandlingId: UUID): String? {
+        val totrinnsvurderinger = totrinnsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
+        return totrinnsvurderinger
+            .find { it.godkjent == false }
+            ?.sporbar
+            ?.endret
+            ?.endretAv
     }
 
     private fun validerAtDetFinnesOppgave(
