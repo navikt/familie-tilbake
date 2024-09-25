@@ -11,6 +11,7 @@ import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsoppsummering
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
@@ -49,13 +50,12 @@ class VedtaksbrevService(
 
     fun hentVedtaksbrevSomTekst(
         behandlingId: UUID,
-        skalSammenslåPerioder: Boolean = false,
     ): List<Avsnitt> {
         val vedtaksbrevgrunnlag = vedtaksbrevgrunnlagService.hentVedtaksbrevgrunnlag(behandlingId)
 
         val hbVedtaksbrevsdata = vedtaksbrevgeneratorService.genererVedtaksbrevsdataTilVisningIFrontendSkjema(vedtaksbrevgrunnlag)
         val hovedoverskrift = TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(hbVedtaksbrevsdata)
-        return AvsnittUtil.lagVedtaksbrevDeltIAvsnitt(hbVedtaksbrevsdata, hovedoverskrift, skalSammenslåPerioder)
+        return AvsnittUtil.lagVedtaksbrevDeltIAvsnitt(hbVedtaksbrevsdata, hovedoverskrift)
     }
 
     @Transactional
@@ -131,6 +131,8 @@ class VedtaksbrevService(
         val vedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)
         if (vedtaksbrevsoppsummering != null) {
             vedtaksbrevsoppsummeringRepository.update(vedtaksbrevsoppsummering.copy(skalSammenslåPerioder = skalSammenslåPerioder))
+        } else {
+            vedtaksbrevsoppsummeringRepository.insert(Vedtaksbrevsoppsummering(behandlingId = behandlingId, oppsummeringFritekst = "", skalSammenslåPerioder = true))
         }
     }
 }

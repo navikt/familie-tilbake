@@ -116,11 +116,12 @@ class VedtaksbrevgeneratorService(
                 ""
             }
 
+        val skalSammenslåPerioder = vedtaksbrevgrunnlag.behandling.vedtaksbrevOppsummering?.skalSammenslåPerioder ?: false
         return Brevdata(
             mottager = brevmottager,
             metadata = vedtaksbrevsdata.metadata,
             overskrift = TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(hbVedtaksbrevsdata),
-            brevtekst = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(hbVedtaksbrevsdata, hentForhåndvisningVedtaksbrevPdfDto.slåSammenPerioder),
+            brevtekst = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(hbVedtaksbrevsdata, skalSammenslåPerioder),
             vedleggHtml = vedleggHtml,
         )
     }

@@ -15,13 +15,12 @@ internal object AvsnittUtil {
     fun lagVedtaksbrevDeltIAvsnitt(
         vedtaksbrevsdata: HbVedtaksbrevsdata,
         hovedoverskrift: String,
-        skalSammenslåPerioder: Boolean = false,
     ): List<Avsnitt> {
         val resultat: MutableList<Avsnitt> = ArrayList()
         val vedtaksbrevsdataMedFriteksmarkeringer = Vedtaksbrevsfritekst.settInnMarkeringForFritekst(vedtaksbrevsdata)
         resultat.add(lagOppsummeringsavsnitt(vedtaksbrevsdataMedFriteksmarkeringer, hovedoverskrift))
         if (vedtaksbrevsdata.felles.vedtaksbrevstype == Vedtaksbrevstype.ORDINÆR) {
-            resultat.addAll(lagPerioderavsnitt(vedtaksbrevsdataMedFriteksmarkeringer, skalSammenslåPerioder))
+            resultat.addAll(lagPerioderavsnitt(vedtaksbrevsdataMedFriteksmarkeringer))
         }
         resultat.add(lagAvsluttendeAvsnitt(vedtaksbrevsdataMedFriteksmarkeringer))
         return resultat
@@ -46,21 +45,10 @@ internal object AvsnittUtil {
         return FellesTekstformaterer.lagDeltekst(vedtaksbrevFelles, filsti)
     }
 
-    private fun lagPerioderavsnitt(
-        vedtaksbrevsdata: HbVedtaksbrevsdata,
-        skalSammenslåPerioder: Boolean,
-    ): List<Avsnitt> {
-        val avsnittList =
-            vedtaksbrevsdata.perioder.map {
-                lagPeriodeAvsnitt(HbVedtaksbrevPeriodeOgFelles(vedtaksbrevsdata.felles, it))
-            }
-
-        if (skalSammenslåPerioder) {
-            return listOf(avsnittList.first())
-        } else {
-            return avsnittList
+    private fun lagPerioderavsnitt(vedtaksbrevsdata: HbVedtaksbrevsdata): List<Avsnitt> =
+        vedtaksbrevsdata.perioder.map {
+            lagPeriodeAvsnitt(HbVedtaksbrevPeriodeOgFelles(vedtaksbrevsdata.felles, it))
         }
-    }
 
     private fun lagAvsluttendeAvsnitt(vedtaksbrevsdata: HbVedtaksbrevsdata): Avsnitt {
         val tekst = FellesTekstformaterer.lagDeltekst(vedtaksbrevsdata, "vedtak/vedtak_slutt")
