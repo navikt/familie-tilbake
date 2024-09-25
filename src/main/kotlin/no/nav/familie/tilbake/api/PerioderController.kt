@@ -62,7 +62,7 @@ class PerioderController(
     )
     fun slåSammenPerioder(
         @PathVariable behandlingId: UUID,
-        @RequestParam skalSammenslåPerioder: Boolean,
+        @RequestParam("skalSammenslaa") skalSammenslåPerioder: Boolean,
     ): Ressurs<Boolean> {
         vedtaksbrevService.oppdaterSkalSammenslåPerioder(behandlingId, skalSammenslåPerioder)
         return Ressurs.success(true)

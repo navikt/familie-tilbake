@@ -12,7 +12,7 @@ data class Vedtaksbrevsoppsummering(
     val id: UUID = UUID.randomUUID(),
     val behandlingId: UUID,
     val oppsummeringFritekst: String?,
-    @Column( "skal_sammenslaa_perioder")
+    @Column("skal_sammenslaa_perioder")
     val skalSammenslåPerioder: Boolean,
     @Version
     val versjon: Long = 0,

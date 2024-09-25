@@ -5,6 +5,9 @@ import no.nav.familie.tilbake.api.dto.BehandlingsstegForeldelseDto
 import no.nav.familie.tilbake.api.dto.ForeldelsesperiodeDto
 import no.nav.familie.tilbake.api.dto.VurdertForeldelseDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningUtil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
@@ -24,6 +27,7 @@ class ForeldelseService(
     private val kravgrunnlagRepository: KravgrunnlagRepository,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val behandlingRepository: BehandlingRepository,
+    private val behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository,
 ) {
     fun hentVurdertForeldelse(behandlingId: UUID): VurdertForeldelseDto {
         val vurdertForeldelse: VurdertForeldelse? = foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
@@ -102,6 +106,10 @@ class ForeldelseService(
     }
 
     fun sjekkOmForeldelsePerioderErLike(behandlingId: UUID): Boolean {
+        val behandlingssteg = behandlingsstegstilstandRepository.findByBehandlingIdAndBehandlingssteg(behandlingId, Behandlingssteg.FORELDELSE)
+        if (behandlingssteg?.behandlingsstegsstatus == Behandlingsstegstatus.AUTOUTFØRT) {
+            return true
+        }
         val vurdertForeldelse: VurdertForeldelse? = foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
         val førstePeriode = vurdertForeldelse?.foreldelsesperioder?.firstOrNull() ?: return false
 
