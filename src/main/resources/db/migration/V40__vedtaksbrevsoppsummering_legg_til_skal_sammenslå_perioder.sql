@@ -1,2 +1,2 @@
 ALTER TABLE vedtaksbrevsoppsummering
-    ADD COLUMN skal_sammenslå_perioder BOOLEAN NOT NULL DEFAULT FALSE;
+    ADD COLUMN skal_sammenslaa_perioder BOOLEAN NOT NULL DEFAULT FALSE;
