@@ -8,12 +8,13 @@ internal object TekstformatererVedtaksbrev {
     fun lagVedtaksbrevsfritekst(
         vedtaksbrevsdata: HbVedtaksbrevsdata,
         skalSammenslåPerioder: Boolean = false,
+        erPerioderLike: Boolean = false,
     ): String =
         when (vedtaksbrevsdata.felles.vedtaksbrevstype) {
             Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT ->
                 lagVedtaksbrev("vedtak/fritekstFeilutbetalingBortfalt/fritekstFeilutbetalingBortfalt", vedtaksbrevsdata)
             Vedtaksbrevstype.ORDINÆR ->
-                if (skalSammenslåPerioder) {
+                if (skalSammenslåPerioder && erPerioderLike) {
                     lagVedtaksbrev("vedtak/vedtak_sammenslå_perioder", vedtaksbrevsdata)
                 } else {
                     lagVedtaksbrev("vedtak/vedtak", vedtaksbrevsdata)

@@ -2,8 +2,6 @@ package no.nav.familie.tilbake.api
 
 import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.tilbake.api.dto.FritekstavsnittDto
-import no.nav.familie.tilbake.behandling.LagreUtkastVedtaksbrevService
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevService
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
@@ -31,9 +29,7 @@ class PerioderController(
     private val vilkårsVurderingService: VilkårsvurderingService,
     private val foreldelseService: ForeldelseService,
     private val vedtaksbrevService: VedtaksbrevService,
-    private val lagreUtkastVedtaksbrevService: LagreUtkastVedtaksbrevService,
 ) {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Operation(summary = "Sjekker om perioder er like - unntatt dato og beløp")
