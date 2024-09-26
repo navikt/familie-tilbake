@@ -124,6 +124,7 @@ class VedtaksbrevgeneratorService(
                 hentForhåndvisningVedtaksbrevPdfDto.perioderMedTekst,
                 brevmottager,
                 brevmetadata,
+                erPerioderLike,
             )
         val hbVedtaksbrevsdata: HbVedtaksbrevsdata = vedtaksbrevsdata.vedtaksbrevsdata
 
@@ -176,6 +177,7 @@ class VedtaksbrevgeneratorService(
         perioderFritekst: List<PeriodeMedTekstDto>,
         brevmottager: Brevmottager,
         forhåndsgenerertMetadata: Brevmetadata? = null,
+        erPerioderLike: Boolean = false,
     ): Vedtaksbrevsdata {
         val språkkode: Språkkode = vedtaksbrevgrunnlag.bruker.språkkode
         val personinfo: Personinfo =
