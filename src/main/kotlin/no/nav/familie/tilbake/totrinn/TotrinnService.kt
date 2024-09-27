@@ -15,6 +15,7 @@ import no.nav.familie.tilbake.totrinn.domain.Totrinnsvurdering
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.util.UUID
 
 @Service
@@ -95,6 +96,20 @@ class TotrinnService(
     fun fjernAnsvarligBeslutter(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         behandlingRepository.update(behandling.copy(ansvarligBeslutter = null))
+    }
+
+    fun finnTidligereBeslutterEllerNullHvisEldreEnn1mnd(behandlingId: UUID): String? {
+        return totrinnsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
+            .find { !it.godkjent }
+            ?.takeIf { erEndretTidUnder1Mnd(it) }
+            ?.sporbar
+            ?.endret
+            ?.endretAv
+    }
+
+    private fun erEndretTidUnder1Mnd(totrinnsvurdering: Totrinnsvurdering): Boolean {
+        val endretTid = totrinnsvurdering.sporbar.endret.endretTid.toLocalDate()
+        return endretTid.isAfter(LocalDate.now().minusMonths(1))
     }
 
     private fun finnOmStegKanBesluttes(

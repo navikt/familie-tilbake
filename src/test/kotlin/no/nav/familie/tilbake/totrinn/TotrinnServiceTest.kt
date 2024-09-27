@@ -15,6 +15,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.data.Testdata
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -188,6 +189,82 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
             }
 
         exception.message shouldBe "Stegene [FORELDELSE, VILKÅRSVURDERING] mangler totrinnsvurdering"
+    }
+
+    @Test
+    fun `tidligere beslutter skal bli satt hvis en vurdering er underkjent og har blitt fattet tidlig nok`() {
+
+        lagBehandlingsstegstilstand(Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
+
+        totrinnService.lagreTotrinnsvurderinger(
+            behandlingId,
+            listOf(
+                VurdertTotrinnDto(
+                    behandlingssteg = Behandlingssteg.FAKTA,
+                    godkjent = false,
+                    begrunnelse = "testverdi",
+                ),
+                VurdertTotrinnDto(
+                    behandlingssteg = Behandlingssteg.VILKÅRSVURDERING,
+                    godkjent = true,
+                    begrunnelse = "testverdi",
+                ),
+                VurdertTotrinnDto(
+                    behandlingssteg = Behandlingssteg.FORESLÅ_VEDTAK,
+                    godkjent = true,
+                    begrunnelse = "testverdi",
+                ),
+            ),
+        )
+
+        val tidligerebeslutter = totrinnService.finnTidligereBeslutterEllerNullHvisEldreEnn1mnd(behandlingId)
+
+        assertThat(tidligerebeslutter).isNotNull
+
+    }
+
+    @Test
+    fun `tidligere beslutter skal bli null hvis alle vurderingene er godkjente`() {
+
+        lagBehandlingsstegstilstand(Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
+
+        totrinnService.lagreTotrinnsvurderinger(
+            behandlingId,
+            listOf(
+                VurdertTotrinnDto(
+                    behandlingssteg = Behandlingssteg.FAKTA,
+                    godkjent = true,
+                    begrunnelse = "testverdi",
+                ),
+                VurdertTotrinnDto(
+                    behandlingssteg = Behandlingssteg.VILKÅRSVURDERING,
+                    godkjent = true,
+                    begrunnelse = "testverdi",
+                ),
+                VurdertTotrinnDto(
+                    behandlingssteg = Behandlingssteg.FORESLÅ_VEDTAK,
+                    godkjent = true,
+                    begrunnelse = "testverdi",
+                ),
+            ),
+        )
+
+        val tidligerebeslutter = totrinnService.finnTidligereBeslutterEllerNullHvisEldreEnn1mnd(behandlingId)
+
+        assertThat(tidligerebeslutter).isNull()
+
     }
 
     private fun lagBehandlingsstegstilstand(
