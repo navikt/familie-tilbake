@@ -15,12 +15,13 @@ internal object AvsnittUtil {
     fun lagVedtaksbrevDeltIAvsnitt(
         vedtaksbrevsdata: HbVedtaksbrevsdata,
         hovedoverskrift: String,
+        skalSammenslåPerioder: Boolean = true,
     ): List<Avsnitt> {
         val resultat: MutableList<Avsnitt> = ArrayList()
         val vedtaksbrevsdataMedFriteksmarkeringer = Vedtaksbrevsfritekst.settInnMarkeringForFritekst(vedtaksbrevsdata)
         resultat.add(lagOppsummeringsavsnitt(vedtaksbrevsdataMedFriteksmarkeringer, hovedoverskrift))
         if (vedtaksbrevsdata.felles.vedtaksbrevstype == Vedtaksbrevstype.ORDINÆR) {
-            resultat.addAll(lagPerioderavsnitt(vedtaksbrevsdataMedFriteksmarkeringer))
+            resultat.addAll(lagPerioderavsnitt(vedtaksbrevsdataMedFriteksmarkeringer, skalSammenslåPerioder))
         }
         resultat.add(lagAvsluttendeAvsnitt(vedtaksbrevsdataMedFriteksmarkeringer))
         return resultat
@@ -45,10 +46,18 @@ internal object AvsnittUtil {
         return FellesTekstformaterer.lagDeltekst(vedtaksbrevFelles, filsti)
     }
 
-    private fun lagPerioderavsnitt(vedtaksbrevsdata: HbVedtaksbrevsdata): List<Avsnitt> =
-        vedtaksbrevsdata.perioder.map {
-            lagPeriodeAvsnitt(HbVedtaksbrevPeriodeOgFelles(vedtaksbrevsdata.felles, it))
+    private fun lagPerioderavsnitt(
+        vedtaksbrevsdata: HbVedtaksbrevsdata,
+        skalSammenslåPerioder: Boolean,
+    ): List<Avsnitt> {
+        if (skalSammenslåPerioder) {
+            return listOf(lagSammenslåttPeriodeAvsnitt(vedtaksbrevsdata))
+        } else {
+            return vedtaksbrevsdata.perioder.map {
+                lagPeriodeAvsnitt(HbVedtaksbrevPeriodeOgFelles(vedtaksbrevsdata.felles, it))
+            }
         }
+    }
 
     private fun lagAvsluttendeAvsnitt(vedtaksbrevsdata: HbVedtaksbrevsdata): Avsnitt {
         val tekst = FellesTekstformaterer.lagDeltekst(vedtaksbrevsdata, "vedtak/vedtak_slutt")
@@ -76,6 +85,40 @@ internal object AvsnittUtil {
         avsnitt = parseTekst(vilkårstekst, avsnitt, Underavsnittstype.VILKÅR)
         avsnitt = parseTekst(særligeGrunnerstekst, avsnitt, Underavsnittstype.SÆRLIGEGRUNNER)
         avsnitt = parseTekst(avsluttendeTekst, avsnitt, null)
+        return avsnitt
+    }
+
+    private fun lagSammenslåttPeriodeAvsnitt(data: HbVedtaksbrevsdata): Avsnitt {
+//        TODO: Sender med HbVedtaksbrevsdata må sende HbVedtaksbrevPeriodeOgFelles
+        val overskrift = FellesTekstformaterer.lagDeltekst(data, "vedtak/periode_overskrift")
+        val førsteFom =
+            data.perioder
+                .first()
+                .periode.fom
+        val sisteTom =
+            data.perioder
+                .last()
+                .periode.tom
+        var avsnitt =
+            Avsnitt(
+                avsnittstype = Avsnittstype.SAMMENSLÅTT_PERIODE,
+                fom = førsteFom,
+                tom = sisteTom,
+                overskrift = overskrift,
+            )
+
+        val faktatekst = FellesTekstformaterer.lagDeltekst(data, PARTIAL_PERIODE_FAKTA)
+        val foreldelsestekst = FellesTekstformaterer.lagDeltekst(data, PARTIAL_PERIODE_FORELDELSE)
+        val vilkårstekst = FellesTekstformaterer.lagDeltekst(data, PARTIAL_PERIODE_VILKÅR)
+        val særligeGrunnerstekst = FellesTekstformaterer.lagDeltekst(data, PARTIAL_PERIODE_SÆRLIGE_GRUNNER)
+        val avsluttendeTekst = FellesTekstformaterer.lagDeltekst(data, "vedtak/periode_slutt")
+
+        avsnitt = parseTekst(faktatekst, avsnitt, Underavsnittstype.FAKTA)
+        avsnitt = parseTekst(foreldelsestekst, avsnitt, Underavsnittstype.FORELDELSE)
+        avsnitt = parseTekst(vilkårstekst, avsnitt, Underavsnittstype.VILKÅR)
+        avsnitt = parseTekst(særligeGrunnerstekst, avsnitt, Underavsnittstype.SÆRLIGEGRUNNER)
+        avsnitt = parseTekst(avsluttendeTekst, avsnitt, null)
+
         return avsnitt
     }
 

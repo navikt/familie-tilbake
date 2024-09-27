@@ -82,7 +82,7 @@ class VedtaksbrevgeneratorService(
             vedtaksbrevgrunnlag.behandlinger
                 .first { it.id == vedtaksbrevgrunnlag.behandling.id }
                 .vedtaksbrevOppsummering
-                ?.skalSammenslåPerioder ?: false
+                ?.skalSammenslåPerioder ?: erPerioderLike
         val data =
             Fritekstbrevsdata(
                 TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(hbVedtaksbrevsdata),
@@ -115,6 +115,8 @@ class VedtaksbrevgeneratorService(
                 foreldelseService.sjekkOmForeldelsePerioderErLike(behandlingId) &&
                 vilkårsVurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandlingId)
 
+        val skalSammenslåPerioder = vedtaksbrevgrunnlag.behandling.vedtaksbrevOppsummering?.skalSammenslåPerioder ?: erPerioderLike
+
         val (brevmetadata, brevmottager) =
             brevmetadataUtil.lagBrevmetadataForMottakerTilForhåndsvisning(vedtaksbrevgrunnlag)
         val vedtaksbrevsdata =
@@ -134,8 +136,6 @@ class VedtaksbrevgeneratorService(
             } else {
                 ""
             }
-
-        val skalSammenslåPerioder = vedtaksbrevgrunnlag.behandling.vedtaksbrevOppsummering?.skalSammenslåPerioder ?: false
         return Brevdata(
             mottager = brevmottager,
             metadata = vedtaksbrevsdata.metadata,
