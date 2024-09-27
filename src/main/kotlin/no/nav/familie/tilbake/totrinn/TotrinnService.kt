@@ -98,7 +98,6 @@ class TotrinnService(
         behandlingRepository.update(behandling.copy(ansvarligBeslutter = null))
     }
 
-    // finnTidligereBeslutterHvisUnderkjentVurdering
     fun finnForrigeBeslutterMedNyVurderingEllerNull(behandlingId: UUID): String? =
         totrinnsvurderingRepository
             .findByBehandlingIdAndAktivIsTrue(behandlingId)
