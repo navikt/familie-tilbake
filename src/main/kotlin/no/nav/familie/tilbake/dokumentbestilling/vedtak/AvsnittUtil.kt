@@ -2,7 +2,6 @@ package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
 import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.FellesTekstformaterer
-import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevDatoer
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevFelles
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevPeriodeOgFelles
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevsdata
@@ -95,7 +94,13 @@ internal object AvsnittUtil {
 
     private fun lagSammenslåttPeriodeAvsnitt(vedtaksbrevsdata: HbVedtaksbrevsdata): Avsnitt {
         val førstePeriode = vedtaksbrevsdata.perioder.first()
-        val sammenslåttDatoperiode = Datoperiode(førstePeriode.periode.fom, vedtaksbrevsdata.perioder.last().periode.tom)
+        val sammenslåttDatoperiode =
+            Datoperiode(
+                førstePeriode.periode.fom,
+                vedtaksbrevsdata.perioder
+                    .last()
+                    .periode.tom,
+            )
         val hbVedtaksbrevsperiode = HbVedtaksbrevsperiode(sammenslåttDatoperiode, førstePeriode.kravgrunnlag, førstePeriode.fakta, førstePeriode.vurderinger, førstePeriode.resultat, true, førstePeriode.grunnbeløp)
         val hbVedtaksbrevPeriodeOgFelles = HbVedtaksbrevPeriodeOgFelles(vedtaksbrevsdata.felles, hbVedtaksbrevsperiode)
 

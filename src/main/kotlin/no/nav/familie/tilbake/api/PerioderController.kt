@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.api
 import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevService
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevsoppsummeringRepository
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
@@ -29,6 +30,7 @@ class PerioderController(
     private val vilkårsVurderingService: VilkårsvurderingService,
     private val foreldelseService: ForeldelseService,
     private val vedtaksbrevService: VedtaksbrevService,
+    private val vedtaksbrevsoppsummeringRepository: VedtaksbrevsoppsummeringRepository,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -70,5 +72,23 @@ class PerioderController(
         logger.info("Oppdater skal sammenslå perioder: $skalSammenslåPerioder")
         vedtaksbrevService.oppdaterSkalSammenslåPerioder(behandlingId, skalSammenslåPerioder)
         return Ressurs.success(true)
+    }
+
+    @Operation(summary = "Er perioder slått sammen")
+    @PostMapping(
+        "/erPerioderSlaattSammen/{behandlingId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    @Rolletilgangssjekk(
+        Behandlerrolle.SAKSBEHANDLER,
+        "Er perioder slått sammen",
+        AuditLoggerEvent.UPDATE,
+        HenteParam.BEHANDLING_ID,
+    )
+    fun erPerioderSlåttSammen(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<Boolean> {
+        val erPerioderSlåttSammen = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)?.skalSammenslåPerioder ?: false
+        return Ressurs.success(erPerioderSlåttSammen)
     }
 }
