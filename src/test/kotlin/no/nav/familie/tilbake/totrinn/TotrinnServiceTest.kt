@@ -228,9 +228,8 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
         assertThat(tidligerebeslutter).isNotNull
 
     }
-
     @Test
-    fun `tidligere beslutter skal bli null hvis alle vurderingene er godkjente`() {
+    fun `tidligere beslutter skal bli lik null hvis alle vurderinger er godkjente`() {
 
         lagBehandlingsstegstilstand(Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
@@ -260,6 +259,23 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
                 ),
             ),
         )
+
+        val tidligerebeslutter = totrinnService.finnTidligereBeslutterEllerNullHvisEldreEnn1mnd(behandlingId)
+
+        assertThat(tidligerebeslutter).isNull()
+
+    }
+
+    @Test
+    fun `tidligere beslutter skal bli null hvis det ikke finnes totrinnsvurderinger`() {
+
+        lagBehandlingsstegstilstand(Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
 
         val tidligerebeslutter = totrinnService.finnTidligereBeslutterEllerNullHvisEldreEnn1mnd(behandlingId)
 

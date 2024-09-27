@@ -14,6 +14,8 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.config.FeatureToggleConfig
+import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevService
 import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
@@ -40,6 +42,7 @@ class Foreslåvedtakssteg(
     private val historikkTaskService: HistorikkTaskService,
     private val oppgaveService: OppgaveService,
     private val totrinnService: TotrinnService,
+    private val featureToggleService: FeatureToggleService
 ) : IBehandlingssteg {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -161,11 +164,15 @@ class Foreslåvedtakssteg(
     private fun opprettGodkjennevedtakOppgave(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.saksbehandlingstype == Saksbehandlingstype.ORDINÆR) {
+            val tidligerebeslutter = when (featureToggleService.isEnabled(FeatureToggleConfig.TIDLIGERE_BESLUTTER)) {
+                true -> totrinnService.finnTidligereBeslutterEllerNullHvisEldreEnn1mnd(behandlingId)
+                false -> null
+            }
             oppgaveTaskService.opprettOppgaveTask(
                 behandling = behandling,
                 oppgavetype = Oppgavetype.GodkjenneVedtak,
                 opprettetAv = ContextService.hentSaksbehandlerNavn(),
-                saksbehandler = totrinnService.finnTidligereBeslutterEllerNullHvisEldreEnn1mnd(behandlingId),
+                saksbehandler = tidligerebeslutter,
             )
         }
     }
