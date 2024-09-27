@@ -222,7 +222,7 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
             ),
         )
 
-        val tidligerebeslutter = totrinnService.finnTidligereBeslutterEllerNullHvisEldreEnn1mnd(behandlingId)
+        val tidligerebeslutter = totrinnService.finnForrigeBeslutterMedNyVurderingEllerNull(behandlingId)
 
         assertThat(tidligerebeslutter).isNotNull
     }
@@ -258,7 +258,7 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
             ),
         )
 
-        val tidligerebeslutter = totrinnService.finnTidligereBeslutterEllerNullHvisEldreEnn1mnd(behandlingId)
+        val tidligerebeslutter = totrinnService.finnForrigeBeslutterMedNyVurderingEllerNull(behandlingId)
 
         assertThat(tidligerebeslutter).isNull()
     }
@@ -273,7 +273,7 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
 
-        val tidligerebeslutter = totrinnService.finnTidligereBeslutterEllerNullHvisEldreEnn1mnd(behandlingId)
+        val tidligerebeslutter = totrinnService.finnForrigeBeslutterMedNyVurderingEllerNull(behandlingId)
 
         assertThat(tidligerebeslutter).isNull()
     }

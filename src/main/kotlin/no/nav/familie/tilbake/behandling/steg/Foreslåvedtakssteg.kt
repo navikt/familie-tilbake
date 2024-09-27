@@ -166,7 +166,7 @@ class Foreslåvedtakssteg(
         if (behandling.saksbehandlingstype == Saksbehandlingstype.ORDINÆR) {
             val tidligerebeslutter =
                 when (featureToggleService.isEnabled(FeatureToggleConfig.TIDLIGERE_BESLUTTER)) {
-                    true -> totrinnService.finnTidligereBeslutterEllerNullHvisEldreEnn1mnd(behandlingId)
+                    true -> totrinnService.finnForrigeBeslutterMedNyVurderingEllerNull(behandlingId)
                     false -> null
                 }
             oppgaveTaskService.opprettOppgaveTask(

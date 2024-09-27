@@ -35,7 +35,7 @@ class TotrinnServiceUnitTest {
             )
         every { totrinnsvurderingRepository.findByBehandlingIdAndAktivIsTrue(any()) } returns listOf(totrinnsvurdering)
 
-        val beslutter = totrinnService.finnTidligereBeslutterEllerNullHvisEldreEnn1mnd(behandlingId)
+        val beslutter = totrinnService.finnForrigeBeslutterMedNyVurderingEllerNull(behandlingId)
 
         assertThat(beslutter).isNull()
     }
@@ -53,7 +53,7 @@ class TotrinnServiceUnitTest {
             )
         every { totrinnsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId) } returns listOf(totrinnsvurdering)
 
-        val result = totrinnService.finnTidligereBeslutterEllerNullHvisEldreEnn1mnd(behandlingId)
+        val result = totrinnService.finnForrigeBeslutterMedNyVurderingEllerNull(behandlingId)
 
         assertEquals("endretAv", result)
     }
