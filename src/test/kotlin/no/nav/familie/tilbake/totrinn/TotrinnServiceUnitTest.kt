@@ -14,7 +14,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class TotrinnServiceUnitTest {
-
     private val behandlingRepository = mockk<BehandlingRepository>()
     private val behandlingsstegstilstandRepository = mockk<BehandlingsstegstilstandRepository>()
     private val totrinnsvurderingRepository = mockk<TotrinnsvurderingRepository>()
@@ -26,13 +25,14 @@ class TotrinnServiceUnitTest {
     @Test
     fun `skal returnere tidligere beslutter lik null når underkjenningen er over 1 mnd tilbake i tid  `() {
         val toMndTilbakeITid = LocalDateTime.now().minusMonths(2)
-        val totrinnsvurdering = Totrinnsvurdering(
-            behandlingId = behandlingId,
-            behandlingssteg = mockk(),
-            godkjent = false,
-            begrunnelse = "begrunnelse",
-            sporbar = Sporbar(endret = Endret(endretTid = toMndTilbakeITid, endretAv = "endretAv"))
-        )
+        val totrinnsvurdering =
+            Totrinnsvurdering(
+                behandlingId = behandlingId,
+                behandlingssteg = mockk(),
+                godkjent = false,
+                begrunnelse = "begrunnelse",
+                sporbar = Sporbar(endret = Endret(endretTid = toMndTilbakeITid, endretAv = "endretAv")),
+            )
         every { totrinnsvurderingRepository.findByBehandlingIdAndAktivIsTrue(any()) } returns listOf(totrinnsvurdering)
 
         val beslutter = totrinnService.finnTidligereBeslutterEllerNullHvisEldreEnn1mnd(behandlingId)
@@ -43,13 +43,14 @@ class TotrinnServiceUnitTest {
     @Test
     fun `skal returnere tidligere beslutter hvis en vurdering er underkjent og det er under 1 mnd siden`() {
         val treUkerTilbakeITid = LocalDateTime.now().minusWeeks(3)
-        val totrinnsvurdering = Totrinnsvurdering(
-            behandlingId = behandlingId,
-            behandlingssteg = mockk(),
-            godkjent = false,
-            begrunnelse = "begrunnelse",
-            sporbar = Sporbar(endret = Endret(endretTid = treUkerTilbakeITid, endretAv = "endretAv"))
-        )
+        val totrinnsvurdering =
+            Totrinnsvurdering(
+                behandlingId = behandlingId,
+                behandlingssteg = mockk(),
+                godkjent = false,
+                begrunnelse = "begrunnelse",
+                sporbar = Sporbar(endret = Endret(endretTid = treUkerTilbakeITid, endretAv = "endretAv")),
+            )
         every { totrinnsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId) } returns listOf(totrinnsvurdering)
 
         val result = totrinnService.finnTidligereBeslutterEllerNullHvisEldreEnn1mnd(behandlingId)

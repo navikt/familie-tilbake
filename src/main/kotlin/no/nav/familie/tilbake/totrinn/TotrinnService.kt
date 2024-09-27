@@ -98,17 +98,19 @@ class TotrinnService(
         behandlingRepository.update(behandling.copy(ansvarligBeslutter = null))
     }
 
-    fun finnTidligereBeslutterEllerNullHvisEldreEnn1mnd(behandlingId: UUID): String? {
-        return totrinnsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
+    fun finnTidligereBeslutterEllerNullHvisEldreEnn1mnd(behandlingId: UUID): String? =
+        totrinnsvurderingRepository
+            .findByBehandlingIdAndAktivIsTrue(behandlingId)
             .find { !it.godkjent }
             ?.takeIf { erEndretTidUnder1Mnd(it) }
             ?.sporbar
             ?.endret
             ?.endretAv
-    }
 
     private fun erEndretTidUnder1Mnd(totrinnsvurdering: Totrinnsvurdering): Boolean {
-        val endretTid = totrinnsvurdering.sporbar.endret.endretTid.toLocalDate()
+        val endretTid =
+            totrinnsvurdering.sporbar.endret.endretTid
+                .toLocalDate()
         return endretTid.isAfter(LocalDate.now().minusMonths(1))
     }
 

@@ -42,7 +42,7 @@ class Foreslåvedtakssteg(
     private val historikkTaskService: HistorikkTaskService,
     private val oppgaveService: OppgaveService,
     private val totrinnService: TotrinnService,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
 ) : IBehandlingssteg {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -164,10 +164,11 @@ class Foreslåvedtakssteg(
     private fun opprettGodkjennevedtakOppgave(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.saksbehandlingstype == Saksbehandlingstype.ORDINÆR) {
-            val tidligerebeslutter = when (featureToggleService.isEnabled(FeatureToggleConfig.TIDLIGERE_BESLUTTER)) {
-                true -> totrinnService.finnTidligereBeslutterEllerNullHvisEldreEnn1mnd(behandlingId)
-                false -> null
-            }
+            val tidligerebeslutter =
+                when (featureToggleService.isEnabled(FeatureToggleConfig.TIDLIGERE_BESLUTTER)) {
+                    true -> totrinnService.finnTidligereBeslutterEllerNullHvisEldreEnn1mnd(behandlingId)
+                    false -> null
+                }
             oppgaveTaskService.opprettOppgaveTask(
                 behandling = behandling,
                 oppgavetype = Oppgavetype.GodkjenneVedtak,

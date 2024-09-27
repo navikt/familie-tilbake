@@ -193,7 +193,6 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `tidligere beslutter skal bli satt hvis en vurdering er underkjent og har blitt fattet tidlig nok`() {
-
         lagBehandlingsstegstilstand(Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
@@ -226,11 +225,10 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
         val tidligerebeslutter = totrinnService.finnTidligereBeslutterEllerNullHvisEldreEnn1mnd(behandlingId)
 
         assertThat(tidligerebeslutter).isNotNull
-
     }
+
     @Test
     fun `tidligere beslutter skal bli lik null hvis alle vurderinger er godkjente`() {
-
         lagBehandlingsstegstilstand(Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
@@ -263,12 +261,10 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
         val tidligerebeslutter = totrinnService.finnTidligereBeslutterEllerNullHvisEldreEnn1mnd(behandlingId)
 
         assertThat(tidligerebeslutter).isNull()
-
     }
 
     @Test
     fun `tidligere beslutter skal bli null hvis det ikke finnes totrinnsvurderinger`() {
-
         lagBehandlingsstegstilstand(Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
@@ -280,7 +276,6 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
         val tidligerebeslutter = totrinnService.finnTidligereBeslutterEllerNullHvisEldreEnn1mnd(behandlingId)
 
         assertThat(tidligerebeslutter).isNull()
-
     }
 
     private fun lagBehandlingsstegstilstand(
