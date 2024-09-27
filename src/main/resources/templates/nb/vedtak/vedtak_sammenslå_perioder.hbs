@@ -1,9 +1,7 @@
 {{> nb/vedtak/vedtak_felles}}
 {{> nb/vedtak/vedtak_start}}
 _Perioder som er feilutbetalt
-{{#each perioder }}
-    - Fra og med {{{dato periode.fom}}} til og med {{{dato periode.tom}}}
-{{/each}}
+{{> nb/vedtak/periode-fakta/periode_fakta_ef_sammenslåtte_perioder }}
 
 {{#with perioder.[0] as |periode|}}
 {{> nb/vedtak/periode_fakta_ef_sammenslå_perioder perioder=periode}}

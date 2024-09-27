@@ -1,13 +1,18 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.FellesTekstformaterer
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevDatoer
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevFelles
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevPeriodeOgFelles
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevsdata
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVedtaksbrevsperiode
 
 internal object AvsnittUtil {
     const val PARTIAL_PERIODE_FAKTA = "vedtak/periode_fakta"
+    const val PARTIAL_PERIODE_FAKTA_SAMMENSLÅTT_PERIODER = "vedtak/periode_fakta_ef_sammenslå_perioder"
+    const val PARTIAL_FAKTA_SAMMENSLÅTTE_PERIODER = "vedtak/periode-fakta/periode_fakta_ef_sammenslåtte_perioder"
     const val PARTIAL_PERIODE_FORELDELSE = "vedtak/periode_foreldelse"
     const val PARTIAL_PERIODE_VILKÅR = "vedtak/periode_vilkår"
     const val PARTIAL_PERIODE_SÆRLIGE_GRUNNER = "vedtak/periode_særlige_grunner"
@@ -15,7 +20,7 @@ internal object AvsnittUtil {
     fun lagVedtaksbrevDeltIAvsnitt(
         vedtaksbrevsdata: HbVedtaksbrevsdata,
         hovedoverskrift: String,
-        skalSammenslåPerioder: Boolean = true,
+        skalSammenslåPerioder: Boolean = false,
     ): List<Avsnitt> {
         val resultat: MutableList<Avsnitt> = ArrayList()
         val vedtaksbrevsdataMedFriteksmarkeringer = Vedtaksbrevsfritekst.settInnMarkeringForFritekst(vedtaksbrevsdata)
@@ -88,31 +93,25 @@ internal object AvsnittUtil {
         return avsnitt
     }
 
-    private fun lagSammenslåttPeriodeAvsnitt(data: HbVedtaksbrevsdata): Avsnitt {
-//        TODO: Sender med HbVedtaksbrevsdata må sende HbVedtaksbrevPeriodeOgFelles
-        val overskrift = FellesTekstformaterer.lagDeltekst(data, "vedtak/periode_overskrift")
-        val førsteFom =
-            data.perioder
-                .first()
-                .periode.fom
-        val sisteTom =
-            data.perioder
-                .last()
-                .periode.tom
+    private fun lagSammenslåttPeriodeAvsnitt(vedtaksbrevsdata: HbVedtaksbrevsdata): Avsnitt {
+        val førstePeriode = vedtaksbrevsdata.perioder.first()
+        val sammenslåttDatoperiode = Datoperiode(førstePeriode.periode.fom, vedtaksbrevsdata.perioder.last().periode.tom)
+        val hbVedtaksbrevsperiode = HbVedtaksbrevsperiode(sammenslåttDatoperiode, førstePeriode.kravgrunnlag, førstePeriode.fakta, førstePeriode.vurderinger, førstePeriode.resultat, true, førstePeriode.grunnbeløp)
+        val hbVedtaksbrevPeriodeOgFelles = HbVedtaksbrevPeriodeOgFelles(vedtaksbrevsdata.felles, hbVedtaksbrevsperiode)
+
         var avsnitt =
             Avsnitt(
                 avsnittstype = Avsnittstype.SAMMENSLÅTT_PERIODE,
-                fom = førsteFom,
-                tom = sisteTom,
-                overskrift = overskrift,
+                overskrift = "Perioder som er feilutbetalt",
             )
+        val perioder = FellesTekstformaterer.lagDeltekst(vedtaksbrevsdata, PARTIAL_FAKTA_SAMMENSLÅTTE_PERIODER)
+        val faktatekst = FellesTekstformaterer.lagDeltekst(hbVedtaksbrevPeriodeOgFelles, PARTIAL_PERIODE_FAKTA_SAMMENSLÅTT_PERIODER)
+        val foreldelsestekst = FellesTekstformaterer.lagDeltekst(hbVedtaksbrevPeriodeOgFelles, PARTIAL_PERIODE_FORELDELSE)
+        val vilkårstekst = FellesTekstformaterer.lagDeltekst(hbVedtaksbrevPeriodeOgFelles, PARTIAL_PERIODE_VILKÅR)
+        val særligeGrunnerstekst = FellesTekstformaterer.lagDeltekst(hbVedtaksbrevPeriodeOgFelles, PARTIAL_PERIODE_SÆRLIGE_GRUNNER)
+        val avsluttendeTekst = FellesTekstformaterer.lagDeltekst(hbVedtaksbrevPeriodeOgFelles, "vedtak/periode_slutt")
 
-        val faktatekst = FellesTekstformaterer.lagDeltekst(data, PARTIAL_PERIODE_FAKTA)
-        val foreldelsestekst = FellesTekstformaterer.lagDeltekst(data, PARTIAL_PERIODE_FORELDELSE)
-        val vilkårstekst = FellesTekstformaterer.lagDeltekst(data, PARTIAL_PERIODE_VILKÅR)
-        val særligeGrunnerstekst = FellesTekstformaterer.lagDeltekst(data, PARTIAL_PERIODE_SÆRLIGE_GRUNNER)
-        val avsluttendeTekst = FellesTekstformaterer.lagDeltekst(data, "vedtak/periode_slutt")
-
+        avsnitt = parseTekst(perioder, avsnitt, Underavsnittstype.FAKTA)
         avsnitt = parseTekst(faktatekst, avsnitt, Underavsnittstype.FAKTA)
         avsnitt = parseTekst(foreldelsestekst, avsnitt, Underavsnittstype.FORELDELSE)
         avsnitt = parseTekst(vilkårstekst, avsnitt, Underavsnittstype.VILKÅR)
