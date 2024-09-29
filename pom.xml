@@ -46,7 +46,7 @@
         <testcontainers.version>1.20.1</testcontainers.version>
         <tjenestespesifikasjoner.version>2633.1685ed5</tjenestespesifikasjoner.version>
         <familie-tjenestespesifikasjoner.version>1.0_20240729135316_1bd0ab3</familie-tjenestespesifikasjoner.version>
-        <prosessering-core.version>2.20240902084316_04f17df</prosessering-core.version>
+        <prosessering-core.version>2.20240925091323_ea1bd3c</prosessering-core.version>
     </properties>
 
 
@@ -207,7 +207,7 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
-            <version>10.18.0</version>
+            <version>10.18.2</version>
             <scope>runtime</scope>
         </dependency>
 
