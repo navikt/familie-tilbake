@@ -143,7 +143,7 @@ class VedtaksbrevService(
         if (vedtaksbrevsoppsummering != null) {
             vedtaksbrevsoppsummeringRepository.update(vedtaksbrevsoppsummering.copy(skalSammenslåPerioder = skalSammenslåPerioder))
         } else {
-            vedtaksbrevsoppsummeringRepository.insert(Vedtaksbrevsoppsummering(behandlingId = behandlingId, oppsummeringFritekst = "", skalSammenslåPerioder = true))
+            vedtaksbrevsoppsummeringRepository.insert(Vedtaksbrevsoppsummering(behandlingId = behandlingId, oppsummeringFritekst = "", skalSammenslåPerioder = skalSammenslåPerioder))
         }
     }
 }

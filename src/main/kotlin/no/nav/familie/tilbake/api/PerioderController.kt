@@ -47,12 +47,19 @@ class PerioderController(
     )
     fun erPerioderLike(
         @PathVariable behandlingId: UUID,
-    ): Ressurs<Boolean> =
-        Ressurs.success(
-            faktaFeilutbetalingService.sjekkOmFaktaPerioderErLike(behandlingId) &&
+    ): Ressurs<Boolean> {
+        val erPerioderLike = faktaFeilutbetalingService.sjekkOmFaktaPerioderErLike(behandlingId) &&
                 foreldelseService.sjekkOmForeldelsePerioderErLike(behandlingId) &&
-                vilkårsVurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandlingId),
+                vilkårsVurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandlingId)
+
+        val vedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)
+        if (!erPerioderLike && vedtaksbrevsoppsummering != null) {
+            vedtaksbrevsoppsummeringRepository.update(vedtaksbrevsoppsummering.copy(skalSammenslåPerioder = false))
+        }
+        return Ressurs.success(
+            erPerioderLike,
         )
+    }
 
     @Operation(summary = "Skal oppdatere skalSammenslåPerioder")
     @PostMapping(
