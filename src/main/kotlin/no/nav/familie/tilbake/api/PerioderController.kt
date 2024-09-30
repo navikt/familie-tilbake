@@ -75,7 +75,7 @@ class PerioderController(
     }
 
     @Operation(summary = "Er perioder slått sammen")
-    @PostMapping(
+    @GetMapping(
         "/erPerioderSlaattSammen/{behandlingId}",
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
@@ -88,7 +88,11 @@ class PerioderController(
     fun erPerioderSlåttSammen(
         @PathVariable behandlingId: UUID,
     ): Ressurs<Boolean> {
-        val erPerioderSlåttSammen = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)?.skalSammenslåPerioder ?: false
+        val erPerioderSlåttSammen =
+            vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)?.skalSammenslåPerioder
+                ?: faktaFeilutbetalingService.sjekkOmFaktaPerioderErLike(behandlingId) &&
+                foreldelseService.sjekkOmForeldelsePerioderErLike(behandlingId) &&
+                vilkårsVurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandlingId)
         return Ressurs.success(erPerioderSlåttSammen)
     }
 }

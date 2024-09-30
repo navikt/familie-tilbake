@@ -13,7 +13,10 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsoppsummering
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
+import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
+import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
+import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -31,6 +34,9 @@ class VedtaksbrevService(
     private val pdfBrevService: PdfBrevService,
     private val distribusjonshåndteringService: DistribusjonshåndteringService,
     private val featureToggleService: FeatureToggleService,
+    private val faktaFeilutbetalingService: FaktaFeilutbetalingService,
+    private val foreldelseService: ForeldelseService,
+    private val vilkårsvurderingService: VilkårsvurderingService,
 ) {
     fun sendVedtaksbrev(
         behandling: Behandling,
@@ -53,7 +59,11 @@ class VedtaksbrevService(
     ): List<Avsnitt> {
         val vedtaksbrevgrunnlag = vedtaksbrevgrunnlagService.hentVedtaksbrevgrunnlag(behandlingId)
         val vedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)
-        val skalSammenslåPerioder = vedtaksbrevsoppsummering?.skalSammenslåPerioder ?: false
+        val skalSammenslåPerioder =
+            vedtaksbrevsoppsummering?.skalSammenslåPerioder
+                ?: faktaFeilutbetalingService.sjekkOmFaktaPerioderErLike(behandlingId) &&
+                foreldelseService.sjekkOmForeldelsePerioderErLike(behandlingId) &&
+                vilkårsvurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandlingId)
         val hbVedtaksbrevsdata = vedtaksbrevgeneratorService.genererVedtaksbrevsdataTilVisningIFrontendSkjema(vedtaksbrevgrunnlag)
         val hovedoverskrift = TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(hbVedtaksbrevsdata)
         return AvsnittUtil.lagVedtaksbrevDeltIAvsnitt(hbVedtaksbrevsdata, hovedoverskrift, skalSammenslåPerioder)

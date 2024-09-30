@@ -52,6 +52,7 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetalingsperiode
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
+import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.pdfgen.validering.PdfaValidator
@@ -131,6 +132,9 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
 
+    @Autowired
+    private lateinit var foreldelseService: ForeldelseService
+
     @BeforeEach
     fun init() {
         spyPdfBrevService = spyk(pdfBrevService)
@@ -156,6 +160,9 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
                 spyPdfBrevService,
                 sendBrevService,
                 featureToggleService,
+                faktaFeilutbetalingService,
+                foreldelseService,
+                vilkårsvurderingService,
             )
 
         fagsak = fagsakRepository.insert(Testdata.fagsak)

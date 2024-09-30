@@ -2,6 +2,7 @@
 {{> nb/vedtak/vedtak_start}}
 _Perioder som er feilutbetalt
 {{> nb/vedtak/periode-fakta/periode_fakta_ef_sammenslåtte_perioder }}
+
 {{#with perioder.[0] as |periode|}}
 {{> nb/vedtak/periode_fakta_ef_sammenslå_perioder perioder=periode}}
 {{> nb/vedtak/periode_foreldelse perioder=periode}}
