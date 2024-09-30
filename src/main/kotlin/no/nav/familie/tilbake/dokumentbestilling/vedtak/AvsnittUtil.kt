@@ -11,7 +11,6 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.H
 internal object AvsnittUtil {
     const val PARTIAL_PERIODE_FAKTA = "vedtak/periode_fakta"
     const val PARTIAL_PERIODE_FAKTA_SAMMENSLÅTT_PERIODER = "vedtak/periode_fakta_ef_sammenslå_perioder"
-    const val PARTIAL_FAKTA_SAMMENSLÅTTE_PERIODER = "vedtak/periode-fakta/periode_fakta_ef_sammenslåtte_perioder"
     const val PARTIAL_PERIODE_FORELDELSE = "vedtak/periode_foreldelse"
     const val PARTIAL_PERIODE_VILKÅR = "vedtak/periode_vilkår"
     const val PARTIAL_PERIODE_SÆRLIGE_GRUNNER = "vedtak/periode_særlige_grunner"
@@ -108,15 +107,16 @@ internal object AvsnittUtil {
             Avsnitt(
                 avsnittstype = Avsnittstype.SAMMENSLÅTT_PERIODE,
                 overskrift = "Perioder som er feilutbetalt",
+                fom = førstePeriode.periode.fom,
+                tom = førstePeriode.periode.tom,
             )
-        val perioder = FellesTekstformaterer.lagDeltekst(vedtaksbrevsdata, PARTIAL_FAKTA_SAMMENSLÅTTE_PERIODER)
+
         val faktatekst = FellesTekstformaterer.lagDeltekst(hbVedtaksbrevPeriodeOgFelles, PARTIAL_PERIODE_FAKTA_SAMMENSLÅTT_PERIODER)
         val foreldelsestekst = FellesTekstformaterer.lagDeltekst(hbVedtaksbrevPeriodeOgFelles, PARTIAL_PERIODE_FORELDELSE)
         val vilkårstekst = FellesTekstformaterer.lagDeltekst(hbVedtaksbrevPeriodeOgFelles, PARTIAL_PERIODE_VILKÅR)
         val særligeGrunnerstekst = FellesTekstformaterer.lagDeltekst(hbVedtaksbrevPeriodeOgFelles, PARTIAL_PERIODE_SÆRLIGE_GRUNNER)
         val avsluttendeTekst = FellesTekstformaterer.lagDeltekst(hbVedtaksbrevPeriodeOgFelles, "vedtak/periode_slutt")
 
-        avsnitt = parseTekst(perioder, avsnitt, Underavsnittstype.FAKTA)
         avsnitt = parseTekst(faktatekst, avsnitt, Underavsnittstype.FAKTA)
         avsnitt = parseTekst(foreldelsestekst, avsnitt, Underavsnittstype.FORELDELSE)
         avsnitt = parseTekst(vilkårstekst, avsnitt, Underavsnittstype.VILKÅR)
