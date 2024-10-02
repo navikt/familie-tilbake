@@ -15,6 +15,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.data.Testdata
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -69,13 +70,7 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentTotrinnsvurderinger skal hente totrinnsvurdering etter beslutters vurdering`() {
-        lagBehandlingsstegstilstand(Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
+        lagBehandlingKlarForFatteVedtak()
 
         totrinnService.lagreTotrinnsvurderinger(
             behandlingId,
@@ -115,13 +110,7 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentTotrinnsvurderinger skal hente totrinnsvurdering etter beslutters vurdering med nytt behandlingssteg`() {
-        lagBehandlingsstegstilstand(Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
+        lagBehandlingKlarForFatteVedtak()
 
         totrinnService.lagreTotrinnsvurderinger(
             behandlingId,
@@ -188,6 +177,85 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
             }
 
         exception.message shouldBe "Stegene [FORELDELSE, VILKÅRSVURDERING] mangler totrinnsvurdering"
+    }
+
+    @Test
+    fun `tidligere beslutter skal bli satt hvis en vurdering er underkjent og har blitt fattet tidlig nok`() {
+        lagBehandlingKlarForFatteVedtak()
+
+        totrinnService.lagreTotrinnsvurderinger(
+            behandlingId,
+            listOf(
+                VurdertTotrinnDto(
+                    behandlingssteg = Behandlingssteg.FAKTA,
+                    godkjent = false,
+                    begrunnelse = "testverdi",
+                ),
+                VurdertTotrinnDto(
+                    behandlingssteg = Behandlingssteg.VILKÅRSVURDERING,
+                    godkjent = true,
+                    begrunnelse = "testverdi",
+                ),
+                VurdertTotrinnDto(
+                    behandlingssteg = Behandlingssteg.FORESLÅ_VEDTAK,
+                    godkjent = true,
+                    begrunnelse = "testverdi",
+                ),
+            ),
+        )
+
+        val tidligerebeslutter = totrinnService.finnForrigeBeslutterMedNyVurderingEllerNull(behandlingId)
+
+        assertThat(tidligerebeslutter).isNotNull
+    }
+
+    @Test
+    fun `tidligere beslutter skal bli lik null hvis alle vurderinger er godkjente`() {
+        lagBehandlingKlarForFatteVedtak()
+
+        totrinnService.lagreTotrinnsvurderinger(
+            behandlingId,
+            listOf(
+                VurdertTotrinnDto(
+                    behandlingssteg = Behandlingssteg.FAKTA,
+                    godkjent = true,
+                    begrunnelse = "testverdi",
+                ),
+                VurdertTotrinnDto(
+                    behandlingssteg = Behandlingssteg.VILKÅRSVURDERING,
+                    godkjent = true,
+                    begrunnelse = "testverdi",
+                ),
+                VurdertTotrinnDto(
+                    behandlingssteg = Behandlingssteg.FORESLÅ_VEDTAK,
+                    godkjent = true,
+                    begrunnelse = "testverdi",
+                ),
+            ),
+        )
+
+        val tidligerebeslutter = totrinnService.finnForrigeBeslutterMedNyVurderingEllerNull(behandlingId)
+
+        assertThat(tidligerebeslutter).isNull()
+    }
+
+    @Test
+    fun `tidligere beslutter skal bli null hvis det ikke finnes totrinnsvurderinger`() {
+        lagBehandlingKlarForFatteVedtak()
+
+        val tidligerebeslutter = totrinnService.finnForrigeBeslutterMedNyVurderingEllerNull(behandlingId)
+
+        assertThat(tidligerebeslutter).isNull()
+    }
+
+    private fun lagBehandlingKlarForFatteVedtak() {
+        lagBehandlingsstegstilstand(Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
     }
 
     private fun lagBehandlingsstegstilstand(
