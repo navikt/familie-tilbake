@@ -77,7 +77,6 @@ class PerioderController(
         @PathVariable behandlingId: UUID,
         @RequestParam("skalSammenslaa") skalSammenslåPerioder: Boolean,
     ): Ressurs<Boolean> {
-        logger.info("Oppdater skal sammenslå perioder: $skalSammenslåPerioder")
         vedtaksbrevService.oppdaterSkalSammenslåPerioder(behandlingId, skalSammenslåPerioder)
         return Ressurs.success(true)
     }
