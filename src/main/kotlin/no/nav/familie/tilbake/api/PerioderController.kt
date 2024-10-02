@@ -48,7 +48,8 @@ class PerioderController(
     fun erPerioderLike(
         @PathVariable behandlingId: UUID,
     ): Ressurs<Boolean> {
-        val erPerioderLike = faktaFeilutbetalingService.sjekkOmFaktaPerioderErLike(behandlingId) &&
+        val erPerioderLike =
+            faktaFeilutbetalingService.sjekkOmFaktaPerioderErLike(behandlingId) &&
                 foreldelseService.sjekkOmForeldelsePerioderErLike(behandlingId) &&
                 vilkårsVurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandlingId)
 

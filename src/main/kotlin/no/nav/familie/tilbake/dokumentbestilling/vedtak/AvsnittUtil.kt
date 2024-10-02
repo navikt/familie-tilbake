@@ -10,7 +10,7 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.H
 
 internal object AvsnittUtil {
     const val PARTIAL_PERIODE_FAKTA = "vedtak/periode_fakta"
-    const val PARTIAL_PERIODE_FAKTA_SAMMENSLÅTT_PERIODER = "vedtak/periode_fakta_ef_sammenslå_perioder"
+    const val PARTIAL_PERIODE_FAKTA_SAMMENSLÅTT_PERIODER = "vedtak/periode-fakta/periode_fakta_ef_sammenslå_perioder"
     const val PARTIAL_PERIODE_FORELDELSE = "vedtak/periode_foreldelse"
     const val PARTIAL_PERIODE_VILKÅR = "vedtak/periode_vilkår"
     const val PARTIAL_PERIODE_SÆRLIGE_GRUNNER = "vedtak/periode_særlige_grunner"
@@ -111,7 +111,7 @@ internal object AvsnittUtil {
                 tom = førstePeriode.periode.tom,
             )
 
-        val faktatekst = FellesTekstformaterer.lagDeltekst(hbVedtaksbrevPeriodeOgFelles, PARTIAL_PERIODE_FAKTA_SAMMENSLÅTT_PERIODER)
+        val faktatekst = FellesTekstformaterer.lagDeltekst(vedtaksbrevsdata, PARTIAL_PERIODE_FAKTA_SAMMENSLÅTT_PERIODER)
         val foreldelsestekst = FellesTekstformaterer.lagDeltekst(hbVedtaksbrevPeriodeOgFelles, PARTIAL_PERIODE_FORELDELSE)
         val vilkårstekst = FellesTekstformaterer.lagDeltekst(hbVedtaksbrevPeriodeOgFelles, PARTIAL_PERIODE_VILKÅR)
         val særligeGrunnerstekst = FellesTekstformaterer.lagDeltekst(hbVedtaksbrevPeriodeOgFelles, PARTIAL_PERIODE_SÆRLIGE_GRUNNER)

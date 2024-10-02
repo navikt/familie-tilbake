@@ -1,4 +1,7 @@
 {{> nb/vedtak/periode-fakta/periode_fakta_felles}}
+*-{{#each perioder }}
+Fra og med {{{dato periode.fom}}} til og med {{{dato periode.tom}}}{{/each}}-*
+{{#with perioder.[0] as |periode|}}
 {{#switch fakta.hendelsestype}}
     {{#case "ANNET"}}
         {{#switch fakta.hendelsesundertype}}
@@ -217,3 +220,4 @@
         {{{fakta.fritekstFakta}}}
     {{/if}}
 {{/if}}
+{{/with}}
