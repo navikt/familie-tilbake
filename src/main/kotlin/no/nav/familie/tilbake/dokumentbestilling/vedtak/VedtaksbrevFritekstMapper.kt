@@ -15,7 +15,7 @@ object VedtaksbrevFritekstMapper {
         Vedtaksbrevsoppsummering(
             behandlingId = behandlingId,
             oppsummeringFritekst = oppsummeringstekst,
-            skalSammenslåPerioder = true,
+            skalSammenslåPerioder = false,
         )
 
     fun tilDomeneVedtaksbrevsperiode(

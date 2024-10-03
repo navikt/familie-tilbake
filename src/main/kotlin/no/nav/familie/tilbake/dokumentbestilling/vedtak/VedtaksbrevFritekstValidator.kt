@@ -38,6 +38,7 @@ object VedtaksbrevFritekstValidator {
                     it,
                     vedtaksbrevFritekstPerioder,
                     validerPåkrevetFritekster,
+                    vedtaksbrevsoppsummering.skalSammenslåPerioder,
                 )
             }
         }
@@ -48,6 +49,7 @@ object VedtaksbrevFritekstValidator {
                 vedtaksbrevFritekstPerioder,
                 avsnittMedPerioder,
                 validerPåkrevetFritekster,
+                vedtaksbrevsoppsummering.skalSammenslåPerioder,
             )
         }
         validerOppsummeringsfritekstLengde(behandling, vedtaksbrevsoppsummering, vedtaksbrevstype)
@@ -127,9 +129,16 @@ object VedtaksbrevFritekstValidator {
         vedtaksbrevFritekstPerioder: List<Vedtaksbrevsperiode>,
         avsnittMedPerioder: List<PeriodeMedTekstDto>,
         validerPåkrevetFritekster: Boolean,
+        skalSammenslåPerioder: Boolean,
     ) {
-        faktaFeilutbetaling.perioder
-            .filter { Hendelsesundertype.ANNET_FRITEKST == it.hendelsesundertype }
+        val validerPerioder =
+            if (skalSammenslåPerioder && faktaFeilutbetaling.perioder.isNotEmpty()) {
+                setOf(faktaFeilutbetaling.perioder.sortedBy { it.periode }.first())
+            } else {
+                faktaFeilutbetaling.perioder.filter { Hendelsesundertype.ANNET_FRITEKST == it.hendelsesundertype }
+            }
+
+        validerPerioder
             .forEach { faktaFeilutbetalingsperiode ->
                 val perioder =
                     finnFritekstPerioder(
@@ -165,13 +174,25 @@ object VedtaksbrevFritekstValidator {
         vilkårsvurdering: Vilkårsvurdering,
         vedtaksbrevFritekstPerioder: List<Vedtaksbrevsperiode>,
         validerPåkrevetFritekster: Boolean,
+        skalSammenslåPerioder: Boolean,
     ) {
-        vilkårsvurdering.perioder
-            .filter {
-                it.aktsomhet?.vilkårsvurderingSærligeGrunner != null &&
-                    it.aktsomhet.vilkårsvurderingSærligeGrunner
-                        .any { særligGrunn -> SærligGrunn.ANNET == særligGrunn.særligGrunn }
-            }.forEach {
+        val perioderMedSærligeGrunner =
+            vilkårsvurdering.perioder
+                .filter {
+                    it.aktsomhet?.vilkårsvurderingSærligeGrunner != null &&
+                        it.aktsomhet.vilkårsvurderingSærligeGrunner.any { særligGrunn -> SærligGrunn.ANNET == særligGrunn.særligGrunn }
+                }.sortedBy { it.periode }
+
+
+        val validerPerioder =
+            if (skalSammenslåPerioder && perioderMedSærligeGrunner.isNotEmpty()) {
+                setOf(perioderMedSærligeGrunner.first())
+            } else {
+                perioderMedSærligeGrunner
+            }
+
+        validerPerioder
+            .forEach {
                 val perioder =
                     finnFritekstPerioder(
                         vedtaksbrevFritekstPerioder,

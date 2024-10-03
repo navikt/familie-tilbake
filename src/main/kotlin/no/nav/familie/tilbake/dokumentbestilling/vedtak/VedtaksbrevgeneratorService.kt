@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Språkkode
+import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.api.dto.HentForhåndvisningVedtaksbrevPdfDto
 import no.nav.familie.tilbake.api.dto.PeriodeMedTekstDto
@@ -76,7 +77,9 @@ class VedtaksbrevgeneratorService(
         val erPerioderLike =
             faktaFeilutbetalingService.sjekkOmFaktaPerioderErLike(behandlingId) &&
                 foreldelseService.sjekkOmForeldelsePerioderErLike(behandlingId) &&
-                vilkårsVurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandlingId)
+                vilkårsVurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandlingId) &&
+                vedtaksbrevsdata.vedtaksbrevsdata.felles.ytelsestype
+                    .tilTema() == Tema.ENF
 
         val skalSammenslåPerioder =
             vedtaksbrevgrunnlag.behandlinger
@@ -110,12 +113,13 @@ class VedtaksbrevgeneratorService(
     ): Brevdata {
         val behandlingId = vedtaksbrevgrunnlag.behandling.id
 
-        val erPerioderLike =
+        val erEnsligForsørgerOgPerioderLike =
             faktaFeilutbetalingService.sjekkOmFaktaPerioderErLike(behandlingId) &&
                 foreldelseService.sjekkOmForeldelsePerioderErLike(behandlingId) &&
-                vilkårsVurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandlingId)
+                vilkårsVurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandlingId) &&
+                vedtaksbrevgrunnlag.ytelsestype.tilTema() == Tema.ENF
 
-        val skalSammenslåPerioder = vedtaksbrevgrunnlag.behandling.vedtaksbrevOppsummering?.skalSammenslåPerioder ?: erPerioderLike
+        val skalSammenslåPerioder = vedtaksbrevgrunnlag.behandling.vedtaksbrevOppsummering?.skalSammenslåPerioder ?: erEnsligForsørgerOgPerioderLike
 
         val (brevmetadata, brevmottager) =
             brevmetadataUtil.lagBrevmetadataForMottakerTilForhåndsvisning(vedtaksbrevgrunnlag)
@@ -126,7 +130,6 @@ class VedtaksbrevgeneratorService(
                 hentForhåndvisningVedtaksbrevPdfDto.perioderMedTekst,
                 brevmottager,
                 brevmetadata,
-                erPerioderLike,
             )
         val hbVedtaksbrevsdata: HbVedtaksbrevsdata = vedtaksbrevsdata.vedtaksbrevsdata
 
@@ -140,7 +143,7 @@ class VedtaksbrevgeneratorService(
             mottager = brevmottager,
             metadata = vedtaksbrevsdata.metadata,
             overskrift = TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(hbVedtaksbrevsdata),
-            brevtekst = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(hbVedtaksbrevsdata, skalSammenslåPerioder, erPerioderLike),
+            brevtekst = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(hbVedtaksbrevsdata, skalSammenslåPerioder, erEnsligForsørgerOgPerioderLike),
             vedleggHtml = vedleggHtml,
         )
     }
@@ -177,7 +180,6 @@ class VedtaksbrevgeneratorService(
         perioderFritekst: List<PeriodeMedTekstDto>,
         brevmottager: Brevmottager,
         forhåndsgenerertMetadata: Brevmetadata? = null,
-        erPerioderLike: Boolean = false,
     ): Vedtaksbrevsdata {
         val språkkode: Språkkode = vedtaksbrevgrunnlag.bruker.språkkode
         val personinfo: Personinfo =

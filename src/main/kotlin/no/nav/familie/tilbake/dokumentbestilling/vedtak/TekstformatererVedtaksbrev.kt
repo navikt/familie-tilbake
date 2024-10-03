@@ -7,7 +7,7 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbr
 internal object TekstformatererVedtaksbrev {
     fun lagVedtaksbrevsfritekst(
         vedtaksbrevsdata: HbVedtaksbrevsdata,
-        skalSammenslåPerioder: Boolean = true,
+        skalSammenslåPerioder: Boolean = false,
         erPerioderLike: Boolean = false,
     ): String =
         when (vedtaksbrevsdata.felles.vedtaksbrevstype) {

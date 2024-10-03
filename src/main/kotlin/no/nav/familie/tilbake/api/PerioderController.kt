@@ -2,6 +2,8 @@ package no.nav.familie.tilbake.api
 
 import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.Tema
+import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevService
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevsoppsummeringRepository
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
@@ -31,6 +33,7 @@ class PerioderController(
     private val foreldelseService: ForeldelseService,
     private val vedtaksbrevService: VedtaksbrevService,
     private val vedtaksbrevsoppsummeringRepository: VedtaksbrevsoppsummeringRepository,
+    private val fagsakRepository: FagsakRepository,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -48,17 +51,19 @@ class PerioderController(
     fun erPerioderLike(
         @PathVariable behandlingId: UUID,
     ): Ressurs<Boolean> {
-        val erPerioderLike =
+        val fagsak = fagsakRepository.finnFagsakForBehandlingId(behandlingId)
+        val erEnsligForsørgerOgPerioderLike =
             faktaFeilutbetalingService.sjekkOmFaktaPerioderErLike(behandlingId) &&
                 foreldelseService.sjekkOmForeldelsePerioderErLike(behandlingId) &&
-                vilkårsVurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandlingId)
+                vilkårsVurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandlingId) &&
+                fagsak.ytelsestype.tilTema() == Tema.ENF
 
         val vedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)
-        if (!erPerioderLike && vedtaksbrevsoppsummering != null) {
+        if (!erEnsligForsørgerOgPerioderLike && vedtaksbrevsoppsummering != null) {
             vedtaksbrevsoppsummeringRepository.update(vedtaksbrevsoppsummering.copy(skalSammenslåPerioder = false))
         }
         return Ressurs.success(
-            erPerioderLike,
+            erEnsligForsørgerOgPerioderLike,
         )
     }
 
@@ -77,6 +82,10 @@ class PerioderController(
         @PathVariable behandlingId: UUID,
         @RequestParam("skalSammenslaa") skalSammenslåPerioder: Boolean,
     ): Ressurs<Boolean> {
+        val behandling = fagsakRepository.finnFagsakForBehandlingId(behandlingId)
+        if (behandling.ytelsestype.tilTema() != Tema.ENF) {
+            throw Exception("Kan ikke slå sammen perioder i behandling som ikke er for en enslig forsørger ytelse")
+        }
         vedtaksbrevService.oppdaterSkalSammenslåPerioder(behandlingId, skalSammenslåPerioder)
         return Ressurs.success(true)
     }
@@ -95,11 +104,13 @@ class PerioderController(
     fun erPerioderSlåttSammen(
         @PathVariable behandlingId: UUID,
     ): Ressurs<Boolean> {
+        val fagsak = fagsakRepository.finnFagsakForBehandlingId(behandlingId)
         val erPerioderSlåttSammen =
             vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)?.skalSammenslåPerioder
                 ?: faktaFeilutbetalingService.sjekkOmFaktaPerioderErLike(behandlingId) &&
                 foreldelseService.sjekkOmForeldelsePerioderErLike(behandlingId) &&
-                vilkårsVurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandlingId)
+                vilkårsVurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandlingId) &&
+                fagsak.ytelsestype.tilTema() == Tema.ENF
         return Ressurs.success(erPerioderSlåttSammen)
     }
 }
