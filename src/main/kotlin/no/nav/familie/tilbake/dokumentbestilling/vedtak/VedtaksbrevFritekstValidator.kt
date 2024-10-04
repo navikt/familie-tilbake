@@ -131,12 +131,8 @@ object VedtaksbrevFritekstValidator {
         validerPåkrevetFritekster: Boolean,
         skalSammenslåPerioder: Boolean,
     ) {
-        val validerPerioder =
-            if (skalSammenslåPerioder && faktaFeilutbetaling.perioder.isNotEmpty()) {
-                setOf(faktaFeilutbetaling.perioder.sortedBy { it.periode }.first())
-            } else {
-                faktaFeilutbetaling.perioder.filter { Hendelsesundertype.ANNET_FRITEKST == it.hendelsesundertype }
-            }
+        val faktaPerioderMedFritekst = faktaFeilutbetaling.perioder.filter { Hendelsesundertype.ANNET_FRITEKST == it.hendelsesundertype }.sortedBy { it.periode }
+        val validerPerioder = if (skalSammenslåPerioder && faktaPerioderMedFritekst.isNotEmpty()) listOf(faktaPerioderMedFritekst.first()) else faktaPerioderMedFritekst
 
         validerPerioder
             .forEach { faktaFeilutbetalingsperiode ->
@@ -182,7 +178,6 @@ object VedtaksbrevFritekstValidator {
                     it.aktsomhet?.vilkårsvurderingSærligeGrunner != null &&
                         it.aktsomhet.vilkårsvurderingSærligeGrunner.any { særligGrunn -> SærligGrunn.ANNET == særligGrunn.særligGrunn }
                 }.sortedBy { it.periode }
-
 
         val validerPerioder =
             if (skalSammenslåPerioder && perioderMedSærligeGrunner.isNotEmpty()) {

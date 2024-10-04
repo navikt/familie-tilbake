@@ -2,7 +2,6 @@ package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Språkkode
-import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.api.dto.HentForhåndvisningVedtaksbrevPdfDto
 import no.nav.familie.tilbake.api.dto.PeriodeMedTekstDto
@@ -65,6 +64,7 @@ class VedtaksbrevgeneratorService(
     private val faktaFeilutbetalingService: FaktaFeilutbetalingService,
     private val vilkårsVurderingService: VilkårsvurderingService,
     private val foreldelseService: ForeldelseService,
+    private val periodeService: PeriodeService,
 ) {
     fun genererVedtaksbrevForSending(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
@@ -74,22 +74,17 @@ class VedtaksbrevgeneratorService(
         val behandlingId = vedtaksbrevgrunnlag.behandling.id
         val vedtaksbrevsdata = hentDataForVedtaksbrev(vedtaksbrevgrunnlag, brevmottager, forhåndsgenerertMetadata)
         val hbVedtaksbrevsdata: HbVedtaksbrevsdata = vedtaksbrevsdata.vedtaksbrevsdata
-        val erPerioderLike =
-            faktaFeilutbetalingService.sjekkOmFaktaPerioderErLike(behandlingId) &&
-                foreldelseService.sjekkOmForeldelsePerioderErLike(behandlingId) &&
-                vilkårsVurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandlingId) &&
-                vedtaksbrevsdata.vedtaksbrevsdata.felles.ytelsestype
-                    .tilTema() == Tema.ENF
+        val erEnsligForsørgerOgPerioderLike = periodeService.erEnsligForsørgerOgPerioderLike(behandlingId)
 
         val skalSammenslåPerioder =
             vedtaksbrevgrunnlag.behandlinger
                 .first { it.id == vedtaksbrevgrunnlag.behandling.id }
                 .vedtaksbrevOppsummering
-                ?.skalSammenslåPerioder ?: erPerioderLike
+                ?.skalSammenslåPerioder ?: erEnsligForsørgerOgPerioderLike
         val data =
             Fritekstbrevsdata(
                 TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(hbVedtaksbrevsdata),
-                TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(hbVedtaksbrevsdata, skalSammenslåPerioder, erPerioderLike),
+                TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(hbVedtaksbrevsdata, skalSammenslåPerioder, erEnsligForsørgerOgPerioderLike),
                 vedtaksbrevsdata.metadata,
             )
         val vedleggHtml =
@@ -113,11 +108,7 @@ class VedtaksbrevgeneratorService(
     ): Brevdata {
         val behandlingId = vedtaksbrevgrunnlag.behandling.id
 
-        val erEnsligForsørgerOgPerioderLike =
-            faktaFeilutbetalingService.sjekkOmFaktaPerioderErLike(behandlingId) &&
-                foreldelseService.sjekkOmForeldelsePerioderErLike(behandlingId) &&
-                vilkårsVurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandlingId) &&
-                vedtaksbrevgrunnlag.ytelsestype.tilTema() == Tema.ENF
+        val erEnsligForsørgerOgPerioderLike = periodeService.erEnsligForsørgerOgPerioderLike(behandlingId)
 
         val skalSammenslåPerioder = vedtaksbrevgrunnlag.behandling.vedtaksbrevOppsummering?.skalSammenslåPerioder ?: erEnsligForsørgerOgPerioderLike
 

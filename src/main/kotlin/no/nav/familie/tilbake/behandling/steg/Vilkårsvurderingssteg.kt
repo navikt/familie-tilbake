@@ -10,6 +10,9 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.AUTOUTFØRT
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.UTFØRT
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.PeriodeService
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevsoppsummeringRepository
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsoppsummering
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
@@ -31,6 +34,8 @@ class Vilkårsvurderingssteg(
     private val foreldelseService: ForeldelseService,
     private val historikkTaskService: HistorikkTaskService,
     private val oppgaveTaskService: OppgaveTaskService,
+    private val periodeService: PeriodeService,
+    private val vedtaksbrevsoppsummeringRepository: VedtaksbrevsoppsummeringRepository,
 ) : IBehandlingssteg {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -65,7 +70,10 @@ class Vilkårsvurderingssteg(
             )
         }
         vilkårsvurderingService.lagreVilkårsvurdering(behandlingId, behandlingsstegDto as BehandlingsstegVilkårsvurderingDto)
-
+        val erEnsligForsørgerOgPerioderLike = periodeService.erEnsligForsørgerOgPerioderLike(behandlingId)
+        if (erEnsligForsørgerOgPerioderLike && vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId) == null) {
+            vedtaksbrevsoppsummeringRepository.insert(Vedtaksbrevsoppsummering(behandlingId = behandlingId, skalSammenslåPerioder = erEnsligForsørgerOgPerioderLike, oppsummeringFritekst = null))
+        }
         oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId)
 
         lagHistorikkinnslag(behandlingId, Aktør.SAKSBEHANDLER)

@@ -11,11 +11,12 @@ object VedtaksbrevFritekstMapper {
     fun tilDomene(
         behandlingId: UUID,
         oppsummeringstekst: String?,
+        skalSammenslåPerioder: Boolean,
     ): Vedtaksbrevsoppsummering =
         Vedtaksbrevsoppsummering(
             behandlingId = behandlingId,
             oppsummeringFritekst = oppsummeringstekst,
-            skalSammenslåPerioder = false,
+            skalSammenslåPerioder = skalSammenslåPerioder,
         )
 
     fun tilDomeneVedtaksbrevsperiode(

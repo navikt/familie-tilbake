@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.dokumentbestilling.vedtak
 import no.nav.familie.tilbake.api.dto.FritekstavsnittDto
 import no.nav.familie.tilbake.api.dto.HentForhåndvisningVedtaksbrevPdfDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
-import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.FeatureToggleConfig
@@ -13,10 +12,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsoppsummering
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
-import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
-import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
-import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -28,15 +24,12 @@ class VedtaksbrevService(
     private val vedtaksbrevgrunnlagService: VedtaksbrevgunnlagService,
     private val faktaRepository: FaktaFeilutbetalingRepository,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-    private val fagsakRepository: FagsakRepository,
     private val vedtaksbrevsoppsummeringRepository: VedtaksbrevsoppsummeringRepository,
     private val vedtaksbrevsperiodeRepository: VedtaksbrevsperiodeRepository,
     private val pdfBrevService: PdfBrevService,
     private val distribusjonshåndteringService: DistribusjonshåndteringService,
     private val featureToggleService: FeatureToggleService,
-    private val faktaFeilutbetalingService: FaktaFeilutbetalingService,
-    private val foreldelseService: ForeldelseService,
-    private val vilkårsvurderingService: VilkårsvurderingService,
+    private val periodeService: PeriodeService,
 ) {
     fun sendVedtaksbrev(
         behandling: Behandling,
@@ -62,9 +55,7 @@ class VedtaksbrevService(
         val vedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)
         val skalSammenslåPerioder =
             vedtaksbrevsoppsummering?.skalSammenslåPerioder
-                ?: faktaFeilutbetalingService.sjekkOmFaktaPerioderErLike(behandlingId) &&
-                foreldelseService.sjekkOmForeldelsePerioderErLike(behandlingId) &&
-                vilkårsvurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandlingId)
+                ?: periodeService.erEnsligForsørgerOgPerioderLike(behandlingId)
         val hbVedtaksbrevsdata = vedtaksbrevgeneratorService.genererVedtaksbrevsdataTilVisningIFrontendSkjema(vedtaksbrevgrunnlag)
         val hovedoverskrift = TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(hbVedtaksbrevsdata)
         return AvsnittUtil.lagVedtaksbrevDeltIAvsnitt(hbVedtaksbrevsdata, hovedoverskrift, skalSammenslåPerioder)
@@ -93,7 +84,9 @@ class VedtaksbrevService(
     ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val vedtaksbrevstype = behandling.utledVedtaksbrevstype()
-        val vedtaksbrevsoppsummering = VedtaksbrevFritekstMapper.tilDomene(behandlingId, fritekstavsnittDto.oppsummeringstekst)
+        val skalSammenslåPerioder = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)?.skalSammenslåPerioder ?: false
+        val vedtaksbrevsoppsummering = VedtaksbrevFritekstMapper.tilDomene(behandlingId, fritekstavsnittDto.oppsummeringstekst, skalSammenslåPerioder)
+
         val vedtaksbrevsperioder =
             VedtaksbrevFritekstMapper
                 .tilDomeneVedtaksbrevsperiode(behandlingId, fritekstavsnittDto.perioderMedTekst)

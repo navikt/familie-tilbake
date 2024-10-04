@@ -159,7 +159,6 @@ class VilkårsvurderingService(
         }
     }
 
-    @Transactional
     fun sjekkOmVilkårsvurderingPerioderErLike(
         behandlingId: UUID,
     ): Boolean {

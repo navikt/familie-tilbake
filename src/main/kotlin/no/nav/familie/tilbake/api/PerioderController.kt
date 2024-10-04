@@ -4,15 +4,14 @@ import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.PeriodeService
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevService
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevsoppsummeringRepository
-import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
-import no.nav.familie.tilbake.foreldelse.ForeldelseService
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsoppsummering
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.HenteParam
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
-import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
@@ -28,12 +27,10 @@ import java.util.UUID
 @RequestMapping("/api/perioder")
 @ProtectedWithClaims(issuer = "azuread")
 class PerioderController(
-    private val faktaFeilutbetalingService: FaktaFeilutbetalingService,
-    private val vilkårsVurderingService: VilkårsvurderingService,
-    private val foreldelseService: ForeldelseService,
     private val vedtaksbrevService: VedtaksbrevService,
     private val vedtaksbrevsoppsummeringRepository: VedtaksbrevsoppsummeringRepository,
     private val fagsakRepository: FagsakRepository,
+    private val periodeService: PeriodeService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -51,17 +48,17 @@ class PerioderController(
     fun erPerioderLike(
         @PathVariable behandlingId: UUID,
     ): Ressurs<Boolean> {
-        val fagsak = fagsakRepository.finnFagsakForBehandlingId(behandlingId)
-        val erEnsligForsørgerOgPerioderLike =
-            faktaFeilutbetalingService.sjekkOmFaktaPerioderErLike(behandlingId) &&
-                foreldelseService.sjekkOmForeldelsePerioderErLike(behandlingId) &&
-                vilkårsVurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandlingId) &&
-                fagsak.ytelsestype.tilTema() == Tema.ENF
+        val erEnsligForsørgerOgPerioderLike = periodeService.erEnsligForsørgerOgPerioderLike(behandlingId)
 
         val vedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)
+
         if (!erEnsligForsørgerOgPerioderLike && vedtaksbrevsoppsummering != null) {
             vedtaksbrevsoppsummeringRepository.update(vedtaksbrevsoppsummering.copy(skalSammenslåPerioder = false))
         }
+        if (vedtaksbrevsoppsummering == null) {
+            vedtaksbrevsoppsummeringRepository.insert(Vedtaksbrevsoppsummering(UUID.randomUUID(), behandlingId, null, erEnsligForsørgerOgPerioderLike))
+        }
+
         return Ressurs.success(
             erEnsligForsørgerOgPerioderLike,
         )
@@ -104,13 +101,9 @@ class PerioderController(
     fun erPerioderSlåttSammen(
         @PathVariable behandlingId: UUID,
     ): Ressurs<Boolean> {
-        val fagsak = fagsakRepository.finnFagsakForBehandlingId(behandlingId)
         val erPerioderSlåttSammen =
             vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)?.skalSammenslåPerioder
-                ?: faktaFeilutbetalingService.sjekkOmFaktaPerioderErLike(behandlingId) &&
-                foreldelseService.sjekkOmForeldelsePerioderErLike(behandlingId) &&
-                vilkårsVurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandlingId) &&
-                fagsak.ytelsestype.tilTema() == Tema.ENF
+                ?: periodeService.erEnsligForsørgerOgPerioderLike(behandlingId)
         return Ressurs.success(erPerioderSlåttSammen)
     }
 }
