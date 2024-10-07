@@ -75,15 +75,15 @@ class PerioderController(
         AuditLoggerEvent.UPDATE,
         HenteParam.BEHANDLING_ID,
     )
-    fun samenslå(
+    fun sammenslå(
         @PathVariable behandlingId: UUID,
-    ): Ressurs<Boolean> {
+    ): Ressurs<String> {
         val behandling = fagsakRepository.finnFagsakForBehandlingId(behandlingId)
         if (behandling.ytelsestype.tilTema() != Tema.ENF) {
             throw Exception("Kan ikke slå sammen perioder i behandling som ikke er for en enslig forsørger ytelse")
         }
         vedtaksbrevService.oppdaterSkalSammenslåPerioder(behandlingId, true)
-        return Ressurs.success(true)
+        return Ressurs.success("OK")
     }
 
     @Operation(summary = "Angre sammenslå av perioder")
@@ -99,11 +99,11 @@ class PerioderController(
     )
     fun angreSammenslåing(
         @PathVariable behandlingId: UUID,
-    ): Ressurs<Boolean> {
+    ): Ressurs<String> {
         val vedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)
         if (vedtaksbrevsoppsummering != null) {
             vedtaksbrevsoppsummeringRepository.update(vedtaksbrevsoppsummering.copy(skalSammenslåPerioder =  false))
         }
-        return Ressurs.success(true)
+        return Ressurs.success("OK")
     }
 }
