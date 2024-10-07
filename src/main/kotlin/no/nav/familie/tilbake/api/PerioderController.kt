@@ -48,16 +48,6 @@ class PerioderController(
         @PathVariable behandlingId: UUID,
     ): Ressurs<Boolean> {
         val erEnsligForsørgerOgPerioderLike = periodeService.erEnsligForsørgerOgPerioderLike(behandlingId)
-
-        val vedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)
-
-        if (!erEnsligForsørgerOgPerioderLike && vedtaksbrevsoppsummering != null) {
-            vedtaksbrevsoppsummeringRepository.update(vedtaksbrevsoppsummering.copy(skalSammenslåPerioder = false))
-        }
-        if (vedtaksbrevsoppsummering == null) {
-            vedtaksbrevsoppsummeringRepository.insert(Vedtaksbrevsoppsummering(UUID.randomUUID(), behandlingId, null, erEnsligForsørgerOgPerioderLike))
-        }
-
         return Ressurs.success(
             erEnsligForsørgerOgPerioderLike,
         )
