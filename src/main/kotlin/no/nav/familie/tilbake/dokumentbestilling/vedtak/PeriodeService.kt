@@ -17,9 +17,11 @@ class PeriodeService(
 ) {
     fun erEnsligForsørgerOgPerioderLike(behandlingId: UUID): Boolean {
         val fagsak = fagsakRepository.finnFagsakForBehandlingId(behandlingId)
-        return faktaFeilutbetalingService.sjekkOmFaktaPerioderErLike(behandlingId) &&
-            foreldelseService.sjekkOmForeldelsePerioderErLike(behandlingId) &&
-            vilkårsvurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandlingId) &&
-            fagsak.ytelsestype.tilTema() == Tema.ENF
+        return erPerioderLike(behandlingId) && fagsak.ytelsestype.tilTema() == Tema.ENF
     }
+
+    private fun erPerioderLike(behandlingId: UUID) =
+        faktaFeilutbetalingService.sjekkOmFaktaPerioderErLike(behandlingId) &&
+            foreldelseService.sjekkOmForeldelsePerioderErLike(behandlingId) &&
+            vilkårsvurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandlingId)
 }
