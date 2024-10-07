@@ -86,24 +86,4 @@ class PerioderController(
         vedtaksbrevService.oppdaterSkalSammenslåPerioder(behandlingId, skalSammenslåPerioder)
         return Ressurs.success(true)
     }
-
-    @Operation(summary = "Er perioder slått sammen")
-    @GetMapping(
-        "/erPerioderSlaattSammen/{behandlingId}",
-        produces = [MediaType.APPLICATION_JSON_VALUE],
-    )
-    @Rolletilgangssjekk(
-        Behandlerrolle.SAKSBEHANDLER,
-        "Er perioder slått sammen",
-        AuditLoggerEvent.UPDATE,
-        HenteParam.BEHANDLING_ID,
-    )
-    fun erPerioderSlåttSammen(
-        @PathVariable behandlingId: UUID,
-    ): Ressurs<Boolean> {
-        val erPerioderSlåttSammen =
-            vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)?.skalSammenslåPerioder
-                ?: periodeService.erEnsligForsørgerOgPerioderLike(behandlingId)
-        return Ressurs.success(erPerioderSlåttSammen)
-    }
 }
