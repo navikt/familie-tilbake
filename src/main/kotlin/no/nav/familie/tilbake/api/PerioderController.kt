@@ -64,26 +64,46 @@ class PerioderController(
         )
     }
 
-    @Operation(summary = "Skal oppdatere skalSammenslåPerioder")
+    @Operation(summary = "Oppdatere skalSammenslåPerioder")
     @PostMapping(
-        "/slaa-sammen-perioder/{behandlingId}",
+        "/sammensla/{behandlingId}",
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     @Rolletilgangssjekk(
         Behandlerrolle.SAKSBEHANDLER,
-        "Skal oppdatere skalSammenslåPerioder",
+        "Oppdatere skalSammenslåPerioder",
         AuditLoggerEvent.UPDATE,
         HenteParam.BEHANDLING_ID,
     )
-    fun slåSammenPerioder(
+    fun samenslå(
         @PathVariable behandlingId: UUID,
-        @RequestParam("skalSammenslaa") skalSammenslåPerioder: Boolean,
     ): Ressurs<Boolean> {
         val behandling = fagsakRepository.finnFagsakForBehandlingId(behandlingId)
         if (behandling.ytelsestype.tilTema() != Tema.ENF) {
             throw Exception("Kan ikke slå sammen perioder i behandling som ikke er for en enslig forsørger ytelse")
         }
-        vedtaksbrevService.oppdaterSkalSammenslåPerioder(behandlingId, skalSammenslåPerioder)
+        vedtaksbrevService.oppdaterSkalSammenslåPerioder(behandlingId, true)
+        return Ressurs.success(true)
+    }
+
+    @Operation(summary = "Angre sammenslå av perioder")
+    @PostMapping(
+        "/angre-sammenslaing/{behandlingId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    @Rolletilgangssjekk(
+        Behandlerrolle.SAKSBEHANDLER,
+        "Angre sammenslåing av perioder",
+        AuditLoggerEvent.UPDATE,
+        HenteParam.BEHANDLING_ID,
+    )
+    fun angreSammenslåing(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<Boolean> {
+        val vedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)
+        if (vedtaksbrevsoppsummering != null) {
+            vedtaksbrevsoppsummeringRepository.update(vedtaksbrevsoppsummering.copy(skalSammenslåPerioder =  false))
+        }
         return Ressurs.success(true)
     }
 }
