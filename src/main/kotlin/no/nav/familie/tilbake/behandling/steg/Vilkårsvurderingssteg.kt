@@ -70,10 +70,7 @@ class Vilkårsvurderingssteg(
             )
         }
         vilkårsvurderingService.lagreVilkårsvurdering(behandlingId, behandlingsstegDto as BehandlingsstegVilkårsvurderingDto)
-        val erEnsligForsørgerOgPerioderLike = periodeService.erEnsligForsørgerOgPerioderLike(behandlingId)
-        if (erEnsligForsørgerOgPerioderLike && vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId) == null) {
-            vedtaksbrevsoppsummeringRepository.insert(Vedtaksbrevsoppsummering(behandlingId = behandlingId, skalSammenslåPerioder = erEnsligForsørgerOgPerioderLike, oppsummeringFritekst = null))
-        }
+        oppdatereVedtaksbrevsoppsummering(behandlingId)
         oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId)
 
         lagHistorikkinnslag(behandlingId, Aktør.SAKSBEHANDLER)
@@ -134,5 +131,18 @@ class Vilkårsvurderingssteg(
             TilbakekrevingHistorikkinnslagstype.VILKÅRSVURDERING_VURDERT,
             aktør,
         )
+    }
+
+    private fun oppdatereVedtaksbrevsoppsummering(behandlingId: UUID) {
+        val erEnsligForsørgerOgPerioderLike = periodeService.erEnsligForsørgerOgPerioderLike(behandlingId)
+        val vedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)
+
+        if (vedtaksbrevsoppsummering != null) {
+            vedtaksbrevsoppsummeringRepository.update(vedtaksbrevsoppsummering.copy(skalSammenslåPerioder = erEnsligForsørgerOgPerioderLike))
+        }
+
+        if (erEnsligForsørgerOgPerioderLike && vedtaksbrevsoppsummering == null) {
+            vedtaksbrevsoppsummeringRepository.insert(Vedtaksbrevsoppsummering(behandlingId = behandlingId, skalSammenslåPerioder = erEnsligForsørgerOgPerioderLike, oppsummeringFritekst = null))
+        }
     }
 }
