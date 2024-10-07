@@ -7,7 +7,6 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.PeriodeService
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevService
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevsoppsummeringRepository
-import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsoppsummering
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.HenteParam
