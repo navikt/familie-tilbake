@@ -38,17 +38,14 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.H
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbSærligeGrunner
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVedtaksbrevsperiode
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVurderinger
-import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.HarBrukerUttaltSeg
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
-import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.organisasjon.OrganisasjonService
-import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import org.apache.commons.text.WordUtils
@@ -61,9 +58,6 @@ class VedtaksbrevgeneratorService(
     private val eksterneDataForBrevService: EksterneDataForBrevService,
     private val organisasjonService: OrganisasjonService,
     private val brevmetadataUtil: BrevmetadataUtil,
-    private val faktaFeilutbetalingService: FaktaFeilutbetalingService,
-    private val vilkårsVurderingService: VilkårsvurderingService,
-    private val foreldelseService: ForeldelseService,
     private val periodeService: PeriodeService,
 ) {
     fun genererVedtaksbrevForSending(
@@ -74,17 +68,12 @@ class VedtaksbrevgeneratorService(
         val behandlingId = vedtaksbrevgrunnlag.behandling.id
         val vedtaksbrevsdata = hentDataForVedtaksbrev(vedtaksbrevgrunnlag, brevmottager, forhåndsgenerertMetadata)
         val hbVedtaksbrevsdata: HbVedtaksbrevsdata = vedtaksbrevsdata.vedtaksbrevsdata
-        val erEnsligForsørgerOgPerioderLike = periodeService.erEnsligForsørgerOgPerioderLike(behandlingId)
+        val erPerioderSammenslått = periodeService.erPerioderSammenslått(behandlingId)
 
-        val skalSammenslåPerioder =
-            vedtaksbrevgrunnlag.behandlinger
-                .first { it.id == vedtaksbrevgrunnlag.behandling.id }
-                .vedtaksbrevOppsummering
-                ?.skalSammenslåPerioder ?: erEnsligForsørgerOgPerioderLike
         val data =
             Fritekstbrevsdata(
                 TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(hbVedtaksbrevsdata),
-                TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(hbVedtaksbrevsdata, skalSammenslåPerioder, erEnsligForsørgerOgPerioderLike),
+                TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(hbVedtaksbrevsdata, erPerioderSammenslått),
                 vedtaksbrevsdata.metadata,
             )
         val vedleggHtml =
@@ -108,9 +97,7 @@ class VedtaksbrevgeneratorService(
     ): Brevdata {
         val behandlingId = vedtaksbrevgrunnlag.behandling.id
 
-        val erEnsligForsørgerOgPerioderLike = periodeService.erEnsligForsørgerOgPerioderLike(behandlingId)
-
-        val skalSammenslåPerioder = vedtaksbrevgrunnlag.behandling.vedtaksbrevOppsummering?.skalSammenslåPerioder ?: erEnsligForsørgerOgPerioderLike
+        val erPerioderSammenslått = periodeService.erPerioderSammenslått(behandlingId)
 
         val (brevmetadata, brevmottager) =
             brevmetadataUtil.lagBrevmetadataForMottakerTilForhåndsvisning(vedtaksbrevgrunnlag)
@@ -134,7 +121,7 @@ class VedtaksbrevgeneratorService(
             mottager = brevmottager,
             metadata = vedtaksbrevsdata.metadata,
             overskrift = TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(hbVedtaksbrevsdata),
-            brevtekst = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(hbVedtaksbrevsdata, skalSammenslåPerioder, erEnsligForsørgerOgPerioderLike),
+            brevtekst = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(hbVedtaksbrevsdata, erPerioderSammenslått),
             vedleggHtml = vedleggHtml,
         )
     }

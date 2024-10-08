@@ -52,10 +52,7 @@ class VedtaksbrevService(
         behandlingId: UUID,
     ): List<Avsnitt> {
         val vedtaksbrevgrunnlag = vedtaksbrevgrunnlagService.hentVedtaksbrevgrunnlag(behandlingId)
-        val vedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)
-        val skalSammenslåPerioder =
-            vedtaksbrevsoppsummering?.skalSammenslåPerioder
-                ?: periodeService.erEnsligForsørgerOgPerioderLike(behandlingId)
+        val skalSammenslåPerioder = periodeService.erPerioderSammenslått(behandlingId)
         val hbVedtaksbrevsdata = vedtaksbrevgeneratorService.genererVedtaksbrevsdataTilVisningIFrontendSkjema(vedtaksbrevgrunnlag)
         val hovedoverskrift = TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(hbVedtaksbrevsdata)
         return AvsnittUtil.lagVedtaksbrevDeltIAvsnitt(hbVedtaksbrevsdata, hovedoverskrift, skalSammenslåPerioder)

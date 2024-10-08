@@ -12,7 +12,6 @@ import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.HenteParam
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -30,7 +29,6 @@ class PerioderController(
     private val fagsakRepository: FagsakRepository,
     private val periodeService: PeriodeService,
 ) {
-    private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Operation(summary = "Sjekker om perioder er like - unntatt dato og beløp")
     @GetMapping(

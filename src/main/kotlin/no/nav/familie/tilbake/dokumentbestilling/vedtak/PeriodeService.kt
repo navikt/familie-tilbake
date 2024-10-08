@@ -14,6 +14,7 @@ class PeriodeService(
     private val foreldelseService: ForeldelseService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val fagsakRepository: FagsakRepository,
+    private val vedtaksbrevsoppsummeringRepository: VedtaksbrevsoppsummeringRepository,
 ) {
     fun erEnsligForsørgerOgPerioderLike(behandlingId: UUID): Boolean {
         val fagsak = fagsakRepository.finnFagsakForBehandlingId(behandlingId)
@@ -24,4 +25,9 @@ class PeriodeService(
         faktaFeilutbetalingService.sjekkOmFaktaPerioderErLike(behandlingId) &&
             foreldelseService.sjekkOmForeldelsePerioderErLike(behandlingId) &&
             vilkårsvurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandlingId)
+
+    fun erPerioderSammenslått(behandlingId: UUID): Boolean {
+        val vedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)
+        return vedtaksbrevsoppsummering?.skalSammenslåPerioder ?: erEnsligForsørgerOgPerioderLike(behandlingId)
+    }
 }

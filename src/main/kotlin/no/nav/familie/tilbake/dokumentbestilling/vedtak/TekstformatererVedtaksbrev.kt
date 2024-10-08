@@ -7,14 +7,13 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbr
 internal object TekstformatererVedtaksbrev {
     fun lagVedtaksbrevsfritekst(
         vedtaksbrevsdata: HbVedtaksbrevsdata,
-        skalSammenslåPerioder: Boolean = false,
-        erPerioderLike: Boolean = false,
+        erPerioderSammenslått: Boolean = false,
     ): String =
         when (vedtaksbrevsdata.felles.vedtaksbrevstype) {
             Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT ->
                 lagVedtaksbrev("vedtak/fritekstFeilutbetalingBortfalt/fritekstFeilutbetalingBortfalt", vedtaksbrevsdata)
             Vedtaksbrevstype.ORDINÆR ->
-                if (skalSammenslåPerioder && erPerioderLike) {
+                if (erPerioderSammenslått) {
                     lagVedtaksbrev("vedtak/vedtak_sammenslå_perioder", vedtaksbrevsdata)
                 } else {
                     lagVedtaksbrev("vedtak/vedtak", vedtaksbrevsdata)
