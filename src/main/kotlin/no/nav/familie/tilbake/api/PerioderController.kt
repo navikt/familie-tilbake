@@ -29,7 +29,6 @@ class PerioderController(
     private val fagsakRepository: FagsakRepository,
     private val periodeService: PeriodeService,
 ) {
-
     @Operation(summary = "Sjekker om perioder er like - unntatt dato og beløp")
     @GetMapping(
         "/sjekk-likhet/{behandlingId}",
