@@ -229,7 +229,28 @@ object Testdata {
             månedligSkattebeløp = BigDecimal("123.11"),
         )
 
-    fun lagKravgrunnlag(behandlingId: UUID) =
+    fun lagKravgrunnlagsperiode(
+        fom: LocalDate,
+        tom: LocalDate,
+    ): Kravgrunnlagsperiode432 =
+        Kravgrunnlagsperiode432(
+            periode =
+                Månedsperiode(
+                    fom,
+                    tom,
+                ),
+            beløp =
+                setOf(
+                    feilKravgrunnlagsbeløp433,
+                    ytelKravgrunnlagsbeløp433,
+                ),
+            månedligSkattebeløp = BigDecimal("123.11"),
+        )
+
+    fun lagKravgrunnlag(
+        behandlingId: UUID,
+        perioder: Set<Kravgrunnlagsperiode432> = setOf(kravgrunnlagsperiode432),
+    ) =
         Kravgrunnlag431(
             behandlingId = behandlingId,
             vedtakId = BigInteger.ZERO,
@@ -251,7 +272,7 @@ object Testdata {
             saksbehandlerId = "testverdi",
             referanse = "testverdi",
             eksternKravgrunnlagId = BigInteger.ZERO,
-            perioder = setOf(kravgrunnlagsperiode432),
+            perioder = perioder,
             aktiv = true,
             sperret = false,
         )
@@ -343,6 +364,7 @@ object Testdata {
         Vedtaksbrevsoppsummering(
             behandlingId = behandlingId,
             oppsummeringFritekst = "testverdi",
+            skalSammenslåPerioder = false,
         )
 
     fun lagVedtaksbrevsperiode(behandlingId: UUID) =
