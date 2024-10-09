@@ -28,6 +28,6 @@ class PeriodeService(
 
     fun erPerioderSammenslått(behandlingId: UUID): Boolean {
         val vedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)
-        return vedtaksbrevsoppsummering?.skalSammenslåPerioder ?: erEnsligForsørgerOgPerioderLike(behandlingId)
+        return vedtaksbrevsoppsummering?.skalSammenslåPerioder ?: false
     }
 }
