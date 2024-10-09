@@ -49,6 +49,26 @@ class PerioderController(
         )
     }
 
+    @Operation(summary = "Sjekker om perioder er sammenslått")
+    @GetMapping(
+        "/hent-sammenslatt/{behandlingId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    @Rolletilgangssjekk(
+        Behandlerrolle.SAKSBEHANDLER,
+        "Sjekker om perioder er sammenslått",
+        AuditLoggerEvent.UPDATE,
+        HenteParam.BEHANDLING_ID,
+    )
+    fun erPerioderSammenslått(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<Boolean> {
+        val erPerioderSammenslått = periodeService.erPerioderSammenslått(behandlingId)
+        return Ressurs.success(
+            erPerioderSammenslått,
+        )
+    }
+
     @Operation(summary = "Oppdatere skalSammenslåPerioder")
     @PostMapping(
         "/sammensla/{behandlingId}",
