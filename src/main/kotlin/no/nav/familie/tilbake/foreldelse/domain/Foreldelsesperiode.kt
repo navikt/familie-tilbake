@@ -26,9 +26,7 @@ data class Foreldelsesperiode(
 
     fun erLik(andrePeriode: Foreldelsesperiode): Boolean =
         foreldelsesvurderingstype == andrePeriode.foreldelsesvurderingstype &&
-            begrunnelse == andrePeriode.begrunnelse &&
-            foreldelsesfrist == andrePeriode.foreldelsesfrist &&
-            oppdagelsesdato == andrePeriode.oppdagelsesdato
+            begrunnelse == andrePeriode.begrunnelse
 }
 
 enum class Foreldelsesvurderingstype(
