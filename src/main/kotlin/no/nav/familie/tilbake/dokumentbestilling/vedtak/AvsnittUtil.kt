@@ -15,7 +15,8 @@ internal object AvsnittUtil {
     const val PARTIAL_PERIODE_FAKTA_SAMMENSLÅTT_PERIODER = "vedtak/periode-fakta/periode_fakta_ef_sammenslå_perioder"
     const val PARTIAL_PERIODE_FORELDELSE = "vedtak/periode_foreldelse"
     const val PARTIAL_PERIODE_VILKÅR = "vedtak/periode_vilkår"
-    const val PARTIAL_PERIODE_SÆRLIGE_GRUNNER = "vedtak/periode_særlige_grunner_sammenslått"
+    const val PARTIAL_PERIODE_SÆRLIGE_GRUNNER = "vedtak/periode_særlige_grunner"
+    const val PARTIAL_PERIODE_SÆRLIGE_GRUNNER_SAMMENSLÅTT = "vedtak/periode_særlige_grunner_sammenslått"
 
     fun lagVedtaksbrevDeltIAvsnitt(
         vedtaksbrevsdata: HbVedtaksbrevsdata,
@@ -121,7 +122,7 @@ internal object AvsnittUtil {
         val faktatekst = FellesTekstformaterer.lagDeltekst(vedtaksbrevsdata, PARTIAL_PERIODE_FAKTA_SAMMENSLÅTT_PERIODER)
         val foreldelsestekst = FellesTekstformaterer.lagDeltekst(hbVedtaksbrevPeriodeOgFelles, PARTIAL_PERIODE_FORELDELSE)
         val vilkårstekst = FellesTekstformaterer.lagDeltekst(hbVedtaksbrevPeriodeOgFelles, PARTIAL_PERIODE_VILKÅR)
-        val særligeGrunnerstekst = FellesTekstformaterer.lagDeltekst(hbVedtaksbrevPeriodeOgFelles, PARTIAL_PERIODE_SÆRLIGE_GRUNNER)
+        val særligeGrunnerstekst = FellesTekstformaterer.lagDeltekst(hbVedtaksbrevPeriodeOgFelles, PARTIAL_PERIODE_SÆRLIGE_GRUNNER_SAMMENSLÅTT)
         val avsluttendeTekst = FellesTekstformaterer.lagDeltekst(hbVedtaksbrevPeriodeOgFelles, "vedtak/periode_slutt_sammenslått")
 
         avsnitt = parseTekst(faktatekst, avsnitt, Underavsnittstype.FAKTA)
