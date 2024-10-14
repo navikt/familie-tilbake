@@ -17,6 +17,7 @@ import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.FeatureToggleConfig.Companion.BRUK_6_DESIMALER_I_SKATTEBEREGNING
 import no.nav.familie.tilbake.config.FeatureToggleService
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevsoppsummeringRepository
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingMapper
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.foreldelse.VurdertForeldelseRepository

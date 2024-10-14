@@ -6,14 +6,16 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaks
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevPeriodeOgFelles
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevsdata
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbResultat
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVedtaksbrevsperiode
+import java.math.BigDecimal
 
 internal object AvsnittUtil {
     const val PARTIAL_PERIODE_FAKTA = "vedtak/periode_fakta"
     const val PARTIAL_PERIODE_FAKTA_SAMMENSLÅTT_PERIODER = "vedtak/periode-fakta/periode_fakta_ef_sammenslå_perioder"
     const val PARTIAL_PERIODE_FORELDELSE = "vedtak/periode_foreldelse"
     const val PARTIAL_PERIODE_VILKÅR = "vedtak/periode_vilkår"
-    const val PARTIAL_PERIODE_SÆRLIGE_GRUNNER = "vedtak/periode_særlige_grunner"
+    const val PARTIAL_PERIODE_SÆRLIGE_GRUNNER = "vedtak/periode_særlige_grunner_sammenslått"
 
     fun lagVedtaksbrevDeltIAvsnitt(
         vedtaksbrevsdata: HbVedtaksbrevsdata,
@@ -100,7 +102,12 @@ internal object AvsnittUtil {
                     .last()
                     .periode.tom,
             )
-        val hbVedtaksbrevsperiode = HbVedtaksbrevsperiode(sammenslåttDatoperiode, førstePeriode.kravgrunnlag, førstePeriode.fakta, førstePeriode.vurderinger, førstePeriode.resultat, true, førstePeriode.grunnbeløp)
+        val totalTilbakekrevesBeløp = vedtaksbrevsdata.perioder.sumOf { it.resultat.tilbakekrevesBeløp }
+        val totalrente = vedtaksbrevsdata.perioder.sumOf { it.resultat.rentebeløp }
+        val totalForeldetBeløp = vedtaksbrevsdata.perioder.sumOf { it.resultat.foreldetBeløp ?: BigDecimal.ZERO }
+        val totalTilbakekrevesBeløpUtenSkattMedRenter = vedtaksbrevsdata.perioder.sumOf { it.resultat.tilbakekrevesBeløpUtenSkattMedRenter }
+        val sammenslåttResultat = HbResultat(totalTilbakekrevesBeløp, totalrente, totalForeldetBeløp, totalTilbakekrevesBeløpUtenSkattMedRenter)
+        val hbVedtaksbrevsperiode = HbVedtaksbrevsperiode(sammenslåttDatoperiode, førstePeriode.kravgrunnlag, førstePeriode.fakta, førstePeriode.vurderinger, sammenslåttResultat, true, førstePeriode.grunnbeløp)
         val hbVedtaksbrevPeriodeOgFelles = HbVedtaksbrevPeriodeOgFelles(vedtaksbrevsdata.felles, hbVedtaksbrevsperiode)
 
         var avsnitt =
@@ -115,7 +122,7 @@ internal object AvsnittUtil {
         val foreldelsestekst = FellesTekstformaterer.lagDeltekst(hbVedtaksbrevPeriodeOgFelles, PARTIAL_PERIODE_FORELDELSE)
         val vilkårstekst = FellesTekstformaterer.lagDeltekst(hbVedtaksbrevPeriodeOgFelles, PARTIAL_PERIODE_VILKÅR)
         val særligeGrunnerstekst = FellesTekstformaterer.lagDeltekst(hbVedtaksbrevPeriodeOgFelles, PARTIAL_PERIODE_SÆRLIGE_GRUNNER)
-        val avsluttendeTekst = FellesTekstformaterer.lagDeltekst(hbVedtaksbrevPeriodeOgFelles, "vedtak/periode_slutt")
+        val avsluttendeTekst = FellesTekstformaterer.lagDeltekst(hbVedtaksbrevPeriodeOgFelles, "vedtak/periode_slutt_sammenslått")
 
         avsnitt = parseTekst(faktatekst, avsnitt, Underavsnittstype.FAKTA)
         avsnitt = parseTekst(foreldelsestekst, avsnitt, Underavsnittstype.FORELDELSE)
