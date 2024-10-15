@@ -5,6 +5,7 @@ import java.time.LocalDate
 enum class Avsnittstype {
     OPPSUMMERING,
     PERIODE,
+    SAMMENSLÅTT_PERIODE,
     TILLEGGSINFORMASJON,
 }
 
