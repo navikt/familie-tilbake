@@ -21,9 +21,9 @@
         <java.version>21</java.version>
         <jvmTarget>21</jvmTarget>
         <main-class>no.nav.familie.tilbake.LauncherKt</main-class>
-        <kotlin.version>2.0.20</kotlin.version>
+        <kotlin.version>2.0.21</kotlin.version>
         <common-java-modules.version>2.2021.09.17_07.09-67428a6422cc</common-java-modules.version>
-        <kontrakter.version>3.0_20241004134208_2962899</kontrakter.version>
+        <kontrakter.version>3.0_20241009100044_c0fcd51</kontrakter.version>
         <felles.version>3.20240913110742_adb42f8</felles.version>
         <!-- kotest.properties kan antakelig fjernes i versjon 6, for autoscan blir default false -->
         <kotest.version>5.9.1</kotest.version>
@@ -33,7 +33,7 @@
         <jakarta.xml.bind-api.version>4.0.1</jakarta.xml.bind-api.version>
         <jaxb-impl.version>4.0.5</jaxb-impl.version>
         <verapdf.version>1.26.1</verapdf.version>
-        <mockk.version>1.13.12</mockk.version>
+        <mockk.version>1.13.13</mockk.version>
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
@@ -46,7 +46,7 @@
         <testcontainers.version>1.20.2</testcontainers.version>
         <tjenestespesifikasjoner.version>2633.1685ed5</tjenestespesifikasjoner.version>
         <familie-tjenestespesifikasjoner.version>1.0_20240925091340_7cb955b</familie-tjenestespesifikasjoner.version>
-        <prosessering-core.version>2.20240925091323_ea1bd3c</prosessering-core.version>
+        <prosessering-core.version>2.20241011144712_deb1f2c</prosessering-core.version>
     </properties>
 
 
@@ -319,7 +319,7 @@
         <dependency>
             <groupId>org.messaginghub</groupId>
             <artifactId>pooled-jms</artifactId>
-            <version>3.1.6</version>
+            <version>3.1.7</version>
         </dependency>
         <dependency> <!-- Overstyrer versjon default i spring pga sikkerhetshull https://security.snyk.io/package/maven/org.yaml:snakeyaml -->
             <groupId>org.yaml</groupId>
