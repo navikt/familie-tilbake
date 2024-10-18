@@ -131,6 +131,9 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
 
+    @Autowired
+    private lateinit var periodeService: PeriodeService
+
     @BeforeEach
     fun init() {
         spyPdfBrevService = spyk(pdfBrevService)
@@ -150,12 +153,12 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
                 vedtaksbrevgrunnlagService,
                 faktaRepository,
                 vilkårsvurderingRepository,
-                fagsakRepository,
                 vedtaksbrevsoppsummeringRepository,
                 vedtaksbrevsperiodeRepository,
                 spyPdfBrevService,
                 sendBrevService,
                 featureToggleService,
+                periodeService,
             )
 
         fagsak = fagsakRepository.insert(Testdata.fagsak)
