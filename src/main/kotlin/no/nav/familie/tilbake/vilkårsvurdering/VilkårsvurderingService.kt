@@ -20,6 +20,8 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
+import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhet
+import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingGodTro
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -166,8 +168,8 @@ class VilkårsvurderingService(
         val førstePeriode = vilkårsvurdering?.perioder?.first()
         return if (førstePeriode != null) {
             vilkårsvurdering.perioder.all {
-                it.aktsomhet?.erLik(førstePeriode.aktsomhet) == true &&
-                    it.godTro == førstePeriode.godTro &&
+                erVilkårsvurderingAktsomhetNullEllerLik(it.aktsomhet, førstePeriode.aktsomhet) &&
+                    erVilkårsvurderingGodTroNullEllerLik(it.godTro, førstePeriode.godTro) &&
                     it.vilkårsvurderingsresultat == førstePeriode.vilkårsvurderingsresultat &&
                     it.begrunnelse == førstePeriode.begrunnelse
             }
@@ -175,6 +177,18 @@ class VilkårsvurderingService(
             false
         }
     }
+
+    private fun erVilkårsvurderingAktsomhetNullEllerLik(
+        gjeldendeVilkårsvurderingAktsomhet: VilkårsvurderingAktsomhet?,
+        førsteVilkårsvurderingAktsomhet: VilkårsvurderingAktsomhet?,
+    ) =
+        (gjeldendeVilkårsvurderingAktsomhet == null && førsteVilkårsvurderingAktsomhet == null) || gjeldendeVilkårsvurderingAktsomhet?.erLik(førsteVilkårsvurderingAktsomhet) == true
+
+    private fun erVilkårsvurderingGodTroNullEllerLik(
+        gjeldendeVilkårsvurderingGodTro: VilkårsvurderingGodTro?,
+        førsteVilkårsvurderingGodTro: VilkårsvurderingGodTro?,
+    ) =
+        (gjeldendeVilkårsvurderingGodTro == null && førsteVilkårsvurderingGodTro == null) || gjeldendeVilkårsvurderingGodTro?.erLik(førsteVilkårsvurderingGodTro) == true
 
     private fun erPeriodeAlleredeVurdert(
         vilkårsvurdering: Vilkårsvurdering?,

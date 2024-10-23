@@ -59,6 +59,9 @@ data class VilkårsvurderingGodTro(
     val sporbar: Sporbar = Sporbar(),
 ) {
     val beløpSomErIBehold get() = if (this.beløpErIBehold) beløpTilbakekreves else BigDecimal.ZERO
+
+    fun erLik(vilkårsvurderingGodTro: VilkårsvurderingGodTro?) =
+        beløpErIBehold == vilkårsvurderingGodTro?.beløpErIBehold && begrunnelse == vilkårsvurderingGodTro.begrunnelse
 }
 
 @Table("vilkarsvurdering_aktsomhet")
