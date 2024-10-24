@@ -12,6 +12,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.U
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.PeriodeService
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevsoppsummeringRepository
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.SkalSammenslåPerioder
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsoppsummering
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.historikkinnslag.Aktør
@@ -134,15 +135,15 @@ class Vilkårsvurderingssteg(
     }
 
     private fun oppdatereVedtaksbrevsoppsummering(behandlingId: UUID) {
-        val erEnsligForsørgerOgPerioderLike = periodeService.erEnsligForsørgerOgPerioderLike(behandlingId)
+        val skalSammenslåPerioder = periodeService.erEnsligForsørgerOgPerioderLike(behandlingId)
         val vedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)
 
         if (vedtaksbrevsoppsummering != null) {
-            vedtaksbrevsoppsummeringRepository.update(vedtaksbrevsoppsummering.copy(skalSammenslåPerioder = erEnsligForsørgerOgPerioderLike))
+            vedtaksbrevsoppsummeringRepository.update(vedtaksbrevsoppsummering.copy(skalSammenslåPerioder = skalSammenslåPerioder))
         }
 
-        if (erEnsligForsørgerOgPerioderLike && vedtaksbrevsoppsummering == null) {
-            vedtaksbrevsoppsummeringRepository.insert(Vedtaksbrevsoppsummering(behandlingId = behandlingId, skalSammenslåPerioder = erEnsligForsørgerOgPerioderLike, oppsummeringFritekst = null))
+        if (skalSammenslåPerioder == SkalSammenslåPerioder.JA && vedtaksbrevsoppsummering == null) {
+            vedtaksbrevsoppsummeringRepository.insert(Vedtaksbrevsoppsummering(behandlingId = behandlingId, skalSammenslåPerioder = SkalSammenslåPerioder.JA, oppsummeringFritekst = null))
         }
     }
 }

@@ -10,6 +10,7 @@ import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.SkalSammenslåPerioder
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsoppsummering
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
@@ -81,7 +82,7 @@ class VedtaksbrevService(
     ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val vedtaksbrevstype = behandling.utledVedtaksbrevstype()
-        val skalSammenslåPerioder = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)?.skalSammenslåPerioder ?: false
+        val skalSammenslåPerioder = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)?.skalSammenslåPerioder ?: SkalSammenslåPerioder.IKKE_AKTUELT
         val vedtaksbrevsoppsummering = VedtaksbrevFritekstMapper.tilDomene(behandlingId, fritekstavsnittDto.oppsummeringstekst, skalSammenslåPerioder)
 
         val vedtaksbrevsperioder =
@@ -128,7 +129,7 @@ class VedtaksbrevService(
     @Transactional
     fun oppdaterSkalSammenslåPerioder(
         behandlingId: UUID,
-        skalSammenslåPerioder: Boolean,
+        skalSammenslåPerioder: SkalSammenslåPerioder,
     ) {
         val vedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)
         if (vedtaksbrevsoppsummering != null) {

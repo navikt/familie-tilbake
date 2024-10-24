@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.SkalSammenslåPerioder
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
@@ -16,9 +17,12 @@ class PeriodeService(
     private val fagsakRepository: FagsakRepository,
     private val vedtaksbrevsoppsummeringRepository: VedtaksbrevsoppsummeringRepository,
 ) {
-    fun erEnsligForsørgerOgPerioderLike(behandlingId: UUID): Boolean {
+    fun erEnsligForsørgerOgPerioderLike(behandlingId: UUID): SkalSammenslåPerioder {
         val fagsak = fagsakRepository.finnFagsakForBehandlingId(behandlingId)
-        return erPerioderLike(behandlingId) && fagsak.ytelsestype.tilTema() == Tema.ENF
+        if (erPerioderLike(behandlingId) && fagsak.ytelsestype.tilTema() == Tema.ENF) {
+            return SkalSammenslåPerioder.JA
+        }
+        return SkalSammenslåPerioder.IKKE_AKTUELT
     }
 
     private fun erPerioderLike(behandlingId: UUID) =
@@ -28,6 +32,6 @@ class PeriodeService(
 
     fun erPerioderSammenslått(behandlingId: UUID): Boolean {
         val vedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)
-        return vedtaksbrevsoppsummering?.skalSammenslåPerioder ?: false
+        return vedtaksbrevsoppsummering?.skalSammenslåPerioder == SkalSammenslåPerioder.JA
     }
 }

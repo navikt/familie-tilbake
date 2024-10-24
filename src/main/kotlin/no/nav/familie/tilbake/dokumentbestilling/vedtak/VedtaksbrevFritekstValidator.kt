@@ -7,6 +7,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Friteksttype
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.SkalSammenslåPerioder
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsoppsummering
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsperiode
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
@@ -38,7 +39,7 @@ object VedtaksbrevFritekstValidator {
                     it,
                     vedtaksbrevFritekstPerioder,
                     validerPåkrevetFritekster,
-                    vedtaksbrevsoppsummering.skalSammenslåPerioder,
+                    vedtaksbrevsoppsummering.skalSammenslåPerioder == SkalSammenslåPerioder.JA,
                 )
             }
         }
@@ -49,7 +50,7 @@ object VedtaksbrevFritekstValidator {
                 vedtaksbrevFritekstPerioder,
                 avsnittMedPerioder,
                 validerPåkrevetFritekster,
-                vedtaksbrevsoppsummering.skalSammenslåPerioder,
+                vedtaksbrevsoppsummering.skalSammenslåPerioder == SkalSammenslåPerioder.JA,
             )
         }
         validerOppsummeringsfritekstLengde(behandling, vedtaksbrevsoppsummering, vedtaksbrevstype)

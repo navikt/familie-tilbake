@@ -13,9 +13,16 @@ data class Vedtaksbrevsoppsummering(
     val behandlingId: UUID,
     val oppsummeringFritekst: String?,
     @Column("skal_sammenslaa_perioder")
-    val skalSammenslåPerioder: Boolean,
+    val skalSammenslåPerioder: SkalSammenslåPerioder,
     @Version
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar(),
 )
+
+enum class SkalSammenslåPerioder {
+    PRE_IMPLEMENTERING,
+    IKKE_AKTUELT,
+    JA,
+    NEI,
+}

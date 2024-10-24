@@ -28,6 +28,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.Vedtaksbrevbehandling
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.Vedtaksbrevgrunnlag
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Friteksttype
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.SkalSammenslåPerioder
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsoppsummering
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsperiode
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
@@ -364,7 +365,7 @@ object Testdata {
         Vedtaksbrevsoppsummering(
             behandlingId = behandlingId,
             oppsummeringFritekst = "testverdi",
-            skalSammenslåPerioder = false,
+            skalSammenslåPerioder = SkalSammenslåPerioder.IKKE_AKTUELT,
         )
 
     fun lagVedtaksbrevsperiode(behandlingId: UUID) =
