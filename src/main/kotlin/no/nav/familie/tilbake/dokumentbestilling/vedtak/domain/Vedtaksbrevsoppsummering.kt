@@ -21,7 +21,7 @@ data class Vedtaksbrevsoppsummering(
 )
 
 enum class SkalSammenslåPerioder {
-    PRE_IMPLEMENTERING,
+    PRE_IMPLEMENTASJON,
     IKKE_AKTUELT,
     JA,
     NEI,
