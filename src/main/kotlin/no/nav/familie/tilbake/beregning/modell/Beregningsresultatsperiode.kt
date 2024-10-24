@@ -20,22 +20,3 @@ data class Beregningsresultatsperiode(
     val utbetaltYtelsesbeløp: BigDecimal,
     val riktigYtelsesbeløp: BigDecimal,
 ) // Rått beløp, ikke justert for ev. trekk
-
-fun List<Beregningsresultatsperiode>.sammenslåOgSummer(): List<Beregningsresultatsperiode> =
-    listOf(
-        Beregningsresultatsperiode(
-            periode = Månedsperiode(this.first().periode.fom, this.first().periode.tom),
-            feilutbetaltBeløp = this.sumOf { it.feilutbetaltBeløp },
-            vurdering = this.first().vurdering,
-            andelAvBeløp = this.sumOf { it.andelAvBeløp ?: BigDecimal.ZERO },
-            renteprosent = this.first().renteprosent,
-            manueltSattTilbakekrevingsbeløp = this.first().manueltSattTilbakekrevingsbeløp,
-            tilbakekrevingsbeløpUtenRenter = this.sumOf { it.tilbakekrevingsbeløpUtenRenter },
-            rentebeløp = this.sumOf { it.rentebeløp },
-            tilbakekrevingsbeløp = this.sumOf { it.tilbakekrevingsbeløp },
-            skattebeløp = this.sumOf { it.skattebeløp },
-            tilbakekrevingsbeløpEtterSkatt = this.sumOf { it.tilbakekrevingsbeløpEtterSkatt },
-            utbetaltYtelsesbeløp = this.sumOf { it.utbetaltYtelsesbeløp },
-            riktigYtelsesbeløp = this.sumOf { it.riktigYtelsesbeløp },
-        ),
-    )
