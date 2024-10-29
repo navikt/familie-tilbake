@@ -31,9 +31,9 @@ class PerioderController(
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     @Rolletilgangssjekk(
-        Behandlerrolle.SAKSBEHANDLER,
+        Behandlerrolle.VEILEDER,
         "Sjekker om perioder er like - unntatt dato og beløp",
-        AuditLoggerEvent.UPDATE,
+        AuditLoggerEvent.ACCESS,
         HenteParam.BEHANDLING_ID,
     )
     fun erPerioderLike(
