@@ -112,6 +112,7 @@ data class VilkårsvurderingAktsomhet(
             begrunnelse == vilkårsvurderingAktsomhet.begrunnelse &&
             særligeGrunnerTilReduksjon == vilkårsvurderingAktsomhet.særligeGrunnerTilReduksjon &&
             tilbakekrevSmåbeløp == vilkårsvurderingAktsomhet.tilbakekrevSmåbeløp &&
+            andelTilbakekreves == vilkårsvurderingAktsomhet.andelTilbakekreves &&
             særligeGrunnerTilReduksjonErLik(vilkårsvurderingAktsomhet.vilkårsvurderingSærligeGrunner)
 
     fun særligeGrunnerTilReduksjonErLik(vilkårsvurderingSærligeGrunner: Set<VilkårsvurderingSærligGrunn>) =
