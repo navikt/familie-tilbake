@@ -113,11 +113,15 @@ data class VilkårsvurderingAktsomhet(
             særligeGrunnerTilReduksjon == vilkårsvurderingAktsomhet.særligeGrunnerTilReduksjon &&
             tilbakekrevSmåbeløp == vilkårsvurderingAktsomhet.tilbakekrevSmåbeløp &&
             andelTilbakekreves == vilkårsvurderingAktsomhet.andelTilbakekreves &&
-            særligeGrunnerTilReduksjonErLik(vilkårsvurderingAktsomhet.vilkårsvurderingSærligeGrunner)
+            særligeGrunnerTilReduksjonErLik(vilkårsvurderingSærligeGrunner, vilkårsvurderingAktsomhet.vilkårsvurderingSærligeGrunner)
 
-    fun særligeGrunnerTilReduksjonErLik(vilkårsvurderingSærligeGrunner: Set<VilkårsvurderingSærligGrunn>) =
-        vilkårsvurderingSærligeGrunner.map { it.særligGrunn } == vilkårsvurderingSærligeGrunner.map { it.særligGrunn } &&
-            vilkårsvurderingSærligeGrunner.map { it.begrunnelse } == vilkårsvurderingSærligeGrunner.map { it.begrunnelse }
+    fun særligeGrunnerTilReduksjonErLik(
+        gjeldeneVilkårsvurderingSærligeGrunner: Set<VilkårsvurderingSærligGrunn>,
+        vilkårsvurderingSærligeGrunner: Set<VilkårsvurderingSærligGrunn>
+    ): Boolean {
+        return gjeldeneVilkårsvurderingSærligeGrunner.map { it.særligGrunn } == vilkårsvurderingSærligeGrunner.map { it.særligGrunn } &&
+                gjeldeneVilkårsvurderingSærligeGrunner.map { it.begrunnelse } == vilkårsvurderingSærligeGrunner.map { it.begrunnelse }
+    }
 }
 
 @Table("vilkarsvurdering_serlig_grunn")
