@@ -634,9 +634,7 @@ class BehandlingService(
     private fun harInnloggetBrukerTilgangTilÅSetteTilbakeTilFakta(
         ansvarligSaksbehandler: String,
         behandlerRolle: Behandlerrolle,
-    ) = erAnsvarligSaksbehandler(ansvarligSaksbehandler, behandlerRolle) || erForvalter(behandlerRolle)
-
-    private fun erForvalter(behandlerRolle: Behandlerrolle): Boolean = behandlerRolle == Behandlerrolle.FORVALTER
+    ) = erAnsvarligSaksbehandler(ansvarligSaksbehandler, behandlerRolle) || tilgangService.harInnloggetBrukerForvalterRolle()
 
     private fun erAnsvarligSaksbehandler(
         ansvarligSaksbehandler: String,
@@ -644,7 +642,7 @@ class BehandlingService(
     ) = ContextService.hentSaksbehandler() == ansvarligSaksbehandler &&
         (behandlerRolle == Behandlerrolle.SAKSBEHANDLER || behandlerRolle == Behandlerrolle.BESLUTTER)
 
-    private fun behandlingUtredesOgErIkkePåVent(behandling: Behandling) = Behandlingsstatus.UTREDES == behandling.status && !behandlingskontrollService.erBehandlingPåVent(behandling.id)
+    private fun behandlingUtredesOgErIkkePåVent(behandling: Behandling) = !behandlingskontrollService.erBehandlingPåVent(behandling.id)
 
     private fun kanRevurderingOpprettes(behandling: Behandling): Boolean =
         behandling.erAvsluttet &&
