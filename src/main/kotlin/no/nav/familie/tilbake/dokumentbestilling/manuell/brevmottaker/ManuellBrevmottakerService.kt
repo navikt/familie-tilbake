@@ -181,14 +181,14 @@ class ManuellBrevmottakerService(
     }
 
     private fun lagHistorikkBeskrivelseForBrevmottaker(brevmottaker: ManuellBrevmottaker) =
-        listOfNotNull(
+        listOf(
             brevmottaker.navn,
             brevmottaker.adresselinje1,
             brevmottaker.adresselinje2,
             brevmottaker.postnummer,
             brevmottaker.poststed,
             brevmottaker.landkode,
-        ).joinToString(separator = System.lineSeparator())
+        ).filter { it != null && it != "" }.joinToString(separator = System.lineSeparator())
 
     private fun hentPersonEllerOrganisasjonNavnFraRegister(
         dto: ManuellBrevmottakerRequestDto,
