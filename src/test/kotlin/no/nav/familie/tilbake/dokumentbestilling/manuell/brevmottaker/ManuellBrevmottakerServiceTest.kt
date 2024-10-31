@@ -210,7 +210,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
             manuellBrevmottakerService.leggTilBrevmottaker(behandling.id, manuellBrevmottakerIUtlandetRequestDto)
         }
 
-        var manuellBrevmottakere = manuellBrevmottakerService.hentBrevmottakere(behandling.id)
+        val manuellBrevmottakere = manuellBrevmottakerService.hentBrevmottakere(behandling.id)
 
         manuellBrevmottakere.shouldHaveSize(1)
         val dbManuellBrevmottaker = manuellBrevmottakere.first()
@@ -246,9 +246,9 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
             )
         }
 
-        manuellBrevmottakere = manuellBrevmottakerService.hentBrevmottakere(behandling.id)
-        manuellBrevmottakere.shouldHaveSize(1)
-        val dbOppdatertManuellBrevmottaker = manuellBrevmottakere.first()
+        val oppdaterteBrevmottakere = manuellBrevmottakerService.hentBrevmottakere(behandling.id)
+        oppdaterteBrevmottakere.shouldHaveSize(1)
+        val dbOppdatertManuellBrevmottaker = oppdaterteBrevmottakere.first()
         assertEqualsManuellBrevmottaker(dbOppdatertManuellBrevmottaker, oppdatertManuellBrevmottaker)
     }
 
