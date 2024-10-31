@@ -188,7 +188,7 @@ class ManuellBrevmottakerService(
             brevmottaker.postnummer,
             brevmottaker.poststed,
             brevmottaker.landkode,
-        ).filter { it != null && it != "" }.joinToString(separator = System.lineSeparator())
+        ).filter { !it.isNullOrEmpty() }.joinToString(separator = System.lineSeparator())
 
     private fun hentPersonEllerOrganisasjonNavnFraRegister(
         dto: ManuellBrevmottakerRequestDto,
