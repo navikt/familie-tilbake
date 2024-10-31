@@ -95,13 +95,13 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
             type = DØDSBO,
             navn = "John Doe",
             manuellAdresseInfo =
-            ManuellAdresseInfo(
-                adresselinje1 = "test adresse1",
-                adresselinje2 = "0000 Stockholm",
-                postnummer = "",
-                poststed = "",
-                landkode = "SE",
-            ),
+                ManuellAdresseInfo(
+                    adresselinje1 = "test adresse1",
+                    adresselinje2 = "0000 Stockholm",
+                    postnummer = "",
+                    poststed = "",
+                    landkode = "SE",
+                ),
         )
 
     private val mockPdlClient: PdlClient = mockk()
@@ -230,13 +230,13 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
         val oppdatertManuellBrevmottaker =
             manuellBrevmottakerIUtlandetRequestDto.copy(
                 manuellAdresseInfo =
-                ManuellAdresseInfo(
-                    adresselinje1 = "Ny adresse",
-                    adresselinje2 = "0001 Stockholm",
-                    postnummer = "",
-                    poststed = "",
-                    landkode = "SE",
-                ),
+                    ManuellAdresseInfo(
+                        adresselinje1 = "Ny adresse",
+                        adresselinje2 = "0001 Stockholm",
+                        postnummer = "",
+                        poststed = "",
+                        landkode = "SE",
+                    ),
             )
         shouldNotThrow<RuntimeException> {
             manuellBrevmottakerService.oppdaterBrevmottaker(
