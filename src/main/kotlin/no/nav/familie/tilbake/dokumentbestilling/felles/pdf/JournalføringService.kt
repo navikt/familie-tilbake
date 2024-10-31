@@ -8,6 +8,7 @@ import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
+import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottakerIdType
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
@@ -131,8 +132,8 @@ class JournalføringService(
     private fun utledIdType(mottagerIdent: String?) =
         when (mottagerIdent?.length) {
             0, null -> null
-            9 -> BrukerIdType.ORGNR
-            11 -> BrukerIdType.FNR
+            9 -> AvsenderMottakerIdType.ORGNR
+            11 -> AvsenderMottakerIdType.FNR
             else -> throw IllegalArgumentException("Ugyldig idType")
         }
 
@@ -146,7 +147,7 @@ class JournalføringService(
                     "Fagsak ${behandling.fagsakId} og behandling ${behandling.id}",
             )
         return AvsenderMottaker(
-            idType = BrukerIdType.ORGNR,
+            idType = AvsenderMottakerIdType.ORGNR,
             id = institusjon.organisasjonsnummer,
             navn = institusjon.navn,
         )
@@ -161,13 +162,13 @@ class JournalføringService(
                 )
         return if (verge.orgNr != null) {
             AvsenderMottaker(
-                idType = BrukerIdType.ORGNR,
+                idType = AvsenderMottakerIdType.ORGNR,
                 id = verge.orgNr,
                 navn = verge.navn,
             )
         } else {
             AvsenderMottaker(
-                idType = BrukerIdType.FNR,
+                idType = AvsenderMottakerIdType.FNR,
                 id = verge.ident!!,
                 navn = verge.navn,
             )
