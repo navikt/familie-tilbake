@@ -36,8 +36,6 @@ data class ManuellBrevmottaker(
     fun hasManuellAdresse(): Boolean =
         !(
             adresselinje1.isNullOrBlank() ||
-                postnummer.isNullOrBlank() ||
-                poststed.isNullOrBlank() ||
                 landkode.isNullOrBlank()
         )
 
