@@ -86,7 +86,6 @@ class FaktaFeilutbetalingService(
         )
     }
 
-    @Transactional
     fun sjekkOmFaktaPerioderErLike(
         behandlingId: UUID,
     ): Boolean {

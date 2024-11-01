@@ -1,26 +1,34 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.FellesTekstformaterer
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevFelles
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevPeriodeOgFelles
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevsdata
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbResultat
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVedtaksbrevsperiode
+import java.math.BigDecimal
 
 internal object AvsnittUtil {
     const val PARTIAL_PERIODE_FAKTA = "vedtak/periode_fakta"
+    const val PARTIAL_PERIODE_FAKTA_SAMMENSLÅTT_PERIODER = "vedtak/periode-fakta/periode_fakta_ef_sammenslå_perioder"
     const val PARTIAL_PERIODE_FORELDELSE = "vedtak/periode_foreldelse"
     const val PARTIAL_PERIODE_VILKÅR = "vedtak/periode_vilkår"
+    const val PARTIAL_PERIODE_VILKÅR_SAMMENSLÅTT = "vedtak/periode_vilkår_sammenslått"
     const val PARTIAL_PERIODE_SÆRLIGE_GRUNNER = "vedtak/periode_særlige_grunner"
+    const val PARTIAL_PERIODE_SÆRLIGE_GRUNNER_SAMMENSLÅTT = "vedtak/periode_særlige_grunner_sammenslått"
 
     fun lagVedtaksbrevDeltIAvsnitt(
         vedtaksbrevsdata: HbVedtaksbrevsdata,
         hovedoverskrift: String,
+        skalSammenslåPerioder: Boolean = false,
     ): List<Avsnitt> {
         val resultat: MutableList<Avsnitt> = ArrayList()
         val vedtaksbrevsdataMedFriteksmarkeringer = Vedtaksbrevsfritekst.settInnMarkeringForFritekst(vedtaksbrevsdata)
         resultat.add(lagOppsummeringsavsnitt(vedtaksbrevsdataMedFriteksmarkeringer, hovedoverskrift))
         if (vedtaksbrevsdata.felles.vedtaksbrevstype == Vedtaksbrevstype.ORDINÆR) {
-            resultat.addAll(lagPerioderavsnitt(vedtaksbrevsdataMedFriteksmarkeringer))
+            resultat.addAll(lagPerioderavsnitt(vedtaksbrevsdataMedFriteksmarkeringer, skalSammenslåPerioder))
         }
         resultat.add(lagAvsluttendeAvsnitt(vedtaksbrevsdataMedFriteksmarkeringer))
         return resultat
@@ -45,10 +53,18 @@ internal object AvsnittUtil {
         return FellesTekstformaterer.lagDeltekst(vedtaksbrevFelles, filsti)
     }
 
-    private fun lagPerioderavsnitt(vedtaksbrevsdata: HbVedtaksbrevsdata): List<Avsnitt> =
-        vedtaksbrevsdata.perioder.map {
-            lagPeriodeAvsnitt(HbVedtaksbrevPeriodeOgFelles(vedtaksbrevsdata.felles, it))
+    private fun lagPerioderavsnitt(
+        vedtaksbrevsdata: HbVedtaksbrevsdata,
+        skalSammenslåPerioder: Boolean,
+    ): List<Avsnitt> {
+        if (skalSammenslåPerioder) {
+            return listOf(lagSammenslåttPeriodeAvsnitt(vedtaksbrevsdata))
+        } else {
+            return vedtaksbrevsdata.perioder.map {
+                lagPeriodeAvsnitt(HbVedtaksbrevPeriodeOgFelles(vedtaksbrevsdata.felles, it))
+            }
         }
+    }
 
     private fun lagAvsluttendeAvsnitt(vedtaksbrevsdata: HbVedtaksbrevsdata): Avsnitt {
         val tekst = FellesTekstformaterer.lagDeltekst(vedtaksbrevsdata, "vedtak/vedtak_slutt")
@@ -76,6 +92,46 @@ internal object AvsnittUtil {
         avsnitt = parseTekst(vilkårstekst, avsnitt, Underavsnittstype.VILKÅR)
         avsnitt = parseTekst(særligeGrunnerstekst, avsnitt, Underavsnittstype.SÆRLIGEGRUNNER)
         avsnitt = parseTekst(avsluttendeTekst, avsnitt, null)
+        return avsnitt
+    }
+
+    private fun lagSammenslåttPeriodeAvsnitt(vedtaksbrevsdata: HbVedtaksbrevsdata): Avsnitt {
+        val førstePeriode = vedtaksbrevsdata.perioder.first()
+        val sammenslåttDatoperiode =
+            Datoperiode(
+                førstePeriode.periode.fom,
+                vedtaksbrevsdata.perioder
+                    .last()
+                    .periode.tom,
+            )
+        val totalTilbakekrevesBeløp = vedtaksbrevsdata.perioder.sumOf { it.resultat.tilbakekrevesBeløp }
+        val totalrente = vedtaksbrevsdata.perioder.sumOf { it.resultat.rentebeløp }
+        val totalForeldetBeløp = vedtaksbrevsdata.perioder.sumOf { it.resultat.foreldetBeløp ?: BigDecimal.ZERO }
+        val totalTilbakekrevesBeløpUtenSkattMedRenter = vedtaksbrevsdata.perioder.sumOf { it.resultat.tilbakekrevesBeløpUtenSkattMedRenter }
+        val sammenslåttResultat = HbResultat(totalTilbakekrevesBeløp, totalrente, totalForeldetBeløp, totalTilbakekrevesBeløpUtenSkattMedRenter)
+        val hbVedtaksbrevsperiode = HbVedtaksbrevsperiode(sammenslåttDatoperiode, førstePeriode.kravgrunnlag, førstePeriode.fakta, førstePeriode.vurderinger, sammenslåttResultat, true, førstePeriode.grunnbeløp)
+        val hbVedtaksbrevPeriodeOgFelles = HbVedtaksbrevPeriodeOgFelles(vedtaksbrevsdata.felles, hbVedtaksbrevsperiode)
+
+        var avsnitt =
+            Avsnitt(
+                avsnittstype = Avsnittstype.SAMMENSLÅTT_PERIODE,
+                overskrift = "Perioder som er feilutbetalt",
+                fom = førstePeriode.periode.fom,
+                tom = førstePeriode.periode.tom,
+            )
+
+        val faktatekst = FellesTekstformaterer.lagDeltekst(vedtaksbrevsdata, PARTIAL_PERIODE_FAKTA_SAMMENSLÅTT_PERIODER)
+        val foreldelsestekst = FellesTekstformaterer.lagDeltekst(hbVedtaksbrevPeriodeOgFelles, PARTIAL_PERIODE_FORELDELSE)
+        val vilkårstekst = FellesTekstformaterer.lagDeltekst(hbVedtaksbrevPeriodeOgFelles, PARTIAL_PERIODE_VILKÅR_SAMMENSLÅTT)
+        val særligeGrunnerstekst = FellesTekstformaterer.lagDeltekst(hbVedtaksbrevPeriodeOgFelles, PARTIAL_PERIODE_SÆRLIGE_GRUNNER_SAMMENSLÅTT)
+        val avsluttendeTekst = FellesTekstformaterer.lagDeltekst(hbVedtaksbrevPeriodeOgFelles, "vedtak/periode_slutt_sammenslått")
+
+        avsnitt = parseTekst(faktatekst, avsnitt, Underavsnittstype.FAKTA)
+        avsnitt = parseTekst(foreldelsestekst, avsnitt, Underavsnittstype.FORELDELSE)
+        avsnitt = parseTekst(vilkårstekst, avsnitt, Underavsnittstype.VILKÅR)
+        avsnitt = parseTekst(særligeGrunnerstekst, avsnitt, Underavsnittstype.SÆRLIGEGRUNNER)
+        avsnitt = parseTekst(avsluttendeTekst, avsnitt, null)
+
         return avsnitt
     }
 

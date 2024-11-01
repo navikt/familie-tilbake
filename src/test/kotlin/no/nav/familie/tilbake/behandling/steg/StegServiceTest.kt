@@ -50,6 +50,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.data.Testdata.lagKravgrunnlagsperiode
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
@@ -461,26 +462,13 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `håndterSteg skal utføre foreldelse og fortsette til foreslå vedtak når alle perioder endret til foreldet`() {
-        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.KLAR)
+        val fom = LocalDate.of(2010, 1, 1)
+        val tom = LocalDate.of(2010, 1, 31)
 
-        var kravgrunnlag431 = Testdata.lagKravgrunnlag(behandling.id)
-        for (grunnlagsperiode in kravgrunnlag431.perioder) {
-            kravgrunnlag431 =
-                kravgrunnlag431.copy(
-                    perioder =
-                        setOf(
-                            grunnlagsperiode.copy(
-                                periode =
-                                    Månedsperiode(
-                                        LocalDate.of(2010, 1, 1),
-                                        LocalDate.of(2010, 1, 31),
-                                    ),
-                            ),
-                        ),
-                )
-        }
-        kravgrunnlagRepository.insert(kravgrunnlag431)
+        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
+        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id, setOf(lagKravgrunnlagsperiode(fom, tom))))
+        stegService.håndterSteg(behandlingId, lagBehandlingsstegFaktaDto(fom, tom))
+
         // foreldelsesteg vurderte som IKKE_FORELDET med første omgang
         var behandlingsstegForeldelseDto =
             BehandlingsstegForeldelseDto(
@@ -995,10 +983,13 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         )
     }
 
-    private fun lagBehandlingsstegFaktaDto(): BehandlingsstegFaktaDto {
+    private fun lagBehandlingsstegFaktaDto(
+        fomParameter: LocalDate = fom,
+        tomParameter: LocalDate = tom,
+    ): BehandlingsstegFaktaDto {
         val faktaFeilutbetaltePerioderDto =
             FaktaFeilutbetalingsperiodeDto(
-                periode = Datoperiode(fom, tom),
+                periode = Datoperiode(fomParameter, tomParameter),
                 hendelsestype = Hendelsestype.ANNET,
                 hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
             )
