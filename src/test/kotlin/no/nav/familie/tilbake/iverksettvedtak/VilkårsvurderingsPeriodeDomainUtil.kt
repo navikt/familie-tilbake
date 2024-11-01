@@ -8,6 +8,7 @@ import no.nav.familie.tilbake.api.dto.VilkårsvurderingsperiodeDto
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhet
+import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingGodTro
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingSærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
@@ -43,6 +44,7 @@ object VilkårsvurderingsPeriodeDomainUtil {
         vilkårsvurderingsresultat: Vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
         begrunnelse: String = "begrunnelse",
         aktsomhet: VilkårsvurderingAktsomhet = lagVilkårsvurderingAktsomhet(),
+        godTro: VilkårsvurderingGodTro = lagVilkårsvurderingGodTro(),
     ) =
         Vilkårsvurderingsperiode(
             id = UUID.randomUUID(),
@@ -50,6 +52,7 @@ object VilkårsvurderingsPeriodeDomainUtil {
             vilkårsvurderingsresultat = vilkårsvurderingsresultat,
             aktsomhet = aktsomhet,
             begrunnelse = begrunnelse,
+            godTro = godTro,
         )
 
     fun lagVilkårsvurderingAktsomhet(andelTilbakekreves: BigDecimal = BigDecimal(50)) =
@@ -64,5 +67,13 @@ object VilkårsvurderingsPeriodeDomainUtil {
             vilkårsvurderingSærligeGrunner = setOf(VilkårsvurderingSærligGrunn(særligGrunn = SærligGrunn.HELT_ELLER_DELVIS_NAVS_FEIL, begrunnelse = "begrunnelse")),
             tilbakekrevSmåbeløp = false,
             særligeGrunnerBegrunnelse = "Særlig grunner begrunnelse",
+        )
+
+    fun lagVilkårsvurderingGodTro(beløpTilbakekreves: BigDecimal = BigDecimal(1234)) =
+        VilkårsvurderingGodTro(
+            id = UUID.randomUUID(),
+            beløpErIBehold = true,
+            beløpTilbakekreves = beløpTilbakekreves,
+            begrunnelse = "God tro begrunnelse",
         )
 }

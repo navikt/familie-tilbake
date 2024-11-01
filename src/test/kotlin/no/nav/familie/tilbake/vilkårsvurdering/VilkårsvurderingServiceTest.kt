@@ -37,6 +37,7 @@ import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
 import no.nav.familie.tilbake.iverksettvedtak.VilkårsvurderingsPeriodeDomainUtil.lagVilkårsvurderingAktsomhet
+import no.nav.familie.tilbake.iverksettvedtak.VilkårsvurderingsPeriodeDomainUtil.lagVilkårsvurderingGodTro
 import no.nav.familie.tilbake.iverksettvedtak.VilkårsvurderingsPeriodeDomainUtil.lagVilkårsvurderingsperiode
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassekode
@@ -711,7 +712,33 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `sjekk er vilkårsperioder like uten dato og beløp - skal være like og returnere true`() {
+    fun `sjekk er vilkårsperioder like utenom dato og beløp som skal tilbakekreves - skal være like og returnere true`() {
+        val vilkårsvurdering =
+            Vilkårsvurdering(
+                id = UUID.randomUUID(),
+                behandlingId = behandling.id,
+                aktiv = true,
+                perioder =
+                    setOf(
+                        lagVilkårsvurderingsperiode(
+                            periode = Månedsperiode(YearMonth.of(2024, 1), YearMonth.of(2024, 3)),
+                            godTro = lagVilkårsvurderingGodTro(beløpTilbakekreves = BigDecimal(1234)),
+                        ),
+                        lagVilkårsvurderingsperiode(
+                            periode = Månedsperiode(YearMonth.of(2024, 4), YearMonth.of(2024, 5)),
+                            godTro = lagVilkårsvurderingGodTro(beløpTilbakekreves = BigDecimal(4321)),
+                        ),
+                    ),
+            )
+
+        vilkårsvurderingRepository.insert(vilkårsvurdering)
+
+        val erLike = vilkårsvurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandling.id)
+        Assertions.assertTrue(erLike)
+    }
+
+    @Test
+    fun `sjekk at vilkårsperioder ikke er like når det er ulik prosent andel som skal tilbakekreves`() {
         val vilkårsvurdering =
             Vilkårsvurdering(
                 id = UUID.randomUUID(),
@@ -722,9 +749,12 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                         lagVilkårsvurderingsperiode(
                             periode = Månedsperiode(YearMonth.of(2024, 1), YearMonth.of(2024, 3)),
                             aktsomhet = lagVilkårsvurderingAktsomhet(andelTilbakekreves = BigDecimal(100)),
+                            godTro = lagVilkårsvurderingGodTro(beløpTilbakekreves = BigDecimal(1234)),
                         ),
                         lagVilkårsvurderingsperiode(
                             periode = Månedsperiode(YearMonth.of(2024, 4), YearMonth.of(2024, 5)),
+                            aktsomhet = lagVilkårsvurderingAktsomhet(andelTilbakekreves = BigDecimal(50)),
+                            godTro = lagVilkårsvurderingGodTro(beløpTilbakekreves = BigDecimal(4321)),
                         ),
                     ),
             )
@@ -732,7 +762,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         vilkårsvurderingRepository.insert(vilkårsvurdering)
 
         val erLike = vilkårsvurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandling.id)
-        Assertions.assertTrue(erLike)
+        Assertions.assertFalse(erLike)
     }
 
     private fun lagBehandlingsstegstilstand(

@@ -28,6 +28,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.Vedtaksbrevbehandling
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.Vedtaksbrevgrunnlag
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Friteksttype
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.SkalSammenslåPerioder
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsoppsummering
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsperiode
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
@@ -229,7 +230,28 @@ object Testdata {
             månedligSkattebeløp = BigDecimal("123.11"),
         )
 
-    fun lagKravgrunnlag(behandlingId: UUID) =
+    fun lagKravgrunnlagsperiode(
+        fom: LocalDate,
+        tom: LocalDate,
+    ): Kravgrunnlagsperiode432 =
+        Kravgrunnlagsperiode432(
+            periode =
+                Månedsperiode(
+                    fom,
+                    tom,
+                ),
+            beløp =
+                setOf(
+                    feilKravgrunnlagsbeløp433,
+                    ytelKravgrunnlagsbeløp433,
+                ),
+            månedligSkattebeløp = BigDecimal("123.11"),
+        )
+
+    fun lagKravgrunnlag(
+        behandlingId: UUID,
+        perioder: Set<Kravgrunnlagsperiode432> = setOf(kravgrunnlagsperiode432),
+    ) =
         Kravgrunnlag431(
             behandlingId = behandlingId,
             vedtakId = BigInteger.ZERO,
@@ -251,7 +273,7 @@ object Testdata {
             saksbehandlerId = "testverdi",
             referanse = "testverdi",
             eksternKravgrunnlagId = BigInteger.ZERO,
-            perioder = setOf(kravgrunnlagsperiode432),
+            perioder = perioder,
             aktiv = true,
             sperret = false,
         )
@@ -343,6 +365,7 @@ object Testdata {
         Vedtaksbrevsoppsummering(
             behandlingId = behandlingId,
             oppsummeringFritekst = "testverdi",
+            skalSammenslåPerioder = SkalSammenslåPerioder.IKKE_AKTUELT,
         )
 
     fun lagVedtaksbrevsperiode(behandlingId: UUID) =

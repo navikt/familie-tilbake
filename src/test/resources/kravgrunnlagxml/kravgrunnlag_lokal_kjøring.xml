@@ -70,31 +70,6 @@
         </urn:tilbakekrevingsPeriode>
         <urn:tilbakekrevingsPeriode>
             <urn:periode>
-                <mmel:fom>2024-06-01</mmel:fom>
-                <mmel:tom>2024-06-30</mmel:tom>
-            </urn:periode>
-            <urn:belopSkattMnd>0.00</urn:belopSkattMnd>
-            <urn:tilbakekrevingsBelop>
-                <urn:kodeKlasse>EFOG</urn:kodeKlasse>
-                <urn:typeKlasse>YTEL</urn:typeKlasse>
-                <urn:belopOpprUtbet>21718.00</urn:belopOpprUtbet>
-                <urn:belopNy>12831.00</urn:belopNy>
-                <urn:belopTilbakekreves>8887.00</urn:belopTilbakekreves>
-                <urn:belopUinnkrevd>0.00</urn:belopUinnkrevd>
-                <urn:skattProsent>0.0000</urn:skattProsent>
-            </urn:tilbakekrevingsBelop>
-            <urn:tilbakekrevingsBelop>
-                <urn:kodeKlasse>KL_KODE_FEIL_EFOG</urn:kodeKlasse>
-                <urn:typeKlasse>FEIL</urn:typeKlasse>
-                <urn:belopOpprUtbet>0.00</urn:belopOpprUtbet>
-                <urn:belopNy>8887.00</urn:belopNy>
-                <urn:belopTilbakekreves>0.00</urn:belopTilbakekreves>
-                <urn:belopUinnkrevd>0.00</urn:belopUinnkrevd>
-                <urn:skattProsent>0.0000</urn:skattProsent>
-            </urn:tilbakekrevingsBelop>
-        </urn:tilbakekrevingsPeriode>
-        <urn:tilbakekrevingsPeriode>
-            <urn:periode>
                 <mmel:fom>2024-07-01</mmel:fom>
                 <mmel:tom>2024-07-31</mmel:tom>
             </urn:periode>

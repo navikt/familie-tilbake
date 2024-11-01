@@ -58,18 +58,22 @@ class VedtaksbrevgeneratorService(
     private val eksterneDataForBrevService: EksterneDataForBrevService,
     private val organisasjonService: OrganisasjonService,
     private val brevmetadataUtil: BrevmetadataUtil,
+    private val periodeService: PeriodeService,
 ) {
     fun genererVedtaksbrevForSending(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
         brevmottager: Brevmottager,
         forhåndsgenerertMetadata: Brevmetadata? = null,
     ): Brevdata {
+        val behandlingId = vedtaksbrevgrunnlag.behandling.id
         val vedtaksbrevsdata = hentDataForVedtaksbrev(vedtaksbrevgrunnlag, brevmottager, forhåndsgenerertMetadata)
         val hbVedtaksbrevsdata: HbVedtaksbrevsdata = vedtaksbrevsdata.vedtaksbrevsdata
+        val erPerioderSammenslått = periodeService.erPerioderSammenslått(behandlingId)
+
         val data =
             Fritekstbrevsdata(
                 TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(hbVedtaksbrevsdata),
-                TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(hbVedtaksbrevsdata),
+                TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(hbVedtaksbrevsdata, erPerioderSammenslått),
                 vedtaksbrevsdata.metadata,
             )
         val vedleggHtml =
@@ -89,15 +93,19 @@ class VedtaksbrevgeneratorService(
 
     fun genererVedtaksbrevForForhåndsvisning(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
-        dto: HentForhåndvisningVedtaksbrevPdfDto,
+        hentForhåndvisningVedtaksbrevPdfDto: HentForhåndvisningVedtaksbrevPdfDto,
     ): Brevdata {
+        val behandlingId = vedtaksbrevgrunnlag.behandling.id
+
+        val erPerioderSammenslått = periodeService.erPerioderSammenslått(behandlingId)
+
         val (brevmetadata, brevmottager) =
             brevmetadataUtil.lagBrevmetadataForMottakerTilForhåndsvisning(vedtaksbrevgrunnlag)
         val vedtaksbrevsdata =
             hentDataForVedtaksbrev(
                 vedtaksbrevgrunnlag,
-                dto.oppsummeringstekst,
-                dto.perioderMedTekst,
+                hentForhåndvisningVedtaksbrevPdfDto.oppsummeringstekst,
+                hentForhåndvisningVedtaksbrevPdfDto.perioderMedTekst,
                 brevmottager,
                 brevmetadata,
             )
@@ -109,12 +117,11 @@ class VedtaksbrevgeneratorService(
             } else {
                 ""
             }
-
         return Brevdata(
             mottager = brevmottager,
             metadata = vedtaksbrevsdata.metadata,
             overskrift = TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(hbVedtaksbrevsdata),
-            brevtekst = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(hbVedtaksbrevsdata),
+            brevtekst = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(hbVedtaksbrevsdata, erPerioderSammenslått),
             vedleggHtml = vedleggHtml,
         )
     }
