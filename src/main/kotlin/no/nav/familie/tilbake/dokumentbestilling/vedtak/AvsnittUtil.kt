@@ -110,11 +110,12 @@ internal object AvsnittUtil {
         val totalForeldetBeløp = vedtaksbrevsdata.perioder.sumOf { it.resultat.foreldetBeløp ?: BigDecimal.ZERO }
         val totalTilbakekrevesBeløpUtenSkattMedRenter = vedtaksbrevsdata.perioder.sumOf { it.resultat.tilbakekrevesBeløpUtenSkattMedRenter }
         val totalFeilutbetaltBeløp = vedtaksbrevsdata.perioder.sumOf { it.kravgrunnlag.feilutbetaltBeløp }
-        val sammenslåttPeriodeKravgrunnlag = HbKravgrunnlag(
-            riktigBeløp = førstePeriode.kravgrunnlag.riktigBeløp,
-            utbetaltBeløp = førstePeriode.kravgrunnlag.utbetaltBeløp,
-            feilutbetaltBeløp = totalFeilutbetaltBeløp,
-        )
+        val sammenslåttPeriodeKravgrunnlag =
+            HbKravgrunnlag(
+                riktigBeløp = førstePeriode.kravgrunnlag.riktigBeløp,
+                utbetaltBeløp = førstePeriode.kravgrunnlag.utbetaltBeløp,
+                feilutbetaltBeløp = totalFeilutbetaltBeløp,
+            )
         val sammenslåttResultat = HbResultat(totalTilbakekrevesBeløp, totalrente, totalForeldetBeløp, totalTilbakekrevesBeløpUtenSkattMedRenter)
         val hbVedtaksbrevsperiode = HbVedtaksbrevsperiode(sammenslåttDatoperiode, sammenslåttPeriodeKravgrunnlag, førstePeriode.fakta, førstePeriode.vurderinger, sammenslåttResultat, true, førstePeriode.grunnbeløp)
         val hbVedtaksbrevPeriodeOgFelles = HbVedtaksbrevPeriodeOgFelles(vedtaksbrevsdata.felles, hbVedtaksbrevsperiode)
