@@ -6,6 +6,7 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaks
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevPeriodeOgFelles
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevsdata
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbKravgrunnlag
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbResultat
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVedtaksbrevsperiode
 import java.math.BigDecimal
@@ -108,10 +109,15 @@ internal object AvsnittUtil {
         val totalrente = vedtaksbrevsdata.perioder.sumOf { it.resultat.rentebeløp }
         val totalForeldetBeløp = vedtaksbrevsdata.perioder.sumOf { it.resultat.foreldetBeløp ?: BigDecimal.ZERO }
         val totalTilbakekrevesBeløpUtenSkattMedRenter = vedtaksbrevsdata.perioder.sumOf { it.resultat.tilbakekrevesBeløpUtenSkattMedRenter }
+        val totalFeilutbetaltBeløp = vedtaksbrevsdata.perioder.sumOf { it.kravgrunnlag.feilutbetaltBeløp }
+        val sammenslåttPeriodeKravgrunnlag = HbKravgrunnlag(
+            riktigBeløp = førstePeriode.kravgrunnlag.riktigBeløp,
+            utbetaltBeløp = førstePeriode.kravgrunnlag.utbetaltBeløp,
+            feilutbetaltBeløp = totalFeilutbetaltBeløp,
+        )
         val sammenslåttResultat = HbResultat(totalTilbakekrevesBeløp, totalrente, totalForeldetBeløp, totalTilbakekrevesBeløpUtenSkattMedRenter)
-        val hbVedtaksbrevsperiode = HbVedtaksbrevsperiode(sammenslåttDatoperiode, førstePeriode.kravgrunnlag, førstePeriode.fakta, førstePeriode.vurderinger, sammenslåttResultat, true, førstePeriode.grunnbeløp)
+        val hbVedtaksbrevsperiode = HbVedtaksbrevsperiode(sammenslåttDatoperiode, sammenslåttPeriodeKravgrunnlag, førstePeriode.fakta, førstePeriode.vurderinger, sammenslåttResultat, true, førstePeriode.grunnbeløp)
         val hbVedtaksbrevPeriodeOgFelles = HbVedtaksbrevPeriodeOgFelles(vedtaksbrevsdata.felles, hbVedtaksbrevsperiode)
-
         var avsnitt =
             Avsnitt(
                 avsnittstype = Avsnittstype.SAMMENSLÅTT_PERIODE,
