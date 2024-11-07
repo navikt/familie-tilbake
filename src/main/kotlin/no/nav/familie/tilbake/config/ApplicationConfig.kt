@@ -91,31 +91,30 @@ class ApplicationConfig {
     @Bean
     fun prosesseringInfoProvider(
         @Value("\${rolle.prosessering}") prosesseringRolle: String,
-    ) =
-        object :
-            ProsesseringInfoProvider {
-            override fun hentBrukernavn(): String =
-                try {
-                    SpringTokenValidationContextHolder()
-                        .getTokenValidationContext()
-                        .getClaims("azuread")
-                        .getStringClaim("preferred_username")
-                } catch (e: Exception) {
-                    throw e
-                }
+    ) = object :
+        ProsesseringInfoProvider {
+        override fun hentBrukernavn(): String =
+            try {
+                SpringTokenValidationContextHolder()
+                    .getTokenValidationContext()
+                    .getClaims("azuread")
+                    .getStringClaim("preferred_username")
+            } catch (e: Exception) {
+                throw e
+            }
 
-            override fun harTilgang(): Boolean = grupper().contains(prosesseringRolle)
+        override fun harTilgang(): Boolean = grupper().contains(prosesseringRolle)
 
-            private fun grupper(): List<String> =
-                try {
-                    SpringTokenValidationContextHolder()
-                        .getTokenValidationContext()
-                        .getClaims("azuread")
-                        ?.get("groups") as List<String>? ?: emptyList()
-                } catch (e: Exception) {
-                    emptyList()
-                }
-        }
+        private fun grupper(): List<String> =
+            try {
+                SpringTokenValidationContextHolder()
+                    .getTokenValidationContext()
+                    .getClaims("azuread")
+                    ?.get("groups") as List<String>? ?: emptyList()
+            } catch (e: Exception) {
+                emptyList()
+            }
+    }
 
     companion object {
         const val PAKKE_NAVN = "no.nav.familie.tilbake"

@@ -100,13 +100,12 @@ class IntegrasjonerClient(
         oppgaveId: Long,
         nyEnhet: String,
         fjernMappeFraOppgave: Boolean,
-    ) =
-        UriComponentsBuilder
-            .fromUri(integrasjonerConfig.integrasjonUri)
-            .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, oppgaveId.toString(), "enhet", nyEnhet)
-            .queryParam("fjernMappeFraOppgave", fjernMappeFraOppgave)
-            .build()
-            .toUri()
+    ) = UriComponentsBuilder
+        .fromUri(integrasjonerConfig.integrasjonUri)
+        .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, oppgaveId.toString(), "enhet", nyEnhet)
+        .queryParam("fjernMappeFraOppgave", fjernMappeFraOppgave)
+        .build()
+        .toUri()
 
     private val finnoppgaverUri =
         UriComponentsBuilder
@@ -146,12 +145,11 @@ class IntegrasjonerClient(
     private fun hentJournalpostHentDokumentUri(
         journalpostId: String,
         dokumentInfoId: String,
-    ) =
-        UriComponentsBuilder
-            .fromUri(integrasjonerConfig.integrasjonUri)
-            .pathSegment(IntegrasjonerConfig.PATH_HENTDOKUMENT, journalpostId, dokumentInfoId)
-            .build()
-            .toUri()
+    ) = UriComponentsBuilder
+        .fromUri(integrasjonerConfig.integrasjonUri)
+        .pathSegment(IntegrasjonerConfig.PATH_HENTDOKUMENT, journalpostId, dokumentInfoId)
+        .build()
+        .toUri()
 
     private fun hentNavkontorUri(enhetsId: String) =
         UriComponentsBuilder

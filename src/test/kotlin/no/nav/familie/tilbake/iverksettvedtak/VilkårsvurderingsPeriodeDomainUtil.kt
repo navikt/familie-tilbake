@@ -20,24 +20,23 @@ object VilkårsvurderingsPeriodeDomainUtil {
     fun lagGrovtUaktsomVilkårsvurderingsperiode(
         fom: YearMonth,
         tom: YearMonth,
-    ) =
-        VilkårsvurderingsperiodeDto(
-            periode = Datoperiode(fom, tom),
-            begrunnelse = "testverdi",
-            aktsomhetDto =
-                AktsomhetDto(
-                    aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
-                    ileggRenter = true,
-                    andelTilbakekreves = null,
-                    begrunnelse = "testverdi",
-                    særligeGrunnerTilReduksjon = false,
-                    tilbakekrevSmåbeløp = true,
-                    særligeGrunnerBegrunnelse = "testverdi",
-                    særligeGrunner = listOf(SærligGrunnDto(SærligGrunn.ANNET, "testverdi")),
-                ),
-            vilkårsvurderingsresultat =
-                Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
-        )
+    ) = VilkårsvurderingsperiodeDto(
+        periode = Datoperiode(fom, tom),
+        begrunnelse = "testverdi",
+        aktsomhetDto =
+            AktsomhetDto(
+                aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
+                ileggRenter = true,
+                andelTilbakekreves = null,
+                begrunnelse = "testverdi",
+                særligeGrunnerTilReduksjon = false,
+                tilbakekrevSmåbeløp = true,
+                særligeGrunnerBegrunnelse = "testverdi",
+                særligeGrunner = listOf(SærligGrunnDto(SærligGrunn.ANNET, "testverdi")),
+            ),
+        vilkårsvurderingsresultat =
+            Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
+    )
 
     fun lagVilkårsvurderingsperiode(
         periode: Månedsperiode = Månedsperiode(YearMonth.of(2024, 4), YearMonth.of(2024, 5)),
@@ -45,15 +44,14 @@ object VilkårsvurderingsPeriodeDomainUtil {
         begrunnelse: String = "begrunnelse",
         aktsomhet: VilkårsvurderingAktsomhet = lagVilkårsvurderingAktsomhet(),
         godTro: VilkårsvurderingGodTro = lagVilkårsvurderingGodTro(),
-    ) =
-        Vilkårsvurderingsperiode(
-            id = UUID.randomUUID(),
-            periode = periode,
-            vilkårsvurderingsresultat = vilkårsvurderingsresultat,
-            aktsomhet = aktsomhet,
-            begrunnelse = begrunnelse,
-            godTro = godTro,
-        )
+    ) = Vilkårsvurderingsperiode(
+        id = UUID.randomUUID(),
+        periode = periode,
+        vilkårsvurderingsresultat = vilkårsvurderingsresultat,
+        aktsomhet = aktsomhet,
+        begrunnelse = begrunnelse,
+        godTro = godTro,
+    )
 
     fun lagVilkårsvurderingAktsomhet(andelTilbakekreves: BigDecimal = BigDecimal(50)) =
         VilkårsvurderingAktsomhet(

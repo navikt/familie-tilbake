@@ -283,8 +283,7 @@ class VedtaksbrevgeneratorService(
             Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP -> false
         }
 
-    private fun harAnsvarligBeslutter(vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag) =
-        saksbehandlingstypeHarBeslutter(vedtaksbrevgrunnlag) && erBesluttet(vedtaksbrevgrunnlag)
+    private fun harAnsvarligBeslutter(vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag) = saksbehandlingstypeHarBeslutter(vedtaksbrevgrunnlag) && erBesluttet(vedtaksbrevgrunnlag)
 
     private fun erBesluttet(vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag) =
         vedtaksbrevgrunnlag.aktivtSteg in

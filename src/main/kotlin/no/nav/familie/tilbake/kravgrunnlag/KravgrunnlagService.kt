@@ -282,5 +282,4 @@ class KravgrunnlagService(
     }
 }
 
-private fun String.toLocalDateTime(): LocalDateTime =
-    LocalDateTime.parse(this, DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS"))
+private fun String.toLocalDateTime(): LocalDateTime = LocalDateTime.parse(this, DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS"))

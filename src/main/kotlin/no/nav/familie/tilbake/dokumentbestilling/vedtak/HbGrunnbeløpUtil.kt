@@ -45,6 +45,5 @@ object HbGrunnbeløpUtil {
         return KroneFormattererMedTusenskille.formatterKronerMedTusenskille(grunnbeløpX6, utf8nonBreakingSpace)
     }
 
-    private fun grunnbeløpX6(grunnbeløp: Grunnbeløp) =
-        grunnbeløp.grunnbeløp.multiply(BigDecimal.valueOf(6L))
+    private fun grunnbeløpX6(grunnbeløp: Grunnbeløp) = grunnbeløp.grunnbeløp.multiply(BigDecimal.valueOf(6L))
 }

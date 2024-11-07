@@ -281,15 +281,16 @@ class DokumentasjonsgeneratorVedtaksslutt {
         medVerge: Boolean,
         feilutbetaltBeløpBortfalt: Boolean,
         erRevurdering: Boolean,
-    ): String = (
-        "*[ " + (if (flerePerioder) "flere perioder" else "en periode") +
-            " - " + (if (medSkattetrekk) "med skattetrekk" else "uten skattetrekk") +
-            " - " + (if (flereLovhjemler) "flere lovhjemmel" else "en lovhjemmel") +
-            " - " + (if (medVerge) "med verge" else "uten verge") +
-            " - " + (if (feilutbetaltBeløpBortfalt) "feilutbetalt beløp bortfalt" else "ordinær") +
-            (if (erRevurdering) " - revurdering" else "") +
-            " ]*"
-    )
+    ): String =
+        (
+            "*[ " + (if (flerePerioder) "flere perioder" else "en periode") +
+                " - " + (if (medSkattetrekk) "med skattetrekk" else "uten skattetrekk") +
+                " - " + (if (flereLovhjemler) "flere lovhjemmel" else "en lovhjemmel") +
+                " - " + (if (medVerge) "med verge" else "uten verge") +
+                " - " + (if (feilutbetaltBeløpBortfalt) "feilutbetalt beløp bortfalt" else "ordinær") +
+                (if (erRevurdering) " - revurdering" else "") +
+                " ]*"
+        )
 
     private fun prettyprint(s: String): String =
         s

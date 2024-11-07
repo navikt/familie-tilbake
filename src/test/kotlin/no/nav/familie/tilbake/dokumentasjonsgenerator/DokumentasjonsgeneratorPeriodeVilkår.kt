@@ -340,15 +340,16 @@ class DokumentasjonsgeneratorPeriodeVilkår {
         fritekst: Boolean,
         pengerIBehold: Boolean,
         foreldelsevurdering: Foreldelsesvurderingstype,
-    ): String = (
-        "*[ ${hentVilkårresultatOverskriftDel(resultat)}" +
-            (if (vurdering != null) " - " + vurdering.navn else "") +
-            (if (fritekst) " - med fritekst" else " - uten fritekst") +
-            hentVIlkårsvurderingOverskriftDel(foreldelsevurdering) +
-            (if (pengerIBehold) " - penger i behold" else "") +
-            (if (lavtBeløp) " - lavt beløp" else "") +
-            " ]*"
-    )
+    ): String =
+        (
+            "*[ ${hentVilkårresultatOverskriftDel(resultat)}" +
+                (if (vurdering != null) " - " + vurdering.navn else "") +
+                (if (fritekst) " - med fritekst" else " - uten fritekst") +
+                hentVIlkårsvurderingOverskriftDel(foreldelsevurdering) +
+                (if (pengerIBehold) " - penger i behold" else "") +
+                (if (lavtBeløp) " - lavt beløp" else "") +
+                " ]*"
+        )
 
     private fun prettyprint(
         vilkårTekst: String,

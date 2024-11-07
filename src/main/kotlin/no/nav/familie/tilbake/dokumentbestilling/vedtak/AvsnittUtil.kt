@@ -165,8 +165,7 @@ internal object AvsnittUtil {
         for (linje in splittet) {
             fun nyOverskriftOgAvsnittetHarAlleredeOverskrift(linje: String) = erOverskrift(linje) && overskrift != null
 
-            fun avsnittHarBrødtekstSomIkkeEtterfølgesAvFritekst(linje: String) =
-                brødtekst != null && !Vedtaksbrevsfritekst.erFritekstStart(linje)
+            fun avsnittHarBrødtekstSomIkkeEtterfølgesAvFritekst(linje: String) = brødtekst != null && !Vedtaksbrevsfritekst.erFritekstStart(linje)
 
             if (!leserFritekst &&
                 (

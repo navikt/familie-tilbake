@@ -181,14 +181,12 @@ class VilkårsvurderingService(
     private fun erVilkårsvurderingAktsomhetNullEllerLik(
         gjeldendeVilkårsvurderingAktsomhet: VilkårsvurderingAktsomhet?,
         førsteVilkårsvurderingAktsomhet: VilkårsvurderingAktsomhet?,
-    ) =
-        (gjeldendeVilkårsvurderingAktsomhet == null && førsteVilkårsvurderingAktsomhet == null) || gjeldendeVilkårsvurderingAktsomhet?.erLik(førsteVilkårsvurderingAktsomhet) == true
+    ) = (gjeldendeVilkårsvurderingAktsomhet == null && førsteVilkårsvurderingAktsomhet == null) || gjeldendeVilkårsvurderingAktsomhet?.erLik(førsteVilkårsvurderingAktsomhet) == true
 
     private fun erVilkårsvurderingGodTroNullEllerLik(
         gjeldendeVilkårsvurderingGodTro: VilkårsvurderingGodTro?,
         førsteVilkårsvurderingGodTro: VilkårsvurderingGodTro?,
-    ) =
-        (gjeldendeVilkårsvurderingGodTro == null && førsteVilkårsvurderingGodTro == null) || gjeldendeVilkårsvurderingGodTro?.erLik(førsteVilkårsvurderingGodTro) == true
+    ) = (gjeldendeVilkårsvurderingGodTro == null && førsteVilkårsvurderingGodTro == null) || gjeldendeVilkårsvurderingGodTro?.erLik(førsteVilkårsvurderingGodTro) == true
 
     private fun erPeriodeAlleredeVurdert(
         vilkårsvurdering: Vilkårsvurdering?,
