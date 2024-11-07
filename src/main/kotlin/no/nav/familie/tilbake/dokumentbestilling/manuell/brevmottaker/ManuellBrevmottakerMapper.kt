@@ -12,38 +12,36 @@ object ManuellBrevmottakerMapper {
         behandlingId: UUID,
         manuellBrevmottakerRequestDto: ManuellBrevmottakerRequestDto,
         navnFraRegister: String?,
-    ) =
-        ManuellBrevmottaker(
-            behandlingId = behandlingId,
-            type = manuellBrevmottakerRequestDto.type,
-            navn = navnFraRegister ?: manuellBrevmottakerRequestDto.navn,
-            ident = manuellBrevmottakerRequestDto.personIdent,
-            orgNr = manuellBrevmottakerRequestDto.organisasjonsnummer,
-            adresselinje1 = manuellBrevmottakerRequestDto.manuellAdresseInfo?.adresselinje1,
-            adresselinje2 = manuellBrevmottakerRequestDto.manuellAdresseInfo?.adresselinje2,
-            postnummer = manuellBrevmottakerRequestDto.manuellAdresseInfo?.postnummer?.trim(),
-            poststed = manuellBrevmottakerRequestDto.manuellAdresseInfo?.poststed?.trim(),
-            landkode = manuellBrevmottakerRequestDto.manuellAdresseInfo?.landkode,
-            vergetype = manuellBrevmottakerRequestDto.vergetype,
-        )
+    ) = ManuellBrevmottaker(
+        behandlingId = behandlingId,
+        type = manuellBrevmottakerRequestDto.type,
+        navn = navnFraRegister ?: manuellBrevmottakerRequestDto.navn,
+        ident = manuellBrevmottakerRequestDto.personIdent,
+        orgNr = manuellBrevmottakerRequestDto.organisasjonsnummer,
+        adresselinje1 = manuellBrevmottakerRequestDto.manuellAdresseInfo?.adresselinje1,
+        adresselinje2 = manuellBrevmottakerRequestDto.manuellAdresseInfo?.adresselinje2,
+        postnummer = manuellBrevmottakerRequestDto.manuellAdresseInfo?.postnummer?.trim(),
+        poststed = manuellBrevmottakerRequestDto.manuellAdresseInfo?.poststed?.trim(),
+        landkode = manuellBrevmottakerRequestDto.manuellAdresseInfo?.landkode,
+        vergetype = manuellBrevmottakerRequestDto.vergetype,
+    )
 
     fun tilDomene(
         brevmottaker: Brevmottaker,
         behandlingId: UUID,
-    ) =
-        ManuellBrevmottaker(
-            behandlingId = behandlingId,
-            type = brevmottaker.type,
-            ident = brevmottaker.personIdent,
-            orgNr = brevmottaker.organisasjonsnummer,
-            adresselinje1 = brevmottaker.manuellAdresseInfo?.adresselinje1,
-            adresselinje2 = brevmottaker.manuellAdresseInfo?.adresselinje2,
-            postnummer = brevmottaker.manuellAdresseInfo?.postnummer,
-            poststed = brevmottaker.manuellAdresseInfo?.poststed,
-            landkode = brevmottaker.manuellAdresseInfo?.landkode,
-            navn = brevmottaker.navn,
-            vergetype = brevmottaker.vergetype,
-        )
+    ) = ManuellBrevmottaker(
+        behandlingId = behandlingId,
+        type = brevmottaker.type,
+        ident = brevmottaker.personIdent,
+        orgNr = brevmottaker.organisasjonsnummer,
+        adresselinje1 = brevmottaker.manuellAdresseInfo?.adresselinje1,
+        adresselinje2 = brevmottaker.manuellAdresseInfo?.adresselinje2,
+        postnummer = brevmottaker.manuellAdresseInfo?.postnummer,
+        poststed = brevmottaker.manuellAdresseInfo?.poststed,
+        landkode = brevmottaker.manuellAdresseInfo?.landkode,
+        navn = brevmottaker.navn,
+        vergetype = brevmottaker.vergetype,
+    )
 
     fun tilRespons(manuellBrevmottaker: ManuellBrevmottaker) =
         ManuellBrevmottakerResponsDto(

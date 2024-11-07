@@ -92,8 +92,7 @@ class PubliserJournalpostTask(
 
     // 409 Conflict betyr duplikatdistribusjon
     // https://nav-it.slack.com/archives/C6W9E5GPJ/p1657610907144549?thread_ts=1657610829.116619&cid=C6W9E5GPJ
-    fun dokumentetErAlleredeDistribuert(ressursException: RessursException) =
-        ressursException.httpStatus == HttpStatus.CONFLICT
+    fun dokumentetErAlleredeDistribuert(ressursException: RessursException) = ressursException.httpStatus == HttpStatus.CONFLICT
 
     companion object {
         const val TYPE = "publiserJournalpost"

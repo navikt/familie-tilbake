@@ -217,8 +217,7 @@ object VilkårsvurderingMapper {
     private fun hentHendelsestype(
         faktaPerioder: Set<FaktaFeilutbetalingsperiode>,
         vurdertVilkårsperiode: Månedsperiode,
-    ): Hendelsestype =
-        faktaPerioder.first { it.periode.overlapper(vurdertVilkårsperiode) }.hendelsestype
+    ): Hendelsestype = faktaPerioder.first { it.periode.overlapper(vurdertVilkårsperiode) }.hendelsestype
 
     private fun utledReduserteBeløp(
         kravgrunnlag431: Kravgrunnlag431,

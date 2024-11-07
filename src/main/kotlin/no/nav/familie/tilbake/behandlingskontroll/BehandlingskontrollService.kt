@@ -447,8 +447,7 @@ class BehandlingskontrollService(
     private fun sjekkOmBrevmottakerErstatterVergeForSekvens(
         sekvens: Int,
         behandlingId: UUID,
-    ) =
-        sekvens == Behandlingssteg.VERGE.sekvens &&
-            behandlingsstegstilstandRepository
-                .findByBehandlingIdAndBehandlingssteg(behandlingId, Behandlingssteg.BREVMOTTAKER) != null
+    ) = sekvens == Behandlingssteg.VERGE.sekvens &&
+        behandlingsstegstilstandRepository
+            .findByBehandlingIdAndBehandlingssteg(behandlingId, Behandlingssteg.BREVMOTTAKER) != null
 }

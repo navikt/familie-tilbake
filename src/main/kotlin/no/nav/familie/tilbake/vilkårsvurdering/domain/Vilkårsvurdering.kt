@@ -60,8 +60,7 @@ data class VilkårsvurderingGodTro(
 ) {
     val beløpSomErIBehold get() = if (this.beløpErIBehold) beløpTilbakekreves else BigDecimal.ZERO
 
-    fun erLik(vilkårsvurderingGodTro: VilkårsvurderingGodTro?) =
-        beløpErIBehold == vilkårsvurderingGodTro?.beløpErIBehold && begrunnelse == vilkårsvurderingGodTro.begrunnelse
+    fun erLik(vilkårsvurderingGodTro: VilkårsvurderingGodTro?) = beløpErIBehold == vilkårsvurderingGodTro?.beløpErIBehold && begrunnelse == vilkårsvurderingGodTro.begrunnelse
 }
 
 @Table("vilkarsvurdering_aktsomhet")

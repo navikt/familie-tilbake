@@ -40,14 +40,16 @@ class TekstformatererHeaderTest {
         generertHeader shouldBe institusjonHeader()
     }
 
-    private fun personHeader(): String = """<div id="dato">Dato: ${dagensDato()}</div>
+    private fun personHeader(): String =
+        """<div id="dato">Dato: ${dagensDato()}</div>
 <h1 id="hovedoverskrift">Dette er en header</h1>
 <div id="person">
 Navn: Test<br/>
 Fødselsnummer: 12345678901
 </div>"""
 
-    private fun institusjonHeader(): String = """<div id="dato">Dato: ${dagensDato()}</div>
+    private fun institusjonHeader(): String =
+        """<div id="dato">Dato: ${dagensDato()}</div>
 <h1 id="hovedoverskrift">Dette er en header</h1>
 <div id="institusjon">
 Navn: Test &amp; institusjon<br/>
