@@ -1472,7 +1472,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandling.behandlendeEnhet shouldBe "4806"
-        behandling.behandlendeEnhetsNavn shouldBe "Mock NAV Drammen"
+        behandling.behandlendeEnhetsNavn shouldBe "Mock Nav Drammen"
 
         taskService
             .finnTasksMedStatus(listOf(Status.UBEHANDLET))
