@@ -11,7 +11,7 @@ Du må betale 20 002 kroner.
 
 Vedtaket er gjort etter Folketrygdloven.
 _Skatt og skatteoppgjør
-NAV gir opplysninger til Skatteetaten. Skatteetaten vil vurdere om det er grunnlag for å endre skatteoppgjør.
+Nav gir opplysninger til Skatteetaten. Skatteetaten vil vurdere om det er grunnlag for å endre skatteoppgjør.
 _Hvordan betaler du tilbake?
 Du vil få faktura fra Skatteetaten på det beløpet du skal betale tilbake.
 
@@ -33,7 +33,7 @@ Hvis du ikke finner svar på nav.no kan du ringe oss på telefon 55 55 33 33, hv
 
 
 Med vennlig hilsen
-NAV Arbeid og ytelser
+Nav Arbeid og ytelser
 
 {venstrejustert}Ansvarlig Saksbehandler{høyrejustert}Ansvarlig Beslutter
 

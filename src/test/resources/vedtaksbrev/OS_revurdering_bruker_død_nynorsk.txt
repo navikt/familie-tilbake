@@ -17,7 +17,7 @@ Vedtaket er gjort etter Folketrygdloven § 22-15.
 _Skatt og skatteoppgjer
 Skatten som er trekt frå beløpet som skal betalast tilbake, er berekna etter det som har blitt trekt i skatt i gjennomsnitt per månad.
 
-NAV gjev opplysningar til Skatteetaten om skattebeløpet og om beløpet som skal betalast tilbake før skatt er trekt frå. Skatteetaten vil vurdere om det er grunnlag for å endre skatteoppgjer.
+Nav gjev opplysningar til Skatteetaten om skattebeløpet og om beløpet som skal betalast tilbake før skatt er trekt frå. Skatteetaten vil vurdere om det er grunnlag for å endre skatteoppgjer.
 _Korleis betalar du tilbake?
 Skatteetaten vil korrigere beløpet de skal betale tilbake. De finn meir informasjon på
 skatteetaten.no/betale.
@@ -36,7 +36,7 @@ Om de ikkje finn svar på nav.no, kan de ringe oss på telefon 55 55 33 33, kvar
 
 
 Med venleg helsing
-NAV Arbeid og ytelser
+Nav Arbeid og ytelser
 
 {venstrejustert}Ansvarlig Saksbehandler{høyrejustert}Ansvarlig Beslutter
 

@@ -21,7 +21,7 @@ class TekstformatererHenleggelsesbrevTest {
             sakspartsnavn = "Test",
             vergenavn = "John Doe",
             mottageradresse = Adresseinfo("12345678901", "Test"),
-            behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
+            behandlendeEnhetsNavn = "Nav Familie- og pensjonsytelser Skien",
             ansvarligSaksbehandler = "Bob",
             saksnummer = "1232456",
             språkkode = Språkkode.NB,
@@ -151,7 +151,7 @@ class TekstformatererHenleggelsesbrevTest {
     @Test
     fun `lagOverskrift skal generere henleggelsesbrev overskrift`() {
         val overskrift: String = TekstformatererHenleggelsesbrev.lagOverskrift(brevmetadata)
-        val fasit = "NAV har avsluttet saken din om tilbakebetaling"
+        val fasit = "Nav har avsluttet saken din om tilbakebetaling"
         overskrift shouldBe fasit
     }
 
@@ -159,7 +159,7 @@ class TekstformatererHenleggelsesbrevTest {
     fun `lagOverskrift skal generere henleggelsesbrev overskrift dødsfall bruker`() {
         val brevmetadata = brevmetadata.copy(gjelderDødsfall = true)
         val overskrift: String = TekstformatererHenleggelsesbrev.lagOverskrift(brevmetadata)
-        val fasit = "NAV har avsluttet saken om tilbakebetaling"
+        val fasit = "Nav har avsluttet saken om tilbakebetaling"
         overskrift shouldBe fasit
     }
 
@@ -167,7 +167,7 @@ class TekstformatererHenleggelsesbrevTest {
     fun `lagOverskrift skal generere henleggelsesbrev institusjon`() {
         val brevmetadata = brevmetadata.copy(institusjon = Institusjon("test", "test"))
         val overskrift: String = TekstformatererHenleggelsesbrev.lagOverskrift(brevmetadata)
-        val fasit = "NAV har avsluttet saken om tilbakebetaling"
+        val fasit = "Nav har avsluttet saken om tilbakebetaling"
         overskrift shouldBe fasit
     }
 
@@ -183,7 +183,7 @@ class TekstformatererHenleggelsesbrevTest {
     fun `lagOverskrift skal generere henleggelsesbrev overskrift nynorsk`() {
         val brevmetadata = brevmetadata.copy(språkkode = Språkkode.NN)
         val overskrift: String = TekstformatererHenleggelsesbrev.lagOverskrift(brevmetadata)
-        val fasit = "NAV har avslutta saka di om tilbakebetaling"
+        val fasit = "Nav har avslutta saka di om tilbakebetaling"
         overskrift shouldBe fasit
     }
 
@@ -191,7 +191,7 @@ class TekstformatererHenleggelsesbrevTest {
     fun `lagOverskrift skal generere henleggelsesbrev overskrift nynorsk dødsfall bruker`() {
         val brevmetadata = brevmetadata.copy(språkkode = Språkkode.NN, gjelderDødsfall = true)
         val overskrift: String = TekstformatererHenleggelsesbrev.lagOverskrift(brevmetadata)
-        val fasit = "NAV har avslutta saka om tilbakebetaling"
+        val fasit = "Nav har avslutta saka om tilbakebetaling"
         overskrift shouldBe fasit
     }
 
@@ -199,7 +199,7 @@ class TekstformatererHenleggelsesbrevTest {
     fun `lagOverskrift skal generere henleggelsesbrev overskrift institusjon`() {
         val brevmetadata = brevmetadata.copy(språkkode = Språkkode.NN, institusjon = Institusjon("123", "123"))
         val overskrift: String = TekstformatererHenleggelsesbrev.lagOverskrift(brevmetadata)
-        val fasit = "NAV har avslutta saka om tilbakebetaling"
+        val fasit = "Nav har avslutta saka om tilbakebetaling"
         overskrift shouldBe fasit
     }
 

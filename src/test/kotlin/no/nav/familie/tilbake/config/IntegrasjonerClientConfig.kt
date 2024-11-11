@@ -298,7 +298,7 @@ class IntegrasjonerClientConfig {
         every { integrasjonerClient.hentNavkontor(any()) } returns
             NavKontorEnhet(
                 enhetId = 4806,
-                navn = "Mock NAV Drammen",
+                navn = "Mock Nav Drammen",
                 enhetNr = "mock",
                 status = "mock",
             )
