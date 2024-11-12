@@ -47,8 +47,8 @@ class DokprodTilHtmlTest {
     @Test
     fun `dokprodInnholdTilHtml skal spesialbehandle hilsen`() {
         // halvhjertet avsnitt er hvor det er tatt kun ett linjeskift.
-        val resultat: String = DokprodTilHtml.dokprodInnholdTilHtml("Med vennlig hilsen\nNAV Familie- og pensjonsytelser")
+        val resultat: String = DokprodTilHtml.dokprodInnholdTilHtml("Med vennlig hilsen\nNav Familie- og pensjonsytelser")
 
-        resultat shouldBe "<p class=\"hilsen\">Med vennlig hilsen<br/>NAV Familie- og pensjonsytelser</p>"
+        resultat shouldBe "<p class=\"hilsen\">Med vennlig hilsen<br/>Nav Familie- og pensjonsytelser</p>"
     }
 }

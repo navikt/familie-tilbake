@@ -23,7 +23,7 @@ class TekstformatererVarselbrevTest {
             sakspartId = "123456",
             sakspartsnavn = "Test",
             mottageradresse = lagAdresseinfo(),
-            behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
+            behandlendeEnhetsNavn = "Nav Familie- og pensjonsytelser Skien",
             ansvarligSaksbehandler = "Bob",
             saksnummer = "1232456",
             språkkode = Språkkode.NB,
@@ -173,7 +173,7 @@ class TekstformatererVarselbrevTest {
     @Test
     fun `lagVarselbrevsoverskrift skal generere varselbrevsoverskrift`() {
         val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(metadata, false)
-        val fasit = "NAV vurderer om du må betale tilbake overgangsstønad"
+        val fasit = "Nav vurderer om du må betale tilbake overgangsstønad"
         overskrift shouldBe fasit
     }
 
@@ -181,7 +181,7 @@ class TekstformatererVarselbrevTest {
     fun `lagVarselbrevsoverskrift skal generere varselbrevsoverskrift nynorsk`() {
         val brevMetadata = metadata.copy(språkkode = Språkkode.NN)
         val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(brevMetadata, false)
-        val fasit = "NAV vurderer om du må betale tilbake overgangsstønad"
+        val fasit = "Nav vurderer om du må betale tilbake overgangsstønad"
         overskrift shouldBe fasit
     }
 
@@ -189,7 +189,7 @@ class TekstformatererVarselbrevTest {
     fun `lagVarselbrevsoverskrift skal generere varselbrevsoverskrift institusjon`() {
         val brevMetadata = metadata.copy(institusjon = Institusjon("test", "test"))
         val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(brevMetadata, false)
-        val fasit = "NAV vurderer om institusjonen må betale tilbake overgangsstønad"
+        val fasit = "Nav vurderer om institusjonen må betale tilbake overgangsstønad"
         overskrift shouldBe fasit
     }
 
@@ -197,7 +197,7 @@ class TekstformatererVarselbrevTest {
     fun `lagVarselbrevsoverskrift skal generere varselbrevsoverskrift institusjon nynorsk`() {
         val brevMetadata = metadata.copy(institusjon = Institusjon("test", "test"), språkkode = Språkkode.NN)
         val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(brevMetadata, false)
-        val fasit = "NAV vurderer om institusjonen må betale tilbake overgangsstønad"
+        val fasit = "Nav vurderer om institusjonen må betale tilbake overgangsstønad"
         overskrift shouldBe fasit
     }
 

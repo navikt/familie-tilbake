@@ -18,7 +18,7 @@ open class BaseDokument(
 ) : Språkstøtte {
     val avsenderenhet =
         if (FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype) == Fagsystem.EF) {
-            "NAV Arbeid og ytelser"
+            "Nav Arbeid og ytelser"
         } else {
             behandlendeEnhetsNavn
         }

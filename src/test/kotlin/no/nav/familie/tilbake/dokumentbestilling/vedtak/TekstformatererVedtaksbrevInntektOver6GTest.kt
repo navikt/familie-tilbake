@@ -81,7 +81,7 @@ class TekstformatererVedtaksbrevInntektOver6GTest {
             sakspartId = "123456",
             sakspartsnavn = "Test",
             mottageradresse = Adresseinfo("ident", "bob"),
-            behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
+            behandlendeEnhetsNavn = "Nav Familie- og pensjonsytelser Skien",
             ansvarligSaksbehandler = "Ansvarlig Saksbehandler",
             saksnummer = "1232456",
             språkkode = Språkkode.NB,

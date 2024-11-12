@@ -16,7 +16,7 @@ class TekstformatererHeaderTest {
             sakspartsnavn = "Test",
             vergenavn = "John Doe",
             mottageradresse = Adresseinfo("12345678901", "Test"),
-            behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
+            behandlendeEnhetsNavn = "Nav Familie- og pensjonsytelser Skien",
             ansvarligSaksbehandler = "Bob",
             saksnummer = "1232456",
             språkkode = Språkkode.NB,
