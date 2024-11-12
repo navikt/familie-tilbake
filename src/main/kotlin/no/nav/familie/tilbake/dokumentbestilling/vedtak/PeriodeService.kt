@@ -19,11 +19,19 @@ class PeriodeService(
 ) {
     fun erEnsligForsørgerOgPerioderLike(behandlingId: UUID): SkalSammenslåPerioder {
         val fagsak = fagsakRepository.finnFagsakForBehandlingId(behandlingId)
-        if (erPerioderLike(behandlingId) && fagsak.ytelsestype.tilTema() == Tema.ENF) {
+        if (harMerEnnEnPeriode(behandlingId) &&
+            erPerioderLike(behandlingId) &&
+            fagsak.ytelsestype.tilTema() == Tema.ENF
+        ) {
             return SkalSammenslåPerioder.JA
         }
         return SkalSammenslåPerioder.IKKE_AKTUELT
     }
+
+    private fun harMerEnnEnPeriode(behandlingId: UUID) =
+        faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId).feilutbetaltePerioder.size > 1 &&
+            (foreldelseService.hentAktivVurdertForeldelse(behandlingId)?.foreldelsesperioder?.size ?: 0) > 1 &&
+            vilkårsvurderingService.hentVilkårsvurdering(behandlingId).perioder.size > 1
 
     private fun erPerioderLike(behandlingId: UUID) =
         faktaFeilutbetalingService.sjekkOmFaktaPerioderErLike(behandlingId) &&
