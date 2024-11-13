@@ -33,7 +33,7 @@ class PeriodeService(
 
         val harEnFaktaPeriode = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId).feilutbetaltePerioder.size == 1
         val harEnVilkårsperiode = vilkårsvurderingService.hentVilkårsvurdering(behandlingId).perioder.size == 1
-        val harEnForeldelseperiode = foreldelsesperioder == null || foreldelsesperioder.size == 1
+        val harEnForeldelseperiode = foreldelsesperioder?.size == 1
 
         return harEnFaktaPeriode && harEnVilkårsperiode && harEnForeldelseperiode
     }

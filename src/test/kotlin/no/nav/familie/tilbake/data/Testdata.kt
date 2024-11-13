@@ -180,11 +180,23 @@ object Testdata {
             oppdagelsesdato = LocalDate.now(),
         )
 
-    fun lagVurdertForeldelse(behandlingId: UUID) =
-        VurdertForeldelse(
-            behandlingId = behandlingId,
-            foreldelsesperioder = setOf(foreldelsesperiode),
-        )
+    fun lagVurdertForeldelse(
+        behandlingId: UUID,
+        månedsperioder: Set<Månedsperiode> = setOf(Månedsperiode(LocalDate.now(), LocalDate.now().plusDays(1))),
+    ) = VurdertForeldelse(
+        behandlingId = behandlingId,
+        foreldelsesperioder = månedsperioder.map { lagVurdertForeldelsePeriode(it) }.toSet(),
+    )
+
+    fun lagVurdertForeldelsePeriode(
+        månedsperiode: Månedsperiode,
+    ) = Foreldelsesperiode(
+        periode = månedsperiode,
+        foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_FORELDET,
+        begrunnelse = "begrunnelse foreldelsesperiode",
+        foreldelsesfrist = LocalDate.now(),
+        oppdagelsesdato = LocalDate.now(),
+    )
 
     val feilKravgrunnlagsbeløp433 =
         Kravgrunnlagsbeløp433(
@@ -241,8 +253,8 @@ object Testdata {
                 ),
             beløp =
                 setOf(
-                    feilKravgrunnlagsbeløp433,
-                    ytelKravgrunnlagsbeløp433,
+                    feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
+                    ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
                 ),
             månedligSkattebeløp = BigDecimal("123.11"),
         )
@@ -323,21 +335,23 @@ object Testdata {
             hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
         )
 
-    fun lagFaktaFeilutbetaling(behandlingId: UUID) =
-        FaktaFeilutbetaling(
-            begrunnelse = "testverdi",
-            aktiv = true,
-            behandlingId = behandlingId,
-            perioder =
-                setOf(
+    fun lagFaktaFeilutbetaling(
+        behandlingId: UUID,
+        månedsperioder: Set<Månedsperiode> = setOf(Månedsperiode("2020-04", "2020-08")),
+    ) = FaktaFeilutbetaling(
+        begrunnelse = "testverdi",
+        aktiv = true,
+        behandlingId = behandlingId,
+        perioder =
+            månedsperioder
+                .map {
                     FaktaFeilutbetalingsperiode(
-                        periode = Månedsperiode("2020-04" to "2022-08"),
+                        periode = it,
                         hendelsestype = Hendelsestype.ANNET,
                         hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
-                    ),
-                    faktaFeilutbetalingsperiode,
-                ),
-        )
+                    )
+                }.toSet(),
+    )
 
     val økonomiXmlMottatt =
         ØkonomiXmlMottatt(
