@@ -74,6 +74,19 @@ class PeriodeServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `erEnsligForsørgerOgPerioderLike - en periode som er splittet skal returnere IKKE_AKTUELL`() {
+        faktaFeilutbetalingRepository.insert(Testdata.lagFaktaFeilutbetaling(behandling.id))
+        val kravgrunnlag = lagKravgrunnlagsperiode(førstePeriode.fomDato, førstePeriode.tomDato)
+        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id, setOf(kravgrunnlag)))
+
+        val vilkårsvurderingsperiode = Vilkårsvurderingsperiode(periode = Månedsperiode(førstePeriode.fomDato, førstePeriode.tomDato), vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT, begrunnelse = "begrunnelse")
+        vilkårsvurderingRepository.insert(Vilkårsvurdering(behandlingId = behandling.id, perioder = setOf(vilkårsvurderingsperiode)))
+
+        val erEnsligForsørgerOgPerioderLike = periodeService.erEnsligForsørgerOgPerioderLike(behandling.id)
+        erEnsligForsørgerOgPerioderLike shouldBe SkalSammenslåPerioder.IKKE_AKTUELT
+    }
+
+    @Test
     fun `erEnsligForsørgerOgPerioderLike - har to perioder i fakta - skal returnere JA`() {
         faktaFeilutbetalingRepository.insert(Testdata.lagFaktaFeilutbetaling(behandling.id, setOf(førstePeriode, andrePeriode)))
         kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id, perioder = setOf(lagKravgrunnlagsperiode(førstePeriode.fomDato, førstePeriode.tomDato), lagKravgrunnlagsperiode(andrePeriode.fomDato, andrePeriode.tomDato))))

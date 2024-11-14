@@ -29,13 +29,10 @@ class PeriodeService(
     }
 
     private fun harKunEnPeriode(behandlingId: UUID): Boolean {
-        val foreldelsesperioder = foreldelseService.hentAktivVurdertForeldelse(behandlingId)?.foreldelsesperioder
-
         val harEnFaktaPeriode = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId).feilutbetaltePerioder.size == 1
         val harEnVilkårsperiode = vilkårsvurderingService.hentVilkårsvurdering(behandlingId).perioder.size == 1
-        val harEnForeldelseperiode = foreldelsesperioder?.size == 1
 
-        return harEnFaktaPeriode && harEnVilkårsperiode && harEnForeldelseperiode
+        return harEnFaktaPeriode || harEnVilkårsperiode
     }
 
     private fun erPerioderLike(behandlingId: UUID) =
