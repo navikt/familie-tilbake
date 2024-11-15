@@ -109,6 +109,9 @@ object Testdata {
 
     val behandlingsresultat = Behandlingsresultat(behandlingsvedtak = behandlingsvedtak)
 
+    private val periode = Månedsperiode(LocalDate.now(), LocalDate.now().plusDays(1))
+    private val periode4Mnd = Månedsperiode("2020-04", "2020-08")
+
     fun lagBehandling(
         fagsakId: UUID = fagsak.id,
         ansvarligSaksbehandler: String = "saksbehandler",
@@ -171,18 +174,9 @@ object Testdata {
             begrunnelse = "testverdi",
         )
 
-    private val foreldelsesperiode =
-        Foreldelsesperiode(
-            periode = Månedsperiode(LocalDate.now(), LocalDate.now().plusDays(1)),
-            foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_FORELDET,
-            begrunnelse = "testverdi",
-            foreldelsesfrist = LocalDate.now(),
-            oppdagelsesdato = LocalDate.now(),
-        )
-
     fun lagVurdertForeldelse(
         behandlingId: UUID,
-        månedsperioder: Set<Månedsperiode> = setOf(Månedsperiode(LocalDate.now(), LocalDate.now().plusDays(1))),
+        månedsperioder: Set<Månedsperiode> = setOf(periode),
     ) = VurdertForeldelse(
         behandlingId = behandlingId,
         foreldelsesperioder = månedsperioder.map { lagVurdertForeldelsePeriode(it) }.toSet(),
@@ -328,16 +322,9 @@ object Testdata {
             perioder = setOf(vilkårsperiode),
         )
 
-    private val faktaFeilutbetalingsperiode =
-        FaktaFeilutbetalingsperiode(
-            periode = Månedsperiode(LocalDate.now(), LocalDate.now().plusDays(1)),
-            hendelsestype = Hendelsestype.ANNET,
-            hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
-        )
-
     fun lagFaktaFeilutbetaling(
         behandlingId: UUID,
-        månedsperioder: Set<Månedsperiode> = setOf(Månedsperiode("2020-04", "2020-08")),
+        månedsperioder: Set<Månedsperiode> = setOf(periode4Mnd),
     ) = FaktaFeilutbetaling(
         begrunnelse = "testverdi",
         aktiv = true,
