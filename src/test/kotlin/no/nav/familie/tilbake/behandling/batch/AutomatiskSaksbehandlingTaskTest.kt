@@ -108,9 +108,9 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
                 status = Behandlingsstatus.UTREDES,
             ),
         )
-        val feilKravgrunnlagBeløp = Testdata.feilKravgrunnlagsbeløp433.copy(nyttBeløp = BigDecimal("100"))
+        val feilKravgrunnlagBeløp = Testdata.lagFeilKravgrunnlagsbeløp().copy(nyttBeløp = BigDecimal("100"))
         val ytelKravgrunnlagsbeløp433 =
-            Testdata.ytelKravgrunnlagsbeløp433.copy(
+            Testdata.lagYtelKravgrunnlagsbeløp().copy(
                 opprinneligUtbetalingsbeløp = BigDecimal("100"),
                 tilbakekrevesBeløp = BigDecimal("100"),
             )
