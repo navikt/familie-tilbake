@@ -206,9 +206,39 @@ object Testdata {
             skatteprosent = BigDecimal("35.1100"),
         )
 
+    fun lagFeilKravgrunnlagsbeløp(
+        klassekode: Klassekode = Klassekode.KL_KODE_FEIL_BA,
+        nyttBeløp: BigDecimal = BigDecimal("10000"),
+    ) = Kravgrunnlagsbeløp433(
+        klassekode = klassekode,
+        klassetype = Klassetype.FEIL,
+        opprinneligUtbetalingsbeløp = BigDecimal.ZERO,
+        nyttBeløp = nyttBeløp,
+        tilbakekrevesBeløp = BigDecimal.ZERO,
+        uinnkrevdBeløp = BigDecimal.ZERO,
+        resultatkode = "testverdi",
+        årsakskode = "testverdi",
+        skyldkode = "testverdi",
+        skatteprosent = BigDecimal("35.1100"),
+    )
+
     val ytelKravgrunnlagsbeløp433 =
         Kravgrunnlagsbeløp433(
             klassekode = Klassekode.BATR,
+            klassetype = Klassetype.YTEL,
+            opprinneligUtbetalingsbeløp = BigDecimal("10000"),
+            nyttBeløp = BigDecimal.ZERO,
+            tilbakekrevesBeløp = BigDecimal("10000"),
+            uinnkrevdBeløp = BigDecimal.ZERO,
+            resultatkode = "testverdi",
+            årsakskode = "testverdi",
+            skyldkode = "testverdi",
+            skatteprosent = BigDecimal("35.1100"),
+        )
+
+    fun lagYtelKravgrunnlagsbeløp(klassekode: Klassekode = Klassekode.BATR) =
+        Kravgrunnlagsbeløp433(
+            klassekode = klassekode,
             klassetype = Klassetype.YTEL,
             opprinneligUtbetalingsbeløp = BigDecimal("10000"),
             nyttBeløp = BigDecimal.ZERO,
@@ -229,8 +259,8 @@ object Testdata {
                 ),
             beløp =
                 setOf(
-                    feilKravgrunnlagsbeløp433,
-                    ytelKravgrunnlagsbeløp433,
+                    lagFeilKravgrunnlagsbeløp(),
+                    lagYtelKravgrunnlagsbeløp(),
                 ),
             månedligSkattebeløp = BigDecimal("123.11"),
         )
@@ -238,6 +268,7 @@ object Testdata {
     fun lagKravgrunnlagsperiode(
         fom: LocalDate,
         tom: LocalDate,
+        klassekode: Klassekode = Klassekode.KL_KODE_FEIL_BA,
     ): Kravgrunnlagsperiode432 =
         Kravgrunnlagsperiode432(
             periode =
@@ -247,8 +278,8 @@ object Testdata {
                 ),
             beløp =
                 setOf(
-                    feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
-                    ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
+                    lagFeilKravgrunnlagsbeløp(klassekode),
+                    lagYtelKravgrunnlagsbeløp(klassekode),
                 ),
             månedligSkattebeløp = BigDecimal("123.11"),
         )
@@ -256,11 +287,12 @@ object Testdata {
     fun lagKravgrunnlag(
         behandlingId: UUID,
         perioder: Set<Kravgrunnlagsperiode432> = setOf(kravgrunnlagsperiode432),
+        fagområdekode: Fagområdekode = Fagområdekode.EFOG,
     ) = Kravgrunnlag431(
         behandlingId = behandlingId,
         vedtakId = BigInteger.ZERO,
         kravstatuskode = Kravstatuskode.NYTT,
-        fagområdekode = Fagområdekode.EFOG,
+        fagområdekode = fagområdekode,
         fagsystemId = "testverdi",
         fagsystemVedtaksdato = LocalDate.now(),
         omgjortVedtakId = BigInteger.ZERO,

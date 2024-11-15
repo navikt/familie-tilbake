@@ -14,6 +14,8 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.SkalSammenslåPer
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
 import no.nav.familie.tilbake.foreldelse.VurdertForeldelseRepository
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
+import no.nav.familie.tilbake.kravgrunnlag.domain.Klassekode
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
@@ -90,6 +92,19 @@ class PeriodeServiceTest : OppslagSpringRunnerTest() {
     fun `erEnsligForsørgerOgPerioderLike - har to perioder i fakta - skal returnere JA`() {
         faktaFeilutbetalingRepository.insert(Testdata.lagFaktaFeilutbetaling(behandling.id, setOf(førstePeriode, andrePeriode)))
         kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id, perioder = setOf(lagKravgrunnlagsperiode(førstePeriode.fomDato, førstePeriode.tomDato), lagKravgrunnlagsperiode(andrePeriode.fomDato, andrePeriode.tomDato))))
+        foreldelseRepository.insert(Testdata.lagVurdertForeldelse(behandling.id, setOf(førstePeriode, andrePeriode)))
+
+        val vilkårsvurderingsperiode = Vilkårsvurderingsperiode(periode = Månedsperiode(førstePeriode.fomDato, førstePeriode.tomDato), vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT, begrunnelse = "begrunnelse")
+        val vilkårsvurderingsperiode2 = Vilkårsvurderingsperiode(periode = Månedsperiode(andrePeriode.fomDato, andrePeriode.tomDato), vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT, begrunnelse = "begrunnelse")
+        vilkårsvurderingRepository.insert(Vilkårsvurdering(behandlingId = behandling.id, perioder = setOf(vilkårsvurderingsperiode, vilkårsvurderingsperiode2)))
+        val erEnsligForsørgerOgPerioderLike = periodeService.erEnsligForsørgerOgPerioderLike(behandling.id)
+        erEnsligForsørgerOgPerioderLike shouldBe SkalSammenslåPerioder.JA
+    }
+
+    @Test
+    fun `erEnsligForsørgerOgPerioderLike - har to perioder i fakta for barnetilsyn - skal returnere JA`() {
+        faktaFeilutbetalingRepository.insert(Testdata.lagFaktaFeilutbetaling(behandling.id, setOf(førstePeriode, andrePeriode)))
+        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id, perioder = setOf(lagKravgrunnlagsperiode(førstePeriode.fomDato, førstePeriode.tomDato, Klassekode.EFBT), lagKravgrunnlagsperiode(andrePeriode.fomDato, andrePeriode.tomDato, Klassekode.EFBT)), fagområdekode = Fagområdekode.EFBT))
         foreldelseRepository.insert(Testdata.lagVurdertForeldelse(behandling.id, setOf(førstePeriode, andrePeriode)))
 
         val vilkårsvurderingsperiode = Vilkårsvurderingsperiode(periode = Månedsperiode(førstePeriode.fomDato, førstePeriode.tomDato), vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT, begrunnelse = "begrunnelse")
