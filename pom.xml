@@ -23,11 +23,11 @@
         <main-class>no.nav.familie.tilbake.LauncherKt</main-class>
         <kotlin.version>2.0.21</kotlin.version>
         <common-java-modules.version>2.2021.09.17_07.09-67428a6422cc</common-java-modules.version>
-        <kontrakter.version>3.0_20241102131210_d65efd1</kontrakter.version>
-        <felles.version>3.20240913110742_adb42f8</felles.version>
+        <kontrakter.version>3.0_20241113143804_80bdd40</kontrakter.version>
+        <felles.version>3.20241111113426_be51eee</felles.version>
         <!-- kotest.properties kan antakelig fjernes i versjon 6, for autoscan blir default false -->
         <kotest.version>5.9.1</kotest.version>
-        <token-validation-spring.version>5.0.10</token-validation-spring.version>
+        <token-validation-spring.version>5.0.11</token-validation-spring.version>
         <okhttp3.version>4.9.1</okhttp3.version><!-- Inntil videre nødvendig for token-validation-spring-test-->
         <openhtmltopdf.version>1.1.22</openhtmltopdf.version>
         <jakarta.xml.bind-api.version>4.0.1</jakarta.xml.bind-api.version>
@@ -44,9 +44,9 @@
         <spring.cloud-contract>4.1.4</spring.cloud-contract>
         <springdoc.version>2.6.0</springdoc.version>
         <testcontainers.version>1.20.3</testcontainers.version>
-        <tjenestespesifikasjoner.version>2633.1685ed5</tjenestespesifikasjoner.version>
-        <familie-tjenestespesifikasjoner.version>1.0_20241021101018_2aa57cc</familie-tjenestespesifikasjoner.version>
-        <prosessering-core.version>2.20241011144712_deb1f2c</prosessering-core.version>
+        <tjenestespesifikasjoner.version>2639.36f9120</tjenestespesifikasjoner.version>
+        <familie-tjenestespesifikasjoner.version>1.0_20241111164947_b183dab</familie-tjenestespesifikasjoner.version>
+        <prosessering-core.version>2.20241112093526_694e258</prosessering-core.version>
     </properties>
 
 
