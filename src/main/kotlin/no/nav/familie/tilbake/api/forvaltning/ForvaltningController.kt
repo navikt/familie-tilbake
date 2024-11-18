@@ -266,7 +266,7 @@ class ForvaltningController(
     fun ferdigstillOppgaverForBehandling(
         @PathVariable behandlingId: UUID,
         @PathVariable oppgaveType: String,
-    ){
+    ) {
         logger.info("Ferdigstiller oppgave $oppgaveType for behandling $behandlingId")
         oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId = behandlingId, oppgavetype = oppgaveType)
     }
