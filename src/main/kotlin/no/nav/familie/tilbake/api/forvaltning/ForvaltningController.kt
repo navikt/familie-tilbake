@@ -261,7 +261,6 @@ class ForvaltningController(
     @Operation(summary = "Ferdigstiller åpen oppgave som skulle vært lukket i en behandling")
     @PostMapping(
         path = ["/ferdigstillOppgaverForBehandling/{behandlingId}/{oppgaveType}"],
-        produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun ferdigstillOppgaverForBehandling(
         @PathVariable behandlingId: UUID,
