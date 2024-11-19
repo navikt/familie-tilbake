@@ -7,6 +7,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
+import no.nav.familie.tilbake.integration.pdl.internal.logger
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
@@ -255,6 +256,18 @@ class ForvaltningController(
         behandlingIder.forEach {
             oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgave(it, "--- Opprettet av familie-tilbake ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n", LocalDate.now())
         }
+    }
+
+    @Operation(summary = "Ferdigstiller åpen oppgave som skulle vært lukket i en behandling")
+    @PostMapping(
+        path = ["/ferdigstillOppgaverForBehandling/{behandlingId}/{oppgaveType}"],
+    )
+    fun ferdigstillOppgaverForBehandling(
+        @PathVariable behandlingId: UUID,
+        @PathVariable oppgaveType: String,
+    ) {
+        logger.info("Ferdigstiller oppgave $oppgaveType for behandling $behandlingId")
+        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId = behandlingId, oppgavetype = oppgaveType)
     }
 }
 
