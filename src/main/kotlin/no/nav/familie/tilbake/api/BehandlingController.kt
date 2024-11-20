@@ -250,7 +250,7 @@ class BehandlingController(
     }
 
     private fun validerKanSetteBehandlingTilbakeTilFakta(behandlingId: UUID) {
-        feilHvis(!erAnsvarligSaksbehandler(behandlingId) || !tilgangService.harInnloggetBrukerForvalterRolle(), HttpStatus.FORBIDDEN) {
+        feilHvis(!erAnsvarligSaksbehandler(behandlingId) && !tilgangService.harInnloggetBrukerForvalterRolle(), HttpStatus.FORBIDDEN) {
             "Kun ansvarlig saksbehandler kan flytte behandling tilbake til fakta"
         }
         feilHvis(behandlingskontrollService.erBehandlingPåVent(behandlingId), HttpStatus.FORBIDDEN) {
