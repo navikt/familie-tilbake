@@ -22,6 +22,7 @@ import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.HenteParam
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
+import no.nav.familie.tilbake.sikkerhet.TilgangService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -44,6 +45,7 @@ class BehandlingController(
     private val stegService: StegService,
     private val forvaltningService: ForvaltningService,
     private val behandlingskontrollService: BehandlingskontrollService,
+    private val tilgangService: TilgangService,
 ) {
     @Operation(summary = "Opprett tilbakekrevingsbehandling automatisk, kan kalles av fagsystem, batch")
     @PostMapping(
@@ -248,7 +250,7 @@ class BehandlingController(
     }
 
     private fun validerKanSetteBehandlingTilbakeTilFakta(behandlingId: UUID) {
-        feilHvis(!erAnsvarligSaksbehandler(behandlingId), HttpStatus.FORBIDDEN) {
+        feilHvis(!erAnsvarligSaksbehandler(behandlingId) || tilgangService.harInnloggetBrukerForvalterRolle(), HttpStatus.FORBIDDEN) {
             "Kun ansvarlig saksbehandler kan flytte behandling tilbake til fakta"
         }
         feilHvis(behandlingskontrollService.erBehandlingPåVent(behandlingId), HttpStatus.FORBIDDEN) {
