@@ -39,5 +39,19 @@ data class ManuellBrevmottaker(
                 landkode.isNullOrBlank()
         )
 
+    fun harGyldigAdresse(): Boolean =
+        if (landkode == "NO") {
+            navn.isNotEmpty() &&
+                !adresselinje1.isNullOrEmpty()
+            !postnummer.isNullOrEmpty() &&
+                !poststed.isNullOrEmpty()
+        } else {
+            // Utenlandske manuelle brevmottakere skal ha postnummer og poststed satt i adresselinjene
+            navn.isNotEmpty() &&
+                !adresselinje1.isNullOrEmpty() &&
+                postnummer.isNullOrEmpty() &&
+                poststed.isNullOrEmpty()
+        }
+
     val erTilleggsmottaker get() = type == MottakerType.VERGE || type == MottakerType.FULLMEKTIG
 }

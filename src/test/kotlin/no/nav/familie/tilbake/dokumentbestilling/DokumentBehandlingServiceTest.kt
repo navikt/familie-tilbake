@@ -17,6 +17,7 @@ import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.brevmaler.Dokumentmalstype
 import no.nav.familie.tilbake.dokumentbestilling.innhentdokumentasjon.InnhentDokumentasjonbrevService
 import no.nav.familie.tilbake.dokumentbestilling.innhentdokumentasjon.InnhentDokumentasjonbrevTask
+import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
 import no.nav.familie.tilbake.dokumentbestilling.varsel.manuelt.ManueltVarselbrevService
 import no.nav.familie.tilbake.dokumentbestilling.varsel.manuelt.SendManueltVarselbrevTask
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
@@ -62,6 +63,7 @@ class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
 
     private val mockManueltVarselBrevService: ManueltVarselbrevService = mockk()
     private val mockInnhentDokumentasjonbrevService: InnhentDokumentasjonbrevService = mockk()
+    private val mockManuellBrevmottakerRepository: ManuellBrevmottakerRepository = mockk()
 
     private lateinit var dokumentBehandlingService: DokumentbehandlingService
 
@@ -79,6 +81,7 @@ class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
                 taskService,
                 mockManueltVarselBrevService,
                 mockInnhentDokumentasjonbrevService,
+                mockManuellBrevmottakerRepository,
             )
     }
 
