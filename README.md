@@ -1,15 +1,6 @@
 # familie-tilbake
 Applikasjon for tilbakekreving av barnetrygd, kontantstøtte og enslig forsørger
 
-## Maven-oppsett
-Så lenge vi bruker en spesialversjon av openhtmltopdf må du legge inn ny server i `~/.m2/settings.xml`-fila lokalt:
-```
-    <server>
-      <id>at.datenwort.openhtmltopdf</id>
-      <username>navikt</username>
-      <password>[TOKEN-DU-BRUKER-TIL-DETTE]</password>
-    </server>
-```
 ## Bygging
 Bygging gjøres med `mvn verify`.
 
