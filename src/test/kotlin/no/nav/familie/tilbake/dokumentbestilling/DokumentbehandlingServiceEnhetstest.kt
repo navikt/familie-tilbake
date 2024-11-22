@@ -18,9 +18,8 @@ import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBre
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
 import no.nav.familie.tilbake.dokumentbestilling.varsel.manuelt.ManueltVarselbrevService
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.util.*
+import java.util.UUID
 
 class DokumentbehandlingServiceEnhetstest {
     private val mockBehandlingRepository: BehandlingRepository = mockk()
