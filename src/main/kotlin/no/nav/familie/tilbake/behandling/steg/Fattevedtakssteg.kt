@@ -137,7 +137,7 @@ class Fattevedtakssteg(
         behandlingId: UUID,
         erAlleStegGodkjente: Boolean,
     ) {
-        val manuelleBrevmottakere = manuellBrevmottakerRepository.findByBehandlingId(behandlingId)
+        val manuelleBrevmottakere by lazy { manuellBrevmottakerRepository.findByBehandlingId(behandlingId) }
         if (erAlleStegGodkjente && !BrevmottakerAdresseValidering.erBrevmottakereGyldige(manuelleBrevmottakere)) {
             throw Feil(
                 message = "Det finnes ugyldige brevmottakere, vi kan ikke beslutte vedtaket",
