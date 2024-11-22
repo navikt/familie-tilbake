@@ -133,7 +133,7 @@ class Fattevedtakssteg(
 
     override fun getBehandlingssteg(): Behandlingssteg = Behandlingssteg.FATTE_VEDTAK
 
-    fun validerManuelleBrevmottakere(
+    private fun validerManuelleBrevmottakere(
         behandlingId: UUID,
         erAlleStegGodkjente: Boolean,
     ) {
