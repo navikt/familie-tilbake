@@ -66,13 +66,12 @@ class FattevedtaksstegEnhetstest {
                 ),
             )
 
-        // Act
+        // Act & assert
         val exception =
             assertThrows<Feil> {
                 fattevedtakssteg.utførSteg(behandlingsId, fatteVedtaksstegDto)
             }
 
-        // Assert
         assertThat(exception.message, `is`("Det finnes ugyldige brevmottakere, vi kan ikke beslutte vedtaket"))
     }
 }
