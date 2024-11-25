@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.dokumentbestilling
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.prosessering.domene.Status
@@ -83,6 +84,8 @@ class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
                 mockInnhentDokumentasjonbrevService,
                 mockManuellBrevmottakerRepository,
             )
+
+        every { mockManuellBrevmottakerRepository.findByBehandlingId(behandling.id) } returns emptyList()
     }
 
     @Test
