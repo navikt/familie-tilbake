@@ -7,11 +7,14 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.ContextService
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.dokumentbestilling.brevmaler.Dokumentmalstype
 import no.nav.familie.tilbake.dokumentbestilling.innhentdokumentasjon.InnhentDokumentasjonbrevService
 import no.nav.familie.tilbake.dokumentbestilling.innhentdokumentasjon.InnhentDokumentasjonbrevTask
+import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.BrevmottakerAdresseValidering
+import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
 import no.nav.familie.tilbake.dokumentbestilling.varsel.manuelt.ManueltVarselbrevService
 import no.nav.familie.tilbake.dokumentbestilling.varsel.manuelt.SendManueltVarselbrevTask
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
@@ -29,6 +32,7 @@ class DokumentbehandlingService(
     private val taskService: TaskService,
     private val manueltVarselBrevService: ManueltVarselbrevService,
     private val innhentDokumentasjonBrevService: InnhentDokumentasjonbrevService,
+    private val manuellBrevmottakerRepository: ManuellBrevmottakerRepository,
 ) {
     fun bestillBrev(
         behandlingId: UUID,
@@ -37,6 +41,15 @@ class DokumentbehandlingService(
     ) {
         val behandling: Behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val ansvarligSaksbehandler = ContextService.hentSaksbehandler()
+
+        val manuelleBrevmottakere = manuellBrevmottakerRepository.findByBehandlingId(behandlingId)
+        if (!BrevmottakerAdresseValidering.erBrevmottakereGyldige(manuelleBrevmottakere)) {
+            throw Feil(
+                message = "Det finnes ugyldige brevmottakere i utsending av manuelt brev",
+                frontendFeilmelding = "Adressen som er lagt til manuelt har ugyldig format, og brevet kan ikke sendes. Du må legge til manuell adresse på nytt.",
+            )
+        }
+
         if (behandling.ansvarligSaksbehandler != ansvarligSaksbehandler) {
             behandlingRepository.update(behandling.copy(ansvarligSaksbehandler = ansvarligSaksbehandler))
         }
