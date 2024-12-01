@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.5</version>
+        <version>3.4.0</version>
     </parent>
 
     <properties>
@@ -21,13 +21,13 @@
         <java.version>21</java.version>
         <jvmTarget>21</jvmTarget>
         <main-class>no.nav.familie.tilbake.LauncherKt</main-class>
-        <kotlin.version>2.0.21</kotlin.version>
+        <kotlin.version>2.1.0</kotlin.version>
         <common-java-modules.version>2.2021.09.17_07.09-67428a6422cc</common-java-modules.version>
-        <kontrakter.version>3.0_20241102131210_d65efd1</kontrakter.version>
-        <felles.version>3.20240913110742_adb42f8</felles.version>
+        <kontrakter.version>3.0_20241127135607_0f52105</kontrakter.version>
+        <felles.version>3.20241127123724_adfc561</felles.version>
         <!-- kotest.properties kan antakelig fjernes i versjon 6, for autoscan blir default false -->
         <kotest.version>5.9.1</kotest.version>
-        <token-validation-spring.version>5.0.10</token-validation-spring.version>
+        <token-validation-spring.version>5.0.13</token-validation-spring.version>
         <okhttp3.version>4.9.1</okhttp3.version><!-- Inntil videre nødvendig for token-validation-spring-test-->
         <openhtmltopdf.version>1.1.22</openhtmltopdf.version>
         <jakarta.xml.bind-api.version>4.0.1</jakarta.xml.bind-api.version>
@@ -41,12 +41,12 @@
         <sonar.coverage.exclusions>**/config/FlywayConfig.kt</sonar.coverage.exclusions>
         <!--suppress UnresolvedMavenProperty Ligger som secret i github-->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
-        <spring.cloud-contract>4.1.4</spring.cloud-contract>
-        <springdoc.version>2.6.0</springdoc.version>
-        <testcontainers.version>1.20.3</testcontainers.version>
-        <tjenestespesifikasjoner.version>2633.1685ed5</tjenestespesifikasjoner.version>
-        <familie-tjenestespesifikasjoner.version>1.0_20241021101018_2aa57cc</familie-tjenestespesifikasjoner.version>
-        <prosessering-core.version>2.20241011144712_deb1f2c</prosessering-core.version>
+        <spring.cloud-contract>4.1.5</spring.cloud-contract>
+        <springdoc.version>2.7.0</springdoc.version>
+        <testcontainers.version>1.20.4</testcontainers.version>
+        <tjenestespesifikasjoner.version>2639.36f9120</tjenestespesifikasjoner.version>
+        <familie-tjenestespesifikasjoner.version>1.0_20241111164947_b183dab</familie-tjenestespesifikasjoner.version>
+        <prosessering-core.version>2.20241118095311_c66bd61</prosessering-core.version>
     </properties>
 
 
@@ -207,7 +207,7 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
-            <version>10.21.0</version>
+            <version>11.0.0</version>
             <scope>runtime</scope>
         </dependency>
 
@@ -384,7 +384,7 @@
         <dependency>
             <groupId>org.wiremock</groupId>
             <artifactId>wiremock</artifactId>
-            <version>3.9.2</version>
+            <version>3.10.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
