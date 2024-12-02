@@ -135,7 +135,7 @@ data class Kravgrunnlagsbeløp433(
 
 enum class Klassekode(
     val aktivitet: String,
-    val overstyrtKlassekode: String = ""
+    val overstyrtKlassekode: String = "",
 ) {
     KL_KODE_FEIL_BA(""),
     KL_KODE_FEIL_EFOG(""),
@@ -169,7 +169,7 @@ enum class Klassekode(
             klassetype: Klassetype,
         ): Klassekode {
             if (klassetype == Klassetype.TREK) return TREK_KODER
-            return entries.firstOrNull { it.name == kode || (it.overstyrtKlassekode.isNotEmpty() && it.overstyrtKlassekode == kode)}
+            return entries.firstOrNull { it.name == kode || (it.overstyrtKlassekode.isNotEmpty() && it.overstyrtKlassekode == kode) }
                 ?: throw IllegalArgumentException("Ukjent KlasseKode $kode")
         }
     }

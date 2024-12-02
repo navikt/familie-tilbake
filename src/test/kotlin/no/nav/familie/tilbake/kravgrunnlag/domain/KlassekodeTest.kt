@@ -1,12 +1,10 @@
 package no.nav.familie.tilbake.kravgrunnlag.domain
 
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class KlassekodeTest {
-
     @Nested
     inner class FraKode {
         @Test
