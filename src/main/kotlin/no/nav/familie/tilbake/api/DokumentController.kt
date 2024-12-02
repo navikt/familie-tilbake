@@ -97,8 +97,8 @@ class DokumentController(
     @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Forhåndsviser brev", AuditLoggerEvent.ACCESS)
     fun hentForhåndsvisningVedtaksbrev(
         @Valid @RequestBody
-        dto: HentForhåndvisningVedtaksbrevPdfDto,
-    ): Ressurs<ByteArray> = Ressurs.success(vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(dto))
+        hentForhåndsvisningVedtaksbrevRequest: HentForhåndvisningVedtaksbrevPdfDto,
+    ): Ressurs<ByteArray> = Ressurs.success(vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(hentForhåndsvisningVedtaksbrevRequest))
 
     @Operation(summary = "Hent vedtaksbrevtekst")
     @GetMapping(

@@ -28,6 +28,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.Vedtaksbrevbehandling
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.Vedtaksbrevgrunnlag
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Friteksttype
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.SkalSammenslåPerioder
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsoppsummering
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsperiode
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
@@ -108,29 +109,31 @@ object Testdata {
 
     val behandlingsresultat = Behandlingsresultat(behandlingsvedtak = behandlingsvedtak)
 
+    private val periode = Månedsperiode(LocalDate.now(), LocalDate.now().plusDays(1))
+    private val periode4Mnd = Månedsperiode("2020-04", "2020-08")
+
     fun lagBehandling(
         fagsakId: UUID = fagsak.id,
         ansvarligSaksbehandler: String = "saksbehandler",
         behandlingStatus: Behandlingsstatus = Behandlingsstatus.UTREDES,
-    ) =
-        Behandling(
-            fagsakId = fagsakId,
-            status = behandlingStatus,
-            type = Behandlingstype.TILBAKEKREVING,
-            opprettetDato = LocalDate.now(),
-            avsluttetDato = null,
-            ansvarligSaksbehandler = ansvarligSaksbehandler,
-            ansvarligBeslutter = "beslutter",
-            behandlendeEnhet = "testverdi",
-            behandlendeEnhetsNavn = "testverdi",
-            manueltOpprettet = false,
-            fagsystemsbehandling = setOf(fagsystemsbehandling),
-            resultater = setOf(behandlingsresultat),
-            varsler = setOf(varsel),
-            verger = setOf(verge),
-            eksternBrukId = UUID.randomUUID(),
-            begrunnelseForTilbakekreving = null,
-        )
+    ) = Behandling(
+        fagsakId = fagsakId,
+        status = behandlingStatus,
+        type = Behandlingstype.TILBAKEKREVING,
+        opprettetDato = LocalDate.now(),
+        avsluttetDato = null,
+        ansvarligSaksbehandler = ansvarligSaksbehandler,
+        ansvarligBeslutter = "beslutter",
+        behandlendeEnhet = "testverdi",
+        behandlendeEnhetsNavn = "testverdi",
+        manueltOpprettet = false,
+        fagsystemsbehandling = setOf(fagsystemsbehandling),
+        resultater = setOf(behandlingsresultat),
+        varsler = setOf(varsel),
+        verger = setOf(verge),
+        eksternBrukId = UUID.randomUUID(),
+        begrunnelseForTilbakekreving = null,
+    )
 
     fun lagRevurdering(originalBehandlingId: UUID) =
         Behandling(
@@ -171,20 +174,23 @@ object Testdata {
             begrunnelse = "testverdi",
         )
 
-    private val foreldelsesperiode =
-        Foreldelsesperiode(
-            periode = Månedsperiode(LocalDate.now(), LocalDate.now().plusDays(1)),
-            foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_FORELDET,
-            begrunnelse = "testverdi",
-            foreldelsesfrist = LocalDate.now(),
-            oppdagelsesdato = LocalDate.now(),
-        )
+    fun lagVurdertForeldelse(
+        behandlingId: UUID,
+        månedsperioder: Set<Månedsperiode> = setOf(periode),
+    ) = VurdertForeldelse(
+        behandlingId = behandlingId,
+        foreldelsesperioder = månedsperioder.map { lagVurdertForeldelsePeriode(it) }.toSet(),
+    )
 
-    fun lagVurdertForeldelse(behandlingId: UUID) =
-        VurdertForeldelse(
-            behandlingId = behandlingId,
-            foreldelsesperioder = setOf(foreldelsesperiode),
-        )
+    fun lagVurdertForeldelsePeriode(
+        månedsperiode: Månedsperiode,
+    ) = Foreldelsesperiode(
+        periode = månedsperiode,
+        foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_FORELDET,
+        begrunnelse = "begrunnelse foreldelsesperiode",
+        foreldelsesfrist = LocalDate.now(),
+        oppdagelsesdato = LocalDate.now(),
+    )
 
     val feilKravgrunnlagsbeløp433 =
         Kravgrunnlagsbeløp433(
@@ -200,9 +206,39 @@ object Testdata {
             skatteprosent = BigDecimal("35.1100"),
         )
 
+    fun lagFeilKravgrunnlagsbeløp(
+        klassekode: Klassekode = Klassekode.KL_KODE_FEIL_BA,
+        nyttBeløp: BigDecimal = BigDecimal("10000"),
+    ) = Kravgrunnlagsbeløp433(
+        klassekode = klassekode,
+        klassetype = Klassetype.FEIL,
+        opprinneligUtbetalingsbeløp = BigDecimal.ZERO,
+        nyttBeløp = nyttBeløp,
+        tilbakekrevesBeløp = BigDecimal.ZERO,
+        uinnkrevdBeløp = BigDecimal.ZERO,
+        resultatkode = "testverdi",
+        årsakskode = "testverdi",
+        skyldkode = "testverdi",
+        skatteprosent = BigDecimal("35.1100"),
+    )
+
     val ytelKravgrunnlagsbeløp433 =
         Kravgrunnlagsbeløp433(
             klassekode = Klassekode.BATR,
+            klassetype = Klassetype.YTEL,
+            opprinneligUtbetalingsbeløp = BigDecimal("10000"),
+            nyttBeløp = BigDecimal.ZERO,
+            tilbakekrevesBeløp = BigDecimal("10000"),
+            uinnkrevdBeløp = BigDecimal.ZERO,
+            resultatkode = "testverdi",
+            årsakskode = "testverdi",
+            skyldkode = "testverdi",
+            skatteprosent = BigDecimal("35.1100"),
+        )
+
+    fun lagYtelKravgrunnlagsbeløp(klassekode: Klassekode = Klassekode.BATR) =
+        Kravgrunnlagsbeløp433(
+            klassekode = klassekode,
             klassetype = Klassetype.YTEL,
             opprinneligUtbetalingsbeløp = BigDecimal("10000"),
             nyttBeløp = BigDecimal.ZERO,
@@ -223,38 +259,60 @@ object Testdata {
                 ),
             beløp =
                 setOf(
-                    feilKravgrunnlagsbeløp433,
-                    ytelKravgrunnlagsbeløp433,
+                    lagFeilKravgrunnlagsbeløp(),
+                    lagYtelKravgrunnlagsbeløp(),
                 ),
             månedligSkattebeløp = BigDecimal("123.11"),
         )
 
-    fun lagKravgrunnlag(behandlingId: UUID) =
-        Kravgrunnlag431(
-            behandlingId = behandlingId,
-            vedtakId = BigInteger.ZERO,
-            kravstatuskode = Kravstatuskode.NYTT,
-            fagområdekode = Fagområdekode.EFOG,
-            fagsystemId = "testverdi",
-            fagsystemVedtaksdato = LocalDate.now(),
-            omgjortVedtakId = BigInteger.ZERO,
-            gjelderVedtakId = "testverdi",
-            gjelderType = GjelderType.PERSON,
-            utbetalesTilId = "testverdi",
-            utbetIdType = GjelderType.PERSON,
-            hjemmelkode = "testverdi",
-            beregnesRenter = true,
-            ansvarligEnhet = "testverdi",
-            bostedsenhet = "testverdi",
-            behandlingsenhet = "testverdi",
-            kontrollfelt = "testverdi",
-            saksbehandlerId = "testverdi",
-            referanse = "testverdi",
-            eksternKravgrunnlagId = BigInteger.ZERO,
-            perioder = setOf(kravgrunnlagsperiode432),
-            aktiv = true,
-            sperret = false,
+    fun lagKravgrunnlagsperiode(
+        fom: LocalDate,
+        tom: LocalDate,
+        klassekode: Klassekode = Klassekode.KL_KODE_FEIL_BA,
+    ): Kravgrunnlagsperiode432 =
+        Kravgrunnlagsperiode432(
+            periode =
+                Månedsperiode(
+                    fom,
+                    tom,
+                ),
+            beløp =
+                setOf(
+                    lagFeilKravgrunnlagsbeløp(klassekode),
+                    lagYtelKravgrunnlagsbeløp(klassekode),
+                ),
+            månedligSkattebeløp = BigDecimal("123.11"),
         )
+
+    fun lagKravgrunnlag(
+        behandlingId: UUID,
+        perioder: Set<Kravgrunnlagsperiode432> = setOf(kravgrunnlagsperiode432),
+        fagområdekode: Fagområdekode = Fagområdekode.EFOG,
+    ) = Kravgrunnlag431(
+        behandlingId = behandlingId,
+        vedtakId = BigInteger.ZERO,
+        kravstatuskode = Kravstatuskode.NYTT,
+        fagområdekode = fagområdekode,
+        fagsystemId = "testverdi",
+        fagsystemVedtaksdato = LocalDate.now(),
+        omgjortVedtakId = BigInteger.ZERO,
+        gjelderVedtakId = "testverdi",
+        gjelderType = GjelderType.PERSON,
+        utbetalesTilId = "testverdi",
+        utbetIdType = GjelderType.PERSON,
+        hjemmelkode = "testverdi",
+        beregnesRenter = true,
+        ansvarligEnhet = "testverdi",
+        bostedsenhet = "testverdi",
+        behandlingsenhet = "testverdi",
+        kontrollfelt = "testverdi",
+        saksbehandlerId = "testverdi",
+        referanse = "testverdi",
+        eksternKravgrunnlagId = BigInteger.ZERO,
+        perioder = perioder,
+        aktiv = true,
+        sperret = false,
+    )
 
     private val vilkårsvurderingSærligGrunn =
         VilkårsvurderingSærligGrunn(
@@ -296,28 +354,23 @@ object Testdata {
             perioder = setOf(vilkårsperiode),
         )
 
-    private val faktaFeilutbetalingsperiode =
-        FaktaFeilutbetalingsperiode(
-            periode = Månedsperiode(LocalDate.now(), LocalDate.now().plusDays(1)),
-            hendelsestype = Hendelsestype.ANNET,
-            hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
-        )
-
-    fun lagFaktaFeilutbetaling(behandlingId: UUID) =
-        FaktaFeilutbetaling(
-            begrunnelse = "testverdi",
-            aktiv = true,
-            behandlingId = behandlingId,
-            perioder =
-                setOf(
+    fun lagFaktaFeilutbetaling(
+        behandlingId: UUID,
+        månedsperioder: Set<Månedsperiode> = setOf(periode4Mnd),
+    ) = FaktaFeilutbetaling(
+        begrunnelse = "testverdi",
+        aktiv = true,
+        behandlingId = behandlingId,
+        perioder =
+            månedsperioder
+                .map {
                     FaktaFeilutbetalingsperiode(
-                        periode = Månedsperiode("2020-04" to "2022-08"),
+                        periode = it,
                         hendelsestype = Hendelsestype.ANNET,
                         hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
-                    ),
-                    faktaFeilutbetalingsperiode,
-                ),
-        )
+                    )
+                }.toSet(),
+    )
 
     val økonomiXmlMottatt =
         ØkonomiXmlMottatt(
@@ -343,6 +396,7 @@ object Testdata {
         Vedtaksbrevsoppsummering(
             behandlingId = behandlingId,
             oppsummeringFritekst = "testverdi",
+            skalSammenslåPerioder = SkalSammenslåPerioder.IKKE_AKTUELT,
         )
 
     fun lagVedtaksbrevsperiode(behandlingId: UUID) =

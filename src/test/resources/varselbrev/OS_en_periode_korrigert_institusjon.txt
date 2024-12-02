@@ -18,13 +18,13 @@ For å avgjøre om vi kan kreve tilbake, tar vi først stilling til de tre øver
 Vi legger vekt på
 
 *-om dere forstod eller burde forstått at beløpet dere fikk utbetalt var feil
-om dere har gitt riktig informasjon til NAV
-om dere har gitt all informasjon til NAV i rett tid
+om dere har gitt riktig informasjon til Nav
+om dere har gitt all informasjon til Nav i rett tid
 hvor lang tid det har gått siden overgangsstønaden ble feilutbetalt
 hvor stort det feilutbetalte beløpet er
-om feilen kan skyldes NAV-*
+om feilen kan skyldes Nav-*
 
-Selv om det er NAV som er skyld i feilutbetalingen, kan vi likevel kreve at feilutbetalt beløp betales tilbake.
+Selv om det er Nav som er skyld i feilutbetalingen, kan vi likevel kreve at feilutbetalt beløp betales tilbake.
 
 Hvis dere må betale tilbake, og dere har gitt oss feil eller mangelfull informasjon, kan vi kreve at dere betaler et rentetillegg på ti prosent av beløpet.
 
@@ -43,7 +43,7 @@ Hvis dere ikke finner svar på nav.no kan dere ringe oss på telefon 55 55 33 33
 
 
 Med vennlig hilsen
-NAV Arbeid og ytelser
+Nav Arbeid og ytelser
 
 Bob
 

@@ -10,6 +10,10 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.AUTOUTFØRT
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.UTFØRT
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.PeriodeService
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevsoppsummeringRepository
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.SkalSammenslåPerioder
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsoppsummering
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
@@ -31,6 +35,8 @@ class Vilkårsvurderingssteg(
     private val foreldelseService: ForeldelseService,
     private val historikkTaskService: HistorikkTaskService,
     private val oppgaveTaskService: OppgaveTaskService,
+    private val periodeService: PeriodeService,
+    private val vedtaksbrevsoppsummeringRepository: VedtaksbrevsoppsummeringRepository,
 ) : IBehandlingssteg {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -65,7 +71,7 @@ class Vilkårsvurderingssteg(
             )
         }
         vilkårsvurderingService.lagreVilkårsvurdering(behandlingId, behandlingsstegDto as BehandlingsstegVilkårsvurderingDto)
-
+        oppdatereVedtaksbrevsoppsummering(behandlingId)
         oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId)
 
         lagHistorikkinnslag(behandlingId, Aktør.SAKSBEHANDLER)
@@ -126,5 +132,18 @@ class Vilkårsvurderingssteg(
             TilbakekrevingHistorikkinnslagstype.VILKÅRSVURDERING_VURDERT,
             aktør,
         )
+    }
+
+    private fun oppdatereVedtaksbrevsoppsummering(behandlingId: UUID) {
+        val skalSammenslåPerioder = periodeService.erEnsligForsørgerOgPerioderLike(behandlingId)
+        val vedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)
+
+        if (vedtaksbrevsoppsummering != null) {
+            vedtaksbrevsoppsummeringRepository.update(vedtaksbrevsoppsummering.copy(skalSammenslåPerioder = skalSammenslåPerioder))
+        }
+
+        if (skalSammenslåPerioder == SkalSammenslåPerioder.JA && vedtaksbrevsoppsummering == null) {
+            vedtaksbrevsoppsummeringRepository.insert(Vedtaksbrevsoppsummering(behandlingId = behandlingId, skalSammenslåPerioder = SkalSammenslåPerioder.JA, oppsummeringFritekst = null))
+        }
     }
 }

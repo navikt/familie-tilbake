@@ -59,6 +59,8 @@ data class VilkårsvurderingGodTro(
     val sporbar: Sporbar = Sporbar(),
 ) {
     val beløpSomErIBehold get() = if (this.beløpErIBehold) beløpTilbakekreves else BigDecimal.ZERO
+
+    fun erLik(vilkårsvurderingGodTro: VilkårsvurderingGodTro?) = beløpErIBehold == vilkårsvurderingGodTro?.beløpErIBehold && begrunnelse == vilkårsvurderingGodTro.begrunnelse
 }
 
 @Table("vilkarsvurdering_aktsomhet")
@@ -101,6 +103,23 @@ data class VilkårsvurderingAktsomhet(
         get() = Aktsomhet.GROV_UAKTSOMHET == aktsomhet || Aktsomhet.SIMPEL_UAKTSOMHET == aktsomhet && this.tilbakekrevSmåbeløp
 
     val særligeGrunner get() = vilkårsvurderingSærligeGrunner.map(VilkårsvurderingSærligGrunn::særligGrunn)
+
+    fun erLik(vilkårsvurderingAktsomhet: VilkårsvurderingAktsomhet?) =
+        aktsomhet == vilkårsvurderingAktsomhet?.aktsomhet &&
+            ileggRenter == vilkårsvurderingAktsomhet.ileggRenter &&
+            manueltSattBeløp?.toInt() == vilkårsvurderingAktsomhet.manueltSattBeløp?.toInt() &&
+            begrunnelse == vilkårsvurderingAktsomhet.begrunnelse &&
+            særligeGrunnerTilReduksjon == vilkårsvurderingAktsomhet.særligeGrunnerTilReduksjon &&
+            tilbakekrevSmåbeløp == vilkårsvurderingAktsomhet.tilbakekrevSmåbeløp &&
+            andelTilbakekreves == vilkårsvurderingAktsomhet.andelTilbakekreves &&
+            særligeGrunnerTilReduksjonErLik(vilkårsvurderingSærligeGrunner, vilkårsvurderingAktsomhet.vilkårsvurderingSærligeGrunner)
+
+    fun særligeGrunnerTilReduksjonErLik(
+        gjeldeneVilkårsvurderingSærligeGrunner: Set<VilkårsvurderingSærligGrunn>,
+        vilkårsvurderingSærligeGrunner: Set<VilkårsvurderingSærligGrunn>,
+    ): Boolean =
+        gjeldeneVilkårsvurderingSærligeGrunner.map { it.særligGrunn } == vilkårsvurderingSærligeGrunner.map { it.særligGrunn } &&
+            gjeldeneVilkårsvurderingSærligeGrunner.map { it.begrunnelse } == vilkårsvurderingSærligeGrunner.map { it.begrunnelse }
 }
 
 @Table("vilkarsvurdering_serlig_grunn")

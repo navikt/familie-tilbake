@@ -17,19 +17,19 @@ For å avgjere om vi kan krevje tilbake, tek vi først stilling til dei tre øvs
 Vi legg vekt på
 
 *-om du forstod eller burde forstått at beløpet du fekk utbetalt var feil
-om du har gitt riktig informasjon til NAV
-om du har gitt all informasjon til NAV i rett tid
+om du har gitt riktig informasjon til Nav
+om du har gitt all informasjon til Nav i rett tid
 kor lang tid det har gått sidan overgangsstønaden blei feilutbetalt
 kor stort det feilutbetalte beløpet er
-om feilen kan vere NAV si skuld-*
+om feilen kan vere Nav si skuld-*
 
-Sjølv om det er NAV som er skuld i feilutbetalinga, kan vi likevel krevje at du betaler tilbake pengane.
+Sjølv om det er Nav som er skuld i feilutbetalinga, kan vi likevel krevje at du betaler tilbake pengane.
 
 Dersom du må betale tilbake, og du har gitt oss feil eller mangelfull informasjon, kan vi krevje at du betaler eit rentetillegg på ti prosent av beløpet du skuldar.
 
 Dette går fram av folketrygdlova §§ 22-15 og 22-17a.
 _Slik uttaler du deg
-Du kan sende uttalen din ved å logge deg inn på nav.no/skriv-til-oss og velje «Send beskjed til NAV». Du kan også sende uttalen din til oss i posten. Adressa finn du på
+Du kan sende uttalen din ved å logge deg inn på nav.no/skriv-til-oss og velje «Send beskjed til Nav». Du kan også sende uttalen din til oss i posten. Adressa finn du på
 nav.no/ettersendelser.
 _Du har rett til innsyn
 På nav.no/dittnav kan du sjå dokumenta i saka di.
@@ -42,7 +42,7 @@ Om du ikkje finn svar på nav.no, kan du ringe oss på telefon 55 55 33 33, kvar
 
 
 Med venleg helsing
-NAV Arbeid og ytelser
+Nav Arbeid og ytelser
 
 Bob
 

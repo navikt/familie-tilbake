@@ -24,17 +24,13 @@ class TellerService(
     private val fagsakRepository: FagsakRepository,
     private val meldingstellingRepository: MeldingstellingRepository,
 ) {
-    fun tellKobletKravgrunnlag(fagsystem: Fagsystem) =
-        tellMelding(fagsystem, Meldingstype.KRAVGRUNNLAG, Mottaksstatus.KOBLET)
+    fun tellKobletKravgrunnlag(fagsystem: Fagsystem) = tellMelding(fagsystem, Meldingstype.KRAVGRUNNLAG, Mottaksstatus.KOBLET)
 
-    fun tellUkobletKravgrunnlag(fagsystem: Fagsystem) =
-        tellMelding(fagsystem, Meldingstype.KRAVGRUNNLAG, Mottaksstatus.UKOBLET)
+    fun tellUkobletKravgrunnlag(fagsystem: Fagsystem) = tellMelding(fagsystem, Meldingstype.KRAVGRUNNLAG, Mottaksstatus.UKOBLET)
 
-    fun tellKobletStatusmelding(fagsystem: Fagsystem) =
-        tellMelding(fagsystem, Meldingstype.STATUSMELDING, Mottaksstatus.KOBLET)
+    fun tellKobletStatusmelding(fagsystem: Fagsystem) = tellMelding(fagsystem, Meldingstype.STATUSMELDING, Mottaksstatus.KOBLET)
 
-    fun tellUkobletStatusmelding(fagsystem: Fagsystem) =
-        tellMelding(fagsystem, Meldingstype.STATUSMELDING, Mottaksstatus.UKOBLET)
+    fun tellUkobletStatusmelding(fagsystem: Fagsystem) = tellMelding(fagsystem, Meldingstype.STATUSMELDING, Mottaksstatus.UKOBLET)
 
     fun tellMelding(
         fagsystem: Fagsystem,

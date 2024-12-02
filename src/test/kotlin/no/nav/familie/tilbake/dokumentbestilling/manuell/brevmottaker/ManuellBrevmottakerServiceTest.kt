@@ -90,6 +90,20 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                 ),
         )
 
+    private val manuellBrevmottakerIUtlandetRequestDto =
+        ManuellBrevmottakerRequestDto(
+            type = DØDSBO,
+            navn = "John Doe",
+            manuellAdresseInfo =
+                ManuellAdresseInfo(
+                    adresselinje1 = "test adresse1",
+                    adresselinje2 = "0000 Stockholm",
+                    postnummer = "",
+                    poststed = "",
+                    landkode = "SE",
+                ),
+        )
+
     private val mockPdlClient: PdlClient = mockk()
 
     private val mockIntegrasjonerClient: IntegrasjonerClient = mockk()
@@ -191,6 +205,54 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `leggTilBrevmottaker skal legge til brevmottakere i utlandet uten postadresse og oppdatere med oppdaterBrevmottaker`() {
+        shouldNotThrow<RuntimeException> {
+            manuellBrevmottakerService.leggTilBrevmottaker(behandling.id, manuellBrevmottakerIUtlandetRequestDto)
+        }
+
+        val manuellBrevmottakere = manuellBrevmottakerService.hentBrevmottakere(behandling.id)
+
+        manuellBrevmottakere.shouldHaveSize(1)
+        val dbManuellBrevmottaker = manuellBrevmottakere.first()
+        assertEqualsManuellBrevmottaker(dbManuellBrevmottaker, manuellBrevmottakerIUtlandetRequestDto)
+
+        verify(exactly = 1) {
+            mockHistorikkService.lagHistorikkinnslag(
+                behandlingId = behandling.id,
+                historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_LAGT_TIL,
+                aktør = Aktør.SAKSBEHANDLER,
+                opprettetTidspunkt = opprettetTidspunktSlot[0],
+                beskrivelse = any(),
+                tittel = any(),
+            )
+        }
+
+        val oppdatertManuellBrevmottaker =
+            manuellBrevmottakerIUtlandetRequestDto.copy(
+                manuellAdresseInfo =
+                    ManuellAdresseInfo(
+                        adresselinje1 = "Ny adresse",
+                        adresselinje2 = "0001 Stockholm",
+                        postnummer = "",
+                        poststed = "",
+                        landkode = "SE",
+                    ),
+            )
+        shouldNotThrow<RuntimeException> {
+            manuellBrevmottakerService.oppdaterBrevmottaker(
+                behandling.id,
+                dbManuellBrevmottaker.id,
+                oppdatertManuellBrevmottaker,
+            )
+        }
+
+        val oppdaterteBrevmottakere = manuellBrevmottakerService.hentBrevmottakere(behandling.id)
+        oppdaterteBrevmottakere.shouldHaveSize(1)
+        val dbOppdatertManuellBrevmottaker = oppdaterteBrevmottakere.first()
+        assertEqualsManuellBrevmottaker(dbOppdatertManuellBrevmottaker, oppdatertManuellBrevmottaker)
+    }
+
+    @Test
     fun `fjernBrevmottaker fjerner brevmottaker`() {
         shouldNotThrow<RuntimeException> {
             manuellBrevmottakerService.leggTilBrevmottaker(behandling.id, manuellBrevmottakerRequestDto)
@@ -234,6 +296,49 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                 historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_FJERNET,
                 aktør = Aktør.SAKSBEHANDLER,
                 opprettetTidspunkt = opprettetTidspunktSlot[2],
+                beskrivelse = any(),
+                tittel = any(),
+            )
+        }
+    }
+
+    @Test
+    fun `fjernBrevmottaker fjerner brevmottaker i utlandet`() {
+        shouldNotThrow<RuntimeException> {
+            manuellBrevmottakerService.leggTilBrevmottaker(behandling.id, manuellBrevmottakerIUtlandetRequestDto)
+        }
+
+        val manuellBrevmottakere = manuellBrevmottakerService.hentBrevmottakere(behandling.id)
+
+        manuellBrevmottakere.shouldHaveSize(1)
+        val dbManuellBrevmottaker = manuellBrevmottakere.first()
+        assertEqualsManuellBrevmottaker(dbManuellBrevmottaker, manuellBrevmottakerIUtlandetRequestDto)
+
+        verify(exactly = 1) {
+            mockHistorikkService.lagHistorikkinnslag(
+                behandlingId = behandling.id,
+                historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_LAGT_TIL,
+                aktør = Aktør.SAKSBEHANDLER,
+                opprettetTidspunkt = opprettetTidspunktSlot[0],
+                beskrivelse = any(),
+                tittel = any(),
+            )
+        }
+
+        shouldNotThrow<RuntimeException> {
+            manuellBrevmottakerService.fjernBrevmottaker(behandling.id, dbManuellBrevmottaker.id)
+        }
+
+        manuellBrevmottakerService
+            .hentBrevmottakere(behandling.id)
+            .shouldBeEmpty()
+
+        verify(exactly = 1) {
+            mockHistorikkService.lagHistorikkinnslag(
+                behandlingId = behandling.id,
+                historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_FJERNET,
+                aktør = Aktør.SAKSBEHANDLER,
+                opprettetTidspunkt = opprettetTidspunktSlot[1],
                 beskrivelse = any(),
                 tittel = any(),
             )

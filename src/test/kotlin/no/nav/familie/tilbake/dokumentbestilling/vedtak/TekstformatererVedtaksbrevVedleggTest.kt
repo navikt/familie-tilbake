@@ -46,7 +46,7 @@ class TekstformatererVedtaksbrevVedleggTest {
             sakspartId = "123456",
             sakspartsnavn = "Test",
             mottageradresse = Adresseinfo("ident", "bob"),
-            behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
+            behandlendeEnhetsNavn = "Nav Familie- og pensjonsytelser Skien",
             ansvarligSaksbehandler = "Bob",
             saksnummer = "1232456",
             språkkode = Språkkode.NB,
@@ -166,36 +166,35 @@ class TekstformatererVedtaksbrevVedleggTest {
     private fun lagTestBuilder(
         språkkode: Språkkode = Språkkode.NB,
         ytelsestype: Ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
-    ) =
-        HbVedtaksbrevFelles(
-            brevmetadata = brevmetadata.copy(språkkode = språkkode, ytelsestype = ytelsestype),
-            hjemmel = HbHjemmel("Folketrygdloven"),
-            totalresultat =
-                HbTotalresultat(
-                    hovedresultat = Vedtaksresultat.FULL_TILBAKEBETALING,
-                    totaltRentebeløp = BigDecimal.valueOf(1000),
-                    totaltTilbakekrevesBeløp = BigDecimal.valueOf(10000),
-                    totaltTilbakekrevesBeløpMedRenter = BigDecimal.valueOf(11000),
-                    totaltTilbakekrevesBeløpMedRenterUtenSkatt =
-                        BigDecimal.valueOf(11000),
-                ),
-            varsel =
-                HbVarsel(
-                    varsletBeløp = BigDecimal.valueOf(10000),
-                    varsletDato = LocalDate.now().minusDays(100),
-                ),
-            konfigurasjon = HbKonfigurasjon(klagefristIUker = 6),
-            søker =
-                HbPerson(
-                    navn = "Søker Søkersen",
-                ),
-            fagsaksvedtaksdato = LocalDate.now(),
-            behandling = HbBehandling(),
-            totaltFeilutbetaltBeløp = BigDecimal.valueOf(10000),
-            vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
-            ansvarligBeslutter = "ansvarlig person sin signatur",
-            harBrukerUttaltSeg = HarBrukerUttaltSeg.JA,
-        )
+    ) = HbVedtaksbrevFelles(
+        brevmetadata = brevmetadata.copy(språkkode = språkkode, ytelsestype = ytelsestype),
+        hjemmel = HbHjemmel("Folketrygdloven"),
+        totalresultat =
+            HbTotalresultat(
+                hovedresultat = Vedtaksresultat.FULL_TILBAKEBETALING,
+                totaltRentebeløp = BigDecimal.valueOf(1000),
+                totaltTilbakekrevesBeløp = BigDecimal.valueOf(10000),
+                totaltTilbakekrevesBeløpMedRenter = BigDecimal.valueOf(11000),
+                totaltTilbakekrevesBeløpMedRenterUtenSkatt =
+                    BigDecimal.valueOf(11000),
+            ),
+        varsel =
+            HbVarsel(
+                varsletBeløp = BigDecimal.valueOf(10000),
+                varsletDato = LocalDate.now().minusDays(100),
+            ),
+        konfigurasjon = HbKonfigurasjon(klagefristIUker = 6),
+        søker =
+            HbPerson(
+                navn = "Søker Søkersen",
+            ),
+        fagsaksvedtaksdato = LocalDate.now(),
+        behandling = HbBehandling(),
+        totaltFeilutbetaltBeløp = BigDecimal.valueOf(10000),
+        vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
+        ansvarligBeslutter = "ansvarlig person sin signatur",
+        harBrukerUttaltSeg = HarBrukerUttaltSeg.JA,
+    )
 
     @Test
     fun `lagVedtaksbrevVedleggHtml skal generere vedlegg med flere perioder og med renter`() {

@@ -1,0 +1,16 @@
+name: Deploy familie-tilbake-alerts
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-prod:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: deploy familie-tilbake-alerts to prod
+        uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: prod-gcp
+          RESOURCE: .deploy/nais/alerts/familie-tilbake-alerts.yaml

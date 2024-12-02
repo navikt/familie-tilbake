@@ -20,9 +20,9 @@ Vi legg vekt på
 om vi har fått informasjon frå dykk
 kor lang tid det har gått sidan overgangsstønaden blei feilutbetalt
 kor stort det feilutbetalte beløpet er
-om feilen kan vere NAV si skuld-*
+om feilen kan vere Nav si skuld-*
 
-Sjølv om det er NAV som er skuld i feilutbetalinga, kan vi likevel krevje at feilutbetalt beløp vert betalt tilbake.
+Sjølv om det er Nav som er skuld i feilutbetalinga, kan vi likevel krevje at feilutbetalt beløp vert betalt tilbake.
 
 Dersom de må betale tilbake, og de har gitt oss feil eller mangelfull informasjon, kan vi krevje at de betaler eit rentetillegg på ti prosent av beløpet de skuldar.
 
@@ -41,7 +41,7 @@ Om de ikkje finn svar på nav.no, kan de ringe oss på telefon 55 55 33 33, kvar
 
 
 Med venleg helsing
-NAV Arbeid og ytelser
+Nav Arbeid og ytelser
 
 Bob
 

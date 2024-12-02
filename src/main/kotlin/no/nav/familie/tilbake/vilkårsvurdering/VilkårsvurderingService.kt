@@ -11,6 +11,7 @@ import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants.hentAutomatiskVilkårsvurderingAktsomhetBegrunnelse
 import no.nav.familie.tilbake.config.Constants.hentAutomatiskVilkårsvurderingBegrunnelse
+import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
@@ -19,6 +20,8 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
+import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhet
+import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingGodTro
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -32,6 +35,7 @@ class VilkårsvurderingService(
     val behandlingRepository: BehandlingRepository,
     val foreldelseService: ForeldelseService,
     val faktaFeilutbetalingService: FaktaFeilutbetalingService,
+    private val faktaFeilutbetalingRepository: FaktaFeilutbetalingRepository,
 ) {
     fun hentVilkårsvurdering(behandlingId: UUID): VurdertVilkårsvurderingDto {
         val faktaOmFeilutbetaling =
@@ -156,6 +160,33 @@ class VilkårsvurderingService(
             vilkårsvurderingRepository.update(it)
         }
     }
+
+    fun sjekkOmVilkårsvurderingPerioderErLike(
+        behandlingId: UUID,
+    ): Boolean {
+        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
+        val førstePeriode = vilkårsvurdering?.perioder?.first()
+        return if (førstePeriode != null) {
+            vilkårsvurdering.perioder.all {
+                erVilkårsvurderingAktsomhetNullEllerLik(it.aktsomhet, førstePeriode.aktsomhet) &&
+                    erVilkårsvurderingGodTroNullEllerLik(it.godTro, førstePeriode.godTro) &&
+                    it.vilkårsvurderingsresultat == førstePeriode.vilkårsvurderingsresultat &&
+                    it.begrunnelse == førstePeriode.begrunnelse
+            }
+        } else {
+            false
+        }
+    }
+
+    private fun erVilkårsvurderingAktsomhetNullEllerLik(
+        gjeldendeVilkårsvurderingAktsomhet: VilkårsvurderingAktsomhet?,
+        førsteVilkårsvurderingAktsomhet: VilkårsvurderingAktsomhet?,
+    ) = (gjeldendeVilkårsvurderingAktsomhet == null && førsteVilkårsvurderingAktsomhet == null) || gjeldendeVilkårsvurderingAktsomhet?.erLik(førsteVilkårsvurderingAktsomhet) == true
+
+    private fun erVilkårsvurderingGodTroNullEllerLik(
+        gjeldendeVilkårsvurderingGodTro: VilkårsvurderingGodTro?,
+        førsteVilkårsvurderingGodTro: VilkårsvurderingGodTro?,
+    ) = (gjeldendeVilkårsvurderingGodTro == null && førsteVilkårsvurderingGodTro == null) || gjeldendeVilkårsvurderingGodTro?.erLik(førsteVilkårsvurderingGodTro) == true
 
     private fun erPeriodeAlleredeVurdert(
         vilkårsvurdering: Vilkårsvurdering?,

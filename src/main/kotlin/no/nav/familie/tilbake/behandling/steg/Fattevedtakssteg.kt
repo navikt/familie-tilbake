@@ -9,7 +9,10 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.BrevmottakerAdresseValidering
+import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
 import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
@@ -28,6 +31,7 @@ class Fattevedtakssteg(
     private val oppgaveTaskService: OppgaveTaskService,
     private val historikkTaskService: HistorikkTaskService,
     private val behandlingsvedtakService: BehandlingsvedtakService,
+    private val manuellBrevmottakerRepository: ManuellBrevmottakerRepository,
 ) : IBehandlingssteg {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -40,20 +44,24 @@ class Fattevedtakssteg(
         behandlingId: UUID,
         behandlingsstegDto: BehandlingsstegDto,
     ) {
+        val fatteVedtaksstegDto = behandlingsstegDto as BehandlingsstegFatteVedtaksstegDto
+
+        // Steg 1: Validere behandlingens manuelle brevmottakere
+        validerManuelleBrevmottakere(behandlingId, fatteVedtaksstegDto.totrinnsvurderinger.all { it.godkjent })
+
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FATTE_VEDTAK} steg")
-        // step1: oppdater ansvarligBeslutter
+        // Steg 2: Oppdater ansvarligBeslutter
         totrinnService.validerAnsvarligBeslutter(behandlingId)
         totrinnService.oppdaterAnsvarligBeslutter(behandlingId)
 
-        // step2: lagre totrinnsvurderinger
-        val fatteVedtaksstegDto = behandlingsstegDto as BehandlingsstegFatteVedtaksstegDto
+        // Steg 3: Lagre totrinnsvurderinger
         totrinnService.lagreTotrinnsvurderinger(behandlingId, fatteVedtaksstegDto.totrinnsvurderinger)
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        // step3: lukk Godkjenne vedtak oppgaver
+        // Steg 4: Lukk Godkjenne vedtak oppgaver
         oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId = behandlingId, oppgavetype = Oppgavetype.GodkjenneVedtak.name)
 
-        // step4: flytter behandling tilbake til Foreslå Vedtak om beslutter underkjente noen steg
+        // Steg 5: Flytter behandling tilbake til Foreslå Vedtak om beslutter underkjente noen steg
         val finnesUnderkjenteSteg = fatteVedtaksstegDto.totrinnsvurderinger.any { !it.godkjent }
         if (finnesUnderkjenteSteg) {
             behandlingskontrollService.behandleStegPåNytt(behandlingId, Behandlingssteg.FORESLÅ_VEDTAK)
@@ -83,7 +91,7 @@ class Fattevedtakssteg(
                 TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET,
                 Aktør.BESLUTTER,
             )
-            // step 5: opprett behandlingsvedtak og oppdater behandlingsresultat
+            // Steg 6: Opprett behandlingsvedtak og oppdater behandlingsresultat
             behandlingsvedtakService.opprettBehandlingsvedtak(behandlingId)
         }
         behandlingskontrollService.fortsettBehandling(behandlingId)
@@ -124,4 +132,17 @@ class Fattevedtakssteg(
     }
 
     override fun getBehandlingssteg(): Behandlingssteg = Behandlingssteg.FATTE_VEDTAK
+
+    private fun validerManuelleBrevmottakere(
+        behandlingId: UUID,
+        erAlleStegGodkjente: Boolean,
+    ) {
+        val manuelleBrevmottakere by lazy { manuellBrevmottakerRepository.findByBehandlingId(behandlingId) }
+        if (erAlleStegGodkjente && !BrevmottakerAdresseValidering.erBrevmottakereGyldige(manuelleBrevmottakere)) {
+            throw Feil(
+                message = "Det finnes ugyldige brevmottakere, vi kan ikke beslutte vedtaket",
+                frontendFeilmelding = "Adressen som er lagt til manuelt har ugyldig format, og vedtaksbrevet kan ikke sendes. Behandlingen må underkjennes, og saksbehandler må legge til manuell adresse på nytt.",
+            )
+        }
+    }
 }

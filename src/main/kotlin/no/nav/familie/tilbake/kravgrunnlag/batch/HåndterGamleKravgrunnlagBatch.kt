@@ -114,11 +114,10 @@ class HåndterGamleKravgrunnlagBatch(
     private fun finnesAlleredeTaskForKravgrunnlag(
         taskerMedStatus: List<Task>,
         kravgrunnlag: ØkonomiXmlMottatt,
-    ) =
-        taskerMedStatus.any {
-            val harRiktigType = it.type == GammelKravgrunnlagTask.TYPE || it.type == HentFagsystemsbehandlingTask.TYPE
-            it.payload == kravgrunnlag.id.toString() && harRiktigType
-        }
+    ) = taskerMedStatus.any {
+        val harRiktigType = it.type == GammelKravgrunnlagTask.TYPE || it.type == HentFagsystemsbehandlingTask.TYPE
+        it.payload == kravgrunnlag.id.toString() && harRiktigType
+    }
 
     private fun opprettSpredtTaskForKravgrunnlagBasertPåIndex(
         index: Int,

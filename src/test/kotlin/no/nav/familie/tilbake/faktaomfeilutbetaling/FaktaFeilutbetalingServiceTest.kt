@@ -19,6 +19,8 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingDomainUtil.lagFaktaFeilutbetaling
+import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetalingsperiode
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.HarBrukerUttaltSeg
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
@@ -123,7 +125,7 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
         lagFaktaomfeilutbetaling(behandlingId = lagretBehandling.id, hendelsestype = Hendelsestype.DØDSFALL)
         lagFaktaomfeilutbetaling(behandlingId = lagretBehandling.id, hendelsestype = Hendelsestype.INNTEKT)
 
-        val faktaFeilutbetalinger = faktaFeilutbetalingService.hentInaktivFaktaomfeilutbetaling(behandlingId = lagretBehandling.id)
+        val faktaFeilutbetalinger = faktaFeilutbetalingService.hentInaktivFaktaomfeilutbetaling(behandlingId = lagretBehandling.id).sortedBy { it.opprettetTid }
 
         faktaFeilutbetalinger shouldHaveSize 2
         assertFeilutbetaltePerioder(
@@ -225,6 +227,56 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
             hendelsestype = null,
             hendelsesundertype = null,
         )
+    }
+
+    @Test
+    fun `sjekk om fakta feilutbetalingsperioder er like, unntatt periode og beløp, skal returnere true`() {
+        val faktaFeilutbetalingsperiode =
+            FaktaFeilutbetalingsperiode(
+                periode = Månedsperiode(YearMonth.of(2024, 1), YearMonth.of(2024, 3)),
+                hendelsestype = Hendelsestype.ANNET,
+                hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
+            )
+
+        val faktaFeilutbetalingsperiode2 =
+            FaktaFeilutbetalingsperiode(
+                periode = Månedsperiode(YearMonth.of(2024, 4), YearMonth.of(2024, 5)),
+                hendelsestype = Hendelsestype.ANNET,
+                hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
+            )
+        val faktaFeilutbetaling =
+            lagFaktaFeilutbetaling(
+                behandlingId = behandling.id,
+                perioder = setOf(faktaFeilutbetalingsperiode, faktaFeilutbetalingsperiode2),
+            )
+
+        faktaFeilutbetalingRepository.insert(faktaFeilutbetaling)
+        faktaFeilutbetalingService.sjekkOmFaktaPerioderErLike(behandling.id) shouldBe true
+    }
+
+    @Test
+    fun `sjekk om fakta feilutbetalingsperioder er like, unntatt periode og beløp, skal returnere false`() {
+        val faktaFeilutbetalingsperiode =
+            FaktaFeilutbetalingsperiode(
+                periode = Månedsperiode(YearMonth.of(2024, 1), YearMonth.of(2024, 3)),
+                hendelsestype = Hendelsestype.INNTEKT,
+                hendelsesundertype = Hendelsesundertype.MEDLEM_SISTE_5_ÅR,
+            )
+
+        val faktaFeilutbetalingsperiode2 =
+            FaktaFeilutbetalingsperiode(
+                periode = Månedsperiode(YearMonth.of(2024, 4), YearMonth.of(2024, 5)),
+                hendelsestype = Hendelsestype.INNTEKT,
+                hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
+            )
+        val faktaFeilutbetaling =
+            lagFaktaFeilutbetaling(
+                behandlingId = behandling.id,
+                perioder = setOf(faktaFeilutbetalingsperiode, faktaFeilutbetalingsperiode2),
+            )
+
+        faktaFeilutbetalingRepository.insert(faktaFeilutbetaling)
+        faktaFeilutbetalingService.sjekkOmFaktaPerioderErLike(behandling.id) shouldBe false
     }
 
     private fun lagFaktaomfeilutbetaling(

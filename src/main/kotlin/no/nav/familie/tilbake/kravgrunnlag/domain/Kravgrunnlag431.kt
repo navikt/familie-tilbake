@@ -158,6 +158,7 @@ enum class Klassekode(
     EFBTOR("Barnetilsyn-Infotrygd"),
     EFSP("Skolepenger"),
     FEILUTB_0986(""), // Inntektsytelser feilutbetaling, manuell
+    FSKTSKAT("Forskuddsskatt"),
     KS("Kontantstøtte"),
     TREK_KODER(""), // Felles klassekode for alle TREK klassetyper
     ;

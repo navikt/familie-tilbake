@@ -29,6 +29,8 @@ class FeatureToggleConfig(
         const val KAN_SE_HISTORISKE_VURDERINGER = "familie-tilbake.se-historiske-vurderinger"
 
         const val SAKSBEHANDLER_KAN_RESETTE_BEHANDLING = "familie-tilbake-frontend.saksbehandler.kan.resette.behandling"
+
+        const val TIDLIGERE_BESLUTTER = "familie-tilbake.tidligere-beslutter"
     }
 }
 

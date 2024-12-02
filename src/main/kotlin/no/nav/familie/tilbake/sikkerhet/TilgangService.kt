@@ -29,4 +29,12 @@ class TilgangService(
         }
         return behandlerrolle
     }
+
+    fun harInnloggetBrukerForvalterRolle(): Boolean {
+        val innloggetBrukerstilgang =
+            ContextService
+                .hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, "henter behandling")
+
+        return innloggetBrukerstilgang.tilganger.containsKey(Tilgangskontrollsfagsystem.FORVALTER_TILGANG)
+    }
 }

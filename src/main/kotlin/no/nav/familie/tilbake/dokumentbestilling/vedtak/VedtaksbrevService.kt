@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.dokumentbestilling.vedtak
 import no.nav.familie.tilbake.api.dto.FritekstavsnittDto
 import no.nav.familie.tilbake.api.dto.HentForhåndvisningVedtaksbrevPdfDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
-import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.FeatureToggleConfig
@@ -11,6 +10,8 @@ import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.SkalSammenslåPerioder
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsoppsummering
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
@@ -24,12 +25,12 @@ class VedtaksbrevService(
     private val vedtaksbrevgrunnlagService: VedtaksbrevgunnlagService,
     private val faktaRepository: FaktaFeilutbetalingRepository,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-    private val fagsakRepository: FagsakRepository,
     private val vedtaksbrevsoppsummeringRepository: VedtaksbrevsoppsummeringRepository,
     private val vedtaksbrevsperiodeRepository: VedtaksbrevsperiodeRepository,
     private val pdfBrevService: PdfBrevService,
     private val distribusjonshåndteringService: DistribusjonshåndteringService,
     private val featureToggleService: FeatureToggleService,
+    private val periodeService: PeriodeService,
 ) {
     fun sendVedtaksbrev(
         behandling: Behandling,
@@ -41,19 +42,21 @@ class VedtaksbrevService(
         }
     }
 
-    fun hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(dto: HentForhåndvisningVedtaksbrevPdfDto): ByteArray {
-        val vedtaksbrevgrunnlag = vedtaksbrevgrunnlagService.hentVedtaksbrevgrunnlag(dto.behandlingId)
-        val brevdata = vedtaksbrevgeneratorService.genererVedtaksbrevForForhåndsvisning(vedtaksbrevgrunnlag, dto)
+    fun hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(hentForhåndvisningVedtaksbrevPdfDto: HentForhåndvisningVedtaksbrevPdfDto): ByteArray {
+        val vedtaksbrevgrunnlag = vedtaksbrevgrunnlagService.hentVedtaksbrevgrunnlag(hentForhåndvisningVedtaksbrevPdfDto.behandlingId)
+        val brevdata = vedtaksbrevgeneratorService.genererVedtaksbrevForForhåndsvisning(vedtaksbrevgrunnlag, hentForhåndvisningVedtaksbrevPdfDto)
 
         return pdfBrevService.genererForhåndsvisning(brevdata)
     }
 
-    fun hentVedtaksbrevSomTekst(behandlingId: UUID): List<Avsnitt> {
+    fun hentVedtaksbrevSomTekst(
+        behandlingId: UUID,
+    ): List<Avsnitt> {
         val vedtaksbrevgrunnlag = vedtaksbrevgrunnlagService.hentVedtaksbrevgrunnlag(behandlingId)
-
+        val skalSammenslåPerioder = periodeService.erPerioderSammenslått(behandlingId)
         val hbVedtaksbrevsdata = vedtaksbrevgeneratorService.genererVedtaksbrevsdataTilVisningIFrontendSkjema(vedtaksbrevgrunnlag)
         val hovedoverskrift = TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(hbVedtaksbrevsdata)
-        return AvsnittUtil.lagVedtaksbrevDeltIAvsnitt(hbVedtaksbrevsdata, hovedoverskrift)
+        return AvsnittUtil.lagVedtaksbrevDeltIAvsnitt(hbVedtaksbrevsdata, hovedoverskrift, skalSammenslåPerioder)
     }
 
     @Transactional
@@ -79,7 +82,9 @@ class VedtaksbrevService(
     ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val vedtaksbrevstype = behandling.utledVedtaksbrevstype()
-        val vedtaksbrevsoppsummering = VedtaksbrevFritekstMapper.tilDomene(behandlingId, fritekstavsnittDto.oppsummeringstekst)
+        val skalSammenslåPerioder = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)?.skalSammenslåPerioder ?: SkalSammenslåPerioder.IKKE_AKTUELT
+        val vedtaksbrevsoppsummering = VedtaksbrevFritekstMapper.tilDomene(behandlingId, fritekstavsnittDto.oppsummeringstekst, skalSammenslåPerioder)
+
         val vedtaksbrevsperioder =
             VedtaksbrevFritekstMapper
                 .tilDomeneVedtaksbrevsperiode(behandlingId, fritekstavsnittDto.perioderMedTekst)
@@ -119,5 +124,18 @@ class VedtaksbrevService(
             .findByBehandlingId(behandlingId)
             ?.let { vedtaksbrevsoppsummeringRepository.deleteById(it.id) }
         vedtaksbrevsperiodeRepository.findByBehandlingId(behandlingId).forEach { vedtaksbrevsperiodeRepository.deleteById(it.id) }
+    }
+
+    @Transactional
+    fun oppdaterSkalSammenslåPerioder(
+        behandlingId: UUID,
+        skalSammenslåPerioder: SkalSammenslåPerioder,
+    ) {
+        val vedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)
+        if (vedtaksbrevsoppsummering != null) {
+            vedtaksbrevsoppsummeringRepository.update(vedtaksbrevsoppsummering.copy(skalSammenslåPerioder = skalSammenslåPerioder))
+        } else {
+            vedtaksbrevsoppsummeringRepository.insert(Vedtaksbrevsoppsummering(behandlingId = behandlingId, oppsummeringFritekst = "", skalSammenslåPerioder = skalSammenslåPerioder))
+        }
     }
 }

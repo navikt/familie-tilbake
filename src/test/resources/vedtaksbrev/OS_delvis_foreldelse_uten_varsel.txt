@@ -13,7 +13,7 @@ Du er ikke medlem av folketrygden fordi du ikke har oppholdstillatelse i Norge. 
 
 Du har fått 1 000 kroner for mye utbetalt.
 __Hvordan har vi kommet fram til at du må betale tilbake?
-Fristen for å kreve tilbake overgangsstønaden er tre år fra det tidspunktet feilutbetalingen skjedde. Vi kan utvide fristen med ytterligere 10 år hvis det ikke var mulig for NAV å oppdage feilen tidligere. Fra tidspunktet vi oppdaget feilen, har vi ett år på å kreve pengene tilbake.
+Fristen for å kreve tilbake overgangsstønaden er tre år fra det tidspunktet feilutbetalingen skjedde. Vi kan utvide fristen med ytterligere 10 år hvis det ikke var mulig for Nav å oppdage feilen tidligere. Fra tidspunktet vi oppdaget feilen, har vi ett år på å kreve pengene tilbake.
 
 Vi har oppdaget feilutbetalingen 1. september 2019, og har behandlet saken din innen ett år. Derfor må du betale tilbake overgangsstønaden du har fått fra og med 1. februar 2019 til og med 28. februar 2019.
 
@@ -21,7 +21,7 @@ Vi har ikke gitt deg den informasjonen du trengte for å forstå at beløpet du 
 _Lovhjemmelen vi har brukt
 Vedtaket er gjort etter Folketrygdloven § 22-15.
 _Skatt og skatteoppgjør
-NAV gir opplysninger til Skatteetaten. Skatteetaten vil vurdere om det er grunnlag for å endre skatteoppgjør.
+Nav gir opplysninger til Skatteetaten. Skatteetaten vil vurdere om det er grunnlag for å endre skatteoppgjør.
 _Hvordan betaler du tilbake?
 Du vil få faktura fra Skatteetaten på det beløpet du skal betale tilbake.
 
@@ -43,7 +43,7 @@ Hvis du ikke finner svar på nav.no kan du ringe oss på telefon 55 55 33 33, hv
 
 
 Med vennlig hilsen
-NAV Arbeid og ytelser
+Nav Arbeid og ytelser
 
 {venstrejustert}Ansvarlig Saksbehandler{høyrejustert}Ansvarlig Beslutter
 
