@@ -30,7 +30,10 @@ class OppdaterAnsvarligSaksbehandlerTask(
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val oppgave = oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
         val prioritet = oppgavePrioritetService.utledOppgaveprioritet(behandlingId, oppgave)
-
+        log.info("=====>>>> oppgave.tilordnetRessurs:           {}", oppgave.tilordnetRessurs)
+        log.info("=====>>>> behandling.ansvarligSaksbehandler:  {}", behandling.ansvarligSaksbehandler)
+        log.info("=====>>>> oppgave.prioritet:   {}", oppgave.prioritet)
+        log.info("=====>>>> prioritet:           {}", prioritet)
         if (oppgave.tilordnetRessurs != behandling.ansvarligSaksbehandler || oppgave.prioritet != prioritet) {
             oppgaveService.patchOppgave(oppgave.copy(tilordnetRessurs = behandling.ansvarligSaksbehandler, prioritet = prioritet))
         }
