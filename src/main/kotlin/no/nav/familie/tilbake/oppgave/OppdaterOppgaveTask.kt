@@ -60,11 +60,7 @@ class OppdaterOppgaveTask(
                 beskrivelse + System.lineSeparator() + (oppgave?.beskrivelse ?: "")
 
         val prioritet = oppgavePrioritetService.utledOppgaveprioritet(behandlingId, oppgave)
-        log.info("=====>>>>> TEST saksbehandler <<<====== {}", saksbehandler)
-        log.info("=====>>>>> TEST oppgave.tildeltEnhetsnr <<<====== {}", oppgave.tildeltEnhetsnr)
-        log.info("=====>>>>> TEST oppgave.tilordnetRessurs <<<====== {}", oppgave.tilordnetRessurs)
-
-
+     
         var patchetOppgave =
             oppgave.copy(
                 fristFerdigstillelse = frist,

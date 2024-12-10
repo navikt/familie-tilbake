@@ -30,19 +30,14 @@ class OppdaterAnsvarligSaksbehandlerTask(
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val oppgave = oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
         val prioritet = oppgavePrioritetService.utledOppgaveprioritet(behandlingId, oppgave)
-        log.info("=====>>>> oppgave.tilordnetRessurs:           {}", oppgave.tilordnetRessurs)
-        log.info("=====>>>> behandling.ansvarligSaksbehandler:  {}", behandling.ansvarligSaksbehandler)
-        log.info("=====>>>> oppgave.prioritet:   {}", oppgave.prioritet)
-        log.info("=====>>>> prioritet:           {}", prioritet)
-      /*  if (oppgave.tilordnetRessurs != behandling.ansvarligSaksbehandler || oppgave.prioritet != prioritet) {
-            oppgaveService.patchOppgave(oppgave.copy(tilordnetRessurs = behandling.ansvarligSaksbehandler, prioritet = prioritet))
-        }*/
-        try{
-            oppgaveService.patchOppgave(oppgave.copy(tilordnetRessurs = behandling.ansvarligSaksbehandler, prioritet = prioritet))
-        }catch (e:Exception) {
-            log.info("Eneht på oppgaven og enhet hos saksbehandleren er IKKE det samme!")
-            oppgaveService.patchOppgave(oppgave.copy(prioritet = prioritet))
-        }
+        oppgave.tildeltEnhetsnr
+
+          try{
+              oppgaveService.patchOppgave(oppgave.copy(tilordnetRessurs = behandling.ansvarligSaksbehandler, prioritet = prioritet))
+          }catch (e:Exception) {
+              oppgaveService.patchOppgave(oppgave.copy(prioritet = prioritet))
+              log.info("Eneht på oppgaven og enhet hos saksbehandleren er IKKE det samme!")
+          }
     }
 
     companion object {
