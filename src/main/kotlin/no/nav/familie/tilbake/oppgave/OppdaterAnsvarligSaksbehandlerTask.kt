@@ -34,9 +34,9 @@ class OppdaterAnsvarligSaksbehandlerTask(
         log.info("=====>>>> behandling.ansvarligSaksbehandler:  {}", behandling.ansvarligSaksbehandler)
         log.info("=====>>>> oppgave.prioritet:   {}", oppgave.prioritet)
         log.info("=====>>>> prioritet:           {}", prioritet)
-        if (oppgave.tilordnetRessurs != behandling.ansvarligSaksbehandler || oppgave.prioritet != prioritet) {
+      /*  if (oppgave.tilordnetRessurs != behandling.ansvarligSaksbehandler || oppgave.prioritet != prioritet) {
             oppgaveService.patchOppgave(oppgave.copy(tilordnetRessurs = behandling.ansvarligSaksbehandler, prioritet = prioritet))
-        }
+        }*/
         try{
             oppgaveService.patchOppgave(oppgave.copy(tilordnetRessurs = behandling.ansvarligSaksbehandler, prioritet = prioritet))
         }catch (e:Exception) {
