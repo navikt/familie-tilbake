@@ -37,6 +37,12 @@ class OppdaterAnsvarligSaksbehandlerTask(
         if (oppgave.tilordnetRessurs != behandling.ansvarligSaksbehandler || oppgave.prioritet != prioritet) {
             oppgaveService.patchOppgave(oppgave.copy(tilordnetRessurs = behandling.ansvarligSaksbehandler, prioritet = prioritet))
         }
+        try{
+            oppgaveService.patchOppgave(oppgave.copy(tilordnetRessurs = behandling.ansvarligSaksbehandler, prioritet = prioritet))
+        }catch (e:Exception) {
+            log.info("Eneht på oppgaven og enhet hos saksbehandleren er IKKE det samme!")
+            oppgaveService.patchOppgave(oppgave.copy(prioritet = prioritet))
+        }
     }
 
     companion object {
