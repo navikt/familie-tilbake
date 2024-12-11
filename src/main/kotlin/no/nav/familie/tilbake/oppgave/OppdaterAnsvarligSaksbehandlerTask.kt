@@ -32,12 +32,12 @@ class OppdaterAnsvarligSaksbehandlerTask(
         val prioritet = oppgavePrioritetService.utledOppgaveprioritet(behandlingId, oppgave)
         oppgave.tildeltEnhetsnr
 
-          try{
-              oppgaveService.patchOppgave(oppgave.copy(tilordnetRessurs = behandling.ansvarligSaksbehandler, prioritet = prioritet))
-          }catch (e:Exception) {
-              oppgaveService.patchOppgave(oppgave.copy(prioritet = prioritet))
-              log.info("Eneht på oppgaven og enhet hos saksbehandleren er IKKE det samme!")
-          }
+        try {
+            oppgaveService.patchOppgave(oppgave.copy(tilordnetRessurs = behandling.ansvarligSaksbehandler, prioritet = prioritet))
+        } catch (e: Exception) {
+            oppgaveService.patchOppgave(oppgave.copy(prioritet = prioritet))
+            log.info("Eneht på oppgaven og enhet hos saksbehandleren er IKKE det samme!")
+        }
     }
 
     companion object {

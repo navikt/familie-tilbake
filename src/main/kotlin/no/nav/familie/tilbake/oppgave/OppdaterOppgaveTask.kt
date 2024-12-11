@@ -60,7 +60,7 @@ class OppdaterOppgaveTask(
                 beskrivelse + System.lineSeparator() + (oppgave?.beskrivelse ?: "")
 
         val prioritet = oppgavePrioritetService.utledOppgaveprioritet(behandlingId, oppgave)
-     
+
         var patchetOppgave =
             oppgave.copy(
                 fristFerdigstillelse = frist,

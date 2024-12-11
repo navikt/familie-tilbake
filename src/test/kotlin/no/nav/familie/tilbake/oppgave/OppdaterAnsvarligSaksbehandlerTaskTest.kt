@@ -1,6 +1,9 @@
 package no.nav.familie.tilbake.oppgave
 
-import io.mockk.*
+import io.mockk.clearMocks
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
@@ -75,7 +78,6 @@ internal class OppdaterAnsvarligSaksbehandlerTaskTest {
         }
     }
 
-
     @Test
     fun `Skal kalle patchOppgave med oppdatert prioritet når unntak kastes`() {
         val oppgave = Oppgave(tilordnetRessurs = behandling.ansvarligSaksbehandler, prioritet = OppgavePrioritet.NORM)
@@ -91,11 +93,12 @@ internal class OppdaterAnsvarligSaksbehandlerTaskTest {
 
         verify(exactly = 2) { mockOppgaveService.patchOppgave(any()) }
         verify {
-            mockOppgaveService.patchOppgave(match {
-                it.prioritet == OppgavePrioritet.NORM
-            })
+            mockOppgaveService.patchOppgave(
+                match {
+                    it.prioritet == OppgavePrioritet.NORM
+                },
+            )
         }
-
     }
 
     private fun lagTask(opprettetAv: String? = null): Task =
@@ -111,9 +114,4 @@ internal class OppdaterAnsvarligSaksbehandlerTaskTest {
                     }
                 },
         )
-
-
-
 }
-
-
