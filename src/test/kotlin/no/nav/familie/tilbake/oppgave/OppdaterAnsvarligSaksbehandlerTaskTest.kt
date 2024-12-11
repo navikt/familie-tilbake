@@ -58,8 +58,20 @@ internal class OppdaterAnsvarligSaksbehandlerTaskTest {
     }
 
     @Test
-    fun `doTask skal oppdatere oppgave når saksbehandler endret`() {
+    fun `Skal ikke oppdatere oppgave når ingenting er endret`() {
         val oppgave = Oppgave(tilordnetRessurs = behandling.ansvarligSaksbehandler, prioritet = OppgavePrioritet.NORM)
+
+        every { oppgavePrioritetService.utledOppgaveprioritet(any(), any()) } returns OppgavePrioritet.NORM
+        every { mockOppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandling.id) } returns oppgave
+
+        oppdaterAnsvarligSaksbehandlerTask.doTask(lagTask())
+
+        verify(exactly = 0) { mockOppgaveService.patchOppgave(any()) }
+    }
+
+    @Test
+    fun `doTask skal oppdatere oppgave når saksbehandler endret`() {
+        val oppgave = Oppgave(tilordnetRessurs = "Saksbehandler", prioritet = OppgavePrioritet.NORM)
 
         every { oppgavePrioritetService.utledOppgaveprioritet(any(), any()) } returns OppgavePrioritet.NORM
         every { mockOppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandling.id) } returns oppgave

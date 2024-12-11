@@ -31,11 +31,13 @@ class OppdaterAnsvarligSaksbehandlerTask(
         val oppgave = oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
         val prioritet = oppgavePrioritetService.utledOppgaveprioritet(behandlingId, oppgave)
 
-        try {
-            oppgaveService.patchOppgave(oppgave.copy(tilordnetRessurs = behandling.ansvarligSaksbehandler, prioritet = prioritet))
-        } catch (e: Exception) {
-            oppgaveService.patchOppgave(oppgave.copy(prioritet = prioritet))
-            log.info("Kunne ikke oppdatere tilordnetRessurs. Mulig årsak kan være at eneht på oppgaven og enhet hos saksbehandleren er IKKE det samme!")
+        if (oppgave.tilordnetRessurs != behandling.ansvarligSaksbehandler || oppgave.prioritet != prioritet) {
+            try {
+                oppgaveService.patchOppgave(oppgave.copy(tilordnetRessurs = behandling.ansvarligSaksbehandler, prioritet = prioritet))
+            } catch (e: Exception) {
+                oppgaveService.patchOppgave(oppgave.copy(prioritet = prioritet))
+                log.info("Kunne ikke oppdatere tilordnetRessurs. Mulig årsak kan være at eneht på oppgaven og enhet hos saksbehandleren er IKKE det samme!")
+            }
         }
     }
 
