@@ -36,7 +36,7 @@ class OppdaterAnsvarligSaksbehandlerTask(
             oppgaveService.patchOppgave(oppgave.copy(tilordnetRessurs = behandling.ansvarligSaksbehandler, prioritet = prioritet))
         } catch (e: Exception) {
             oppgaveService.patchOppgave(oppgave.copy(prioritet = prioritet))
-            log.info("Eneht på oppgaven og enhet hos saksbehandleren er IKKE det samme!")
+            log.info("Kunne ikke oppdatere tilordnetRessurs. Mulig årsak kan være at eneht på oppgaven og enhet hos saksbehandleren er IKKE det samme!")
         }
     }
 
