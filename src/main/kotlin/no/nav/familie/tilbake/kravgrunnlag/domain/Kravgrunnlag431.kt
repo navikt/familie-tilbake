@@ -163,8 +163,7 @@ enum class Klassekode(
     TREK_KODER(""), // Felles klassekode for alle TREK klassetyper
     ;
 
-    fun tilKlassekodeNavn(): String =
-        this.overstyrtKlassekode.ifEmpty { this.name }
+    fun tilKlassekodeNavn(): String = this.overstyrtKlassekode.ifEmpty { this.name }
 
     companion object {
         fun fraKode(

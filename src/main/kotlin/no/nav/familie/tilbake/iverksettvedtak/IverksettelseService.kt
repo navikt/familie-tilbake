@@ -168,7 +168,7 @@ class IverksettelseService(
         ) {
             throw Feil(
                 message =
-                "Det gikk noe feil i beregning under iverksettelse for behandlingId=$behandlingId." +
+                    "Det gikk noe feil i beregning under iverksettelse for behandlingId=$behandlingId." +
                         "Beregnet beløp i vedtaksbrev er " +
                         "totalTilbakekrevingsbeløpUtenRenter=$totalTilbakekrevingsbeløpUtenRenter," +
                         "totalRenteBeløp=$totalRenteBeløp, totalSkatteBeløp=$totalSkatteBeløp mens " +
