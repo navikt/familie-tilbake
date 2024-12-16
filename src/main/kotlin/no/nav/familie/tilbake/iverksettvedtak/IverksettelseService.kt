@@ -110,7 +110,7 @@ class IverksettelseService(
         beregnetBeløper.map {
             val tilbakekrevingsbeløp = TilbakekrevingsbelopDto()
             tilbakekrevingsbeløp.apply {
-                kodeKlasse = it.klassekode.name
+                kodeKlasse = it.klassekode.tilKlassekodeNavn()
                 belopNy = it.nyttBeløp
                 belopOpprUtbet = it.utbetaltBeløp
                 belopTilbakekreves = it.tilbakekrevesBeløp
@@ -168,7 +168,7 @@ class IverksettelseService(
         ) {
             throw Feil(
                 message =
-                    "Det gikk noe feil i beregning under iverksettelse for behandlingId=$behandlingId." +
+                "Det gikk noe feil i beregning under iverksettelse for behandlingId=$behandlingId." +
                         "Beregnet beløp i vedtaksbrev er " +
                         "totalTilbakekrevingsbeløpUtenRenter=$totalTilbakekrevingsbeløpUtenRenter," +
                         "totalRenteBeløp=$totalRenteBeløp, totalSkatteBeløp=$totalSkatteBeløp mens " +
