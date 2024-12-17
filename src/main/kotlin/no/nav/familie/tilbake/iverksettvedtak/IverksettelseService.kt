@@ -110,7 +110,7 @@ class IverksettelseService(
         beregnetBeløper.map {
             val tilbakekrevingsbeløp = TilbakekrevingsbelopDto()
             tilbakekrevingsbeløp.apply {
-                kodeKlasse = it.klassekode.name
+                kodeKlasse = it.klassekode.tilKlassekodeNavn()
                 belopNy = it.nyttBeløp
                 belopOpprUtbet = it.utbetaltBeløp
                 belopTilbakekreves = it.tilbakekrevesBeløp

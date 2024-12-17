@@ -16,4 +16,25 @@ class KlassekodeTest {
             assertThat(klassekode).isEqualTo(Klassekode.BAUTV_OP)
         }
     }
+
+    @Nested
+    inner class TilKlassekodeNavn {
+        @Test
+        fun `skal bruke overstyrtKlassekode dersom den finnes ellers enum navn`() {
+            // Act
+            val klassekodeNavn = Klassekode.BAUTV_OP.tilKlassekodeNavn()
+
+            // Assert
+            assertThat(klassekodeNavn).isEqualTo("BAUTV-OP")
+        }
+
+        @Test
+        fun `skal bruke enum navn dersom overstyrtKlassekode ikke er satt`() {
+            // Act
+            val klassekodeNavn = Klassekode.BATR.tilKlassekodeNavn()
+
+            // Assert
+            assertThat(klassekodeNavn).isEqualTo("BATR")
+        }
+    }
 }
