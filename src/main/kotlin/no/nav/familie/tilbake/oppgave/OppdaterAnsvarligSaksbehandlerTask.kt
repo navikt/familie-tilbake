@@ -37,7 +37,7 @@ class OppdaterAnsvarligSaksbehandlerTask(
                 oppgaveService.patchOppgave(oppgave.copy(tilordnetRessurs = behandling.ansvarligSaksbehandler, prioritet = prioritet))
             } catch (e: Exception) {
                 oppgaveService.patchOppgave(oppgave.copy(prioritet = prioritet))
-                secureLogger.warn("Kunne ikke oppdatere tilordnetRessurs, ${behandling.ansvarligSaksbehandler}" )
+                secureLogger.warn("Kunne ikke oppdatere tilordnetRessurs, ${behandling.ansvarligSaksbehandler}")
             }
         }
     }
