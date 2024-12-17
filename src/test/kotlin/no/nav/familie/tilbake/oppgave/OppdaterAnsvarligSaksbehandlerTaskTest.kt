@@ -6,6 +6,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
+import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -57,10 +58,25 @@ internal class OppdaterAnsvarligSaksbehandlerTaskTest {
     }
 
     @Test
-    fun `doTask skal oppdatere oppgave når saksbehandler endret`() {
-        val oppgave = Oppgave(tilordnetRessurs = "TIDLIGERE saksbehandler", prioritet = OppgavePrioritet.NORM)
+    fun `Skal ikke oppdatere oppgave når ingenting er endret`() {
+        val oppgave = Oppgave(tilordnetRessurs = behandling.ansvarligSaksbehandler, prioritet = OppgavePrioritet.NORM)
+
         every { oppgavePrioritetService.utledOppgaveprioritet(any(), any()) } returns OppgavePrioritet.NORM
         every { mockOppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandling.id) } returns oppgave
+
+        oppdaterAnsvarligSaksbehandlerTask.doTask(lagTask())
+
+        verify(exactly = 0) { mockOppgaveService.patchOppgave(any()) }
+    }
+
+    @Test
+    fun `doTask skal oppdatere oppgave når saksbehandler endret`() {
+        val oppgave = Oppgave(tilordnetRessurs = "Saksbehandler", prioritet = OppgavePrioritet.NORM)
+
+        every { oppgavePrioritetService.utledOppgaveprioritet(any(), any()) } returns OppgavePrioritet.NORM
+        every { mockOppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandling.id) } returns oppgave
+
+        every { mockOppgaveService.patchOppgave(match { it.tilordnetRessurs == behandling.ansvarligSaksbehandler && it.prioritet == OppgavePrioritet.NORM }) } returns OppgaveResponse(oppgave.id ?: 1)
 
         oppdaterAnsvarligSaksbehandlerTask.doTask(lagTask())
 
@@ -75,15 +91,26 @@ internal class OppdaterAnsvarligSaksbehandlerTaskTest {
     }
 
     @Test
-    fun `Skal ikke oppdatere oppgave når ingenting er endret`() {
+    fun `Skal kalle patchOppgave med oppdatert prioritet når unntak kastes`() {
         val oppgave = Oppgave(tilordnetRessurs = behandling.ansvarligSaksbehandler, prioritet = OppgavePrioritet.NORM)
+        val oppgaveSomFeiler = Oppgave(prioritet = OppgavePrioritet.NORM)
 
         every { oppgavePrioritetService.utledOppgaveprioritet(any(), any()) } returns OppgavePrioritet.NORM
-        every { mockOppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandling.id) } returns oppgave
+        every { mockOppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandling.id) } returns oppgaveSomFeiler
+
+        every { mockOppgaveService.patchOppgave(match { it.tilordnetRessurs == behandling.ansvarligSaksbehandler && it.prioritet == OppgavePrioritet.NORM }) } throws RuntimeException("Mock exception")
+        every { mockOppgaveService.patchOppgave(match { it.prioritet == OppgavePrioritet.NORM && it.tilordnetRessurs == null }) } returns OppgaveResponse(oppgave.id ?: 1)
 
         oppdaterAnsvarligSaksbehandlerTask.doTask(lagTask())
 
-        verify(exactly = 0) { mockOppgaveService.patchOppgave(any()) }
+        verify(exactly = 2) { mockOppgaveService.patchOppgave(any()) }
+        verify {
+            mockOppgaveService.patchOppgave(
+                match {
+                    it.prioritet == OppgavePrioritet.NORM
+                },
+            )
+        }
     }
 
     private fun lagTask(opprettetAv: String? = null): Task =
