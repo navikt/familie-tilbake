@@ -5,6 +5,7 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.integration.pdl.internal.secureLogger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -36,7 +37,7 @@ class OppdaterAnsvarligSaksbehandlerTask(
                 oppgaveService.patchOppgave(oppgave.copy(tilordnetRessurs = behandling.ansvarligSaksbehandler, prioritet = prioritet))
             } catch (e: Exception) {
                 oppgaveService.patchOppgave(oppgave.copy(prioritet = prioritet))
-                log.info("Kunne ikke oppdatere tilordnetRessurs. Mulig årsak kan være at eneht på oppgaven og enhet hos saksbehandleren er IKKE det samme!")
+                secureLogger.warn("Kunne ikke oppdatere tilordnetRessurs, ${behandling.ansvarligSaksbehandler}" )
             }
         }
     }
