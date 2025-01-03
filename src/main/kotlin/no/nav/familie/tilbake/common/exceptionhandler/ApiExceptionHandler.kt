@@ -32,7 +32,7 @@ class ApiExceptionHandler {
 
     @ExceptionHandler(Feil::class)
     fun handleThrowable(feil: Feil): ResponseEntity<Ressurs<Nothing>> {
-        secureLogger.error("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.message}", feil)
+        secureLogger.warn("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.message}", feil)
         logger.info("En håndtert feil har oppstått(${feil.httpStatus}) exception=${rootCause(feil)}: ${feil.message} ")
         return ResponseEntity.status(feil.httpStatus).body(
             Ressurs.failure(
@@ -40,13 +40,6 @@ class ApiExceptionHandler {
                 frontendFeilmelding = feil.frontendFeilmelding,
             ),
         )
-    }
-
-    @ExceptionHandler(ManglerTilgang::class)
-    fun handleThrowable(manglerTilgang: ManglerTilgang): ResponseEntity<Ressurs<Nothing>> {
-        secureLogger.error("En håndtert tilgangsfeil har oppstått - ${manglerTilgang.melding}", manglerTilgang)
-        logger.info("En håndtert tilgangsfeil har oppstått")
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Ressurs.ikkeTilgang(melding = manglerTilgang.melding))
     }
 
     @ExceptionHandler(IntegrasjonException::class)
