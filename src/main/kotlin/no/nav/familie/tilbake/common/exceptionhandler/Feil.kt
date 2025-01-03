@@ -37,10 +37,6 @@ class ManglerOppgaveFeil(
     val melding: String,
 ) : RuntimeException(melding)
 
-class ManglerTilgang(
-    val melding: String,
-) : RuntimeException(melding)
-
 class UgyldigKravgrunnlagFeil(
     val melding: String,
 ) : RuntimeException(melding)
