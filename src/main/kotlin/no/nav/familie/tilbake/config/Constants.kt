@@ -16,7 +16,8 @@ object Constants {
             Datobeløp(LocalDate.of(2022, 1, 1), 1223),
             Datobeløp(LocalDate.of(2023, 1, 1), 1243),
             Datobeløp(LocalDate.of(2024, 1, 1), 1277),
-        )
+            Datobeløp(LocalDate.of(2025, 1, 1), 1314),
+            )
 
     private val brukersSvarfrist: Period = Period.ofWeeks(2)
 
