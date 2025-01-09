@@ -6,18 +6,18 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
-import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
-import no.nav.familie.tilbake.behandling.domain.Verge
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
+import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
+import no.nav.familie.tilbake.behandling.domain.Behandlingsvedtak
+import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.behandling.domain.Varselsperiode
-import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
-import no.nav.familie.tilbake.behandling.domain.Behandlingsvedtak
-import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.data.Testdata
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
 import java.util.UUID
 
 internal class AutomatiskBehandlingRydderServiceTest : OppslagSpringRunnerTest() {
@@ -34,10 +34,12 @@ internal class AutomatiskBehandlingRydderServiceTest : OppslagSpringRunnerTest()
     fun `skal fjerne behandlinger eldre enn 8 uker som ikke har en kravgrunnlag og ikke er avsluttet`() {
         val fagsak = Testdata.fagsak
         fagsakRepository.insert(fagsak)
-        val behandlingEldreEnn8Uker = behandlingRepository.insert(
-            Testdata.lagBehandling()
-                .copy(status = Behandlingsstatus.UTREDES, opprettetDato = LocalDate.now().minusWeeks(9), )
-        )
+        val behandlingEldreEnn8Uker =
+            behandlingRepository.insert(
+                Testdata
+                    .lagBehandling()
+                    .copy(status = Behandlingsstatus.UTREDES, opprettetDato = LocalDate.now().minusWeeks(9)),
+            )
         val behandlingYngreEnn8Uker = behandlingRepository.insert(unikBehandling((Behandlingsstatus.UTREDES), 7))
         val behandlingEldreEnn8UkerOgAvsluttet = behandlingRepository.insert(unikBehandling((Behandlingsstatus.AVSLUTTET), 10))
 
@@ -69,39 +71,47 @@ internal class AutomatiskBehandlingRydderServiceTest : OppslagSpringRunnerTest()
         }
     }
 
-    private fun unikBehandling (behandlingStatus: Behandlingsstatus, alder: Long): Behandling {
-        return Testdata.lagBehandling()
+    private fun unikBehandling(
+        behandlingStatus: Behandlingsstatus,
+        alder: Long,
+    ): Behandling =
+        Testdata
+            .lagBehandling()
             .copy(
-                status = behandlingStatus, opprettetDato = LocalDate.now().minusWeeks(alder),
-                verger = setOf(
-                    Verge(
-                        ident = "32132132112",
-                        type = Vergetype.VERGE_FOR_BARN,
-                        orgNr = "testverdi",
-                        navn = "testverdi",
-                        kilde = "testverdi",
-                        begrunnelse = "testverdi",
-                    )
-                ),
-                fagsystemsbehandling = setOf(
-                    Fagsystemsbehandling(
-                        eksternId = UUID.randomUUID().toString(),
-                        tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-                        revurderingsvedtaksdato = LocalDate.now().minusDays(1),
-                        resultat = "OPPHØR",
-                        årsak = "testverdi",
-                    )
-                ),
-                resultater = setOf(
-                    Behandlingsresultat(behandlingsvedtak = Behandlingsvedtak(vedtaksdato = LocalDate.now()))
-                ),
-                varsler = setOf(
-                    Varsel(
-                        varseltekst = "testverdi",
-                        varselbeløp = 123,
-                        perioder = setOf(Varselsperiode(fom = LocalDate.now().minusMonths(2), tom = LocalDate.now())),
-                    )
-                )
+                status = behandlingStatus,
+                opprettetDato = LocalDate.now().minusWeeks(alder),
+                verger =
+                    setOf(
+                        Verge(
+                            ident = "32132132112",
+                            type = Vergetype.VERGE_FOR_BARN,
+                            orgNr = "testverdi",
+                            navn = "testverdi",
+                            kilde = "testverdi",
+                            begrunnelse = "testverdi",
+                        ),
+                    ),
+                fagsystemsbehandling =
+                    setOf(
+                        Fagsystemsbehandling(
+                            eksternId = UUID.randomUUID().toString(),
+                            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+                            revurderingsvedtaksdato = LocalDate.now().minusDays(1),
+                            resultat = "OPPHØR",
+                            årsak = "testverdi",
+                        ),
+                    ),
+                resultater =
+                    setOf(
+                        Behandlingsresultat(behandlingsvedtak = Behandlingsvedtak(vedtaksdato = LocalDate.now())),
+                    ),
+                varsler =
+                    setOf(
+                        Varsel(
+                            varseltekst = "testverdi",
+                            varselbeløp = 123,
+                            perioder = setOf(Varselsperiode(fom = LocalDate.now().minusMonths(2), tom = LocalDate.now())),
+                        ),
+                    ),
             )
-    }
 }

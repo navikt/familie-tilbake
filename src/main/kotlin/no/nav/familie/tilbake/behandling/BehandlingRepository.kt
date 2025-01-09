@@ -5,7 +5,6 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.common.repository.InsertUpdateRepository
 import no.nav.familie.tilbake.common.repository.RepositoryInterface
-import org.springframework.data.jdbc.repository.query.Modifying
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
@@ -119,7 +118,6 @@ interface BehandlingRepository :
     )
     fun hentÅpneBehandlingerMedTilbakeførtFatteVedtakSteg(fagsystem: Fagsystem): List<Behandling>
 
-
     @Query(
         """
             SELECT beh.* FROM behandling beh
@@ -127,7 +125,7 @@ interface BehandlingRepository :
             WHERE k431.id IS NULL
             AND beh.status != 'AVSLUTTET'
             AND beh.opprettet_dato < CURRENT_TIMESTAMP - INTERVAL '8 weeks'
-        """
+        """,
     )
     fun finnAlleGamleBehandlingerUtenKravgrunnlag(): List<Behandling>
 }
