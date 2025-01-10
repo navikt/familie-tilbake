@@ -22,6 +22,7 @@ import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagsty
 import no.nav.familie.tilbake.iverksettvedtak.task.AvsluttBehandlingTask
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
 
@@ -83,5 +84,15 @@ internal class AvsluttBehandlingTaskTest : OppslagSpringRunnerTest() {
         val taskProperty = historikkTask.metadata
         taskProperty["aktør"] shouldBe Aktør.VEDTAKSLØSNING.name
         taskProperty["historikkinnslagstype"] shouldBe TilbakekrevingHistorikkinnslagstype.BEHANDLING_AVSLUTTET.name
+    }
+
+    @Test
+    fun `doTask skal ikke avslutte en behandling som allerede er avsluttet`() {
+        // Arrange
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
+
+        // Act and assert
+        assertDoesNotThrow { avsluttBehandlingTask.doTask(Task(type = AvsluttBehandlingTask.TYPE, payload = behandlingId.toString())) }
     }
 }
