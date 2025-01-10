@@ -1,6 +1,9 @@
 package no.nav.familie.tilbake.iverksettvedtak
 
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.read.ListAppender
 import io.kotest.matchers.shouldBe
+import io.kotest.mpp.log
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
@@ -22,6 +25,8 @@ import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagsty
 import no.nav.familie.tilbake.iverksettvedtak.task.AvsluttBehandlingTask
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
 
@@ -83,5 +88,15 @@ internal class AvsluttBehandlingTaskTest : OppslagSpringRunnerTest() {
         val taskProperty = historikkTask.metadata
         taskProperty["aktør"] shouldBe Aktør.VEDTAKSLØSNING.name
         taskProperty["historikkinnslagstype"] shouldBe TilbakekrevingHistorikkinnslagstype.BEHANDLING_AVSLUTTET.name
+    }
+
+    @Test
+    fun `doTask skal ikke avslutte en behandling som allerede er avsluttet`() {
+        // Arrange
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
+
+        //Act and assert
+        assertDoesNotThrow { avsluttBehandlingTask.doTask(Task(type = AvsluttBehandlingTask.TYPE, payload = behandlingId.toString())) }
     }
 }
