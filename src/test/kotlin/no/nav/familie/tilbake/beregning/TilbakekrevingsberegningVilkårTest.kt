@@ -317,7 +317,7 @@ class TilbakekrevingsberegningVilkårTest {
         }
 
         @Test
-        fun `beregn skatt med 4 og 6 desimaler`() {
+        fun `beregn skatt med feil ved 4 desimaler`() {
             val tilbakekrevingsbeløp = BigDecimal.valueOf(4212)
             val skatteprosent = BigDecimal.valueOf(33.9981)
 
@@ -345,30 +345,9 @@ class TilbakekrevingsberegningVilkårTest {
                     feilutbetalt = tilbakekrevingsbeløp,
                     perioderMedSkatteprosent = grunnlagPeriodeMedSkattProsent,
                     beregnRenter = true,
-                    bruk6desimalerISkatteberegning = false,
-                )
-            val resultatMed6Desimaler =
-                beregn(
-                    vilkårVurdering = vilkårsvurdering,
-                    feilutbetalt = tilbakekrevingsbeløp,
-                    perioderMedSkatteprosent = grunnlagPeriodeMedSkattProsent,
-                    beregnRenter = true,
-                    bruk6desimalerISkatteberegning = true,
                 )
 
             resultat.skalHaVerdier(
-                vilkårsvurdering = vilkårsvurdering,
-                vurdering = Aktsomhet.FORSETT,
-                feilutbetalt = tilbakekrevingsbeløp,
-                renteprosent = renteProsent,
-                rentebeløp = BigDecimal.valueOf(421),
-                tilbakekrevingsbeløpUtenRenter = tilbakekrevingsbeløp,
-                tilbakekrevingsbeløp = BigDecimal.valueOf(4633),
-                tilbakekrevingsbeløpEtterSkatt = BigDecimal.valueOf(3201),
-                skattebeløp = BigDecimal.valueOf(1432),
-            )
-
-            resultatMed6Desimaler.skalHaVerdier(
                 vilkårsvurdering = vilkårsvurdering,
                 vurdering = Aktsomhet.FORSETT,
                 feilutbetalt = tilbakekrevingsbeløp,
@@ -622,7 +601,6 @@ class TilbakekrevingsberegningVilkårTest {
         feilutbetalt: BigDecimal,
         perioderMedSkatteprosent: List<GrunnlagsperiodeMedSkatteprosent>,
         beregnRenter: Boolean,
-        bruk6desimalerISkatteberegning: Boolean = false,
     ): Beregningsresultatsperiode {
         val delresultat = FordeltKravgrunnlagsbeløp(feilutbetalt, feilutbetalt, BigDecimal.ZERO)
         return TilbakekrevingsberegningVilkår.beregn(
@@ -630,7 +608,6 @@ class TilbakekrevingsberegningVilkårTest {
             delresultat = delresultat,
             perioderMedSkatteprosent = perioderMedSkatteprosent,
             beregnRenter = beregnRenter,
-            bruk6desimalerISkatteberegning = bruk6desimalerISkatteberegning,
         )
     }
 

@@ -29,19 +29,16 @@ object VedtaksbrevFritekstValidator {
         vedtaksbrevsoppsummering: Vedtaksbrevsoppsummering,
         vedtaksbrevstype: Vedtaksbrevstype,
         validerPåkrevetFritekster: Boolean,
-        skalIkkeValidereAnnetFritekst: Boolean,
     ) {
         validerPerioder(behandling, avsnittMedPerioder, faktaFeilutbetaling)
 
-        if (!skalIkkeValidereAnnetFritekst) {
-            vilkårsvurdering?.let {
-                validerFritekstISærligGrunnerAnnetAvsnitt(
-                    it,
-                    vedtaksbrevFritekstPerioder,
-                    validerPåkrevetFritekster,
-                    vedtaksbrevsoppsummering.skalSammenslåPerioder == SkalSammenslåPerioder.JA,
-                )
-            }
+        vilkårsvurdering?.let {
+            validerFritekstISærligGrunnerAnnetAvsnitt(
+                it,
+                vedtaksbrevFritekstPerioder,
+                validerPåkrevetFritekster,
+                vedtaksbrevsoppsummering.skalSammenslåPerioder == SkalSammenslåPerioder.JA,
+            )
         }
 
         if (ORDINÆR == vedtaksbrevstype) {

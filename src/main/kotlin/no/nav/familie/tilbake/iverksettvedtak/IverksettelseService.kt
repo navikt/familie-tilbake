@@ -7,7 +7,6 @@ import no.nav.familie.tilbake.behandling.domain.Iverksettingsstatus
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.FeatureToggleConfig
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.integration.økonomi.OppdragClient
 import no.nav.familie.tilbake.iverksettvedtak.domain.KodeResultat
@@ -133,11 +132,7 @@ class IverksettelseService(
                 | Vurder å skru på featuretoggle familie-tilbake-overstyr-delvis-tilbakekreving og rekjør.
                 | Tilbakekrevingsbeløp=$tilbakekrevingsbeløp """.trimMargin(),
             )
-            if (featureToggleService.isEnabled(FeatureToggleConfig.OVERSTYR_DELVILS_TILBAKEKREVING_TIL_FULL_TILBAKEKREVING)) {
-                KodeResultat.FULL_TILBAKEKREVING.kode
-            } else {
-                KodeResultat.DELVIS_TILBAKEKREVING.kode
-            }
+            KodeResultat.DELVIS_TILBAKEKREVING.kode
         } else {
             tilbakekrevingsbeløp.kodeResultat.kode
         }

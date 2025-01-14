@@ -17,7 +17,6 @@ import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.integration.økonomi.OppdragClient
 import no.nav.familie.tilbake.iverksettvedtak.domain.KodeResultat.DELVIS_TILBAKEKREVING
-import no.nav.familie.tilbake.iverksettvedtak.domain.KodeResultat.FULL_TILBAKEKREVING
 import no.nav.familie.tilbake.iverksettvedtak.domain.Tilbakekrevingsbeløp
 import no.nav.familie.tilbake.iverksettvedtak.domain.Tilbakekrevingsperiode
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
@@ -63,36 +62,9 @@ class IverksettelseServiceUnitTest {
     }
 
     @Test
-    fun `skal endre fra delvis til full tilbakekreving dersom utestående beløp er 0 og featuretoggle skrudd på`() {
+    fun `skal beholde delvis tilbakekreving selv om utestående beløp er 0`() {
         val requestSlot = settOppMockDataSomGirUriktigDelvisTilbakekrevingForEnPeriode()
 
-        every { featureToggleService.isEnabled(any()) } returns true
-        iverksettelseService.sendIverksettVedtak(behandling.id)
-
-        val tilbakekrevingsperioder = requestSlot.captured.tilbakekrevingsvedtak.tilbakekrevingsperiode
-
-        assertThat(tilbakekrevingsperioder).hasSize(2)
-        assertThat(
-            tilbakekrevingsperioder
-                .first()
-                .tilbakekrevingsbelop
-                .first()
-                .kodeResultat,
-        ).isEqualTo(DELVIS_TILBAKEKREVING.kode)
-        assertThat(
-            tilbakekrevingsperioder
-                .last()
-                .tilbakekrevingsbelop
-                .first()
-                .kodeResultat,
-        ).isEqualTo(FULL_TILBAKEKREVING.kode)
-    }
-
-    @Test
-    fun `skal beholde delvis tilbakekreving selv om utestående beløp er 0 når featuretoggle ikke er på`() {
-        val requestSlot = settOppMockDataSomGirUriktigDelvisTilbakekrevingForEnPeriode()
-
-        every { featureToggleService.isEnabled(any()) } returns false
         iverksettelseService.sendIverksettVedtak(behandling.id)
 
         val tilbakekrevingsperioder = requestSlot.captured.tilbakekrevingsvedtak.tilbakekrevingsperiode

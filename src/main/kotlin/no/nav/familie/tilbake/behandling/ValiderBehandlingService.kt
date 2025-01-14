@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.behandling
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
-import no.nav.familie.tilbake.config.FeatureToggleConfig
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import org.springframework.http.HttpStatus
@@ -38,24 +37,20 @@ class ValiderBehandlingService(
         }
 
         // hvis behandlingen er henlagt, kan det opprettes ny behandling
-        // hvis toggelen KAN_OPPRETTE_BEH_MED_EKSTERNID_SOM_HAR_AVSLUTTET_TBK er på,
-        // sjekker ikke om det finnes en avsluttet tilbakekreving for eksternId
-        if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_OPPRETTE_BEH_MED_EKSTERNID_SOM_HAR_AVSLUTTET_TBK)) {
-            val avsluttetBehandlinger = behandlingRepository.finnAvsluttetTilbakekrevingsbehandlinger(request.eksternId, request.fagsystem)
-            if (avsluttetBehandlinger.isNotEmpty()) {
-                val sisteAvsluttetBehandling: Behandling = avsluttetBehandlinger.first()
-                val erSisteBehandlingHenlagt: Boolean =
-                    sisteAvsluttetBehandling.resultater.any { it.erBehandlingHenlagt() }
-                if (!erSisteBehandlingHenlagt) {
-                    val feilMelding =
-                        "Det finnes allerede en avsluttet behandling for ytelsestype=${request.ytelsestype} " +
-                            "og eksternFagsakId=${request.eksternFagsakId} som ikke er henlagt, kan ikke opprette en ny."
-                    throw Feil(
-                        message = feilMelding,
-                        frontendFeilmelding = feilMelding,
-                        httpStatus = HttpStatus.BAD_REQUEST,
-                    )
-                }
+        val avsluttetBehandlinger = behandlingRepository.finnAvsluttetTilbakekrevingsbehandlinger(request.eksternId, request.fagsystem)
+        if (avsluttetBehandlinger.isNotEmpty()) {
+            val sisteAvsluttetBehandling: Behandling = avsluttetBehandlinger.first()
+            val erSisteBehandlingHenlagt: Boolean =
+                sisteAvsluttetBehandling.resultater.any { it.erBehandlingHenlagt() }
+            if (!erSisteBehandlingHenlagt) {
+                val feilMelding =
+                    "Det finnes allerede en avsluttet behandling for ytelsestype=${request.ytelsestype} " +
+                        "og eksternFagsakId=${request.eksternFagsakId} som ikke er henlagt, kan ikke opprette en ny."
+                throw Feil(
+                    message = feilMelding,
+                    frontendFeilmelding = feilMelding,
+                    httpStatus = HttpStatus.BAD_REQUEST,
+                )
             }
         }
 

@@ -5,7 +5,6 @@ import no.nav.familie.tilbake.api.dto.HentForhåndvisningVedtaksbrevPdfDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.FeatureToggleConfig
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
@@ -92,7 +91,6 @@ class VedtaksbrevService(
         // Valider om obligatoriske fritekster er satt
         val faktaFeilutbetaling = faktaRepository.findFaktaFeilutbetalingByBehandlingIdAndAktivIsTrue(behandlingId)
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
-        val skalIkkeValidereAnnetFritekst = featureToggleService.isEnabled(FeatureToggleConfig.IKKE_VALIDER_SÆRLIG_GRUNNET_ANNET_FRITEKST)
 
         VedtaksbrevFritekstValidator.validerObligatoriskeFritekster(
             behandling = behandling,
@@ -103,7 +101,6 @@ class VedtaksbrevService(
             vedtaksbrevsoppsummering = vedtaksbrevsoppsummering,
             vedtaksbrevstype = vedtaksbrevstype,
             validerPåkrevetFritekster = validerPåkrevetFritekster,
-            skalIkkeValidereAnnetFritekst = skalIkkeValidereAnnetFritekst,
         )
         // slett og legge til Vedtaksbrevsoppsummering
         val eksisterendeVedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)
