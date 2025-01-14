@@ -14,7 +14,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.clearMocks
 import io.mockk.every
-import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.mockkObject
 import no.nav.familie.kontrakter.felles.Fagsystem
@@ -52,7 +51,6 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
-import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
@@ -68,32 +66,24 @@ import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.data.Testdata.behandlingsresultat
-import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
-import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingService
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevsporing
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.SendHenleggelsesbrevTask
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
 import no.nav.familie.tilbake.historikkinnslag.Aktør
-import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
-import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.task.HentKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
-import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.oppgave.FerdigstillOppgaveTask
 import no.nav.familie.tilbake.oppgave.LagOppgaveTask
 import no.nav.familie.tilbake.oppgave.OppdaterEnhetOppgaveTask
 import no.nav.familie.tilbake.oppgave.OppdaterOppgaveTask
-import no.nav.familie.tilbake.oppgave.OppgaveService
-import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.InnloggetBrukertilgang
-import no.nav.familie.tilbake.sikkerhet.TilgangService
 import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -389,55 +379,40 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 ytelsestype = BARNETRYGD,
             )
         val behandlingRepository = mockk<BehandlingRepository>()
-        val fagsakService = mockk<FagsakService>()
-        val taskService = mockk<TaskService>(relaxed = true)
-        val brevSporingService = mockk<BrevsporingService>(relaxed = true)
-        val manuellBrevmottakerRepository = mockk<ManuellBrevmottakerRepository>(relaxed = true)
-        val kravgrunnlagRepository = mockk<KravgrunnlagRepository>(relaxed = true)
-        val økonomiXmlMottattRepository = mockk<ØkonomiXmlMottattRepository>(relaxed = true)
-        val behandlingskontrollService = mockk<BehandlingskontrollService>(relaxed = true)
-        val behandlingstilstandService = mockk<BehandlingTilstandService>(relaxed = true)
-        val tellerService = mockk<TellerService>(relaxed = true)
-        val stegService = mockk<StegService>(relaxed = true)
-        val oppgaveTaskService = mockk<OppgaveTaskService>(relaxed = true)
-        val historikkTaskService = mockk<HistorikkTaskService>(relaxed = true)
-        val tilgangService = mockk<TilgangService>(relaxed = true)
-        val integrasjonerClient = mockk<IntegrasjonerClient>(relaxed = true)
-        val validerBehandlingService = mockk<ValiderBehandlingService>()
         val featureToggleService = mockk<FeatureToggleService>()
-        val oppgaveService = mockk<OppgaveService>()
+        val validerBehandlingService = ValiderBehandlingService(behandlingRepository, featureToggleService, økonomiXmlMottattRepository)
 
-        val behandlingServiceMock =
-            BehandlingService(
-                behandlingRepository,
-                fagsakService,
-                taskService,
-                brevSporingService,
-                manuellBrevmottakerRepository,
-                kravgrunnlagRepository,
-                behandlingskontrollService,
-                behandlingstilstandService,
-                tellerService,
-                stegService,
-                oppgaveTaskService,
-                historikkTaskService,
-                tilgangService,
-                6,
-                integrasjonerClient,
-                validerBehandlingService,
-                oppgaveService,
-            )
-        justRun { validerBehandlingService.validerOpprettBehandling(any()) }
-        every { featureToggleService.isEnabled(any()) } returns false
+        every { featureToggleService.isEnabled(any()) } returns true
         every { behandlingRepository.finnÅpenTilbakekrevingsbehandling(any(), any()) } returns null
-        val behandling = Testdata.lagBehandling()
+        val behandling = Testdata.lagBehandling(behandlingStatus = Behandlingsstatus.AVSLUTTET)
         every { behandlingRepository.finnAvsluttetTilbakekrevingsbehandlinger(any(), any()) } returns listOf(behandling)
         every { behandlingRepository.insert(any()) } returns behandling
-        every { fagsakService.finnFagsak(any(), any()) } returns null
-        every { fagsakService.opprettFagsak(any(), any(), any()) } returns Testdata.fagsak
 
-        shouldNotThrowAny { behandlingServiceMock.opprettBehandling(opprettTilbakekrevingRequest) }
-        behandling.shouldNotBeNull()
+        shouldNotThrowAny { validerBehandlingService.validerOpprettBehandling(opprettTilbakekrevingRequest) }
+    }
+
+    @Test
+    fun `opprettBehandling skal ikke automatisk behandles når siste tilbakekreving er ikke henlagt og toggelen er av`() {
+        val opprettTilbakekrevingRequest =
+            lagOpprettTilbakekrevingRequest(
+                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+                finnesVerge = true,
+                finnesVarsel = true,
+                manueltOpprettet = false,
+                fagsystem = Fagsystem.BA,
+                ytelsestype = BARNETRYGD,
+            )
+        val behandlingRepository = mockk<BehandlingRepository>()
+        val featureToggleService = mockk<FeatureToggleService>()
+        val validerBehandlingService = ValiderBehandlingService(behandlingRepository, featureToggleService, økonomiXmlMottattRepository)
+
+        every { featureToggleService.isEnabled(any()) } returns false
+        every { behandlingRepository.finnÅpenTilbakekrevingsbehandling(any(), any()) } returns null
+        val behandling = Testdata.lagBehandling(behandlingStatus = Behandlingsstatus.AVSLUTTET)
+        every { behandlingRepository.finnAvsluttetTilbakekrevingsbehandlinger(any(), any()) } returns listOf(behandling)
+
+        val exception = shouldThrow<Feil> { validerBehandlingService.validerOpprettBehandling(opprettTilbakekrevingRequest) }
+        exception.message shouldBe "Det finnes allerede en avsluttet behandling for ytelsestype=" + opprettTilbakekrevingRequest.ytelsestype + " og eksternFagsakId=${opprettTilbakekrevingRequest.eksternFagsakId} " + "som ikke er henlagt, kan ikke opprette en ny."
     }
 
     @Test
@@ -452,54 +427,15 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 ytelsestype = BARNETRYGD,
             )
         val behandlingRepository = mockk<BehandlingRepository>()
-        val fagsakService = mockk<FagsakService>()
-        val taskService = mockk<TaskService>(relaxed = true)
-        val brevSporingService = mockk<BrevsporingService>(relaxed = true)
-        val manuellBrevmottakerRepository = mockk<ManuellBrevmottakerRepository>(relaxed = true)
-        val kravgrunnlagRepository = mockk<KravgrunnlagRepository>(relaxed = true)
-        val økonomiXmlMottattRepository = mockk<ØkonomiXmlMottattRepository>(relaxed = true)
-        val behandlingskontrollService = mockk<BehandlingskontrollService>(relaxed = true)
-        val behandlingstilstandService = mockk<BehandlingTilstandService>(relaxed = true)
-        val tellerService = mockk<TellerService>(relaxed = true)
-        val stegService = mockk<StegService>(relaxed = true)
-        val oppgaveTaskService = mockk<OppgaveTaskService>(relaxed = true)
-        val historikkTaskService = mockk<HistorikkTaskService>(relaxed = true)
-        val tilgangService = mockk<TilgangService>(relaxed = true)
-        val integrasjonerClient = mockk<IntegrasjonerClient>(relaxed = true)
-        val validerBehandlingService = mockk<ValiderBehandlingService>()
         val featureToggleService = mockk<FeatureToggleService>()
-        val oppgaveService = mockk<OppgaveService>()
+        val validerBehandlingService = ValiderBehandlingService(behandlingRepository, featureToggleService, økonomiXmlMottattRepository)
 
-        val behandlingServiceMock =
-            BehandlingService(
-                behandlingRepository,
-                fagsakService,
-                taskService,
-                brevSporingService,
-                manuellBrevmottakerRepository,
-                kravgrunnlagRepository,
-                behandlingskontrollService,
-                behandlingstilstandService,
-                tellerService,
-                stegService,
-                oppgaveTaskService,
-                historikkTaskService,
-                tilgangService,
-                6,
-                integrasjonerClient,
-                validerBehandlingService,
-                oppgaveService,
-            )
-        justRun { validerBehandlingService.validerOpprettBehandling(any()) }
         every { featureToggleService.isEnabled(any()) } returns false
         every { behandlingRepository.finnÅpenTilbakekrevingsbehandling(any(), any()) } returns null
         val behandling = Testdata.lagBehandling()
         every { behandlingRepository.finnAvsluttetTilbakekrevingsbehandlinger(any(), any()) } returns listOf(behandling.copy(resultater = setOf(behandlingsresultat.copy(type = Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT))))
-        every { behandlingRepository.insert(any()) } returns behandling.copy(resultater = setOf(behandlingsresultat.copy(type = Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT)))
-        every { fagsakService.finnFagsak(any(), any()) } returns null
-        every { fagsakService.opprettFagsak(any(), any(), any()) } returns Testdata.fagsak
 
-        shouldNotThrowAny { behandlingServiceMock.opprettBehandling(opprettTilbakekrevingRequest) }.apply {
+        shouldNotThrowAny { validerBehandlingService.validerOpprettBehandling(opprettTilbakekrevingRequest) }.apply {
             this.shouldNotBeNull()
         }
     }
