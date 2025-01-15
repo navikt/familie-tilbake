@@ -1,7 +1,7 @@
 apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
-  name: privat-tbk-hentfagsystemsbehandling-respons
+  name: privat-tbk-hentfagsystemsbehandling-svar
   namespace: tilbake
   labels:
     team: tilbake
