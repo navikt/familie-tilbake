@@ -56,7 +56,6 @@ internal class AutomatiskBehandlingRydderBatchTest : OppslagSpringRunnerTest() {
         val fagsak = Testdata.fagsak
         fagsakRepository.insert(fagsak)
 
-
         val behandlingEldreEnn8UkerUtenBrev = behandlingRepository.insert(unikBehandling((Behandlingsstatus.UTREDES), 10))
         behandlingRepository.insert(unikBehandling((Behandlingsstatus.AVSLUTTET), 10))
         behandlingRepository.insert(unikBehandling((Behandlingsstatus.UTREDES), 7))

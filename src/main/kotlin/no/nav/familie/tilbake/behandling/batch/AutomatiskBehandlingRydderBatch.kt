@@ -53,10 +53,11 @@ class AutomatiskBehandlingRydderBatch(
                 // Var også litt usikker på Oppgave type her!
                 // Hvordan skal forklares at behandlingen kanskje skal henlegges pga manglende kravgrunlagg?
                 // Er det riktig måte å sjekke om en lignende task for denne ikke ble opprettet i går? for å unngå flere opprettelse av samme task
-                var finnesAlleredeEnTask : Task? = taskService.finnTaskMedPayloadOgType(behandling.id.toString(), LagOppgaveTask.TYPE)
-                
+                var finnesAlleredeEnTask: Task? = taskService.finnTaskMedPayloadOgType(behandling.id.toString(), LagOppgaveTask.TYPE)
+
                 if (finnesAlleredeEnTask == null ||
-                    !finnesAlleredeEnTask.metadata.getProperty("oppgavetype").equals(Oppgavetype.VurderHenvendelse)) {
+                    !finnesAlleredeEnTask.metadata.getProperty("oppgavetype").equals(Oppgavetype.VurderHenvendelse)
+                ) {
                     oppgaveTaskService.opprettOppgaveTask(behandling, Oppgavetype.VurderHenvendelse)
                 }
             }
