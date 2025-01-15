@@ -39,6 +39,11 @@ class AvsluttBehandlingTask(
         val behandlingId = UUID.fromString(task.payload)
 
         var behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        if (behandling.status == Behandlingsstatus.AVSLUTTET) {
+            log.info("Behandling er allerede avsluttet")
+            return
+        }
+
         if (!behandling.erUnderIverksettelse) {
             throw Feil(message = "Behandling med id=$behandlingId kan ikke avsluttes")
         }

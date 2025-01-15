@@ -15,7 +15,6 @@ import no.nav.familie.tilbake.beregning.modell.FordeltKravgrunnlagsbeløp
 import no.nav.familie.tilbake.beregning.modell.GrunnlagsperiodeMedSkatteprosent
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.FeatureToggleConfig.Companion.BRUK_6_DESIMALER_I_SKATTEBEREGNING
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingMapper
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
@@ -201,13 +200,11 @@ class TilbakekrevingsberegningService(
                 ?: throw IllegalStateException("Periode i finnes ikke i map kravbeløpPerPeriode")
         val perioderMedSkattProsent = lagGrunnlagPeriodeMedSkattProsent(vurdering.periode, kravgrunnlag)
 
-        val bruk6desimalerISkatteberegning = featureToggleService.isEnabled(BRUK_6_DESIMALER_I_SKATTEBEREGNING)
         return TilbakekrevingsberegningVilkår.beregn(
             vurdering,
             delresultat,
             perioderMedSkattProsent,
             beregnRenter,
-            bruk6desimalerISkatteberegning,
         )
     }
 
