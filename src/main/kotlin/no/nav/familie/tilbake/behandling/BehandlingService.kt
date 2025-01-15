@@ -309,13 +309,14 @@ class BehandlingService(
     fun henleggBehandling(
         behandlingId: UUID,
         henleggelsesbrevFritekstDto: HenleggelsesbrevFritekstDto,
+        fraRydderBatch: Boolean? = null,
     ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         sjekkOmBehandlingAlleredeErAvsluttet(behandling)
 
         val behandlingsresultatstype = henleggelsesbrevFritekstDto.behandlingsresultatstype
 
-        if (!kanHenleggeBehandling(behandling, behandlingsresultatstype)) {
+        if (fraRydderBatch == null && !kanHenleggeBehandling(behandling, behandlingsresultatstype)) {
             throw Feil(
                 message = "Behandling med behandlingId=$behandlingId kan ikke henlegges.",
                 frontendFeilmelding = "Behandling med behandlingId=$behandlingId kan ikke henlegges.",

@@ -27,6 +27,7 @@ data class Behandlingsresultat(
                 Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
                 Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_MED_BREV,
                 Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_UTEN_BREV,
+                Behandlingsresultatstype.HENLAGT_MANGLENDE_KRAVGRUNNLAG,
             )
 
         val ALLE_FASTSATTKODER =
@@ -75,6 +76,7 @@ enum class Behandlingsresultatstype(
     HENLAGT_FEILOPPRETTET_UTEN_BREV("Feilaktig opprettet - uten henleggelsesbrev"),
     HENLAGT_KRAVGRUNNLAG_NULLSTILT("Kravgrunnlaget er nullstilt"),
     HENLAGT_TEKNISK_VEDLIKEHOLD("Teknisk vedlikehold"),
+    HENLAGT_MANGLENDE_KRAVGRUNNLAG("Uten kravgrunnlag i 8 uker"),
     HENLAGT("Henlagt"), // kun brukes i frontend
 
     INGEN_TILBAKEBETALING("Ingen tilbakebetaling"),
