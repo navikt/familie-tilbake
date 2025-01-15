@@ -1,10 +1,10 @@
 apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
-  name: privat-tbk-hentfagsystemsbehandling-respons-topic
-  namespace: teamfamilie
+  name: privat-tbk-hentfagsystemsbehandling-respons
+  namespace: tilbake
   labels:
-    team: teamfamilie
+    team: tilbake
 spec:
   pool: nav-dev
   config: # optional; all fields are optional too; defaults shown
