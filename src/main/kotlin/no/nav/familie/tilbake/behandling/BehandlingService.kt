@@ -309,14 +309,13 @@ class BehandlingService(
     fun henleggBehandling(
         behandlingId: UUID,
         henleggelsesbrevFritekstDto: HenleggelsesbrevFritekstDto,
-        fraRydderBatch: Boolean? = null,
     ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         sjekkOmBehandlingAlleredeErAvsluttet(behandling)
 
         val behandlingsresultatstype = henleggelsesbrevFritekstDto.behandlingsresultatstype
 
-        if (fraRydderBatch == null && !kanHenleggeBehandling(behandling, behandlingsresultatstype)) {
+        if (!kanHenleggeBehandling(behandling, behandlingsresultatstype)) {
             throw Feil(
                 message = "Behandling med behandlingId=$behandlingId kan ikke henlegges.",
                 frontendFeilmelding = "Behandling med behandlingId=$behandlingId kan ikke henlegges.",
@@ -569,7 +568,9 @@ class BehandlingService(
         behandling: Behandling,
         behandlingsresultatstype: Behandlingsresultatstype? = null,
     ): Boolean {
-        if (Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT == behandlingsresultatstype) {
+        if (Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT == behandlingsresultatstype ||
+            Behandlingsresultatstype.HENLAGT_MANGLENDE_KRAVGRUNNLAG == behandlingsresultatstype
+        ) {
             return true
         } else if (TILBAKEKREVING == behandling.type) {
             return !behandling.erAvsluttet &&

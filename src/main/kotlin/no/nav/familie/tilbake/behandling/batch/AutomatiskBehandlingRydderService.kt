@@ -4,6 +4,7 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class AutomatiskBehandlingRydderService(
@@ -13,6 +14,7 @@ class AutomatiskBehandlingRydderService(
 
     fun hentGammelBehandlingerUtenKravgrunnlag(): List<Behandling> {
         logger.info("Henter gammel behandlinger uten kravgrunnlag.")
-        return behandlingRepository.finnAlleGamleBehandlingerUtenKravgrunnlag()
+        val utgaattDato = LocalDate.now().minusWeeks(8)
+        return behandlingRepository.finnAlleGamleBehandlingerUtenKravgrunnlag(utgaattDato)
     }
 }

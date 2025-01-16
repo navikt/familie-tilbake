@@ -69,7 +69,6 @@ class AutomatiskBehandlingRydderBatch(
                         behandlingsresultatstype = Behandlingsresultatstype.HENLAGT_MANGLENDE_KRAVGRUNNLAG,
                         begrunnelse = "",
                     ),
-                    true,
                 )
             }
 
