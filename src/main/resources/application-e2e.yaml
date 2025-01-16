@@ -5,10 +5,10 @@ no.nav.security.jwt:
   client:
     registration:
       familie-integrasjoner:
-        resource-url: ${FAMILIE_INTEGRASJONER_URL}
+        resource-url: ${FAMILIE_INTEGRASJONER_URL}n
         token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-        scope: ${FAMILIE_INTEGRASJONER_SCOPE}
+        scope: api://dev-fss.teamfamilie.familie-integrasjoner/.default
         authentication:
           client-id: ${TILBAKE_CLIENT_ID}
           client-secret: ${TILBAKE_CLIENT_SECRET}
@@ -17,7 +17,7 @@ no.nav.security.jwt:
         resource-url: ${FAMILIE_INTEGRASJONER_URL}
         token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
         grant-type: client_credentials
-        scope: ${FAMILIE_INTEGRASJONER_SCOPE}
+        scope: api://dev-fss.teamfamilie.familie-integrasjoner/.default
         authentication:
           client-id: ${TILBAKE_CLIENT_ID}
           client-secret: ${TILBAKE_CLIENT_SECRET}
@@ -44,7 +44,7 @@ no.nav.security.jwt:
         resource-url: ${FAMILIE_OPPDRAG_URL}
         token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-        scope: ${FAMILIE_OPPDRAG_SCOPE}
+        scope: api://dev-fss.teamfamilie.familie-oppdrag/.default
         authentication:
           client-id: ${AZURE_APP_CLIENT_ID}
           client-secret: ${AZURE_APP_CLIENT_SECRET}
@@ -53,7 +53,7 @@ no.nav.security.jwt:
         resource-url: ${FAMILIE_OPPDRAG_URL}
         token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
         grant-type: client_credentials
-        scope: ${FAMILIE_OPPDRAG_SCOPE}
+        scope: api://dev-fss.teamfamilie.familie-oppdrag/.default
         authentication:
           client-id: ${AZURE_APP_CLIENT_ID}
           client-secret: ${AZURE_APP_CLIENT_SECRET}
