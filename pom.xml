@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.5</version>
+        <version>3.4.1</version>
     </parent>
 
     <properties>
@@ -23,11 +23,11 @@
         <main-class>no.nav.familie.tilbake.LauncherKt</main-class>
         <kotlin.version>2.0.21</kotlin.version>
         <common-java-modules.version>2.2021.09.17_07.09-67428a6422cc</common-java-modules.version>
-        <kontrakter.version>3.0_20241102131210_d65efd1</kontrakter.version>
-        <felles.version>3.20240913110742_adb42f8</felles.version>
+        <kontrakter.version>3.0_20250116111901_78b5a16</kontrakter.version>
+        <felles.version>3.20250106100611_6ae49d2</felles.version>
         <!-- kotest.properties kan antakelig fjernes i versjon 6, for autoscan blir default false -->
         <kotest.version>5.9.1</kotest.version>
-        <token-validation-spring.version>5.0.10</token-validation-spring.version>
+        <token-validation-spring.version>5.0.14</token-validation-spring.version>
         <okhttp3.version>4.9.1</okhttp3.version><!-- Inntil videre nødvendig for token-validation-spring-test-->
         <openhtmltopdf.version>1.1.22</openhtmltopdf.version>
         <jakarta.xml.bind-api.version>4.0.1</jakarta.xml.bind-api.version>
@@ -41,8 +41,8 @@
         <sonar.coverage.exclusions>**/config/FlywayConfig.kt</sonar.coverage.exclusions>
         <!--suppress UnresolvedMavenProperty Ligger som secret i github-->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
-        <spring.cloud-contract>4.1.4</spring.cloud-contract>
-        <springdoc.version>2.6.0</springdoc.version>
+        <spring.cloud-contract>4.2.0</spring.cloud-contract>
+        <springdoc.version>2.8.3</springdoc.version>
         <testcontainers.version>1.20.3</testcontainers.version>
         <tjenestespesifikasjoner.version>2633.1685ed5</tjenestespesifikasjoner.version>
         <familie-tjenestespesifikasjoner.version>1.0_20241021101018_2aa57cc</familie-tjenestespesifikasjoner.version>

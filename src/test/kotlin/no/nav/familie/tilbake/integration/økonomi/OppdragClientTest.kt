@@ -11,6 +11,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.simulering.FeilutbetalingerFraSimulering
@@ -146,7 +147,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
         exception.shouldNotBeNull()
         exception.shouldBeInstanceOf<IntegrasjonException>()
         exception.message shouldBe "Noe gikk galt ved iverksetting av behandling=${behandling.id}"
-        exception.cause?.message shouldBe "503 Couldn't send message: [no body]"
+        exception.cause?.message shouldContain "503 Couldn't send message"
     }
 
     @Test
@@ -249,7 +250,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
         exception.shouldNotBeNull()
         exception.shouldBeInstanceOf<IntegrasjonException>()
         exception.message shouldBe "Noe gikk galt ved henting av kravgrunnlag for kravgrunnlagId=$kravgrunnlagId"
-        exception.cause?.message shouldBe "503 Couldn't send message: [no body]"
+        exception.cause?.message shouldContain "503 Couldn't send message"
     }
 
     @Test
@@ -300,7 +301,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
         exception.shouldNotBeNull()
         exception.shouldBeInstanceOf<IntegrasjonException>()
         exception.message shouldBe "Noe gikk galt ved henting av feilutbetalinger fra simulering"
-        exception.cause?.message shouldBe "503 Couldn't send message: [no body]"
+        exception.cause?.message shouldContain "503 Couldn't send message"
     }
 
     private fun lagIverksettelseRespons(): TilbakekrevingsvedtakResponse {
