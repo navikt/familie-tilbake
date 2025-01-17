@@ -19,13 +19,6 @@ class FeatureToggleConfig(
         const val KAN_OPPRETTE_BEH_MED_EKSTERNID_SOM_HAR_AVSLUTTET_TBK =
             "familie-tilbake.beh.kanopprettes.eksternid.avsluttet.tilbakekreving"
 
-        const val OVERSTYR_DELVILS_TILBAKEKREVING_TIL_FULL_TILBAKEKREVING = "familie-tilbake.overstyr-delvis-hvis-full"
-
-        const val BRUK_6_DESIMALER_I_SKATTEBEREGNING = "familie-tilbake.bruk-seks-desimaler-skatt"
-
-        const val IKKE_VALIDER_SÆRLIG_GRUNNET_ANNET_FRITEKST =
-            "familie-tilbake.ikke-valider-saerlig-grunnet-annet-fritekst"
-
         const val KAN_SE_HISTORISKE_VURDERINGER = "familie-tilbake.se-historiske-vurderinger"
 
         const val SAKSBEHANDLER_KAN_RESETTE_BEHANDLING = "familie-tilbake-frontend.saksbehandler.kan.resette.behandling"
