@@ -23,7 +23,7 @@ class AutomatiskBehandlingRydderBatch(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    @Scheduled(cron = "\${CRON_AUTOMATISK_GJENOPPTA}")
+    @Scheduled(cron = "0 15 14 ? * MON")
     fun automatiskFjerningAvGammelBehandlingerUtenKravgrunnlag() {
         if (LeaderClient.isLeader() != true &&
             !environment.activeProfiles.any {
