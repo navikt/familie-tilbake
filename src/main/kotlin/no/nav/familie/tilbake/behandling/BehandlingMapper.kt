@@ -247,6 +247,7 @@ object BehandlingMapper {
             Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_UTEN_BREV,
             Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT,
             Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
+            Behandlingsresultatstype.HENLAGT_MANGLENDE_KRAVGRUNNLAG,
             -> HENLAGT
             Behandlingsresultatstype.IKKE_FASTSATT,
             null,

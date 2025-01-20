@@ -568,7 +568,9 @@ class BehandlingService(
         behandling: Behandling,
         behandlingsresultatstype: Behandlingsresultatstype? = null,
     ): Boolean {
-        if (Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT == behandlingsresultatstype) {
+        if (Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT == behandlingsresultatstype ||
+            Behandlingsresultatstype.HENLAGT_MANGLENDE_KRAVGRUNNLAG == behandlingsresultatstype
+        ) {
             return true
         } else if (TILBAKEKREVING == behandling.type) {
             return !behandling.erAvsluttet &&

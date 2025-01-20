@@ -117,4 +117,15 @@ interface BehandlingRepository :
         """,
     )
     fun hentÅpneBehandlingerMedTilbakeførtFatteVedtakSteg(fagsystem: Fagsystem): List<Behandling>
+
+    @Query(
+        """
+            SELECT beh.* FROM behandling beh
+            LEFT JOIN Kravgrunnlag431 k431 ON beh.id = k431.behandling_id
+            WHERE k431.id IS NULL
+            AND beh.status != 'AVSLUTTET'
+            AND beh.opprettet_dato < :utgaattDato
+        """,
+    )
+    fun finnAlleGamleBehandlingerUtenKravgrunnlag(utgaattDato: LocalDate): List<Behandling>
 }
