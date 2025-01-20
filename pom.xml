@@ -21,7 +21,7 @@
         <java.version>21</java.version>
         <jvmTarget>21</jvmTarget>
         <main-class>no.nav.familie.tilbake.LauncherKt</main-class>
-        <kotlin.version>2.0.21</kotlin.version>
+        <kotlin.version>2.1.0</kotlin.version>
         <common-java-modules.version>2.2021.09.17_07.09-67428a6422cc</common-java-modules.version>
         <kontrakter.version>3.0_20250116111901_78b5a16</kontrakter.version>
         <felles.version>3.20250106100611_6ae49d2</felles.version>
@@ -29,11 +29,11 @@
         <kotest.version>5.9.1</kotest.version>
         <token-validation-spring.version>5.0.14</token-validation-spring.version>
         <okhttp3.version>4.9.1</okhttp3.version><!-- Inntil videre nødvendig for token-validation-spring-test-->
-        <openhtmltopdf.version>1.1.22</openhtmltopdf.version>
+        <openhtmltopdf.version>1.1.24</openhtmltopdf.version>
         <jakarta.xml.bind-api.version>4.0.1</jakarta.xml.bind-api.version>
         <jaxb-impl.version>4.0.5</jaxb-impl.version>
-        <verapdf.version>1.26.1</verapdf.version>
-        <mockk.version>1.13.13</mockk.version>
+        <verapdf.version>1.26.5</verapdf.version>
+        <mockk.version>1.13.16</mockk.version>
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
@@ -43,10 +43,10 @@
         <sonar.login>${SONAR_LOGIN}</sonar.login>
         <spring.cloud-contract>4.2.0</spring.cloud-contract>
         <springdoc.version>2.8.3</springdoc.version>
-        <testcontainers.version>1.20.3</testcontainers.version>
-        <tjenestespesifikasjoner.version>2633.1685ed5</tjenestespesifikasjoner.version>
-        <familie-tjenestespesifikasjoner.version>1.0_20241021101018_2aa57cc</familie-tjenestespesifikasjoner.version>
-        <prosessering-core.version>2.20241011144712_deb1f2c</prosessering-core.version>
+        <testcontainers.version>1.20.4</testcontainers.version>
+        <tjenestespesifikasjoner.version>2641.575768a</tjenestespesifikasjoner.version>
+        <familie-tjenestespesifikasjoner.version>1.0_20250103091213_2eaa779</familie-tjenestespesifikasjoner.version>
+        <prosessering-core.version>2.20250114104710_d9ad759</prosessering-core.version>
     </properties>
 
 
@@ -174,7 +174,7 @@
         <dependency>
             <groupId>com.ibm.mq</groupId>
             <artifactId>com.ibm.mq.jakarta.client</artifactId>
-            <version>9.4.1.0</version>
+            <version>9.4.1.1</version>
         </dependency>
         <dependency>
             <groupId>jakarta.jms</groupId>
@@ -193,7 +193,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.7.4</version>
+            <version>42.7.5</version>
         </dependency>
 
         <dependency>
@@ -207,7 +207,7 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
-            <version>10.21.0</version>
+            <version>11.2.0</version>
             <scope>runtime</scope>
         </dependency>
 
@@ -384,7 +384,7 @@
         <dependency>
             <groupId>org.wiremock</groupId>
             <artifactId>wiremock</artifactId>
-            <version>3.9.2</version>
+            <version>3.10.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -545,7 +545,7 @@
                     <dependency>
                         <groupId>com.pinterest.ktlint</groupId>
                         <artifactId>ktlint-cli</artifactId>
-                        <version>1.4.1</version>
+                        <version>1.5.0</version>
                     </dependency>
                     <!-- additional 3rd party ruleset(s) can be specified here -->
                 </dependencies>
