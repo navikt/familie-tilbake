@@ -30,6 +30,7 @@ class OppgaveTaskService(
         oppgavetype: Oppgavetype,
         saksbehandler: String? = null,
         opprettetAv: String? = null,
+        beskrivelse: String? = null,
     ) {
         val fagsystem = fagsakService.finnFagsystemForBehandlingId(behandling.id)
         val properties =
@@ -39,6 +40,7 @@ class OppgaveTaskService(
                 setProperty(PropertyName.ENHET, behandling.behandlendeEnhet)
                 saksbehandler?.let { setProperty("saksbehandler", it) }
                 opprettetAv?.let { setProperty("opprettetAv", it) }
+                beskrivelse?.let { setProperty("beskrivelse", it) }
             }
         taskService.save(
             Task(
