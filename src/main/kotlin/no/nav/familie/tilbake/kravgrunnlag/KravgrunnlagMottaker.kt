@@ -7,6 +7,7 @@ import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleStatusmeldingTask
 import org.slf4j.LoggerFactory
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Profile
 import org.springframework.jms.annotation.JmsListener
 import org.springframework.stereotype.Service
@@ -16,6 +17,11 @@ import java.util.UUID
 
 @Service
 @Profile("!e2e & !integrasjonstest")
+@ConditionalOnProperty(
+    value = ["oppdrag.mq.enabled"],
+    havingValue = "true",
+    matchIfMissing = true
+)
 class KravgrunnlagMottaker(
     private val taskService: TaskService,
 ) {

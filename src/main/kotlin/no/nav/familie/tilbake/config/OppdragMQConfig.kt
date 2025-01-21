@@ -10,6 +10,7 @@ import org.messaginghub.pooled.jms.JmsPoolConnectionFactory
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.autoconfigure.jms.DefaultJmsListenerContainerFactoryConfigurer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -24,6 +25,11 @@ private const val UTF_8_WITH_PUA = 1208
 
 @Configuration
 @Profile("!integrasjonstest & !e2e")
+@ConditionalOnProperty(
+    value = ["oppdrag.mq.enabled"],
+    havingValue = "true",
+    matchIfMissing = true
+)
 class OppdragMQConfig(
     @Value("\${oppdrag.mq.hostname}") val hostname: String,
     @Value("\${oppdrag.mq.queuemanager}") val queuemanager: String,

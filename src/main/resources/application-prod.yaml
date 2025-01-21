@@ -11,7 +11,7 @@ oppdrag.mq:
   channel: P_FAMILIE_TILBAKE
   hostname: mpls02.adeo.no
   port: 1414
-  enabled: false
+  enabled: ${OPPDRAG_MQ_ENABLED:true}
 
 rolle:
   barnetrygd:
