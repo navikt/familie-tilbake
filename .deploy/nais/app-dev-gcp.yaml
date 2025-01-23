@@ -62,7 +62,7 @@ spec:
       enabled: true
       tenant: trygdeetaten.no
       replyURLs:
-        - "https://tilbakekreving.intern.dev.nav.no/swagger-ui/oauth2-redirect.html"
+        - "https://tilbakekreving-backend.intern.dev.nav.no/swagger-ui/oauth2-redirect.html"
       singlePageApplication: true
   accessPolicy:
     inbound:
@@ -115,7 +115,7 @@ spec:
       memory: 1024Mi
       cpu: 25m
   ingresses:
-    - https://tilbakekreving.intern.dev.nav.no
+    - https://tilbakekreving-backend.intern.dev.nav.no
   secureLogs:
     enabled: true
   env:
