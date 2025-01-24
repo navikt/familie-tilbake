@@ -20,7 +20,7 @@ import java.util.UUID
 @ConditionalOnProperty(
     value = ["oppdrag.mq.enabled"],
     havingValue = "true",
-    matchIfMissing = true
+    matchIfMissing = true,
 )
 class KravgrunnlagMottaker(
     private val taskService: TaskService,
