@@ -28,7 +28,7 @@ private const val UTF_8_WITH_PUA = 1208
 @ConditionalOnProperty(
     value = ["oppdrag.mq.enabled"],
     havingValue = "true",
-    matchIfMissing = true
+    matchIfMissing = true,
 )
 class OppdragMQConfig(
     @Value("\${oppdrag.mq.hostname}") val hostname: String,
