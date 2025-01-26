@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.1</version>
+        <version>3.4.2</version>
     </parent>
 
     <properties>
@@ -23,8 +23,8 @@
         <main-class>no.nav.familie.tilbake.LauncherKt</main-class>
         <kotlin.version>2.1.0</kotlin.version>
         <common-java-modules.version>2.2021.09.17_07.09-67428a6422cc</common-java-modules.version>
-        <kontrakter.version>3.0_20250116111901_78b5a16</kontrakter.version>
-        <felles.version>3.20250106100611_6ae49d2</felles.version>
+        <kontrakter.version>3.0_20250121154645_1b256a5</kontrakter.version>
+        <felles.version>3.20250122103549_5bcb4dc</felles.version>
         <!-- kotest.properties kan antakelig fjernes i versjon 6, for autoscan blir default false -->
         <kotest.version>5.9.1</kotest.version>
         <token-validation-spring.version>5.0.14</token-validation-spring.version>
