@@ -9,7 +9,7 @@ no.nav.security.jwt:
         resource-url: ${FAMILIE_INTEGRASJONER_URL}
         token-endpoint-url: http://mock-oauth2-server:1111/v2.0/token
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-        scope: ${FAMILIE_INTEGRASJONER_SCOPE}
+        scope: api://dev-fss.teamfamilie.familie-integrasjoner/.default
         authentication:
           client-id: ${TILBAKE_CLIENT_ID}
           client-secret: ${TILBAKE_CLIENT_SECRET}
@@ -18,7 +18,7 @@ no.nav.security.jwt:
         resource-url: ${FAMILIE_INTEGRASJONER_URL}
         token-endpoint-url: http://mock-oauth2-server:1111/v2.0/token
         grant-type: client_credentials
-        scope: ${FAMILIE_INTEGRASJONER_SCOPE}
+        scope: api://dev-fss.teamfamilie.familie-integrasjoner/.default
         authentication:
           client-id: ${TILBAKE_CLIENT_ID}
           client-secret: ${TILBAKE_CLIENT_SECRET}

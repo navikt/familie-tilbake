@@ -1,18 +1,18 @@
 apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
-  name: familie-tilbake
-  namespace: teamfamilie
+  name: tilbakekreving-backend
+  namespace: tilbake
   annotations:
     nais.io/run-as-group: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
     nais.io/run-as-user: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
   labels:
-    team: teamfamilie
+    team: tilbake
 
 spec:
   envFrom:
-    - secret: familie-tilbake
-    - secret: familie-tilbake-unleash-api-token
+    - secret: tilbakekreving-backend
+    - secret: tilbakekreving-backend-unleash-api-token
   image: {{ image }}
   port: 8030
   leaderElection: true
@@ -35,12 +35,12 @@ spec:
     enabled: false
   gcp: # Database
     sqlInstances:
-      - type: POSTGRES_14
+      - type: POSTGRES_17
         tier: db-custom-1-3840
-        name: familie-tilbake
+        name: tilbakekreving
         autoBackupHour: 3
         databases:
-          - name: familie-tilbake
+          - name: tilbakekreving
             envVarPrefix: DB
   azure:
     application:
@@ -62,7 +62,7 @@ spec:
       enabled: true
       tenant: trygdeetaten.no
       replyURLs:
-        - "https://familie-tilbake.intern.dev.nav.no/swagger-ui/oauth2-redirect.html"
+        - "https://tilbakekreving-backend.intern.dev.nav.no/swagger-ui/oauth2-redirect.html"
       singlePageApplication: true
   accessPolicy:
     inbound:
@@ -88,8 +88,8 @@ spec:
         - application: ida
           namespace: traktor
           cluster: prod-fss
-        - application: familie-prosessering
-          namespace: teamfamilie
+        - application: tilbakekreving-prosessering
+          namespace: tilbake
           cluster: dev-gcp
         - application: familie-prosessering-lokal
           namespace: teamfamilie
@@ -99,7 +99,7 @@ spec:
           cluster: dev-gcp
     outbound:
       external:
-        - host: teamfamilie-unleash-api.nav.cloud.nais.io
+        - host: tilbake-unleash-api.nav.cloud.nais.io
         - host: familie-integrasjoner.dev-fss-pub.nais.io
         - host: pdl-api.dev-fss-pub.nais.io
         - host: b27apvl220.preprod.local
@@ -115,7 +115,7 @@ spec:
       memory: 1024Mi
       cpu: 25m
   ingresses:
-    - https://familie-tilbake.intern.dev.nav.no
+    - https://tilbakekreving-backend.intern.dev.nav.no
   secureLogs:
     enabled: true
   env:

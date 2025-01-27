@@ -6,15 +6,18 @@ on:
 jobs:
   deploy-dev:
     runs-on: ubuntu-latest
+    permissions:
+      contents: "read"
+      id-token: "write"
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: deploy unleash api-token to dev
         uses: nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: .deploy/nais/unleash/unleash-apitoken-preprod.yaml
+          ENVIRONMENT: dev-gcp:tilbake
   deploy-prod:
     runs-on: ubuntu-latest
     steps:
