@@ -145,6 +145,7 @@ class OppgaveTaskService(
                 setProperty("beskrivelse", beskrivelse)
                 setProperty("enhetId", enhetId)
                 setProperty("saksbehandler", ContextService.hentSaksbehandler())
+                setProperty("behandlingId", behandlingId.toString())
             }
         taskService.save(
             Task(
