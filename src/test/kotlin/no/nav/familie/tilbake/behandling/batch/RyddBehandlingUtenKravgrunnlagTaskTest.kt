@@ -3,6 +3,9 @@ package no.nav.familie.tilbake.behandling.batch
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.mockk.clearMocks
+import io.mockk.every
+import io.mockk.mockkObject
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
@@ -11,12 +14,18 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
+import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.fagsystem
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.oppgave.LagOppgaveTask
+import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
+import no.nav.familie.tilbake.sikkerhet.InnloggetBrukertilgang
+import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.Properties
@@ -40,6 +49,18 @@ internal class RyddBehandlingUtenKravgrunnlagTaskTest : OppslagSpringRunnerTest(
 
     @Autowired
     private lateinit var taskService: TaskService
+
+    @BeforeEach
+    fun init() {
+        mockkObject(ContextService)
+        every { ContextService.hentSaksbehandler() }.returns("Z0000")
+        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any()) }.returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.SYSTEM_TILGANG to Behandlerrolle.SYSTEM)))
+    }
+
+    @AfterEach
+    fun tearDown() {
+        clearMocks(ContextService)
+    }
 
     @Test
     fun `skal hennlegge behandling uten kravgrunnlag som har sendt brev`() {
