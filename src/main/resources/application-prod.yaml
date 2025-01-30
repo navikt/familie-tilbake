@@ -1,6 +1,8 @@
 spring:
   datasource:
-    url: ${DB_JDBC_URL}
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/familie-tilbake
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   flyway:
     placeholders:
       ignoreIfProd: --
