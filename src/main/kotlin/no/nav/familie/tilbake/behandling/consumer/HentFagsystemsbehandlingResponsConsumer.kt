@@ -1,7 +1,6 @@
 package no.nav.familie.tilbake.behandling.consumer
 
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
-import no.nav.familie.tilbake.config.KafkaConfig
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
@@ -23,7 +22,7 @@ class HentFagsystemsbehandlingResponsConsumer(
 
     @KafkaListener(
         id = "familie-tilbake",
-        topics = [KafkaConfig.HENT_FAGSYSTEMSBEHANDLING_RESPONS_TOPIC],
+        topics = ["#{kafkaProducer.fagsystemsbehandlingResponseTopic}"],
         containerFactory = "concurrentKafkaListenerContainerFactory",
     )
     fun listen(

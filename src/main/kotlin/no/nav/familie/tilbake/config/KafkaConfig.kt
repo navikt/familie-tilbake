@@ -88,8 +88,6 @@ class KafkaConfig(
         )
 
     companion object {
-        const val HENT_FAGSYSTEMSBEHANDLING_REQUEST_TOPIC = "tilbake.privat-tbk-hentfagsystemsbehandling"
-        const val HENT_FAGSYSTEMSBEHANDLING_RESPONS_TOPIC = "tilbake.privat-tbk-hentfagsystemsbehandling-svar"
         const val SAK_TOPIC = "teamfamilie.aapen-tbk-datavarehus-sak-topic"
         const val VEDTAK_TOPIC = "teamfamilie.aapen-tbk-datavarehus-vedtak-topic"
     }

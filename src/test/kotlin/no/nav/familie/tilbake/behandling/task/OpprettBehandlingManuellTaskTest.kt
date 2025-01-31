@@ -85,7 +85,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        spyKafkaProducer = spyk(DefaultKafkaProducer(mockKafkaTemplate))
+        spyKafkaProducer = spyk(DefaultKafkaProducer(mockKafkaTemplate, "request", "response"))
         hentFagsystemsbehandlingService = HentFagsystemsbehandlingService(requestSendtRepository, spyKafkaProducer)
         behandlingManuellOpprettelseService = BehandlingManuellOpprettelseService(behandlingService)
         opprettBehandlingManueltTask =

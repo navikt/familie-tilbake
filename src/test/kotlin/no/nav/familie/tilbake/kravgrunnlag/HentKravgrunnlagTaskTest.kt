@@ -83,7 +83,7 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
         val kafkaTemplate: KafkaTemplate<String, String> = mockk()
-        kafkaProducer = spyk(DefaultKafkaProducer(kafkaTemplate))
+        kafkaProducer = spyk(DefaultKafkaProducer(kafkaTemplate, "request", "response"))
         historikkService = HistorikkService(behandlingRepository, brevsporingRepository, historikkinnslagRepository)
         oppdragClient = MockOppdragClient(kravgrunnlagRepository, mottattXmlRepository)
         hentKravgrunnlagService = HentKravgrunnlagService(kravgrunnlagRepository, oppdragClient, historikkService)
