@@ -171,6 +171,9 @@ AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_BARNETILSYN: 8
 AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_OVERGANGSSTØNAD: 8
 AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_SKOLEPENGER: 8
 AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_KONTANTSTØTTE: 8
-TILBAKEKREVING_REQUEST_TOPIC: "tilbake.privat-tbk-hentfagsystemsbehandling"
-TILBAKEKREVING_RESPONSE_TOPIC: "tilbake.privat-tbk-hentfagsystemsbehandling-svar"
+
+kafka:
+  hentFagsystem:
+    requestTopic: "tilbake.privat-tbk-hentfagsystemsbehandling"
+    responseTopic: "tilbake.privat-tbk-hentfagsystemsbehandling-svar"
 

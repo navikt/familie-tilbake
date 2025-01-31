@@ -8,7 +8,6 @@ import no.nav.familie.tilbake.datavarehus.saksstatistikk.sakshendelse.Behandling
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.Vedtaksoppsummering
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
@@ -40,10 +39,7 @@ interface KafkaProducer {
 @Profile("!integrasjonstest & !e2e & !local")
 class DefaultKafkaProducer(
     private val kafkaTemplate: KafkaTemplate<String, String>,
-    @Value("\${TILBAKEKREVING_REQUEST_TOPIC}")
-    private val fagsystemsbehandlingRequestTopic: String,
-    @Value("\${TILBAKEKREVING_RESPONSE_TOPIC}")
-    private val fagsystemsbehandlingResponseTopic: String,
+    private val kafkaProperties: KafkaProperties,
 ) : KafkaProducer {
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -65,7 +61,7 @@ class DefaultKafkaProducer(
         requestId: UUID,
         request: HentFagsystemsbehandlingRequest,
     ) {
-        sendKafkamelding(requestId, fagsystemsbehandlingRequestTopic, requestId.toString(), request)
+        sendKafkamelding(requestId, kafkaProperties.hentFagsystem.requestTopic, requestId.toString(), request)
     }
 
     override fun sendRåFagsystemsbehandlingResponse(
@@ -74,7 +70,7 @@ class DefaultKafkaProducer(
     ) {
         val producerRecord =
             ProducerRecord(
-                fagsystemsbehandlingResponseTopic,
+                kafkaProperties.hentFagsystem.responseTopic,
                 behandlingId?.toString(),
                 response,
             )

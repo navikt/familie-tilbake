@@ -22,7 +22,7 @@ class HentFagsystemsbehandlingResponsConsumer(
 
     @KafkaListener(
         id = "familie-tilbake",
-        topics = ["#{kafkaProducer.fagsystemsbehandlingResponseTopic}"],
+        topics = ["\${kafka.hentFagsystem.responseTopic}"],
         containerFactory = "concurrentKafkaListenerContainerFactory",
     )
     fun listen(
