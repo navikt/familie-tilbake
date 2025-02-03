@@ -171,7 +171,7 @@ enum class Klassekode(
             klassetype: Klassetype,
         ): Klassekode {
             if (klassetype == Klassetype.TREK) return TREK_KODER
-            return entries.firstOrNull { it.name == kode || (it.overstyrtKlassekode.isNotEmpty() && it.overstyrtKlassekode == kode) }
+            return values().firstOrNull { it.name == kode || (it.overstyrtKlassekode.isNotEmpty() && it.overstyrtKlassekode == kode) }
                 ?: throw IllegalArgumentException("Ukjent KlasseKode $kode")
         }
     }

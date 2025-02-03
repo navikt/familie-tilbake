@@ -24,6 +24,11 @@ interface KafkaProducer {
         request: Vedtaksoppsummering,
     )
 
+    fun sendRåFagsystemsbehandlingResponse(
+        behandlingId: UUID?,
+        response: String,
+    )
+
     fun sendHentFagsystemsbehandlingRequest(
         requestId: UUID,
         request: HentFagsystemsbehandlingRequest,
@@ -34,6 +39,7 @@ interface KafkaProducer {
 @Profile("!integrasjonstest & !e2e & !local")
 class DefaultKafkaProducer(
     private val kafkaTemplate: KafkaTemplate<String, String>,
+    private val kafkaProperties: KafkaProperties,
 ) : KafkaProducer {
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -55,7 +61,20 @@ class DefaultKafkaProducer(
         requestId: UUID,
         request: HentFagsystemsbehandlingRequest,
     ) {
-        sendKafkamelding(requestId, KafkaConfig.HENT_FAGSYSTEMSBEHANDLING_REQUEST_TOPIC, requestId.toString(), request)
+        sendKafkamelding(requestId, kafkaProperties.hentFagsystem.requestTopic, requestId.toString(), request)
+    }
+
+    override fun sendRåFagsystemsbehandlingResponse(
+        behandlingId: UUID?,
+        response: String,
+    ) {
+        val producerRecord =
+            ProducerRecord(
+                kafkaProperties.hentFagsystem.responseTopic,
+                behandlingId?.toString(),
+                response,
+            )
+        kafkaTemplate.send(producerRecord)
     }
 
     private fun sendKafkamelding(
@@ -98,6 +117,13 @@ class E2EKafkaProducer : KafkaProducer {
         request: Vedtaksoppsummering,
     ) {
         logger.info("Skipper sending av vedtaksstatistikk for behandling $behandlingId fordi kafka ikke er enablet")
+    }
+
+    override fun sendRåFagsystemsbehandlingResponse(
+        behandlingId: UUID?,
+        request: String,
+    ) {
+        logger.info("Skipper sending av rå vedtaksdata for behandling $behandlingId fordi kafka ikke er enablet")
     }
 
     override fun sendHentFagsystemsbehandlingRequest(

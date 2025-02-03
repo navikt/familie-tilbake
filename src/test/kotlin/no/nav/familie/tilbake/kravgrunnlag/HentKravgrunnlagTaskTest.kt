@@ -28,6 +28,7 @@ import no.nav.familie.tilbake.historikkinnslag.Historikkinnslagstype
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.integration.kafka.DefaultKafkaProducer
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
+import no.nav.familie.tilbake.integration.kafka.KafkaProperties
 import no.nav.familie.tilbake.integration.økonomi.MockOppdragClient
 import no.nav.familie.tilbake.integration.økonomi.OppdragClient
 import no.nav.familie.tilbake.kravgrunnlag.task.HentKravgrunnlagTask
@@ -83,7 +84,7 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
         val kafkaTemplate: KafkaTemplate<String, String> = mockk()
-        kafkaProducer = spyk(DefaultKafkaProducer(kafkaTemplate))
+        kafkaProducer = spyk(DefaultKafkaProducer(kafkaTemplate, KafkaProperties(KafkaProperties.HentFagsystem("request", "response"))))
         historikkService = HistorikkService(behandlingRepository, brevsporingRepository, historikkinnslagRepository)
         oppdragClient = MockOppdragClient(kravgrunnlagRepository, mottattXmlRepository)
         hentKravgrunnlagService = HentKravgrunnlagService(kravgrunnlagRepository, oppdragClient, historikkService)

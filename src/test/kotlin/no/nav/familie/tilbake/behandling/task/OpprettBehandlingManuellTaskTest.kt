@@ -35,6 +35,7 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.integration.kafka.DefaultKafkaProducer
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
+import no.nav.familie.tilbake.integration.kafka.KafkaProperties
 import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -85,7 +86,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        spyKafkaProducer = spyk(DefaultKafkaProducer(mockKafkaTemplate))
+        spyKafkaProducer = spyk(DefaultKafkaProducer(mockKafkaTemplate, KafkaProperties(KafkaProperties.HentFagsystem("request", "response"))))
         hentFagsystemsbehandlingService = HentFagsystemsbehandlingService(requestSendtRepository, spyKafkaProducer)
         behandlingManuellOpprettelseService = BehandlingManuellOpprettelseService(behandlingService)
         opprettBehandlingManueltTask =

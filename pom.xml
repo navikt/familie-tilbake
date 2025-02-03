@@ -420,7 +420,7 @@
             </activation>
             <build>
                 <plugins>
-                    <plugin>
+                    <!--<plugin>
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
                         <executions>
@@ -437,7 +437,8 @@
                                 </goals>
                             </execution>
                         </executions>
-                    </plugin>
+
+                    </plugin>-->
                 </plugins>
             </build>
         </profile>
@@ -455,7 +456,7 @@
                     <artifactId>sonar-maven-plugin</artifactId>
                     <version>5.0.0.4389</version>
                 </plugin>
-                <plugin>
+                <!--<plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>0.8.12</version>
@@ -465,7 +466,7 @@
                             <exclude>**/config/OppdragMQConfig.kt</exclude>
                         </excludes>
                     </configuration>
-                </plugin>
+                </plugin>-->
             </plugins>
         </pluginManagement>
 

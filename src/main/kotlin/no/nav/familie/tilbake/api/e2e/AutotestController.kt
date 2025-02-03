@@ -15,7 +15,7 @@ import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingRequestSendtRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.KafkaConfig
+import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleStatusmeldingTask
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
@@ -23,11 +23,9 @@ import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.HenteParam
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.context.annotation.Profile
 import org.springframework.core.env.Environment
 import org.springframework.http.MediaType
-import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
@@ -47,7 +45,7 @@ class AutotestController(
     private val taskService: TaskService,
     private val behandlingRepository: BehandlingRepository,
     private val requestSendtRepository: HentFagsystemsbehandlingRequestSendtRepository,
-    private val kafkaTemplate: KafkaTemplate<String, String>,
+    private val kafkaProducer: KafkaProducer,
     private val environment: Environment,
 ) {
     @PostMapping(path = ["/opprett/kravgrunnlag/"])
@@ -144,13 +142,10 @@ class AutotestController(
         if (environment.activeProfiles.any { it.contains("e2e") }) {
             requestSendtRepository.update(requestSendt!!.copy(respons = melding))
         } else {
-            val producerRecord =
-                ProducerRecord(
-                    KafkaConfig.HENT_FAGSYSTEMSBEHANDLING_RESPONS_TOPIC,
-                    requestSendt?.id.toString(),
-                    melding,
-                )
-            kafkaTemplate.send(producerRecord)
+            kafkaProducer.sendRåFagsystemsbehandlingResponse(
+                requestSendt?.id,
+                melding,
+            )
         }
         return Ressurs.success("OK")
     }
