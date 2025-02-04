@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.familie.kontrakter.felles.Regelverk
@@ -139,18 +140,16 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
     }
 
     @Test
-    fun `Skal behandle automatisk selv om det finnes foreldet periode i kravgrunnlag`() {
+    fun `Skal ikke behandle automatisk nyeste periode er før vi har registrert rettsgebyr`() {
         lagGrunnlagssteg()
 
         val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_EF_under_4x_rettsgebyr_foreldet.xml")
         val task = opprettTask(kravgrunnlagXml)
+
         behandleKravgrunnlagTask.doTask(task)
         val automatiskSaksbehandlingTasks = taskService.finnAlleTaskerMedPayloadOgType(behandlingId.toString(), AutomatiskSaksbehandlingTask.TYPE)
 
-        automatiskSaksbehandlingTask.doTask(automatiskSaksbehandlingTasks.first())
-        val vurdertForeldelse = foreldelseService.hentAktivVurdertForeldelse(behandlingId)
-        vurdertForeldelse?.foreldelsesperioder?.size shouldBe 1
-        vurdertForeldelse?.foreldelsesperioder?.first()?.begrunnelse shouldBe Constants.AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_FORELDELSE_BEGRUNNELSE
+        automatiskSaksbehandlingTasks shouldHaveSize 0
     }
 
     private fun lagGrunnlagssteg() {

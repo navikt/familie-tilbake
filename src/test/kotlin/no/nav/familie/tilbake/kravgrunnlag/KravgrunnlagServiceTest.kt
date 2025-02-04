@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -10,14 +11,18 @@ import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
+import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
+import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEventPublisher
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.util.UUID
 
 class KravgrunnlagServiceTest {
     private val kravgrunnlagRepository: KravgrunnlagRepository = mockk()
@@ -48,6 +53,95 @@ class KravgrunnlagServiceTest {
             endretKravgrunnlagEventPublisher = endretKravgrunnlagEventPublisher,
             behandlingService = behandlingService,
         )
+
+    @Test
+    fun `Skal finne år for feilutbetaling i kravgrunnlagsperioder `() {
+        val fom = LocalDate.now().minusYears(10)
+        val tom = LocalDate.now()
+
+        val kravgrunnlagsperioder: Set<Kravgrunnlagsperiode432> =
+            setOf(Testdata.lagKravgrunnlagsperiode(fom, tom))
+
+        kravgrunnlagsperioder.finnÅrForNyesteFeilutbetalingsperiode() shouldBe tom.year
+    }
+
+    @Test
+    fun `Skal finne riktig (nyeste) år med feilutbetaling i kravgrunnlagsperioder `() {
+        val now = LocalDate.now()
+        val forventetTom = now.minusYears(2)
+
+        val eldstePeriode = Testdata.lagKravgrunnlagsperiode(now.minusYears(5), now.minusYears(5))
+        val gammelPeriode = Testdata.lagKravgrunnlagsperiode(now.minusYears(4), now.minusYears(4))
+        val nyestePeriode = Testdata.lagKravgrunnlagsperiode(now.minusYears(3), forventetTom)
+
+        val kravgrunnlagsperioder: Set<Kravgrunnlagsperiode432> =
+            setOf(eldstePeriode, nyestePeriode, gammelPeriode)
+
+        kravgrunnlagsperioder.finnÅrForNyesteFeilutbetalingsperiode() shouldBe forventetTom.year
+    }
+
+    @Test
+    fun `Er under fire rettsgebyr og refererer til samme fagsystembehandling `() {
+        val fom = LocalDate.of(2022, 1, 1)
+        val tom = LocalDate.of(2022, 1, 1)
+
+        val kravgrunnlagsperioder: Set<Kravgrunnlagsperiode432> =
+            setOf(Testdata.lagKravgrunnlagsperiode(fom = fom, tom = tom, beløp = 1000))
+
+        val behandling = Testdata.lagBehandling()
+
+        val kravgrunnlag =
+            Testdata.lagKravgrunnlag(behandlingId = behandling.id, perioder = kravgrunnlagsperioder).copy(referanse = behandling.fagsystemsbehandling.first().eksternId)
+
+        kravgrunnlagService.kanBehandlesAutomatiskBasertPåRettsgebyrOgfagsystemreferanse(
+            kravgrunnlag,
+            behandling,
+        ) shouldBe true
+    }
+
+    @Test
+    fun `Feiler fordi beløp er 1 kr over fire rettsgebyr`() {
+        val fom = LocalDate.of(2022, 1, 1)
+        val tom = LocalDate.of(2022, 1, 1)
+
+        // 1223
+
+        val kravgrunnlagsperioder: Set<Kravgrunnlagsperiode432> =
+            setOf(Testdata.lagKravgrunnlagsperiode(fom = fom, tom = tom, beløp = 1223 * 4 + 1))
+
+        val behandling = Testdata.lagBehandling()
+
+        val kravgrunnlag =
+            Testdata.lagKravgrunnlag(behandlingId = behandling.id, perioder = kravgrunnlagsperioder).copy(referanse = behandling.fagsystemsbehandling.first().eksternId)
+
+        kravgrunnlagService.kanBehandlesAutomatiskBasertPåRettsgebyrOgfagsystemreferanse(
+            kravgrunnlag,
+            behandling,
+        ) shouldBe false
+    }
+
+    @Test
+    fun `Henter ut riktig rettsgebyr for 2022`() {
+        val rettsgebyr2022 = 1223
+        Constants.rettsgebyrForÅr(2022) shouldBe rettsgebyr2022
+    }
+
+    @Test
+    fun `Skal ikke finne rettsgebyr for år vi ikke har registrert `() {
+        val fom = LocalDate.of(2017, 1, 1)
+        val tom = LocalDate.of(2017, 1, 1)
+
+        val kravgrunnlagsperioder: Set<Kravgrunnlagsperiode432> =
+            setOf(Testdata.lagKravgrunnlagsperiode(fom, tom))
+
+        val kravgrunnlag =
+            Testdata.lagKravgrunnlag(behandlingId = UUID.randomUUID(), perioder = kravgrunnlagsperioder)
+
+        kravgrunnlagService.kanBehandlesAutomatiskBasertPåRettsgebyrOgfagsystemreferanse(
+            kravgrunnlag,
+            Testdata.lagBehandling(),
+        ) shouldBe false
+    }
 
     @Test
     fun `Skal ikke oppdatere aktiv på nytt kravgrunnlag med eldre dato i kontrollfelt`() {

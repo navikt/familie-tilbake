@@ -32,8 +32,9 @@ object Constants {
 
     const val STATUSMELDING_XML_ROOT_ELEMENT: String = "urn:endringKravOgVedtakstatus"
 
+    fun rettsgebyrForÅr(år: Int) = rettsgebyrForDato.filter { it.gyldigFra.year <= år }.maxByOrNull { it.gyldigFra }?.beløp ?: throw Feil("Rettsgebyr for år $år er ikke satt")
+
     val rettsgebyr = rettsgebyrForDato.filter { it.gyldigFra <= LocalDate.now() }.maxByOrNull { it.gyldigFra }!!.beløp
-    val FIRE_X_RETTSGEBYR = rettsgebyr * 4
 
     private class Datobeløp(
         val gyldigFra: LocalDate,
