@@ -82,9 +82,6 @@ spec:
         - application: familie-ks-sak
           namespace: teamfamilie
           cluster: dev-gcp
-        - application: familie-tilbake-frontend
-          namespace: teamfamilie
-          cluster: dev-gcp
         - application: tilbakekreving-frontend
           namespace: tilbake
           cluster: dev-gcp
