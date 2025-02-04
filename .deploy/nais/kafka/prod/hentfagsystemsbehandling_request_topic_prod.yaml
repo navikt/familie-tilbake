@@ -1,10 +1,10 @@
 apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
-  name: privat-tbk-hentfagsystemsbehandling-request-topic
-  namespace: teamfamilie
+  name: privat-tbk-hentfagsystemsbehandling
+  namespace: tilbake
   labels:
-    team: teamfamilie
+    team: tilbake
 spec:
   pool: nav-prod
   config: # optional; all fields are optional too; defaults shown
@@ -15,19 +15,18 @@ spec:
     retentionBytes: -1  # -1 means unlimited
     retentionHours: 72  # -1 means unlimited
   acl:
-    - team: teamfamilie
-      application: familie-tilbake #owner
+    - team: tilbake
+      application: tilbakekreving-backend #owner
       access: readwrite   # readwrite
     - team: teamfamilie
       application: familie-ba-sak #owner
       access: read   # readwrite
     - team: teamfamilie
       application: familie-ks-sak
-      access: read   # read
+      access: read # read
     - team: teamfamilie
       application: familie-ef-iverksett #owner
       access: read   # readwrite
     - team: teamfamilie
       application: familie-tilbake-kafka-manager #forvalter
       access: read   # read
-
