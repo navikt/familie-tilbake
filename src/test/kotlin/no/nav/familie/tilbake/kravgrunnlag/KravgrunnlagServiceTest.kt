@@ -93,7 +93,7 @@ class KravgrunnlagServiceTest {
         val kravgrunnlag =
             Testdata.lagKravgrunnlag(behandlingId = behandling.id, perioder = kravgrunnlagsperioder).copy(referanse = behandling.fagsystemsbehandling.first().eksternId)
 
-        kravgrunnlagService.kanBehandlesAutomatiskBasertPåRettsgebyrOgfagsystemreferanse(
+        kravgrunnlagService.kanBehandlesAutomatiskBasertPåRettsgebyrOgFagsystemreferanse(
             kravgrunnlag,
             behandling,
         ) shouldBe true
@@ -114,7 +114,7 @@ class KravgrunnlagServiceTest {
         val kravgrunnlag =
             Testdata.lagKravgrunnlag(behandlingId = behandling.id, perioder = kravgrunnlagsperioder).copy(referanse = behandling.fagsystemsbehandling.first().eksternId)
 
-        kravgrunnlagService.kanBehandlesAutomatiskBasertPåRettsgebyrOgfagsystemreferanse(
+        kravgrunnlagService.kanBehandlesAutomatiskBasertPåRettsgebyrOgFagsystemreferanse(
             kravgrunnlag,
             behandling,
         ) shouldBe false
@@ -137,7 +137,7 @@ class KravgrunnlagServiceTest {
         val kravgrunnlag =
             Testdata.lagKravgrunnlag(behandlingId = UUID.randomUUID(), perioder = kravgrunnlagsperioder)
 
-        kravgrunnlagService.kanBehandlesAutomatiskBasertPåRettsgebyrOgfagsystemreferanse(
+        kravgrunnlagService.kanBehandlesAutomatiskBasertPåRettsgebyrOgFagsystemreferanse(
             kravgrunnlag,
             Testdata.lagBehandling(),
         ) shouldBe false

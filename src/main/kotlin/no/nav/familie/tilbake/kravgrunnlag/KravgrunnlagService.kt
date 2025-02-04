@@ -133,7 +133,7 @@ class KravgrunnlagService(
         tellerService.tellKobletKravgrunnlag(fagsystem)
     }
 
-    fun kanBehandlesAutomatiskBasertPåRettsgebyrOgfagsystemreferanse(
+    fun kanBehandlesAutomatiskBasertPåRettsgebyrOgFagsystemreferanse(
         kravgrunnlag431: Kravgrunnlag431,
         behandling: Behandling,
     ): Boolean =
