@@ -123,7 +123,7 @@ class KravgrunnlagService(
 
         stegService.håndterSteg(behandling.id) // Kjører automatisk frem til fakta-steg = KLAR
         if (behandling.saksbehandlingstype == Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR) {
-            if (kanBehandlesAutomatiskBasertPåRettsgebyrOgfagsystemreferanse(kravgrunnlag431, behandling)) {
+            if (kanBehandlesAutomatiskBasertPåRettsgebyrOgFagsystemreferanse(kravgrunnlag431, behandling)) {
                 taskService.save(AutomatiskSaksbehandlingTask.opprettTask(behandling.id, fagsystem))
             } else {
                 behandlingService.oppdaterSaksbehandlingtype(behandling.id, Saksbehandlingstype.ORDINÆR)
