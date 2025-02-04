@@ -1,15 +1,18 @@
 apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
-  name: familie-tilbake
-  namespace: teamfamilie
+  name: tilbakekreving-backend
+  namespace: tilbake
   annotations:
     nais.io/run-as-group: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
     nais.io/run-as-user: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
   labels:
-    team: teamfamilie
+    team: tilbake
 
 spec:
+  envFrom:
+    - secret: tilbakekreving-backend
+    - secret: tilbakekreving-backend-unleash-api-token
   image: {{ image }}
   port: 8030
   leaderElection: true
@@ -32,14 +35,14 @@ spec:
     enabled: false
   gcp: # Database
     sqlInstances:
-      - type: POSTGRES_14
+      - type: POSTGRES_17
         tier: db-custom-1-3840
-        name: familie-tilbake
+        name: tilbakekreving
         diskAutoresize: true
         highAvailability: true
         autoBackupHour: 3
         databases:
-          - name: familie-tilbake
+          - name: tilbakekreving
             envVarPrefix: DB
   azure:
     application:
@@ -62,7 +65,7 @@ spec:
           - id: 4e7f23d9-5db1-45c0-acec-89c86a9ec678 # 0000-GA-Kontantstøtte-Beslutter
       enabled: true
       replyURLs:
-        - "https://familie-tilbake.intern.nav.no/swagger-ui/oauth2-redirect.html"
+        - "https://tilbakekreving-backend.intern.nav.no/swagger-ui/oauth2-redirect.html"
       singlePageApplication: true
   accessPolicy:
     inbound:
@@ -85,15 +88,12 @@ spec:
         - application: familie-tilbake-frontend
           namespace: teamfamilie
           cluster: prod-gcp
-        - application: tilbakekreving-frontend
+        - application: tilbakekreving-prosessering
           namespace: tilbake
-          cluster: prod-gcp
-        - application: familie-prosessering
-          namespace: teamfamilie
           cluster: prod-gcp
     outbound:
       external:
-        - host: teamfamilie-unleash-api.nav.cloud.nais.io
+        - host: tilbake-unleash-api.nav.cloud.nais.io
         - host: familie-integrasjoner.prod-fss-pub.nais.io
         - host: pdl-api.prod-fss-pub.nais.io
         - host: mpls02.adeo.no
@@ -108,19 +108,14 @@ spec:
     requests:
       memory: 1024Mi
       cpu: 50m
+  ingresses:
+    - https://tilbakekreving-backend.intern.nav.no
   secureLogs:
     enabled: true
-  ingresses: # Optional. List of ingress URLs that will route HTTP traffic to the application.
-    - https://familie-tilbake.intern.nav.no
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: prod
-    - name: KAFKA_HENTFAGSYSTEM_REQUEST_TOPIC
-      value: teamfamilie.privat-tbk-hentfagsystemsbehandling-request-topic
-    - name: KAFKA_HENTFAGSYSTEM_RESPONSE_TOPIC
-      value: teamfamilie.privat-tbk-hentfagsystemsbehandling-respons-topic
-  envFrom:
-    - secret: familie-tilbake
-    - secret: familie-tilbake-unleash-api-token
+    - name: OPPDRAG_MQ_ENABLED
+      value: "false"
   kafka:
     pool: nav-prod

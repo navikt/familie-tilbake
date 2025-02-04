@@ -3,9 +3,6 @@ on:
   push:
     branches:
       - 'main'
-env:
-  IMAGE: ghcr.io/navikt/familie-tilbake:${{ github.sha }}
-  IMAGE_LATEST: ghcr.io/navikt/familie-tilbake:latest
 jobs:
   build:
     name: Bygg app/image, push til github, deploy til prod-gcp og dev-gcp
@@ -32,13 +29,11 @@ jobs:
       - uses: nais/docker-build-push@v0
         id: docker-push
         with:
-          team: teamfamilie
+          team: tilbake
           tag: latest
           push_image: true
           dockerfile: Dockerfile
           docker_context: .
-          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
-          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
       - name: Post build failures to Slack
         if: failure()
         run: |
@@ -66,10 +61,17 @@ jobs:
       - name: Deploy til prod-gcp
         uses: nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: prod-gcp
+          RESOURCE: .deploy/nais/app-prod-gcp-tilbake.yaml
+          VAR: image= ${{ needs.build.outputs.image }}
+          ENVIRONMENT: prod-gcp:tilbake
+      - name: Deploy til prod-gcp team familie
+        uses: nais/deploy/actions/deploy@v2
+        env:
           CLUSTER: prod-gcp
           RESOURCE: .deploy/nais/app-prod-gcp.yaml
           VAR: image= ${{ needs.build.outputs.image }}
+          ENVIRONMENT: prod-gcp:teamfamilie
       - name: Post deploy failures to Slack
         if: failure()
         run: |

@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/familie-tilbake
+    url: ${DB_JDBC_URL:jdbc:postgresql://${DB_HOST}:${DB_PORT}/familie-tilbake}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
   flyway:
@@ -48,5 +48,5 @@ TOKEN_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/t
 
 kafka:
   hentFagsystem:
-    requestTopic: "teamfamilie.privat-tbk-hentfagsystemsbehandling-request-topic"
-    responseTopic: "teamfamilie.privat-tbk-hentfagsystemsbehandling-respons-topic"
+    requestTopic: ${KAFKA_HENTFAGSYSTEM_REQUEST_TOPIC:tilbake.privat-tbk-hentfagsystemsbehandling}
+    responseTopic: ${KAFKA_HENTFAGSYSTEM_RESPONSE_TOPIC:tilbake.privat-tbk-hentfagsystemsbehandling-svar}

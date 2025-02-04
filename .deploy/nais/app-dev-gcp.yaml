@@ -85,12 +85,15 @@ spec:
         - application: familie-tilbake-frontend
           namespace: teamfamilie
           cluster: dev-gcp
-        - application: ida
-          namespace: traktor
-          cluster: prod-fss
+        - application: tilbakekreving-frontend
+          namespace: tilbake
+          cluster: dev-gcp
         - application: tilbakekreving-prosessering
           namespace: tilbake
           cluster: dev-gcp
+        - application: ida
+          namespace: traktor
+          cluster: prod-fss
         - application: familie-prosessering-lokal
           namespace: teamfamilie
           cluster: dev-gcp
