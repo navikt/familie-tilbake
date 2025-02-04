@@ -112,6 +112,10 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: prod
+    - name: KAFKA_HENTFAGSYSTEM_REQUEST_TOPIC
+      value: teamfamilie.privat-tbk-hentfagsystemsbehandling-request-topic
+    - name: KAFKA_HENTFAGSYSTEM_RESPONSE_TOPIC
+      value: teamfamilie.privat-tbk-hentfagsystemsbehandling-respons-topic
   envFrom:
     - secret: familie-tilbake
     - secret: familie-tilbake-unleash-api-token
