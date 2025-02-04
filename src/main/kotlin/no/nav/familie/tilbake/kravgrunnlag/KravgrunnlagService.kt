@@ -137,15 +137,19 @@ class KravgrunnlagService(
         kravgrunnlag431: Kravgrunnlag431,
         behandling: Behandling,
     ): Boolean =
-        kanBehandlesAutomatiskBasertPåRettsgebyr(kravgrunnlag431) &&
+        feilutbetalingErUnderFireRettsgebyr(kravgrunnlag431) &&
             behandlingOgKravgrunnlagReferererTilSammeFagsystembehandling(behandling, kravgrunnlag431)
 
     fun erOverFireRettsgebyr(behandling: Behandling): Boolean {
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
-        return !kanBehandlesAutomatiskBasertPåRettsgebyr(kravgrunnlag)
+        return !feilutbetalingErUnderFireRettsgebyr(kravgrunnlag)
     }
 
-    private fun kanBehandlesAutomatiskBasertPåRettsgebyr(
+    /**
+     * Sjekker om feilutbetaling er under 4 rettsgebyr.
+     * PS. returnerer false dersom perioden vi sjekker er eldre en registrert rettsgebyr.
+     */
+    private fun feilutbetalingErUnderFireRettsgebyr(
         kravgrunnlag431: Kravgrunnlag431,
     ): Boolean {
         return try {
