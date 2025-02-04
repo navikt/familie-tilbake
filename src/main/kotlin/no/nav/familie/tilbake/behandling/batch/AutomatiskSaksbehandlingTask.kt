@@ -9,7 +9,6 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagService
 import org.slf4j.LoggerFactory
@@ -35,17 +34,16 @@ class AutomatiskSaksbehandlingTask(
         logger.info("AutomatiskSaksbehandlingTask prosesserer med id=${task.id} og metadata ${task.metadata}")
         val behandlingId = UUID.fromString(task.payload)
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        validerOmAutomatiskBehandlingUnder4RettsgebyrErMulig(behandlingId, behandling)
+        validerOmAutomatiskBehandlingUnder4RettsgebyrErMulig(behandling)
         automatiskSaksbehandlingService.settSaksbehandlingstypeTilAutomatiskHvisOrdinær(behandlingId)
 
         automatiskSaksbehandlingService.behandleAutomatisk(behandlingId)
     }
 
     private fun validerOmAutomatiskBehandlingUnder4RettsgebyrErMulig(
-        behandlingId: UUID,
         behandling: Behandling,
     ) {
-        if (kravgrunnlagService.sumFeilutbetalingsbeløpForBehandlingId(behandlingId) > Constants.FIRE_X_RETTSGEBYR &&
+        if (kravgrunnlagService.erOverFireRettsgebyr(behandling) &&
             behandling.saksbehandlingstype == Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR
         ) {
             throw Feil("Skal ikke behandle beløp over 4x rettsgebyr automatisk")

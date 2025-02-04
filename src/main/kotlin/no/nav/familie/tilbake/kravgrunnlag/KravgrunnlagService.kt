@@ -17,13 +17,16 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
-import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningUtil
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
+import no.nav.familie.tilbake.integration.pdl.internal.secureLogger
+import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
+import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEventPublisher
 import no.nav.familie.tilbake.micrometer.TellerService
@@ -37,7 +40,6 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Properties
-import java.util.UUID
 
 @Service
 class KravgrunnlagService(
@@ -121,7 +123,7 @@ class KravgrunnlagService(
 
         stegService.håndterSteg(behandling.id) // Kjører automatisk frem til fakta-steg = KLAR
         if (behandling.saksbehandlingstype == Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR) {
-            if (skalBehandlesAutomatisk(kravgrunnlag431, behandling)) {
+            if (kanBehandlesAutomatiskBasertPåRettsgebyrOgFagsystemreferanse(kravgrunnlag431, behandling)) {
                 taskService.save(AutomatiskSaksbehandlingTask.opprettTask(behandling.id, fagsystem))
             } else {
                 behandlingService.oppdaterSaksbehandlingtype(behandling.id, Saksbehandlingstype.ORDINÆR)
@@ -131,17 +133,39 @@ class KravgrunnlagService(
         tellerService.tellKobletKravgrunnlag(fagsystem)
     }
 
-    private fun skalBehandlesAutomatisk(
+    fun kanBehandlesAutomatiskBasertPåRettsgebyrOgFagsystemreferanse(
         kravgrunnlag431: Kravgrunnlag431,
         behandling: Behandling,
-    ) = erUnder4xRettsgebyr(kravgrunnlag431) && behandlingOgKravgrunnlagReferererTilSammeFagsystembehandling(behandling, kravgrunnlag431)
+    ): Boolean =
+        feilutbetalingErUnderFireRettsgebyr(kravgrunnlag431) &&
+            behandlingOgKravgrunnlagReferererTilSammeFagsystembehandling(behandling, kravgrunnlag431)
+
+    fun erOverFireRettsgebyr(behandling: Behandling): Boolean {
+        val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
+        return !feilutbetalingErUnderFireRettsgebyr(kravgrunnlag)
+    }
+
+    /**
+     * Sjekker om feilutbetaling er under 4 rettsgebyr.
+     * PS. returnerer false dersom perioden vi sjekker er eldre en registrert rettsgebyr.
+     */
+    private fun feilutbetalingErUnderFireRettsgebyr(
+        kravgrunnlag431: Kravgrunnlag431,
+    ): Boolean {
+        return try {
+            val år = kravgrunnlag431.perioder.finnÅrForNyesteFeilutbetalingsperiode() ?: return false
+            val fireRettsgebyr = Constants.rettsgebyrForÅr(år) * 4
+            kravgrunnlag431.sumFeilutbetaling().longValueExact() <= fireRettsgebyr
+        } catch (e: Feil) {
+            secureLogger.warn("Feil ved henting av rettsgebyr for år", e)
+            false
+        }
+    }
 
     private fun behandlingOgKravgrunnlagReferererTilSammeFagsystembehandling(
         behandling: Behandling,
         kravgrunnlag431: Kravgrunnlag431,
     ) = behandling.fagsystemsbehandling.first { it.aktiv }.eksternId == kravgrunnlag431.referanse
-
-    private fun erUnder4xRettsgebyr(kravgrunnlag431: Kravgrunnlag431) = kravgrunnlag431.sumFeilutbetaling().longValueExact() <= Constants.FIRE_X_RETTSGEBYR
 
     private fun finnÅpenBehandling(
         ytelsestype: Ytelsestype,
@@ -180,12 +204,6 @@ class KravgrunnlagService(
         }
         kravgrunnlagRepository.update(eksisterendeKravgrunnlag.copy(aktiv = !sistMottattKravgrunnlagSkalVæreAktivt))
         kravgrunnlagRepository.insert(mottattKravgrunnlag.copy(aktiv = sistMottattKravgrunnlagSkalVæreAktivt))
-    }
-
-    fun sumFeilutbetalingsbeløpForBehandlingId(behandlingId: UUID): Long {
-        val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
-        val beløpForPerioder = KravgrunnlagsberegningUtil.summerKravgrunnlagBeløpForPerioder(kravgrunnlag)
-        return beløpForPerioder.values.sumOf { it.feilutbetaltBeløp }.longValueExact()
     }
 
     private fun hentOgOppdaterFaktaInfo(
@@ -283,3 +301,8 @@ class KravgrunnlagService(
 }
 
 private fun String.toLocalDateTime(): LocalDateTime = LocalDateTime.parse(this, DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS"))
+
+fun Set<Kravgrunnlagsperiode432>.finnÅrForNyesteFeilutbetalingsperiode(): Int? =
+    this
+        .filter { it.beløp.any { kravgrunnlagsbeløp -> kravgrunnlagsbeløp.klassetype == Klassetype.FEIL } }
+        .maxOfOrNull { it.periode.tomDato.year }

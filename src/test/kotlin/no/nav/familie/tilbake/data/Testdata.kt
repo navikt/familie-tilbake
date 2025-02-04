@@ -269,6 +269,7 @@ object Testdata {
         fom: LocalDate,
         tom: LocalDate,
         klassekode: Klassekode = Klassekode.KL_KODE_FEIL_BA,
+        beløp: Int = 10000,
     ): Kravgrunnlagsperiode432 =
         Kravgrunnlagsperiode432(
             periode =
@@ -278,7 +279,7 @@ object Testdata {
                 ),
             beløp =
                 setOf(
-                    lagFeilKravgrunnlagsbeløp(klassekode),
+                    lagFeilKravgrunnlagsbeløp(klassekode, beløp.toBigDecimal()),
                     lagYtelKravgrunnlagsbeløp(klassekode),
                 ),
             månedligSkattebeløp = BigDecimal("123.11"),
