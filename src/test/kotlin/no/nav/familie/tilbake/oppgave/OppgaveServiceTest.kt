@@ -19,6 +19,7 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.data.Testdata.fagsak
@@ -28,6 +29,7 @@ import no.nav.familie.tilbake.totrinn.TotrinnService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.core.env.Environment
 import java.time.LocalDate
 import java.util.Properties
@@ -246,5 +248,42 @@ class OppgaveServiceTest {
 
             slot.captured.mappeId shouldBe mappeIdGodkjenneVedtak
         }
+    }
+
+    @Test
+    fun `ferdigstillOppgave skal ikke ferdigstille hvis det er mer enn én oppgave`() {
+        // Arrange
+        every { behandlingRepository.findByIdOrThrow(any()) } returns behandling
+        every { fagsakRepository.findByIdOrThrow(any()) } returns fagsak
+        every { integrasjonerClient.finnOppgaver(any()) } returns
+            FinnOppgaveResponseDto(
+                2L,
+                listOf(
+                    Oppgave(oppgavetype = Oppgavetype.GodkjenneVedtak.name),
+                    Oppgave(oppgavetype = Oppgavetype.BehandleUnderkjentVedtak.name),
+                ),
+            )
+        // Act & Assert
+        assertThrows<Feil> { oppgaveService.ferdigstillOppgave(behandling.id, Oppgavetype.GodkjenneVedtak) }
+    }
+
+    @Test
+    fun `ferdigstillOppgave skal ferdigstille hvis det ikke er mer enn én oppgave av familie tilbake sine oppgavetyper`() {
+        // Arrange
+        every { behandlingRepository.findByIdOrThrow(any()) } returns behandling
+        every { fagsakRepository.findByIdOrThrow(any()) } returns fagsak
+        every { integrasjonerClient.finnOppgaver(any()) } returns
+            FinnOppgaveResponseDto(
+                2L,
+                listOf(
+                    Oppgave(oppgavetype = Oppgavetype.GodkjenneVedtak.name, id = 1L),
+                    Oppgave(oppgavetype = "randomUkjentOppgavetype", id = 2L),
+                ),
+            )
+        // Act
+        oppgaveService.ferdigstillOppgave(behandling.id, Oppgavetype.GodkjenneVedtak)
+
+        // Assert
+        verify(exactly = 1) { integrasjonerClient.ferdigstillOppgave(any()) }
     }
 }

@@ -216,8 +216,10 @@ class OppgaveService(
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val (finnOppgaveRequest, finnOppgaveResponse) = finnOppgave(behandling, oppgavetype, fagsak)
 
+        val tilbakekrevingsOppgaver = finnOppgaveResponse.oppgaver.filtrerTilbakekrevringsOppgave()
+
         when {
-            finnOppgaveResponse.oppgaver.size > 1 -> {
+            tilbakekrevingsOppgaver.size > 1 -> {
                 secureLogger.error(
                     "Mer enn en oppgave åpen for behandling ${behandling.eksternBrukId}, " +
                         "$finnOppgaveRequest, $finnOppgaveResponse",
@@ -225,7 +227,7 @@ class OppgaveService(
                 throw Feil("Har mer enn en åpen oppgave for behandling ${behandling.eksternBrukId}")
             }
 
-            finnOppgaveResponse.oppgaver.isEmpty() -> {
+            tilbakekrevingsOppgaver.isEmpty() -> {
                 logger.error("Fant ingen oppgave å ferdigstille for behandling ${behandling.eksternBrukId}")
                 secureLogger.error(
                     "Fant ingen oppgave å ferdigstille ${behandling.eksternBrukId}, " +
@@ -234,10 +236,20 @@ class OppgaveService(
             }
 
             else -> {
-                integrasjonerClient.ferdigstillOppgave(finnOppgaveResponse.oppgaver[0].id!!)
+                integrasjonerClient.ferdigstillOppgave(tilbakekrevingsOppgaver[0].id!!)
             }
         }
     }
+
+    private fun List<Oppgave>.filtrerTilbakekrevringsOppgave(): List<Oppgave> =
+        this.filter {
+            it.oppgavetype in
+                listOf(
+                    Oppgavetype.BehandleSak.name,
+                    Oppgavetype.GodkjenneVedtak.name,
+                    Oppgavetype.BehandleUnderkjentVedtak.name,
+                )
+        }
 
     fun utledOppgavetypeForGjenoppretting(behandlingId: UUID): Oppgavetype {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
@@ -254,6 +266,7 @@ class OppgaveService(
                     Oppgavetype.BehandleSak
                 }
             }
+
             FATTE_VEDTAK -> Oppgavetype.GodkjenneVedtak
             else -> Oppgavetype.BehandleSak
         }
