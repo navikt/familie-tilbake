@@ -151,7 +151,15 @@ class OppgaveService(
         behandling: Behandling,
     ): Oppgave? {
         val (_, finnOppgaveResponse) = finnOppgave(behandling, oppgavetype, fagsakRepository.findByIdOrThrow(behandling.fagsakId))
-        return finnOppgaveResponse.oppgaver.singleOrNull { it.status != StatusEnum.FERDIGSTILT }
+        val ferdigstilteOppgaver = finnOppgaveResponse.oppgaver.filter { it.status != StatusEnum.FERDIGSTILT }
+        if (ferdigstilteOppgaver.size > 1) {
+            secureLogger.warn(
+                "Fant flere enn en oppgave for behandling med fagsakId={}, oppgaveinfo: ({})",
+                behandling.fagsakId,
+                ferdigstilteOppgaver.map { "opprettet: ${it.opprettetTidspunkt}, type: ${it.oppgavetype}" },
+            )
+        }
+        return ferdigstilteOppgaver.singleOrNull()
     }
 
     private fun finnAktuellMappe(
