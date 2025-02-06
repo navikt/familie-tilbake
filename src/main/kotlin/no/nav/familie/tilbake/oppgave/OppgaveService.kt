@@ -216,7 +216,7 @@ class OppgaveService(
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val (finnOppgaveRequest, finnOppgaveResponse) = finnOppgave(behandling, oppgavetype, fagsak)
 
-        val tilbakekrevingsOppgaver = finnOppgaveResponse.oppgaver.filtrerTilbakekrevringsOppgave()
+        val tilbakekrevingsOppgaver = finnOppgaveResponse.oppgaver.filtrerTilbakekrevingsOppgave()
 
         when {
             tilbakekrevingsOppgaver.size > 1 -> {
@@ -241,13 +241,13 @@ class OppgaveService(
         }
     }
 
-    private fun List<Oppgave>.filtrerTilbakekrevringsOppgave(): List<Oppgave> =
+    private fun List<Oppgave>.filtrerTilbakekrevingsOppgave(): List<Oppgave> =
         this.filter {
             it.oppgavetype in
                 listOf(
-                    Oppgavetype.BehandleSak.name,
-                    Oppgavetype.GodkjenneVedtak.name,
-                    Oppgavetype.BehandleUnderkjentVedtak.name,
+                    Oppgavetype.BehandleSak.value,
+                    Oppgavetype.GodkjenneVedtak.value,
+                    Oppgavetype.BehandleUnderkjentVedtak.value,
                 )
         }
 
