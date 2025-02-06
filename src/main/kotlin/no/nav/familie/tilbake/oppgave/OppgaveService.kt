@@ -18,16 +18,11 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
-import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg.FATTE_VEDTAK
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg.FORESLÅ_VEDTAK
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.exceptionhandler.ManglerOppgaveFeil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.person.PersonService
-import no.nav.familie.tilbake.totrinn.TotrinnService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.core.env.Environment
@@ -46,8 +41,6 @@ class OppgaveService(
     private val personService: PersonService,
     private val taskService: TaskService,
     private val environment: Environment,
-    private val behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository,
-    private val totrinnService: TotrinnService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
@@ -216,8 +209,10 @@ class OppgaveService(
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val (finnOppgaveRequest, finnOppgaveResponse) = finnOppgave(behandling, oppgavetype, fagsak)
 
+        val tilbakekrevingsOppgaver = finnOppgaveResponse.oppgaver.filtrerTilbakekrevingsOppgave()
+
         when {
-            finnOppgaveResponse.oppgaver.size > 1 -> {
+            tilbakekrevingsOppgaver.size > 1 -> {
                 secureLogger.error(
                     "Mer enn en oppgave åpen for behandling ${behandling.eksternBrukId}, " +
                         "$finnOppgaveRequest, $finnOppgaveResponse",
@@ -225,7 +220,7 @@ class OppgaveService(
                 throw Feil("Har mer enn en åpen oppgave for behandling ${behandling.eksternBrukId}")
             }
 
-            finnOppgaveResponse.oppgaver.isEmpty() -> {
+            tilbakekrevingsOppgaver.isEmpty() -> {
                 logger.error("Fant ingen oppgave å ferdigstille for behandling ${behandling.eksternBrukId}")
                 secureLogger.error(
                     "Fant ingen oppgave å ferdigstille ${behandling.eksternBrukId}, " +
@@ -234,30 +229,20 @@ class OppgaveService(
             }
 
             else -> {
-                integrasjonerClient.ferdigstillOppgave(finnOppgaveResponse.oppgaver[0].id!!)
+                integrasjonerClient.ferdigstillOppgave(tilbakekrevingsOppgaver[0].id!!)
             }
         }
     }
 
-    fun utledOppgavetypeForGjenoppretting(behandlingId: UUID): Oppgavetype {
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        val behandlingsstegstilstand =
-            behandlingsstegstilstandRepository
-                .findByBehandlingIdAndBehandlingsstegsstatusIn(behandling.id, Behandlingsstegstatus.aktiveStegStatuser)
-                ?: throw Feil("Prøvde å gjenopprette oppgave på en inaktiv behandling (id=${behandling.id})")
-
-        return when (behandlingsstegstilstand.behandlingssteg) {
-            FORESLÅ_VEDTAK -> {
-                if (totrinnService.finnesUnderkjenteStegITotrinnsvurdering(behandlingId)) {
-                    Oppgavetype.BehandleUnderkjentVedtak
-                } else {
-                    Oppgavetype.BehandleSak
-                }
-            }
-            FATTE_VEDTAK -> Oppgavetype.GodkjenneVedtak
-            else -> Oppgavetype.BehandleSak
+    private fun List<Oppgave>.filtrerTilbakekrevingsOppgave(): List<Oppgave> =
+        this.filter {
+            it.oppgavetype in
+                listOf(
+                    Oppgavetype.BehandleSak.value,
+                    Oppgavetype.GodkjenneVedtak.value,
+                    Oppgavetype.BehandleUnderkjentVedtak.value,
+                )
         }
-    }
 
     fun finnOppgave(
         behandling: Behandling,
