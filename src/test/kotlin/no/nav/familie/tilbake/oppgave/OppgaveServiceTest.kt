@@ -69,8 +69,6 @@ class OppgaveServiceTest {
                 personService,
                 taskService,
                 environment,
-                behandlingsstegstilstandRepository,
-                totrinnService,
             )
         every { fagsakRepository.findByIdOrThrow(fagsak.id) } returns fagsak
         every { behandlingRepository.findByIdOrThrow(behandling.id) } returns behandling
