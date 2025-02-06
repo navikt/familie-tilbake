@@ -87,6 +87,8 @@ spec:
           cluster: prod-gcp
         - application: tilbakekreving-frontend
           namespace: tilbake
+        - application: familie-tilbake-frontend
+          namespace: teamfamilie
           cluster: prod-gcp
         - application: tilbakekreving-prosessering
           namespace: tilbake

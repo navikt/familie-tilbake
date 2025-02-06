@@ -88,6 +88,12 @@ spec:
         - application: tilbakekreving-prosessering
           namespace: tilbake
           cluster: dev-gcp
+        - application: tilbakekreving-frontend
+          namespace: tilbake
+          cluster: dev-gcp
+        - application: tilbakekreving-prosessering
+          namespace: tilbake
+          cluster: dev-gcp
         - application: ida
           namespace: traktor
           cluster: prod-fss
