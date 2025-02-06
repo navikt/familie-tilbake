@@ -18,14 +18,12 @@ import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
-import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.data.Testdata.fagsak
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.person.PersonService
-import no.nav.familie.tilbake.totrinn.TotrinnService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -41,8 +39,8 @@ class OppgaveServiceTest {
     private val personService: PersonService = mockk(relaxed = true)
     private val environment: Environment = mockk(relaxed = true)
     private val taskService: TaskService = mockk(relaxed = true)
-    private val behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository = mockk(relaxed = true)
-    private val totrinnService: TotrinnService = mockk(relaxed = true)
+    // private val behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository = mockk(relaxed = true)
+    // private val totrinnService: TotrinnService = mockk(relaxed = true)
 
     private val mappeIdGodkjenneVedtak = 100
     private val mappeIdBehandleSak = 200
@@ -248,40 +246,43 @@ class OppgaveServiceTest {
         }
     }
 
-    @Test
-    fun `ferdigstillOppgave skal ikke ferdigstille hvis det er mer enn én oppgave`() {
-        // Arrange
-        every { behandlingRepository.findByIdOrThrow(any()) } returns behandling
-        every { fagsakRepository.findByIdOrThrow(any()) } returns fagsak
-        every { integrasjonerClient.finnOppgaver(any()) } returns
-            FinnOppgaveResponseDto(
-                2L,
-                listOf(
-                    Oppgave(oppgavetype = Oppgavetype.GodkjenneVedtak.name),
-                    Oppgave(oppgavetype = Oppgavetype.BehandleUnderkjentVedtak.name),
-                ),
-            )
-        // Act & Assert
-        assertThrows<Feil> { oppgaveService.ferdigstillOppgave(behandling.id, Oppgavetype.GodkjenneVedtak) }
-    }
+    @Nested
+    inner class FerdigstillOppgave {
+        @Test
+        fun `ferdigstillOppgave skal ikke ferdigstille hvis det er mer enn én oppgave`() {
+            // Arrange
+            every { behandlingRepository.findByIdOrThrow(any()) } returns behandling
+            every { fagsakRepository.findByIdOrThrow(any()) } returns fagsak
+            every { integrasjonerClient.finnOppgaver(any()) } returns
+                FinnOppgaveResponseDto(
+                    2L,
+                    listOf(
+                        Oppgave(oppgavetype = Oppgavetype.GodkjenneVedtak.value),
+                        Oppgave(oppgavetype = Oppgavetype.BehandleUnderkjentVedtak.value),
+                    ),
+                )
+            // Act & Assert
+            assertThrows<Feil> { oppgaveService.ferdigstillOppgave(behandling.id, Oppgavetype.GodkjenneVedtak) }
+        }
 
-    @Test
-    fun `ferdigstillOppgave skal ferdigstille hvis det ikke er mer enn én oppgave av familie tilbake sine oppgavetyper`() {
-        // Arrange
-        every { behandlingRepository.findByIdOrThrow(any()) } returns behandling
-        every { fagsakRepository.findByIdOrThrow(any()) } returns fagsak
-        every { integrasjonerClient.finnOppgaver(any()) } returns
-            FinnOppgaveResponseDto(
-                2L,
-                listOf(
-                    Oppgave(oppgavetype = Oppgavetype.GodkjenneVedtak.name, id = 1L),
-                    Oppgave(oppgavetype = "randomUkjentOppgavetype", id = 2L),
-                ),
-            )
-        // Act
-        oppgaveService.ferdigstillOppgave(behandling.id, Oppgavetype.GodkjenneVedtak)
+        @Test
+        fun `ferdigstillOppgave skal ferdigstille hvis det ikke er mer enn én oppgave av familie tilbake sine oppgavetyper`() {
+            // Arrange
+            every { behandlingRepository.findByIdOrThrow(any()) } returns behandling
+            every { fagsakRepository.findByIdOrThrow(any()) } returns fagsak
+            every { integrasjonerClient.finnOppgaver(any()) } returns
+                FinnOppgaveResponseDto(
+                    2L,
+                    listOf(
+                        Oppgave(oppgavetype = Oppgavetype.GodkjenneVedtak.value, id = 1L),
+                        Oppgave(oppgavetype = "randomUkjentOppgavetype", id = 2L),
+                    ),
+                )
+            // Act
+            oppgaveService.ferdigstillOppgave(behandling.id, Oppgavetype.GodkjenneVedtak)
 
-        // Assert
-        verify(exactly = 1) { integrasjonerClient.ferdigstillOppgave(any()) }
+            // Assert
+            verify(exactly = 1) { integrasjonerClient.ferdigstillOppgave(any()) }
+        }
     }
 }
