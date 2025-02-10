@@ -7,6 +7,7 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.log.SecureLog
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -46,11 +47,11 @@ class OppdaterFaktainfoTask(
             }
 
         val respons = hentFagsystemsbehandlingService.lesRespons(hentFagsystemsbehandlingRespons)
-        val feilMelding = respons.feilMelding
-        if (feilMelding != null) {
+        val feilmelding = respons.feilMelding
+        if (feilmelding != null) {
             throw Feil(
-                "Noen gikk galt mens henter fagsystemsbehandling fra fagsystem. " +
-                    "Feiler med $feilMelding",
+                message = "Noen gikk galt mens henter fagsystemsbehandling fra fagsystem. Feiler med $feilmelding",
+                logContext = SecureLog.Context.utenBehandling(eksternFagsakId),
             )
         }
         behandlingService.oppdaterFaktainfo(eksternFagsakId, ytelsestype, eksternId, respons.hentFagsystemsbehandling!!)

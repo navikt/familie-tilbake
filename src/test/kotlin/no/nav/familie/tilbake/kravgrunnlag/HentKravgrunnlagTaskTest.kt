@@ -32,6 +32,7 @@ import no.nav.familie.tilbake.integration.kafka.KafkaProperties
 import no.nav.familie.tilbake.integration.økonomi.MockOppdragClient
 import no.nav.familie.tilbake.integration.økonomi.OppdragClient
 import no.nav.familie.tilbake.kravgrunnlag.task.HentKravgrunnlagTask
+import no.nav.familie.tilbake.log.LogService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -64,6 +65,9 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var historikkinnslagRepository: HistorikkinnslagRepository
 
+    @Autowired
+    private lateinit var logService: LogService
+
     private lateinit var kafkaProducer: KafkaProducer
     private lateinit var historikkService: HistorikkService
     private lateinit var oppdragClient: OppdragClient
@@ -88,7 +92,7 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         historikkService = HistorikkService(behandlingRepository, brevsporingRepository, historikkinnslagRepository)
         oppdragClient = MockOppdragClient(kravgrunnlagRepository, mottattXmlRepository)
         hentKravgrunnlagService = HentKravgrunnlagService(kravgrunnlagRepository, oppdragClient, historikkService)
-        hentKravgrunnlagTask = HentKravgrunnlagTask(behandlingRepository, hentKravgrunnlagService, stegService)
+        hentKravgrunnlagTask = HentKravgrunnlagTask(behandlingRepository, hentKravgrunnlagService, stegService, logService)
     }
 
     @Test

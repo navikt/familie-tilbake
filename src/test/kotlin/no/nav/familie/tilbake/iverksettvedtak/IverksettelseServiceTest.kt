@@ -10,7 +10,6 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldNotBeEmpty
 import io.kotest.matchers.types.shouldBeInstanceOf
-import io.mockk.mockk
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -28,7 +27,6 @@ import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.integration.økonomi.DefaultOppdragClient
 import no.nav.familie.tilbake.integration.økonomi.OppdragClient
@@ -43,6 +41,8 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
+import no.nav.familie.tilbake.log.LogService
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn
@@ -88,13 +88,15 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var beregningService: TilbakekrevingsberegningService
 
+    @Autowired
+    private lateinit var logService: LogService
+
     private lateinit var iverksettelseService: IverksettelseService
     private lateinit var oppdragClient: OppdragClient
 
     private val restOperations: RestOperations = RestTemplateBuilder().build()
     private val wireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
 
-    private val mockFeatureToggleService: FeatureToggleService = mockk()
     private lateinit var fagsak: Fagsak
     private lateinit var behandling: Behandling
     private lateinit var behandlingId: UUID
@@ -130,7 +132,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
                 beregningService,
                 behandlingVedtakService,
                 oppdragClient,
-                mockFeatureToggleService,
+                logService,
             )
     }
 
@@ -338,7 +340,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
         behandlingId: UUID,
         xmlId: UUID,
     ) {
-        val request = TilbakekrevingsvedtakMarshaller.unmarshall(melding, behandlingId, xmlId)
+        val request = TilbakekrevingsvedtakMarshaller.unmarshall(melding, behandlingId, xmlId, SecureLog.Context.tom())
         request.shouldNotBeNull()
 
         val tilbakekrevingsvedtak = request.tilbakekrevingsvedtak

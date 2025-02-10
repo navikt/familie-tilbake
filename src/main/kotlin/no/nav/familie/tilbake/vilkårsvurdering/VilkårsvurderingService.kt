@@ -11,13 +11,14 @@ import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants.hentAutomatiskVilkårsvurderingAktsomhetBegrunnelse
 import no.nav.familie.tilbake.config.Constants.hentAutomatiskVilkårsvurderingBegrunnelse
-import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
+import no.nav.familie.tilbake.log.LogService
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhet
@@ -35,15 +36,19 @@ class VilkårsvurderingService(
     val behandlingRepository: BehandlingRepository,
     val foreldelseService: ForeldelseService,
     val faktaFeilutbetalingService: FaktaFeilutbetalingService,
-    private val faktaFeilutbetalingRepository: FaktaFeilutbetalingRepository,
+    private val logService: LogService,
 ) {
-    fun hentVilkårsvurdering(behandlingId: UUID): VurdertVilkårsvurderingDto {
+    fun hentVilkårsvurdering(
+        behandlingId: UUID,
+    ): VurdertVilkårsvurderingDto {
+        val logContext = logService.contextFraBehandling(behandlingId)
         val faktaOmFeilutbetaling =
             faktaFeilutbetalingService.hentAktivFaktaOmFeilutbetaling(behandlingId)
                 ?: throw Feil(
                     message =
                         "Fakta om feilutbetaling finnes ikke for behandling=$behandlingId, " +
                             "kan ikke hente vilkårsvurdering",
+                    logContext = logContext,
                 )
         val kravgrunnlag431 = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
@@ -104,12 +109,14 @@ class VilkårsvurderingService(
         behandlingsstegVilkårsvurderingDto: BehandlingsstegVilkårsvurderingDto,
     ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        val fagsystem = fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem
+        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandling.id.toString())
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
         // Valider request
         VilkårsvurderingValidator.validerVilkårsvurdering(
             vilkårsvurderingDto = behandlingsstegVilkårsvurderingDto,
             kravgrunnlag431 = kravgrunnlag,
+            logContext = logContext,
         )
         // filter bort perioder som er foreldet
         val ikkeForeldetPerioder =
@@ -120,7 +127,7 @@ class VilkårsvurderingService(
             VilkårsvurderingMapper.tilDomene(
                 behandlingId = behandlingId,
                 vilkårsvurderingsperioder = ikkeForeldetPerioder,
-                fagsystem = fagsystem,
+                fagsystem = fagsak.fagsystem,
             ),
         )
     }
@@ -128,7 +135,8 @@ class VilkårsvurderingService(
     @Transactional
     fun lagreFastVilkårForAutomatiskSaksbehandling(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        val fagsystem = fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem
+        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandling.id.toString())
 
         val perioder = hentVilkårsvurdering(behandlingId).perioder
         val vurdertePerioder =
@@ -136,12 +144,12 @@ class VilkårsvurderingService(
                 VilkårsvurderingsperiodeDto(
                     periode = it.periode,
                     vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
-                    begrunnelse = hentAutomatiskVilkårsvurderingBegrunnelse(behandling.saksbehandlingstype),
+                    begrunnelse = hentAutomatiskVilkårsvurderingBegrunnelse(behandling.saksbehandlingstype, logContext),
                     aktsomhetDto =
                         AktsomhetDto(
                             aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
                             tilbakekrevSmåbeløp = false,
-                            begrunnelse = hentAutomatiskVilkårsvurderingAktsomhetBegrunnelse(behandling.saksbehandlingstype),
+                            begrunnelse = hentAutomatiskVilkårsvurderingAktsomhetBegrunnelse(behandling.saksbehandlingstype, logContext),
                         ),
                 )
             }
@@ -149,7 +157,7 @@ class VilkårsvurderingService(
             VilkårsvurderingMapper.tilDomene(
                 behandlingId = behandlingId,
                 vilkårsvurderingsperioder = vurdertePerioder,
-                fagsystem = fagsystem,
+                fagsystem = fagsak.fagsystem,
             ),
         )
     }

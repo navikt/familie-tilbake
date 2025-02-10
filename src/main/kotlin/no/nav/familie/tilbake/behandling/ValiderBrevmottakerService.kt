@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.behandling
 
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.person.PersonService
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -15,6 +16,7 @@ class ValiderBrevmottakerService(
     fun validerAtBehandlingIkkeInneholderStrengtFortroligPersonMedManuelleBrevmottakere(
         behandlingId: UUID,
         fagsakId: UUID,
+        logContext: SecureLog.Context,
     ) {
         val manuelleBrevmottakere = manuellBrevmottakerRepository.findByBehandlingId(behandlingId).takeIf { it.isNotEmpty() } ?: return
         val fagsak = fagsakService.hentFagsak(fagsakId)
@@ -22,13 +24,17 @@ class ValiderBrevmottakerService(
         val fagsystem = fagsak.fagsystem
         val personIdenter = listOfNotNull(bruker.ident)
         if (personIdenter.isEmpty()) return
-        val strengtFortroligePersonIdenter = personService.hentIdenterMedStrengtFortroligAdressebeskyttelse(personIdenter, fagsystem)
+        val strengtFortroligePersonIdenter = personService.hentIdenterMedStrengtFortroligAdressebeskyttelse(personIdenter, fagsystem, logContext)
         if (strengtFortroligePersonIdenter.isNotEmpty()) {
             val melding =
                 "Behandlingen (id: $behandlingId) inneholder person med strengt fortrolig adressebeskyttelse og kan ikke kombineres med manuelle brevmottakere (${manuelleBrevmottakere.size} stk)."
             val frontendFeilmelding =
                 "Behandlingen inneholder person med strengt fortrolig adressebeskyttelse og kan ikke kombineres med manuelle brevmottakere."
-            throw Feil(melding, frontendFeilmelding)
+            throw Feil(
+                message = melding,
+                frontendFeilmelding = frontendFeilmelding,
+                logContext = logContext,
+            )
         }
     }
 
@@ -37,17 +43,22 @@ class ValiderBrevmottakerService(
         fagsakId: UUID,
     ) {
         val fagsak = fagsakService.hentFagsak(fagsakId)
+        val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandlingId.toString())
         val bruker = fagsak.bruker
         val fagsystem = fagsak.fagsystem
         val personIdenter = listOfNotNull(bruker.ident)
         if (personIdenter.isEmpty()) return
-        val strengtFortroligePersonIdenter = personService.hentIdenterMedStrengtFortroligAdressebeskyttelse(personIdenter, fagsystem)
+        val strengtFortroligePersonIdenter = personService.hentIdenterMedStrengtFortroligAdressebeskyttelse(personIdenter, fagsystem, logContext)
         if (strengtFortroligePersonIdenter.isNotEmpty()) {
             val melding =
                 "Behandlingen (id: $behandlingId) inneholder person med strengt fortrolig adressebeskyttelse og kan ikke kombineres med manuelle brevmottakere."
             val frontendFeilmelding =
                 "Behandlingen inneholder person med strengt fortrolig adressebeskyttelse og kan ikke kombineres med manuelle brevmottakere."
-            throw Feil(melding, frontendFeilmelding)
+            throw Feil(
+                message = melding,
+                frontendFeilmelding = frontendFeilmelding,
+                logContext = logContext,
+            )
         }
     }
 }

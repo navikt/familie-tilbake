@@ -37,6 +37,7 @@ import no.nav.familie.tilbake.foreldelse.VurdertForeldelseRepository
 import no.nav.familie.tilbake.iverksettvedtak.task.AvsluttBehandlingTask
 import no.nav.familie.tilbake.iverksettvedtak.task.SendØkonomiTilbakekrevingsvedtakTask
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
@@ -162,6 +163,7 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
             behandling.id,
             Venteårsak.ENDRE_TILKJENT_YTELSE,
             LocalDate.now().plusWeeks(2),
+            SecureLog.Context.tom(),
         )
 
         val exception = shouldThrow<RuntimeException> { automatiskSaksbehandlingTask.doTask(lagTask()) }
@@ -245,7 +247,7 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
                     Properties().apply {
                         setProperty(
                             "ansvarligSaksbehandler",
-                            ContextService.hentSaksbehandler(),
+                            ContextService.hentSaksbehandler(SecureLog.Context.tom()),
                         )
                     },
             )

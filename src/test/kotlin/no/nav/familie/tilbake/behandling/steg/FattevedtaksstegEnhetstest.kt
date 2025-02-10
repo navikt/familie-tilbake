@@ -7,18 +7,22 @@ import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.familie.tilbake.api.dto.VurdertTotrinnDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
+import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.totrinn.TotrinnService
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.util.Optional
 import java.util.UUID
 
 class FattevedtaksstegEnhetstest {
@@ -53,6 +57,19 @@ class FattevedtaksstegEnhetstest {
             )
         val fatteVedtaksstegDto = BehandlingsstegFatteVedtaksstegDto(totrinnsvurderinger)
 
+        every { mockBehandlingRepository.findById(any()) } returns
+            Optional.of(
+                Behandling(
+                    id = behandlingsId,
+                    fagsakId = UUID.randomUUID(),
+                    type = Behandlingstype.TILBAKEKREVING,
+                    ansvarligSaksbehandler = "A123456",
+                    behandlendeEnhet = "1234",
+                    behandlendeEnhetsNavn = "NAV Danmark",
+                    manueltOpprettet = false,
+                    begrunnelseForTilbakekreving = "Yes",
+                ),
+            )
         every { mockManuellBrevmottakerRepository.findByBehandlingId(any()) } returns
             listOf(
                 ManuellBrevmottaker(
@@ -69,7 +86,7 @@ class FattevedtaksstegEnhetstest {
         // Act & assert
         val exception =
             assertThrows<Feil> {
-                fattevedtakssteg.utførSteg(behandlingsId, fatteVedtaksstegDto)
+                fattevedtakssteg.utførSteg(behandlingsId, fatteVedtaksstegDto, SecureLog.Context.tom())
             }
 
         assertThat(exception.message, `is`("Det finnes ugyldige brevmottakere, vi kan ikke beslutte vedtaket"))

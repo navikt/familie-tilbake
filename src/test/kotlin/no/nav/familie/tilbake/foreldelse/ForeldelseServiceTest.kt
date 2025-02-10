@@ -15,6 +15,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -122,6 +123,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
                         ),
                     ),
                 ),
+                SecureLog.Context.tom(),
             )
 
         val vurdertForeldelseDto = foreldelseService.hentVurdertForeldelse(behandling.id)
@@ -163,6 +165,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
                         ),
                     ),
                 ),
+                SecureLog.Context.tom(),
             )
 
         val vurdertForeldelse = foreldelsesRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
@@ -190,6 +193,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
                     .lagreVurdertForeldelse(
                         behandling.id,
                         BehandlingsstegForeldelseDto(listOf(foreldelsesperiode)),
+                        SecureLog.Context.tom(),
                     )
             }
         exception.message shouldBe "Periode med ${foreldelsesperiode.periode} er ikke i hele måneder"
@@ -209,6 +213,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
                     .lagreVurdertForeldelse(
                         behandling.id,
                         BehandlingsstegForeldelseDto(listOf(foreldelsesperiode)),
+                        SecureLog.Context.tom(),
                     )
             }
         exception.message shouldBe "Periode med ${foreldelsesperiode.periode} er ikke i hele måneder"
@@ -222,7 +227,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
                 LocalDate.of(2017, 4, 30),
                 Foreldelsesvurderingstype.IKKE_FORELDET,
             )
-        foreldelseService.lagreVurdertForeldelse(behandling.id, BehandlingsstegForeldelseDto(listOf(forrigeForeldelsesperiode)))
+        foreldelseService.lagreVurdertForeldelse(behandling.id, BehandlingsstegForeldelseDto(listOf(forrigeForeldelsesperiode)), SecureLog.Context.tom())
         vilkårsvurderingRepository.insert(Testdata.lagVilkårsvurdering(behandling.id))
 
         vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldNotBeNull()
@@ -247,6 +252,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
                     nyForeldelsesperiode2,
                 ),
             ),
+            SecureLog.Context.tom(),
         )
         vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeNull()
     }
@@ -259,7 +265,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
                 LocalDate.of(2017, 4, 30),
                 Foreldelsesvurderingstype.IKKE_FORELDET,
             )
-        foreldelseService.lagreVurdertForeldelse(behandling.id, BehandlingsstegForeldelseDto(listOf(forrigeForeldelsesperiode)))
+        foreldelseService.lagreVurdertForeldelse(behandling.id, BehandlingsstegForeldelseDto(listOf(forrigeForeldelsesperiode)), SecureLog.Context.tom())
         vilkårsvurderingRepository.insert(Testdata.lagVilkårsvurdering(behandling.id))
 
         vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldNotBeNull()
@@ -270,7 +276,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
                 LocalDate.of(2017, 4, 30),
                 Foreldelsesvurderingstype.FORELDET,
             )
-        foreldelseService.lagreVurdertForeldelse(behandling.id, BehandlingsstegForeldelseDto(listOf(nyForeldelsesperiode)))
+        foreldelseService.lagreVurdertForeldelse(behandling.id, BehandlingsstegForeldelseDto(listOf(nyForeldelsesperiode)), SecureLog.Context.tom())
         vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldNotBeNull()
     }
 
@@ -288,7 +294,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
                 LocalDate.of(2017, 4, 30),
                 Foreldelsesvurderingstype.FORELDET,
             )
-        foreldelseService.lagreVurdertForeldelse(behandling.id, BehandlingsstegForeldelseDto(listOf(likForeldelsesperiode, likForeldelsesperiode2)))
+        foreldelseService.lagreVurdertForeldelse(behandling.id, BehandlingsstegForeldelseDto(listOf(likForeldelsesperiode, likForeldelsesperiode2)), SecureLog.Context.tom())
         vilkårsvurderingRepository.insert(Testdata.lagVilkårsvurdering(behandling.id))
 
         foreldelseService.sjekkOmForeldelsePerioderErLike(behandling.id) shouldBe true
@@ -299,7 +305,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
                 LocalDate.of(2017, 5, 31),
                 Foreldelsesvurderingstype.IKKE_FORELDET,
             )
-        foreldelseService.lagreVurdertForeldelse(behandling.id, BehandlingsstegForeldelseDto(listOf(likForeldelsesperiode, likForeldelsesperiode2, ulikForeldelsesperiode)))
+        foreldelseService.lagreVurdertForeldelse(behandling.id, BehandlingsstegForeldelseDto(listOf(likForeldelsesperiode, likForeldelsesperiode2, ulikForeldelsesperiode)), SecureLog.Context.tom())
 
         foreldelseService.sjekkOmForeldelsePerioderErLike(behandling.id) shouldBe false
     }

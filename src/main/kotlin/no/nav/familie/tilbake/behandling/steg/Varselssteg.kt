@@ -5,6 +5,7 @@ import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
+import no.nav.familie.tilbake.log.SecureLog
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -17,7 +18,10 @@ class Varselssteg(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
-    override fun utførSteg(behandlingId: UUID) {
+    override fun utførSteg(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.VARSEL} steg")
         logger.info(
             "Behandling $behandlingId venter på ${Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING}. " +
@@ -26,7 +30,10 @@ class Varselssteg(
     }
 
     @Transactional
-    override fun gjenopptaSteg(behandlingId: UUID) {
+    override fun gjenopptaSteg(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.VARSEL} steg")
         behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
@@ -34,8 +41,9 @@ class Varselssteg(
                 Behandlingssteg.VARSEL,
                 Behandlingsstegstatus.UTFØRT,
             ),
+            logContext,
         )
-        behandlingskontrollService.fortsettBehandling(behandlingId)
+        behandlingskontrollService.fortsettBehandling(behandlingId, logContext)
     }
 
     override fun getBehandlingssteg(): Behandlingssteg = Behandlingssteg.VARSEL

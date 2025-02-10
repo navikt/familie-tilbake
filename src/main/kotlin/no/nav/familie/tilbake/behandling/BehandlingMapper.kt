@@ -36,6 +36,7 @@ import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerMapper
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
+import no.nav.familie.tilbake.log.SecureLog
 
 object BehandlingMapper {
     fun tilDomeneBehandling(
@@ -257,12 +258,13 @@ object BehandlingMapper {
     fun tilDomeneBehandlingRevurdering(
         originalBehandling: Behandling,
         behandlingsårsakstype: Behandlingsårsakstype,
+        logContext: SecureLog.Context,
     ): Behandling {
         val verger: Set<Verge> = kopiVerge(originalBehandling)?.let { setOf(it) } ?: emptySet()
         return Behandling(
             fagsakId = originalBehandling.fagsakId,
             type = Behandlingstype.REVURDERING_TILBAKEKREVING,
-            ansvarligSaksbehandler = ContextService.hentSaksbehandler(),
+            ansvarligSaksbehandler = ContextService.hentSaksbehandler(logContext),
             behandlendeEnhet = originalBehandling.behandlendeEnhet,
             behandlendeEnhetsNavn = originalBehandling.behandlendeEnhetsNavn,
             manueltOpprettet = false,

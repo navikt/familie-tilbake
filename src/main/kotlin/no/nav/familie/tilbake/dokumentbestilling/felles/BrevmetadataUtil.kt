@@ -3,19 +3,16 @@ package no.nav.familie.tilbake.dokumentbestilling.felles
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.FagsakRepository
-import no.nav.familie.tilbake.behandling.domain.Behandling
-import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
-import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
 import no.nav.familie.tilbake.dokumentbestilling.manuellAdresse
 import no.nav.familie.tilbake.dokumentbestilling.somBrevmottager
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.Vedtaksbrevgrunnlag
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.organisasjon.OrganisasjonService
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -26,10 +23,7 @@ class BrevmetadataUtil(
     private val manuelleBrevmottakerRepository: ManuellBrevmottakerRepository,
     private val eksterneDataForBrevService: EksterneDataForBrevService,
     private val organisasjonService: OrganisasjonService,
-    private val featureToggleService: FeatureToggleService,
 ) {
-    private val logger = LoggerFactory.getLogger(this::class.java)
-
     fun genererMetadataForBrev(
         behandlingId: UUID,
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag? = null,
@@ -41,9 +35,11 @@ class BrevmetadataUtil(
             "For en manuelt registrert brevmottaker kan ikke manuellAdresseinfo være null"
         }
 
-        val behandling: Behandling by lazy { behandlingRepository.findByIdOrThrow(behandlingId) }
-        val fagsak: Fagsak by lazy { fagsakRepository.findByIdOrThrow(behandling.fagsakId) }
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val fagsystem = vedtaksbrevgrunnlag?.fagsystem ?: fagsak.fagsystem
+
+        val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandling.id.toString())
 
         val aktivVerge = vedtaksbrevgrunnlag?.aktivVerge ?: behandling.aktivVerge
 
@@ -51,6 +47,7 @@ class BrevmetadataUtil(
             eksterneDataForBrevService.hentPerson(
                 ident = vedtaksbrevgrunnlag?.bruker?.ident ?: fagsak.bruker.ident,
                 fagsystem = fagsystem,
+                logContext = logContext,
             )
         val adresseinfo =
             manuellAdresseinfo ?: eksterneDataForBrevService.hentAdresse(
@@ -58,6 +55,7 @@ class BrevmetadataUtil(
                 brevmottager = brevmottager,
                 verge = aktivVerge,
                 fagsystem = fagsystem,
+                logContext = logContext,
             )
         val vergenavn = BrevmottagerUtil.getVergenavn(aktivVerge, adresseinfo)
 
@@ -77,7 +75,7 @@ class BrevmetadataUtil(
                 mottageradresse = adresseinfo,
                 behandlendeEnhetId = vedtaksbrevgrunnlag?.behandling?.behandlendeEnhet ?: behandling.behandlendeEnhet,
                 behandlendeEnhetsNavn = vedtaksbrevgrunnlag?.behandling?.behandlendeEnhetsNavn ?: behandling.behandlendeEnhetsNavn,
-                ansvarligSaksbehandler = hentAnsvarligSaksbehandlerNavn(persistertSaksbehandlerId, vedtaksbrevgrunnlag),
+                ansvarligSaksbehandler = hentAnsvarligSaksbehandlerNavn(persistertSaksbehandlerId, vedtaksbrevgrunnlag, logContext),
                 saksnummer = vedtaksbrevgrunnlag?.eksternFagsakId ?: fagsak.eksternFagsakId,
                 språkkode = vedtaksbrevgrunnlag?.bruker?.språkkode ?: fagsak.bruker.språkkode,
                 ytelsestype = vedtaksbrevgrunnlag?.ytelsestype ?: fagsak.ytelsestype,
@@ -105,6 +103,8 @@ class BrevmetadataUtil(
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
 
+        val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandling.id.toString())
+
         val støtterManuelleBrevmottakere =
             BehandlingService.sjekkOmManuelleBrevmottakereErStøttet(
                 behandling = behandling,
@@ -130,7 +130,7 @@ class BrevmetadataUtil(
                 manuellAdresseinfo = manuellAdresseinfo,
                 annenMottakersNavn =
                     tilleggsmottaker?.let {
-                        eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem).navn
+                        eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem, logContext).navn
                     },
             )
         return metadata to brevmottager
@@ -139,16 +139,17 @@ class BrevmetadataUtil(
     private fun hentAnsvarligSaksbehandlerNavn(
         persistertSaksbehandlerId: String,
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag?,
+        logContext: SecureLog.Context,
     ): String =
         when {
             vedtaksbrevgrunnlag?.aktivtSteg == Behandlingssteg.FORESLÅ_VEDTAK ->
-                eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(persistertSaksbehandlerId)
+                eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(persistertSaksbehandlerId, logContext)
 
             vedtaksbrevgrunnlag != null ->
                 eksterneDataForBrevService.hentSaksbehandlernavn(persistertSaksbehandlerId)
 
             persistertSaksbehandlerId != Constants.BRUKER_ID_VEDTAKSLØSNINGEN ->
-                eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(persistertSaksbehandlerId)
+                eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(persistertSaksbehandlerId, logContext)
 
             else -> ""
         }

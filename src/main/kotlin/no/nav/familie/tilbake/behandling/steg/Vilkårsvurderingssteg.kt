@@ -19,6 +19,7 @@ import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEvent
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
 import org.slf4j.LoggerFactory
@@ -41,7 +42,10 @@ class Vilkårsvurderingssteg(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
-    override fun utførSteg(behandlingId: UUID) {
+    override fun utførSteg(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         logger.info("Behandling $behandlingId er på $VILKÅRSVURDERING steg")
         if (harAllePerioderForeldet(behandlingId)) {
             // hvis det finnes noen periode som ble vurdert før i vilkårsvurdering, må slettes
@@ -52,8 +56,9 @@ class Vilkårsvurderingssteg(
             behandlingskontrollService.oppdaterBehandlingsstegStatus(
                 behandlingId,
                 Behandlingsstegsinfo(VILKÅRSVURDERING, AUTOUTFØRT),
+                logContext,
             )
-            behandlingskontrollService.fortsettBehandling(behandlingId)
+            behandlingskontrollService.fortsettBehandling(behandlingId, logContext)
         }
     }
 
@@ -61,12 +66,14 @@ class Vilkårsvurderingssteg(
     override fun utførSteg(
         behandlingId: UUID,
         behandlingsstegDto: BehandlingsstegDto,
+        logContext: SecureLog.Context,
     ) {
         logger.info("Behandling $behandlingId er på $VILKÅRSVURDERING steg")
         if (harAllePerioderForeldet(behandlingId)) {
             throw Feil(
                 message = "Alle perioder er foreldet for $behandlingId,kan ikke behandle vilkårsvurdering",
                 frontendFeilmelding = "Alle perioder er foreldet for $behandlingId,kan ikke behandle vilkårsvurdering",
+                logContext = logContext,
                 httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
@@ -76,15 +83,18 @@ class Vilkårsvurderingssteg(
 
         lagHistorikkinnslag(behandlingId, Aktør.SAKSBEHANDLER)
 
-        behandlingskontrollService.oppdaterBehandlingsstegStatus(behandlingId, Behandlingsstegsinfo(VILKÅRSVURDERING, UTFØRT))
-        behandlingskontrollService.fortsettBehandling(behandlingId)
+        behandlingskontrollService.oppdaterBehandlingsstegStatus(behandlingId, Behandlingsstegsinfo(VILKÅRSVURDERING, UTFØRT), logContext)
+        behandlingskontrollService.fortsettBehandling(behandlingId, logContext)
     }
 
     @Transactional
-    override fun utførStegAutomatisk(behandlingId: UUID) {
+    override fun utførStegAutomatisk(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         logger.info("Behandling $behandlingId er på $VILKÅRSVURDERING steg og behandler automatisk..")
         if (harAllePerioderForeldet(behandlingId)) {
-            utførSteg(behandlingId)
+            utførSteg(behandlingId, logContext)
             return
         }
 
@@ -94,12 +104,16 @@ class Vilkårsvurderingssteg(
         behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
             Behandlingsstegsinfo(VILKÅRSVURDERING, UTFØRT),
+            logContext,
         )
-        behandlingskontrollService.fortsettBehandling(behandlingId)
+        behandlingskontrollService.fortsettBehandling(behandlingId, logContext)
     }
 
     @Transactional
-    override fun gjenopptaSteg(behandlingId: UUID) {
+    override fun gjenopptaSteg(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         logger.info("Behandling $behandlingId gjenopptar på $VILKÅRSVURDERING steg")
         behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
@@ -107,6 +121,7 @@ class Vilkårsvurderingssteg(
                 VILKÅRSVURDERING,
                 Behandlingsstegstatus.KLAR,
             ),
+            logContext,
         )
     }
 

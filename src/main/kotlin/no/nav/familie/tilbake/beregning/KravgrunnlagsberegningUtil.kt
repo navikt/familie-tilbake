@@ -9,6 +9,7 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
+import no.nav.familie.tilbake.log.SecureLog
 import org.springframework.http.HttpStatus
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -61,7 +62,10 @@ object KravgrunnlagsberegningUtil {
         vurderingsperiode: Månedsperiode,
     ): BigDecimal = beregnBeløp(kravgrunnlag, vurderingsperiode, feilutbetaltYtelsesbeløputleder)
 
-    fun validatePerioder(perioder: List<Datoperiode>) {
+    fun validatePerioder(
+        perioder: List<Datoperiode>,
+        logContext: SecureLog.Context,
+    ) {
         val perioderSomIkkeErHeleMåneder =
             perioder.filter {
                 it.fom.dayOfMonth != 1 ||
@@ -73,6 +77,7 @@ object KravgrunnlagsberegningUtil {
                 message = "Periode med ${perioderSomIkkeErHeleMåneder[0]} er ikke i hele måneder",
                 frontendFeilmelding = "Periode med ${perioderSomIkkeErHeleMåneder[0]} er ikke i hele måneder",
                 httpStatus = HttpStatus.BAD_REQUEST,
+                logContext = logContext,
             )
         }
     }

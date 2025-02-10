@@ -11,6 +11,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.AUTOUTFØRT
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.UTFØRT
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -27,7 +28,10 @@ class Vergessteg(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
-    override fun utførSteg(behandlingId: UUID) {
+    override fun utførSteg(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.VERGE} steg")
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.harVerge) {
@@ -37,15 +41,17 @@ class Vergessteg(
                     Behandlingssteg.VERGE,
                     AUTOUTFØRT,
                 ),
+                logContext,
             )
         }
-        behandlingskontrollService.fortsettBehandling(behandlingId)
+        behandlingskontrollService.fortsettBehandling(behandlingId, logContext)
     }
 
     @Transactional
     override fun utførSteg(
         behandlingId: UUID,
         behandlingsstegDto: BehandlingsstegDto,
+        logContext: SecureLog.Context,
     ) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.VERGE} steg")
         vergeService.lagreVerge(behandlingId, (behandlingsstegDto as BehandlingsstegVergeDto).verge)
@@ -55,12 +61,16 @@ class Vergessteg(
         behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
             Behandlingsstegsinfo(Behandlingssteg.VERGE, UTFØRT),
+            logContext,
         )
-        behandlingskontrollService.fortsettBehandling(behandlingId)
+        behandlingskontrollService.fortsettBehandling(behandlingId, logContext)
     }
 
     @Transactional
-    override fun gjenopptaSteg(behandlingId: UUID) {
+    override fun gjenopptaSteg(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.VERGE} steg")
         behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
@@ -68,6 +78,7 @@ class Vergessteg(
                 Behandlingssteg.VERGE,
                 Behandlingsstegstatus.KLAR,
             ),
+            logContext,
         )
     }
 

@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.kravgrunnlag
 
 import no.nav.familie.tilbake.integration.økonomi.OppdragClient
 import no.nav.familie.tilbake.kravgrunnlag.domain.KodeAksjon
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagAnnulerRequest
 import no.nav.tilbakekreving.kravgrunnlag.annuller.v1.AnnullerKravgrunnlagDto
 import org.springframework.stereotype.Service
@@ -14,6 +15,7 @@ class AnnulerKravgrunnlagService(
     fun annulerKravgrunnlagRequest(
         eksternKravgrunnlagId: BigInteger,
         vedtakId: BigInteger,
+        logContext: SecureLog.Context,
     ) {
         val annullerKravgrunnlagDto = AnnullerKravgrunnlagDto()
         annullerKravgrunnlagDto.kodeAksjon = KodeAksjon.ANNULERE_GRUNNLAG.kode // fast verdi
@@ -23,6 +25,6 @@ class AnnulerKravgrunnlagService(
         val annulerRequest = KravgrunnlagAnnulerRequest()
         annulerRequest.annullerkravgrunnlag = annullerKravgrunnlagDto
 
-        oppdragClient.annulerKravgrunnlag(eksternKravgrunnlagId, annulerRequest)
+        oppdragClient.annulerKravgrunnlag(eksternKravgrunnlagId, annulerRequest, logContext)
     }
 }

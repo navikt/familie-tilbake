@@ -5,6 +5,7 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.common.exceptionhandler.UkjentravgrunnlagFeil
+import no.nav.familie.tilbake.log.SecureLog
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -54,14 +55,19 @@ class GammelKravgrunnlagTask(
             }
 
         val hentFagsystemsbehandlingRespons = hentFagsystemsbehandlingService.lesRespons(respons)
-        val feilMelding = hentFagsystemsbehandlingRespons.feilMelding
-        if (feilMelding != null) {
+        val feilmelding = hentFagsystemsbehandlingRespons.feilMelding
+        if (feilmelding != null) {
             throw UkjentravgrunnlagFeil(
                 "Noen gikk galt mens henter fagsystemsbehandling fra fagsystem. " +
-                    "Feiler med $feilMelding",
+                    "Feiler med $feilmelding",
             )
         }
-        gammelKravgrunnlagService.håndter(hentFagsystemsbehandlingRespons.hentFagsystemsbehandling!!, mottattXml, task)
+        gammelKravgrunnlagService.håndter(
+            fagsystemsbehandlingData = hentFagsystemsbehandlingRespons.hentFagsystemsbehandling!!,
+            mottattXml = mottattXml,
+            task = task,
+            logContext = SecureLog.Context.utenBehandling(eksternFagsakId),
+        )
     }
 
     companion object {

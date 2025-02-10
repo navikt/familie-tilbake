@@ -23,6 +23,7 @@ import no.nav.familie.tilbake.dokumentbestilling.varsel.TekstformatererVarselbre
 import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevUtil
 import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
+import no.nav.familie.tilbake.log.SecureLog
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -59,6 +60,7 @@ class ManueltVarselbrevService(
         erKorrigert: Boolean,
     ) {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandling.id.toString())
         val feilutbetalingsfakta = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandling.id)
         val varsletFeilutbetaling = feilutbetalingsfakta.totaltFeilutbetaltBeløp.toLong()
 
@@ -79,6 +81,7 @@ class ManueltVarselbrevService(
                     feilutbetalingsfakta = feilutbetalingsfakta,
                     aktivtVarsel = behandling.aktivtVarsel,
                     forhåndsgenerertMetadata = brevmetadata,
+                    logContext = logContext,
                 )
             Brevdata(
                 mottager = brevmottager,
@@ -97,9 +100,10 @@ class ManueltVarselbrevService(
         erKorrigert: Boolean,
     ) {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandling.id.toString())
         val feilutbetalingsfakta = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandling.id)
         val varselbrevsdokument =
-            lagVarselbrev(fritekst, behandling, fagsak, brevmottager, erKorrigert, feilutbetalingsfakta, behandling.aktivtVarsel)
+            lagVarselbrev(fritekst, behandling, fagsak, brevmottager, erKorrigert, feilutbetalingsfakta, behandling.aktivtVarsel, null, logContext)
         val overskrift =
             lagVarselbrevsoverskrift(varselbrevsdokument.brevmetadata, erKorrigert)
         val brevtekst = lagFritekst(varselbrevsdokument, erKorrigert)
@@ -128,6 +132,7 @@ class ManueltVarselbrevService(
     ): ByteArray {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandling.id.toString())
         val (metadata, brevmottager) =
             brevmetadataUtil.lagBrevmetadataForMottakerTilForhåndsvisning(behandlingId)
         val erKorrigert = maltype == Dokumentmalstype.KORRIGERT_VARSEL
@@ -135,7 +140,7 @@ class ManueltVarselbrevService(
         val aktivtVarsel = behandling.aktivtVarsel
 
         val varselbrevsdokument =
-            lagVarselbrev(fritekst, behandling, fagsak, brevmottager, erKorrigert, feilutbetalingsfakta, aktivtVarsel, metadata)
+            lagVarselbrev(fritekst, behandling, fagsak, brevmottager, erKorrigert, feilutbetalingsfakta, aktivtVarsel, metadata, logContext)
         val overskrift =
             lagVarselbrevsoverskrift(varselbrevsdokument.brevmetadata, erKorrigert)
         val brevtekst = lagFritekst(varselbrevsdokument, erKorrigert)
@@ -159,14 +164,26 @@ class ManueltVarselbrevService(
         erKorrigert: Boolean,
         feilutbetalingsfakta: FaktaFeilutbetalingDto,
         aktivtVarsel: Varsel? = null,
-        forhåndsgenerertMetadata: Brevmetadata? = null,
+        forhåndsgenerertMetadata: Brevmetadata?,
+        logContext: SecureLog.Context,
     ): Varselbrevsdokument {
         val metadata =
             forhåndsgenerertMetadata ?: run {
                 // Henter data fra pdl
-                val personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
+                val personinfo =
+                    eksterneDataForBrevService.hentPerson(
+                        fagsak.bruker.ident,
+                        fagsak.fagsystem,
+                        logContext,
+                    )
                 val adresseinfo: Adresseinfo =
-                    eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, behandling.aktivVerge, fagsak.fagsystem)
+                    eksterneDataForBrevService.hentAdresse(
+                        personinfo,
+                        brevmottager,
+                        behandling.aktivVerge,
+                        fagsak.fagsystem,
+                        logContext,
+                    )
                 val vergenavn: String = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)
                 varselbrevUtil.sammenstillInfoForBrevmetadata(
                     behandling,
@@ -176,6 +193,7 @@ class ManueltVarselbrevService(
                     vergenavn,
                     erKorrigert,
                     personinfo.dødsdato != null,
+                    logContext,
                 )
             }
 

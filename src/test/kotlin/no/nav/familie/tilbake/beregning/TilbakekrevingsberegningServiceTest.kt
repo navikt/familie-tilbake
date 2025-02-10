@@ -25,6 +25,7 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
@@ -362,6 +363,7 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
                             ),
                         ),
                     ),
+                logContext = SecureLog.Context.tom(),
             )
         beregnetPerioderDto.beregnetPerioder.size shouldBe 2
         beregnetPerioderDto.beregnetPerioder[0].periode shouldBe Datoperiode(LocalDate.of(2017, 1, 1), LocalDate.of(2017, 1, 31))
@@ -387,8 +389,10 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
                                 LocalDate.of(2017, 2, 28),
                             ),
                         ),
+                    logContext = SecureLog.Context.tom(),
                 )
             }
+
         exception.message shouldBe "Periode med ${
             Datoperiode(
                 LocalDate.of(2017, 2, 16),
@@ -414,6 +418,7 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
                                 LocalDate.of(2017, 2, 28),
                             ),
                         ),
+                    logContext = SecureLog.Context.tom(),
                 )
             }
         exception.message shouldBe "Periode med ${

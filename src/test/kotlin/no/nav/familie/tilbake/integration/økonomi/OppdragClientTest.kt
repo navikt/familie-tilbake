@@ -28,6 +28,7 @@ import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.iverksettvedtak.TilbakekrevingsvedtakMarshaller
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
 import no.nav.familie.tilbake.kravgrunnlag.domain.KodeAksjon
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagHentDetaljRequest
 import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagHentDetaljResponse
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
@@ -81,6 +82,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
                 tilbakekrevingsvedtakRequestXml,
                 behandling.id,
                 UUID.randomUUID(),
+                SecureLog.Context.tom(),
             )
         hentKravgrunnlagRequest =
             KravgrunnlagHentDetaljRequest().apply {
@@ -106,7 +108,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
             post(urlEqualTo("/${DefaultOppdragClient.IVERKSETTELSE_PATH}/${behandling.id}"))
                 .willReturn(okJson(Ressurs.success(lagIverksettelseRespons()).toJson())),
         )
-        val iverksettVedtak = oppdragClient.iverksettVedtak(behandling.id, tilbakekrevingsvedtakRequest)
+        val iverksettVedtak = oppdragClient.iverksettVedtak(behandling.id, tilbakekrevingsvedtakRequest, SecureLog.Context.tom())
 
         iverksettVedtak shouldNotBe null
     }
@@ -123,6 +125,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
                 oppdragClient.iverksettVedtak(
                     behandling.id,
                     tilbakekrevingsvedtakRequest,
+                    SecureLog.Context.tom(),
                 )
             }
         exception.shouldNotBeNull()
@@ -142,6 +145,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
                 oppdragClient.iverksettVedtak(
                     behandling.id,
                     tilbakekrevingsvedtakRequest,
+                    SecureLog.Context.tom(),
                 )
             }
         exception.shouldNotBeNull()
@@ -169,7 +173,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
                 ),
             ),
         )
-        val hentKravgrunnlag = oppdragClient.hentKravgrunnlag(kravgrunnlagId, hentKravgrunnlagRequest)
+        val hentKravgrunnlag = oppdragClient.hentKravgrunnlag(kravgrunnlagId, hentKravgrunnlagRequest, SecureLog.Context.tom())
 
         hentKravgrunnlag shouldNotBe null
     }
@@ -195,7 +199,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
         )
         val exception =
             shouldThrow<RuntimeException> {
-                oppdragClient.hentKravgrunnlag(kravgrunnlagId, hentKravgrunnlagRequest)
+                oppdragClient.hentKravgrunnlag(kravgrunnlagId, hentKravgrunnlagRequest, SecureLog.Context.tom())
             }
         exception.shouldNotBeNull()
         exception.shouldBeInstanceOf<IntegrasjonException>()
@@ -227,7 +231,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
         )
         val exception =
             shouldThrow<RuntimeException> {
-                oppdragClient.hentKravgrunnlag(kravgrunnlagId, hentKravgrunnlagRequest)
+                oppdragClient.hentKravgrunnlag(kravgrunnlagId, hentKravgrunnlagRequest, SecureLog.Context.tom())
             }
         exception.shouldNotBeNull()
         exception.message shouldBe "Noe gikk galt ved henting av kravgrunnlag for kravgrunnlagId=$kravgrunnlagId"
@@ -245,7 +249,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
         )
         val exception =
             shouldThrow<RuntimeException> {
-                oppdragClient.hentKravgrunnlag(kravgrunnlagId, hentKravgrunnlagRequest)
+                oppdragClient.hentKravgrunnlag(kravgrunnlagId, hentKravgrunnlagRequest, SecureLog.Context.tom())
             }
         exception.shouldNotBeNull()
         exception.shouldBeInstanceOf<IntegrasjonException>()
@@ -277,6 +281,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
                         "123",
                         "1",
                     ),
+                    SecureLog.Context.tom(),
                 )
         respons shouldNotBe null
     }
@@ -296,6 +301,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
                         "123",
                         "1",
                     ),
+                    SecureLog.Context.tom(),
                 )
             }
         exception.shouldNotBeNull()

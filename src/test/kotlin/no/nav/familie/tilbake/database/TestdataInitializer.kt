@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.stereotype.Component
 import java.time.LocalDate
+import java.util.Properties
 
 @Component
 @Profile("local")
@@ -63,7 +64,7 @@ class TestdataInitializer : ApplicationListener<ContextRefreshedEvent> {
 
             val mottattXml = readXml("/kravgrunnlagxml/kravgrunnlag_lokal_kjøring.xml")
 
-            kravgrunnlagService.håndterMottattKravgrunnlag(mottattXml.replace("<urn:fagsystemId>testverdi</urn:fagsystemId>", "<urn:fagsystemId>1234567</urn:fagsystemId>"))
+            kravgrunnlagService.håndterMottattKravgrunnlag(mottattXml.replace("<urn:fagsystemId>testverdi</urn:fagsystemId>", "<urn:fagsystemId>1234567</urn:fagsystemId>"), 0L, Properties())
         } else {
             logger.info("Opprettet dummy-behandling. Hvis frontend kjøres lokalt kan du gå til: http://localhost:8000/fagsystem/${opprettTilbakekrevingRequest.fagsystem}/fagsak/${opprettTilbakekrevingRequest.eksternFagsakId}/behandling/${åpenTilbakekrevingsbehandling.eksternBrukId}")
         }

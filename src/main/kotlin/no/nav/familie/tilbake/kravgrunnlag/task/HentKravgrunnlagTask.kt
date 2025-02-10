@@ -10,6 +10,7 @@ import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.kravgrunnlag.HentKravgrunnlagService
 import no.nav.familie.tilbake.kravgrunnlag.domain.KodeAksjon
+import no.nav.familie.tilbake.log.LogService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -25,6 +26,7 @@ class HentKravgrunnlagTask(
     private val behandlingRepository: BehandlingRepository,
     private val hentKravgrunnlagService: HentKravgrunnlagService,
     private val stegService: StegService,
+    private val logService: LogService,
 ) : AsyncTaskStep {
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -33,8 +35,12 @@ class HentKravgrunnlagTask(
         log.info("HentKravgrunnlagTask prosesserer med id=${task.id} og metadata ${task.metadata}")
         val behandlingId = UUID.fromString(task.payload)
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val logContext = logService.contextFraBehandling(behandling.id)
         if (behandling.type != Behandlingstype.REVURDERING_TILBAKEKREVING) {
-            throw Feil(message = "HentKravgrunnlagTask kan kjøres bare for tilbakekrevingsrevurdering.")
+            throw Feil(
+                message = "HentKravgrunnlagTask kan kjøres bare for tilbakekrevingsrevurdering.",
+                logContext = logContext,
+            )
         }
         val originalBehandlingId = requireNotNull(behandling.sisteÅrsak?.originalBehandlingId)
 
@@ -43,12 +49,13 @@ class HentKravgrunnlagTask(
             hentKravgrunnlagService.hentKravgrunnlagFraØkonomi(
                 tilbakekrevingsgrunnlag.eksternKravgrunnlagId,
                 KodeAksjon.HENT_GRUNNLAG_OMGJØRING,
+                logContext,
             )
         hentKravgrunnlagService.lagreHentetKravgrunnlag(behandlingId, hentetKravgrunnlag)
 
         hentKravgrunnlagService.opprettHistorikkinnslag(behandlingId)
 
-        stegService.håndterSteg(behandlingId)
+        stegService.håndterSteg(behandlingId, logContext)
     }
 
     companion object {
