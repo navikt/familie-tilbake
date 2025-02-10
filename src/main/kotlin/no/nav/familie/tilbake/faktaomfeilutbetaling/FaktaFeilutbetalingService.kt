@@ -16,6 +16,8 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.VurderingAvBrukersUttalelse
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
+import no.nav.familie.tilbake.log.LogService
+import no.nav.familie.tilbake.log.SecureLog
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -25,6 +27,7 @@ class FaktaFeilutbetalingService(
     private val behandlingRepository: BehandlingRepository,
     private val faktaFeilutbetalingRepository: FaktaFeilutbetalingRepository,
     private val kravgrunnlagRepository: KravgrunnlagRepository,
+    private val logService: LogService,
 ) {
     @Transactional(readOnly = true)
     fun hentFaktaomfeilutbetaling(behandlingId: UUID): FaktaFeilutbetalingDto {
@@ -59,8 +62,9 @@ class FaktaFeilutbetalingService(
     fun lagreFaktaomfeilutbetaling(
         behandlingId: UUID,
         behandlingsstegFaktaDto: BehandlingsstegFaktaDto,
+        logContext: SecureLog.Context,
     ) {
-        validerVurderingAvBrukersUttalelse(behandlingsstegFaktaDto.vurderingAvBrukersUttalelse)
+        validerVurderingAvBrukersUttalelse(behandlingsstegFaktaDto.vurderingAvBrukersUttalelse, logContext)
         deaktiverEksisterendeFaktaOmFeilutbetaling(behandlingId)
 
         val feilutbetaltePerioder: Set<FaktaFeilutbetalingsperiode> =
@@ -94,12 +98,21 @@ class FaktaFeilutbetalingService(
         return faktaFeilutbetaling.perioder.all { it.hendelsestype == førstePeriode.hendelsestype && it.hendelsesundertype == førstePeriode.hendelsesundertype }
     }
 
-    private fun validerVurderingAvBrukersUttalelse(vurderingAvBrukersUttalelse: VurderingAvBrukersUttalelseDto?) {
+    private fun validerVurderingAvBrukersUttalelse(
+        vurderingAvBrukersUttalelse: VurderingAvBrukersUttalelseDto?,
+        logContext: SecureLog.Context,
+    ) {
         vurderingAvBrukersUttalelse?.let {
             if (it.harBrukerUttaltSeg == HarBrukerUttaltSeg.JA && it.beskrivelse.isNullOrBlank()) {
-                throw Feil("Mangler beskrivelse på vurdering av brukers uttalelse")
+                throw Feil(
+                    message = "Mangler beskrivelse på vurdering av brukers uttalelse",
+                    logContext = logContext,
+                )
             } else if (it.harBrukerUttaltSeg != HarBrukerUttaltSeg.JA && !it.beskrivelse.isNullOrBlank()) {
-                throw Feil("Skal ikke ha beskrivelse når bruker ikke har uttalt seg")
+                throw Feil(
+                    message = "Skal ikke ha beskrivelse når bruker ikke har uttalt seg",
+                    logContext = logContext,
+                )
             }
         }
     }
@@ -117,11 +130,12 @@ class FaktaFeilutbetalingService(
                     )
                 }.toSet()
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val logContext = logService.contextFraBehandling(behandling.id)
         faktaFeilutbetalingRepository.insert(
             FaktaFeilutbetaling(
                 behandlingId = behandlingId,
                 perioder = feilutbetaltePerioder,
-                begrunnelse = hentAutomatiskSaksbehandlingBegrunnelse(behandling),
+                begrunnelse = hentAutomatiskSaksbehandlingBegrunnelse(behandling, logContext),
             ),
         )
     }

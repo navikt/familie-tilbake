@@ -55,7 +55,6 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
             manuelleBrevmottakerRepository = mockk(relaxed = true),
             eksterneDataForBrevService = eksterneDataForBrevService,
             organisasjonService = organisasjonService,
-            featureToggleService = featureToggleService,
         )
 
     @BeforeEach
@@ -77,10 +76,10 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
         every { behandlingRepository.findByIdOrThrow(behandling.id) } returns behandling
         val personinfo = Personinfo("DUMMY_FNR_1", LocalDate.now(), "Fiona")
         val ident = Testdata.fagsak.bruker.ident
-        every { eksterneDataForBrevService.hentPerson(ident, Fagsystem.BA) } returns personinfo
-        every { eksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any()) }
+        every { eksterneDataForBrevService.hentPerson(ident, Fagsystem.BA, any()) } returns personinfo
+        every { eksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any(), any()) }
             .returns(Adresseinfo("DUMMY_FNR_2", "Bob"))
-        every { eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(any()) } returns "Siri Saksbehandler"
+        every { eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(any(), any()) } returns "Siri Saksbehandler"
         every {
             brevsporingService.finnSisteVarsel(behandling.id)
         } returns (Testdata.lagBrevsporing(behandling.id))

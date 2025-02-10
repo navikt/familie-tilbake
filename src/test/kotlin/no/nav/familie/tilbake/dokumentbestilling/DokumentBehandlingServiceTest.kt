@@ -30,6 +30,7 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
+import no.nav.familie.tilbake.log.LogService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -58,6 +59,9 @@ class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var taskService: TaskService
 
+    @Autowired
+    private lateinit var logService: LogService
+
     private lateinit var fagsak: Fagsak
 
     private lateinit var behandling: Behandling
@@ -83,6 +87,7 @@ class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
                 mockManueltVarselBrevService,
                 mockInnhentDokumentasjonbrevService,
                 mockManuellBrevmottakerRepository,
+                logService,
             )
 
         every { mockManuellBrevmottakerRepository.findByBehandlingId(behandling.id) } returns emptyList()

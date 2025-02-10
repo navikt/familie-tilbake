@@ -26,6 +26,7 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
+import no.nav.familie.tilbake.log.SecureLog
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -296,7 +297,7 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
                 feilutbetaltePerioder = listOf(faktaPerioder),
                 vurderingAvBrukersUttalelse = vurderingAvBrukersUttalelse,
             )
-        faktaFeilutbetalingService.lagreFaktaomfeilutbetaling(behandlingId, faktaFeilutbetaling)
+        faktaFeilutbetalingService.lagreFaktaomfeilutbetaling(behandlingId, faktaFeilutbetaling, SecureLog.Context.tom())
     }
 
     private fun assertFagsystemsbehandling(

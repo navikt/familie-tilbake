@@ -23,6 +23,7 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.log.SecureLog
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -166,6 +167,7 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
             behandling.id,
             Venteårsak.AVVENTER_DOKUMENTASJON,
             LocalDate.now().plusWeeks(2),
+            SecureLog.Context.tom(),
         )
 
         automatiskSaksbehandlingBatch.behandleAutomatisk()

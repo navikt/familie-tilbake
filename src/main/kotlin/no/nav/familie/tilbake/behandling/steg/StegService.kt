@@ -10,6 +10,7 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.log.SecureLog
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -23,15 +24,18 @@ class StegService(
     val validerBrevmottakerService: ValiderBrevmottakerService,
 ) {
     @Transactional
-    fun håndterSteg(behandlingId: UUID) {
-        var aktivtBehandlingssteg: Behandlingssteg = hentAktivBehandlingssteg(behandlingId)
+    fun håndterSteg(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
+        var aktivtBehandlingssteg: Behandlingssteg = hentAktivBehandlingssteg(behandlingId, logContext)
 
-        hentStegInstans(aktivtBehandlingssteg).utførSteg(behandlingId)
+        hentStegInstans(aktivtBehandlingssteg).utførSteg(behandlingId, logContext)
 
         // Autoutfør brevmottaker steg og verge steg om verge informasjon er kopiert fra fagsystem
-        aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
+        aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId, logContext)
         when (aktivtBehandlingssteg) {
-            Behandlingssteg.BREVMOTTAKER, Behandlingssteg.VERGE -> hentStegInstans(aktivtBehandlingssteg).utførSteg(behandlingId)
+            Behandlingssteg.BREVMOTTAKER, Behandlingssteg.VERGE -> hentStegInstans(aktivtBehandlingssteg).utførSteg(behandlingId, logContext)
             else -> return
         }
     }
@@ -40,106 +44,136 @@ class StegService(
     fun håndterSteg(
         behandlingId: UUID,
         behandlingsstegDto: BehandlingsstegDto,
+        logContext: SecureLog.Context,
     ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.erSaksbehandlingAvsluttet) {
-            throw Feil("Behandling med id=$behandlingId er allerede ferdig behandlet")
+            throw Feil(
+                message = "Behandling med id=$behandlingId er allerede ferdig behandlet",
+                logContext = logContext,
+            )
         }
         val behandledeSteg: Behandlingssteg = Behandlingssteg.fraNavn(behandlingsstegDto.getSteg())
         if (behandlingskontrollService.erBehandlingPåVent(behandlingId)) {
             throw Feil(
                 message = "Behandling med id=$behandlingId er på vent, kan ikke behandle steg $behandledeSteg",
                 frontendFeilmelding = "Behandling med id=$behandlingId er på vent, kan ikke behandle steg $behandledeSteg",
+                logContext = logContext,
                 httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
 
-        var aktivtBehandlingssteg: Behandlingssteg = hentAktivBehandlingssteg(behandlingId)
+        var aktivtBehandlingssteg: Behandlingssteg = hentAktivBehandlingssteg(behandlingId, logContext)
         if (Behandlingssteg.FORESLÅ_VEDTAK == aktivtBehandlingssteg) {
-            validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligPersonMedManuelleBrevmottakere(behandlingId = behandling.id, fagsakId = behandling.fagsakId)
+            validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligPersonMedManuelleBrevmottakere(
+                behandlingId = behandling.id,
+                fagsakId = behandling.fagsakId,
+                logContext = logContext,
+            )
         }
         // Behandling kan ikke tilbakeføres når er på FatteVedtak/IverksetteVedtak steg
         if (Behandlingssteg.FATTE_VEDTAK == aktivtBehandlingssteg || Behandlingssteg.IVERKSETT_VEDTAK == aktivtBehandlingssteg) {
             if (behandlingsstegDto is BehandlingsstegFatteVedtaksstegDto) {
-                hentStegInstans(behandledeSteg).utførSteg(behandlingId, behandlingsstegDto)
+                hentStegInstans(behandledeSteg).utførSteg(behandlingId, behandlingsstegDto, logContext)
 
-                aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
+                aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId, logContext)
                 if (aktivtBehandlingssteg == Behandlingssteg.IVERKSETT_VEDTAK) {
-                    hentStegInstans(aktivtBehandlingssteg).utførSteg(behandlingId)
+                    hentStegInstans(aktivtBehandlingssteg).utførSteg(behandlingId, logContext)
                 }
             }
             return
         }
-        behandlingskontrollService.behandleStegPåNytt(behandlingId, behandledeSteg)
-        hentStegInstans(behandledeSteg).utførSteg(behandlingId, behandlingsstegDto)
+        behandlingskontrollService.behandleStegPåNytt(behandlingId, behandledeSteg, logContext)
+        hentStegInstans(behandledeSteg).utførSteg(behandlingId, behandlingsstegDto, logContext)
 
         // sjekk om aktivtBehandlingssteg kan autoutføres
-        aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
+        aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId, logContext)
         if (aktivtBehandlingssteg in
             listOf(
                 Behandlingssteg.FORELDELSE,
                 Behandlingssteg.VILKÅRSVURDERING,
             )
         ) {
-            hentStegInstans(aktivtBehandlingssteg).utførSteg(behandlingId)
+            hentStegInstans(aktivtBehandlingssteg).utførSteg(behandlingId, logContext)
         }
     }
 
     @Transactional
-    fun håndterStegAutomatisk(behandlingId: UUID) {
+    fun håndterStegAutomatisk(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        val aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
+        val aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId, logContext)
 
-        håndterStegAutomatisk(behandling, aktivtBehandlingssteg)
+        håndterStegAutomatisk(behandling, aktivtBehandlingssteg, logContext)
     }
 
     @Transactional
     fun håndterStegAutomatisk(
         behandling: Behandling,
         aktivtBehandlingssteg: Behandlingssteg,
+        logContext: SecureLog.Context,
     ) {
-        validerAtBehandlingIkkeErAvsluttet(behandling)
-        validerAtUtomatiskBehandlingIkkeErEøs(behandling)
-        validerAtBehandlingIkkeErPåVent(behandlingId = behandling.id, erBehandlingPåVent = behandlingskontrollService.erBehandlingPåVent(behandling.id), behandledeSteg = aktivtBehandlingssteg.name)
-        validerAtBehandlingErAutomatisk(behandling)
+        validerAtBehandlingIkkeErAvsluttet(behandling, logContext)
+        validerAtUtomatiskBehandlingIkkeErEøs(behandling, logContext)
+        validerAtBehandlingIkkeErPåVent(
+            behandlingId = behandling.id,
+            erBehandlingPåVent = behandlingskontrollService.erBehandlingPåVent(behandling.id),
+            behandledeSteg = aktivtBehandlingssteg.name,
+            logContext = logContext,
+        )
+        validerAtBehandlingErAutomatisk(behandling, logContext)
 
         if (aktivtBehandlingssteg != Behandlingssteg.AVSLUTTET) {
-            hentStegInstans(aktivtBehandlingssteg).utførStegAutomatisk(behandling.id)
+            hentStegInstans(aktivtBehandlingssteg).utførStegAutomatisk(behandling.id, logContext)
 
             if (aktivtBehandlingssteg != Behandlingssteg.IVERKSETT_VEDTAK) {
-                val nesteSteg = hentAktivBehandlingssteg(behandling.id)
-                håndterStegAutomatisk(behandling, nesteSteg)
+                val nesteSteg = hentAktivBehandlingssteg(behandling.id, logContext)
+                håndterStegAutomatisk(behandling, nesteSteg, logContext)
             }
         }
     }
 
     @Transactional
-    fun gjenopptaSteg(behandlingId: UUID) {
-        var aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
+    fun gjenopptaSteg(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
+        var aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId, logContext)
 
-        hentStegInstans(aktivtBehandlingssteg).gjenopptaSteg(behandlingId)
+        hentStegInstans(aktivtBehandlingssteg).gjenopptaSteg(behandlingId, logContext)
 
         // Autoutfør brevmottaker steg og verge steg om verge informasjon er kopiert fra fagsystem
-        aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
+        aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId, logContext)
         when (aktivtBehandlingssteg) {
-            Behandlingssteg.BREVMOTTAKER, Behandlingssteg.VERGE -> hentStegInstans(aktivtBehandlingssteg).utførSteg(behandlingId)
+            Behandlingssteg.BREVMOTTAKER, Behandlingssteg.VERGE -> hentStegInstans(aktivtBehandlingssteg).utførSteg(behandlingId, logContext)
             else -> return
         }
     }
 
     @Transactional
-    fun angreSendTilBeslutter(behandling: Behandling) {
+    fun angreSendTilBeslutter(
+        behandling: Behandling,
+        logContext: SecureLog.Context,
+    ) {
         val behandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandling.id)
 
         if (behandlingsstegstilstand?.behandlingssteg != Behandlingssteg.FATTE_VEDTAK) {
-            throw Feil("Kan ikke angre send til beslutter når behandlingen er i steg ${behandlingsstegstilstand?.behandlingssteg}")
+            throw Feil(
+                message = "Kan ikke angre send til beslutter når behandlingen er i steg ${behandlingsstegstilstand?.behandlingssteg}",
+                logContext = logContext,
+            )
         }
 
         if (behandling.status != Behandlingsstatus.FATTER_VEDTAK) {
-            throw Feil("Kan ikke angre send til beslutter når behandlingen har status ${behandling.status}")
+            throw Feil(
+                message = "Kan ikke angre send til beslutter når behandlingen har status ${behandling.status}",
+                logContext = logContext,
+            )
         }
 
-        behandlingskontrollService.behandleStegPåNytt(behandling.id, Behandlingssteg.FORESLÅ_VEDTAK)
+        behandlingskontrollService.behandleStegPåNytt(behandling.id, Behandlingssteg.FORESLÅ_VEDTAK, logContext)
     }
 
     fun kanAnsvarligSaksbehandlerOppdateres(
@@ -153,12 +187,16 @@ class StegService(
         }
     }
 
-    private fun hentAktivBehandlingssteg(behandlingId: UUID): Behandlingssteg {
+    private fun hentAktivBehandlingssteg(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ): Behandlingssteg {
         val aktivtBehandlingssteg =
             behandlingskontrollService.finnAktivtSteg(behandlingId)
                 ?: throw Feil(
                     message = "Behandling $behandlingId har ikke noe aktiv steg",
                     frontendFeilmelding = "Behandling $behandlingId har ikke noe aktiv steg",
+                    logContext = logContext,
                 )
         if (aktivtBehandlingssteg !in
             setOf(
@@ -174,7 +212,10 @@ class StegService(
                 Behandlingssteg.IVERKSETT_VEDTAK,
             )
         ) {
-            throw Feil(message = "Steg $aktivtBehandlingssteg er ikke implementer ennå")
+            throw Feil(
+                message = "Steg $aktivtBehandlingssteg er ikke implementer ennå",
+                logContext = logContext,
+            )
         }
 
         return aktivtBehandlingssteg

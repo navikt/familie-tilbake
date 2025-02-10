@@ -23,6 +23,7 @@ import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Vedleggsd
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.integration.økonomi.OppdragClient
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -49,7 +50,10 @@ class VarselbrevUtil(
         val tittel = getTittelForVarselbrev(request.ytelsestype.navn[request.språkkode]!!, false)
         val vergenavn = BrevmottagerUtil.getVergenavn(request.verge, adresseinfo)
         val ansvarligSaksbehandler =
-            eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(ContextService.hentSaksbehandler())
+            eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(
+                ContextService.hentSaksbehandler(SecureLog.Context.tom()),
+                SecureLog.Context.tom(),
+            )
 
         val metadata =
             Brevmetadata(
@@ -90,9 +94,13 @@ class VarselbrevUtil(
         vergenavn: String?,
         erKorrigert: Boolean,
         gjelderDødsfall: Boolean,
+        logContext: SecureLog.Context,
     ): Brevmetadata {
         val ansvarligSaksbehandler =
-            eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(behandling.ansvarligSaksbehandler)
+            eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(
+                behandling.ansvarligSaksbehandler,
+                logContext,
+            )
 
         return Brevmetadata(
             sakspartId = personinfo.ident,
@@ -137,6 +145,7 @@ class VarselbrevUtil(
         varselbrevsdokument: Varselbrevsdokument,
         eksternBehandlingId: String,
         varsletTotalbeløp: Long,
+        logContext: SecureLog.Context,
     ): Vedleggsdata {
         val request =
             HentFeilutbetalingerFraSimuleringRequest(
@@ -145,7 +154,7 @@ class VarselbrevUtil(
                 eksternBehandlingId,
             )
 
-        val feilutbetalingerFraSimulering = oppdragClient.hentFeilutbetalingerFraSimulering(request)
+        val feilutbetalingerFraSimulering = oppdragClient.hentFeilutbetalingerFraSimulering(request, logContext)
 
         val perioder =
             feilutbetalingerFraSimulering.feilutbetaltePerioder.map {
@@ -163,6 +172,7 @@ class VarselbrevUtil(
             varselbrevsdokument.ytelsestype,
             varselbrevsdokument.brevmetadata.saksnummer,
             eksternBehandlingId,
+            SecureLog.Context.utenBehandling(eksternBehandlingId),
         )
         return Vedleggsdata(varselbrevsdokument.språkkode, varselbrevsdokument.isYtelseMedSkatt, perioder)
     }
@@ -192,6 +202,7 @@ class VarselbrevUtil(
         varselbrevsdokument: Varselbrevsdokument,
         fagsystemsbehandlingId: String?,
         varsletTotalbeløp: Long,
+        logContext: SecureLog.Context,
     ): String =
         if (varselbrevsdokument.harVedlegg) {
             if (fagsystemsbehandlingId == null) {
@@ -202,7 +213,7 @@ class VarselbrevUtil(
             }
 
             val vedleggsdata =
-                sammenstillInfoFraSimuleringForVedlegg(varselbrevsdokument, fagsystemsbehandlingId, varsletTotalbeløp)
+                sammenstillInfoFraSimuleringForVedlegg(varselbrevsdokument, fagsystemsbehandlingId, varsletTotalbeløp, logContext)
             TekstformatererVarselbrev.lagVarselbrevsvedleggHtml(vedleggsdata)
         } else {
             ""
@@ -225,11 +236,14 @@ class VarselbrevUtil(
         ytelsestype: Ytelsestype,
         eksternFagsakId: String,
         eksternId: String,
+        logContext: SecureLog.Context,
     ) {
         if (feilutbetaltePerioder.sumOf { it.feilutbetaltBeløp.toLong() } != varsletTotalFeilutbetaltBeløp) {
             throw Feil(
-                "Varslet totalFeilutbetaltBeløp matcher ikke med hentet totalFeilutbetaltBeløp fra " +
-                    "simulering for ytelsestype=$ytelsestype, eksternFagsakId=$eksternFagsakId og eksternId=$eksternId",
+                message =
+                    "Varslet totalFeilutbetaltBeløp matcher ikke med hentet totalFeilutbetaltBeløp fra " +
+                        "simulering for ytelsestype=$ytelsestype, eksternFagsakId=$eksternFagsakId og eksternId=$eksternId",
+                logContext = logContext,
             )
         }
     }

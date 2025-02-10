@@ -21,13 +21,16 @@ import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagsty
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.oppgave.OppgaveService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.tilbakekreving.status.v1.KravOgVedtakstatus
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.util.Properties
 import java.util.UUID
 
 @Service
@@ -43,8 +46,14 @@ class KravvedtakstatusService(
     private val oppgaveTaskService: OppgaveTaskService,
     private val oppgaveService: OppgaveService,
 ) {
+    private val log = LoggerFactory.getLogger(KravgrunnlagService::class.java)
+
     @Transactional
-    fun håndterMottattStatusmelding(statusmeldingXml: String) {
+    fun håndterMottattStatusmelding(
+        statusmeldingXml: String,
+        taskId: Long,
+        taskMetadata: Properties,
+    ) {
         val kravOgVedtakstatus: KravOgVedtakstatus = KravgrunnlagUtil.unmarshalStatusmelding(statusmeldingXml)
 
         validerStatusmelding(kravOgVedtakstatus)
@@ -54,6 +63,12 @@ class KravvedtakstatusService(
         val ytelsestype: Ytelsestype = KravgrunnlagUtil.tilYtelsestype(kravOgVedtakstatus.kodeFagomraade)
 
         val behandling: Behandling? = finnÅpenBehandling(ytelsestype, fagsystemId)
+
+        log.info("BehandleStatusmeldingTask prosesserer med id={} og metadata {}", taskId, taskMetadata)
+        SecureLog
+            .medBehandling(fagsystemId, behandling?.id?.toString())
+            .info("BehandleStatusmeldingTask prosesserer med id={} og metadata {}", taskId, taskMetadata)
+
         if (behandling == null) {
             val kravgrunnlagXmlListe =
                 mottattXmlService
@@ -79,6 +94,7 @@ class KravvedtakstatusService(
                 melding =
                     "Ugyldig statusmelding for vedtakId=${kravOgVedtakstatus.vedtakId}, " +
                         "Mangler referanse.",
+                SecureLog.Context.utenBehandling(kravOgVedtakstatus.fagsystemId),
             )
     }
 
@@ -128,7 +144,7 @@ class KravvedtakstatusService(
             }
             Kravstatuskode.ENDRET -> {
                 kravgrunnlagRepository.update(kravgrunnlag431.copy(sperret = false))
-                stegService.håndterSteg(behandling.id)
+                stegService.håndterSteg(behandling.id, SecureLog.Context.medBehandling(kravgrunnlag431.fagsystemId, behandling.id.toString()))
                 oppgaveTaskService.oppdaterOppgaveTask(
                     behandlingId = behandling.id,
                     beskrivelse = "Behandling er tatt av vent, pga mottatt ENDR melding",
@@ -157,6 +173,7 @@ class KravvedtakstatusService(
         behandlingId: UUID,
         kravgrunnlag431: Kravgrunnlag431,
     ) {
+        val logContext = SecureLog.Context.medBehandling(kravgrunnlag431.fagsystemId, behandlingId.toString())
         kravgrunnlagRepository.update(kravgrunnlag431.copy(sperret = true))
         val venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
         val tidsfrist = LocalDate.now().plusWeeks(venteårsak.defaultVenteTidIUker)
@@ -169,6 +186,7 @@ class KravvedtakstatusService(
                     venteårsak = venteårsak,
                     tidsfrist = tidsfrist,
                 ),
+                logContext = logContext,
             )
         historikkTaskService.lagHistorikkTask(
             behandlingId = behandlingId,

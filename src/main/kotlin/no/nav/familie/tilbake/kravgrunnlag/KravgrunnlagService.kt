@@ -23,12 +23,12 @@ import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
-import no.nav.familie.tilbake.integration.pdl.internal.secureLogger
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEventPublisher
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
@@ -59,13 +59,24 @@ class KravgrunnlagService(
     private val log = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
-    fun håndterMottattKravgrunnlag(kravgrunnlagXml: String) {
+    fun håndterMottattKravgrunnlag(
+        kravgrunnlagXml: String,
+        taskId: Long,
+        taskMetadata: Properties,
+    ) {
         val kravgrunnlag: DetaljertKravgrunnlagDto = KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagXml)
         val fagsystemId = kravgrunnlag.fagsystemId
         val ytelsestype: Ytelsestype = KravgrunnlagUtil.tilYtelsestype(kravgrunnlag.kodeFagomraade)
 
         val behandling: Behandling? = finnÅpenBehandling(ytelsestype, fagsystemId)
         val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype)
+        log.info("BehandleKravgrunnlagTask prosesserer med id={} og metadata {}", taskId, taskMetadata.toString())
+        val logContext = SecureLog.Context.medBehandling(fagsystemId, behandling?.id.toString())
+        SecureLog.medContext(logContext).info(
+            "BehandleKravgrunnlagTask prosesserer med id={} og metadata {}",
+            taskId,
+            taskMetadata.toString(),
+        )
 
         log.info("Håndterer kravgrunnlag fagsystem=$fagsystem, eksternFagId=$fagsystemId, behandlingId=${behandling?.id}, ytelsestype=$ytelsestype, eksternKravgrunnlagId=${kravgrunnlag.kravgrunnlagId}")
 
@@ -108,7 +119,7 @@ class KravgrunnlagService(
                         "Behandling ${behandling.id} venter på kravgrunnlag, mottatt ENDR kravgrunnlag. " +
                             "Flytter behandlingen til fakta steg",
                     )
-                    behandlingskontrollService.tilbakeførBehandledeSteg(behandling.id)
+                    behandlingskontrollService.tilbakeførBehandledeSteg(behandling.id, logContext)
                 }
 
                 else -> { // behandling har ikke fått SPER melding og har noen steg som blir behandlet
@@ -116,12 +127,12 @@ class KravgrunnlagService(
                         "Behandling ${behandling.id} blir behandlet, mottatt ENDR kravgrunnlag. " +
                             "Flytter behandlingen til fakta steg",
                     )
-                    behandlingskontrollService.behandleStegPåNytt(behandling.id, Behandlingssteg.FAKTA)
+                    behandlingskontrollService.behandleStegPåNytt(behandling.id, Behandlingssteg.FAKTA, logContext)
                 }
             }
         }
 
-        stegService.håndterSteg(behandling.id) // Kjører automatisk frem til fakta-steg = KLAR
+        stegService.håndterSteg(behandling.id, logContext) // Kjører automatisk frem til fakta-steg = KLAR
         if (behandling.saksbehandlingstype == Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR) {
             if (kanBehandlesAutomatiskBasertPåRettsgebyrOgFagsystemreferanse(kravgrunnlag431, behandling)) {
                 taskService.save(AutomatiskSaksbehandlingTask.opprettTask(behandling.id, fagsystem))
@@ -154,10 +165,15 @@ class KravgrunnlagService(
     ): Boolean {
         return try {
             val år = kravgrunnlag431.perioder.finnÅrForNyesteFeilutbetalingsperiode() ?: return false
-            val fireRettsgebyr = Constants.rettsgebyrForÅr(år) * 4
+            val rettsgebyr =
+                Constants.rettsgebyrForÅr(år) ?: throw Feil(
+                    message = "Rettsgebyr for år $år er ikke satt",
+                    logContext = SecureLog.Context.utenBehandling(kravgrunnlag431.fagsystemId),
+                )
+            val fireRettsgebyr = rettsgebyr * 4
             kravgrunnlag431.sumFeilutbetaling().longValueExact() <= fireRettsgebyr
         } catch (e: Feil) {
-            secureLogger.warn("Feil ved henting av rettsgebyr for år", e)
+            SecureLog.utenBehandling(kravgrunnlag431.fagsystemId).warn("Feil ved henting av rettsgebyr for år", e)
             false
         }
     }

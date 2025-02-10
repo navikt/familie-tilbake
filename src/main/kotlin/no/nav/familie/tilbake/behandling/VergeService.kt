@@ -16,6 +16,8 @@ import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
+import no.nav.familie.tilbake.log.LogService
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.person.PersonService
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -30,6 +32,7 @@ class VergeService(
     private val behandlingskontrollService: BehandlingskontrollService,
     private val integrasjonerClient: IntegrasjonerClient,
     private val personService: PersonService,
+    private val logService: LogService,
 ) {
     @Transactional
     fun lagreVerge(
@@ -37,9 +40,11 @@ class VergeService(
         vergeDto: VergeDto,
     ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        validerBehandling(behandling)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        validerVergeData(vergeDto, fagsak.fagsystem)
+        val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandling.id.toString())
+
+        validerBehandling(behandling, logContext)
+        validerVergeData(vergeDto, fagsak.fagsystem, logContext)
 
         val verge = tilDomene(vergeDto)
         val oppdatertBehandling = behandling.copy(verger = behandling.verger.map { it.copy(aktiv = false) }.toSet() + verge)
@@ -54,13 +59,15 @@ class VergeService(
     @Transactional
     fun opprettVergeSteg(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        validerBehandling(behandling)
-        behandlingskontrollService.behandleVergeSteg(behandlingId)
+        val logContext = logService.contextFraBehandling(behandling.id)
+        validerBehandling(behandling, logContext)
+        behandlingskontrollService.behandleVergeSteg(behandlingId, logContext)
     }
 
     @Transactional
     fun fjernVerge(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val logContext = logService.contextFraBehandling(behandling.id)
         val finnesAktivVerge = behandling.harVerge
 
         if (finnesAktivVerge) {
@@ -78,8 +85,9 @@ class VergeService(
                 Behandlingssteg.VERGE,
                 Behandlingsstegstatus.TILBAKEFØRT,
             ),
+            logContext,
         )
-        behandlingskontrollService.fortsettBehandling(behandlingId)
+        behandlingskontrollService.fortsettBehandling(behandlingId, logContext)
     }
 
     @Transactional(readOnly = true)
@@ -88,11 +96,15 @@ class VergeService(
         return behandling.aktivVerge?.let { tilRespons(it) }
     }
 
-    private fun validerBehandling(behandling: Behandling) {
+    private fun validerBehandling(
+        behandling: Behandling,
+        logContext: SecureLog.Context,
+    ) {
         if (behandling.erSaksbehandlingAvsluttet) {
             throw Feil(
-                "Behandling med id=${behandling.id} er allerede ferdig behandlet.",
+                message = "Behandling med id=${behandling.id} er allerede ferdig behandlet.",
                 frontendFeilmelding = "Behandling med id=${behandling.id} er allerede ferdig behandlet.",
+                logContext = logContext,
                 httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
@@ -100,6 +112,7 @@ class VergeService(
             throw Feil(
                 "Behandling med id=${behandling.id} er på vent.",
                 frontendFeilmelding = "Behandling med id=${behandling.id} er på vent.",
+                logContext = logContext,
                 httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
@@ -108,6 +121,7 @@ class VergeService(
     private fun validerVergeData(
         vergeDto: VergeDto,
         fagsystem: Fagsystem,
+        logContext: SecureLog.Context,
     ) {
         when (vergeDto.type) {
             Vergetype.ADVOKAT -> {
@@ -117,13 +131,14 @@ class VergeService(
                     throw Feil(
                         message = "Organisasjon ${vergeDto.orgNr} er ikke gyldig",
                         frontendFeilmelding = "Organisasjon ${vergeDto.orgNr} er ikke gyldig",
+                        logContext = logContext,
                     )
                 }
             }
             else -> {
                 requireNotNull(vergeDto.ident) { "ident kan ikke være null for ${vergeDto.type}" }
                 // Henter personen å verifisere om det finnes. Hvis det ikke finnes, kaster det en exception
-                personService.hentPersoninfo(vergeDto.ident, fagsystem)
+                personService.hentPersoninfo(vergeDto.ident, fagsystem, logContext)
             }
         }
     }

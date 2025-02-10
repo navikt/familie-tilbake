@@ -18,6 +18,8 @@ import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBre
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
 import no.nav.familie.tilbake.dokumentbestilling.varsel.manuelt.ManueltVarselbrevService
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.log.LogService
+import no.nav.familie.tilbake.log.SecureLog
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
@@ -30,13 +32,15 @@ class DokumentbehandlingServiceEnhetstest {
     private val mockManueltVarselBrevService: ManueltVarselbrevService = mockk()
     private val mockInnhentDokumentasjonBrevService: InnhentDokumentasjonbrevService = mockk()
     private val mockManuellBrevmottakerRepository: ManuellBrevmottakerRepository = mockk()
+    private val mockLogService: LogService = mockk()
 
-    val dokumentBehandlingService = DokumentbehandlingService(mockBehandlingRepository, mockFagsakRepository, mockBehandlingskontrollService, mockKravgrunnlagRepository, mockTaskService, mockManueltVarselBrevService, mockInnhentDokumentasjonBrevService, mockManuellBrevmottakerRepository)
+    val dokumentBehandlingService = DokumentbehandlingService(mockBehandlingRepository, mockFagsakRepository, mockBehandlingskontrollService, mockKravgrunnlagRepository, mockTaskService, mockManueltVarselBrevService, mockInnhentDokumentasjonBrevService, mockManuellBrevmottakerRepository, mockLogService)
 
     @Test
     fun `bestillBrev skal ikke kunne bestille brev når brevmottakerne er ugyldige`() {
         // Arrange
         val behandling = Testdata.lagBehandling()
+        every { mockLogService.contextFraBehandling(any()) } returns SecureLog.Context.tom()
         every { mockBehandlingRepository.findByIdOrThrow(behandling.id) } returns behandling
         every { mockManuellBrevmottakerRepository.findByBehandlingId(any()) } returns
             listOf(

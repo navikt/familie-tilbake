@@ -11,6 +11,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.tilbake.config.PdlConfig
 import no.nav.familie.tilbake.integration.pdl.internal.Kjønn
+import no.nav.familie.tilbake.log.SecureLog
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -54,7 +55,7 @@ class PdlClientTest {
                 .willReturn(okJson(readFile("pdlOkResponseEnkel.json"))),
         )
 
-        val respons = pdlClient.hentPersoninfo("11111122222", Fagsystem.BA)
+        val respons = pdlClient.hentPersoninfo("11111122222", Fagsystem.BA, SecureLog.Context.tom())
 
         respons.shouldNotBeNull()
         respons.navn shouldBe "ENGASJERT FYR"
@@ -70,7 +71,7 @@ class PdlClientTest {
                 .willReturn(okJson(readFile("pdlOkResponseDødPerson.json"))),
         )
 
-        val respons = pdlClient.hentPersoninfo("11111122222", Fagsystem.BA)
+        val respons = pdlClient.hentPersoninfo("11111122222", Fagsystem.BA, SecureLog.Context.tom())
 
         respons.shouldNotBeNull()
         respons.navn shouldBe "ENGASJERT FYR"
@@ -89,7 +90,7 @@ class PdlClientTest {
         val exception =
             shouldThrow<RuntimeException>(
                 block =
-                    { pdlClient.hentPersoninfo("11111122222", Fagsystem.BA) },
+                    { pdlClient.hentPersoninfo("11111122222", Fagsystem.BA, SecureLog.Context.tom()) },
             )
         exception.message shouldBe "Feil ved oppslag på person: Person ikke funnet"
     }

@@ -7,6 +7,7 @@ import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.person.PersonService
 import org.springframework.stereotype.Service
 import no.nav.familie.kontrakter.felles.tilbakekreving.Verge as VergeDto
@@ -19,15 +20,19 @@ class EksterneDataForBrevService(
     fun hentPerson(
         ident: String,
         fagsystem: Fagsystem,
-    ): Personinfo = personService.hentPersoninfo(ident, fagsystem)
+        logContext: SecureLog.Context,
+    ): Personinfo = personService.hentPersoninfo(ident, fagsystem, logContext)
 
     fun hentSaksbehandlernavn(id: String): String {
         val saksbehandler = integrasjonerClient.hentSaksbehandler(id)
         return saksbehandler.fornavn + " " + saksbehandler.etternavn
     }
 
-    fun hentPåloggetSaksbehandlernavnMedDefault(defaultId: String?): String {
-        val saksbehandlerId = ContextService.hentPåloggetSaksbehandler(defaultId)
+    fun hentPåloggetSaksbehandlernavnMedDefault(
+        defaultId: String?,
+        logContext: SecureLog.Context,
+    ): String {
+        val saksbehandlerId = ContextService.hentPåloggetSaksbehandler(defaultId, logContext)
         val saksbehandler = integrasjonerClient.hentSaksbehandler(saksbehandlerId)
         return saksbehandler.fornavn + " " + saksbehandler.etternavn
     }
@@ -39,8 +44,9 @@ class EksterneDataForBrevService(
         brevmottager: Brevmottager,
         verge: Verge?,
         fagsystem: Fagsystem,
+        logContext: SecureLog.Context,
     ): Adresseinfo =
-        verge?.let { hentAdresse(it.type, it.orgNr, it.navn, personinfo, brevmottager, it.ident, fagsystem) }
+        verge?.let { hentAdresse(it.type, it.orgNr, it.navn, personinfo, brevmottager, it.ident, fagsystem, logContext) }
             ?: hentAdresse(personinfo)
 
     fun hentAdresse(
@@ -48,6 +54,7 @@ class EksterneDataForBrevService(
         brevmottager: Brevmottager,
         vergeDto: VergeDto?,
         fagsystem: Fagsystem,
+        logContext: SecureLog.Context,
     ): Adresseinfo =
         vergeDto?.let {
             hentAdresse(
@@ -58,6 +65,7 @@ class EksterneDataForBrevService(
                 brevmottager,
                 it.personIdent,
                 fagsystem,
+                logContext,
             )
         } ?: hentAdresse(personinfo)
 
@@ -69,6 +77,7 @@ class EksterneDataForBrevService(
         brevmottager: Brevmottager,
         personIdent: String?,
         fagsystem: Fagsystem,
+        logContext: SecureLog.Context,
     ): Adresseinfo {
         if (Vergetype.ADVOKAT == vergeType) {
             return hentOrganisasjonsadresse(
@@ -78,7 +87,7 @@ class EksterneDataForBrevService(
                 brevmottager,
             )
         } else if (Brevmottager.VERGE == brevmottager) {
-            val person = hentPerson(personIdent ?: error("personIdent er påkrevd for $vergeType"), fagsystem)
+            val person = hentPerson(personIdent ?: error("personIdent er påkrevd for $vergeType"), fagsystem, logContext)
             return hentAdresse(person)
         }
         return hentAdresse(personinfo)

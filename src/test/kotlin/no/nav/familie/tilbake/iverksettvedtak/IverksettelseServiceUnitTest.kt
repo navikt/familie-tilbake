@@ -13,7 +13,6 @@ import no.nav.familie.tilbake.beregning.modell.Beregningsresultat
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.integration.økonomi.OppdragClient
 import no.nav.familie.tilbake.iverksettvedtak.domain.KodeResultat.DELVIS_TILBAKEKREVING
@@ -23,6 +22,8 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
+import no.nav.familie.tilbake.log.LogService
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakResponse
 import org.assertj.core.api.Assertions.assertThat
@@ -40,7 +41,7 @@ class IverksettelseServiceUnitTest {
     val beregningService = mockk<TilbakekrevingsberegningService>()
     val behandlingVedtakService = mockk<BehandlingsvedtakService>()
     val oppdragClient = mockk<OppdragClient>()
-    val featureToggleService = mockk<FeatureToggleService>()
+    val logService = mockk<LogService>()
 
     lateinit var behandling: Behandling
 
@@ -53,7 +54,7 @@ class IverksettelseServiceUnitTest {
             beregningService,
             behandlingVedtakService,
             oppdragClient,
-            featureToggleService,
+            logService,
         )
 
     @BeforeEach
@@ -95,11 +96,12 @@ class IverksettelseServiceUnitTest {
         every { tilbakekrevingsvedtakBeregningService.beregnVedtaksperioder(any(), any()) } returns tilbakekrevingsperioder
         val økonomiXmlSendt = Testdata.lagØkonomiXmlSendt(behandling.id)
         every { økonomiXmlSendtRepository.insert(any()) } returns økonomiXmlSendt
-        every { oppdragClient.iverksettVedtak(any(), capture(requestSlot)) } returns TilbakekrevingsvedtakResponse()
+        every { oppdragClient.iverksettVedtak(any(), capture(requestSlot), any()) } returns TilbakekrevingsvedtakResponse()
         every { økonomiXmlSendtRepository.findByIdOrThrow(any()) } returns økonomiXmlSendt
         every { økonomiXmlSendtRepository.update(any()) } returns økonomiXmlSendt
         every { beregningService.beregn(any()) } returns lagBeregningsresultat()
         every { behandlingVedtakService.oppdaterBehandlingsvedtak(any(), any()) } returns behandling
+        every { logService.contextFraBehandling(any()) } returns SecureLog.Context.tom()
         return requestSlot
     }
 

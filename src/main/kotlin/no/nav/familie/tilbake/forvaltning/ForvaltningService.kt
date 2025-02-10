@@ -34,6 +34,8 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.KodeAksjon
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEventPublisher
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattService
+import no.nav.familie.tilbake.log.LogService
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import org.slf4j.Logger
@@ -62,6 +64,7 @@ class ForvaltningService(
     private val tellerService: TellerService,
     private val taskService: TaskService,
     private val endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher,
+    private val logService: LogService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
@@ -71,11 +74,13 @@ class ForvaltningService(
         kravgrunnlagId: BigInteger,
     ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        sjekkOmBehandlingErAvsluttet(behandling)
+        val logContext = logService.contextFraBehandling(behandlingId)
+        sjekkOmBehandlingErAvsluttet(behandling, logContext)
         val hentetKravgrunnlag =
             hentKravgrunnlagService.hentKravgrunnlagFraØkonomi(
                 kravgrunnlagId,
                 KodeAksjon.HENT_KORRIGERT_KRAVGRUNNLAG,
+                logContext,
             )
 
         val kravgrunnlag = kravgrunnlagRepository.findByEksternKravgrunnlagIdAndAktivIsTrue(kravgrunnlagId)
@@ -84,7 +89,7 @@ class ForvaltningService(
         }
         hentKravgrunnlagService.lagreHentetKravgrunnlag(behandlingId, hentetKravgrunnlag)
 
-        stegService.håndterSteg(behandlingId)
+        stegService.håndterSteg(behandlingId, logContext)
     }
 
     @Transactional
@@ -92,7 +97,8 @@ class ForvaltningService(
         behandlingId: UUID,
     ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        sjekkOmBehandlingErAvsluttet(behandling)
+        val logContext = logService.contextFraBehandling(behandling.id)
+        sjekkOmBehandlingErAvsluttet(behandling, logContext)
 
         val kravgrunnlagId =
             kravgrunnlagRepository
@@ -104,6 +110,7 @@ class ForvaltningService(
             hentKravgrunnlagService.hentKravgrunnlagFraØkonomi(
                 kravgrunnlagId,
                 KodeAksjon.HENT_KORRIGERT_KRAVGRUNNLAG,
+                logContext,
             )
 
         val kravgrunnlag = kravgrunnlagRepository.findByEksternKravgrunnlagIdAndAktivIsTrue(kravgrunnlagId)
@@ -112,7 +119,7 @@ class ForvaltningService(
         }
         hentKravgrunnlagService.lagreHentetKravgrunnlag(behandlingId, hentetKravgrunnlag)
 
-        stegService.håndterSteg(behandlingId)
+        stegService.håndterSteg(behandlingId, logContext)
     }
 
     @Transactional
@@ -120,6 +127,7 @@ class ForvaltningService(
         behandlingId: UUID,
         taskId: Long,
     ) {
+        val logContext = logService.contextFraBehandling(behandlingId)
         behandlingVedtakService.oppdaterBehandlingsvedtak(behandlingId, Iverksettingsstatus.IVERKSATT)
 
         behandlingskontrollService
@@ -129,8 +137,9 @@ class ForvaltningService(
                     behandlingssteg = Behandlingssteg.IVERKSETT_VEDTAK,
                     behandlingsstegstatus = Behandlingsstegstatus.UTFØRT,
                 ),
+                logContext,
             )
-        behandlingskontrollService.fortsettBehandling(behandlingId)
+        behandlingskontrollService.fortsettBehandling(behandlingId, logContext)
 
         val task = taskService.findById(taskId)
         taskService.save(
@@ -160,7 +169,8 @@ class ForvaltningService(
     @Transactional
     fun tvingHenleggBehandling(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        sjekkOmBehandlingErAvsluttet(behandling)
+        val logContext = logService.contextFraBehandling(behandling.id)
+        sjekkOmBehandlingErAvsluttet(behandling, logContext)
 
         // oppdaterer behandlingsstegstilstand
         behandlingskontrollService.henleggBehandlingssteg(behandlingId)
@@ -171,7 +181,7 @@ class ForvaltningService(
             behandling.copy(
                 resultater = setOf(behandlingsresultat),
                 status = Behandlingsstatus.AVSLUTTET,
-                ansvarligSaksbehandler = ContextService.hentSaksbehandler(),
+                ansvarligSaksbehandler = ContextService.hentSaksbehandler(logContext),
                 avsluttetDato = LocalDate.now(),
             ),
         )
@@ -190,11 +200,12 @@ class ForvaltningService(
     @Transactional
     fun flyttBehandlingsstegTilbakeTilFakta(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        sjekkOmBehandlingErAvsluttet(behandling)
+        val logContext = logService.contextFraBehandling(behandling.id)
+        sjekkOmBehandlingErAvsluttet(behandling, logContext)
 
         // fjerner eksisterende saksbehandlet data
         endretKravgrunnlagEventPublisher.fireEvent(behandlingId)
-        behandlingskontrollService.behandleStegPåNytt(behandlingId, Behandlingssteg.FAKTA)
+        behandlingskontrollService.behandleStegPåNytt(behandlingId, Behandlingssteg.FAKTA, logContext)
 
         historikkTaskService.lagHistorikkTask(
             behandlingId,
@@ -207,10 +218,15 @@ class ForvaltningService(
         val økonomiXmlMottatt = økonomiXmlMottattRepository.findByEksternKravgrunnlagId(eksternKravgrunnlagId)
         val kravgrunnlag431 = kravgrunnlagRepository.findByEksternKravgrunnlagIdAndAktivIsTrue(eksternKravgrunnlagId)
         if (økonomiXmlMottatt == null && kravgrunnlag431 == null) {
-            throw Feil(message = "Finnes ikke eksternKravgrunnlagId=$eksternKravgrunnlagId")
+            throw Feil(
+                message = "Finnes ikke eksternKravgrunnlagId=$eksternKravgrunnlagId",
+                logContext = SecureLog.Context.tom(),
+            )
         }
         val vedtakId = økonomiXmlMottatt?.vedtakId ?: kravgrunnlag431!!.vedtakId
-        annulerKravgrunnlagService.annulerKravgrunnlagRequest(eksternKravgrunnlagId, vedtakId)
+        val fagsakId = økonomiXmlMottatt?.eksternFagsakId ?: kravgrunnlag431?.fagsystemId!!
+        val logContext = SecureLog.Context.medBehandling(fagsakId, kravgrunnlag431?.behandlingId?.toString())
+        annulerKravgrunnlagService.annulerKravgrunnlagRequest(eksternKravgrunnlagId, vedtakId, logContext)
     }
 
     fun hentForvaltningsinfo(
@@ -243,7 +259,8 @@ class ForvaltningService(
             økonomiXmlMottattRepository.findByEksternFagsakIdAndYtelsestype(eksternFagsakId, ytelsestype)
         if (økonomiXmlMottatt.isEmpty()) {
             throw Feil(
-                "Finnes ikke kravgrunnlag som ikke er arkivert for ytelsestype=$ytelsestype og eksternFagsakId=$eksternFagsakId",
+                message = "Finnes ikke kravgrunnlag som ikke er arkivert for ytelsestype=$ytelsestype og eksternFagsakId=$eksternFagsakId",
+                logContext = SecureLog.Context.utenBehandling(eksternFagsakId),
                 httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
@@ -258,8 +275,15 @@ class ForvaltningService(
         }
     }
 
-    private fun sjekkOmBehandlingErAvsluttet(behandling: Behandling) {
-        feilHvis(behandling.erAvsluttet, HttpStatus.BAD_REQUEST) {
+    private fun sjekkOmBehandlingErAvsluttet(
+        behandling: Behandling,
+        logContext: SecureLog.Context,
+    ) {
+        feilHvis(
+            behandling.erAvsluttet,
+            logContext = logContext,
+            httpStatus = HttpStatus.BAD_REQUEST,
+        ) {
             "Behandling med id=${behandling.id} er allerede ferdig behandlet."
         }
     }

@@ -15,13 +15,13 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstan
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
 import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.log.SecureLog
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -35,13 +35,15 @@ class BehandlingskontrollService(
     private val behandlingTilstandService: BehandlingTilstandService,
     private val kravgrunnlagRepository: KravgrunnlagRepository,
     private val historikkTaskService: HistorikkTaskService,
-    private val featureToggleService: FeatureToggleService,
     private val brevmottakerRepository: ManuellBrevmottakerRepository,
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
-    fun fortsettBehandling(behandlingId: UUID) {
+    fun fortsettBehandling(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.erAvsluttet) {
             return
@@ -51,7 +53,7 @@ class BehandlingskontrollService(
 
         if (aktivtStegstilstand == null) {
             val nesteStegMetaData = finnNesteBehandlingsstegMedStatus(behandling, behandlingsstegstilstand)
-            persisterBehandlingsstegOgStatus(behandlingId, nesteStegMetaData)
+            persisterBehandlingsstegOgStatus(behandlingId, nesteStegMetaData, logContext)
             if (nesteStegMetaData.behandlingsstegstatus == VENTER) {
                 historikkTaskService
                     .lagHistorikkTask(
@@ -73,28 +75,37 @@ class BehandlingskontrollService(
     fun tilbakehoppBehandlingssteg(
         behandlingId: UUID,
         behandlingsstegsinfo: Behandlingsstegsinfo,
+        logContext: SecureLog.Context,
     ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.erAvsluttet) {
             throw Feil(
-                "Behandling med id=$behandlingId er allerede ferdig behandlet, " +
-                    "så kan ikke forsette til ${behandlingsstegsinfo.behandlingssteg}",
+                message =
+                    "Behandling med id=$behandlingId er allerede ferdig behandlet, " +
+                        "så kan ikke forsette til ${behandlingsstegsinfo.behandlingssteg}",
+                logContext = logContext,
             )
         }
         val behandlingsstegstilstand: List<Behandlingsstegstilstand> =
             behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         val aktivtBehandlingssteg =
             finnAktivStegstilstand(behandlingsstegstilstand)
-                ?: throw Feil("Behandling med id=$behandlingId har ikke noe aktivt steg")
+                ?: throw Feil(
+                    message = "Behandling med id=$behandlingId har ikke noe aktivt steg",
+                    logContext = logContext,
+                )
         // steg som kan behandles, kan avbrytes
         if (aktivtBehandlingssteg.behandlingssteg.kanSaksbehandles) {
             behandlingsstegstilstandRepository.update(aktivtBehandlingssteg.copy(behandlingsstegsstatus = AVBRUTT))
-            persisterBehandlingsstegOgStatus(behandlingId, behandlingsstegsinfo)
+            persisterBehandlingsstegOgStatus(behandlingId, behandlingsstegsinfo, logContext)
         }
     }
 
     @Transactional
-    fun tilbakeførBehandledeSteg(behandlingId: UUID) {
+    fun tilbakeførBehandledeSteg(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
         val alleIkkeVentendeSteg =
             behandlingsstegstilstand
@@ -102,7 +113,7 @@ class BehandlingskontrollService(
                 .filter { it.behandlingssteg !in listOf(Behandlingssteg.VARSEL, Behandlingssteg.GRUNNLAG) }
         alleIkkeVentendeSteg.forEach {
             log.info("Tilbakefører ${it.behandlingssteg} for behandling $behandlingId")
-            oppdaterBehandlingsstegStatus(behandlingId, Behandlingsstegsinfo(it.behandlingssteg, TILBAKEFØRT))
+            oppdaterBehandlingsstegStatus(behandlingId, Behandlingsstegsinfo(it.behandlingssteg, TILBAKEFØRT), logContext)
         }
     }
 
@@ -110,23 +121,30 @@ class BehandlingskontrollService(
     fun behandleStegPåNytt(
         behandlingId: UUID,
         behandledeSteg: Behandlingssteg,
+        logContext: SecureLog.Context,
     ) {
         val aktivtBehandlingssteg =
             finnAktivtSteg(behandlingId)
-                ?: throw Feil("Behandling med id=$behandlingId har ikke noe aktivt steg")
+                ?: throw Feil(
+                    message = "Behandling med id=$behandlingId har ikke noe aktivt steg",
+                    logContext = logContext,
+                )
 
         if (behandledeSteg.sekvens < aktivtBehandlingssteg.sekvens) {
             for (i in aktivtBehandlingssteg.sekvens downTo behandledeSteg.sekvens + 1 step 1) {
                 val behandlingssteg = Behandlingssteg.fraSekvens(i, sjekkOmBrevmottakerErstatterVergeForSekvens(i, behandlingId))
-                oppdaterBehandlingsstegStatus(behandlingId, Behandlingsstegsinfo(behandlingssteg, TILBAKEFØRT))
+                oppdaterBehandlingsstegStatus(behandlingId, Behandlingsstegsinfo(behandlingssteg, TILBAKEFØRT), logContext)
             }
-            oppdaterBehandlingsstegStatus(behandlingId, Behandlingsstegsinfo(behandledeSteg, KLAR))
+            oppdaterBehandlingsstegStatus(behandlingId, Behandlingsstegsinfo(behandledeSteg, KLAR), logContext)
         }
     }
 
     @Transactional
-    fun behandleVergeSteg(behandlingId: UUID) {
-        tilbakeførBehandledeSteg(behandlingId)
+    fun behandleVergeSteg(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
+        tilbakeførBehandledeSteg(behandlingId, logContext)
         log.info("Oppretter verge steg for behandling med id=$behandlingId")
         val eksisterendeVergeSteg =
             behandlingsstegstilstandRepository.findByBehandlingIdAndBehandlingssteg(
@@ -135,7 +153,7 @@ class BehandlingskontrollService(
             )
         when {
             eksisterendeVergeSteg != null -> {
-                oppdaterBehandlingsstegStatus(behandlingId, Behandlingsstegsinfo(Behandlingssteg.VERGE, KLAR))
+                oppdaterBehandlingsstegStatus(behandlingId, Behandlingsstegsinfo(Behandlingssteg.VERGE, KLAR), logContext)
             }
             else -> {
                 opprettBehandlingsstegOgStatus(behandlingId, Behandlingsstegsinfo(Behandlingssteg.VERGE, KLAR))
@@ -144,14 +162,17 @@ class BehandlingskontrollService(
     }
 
     @Transactional
-    fun behandleBrevmottakerSteg(behandlingId: UUID) {
+    fun behandleBrevmottakerSteg(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         log.info("Aktiverer brevmottaker steg for behandling med id=$behandlingId")
         behandlingsstegstilstandRepository
             .findByBehandlingIdAndBehandlingssteg(
                 behandlingId,
                 Behandlingssteg.BREVMOTTAKER,
             ) ?.apply {
-                oppdaterBehandlingsstegStatus(behandlingId, Behandlingsstegsinfo(Behandlingssteg.BREVMOTTAKER, AUTOUTFØRT))
+                oppdaterBehandlingsstegStatus(behandlingId, Behandlingsstegsinfo(Behandlingssteg.BREVMOTTAKER, AUTOUTFØRT), logContext)
             } ?: opprettBehandlingsstegOgStatus(
             behandlingId = behandlingId,
             nesteStegMedStatus = Behandlingsstegsinfo(Behandlingssteg.BREVMOTTAKER, AUTOUTFØRT),
@@ -165,6 +186,7 @@ class BehandlingskontrollService(
         behandlingId: UUID,
         venteårsak: Venteårsak,
         tidsfrist: LocalDate,
+        logContext: SecureLog.Context,
     ) {
         val behandlingsstegstilstand: List<Behandlingsstegstilstand> =
             behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
@@ -177,6 +199,7 @@ class BehandlingskontrollService(
                     frontendFeilmelding =
                         "Behandling $behandlingId " +
                             "har ikke aktivt steg",
+                    logContext = logContext,
                 )
         behandlingsstegstilstandRepository.update(
             aktivtBehandlingsstegstilstand.copy(
@@ -246,6 +269,7 @@ class BehandlingskontrollService(
     fun oppdaterBehandlingsstegStatus(
         behandlingId: UUID,
         behandlingsstegsinfo: Behandlingsstegsinfo,
+        logContext: SecureLog.Context,
     ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.erAvsluttet &&
@@ -257,6 +281,7 @@ class BehandlingskontrollService(
             throw Feil(
                 "Behandling med id=$behandlingId er allerede ferdig behandlet, " +
                     "så status=${behandlingsstegsinfo.behandlingsstegstatus} kan ikke oppdateres",
+                logContext = logContext,
             )
         }
         val behandlingsstegstilstand =
@@ -266,6 +291,7 @@ class BehandlingskontrollService(
                     message =
                         "Behandling med id=$behandlingId og " +
                             "steg=${behandlingsstegsinfo.behandlingssteg} finnes ikke",
+                    logContext = logContext,
                 )
 
         behandlingsstegstilstandRepository
@@ -308,6 +334,7 @@ class BehandlingskontrollService(
     private fun persisterBehandlingsstegOgStatus(
         behandlingId: UUID,
         behandlingsstegsinfo: Behandlingsstegsinfo,
+        logContext: SecureLog.Context,
     ) {
         val gammelBehandlingsstegstilstand =
             behandlingsstegstilstandRepository.findByBehandlingIdAndBehandlingssteg(
@@ -319,7 +346,7 @@ class BehandlingskontrollService(
                 opprettBehandlingsstegOgStatus(behandlingId, behandlingsstegsinfo)
             }
             else -> {
-                oppdaterBehandlingsstegStatus(behandlingId, behandlingsstegsinfo)
+                oppdaterBehandlingsstegStatus(behandlingId, behandlingsstegsinfo, logContext)
             }
         }
     }

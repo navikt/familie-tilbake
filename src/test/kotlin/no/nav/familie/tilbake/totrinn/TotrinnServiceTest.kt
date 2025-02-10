@@ -15,6 +15,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.log.SecureLog
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -96,6 +97,7 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
                     begrunnelse = "testverdi",
                 ),
             ),
+            SecureLog.Context.tom(),
         )
 
         val totrinnsvurderingDto = totrinnService.hentTotrinnsvurderinger(behandlingId)
@@ -131,6 +133,7 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
                     begrunnelse = "testverdi",
                 ),
             ),
+            SecureLog.Context.tom(),
         )
 
         // Dette steget var ikke behandlet med første omgang
@@ -173,6 +176,7 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
                             begrunnelse = "testverdi",
                         ),
                     ),
+                    SecureLog.Context.tom(),
                 )
             }
 
@@ -202,6 +206,7 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
                     begrunnelse = "testverdi",
                 ),
             ),
+            SecureLog.Context.tom(),
         )
 
         val tidligerebeslutter = totrinnService.finnForrigeBeslutterMedNyVurderingEllerNull(behandlingId)
@@ -232,6 +237,7 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
                     begrunnelse = "testverdi",
                 ),
             ),
+            SecureLog.Context.tom(),
         )
 
         val tidligerebeslutter = totrinnService.finnForrigeBeslutterMedNyVurderingEllerNull(behandlingId)

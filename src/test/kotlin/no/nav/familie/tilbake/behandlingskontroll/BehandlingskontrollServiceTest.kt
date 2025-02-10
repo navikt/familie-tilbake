@@ -32,6 +32,7 @@ import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.data.Testdata.lagBehandling
 import no.nav.familie.tilbake.data.Testdata.lagKravgrunnlag
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.log.SecureLog
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -86,7 +87,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
             ),
         )
 
-        behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
+        behandlingskontrollService.fortsettBehandling(behandling.id, SecureLog.Context.tom())
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         behandlingsstegstilstand.size shouldBe 1
@@ -100,14 +101,14 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `fortsettBehandling skal ikke fortsette til grunnlagssteg når behandling venter på varsel steg`() {
-        behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
+        behandlingskontrollService.fortsettBehandling(behandling.id, SecureLog.Context.tom())
         var behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         behandlingsstegstilstand.size shouldBe 1
         behandlingsstegstilstand[0].behandlingssteg shouldBe VARSEL
         behandlingsstegstilstand[0].behandlingsstegsstatus shouldBe VENTER
         assertBehandlingsstatus(behandling.id, Behandlingsstatus.UTREDES)
 
-        behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
+        behandlingskontrollService.fortsettBehandling(behandling.id, SecureLog.Context.tom())
 
         behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         behandlingsstegstilstand.size shouldBe 1
@@ -130,7 +131,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
             ),
         )
 
-        behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
+        behandlingskontrollService.fortsettBehandling(behandling.id, SecureLog.Context.tom())
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         behandlingsstegstilstand.size shouldBe 1
@@ -146,7 +147,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
     fun `fortsettBehandling skal fortsette til grunnlagssteg når varselsrespons ble mottatt uten kravgrunnlag`() {
         lagBehandlingsstegstilstand(setOf(Behandlingsstegsinfo(VARSEL, UTFØRT)))
 
-        behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
+        behandlingskontrollService.fortsettBehandling(behandling.id, SecureLog.Context.tom())
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         behandlingsstegstilstand.size shouldBe 2
@@ -166,7 +167,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         val oppdatertKravgrunnlag = kravgrunnlag.copy(sperret = true)
         kravgrunnlagRepository.insert(oppdatertKravgrunnlag)
 
-        behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
+        behandlingskontrollService.fortsettBehandling(behandling.id, SecureLog.Context.tom())
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         behandlingsstegstilstand.size shouldBe 2
@@ -191,7 +192,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         val kravgrunnlag = lagKravgrunnlag(behandling.id)
         kravgrunnlagRepository.insert(kravgrunnlag)
 
-        behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
+        behandlingskontrollService.fortsettBehandling(behandling.id, SecureLog.Context.tom())
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         behandlingsstegstilstand.size shouldBe 2
@@ -216,7 +217,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         )
         kravgrunnlagRepository.insert(lagKravgrunnlag(behandling.id))
 
-        behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
+        behandlingskontrollService.fortsettBehandling(behandling.id, SecureLog.Context.tom())
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         behandlingsstegstilstand.size shouldBe 1
@@ -233,7 +234,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(setOf(Behandlingsstegsinfo(FAKTA, UTFØRT)))
         kravgrunnlagRepository.insert(lagKravgrunnlag(behandling.id))
 
-        behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
+        behandlingskontrollService.fortsettBehandling(behandling.id, SecureLog.Context.tom())
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         behandlingsstegstilstand.size shouldBe 2
@@ -256,7 +257,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         )
         kravgrunnlagRepository.insert(lagKravgrunnlag(behandling.id))
 
-        behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
+        behandlingskontrollService.fortsettBehandling(behandling.id, SecureLog.Context.tom())
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         behandlingsstegstilstand.size shouldBe 3
@@ -279,7 +280,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
             ),
         )
 
-        behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
+        behandlingskontrollService.fortsettBehandling(behandling.id, SecureLog.Context.tom())
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
 
@@ -306,7 +307,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
 
         kravgrunnlagRepository.insert(lagKravgrunnlag(behandling.id))
 
-        behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
+        behandlingskontrollService.fortsettBehandling(behandling.id, SecureLog.Context.tom())
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         behandlingsstegstilstand.size shouldBe 5
@@ -334,9 +335,9 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
 
         behandlingskontrollService
             .tilbakehoppBehandlingssteg(
-                behandlingId = behandling.id,
-                behandlingsstegsinfo =
-                    lagBehandlingsstegsinfo(VARSEL, Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING),
+                behandling.id,
+                lagBehandlingsstegsinfo(VARSEL, Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING),
+                SecureLog.Context.tom(),
             )
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         behandlingsstegstilstand.size shouldBe 5
@@ -373,6 +374,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
                 behandlingId = behandling.id,
                 behandlingsstegsinfo =
                     lagBehandlingsstegsinfo(GRUNNLAG, Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG),
+                logContext = SecureLog.Context.tom(),
             )
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
@@ -407,6 +409,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
             behandlingId = behandling.id,
             venteårsak = Venteårsak.AVVENTER_DOKUMENTASJON,
             tidsfrist = tidsfrist,
+            logContext = SecureLog.Context.tom(),
         )
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
@@ -437,6 +440,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
                     behandlingId = behandling.id,
                     venteårsak = Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
                     tidsfrist = tidsfrist.minusDays(5),
+                    logContext = SecureLog.Context.tom(),
                 )
             })
         exception.message shouldBe "Behandling ${behandling.id} har ikke aktivt steg"
@@ -461,6 +465,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
             behandlingId = behandling.id,
             venteårsak = Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
             tidsfrist = tidsfrist.plusWeeks(2),
+            logContext = SecureLog.Context.tom(),
         )
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)

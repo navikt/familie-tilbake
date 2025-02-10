@@ -19,6 +19,7 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.sakshendelse.Behandlingstilstand
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
+import no.nav.familie.tilbake.log.SecureLog
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -88,6 +89,7 @@ class BehandlingTilstandService(
     fun hentBehandlingensTilstand(behandlingId: UUID): Behandlingstilstand {
         val behandling: Behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandling.id.toString())
         val eksternBehandling = behandling.aktivFagsystemsbehandling.eksternId
         val behandlingsresultat = behandling.sisteResultat?.type ?: Behandlingsresultatstype.IKKE_FASTSATT
         val behandlingsstegstilstand =
@@ -108,7 +110,11 @@ class BehandlingTilstandService(
             totalFeilutbetaltPeriode = Periode(fakta.totalFeilutbetaltPeriode.fom, fakta.totalFeilutbetaltPeriode.tom)
             totalFeilutbetaltBeløp = fakta.totaltFeilutbetaltBeløp
         } else if (behandlingsstegstilstand?.behandlingssteg == Behandlingssteg.VARSEL && !erBehandlingHenlagt) {
-            val varsel = behandling.aktivtVarsel ?: throw Feil("Behandling $behandlingId venter på varselssteg uten varsel data")
+            val varsel =
+                behandling.aktivtVarsel ?: throw Feil(
+                    message = "Behandling $behandlingId venter på varselssteg uten varsel data",
+                    logContext = logContext,
+                )
             val førsteDagIVarselsperiode = varsel.perioder.minOf { it.fom }
             val sisteDagIVarselsperiode = varsel.perioder.maxOf { it.tom }
 

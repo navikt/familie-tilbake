@@ -5,6 +5,7 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.SkalSammenslåPerioder
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -19,7 +20,8 @@ class PeriodeService(
 ) {
     fun erEnsligForsørgerOgPerioderLike(behandlingId: UUID): SkalSammenslåPerioder {
         val fagsak = fagsakRepository.finnFagsakForBehandlingId(behandlingId)
-        if (harKunEnPeriode(behandlingId)) return SkalSammenslåPerioder.IKKE_AKTUELT
+        val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandlingId.toString())
+        if (harKunEnPeriode(behandlingId, logContext)) return SkalSammenslåPerioder.IKKE_AKTUELT
 
         if (erPerioderLike(behandlingId) && fagsak.ytelsestype.tilTema() == Tema.ENF) {
             return SkalSammenslåPerioder.JA
@@ -28,7 +30,10 @@ class PeriodeService(
         return SkalSammenslåPerioder.IKKE_AKTUELT
     }
 
-    private fun harKunEnPeriode(behandlingId: UUID): Boolean {
+    private fun harKunEnPeriode(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ): Boolean {
         val harEnFaktaPeriode = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId).feilutbetaltePerioder.size == 1
         val harEnVilkårsperiode = vilkårsvurderingService.hentVilkårsvurdering(behandlingId).perioder.size == 1
 

@@ -13,6 +13,8 @@ import no.nav.familie.tilbake.config.IntegrasjonerConfig
 import no.nav.familie.tilbake.iverksettvedtak.TilbakekrevingsvedtakMarshaller
 import no.nav.familie.tilbake.iverksettvedtak.domain.ØkonomiXmlSendt
 import no.nav.familie.tilbake.iverksettvedtak.ØkonomiXmlSendtRepository
+import no.nav.familie.tilbake.log.LogService
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
 import no.nav.tilbakekreving.typer.v1.MmelDto
 import org.slf4j.LoggerFactory
@@ -25,6 +27,7 @@ class AvstemmingService(
     private val sendtXmlRepository: ØkonomiXmlSendtRepository,
     private val fagsakRepository: FagsakRepository,
     private val integrasjonerConfig: IntegrasjonerConfig,
+    private val logService: LogService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -39,7 +42,7 @@ class AvstemmingService(
                     return@mapNotNull null
                 }
                 val behandling = behandlingRepository.findByIdOrThrow(sendtVedtak.behandlingId)
-                val oppsummering: TilbakekrevingsvedtakOppsummering = oppsummer(sendtVedtak)
+                val oppsummering: TilbakekrevingsvedtakOppsummering = oppsummer(sendtVedtak, logService.contextFraBehandling(sendtVedtak.behandlingId))
                 if (erFørstegangsvedtakUtenTilbakekreving(behandling, oppsummering)) {
                     antallFørstegangsvedtakUtenTilbakekreving++
                     return@mapNotNull null
@@ -106,10 +109,13 @@ class AvstemmingService(
         behandling: Behandling,
     ): Boolean = behandling.type == Behandlingstype.REVURDERING_TILBAKEKREVING && oppsummering.harIngenTilbakekreving()
 
-    private fun oppsummer(sendtMelding: ØkonomiXmlSendt): TilbakekrevingsvedtakOppsummering {
+    private fun oppsummer(
+        sendtMelding: ØkonomiXmlSendt,
+        logContext: SecureLog.Context,
+    ): TilbakekrevingsvedtakOppsummering {
         val xml: String = sendtMelding.melding
         val melding: TilbakekrevingsvedtakRequest =
-            TilbakekrevingsvedtakMarshaller.unmarshall(xml, sendtMelding.behandlingId, sendtMelding.id)
+            TilbakekrevingsvedtakMarshaller.unmarshall(xml, sendtMelding.behandlingId, sendtMelding.id, logContext)
         return TilbakekrevingsvedtakOppsummering.oppsummer(melding.tilbakekrevingsvedtak)
     }
 

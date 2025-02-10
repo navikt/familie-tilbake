@@ -16,6 +16,7 @@ import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBre
 import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.totrinn.TotrinnService
 import org.slf4j.LoggerFactory
@@ -35,7 +36,10 @@ class Fattevedtakssteg(
 ) : IBehandlingssteg {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun utførSteg(behandlingId: UUID) {
+    override fun utførSteg(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FATTE_VEDTAK} steg")
     }
 
@@ -43,28 +47,33 @@ class Fattevedtakssteg(
     override fun utførSteg(
         behandlingId: UUID,
         behandlingsstegDto: BehandlingsstegDto,
+        logContext: SecureLog.Context,
     ) {
         val fatteVedtaksstegDto = behandlingsstegDto as BehandlingsstegFatteVedtaksstegDto
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
 
         // Steg 1: Validere behandlingens manuelle brevmottakere
-        validerManuelleBrevmottakere(behandlingId, fatteVedtaksstegDto.totrinnsvurderinger.all { it.godkjent })
+        validerManuelleBrevmottakere(
+            behandlingId = behandlingId,
+            erAlleStegGodkjente = fatteVedtaksstegDto.totrinnsvurderinger.all { it.godkjent },
+            logContext = logContext,
+        )
 
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FATTE_VEDTAK} steg")
         // Steg 2: Oppdater ansvarligBeslutter
-        totrinnService.validerAnsvarligBeslutter(behandlingId)
-        totrinnService.oppdaterAnsvarligBeslutter(behandlingId)
+        totrinnService.validerAnsvarligBeslutter(behandlingId, logContext)
+        totrinnService.oppdaterAnsvarligBeslutter(behandlingId, logContext)
 
         // Steg 3: Lagre totrinnsvurderinger
-        totrinnService.lagreTotrinnsvurderinger(behandlingId, fatteVedtaksstegDto.totrinnsvurderinger)
+        totrinnService.lagreTotrinnsvurderinger(behandlingId, fatteVedtaksstegDto.totrinnsvurderinger, logContext)
 
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         // Steg 4: Lukk Godkjenne vedtak oppgaver
         oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId = behandlingId, oppgavetype = Oppgavetype.GodkjenneVedtak.name)
 
         // Steg 5: Flytter behandling tilbake til Foreslå Vedtak om beslutter underkjente noen steg
         val finnesUnderkjenteSteg = fatteVedtaksstegDto.totrinnsvurderinger.any { !it.godkjent }
         if (finnesUnderkjenteSteg) {
-            behandlingskontrollService.behandleStegPåNytt(behandlingId, Behandlingssteg.FORESLÅ_VEDTAK)
+            behandlingskontrollService.behandleStegPåNytt(behandlingId, Behandlingssteg.FORESLÅ_VEDTAK, logContext)
 
             historikkTaskService.lagHistorikkTask(
                 behandlingId,
@@ -85,6 +94,7 @@ class Fattevedtakssteg(
                     Behandlingssteg.FATTE_VEDTAK,
                     Behandlingsstegstatus.UTFØRT,
                 ),
+                logContext,
             )
             historikkTaskService.lagHistorikkTask(
                 behandlingId,
@@ -94,13 +104,16 @@ class Fattevedtakssteg(
             // Steg 6: Opprett behandlingsvedtak og oppdater behandlingsresultat
             behandlingsvedtakService.opprettBehandlingsvedtak(behandlingId)
         }
-        behandlingskontrollService.fortsettBehandling(behandlingId)
+        behandlingskontrollService.fortsettBehandling(behandlingId, logContext)
     }
 
     @Transactional
-    override fun utførStegAutomatisk(behandlingId: UUID) {
+    override fun utførStegAutomatisk(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FATTE_VEDTAK} steg og behandler automatisk..")
-        totrinnService.oppdaterAnsvarligBeslutter(behandlingId)
+        totrinnService.oppdaterAnsvarligBeslutter(behandlingId, logContext)
         totrinnService.lagreFastTotrinnsvurderingerForAutomatiskSaksbehandling(behandlingId)
 
         behandlingskontrollService.oppdaterBehandlingsstegStatus(
@@ -109,6 +122,7 @@ class Fattevedtakssteg(
                 Behandlingssteg.FATTE_VEDTAK,
                 Behandlingsstegstatus.UTFØRT,
             ),
+            logContext,
         )
         historikkTaskService.lagHistorikkTask(
             behandlingId,
@@ -116,11 +130,14 @@ class Fattevedtakssteg(
             Aktør.BESLUTTER,
         )
         behandlingsvedtakService.opprettBehandlingsvedtak(behandlingId)
-        behandlingskontrollService.fortsettBehandling(behandlingId)
+        behandlingskontrollService.fortsettBehandling(behandlingId, logContext)
     }
 
     @Transactional
-    override fun gjenopptaSteg(behandlingId: UUID) {
+    override fun gjenopptaSteg(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.FATTE_VEDTAK} steg")
         behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
@@ -128,6 +145,7 @@ class Fattevedtakssteg(
                 Behandlingssteg.FATTE_VEDTAK,
                 Behandlingsstegstatus.KLAR,
             ),
+            logContext,
         )
     }
 
@@ -136,12 +154,14 @@ class Fattevedtakssteg(
     private fun validerManuelleBrevmottakere(
         behandlingId: UUID,
         erAlleStegGodkjente: Boolean,
+        logContext: SecureLog.Context,
     ) {
         val manuelleBrevmottakere by lazy { manuellBrevmottakerRepository.findByBehandlingId(behandlingId) }
         if (erAlleStegGodkjente && !BrevmottakerAdresseValidering.erBrevmottakereGyldige(manuelleBrevmottakere)) {
             throw Feil(
                 message = "Det finnes ugyldige brevmottakere, vi kan ikke beslutte vedtaket",
                 frontendFeilmelding = "Adressen som er lagt til manuelt har ugyldig format, og vedtaksbrevet kan ikke sendes. Behandlingen må underkjennes, og saksbehandler må legge til manuell adresse på nytt.",
+                logContext = logContext,
             )
         }
     }

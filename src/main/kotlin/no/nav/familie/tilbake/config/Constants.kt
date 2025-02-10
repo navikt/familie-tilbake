@@ -5,6 +5,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.log.SecureLog
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.Period
@@ -32,7 +33,7 @@ object Constants {
 
     const val STATUSMELDING_XML_ROOT_ELEMENT: String = "urn:endringKravOgVedtakstatus"
 
-    fun rettsgebyrForÅr(år: Int) = rettsgebyrForDato.filter { it.gyldigFra.year <= år }.maxByOrNull { it.gyldigFra }?.beløp ?: throw Feil("Rettsgebyr for år $år er ikke satt")
+    fun rettsgebyrForÅr(år: Int) = rettsgebyrForDato.filter { it.gyldigFra.year <= år }.maxByOrNull { it.gyldigFra }?.beløp
 
     val rettsgebyr = rettsgebyrForDato.filter { it.gyldigFra <= LocalDate.now() }.maxByOrNull { it.gyldigFra }!!.beløp
 
@@ -67,30 +68,54 @@ object Constants {
     const val AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_BEGRUNNELSE = "Automatisk behandlet. Feilutbetaling under 4 rettsgebyr. Beløpet skal ikke tilbakebetales."
     const val AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_AKTSOMHET_BEGRUNNELSE = "Automatisk behandlet. Feilutbetaling under 4 rettsgebyr. Bruker har ikke handlet forsettlig eller grovt uaktsomt."
 
-    fun hentAutomatiskSaksbehandlingBegrunnelse(behandling: Behandling): String =
+    fun hentAutomatiskSaksbehandlingBegrunnelse(
+        behandling: Behandling,
+        logContext: SecureLog.Context,
+    ): String =
         when (behandling.saksbehandlingstype) {
-            Saksbehandlingstype.ORDINÆR -> throw Feil("Kan ikke utlede automatisk saksbehandlingsbegrunnelse for ordinære saker")
+            Saksbehandlingstype.ORDINÆR -> throw Feil(
+                message = "Kan ikke utlede automatisk saksbehandlingsbegrunnelse for ordinære saker",
+                logContext = logContext,
+            )
             Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR -> behandling.begrunnelseForTilbakekreving ?: AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_FAKTA_BEGRUNNELSE
             Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP -> AUTOMATISK_SAKSBEHANDLING_BEGRUNNELSE
         }
 
-    fun hentAutomatiskForeldelsesbegrunnelse(saksbehandlingstype: Saksbehandlingstype): String =
+    fun hentAutomatiskForeldelsesbegrunnelse(
+        saksbehandlingstype: Saksbehandlingstype,
+        logContext: SecureLog.Context,
+    ): String =
         when (saksbehandlingstype) {
-            Saksbehandlingstype.ORDINÆR -> throw Feil("Kan ikke utlede automatisk foreldelsesbegrunnelse for ordinære saker")
+            Saksbehandlingstype.ORDINÆR -> throw Feil(
+                message = "Kan ikke utlede automatisk foreldelsesbegrunnelse for ordinære saker",
+                logContext = logContext,
+            )
             Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR -> AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_FORELDELSE_BEGRUNNELSE
             Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP -> AUTOMATISK_SAKSBEHANDLING_BEGRUNNELSE
         }
 
-    fun hentAutomatiskVilkårsvurderingBegrunnelse(saksbehandlingstype: Saksbehandlingstype): String =
+    fun hentAutomatiskVilkårsvurderingBegrunnelse(
+        saksbehandlingstype: Saksbehandlingstype,
+        logContext: SecureLog.Context,
+    ): String =
         when (saksbehandlingstype) {
-            Saksbehandlingstype.ORDINÆR -> throw Feil("Kan ikke utlede automatisk vilkårsvurderingsbegrunnelse for ordinære saker")
+            Saksbehandlingstype.ORDINÆR -> throw Feil(
+                message = "Kan ikke utlede automatisk vilkårsvurderingsbegrunnelse for ordinære saker",
+                logContext = logContext,
+            )
             Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR -> AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_BEGRUNNELSE
             Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP -> AUTOMATISK_SAKSBEHANDLING_BEGRUNNELSE
         }
 
-    fun hentAutomatiskVilkårsvurderingAktsomhetBegrunnelse(saksbehandlingstype: Saksbehandlingstype): String =
+    fun hentAutomatiskVilkårsvurderingAktsomhetBegrunnelse(
+        saksbehandlingstype: Saksbehandlingstype,
+        logContext: SecureLog.Context,
+    ): String =
         when (saksbehandlingstype) {
-            Saksbehandlingstype.ORDINÆR -> throw Feil("Kan ikke utlede automatisk aktsomhetsbegrunnelse for ordinære saker")
+            Saksbehandlingstype.ORDINÆR -> throw Feil(
+                message = "Kan ikke utlede automatisk aktsomhetsbegrunnelse for ordinære saker",
+                logContext = logContext,
+            )
             Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR -> AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_AKTSOMHET_BEGRUNNELSE
             Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP -> AUTOMATISK_SAKSBEHANDLING_BEGRUNNELSE
         }

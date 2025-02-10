@@ -18,6 +18,8 @@ import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBre
 import no.nav.familie.tilbake.dokumentbestilling.varsel.manuelt.ManueltVarselbrevService
 import no.nav.familie.tilbake.dokumentbestilling.varsel.manuelt.SendManueltVarselbrevTask
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.log.LogService
+import no.nav.familie.tilbake.log.SecureLog
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -33,6 +35,7 @@ class DokumentbehandlingService(
     private val manueltVarselBrevService: ManueltVarselbrevService,
     private val innhentDokumentasjonBrevService: InnhentDokumentasjonbrevService,
     private val manuellBrevmottakerRepository: ManuellBrevmottakerRepository,
+    private val logService: LogService,
 ) {
     fun bestillBrev(
         behandlingId: UUID,
@@ -40,13 +43,15 @@ class DokumentbehandlingService(
         fritekst: String,
     ) {
         val behandling: Behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        val ansvarligSaksbehandler = ContextService.hentSaksbehandler()
+        val logContext = logService.contextFraBehandling(behandling.id)
+        val ansvarligSaksbehandler = ContextService.hentSaksbehandler(logContext)
 
         val manuelleBrevmottakere = manuellBrevmottakerRepository.findByBehandlingId(behandlingId)
         if (!BrevmottakerAdresseValidering.erBrevmottakereGyldige(manuelleBrevmottakere)) {
             throw Feil(
                 message = "Det finnes ugyldige brevmottakere i utsending av manuelt brev",
                 frontendFeilmelding = "Adressen som er lagt til manuelt har ugyldig format, og brevet kan ikke sendes. Du må legge til manuell adresse på nytt.",
+                logContext = logContext,
             )
         }
 
@@ -54,9 +59,9 @@ class DokumentbehandlingService(
             behandlingRepository.update(behandling.copy(ansvarligSaksbehandler = ansvarligSaksbehandler))
         }
         if (Dokumentmalstype.VARSEL == maltype || Dokumentmalstype.KORRIGERT_VARSEL == maltype) {
-            opprettSendManueltVarselbrevTaskOgSettPåVent(behandling, maltype, fritekst)
+            opprettSendManueltVarselbrevTaskOgSettPåVent(behandling, maltype, fritekst, logContext)
         } else if (Dokumentmalstype.INNHENT_DOKUMENTASJON == maltype) {
-            håndterInnhentDokumentasjon(behandling, fritekst)
+            håndterInnhentDokumentasjon(behandling, fritekst, logContext)
         }
     }
 
@@ -78,6 +83,7 @@ class DokumentbehandlingService(
         behandling: Behandling,
         maltype: Dokumentmalstype,
         fritekst: String,
+        logContext: SecureLog.Context,
     ) {
         if (!kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)) {
             error("Kan ikke sende varselbrev fordi grunnlag finnes ikke for behandlingId = ${behandling.id}")
@@ -86,21 +92,26 @@ class DokumentbehandlingService(
         val sendVarselbrev =
             SendManueltVarselbrevTask.opprettTask(behandling.id, fagsystem, maltype, fritekst)
         taskService.save(sendVarselbrev)
-        settPåVent(behandling)
+        settPåVent(behandling, logContext)
     }
 
-    private fun settPåVent(behandling: Behandling) {
+    private fun settPåVent(
+        behandling: Behandling,
+        logContext: SecureLog.Context,
+    ) {
         val tidsfrist = Constants.saksbehandlersTidsfrist()
         behandlingskontrollService.settBehandlingPåVent(
             behandling.id,
             Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
             tidsfrist,
+            logContext,
         )
     }
 
     private fun håndterInnhentDokumentasjon(
         behandling: Behandling,
         fritekst: String,
+        logContext: SecureLog.Context,
     ) {
         if (!kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)) {
             error("Kan ikke sende innhent dokumentasjonsbrev fordi grunnlag finnes ikke for behandlingId = ${behandling.id}")
@@ -109,6 +120,6 @@ class DokumentbehandlingService(
         val sendInnhentDokumentasjonBrev =
             InnhentDokumentasjonbrevTask.opprettTask(behandling.id, fagsystem, fritekst)
         taskService.save(sendInnhentDokumentasjonBrev)
-        settPåVent(behandling)
+        settPåVent(behandling, logContext)
     }
 }

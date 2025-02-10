@@ -22,8 +22,8 @@ import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.exceptionhandler.ManglerOppgaveFeil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.person.PersonService
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.core.env.Environment
 import org.springframework.data.domain.Pageable
@@ -43,7 +43,6 @@ class OppgaveService(
     private val environment: Environment,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
-    private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
 
     private val antallOppgaveTyper =
         Oppgavetype.values().associateWith {
@@ -53,6 +52,7 @@ class OppgaveService(
     fun finnOppgaveForBehandlingUtenOppgaveType(behandlingId: UUID): Oppgave {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandling.id.toString())
 
         val finnOppgaveRequest =
             FinnOppgaveRequest(
@@ -62,17 +62,25 @@ class OppgaveService(
         val finnOppgaveResponse = integrasjonerClient.finnOppgaver(finnOppgaveRequest)
         when {
             finnOppgaveResponse.oppgaver.size > 1 -> {
-                secureLogger.error(
-                    "Mer enn en oppgave åpen for behandling ${behandling.eksternBrukId}, " +
-                        "$finnOppgaveRequest, $finnOppgaveResponse",
+                SecureLog.medContext(logContext).error(
+                    "Mer enn en oppgave åpen for behandling {}, {}, {}",
+                    behandling.eksternBrukId,
+                    finnOppgaveRequest,
+                    finnOppgaveResponse,
                 )
-                throw Feil("Har mer enn en åpen oppgave for behandling ${behandling.eksternBrukId}")
+                throw Feil(
+                    message = "Har mer enn en åpen oppgave for behandling ${behandling.eksternBrukId}",
+                    logContext = logContext,
+                )
             }
 
             finnOppgaveResponse.oppgaver.isEmpty() -> {
-                secureLogger.error(
-                    "Fant ingen oppgave for behandling ${behandling.eksternBrukId} på fagsak ${fagsak.eksternFagsakId}, " +
-                        "$finnOppgaveRequest, $finnOppgaveResponse",
+                SecureLog.medContext(logContext).error(
+                    "Fant ingen oppgave for behandling {} på fagsak {}, {}, {}",
+                    behandling.eksternBrukId,
+                    fagsak.eksternFagsakId,
+                    finnOppgaveRequest,
+                    finnOppgaveResponse,
                 )
                 throw ManglerOppgaveFeil("Fant ingen oppgave for behandling ${behandling.eksternBrukId} på fagsak ${fagsak.eksternFagsakId}. Oppgaven kan være manuelt lukket.")
             }
@@ -95,7 +103,8 @@ class OppgaveService(
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsakId = behandling.fagsakId
         val fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
-        val aktørId = personService.hentAktivAktørId(fagsak.bruker.ident, fagsak.fagsystem)
+        val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandling.id.toString())
+        val aktørId = personService.hentAktivAktørId(fagsak.bruker.ident, fagsak.fagsystem, logContext)
 
         // Sjekk om oppgave allerede finnes for behandling
         val (_, finnOppgaveRespons) = finnOppgave(behandling, oppgavetype, fagsak)
@@ -143,20 +152,22 @@ class OppgaveService(
         oppgavetype: Oppgavetype,
         behandling: Behandling,
     ): Oppgave? {
-        val (_, finnOppgaveResponse) = finnOppgave(behandling, oppgavetype, fagsakRepository.findByIdOrThrow(behandling.fagsakId))
+        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandling.id.toString())
+        val (_, finnOppgaveResponse) = finnOppgave(behandling, oppgavetype, fagsak)
         val alleOppgaver = finnOppgaveResponse.oppgaver
         val ikkeFerdigstilteOppgaver = alleOppgaver.filter { it.status != StatusEnum.FERDIGSTILT }
         if (ikkeFerdigstilteOppgaver.size > 1) {
-            secureLogger.warn(
+            SecureLog.medContext(logContext).warn(
                 "Fant flere enn en oppgave for behandling med fagsakId={}, oppgaveinfo: ({})",
                 behandling.fagsakId,
-                ikkeFerdigstilteOppgaver.map { "opprettet: ${it.opprettetTidspunkt}, type: ${it.oppgavetype}" },
+                ikkeFerdigstilteOppgaver.joinToString(",") { "opprettet: ${it.opprettetTidspunkt}, type: ${it.oppgavetype}" },
             )
         } else if (ikkeFerdigstilteOppgaver.isEmpty()) {
-            secureLogger.warn(
+            SecureLog.medContext(logContext).warn(
                 "Fant ingen fagsystemsaker som ikke er ferdigstilte fagsakId={}, oppgaveinfo: ({})",
                 behandling.fagsakId,
-                alleOppgaver.map { "opprettet: ${it.opprettetTidspunkt}, type: ${it.oppgavetype}, status: ${it.status}" },
+                alleOppgaver.joinToString(",") { "opprettet: ${it.opprettetTidspunkt}, type: ${it.oppgavetype}, status: ${it.status}" },
             )
         }
         return ikkeFerdigstilteOppgaver.singleOrNull()
@@ -208,23 +219,31 @@ class OppgaveService(
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val (finnOppgaveRequest, finnOppgaveResponse) = finnOppgave(behandling, oppgavetype, fagsak)
+        val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId.toString(), behandling.id.toString())
 
         val tilbakekrevingsOppgaver = finnOppgaveResponse.oppgaver.filtrerTilbakekrevingsOppgave()
 
         when {
             tilbakekrevingsOppgaver.size > 1 -> {
-                secureLogger.error(
-                    "Mer enn en oppgave åpen for behandling ${behandling.eksternBrukId}, " +
-                        "$finnOppgaveRequest, $finnOppgaveResponse",
+                SecureLog.medContext(logContext).error(
+                    "Mer enn en oppgave åpen for behandling {}, {}, {}",
+                    behandling.eksternBrukId,
+                    finnOppgaveRequest,
+                    finnOppgaveResponse,
                 )
-                throw Feil("Har mer enn en åpen oppgave for behandling ${behandling.eksternBrukId}")
+                throw Feil(
+                    message = "Har mer enn en åpen oppgave for behandling ${behandling.eksternBrukId}",
+                    logContext = logContext,
+                )
             }
 
             tilbakekrevingsOppgaver.isEmpty() -> {
                 logger.error("Fant ingen oppgave å ferdigstille for behandling ${behandling.eksternBrukId}")
-                secureLogger.error(
-                    "Fant ingen oppgave å ferdigstille ${behandling.eksternBrukId}, " +
-                        "$finnOppgaveRequest, $finnOppgaveResponse",
+                SecureLog.medContext(logContext).error(
+                    "Fant ingen oppgave å ferdigstille {}, {}, {}",
+                    behandling.eksternBrukId,
+                    finnOppgaveRequest,
+                    finnOppgaveResponse,
                 )
             }
 

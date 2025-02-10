@@ -61,7 +61,6 @@ class DistribusjonshåndteringServiceTest {
             manuelleBrevmottakerRepository = manuelleBrevmottakerRepository,
             eksterneDataForBrevService = eksterneDataForBrevService,
             organisasjonService = mockk(),
-            featureToggleService = featureToggleService,
         )
     private val distribusjonshåndteringService =
         DistribusjonshåndteringService(
@@ -102,16 +101,16 @@ class DistribusjonshåndteringServiceTest {
     fun setUp() {
         every { behandlingRepository.findById(any()) } returns Optional.of(behandling)
         every { fagsakRepository.findById(any()) } returns Optional.of(fagsak)
-        every { eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem) } returns
+        every { eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem, any()) } returns
             personinfoBruker
         every {
-            eksterneDataForBrevService.hentAdresse(personinfoBruker, BRUKER, behandling.aktivVerge, any())
+            eksterneDataForBrevService.hentAdresse(personinfoBruker, BRUKER, behandling.aktivVerge, any(), any())
         } returns brukerAdresse
         every {
-            eksterneDataForBrevService.hentAdresse(personinfoBruker, VERGE, behandling.aktivVerge, any())
+            eksterneDataForBrevService.hentAdresse(personinfoBruker, VERGE, behandling.aktivVerge, any(), any())
         } returns vergeAdresse
         every { eksterneDataForBrevService.hentSaksbehandlernavn(any()) } returns behandling.ansvarligSaksbehandler
-        every { eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(any()) } returns behandling.ansvarligSaksbehandler
+        every { eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(any(), any()) } returns behandling.ansvarligSaksbehandler
         every { brevsporingService.finnSisteVarsel(any()) } returns Testdata.lagBrevsporing(behandling.id)
         every { featureToggleService.isEnabled(any()) } returns false
     }
@@ -122,7 +121,7 @@ class DistribusjonshåndteringServiceTest {
 
         every { behandlingRepository.findById(any()) } returns Optional.of(behandlingUtenVerge)
         every {
-            eksterneDataForBrevService.hentAdresse(personinfoBruker, BRUKER, behandlingUtenVerge.aktivVerge, any())
+            eksterneDataForBrevService.hentAdresse(personinfoBruker, BRUKER, behandlingUtenVerge.aktivVerge, any(), any())
         } returns brukerAdresse
 
         val task = SendHenleggelsesbrevTask.opprettTask(behandling.id, fagsak.fagsystem, "fritekst")

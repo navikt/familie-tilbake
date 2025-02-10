@@ -55,6 +55,7 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
 import no.nav.familie.tilbake.lagDatoIkkeForeldet
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.oppgave.OppdaterOppgaveTask
 import no.nav.familie.tilbake.oppgave.OppdaterPrioritetTask
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
@@ -311,6 +312,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                         Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
                         LocalDate.now().plusWeeks(4),
                     ),
+                logContext = SecureLog.Context.tom(),
             )
         val endretKravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_BA_ENDR.xml")
 
@@ -372,6 +374,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                 ),
                 "Fakta begrunnelse",
             ),
+            SecureLog.Context.tom(),
         )
         // Håndter foreldelse steg
         stegService.håndterSteg(
@@ -389,6 +392,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                     ),
                 ),
             ),
+            SecureLog.Context.tom(),
         )
 
         faktaFeilutbetalingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldNotBeNull()
@@ -472,6 +476,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                 ),
                 "Fakta begrunnelse",
             ),
+            SecureLog.Context.tom(),
         )
         // Håndter foreldelse steg
         stegService.håndterSteg(
@@ -486,6 +491,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                     ),
                 ),
             ),
+            SecureLog.Context.tom(),
         )
 
         // Håndter Vilkårsvurdering steg
@@ -499,6 +505,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         stegService.håndterSteg(
             behandling.id,
             BehandlingsstegVilkårsvurderingDto(listOf(periodeMedGodTro)),
+            SecureLog.Context.tom(),
         )
 
         // Håndter Foreslå Vedtak steg
@@ -510,6 +517,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                     emptyList(),
                 ),
             ),
+            SecureLog.Context.tom(),
         )
 
         faktaFeilutbetalingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldNotBeNull()

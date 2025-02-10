@@ -14,6 +14,7 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
+import no.nav.familie.tilbake.log.LogService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -30,6 +31,7 @@ class AvsluttBehandlingTask(
     private val behandlingRepository: BehandlingRepository,
     private val behandlingskontrollService: BehandlingskontrollService,
     private val historikkTaskService: HistorikkTaskService,
+    private val logService: LogService,
 ) : AsyncTaskStep {
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -39,13 +41,17 @@ class AvsluttBehandlingTask(
         val behandlingId = UUID.fromString(task.payload)
 
         var behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val logContext = logService.contextFraBehandling(behandling.id)
         if (behandling.status == Behandlingsstatus.AVSLUTTET) {
             log.info("Behandling er allerede avsluttet")
             return
         }
 
         if (!behandling.erUnderIverksettelse) {
-            throw Feil(message = "Behandling med id=$behandlingId kan ikke avsluttes")
+            throw Feil(
+                message = "Behandling med id=$behandlingId kan ikke avsluttes",
+                logContext = logContext,
+            )
         }
 
         behandling = behandlingRepository.findByIdOrThrow(behandlingId)
@@ -63,6 +69,7 @@ class AvsluttBehandlingTask(
                     behandlingssteg = Behandlingssteg.AVSLUTTET,
                     behandlingsstegstatus = Behandlingsstegstatus.UTFØRT,
                 ),
+                logContext = logContext,
             )
 
         historikkTaskService.lagHistorikkTask(

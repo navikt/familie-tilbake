@@ -19,6 +19,7 @@ import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevsporing
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
+import no.nav.familie.tilbake.log.SecureLog
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -86,11 +87,12 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `lagHistorikkinnslag skal lage historikkinnslag når behandling setter på vent automatisk`() {
-        behandlingskontrollService.fortsettBehandling(behandlingId)
+        behandlingskontrollService.fortsettBehandling(behandlingId, SecureLog.Context.tom())
         behandlingskontrollService.settBehandlingPåVent(
             behandlingId,
             Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
             LocalDate.now().plusDays(20),
+            SecureLog.Context.tom(),
         )
 
         val opprettetHistorikkInnslag =
@@ -114,11 +116,12 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `lagHistorikkinnslag skal lage historikkinnslag når behandling setter på vent manuelt`() {
-        behandlingskontrollService.fortsettBehandling(behandlingId)
+        behandlingskontrollService.fortsettBehandling(behandlingId, SecureLog.Context.tom())
         behandlingskontrollService.settBehandlingPåVent(
             behandlingId,
             Venteårsak.AVVENTER_DOKUMENTASJON,
             LocalDate.now().plusDays(20),
+            SecureLog.Context.tom(),
         )
 
         val opprettetHistorikkInnslag =

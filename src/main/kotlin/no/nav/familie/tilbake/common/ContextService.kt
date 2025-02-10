@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.common
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.RolleConfig
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.InnloggetBrukertilgang
 import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
@@ -14,18 +15,29 @@ import org.springframework.http.HttpStatus
 object ContextService {
     private const val SYSTEM_NAVN = "System"
 
-    fun hentSaksbehandler(): String = hentPåloggetSaksbehandler(Constants.BRUKER_ID_VEDTAKSLØSNINGEN)
+    fun hentSaksbehandler(logContext: SecureLog.Context): String = hentPåloggetSaksbehandler(Constants.BRUKER_ID_VEDTAKSLØSNINGEN, logContext)
 
-    fun hentPåloggetSaksbehandler(defaultverdi: String?): String {
+    fun hentPåloggetSaksbehandler(
+        defaultverdi: String?,
+        logContext: SecureLog.Context,
+    ): String {
         return Result
             .runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
             .fold(
                 onSuccess = {
                     return it.getAzureadClaimsOrNull()?.get("NAVident")?.toString()
                         ?: defaultverdi
-                        ?: throw Feil("Ingen defaultverdi for bruker ved maskinelt oppslag")
+                        ?: throw Feil(
+                            message = "Ingen defaultverdi for bruker ved maskinelt oppslag",
+                            logContext = logContext,
+                        )
                 },
-                onFailure = { defaultverdi ?: throw Feil("Ingen defaultverdi for bruker ved maskinelt oppslag") },
+                onFailure = {
+                    defaultverdi ?: throw Feil(
+                        message = "Ingen defaultverdi for bruker ved maskinelt oppslag",
+                        logContext = logContext,
+                    )
+                },
             )
     }
 
@@ -63,8 +75,9 @@ object ContextService {
     fun hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(
         rolleConfig: RolleConfig,
         handling: String,
+        logContext: SecureLog.Context,
     ): InnloggetBrukertilgang {
-        val saksbehandler = hentSaksbehandler()
+        val saksbehandler = hentSaksbehandler(logContext)
         val brukerTilganger = mutableMapOf<Tilgangskontrollsfagsystem, Behandlerrolle>()
         if (saksbehandler == Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
             brukerTilganger[Tilgangskontrollsfagsystem.SYSTEM_TILGANG] = Behandlerrolle.SYSTEM
@@ -166,6 +179,7 @@ object ContextService {
             throw Feil(
                 message = "Bruker har mangler tilgang til $handling",
                 frontendFeilmelding = "Bruker har mangler tilgang til $handling",
+                logContext = logContext,
                 httpStatus = HttpStatus.FORBIDDEN,
             )
         }

@@ -18,6 +18,7 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.feilHvis
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.HenteParam
@@ -129,7 +130,8 @@ class BehandlingController(
         if (stegService.kanAnsvarligSaksbehandlerOppdateres(behandlingId, behandlingsstegDto)) {
             behandlingService.oppdaterAnsvarligSaksbehandler(behandlingId)
         }
-        stegService.håndterSteg(behandlingId, behandlingsstegDto)
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        stegService.håndterSteg(behandlingId, behandlingsstegDto, SecureLog.Context.medBehandling(behandling.eksternFagsakId, behandlingId.toString()))
 
         return Ressurs.success("OK")
     }
@@ -244,28 +246,31 @@ class BehandlingController(
     fun flyttBehandlingTilFakta(
         @PathVariable behandlingId: UUID,
     ): Ressurs<String> {
-        validerKanSetteBehandlingTilbakeTilFakta(behandlingId)
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        val logContext = SecureLog.Context.medBehandling(behandling.eksternFagsakId, behandling.behandlingId.toString())
+        validerKanSetteBehandlingTilbakeTilFakta(behandling, logContext)
         forvaltningService.flyttBehandlingsstegTilbakeTilFakta(behandlingId)
         return Ressurs.success("OK")
     }
 
-    private fun validerKanSetteBehandlingTilbakeTilFakta(behandlingId: UUID) {
-        feilHvis(!erAnsvarligSaksbehandler(behandlingId) && !tilgangService.harInnloggetBrukerForvalterRolle(), HttpStatus.FORBIDDEN) {
+    private fun validerKanSetteBehandlingTilbakeTilFakta(
+        behandling: BehandlingDto,
+        logContext: SecureLog.Context,
+    ) {
+        feilHvis(!erAnsvarligSaksbehandler(behandling, logContext) && !tilgangService.harInnloggetBrukerForvalterRolle(), HttpStatus.FORBIDDEN, logContext) {
             "Kun ansvarlig saksbehandler kan flytte behandling tilbake til fakta"
         }
-        feilHvis(behandlingskontrollService.erBehandlingPåVent(behandlingId), HttpStatus.FORBIDDEN) {
+        feilHvis(behandlingskontrollService.erBehandlingPåVent(behandling.behandlingId), HttpStatus.FORBIDDEN, logContext) {
             "Behandling er på vent og kan derfor ikke flyttes tilbake til fakta"
         }
-        val behandlingstatus = behandlingService.hentBehandling(behandlingId).status
-        feilHvis(behandlingstatus != Behandlingsstatus.UTREDES, HttpStatus.FORBIDDEN) {
+        val behandlingstatus = behandlingService.hentBehandling(behandling.behandlingId).status
+        feilHvis(behandlingstatus != Behandlingsstatus.UTREDES, HttpStatus.FORBIDDEN, logContext) {
             "Behandling er ikke under utredning, og kan derfor ikke flyttes tilbake til fakta"
         }
     }
 
     private fun erAnsvarligSaksbehandler(
-        behandlingId: UUID,
-    ): Boolean {
-        val behandling = behandlingService.hentBehandling(behandlingId)
-        return ContextService.hentSaksbehandler() == behandling.ansvarligSaksbehandler
-    }
+        behandling: BehandlingDto,
+        logContext: SecureLog.Context,
+    ): Boolean = ContextService.hentSaksbehandler(logContext) == behandling.ansvarligSaksbehandler
 }

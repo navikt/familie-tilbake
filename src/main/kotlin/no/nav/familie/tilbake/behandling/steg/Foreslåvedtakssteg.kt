@@ -21,6 +21,7 @@ import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEvent
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.oppgave.OppgaveService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.totrinn.TotrinnService
@@ -47,22 +48,26 @@ class Foreslåvedtakssteg(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
-    override fun utførSteg(behandlingId: UUID) {
+    override fun utførSteg(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORESLÅ_VEDTAK} steg")
-        flyttBehandlingVidere(behandlingId)
+        flyttBehandlingVidere(behandlingId, logContext)
     }
 
     @Transactional
     override fun utførSteg(
         behandlingId: UUID,
         behandlingsstegDto: BehandlingsstegDto,
+        logContext: SecureLog.Context,
     ) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORESLÅ_VEDTAK} steg")
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        validerAtDetFinnesOppgave(behandling)
+        validerAtDetFinnesOppgave(behandling, logContext)
 
         val foreslåvedtaksstegDto = behandlingsstegDto as BehandlingsstegForeslåVedtaksstegDto
-        vedtaksbrevService.lagreFriteksterFraSaksbehandler(behandlingId, foreslåvedtaksstegDto.fritekstavsnitt)
+        vedtaksbrevService.lagreFriteksterFraSaksbehandler(behandlingId, foreslåvedtaksstegDto.fritekstavsnitt, logContext)
 
         historikkTaskService.lagHistorikkTask(
             behandlingId,
@@ -70,7 +75,7 @@ class Foreslåvedtakssteg(
             Aktør.SAKSBEHANDLER,
         )
 
-        flyttBehandlingVidere(behandlingId)
+        flyttBehandlingVidere(behandlingId, logContext)
 
         ferdigstillOppgave(behandling)
         opprettGodkjennevedtakOppgave(behandlingId)
@@ -86,14 +91,17 @@ class Foreslåvedtakssteg(
     }
 
     @Transactional
-    override fun utførStegAutomatisk(behandlingId: UUID) {
+    override fun utførStegAutomatisk(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORESLÅ_VEDTAK} steg og behandler automatisk..")
         historikkTaskService.lagHistorikkTask(
             behandlingId,
             TilbakekrevingHistorikkinnslagstype.FORESLÅ_VEDTAK_VURDERT,
             Aktør.VEDTAKSLØSNING,
         )
-        flyttBehandlingVidere(behandlingId)
+        flyttBehandlingVidere(behandlingId, logContext)
 
         // lukker BehandleSak oppgave og oppretter GodkjenneVedtak oppgave
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
@@ -112,7 +120,10 @@ class Foreslåvedtakssteg(
     }
 
     @Transactional
-    override fun gjenopptaSteg(behandlingId: UUID) {
+    override fun gjenopptaSteg(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.FORESLÅ_VEDTAK} steg")
         behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
@@ -120,6 +131,7 @@ class Foreslåvedtakssteg(
                 Behandlingssteg.FORESLÅ_VEDTAK,
                 Behandlingsstegstatus.KLAR,
             ),
+            logContext,
         )
     }
 
@@ -128,15 +140,19 @@ class Foreslåvedtakssteg(
         vedtaksbrevService.deaktiverEksisterendeVedtaksbrevdata(endretKravgrunnlagEvent.behandlingId)
     }
 
-    private fun flyttBehandlingVidere(behandlingId: UUID) {
+    private fun flyttBehandlingVidere(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
             Behandlingsstegsinfo(
                 Behandlingssteg.FORESLÅ_VEDTAK,
                 Behandlingsstegstatus.UTFØRT,
             ),
+            logContext,
         )
-        behandlingskontrollService.fortsettBehandling(behandlingId)
+        behandlingskontrollService.fortsettBehandling(behandlingId, logContext)
     }
 
     // Her vet vi ikke hvorvidt vi skal ferdigstille en BehandleSak- eller en BehandleUnderkjentVedtak-oppgave.
@@ -180,6 +196,7 @@ class Foreslåvedtakssteg(
 
     private fun validerAtDetFinnesOppgave(
         behandling: Behandling,
+        logContext: SecureLog.Context,
     ) {
         val oppgavetyper: Set<Oppgavetype> = setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak)
 
@@ -192,6 +209,7 @@ class Foreslåvedtakssteg(
             throw Feil(
                 message = "Oppgaven for behandlingen er ikke tilgjengelig. Vennligst vent og prøv igjen om litt.",
                 frontendFeilmelding = "Oppgaven for behandlingen er ikke tilgjengelig. Vennligst vent og prøv igjen om litt.",
+                logContext = logContext,
                 httpStatus = HttpStatus.BAD_REQUEST,
             )
         }

@@ -7,6 +7,7 @@ import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottattArkiv
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -75,6 +76,7 @@ class ØkonomiXmlMottattService(
             } else {
                 throw Feil(
                     message = "Det finnes ikke noe kravgrunnlag for fagsystemId=$eksternFagsakId og ytelsestype=$ytelsestype",
+                    logContext = SecureLog.Context.utenBehandling(eksternFagsakId),
                 )
             }
         }

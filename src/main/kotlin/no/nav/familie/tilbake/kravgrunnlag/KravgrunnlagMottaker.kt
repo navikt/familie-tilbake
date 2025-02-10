@@ -6,6 +6,7 @@ import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleStatusmeldingTask
+import no.nav.familie.tilbake.log.SecureLog
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Profile
@@ -26,7 +27,6 @@ class KravgrunnlagMottaker(
     private val taskService: TaskService,
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
-    private val secureLog = LoggerFactory.getLogger("secureLogger")
 
     @Transactional
     @JmsListener(destination = "\${oppdrag.mq.kravgrunnlag}", containerFactory = "jmsListenerContainerFactory")
@@ -34,7 +34,7 @@ class KravgrunnlagMottaker(
         val meldingFraOppdrag = melding.text as String
 
         log.info("Mottatt melding fra oppdrag")
-        secureLog.info(meldingFraOppdrag)
+        SecureLog.utenContext().info(meldingFraOppdrag)
         if (meldingFraOppdrag.contains(Constants.KRAVGRUNNLAG_XML_ROOT_ELEMENT)) {
             taskService.save(
                 Task(

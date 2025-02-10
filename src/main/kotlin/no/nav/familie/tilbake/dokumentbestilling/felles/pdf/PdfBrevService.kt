@@ -16,7 +16,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.header.TekstformatererHe
 import no.nav.familie.tilbake.dokumentbestilling.felles.task.PubliserJournalpostTask
 import no.nav.familie.tilbake.dokumentbestilling.felles.task.PubliserJournalpostTaskData
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.JournalpostIdOgDokumentId
-import no.nav.familie.tilbake.integration.pdl.internal.secureLogger
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.pdfgen.Dokumentvariant
 import no.nav.familie.tilbake.pdfgen.PdfGenerator
@@ -50,7 +50,8 @@ class PdfBrevService(
         fritekst: String? = null,
     ) {
         valider(brevtype, varsletBeløp)
-        val dokumentreferanse: JournalpostIdOgDokumentId = lagOgJournalførBrev(behandling, fagsak, brevtype, data)
+        val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandling.id.toString())
+        val dokumentreferanse: JournalpostIdOgDokumentId = lagOgJournalførBrev(behandling, fagsak, brevtype, data, logContext)
         if (data.mottager != Brevmottager.VERGE &&
             !data.metadata.annenMottakersNavn.equals(data.metadata.sakspartsnavn, ignoreCase = true)
         ) {
@@ -101,6 +102,7 @@ class PdfBrevService(
         fagsak: Fagsak,
         brevtype: Brevtype,
         data: Brevdata,
+        logContext: SecureLog.Context,
     ): JournalpostIdOgDokumentId {
         val html = lagHtml(data)
 
@@ -108,7 +110,7 @@ class PdfBrevService(
             try {
                 pdfGenerator.genererPDFMedLogo(html, Dokumentvariant.ENDELIG, data.tittel ?: data.metadata.tittel ?: data.overskrift)
             } catch (e: Exception) {
-                secureLogger.info("Feil ved generering av brev: brevData=$data, html=$html", e)
+                SecureLog.medContext(logContext).info("Feil ved generering av brev: brevData=$data, html=$html", e)
                 throw e
             }
 

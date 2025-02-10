@@ -11,6 +11,7 @@ import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEvent
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import org.slf4j.LoggerFactory
 import org.springframework.context.event.EventListener
@@ -27,7 +28,10 @@ class FaktaFeilutbetalingssteg(
 ) : IBehandlingssteg {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun utførSteg(behandlingId: UUID) {
+    override fun utførSteg(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         // Denne metoden gjør ingenting. Det skrives bare for å unngå feilen når ENDR kravgrunnlag mottas
     }
 
@@ -35,11 +39,12 @@ class FaktaFeilutbetalingssteg(
     override fun utførSteg(
         behandlingId: UUID,
         behandlingsstegDto: BehandlingsstegDto,
+        logContext: SecureLog.Context,
     ) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FAKTA} steg")
         val behandlingsstegFaktaDto: BehandlingsstegFaktaDto = behandlingsstegDto as BehandlingsstegFaktaDto
 
-        faktaFeilutbetalingService.lagreFaktaomfeilutbetaling(behandlingId, behandlingsstegFaktaDto)
+        faktaFeilutbetalingService.lagreFaktaomfeilutbetaling(behandlingId, behandlingsstegFaktaDto, logContext)
 
         oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId)
 
@@ -50,12 +55,15 @@ class FaktaFeilutbetalingssteg(
         )
 
         if (faktaFeilutbetalingService.hentAktivFaktaOmFeilutbetaling(behandlingId) != null) {
-            flyttBehandlingVidere(behandlingId)
+            flyttBehandlingVidere(behandlingId, logContext)
         }
     }
 
     @Transactional
-    override fun utførStegAutomatisk(behandlingId: UUID) {
+    override fun utførStegAutomatisk(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FAKTA} steg og behandler automatisk..")
         faktaFeilutbetalingService.lagreFastFaktaForAutomatiskSaksbehandling(behandlingId)
 
@@ -65,11 +73,14 @@ class FaktaFeilutbetalingssteg(
             Aktør.VEDTAKSLØSNING,
         )
 
-        flyttBehandlingVidere(behandlingId)
+        flyttBehandlingVidere(behandlingId, logContext)
     }
 
     @Transactional
-    override fun gjenopptaSteg(behandlingId: UUID) {
+    override fun gjenopptaSteg(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.FAKTA} steg")
         behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
@@ -77,6 +88,7 @@ class FaktaFeilutbetalingssteg(
                 Behandlingssteg.FAKTA,
                 Behandlingsstegstatus.KLAR,
             ),
+            logContext,
         )
     }
 
@@ -87,14 +99,18 @@ class FaktaFeilutbetalingssteg(
         faktaFeilutbetalingService.deaktiverEksisterendeFaktaOmFeilutbetaling(behandlingId = endretKravgrunnlagEvent.behandlingId)
     }
 
-    private fun flyttBehandlingVidere(behandlingId: UUID) {
+    private fun flyttBehandlingVidere(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
             Behandlingsstegsinfo(
                 Behandlingssteg.FAKTA,
                 Behandlingsstegstatus.UTFØRT,
             ),
+            logContext,
         )
-        behandlingskontrollService.fortsettBehandling(behandlingId)
+        behandlingskontrollService.fortsettBehandling(behandlingId, logContext)
     }
 }

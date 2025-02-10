@@ -7,6 +7,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.AUTOUTFØRT
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.UTFØRT
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -21,7 +22,10 @@ class Brevmottakersteg(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
-    override fun utførSteg(behandlingId: UUID) {
+    override fun utførSteg(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.BREVMOTTAKER} steg")
         behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
@@ -29,26 +33,32 @@ class Brevmottakersteg(
                 Behandlingssteg.BREVMOTTAKER,
                 AUTOUTFØRT,
             ),
+            logContext,
         )
-        behandlingskontrollService.fortsettBehandling(behandlingId)
+        behandlingskontrollService.fortsettBehandling(behandlingId, logContext)
     }
 
     @Transactional
     override fun utførSteg(
         behandlingId: UUID,
         behandlingsstegDto: BehandlingsstegDto,
+        logContext: SecureLog.Context,
     ) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.BREVMOTTAKER} steg")
         oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId)
         behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
             Behandlingsstegsinfo(Behandlingssteg.BREVMOTTAKER, UTFØRT),
+            logContext,
         )
-        behandlingskontrollService.fortsettBehandling(behandlingId)
+        behandlingskontrollService.fortsettBehandling(behandlingId, logContext)
     }
 
     @Transactional
-    override fun gjenopptaSteg(behandlingId: UUID) {
+    override fun gjenopptaSteg(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.BREVMOTTAKER} steg")
         behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
@@ -56,6 +66,7 @@ class Brevmottakersteg(
                 Behandlingssteg.BREVMOTTAKER,
                 Behandlingsstegstatus.KLAR,
             ),
+            logContext,
         )
     }
 

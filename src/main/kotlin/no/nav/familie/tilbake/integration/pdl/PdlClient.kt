@@ -17,6 +17,7 @@ import no.nav.familie.tilbake.integration.pdl.internal.PdlPersonRequest
 import no.nav.familie.tilbake.integration.pdl.internal.PdlPersonRequestVariables
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.integration.pdl.internal.feilsjekkOgReturnerData
+import no.nav.familie.tilbake.log.SecureLog
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -37,6 +38,7 @@ class PdlClient(
     fun hentPersoninfo(
         ident: String,
         fagsystem: Fagsystem,
+        logContext: SecureLog.Context,
     ): Personinfo {
         val pdlPersonRequest =
             PdlPersonRequest(
@@ -69,6 +71,7 @@ class PdlClient(
             throw Feil(
                 message = "Feil ved oppslag på person: ${respons.errorMessages()}",
                 frontendFeilmelding = "Feil ved oppslag på person $ident: ${respons.errorMessages()}",
+                logContext = logContext,
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
             )
         }
@@ -77,6 +80,7 @@ class PdlClient(
     fun hentIdenter(
         personIdent: String,
         fagsystem: Fagsystem,
+        logContext: SecureLog.Context,
     ): PdlHentIdenterResponse {
         val pdlPersonRequest =
             PdlPersonRequest(
@@ -97,6 +101,7 @@ class PdlClient(
         throw Feil(
             message = "Feil mot pdl: ${response.errorMessages()}",
             frontendFeilmelding = "Fant ikke identer for person $personIdent: ${response.errorMessages()}",
+            logContext = logContext,
             httpStatus = HttpStatus.NOT_FOUND,
         )
     }
@@ -104,6 +109,7 @@ class PdlClient(
     fun hentAdressebeskyttelseBolk(
         personIdentList: List<String>,
         fagsystem: Fagsystem,
+        logContext: SecureLog.Context,
     ): Map<String, PdlAdressebeskyttelsePerson> {
         val pdlRequest =
             PdlPersonBolkRequest(
@@ -118,6 +124,7 @@ class PdlClient(
             )
         return feilsjekkOgReturnerData(
             pdlResponse = pdlResponse,
+            logContext = logContext,
         )
     }
 

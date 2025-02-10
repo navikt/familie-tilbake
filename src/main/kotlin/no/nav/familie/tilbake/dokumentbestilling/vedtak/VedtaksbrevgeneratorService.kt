@@ -45,6 +45,7 @@ import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
@@ -64,9 +65,10 @@ class VedtaksbrevgeneratorService(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
         brevmottager: Brevmottager,
         forhåndsgenerertMetadata: Brevmetadata? = null,
+        logContext: SecureLog.Context,
     ): Brevdata {
         val behandlingId = vedtaksbrevgrunnlag.behandling.id
-        val vedtaksbrevsdata = hentDataForVedtaksbrev(vedtaksbrevgrunnlag, brevmottager, forhåndsgenerertMetadata)
+        val vedtaksbrevsdata = hentDataForVedtaksbrev(vedtaksbrevgrunnlag, brevmottager, forhåndsgenerertMetadata, logContext)
         val hbVedtaksbrevsdata: HbVedtaksbrevsdata = vedtaksbrevsdata.vedtaksbrevsdata
         val erPerioderSammenslått = periodeService.erPerioderSammenslått(behandlingId)
 
@@ -94,6 +96,7 @@ class VedtaksbrevgeneratorService(
     fun genererVedtaksbrevForForhåndsvisning(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
         hentForhåndvisningVedtaksbrevPdfDto: HentForhåndvisningVedtaksbrevPdfDto,
+        logContext: SecureLog.Context,
     ): Brevdata {
         val behandlingId = vedtaksbrevgrunnlag.behandling.id
 
@@ -108,6 +111,7 @@ class VedtaksbrevgeneratorService(
                 hentForhåndvisningVedtaksbrevPdfDto.perioderMedTekst,
                 brevmottager,
                 brevmetadata,
+                logContext,
             )
         val hbVedtaksbrevsdata: HbVedtaksbrevsdata = vedtaksbrevsdata.vedtaksbrevsdata
 
@@ -128,10 +132,11 @@ class VedtaksbrevgeneratorService(
 
     fun genererVedtaksbrevsdataTilVisningIFrontendSkjema(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
+        logContext: SecureLog.Context,
     ): HbVedtaksbrevsdata {
         val (brevmetadata, brevmottager) =
             brevmetadataUtil.lagBrevmetadataForMottakerTilForhåndsvisning(vedtaksbrevgrunnlag)
-        val vedtaksbrevsdata = hentDataForVedtaksbrev(vedtaksbrevgrunnlag, brevmottager, brevmetadata)
+        val vedtaksbrevsdata = hentDataForVedtaksbrev(vedtaksbrevgrunnlag, brevmottager, brevmetadata, logContext)
         return vedtaksbrevsdata.vedtaksbrevsdata
     }
 
@@ -139,6 +144,7 @@ class VedtaksbrevgeneratorService(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
         brevmottager: Brevmottager,
         brevmetadata: Brevmetadata? = null,
+        logContext: SecureLog.Context,
     ): Vedtaksbrevsdata {
         val fritekstoppsummering = vedtaksbrevgrunnlag.behandling.vedtaksbrevOppsummering?.oppsummeringFritekst
         val fritekstPerioder: List<PeriodeMedTekstDto> =
@@ -149,6 +155,7 @@ class VedtaksbrevgeneratorService(
             fritekstPerioder,
             brevmottager,
             brevmetadata,
+            logContext,
         )
     }
 
@@ -158,12 +165,14 @@ class VedtaksbrevgeneratorService(
         perioderFritekst: List<PeriodeMedTekstDto>,
         brevmottager: Brevmottager,
         forhåndsgenerertMetadata: Brevmetadata? = null,
+        logContext: SecureLog.Context,
     ): Vedtaksbrevsdata {
         val språkkode: Språkkode = vedtaksbrevgrunnlag.bruker.språkkode
         val personinfo: Personinfo =
             eksterneDataForBrevService.hentPerson(
                 vedtaksbrevgrunnlag.bruker.ident,
                 vedtaksbrevgrunnlag.fagsystem,
+                logContext,
             )
         val beregnetResultat = tilbakekrevingBeregningService.beregn(vedtaksbrevgrunnlag.behandling.id)
         val brevMetadata: Brevmetadata =
@@ -173,6 +182,7 @@ class VedtaksbrevgeneratorService(
                     personinfo,
                     brevmottager,
                     språkkode,
+                    logContext,
                 )
             ).copy(
                 tittel =
@@ -191,6 +201,7 @@ class VedtaksbrevgeneratorService(
                 oppsummeringFritekst,
                 perioderFritekst,
                 brevMetadata,
+                logContext,
             )
         return Vedtaksbrevsdata(data, brevMetadata)
     }
@@ -202,6 +213,7 @@ class VedtaksbrevgeneratorService(
         oppsummeringFritekst: String?,
         perioderFritekst: List<PeriodeMedTekstDto>,
         brevmetadata: Brevmetadata,
+        logContext: SecureLog.Context,
     ): HbVedtaksbrevsdata {
         val vedtaksbrevtype = vedtaksbrevgrunnlag.utledVedtaksbrevstype()
         val effektForBruker: VedtakHjemmel.EffektForBruker =
@@ -237,7 +249,7 @@ class VedtaksbrevgeneratorService(
                 ?.sporbar
                 ?.opprettetTid
                 ?.toLocalDate()
-        val ansvarligBeslutter = finnAnsvarligBeslutter(vedtaksbrevgrunnlag)
+        val ansvarligBeslutter = finnAnsvarligBeslutter(vedtaksbrevgrunnlag, logContext)
         val erFeilutbetaltBeløpKorrigertNed =
             varsletBeløp != null && beregningsresultat.totaltFeilutbetaltBeløp < varsletBeløp
 
@@ -268,13 +280,18 @@ class VedtaksbrevgeneratorService(
         return HbVedtaksbrevsdata(vedtaksbrevFelles, perioder)
     }
 
-    private fun finnAnsvarligBeslutter(vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag) =
-        when {
-            harAnsvarligBeslutter(vedtaksbrevgrunnlag) -> hentAnsvarligBeslutterNavn(vedtaksbrevgrunnlag)
-            else -> null
-        }
+    private fun finnAnsvarligBeslutter(
+        vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
+        logContext: SecureLog.Context,
+    ) = when {
+        harAnsvarligBeslutter(vedtaksbrevgrunnlag) -> hentAnsvarligBeslutterNavn(vedtaksbrevgrunnlag, logContext)
+        else -> null
+    }
 
-    private fun hentAnsvarligBeslutterNavn(vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag) = eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(vedtaksbrevgrunnlag.behandling.ansvarligBeslutter)
+    private fun hentAnsvarligBeslutterNavn(
+        vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
+        logContext: SecureLog.Context,
+    ) = eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(vedtaksbrevgrunnlag.behandling.ansvarligBeslutter, logContext)
 
     private fun saksbehandlingstypeHarBeslutter(vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag) =
         when (vedtaksbrevgrunnlag.behandling.saksbehandlingstype) {
@@ -372,6 +389,7 @@ class VedtaksbrevgeneratorService(
         personinfo: Personinfo,
         brevmottager: Brevmottager,
         språkkode: Språkkode,
+        logContext: SecureLog.Context,
     ): Brevmetadata {
         val adresseinfo: Adresseinfo =
             eksterneDataForBrevService.hentAdresse(
@@ -379,12 +397,13 @@ class VedtaksbrevgeneratorService(
                 brevmottager,
                 vedtaksbrevgrunnlag.aktivVerge,
                 vedtaksbrevgrunnlag.fagsystem,
+                logContext,
             )
         val vergeNavn: String = BrevmottagerUtil.getVergenavn(vedtaksbrevgrunnlag.aktivVerge, adresseinfo)
         val ansvarligSaksbehandler =
             if (vedtaksbrevgrunnlag.aktivtSteg == Behandlingssteg.FORESLÅ_VEDTAK) {
                 eksterneDataForBrevService
-                    .hentPåloggetSaksbehandlernavnMedDefault(vedtaksbrevgrunnlag.behandling.ansvarligSaksbehandler)
+                    .hentPåloggetSaksbehandlernavnMedDefault(vedtaksbrevgrunnlag.behandling.ansvarligSaksbehandler, logContext)
             } else {
                 eksterneDataForBrevService.hentSaksbehandlernavn(vedtaksbrevgrunnlag.behandling.ansvarligSaksbehandler)
             }

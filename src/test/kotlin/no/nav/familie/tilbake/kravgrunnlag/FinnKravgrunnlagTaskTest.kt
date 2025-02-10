@@ -136,7 +136,7 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                 kravvedtakstatusService,
             )
 
-        every { kafkaProducer.sendHentFagsystemsbehandlingRequest(any(), any()) } returns Unit
+        every { kafkaProducer.sendHentFagsystemsbehandlingRequest(any(), any(), any()) } returns Unit
     }
 
     @Test

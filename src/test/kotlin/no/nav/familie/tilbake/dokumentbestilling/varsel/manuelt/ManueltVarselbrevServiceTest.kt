@@ -31,6 +31,7 @@ import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevUtil
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.HarBrukerUttaltSeg
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.pdfgen.validering.PdfaValidator
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -79,7 +80,6 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
                 manuelleBrevmottakerRepository = mockk(relaxed = true),
                 eksterneDataForBrevService = mockEksterneDataForBrevService,
                 organisasjonService = mockk(),
-                featureToggleService = featureToggleService,
             )
         manueltVarselbrevService =
             ManueltVarselbrevService(
@@ -97,12 +97,12 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
             .returns(lagFeilutbetaling())
         val personinfo = Personinfo("DUMMY_FØDSELSNUMMER", LocalDate.now(), "Fiona")
         val ident: String = Testdata.fagsak.bruker.ident
-        every { mockEksterneDataForBrevService.hentPerson(ident, any()) }.returns(personinfo)
+        every { mockEksterneDataForBrevService.hentPerson(ident, any(), any()) }.returns(personinfo)
         every {
-            mockEksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any())
+            mockEksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any(), any())
         }.returns(Adresseinfo("12345678901", "Test"))
-        every { mockEksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(any()) } returns
-            eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(behandling.ansvarligSaksbehandler)
+        every { mockEksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(any(), any()) } returns
+            eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(behandling.ansvarligSaksbehandler, SecureLog.Context.tom())
 
         fagsak = fagsakRepository.insert(fagsak)
         behandling = behandlingRepository.insert(behandling)

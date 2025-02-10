@@ -48,7 +48,7 @@ class ForvaltningControllerTest : OppslagSpringRunnerTest() {
     fun init() {
         mockkObject(ContextService)
         headers.setBearerAuth(lokalTestToken())
-        every { ContextService.hentSaksbehandler() } returns "saksbehandler"
+        every { ContextService.hentSaksbehandler(any()) } returns "saksbehandler"
     }
 
     @AfterEach
@@ -58,7 +58,7 @@ class ForvaltningControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `Forvalter kan sette behandling på vent tilbake til fakta`() {
-        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any()) }
+        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }
             .returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.ENSLIG_FORELDER to Behandlerrolle.VEILEDER, Tilgangskontrollsfagsystem.FORVALTER_TILGANG to Behandlerrolle.FORVALTER)))
 
         val response = flyttBehandlingTilFakta()
@@ -67,7 +67,7 @@ class ForvaltningControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `Beslutter skal ikke kunne kalle på forvalterendepunkt`() {
-        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any()) }
+        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }
             .returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.ENSLIG_FORELDER to Behandlerrolle.BESLUTTER)))
         val response = flyttBehandlingTilFakta()
         assertEquals(HttpStatus.FORBIDDEN, response.statusCode)
@@ -77,9 +77,9 @@ class ForvaltningControllerTest : OppslagSpringRunnerTest() {
     fun `Saksbehandler og forvalter som ikke er ansvarlig saksbehandler skal kunne bruke forvaltningsendepunkt`() {
         val tilganger = mapOf(Tilgangskontrollsfagsystem.ENSLIG_FORELDER to Behandlerrolle.SAKSBEHANDLER, Tilgangskontrollsfagsystem.FORVALTER_TILGANG to Behandlerrolle.FORVALTER)
 
-        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any()) }
+        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }
             .returns(InnloggetBrukertilgang(tilganger))
-        every { ContextService.hentSaksbehandler() } returns "ikke ansvarlig"
+        every { ContextService.hentSaksbehandler(any()) } returns "ikke ansvarlig"
 
         val response = flyttBehandlingTilFakta()
         assertEquals(HttpStatus.OK, response.statusCode)
@@ -87,7 +87,7 @@ class ForvaltningControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `Veileder skal ikke kunne sette behandling tilbake til faktasteg`() {
-        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any()) }
+        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }
             .returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.ENSLIG_FORELDER to Behandlerrolle.VEILEDER)))
 
         val response = flyttBehandlingTilFakta()
@@ -96,7 +96,7 @@ class ForvaltningControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `Forvalter kan sette behandling tilbake til fakta når behandling ikke er under utredning`() {
-        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any()) }
+        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }
             .returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.FORVALTER_TILGANG to Behandlerrolle.FORVALTER)))
         val response = flyttBehandlingTilFakta(opprettTestdata(behandlingStatus = Behandlingsstatus.FATTER_VEDTAK))
         assertEquals(HttpStatus.OK, response.statusCode)

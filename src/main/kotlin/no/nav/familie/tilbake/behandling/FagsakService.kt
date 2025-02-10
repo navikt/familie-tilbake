@@ -16,6 +16,7 @@ import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import no.nav.familie.tilbake.person.PersonService
 import org.springframework.context.event.EventListener
@@ -42,6 +43,7 @@ class FagsakService(
         fagsystem: Fagsystem,
         eksternFagsakId: String,
     ): FagsakDto {
+        val logContext = SecureLog.Context.utenBehandling(eksternFagsakId)
         val fagsak =
             fagsakRepository.findByFagsystemAndEksternFagsakId(
                 fagsystem = fagsystem,
@@ -50,14 +52,16 @@ class FagsakService(
                 ?: throw Feil(
                     message = "Fagsak finnes ikke for ${fagsystem.navn} og $eksternFagsakId",
                     frontendFeilmelding = "Fagsak finnes ikke for ${fagsystem.navn} og $eksternFagsakId",
+                    logContext = logContext,
                     httpStatus = HttpStatus.BAD_REQUEST,
                 )
+        val behandlinger = behandlingRepository.findByFagsakId(fagsakId = fagsak.id)
         val personInfo =
             personService.hentPersoninfo(
                 personIdent = fagsak.bruker.ident,
                 fagsystem = fagsak.fagsystem,
+                logContext,
             )
-        val behandlinger = behandlingRepository.findByFagsakId(fagsakId = fagsak.id)
 
         return FagsakMapper.tilRespons(
             fagsak = fagsak,

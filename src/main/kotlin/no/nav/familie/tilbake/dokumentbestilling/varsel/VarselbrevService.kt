@@ -20,6 +20,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.Fritekstbrevsdata
 import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevUtil.Companion.TITTEL_VARSEL_TILBAKEBETALING
 import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
+import no.nav.familie.tilbake.log.SecureLog
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -37,12 +38,13 @@ class VarselbrevService(
         brevmottager: Brevmottager? = null,
     ) {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandling.id.toString())
         val varsletFeilutbetaling = behandling.aktivtVarsel?.varselbeløp ?: 0L
         val fritekst = behandling.aktivtVarsel?.varseltekst
 
         if (brevmottager == null) {
             distribusjonshåndteringService.sendBrev(behandling, Brevtype.VARSEL, varsletFeilutbetaling, fritekst) { brevmottaker, brevmetadata ->
-                val varselbrevsdokument = lagVarselbrevForSending(behandling, fagsak, brevmottaker, brevmetadata)
+                val varselbrevsdokument = lagVarselbrevForSending(behandling, fagsak, brevmottaker, brevmetadata, logContext)
                 val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(varselbrevsdokument.brevmetadata, false)
                 val brevtekst = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false)
 
@@ -51,6 +53,7 @@ class VarselbrevService(
                         varselbrevsdokument,
                         behandling.aktivFagsystemsbehandling.eksternId,
                         varselbrevsdokument.beløp,
+                        logContext,
                     )
                 Brevdata(
                     mottager = brevmottaker,
@@ -61,7 +64,7 @@ class VarselbrevService(
                 )
             }
         } else {
-            val varselbrevsdokument = lagVarselbrevForSending(behandling, fagsak, brevmottager)
+            val varselbrevsdokument = lagVarselbrevForSending(behandling, fagsak, brevmottager, null, logContext)
             val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(varselbrevsdokument.brevmetadata, false)
             val brevtekst = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false)
             val varsletFeilutbetaling = varselbrevsdokument.beløp
@@ -71,6 +74,7 @@ class VarselbrevService(
                     varselbrevsdokument,
                     behandling.aktivFagsystemsbehandling.eksternId,
                     varselbrevsdokument.beløp,
+                    logContext,
                 )
 
             pdfBrevService.sendBrev(
@@ -94,14 +98,15 @@ class VarselbrevService(
         behandling: Behandling,
         fagsak: Fagsak,
         brevmottager: Brevmottager,
-        forhåndsgenerertMetadata: Brevmetadata? = null,
+        forhåndsgenerertMetadata: Brevmetadata?,
+        logContext: SecureLog.Context,
     ): Varselbrevsdokument {
         val metadata =
             forhåndsgenerertMetadata ?: run {
                 // Henter data fra pdl
-                val personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
+                val personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem, logContext)
                 val verge = behandling.aktivVerge
-                val adresseinfo = eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, verge, fagsak.fagsystem)
+                val adresseinfo = eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, verge, fagsak.fagsystem, logContext)
 
                 varselbrevUtil.sammenstillInfoForBrevmetadata(
                     behandling = behandling,
@@ -111,6 +116,7 @@ class VarselbrevService(
                     vergenavn = BrevmottagerUtil.getVergenavn(verge, adresseinfo),
                     erKorrigert = false,
                     gjelderDødsfall = personinfo.dødsdato != null,
+                    logContext = logContext,
                 )
             }
 
@@ -142,6 +148,7 @@ class VarselbrevService(
                 varselbrevsdokument,
                 forhåndsvisVarselbrevRequest.fagsystemsbehandlingId,
                 varselbrevsdokument.beløp,
+                SecureLog.Context.utenBehandling(forhåndsvisVarselbrevRequest.eksternFagsakId),
             )
         return pdfBrevService.genererForhåndsvisning(
             Brevdata(
@@ -156,13 +163,14 @@ class VarselbrevService(
 
     private fun lagVarselbrevForForhåndsvisning(request: ForhåndsvisVarselbrevRequest): Varselbrevsdokument {
         val brevmottager = utledBrevmottager(request)
-        val personinfo = eksterneDataForBrevService.hentPerson(request.ident, request.fagsystem)
+        val personinfo = eksterneDataForBrevService.hentPerson(request.ident, request.fagsystem, SecureLog.Context.tom())
         val adresseinfo: Adresseinfo =
             eksterneDataForBrevService.hentAdresse(
                 personinfo,
                 brevmottager,
                 request.verge,
                 request.fagsystem,
+                SecureLog.Context.tom(),
             )
 
         return varselbrevUtil.sammenstillInfoForForhåndvisningVarselbrev(

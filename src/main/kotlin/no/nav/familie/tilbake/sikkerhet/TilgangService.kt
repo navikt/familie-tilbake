@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.sikkerhet
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.config.RolleConfig
+import no.nav.familie.tilbake.log.SecureLog
 import org.springframework.stereotype.Service
 
 @Service
@@ -14,7 +15,7 @@ class TilgangService(
     fun finnBehandlerrolle(fagsystem: Fagsystem): Behandlerrolle? {
         val inloggetBrukerstilgang =
             ContextService
-                .hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, "henter behandling")
+                .hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, "henter behandling", SecureLog.Context.tom())
 
         val tilganger = inloggetBrukerstilgang.tilganger
         var behandlerrolle: Behandlerrolle? = Behandlerrolle.VEILEDER
@@ -33,7 +34,7 @@ class TilgangService(
     fun harInnloggetBrukerForvalterRolle(): Boolean {
         val innloggetBrukerstilgang =
             ContextService
-                .hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, "henter behandling")
+                .hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, "henter behandling", SecureLog.Context.tom())
 
         return innloggetBrukerstilgang.tilganger.containsKey(Tilgangskontrollsfagsystem.FORVALTER_TILGANG)
     }

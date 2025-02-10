@@ -10,7 +10,6 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
@@ -39,7 +38,6 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
     private val behandlingRepository: BehandlingRepository = mockk()
     private lateinit var innhentDokumentasjonBrevService: InnhentDokumentasjonbrevService
     private val organisasjonService: OrganisasjonService = mockk()
-    private val featureToggleService: FeatureToggleService = mockk(relaxed = true)
     private val brevmetadataUtil =
         BrevmetadataUtil(
             behandlingRepository = behandlingRepository,
@@ -47,7 +45,6 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
             manuelleBrevmottakerRepository = mockk(relaxed = true),
             eksterneDataForBrevService = mockEksterneDataForBrevService,
             organisasjonService = organisasjonService,
-            featureToggleService = featureToggleService,
         )
 
     lateinit var behandling: Behandling
@@ -70,9 +67,9 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
         every { behandlingRepository.findByIdOrThrow(behandling.id) } returns behandling
         val personinfo = Personinfo("DUMMY_FØDSELSNUMMER", LocalDate.now(), "Fiona")
         val ident = Testdata.fagsak.bruker.ident
-        every { mockEksterneDataForBrevService.hentPerson(ident, Fagsystem.BA) } returns personinfo
-        every { mockEksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(any()) } returns "Siri Saksbehandler"
-        every { mockEksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any()) }
+        every { mockEksterneDataForBrevService.hentPerson(ident, Fagsystem.BA, any()) } returns personinfo
+        every { mockEksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(any(), any()) } returns "Siri Saksbehandler"
+        every { mockEksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any(), any()) }
             .returns(Adresseinfo("DUMMY_FØDSELSNUMMER", "Bob"))
     }
 

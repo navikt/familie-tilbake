@@ -131,8 +131,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     @BeforeEach
     fun init() {
         mockkObject(ContextService)
-        every { ContextService.hentSaksbehandler() }.returns("Z0000")
-        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any()) }.returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.SYSTEM_TILGANG to Behandlerrolle.SYSTEM)))
+        every { ContextService.hentSaksbehandler(any()) }.returns("Z0000")
+        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }.returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.SYSTEM_TILGANG to Behandlerrolle.SYSTEM)))
     }
 
     @AfterEach
@@ -749,7 +749,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentBehandling skal ikke endre behandling av veileder`() {
-        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any()) }.returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.BARNETRYGD to Behandlerrolle.VEILEDER)))
+        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }.returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.BARNETRYGD to Behandlerrolle.VEILEDER)))
 
         val opprettTilbakekrevingRequest =
             lagOpprettTilbakekrevingRequest(
@@ -769,7 +769,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentBehandling skal ikke endre behandling av forvalter`() {
-        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any()) }.returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.FORVALTER_TILGANG to Behandlerrolle.FORVALTER)))
+        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }.returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.FORVALTER_TILGANG to Behandlerrolle.FORVALTER)))
 
         val opprettTilbakekrevingRequest =
             lagOpprettTilbakekrevingRequest(
@@ -789,7 +789,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentBehandling skal endre behandling av saksbehandler`() {
-        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any()) }.returns(
+        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }.returns(
             InnloggetBrukertilgang(
                 mapOf(
                     Tilgangskontrollsfagsystem.FORVALTER_TILGANG to Behandlerrolle.FORVALTER,
@@ -816,7 +816,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentBehandling skal ikke endre behandling av saksbehandler når behandling er på fattevedtak steg`() {
-        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any()) }.returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.BARNETRYGD to Behandlerrolle.SAKSBEHANDLER)))
+        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }.returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.BARNETRYGD to Behandlerrolle.SAKSBEHANDLER)))
 
         val opprettTilbakekrevingRequest =
             lagOpprettTilbakekrevingRequest(
@@ -838,7 +838,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentBehandling skal endre behandling av beslutter når behandling er på fattevedtak steg`() {
-        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any()) }.returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.BARNETRYGD to Behandlerrolle.BESLUTTER)))
+        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }.returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.BARNETRYGD to Behandlerrolle.BESLUTTER)))
 
         val opprettTilbakekrevingRequest =
             lagOpprettTilbakekrevingRequest(
@@ -865,7 +865,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentBehandling skal ikke endre behandling med fattevedtak steg og beslutter er samme som saksbehandler`() {
-        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any()) }.returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.BARNETRYGD to Behandlerrolle.BESLUTTER)))
+        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }.returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.BARNETRYGD to Behandlerrolle.BESLUTTER)))
 
         val opprettTilbakekrevingRequest =
             lagOpprettTilbakekrevingRequest(

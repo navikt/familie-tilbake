@@ -14,6 +14,7 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbr
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype.ORDINÆR
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
 import org.springframework.http.HttpStatus
@@ -29,8 +30,9 @@ object VedtaksbrevFritekstValidator {
         vedtaksbrevsoppsummering: Vedtaksbrevsoppsummering,
         vedtaksbrevstype: Vedtaksbrevstype,
         validerPåkrevetFritekster: Boolean,
+        logContext: SecureLog.Context,
     ) {
-        validerPerioder(behandling, avsnittMedPerioder, faktaFeilutbetaling)
+        validerPerioder(behandling, avsnittMedPerioder, faktaFeilutbetaling, logContext)
 
         vilkårsvurdering?.let {
             validerFritekstISærligGrunnerAnnetAvsnitt(
@@ -38,6 +40,7 @@ object VedtaksbrevFritekstValidator {
                 vedtaksbrevFritekstPerioder,
                 validerPåkrevetFritekster,
                 vedtaksbrevsoppsummering.skalSammenslåPerioder == SkalSammenslåPerioder.JA,
+                logContext,
             )
         }
 
@@ -48,11 +51,12 @@ object VedtaksbrevFritekstValidator {
                 avsnittMedPerioder,
                 validerPåkrevetFritekster,
                 vedtaksbrevsoppsummering.skalSammenslåPerioder == SkalSammenslåPerioder.JA,
+                logContext,
             )
         }
-        validerOppsummeringsfritekstLengde(behandling, vedtaksbrevsoppsummering, vedtaksbrevstype)
+        validerOppsummeringsfritekstLengde(behandling, vedtaksbrevsoppsummering, vedtaksbrevstype, logContext)
         if (validerPåkrevetFritekster) {
-            validerNårOppsummeringsfritekstErPåkrevd(behandling, vedtaksbrevsoppsummering)
+            validerNårOppsummeringsfritekstErPåkrevd(behandling, vedtaksbrevsoppsummering, logContext)
         }
     }
 
@@ -60,6 +64,7 @@ object VedtaksbrevFritekstValidator {
         behandling: Behandling,
         avsnittMedPerioder: List<PeriodeMedTekstDto>,
         faktaFeilutbetaling: FaktaFeilutbetaling,
+        logContext: SecureLog.Context,
     ) {
         avsnittMedPerioder.forEach {
             if (!faktaFeilutbetaling.perioder.any { faktaPeriode ->
@@ -71,6 +76,7 @@ object VedtaksbrevFritekstValidator {
                     frontendFeilmelding =
                         "Periode ${it.periode.fom}-${it.periode.tom} er ugyldig " +
                             "for behandling ${behandling.id}",
+                    logContext = logContext,
                     httpStatus = HttpStatus.BAD_REQUEST,
                 )
             }
@@ -80,6 +86,7 @@ object VedtaksbrevFritekstValidator {
     private fun validerNårOppsummeringsfritekstErPåkrevd(
         behandling: Behandling,
         vedtaksbrevsoppsummering: Vedtaksbrevsoppsummering,
+        logContext: SecureLog.Context,
     ) {
         val revurderingIkkeOpprettetEtterKlage =
             behandling.årsaker.none {
@@ -96,6 +103,7 @@ object VedtaksbrevFritekstValidator {
             throw Feil(
                 message = "oppsummering fritekst påkrevet for revurdering ${behandling.id}",
                 frontendFeilmelding = "oppsummering fritekst påkrevet for revurdering ${behandling.id}",
+                logContext = logContext,
                 httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
@@ -105,6 +113,7 @@ object VedtaksbrevFritekstValidator {
         behandling: Behandling,
         vedtaksbrevsoppsummering: Vedtaksbrevsoppsummering,
         vedtaksbrevstype: Vedtaksbrevstype,
+        logContext: SecureLog.Context,
     ) {
         val maksTekstLengde =
             when (vedtaksbrevstype) {
@@ -117,6 +126,7 @@ object VedtaksbrevFritekstValidator {
             throw Feil(
                 message = "Oppsummeringstekst er for lang for behandling ${behandling.id}",
                 frontendFeilmelding = "Oppsummeringstekst er for lang for behandling ${behandling.id}",
+                logContext = logContext,
                 httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
@@ -128,6 +138,7 @@ object VedtaksbrevFritekstValidator {
         avsnittMedPerioder: List<PeriodeMedTekstDto>,
         validerPåkrevetFritekster: Boolean,
         skalSammenslåPerioder: Boolean,
+        logContext: SecureLog.Context,
     ) {
         val faktaPerioderMedFritekst = faktaFeilutbetaling.perioder.filter { Hendelsesundertype.ANNET_FRITEKST == it.hendelsesundertype }.sortedBy { it.periode }
         val validerPerioder = if (skalSammenslåPerioder && faktaPerioderMedFritekst.isNotEmpty()) listOf(faktaPerioderMedFritekst.first()) else faktaPerioderMedFritekst
@@ -144,6 +155,7 @@ object VedtaksbrevFritekstValidator {
                     throw Feil(
                         message = "Mangler fakta fritekst for alle fakta perioder",
                         frontendFeilmelding = "Mangler Fakta fritekst for alle fakta perioder",
+                        logContext = logContext,
                         httpStatus = HttpStatus.BAD_REQUEST,
                     )
                 }
@@ -157,6 +169,7 @@ object VedtaksbrevFritekstValidator {
                         throw Feil(
                             message = "Mangler fakta fritekst for ${it.periode.fom}-${it.periode.tom}",
                             frontendFeilmelding = "Mangler Fakta fritekst for ${it.periode.fom}-${it.periode.tom}",
+                            logContext = logContext,
                             httpStatus = HttpStatus.BAD_REQUEST,
                         )
                     }
@@ -169,6 +182,7 @@ object VedtaksbrevFritekstValidator {
         vedtaksbrevFritekstPerioder: List<Vedtaksbrevsperiode>,
         validerPåkrevetFritekster: Boolean,
         skalSammenslåPerioder: Boolean,
+        logContext: SecureLog.Context,
     ) {
         val perioderMedSærligeGrunner =
             vilkårsvurdering.perioder
@@ -197,6 +211,7 @@ object VedtaksbrevFritekstValidator {
                     throw Feil(
                         message = "Mangler ANNET Særliggrunner fritekst for ${it.periode}",
                         frontendFeilmelding = "Mangler ANNET Særliggrunner fritekst for ${it.periode} ",
+                        logContext = logContext,
                         httpStatus = HttpStatus.BAD_REQUEST,
                     )
                 }

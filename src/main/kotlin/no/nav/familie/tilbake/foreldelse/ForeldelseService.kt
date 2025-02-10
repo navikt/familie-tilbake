@@ -16,6 +16,7 @@ import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -57,9 +58,10 @@ class ForeldelseService(
     fun lagreVurdertForeldelse(
         behandlingId: UUID,
         behandlingsstegForeldelseDto: BehandlingsstegForeldelseDto,
+        logContext: SecureLog.Context,
     ) {
         // Alle familieytelsene er månedsytelser. Så periode som skal lagres bør være innenfor en måned
-        KravgrunnlagsberegningUtil.validatePerioder(behandlingsstegForeldelseDto.foreldetPerioder.map { it.periode })
+        KravgrunnlagsberegningUtil.validatePerioder(behandlingsstegForeldelseDto.foreldetPerioder.map { it.periode }, logContext)
         val vurdertForeldelse = ForeldelseMapper.tilDomene(behandlingId, behandlingsstegForeldelseDto.foreldetPerioder)
 
         nullstillVilkårsvurderingForEndringerIForeldelsesperiode(behandlingId, vurdertForeldelse)
@@ -68,13 +70,20 @@ class ForeldelseService(
     }
 
     @Transactional
-    fun lagreFastForeldelseForAutomatiskSaksbehandling(behandlingId: UUID) {
+    fun lagreFastForeldelseForAutomatiskSaksbehandling(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val foreldetPerioder =
             hentVurdertForeldelse(behandlingId).foreldetPerioder.map {
                 ForeldelsesperiodeDto(
                     periode = it.periode,
-                    begrunnelse = Constants.hentAutomatiskForeldelsesbegrunnelse(behandling.saksbehandlingstype),
+                    begrunnelse =
+                        Constants.hentAutomatiskForeldelsesbegrunnelse(
+                            behandling.saksbehandlingstype,
+                            logContext = logContext,
+                        ),
                     foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_FORELDET,
                 )
             }

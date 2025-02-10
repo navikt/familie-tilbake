@@ -53,8 +53,8 @@ internal class RyddBehandlingUtenKravgrunnlagTaskTest : OppslagSpringRunnerTest(
     @BeforeEach
     fun init() {
         mockkObject(ContextService)
-        every { ContextService.hentSaksbehandler() }.returns("Z0000")
-        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any()) }.returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.SYSTEM_TILGANG to Behandlerrolle.SYSTEM)))
+        every { ContextService.hentSaksbehandler(any()) }.returns("Z0000")
+        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }.returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.SYSTEM_TILGANG to Behandlerrolle.SYSTEM)))
     }
 
     @AfterEach

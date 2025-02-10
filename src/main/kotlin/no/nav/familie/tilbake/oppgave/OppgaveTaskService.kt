@@ -11,6 +11,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.PropertyName
+import no.nav.familie.tilbake.log.SecureLog
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -137,6 +138,7 @@ class OppgaveTaskService(
         behandlingId: UUID,
         beskrivelse: String,
         enhetId: String,
+        logContext: SecureLog.Context,
     ) {
         val fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId)
         val properties =
@@ -144,7 +146,7 @@ class OppgaveTaskService(
                 setProperty(PropertyName.FAGSYSTEM, fagsystem.name)
                 setProperty("beskrivelse", beskrivelse)
                 setProperty("enhetId", enhetId)
-                setProperty("saksbehandler", ContextService.hentSaksbehandler())
+                setProperty("saksbehandler", ContextService.hentSaksbehandler(logContext))
                 setProperty("behandlingId", behandlingId.toString())
             }
         taskService.save(

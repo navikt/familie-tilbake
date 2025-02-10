@@ -37,6 +37,7 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattArkivRepository
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.oppgave.FerdigstillOppgaveTask
 import no.nav.familie.tilbake.totrinn.TotrinnsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
@@ -200,7 +201,7 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
 
         val oppdatertBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
         oppdatertBehandling.erAvsluttet.shouldBeTrue()
-        oppdatertBehandling.ansvarligSaksbehandler shouldBe ContextService.hentSaksbehandler()
+        oppdatertBehandling.ansvarligSaksbehandler shouldBe ContextService.hentSaksbehandler(SecureLog.Context.tom())
         oppdatertBehandling.avsluttetDato shouldBe LocalDate.now()
         oppdatertBehandling.sisteResultat!!.type shouldBe Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD
 

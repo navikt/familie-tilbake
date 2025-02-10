@@ -13,6 +13,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
+import no.nav.familie.tilbake.log.SecureLog
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -80,8 +81,11 @@ class AutomatiskSaksbehandlingService(
     }
 
     @Transactional
-    fun behandleAutomatisk(behandlingId: UUID) {
-        stegService.håndterStegAutomatisk(behandlingId)
+    fun behandleAutomatisk(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
+        stegService.håndterStegAutomatisk(behandlingId, logContext)
     }
 
     private val aldersgrenseIUker =

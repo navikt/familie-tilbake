@@ -55,7 +55,7 @@ class KravvedtakstatusServiceTest {
     @BeforeAll
     fun beforeAll() {
         every { kravgrunnlagRepository.update(any()) } returns kravgrunnlag
-        every { behandlingskontrollService.tilbakehoppBehandlingssteg(any(), any()) } just runs
+        every { behandlingskontrollService.tilbakehoppBehandlingssteg(any(), any(), any()) } just runs
         every { historikkTaskService.lagHistorikkTask(any(), any(), any(), any(), any(), any(), any()) } just runs
         every { oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(any()) } returns Oppgave(oppgavetype = Oppgavetype.GodkjenneVedtak.name)
         every { oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgave(any(), any(), any()) } just runs

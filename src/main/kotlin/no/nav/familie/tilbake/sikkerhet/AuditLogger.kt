@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.sikkerhet
 import jakarta.servlet.http.HttpServletRequest
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.tilbake.common.ContextService
+import no.nav.familie.tilbake.log.SecureLog
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Value
@@ -68,7 +69,7 @@ class AuditLogger(
         val timestamp = System.currentTimeMillis()
         val name = "Saksbehandling"
         return "CEF:0|Familie|$applicationName|1.0|audit:${data.event.type}|$name|INFO|end=$timestamp " +
-            "suid=${ContextService.hentSaksbehandler()} " +
+            "suid=${ContextService.hentSaksbehandler(SecureLog.Context.tom())} " +
             "duid=${data.personIdent} " +
             "sproc=${getCallId()} " +
             "requestMethod=${request.method} " +

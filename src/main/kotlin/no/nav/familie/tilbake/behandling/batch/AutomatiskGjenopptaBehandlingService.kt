@@ -7,9 +7,11 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.common.ContextService
+import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
+import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -24,6 +26,7 @@ class AutomatiskGjenopptaBehandlingService(
     private val historikkTaskService: HistorikkTaskService,
     private val stegService: StegService,
     private val oppgaveTaskService: OppgaveTaskService,
+    private val logService: LogService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -31,6 +34,8 @@ class AutomatiskGjenopptaBehandlingService(
 
     @Transactional
     fun gjenopptaBehandling(behandlingId: UUID) {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val logContext = logService.contextFraBehandling(behandling.id)
         val behandlingsstegstilstand =
             behandlingskontrollService.finnAktivStegstilstand(behandlingId)
                 ?: error("Behandling $behandlingId har ikke aktivt steg")
@@ -43,7 +48,7 @@ class AutomatiskGjenopptaBehandlingService(
             TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT,
             Aktør.VEDTAKSLØSNING,
         )
-        stegService.gjenopptaSteg(behandlingId)
+        stegService.gjenopptaSteg(behandlingId, logContext)
 
         val behandlingsnystegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandlingId)
         if (behandlingsnystegstilstand?.behandlingssteg == Behandlingssteg.GRUNNLAG &&
@@ -60,7 +65,7 @@ class AutomatiskGjenopptaBehandlingService(
             behandlingId = behandlingId,
             beskrivelse = "Behandling er tatt av vent automatisk",
             frist = tidsfrist,
-            saksbehandler = ContextService.hentSaksbehandler(),
+            saksbehandler = ContextService.hentSaksbehandler(logContext),
         )
 
         // oppdaterer oppgave hvis saken er fortsatt på vent,

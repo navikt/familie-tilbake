@@ -19,6 +19,7 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagAnnulerRequest
 import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagAnnulerResponse
 import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagHentDetaljRequest
@@ -53,19 +54,25 @@ interface OppdragClient {
     fun iverksettVedtak(
         behandlingId: UUID,
         tilbakekrevingsvedtakRequest: TilbakekrevingsvedtakRequest,
+        logContext: SecureLog.Context,
     ): TilbakekrevingsvedtakResponse
 
     fun hentKravgrunnlag(
         kravgrunnlagId: BigInteger,
         hentKravgrunnlagRequest: KravgrunnlagHentDetaljRequest,
+        logContext: SecureLog.Context,
     ): DetaljertKravgrunnlagDto
 
     fun annulerKravgrunnlag(
         eksternKravgrunnlagId: BigInteger,
         kravgrunnlagAnnulerRequest: KravgrunnlagAnnulerRequest,
+        logContext: SecureLog.Context,
     )
 
-    fun hentFeilutbetalingerFraSimulering(request: HentFeilutbetalingerFraSimuleringRequest): FeilutbetalingerFraSimulering
+    fun hentFeilutbetalingerFraSimulering(
+        request: HentFeilutbetalingerFraSimuleringRequest,
+        logContext: SecureLog.Context,
+    ): FeilutbetalingerFraSimulering
 }
 
 @Service
@@ -115,6 +122,7 @@ class DefaultOppdragClient(
     override fun iverksettVedtak(
         behandlingId: UUID,
         tilbakekrevingsvedtakRequest: TilbakekrevingsvedtakRequest,
+        logContext: SecureLog.Context,
     ): TilbakekrevingsvedtakResponse {
         logger.info("Sender tilbakekrevingsvedtak til økonomi for behandling $behandlingId")
         try {
@@ -132,6 +140,7 @@ class DefaultOppdragClient(
                     msg =
                         "Fikk feil respons fra økonomi ved iverksetting av behandling=$behandlingId." +
                             "Mottatt respons:${lagRespons(respons.mmel)}",
+                    logContext = logContext,
                 )
             }
             logger.info("Mottatt respons: ${lagRespons(respons.mmel)} fra økonomi ved iverksetting av behandling=$behandlingId.")
@@ -144,6 +153,7 @@ class DefaultOppdragClient(
             throw IntegrasjonException(
                 msg = "Noe gikk galt ved iverksetting av behandling=$behandlingId",
                 throwable = exception,
+                logContext = logContext,
             )
         }
     }
@@ -151,6 +161,7 @@ class DefaultOppdragClient(
     override fun hentKravgrunnlag(
         kravgrunnlagId: BigInteger,
         hentKravgrunnlagRequest: KravgrunnlagHentDetaljRequest,
+        logContext: SecureLog.Context,
     ): DetaljertKravgrunnlagDto {
         logger.info("Henter kravgrunnlag fra økonomi for kravgrunnlagId=$kravgrunnlagId")
         try {
@@ -159,7 +170,7 @@ class DefaultOppdragClient(
                     uri = hentKravgrunnlagUri(kravgrunnlagId),
                     payload = hentKravgrunnlagRequest,
                 ).getDataOrThrow()
-            validerHentKravgrunnlagRespons(respons.mmel, kravgrunnlagId)
+            validerHentKravgrunnlagRespons(respons.mmel, kravgrunnlagId, logContext)
             logger.info("Mottatt respons: ${lagRespons(respons.mmel)} fra økonomi til kravgrunnlagId=$kravgrunnlagId.")
             return respons.detaljertkravgrunnlag
         } catch (exception: Exception) {
@@ -168,11 +179,12 @@ class DefaultOppdragClient(
                     "Feiler med ${exception.message}",
             )
             if (exception.message?.contains("Kravgrunnlag ikke funnet") == true) {
-                throw KravgrunnlagIkkeFunnetFeil(exception.message!!)
+                throw KravgrunnlagIkkeFunnetFeil(exception.message!!, logContext)
             }
             throw IntegrasjonException(
                 msg = "Noe gikk galt ved henting av kravgrunnlag for kravgrunnlagId=$kravgrunnlagId",
                 throwable = exception,
+                logContext = logContext,
             )
         }
     }
@@ -180,6 +192,7 @@ class DefaultOppdragClient(
     override fun annulerKravgrunnlag(
         eksternKravgrunnlagId: BigInteger,
         kravgrunnlagAnnulerRequest: KravgrunnlagAnnulerRequest,
+        logContext: SecureLog.Context,
     ) {
         logger.info("Annulerer kravgrunnlag for kravgrunnlagId=$eksternKravgrunnlagId")
         try {
@@ -199,6 +212,7 @@ class DefaultOppdragClient(
                         "Fikk feil respons fra økonomi ved annulering " +
                             "av kravgrunnlag med eksternKravgrunnlagId=$eksternKravgrunnlagId." +
                             "Mottatt respons:${lagRespons(respons.mmel)}",
+                    logContext = logContext,
                 )
             }
             logger.info("Mottatt respons: ${lagRespons(respons.mmel)} fra økonomi til kravgrunnlagId=$eksternKravgrunnlagId.")
@@ -208,13 +222,17 @@ class DefaultOppdragClient(
                     "Feiler med ${exception.message}",
             )
             throw IntegrasjonException(
-                "Noe gikk galt ved henting av kravgrunnlag for kravgrunnlagId=$eksternKravgrunnlagId",
-                exception,
+                msg = "Noe gikk galt ved henting av kravgrunnlag for kravgrunnlagId=$eksternKravgrunnlagId",
+                throwable = exception,
+                logContext = logContext,
             )
         }
     }
 
-    override fun hentFeilutbetalingerFraSimulering(request: HentFeilutbetalingerFraSimuleringRequest): FeilutbetalingerFraSimulering {
+    override fun hentFeilutbetalingerFraSimulering(
+        request: HentFeilutbetalingerFraSimuleringRequest,
+        logContext: SecureLog.Context,
+    ): FeilutbetalingerFraSimulering {
         logger.info(
             "Henter feilubetalinger fra simulering for ytelsestype=${request.ytelsestype}, " +
                 "eksternFagsakId=${request.eksternFagsakId} og eksternId=${request.fagsystemsbehandlingId}",
@@ -233,6 +251,7 @@ class DefaultOppdragClient(
             throw IntegrasjonException(
                 msg = "Noe gikk galt ved henting av feilutbetalinger fra simulering",
                 throwable = exception,
+                logContext = logContext,
             )
         }
     }
@@ -240,6 +259,7 @@ class DefaultOppdragClient(
     private fun validerHentKravgrunnlagRespons(
         mmelDto: MmelDto,
         kravgrunnlagId: BigInteger,
+        logContext: SecureLog.Context,
     ) {
         if (!erResponsOk(mmelDto) || erKravgrunnlagIkkeFinnes(mmelDto)) {
             logger.error(
@@ -250,10 +270,14 @@ class DefaultOppdragClient(
                 msg =
                     "Fikk feil respons:${lagRespons(mmelDto)} fra økonomi " +
                         "ved henting av kravgrunnlag for kravgrunnlagId=$kravgrunnlagId.",
+                logContext = logContext,
             )
         } else if (erKravgrunnlagSperret(mmelDto)) {
             logger.warn("Hentet kravgrunnlag for kravgrunnlagId=$kravgrunnlagId er sperret")
-            throw SperretKravgrunnlagFeil(melding = "Hentet kravgrunnlag for kravgrunnlagId=$kravgrunnlagId er sperret")
+            throw SperretKravgrunnlagFeil(
+                melding = "Hentet kravgrunnlag for kravgrunnlagId=$kravgrunnlagId er sperret",
+                logContext = logContext,
+            )
         }
     }
 
@@ -286,6 +310,7 @@ class MockOppdragClient(
     override fun iverksettVedtak(
         behandlingId: UUID,
         tilbakekrevingsvedtakRequest: TilbakekrevingsvedtakRequest,
+        logContext: SecureLog.Context,
     ): TilbakekrevingsvedtakResponse {
         logger.info("Sender mock iverksettelse respons i e2e-profil")
         val mmelDto = MmelDto()
@@ -298,6 +323,7 @@ class MockOppdragClient(
     override fun hentKravgrunnlag(
         kravgrunnlagId: BigInteger,
         hentKravgrunnlagRequest: KravgrunnlagHentDetaljRequest,
+        logContext: SecureLog.Context,
     ): DetaljertKravgrunnlagDto {
         logger.info("Henter kravgrunnlag fra økonomi for kravgrunnlagId=$kravgrunnlagId")
         val respons = lagKravgrunnlagRespons(hentKravgrunnlagRequest)
@@ -308,11 +334,15 @@ class MockOppdragClient(
     override fun annulerKravgrunnlag(
         eksternKravgrunnlagId: BigInteger,
         kravgrunnlagAnnulerRequest: KravgrunnlagAnnulerRequest,
+        logContext: SecureLog.Context,
     ) {
         logger.info("Kaller mock annulering request i e2e-profil")
     }
 
-    override fun hentFeilutbetalingerFraSimulering(request: HentFeilutbetalingerFraSimuleringRequest): FeilutbetalingerFraSimulering {
+    override fun hentFeilutbetalingerFraSimulering(
+        request: HentFeilutbetalingerFraSimuleringRequest,
+        logContext: SecureLog.Context,
+    ): FeilutbetalingerFraSimulering {
         logger.info(
             "Henter feilubetalinger fra simulering i e2e-profil for ytelsestype=${request.ytelsestype}, " +
                 "eksternFagsakId=${request.eksternFagsakId} og eksternId=${request.fagsystemsbehandlingId}",
