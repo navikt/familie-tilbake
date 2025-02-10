@@ -6,6 +6,7 @@ import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.FeatureToggleConfig
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
+import no.nav.familie.tilbake.log.SecureLog
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 
@@ -16,10 +17,12 @@ class ValiderBehandlingService(
     private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
 ) {
     fun validerOpprettBehandling(request: OpprettTilbakekrevingRequest) {
+        val logContext = SecureLog.Context.utenBehandling(request.eksternFagsakId)
         if (FagsystemUtil.hentFagsystemFraYtelsestype(request.ytelsestype) != request.fagsystem) {
             throw Feil(
                 message = "Behandling kan ikke opprettes med ytelsestype=${request.ytelsestype} og fagsystem=${request.fagsystem}",
                 frontendFeilmelding = "Behandling kan ikke opprettes med ytelsestype=${request.ytelsestype} og fagsystem=${request.fagsystem}",
+                logContext = logContext,
                 httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
@@ -33,6 +36,7 @@ class ValiderBehandlingService(
             throw Feil(
                 message = feilMelding,
                 frontendFeilmelding = feilMelding,
+                logContext = logContext,
                 httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
@@ -53,6 +57,7 @@ class ValiderBehandlingService(
                     throw Feil(
                         message = feilMelding,
                         frontendFeilmelding = feilMelding,
+                        logContext = logContext,
                         httpStatus = HttpStatus.BAD_REQUEST,
                     )
                 }
@@ -67,7 +72,7 @@ class ValiderBehandlingService(
             val feilMelding =
                 "Det finnes intet kravgrunnlag for ytelsestype=${request.ytelsestype},eksternFagsakId=${request.eksternFagsakId} " +
                     "og eksternId=${request.eksternId}. Tilbakekrevingsbehandling kan ikke opprettes manuelt."
-            throw Feil(message = feilMelding, frontendFeilmelding = feilMelding)
+            throw Feil(message = feilMelding, frontendFeilmelding = feilMelding, logContext = logContext)
         }
     }
 }

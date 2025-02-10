@@ -49,9 +49,9 @@ internal class VarselbrevServiceTest : OppslagSpringRunnerTest() {
 
         val personinfo = Personinfo("28056325874", LocalDate.now(), "Fiona")
 
-        every { eksterneDataForBrevService.hentPerson(Testdata.fagsak.bruker.ident, any()) }.returns(personinfo)
+        every { eksterneDataForBrevService.hentPerson(Testdata.fagsak.bruker.ident, any(), any()) }.returns(personinfo)
         every {
-            eksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any())
+            eksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any(), any())
         }.returns(Adresseinfo("12345678901", "Test"))
     }
 

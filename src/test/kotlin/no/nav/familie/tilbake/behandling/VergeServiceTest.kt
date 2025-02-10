@@ -31,6 +31,8 @@ import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagsty
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.integration.pdl.PdlClient
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.log.LogService
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.person.PersonService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -60,6 +62,9 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var personService: PersonService
 
+    @Autowired
+    private lateinit var logService: LogService
+
     private lateinit var vergeService: VergeService
 
     private val historikkTaskService: HistorikkTaskService = mockk(relaxed = true)
@@ -84,6 +89,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
                 behandlingskontrollService,
                 integrasjonerClient,
                 personService,
+                logService,
             )
         clearAllMocks(answers = false)
     }
@@ -172,6 +178,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
                 behandlingskontrollService,
                 mockIntegrasjonerClient,
                 personService,
+                logService,
             )
 
         every { mockIntegrasjonerClient.validerOrganisasjon(any()) } returns false
@@ -212,9 +219,10 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
                 behandlingskontrollService,
                 integrasjonerClient,
                 personService,
+                logService,
             )
 
-        every { mockPdlClient.hentPersoninfo(any(), any()) } throws Feil(message = "Feil ved oppslag på person")
+        every { mockPdlClient.hentPersoninfo(any(), any(), any()) } throws Feil(message = "Feil ved oppslag på person", logContext = SecureLog.Context.tom())
 
         val vergeDto = VergeDto(ident = "123", type = Vergetype.VERGE_FOR_BARN, navn = "testverdi", begrunnelse = "testverdi")
         val behandlingId =
@@ -376,6 +384,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
             behandling.id,
             Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
             LocalDate.now().plusWeeks(4),
+            SecureLog.Context.tom(),
         )
 
         val exception = shouldThrow<RuntimeException> { vergeService.opprettVergeSteg(behandling.id) }

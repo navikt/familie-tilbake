@@ -38,6 +38,8 @@ import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.integration.pdl.PdlClient
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.log.LogService
+import no.nav.familie.tilbake.log.SecureLog
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -71,6 +73,9 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var validerBrevmottakerService: ValiderBrevmottakerService
+
+    @Autowired
+    private lateinit var logService: LogService
 
     private lateinit var behandling: Behandling
     private lateinit var manuellBrevmottakerService: ManuellBrevmottakerService
@@ -123,6 +128,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                 pdlClient = mockPdlClient,
                 integrasjonerClient = mockIntegrasjonerClient,
                 validerBrevmottakerService = validerBrevmottakerService,
+                logService = logService,
             )
 
         every {
@@ -136,7 +142,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
             )
         } returns mockk()
 
-        every { mockPdlClient.hentPersoninfo(any(), any()) } returns Personinfo("12345678901", LocalDate.MIN, "Eldar")
+        every { mockPdlClient.hentPersoninfo(any(), any(), any()) } returns Personinfo("12345678901", LocalDate.MIN, "Eldar")
         every { mockIntegrasjonerClient.validerOrganisasjon(any()) } returns true
         every { mockIntegrasjonerClient.hentOrganisasjon("123456789") } returns
             Organisasjon("123456789", navn = "Organisasjon AS")
@@ -372,6 +378,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
             behandling.id,
             Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
             LocalDate.now().plusWeeks(4),
+            SecureLog.Context.tom(),
         )
 
         val exception = shouldThrow<RuntimeException> { manuellBrevmottakerService.opprettBrevmottakerSteg(behandling.id) }
@@ -406,7 +413,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
         manuellBrevmottakerService.leggTilBrevmottaker(behandling.id, requestMedPersonIdent)
 
         var lagretMottaker = manuellBrevmottakerService.hentBrevmottakere(behandling.id).single()
-        lagretMottaker.navn shouldBe mockPdlClient.hentPersoninfo("12345678910", Fagsystem.BA).navn
+        lagretMottaker.navn shouldBe mockPdlClient.hentPersoninfo("12345678910", Fagsystem.BA, SecureLog.Context.tom()).navn
 
         val requestMedOrgnrUtenKontaktperson =
             manuellBrevmottakerRequestDto.copy(

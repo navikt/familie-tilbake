@@ -20,6 +20,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.Fritekstbrevsdata
 import no.nav.familie.tilbake.dokumentbestilling.innhentdokumentasjon.handlebars.dto.InnhentDokumentasjonsbrevsdokument
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -40,9 +41,10 @@ class InnhentDokumentasjonbrevService(
         brevmottager: Brevmottager? = null,
     ) {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandling.id.toString())
         if (brevmottager == null) {
             distribusjonshåndteringService.sendBrev(behandling, Brevtype.INNHENT_DOKUMENTASJON) { mottaker, brevmetadata ->
-                val dokument = settOppInnhentDokumentasjonsbrevsdokument(behandling, fagsak, fritekst, mottaker, brevmetadata)
+                val dokument = settOppInnhentDokumentasjonsbrevsdokument(behandling, fagsak, fritekst, mottaker, brevmetadata, logContext)
                 val fritekstbrevsdata: Fritekstbrevsdata = lagInnhentDokumentasjonsbrev(dokument)
                 Brevdata(
                     mottager = mottaker,
@@ -52,7 +54,7 @@ class InnhentDokumentasjonbrevService(
                 )
             }
         } else {
-            val dokument = settOppInnhentDokumentasjonsbrevsdokument(behandling, fagsak, fritekst, brevmottager)
+            val dokument = settOppInnhentDokumentasjonsbrevsdokument(behandling, fagsak, fritekst, brevmottager, null, logContext)
             val fritekstbrevsdata: Fritekstbrevsdata = lagInnhentDokumentasjonsbrev(dokument)
             val brevdata =
                 Brevdata(
@@ -77,9 +79,10 @@ class InnhentDokumentasjonbrevService(
     ): ByteArray {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandling.id.toString())
         val (metadata, brevmottager) =
             brevmetadataUtil.lagBrevmetadataForMottakerTilForhåndsvisning(behandlingId)
-        val dokument = settOppInnhentDokumentasjonsbrevsdokument(behandling, fagsak, fritekst, brevmottager, metadata)
+        val dokument = settOppInnhentDokumentasjonsbrevsdokument(behandling, fagsak, fritekst, brevmottager, metadata, logContext)
         val fritekstbrevsdata: Fritekstbrevsdata = lagInnhentDokumentasjonsbrev(dokument)
 
         return pdfBrevService.genererForhåndsvisning(
@@ -108,16 +111,17 @@ class InnhentDokumentasjonbrevService(
         fagsak: Fagsak,
         fritekst: String,
         brevmottager: Brevmottager,
-        forhåndsgenerertMetadata: Brevmetadata? = null,
+        forhåndsgenerertMetadata: Brevmetadata?,
+        logContext: SecureLog.Context,
     ): InnhentDokumentasjonsbrevsdokument {
         val brevmetadata =
             forhåndsgenerertMetadata ?: run {
-                val personinfo: Personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
+                val personinfo: Personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem, logContext)
                 val adresseinfo: Adresseinfo =
-                    eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, behandling.aktivVerge, fagsak.fagsystem)
+                    eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, behandling.aktivVerge, fagsak.fagsystem, logContext)
                 val vergenavn = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)
                 val ansvarligSaksbehandler =
-                    eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(behandling.ansvarligSaksbehandler)
+                    eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(behandling.ansvarligSaksbehandler, logContext)
                 val gjelderDødsfall = personinfo.dødsdato != null
 
                 Brevmetadata(

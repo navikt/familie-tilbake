@@ -7,6 +7,7 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingManuellOpprettelseService
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.log.SecureLog
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
@@ -58,8 +59,8 @@ class OpprettBehandlingManueltTask(
             }
 
         val hentFagsystemsbehandlingRespons = hentFagsystemsbehandlingService.lesRespons(respons)
-        val feilMelding = hentFagsystemsbehandlingRespons.feilMelding
-        if (feilMelding != null) {
+        val feilmelding = hentFagsystemsbehandlingRespons.feilMelding
+        if (feilmelding != null) {
             hentFagsystemsbehandlingService.slettOgSendNyHentFagsystembehandlingRequest(
                 requestSendtId = requestSendt.id,
                 eksternFagsakId = eksternFagsakId,
@@ -67,8 +68,10 @@ class OpprettBehandlingManueltTask(
                 eksternId = eksternId,
             )
             throw Feil(
-                "Noe gikk galt ved henting av fagsystemsbehandling fra fagsystem. Legger ny melding på topic. Task må rekjøres. " +
-                    "Feiler med $feilMelding",
+                message =
+                    "Noe gikk galt ved henting av fagsystemsbehandling fra fagsystem. Legger ny melding på topic. Task må rekjøres. " +
+                        "Feiler med $feilmelding",
+                logContext = SecureLog.Context.utenBehandling(eksternFagsakId.toString()),
             )
         }
 

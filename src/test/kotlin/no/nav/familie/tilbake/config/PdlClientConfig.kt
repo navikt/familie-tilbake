@@ -26,7 +26,7 @@ class PdlClientConfig {
 
         val identerDødePersoner = listOf("doed1234")
         val ident = slot<String>()
-        every { pdlClient.hentPersoninfo(capture(ident), any()) } answers {
+        every { pdlClient.hentPersoninfo(capture(ident), any(), any()) } answers {
             val dødsdato =
                 if (identerDødePersoner.contains(ident.captured)) {
                     LocalDate.of(2022, 4, 1)
@@ -41,14 +41,14 @@ class PdlClientConfig {
                 dødsdato = dødsdato,
             )
         }
-        every { pdlClient.hentIdenter(any(), any()) } answers {
+        every { pdlClient.hentIdenter(any(), any(), any()) } answers {
             PdlHentIdenterResponse(
                 data = Data(PdlIdenter(identer = listOf(IdentInformasjon("123", "AKTORID")))),
                 extensions = null,
                 errors = listOf(),
             )
         }
-        every { pdlClient.hentAdressebeskyttelseBolk(any(), any()) } answers {
+        every { pdlClient.hentAdressebeskyttelseBolk(any(), any(), any()) } answers {
             emptyMap()
         }
         return pdlClient

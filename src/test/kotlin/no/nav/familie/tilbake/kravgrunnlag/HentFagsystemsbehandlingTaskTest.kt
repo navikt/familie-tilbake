@@ -109,7 +109,7 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
         hentFagsystemsbehandlingTask =
             HentFagsystemsbehandlingTask(gammelKravgrunnlagService, hentFagsystemsbehandlingService, taskService)
 
-        every { kafkaProducer.sendHentFagsystemsbehandlingRequest(any(), any()) } returns Unit
+        every { kafkaProducer.sendHentFagsystemsbehandlingRequest(any(), any(), any()) } returns Unit
     }
 
     @AfterEach

@@ -17,6 +17,7 @@ import no.nav.familie.tilbake.config.RolleConfig
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
+import no.nav.familie.tilbake.log.SecureLog
 import org.aspectj.lang.JoinPoint
 import org.aspectj.lang.annotation.Aspect
 import org.aspectj.lang.annotation.Before
@@ -65,7 +66,7 @@ class TilgangAdvice(
         joinpoint: JoinPoint,
         rolletilgangssjekk: Rolletilgangssjekk,
     ) {
-        if (ContextService.hentSaksbehandler() == Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
+        if (ContextService.hentSaksbehandler(SecureLog.Context.tom()) == Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
             // når behandler har system tilgang, trenges ikke det validering på fagsystem eller rolle
             return
         }
@@ -165,6 +166,7 @@ class TilgangAdvice(
                     throw Feil(
                         message = "Finnes ikke eksternKravgrunnlagId=$eksternKravgrunnlagId",
                         httpStatus = HttpStatus.BAD_REQUEST,
+                        logContext = SecureLog.Context.tom(),
                     )
                 }
                 val ytelsestype = økonomiXmlMottatt?.ytelsestype ?: kravgrunnlag!!.fagområdekode.ytelsestype
@@ -276,7 +278,7 @@ class TilgangAdvice(
         handling: String,
     ) {
         val brukerRolleOgFagsystemstilgang =
-            ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, handling)
+            ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, handling, SecureLog.Context.tom())
 
         // når behandler har forvaltningstilgang, blir rollen bare validert
         if (brukerRolleOgFagsystemstilgang.tilganger.contains(Tilgangskontrollsfagsystem.FORVALTER_TILGANG)) {
@@ -333,8 +335,9 @@ class TilgangAdvice(
         val tilganger = integrasjonerClient.sjekkTilgangTilPersoner(personerIBehandlingen, fagsakSystem.tilTema())
         if (tilganger.any { !it.harTilgang }) {
             throw Feil(
-                message = "${ContextService.hentSaksbehandler()} har ikke tilgang til person i $handling",
-                frontendFeilmelding = "${ContextService.hentSaksbehandler()}  har ikke tilgang til person i $handling",
+                message = "${ContextService.hentSaksbehandler(SecureLog.Context.tom())} har ikke tilgang til person i $handling",
+                frontendFeilmelding = "${ContextService.hentSaksbehandler(SecureLog.Context.tom())}  har ikke tilgang til person i $handling",
+                logContext = SecureLog.Context.tom(),
                 httpStatus = HttpStatus.FORBIDDEN,
             )
         }
@@ -345,7 +348,10 @@ class TilgangAdvice(
             Fagsystem.BA -> Tema.BAR
             Fagsystem.KONT, Fagsystem.KS -> Tema.KON
             Fagsystem.EF -> Tema.ENF
-            Fagsystem.IT01 -> throw Feil("Fagsystem $this støttes ikke")
+            Fagsystem.IT01 -> throw Feil(
+                message = "Fagsystem $this støttes ikke",
+                logContext = SecureLog.Context.tom(),
+            )
         }
 
     private fun validateFagsystem(
@@ -355,8 +361,9 @@ class TilgangAdvice(
     ) {
         if (!brukerRolleOgFagsystemstilgang.tilganger.contains(fagsystem)) {
             throw Feil(
-                message = "${ContextService.hentSaksbehandler()} har ikke tilgang til $handling",
-                frontendFeilmelding = "${ContextService.hentSaksbehandler()}  har ikke tilgang til $handling",
+                message = "${ContextService.hentSaksbehandler(SecureLog.Context.tom())} har ikke tilgang til $handling",
+                frontendFeilmelding = "${ContextService.hentSaksbehandler(SecureLog.Context.tom())}  har ikke tilgang til $handling",
+                logContext = SecureLog.Context.tom(),
                 httpStatus = HttpStatus.FORBIDDEN,
             )
         }
@@ -370,18 +377,20 @@ class TilgangAdvice(
         if (minimumBehandlerrolle == Behandlerrolle.FORVALTER) {
             throw Feil(
                 message =
-                    "${ContextService.hentSaksbehandler()} med rolle $brukersrolleTilFagsystemet " +
+                    "${ContextService.hentSaksbehandler(SecureLog.Context.tom())} med rolle $brukersrolleTilFagsystemet " +
                         "har ikke tilgang til å kalle forvaltningstjeneste $handling. Krever FORVALTER.",
                 frontendFeilmelding = "Du har ikke tilgang til å $handling.",
+                logContext = SecureLog.Context.tom(),
                 httpStatus = HttpStatus.FORBIDDEN,
             )
         }
         if (minimumBehandlerrolle.nivå > brukersrolleTilFagsystemet.nivå) {
             throw Feil(
                 message =
-                    "${ContextService.hentSaksbehandler()} med rolle $brukersrolleTilFagsystemet " +
+                    "${ContextService.hentSaksbehandler(SecureLog.Context.tom())} med rolle $brukersrolleTilFagsystemet " +
                         "har ikke tilgang til å $handling. Krever $minimumBehandlerrolle.",
                 frontendFeilmelding = "Du har ikke tilgang til å $handling.",
+                logContext = SecureLog.Context.tom(),
                 httpStatus = HttpStatus.FORBIDDEN,
             )
         }
@@ -399,9 +408,10 @@ class TilgangAdvice(
         ) {
             throw Feil(
                 message =
-                    "${ContextService.hentSaksbehandler()} med rolle FORVALTER " +
+                    "${ContextService.hentSaksbehandler(SecureLog.Context.tom())} med rolle FORVALTER " +
                         "har ikke tilgang til å $handling. Krever $minimumBehandlerrolle.",
                 frontendFeilmelding = "Du har ikke tilgang til å $handling.",
+                logContext = SecureLog.Context.tom(),
                 httpStatus = HttpStatus.FORBIDDEN,
             )
         }
@@ -414,6 +424,7 @@ class TilgangAdvice(
         throw Feil(
             message = feilmelding,
             frontendFeilmelding = feilmelding,
+            logContext = SecureLog.Context.tom(),
             httpStatus = HttpStatus.BAD_REQUEST,
         )
     }

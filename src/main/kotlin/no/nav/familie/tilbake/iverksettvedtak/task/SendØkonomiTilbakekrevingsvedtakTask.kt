@@ -10,6 +10,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.SendVedtaksbrevTask
 import no.nav.familie.tilbake.iverksettvedtak.IverksettelseService
+import no.nav.familie.tilbake.log.LogService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -26,12 +27,14 @@ class SendØkonomiTilbakekrevingsvedtakTask(
     private val iverksettelseService: IverksettelseService,
     private val taskService: TaskService,
     private val behandlingskontrollService: BehandlingskontrollService,
+    private val logService: LogService,
 ) : AsyncTaskStep {
     private val log = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {
         log.info("SendØkonomiTilbakekrevingsvedtakTask prosesserer med id=${task.id} og metadata ${task.metadata}")
         val behandlingId = UUID.fromString(task.payload)
+        val logContext = logService.contextFraBehandling(behandlingId)
         iverksettelseService.sendIverksettVedtak(behandlingId)
 
         behandlingskontrollService
@@ -41,8 +44,9 @@ class SendØkonomiTilbakekrevingsvedtakTask(
                     behandlingssteg = Behandlingssteg.IVERKSETT_VEDTAK,
                     behandlingsstegstatus = Behandlingsstegstatus.UTFØRT,
                 ),
+                logContext,
             )
-        behandlingskontrollService.fortsettBehandling(behandlingId)
+        behandlingskontrollService.fortsettBehandling(behandlingId, logContext)
     }
 
     @Transactional

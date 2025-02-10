@@ -1,9 +1,8 @@
 package no.nav.familie.tilbake.config
 
 import io.kotest.matchers.shouldBe
-import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 class ConstantsTest {
@@ -20,6 +19,6 @@ class ConstantsTest {
 
     @Test
     fun `Henter ikke ut rettsgebyr for 2020 - ikke registrert`() {
-        assertThrows<Feil> { Constants.rettsgebyrForÅr(2020) }.message shouldBe "Rettsgebyr for år 2020 er ikke satt"
+        assertNull(Constants.rettsgebyrForÅr(2020))
     }
 }

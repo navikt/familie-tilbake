@@ -15,7 +15,6 @@ import no.nav.familie.tilbake.beregning.modell.FordeltKravgrunnlagsbeløp
 import no.nav.familie.tilbake.beregning.modell.GrunnlagsperiodeMedSkatteprosent
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingMapper
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.foreldelse.VurdertForeldelseRepository
@@ -25,6 +24,7 @@ import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
@@ -40,7 +40,6 @@ class TilbakekrevingsberegningService(
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val behandlingRepository: BehandlingRepository,
     private val faktaFeilutbetalingService: FaktaFeilutbetalingService,
-    private val featureToggleService: FeatureToggleService,
 ) {
     fun hentBeregningsresultat(behandlingId: UUID): BeregningsresultatDto {
         val beregningsresultat = beregn(behandlingId)
@@ -95,9 +94,10 @@ class TilbakekrevingsberegningService(
     fun beregnBeløp(
         behandlingId: UUID,
         perioder: List<Datoperiode>,
+        logContext: SecureLog.Context,
     ): BeregnetPerioderDto {
         // Alle familieytelsene er månedsytelser. Så periode som skal lagres bør være innenfor en måned.
-        KravgrunnlagsberegningUtil.validatePerioder(perioder)
+        KravgrunnlagsberegningUtil.validatePerioder(perioder, logContext)
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
 
         return BeregnetPerioderDto(

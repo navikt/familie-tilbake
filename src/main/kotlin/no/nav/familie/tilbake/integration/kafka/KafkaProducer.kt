@@ -6,6 +6,7 @@ import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.KafkaConfig
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.sakshendelse.Behandlingstilstand
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.Vedtaksoppsummering
+import no.nav.familie.tilbake.log.SecureLog
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
@@ -17,11 +18,13 @@ interface KafkaProducer {
     fun sendSaksdata(
         behandlingId: UUID,
         request: Behandlingstilstand,
+        logContext: SecureLog.Context,
     )
 
     fun sendVedtaksdata(
         behandlingId: UUID,
         request: Vedtaksoppsummering,
+        logContext: SecureLog.Context,
     )
 
     fun sendRåFagsystemsbehandlingResponse(
@@ -32,6 +35,7 @@ interface KafkaProducer {
     fun sendHentFagsystemsbehandlingRequest(
         requestId: UUID,
         request: HentFagsystemsbehandlingRequest,
+        logContext: SecureLog.Context,
     )
 }
 
@@ -46,22 +50,43 @@ class DefaultKafkaProducer(
     override fun sendSaksdata(
         behandlingId: UUID,
         request: Behandlingstilstand,
+        logContext: SecureLog.Context,
     ) {
-        sendKafkamelding(behandlingId, KafkaConfig.SAK_TOPIC, request.behandlingUuid.toString(), request)
+        sendKafkamelding(
+            behandlingId = behandlingId,
+            topic = KafkaConfig.SAK_TOPIC,
+            key = request.behandlingUuid.toString(),
+            request = request,
+            logContext = logContext,
+        )
     }
 
     override fun sendVedtaksdata(
         behandlingId: UUID,
         request: Vedtaksoppsummering,
+        logContext: SecureLog.Context,
     ) {
-        sendKafkamelding(behandlingId, KafkaConfig.VEDTAK_TOPIC, request.behandlingUuid.toString(), request)
+        sendKafkamelding(
+            behandlingId = behandlingId,
+            topic = KafkaConfig.VEDTAK_TOPIC,
+            key = request.behandlingUuid.toString(),
+            request = request,
+            logContext = logContext,
+        )
     }
 
     override fun sendHentFagsystemsbehandlingRequest(
         requestId: UUID,
         request: HentFagsystemsbehandlingRequest,
+        logContext: SecureLog.Context,
     ) {
-        sendKafkamelding(requestId, kafkaProperties.hentFagsystem.requestTopic, requestId.toString(), request)
+        sendKafkamelding(
+            behandlingId = requestId,
+            topic = kafkaProperties.hentFagsystem.requestTopic,
+            key = requestId.toString(),
+            request = request,
+            logContext = logContext,
+        )
     }
 
     override fun sendRåFagsystemsbehandlingResponse(
@@ -82,6 +107,7 @@ class DefaultKafkaProducer(
         topic: String,
         key: String,
         request: Any,
+        logContext: SecureLog.Context,
     ) {
         val melding = objectMapper.writeValueAsString(request)
         val producerRecord = ProducerRecord(topic, key, melding)
@@ -97,7 +123,10 @@ class DefaultKafkaProducer(
                     "Melding på topic $topic kan ikke sendes for $behandlingId med $key. " +
                         "Feiler med ${it.message}"
                 log.warn(feilmelding)
-                throw Feil(message = feilmelding)
+                throw Feil(
+                    message = feilmelding,
+                    logContext = logContext,
+                )
             }
     }
 }
@@ -108,6 +137,7 @@ class E2EKafkaProducer : KafkaProducer {
     override fun sendSaksdata(
         behandlingId: UUID,
         request: Behandlingstilstand,
+        logContext: SecureLog.Context,
     ) {
         logger.info("Skipper sending av saksstatistikk for behandling $behandlingId fordi kafka ikke er enablet")
     }
@@ -115,6 +145,7 @@ class E2EKafkaProducer : KafkaProducer {
     override fun sendVedtaksdata(
         behandlingId: UUID,
         request: Vedtaksoppsummering,
+        logContext: SecureLog.Context,
     ) {
         logger.info("Skipper sending av vedtaksstatistikk for behandling $behandlingId fordi kafka ikke er enablet")
     }
@@ -129,6 +160,7 @@ class E2EKafkaProducer : KafkaProducer {
     override fun sendHentFagsystemsbehandlingRequest(
         requestId: UUID,
         request: HentFagsystemsbehandlingRequest,
+        logContext: SecureLog.Context,
     ) {
         logger.info("Skipper sending av info-request for fagsystembehandling ${request.eksternId} fordi kafka ikke er enablet")
     }

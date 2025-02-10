@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
@@ -39,6 +40,7 @@ class ForvaltningController(
     private val forvaltningService: ForvaltningService,
     private val oppgaveTaskService: OppgaveTaskService,
     private val behandlingTilstandService: BehandlingTilstandService,
+    private val behandlingService: BehandlingService,
 ) {
     @Operation(summary = "Hent korrigert kravgrunnlag")
     @PutMapping(

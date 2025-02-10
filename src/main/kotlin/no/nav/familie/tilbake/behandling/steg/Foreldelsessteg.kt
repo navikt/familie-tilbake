@@ -12,6 +12,7 @@ import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEvent
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -34,7 +35,10 @@ class Foreldelsessteg(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
-    override fun utførSteg(behandlingId: UUID) {
+    override fun utførSteg(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORELDELSE} steg")
         if (!harGrunnlagForeldetPeriode(behandlingId)) {
             lagHistorikkinnslag(behandlingId, Aktør.VEDTAKSLØSNING)
@@ -45,8 +49,9 @@ class Foreldelsessteg(
                     Behandlingssteg.FORELDELSE,
                     Behandlingsstegstatus.AUTOUTFØRT,
                 ),
+                logContext,
             )
-            behandlingskontrollService.fortsettBehandling(behandlingId)
+            behandlingskontrollService.fortsettBehandling(behandlingId, logContext)
         }
     }
 
@@ -54,9 +59,10 @@ class Foreldelsessteg(
     override fun utførSteg(
         behandlingId: UUID,
         behandlingsstegDto: BehandlingsstegDto,
+        logContext: SecureLog.Context,
     ) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORELDELSE} steg")
-        foreldelseService.lagreVurdertForeldelse(behandlingId, (behandlingsstegDto as BehandlingsstegForeldelseDto))
+        foreldelseService.lagreVurdertForeldelse(behandlingId, (behandlingsstegDto as BehandlingsstegForeldelseDto), logContext)
 
         oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId)
 
@@ -68,15 +74,19 @@ class Foreldelsessteg(
                 Behandlingssteg.FORELDELSE,
                 Behandlingsstegstatus.UTFØRT,
             ),
+            logContext,
         )
-        behandlingskontrollService.fortsettBehandling(behandlingId)
+        behandlingskontrollService.fortsettBehandling(behandlingId, logContext)
     }
 
     @Transactional
-    override fun utførStegAutomatisk(behandlingId: UUID) {
+    override fun utførStegAutomatisk(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORELDELSE} steg og behandler automatisk..")
         if (harGrunnlagForeldetPeriode(behandlingId)) {
-            foreldelseService.lagreFastForeldelseForAutomatiskSaksbehandling(behandlingId)
+            foreldelseService.lagreFastForeldelseForAutomatiskSaksbehandling(behandlingId, logContext)
             lagHistorikkinnslag(behandlingId, Aktør.VEDTAKSLØSNING)
 
             behandlingskontrollService.oppdaterBehandlingsstegStatus(
@@ -85,15 +95,19 @@ class Foreldelsessteg(
                     Behandlingssteg.FORELDELSE,
                     Behandlingsstegstatus.UTFØRT,
                 ),
+                logContext,
             )
-            behandlingskontrollService.fortsettBehandling(behandlingId)
+            behandlingskontrollService.fortsettBehandling(behandlingId, logContext)
         } else {
-            utførSteg(behandlingId)
+            utførSteg(behandlingId, logContext)
         }
     }
 
     @Transactional
-    override fun gjenopptaSteg(behandlingId: UUID) {
+    override fun gjenopptaSteg(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.FORELDELSE} steg")
         behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
@@ -101,6 +115,7 @@ class Foreldelsessteg(
                 Behandlingssteg.FORELDELSE,
                 Behandlingsstegstatus.KLAR,
             ),
+            logContext,
         )
     }
 

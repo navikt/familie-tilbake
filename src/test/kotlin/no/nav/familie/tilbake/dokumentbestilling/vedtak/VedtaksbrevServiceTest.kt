@@ -23,6 +23,7 @@ import no.nav.familie.tilbake.api.dto.FritekstavsnittDto
 import no.nav.familie.tilbake.api.dto.HentForhåndvisningVedtaksbrevPdfDto
 import no.nav.familie.tilbake.api.dto.PeriodeMedTekstDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsak
@@ -54,6 +55,8 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.log.LogService
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.pdfgen.validering.PdfaValidator
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
@@ -111,6 +114,9 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
 
+    @Autowired
+    private lateinit var logService: LogService
+
     private val eksterneDataForBrevService: EksterneDataForBrevService = mockk()
 
     private lateinit var vedtaksbrevService: VedtaksbrevService
@@ -133,6 +139,9 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var periodeService: PeriodeService
+
+    @Autowired
+    private lateinit var behandlingService: BehandlingService
 
     @BeforeEach
     fun init() {
@@ -157,8 +166,8 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
                 vedtaksbrevsperiodeRepository,
                 spyPdfBrevService,
                 sendBrevService,
-                featureToggleService,
                 periodeService,
+                logService,
             )
 
         fagsak = fagsakRepository.insert(Testdata.fagsak)
@@ -195,13 +204,13 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
         val personinfo = Personinfo("28056325874", LocalDate.now(), "Fiona")
 
-        every { eksterneDataForBrevService.hentPerson(Testdata.fagsak.bruker.ident, any()) }.returns(personinfo)
+        every { eksterneDataForBrevService.hentPerson(Testdata.fagsak.bruker.ident, any(), any()) }.returns(personinfo)
         every { eksterneDataForBrevService.hentSaksbehandlernavn(behandling.ansvarligSaksbehandler) }
             .returns("Ansvarlig O'Saksbehandler")
         every { eksterneDataForBrevService.hentSaksbehandlernavn(behandling.ansvarligBeslutter!!) }
             .returns("Ansvarlig O'Beslutter")
         every {
-            eksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any())
+            eksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any(), any())
         }.returns(Adresseinfo("12345678901", "Test"))
     }
 
@@ -364,8 +373,9 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         val exception =
             shouldThrow<RuntimeException> {
                 vedtaksbrevService.lagreFriteksterFraSaksbehandler(
-                    behandlingId = behandling.id,
+                    behandling.id,
                     fritekstAvsnittDto,
+                    SecureLog.Context.tom(),
                 )
             }
         exception.message shouldBe "Periode 2021-10-01-2021-10-31 er ugyldig for behandling ${behandling.id}"
@@ -377,11 +387,12 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         val exception =
             shouldThrow<RuntimeException> {
                 vedtaksbrevService.lagreFriteksterFraSaksbehandler(
-                    behandlingId = behandling.id,
+                    behandling.id,
                     lagFritekstAvsnittDto(
                         "fakta",
                         RandomStringUtils.random(5000),
                     ),
+                    SecureLog.Context.tom(),
                 )
             }
         exception.message shouldBe "Oppsummeringstekst er for lang for behandling ${behandling.id}"
@@ -394,8 +405,9 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         val exception =
             shouldThrow<RuntimeException> {
                 vedtaksbrevService.lagreFriteksterFraSaksbehandler(
-                    behandlingId = behandling.id,
+                    behandling.id,
                     lagFritekstAvsnittDto("fakta", "fakta data"),
+                    SecureLog.Context.tom(),
                 )
             }
         exception.message shouldBe "Mangler ANNET Særliggrunner fritekst for " +
@@ -408,8 +420,9 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         val exception =
             shouldThrow<RuntimeException> {
                 vedtaksbrevService.lagreFriteksterFraSaksbehandler(
-                    behandlingId = behandling.id,
+                    behandling.id,
                     lagFritekstAvsnittDto(),
+                    SecureLog.Context.tom(),
                 )
             }
         exception.message shouldBe "Mangler fakta fritekst for alle fakta perioder"
@@ -446,6 +459,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
                 vedtaksbrevService.lagreFriteksterFraSaksbehandler(
                     behandlingId = behandling.id,
                     fritekstavsnittDto = fritekstAvsnittDto,
+                    logContext = SecureLog.Context.tom(),
                 )
             }
         exception.message shouldBe "Mangler fakta fritekst for ${LocalDate.of(2021, 3, 1)}-" +
@@ -467,6 +481,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         vedtaksbrevService.lagreFriteksterFraSaksbehandler(
             behandlingId = behandling.id,
             fritekstavsnittDto = fritekstAvsnittDto,
+            logContext = SecureLog.Context.tom(),
         )
 
         val avsnittene = vedtaksbrevService.hentVedtaksbrevSomTekst(behandling.id)
@@ -567,8 +582,9 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
                 særligGrunnerAnnetFritekst = "særliggrunner annet fritekst",
             )
         vedtaksbrevService.lagreUtkastAvFritekster(
-            behandlingId = behandling.id,
+            behandling.id,
             fritekstAvsnittDto,
+            SecureLog.Context.tom(),
         )
 
         val avsnittene = vedtaksbrevService.hentVedtaksbrevSomTekst(behandling.id)
@@ -590,6 +606,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         vedtaksbrevService.lagreUtkastAvFritekster(
             behandlingId = behandling.id,
             fritekstavsnittDto = fritekstAvsnittDto,
+            logContext = SecureLog.Context.tom(),
         )
 
         val avsnittene = vedtaksbrevService.hentVedtaksbrevSomTekst(behandling.id)
@@ -629,6 +646,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         vedtaksbrevService.lagreUtkastAvFritekster(
             behandlingId = lokalBehandling.id,
             fritekstavsnittDto = fritekstAvsnittDto,
+            logContext = SecureLog.Context.tom(),
         )
 
         val avsnittene = vedtaksbrevService.hentVedtaksbrevSomTekst(lokalBehandling.id)
@@ -657,11 +675,12 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         val exception =
             shouldThrow<RuntimeException> {
                 vedtaksbrevService.lagreFriteksterFraSaksbehandler(
-                    behandlingId = lokalBehandling.id,
+                    lokalBehandling.id,
                     lagFritekstAvsnittDto(
                         faktaFritekst = "fakta",
                         særligGrunnerAnnetFritekst = "test",
                     ),
+                    SecureLog.Context.tom(),
                 )
             }
         exception.message shouldBe "oppsummering fritekst påkrevet for revurdering ${lokalBehandling.id}"

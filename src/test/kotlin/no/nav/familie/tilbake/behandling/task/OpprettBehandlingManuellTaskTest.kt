@@ -114,6 +114,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
             spyKafkaProducer.sendHentFagsystemsbehandlingRequest(
                 capture(requestIdSlot),
                 capture(hentFagsystemsbehandlingRequestSlot),
+                any(),
             )
         }
         val requestId = requestIdSlot.captured

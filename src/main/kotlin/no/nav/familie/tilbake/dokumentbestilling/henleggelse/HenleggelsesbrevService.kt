@@ -21,6 +21,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.Fritekstbrevsdata
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.handlebars.dto.Henleggelsesbrevsdokument
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -43,9 +44,10 @@ class HenleggelsesbrevService(
     ) {
         val behandling: Behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandling.id.toString())
         if (brevmottager == null) {
             distribusjonshåndteringService.sendBrev(behandling, Brevtype.HENLEGGELSE) { brevmottaker, brevmetadata ->
-                val henleggelsesbrevSamletInfo = lagHenleggelsebrev(behandling, fagsak, fritekst, brevmottaker, brevmetadata)
+                val henleggelsesbrevSamletInfo = lagHenleggelsebrev(behandling, fagsak, fritekst, brevmottaker, brevmetadata, logContext)
                 val fritekstbrevData: Fritekstbrevsdata =
                     if (Behandlingstype.TILBAKEKREVING == behandling.type) {
                         lagHenleggelsesbrev(henleggelsesbrevSamletInfo)
@@ -60,7 +62,7 @@ class HenleggelsesbrevService(
                 )
             }
         } else {
-            val henleggelsesbrevSamletInfo = lagHenleggelsebrev(behandling, fagsak, fritekst, brevmottager)
+            val henleggelsesbrevSamletInfo = lagHenleggelsebrev(behandling, fagsak, fritekst, brevmottager, null, logContext)
             val fritekstbrevData: Fritekstbrevsdata =
                 if (Behandlingstype.TILBAKEKREVING == behandling.type) {
                     lagHenleggelsesbrev(henleggelsesbrevSamletInfo)
@@ -87,9 +89,10 @@ class HenleggelsesbrevService(
     ): ByteArray {
         val behandling: Behandling = behandlingRepository.findByIdOrThrow(behandlingUuid)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandling.id.toString())
         val (metadata, brevmottager) =
             brevmetadataUtil.lagBrevmetadataForMottakerTilForhåndsvisning(behandling.id)
-        val henleggelsesbrevSamletInfo = lagHenleggelsebrev(behandling, fagsak, fritekst, brevmottager, metadata)
+        val henleggelsesbrevSamletInfo = lagHenleggelsebrev(behandling, fagsak, fritekst, brevmottager, metadata, logContext)
         val fritekstbrevData: Fritekstbrevsdata =
             if (Behandlingstype.TILBAKEKREVING == behandling.type) {
                 lagHenleggelsesbrev(henleggelsesbrevSamletInfo)
@@ -111,7 +114,8 @@ class HenleggelsesbrevService(
         fagsak: Fagsak,
         fritekst: String?,
         brevmottager: Brevmottager,
-        forhåndsgenerertMetadata: Brevmetadata? = null,
+        forhåndsgenerertMetadata: Brevmetadata?,
+        logContext: SecureLog.Context,
     ): Henleggelsesbrevsdokument {
         val brevSporing = brevsporingService.finnSisteVarsel(behandling.id)
         if (Behandlingstype.TILBAKEKREVING == behandling.type && brevSporing == null) {
@@ -130,18 +134,19 @@ class HenleggelsesbrevService(
             if (behandling.ansvarligSaksbehandler == Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
                 SIGNATUR_AUTOMATISK_HENLEGGELSESBREV
             } else {
-                eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(behandling.ansvarligSaksbehandler)
+                eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(behandling.ansvarligSaksbehandler, logContext)
             }
 
         val metadata =
             forhåndsgenerertMetadata ?: run {
-                val personinfo: Personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
+                val personinfo: Personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem, logContext)
                 val adresseinfo: Adresseinfo =
                     eksterneDataForBrevService.hentAdresse(
                         personinfo,
                         brevmottager,
                         behandling.aktivVerge,
                         fagsak.fagsystem,
+                        logContext,
                     )
 
                 val vergenavn: String = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)

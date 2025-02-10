@@ -9,6 +9,7 @@ import no.nav.familie.tilbake.common.exceptionhandler.UgyldigKravgrunnlagFeil
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagMelding
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagPeriodeDto
@@ -53,7 +54,11 @@ object KravgrunnlagUtil {
 
             (jaxbUnmarshaller.unmarshal(StringReader(kravgrunnlagXML)) as DetaljertKravgrunnlagMelding).detaljertKravgrunnlag
         } catch (e: JAXBException) {
-            throw UgyldigKravgrunnlagFeil(melding = "Mottatt kravgrunnlagXML er ugyldig! Den feiler med $e")
+            SecureLog.utenContext().warn("Mottok ugyldig kravgrunnlag {}", kravgrunnlagXML, e)
+            throw UgyldigKravgrunnlagFeil(
+                melding = "Mottatt kravgrunnlagXML er ugyldig! Den feiler med $e",
+                logContext = SecureLog.Context.tom(),
+            )
         }
 
     fun unmarshalStatusmelding(statusmeldingXml: String): KravOgVedtakstatus =
@@ -68,7 +73,8 @@ object KravgrunnlagUtil {
 
             (jaxbUnmarshaller.unmarshal(StringReader(statusmeldingXml)) as EndringKravOgVedtakstatus).kravOgVedtakstatus
         } catch (e: JAXBException) {
-            throw UgyldigKravgrunnlagFeil(melding = "Mottatt statusmeldingXML er ugyldig! Den feiler med $e")
+            SecureLog.utenContext().warn("Mottok ugyldig statusmelding {}", statusmeldingXml, e)
+            throw UgyldigKravgrunnlagFeil(melding = "Mottatt statusmeldingXML er ugyldig! Den feiler med $e", logContext = SecureLog.Context.tom())
         }
 
     fun tilYtelsestype(fagområdekode: String): Ytelsestype =

@@ -7,6 +7,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.tilbake.api.dto.BeregnetPerioderDto
 import no.nav.familie.tilbake.api.dto.BeregningsresultatDto
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
+import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.HenteParam
@@ -28,6 +29,7 @@ import java.util.UUID
 @Validated
 class BeregningController(
     val tilbakekrevingsberegningService: TilbakekrevingsberegningService,
+    val logService: LogService,
 ) {
     @Operation(summary = "Beregn feilutbetalt beløp for nye delte perioder")
     @PostMapping(
@@ -44,7 +46,7 @@ class BeregningController(
         @PathVariable("behandlingId") behandlingId: UUID,
         @Valid @RequestBody
         perioder: List<Datoperiode>,
-    ): Ressurs<BeregnetPerioderDto> = Ressurs.success(tilbakekrevingsberegningService.beregnBeløp(behandlingId, perioder))
+    ): Ressurs<BeregnetPerioderDto> = Ressurs.success(tilbakekrevingsberegningService.beregnBeløp(behandlingId, perioder, logService.contextFraBehandling(behandlingId)))
 
     @Operation(summary = "Hent beregningsresultat")
     @GetMapping(

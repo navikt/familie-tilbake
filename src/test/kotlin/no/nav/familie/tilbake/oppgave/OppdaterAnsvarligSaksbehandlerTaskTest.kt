@@ -15,6 +15,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.log.LogService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.Properties
@@ -24,10 +25,11 @@ internal class OppdaterAnsvarligSaksbehandlerTaskTest {
     private val fagsakRepository: FagsakRepository = mockk(relaxed = true)
     private val mockOppgaveService: OppgaveService = mockk(relaxed = true)
     private val oppgavePrioritetService = mockk<OppgavePrioritetService>()
+    private val logService: LogService = mockk(relaxed = true)
     private lateinit var behandling: Behandling
 
     private val oppdaterAnsvarligSaksbehandlerTask =
-        OppdaterAnsvarligSaksbehandlerTask(mockOppgaveService, behandlingRepository, oppgavePrioritetService)
+        OppdaterAnsvarligSaksbehandlerTask(mockOppgaveService, behandlingRepository, oppgavePrioritetService, logService)
 
     @BeforeEach
     fun init() {

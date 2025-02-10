@@ -41,6 +41,7 @@ import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.kravgrunnlag.batch.GammelKravgrunnlagService
 import no.nav.familie.tilbake.kravgrunnlag.batch.GammelKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
+import no.nav.familie.tilbake.log.SecureLog
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -130,7 +131,7 @@ internal class GammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         gammelKravgrunnlagTask =
             GammelKravgrunnlagTask(gammelKravgrunnlagService, hentFagsystemsbehandlingService)
 
-        every { kafkaProducer.sendHentFagsystemsbehandlingRequest(any(), any()) } returns Unit
+        every { kafkaProducer.sendHentFagsystemsbehandlingRequest(any(), any(), any()) } returns Unit
     }
 
     @AfterEach
@@ -167,7 +168,7 @@ internal class GammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val hentetKravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(mottattXMl)
 
-        every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any()) } returns hentetKravgrunnlag
+        every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any(), any()) } returns hentetKravgrunnlag
 
         gammelKravgrunnlagTask.doTask(lagTask())
 
@@ -205,12 +206,12 @@ internal class GammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val hentetKravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(mottattXMl)
 
-        every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any()) } returns hentetKravgrunnlag
+        every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any(), any()) } returns hentetKravgrunnlag
 
         fagsakRepository.insert(Testdata.fagsak.copy(eksternFagsakId = xmlMottatt.eksternFagsakId))
         val lagretBehandling = behandlingRepository.insert(Testdata.lagBehandling())
-        behandlingskontrollService.fortsettBehandling(lagretBehandling.id)
-        stegService.håndterSteg(lagretBehandling.id)
+        behandlingskontrollService.fortsettBehandling(lagretBehandling.id, SecureLog.Context.tom())
+        stegService.håndterSteg(lagretBehandling.id, SecureLog.Context.tom())
 
         gammelKravgrunnlagTask.doTask(lagTask())
 
@@ -244,8 +245,8 @@ internal class GammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val hentetKravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(mottattXMl)
 
-        every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any()) } throws
-            SperretKravgrunnlagFeil("Hentet kravgrunnlag er sperret")
+        every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any(), any()) } throws
+            SperretKravgrunnlagFeil("Hentet kravgrunnlag er sperret", logContext = SecureLog.Context.tom())
 
         gammelKravgrunnlagTask.doTask(lagTask())
         val behandling =
@@ -279,8 +280,8 @@ internal class GammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                 ),
             )
 
-        every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any()) } throws
-            IntegrasjonException("Kravgrunnlag finnes ikke i økonomi")
+        every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any(), any()) } throws
+            IntegrasjonException("Kravgrunnlag finnes ikke i økonomi", logContext = SecureLog.Context.tom())
 
         val exception = shouldThrow<RuntimeException> { gammelKravgrunnlagTask.doTask(lagTask()) }
         exception.message shouldBe "Kravgrunnlag finnes ikke i økonomi"
@@ -318,8 +319,8 @@ internal class GammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             ytelsestype = xmlMottatt.ytelsestype,
         )
 
-        every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any()) } throws
-            KravgrunnlagIkkeFunnetFeil(melding = "Noe gikk galt")
+        every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any(), any()) } throws
+            KravgrunnlagIkkeFunnetFeil(melding = "Noe gikk galt", logContext = SecureLog.Context.tom())
 
         val task = lagTask()
         gammelKravgrunnlagTask.doTask(task)

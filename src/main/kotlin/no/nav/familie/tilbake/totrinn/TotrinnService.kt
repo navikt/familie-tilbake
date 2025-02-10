@@ -11,6 +11,7 @@ import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.totrinn.domain.Totrinnsvurdering
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -35,10 +36,11 @@ class TotrinnService(
     fun lagreTotrinnsvurderinger(
         behandlingId: UUID,
         totrinnsvurderinger: List<VurdertTotrinnDto>,
+        logContext: SecureLog.Context,
     ) {
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
         // valider request
-        validerOmAlleBesluttendeStegFinnes(totrinnsvurderinger, behandlingsstegstilstand)
+        validerOmAlleBesluttendeStegFinnes(totrinnsvurderinger, behandlingsstegstilstand, logContext)
 
         // deaktiver eksisterende totrinnsvurderinger
         val eksisterendeTotrinnsvurdering = totrinnsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
@@ -73,12 +75,16 @@ class TotrinnService(
         totrinnsvurderinger.forEach { totrinnsvurderingRepository.insert(it) }
     }
 
-    fun validerAnsvarligBeslutter(behandlingId: UUID) {
+    fun validerAnsvarligBeslutter(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        if (behandling.ansvarligSaksbehandler == ContextService.hentSaksbehandler()) {
+        if (behandling.ansvarligSaksbehandler == ContextService.hentSaksbehandler(logContext)) {
             throw Feil(
                 message = "ansvarlig beslutter kan ikke være samme som ansvarlig saksbehandler",
                 frontendFeilmelding = "ansvarlig beslutter kan ikke være samme som ansvarlig saksbehandler",
+                logContext = logContext,
                 httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
@@ -87,9 +93,12 @@ class TotrinnService(
     fun finnesUnderkjenteStegITotrinnsvurdering(behandlingId: UUID): Boolean = totrinnsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId).any { !it.godkjent }
 
     @Transactional
-    fun oppdaterAnsvarligBeslutter(behandlingId: UUID) {
+    fun oppdaterAnsvarligBeslutter(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        behandlingRepository.update(behandling.copy(ansvarligBeslutter = ContextService.hentSaksbehandler()))
+        behandlingRepository.update(behandling.copy(ansvarligBeslutter = ContextService.hentSaksbehandler(logContext)))
     }
 
     @Transactional
@@ -127,6 +136,7 @@ class TotrinnService(
     private fun validerOmAlleBesluttendeStegFinnes(
         totrinnsvurderinger: List<VurdertTotrinnDto>,
         behandlingsstegstilstand: List<Behandlingsstegstilstand>,
+        logContext: SecureLog.Context,
     ) {
         val stegSomBørVurderes: List<Behandlingssteg> =
             behandlingsstegstilstand
@@ -141,6 +151,7 @@ class TotrinnService(
             throw Feil(
                 message = "Stegene $manglendeSteg mangler totrinnsvurdering",
                 frontendFeilmelding = "Stegene $manglendeSteg mangler totrinnsvurdering",
+                logContext = logContext,
                 httpStatus = HttpStatus.BAD_REQUEST,
             )
         }

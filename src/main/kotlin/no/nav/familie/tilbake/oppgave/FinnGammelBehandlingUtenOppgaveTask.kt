@@ -10,7 +10,6 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
-import no.nav.familie.tilbake.integration.pdl.internal.secureLogger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -40,7 +39,7 @@ class FinnGammelBehandlingUtenOppgaveTask(
                 opprettetFørDato = LocalDateTime.now().minusMonths(2),
             ) ?: emptyList()
 
-        secureLogger.info("Fant ${gamleBehandlinger.size} gamle åpne behandlinger. Prøver å finne ut om noen mangler oppgave.")
+        log.info("Fant ${gamleBehandlinger.size} gamle åpne behandlinger. Prøver å finne ut om noen mangler oppgave.")
 
         gamleBehandlinger.forEach {
             val behandling = behandlingRepository.findByIdOrThrow(it)
@@ -53,7 +52,7 @@ class FinnGammelBehandlingUtenOppgaveTask(
                 )
             val finnOppgaveResponse = integrasjonerClient.finnOppgaver(finnOppgaveRequest)
             if (finnOppgaveResponse.antallTreffTotalt == 0L) {
-                secureLogger.info("Ingen oppgave for behandlingId: ${behandling.id} fagsakId: ${fagsak.id}. Oppretter ny oppgave.")
+                log.info("Ingen oppgave for behandlingId: ${behandling.id} fagsakId: ${fagsak.id}. Oppretter ny oppgave.")
             }
         }
     }
