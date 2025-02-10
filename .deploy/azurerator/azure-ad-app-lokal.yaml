@@ -2,10 +2,10 @@
 apiVersion: nais.io/v1
 kind: AzureAdApplication
 metadata:
-  name: familie-tilbake-lokal
-  namespace: teamfamilie
+  name: tilbakekreving-backend-lokal
+  namespace: tilbake
   labels:
-    team: teamfamilie
+    team: tilbake
 spec:
   claims:
     extra:
@@ -22,23 +22,23 @@ spec:
   preAuthorizedApplications:
     - application: familie-tilbake-frontend-lokal
       cluster: dev-gcp
-      namespace: teamfamilie
+      namespace: tilbake
     - application: familie-ba-sak
       cluster: dev-gcp
     - application: familie-ks-sak
       cluster: dev-gcp
     - application: familie-ba-sak-lokal
       cluster: dev-gcp
-      namespace: teamfamilie
+      namespace: tilbake
     - application: familie-ef-sak-lokal
       cluster: dev-gcp
-      namespace: teamfamilie
+      namespace: tilbake
     - application: familie-ks-sak-lokal
       cluster: dev-gcp
-      namespace: teamfamilie
+      namespace: tilbake
     - application: familie-ef-iverksett-lokal
       cluster: dev-gcp
-      namespace: teamfamilie
+      namespace: tilbake
     - application: ida
       cluster: prod-fss
       namespace: traktor
@@ -48,4 +48,4 @@ spec:
   secretName: azuread-familie-tilbake-lokal
   singlePageApplication: true
 
-# secret kan hentes fra cluster med "kubectl -n teamfamilie get secret azuread-familie-tilbake-lokal -o json | jq '.data | map_values(@base64d)'"
+# secret kan hentes fra cluster med "kubectl -n tilbake get secret azuread-familie-tilbake-lokal -o json | jq '.data | map_values(@base64d)'"
