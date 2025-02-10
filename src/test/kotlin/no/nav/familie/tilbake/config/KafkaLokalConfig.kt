@@ -29,9 +29,9 @@ import org.springframework.kafka.test.EmbeddedKafkaZKBroker
 class KafkaLokalConfig(
     @Value("\${LOKAL_BROKER_KAFKA_PORT:8093}") private val brokerKafkaPort: Int,
     @Value("\${LOKAL_BROKER_REMOTE_PORT:8094}") private val brokerRemotePort: Int,
-    @Value("\${TILBAKEKREVING_REQUEST_TOPIC}")
+    @Value("\${kafka.hentFagsystem.requestTopic}")
     private val fagsystemsbehandlingRequestTopic: String,
-    @Value("\${TILBAKEKREVING_RESPONSE_TOPIC}")
+    @Value("\${kafka.hentFagsystem.responseTopic}")
     private val fagsystemsbehandlingResponseTopic: String,
 ) {
     @Bean
