@@ -20,6 +20,7 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagAnnulerRequest
 import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagAnnulerResponse
 import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagHentDetaljRequest
@@ -33,8 +34,6 @@ import no.nav.tilbakekreving.typer.v1.MmelDto
 import no.nav.tilbakekreving.typer.v1.PeriodeDto
 import no.nav.tilbakekreving.typer.v1.TypeGjelderDto
 import no.nav.tilbakekreving.typer.v1.TypeKlasseDto
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
@@ -82,7 +81,7 @@ class DefaultOppdragClient(
     @Value("\${FAMILIE_OPPDRAG_URL}") private val familieOppdragUrl: URI,
 ) : AbstractPingableRestClient(restOperations, "familie.oppdrag"),
     OppdragClient {
-    private val logger: Logger = LoggerFactory.getLogger(this::class.java)
+    private val logger = TracedLogger.getLogger<DefaultOppdragClient>()
 
     override val pingUri: URI =
         UriComponentsBuilder
@@ -124,7 +123,9 @@ class DefaultOppdragClient(
         tilbakekrevingsvedtakRequest: TilbakekrevingsvedtakRequest,
         logContext: SecureLog.Context,
     ): TilbakekrevingsvedtakResponse {
-        logger.info("Sender tilbakekrevingsvedtak til økonomi for behandling $behandlingId")
+        logger.medContext(logContext) {
+            info("Sender tilbakekrevingsvedtak til økonomi for behandling $behandlingId")
+        }
         try {
             val respons =
                 postForEntity<Ressurs<TilbakekrevingsvedtakResponse>>(
@@ -132,10 +133,12 @@ class DefaultOppdragClient(
                     payload = tilbakekrevingsvedtakRequest,
                 ).getDataOrThrow()
             if (!erResponsOk(respons.mmel)) {
-                logger.error(
-                    "Fikk feil respons fra økonomi ved iverksetting av behandling=$behandlingId." +
-                        "Mottatt respons:${lagRespons(respons.mmel)}",
-                )
+                logger.medContext(logContext) {
+                    error(
+                        "Fikk feil respons fra økonomi ved iverksetting av behandling=$behandlingId." +
+                            "Mottatt respons:${lagRespons(respons.mmel)}",
+                    )
+                }
                 throw IntegrasjonException(
                     msg =
                         "Fikk feil respons fra økonomi ved iverksetting av behandling=$behandlingId." +
@@ -143,13 +146,17 @@ class DefaultOppdragClient(
                     logContext = logContext,
                 )
             }
-            logger.info("Mottatt respons: ${lagRespons(respons.mmel)} fra økonomi ved iverksetting av behandling=$behandlingId.")
+            logger.medContext(logContext) {
+                info("Mottatt respons: ${lagRespons(respons.mmel)} fra økonomi ved iverksetting av behandling=$behandlingId.")
+            }
             return respons
         } catch (exception: Exception) {
-            logger.error(
-                "tilbakekrevingsvedtak kan ikke sende til økonomi for behandling=$behandlingId. " +
-                    "Feiler med ${exception.message}.",
-            )
+            logger.medContext(logContext) {
+                error(
+                    "tilbakekrevingsvedtak kan ikke sende til økonomi for behandling=$behandlingId. " +
+                        "Feiler med ${exception.message}.",
+                )
+            }
             throw IntegrasjonException(
                 msg = "Noe gikk galt ved iverksetting av behandling=$behandlingId",
                 throwable = exception,
@@ -163,7 +170,9 @@ class DefaultOppdragClient(
         hentKravgrunnlagRequest: KravgrunnlagHentDetaljRequest,
         logContext: SecureLog.Context,
     ): DetaljertKravgrunnlagDto {
-        logger.info("Henter kravgrunnlag fra økonomi for kravgrunnlagId=$kravgrunnlagId")
+        logger.medContext(logContext) {
+            info("Henter kravgrunnlag fra økonomi for kravgrunnlagId=$kravgrunnlagId")
+        }
         try {
             val respons =
                 postForEntity<Ressurs<KravgrunnlagHentDetaljResponse>>(
@@ -171,13 +180,17 @@ class DefaultOppdragClient(
                     payload = hentKravgrunnlagRequest,
                 ).getDataOrThrow()
             validerHentKravgrunnlagRespons(respons.mmel, kravgrunnlagId, logContext)
-            logger.info("Mottatt respons: ${lagRespons(respons.mmel)} fra økonomi til kravgrunnlagId=$kravgrunnlagId.")
+            logger.medContext(logContext) {
+                info("Mottatt respons: ${lagRespons(respons.mmel)} fra økonomi til kravgrunnlagId=$kravgrunnlagId.")
+            }
             return respons.detaljertkravgrunnlag
         } catch (exception: Exception) {
-            logger.error(
-                "Kravgrunnlag kan ikke hentes fra økonomi for eksternKravgrunnlagId=$kravgrunnlagId. " +
-                    "Feiler med ${exception.message}",
-            )
+            logger.medContext(logContext) {
+                error(
+                    "Kravgrunnlag kan ikke hentes fra økonomi for eksternKravgrunnlagId=$kravgrunnlagId. " +
+                        "Feiler med ${exception.message}",
+                )
+            }
             if (exception.message?.contains("Kravgrunnlag ikke funnet") == true) {
                 throw KravgrunnlagIkkeFunnetFeil(exception.message!!, logContext)
             }
@@ -194,7 +207,9 @@ class DefaultOppdragClient(
         kravgrunnlagAnnulerRequest: KravgrunnlagAnnulerRequest,
         logContext: SecureLog.Context,
     ) {
-        logger.info("Annulerer kravgrunnlag for kravgrunnlagId=$eksternKravgrunnlagId")
+        logger.medContext(logContext) {
+            info("Annulerer kravgrunnlag for kravgrunnlagId=$eksternKravgrunnlagId")
+        }
         try {
             val respons =
                 postForEntity<Ressurs<KravgrunnlagAnnulerResponse>>(
@@ -202,11 +217,13 @@ class DefaultOppdragClient(
                     payload = kravgrunnlagAnnulerRequest,
                 ).getDataOrThrow()
             if (!erResponsOk(respons.mmel)) {
-                logger.error(
-                    "Fikk feil respons fra økonomi ved annulering " +
-                        "av kravgrunnlag med eksternKravgrunnlagId=$eksternKravgrunnlagId." +
-                        "Mottatt respons:${lagRespons(respons.mmel)}",
-                )
+                logger.medContext(logContext) {
+                    error(
+                        "Fikk feil respons fra økonomi ved annulering " +
+                            "av kravgrunnlag med eksternKravgrunnlagId=$eksternKravgrunnlagId." +
+                            "Mottatt respons:${lagRespons(respons.mmel)}",
+                    )
+                }
                 throw IntegrasjonException(
                     msg =
                         "Fikk feil respons fra økonomi ved annulering " +
@@ -215,12 +232,16 @@ class DefaultOppdragClient(
                     logContext = logContext,
                 )
             }
-            logger.info("Mottatt respons: ${lagRespons(respons.mmel)} fra økonomi til kravgrunnlagId=$eksternKravgrunnlagId.")
+            logger.medContext(logContext) {
+                info("Mottatt respons: ${lagRespons(respons.mmel)} fra økonomi til kravgrunnlagId=$eksternKravgrunnlagId.")
+            }
         } catch (exception: Exception) {
-            logger.error(
-                "Kravgrunnlag kan ikke hentes fra økonomi for eksternKravgrunnlagId=$eksternKravgrunnlagId. " +
-                    "Feiler med ${exception.message}",
-            )
+            logger.medContext(logContext) {
+                error(
+                    "Kravgrunnlag kan ikke hentes fra økonomi for eksternKravgrunnlagId=$eksternKravgrunnlagId. " +
+                        "Feiler med ${exception.message}",
+                )
+            }
             throw IntegrasjonException(
                 msg = "Noe gikk galt ved henting av kravgrunnlag for kravgrunnlagId=$eksternKravgrunnlagId",
                 throwable = exception,
@@ -233,21 +254,25 @@ class DefaultOppdragClient(
         request: HentFeilutbetalingerFraSimuleringRequest,
         logContext: SecureLog.Context,
     ): FeilutbetalingerFraSimulering {
-        logger.info(
-            "Henter feilubetalinger fra simulering for ytelsestype=${request.ytelsestype}, " +
-                "eksternFagsakId=${request.eksternFagsakId} og eksternId=${request.fagsystemsbehandlingId}",
-        )
+        logger.medContext(logContext) {
+            info(
+                "Henter feilubetalinger fra simulering for ytelsestype=${request.ytelsestype}, " +
+                    "eksternFagsakId=${request.eksternFagsakId} og eksternId=${request.fagsystemsbehandlingId}",
+            )
+        }
         try {
             return postForEntity<Ressurs<FeilutbetalingerFraSimulering>>(
                 uri = hentFeilutbetalingerFraSimuleringUri,
                 payload = request,
             ).getDataOrThrow()
         } catch (exception: Exception) {
-            logger.error(
-                "Feilutbetalinger kan ikke hentes fra simulering for for ytelsestype=${request.ytelsestype}, " +
-                    "eksternFagsakId=${request.eksternFagsakId} og eksternId=${request.fagsystemsbehandlingId} " +
-                    "Feiler med ${exception.message}",
-            )
+            logger.medContext(logContext) {
+                error(
+                    "Feilutbetalinger kan ikke hentes fra simulering for for ytelsestype=${request.ytelsestype}, " +
+                        "eksternFagsakId=${request.eksternFagsakId} og eksternId=${request.fagsystemsbehandlingId} " +
+                        "Feiler med ${exception.message}",
+                )
+            }
             throw IntegrasjonException(
                 msg = "Noe gikk galt ved henting av feilutbetalinger fra simulering",
                 throwable = exception,
@@ -262,10 +287,12 @@ class DefaultOppdragClient(
         logContext: SecureLog.Context,
     ) {
         if (!erResponsOk(mmelDto) || erKravgrunnlagIkkeFinnes(mmelDto)) {
-            logger.error(
-                "Fikk feil respons:${lagRespons(mmelDto)} fra økonomi ved henting av kravgrunnlag " +
-                    "for kravgrunnlagId=$kravgrunnlagId.",
-            )
+            logger.medContext(logContext) {
+                error(
+                    "Fikk feil respons:${lagRespons(mmelDto)} fra økonomi ved henting av kravgrunnlag " +
+                        "for kravgrunnlagId=$kravgrunnlagId.",
+                )
+            }
             throw IntegrasjonException(
                 msg =
                     "Fikk feil respons:${lagRespons(mmelDto)} fra økonomi " +
@@ -273,7 +300,9 @@ class DefaultOppdragClient(
                 logContext = logContext,
             )
         } else if (erKravgrunnlagSperret(mmelDto)) {
-            logger.warn("Hentet kravgrunnlag for kravgrunnlagId=$kravgrunnlagId er sperret")
+            logger.medContext(logContext) {
+                warn("Hentet kravgrunnlag for kravgrunnlagId=$kravgrunnlagId er sperret")
+            }
             throw SperretKravgrunnlagFeil(
                 melding = "Hentet kravgrunnlag for kravgrunnlagId=$kravgrunnlagId er sperret",
                 logContext = logContext,
@@ -312,7 +341,9 @@ class MockOppdragClient(
         tilbakekrevingsvedtakRequest: TilbakekrevingsvedtakRequest,
         logContext: SecureLog.Context,
     ): TilbakekrevingsvedtakResponse {
-        logger.info("Sender mock iverksettelse respons i e2e-profil")
+        logger.medContext(logContext) {
+            info("Sender mock iverksettelse respons i e2e-profil")
+        }
         val mmelDto = MmelDto()
         mmelDto.alvorlighetsgrad = "00"
         val response = TilbakekrevingsvedtakResponse()
@@ -325,9 +356,13 @@ class MockOppdragClient(
         hentKravgrunnlagRequest: KravgrunnlagHentDetaljRequest,
         logContext: SecureLog.Context,
     ): DetaljertKravgrunnlagDto {
-        logger.info("Henter kravgrunnlag fra økonomi for kravgrunnlagId=$kravgrunnlagId")
+        logger.medContext(logContext) {
+            info("Henter kravgrunnlag fra økonomi for kravgrunnlagId=$kravgrunnlagId")
+        }
         val respons = lagKravgrunnlagRespons(hentKravgrunnlagRequest)
-        logger.info("Mottatt respons: ${lagRespons(respons.mmel)} fra økonomi til kravgrunnlagId=$kravgrunnlagId.")
+        logger.medContext(logContext) {
+            info("Mottatt respons: ${lagRespons(respons.mmel)} fra økonomi til kravgrunnlagId=$kravgrunnlagId.")
+        }
         return respons.detaljertkravgrunnlag
     }
 
@@ -336,17 +371,21 @@ class MockOppdragClient(
         kravgrunnlagAnnulerRequest: KravgrunnlagAnnulerRequest,
         logContext: SecureLog.Context,
     ) {
-        logger.info("Kaller mock annulering request i e2e-profil")
+        logger.medContext(logContext) {
+            info("Kaller mock annulering request i e2e-profil")
+        }
     }
 
     override fun hentFeilutbetalingerFraSimulering(
         request: HentFeilutbetalingerFraSimuleringRequest,
         logContext: SecureLog.Context,
     ): FeilutbetalingerFraSimulering {
-        logger.info(
-            "Henter feilubetalinger fra simulering i e2e-profil for ytelsestype=${request.ytelsestype}, " +
-                "eksternFagsakId=${request.eksternFagsakId} og eksternId=${request.fagsystemsbehandlingId}",
-        )
+        logger.medContext(logContext) {
+            info(
+                "Henter feilubetalinger fra simulering i e2e-profil for ytelsestype=${request.ytelsestype}, " +
+                    "eksternFagsakId=${request.eksternFagsakId} og eksternId=${request.fagsystemsbehandlingId}",
+            )
+        }
         val feilutbetaltPeriode =
             FeilutbetaltPeriode(
                 fom = YearMonth.now().minusMonths(2).atDay(1),
@@ -446,6 +485,6 @@ class MockOppdragClient(
     }
 
     companion object {
-        private val logger: Logger = LoggerFactory.getLogger(this::class.java)
+        private val logger = TracedLogger.getLogger<MockOppdragClient>()
     }
 }

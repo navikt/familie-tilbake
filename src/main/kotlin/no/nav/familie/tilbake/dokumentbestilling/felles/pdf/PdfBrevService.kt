@@ -128,6 +128,7 @@ class PdfBrevService(
                 data.mottager,
                 pdf,
                 eksternReferanseId,
+                logContext,
             )
         } catch (ressursException: RessursException) {
             if (ressursException.httpStatus == HttpStatus.CONFLICT) {

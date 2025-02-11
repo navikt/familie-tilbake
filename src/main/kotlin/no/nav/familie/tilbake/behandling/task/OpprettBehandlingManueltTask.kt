@@ -8,7 +8,7 @@ import no.nav.familie.tilbake.behandling.BehandlingManuellOpprettelseService
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.log.SecureLog
-import org.slf4j.LoggerFactory
+import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -24,12 +24,15 @@ class OpprettBehandlingManueltTask(
     private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
     private val behManuellOpprService: BehandlingManuellOpprettelseService,
 ) : AsyncTaskStep {
-    private val log = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<OpprettBehandlingManueltTask>()
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     override fun preCondition(task: Task) {
-        log.info("Henter fagsystemsbehandling for OpprettBehandlingManueltTask med id ${task.id} og metadata ${task.metadata}")
         val eksternFagsakId = task.metadata.getProperty("eksternFagsakId")
+        val logContext = SecureLog.Context.utenBehandling(eksternFagsakId)
+        log.medContext(logContext) {
+            info("Henter fagsystemsbehandling for OpprettBehandlingManueltTask med id ${task.id} og metadata ${task.metadata}")
+        }
         val ytelsestype = Ytelsestype.valueOf(task.metadata.getProperty("ytelsestype"))
         val eksternId = task.metadata.getProperty("eksternId")
         hentFagsystemsbehandlingService.sendHentFagsystemsbehandlingRequest(eksternFagsakId, ytelsestype, eksternId)
@@ -37,8 +40,11 @@ class OpprettBehandlingManueltTask(
 
     @Transactional
     override fun doTask(task: Task) {
-        log.info("OpprettBehandlingManueltTask prosesserer med id=${task.id} og metadata ${task.metadata}")
         val eksternFagsakId = task.metadata.getProperty("eksternFagsakId")
+        val logContext = SecureLog.Context.utenBehandling(eksternFagsakId)
+        log.medContext(logContext) {
+            info("OpprettBehandlingManueltTask prosesserer med id=${task.id} og metadata ${task.metadata}")
+        }
         val ytelsestype = Ytelsestype.valueOf(task.metadata.getProperty("ytelsestype"))
         val eksternId = task.metadata.getProperty("eksternId")
 
@@ -77,10 +83,12 @@ class OpprettBehandlingManueltTask(
 
         // opprett behandling
         val ansvarligSaksbehandler = task.metadata.getProperty("ansvarligSaksbehandler")
-        log.info(
-            "Oppretter manuell tilbakekrevingsbehandling request for " +
-                "eksternFagsakId=$eksternFagsakId,ytelsestype=$ytelsestype,eksternId=$eksternId.",
-        )
+        log.medContext(logContext) {
+            info(
+                "Oppretter manuell tilbakekrevingsbehandling request for " +
+                    "eksternFagsakId=$eksternFagsakId,ytelsestype=$ytelsestype,eksternId=$eksternId.",
+            )
+        }
         behManuellOpprService.opprettBehandlingManuell(
             eksternFagsakId = eksternFagsakId,
             ytelsestype = ytelsestype,

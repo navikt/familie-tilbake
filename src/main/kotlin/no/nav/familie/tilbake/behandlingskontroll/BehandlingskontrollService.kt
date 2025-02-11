@@ -22,7 +22,7 @@ import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.log.SecureLog
-import org.slf4j.LoggerFactory
+import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -37,7 +37,7 @@ class BehandlingskontrollService(
     private val historikkTaskService: HistorikkTaskService,
     private val brevmottakerRepository: ManuellBrevmottakerRepository,
 ) {
-    private val log = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<BehandlingskontrollService>()
 
     @Transactional
     fun fortsettBehandling(
@@ -64,10 +64,12 @@ class BehandlingskontrollService(
                     )
             }
         } else {
-            log.info(
-                "Behandling har allerede et aktivt steg=${aktivtStegstilstand.behandlingssteg} " +
-                    "med status=${aktivtStegstilstand.behandlingsstegsstatus}",
-            )
+            log.medContext(logContext) {
+                info(
+                    "Behandling har allerede et aktivt steg=${aktivtStegstilstand.behandlingssteg} " +
+                        "med status=${aktivtStegstilstand.behandlingsstegsstatus}",
+                )
+            }
         }
     }
 
@@ -112,7 +114,9 @@ class BehandlingskontrollService(
                 .filter { it.behandlingsstegsstatus != VENTER }
                 .filter { it.behandlingssteg !in listOf(Behandlingssteg.VARSEL, Behandlingssteg.GRUNNLAG) }
         alleIkkeVentendeSteg.forEach {
-            log.info("Tilbakefører ${it.behandlingssteg} for behandling $behandlingId")
+            log.medContext(logContext) {
+                info("Tilbakefører ${it.behandlingssteg} for behandling $behandlingId")
+            }
             oppdaterBehandlingsstegStatus(behandlingId, Behandlingsstegsinfo(it.behandlingssteg, TILBAKEFØRT), logContext)
         }
     }
@@ -145,7 +149,9 @@ class BehandlingskontrollService(
         logContext: SecureLog.Context,
     ) {
         tilbakeførBehandledeSteg(behandlingId, logContext)
-        log.info("Oppretter verge steg for behandling med id=$behandlingId")
+        log.medContext(logContext) {
+            info("Oppretter verge steg for behandling med id=$behandlingId")
+        }
         val eksisterendeVergeSteg =
             behandlingsstegstilstandRepository.findByBehandlingIdAndBehandlingssteg(
                 behandlingId,
@@ -166,7 +172,9 @@ class BehandlingskontrollService(
         behandlingId: UUID,
         logContext: SecureLog.Context,
     ) {
-        log.info("Aktiverer brevmottaker steg for behandling med id=$behandlingId")
+        log.medContext(logContext) {
+            info("Aktiverer brevmottaker steg for behandling med id=$behandlingId")
+        }
         behandlingsstegstilstandRepository
             .findByBehandlingIdAndBehandlingssteg(
                 behandlingId,

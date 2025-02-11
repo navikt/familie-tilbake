@@ -18,12 +18,12 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.KodeAksjon
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsbelopDto
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsperiodeDto
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsvedtakDto
 import no.nav.tilbakekreving.typer.v1.PeriodeDto
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -41,7 +41,7 @@ class IverksettelseService(
     private val oppdragClient: OppdragClient,
     private val logService: LogService,
 ) {
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<IverksettelseService>()
 
     @Transactional
     fun sendIverksettVedtak(behandlingId: UUID) {
@@ -49,7 +49,9 @@ class IverksettelseService(
         val logContext = logService.contextFraBehandling(behandling.id)
 
         if (behandling.erAvsluttet) {
-            logger.info("Behandling med id ${behandling.id} er iverksatt mot økonomi - kan ikke iverksette flere ganger")
+            log.medContext(logContext) {
+                info("Behandling med id ${behandling.id} er iverksatt mot økonomi - kan ikke iverksette flere ganger")
+            }
         } else {
             val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
             val beregnetPerioder = tilbakekrevingsvedtakBeregningService.beregnVedtaksperioder(behandlingId, kravgrunnlag)

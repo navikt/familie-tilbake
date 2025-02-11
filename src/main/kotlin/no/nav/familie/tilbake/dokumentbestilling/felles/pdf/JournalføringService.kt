@@ -23,7 +23,8 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.JournalpostIdOgDokumentId
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
-import org.slf4j.LoggerFactory
+import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -33,7 +34,7 @@ class JournalføringService(
     private val behandlingRepository: BehandlingRepository,
     private val fagsakRepository: FagsakRepository,
 ) {
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<JournalføringService>()
 
     fun hentDokument(
         journalpostId: String,
@@ -68,8 +69,11 @@ class JournalføringService(
         brevmottager: Brevmottager,
         vedleggPdf: ByteArray,
         eksternReferanseId: String?,
+        logContext: SecureLog.Context,
     ): JournalpostIdOgDokumentId {
-        logger.info("Starter journalføring av {} til {} for behandlingId={}", dokumentkategori, brevmottager, behandling.id)
+        log.medContext(logContext) {
+            info("Starter journalføring av {} til {} for behandlingId={}", dokumentkategori, brevmottager, behandling.id)
+        }
         val dokument =
             Dokument(
                 dokument = vedleggPdf,
@@ -97,13 +101,15 @@ class JournalføringService(
                     "Feil ved Journalføring av $dokumentkategori " +
                         "til $brevmottager for behandlingId=${behandling.id}",
                 )
-        logger.info(
-            "Journalførte utgående {} til {} for behandlingId={} med journalpostid={}",
-            dokumentkategori,
-            brevmottager,
-            behandling.id,
-            response.journalpostId,
-        )
+        log.medContext(logContext) {
+            info(
+                "Journalførte utgående {} til {} for behandlingId={} med journalpostid={}",
+                dokumentkategori,
+                brevmottager,
+                behandling.id,
+                response.journalpostId,
+            )
+        }
         return JournalpostIdOgDokumentId(response.journalpostId, dokumentinfoId)
     }
 

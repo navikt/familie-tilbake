@@ -22,10 +22,10 @@ import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEvent
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.oppgave.OppgaveService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.totrinn.TotrinnService
-import org.slf4j.LoggerFactory
 import org.springframework.context.event.EventListener
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -45,14 +45,16 @@ class Foreslåvedtakssteg(
     private val totrinnService: TotrinnService,
     private val featureToggleService: FeatureToggleService,
 ) : IBehandlingssteg {
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<Foreslåvedtakssteg>()
 
     @Transactional
     override fun utførSteg(
         behandlingId: UUID,
         logContext: SecureLog.Context,
     ) {
-        logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORESLÅ_VEDTAK} steg")
+        log.medContext(logContext) {
+            info("Behandling $behandlingId er på ${Behandlingssteg.FORESLÅ_VEDTAK} steg")
+        }
         flyttBehandlingVidere(behandlingId, logContext)
     }
 
@@ -62,7 +64,9 @@ class Foreslåvedtakssteg(
         behandlingsstegDto: BehandlingsstegDto,
         logContext: SecureLog.Context,
     ) {
-        logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORESLÅ_VEDTAK} steg")
+        log.medContext(logContext) {
+            info("Behandling $behandlingId er på ${Behandlingssteg.FORESLÅ_VEDTAK} steg")
+        }
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         validerAtDetFinnesOppgave(behandling, logContext)
 
@@ -77,7 +81,7 @@ class Foreslåvedtakssteg(
 
         flyttBehandlingVidere(behandlingId, logContext)
 
-        ferdigstillOppgave(behandling)
+        ferdigstillOppgave(behandling, logContext)
         opprettGodkjennevedtakOppgave(behandlingId)
 
         historikkTaskService.lagHistorikkTask(
@@ -95,7 +99,9 @@ class Foreslåvedtakssteg(
         behandlingId: UUID,
         logContext: SecureLog.Context,
     ) {
-        logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORESLÅ_VEDTAK} steg og behandler automatisk..")
+        log.medContext(logContext) {
+            info("Behandling $behandlingId er på ${Behandlingssteg.FORESLÅ_VEDTAK} steg og behandler automatisk..")
+        }
         historikkTaskService.lagHistorikkTask(
             behandlingId,
             TilbakekrevingHistorikkinnslagstype.FORESLÅ_VEDTAK_VURDERT,
@@ -106,7 +112,7 @@ class Foreslåvedtakssteg(
         // lukker BehandleSak oppgave og oppretter GodkjenneVedtak oppgave
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.saksbehandlingstype != Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR) {
-            ferdigstillOppgave(behandling)
+            ferdigstillOppgave(behandling, logContext)
             opprettGodkjennevedtakOppgave(behandlingId)
             historikkTaskService.lagHistorikkTask(
                 behandlingId = behandlingId,
@@ -124,7 +130,9 @@ class Foreslåvedtakssteg(
         behandlingId: UUID,
         logContext: SecureLog.Context,
     ) {
-        logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.FORESLÅ_VEDTAK} steg")
+        log.medContext(logContext) {
+            info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.FORESLÅ_VEDTAK} steg")
+        }
         behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
             Behandlingsstegsinfo(
@@ -157,7 +165,10 @@ class Foreslåvedtakssteg(
 
     // Her vet vi ikke hvorvidt vi skal ferdigstille en BehandleSak- eller en BehandleUnderkjentVedtak-oppgave.
     // Må derfor sjekke hva slags oppgave som ligger åpen og ferdigstille denne.
-    private fun ferdigstillOppgave(behandling: Behandling) {
+    private fun ferdigstillOppgave(
+        behandling: Behandling,
+        logContext: SecureLog.Context,
+    ) {
         val muligeOppgavetyper =
             mapOf(
                 Oppgavetype.BehandleSak.value to Oppgavetype.BehandleSak,
@@ -173,7 +184,9 @@ class Foreslåvedtakssteg(
             val oppgavetype = muligeOppgavetyper.getValue(oppgave.oppgavetype!!)
             oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId = behandling.id, oppgavetype = oppgavetype.name)
         } else {
-            logger.warn("Finnes ingen ${Oppgavetype.BehandleSak.name} eller ${Oppgavetype.BehandleUnderkjentVedtak.name} -oppgave å ferdigstille for behandling ${behandling.id}")
+            log.medContext(logContext) {
+                warn("Finnes ingen ${Oppgavetype.BehandleSak.name} eller ${Oppgavetype.BehandleUnderkjentVedtak.name} -oppgave å ferdigstille for behandling ${behandling.id}")
+            }
         }
     }
 

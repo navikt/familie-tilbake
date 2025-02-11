@@ -12,8 +12,8 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.A
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.UTFØRT
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -25,14 +25,16 @@ class Vergessteg(
     private val behandlingskontrollService: BehandlingskontrollService,
     private val oppgaveTaskService: OppgaveTaskService,
 ) : IBehandlingssteg {
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<Vergessteg>()
 
     @Transactional
     override fun utførSteg(
         behandlingId: UUID,
         logContext: SecureLog.Context,
     ) {
-        logger.info("Behandling $behandlingId er på ${Behandlingssteg.VERGE} steg")
+        log.medContext(logContext) {
+            info("Behandling $behandlingId er på ${Behandlingssteg.VERGE} steg")
+        }
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.harVerge) {
             behandlingskontrollService.oppdaterBehandlingsstegStatus(
@@ -53,7 +55,9 @@ class Vergessteg(
         behandlingsstegDto: BehandlingsstegDto,
         logContext: SecureLog.Context,
     ) {
-        logger.info("Behandling $behandlingId er på ${Behandlingssteg.VERGE} steg")
+        log.medContext(logContext) {
+            info("Behandling $behandlingId er på ${Behandlingssteg.VERGE} steg")
+        }
         vergeService.lagreVerge(behandlingId, (behandlingsstegDto as BehandlingsstegVergeDto).verge)
 
         oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId)
@@ -71,7 +75,9 @@ class Vergessteg(
         behandlingId: UUID,
         logContext: SecureLog.Context,
     ) {
-        logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.VERGE} steg")
+        log.medContext(logContext) {
+            info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.VERGE} steg")
+        }
         behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
             Behandlingsstegsinfo(

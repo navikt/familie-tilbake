@@ -10,7 +10,8 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
-import org.slf4j.LoggerFactory
+import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.UUID
@@ -27,7 +28,7 @@ class FinnGammelBehandlingUtenOppgaveTask(
     private val behandlingRepository: BehandlingRepository,
     private val fagsakRepository: FagsakRepository,
 ) : AsyncTaskStep {
-    private val log = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<FinnGammelBehandlingUtenOppgaveTask>()
 
     override fun doTask(task: Task) {
         val dto =
@@ -39,11 +40,14 @@ class FinnGammelBehandlingUtenOppgaveTask(
                 opprettetFørDato = LocalDateTime.now().minusMonths(2),
             ) ?: emptyList()
 
-        log.info("Fant ${gamleBehandlinger.size} gamle åpne behandlinger. Prøver å finne ut om noen mangler oppgave.")
+        log.medContext(SecureLog.Context.tom()) {
+            info("Fant ${gamleBehandlinger.size} gamle åpne behandlinger. Prøver å finne ut om noen mangler oppgave.")
+        }
 
         gamleBehandlinger.forEach {
             val behandling = behandlingRepository.findByIdOrThrow(it)
             val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+            val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandling.id.toString())
 
             val finnOppgaveRequest =
                 FinnOppgaveRequest(
@@ -52,7 +56,9 @@ class FinnGammelBehandlingUtenOppgaveTask(
                 )
             val finnOppgaveResponse = integrasjonerClient.finnOppgaver(finnOppgaveRequest)
             if (finnOppgaveResponse.antallTreffTotalt == 0L) {
-                log.info("Ingen oppgave for behandlingId: ${behandling.id} fagsakId: ${fagsak.id}. Oppretter ny oppgave.")
+                log.medContext(logContext) {
+                    info("Ingen oppgave for behandlingId: ${behandling.id} fagsakId: ${fagsak.id}. Oppretter ny oppgave.")
+                }
             }
         }
     }

@@ -13,8 +13,8 @@ import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagsty
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEvent
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
@@ -32,14 +32,16 @@ class Foreldelsessteg(
     private val foreldelseAntallMåned: Long,
     private val oppgaveTaskService: OppgaveTaskService,
 ) : IBehandlingssteg {
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<Foreldelsessteg>()
 
     @Transactional
     override fun utførSteg(
         behandlingId: UUID,
         logContext: SecureLog.Context,
     ) {
-        logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORELDELSE} steg")
+        log.medContext(logContext) {
+            info("Behandling $behandlingId er på ${Behandlingssteg.FORELDELSE} steg")
+        }
         if (!harGrunnlagForeldetPeriode(behandlingId)) {
             lagHistorikkinnslag(behandlingId, Aktør.VEDTAKSLØSNING)
 
@@ -61,7 +63,9 @@ class Foreldelsessteg(
         behandlingsstegDto: BehandlingsstegDto,
         logContext: SecureLog.Context,
     ) {
-        logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORELDELSE} steg")
+        log.medContext(logContext) {
+            info("Behandling $behandlingId er på ${Behandlingssteg.FORELDELSE} steg")
+        }
         foreldelseService.lagreVurdertForeldelse(behandlingId, (behandlingsstegDto as BehandlingsstegForeldelseDto), logContext)
 
         oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId)
@@ -84,7 +88,9 @@ class Foreldelsessteg(
         behandlingId: UUID,
         logContext: SecureLog.Context,
     ) {
-        logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORELDELSE} steg og behandler automatisk..")
+        log.medContext(logContext) {
+            info("Behandling $behandlingId er på ${Behandlingssteg.FORELDELSE} steg og behandler automatisk..")
+        }
         if (harGrunnlagForeldetPeriode(behandlingId)) {
             foreldelseService.lagreFastForeldelseForAutomatiskSaksbehandling(behandlingId, logContext)
             lagHistorikkinnslag(behandlingId, Aktør.VEDTAKSLØSNING)
@@ -108,7 +114,9 @@ class Foreldelsessteg(
         behandlingId: UUID,
         logContext: SecureLog.Context,
     ) {
-        logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.FORELDELSE} steg")
+        log.medContext(logContext) {
+            info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.FORELDELSE} steg")
+        }
         behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
             Behandlingsstegsinfo(

@@ -10,7 +10,8 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagService
 import no.nav.familie.tilbake.kravgrunnlag.KravvedtakstatusService
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
-import org.slf4j.LoggerFactory
+import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -30,20 +31,23 @@ class FinnKravgrunnlagTask(
     private val kravgrunnlagService: KravgrunnlagService,
     private val kravvedtakstatusService: KravvedtakstatusService,
 ) : AsyncTaskStep {
-    private val log = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<FinnKravgrunnlagTask>()
 
     override fun doTask(task: Task) {
-        log.info("FinnKravgrunnlagTask prosesserer med id=${task.id} og metadata ${task.metadata}")
         val behandlingId = UUID.fromString(task.payload)
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandling.id.toString())
+        log.medContext(logContext) {
+            info("FinnKravgrunnlagTask prosesserer med id=${task.id} og metadata ${task.metadata}")
+        }
 
         val mottattKravgrunnlagene =
             økonomiXmlMottattRepository
                 .findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype)
                 .sortedBy { it.sporbar.opprettetTid }
         mottattKravgrunnlagene.forEach { mottattKravgrunnlag ->
-            kravgrunnlagService.håndterMottattKravgrunnlag(mottattKravgrunnlag.melding, task.id, task.metadata)
+            kravgrunnlagService.håndterMottattKravgrunnlag(mottattKravgrunnlag.melding, task.id, task.metadata, logContext)
             if (mottattKravgrunnlag.sperret) {
                 val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
                 kravvedtakstatusService.håndterSperMeldingMedBehandling(behandlingId, kravgrunnlag)

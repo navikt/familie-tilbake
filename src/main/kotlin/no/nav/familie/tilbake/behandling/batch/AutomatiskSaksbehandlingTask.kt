@@ -13,7 +13,7 @@ import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagService
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
-import org.slf4j.LoggerFactory
+import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.stereotype.Service
 import java.util.Properties
 import java.util.UUID
@@ -31,13 +31,15 @@ class AutomatiskSaksbehandlingTask(
     private val behandlingRepository: BehandlingRepository,
     private val logService: LogService,
 ) : AsyncTaskStep {
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<AutomatiskSaksbehandlingTask>()
 
     override fun doTask(task: Task) {
-        logger.info("AutomatiskSaksbehandlingTask prosesserer med id=${task.id} og metadata ${task.metadata}")
         val behandlingId = UUID.fromString(task.payload)
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val logContext = logService.contextFraBehandling(behandling.id)
+        log.medContext(logContext) {
+            info("AutomatiskSaksbehandlingTask prosesserer med id=${task.id} og metadata ${task.metadata}")
+        }
         validerOmAutomatiskBehandlingUnder4RettsgebyrErMulig(behandling, logContext)
         automatiskSaksbehandlingService.settSaksbehandlingstypeTilAutomatiskHvisOrdinær(behandlingId)
 

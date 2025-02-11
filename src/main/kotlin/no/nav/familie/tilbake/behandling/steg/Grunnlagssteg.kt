@@ -9,7 +9,7 @@ import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.log.SecureLog
-import org.slf4j.LoggerFactory
+import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
@@ -21,14 +21,16 @@ class Grunnlagssteg(
     private val behandlingskontrollService: BehandlingskontrollService,
     private val historikkTaskService: HistorikkTaskService,
 ) : IBehandlingssteg {
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<Grunnlagssteg>()
 
     @Transactional
     override fun utførSteg(
         behandlingId: UUID,
         logContext: SecureLog.Context,
     ) {
-        logger.info("Behandling $behandlingId er på ${Behandlingssteg.GRUNNLAG} steg")
+        log.medContext(logContext) {
+            info("Behandling $behandlingId er på ${Behandlingssteg.GRUNNLAG} steg")
+        }
         if (kravgrunnlagRepository.existsByBehandlingIdAndAktivTrueAndSperretFalse(behandlingId)) {
             behandlingskontrollService.oppdaterBehandlingsstegStatus(
                 behandlingId,
@@ -54,7 +56,9 @@ class Grunnlagssteg(
         logContext: SecureLog.Context,
     ) {
         utførSteg(behandlingId, logContext)
-        logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.GRUNNLAG} steg")
+        log.medContext(logContext) {
+            info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.GRUNNLAG} steg")
+        }
     }
 
     override fun getBehandlingssteg(): Behandlingssteg = Behandlingssteg.GRUNNLAG

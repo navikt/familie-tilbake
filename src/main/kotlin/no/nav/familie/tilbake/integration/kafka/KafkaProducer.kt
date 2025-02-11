@@ -7,8 +7,8 @@ import no.nav.familie.tilbake.config.KafkaConfig
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.sakshendelse.Behandlingstilstand
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.Vedtaksoppsummering
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.TracedLogger
 import org.apache.kafka.clients.producer.ProducerRecord
-import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
@@ -45,7 +45,7 @@ class DefaultKafkaProducer(
     private val kafkaTemplate: KafkaTemplate<String, String>,
     private val kafkaProperties: KafkaProperties,
 ) : KafkaProducer {
-    private val log = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<DefaultKafkaProducer>()
 
     override fun sendSaksdata(
         behandlingId: UUID,
@@ -114,15 +114,19 @@ class DefaultKafkaProducer(
         kotlin
             .runCatching {
                 val callback = kafkaTemplate.send(producerRecord).get()
-                log.info(
-                    "Melding på topic $topic for $behandlingId med $key er sendt. " +
-                        "Fikk offset ${callback?.recordMetadata?.offset()}",
-                )
+                log.medContext(logContext) {
+                    info(
+                        "Melding på topic $topic for $behandlingId med $key er sendt. " +
+                            "Fikk offset ${callback?.recordMetadata?.offset()}",
+                    )
+                }
             }.onFailure {
                 val feilmelding =
                     "Melding på topic $topic kan ikke sendes for $behandlingId med $key. " +
                         "Feiler med ${it.message}"
-                log.warn(feilmelding)
+                log.medContext(logContext) {
+                    warn(feilmelding)
+                }
                 throw Feil(
                     message = feilmelding,
                     logContext = logContext,
@@ -139,7 +143,9 @@ class E2EKafkaProducer : KafkaProducer {
         request: Behandlingstilstand,
         logContext: SecureLog.Context,
     ) {
-        logger.info("Skipper sending av saksstatistikk for behandling $behandlingId fordi kafka ikke er enablet")
+        log.medContext(logContext) {
+            info("Skipper sending av saksstatistikk for behandling $behandlingId fordi kafka ikke er enablet")
+        }
     }
 
     override fun sendVedtaksdata(
@@ -147,14 +153,18 @@ class E2EKafkaProducer : KafkaProducer {
         request: Vedtaksoppsummering,
         logContext: SecureLog.Context,
     ) {
-        logger.info("Skipper sending av vedtaksstatistikk for behandling $behandlingId fordi kafka ikke er enablet")
+        log.medContext(logContext) {
+            info("Skipper sending av vedtaksstatistikk for behandling $behandlingId fordi kafka ikke er enablet")
+        }
     }
 
     override fun sendRåFagsystemsbehandlingResponse(
         behandlingId: UUID?,
         request: String,
     ) {
-        logger.info("Skipper sending av rå vedtaksdata for behandling $behandlingId fordi kafka ikke er enablet")
+        log.medContext(SecureLog.Context.tom()) {
+            info("Skipper sending av rå vedtaksdata for behandling $behandlingId fordi kafka ikke er enablet")
+        }
     }
 
     override fun sendHentFagsystemsbehandlingRequest(
@@ -162,10 +172,12 @@ class E2EKafkaProducer : KafkaProducer {
         request: HentFagsystemsbehandlingRequest,
         logContext: SecureLog.Context,
     ) {
-        logger.info("Skipper sending av info-request for fagsystembehandling ${request.eksternId} fordi kafka ikke er enablet")
+        log.medContext(logContext) {
+            info("Skipper sending av info-request for fagsystembehandling ${request.eksternId} fordi kafka ikke er enablet")
+        }
     }
 
     companion object {
-        private val logger = LoggerFactory.getLogger(E2EKafkaProducer::class.java)
+        private val log = TracedLogger.getLogger<E2EKafkaProducer>()
     }
 }

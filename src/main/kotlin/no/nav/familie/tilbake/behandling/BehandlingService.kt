@@ -51,13 +51,12 @@ import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.task.HentKravgrunnlagTask
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.oppgave.OppgaveService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangService
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -88,7 +87,7 @@ class BehandlingService(
     private val oppgaveService: OppgaveService,
     private val logService: LogService,
 ) {
-    private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
+    private val log = TracedLogger.getLogger<BehandlingService>()
 
     @Transactional
     fun opprettBehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {
@@ -129,7 +128,9 @@ class BehandlingService(
                 logContext = logContext,
             )
         }
-        logger.info("Oppretter OpprettBehandlingManueltTask for request=$opprettManueltTilbakekrevingRequest")
+        log.medContext(logContext) {
+            info("Oppretter OpprettBehandlingManueltTask for request=$opprettManueltTilbakekrevingRequest")
+        }
         val properties =
             Properties().apply {
                 setProperty("eksternFagsakId", opprettManueltTilbakekrevingRequest.eksternFagsakId)
@@ -153,9 +154,11 @@ class BehandlingService(
     @Transactional
     fun opprettRevurdering(opprettRevurderingDto: OpprettRevurderingDto): Behandling {
         val originalBehandlingId = opprettRevurderingDto.originalBehandlingId
-        logger.info("Oppretter revurdering for behandling $originalBehandlingId")
+        val logContext = logService.contextFraBehandling(originalBehandlingId)
+        log.medContext(logContext) {
+            info("Oppretter revurdering for behandling $originalBehandlingId")
+        }
         val originalBehandling = behandlingRepository.findByIdOrThrow(originalBehandlingId)
-        val logContext = logService.contextFraBehandling(originalBehandling.id)
         if (!kanRevurderingOpprettes(originalBehandling)) {
             val feilmelding =
                 "Revurdering kan ikke opprettes for behandling $originalBehandlingId. " +
@@ -419,14 +422,17 @@ class BehandlingService(
                             "eksternFagsakId=$eksternFagsakId,ytelsestype=$ytelsestype",
                     logContext = SecureLog.Context.utenBehandling(eksternFagsakId),
                 )
+        val logContext = SecureLog.Context.medBehandling(eksternFagsakId, behandling.id.toString())
         val faktainfo = respons.faktainfo
         val fagsystemskonsekvenser =
             faktainfo.konsekvensForYtelser.map { Fagsystemskonsekvens(konsekvens = it) }.toSet()
         if (behandling.aktivFagsystemsbehandling.eksternId == eksternId) {
-            logger.info(
-                "Det trenger ikke å oppdatere fakta info siden tilbakekrevingsbehandling " +
-                    "er allerede koblet med riktig fagsystemsbehandling",
-            )
+            log.medContext(logContext) {
+                info(
+                    "Det trenger ikke å oppdatere fakta info siden tilbakekrevingsbehandling " +
+                        "er allerede koblet med riktig fagsystemsbehandling",
+                )
+            }
             return
         }
         val gammelFagsystemsbehandling = behandling.aktivFagsystemsbehandling.copy(aktiv = false)
@@ -542,15 +548,18 @@ class BehandlingService(
         erAutomatisk: Boolean,
         opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
     ) {
+        val logContext = SecureLog.Context.utenBehandling(opprettTilbakekrevingRequest.eksternFagsakId)
         val erAutomatiskLogg = if (erAutomatisk) "som skal behandles automatisk" else ""
-        logger.info(
-            "Oppretter Tilbakekrevingsbehandling {} for ytelsestype={},eksternFagsakId={} og eksternId={}",
-            erAutomatiskLogg,
-            opprettTilbakekrevingRequest.ytelsestype,
-            opprettTilbakekrevingRequest.eksternFagsakId,
-            opprettTilbakekrevingRequest.eksternId,
-        )
-        SecureLog.utenBehandling(opprettTilbakekrevingRequest.eksternFagsakId) {
+        log.medContext(logContext) {
+            info(
+                "Oppretter Tilbakekrevingsbehandling {} for ytelsestype={},eksternFagsakId={} og eksternId={}",
+                erAutomatiskLogg,
+                opprettTilbakekrevingRequest.ytelsestype,
+                opprettTilbakekrevingRequest.eksternFagsakId,
+                opprettTilbakekrevingRequest.eksternId,
+            )
+        }
+        SecureLog.medContext(logContext) {
             info(
                 "Oppretter Tilbakekrevingsbehandling {} for ytelsestype={} og personIdent={}",
                 erAutomatiskLogg,
@@ -598,7 +607,9 @@ class BehandlingService(
     ) {
         val manuelleBrevmottakere = brevmottakere.map { brevmottaker -> ManuellBrevmottakerMapper.tilDomene(brevmottaker, behandling.id) }
         if (manuelleBrevmottakere.isNotEmpty()) {
-            logger.info("Lagrer ${manuelleBrevmottakere.size} manuell(e) brevmottaker(e) oversendt fra $fagsystem-sak")
+            log.medContext(logContext) {
+                info("Lagrer ${manuelleBrevmottakere.size} manuell(e) brevmottaker(e) oversendt fra $fagsystem-sak")
+            }
             manuellBrevmottakerRepository.insertAll(manuelleBrevmottakere)
             if (sjekkOmManuelleBrevmottakereErStøttet(behandling, fagsak)) {
                 behandlingskontrollService.behandleBrevmottakerSteg(behandling.id, logContext)

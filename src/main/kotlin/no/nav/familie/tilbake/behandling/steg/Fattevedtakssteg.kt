@@ -17,9 +17,9 @@ import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.totrinn.TotrinnService
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -34,13 +34,15 @@ class Fattevedtakssteg(
     private val behandlingsvedtakService: BehandlingsvedtakService,
     private val manuellBrevmottakerRepository: ManuellBrevmottakerRepository,
 ) : IBehandlingssteg {
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<Fattevedtakssteg>()
 
     override fun utførSteg(
         behandlingId: UUID,
         logContext: SecureLog.Context,
     ) {
-        logger.info("Behandling $behandlingId er på ${Behandlingssteg.FATTE_VEDTAK} steg")
+        log.medContext(logContext) {
+            info("Behandling $behandlingId er på ${Behandlingssteg.FATTE_VEDTAK} steg")
+        }
     }
 
     @Transactional
@@ -59,7 +61,9 @@ class Fattevedtakssteg(
             logContext = logContext,
         )
 
-        logger.info("Behandling $behandlingId er på ${Behandlingssteg.FATTE_VEDTAK} steg")
+        log.medContext(logContext) {
+            info("Behandling $behandlingId er på ${Behandlingssteg.FATTE_VEDTAK} steg")
+        }
         // Steg 2: Oppdater ansvarligBeslutter
         totrinnService.validerAnsvarligBeslutter(behandlingId, logContext)
         totrinnService.oppdaterAnsvarligBeslutter(behandlingId, logContext)
@@ -112,7 +116,9 @@ class Fattevedtakssteg(
         behandlingId: UUID,
         logContext: SecureLog.Context,
     ) {
-        logger.info("Behandling $behandlingId er på ${Behandlingssteg.FATTE_VEDTAK} steg og behandler automatisk..")
+        log.medContext(logContext) {
+            info("Behandling $behandlingId er på ${Behandlingssteg.FATTE_VEDTAK} steg og behandler automatisk..")
+        }
         totrinnService.oppdaterAnsvarligBeslutter(behandlingId, logContext)
         totrinnService.lagreFastTotrinnsvurderingerForAutomatiskSaksbehandling(behandlingId)
 
@@ -138,7 +144,9 @@ class Fattevedtakssteg(
         behandlingId: UUID,
         logContext: SecureLog.Context,
     ) {
-        logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.FATTE_VEDTAK} steg")
+        log.medContext(logContext) {
+            info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.FATTE_VEDTAK} steg")
+        }
         behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
             Behandlingsstegsinfo(

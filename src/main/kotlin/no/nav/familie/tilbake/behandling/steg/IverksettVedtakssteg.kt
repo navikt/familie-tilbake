@@ -11,7 +11,7 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.iverksettvedtak.task.SendØkonomiTilbakekrevingsvedtakTask
 import no.nav.familie.tilbake.log.SecureLog
-import org.slf4j.LoggerFactory
+import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.stereotype.Service
 import java.util.Properties
 import java.util.UUID
@@ -22,13 +22,15 @@ class IverksettVedtakssteg(
     private val fagsakRepository: FagsakRepository,
     private val taskService: TaskService,
 ) : IBehandlingssteg {
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<IverksettVedtakssteg>()
 
     override fun utførSteg(
         behandlingId: UUID,
         logContext: SecureLog.Context,
     ) {
-        logger.info("Behandling $behandlingId er på ${Behandlingssteg.IVERKSETT_VEDTAK} steg")
+        log.medContext(logContext) {
+            info("Behandling $behandlingId er på ${Behandlingssteg.IVERKSETT_VEDTAK} steg")
+        }
 
         val behandling = behandlingsvedtakService.oppdaterBehandlingsvedtak(behandlingId, Iverksettingsstatus.UNDER_IVERKSETTING)
         val fagsystem = fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem
@@ -50,7 +52,9 @@ class IverksettVedtakssteg(
         behandlingId: UUID,
         logContext: SecureLog.Context,
     ) {
-        logger.info("Behandling $behandlingId er på ${Behandlingssteg.IVERKSETT_VEDTAK} steg og behandler automatisk..")
+        log.medContext(logContext) {
+            info("Behandling $behandlingId er på ${Behandlingssteg.IVERKSETT_VEDTAK} steg og behandler automatisk..")
+        }
         utførSteg(behandlingId, logContext)
     }
 

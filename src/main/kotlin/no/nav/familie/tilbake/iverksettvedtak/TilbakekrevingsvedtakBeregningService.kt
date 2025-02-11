@@ -13,8 +13,9 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
+import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -24,12 +25,13 @@ import java.util.UUID
 class TilbakekrevingsvedtakBeregningService(
     private val tilbakekrevingsberegningService: TilbakekrevingsberegningService,
 ) {
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<TilbakekrevingsvedtakBeregningService>()
 
     fun beregnVedtaksperioder(
         behandlingId: UUID,
         kravgrunnlag431: Kravgrunnlag431,
     ): List<Tilbakekrevingsperiode> {
+        val logContext = SecureLog.Context.medBehandling(kravgrunnlag431.fagsystemId, behandlingId.toString())
         val beregningsresultat = tilbakekrevingsberegningService.beregn(behandlingId)
 
         val kravgrunnlagsperioder = kravgrunnlag431.perioder.toList().sortedBy { it.periode.fom }
@@ -53,7 +55,7 @@ class TilbakekrevingsvedtakBeregningService(
 
                 // renter
                 perioder = beregnRenter(beregnetPeriode, perioder)
-                justerAvrundingRenter(beregnetPeriode, perioder)
+                justerAvrundingRenter(beregnetPeriode, perioder, logContext)
             }.flatten()
     }
 
@@ -280,13 +282,16 @@ class TilbakekrevingsvedtakBeregningService(
     private fun justerAvrundingRenter(
         beregnetPeriode: Beregningsresultatsperiode,
         perioder: List<Tilbakekrevingsperiode>,
+        logContext: SecureLog.Context,
     ): List<Tilbakekrevingsperiode> {
         val totalBeregnetRenteBeløp = beregnetPeriode.rentebeløp
         val totalBeregnetRenterIIverksettelse = perioder.sumOf { it.renter }
-        logger.info(
-            "Total beregnet renteBeløp som sendes i vedtaksbrev er $totalBeregnetRenteBeløp " +
-                "mens total beregnet renteBeløp under iverksettelse er $totalBeregnetRenterIIverksettelse ",
-        )
+        log.medContext(logContext) {
+            info(
+                "Total beregnet renteBeløp som sendes i vedtaksbrev er $totalBeregnetRenteBeløp " +
+                    "mens total beregnet renteBeløp under iverksettelse er $totalBeregnetRenterIIverksettelse ",
+            )
+        }
         var differanse = totalBeregnetRenteBeløp.minus(totalBeregnetRenterIIverksettelse)
 
         return when {

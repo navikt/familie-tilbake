@@ -20,9 +20,9 @@ import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEvent
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
-import org.slf4j.LoggerFactory
 import org.springframework.context.event.EventListener
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -39,14 +39,16 @@ class Vilkårsvurderingssteg(
     private val periodeService: PeriodeService,
     private val vedtaksbrevsoppsummeringRepository: VedtaksbrevsoppsummeringRepository,
 ) : IBehandlingssteg {
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<Vilkårsvurderingssteg>()
 
     @Transactional
     override fun utførSteg(
         behandlingId: UUID,
         logContext: SecureLog.Context,
     ) {
-        logger.info("Behandling $behandlingId er på $VILKÅRSVURDERING steg")
+        log.medContext(logContext) {
+            info("Behandling $behandlingId er på $VILKÅRSVURDERING steg")
+        }
         if (harAllePerioderForeldet(behandlingId)) {
             // hvis det finnes noen periode som ble vurdert før i vilkårsvurdering, må slettes
             vilkårsvurderingService.deaktiverEksisterendeVilkårsvurdering(behandlingId)
@@ -68,7 +70,9 @@ class Vilkårsvurderingssteg(
         behandlingsstegDto: BehandlingsstegDto,
         logContext: SecureLog.Context,
     ) {
-        logger.info("Behandling $behandlingId er på $VILKÅRSVURDERING steg")
+        log.medContext(logContext) {
+            info("Behandling $behandlingId er på $VILKÅRSVURDERING steg")
+        }
         if (harAllePerioderForeldet(behandlingId)) {
             throw Feil(
                 message = "Alle perioder er foreldet for $behandlingId,kan ikke behandle vilkårsvurdering",
@@ -92,7 +96,9 @@ class Vilkårsvurderingssteg(
         behandlingId: UUID,
         logContext: SecureLog.Context,
     ) {
-        logger.info("Behandling $behandlingId er på $VILKÅRSVURDERING steg og behandler automatisk..")
+        log.medContext(logContext) {
+            info("Behandling $behandlingId er på $VILKÅRSVURDERING steg og behandler automatisk..")
+        }
         if (harAllePerioderForeldet(behandlingId)) {
             utførSteg(behandlingId, logContext)
             return
@@ -114,7 +120,9 @@ class Vilkårsvurderingssteg(
         behandlingId: UUID,
         logContext: SecureLog.Context,
     ) {
-        logger.info("Behandling $behandlingId gjenopptar på $VILKÅRSVURDERING steg")
+        log.medContext(logContext) {
+            info("Behandling $behandlingId gjenopptar på $VILKÅRSVURDERING steg")
+        }
         behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
             Behandlingsstegsinfo(

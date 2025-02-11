@@ -29,10 +29,10 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEventPublisher
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -56,13 +56,14 @@ class KravgrunnlagService(
     private val endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher,
     private val behandlingService: BehandlingService,
 ) {
-    private val log = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<KravgrunnlagService>()
 
     @Transactional
     fun håndterMottattKravgrunnlag(
         kravgrunnlagXml: String,
         taskId: Long,
         taskMetadata: Properties,
+        logContext: SecureLog.Context,
     ) {
         val kravgrunnlag: DetaljertKravgrunnlagDto = KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagXml)
         val fagsystemId = kravgrunnlag.fagsystemId
@@ -70,7 +71,9 @@ class KravgrunnlagService(
 
         val behandling: Behandling? = finnÅpenBehandling(ytelsestype, fagsystemId)
         val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype)
-        log.info("BehandleKravgrunnlagTask prosesserer med id={} og metadata {}", taskId, taskMetadata.toString())
+        log.medContext(logContext) {
+            info("BehandleKravgrunnlagTask prosesserer med id={} og metadata {}", taskId, taskMetadata.toString())
+        }
         val logContext = SecureLog.Context.medBehandling(fagsystemId, behandling?.id.toString())
         SecureLog.medContext(logContext) {
             info(
@@ -80,7 +83,9 @@ class KravgrunnlagService(
             )
         }
 
-        log.info("Håndterer kravgrunnlag fagsystem=$fagsystem, eksternFagId=$fagsystemId, behandlingId=${behandling?.id}, ytelsestype=$ytelsestype, eksternKravgrunnlagId=${kravgrunnlag.kravgrunnlagId}")
+        log.medContext(logContext) {
+            info("Håndterer kravgrunnlag fagsystem=$fagsystem, eksternFagId=$fagsystemId, behandlingId=${behandling?.id}, ytelsestype=$ytelsestype, eksternKravgrunnlagId=${kravgrunnlag.kravgrunnlagId}")
+        }
 
         KravgrunnlagValidator.validerGrunnlag(kravgrunnlag)
 
@@ -92,7 +97,7 @@ class KravgrunnlagService(
         }
         // mapper grunnlag til Kravgrunnlag431
         val kravgrunnlag431: Kravgrunnlag431 = KravgrunnlagMapper.tilKravgrunnlag431(kravgrunnlag, behandling.id)
-        sjekkIdentiskKravgrunnlag(kravgrunnlag431, behandling)
+        sjekkIdentiskKravgrunnlag(kravgrunnlag431, behandling, logContext)
         lagreKravgrunnlag(kravgrunnlag431, ytelsestype)
         mottattXmlService.arkiverMottattXml(mottattXmlId = null, mottattXml = kravgrunnlagXml, fagsystemId = fagsystemId, ytelsestype = ytelsestype)
 
@@ -111,24 +116,30 @@ class KravgrunnlagService(
         }
 
         if (Kravstatuskode.ENDRET == kravgrunnlag431.kravstatuskode) {
-            log.info("Mottatt ENDR kravgrunnlag. Fjerner eksisterende data for behandling ${behandling.id}")
+            log.medContext(logContext) {
+                info("Mottatt ENDR kravgrunnlag. Fjerner eksisterende data for behandling ${behandling.id}")
+            }
             endretKravgrunnlagEventPublisher.fireEvent(behandlingId = behandling.id)
             // flytter behandlingssteg tilbake til fakta,
             // behandling har allerede fått SPER melding og venter på kravgrunnlag
             when (aktivBehandlingsstegstilstand?.behandlingsstegsstatus) {
                 Behandlingsstegstatus.VENTER -> {
-                    log.info(
-                        "Behandling ${behandling.id} venter på kravgrunnlag, mottatt ENDR kravgrunnlag. " +
-                            "Flytter behandlingen til fakta steg",
-                    )
+                    log.medContext(logContext) {
+                        info(
+                            "Behandling ${behandling.id} venter på kravgrunnlag, mottatt ENDR kravgrunnlag. " +
+                                "Flytter behandlingen til fakta steg",
+                        )
+                    }
                     behandlingskontrollService.tilbakeførBehandledeSteg(behandling.id, logContext)
                 }
 
                 else -> { // behandling har ikke fått SPER melding og har noen steg som blir behandlet
-                    log.info(
-                        "Behandling ${behandling.id} blir behandlet, mottatt ENDR kravgrunnlag. " +
-                            "Flytter behandlingen til fakta steg",
-                    )
+                    log.medContext(logContext) {
+                        info(
+                            "Behandling ${behandling.id} blir behandlet, mottatt ENDR kravgrunnlag. " +
+                                "Flytter behandlingen til fakta steg",
+                        )
+                    }
                     behandlingskontrollService.behandleStegPåNytt(behandling.id, Behandlingssteg.FAKTA, logContext)
                 }
             }
@@ -282,6 +293,7 @@ class KravgrunnlagService(
     fun sjekkIdentiskKravgrunnlag(
         endretKravgrunnlag: Kravgrunnlag431,
         behandling: Behandling,
+        logContext: SecureLog.Context,
     ) {
         if (endretKravgrunnlag.kravstatuskode != Kravstatuskode.ENDRET ||
             // sjekker ikke identisk kravgrunnlag for behandlinger som har sendt varselbrev
@@ -304,14 +316,16 @@ class KravgrunnlagService(
             }
         }
         if (erIdentiskKravgrunnlag) {
-            log.warn(
-                "Mottatt kravgrunnlag med kravgrunnlagId ${endretKravgrunnlag.eksternKravgrunnlagId}," +
-                    "status ${endretKravgrunnlag.kravstatuskode.kode} og referanse ${endretKravgrunnlag.referanse} " +
-                    "for behandlingId=${endretKravgrunnlag.behandlingId} " +
-                    "er identisk med eksisterende kravgrunnlag med kravgrunnlagId ${forrigeKravgrunnlag.eksternKravgrunnlagId}," +
-                    "status ${forrigeKravgrunnlag.kravstatuskode.kode} og referanse ${forrigeKravgrunnlag.referanse}." +
-                    "Undersøk om ny referanse kan gi feil i brev..",
-            )
+            log.medContext(logContext) {
+                warn(
+                    "Mottatt kravgrunnlag med kravgrunnlagId ${endretKravgrunnlag.eksternKravgrunnlagId}," +
+                        "status ${endretKravgrunnlag.kravstatuskode.kode} og referanse ${endretKravgrunnlag.referanse} " +
+                        "for behandlingId=${endretKravgrunnlag.behandlingId} " +
+                        "er identisk med eksisterende kravgrunnlag med kravgrunnlagId ${forrigeKravgrunnlag.eksternKravgrunnlagId}," +
+                        "status ${forrigeKravgrunnlag.kravstatuskode.kode} og referanse ${forrigeKravgrunnlag.referanse}." +
+                        "Undersøk om ny referanse kan gi feil i brev..",
+                )
+            }
         }
     }
 

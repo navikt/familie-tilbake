@@ -6,7 +6,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.log.SecureLog
-import org.slf4j.LoggerFactory
+import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -15,18 +15,22 @@ import java.util.UUID
 class Varselssteg(
     private val behandlingskontrollService: BehandlingskontrollService,
 ) : IBehandlingssteg {
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<Varselssteg>()
 
     @Transactional
     override fun utførSteg(
         behandlingId: UUID,
         logContext: SecureLog.Context,
     ) {
-        logger.info("Behandling $behandlingId er på ${Behandlingssteg.VARSEL} steg")
-        logger.info(
-            "Behandling $behandlingId venter på ${Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING}. " +
-                "Den kan kun tas av vent av saksbehandler ved å gjenoppta behandlingen",
-        )
+        log.medContext(logContext) {
+            info("Behandling $behandlingId er på ${Behandlingssteg.VARSEL} steg")
+        }
+        log.medContext(logContext) {
+            info(
+                "Behandling $behandlingId venter på ${Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING}. " +
+                    "Den kan kun tas av vent av saksbehandler ved å gjenoppta behandlingen",
+            )
+        }
     }
 
     @Transactional
@@ -34,7 +38,9 @@ class Varselssteg(
         behandlingId: UUID,
         logContext: SecureLog.Context,
     ) {
-        logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.VARSEL} steg")
+        log.medContext(logContext) {
+            info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.VARSEL} steg")
+        }
         behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
             Behandlingsstegsinfo(

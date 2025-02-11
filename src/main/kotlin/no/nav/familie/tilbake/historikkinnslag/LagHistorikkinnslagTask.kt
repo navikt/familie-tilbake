@@ -4,7 +4,8 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.config.PropertyName
-import org.slf4j.LoggerFactory
+import no.nav.familie.tilbake.log.LogService
+import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.UUID
@@ -18,13 +19,17 @@ import java.util.UUID
 )
 class LagHistorikkinnslagTask(
     private val historikkService: HistorikkService,
+    private val logService: LogService,
 ) : AsyncTaskStep {
-    private val log = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<LagHistorikkinnslagTask>()
 
     override fun doTask(task: Task) {
-        log.info("LagHistorikkinnslagTask prosesserer med id=${task.id} og metadata ${task.metadata}")
-
         val behandlingId: UUID = UUID.fromString(task.payload)
+        val logContext = logService.contextFraBehandling(behandlingId)
+        log.medContext(logContext) {
+            info("LagHistorikkinnslagTask prosesserer med id=${task.id} og metadata ${task.metadata}")
+        }
+
         val historikkinnslagstype =
             TilbakekrevingHistorikkinnslagstype.valueOf(task.metadata.getProperty("historikkinnslagstype"))
         val aktør = Aktør.valueOf(task.metadata.getProperty("aktør"))

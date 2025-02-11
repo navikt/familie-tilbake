@@ -11,7 +11,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.SendVedtaksbrevTask
 import no.nav.familie.tilbake.iverksettvedtak.IverksettelseService
 import no.nav.familie.tilbake.log.LogService
-import org.slf4j.LoggerFactory
+import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -29,12 +29,14 @@ class SendØkonomiTilbakekrevingsvedtakTask(
     private val behandlingskontrollService: BehandlingskontrollService,
     private val logService: LogService,
 ) : AsyncTaskStep {
-    private val log = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<SendØkonomiTilbakekrevingsvedtakTask>()
 
     override fun doTask(task: Task) {
-        log.info("SendØkonomiTilbakekrevingsvedtakTask prosesserer med id=${task.id} og metadata ${task.metadata}")
         val behandlingId = UUID.fromString(task.payload)
         val logContext = logService.contextFraBehandling(behandlingId)
+        log.medContext(logContext) {
+            info("SendØkonomiTilbakekrevingsvedtakTask prosesserer med id=${task.id} og metadata ${task.metadata}")
+        }
         iverksettelseService.sendIverksettVedtak(behandlingId)
 
         behandlingskontrollService

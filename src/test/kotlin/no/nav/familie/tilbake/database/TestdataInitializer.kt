@@ -9,6 +9,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype.OVERGANGSSTØ
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagService
+import no.nav.familie.tilbake.log.SecureLog
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationListener
@@ -64,7 +65,7 @@ class TestdataInitializer : ApplicationListener<ContextRefreshedEvent> {
 
             val mottattXml = readXml("/kravgrunnlagxml/kravgrunnlag_lokal_kjøring.xml")
 
-            kravgrunnlagService.håndterMottattKravgrunnlag(mottattXml.replace("<urn:fagsystemId>testverdi</urn:fagsystemId>", "<urn:fagsystemId>1234567</urn:fagsystemId>"), 0L, Properties())
+            kravgrunnlagService.håndterMottattKravgrunnlag(mottattXml.replace("<urn:fagsystemId>testverdi</urn:fagsystemId>", "<urn:fagsystemId>1234567</urn:fagsystemId>"), 0L, Properties(), SecureLog.Context.tom())
         } else {
             logger.info("Opprettet dummy-behandling. Hvis frontend kjøres lokalt kan du gå til: http://localhost:8000/fagsystem/${opprettTilbakekrevingRequest.fagsystem}/fagsak/${opprettTilbakekrevingRequest.eksternFagsakId}/behandling/${åpenTilbakekrevingsbehandling.eksternBrukId}")
         }

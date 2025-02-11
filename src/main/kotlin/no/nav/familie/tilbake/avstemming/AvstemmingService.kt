@@ -15,9 +15,9 @@ import no.nav.familie.tilbake.iverksettvedtak.domain.ØkonomiXmlSendt
 import no.nav.familie.tilbake.iverksettvedtak.ØkonomiXmlSendtRepository
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
 import no.nav.tilbakekreving.typer.v1.MmelDto
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -29,7 +29,7 @@ class AvstemmingService(
     private val integrasjonerConfig: IntegrasjonerConfig,
     private val logService: LogService,
 ) {
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<AvstemmingService>()
 
     fun oppsummer(dato: LocalDate): ByteArray? {
         val sendteVedtak = sendtXmlRepository.findByOpprettetPåDato(dato)
@@ -50,25 +50,29 @@ class AvstemmingService(
                 lagAvstemmingsradForVedtaket(behandling, oppsummering)
             }
         if (antallFeilet == 0) {
-            logger.info(
-                "Avstemmer {}. Sender {} vedtak til avstemming. Totalt ble {} vedtak sendt til OS dette døgnet. " +
-                    "{} førstegangsvedtak uten tilbakekreving sendes ikke til avstemming",
-                dato,
-                rader.size,
-                sendteVedtak.size,
-                antallFørstegangsvedtakUtenTilbakekreving,
-            )
+            log.medContext(SecureLog.Context.tom()) {
+                info(
+                    "Avstemmer {}. Sender {} vedtak til avstemming. Totalt ble {} vedtak sendt til OS dette døgnet. " +
+                        "{} førstegangsvedtak uten tilbakekreving sendes ikke til avstemming",
+                    dato,
+                    rader.size,
+                    sendteVedtak.size,
+                    antallFørstegangsvedtakUtenTilbakekreving,
+                )
+            }
         } else {
-            logger.warn(
-                "Avstemmer {}. Sender {} vedtak til avstemming. Totalt ble {} vedtak sendt til OS dette døgnet. " +
-                    "{} førstegangsvedtak uten tilbakekreving sendes ikke til avstemming. " +
-                    "{} vedtak fikk negativ kvittering fra OS og sendes ikke til avstemming",
-                dato,
-                rader.size,
-                sendteVedtak.size,
-                antallFørstegangsvedtakUtenTilbakekreving,
-                antallFeilet,
-            )
+            log.medContext(SecureLog.Context.tom()) {
+                warn(
+                    "Avstemmer {}. Sender {} vedtak til avstemming. Totalt ble {} vedtak sendt til OS dette døgnet. " +
+                        "{} førstegangsvedtak uten tilbakekreving sendes ikke til avstemming. " +
+                        "{} vedtak fikk negativ kvittering fra OS og sendes ikke til avstemming",
+                    dato,
+                    rader.size,
+                    sendteVedtak.size,
+                    antallFørstegangsvedtakUtenTilbakekreving,
+                    antallFeilet,
+                )
+            }
         }
         return if (rader.isEmpty()) {
             null

@@ -36,8 +36,8 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottattArkiv
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattService
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -56,7 +56,7 @@ class GammelKravgrunnlagService(
     private val stegService: StegService,
     private val historikkService: HistorikkService,
 ) {
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<GammelKravgrunnlagService>()
 
     fun hentFrakobletKravgrunnlag(mottattXmlId: UUID): ØkonomiXmlMottatt = økonomiXmlMottattService.hentMottattKravgrunnlag(mottattXmlId)
 
@@ -66,8 +66,11 @@ class GammelKravgrunnlagService(
         val eksternFagsakId = mottattXml.eksternFagsakId
         val ytelsestype = mottattXml.ytelsestype
         val mottattXmlId = mottattXml.id
+        val logContext = SecureLog.Context.utenBehandling(eksternFagsakId)
 
-        logger.info("Sjekker om det finnes en aktiv behandling for fagsak=$eksternFagsakId og ytelsestype=$ytelsestype")
+        log.medContext(logContext) {
+            info("Sjekker om det finnes en aktiv behandling for fagsak=$eksternFagsakId og ytelsestype=$ytelsestype")
+        }
         if (behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype, eksternFagsakId) != null) {
             throw UgyldigKravgrunnlagFeil(
                 melding =
@@ -113,16 +116,20 @@ class GammelKravgrunnlagService(
         task: Task,
         logContext: SecureLog.Context,
     ) {
-        logger.info("Håndterer kravgrunnlag med kravgrunnlagId=${mottattXml.eksternKravgrunnlagId}")
+        log.medContext(logContext) {
+            info("Håndterer kravgrunnlag med kravgrunnlagId=${mottattXml.eksternKravgrunnlagId}")
+        }
         val (hentetKravgrunnlag, kravgrunnlagErSperret) =
             try {
                 hentKravgrunnlagFraØkonomi(mottattXml, logContext)
             } catch (e: KravgrunnlagIkkeFunnetFeil) {
                 if (sjekkArkivForDuplikatKravgrunnlagMedKravstatusAvsluttet(kravgrunnlagIkkeFunnet = mottattXml)) {
-                    logger.warn(
-                        "Kravgrunnlag(id=${mottattXml.id}, eksternFagsakId=${mottattXml.eksternFagsakId}) ble ikke funnet hos økonomi," +
-                            " men identisk kravgrunnlag med påfølgende melding om at kravet er avsluttet ble funnet i arkivet.",
-                    )
+                    log.medContext(logContext) {
+                        warn(
+                            "Kravgrunnlag(id=${mottattXml.id}, eksternFagsakId=${mottattXml.eksternFagsakId}) ble ikke funnet hos økonomi," +
+                                " men identisk kravgrunnlag med påfølgende melding om at kravet er avsluttet ble funnet i arkivet.",
+                        )
+                    }
                     arkiverKravgrunnlag(mottattXml.id)
                     task.metadata["merknad"] =
                         "Arkivert da kravgrunnlag ikke ble funnet hos økonomi, og duplikat kravgrunnlag med kravstatus AVSLUTTET funnet i arkivet"
@@ -148,14 +155,18 @@ class GammelKravgrunnlagService(
         val mottattKravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(mottattXml.melding)
         val diffs = KravgrunnlagUtil.sammenlignKravgrunnlag(mottattKravgrunnlag, hentetKravgrunnlag)
         if (diffs.isNotEmpty()) {
-            logger.warn("Det finnes avvik mellom hentet kravgrunnlag og mottatt kravgrunnlag for ${hentetKravgrunnlag.kodeFagomraade}. Avvikene er $diffs")
+            log.medContext(logContext) {
+                warn("Det finnes avvik mellom hentet kravgrunnlag og mottatt kravgrunnlag for ${hentetKravgrunnlag.kodeFagomraade}. Avvikene er $diffs")
+            }
         }
-        logger.info(
-            "Kobler kravgrunnlag med kravgrunnlagId=${hentetKravgrunnlag.kravgrunnlagId} " +
-                "til behandling=$behandlingId",
-        )
+        log.medContext(logContext) {
+            info(
+                "Kobler kravgrunnlag med kravgrunnlagId=${hentetKravgrunnlag.kravgrunnlagId} " +
+                    "til behandling=$behandlingId",
+            )
+        }
         val kravgrunnlag = KravgrunnlagMapper.tilKravgrunnlag431(hentetKravgrunnlag, behandlingId)
-        kravgrunnlagService.sjekkIdentiskKravgrunnlag(kravgrunnlag, behandling)
+        kravgrunnlagService.sjekkIdentiskKravgrunnlag(kravgrunnlag, behandling, logContext)
         kravgrunnlagRepository.insert(kravgrunnlag)
 
         historikkService.lagHistorikkinnslag(
@@ -167,10 +178,12 @@ class GammelKravgrunnlagService(
 
         stegService.håndterSteg(behandlingId, logContext)
         if (kravgrunnlagErSperret) {
-            logger.info(
-                "Hentet kravgrunnlag med kravgrunnlagId=${hentetKravgrunnlag.kravgrunnlagId} " +
-                    "til behandling=$behandlingId er sperret. Venter behandlingen på ny kravgrunnlag fra økonomi",
-            )
+            log.medContext(logContext) {
+                info(
+                    "Hentet kravgrunnlag med kravgrunnlagId=${hentetKravgrunnlag.kravgrunnlagId} " +
+                        "til behandling=$behandlingId er sperret. Venter behandlingen på ny kravgrunnlag fra økonomi",
+                )
+            }
             sperKravgrunnlag(behandlingId, logContext)
         }
     }
@@ -193,7 +206,9 @@ class GammelKravgrunnlagService(
                 logContext,
             ) to false
         } catch (e: SperretKravgrunnlagFeil) {
-            logger.warn(e.melding)
+            log.medContext(logContext) {
+                warn(e.melding)
+            }
             KravgrunnlagUtil.unmarshalKravgrunnlag(mottattXml.melding) to true
         }
 

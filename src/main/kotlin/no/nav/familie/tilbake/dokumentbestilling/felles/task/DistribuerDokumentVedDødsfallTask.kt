@@ -35,7 +35,7 @@ class DistribuerDokumentVedDødsfallTask(
     private val integrasjonerClient: IntegrasjonerClient,
     private val historikkTaskService: HistorikkTaskService,
 ) : AsyncTaskStep {
-    val logger: Logger = LoggerFactory.getLogger(this::class.java)
+    private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {
         logger.info("${this::class.simpleName} prosesserer med id=${task.id} og metadata ${task.metadata}")

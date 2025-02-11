@@ -6,7 +6,7 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.common.exceptionhandler.UkjentravgrunnlagFeil
 import no.nav.familie.tilbake.log.SecureLog
-import org.slf4j.LoggerFactory
+import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -22,19 +22,24 @@ class GammelKravgrunnlagTask(
     private val gammelKravgrunnlagService: GammelKravgrunnlagService,
     private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
 ) : AsyncTaskStep {
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<GammelKravgrunnlagService>()
 
     @Transactional
     override fun doTask(task: Task) {
-        logger.info("GammelKravgrunnlagTask prosesserer med id=${task.id} og metadata ${task.metadata}")
         val mottattXmlId = UUID.fromString(task.payload)
         val mottattXml = gammelKravgrunnlagService.hentFrakobletKravgrunnlagNullable(mottattXmlId)
         if (mottattXml == null) {
-            logger.warn("MottattXml med id=$mottattXmlId finnes ikke. Task-en blir avbrutt.")
+            log.medContext(SecureLog.Context.tom()) {
+                warn("MottattXml med id=$mottattXmlId finnes ikke. Task-en blir avbrutt.")
+            }
             return
         }
-
         val eksternFagsakId = mottattXml.eksternFagsakId
+        val logContext = SecureLog.Context.utenBehandling(eksternFagsakId)
+
+        log.medContext(logContext) {
+            info("GammelKravgrunnlagTask prosesserer med id=${task.id} og metadata ${task.metadata}")
+        }
         val ytelsestype = mottattXml.ytelsestype
         val eksternId = mottattXml.referanse
 

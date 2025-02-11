@@ -28,7 +28,7 @@ class FinnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgaveTas
     val behandlingskontrollService: BehandlingskontrollService,
     private val logService: LogService,
 ) : AsyncTaskStep {
-    val logger = LoggerFactory.getLogger(FinnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgaveTask::class.java)
+    private val logger = LoggerFactory.getLogger(FinnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgaveTask::class.java)
 
     override fun doTask(task: Task) {
         val fagsystem = Fagsystem.valueOf(task.payload)

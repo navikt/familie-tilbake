@@ -195,6 +195,7 @@ class DistribusjonshåndteringServiceTest {
                 brevmottager = any(),
                 vedleggPdf = any(),
                 eksternReferanseId = capture(eksternReferanseIdVedJournalføring),
+                logContext = any(),
             )
         }
 

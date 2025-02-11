@@ -18,8 +18,7 @@ import no.nav.familie.tilbake.integration.pdl.internal.PdlPersonRequestVariables
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.integration.pdl.internal.feilsjekkOgReturnerData
 import no.nav.familie.tilbake.log.SecureLog
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -33,7 +32,7 @@ class PdlClient(
     private val pdlConfig: PdlConfig,
     @Qualifier("azureClientCredential") restTemplate: RestOperations,
 ) : AbstractPingableRestClient(restTemplate, "pdl.personinfo") {
-    private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
+    private val logger = TracedLogger.getLogger<PdlClient>()
 
     fun hentPersoninfo(
         ident: String,
@@ -52,7 +51,9 @@ class PdlClient(
                 httpHeaders(mapTilTema(fagsystem)),
             )
         if (respons.harAdvarsel()) {
-            logger.warn("Advarsel ved henting av personinfo fra PDL. Se securelogs for detaljer.")
+            logger.medContext(logContext) {
+                warn("Advarsel ved henting av personinfo fra PDL. Se securelogs for detaljer.")
+            }
             secureLogger.warn("Advarsel ved henting av personinfo fra PDL: ${respons.extensions?.warnings}")
         }
         if (!respons.harFeil()) {
@@ -67,7 +68,9 @@ class PdlClient(
                 )
             }
         } else {
-            logger.warn("Respons fra PDL:${objectMapper.writeValueAsString(respons)}")
+            logger.medContext(logContext) {
+                warn("Respons fra PDL:${objectMapper.writeValueAsString(respons)}")
+            }
             throw Feil(
                 message = "Feil ved oppslag på person: ${respons.errorMessages()}",
                 frontendFeilmelding = "Feil ved oppslag på person $ident: ${respons.errorMessages()}",
@@ -94,7 +97,9 @@ class PdlClient(
                 httpHeaders(mapTilTema(fagsystem)),
             )
         if (response.harAdvarsel()) {
-            logger.warn("Advarsel ved henting av personidenter fra PDL. Se securelogs for detaljer.")
+            logger.medContext(logContext) {
+                warn("Advarsel ved henting av personidenter fra PDL. Se securelogs for detaljer.")
+            }
             secureLogger.warn("Advarsel ved henting av personidenter fra PDL: ${response.extensions?.warnings}")
         }
         if (!response.harFeil()) return response

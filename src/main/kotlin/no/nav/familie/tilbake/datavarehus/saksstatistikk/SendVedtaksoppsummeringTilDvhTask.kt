@@ -9,7 +9,7 @@ import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.Vedtaksoppsummer
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
-import org.slf4j.LoggerFactory
+import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -23,14 +23,16 @@ class SendVedtaksoppsummeringTilDvhTask(
     private val kafkaProducer: KafkaProducer,
     private val logService: LogService,
 ) : AsyncTaskStep {
-    private val log = LoggerFactory.getLogger(this::class.java)
     private val validator = Validation.buildDefaultValidatorFactory().validator
+    private val log = TracedLogger.getLogger<SendVedtaksoppsummeringTilDvhTask>()
 
     override fun doTask(task: Task) {
-        log.info("SendVedtaksoppsummeringTilDvhTask prosesserer med id=${task.id} og metadata ${task.metadata}")
         val behandlingId = UUID.fromString(task.payload)
-        val vedtaksoppsummering: Vedtaksoppsummering = vedtaksoppsummeringService.hentVedtaksoppsummering(behandlingId)
         val logContext = logService.contextFraBehandling(behandlingId)
+        log.medContext(logContext) {
+            info("SendVedtaksoppsummeringTilDvhTask prosesserer med id=${task.id} og metadata ${task.metadata}")
+        }
+        val vedtaksoppsummering: Vedtaksoppsummering = vedtaksoppsummeringService.hentVedtaksoppsummering(behandlingId)
         validate(vedtaksoppsummering)
 
         SecureLog.medContext(logContext) {

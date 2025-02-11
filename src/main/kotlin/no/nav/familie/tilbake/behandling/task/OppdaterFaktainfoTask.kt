@@ -8,7 +8,7 @@ import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.log.SecureLog
-import org.slf4j.LoggerFactory
+import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.stereotype.Service
 
 @Service
@@ -22,11 +22,14 @@ class OppdaterFaktainfoTask(
     private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
     private val behandlingService: BehandlingService,
 ) : AsyncTaskStep {
-    private val log = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<OppdaterFaktainfoTask>()
 
     override fun doTask(task: Task) {
-        log.info("OppdaterFaktainfoTask prosesserer med id=${task.id} og metadata ${task.metadata}")
         val eksternFagsakId = task.metadata.getProperty("eksternFagsakId")
+        val logContext = SecureLog.Context.utenBehandling(eksternFagsakId)
+        log.medContext(logContext) {
+            info("OppdaterFaktainfoTask prosesserer med id=${task.id} og metadata ${task.metadata}")
+        }
         val ytelsestype = Ytelsestype.valueOf(task.metadata.getProperty("ytelsestype"))
         val eksternId = task.metadata.getProperty("eksternId")
 
@@ -51,7 +54,7 @@ class OppdaterFaktainfoTask(
         if (feilmelding != null) {
             throw Feil(
                 message = "Noen gikk galt mens henter fagsystemsbehandling fra fagsystem. Feiler med $feilmelding",
-                logContext = SecureLog.Context.utenBehandling(eksternFagsakId),
+                logContext = logContext,
             )
         }
         behandlingService.oppdaterFaktainfo(eksternFagsakId, ytelsestype, eksternId, respons.hentFagsystemsbehandling!!)

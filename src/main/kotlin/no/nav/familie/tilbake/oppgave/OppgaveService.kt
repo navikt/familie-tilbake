@@ -23,8 +23,8 @@ import no.nav.familie.tilbake.common.exceptionhandler.ManglerOppgaveFeil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.person.PersonService
-import org.slf4j.LoggerFactory
 import org.springframework.core.env.Environment
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -42,7 +42,7 @@ class OppgaveService(
     private val taskService: TaskService,
     private val environment: Environment,
 ) {
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<OppgaveService>()
 
     private val antallOppgaveTyper =
         Oppgavetype.values().associateWith {
@@ -113,10 +113,12 @@ class OppgaveService(
         // Sjekk om oppgave allerede finnes for behandling
         val (_, finnOppgaveRespons) = finnOppgave(behandling, oppgavetype, fagsak)
         if (finnOppgaveRespons.oppgaver.isNotEmpty() && !finnesFerdigstillOppgaveForBehandling(behandlingId, oppgavetype)) {
-            logger.info(
-                "Det finnes allerede en oppgave $oppgavetype for behandling $behandlingId og " +
-                    "finnes ikke noen ferdigstilleoppgaver. Eksisterende oppgaven $oppgavetype må lukke først.",
-            )
+            log.medContext(logContext) {
+                info(
+                    "Det finnes allerede en oppgave $oppgavetype for behandling $behandlingId og " +
+                        "finnes ikke noen ferdigstilleoppgaver. Eksisterende oppgaven $oppgavetype må lukke først.",
+                )
+            }
             return
         }
 
@@ -143,13 +145,15 @@ class OppgaveService(
                 tilordnetRessurs = saksbehandler,
                 behandlingstype = Behandlingstype.Tilbakekreving.value,
                 behandlingstema = null,
-                mappeId = finnAktuellMappe(enhet, oppgavetype),
+                mappeId = finnAktuellMappe(enhet, oppgavetype, logContext),
                 prioritet = prioritet,
             )
 
         val oppgaveResponse = integrasjonerClient.opprettOppgave(opprettOppgave)
         antallOppgaveTyper[oppgavetype]!!.increment()
-        logger.info("Ny oppgave (id=${oppgaveResponse.oppgaveId}, type=$oppgavetype, frist=$fristForFerdigstillelse) opprettet for behandling $behandlingId")
+        log.medContext(logContext) {
+            info("Ny oppgave (id=${oppgaveResponse.oppgaveId}, type=$oppgavetype, frist=$fristForFerdigstillelse) opprettet for behandling $behandlingId")
+        }
     }
 
     fun hentOppgaveSomIkkeErFerdigstilt(
@@ -184,28 +188,38 @@ class OppgaveService(
     private fun finnAktuellMappe(
         enhetsnummer: String?,
         oppgavetype: Oppgavetype,
+        logContext: SecureLog.Context,
     ): Long? {
         if (enhetsnummer == NAY_ENSLIG_FORSØRGER) {
-            val søkemønster = lagSøkeuttrykk(oppgavetype) ?: return null
+            val søkemønster = lagSøkeuttrykk(oppgavetype, logContext) ?: return null
             val mapper = integrasjonerClient.finnMapper(enhetsnummer)
 
             val mappeIdForOppgave = mapper.find { it.navn.matches(søkemønster) }?.id?.toLong()
             mappeIdForOppgave?.let {
-                logger.info("Legger oppgave i Godkjenne vedtak-mappe")
-            } ?: logger.error("Fant ikke mappe for oppgavetype = $oppgavetype")
+                log.medContext(logContext) {
+                    info("Legger oppgave i Godkjenne vedtak-mappe")
+                }
+            } ?: log.medContext(logContext) {
+                error("Fant ikke mappe for oppgavetype = $oppgavetype")
+            }
 
             return mappeIdForOppgave
         }
         return null
     }
 
-    private fun lagSøkeuttrykk(oppgavetype: Oppgavetype): Regex? {
+    private fun lagSøkeuttrykk(
+        oppgavetype: Oppgavetype,
+        logContext: SecureLog.Context,
+    ): Regex? {
         val pattern =
             when (oppgavetype) {
                 Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak -> "50 Tilbakekreving?.+"
                 Oppgavetype.GodkjenneVedtak -> "70 Godkjenne?.vedtak?.+"
                 else -> {
-                    logger.error("Ukjent oppgavetype = $oppgavetype")
+                    log.medContext(logContext) {
+                        error("Ukjent oppgavetype = $oppgavetype")
+                    }
                     return null
                 }
             }
@@ -248,7 +262,9 @@ class OppgaveService(
             }
 
             tilbakekrevingsOppgaver.isEmpty() -> {
-                logger.error("Fant ingen oppgave å ferdigstille for behandling ${behandling.eksternBrukId}")
+                log.medContext(logContext) {
+                    error("Fant ingen oppgave å ferdigstille for behandling ${behandling.eksternBrukId}")
+                }
                 SecureLog.medContext(logContext) {
                     error(
                         "Fant ingen oppgave å ferdigstille {}, {}, {}",

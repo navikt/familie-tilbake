@@ -36,10 +36,9 @@ import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattService
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -66,7 +65,7 @@ class ForvaltningService(
     private val endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher,
     private val logService: LogService,
 ) {
-    private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
+    private val log = TracedLogger.getLogger<ForvaltningService>()
 
     @Transactional
     fun korrigerKravgrunnlag(
@@ -87,7 +86,7 @@ class ForvaltningService(
         if (kravgrunnlag != null) {
             kravgrunnlagRepository.update(kravgrunnlag.copy(aktiv = false))
         }
-        hentKravgrunnlagService.lagreHentetKravgrunnlag(behandlingId, hentetKravgrunnlag)
+        hentKravgrunnlagService.lagreHentetKravgrunnlag(behandlingId, hentetKravgrunnlag, logContext)
 
         stegService.håndterSteg(behandlingId, logContext)
     }
@@ -117,7 +116,7 @@ class ForvaltningService(
         if (kravgrunnlag != null) {
             kravgrunnlagRepository.update(kravgrunnlag.copy(aktiv = false))
         }
-        hentKravgrunnlagService.lagreHentetKravgrunnlag(behandlingId, hentetKravgrunnlag)
+        hentKravgrunnlagService.lagreHentetKravgrunnlag(behandlingId, hentetKravgrunnlag, logContext)
 
         stegService.håndterSteg(behandlingId, logContext)
     }
@@ -155,8 +154,11 @@ class ForvaltningService(
 
     @Transactional
     fun arkiverMottattKravgrunnlag(mottattXmlId: UUID) {
-        logger.info("Arkiverer mottattXml for Id=$mottattXmlId")
         val mottattKravgrunnlag = økonomiXmlMottattService.hentMottattKravgrunnlag(mottattXmlId)
+        val logContext = SecureLog.Context.utenBehandling(mottattKravgrunnlag.eksternFagsakId)
+        log.medContext(logContext) {
+            info("Arkiverer mottattXml for Id=$mottattXmlId")
+        }
         økonomiXmlMottattService.arkiverMottattXml(
             mottattKravgrunnlag.id,
             mottattKravgrunnlag.melding,

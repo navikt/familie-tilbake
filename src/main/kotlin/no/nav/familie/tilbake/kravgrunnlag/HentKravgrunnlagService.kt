@@ -7,11 +7,10 @@ import no.nav.familie.tilbake.integration.økonomi.OppdragClient
 import no.nav.familie.tilbake.kravgrunnlag.domain.KodeAksjon
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagHentDetaljRequest
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.HentKravgrunnlagDetaljDto
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigInteger
@@ -24,14 +23,16 @@ class HentKravgrunnlagService(
     private val oppdragClient: OppdragClient,
     private val historikkService: HistorikkService,
 ) {
-    private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
+    private val log = TracedLogger.getLogger<HentKravgrunnlagService>()
 
     fun hentKravgrunnlagFraØkonomi(
         kravgrunnlagId: BigInteger,
         kodeAksjon: KodeAksjon,
         logContext: SecureLog.Context,
     ): DetaljertKravgrunnlagDto {
-        logger.info("Henter kravgrunnlag for kravgrunnlagId=$kravgrunnlagId for kodeAksjon=$kodeAksjon")
+        log.medContext(logContext) {
+            info("Henter kravgrunnlag for kravgrunnlagId=$kravgrunnlagId for kodeAksjon=$kodeAksjon")
+        }
         return oppdragClient.hentKravgrunnlag(kravgrunnlagId, lagRequest(kravgrunnlagId, kodeAksjon), logContext)
     }
 
@@ -41,18 +42,26 @@ class HentKravgrunnlagService(
     fun lagreHentetKravgrunnlag(
         behandlingId: UUID,
         kravgrunnlag: DetaljertKravgrunnlagDto,
+        logContext: SecureLog.Context,
     ) {
-        logger.info("Lagrer hentet kravgrunnlag for behandling $behandlingId")
+        log.medContext(logContext) {
+            info("Lagrer hentet kravgrunnlag for behandling $behandlingId")
+        }
         val kravgrunnlag431 = KravgrunnlagMapper.tilKravgrunnlag431(kravgrunnlag, behandlingId)
         kravgrunnlagRepository.insert(kravgrunnlag431)
     }
 
     @Transactional
-    fun opprettHistorikkinnslag(behandlingId: UUID) {
-        logger.info(
-            "Oppretter historikkinnslag ${TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_HENT} " +
-                "for behandling $behandlingId",
-        )
+    fun opprettHistorikkinnslag(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
+        log.medContext(logContext) {
+            info(
+                "Oppretter historikkinnslag ${TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_HENT} " +
+                    "for behandling $behandlingId",
+            )
+        }
         historikkService.lagHistorikkinnslag(
             behandlingId = behandlingId,
             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_HENT,

@@ -12,11 +12,12 @@ import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.log.LogService
+import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.util.Properties
 import java.util.UUID
 
 @Service
@@ -28,14 +29,21 @@ class AutomatiskGjenopptaBehandlingService(
     private val oppgaveTaskService: OppgaveTaskService,
     private val logService: LogService,
 ) {
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<AutomatiskGjenopptaBehandlingService>()
 
     fun hentAlleBehandlingerKlarForGjenoppta(): List<Behandling> = behandlingRepository.finnAlleBehandlingerKlarForGjenoppta(dagensdato = LocalDate.now())
 
     @Transactional
-    fun gjenopptaBehandling(behandlingId: UUID) {
+    fun gjenopptaBehandling(
+        behandlingId: UUID,
+        taskId: Long,
+        taskMetadata: Properties,
+    ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val logContext = logService.contextFraBehandling(behandling.id)
+        log.medContext(logContext) {
+            info("AutomatiskGjenopptaBehandlingService prosesserer med id=$taskId og metadata $taskMetadata")
+        }
         val behandlingsstegstilstand =
             behandlingskontrollService.finnAktivStegstilstand(behandlingId)
                 ?: error("Behandling $behandlingId har ikke aktivt steg")
@@ -54,11 +62,13 @@ class AutomatiskGjenopptaBehandlingService(
         if (behandlingsnystegstilstand?.behandlingssteg == Behandlingssteg.GRUNNLAG &&
             behandlingsnystegstilstand.behandlingsstegsstatus == Behandlingsstegstatus.VENTER
         ) {
-            logger.warn(
-                "Behandling $behandlingId har ikke fått kravgrunnlag ennå " +
-                    "eller mottok kravgrunnlag er sperret/avsluttet. " +
-                    "Behandlingen bør analyseres og henlegges ved behov",
-            )
+            log.medContext(logContext) {
+                warn(
+                    "Behandling $behandlingId har ikke fått kravgrunnlag ennå " +
+                        "eller mottok kravgrunnlag er sperret/avsluttet. " +
+                        "Behandlingen bør analyseres og henlegges ved behov",
+                )
+            }
         }
 
         oppgaveTaskService.oppdaterOppgaveTask(

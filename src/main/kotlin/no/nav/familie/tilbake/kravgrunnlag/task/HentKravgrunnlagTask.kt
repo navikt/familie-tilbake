@@ -11,7 +11,7 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.kravgrunnlag.HentKravgrunnlagService
 import no.nav.familie.tilbake.kravgrunnlag.domain.KodeAksjon
 import no.nav.familie.tilbake.log.LogService
-import org.slf4j.LoggerFactory
+import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -28,14 +28,16 @@ class HentKravgrunnlagTask(
     private val stegService: StegService,
     private val logService: LogService,
 ) : AsyncTaskStep {
-    private val log = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<HentKravgrunnlagService>()
 
     @Transactional
     override fun doTask(task: Task) {
-        log.info("HentKravgrunnlagTask prosesserer med id=${task.id} og metadata ${task.metadata}")
         val behandlingId = UUID.fromString(task.payload)
+        val logContext = logService.contextFraBehandling(behandlingId)
+        log.medContext(logContext) {
+            info("HentKravgrunnlagTask prosesserer med id=${task.id} og metadata ${task.metadata}")
+        }
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        val logContext = logService.contextFraBehandling(behandling.id)
         if (behandling.type != Behandlingstype.REVURDERING_TILBAKEKREVING) {
             throw Feil(
                 message = "HentKravgrunnlagTask kan kjøres bare for tilbakekrevingsrevurdering.",
@@ -51,9 +53,9 @@ class HentKravgrunnlagTask(
                 KodeAksjon.HENT_GRUNNLAG_OMGJØRING,
                 logContext,
             )
-        hentKravgrunnlagService.lagreHentetKravgrunnlag(behandlingId, hentetKravgrunnlag)
+        hentKravgrunnlagService.lagreHentetKravgrunnlag(behandlingId, hentetKravgrunnlag, logContext)
 
-        hentKravgrunnlagService.opprettHistorikkinnslag(behandlingId)
+        hentKravgrunnlagService.opprettHistorikkinnslag(behandlingId, logContext)
 
         stegService.håndterSteg(behandlingId, logContext)
     }
