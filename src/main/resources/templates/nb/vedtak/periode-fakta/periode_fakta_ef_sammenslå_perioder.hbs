@@ -213,10 +213,6 @@ Fra og med {{{dato periode.fom}}} til og med {{{dato periode.tom}}}{{/each}}-*
 {{#if fakta.fritekstFakta}}
     {{#if (eq fakta.hendelsesundertype "ANNET_FRITEKST")}}
         {{{fakta.fritekstFakta}}}
-
-        {{#if gjelderDødsfall}}Det er utbetalt {{{kroner kravgrunnlag.feilutbetaltBeløp}}} for mye.{{else}}Du har fått {{{kroner kravgrunnlag.feilutbetaltBeløp}}} for mye utbetalt.{{/if}}
-    {{else}}
-
         {{{fakta.fritekstFakta}}}
     {{/if}}
 {{/if}}
