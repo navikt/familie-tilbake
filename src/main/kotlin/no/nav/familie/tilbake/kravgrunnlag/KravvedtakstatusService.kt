@@ -66,8 +66,9 @@ class KravvedtakstatusService(
 
         log.info("BehandleStatusmeldingTask prosesserer med id={} og metadata {}", taskId, taskMetadata)
         SecureLog
-            .medBehandling(fagsystemId, behandling?.id?.toString())
-            .info("BehandleStatusmeldingTask prosesserer med id={} og metadata {}", taskId, taskMetadata)
+            .medBehandling(fagsystemId, behandling?.id?.toString()) {
+                info("BehandleStatusmeldingTask prosesserer med id={} og metadata {}", taskId, taskMetadata)
+            }
 
         if (behandling == null) {
             val kravgrunnlagXmlListe =

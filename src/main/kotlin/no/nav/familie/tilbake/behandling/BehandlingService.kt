@@ -550,12 +550,14 @@ class BehandlingService(
             opprettTilbakekrevingRequest.eksternFagsakId,
             opprettTilbakekrevingRequest.eksternId,
         )
-        SecureLog.utenBehandling(opprettTilbakekrevingRequest.eksternFagsakId).info(
-            "Oppretter Tilbakekrevingsbehandling {} for ytelsestype={} og personIdent={}",
-            erAutomatiskLogg,
-            opprettTilbakekrevingRequest.ytelsestype,
-            opprettTilbakekrevingRequest.personIdent,
-        )
+        SecureLog.utenBehandling(opprettTilbakekrevingRequest.eksternFagsakId) {
+            info(
+                "Oppretter Tilbakekrevingsbehandling {} for ytelsestype={} og personIdent={}",
+                erAutomatiskLogg,
+                opprettTilbakekrevingRequest.ytelsestype,
+                opprettTilbakekrevingRequest.personIdent,
+            )
+        }
     }
 
     private fun finnEllerOpprettFagsak(

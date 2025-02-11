@@ -64,8 +64,9 @@ class IverksettelseService(
                 )
             val requestXml = TilbakekrevingsvedtakMarshaller.marshall(behandlingId, request, logContext)
             SecureLog
-                .medContext(logContext)
-                .info("Sender tilbakekrevingsvedtak til økonomi for behandling={} request={}", behandlingId.toString(), requestXml)
+                .medContext(logContext) {
+                    info("Sender tilbakekrevingsvedtak til økonomi for behandling={} request={}", behandlingId.toString(), requestXml)
+                }
 
             // Send request til økonomi
             val kvittering = objectMapper.writeValueAsString(oppdragClient.iverksettVedtak(behandlingId, request, logContext).mmel)
@@ -143,13 +144,15 @@ class IverksettelseService(
         logContext: SecureLog.Context,
     ): String =
         if (harSattDelvisTilbakekrevingMenKreverTilbakeFulltBeløp(tilbakekrevingsbeløp)) {
-            SecureLog.medContext(logContext).warn(
-                """Fant tilbakekrevingsperiode med delvis tilbakekreving hvor vi krever tilbake hele beløpet.
+            SecureLog.medContext(logContext) {
+                warn(
+                    """Fant tilbakekrevingsperiode med delvis tilbakekreving hvor vi krever tilbake hele beløpet.
                 | Økonomi krever trolig at vi setter full tilbakekreving. 
                 | Dersom kjøringen feiler mot økonomi med feilmelding: Innkrevd beløp = feilutbetalt ved delvis tilbakekreving.
                 | Vurder å skru på featuretoggle familie-tilbake-overstyr-delvis-tilbakekreving og rekjør.
                 | Tilbakekrevingsbeløp=$tilbakekrevingsbeløp """.trimMargin(),
-            )
+                )
+            }
             KodeResultat.DELVIS_TILBAKEKREVING.kode
         } else {
             tilbakekrevingsbeløp.kodeResultat.kode

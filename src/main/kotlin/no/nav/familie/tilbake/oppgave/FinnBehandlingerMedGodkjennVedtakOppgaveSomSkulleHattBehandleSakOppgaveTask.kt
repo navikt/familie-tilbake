@@ -48,8 +48,9 @@ class FinnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgaveTas
 
         behandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave.forEach {
             SecureLog
-                .medContext(logService.contextFraBehandling(it.id))
-                .info("Behandlinger som mangler oppgave eller har feil åpen oppgave for fagsystem $fagsystem")
+                .medContext(logService.contextFraBehandling(it.id)) {
+                    info("Behandlinger som mangler oppgave eller har feil åpen oppgave for fagsystem $fagsystem")
+                }
         }
         if (behandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave.isEmpty()) {
             logger.info("Ingen behandlinger for fagsystem $fagsystem mangler oppgave eller har feil åpen oppgave.")

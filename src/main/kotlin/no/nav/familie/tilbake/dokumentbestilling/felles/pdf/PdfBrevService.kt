@@ -110,7 +110,9 @@ class PdfBrevService(
             try {
                 pdfGenerator.genererPDFMedLogo(html, Dokumentvariant.ENDELIG, data.tittel ?: data.metadata.tittel ?: data.overskrift)
             } catch (e: Exception) {
-                SecureLog.medContext(logContext).info("Feil ved generering av brev: brevData=$data, html=$html", e)
+                SecureLog.medContext(logContext) {
+                    info("Feil ved generering av brev: brevData=$data, html=$html", e)
+                }
                 throw e
             }
 

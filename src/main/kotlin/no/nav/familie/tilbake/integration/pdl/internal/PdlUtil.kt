@@ -12,11 +12,13 @@ inline fun <reified T : Any> feilsjekkOgReturnerData(
     logContext: SecureLog.Context,
 ): Map<String, T> {
     if (pdlResponse.data == null) {
-        SecureLog.medContext(logContext).error(
-            "Data fra pdl er null ved bolkoppslag av {} fra PDL: {}",
-            T::class.toString(),
-            pdlResponse.errorMessages(),
-        )
+        SecureLog.medContext(logContext) {
+            error(
+                "Data fra pdl er null ved bolkoppslag av {} fra PDL: {}",
+                T::class.toString(),
+                pdlResponse.errorMessages(),
+            )
+        }
         throw Feil(
             message = "Data er null fra PDL -  ${T::class}. Se secure logg for detaljer.",
             logContext = logContext,
@@ -28,7 +30,9 @@ inline fun <reified T : Any> feilsjekkOgReturnerData(
             .filter { it.code != "ok" }
             .associate { it.ident to it.code }
     if (feil.isNotEmpty()) {
-        SecureLog.medContext(logContext).error("Feil ved henting av {} fra PDL: {}", T::class.toString(), feil)
+        SecureLog.medContext(logContext) {
+            error("Feil ved henting av {} fra PDL: {}", T::class.toString(), feil)
+        }
         throw Feil(
             message = "Feil ved henting av ${T::class} fra PDL. Se secure logg for detaljer.",
             logContext = logContext,
@@ -36,11 +40,13 @@ inline fun <reified T : Any> feilsjekkOgReturnerData(
     }
     if (pdlResponse.harAdvarsel()) {
         logger.warn("Advarsel ved henting av {} fra PDL. Se securelogs for detaljer.", T::class.toString())
-        SecureLog.medContext(logContext).warn(
-            "Advarsel ved henting av {} fra PDL: {}",
-            T::class.toString(),
-            pdlResponse.extensions?.warnings?.joinToString(","),
-        )
+        SecureLog.medContext(logContext) {
+            warn(
+                "Advarsel ved henting av {} fra PDL: {}",
+                T::class.toString(),
+                pdlResponse.extensions?.warnings?.joinToString(","),
+            )
+        }
     }
     return pdlResponse.data.personBolk.associateBy({ it.ident }, { it.person!! })
 }

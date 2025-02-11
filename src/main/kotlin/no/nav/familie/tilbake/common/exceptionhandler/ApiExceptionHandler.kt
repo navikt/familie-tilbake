@@ -32,7 +32,9 @@ class ApiExceptionHandler {
 
     @ExceptionHandler(Feil::class)
     fun handleThrowable(feil: Feil): ResponseEntity<Ressurs<Nothing>> {
-        SecureLog.medContext(feil.logContext).warn("En håndtert feil har oppstått({}): {}", feil.httpStatus, feil.message, feil)
+        SecureLog.medContext(feil.logContext) {
+            warn("En håndtert feil har oppstått({}): {}", feil.httpStatus, feil.message, feil)
+        }
         logger.info("En håndtert feil har oppstått({}) exception={}: {}", feil.httpStatus, rootCause(feil), feil.message)
         return ResponseEntity.status(feil.httpStatus).body(
             Ressurs.failure(
@@ -44,7 +46,9 @@ class ApiExceptionHandler {
 
     @ExceptionHandler(IntegrasjonException::class)
     fun handleThrowable(feil: IntegrasjonException): ResponseEntity<Ressurs<Nothing>> {
-        SecureLog.medContext(feil.logContext).error("Feil i integrasjoner har oppstått: uri={} data={}", feil.uri, feil.data, feil)
+        SecureLog.medContext(feil.logContext) {
+            error("Feil i integrasjoner har oppstått: uri={} data={}", feil.uri, feil.data, feil)
+        }
         logger.error("Feil i integrasjoner har oppstått exception=${rootCause(feil)}")
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -73,7 +77,9 @@ class ApiExceptionHandler {
 
     @ExceptionHandler(UgyldigKravgrunnlagFeil::class)
     fun handleThrowable(feil: UgyldigKravgrunnlagFeil): ResponseEntity<Ressurs<Nothing>> {
-        SecureLog.medContext(feil.logContext).error("En håndtert feil har oppstått - {}", feil.melding, feil)
+        SecureLog.medContext(feil.logContext) {
+            error("En håndtert feil har oppstått - {}", feil.melding, feil)
+        }
         logger.info("En håndtert feil har oppstått - {}", feil.melding)
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -82,7 +88,9 @@ class ApiExceptionHandler {
 
     @ExceptionHandler(UgyldigStatusmeldingFeil::class)
     fun handleThrowable(feil: UgyldigStatusmeldingFeil): ResponseEntity<Ressurs<Nothing>> {
-        SecureLog.medContext(feil.logContext).error("En håndtert feil har oppstått - {}", feil.melding, feil)
+        SecureLog.medContext(feil.logContext) {
+            error("En håndtert feil har oppstått - {}", feil.melding, feil)
+        }
         logger.info("En håndtert feil har oppstått - {}", feil.melding)
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)

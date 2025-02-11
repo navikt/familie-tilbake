@@ -72,11 +72,13 @@ class KravgrunnlagService(
         val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype)
         log.info("BehandleKravgrunnlagTask prosesserer med id={} og metadata {}", taskId, taskMetadata.toString())
         val logContext = SecureLog.Context.medBehandling(fagsystemId, behandling?.id.toString())
-        SecureLog.medContext(logContext).info(
-            "BehandleKravgrunnlagTask prosesserer med id={} og metadata {}",
-            taskId,
-            taskMetadata.toString(),
-        )
+        SecureLog.medContext(logContext) {
+            info(
+                "BehandleKravgrunnlagTask prosesserer med id={} og metadata {}",
+                taskId,
+                taskMetadata.toString(),
+            )
+        }
 
         log.info("Håndterer kravgrunnlag fagsystem=$fagsystem, eksternFagId=$fagsystemId, behandlingId=${behandling?.id}, ytelsestype=$ytelsestype, eksternKravgrunnlagId=${kravgrunnlag.kravgrunnlagId}")
 
@@ -173,7 +175,9 @@ class KravgrunnlagService(
             val fireRettsgebyr = rettsgebyr * 4
             kravgrunnlag431.sumFeilutbetaling().longValueExact() <= fireRettsgebyr
         } catch (e: Feil) {
-            SecureLog.utenBehandling(kravgrunnlag431.fagsystemId).warn("Feil ved henting av rettsgebyr for år", e)
+            SecureLog.utenBehandling(kravgrunnlag431.fagsystemId) {
+                warn("Feil ved henting av rettsgebyr for år", e)
+            }
             false
         }
     }

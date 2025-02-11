@@ -7,11 +7,14 @@ import org.slf4j.MDC
 object SecureLog {
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
-    fun medContext(context: Context): Logger {
+    fun medContext(
+        context: Context,
+        callback: Logger.() -> Unit,
+    ) {
         try {
             MDC.put("fagsystemId", context.fagsystemId)
             MDC.put("behandlingId", context.behandlingId)
-            return secureLogger
+            return secureLogger.callback()
         } finally {
             MDC.remove("fagsystemId")
             MDC.remove("behandlingId")
@@ -21,9 +24,13 @@ object SecureLog {
     fun medBehandling(
         fagsystemId: String,
         behandlingId: String?,
-    ) = medContext(Context.medBehandling(fagsystemId = fagsystemId, behandlingId = behandlingId))
+        callback: Logger.() -> Unit,
+    ) = medContext(Context.medBehandling(fagsystemId = fagsystemId, behandlingId = behandlingId), callback)
 
-    fun utenBehandling(fagsystemId: String) = medContext(Context.utenBehandling(fagsystemId = fagsystemId))
+    fun utenBehandling(
+        fagsystemId: String,
+        callback: Logger.() -> Unit,
+    ) = medContext(Context.utenBehandling(fagsystemId = fagsystemId), callback)
 
     fun utenContext() = secureLogger
 

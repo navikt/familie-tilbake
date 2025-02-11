@@ -33,10 +33,12 @@ class SendVedtaksoppsummeringTilDvhTask(
         val logContext = logService.contextFraBehandling(behandlingId)
         validate(vedtaksoppsummering)
 
-        SecureLog.medContext(logContext).info(
-            "Sender Vedtaksoppsummering=${objectMapper.writeValueAsString(vedtaksoppsummering)} til Dvh " +
-                "for behandling $behandlingId",
-        )
+        SecureLog.medContext(logContext) {
+            info(
+                "Sender Vedtaksoppsummering=${objectMapper.writeValueAsString(vedtaksoppsummering)} til Dvh " +
+                    "for behandling $behandlingId",
+            )
+        }
         kafkaProducer.sendVedtaksdata(behandlingId, vedtaksoppsummering, logContext)
     }
 

@@ -41,8 +41,9 @@ class OppdaterAnsvarligSaksbehandlerTask(
             } catch (e: Exception) {
                 oppgaveService.patchOppgave(oppgave.copy(prioritet = prioritet))
                 SecureLog
-                    .medContext(logContext)
-                    .warn("Kunne ikke oppdatere tilordnetRessurs, ${behandling.ansvarligSaksbehandler}")
+                    .medContext(logContext) {
+                        warn("Kunne ikke oppdatere tilordnetRessurs, ${behandling.ansvarligSaksbehandler}")
+                    }
             }
         }
     }

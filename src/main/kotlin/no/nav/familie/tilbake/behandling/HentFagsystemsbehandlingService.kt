@@ -71,8 +71,9 @@ class HentFagsystemsbehandlingService(
         val fagsystemsbehandlingRequestSendt = requestSendtRepository.findByIdOrThrow(requestId)
         logger.info("Fagsystemsbehandlingsdata er mottatt i kafka med key={}", requestId)
         SecureLog
-            .utenBehandling(fagsystemsbehandlingRequestSendt.eksternFagsakId)
-            .info("Fagsystemsbehandlingsdata er mottatt i kafka {}", response)
+            .utenBehandling(fagsystemsbehandlingRequestSendt.eksternFagsakId) {
+                info("Fagsystemsbehandlingsdata er mottatt i kafka {}", response)
+            }
         requestSendtRepository.update(fagsystemsbehandlingRequestSendt.copy(respons = response))
     }
 
