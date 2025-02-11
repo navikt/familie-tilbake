@@ -85,8 +85,8 @@ spec:
         - application: familie-ks-sak
           namespace: teamfamilie
           cluster: prod-gcp
-        - application: familie-tilbake-frontend
-          namespace: teamfamilie
+        - application: tilbakekreving-frontend
+          namespace: tilbake
           cluster: prod-gcp
         - application: tilbakekreving-prosessering
           namespace: tilbake
