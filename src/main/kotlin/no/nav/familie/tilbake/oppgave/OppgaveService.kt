@@ -152,6 +152,61 @@ class OppgaveService(
         logger.info("Ny oppgave (id=${oppgaveResponse.oppgaveId}, type=$oppgavetype, frist=$fristForFerdigstillelse) opprettet for behandling $behandlingId")
     }
 
+    fun opprettOppgaveUtenSaksIdOgBehandlesAvApplikasjon(
+        behandlingId: UUID,
+        oppgavetype: Oppgavetype,
+        enhet: String,
+        beskrivelse: String?,
+        fristForFerdigstillelse: LocalDate,
+        saksbehandler: String?,
+        prioritet: OppgavePrioritet,
+    ) {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val fagsakId = behandling.fagsakId
+        val fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
+        val aktørId = personService.hentAktivAktørId(fagsak.bruker.ident, fagsak.fagsystem)
+
+        // Sjekk om oppgave allerede finnes for behandling
+        val (_, finnOppgaveRespons) = finnOppgave(behandling, oppgavetype, fagsak)
+        if (finnOppgaveRespons.oppgaver.isNotEmpty() && !finnesFerdigstillOppgaveForBehandling(behandlingId, oppgavetype) && oppgavetype != Oppgavetype.VurderHenvendelse) {
+            logger.info(
+                "Det finnes allerede en oppgave $oppgavetype for behandling $behandlingId og " +
+                    "finnes ikke noen ferdigstilleoppgaver. Eksisterende oppgaven $oppgavetype må lukke først.",
+            )
+            return
+        }
+        val opprettOppgave =
+            OpprettOppgaveRequest(
+                ident =
+                    OppgaveIdentV2(
+                        ident = aktørId,
+                        gruppe = IdentGruppe.AKTOERID,
+                    ),
+                saksId = null,
+                tema = fagsak.ytelsestype.tilTema(),
+                oppgavetype = oppgavetype,
+                behandlesAvApplikasjon = null,
+                fristFerdigstillelse = fristForFerdigstillelse,
+                beskrivelse =
+                    lagOppgaveTekst(
+                        fagsak.eksternFagsakId,
+                        behandling.eksternBrukId.toString(),
+                        fagsak.fagsystem.name,
+                        beskrivelse,
+                    ),
+                enhetsnummer = behandling.behandlendeEnhet,
+                tilordnetRessurs = saksbehandler,
+                behandlingstype = Behandlingstype.Tilbakekreving.value,
+                behandlingstema = null,
+                mappeId = finnAktuellMappe(enhet, oppgavetype),
+                prioritet = prioritet,
+            )
+
+        val oppgaveResponse = integrasjonerClient.opprettOppgave(opprettOppgave)
+        antallOppgaveTyper[oppgavetype]!!.increment()
+        logger.info("Ny oppgave (id=${oppgaveResponse.oppgaveId}, type=$oppgavetype, frist=$fristForFerdigstillelse) opprettet for behandling $behandlingId")
+    }
+
     fun hentOppgaveSomIkkeErFerdigstilt(
         oppgavetype: Oppgavetype,
         behandling: Behandling,
