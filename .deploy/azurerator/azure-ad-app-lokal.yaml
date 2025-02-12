@@ -45,7 +45,7 @@ spec:
   replyUrls:
     - url: "http://localhost:8030/swagger-ui/oauth2-redirect.html"
   tenant: trygdeetaten.no
-  secretName: azuread-familie-tilbake-lokal
+  secretName: azuread-tilbakekreving-lokal
   singlePageApplication: true
 
 # secret kan hentes fra cluster med "kubectl -n tilbake get secret azuread-familie-tilbake-lokal -o json | jq '.data | map_values(@base64d)'"
