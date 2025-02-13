@@ -6,9 +6,9 @@ import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstype
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
+import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
@@ -31,7 +31,7 @@ import java.util.Properties
 class PdfBrevService(
     private val journalføringService: JournalføringService,
     private val tellerService: TellerService,
-    private val taskService: TaskService,
+    private val taskService: TracableTaskService,
 ) {
     private val logger = LoggerFactory.getLogger(PdfBrevService::class.java)
     private val pdfGenerator: PdfGenerator = PdfGenerator()
@@ -58,7 +58,7 @@ class PdfBrevService(
             // Ikke tell kopier sendt til verge eller fullmektig
             tellerService.tellBrevSendt(fagsak, brevtype)
         }
-        lagTaskerForUtsendingOgSporing(behandling, fagsak, brevtype, varsletBeløp, fritekst, data, dokumentreferanse)
+        lagTaskerForUtsendingOgSporing(behandling, fagsak, brevtype, varsletBeløp, fritekst, data, dokumentreferanse, logContext)
     }
 
     private fun lagTaskerForUtsendingOgSporing(
@@ -69,6 +69,7 @@ class PdfBrevService(
         fritekst: String?,
         brevdata: Brevdata,
         dokumentreferanse: JournalpostIdOgDokumentId,
+        logContext: SecureLog.Context,
     ) {
         val payload =
             objectMapper.writeValueAsString(
@@ -94,7 +95,7 @@ class PdfBrevService(
         logger.info(
             "Oppretter task for publisering av brev for behandlingId=${behandling.id}, eksternFagsakId=${fagsak.eksternFagsakId}",
         )
-        taskService.save(Task(PubliserJournalpostTask.TYPE, payload, properties))
+        taskService.save(Task(PubliserJournalpostTask.TYPE, payload, properties), logContext)
     }
 
     private fun lagOgJournalførBrev(

@@ -58,8 +58,8 @@ class KravvedtakstatusServiceTest {
         every { behandlingskontrollService.tilbakehoppBehandlingssteg(any(), any(), any()) } just runs
         every { historikkTaskService.lagHistorikkTask(any(), any(), any(), any(), any(), any(), any()) } just runs
         every { oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(any()) } returns Oppgave(oppgavetype = Oppgavetype.GodkjenneVedtak.name)
-        every { oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgave(any(), any(), any()) } just runs
-        every { oppgaveTaskService.oppdaterOppgaveTask(any(), any(), any(), any()) } just runs
+        every { oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgave(any(), any(), any(), any()) } just runs
+        every { oppgaveTaskService.oppdaterOppgaveTask(any(), any(), any(), any(), any()) } just runs
     }
 
     @AfterEach
@@ -77,8 +77,8 @@ class KravvedtakstatusServiceTest {
         kravvedtakstatusService.håndterSperMeldingMedBehandling(behandlingId = behandling.id, kravgrunnlag431 = kravgrunnlag)
 
         // Assert
-        verify(exactly = 0) { oppgaveTaskService.oppdaterOppgaveTask(any(), any(), any()) }
-        verify(exactly = 1) { oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgave(any(), any(), any()) }
+        verify(exactly = 0) { oppgaveTaskService.oppdaterOppgaveTask(any(), any(), any(), any(), any()) }
+        verify(exactly = 1) { oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgave(any(), any(), any(), any()) }
     }
 
     @ParameterizedTest
@@ -92,8 +92,8 @@ class KravvedtakstatusServiceTest {
         kravvedtakstatusService.håndterSperMeldingMedBehandling(behandlingId = behandling.id, kravgrunnlag431 = kravgrunnlag)
 
         // Assert
-        verify(exactly = 1) { oppgaveTaskService.oppdaterOppgaveTask(any(), any(), any()) }
-        verify(exactly = 0) { oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgave(any(), any(), any()) }
+        verify(exactly = 1) { oppgaveTaskService.oppdaterOppgaveTask(any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgave(any(), any(), any(), any()) }
     }
 
     @ParameterizedTest
@@ -106,7 +106,7 @@ class KravvedtakstatusServiceTest {
         kravvedtakstatusService.håndterSperMeldingMedBehandling(behandlingId = behandling.id, kravgrunnlag431 = kravgrunnlag)
 
         // Assert
-        verify(exactly = 0) { oppgaveTaskService.oppdaterOppgaveTask(any(), any(), any()) }
-        verify(exactly = 0) { oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgave(any(), any(), any()) }
+        verify(exactly = 0) { oppgaveTaskService.oppdaterOppgaveTask(any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgave(any(), any(), any(), any()) }
     }
 }

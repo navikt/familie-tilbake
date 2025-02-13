@@ -76,6 +76,7 @@ class AutomatiskGjenopptaBehandlingService(
             beskrivelse = "Behandling er tatt av vent automatisk",
             frist = tidsfrist,
             saksbehandler = ContextService.hentSaksbehandler(logContext),
+            logContext = logContext,
         )
 
         // oppdaterer oppgave hvis saken er fortsatt på vent,
@@ -87,6 +88,7 @@ class AutomatiskGjenopptaBehandlingService(
                 beskrivelse = aktivStegstilstand.venteårsak!!.beskrivelse,
                 frist = aktivStegstilstand.tidsfrist!!,
                 triggerTid = 2L,
+                logContext = logContext,
             )
         }
     }

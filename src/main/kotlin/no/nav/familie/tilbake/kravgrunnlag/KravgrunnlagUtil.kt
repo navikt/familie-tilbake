@@ -42,6 +42,13 @@ object KravgrunnlagUtil {
         return feilutbetalingPrPeriode.toSortedMap(Comparator.comparing(Månedsperiode::fom).thenComparing(Månedsperiode::tom))
     }
 
+    fun kravgrunnlagLogContext(kravgrunnlagXML: String): SecureLog.Context =
+        try {
+            SecureLog.Context.utenBehandling(unmarshalKravgrunnlag(kravgrunnlagXML).fagsystemId)
+        } catch (e: Exception) {
+            SecureLog.Context.tom()
+        }
+
     fun unmarshalKravgrunnlag(kravgrunnlagXML: String): DetaljertKravgrunnlagDto =
         try {
             val jaxbUnmarshaller: Unmarshaller = jaxbContext.createUnmarshaller()
@@ -59,6 +66,13 @@ object KravgrunnlagUtil {
                 melding = "Mottatt kravgrunnlagXML er ugyldig! Den feiler med $e",
                 logContext = SecureLog.Context.tom(),
             )
+        }
+
+    fun statusmeldingLogContext(kravgrunnlagXML: String): SecureLog.Context =
+        try {
+            SecureLog.Context.utenBehandling(unmarshalStatusmelding(kravgrunnlagXML).fagsystemId)
+        } catch (e: Exception) {
+            SecureLog.Context.tom()
         }
 
     fun unmarshalStatusmelding(statusmeldingXml: String): KravOgVedtakstatus =

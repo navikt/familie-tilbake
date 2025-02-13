@@ -12,7 +12,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.PropertyName
-import no.nav.familie.tilbake.log.LogService
+import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -32,13 +32,12 @@ class InnhentDokumentasjonbrevTask(
     private val innhentDokumentasjonBrevService: InnhentDokumentasjonbrevService,
     private val behandlingskontrollService: BehandlingskontrollService,
     private val oppgaveTaskService: OppgaveTaskService,
-    private val logService: LogService,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val taskdata: InnhentDokumentasjonbrevTaskdata = objectMapper.readValue(task.payload)
         val behandling = behandlingRepository.findByIdOrThrow(taskdata.behandlingId)
-        val logContext = logService.contextFraBehandling(behandling.id)
         val fritekst: String = taskdata.fritekst
+        val logContext = task.logContext()
 
         innhentDokumentasjonBrevService.sendInnhentDokumentasjonBrev(behandling, fritekst)
 
@@ -49,6 +48,7 @@ class InnhentDokumentasjonbrevTask(
                 .ansvarligSaksbehandler} har bedt om mer informasjon av bruker",
             frist = fristTid,
             saksbehandler = behandling.ansvarligSaksbehandler,
+            logContext = logContext,
         )
         // Oppdaterer fristen dersom tasken har tidligere feilet. Behandling ble satt på vent i DokumentBehandlingService.
         if (task.opprettetTid.toLocalDate() < LocalDate.now()) {

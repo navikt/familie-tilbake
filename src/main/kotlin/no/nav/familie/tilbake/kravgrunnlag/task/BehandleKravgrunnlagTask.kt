@@ -4,7 +4,7 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagService
-import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
 import org.springframework.stereotype.Service
 
 @Service
@@ -18,7 +18,7 @@ class BehandleKravgrunnlagTask(
     private val kravgrunnlagService: KravgrunnlagService,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
-        kravgrunnlagService.håndterMottattKravgrunnlag(task.payload, task.id, task.metadata, SecureLog.Context.tom())
+        kravgrunnlagService.håndterMottattKravgrunnlag(task.payload, task.id, task.metadata, task.logContext())
     }
 
     companion object {

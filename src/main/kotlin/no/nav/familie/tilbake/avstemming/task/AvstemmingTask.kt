@@ -4,13 +4,14 @@ import no.nav.familie.kontrakter.felles.Fil
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.avstemming.AvstemmingService
 import no.nav.familie.tilbake.avstemming.domain.Avstemmingsfil
 import no.nav.familie.tilbake.avstemming.domain.AvstemmingsfilRepository
+import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.common.fagsystem
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
+import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
 import org.slf4j.LoggerFactory
 import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
@@ -26,7 +27,7 @@ import java.util.UUID
     beskrivelse = "Avstemming av krav.",
 )
 class AvstemmingTask(
-    private val taskService: TaskService,
+    private val taskService: TracableTaskService,
     private val avstemmingService: AvstemmingService,
     private val avstemmingsfilRepository: AvstemmingsfilRepository,
     private val integrasjonerClient: IntegrasjonerClient,
@@ -63,7 +64,7 @@ class AvstemmingTask(
                 payload = dato.plusDays(1).toString(),
                 properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, task.fagsystem()) },
             ).medTriggerTid(dato.plusDays(2).atTime(8, 0))
-        taskService.save(nesteAvstemming)
+        taskService.save(nesteAvstemming, task.logContext())
     }
 
     companion object {

@@ -16,7 +16,6 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandling
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
@@ -25,6 +24,7 @@ import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingRequestSendtRep
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.behandling.domain.HentFagsystemsbehandlingRequestSendt
 import no.nav.familie.tilbake.behandling.steg.StegService
+import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
@@ -73,7 +73,7 @@ internal class GammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     private lateinit var kravgrunnlagService: KravgrunnlagService
 
     @Autowired
-    private lateinit var taskService: TaskService
+    private lateinit var taskService: TracableTaskService
 
     @Autowired
     private lateinit var requestSendtRepository: HentFagsystemsbehandlingRequestSendtRepository
@@ -332,7 +332,7 @@ internal class GammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         arkiverteKravgrunnlag.shouldHaveSingleElement { it.melding == mottattXMl }
     }
 
-    private fun lagTask(): Task = taskService.save(Task(type = GammelKravgrunnlagTask.TYPE, payload = mottattXmlId.toString()))
+    private fun lagTask(): Task = taskService.save(Task(type = GammelKravgrunnlagTask.TYPE, payload = mottattXmlId.toString()), SecureLog.Context.tom())
 
     private fun lagHentFagsystemsbehandlingRespons(xmlMottatt: ØkonomiXmlMottatt): String {
         val fagsystemsbehandling =

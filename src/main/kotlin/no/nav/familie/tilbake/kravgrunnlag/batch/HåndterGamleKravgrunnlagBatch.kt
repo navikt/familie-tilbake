@@ -9,11 +9,12 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype.SKOLEPENGER
 import no.nav.familie.leader.LeaderClient
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.FagsystemUtil
+import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattService
+import no.nav.familie.tilbake.log.SecureLog
 import org.slf4j.LoggerFactory
 import org.springframework.core.env.Environment
 import org.springframework.data.domain.Pageable
@@ -28,7 +29,7 @@ import java.util.Properties
 @Service
 class HåndterGamleKravgrunnlagBatch(
     private val mottattXmlService: ØkonomiXmlMottattService,
-    private val taskService: TaskService,
+    private val taskService: TracableTaskService,
     private val environment: Environment,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -74,11 +75,12 @@ class HåndterGamleKravgrunnlagBatch(
                 val kravgrunnlagSortertEtterKontrollfelt = sorterKravgrunnlagPåKontrollfelt(kravgrunnlagForFagsak)
 
                 kravgrunnlagSortertEtterKontrollfelt.forEachIndexed { index, kravgrunnlagPåFagsak ->
+                    val logContext = SecureLog.Context.utenBehandling(kravgrunnlagPåFagsak.eksternFagsakId)
 
                     val finnesAlleredeTaskPåKravgrunnlag = finnesAlleredeTaskForKravgrunnlag(taskerMedStatus, kravgrunnlagPåFagsak)
 
                     if (!finnesAlleredeTaskPåKravgrunnlag) {
-                        taskService.save(opprettSpredtTaskForKravgrunnlagBasertPåIndex(index, kravgrunnlagPåFagsak))
+                        taskService.save(opprettSpredtTaskForKravgrunnlagBasertPåIndex(index, kravgrunnlagPåFagsak), logContext)
                     } else {
                         logger.info(
                             "Det finnes allerede en feilet HåndterGammelKravgrunnlagTask " +

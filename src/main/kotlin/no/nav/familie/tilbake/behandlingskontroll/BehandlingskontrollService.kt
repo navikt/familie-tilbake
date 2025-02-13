@@ -162,7 +162,7 @@ class BehandlingskontrollService(
                 oppdaterBehandlingsstegStatus(behandlingId, Behandlingsstegsinfo(Behandlingssteg.VERGE, KLAR), logContext)
             }
             else -> {
-                opprettBehandlingsstegOgStatus(behandlingId, Behandlingsstegsinfo(Behandlingssteg.VERGE, KLAR))
+                opprettBehandlingsstegOgStatus(behandlingId, Behandlingsstegsinfo(Behandlingssteg.VERGE, KLAR), true, logContext)
             }
         }
     }
@@ -186,6 +186,7 @@ class BehandlingskontrollService(
             nesteStegMedStatus = Behandlingsstegsinfo(Behandlingssteg.BREVMOTTAKER, AUTOUTFØRT),
             // da det settes AUTOUTFØRT, forblir aktivt steg / tilstanden den samme
             opprettSendingAvBehandlingensTilstand = false,
+            logContext = logContext,
         )
     }
 
@@ -313,13 +314,14 @@ class BehandlingskontrollService(
 
         // oppdater tilsvarende behandlingsstatus
         oppdaterBehandlingsstatus(behandlingId, behandlingsstegsinfo.behandlingssteg)
-        behandlingTilstandService.opprettSendingAvBehandlingensTilstand(behandlingId, behandlingsstegsinfo)
+        behandlingTilstandService.opprettSendingAvBehandlingensTilstand(behandlingId, behandlingsstegsinfo, logContext)
     }
 
     private fun opprettBehandlingsstegOgStatus(
         behandlingId: UUID,
         nesteStegMedStatus: Behandlingsstegsinfo,
-        opprettSendingAvBehandlingensTilstand: Boolean = true,
+        opprettSendingAvBehandlingensTilstand: Boolean,
+        logContext: SecureLog.Context,
     ) {
         // startet nytt behandlingssteg
         behandlingsstegstilstandRepository
@@ -335,7 +337,7 @@ class BehandlingskontrollService(
         // oppdater tilsvarende behandlingsstatus
         oppdaterBehandlingsstatus(behandlingId, nesteStegMedStatus.behandlingssteg)
         if (opprettSendingAvBehandlingensTilstand) {
-            behandlingTilstandService.opprettSendingAvBehandlingensTilstand(behandlingId, nesteStegMedStatus)
+            behandlingTilstandService.opprettSendingAvBehandlingensTilstand(behandlingId, nesteStegMedStatus, logContext)
         }
     }
 
@@ -351,7 +353,7 @@ class BehandlingskontrollService(
             )
         when (gammelBehandlingsstegstilstand) {
             null -> {
-                opprettBehandlingsstegOgStatus(behandlingId, behandlingsstegsinfo)
+                opprettBehandlingsstegOgStatus(behandlingId, behandlingsstegsinfo, true, logContext)
             }
             else -> {
                 oppdaterBehandlingsstegStatus(behandlingId, behandlingsstegsinfo, logContext)

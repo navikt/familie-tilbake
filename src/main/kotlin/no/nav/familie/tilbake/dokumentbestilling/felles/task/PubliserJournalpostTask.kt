@@ -9,8 +9,9 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.internal.TaskService
+import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
+import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -25,7 +26,7 @@ import java.util.UUID
 )
 class PubliserJournalpostTask(
     private val integrasjonerClient: IntegrasjonerClient,
-    private val taskService: TaskService,
+    private val taskService: TracableTaskService,
 ) : AsyncTaskStep {
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -65,7 +66,7 @@ class PubliserJournalpostTask(
                 DistribuerDokumentVedDødsfallTask.mottakerErDødUtenDødsboadresse(ressursException) -> {
                     // ta med info om ukjent adresse for dødsbo
                     task.metadata["dødsboUkjentAdresse"] = "true"
-                    taskService.save(Task(DistribuerDokumentVedDødsfallTask.TYPE, behandlingId.toString(), task.metadata))
+                    taskService.save(Task(DistribuerDokumentVedDødsfallTask.TYPE, behandlingId.toString(), task.metadata), task.logContext())
                 }
 
                 dokumentetErAlleredeDistribuert(ressursException) -> {
@@ -81,7 +82,7 @@ class PubliserJournalpostTask(
 
     override fun onCompletion(task: Task) {
         val behandlingId = objectMapper.readValue(task.payload, PubliserJournalpostTaskData::class.java).behandlingId
-        taskService.save(Task(LagreBrevsporingTask.TYPE, behandlingId.toString(), task.metadata))
+        taskService.save(Task(LagreBrevsporingTask.TYPE, behandlingId.toString(), task.metadata), task.logContext())
     }
 
     // 400 BAD_REQUEST + kanal print er eneste måten å vite at bruker ikke er digital og har ukjent adresse fra Dokdist

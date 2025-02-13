@@ -5,11 +5,11 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.behandling.steg.StegService
+import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.data.Testdata
@@ -17,6 +17,7 @@ import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEventPublisher
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import org.assertj.core.api.Assertions.assertThat
@@ -30,7 +31,7 @@ class KravgrunnlagServiceTest {
     private val mottattXmlService: ØkonomiXmlMottattService = mockk()
     private val stegService: StegService = mockk()
     private val behandlingskontrollService: BehandlingskontrollService = mockk()
-    private val taskService: TaskService = mockk()
+    private val taskService: TracableTaskService = mockk()
     private val tellerService: TellerService = mockk()
     private val oppgaveTaskService: OppgaveTaskService = mockk()
     private val historikkTaskService: HistorikkTaskService = mockk()
@@ -159,7 +160,7 @@ class KravgrunnlagServiceTest {
         every { kravgrunnlagRepository.insert(capture(nyttKravgrunnlagSlot)) } returns mockk()
         every { kravgrunnlagRepository.update(capture(gammeltKravgrunnlagSlot)) } returns mockk()
 
-        kravgrunnlagService.lagreKravgrunnlag(nyttKravgrunnlag, Ytelsestype.BARNETRYGD)
+        kravgrunnlagService.lagreKravgrunnlag(nyttKravgrunnlag, Ytelsestype.BARNETRYGD, SecureLog.Context.tom())
 
         assertThat(gammeltKravgrunnlagSlot.captured.aktiv).isTrue
         assertThat(nyttKravgrunnlagSlot.captured.aktiv).isFalse
@@ -181,7 +182,7 @@ class KravgrunnlagServiceTest {
         every { kravgrunnlagRepository.update(capture(gammeltKravgrunnlagSlot)) } returns mockk()
         every { kravgrunnlagRepository.insert(capture(nyttKravgrunnlagSlot)) } returns mockk()
 
-        kravgrunnlagService.lagreKravgrunnlag(nyttKravgrunnlag, Ytelsestype.OVERGANGSSTØNAD)
+        kravgrunnlagService.lagreKravgrunnlag(nyttKravgrunnlag, Ytelsestype.OVERGANGSSTØNAD, SecureLog.Context.tom())
 
         assertThat(gammeltKravgrunnlagSlot.captured.aktiv).isFalse
         assertThat(nyttKravgrunnlagSlot.captured.aktiv).isTrue
@@ -197,7 +198,7 @@ class KravgrunnlagServiceTest {
         every { kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(any()) } returns false
         every { kravgrunnlagRepository.insert(capture(nyttKravgrunnlagSlot2)) } returns mockk()
 
-        kravgrunnlagService.lagreKravgrunnlag(nyttKravgrunnlag, Ytelsestype.OVERGANGSSTØNAD)
+        kravgrunnlagService.lagreKravgrunnlag(nyttKravgrunnlag, Ytelsestype.OVERGANGSSTØNAD, SecureLog.Context.tom())
 
         assertThat(nyttKravgrunnlagSlot2.captured.aktiv).isTrue
     }

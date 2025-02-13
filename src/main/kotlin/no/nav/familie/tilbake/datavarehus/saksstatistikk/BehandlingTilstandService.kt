@@ -3,12 +3,12 @@ package no.nav.familie.tilbake.datavarehus.saksstatistikk
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.Periode
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.FagsystemUtil
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
+import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
@@ -19,6 +19,7 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.sakshendelse.Behandlingstilstand
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
+import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -35,12 +36,14 @@ class BehandlingTilstandService(
     private val behandlingRepository: BehandlingRepository,
     private val behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository,
     private val fagsakRepository: FagsakRepository,
-    private val taskService: TaskService,
+    private val taskService: TracableTaskService,
     private val faktaFeilutbetalingService: FaktaFeilutbetalingService,
+    private val logService: LogService,
 ) {
     fun opprettSendingAvBehandlingensTilstand(
         behandlingId: UUID,
         info: Behandlingsstegsinfo,
+        logContext: SecureLog.Context,
     ) {
         val hendelsesbeskrivelse =
             "Ny behandlingsstegstilstand " +
@@ -48,27 +51,32 @@ class BehandlingTilstandService(
                 "for behandling $behandlingId"
 
         val tilstand = hentBehandlingensTilstand(behandlingId)
-        opprettProsessTask(behandlingId, tilstand, hendelsesbeskrivelse)
+        opprettProsessTask(behandlingId, tilstand, hendelsesbeskrivelse, logContext)
     }
 
-    fun opprettSendingAvBehandlingenHenlagt(behandlingId: UUID) {
+    fun opprettSendingAvBehandlingenHenlagt(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         val hendelsesbeskrivelse = "Henlegger behandling $behandlingId"
 
         val tilstand = hentBehandlingensTilstand(behandlingId)
-        opprettProsessTask(behandlingId, tilstand, hendelsesbeskrivelse)
+        opprettProsessTask(behandlingId, tilstand, hendelsesbeskrivelse, logContext)
     }
 
-    fun opprettSendingAvBehandlingenManuellt(behandlingId: UUID) {
-        val hendelsesbeskrivelse = "Sender siste tilstand manuellt på behandling  $behandlingId"
+    fun opprettSendingAvBehandlingenManuelt(behandlingId: UUID) {
+        val logContext = logService.contextFraBehandling(behandlingId)
+        val hendelsesbeskrivelse = "Sender siste tilstand manuellt på behandling $behandlingId"
 
         val tilstand = hentBehandlingensTilstand(behandlingId)
-        opprettProsessTask(behandlingId, tilstand, hendelsesbeskrivelse)
+        opprettProsessTask(behandlingId, tilstand, hendelsesbeskrivelse, logContext)
     }
 
     private fun opprettProsessTask(
         behandlingId: UUID,
         behandlingstilstand: Behandlingstilstand,
         hendelsesbeskrivelse: String,
+        logContext: SecureLog.Context,
     ) {
         val task =
             Task(
@@ -83,7 +91,7 @@ class BehandlingTilstandService(
                     )
                 },
             )
-        taskService.save(task)
+        taskService.save(task, logContext)
     }
 
     fun hentBehandlingensTilstand(behandlingId: UUID): Behandlingstilstand {

@@ -84,7 +84,8 @@ class KravvedtakstatusService(
             return
         }
         val kravgrunnlag431: Kravgrunnlag431 = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
-        håndterStatusmeldingerMedBehandling(kravgrunnlag431, kravOgVedtakstatus, behandling)
+        val logContext = SecureLog.Context.medBehandling(kravgrunnlag431.fagsystemId, behandling.id.toString())
+        håndterStatusmeldingerMedBehandling(kravgrunnlag431, kravOgVedtakstatus, behandling, logContext)
         mottattXmlService.arkiverMottattXml(mottattXmlId = null, statusmeldingXml, fagsystemId, ytelsestype)
         tellerService.tellKobletStatusmelding(FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype))
     }
@@ -138,6 +139,7 @@ class KravvedtakstatusService(
         kravgrunnlag431: Kravgrunnlag431,
         kravOgVedtakstatus: KravOgVedtakstatus,
         behandling: Behandling,
+        logContext: SecureLog.Context,
     ) {
         when (val kravstatuskode = Kravstatuskode.fraKode(kravOgVedtakstatus.kodeStatusKrav)) {
             Kravstatuskode.SPERRET, Kravstatuskode.MANUELL -> {
@@ -150,6 +152,7 @@ class KravvedtakstatusService(
                     behandlingId = behandling.id,
                     beskrivelse = "Behandling er tatt av vent, pga mottatt ENDR melding",
                     frist = LocalDate.now(),
+                    logContext = logContext,
                 )
             }
             Kravstatuskode.AVSLUTTET -> {
@@ -206,9 +209,10 @@ class KravvedtakstatusService(
                     behandlingId = behandlingId,
                     beskrivelse = venteårsak.beskrivelse,
                     frist = tidsfrist,
+                    logContext = logContext,
                 )
             } else {
-                oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgave(behandlingId = behandlingId, beskrivelse = venteårsak.beskrivelse, frist = tidsfrist)
+                oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgave(behandlingId = behandlingId, beskrivelse = venteårsak.beskrivelse, frist = tidsfrist, logContext = logContext)
             }
         }
     }

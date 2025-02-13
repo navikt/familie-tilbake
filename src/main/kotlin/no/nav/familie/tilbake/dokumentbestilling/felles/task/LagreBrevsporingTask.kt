@@ -3,7 +3,7 @@ package no.nav.familie.tilbake.dokumentbestilling.felles.task
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.internal.TaskService
+import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingService
@@ -12,6 +12,7 @@ import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.iverksettvedtak.task.AvsluttBehandlingTask
+import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -25,7 +26,7 @@ import java.util.UUID
 )
 class LagreBrevsporingTask(
     private val brevsporingService: BrevsporingService,
-    private val taskService: TaskService,
+    private val taskService: TracableTaskService,
     private val historikkTaskService: HistorikkTaskService,
 ) : AsyncTaskStep {
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -78,13 +79,13 @@ class LagreBrevsporingTask(
         }
 
         if (brevtype.gjelderVarsel() && mottager != Brevmottager.VERGE) {
-            taskService.save(Task(LagreVarselbrevsporingTask.TYPE, task.payload, task.metadata))
+            taskService.save(Task(LagreVarselbrevsporingTask.TYPE, task.payload, task.metadata), task.logContext())
         }
 
         // Behandling bør avsluttes etter å sende vedtaksbrev
         // AvsluttBehandlingTask må kalles kun en gang selv om behandling har to brevmottakere
         if (brevtype == Brevtype.VEDTAK && mottager !in listOf(Brevmottager.VERGE, Brevmottager.MANUELL_TILLEGGSMOTTAKER)) {
-            taskService.save(Task(type = AvsluttBehandlingTask.TYPE, payload = task.payload, task.metadata))
+            taskService.save(Task(type = AvsluttBehandlingTask.TYPE, payload = task.payload, task.metadata), task.logContext())
         }
     }
 

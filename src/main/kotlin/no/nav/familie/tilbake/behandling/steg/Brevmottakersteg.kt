@@ -49,7 +49,7 @@ class Brevmottakersteg(
         log.medContext(logContext) {
             info("Behandling $behandlingId er på ${Behandlingssteg.BREVMOTTAKER} steg")
         }
-        oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId)
+        oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId, logContext)
         behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
             Behandlingsstegsinfo(Behandlingssteg.BREVMOTTAKER, UTFØRT),

@@ -60,7 +60,7 @@ class Vergessteg(
         }
         vergeService.lagreVerge(behandlingId, (behandlingsstegDto as BehandlingsstegVergeDto).verge)
 
-        oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId)
+        oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId, logContext)
 
         behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,

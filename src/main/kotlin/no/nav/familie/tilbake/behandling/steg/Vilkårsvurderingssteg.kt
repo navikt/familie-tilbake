@@ -83,7 +83,7 @@ class Vilkårsvurderingssteg(
         }
         vilkårsvurderingService.lagreVilkårsvurdering(behandlingId, behandlingsstegDto as BehandlingsstegVilkårsvurderingDto)
         oppdatereVedtaksbrevsoppsummering(behandlingId)
-        oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId)
+        oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId, logContext)
 
         lagHistorikkinnslag(behandlingId, Aktør.SAKSBEHANDLER)
 

@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.kravgrunnlag
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.FagsystemUtil
@@ -13,6 +12,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandling.task.OppdaterFaktainfoTask
+import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
@@ -48,7 +48,7 @@ class KravgrunnlagService(
     private val mottattXmlService: ØkonomiXmlMottattService,
     private val stegService: StegService,
     private val behandlingskontrollService: BehandlingskontrollService,
-    private val taskService: TaskService,
+    private val taskService: TracableTaskService,
     private val tellerService: TellerService,
     private val oppgaveTaskService: OppgaveTaskService,
     private val historikkTaskService: HistorikkTaskService,
@@ -74,7 +74,6 @@ class KravgrunnlagService(
         log.medContext(logContext) {
             info("BehandleKravgrunnlagTask prosesserer med id={} og metadata {}", taskId, taskMetadata.toString())
         }
-        val logContext = SecureLog.Context.medBehandling(fagsystemId, behandling?.id.toString())
         SecureLog.medContext(logContext) {
             info(
                 "BehandleKravgrunnlagTask prosesserer med id={} og metadata {}",
@@ -98,7 +97,7 @@ class KravgrunnlagService(
         // mapper grunnlag til Kravgrunnlag431
         val kravgrunnlag431: Kravgrunnlag431 = KravgrunnlagMapper.tilKravgrunnlag431(kravgrunnlag, behandling.id)
         sjekkIdentiskKravgrunnlag(kravgrunnlag431, behandling, logContext)
-        lagreKravgrunnlag(kravgrunnlag431, ytelsestype)
+        lagreKravgrunnlag(kravgrunnlag431, ytelsestype, logContext)
         mottattXmlService.arkiverMottattXml(mottattXmlId = null, mottattXml = kravgrunnlagXml, fagsystemId = fagsystemId, ytelsestype = ytelsestype)
 
         historikkTaskService.lagHistorikkTask(
@@ -110,9 +109,9 @@ class KravgrunnlagService(
         // oppdater frist på oppgave når behandling venter på grunnlag
         val aktivBehandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandling.id)
         if (aktivBehandlingsstegstilstand?.venteårsak == Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG) {
-            håndterOppgave(behandling)
+            håndterOppgave(behandling, logContext)
         } else {
-            håndterOppgavePrioritet(behandling)
+            håndterOppgavePrioritet(behandling, logContext)
         }
 
         if (Kravstatuskode.ENDRET == kravgrunnlag431.kravstatuskode) {
@@ -148,10 +147,10 @@ class KravgrunnlagService(
         stegService.håndterSteg(behandling.id, logContext) // Kjører automatisk frem til fakta-steg = KLAR
         if (behandling.saksbehandlingstype == Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR) {
             if (kanBehandlesAutomatiskBasertPåRettsgebyrOgFagsystemreferanse(kravgrunnlag431, behandling)) {
-                taskService.save(AutomatiskSaksbehandlingTask.opprettTask(behandling.id, fagsystem))
+                taskService.save(AutomatiskSaksbehandlingTask.opprettTask(behandling.id, fagsystem), logContext)
             } else {
                 behandlingService.oppdaterSaksbehandlingtype(behandling.id, Saksbehandlingstype.ORDINÆR)
-                oppgaveTaskService.opprettOppgaveTask(behandling, Oppgavetype.BehandleSak)
+                oppgaveTaskService.opprettOppgaveTask(behandling, Oppgavetype.BehandleSak, logContext = logContext)
             }
         }
         tellerService.tellKobletKravgrunnlag(fagsystem)
@@ -210,10 +209,11 @@ class KravgrunnlagService(
     fun lagreKravgrunnlag(
         kravgrunnlag431: Kravgrunnlag431,
         ytelsestype: Ytelsestype,
+        logContext: SecureLog.Context,
     ) {
         val finnesKravgrunnlag = kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(kravgrunnlag431.behandlingId)
         if (finnesKravgrunnlag) {
-            identifiserAktivtKravgrunnlagOgLagre(kravgrunnlag431, ytelsestype)
+            identifiserAktivtKravgrunnlagOgLagre(kravgrunnlag431, ytelsestype, logContext)
         } else {
             kravgrunnlagRepository.insert(kravgrunnlag431)
         }
@@ -222,6 +222,7 @@ class KravgrunnlagService(
     private fun identifiserAktivtKravgrunnlagOgLagre(
         mottattKravgrunnlag: Kravgrunnlag431,
         ytelsestype: Ytelsestype,
+        logContext: SecureLog.Context,
     ) {
         val eksisterendeKravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(mottattKravgrunnlag.behandlingId)
 
@@ -231,7 +232,7 @@ class KravgrunnlagService(
         val sistMottattKravgrunnlagSkalVæreAktivt = mottattKravgrunnlagKontrollfeltTidspunkt.isAfter(eksisterendeKravgrunnlagKontrollfeltTidspunkt)
 
         if (sistMottattKravgrunnlagSkalVæreAktivt && eksisterendeKravgrunnlag.referanse != mottattKravgrunnlag.referanse) {
-            hentOgOppdaterFaktaInfo(mottattKravgrunnlag, ytelsestype)
+            hentOgOppdaterFaktaInfo(mottattKravgrunnlag, ytelsestype, logContext)
         }
         kravgrunnlagRepository.update(eksisterendeKravgrunnlag.copy(aktiv = !sistMottattKravgrunnlagSkalVæreAktivt))
         kravgrunnlagRepository.insert(mottattKravgrunnlag.copy(aktiv = sistMottattKravgrunnlagSkalVæreAktivt))
@@ -240,6 +241,7 @@ class KravgrunnlagService(
     private fun hentOgOppdaterFaktaInfo(
         kravgrunnlag431: Kravgrunnlag431,
         ytelsestype: Ytelsestype,
+        logContext: SecureLog.Context,
     ) {
         // henter faktainfo fra fagsystem for ny referanse via kafka
         hentFagsystemsbehandlingService.sendHentFagsystemsbehandlingRequest(
@@ -260,10 +262,14 @@ class KravgrunnlagService(
                         setProperty(PropertyName.FAGSYSTEM, FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype).name)
                     },
             ),
+            logContext,
         )
     }
 
-    private fun håndterOppgave(behandling: Behandling) {
+    private fun håndterOppgave(
+        behandling: Behandling,
+        logContext: SecureLog.Context,
+    ) {
         val revurderingsvedtaksdato = behandling.aktivFagsystemsbehandling.revurderingsvedtaksdato
         val interval = ChronoUnit.DAYS.between(revurderingsvedtaksdato, LocalDate.now())
         if (interval >= FRIST_DATO_GRENSE) {
@@ -271,6 +277,7 @@ class KravgrunnlagService(
                 behandlingId = behandling.id,
                 beskrivelse = "Behandling er tatt av vent, pga mottatt kravgrunnlag",
                 frist = LocalDate.now().plusDays(1),
+                logContext = logContext,
             )
         } else {
             val beskrivelse =
@@ -282,12 +289,16 @@ class KravgrunnlagService(
                 behandlingId = behandling.id,
                 beskrivelse = beskrivelse,
                 frist = revurderingsvedtaksdato.plusDays(FRIST_DATO_GRENSE),
+                logContext = logContext,
             )
         }
     }
 
-    private fun håndterOppgavePrioritet(behandling: Behandling) {
-        oppgaveTaskService.oppdaterOppgavePrioritetTask(behandlingId = behandling.id, fagsakId = behandling.aktivFagsystemsbehandling.eksternId)
+    private fun håndterOppgavePrioritet(
+        behandling: Behandling,
+        logContext: SecureLog.Context,
+    ) {
+        oppgaveTaskService.oppdaterOppgavePrioritetTask(behandlingId = behandling.id, fagsakId = behandling.aktivFagsystemsbehandling.eksternId, logContext = logContext)
     }
 
     fun sjekkIdentiskKravgrunnlag(

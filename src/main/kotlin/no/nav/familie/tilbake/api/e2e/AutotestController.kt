@@ -11,13 +11,14 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Institusjon
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettManueltTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingRequestSendtRepository
+import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleStatusmeldingTask
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.HenteParam
@@ -42,7 +43,7 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 @Profile("e2e", "local", "integrasjonstest")
 class AutotestController(
-    private val taskService: TaskService,
+    private val taskService: TracableTaskService,
     private val behandlingRepository: BehandlingRepository,
     private val requestSendtRepository: HentFagsystemsbehandlingRequestSendtRepository,
     private val kafkaProducer: KafkaProducer,
@@ -61,6 +62,7 @@ class AutotestController(
                         this["callId"] = UUID.randomUUID()
                     },
             ),
+            SecureLog.Context.tom(),
         )
         return Ressurs.success("OK")
     }
@@ -78,6 +80,7 @@ class AutotestController(
                         this["callId"] = UUID.randomUUID()
                     },
             ),
+            SecureLog.Context.tom(),
         )
         return Ressurs.success("OK")
     }

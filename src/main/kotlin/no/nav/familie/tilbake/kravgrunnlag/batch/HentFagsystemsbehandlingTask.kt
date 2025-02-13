@@ -3,8 +3,9 @@ package no.nav.familie.tilbake.kravgrunnlag.batch
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
+import no.nav.familie.tilbake.behandling.task.TracableTaskService
+import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -21,7 +22,7 @@ import java.util.UUID
 class HentFagsystemsbehandlingTask(
     private val gammelKravgrunnlagService: GammelKravgrunnlagService,
     private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
-    private val taskService: TaskService,
+    private val taskService: TracableTaskService,
 ) : AsyncTaskStep {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -48,6 +49,7 @@ class HentFagsystemsbehandlingTask(
                 payload = task.payload,
                 properties = task.metadata,
             ).medTriggerTid(LocalDateTime.now().plusSeconds(60)),
+            task.logContext(),
         )
     }
 

@@ -51,7 +51,7 @@ class RyddBehandlingUtenKravgrunnlagTask(
             val beskrivelse =
                 "Tilbakekrevingsbehandlingen for stønad ${task.fagsystem()} opprettet ${behandling.opprettetDato} ble opprettet for over 8 uker siden og har ikke mottatt kravgrunnlag. " +
                     "Med mindre det er foretatt en revurdering med tilbakekrevingsbeløp i dag eller de siste dagene for stønaden, så vil det ikke oppstå et kravgrunnlag i dette tilfellet. Tilbakekrevingsbehandlingen kan derfor henlegges manuelt."
-            oppgaveTaskService.opprettOppgaveTask(behandling, Oppgavetype.VurderHenvendelse, beskrivelse = beskrivelse)
+            oppgaveTaskService.opprettOppgaveTask(behandling, Oppgavetype.VurderHenvendelse, beskrivelse = beskrivelse, logContext = logContext)
         } else {
             behandlingService.henleggBehandling(
                 behandling.id,

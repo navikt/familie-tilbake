@@ -4,13 +4,14 @@ import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakService
 import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.PropertyName
+import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -21,9 +22,10 @@ import java.util.UUID
 
 @Service
 class OppgaveTaskService(
-    private val taskService: TaskService,
+    private val taskService: TracableTaskService,
     private val fagsakService: FagsakService,
     private val behandlingRepository: BehandlingRepository,
+    private val logService: LogService,
 ) {
     @Transactional
     fun opprettOppgaveTask(
@@ -32,6 +34,7 @@ class OppgaveTaskService(
         saksbehandler: String? = null,
         opprettetAv: String? = null,
         beskrivelse: String? = null,
+        logContext: SecureLog.Context,
     ) {
         val fagsystem = fagsakService.finnFagsystemForBehandlingId(behandling.id)
         val properties =
@@ -49,6 +52,7 @@ class OppgaveTaskService(
                 payload = behandling.id.toString(),
                 properties = properties,
             ),
+            logContext,
         )
     }
 
@@ -58,6 +62,7 @@ class OppgaveTaskService(
         oppgavetype: String? = null,
     ) {
         val fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId)
+        val logContext = logService.contextFraBehandling(behandlingId)
         val properties =
             Properties().apply {
                 if (!oppgavetype.isNullOrEmpty()) {
@@ -71,6 +76,7 @@ class OppgaveTaskService(
                 payload = behandlingId.toString(),
                 properties = properties,
             ),
+            logContext,
         )
     }
 
@@ -80,12 +86,14 @@ class OppgaveTaskService(
         beskrivelse: String,
         frist: LocalDate,
         saksbehandler: String? = null,
+        logContext: SecureLog.Context,
     ) {
         opprettOppdaterOppgaveTask(
             behandlingId = behandlingId,
             beskrivelse = beskrivelse,
             frist = frist,
             saksbehandler = saksbehandler,
+            logContext = logContext,
         )
     }
 
@@ -96,6 +104,7 @@ class OppgaveTaskService(
         frist: LocalDate,
         triggerTid: Long,
         saksbehandler: String? = null,
+        logContext: SecureLog.Context,
     ) {
         opprettOppdaterOppgaveTask(
             behandlingId = behandlingId,
@@ -103,6 +112,7 @@ class OppgaveTaskService(
             frist = frist,
             triggerTid = triggerTid,
             saksbehandler = saksbehandler,
+            logContext = logContext,
         )
     }
 
@@ -112,6 +122,7 @@ class OppgaveTaskService(
         frist: LocalDate,
         triggerTid: Long? = null,
         saksbehandler: String? = null,
+        logContext: SecureLog.Context,
     ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId)
@@ -130,7 +141,7 @@ class OppgaveTaskService(
                 properties = properties,
             )
         triggerTid?.let { task.medTriggerTid(LocalDateTime.now().plusSeconds(it)) }
-        taskService.save(task)
+        taskService.save(task, logContext)
     }
 
     @Transactional
@@ -155,11 +166,15 @@ class OppgaveTaskService(
                 payload = behandlingId.toString(),
                 properties = properties,
             ),
+            logContext,
         )
     }
 
     @Transactional
-    fun oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId: UUID) {
+    fun oppdaterAnsvarligSaksbehandlerOppgaveTask(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         val fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId)
         val properties =
             Properties().apply {
@@ -171,12 +186,14 @@ class OppgaveTaskService(
                 payload = behandlingId.toString(),
                 properties = properties,
             ),
+            logContext,
         )
     }
 
     fun oppdaterOppgavePrioritetTask(
         behandlingId: UUID,
         fagsakId: String,
+        logContext: SecureLog.Context,
     ) {
         val fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId)
         val properties =
@@ -191,18 +208,18 @@ class OppgaveTaskService(
                 payload = behandlingId.toString(),
                 properties = properties,
             ),
+            logContext,
         )
     }
 
     @Transactional
-    fun opprettFinnGammelBehandlingUtenOppgaveTask(
-        fagsystem: Fagsystem,
-    ) {
+    fun opprettFinnGammelBehandlingUtenOppgaveTask(fagsystem: Fagsystem) {
         taskService.save(
             Task(
                 type = FinnGammelBehandlingUtenOppgaveTask.TYPE,
                 payload = objectMapper.writeValueAsString(FinnGammelBehandlingUtenOppgaveTask.FinnGammelBehandlingUtenOppgaveDto(fagsystem)),
             ),
+            SecureLog.Context.tom(),
         )
     }
 
@@ -211,6 +228,7 @@ class OppgaveTaskService(
         behandlingId: UUID,
         beskrivelse: String,
         frist: LocalDate,
+        logContext: SecureLog.Context,
     ) {
         taskService.save(
             Task(
@@ -224,6 +242,7 @@ class OppgaveTaskService(
                         ),
                     ),
             ),
+            logContext,
         )
     }
 
@@ -234,6 +253,7 @@ class OppgaveTaskService(
                 type = FinnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgaveTask.TYPE,
                 payload = fagsystem.name,
             ),
+            SecureLog.Context.tom(),
         )
     }
 }

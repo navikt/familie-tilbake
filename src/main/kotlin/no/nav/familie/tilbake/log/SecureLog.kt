@@ -1,8 +1,10 @@
 package no.nav.familie.tilbake.log
 
+import no.nav.familie.prosessering.domene.Task
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
+import java.util.Properties
 
 object SecureLog {
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -12,8 +14,8 @@ object SecureLog {
         callback: Logger.() -> Unit,
     ) {
         try {
-            MDC.put("fagsystemId", context.fagsystemId)
-            MDC.put("behandlingId", context.behandlingId)
+            MDC.put("fagsystemId", context.fagsystemId ?: "ukjent")
+            MDC.put("behandlingId", context.behandlingId ?: "ukjent")
             return secureLogger.callback()
         } finally {
             MDC.remove("fagsystemId")
@@ -35,18 +37,29 @@ object SecureLog {
     fun utenContext() = secureLogger
 
     data class Context private constructor(
-        val fagsystemId: String,
-        val behandlingId: String,
+        val fagsystemId: String?,
+        val behandlingId: String?,
     ) {
-        companion object {
-            fun tom() = utenBehandling("ukjent")
+        fun copyTo(properties: Properties) {
+            properties.setProperty("logContext.fagsystemId", fagsystemId ?: "ukjent")
+            properties.setProperty("logContext.behandlingId", behandlingId ?: "ukjent")
+        }
 
-            fun utenBehandling(fagsystemId: String) = medBehandling(fagsystemId = fagsystemId, behandlingId = null)
+        companion object {
+            fun tom() = utenBehandling(null)
+
+            fun utenBehandling(fagsystemId: String?) = medBehandling(fagsystemId = fagsystemId, behandlingId = null)
 
             fun medBehandling(
-                fagsystemId: String,
+                fagsystemId: String?,
                 behandlingId: String?,
-            ) = Context(fagsystemId = fagsystemId, behandlingId = behandlingId ?: "ukjent")
+            ) = Context(fagsystemId = fagsystemId, behandlingId = behandlingId)
+
+            fun Task.logContext(): Context =
+                medBehandling(
+                    metadata.getProperty("logContext.fagsystemId"),
+                    metadata.getProperty("logContext.behandlingId"),
+                )
         }
     }
 }

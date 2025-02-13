@@ -15,7 +15,6 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg.OPPRE
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL
 import no.nav.familie.kontrakter.felles.tilbakekreving.Varsel
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -26,6 +25,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
+import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
@@ -34,6 +34,7 @@ import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.data.Testdata.behandlingsresultat
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.log.LogService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -54,7 +55,7 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
     private lateinit var fagsakRepository: FagsakRepository
 
     @Autowired
-    private lateinit var taskService: TaskService
+    private lateinit var taskService: TracableTaskService
 
     @Autowired
     private lateinit var behandlingService: BehandlingService
@@ -64,6 +65,9 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
+
+    @Autowired
+    private lateinit var logService: LogService
 
     private lateinit var service: BehandlingTilstandService
 
@@ -78,6 +82,7 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
                 fagsakRepository,
                 taskService,
                 faktaFeilutbetalingService,
+                logService,
             )
 
         fagsakRepository.insert(Testdata.fagsak)

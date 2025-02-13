@@ -3,14 +3,15 @@ package no.nav.familie.tilbake.kravgrunnlag
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.avstemming.task.AvstemmingTask
+import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.common.repository.Sporbar
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.kravgrunnlag.batch.GammelKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.batch.HentFagsystemsbehandlingTask
 import no.nav.familie.tilbake.kravgrunnlag.batch.HåndterGamleKravgrunnlagBatch
+import no.nav.familie.tilbake.log.SecureLog
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,7 +23,7 @@ internal class HåndterGamleKravgrunnlagBatchTest : OppslagSpringRunnerTest() {
     private lateinit var mottattXmlRepository: ØkonomiXmlMottattRepository
 
     @Autowired
-    private lateinit var taskService: TaskService
+    private lateinit var taskService: TracableTaskService
 
     @Autowired
     private lateinit var håndterGamleKravgrunnlagBatch: HåndterGamleKravgrunnlagBatch
@@ -43,8 +44,8 @@ internal class HåndterGamleKravgrunnlagBatchTest : OppslagSpringRunnerTest() {
     fun `utfør skal ikke opprette tasker når det allerede finnes en feilet task på det samme kravgrunnlag`() {
         // Arrange
         val mottattXml = mottattXmlRepository.insert(Testdata.økonomiXmlMottatt)
-        val task = taskService.save(Task(type = GammelKravgrunnlagTask.TYPE, payload = mottattXml.id.toString()))
-        taskService.save(taskService.findById(task.id).copy(status = Status.FEILET))
+        val task = taskService.save(Task(type = GammelKravgrunnlagTask.TYPE, payload = mottattXml.id.toString()), SecureLog.Context.tom())
+        taskService.save(taskService.findById(task.id).copy(status = Status.FEILET), SecureLog.Context.tom())
 
         // Act
         håndterGamleKravgrunnlagBatch.utfør()

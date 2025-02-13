@@ -6,12 +6,12 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.prosessering.domene.Status
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
+import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.data.Testdata
@@ -57,7 +57,7 @@ class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
     private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
 
     @Autowired
-    private lateinit var taskService: TaskService
+    private lateinit var taskService: TracableTaskService
 
     @Autowired
     private lateinit var logService: LogService

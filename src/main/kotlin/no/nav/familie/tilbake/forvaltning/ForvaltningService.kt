@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.forvaltning
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.api.forvaltning.Behandlingsinfo
 import no.nav.familie.tilbake.api.forvaltning.Kravgrunnlagsinfo
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -14,6 +13,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Iverksettingsstatus
 import no.nav.familie.tilbake.behandling.steg.StegService
+import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
@@ -61,7 +61,7 @@ class ForvaltningService(
     private val historikkTaskService: HistorikkTaskService,
     private val oppgaveTaskService: OppgaveTaskService,
     private val tellerService: TellerService,
-    private val taskService: TaskService,
+    private val taskService: TracableTaskService,
     private val endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher,
     private val logService: LogService,
 ) {
@@ -147,9 +147,10 @@ class ForvaltningService(
                 payload = task.payload,
                 properties = task.metadata,
             ),
+            logContext,
         )
         // Setter feilet task til ferdig.
-        taskService.save(task.copy(status = Status.FERDIG))
+        taskService.save(task.copy(status = Status.FERDIG), logContext)
     }
 
     @Transactional
@@ -187,7 +188,7 @@ class ForvaltningService(
                 avsluttetDato = LocalDate.now(),
             ),
         )
-        behandlingTilstandService.opprettSendingAvBehandlingenHenlagt(behandlingId)
+        behandlingTilstandService.opprettSendingAvBehandlingenHenlagt(behandlingId, logContext)
 
         historikkTaskService.lagHistorikkTask(
             behandlingId = behandlingId,

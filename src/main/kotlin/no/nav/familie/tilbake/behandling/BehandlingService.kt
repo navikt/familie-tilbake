@@ -9,7 +9,6 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequ
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
 import no.nav.familie.tilbake.api.dto.ByttEnhetDto
@@ -27,6 +26,7 @@ import no.nav.familie.tilbake.behandling.domain.Fagsystemskonsekvens
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
+import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
@@ -69,7 +69,7 @@ import java.util.UUID
 class BehandlingService(
     private val behandlingRepository: BehandlingRepository,
     private val fagsakService: FagsakService,
-    private val taskService: TaskService,
+    private val taskService: TracableTaskService,
     private val brevsporingService: BrevsporingService,
     private val manuellBrevmottakerRepository: ManuellBrevmottakerRepository,
     private val kravgrunnlagRepository: KravgrunnlagRepository,
@@ -108,7 +108,7 @@ class BehandlingService(
                             setProperty(PropertyName.FAGSYSTEM, opprettTilbakekrevingRequest.fagsystem.name)
                         },
                 )
-            taskService.save(sendVarselbrev)
+            taskService.save(sendVarselbrev, logContext)
         }
 
         return behandling
@@ -148,6 +148,7 @@ class BehandlingService(
                 properties = properties,
                 payload = "",
             ),
+            logContext,
         )
     }
 
@@ -191,10 +192,11 @@ class BehandlingService(
                 payload = revurdering.id.toString(),
                 properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) },
             ),
+            logContext,
         )
 
         // Lag oppgave for behandling
-        oppgaveTaskService.opprettOppgaveTask(revurdering, Oppgavetype.BehandleSak)
+        oppgaveTaskService.opprettOppgaveTask(revurdering, Oppgavetype.BehandleSak, logContext = logContext)
 
         return revurdering
     }
@@ -285,6 +287,7 @@ class BehandlingService(
             beskrivelse,
             behandlingPåVentDto.tidsfrist,
             ContextService.hentSaksbehandler(logContext),
+            logContext,
         )
     }
 
@@ -316,6 +319,7 @@ class BehandlingService(
             beskrivelse = "Behandling er tatt av vent",
             frist = LocalDate.now(),
             saksbehandler = ContextService.hentSaksbehandler(logContext),
+            logContext,
         )
 
         // oppdaterer oppgave hvis saken er fortsatt på vent,
@@ -327,6 +331,7 @@ class BehandlingService(
                 beskrivelse = aktivStegstilstand.venteårsak!!.beskrivelse,
                 frist = aktivStegstilstand.tidsfrist!!,
                 triggerTid = 2L,
+                logContext = logContext,
             )
         }
     }
@@ -364,7 +369,7 @@ class BehandlingService(
         )
 
         oppdaterAnsvarligSaksbehandler(behandlingId)
-        behandlingTilstandService.opprettSendingAvBehandlingenHenlagt(behandlingId)
+        behandlingTilstandService.opprettSendingAvBehandlingenHenlagt(behandlingId, logContext)
         val fagsystem = fagsakService.finnFagsystem(behandling.fagsakId)
 
         val aktør =
@@ -389,6 +394,7 @@ class BehandlingService(
                     fagsystem,
                     henleggelsesbrevFritekstDto.fritekst,
                 ),
+                logContext,
             )
         }
 
@@ -535,10 +541,11 @@ class BehandlingService(
                 payload = behandling.id.toString(),
                 properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) },
             ),
+            logContext,
         )
 
         if (!tilbakekrevingsvalgErAutomatisk) {
-            oppgaveTaskService.opprettOppgaveTask(behandling, Oppgavetype.BehandleSak)
+            oppgaveTaskService.opprettOppgaveTask(behandling, Oppgavetype.BehandleSak, logContext = logContext)
         }
 
         return behandling
@@ -730,7 +737,7 @@ class BehandlingService(
         )
 
         oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, Oppgavetype.GodkjenneVedtak.name)
-        oppgaveTaskService.opprettOppgaveTask(behandling, Oppgavetype.BehandleSak)
+        oppgaveTaskService.opprettOppgaveTask(behandling, Oppgavetype.BehandleSak, logContext = logContext)
 
         stegService.angreSendTilBeslutter(behandling, logContext)
     }

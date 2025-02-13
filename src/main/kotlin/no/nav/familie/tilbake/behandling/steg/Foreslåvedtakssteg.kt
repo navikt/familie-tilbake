@@ -82,7 +82,7 @@ class Foreslåvedtakssteg(
         flyttBehandlingVidere(behandlingId, logContext)
 
         ferdigstillOppgave(behandling, logContext)
-        opprettGodkjennevedtakOppgave(behandlingId)
+        opprettGodkjennevedtakOppgave(behandlingId, logContext)
 
         historikkTaskService.lagHistorikkTask(
             behandlingId = behandlingId,
@@ -113,7 +113,7 @@ class Foreslåvedtakssteg(
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.saksbehandlingstype != Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR) {
             ferdigstillOppgave(behandling, logContext)
-            opprettGodkjennevedtakOppgave(behandlingId)
+            opprettGodkjennevedtakOppgave(behandlingId, logContext)
             historikkTaskService.lagHistorikkTask(
                 behandlingId = behandlingId,
                 historikkinnslagstype =
@@ -190,7 +190,10 @@ class Foreslåvedtakssteg(
         }
     }
 
-    private fun opprettGodkjennevedtakOppgave(behandlingId: UUID) {
+    private fun opprettGodkjennevedtakOppgave(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.saksbehandlingstype == Saksbehandlingstype.ORDINÆR) {
             val tidligerebeslutter =
@@ -203,6 +206,7 @@ class Foreslåvedtakssteg(
                 oppgavetype = Oppgavetype.GodkjenneVedtak,
                 opprettetAv = ContextService.hentSaksbehandlerNavn(),
                 saksbehandler = tidligerebeslutter,
+                logContext = logContext,
             )
         }
     }

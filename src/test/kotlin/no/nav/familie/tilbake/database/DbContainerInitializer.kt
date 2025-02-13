@@ -13,6 +13,7 @@ class DbContainerInitializer : ApplicationContextInitializer<ConfigurableApplica
                 "spring.datasource.url=${postgres.jdbcUrl}",
                 "spring.datasource.username=${postgres.username}",
                 "spring.datasource.password=${postgres.password}",
+                "spring.flyway.placeholders.ignoreIfProd=",
             ).applyTo(applicationContext.environment)
     }
 

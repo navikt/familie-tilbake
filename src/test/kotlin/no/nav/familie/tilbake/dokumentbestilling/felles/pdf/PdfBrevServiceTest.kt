@@ -9,8 +9,8 @@ import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstidspunkt
 import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
+import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
@@ -25,7 +25,7 @@ import java.util.Base64
 internal class PdfBrevServiceTest {
     private val journalføringService: JournalføringService = mockk(relaxed = true)
     private val tellerService: TellerService = mockk(relaxed = true)
-    private val taskService: TaskService = mockk(relaxed = true)
+    private val taskService: TracableTaskService = mockk(relaxed = true)
     private val organisasjonService: OrganisasjonService = mockk(relaxed = true)
 
     private val pdfBrevService =
@@ -39,7 +39,7 @@ internal class PdfBrevServiceTest {
     fun `sendBrev oppretter en task med korrekt fritekst`() {
         val fritekst = "Dette er en \n\nfritekst med \n\nlinjeskift"
         val slot = CapturingSlot<Task>()
-        every { taskService.save(capture(slot)) } returns mockk()
+        every { taskService.save(capture(slot), any()) } returns mockk()
 
         val brevdata = lagBrevdata()
 
@@ -66,7 +66,7 @@ internal class PdfBrevServiceTest {
     @Test
     fun `sendBrev sender vedtaksbrev med riktig distribusjonstype og distribusjonstidspunkt`() {
         val slot = CapturingSlot<Task>()
-        every { taskService.save(capture(slot)) } returns mockk()
+        every { taskService.save(capture(slot), any()) } returns mockk()
         val brevdata = lagBrevdata()
 
         pdfBrevService.sendBrev(Testdata.lagBehandling(), Testdata.fagsak, brevtype = Brevtype.VEDTAK, brevdata)
@@ -83,7 +83,7 @@ internal class PdfBrevServiceTest {
     @Test
     fun `sendBrev sender henleggelsesbrev med riktig distribusjonstype og distribusjonstidspunkt`() {
         val slot = CapturingSlot<Task>()
-        every { taskService.save(capture(slot)) } returns mockk()
+        every { taskService.save(capture(slot), any()) } returns mockk()
         val brevdata = lagBrevdata()
 
         pdfBrevService.sendBrev(Testdata.lagBehandling(), Testdata.fagsak, brevtype = Brevtype.HENLEGGELSE, brevdata)
@@ -100,7 +100,7 @@ internal class PdfBrevServiceTest {
     @Test
     fun `sendBrev støtter å sende brev til institusjon med ampsand i navnet`() {
         val slot = CapturingSlot<Task>()
-        every { taskService.save(capture(slot)) } returns mockk()
+        every { taskService.save(capture(slot), any()) } returns mockk()
         val brevdata =
             lagBrevdata().apply {
                 metadata = this.metadata.copy(institusjon = Institusjon("876543210", "Foo & Bar AS"))

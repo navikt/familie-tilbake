@@ -5,9 +5,9 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.kontrakter.felles.tilbakekreving.MottakerType
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -28,7 +28,7 @@ class DokumentbehandlingServiceEnhetstest {
     private val mockFagsakRepository: FagsakRepository = mockk()
     private val mockBehandlingskontrollService: BehandlingskontrollService = mockk()
     private val mockKravgrunnlagRepository: KravgrunnlagRepository = mockk()
-    private val mockTaskService: TaskService = mockk()
+    private val mockTaskService: TracableTaskService = mockk()
     private val mockManueltVarselBrevService: ManueltVarselbrevService = mockk()
     private val mockInnhentDokumentasjonBrevService: InnhentDokumentasjonbrevService = mockk()
     private val mockManuellBrevmottakerRepository: ManuellBrevmottakerRepository = mockk()

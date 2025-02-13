@@ -3,17 +3,18 @@ package no.nav.familie.tilbake.dokumentbestilling.vedtak
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
+import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.SendVedtaksoppsummeringTilDvhTask
 import no.nav.familie.tilbake.iverksettvedtak.task.AvsluttBehandlingTask
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
 import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.stereotype.Service
 import java.util.Properties
@@ -30,7 +31,7 @@ class SendVedtaksbrevTask(
     private val behandlingRepository: BehandlingRepository,
     private val fagsakRepository: FagsakRepository,
     private val vedtaksbrevService: VedtaksbrevService,
-    private val taskService: TaskService,
+    private val taskService: TracableTaskService,
 ) : AsyncTaskStep {
     private val log = TracedLogger.getLogger<SendVedtaksbrevTask>()
 
@@ -49,6 +50,7 @@ class SendVedtaksbrevTask(
                     payload = task.payload,
                     properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsak.fagsystem.name) },
                 ),
+                task.logContext(),
             )
             return
         }
@@ -65,6 +67,7 @@ class SendVedtaksbrevTask(
                     payload = task.payload,
                     properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsak.fagsystem.name) },
                 ),
+                task.logContext(),
             )
             return
         }
@@ -82,6 +85,7 @@ class SendVedtaksbrevTask(
                 payload = task.payload,
                 properties = task.metadata,
             ),
+            task.logContext(),
         )
     }
 

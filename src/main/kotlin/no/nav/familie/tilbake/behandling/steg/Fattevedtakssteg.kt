@@ -90,6 +90,7 @@ class Fattevedtakssteg(
                 behandling,
                 Oppgavetype.BehandleUnderkjentVedtak,
                 behandling.ansvarligSaksbehandler,
+                logContext = logContext,
             )
         } else {
             behandlingskontrollService.oppdaterBehandlingsstegStatus(

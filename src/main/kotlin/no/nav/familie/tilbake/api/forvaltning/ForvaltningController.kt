@@ -8,6 +8,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
 import no.nav.familie.tilbake.integration.pdl.internal.logger
+import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
@@ -39,6 +40,7 @@ class ForvaltningController(
     private val forvaltningService: ForvaltningService,
     private val oppgaveTaskService: OppgaveTaskService,
     private val behandlingTilstandService: BehandlingTilstandService,
+    private val logService: LogService,
 ) {
     @Operation(summary = "Hent korrigert kravgrunnlag")
     @PutMapping(
@@ -217,6 +219,7 @@ class ForvaltningController(
                 behandlingId = behandlingID,
                 beskrivelse = "Gjenopprettet oppgave",
                 frist = LocalDate.now(),
+                logContext = logService.contextFraBehandling(behandlingID),
             )
         }
     }
@@ -230,7 +233,7 @@ class ForvaltningController(
         @RequestBody behandlingIder: List<UUID>,
     ) {
         behandlingIder.forEach { behandlingID ->
-            behandlingTilstandService.opprettSendingAvBehandlingenManuellt(behandlingId = behandlingID)
+            behandlingTilstandService.opprettSendingAvBehandlingenManuelt(behandlingId = behandlingID)
         }
     }
 
@@ -254,7 +257,8 @@ class ForvaltningController(
         @RequestBody behandlingIder: List<UUID>,
     ) {
         behandlingIder.forEach {
-            oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgave(it, "--- Opprettet av familie-tilbake ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n", LocalDate.now())
+            val logContext = logService.contextFraBehandling(it)
+            oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgave(it, "--- Opprettet av familie-tilbake ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n", LocalDate.now(), logContext)
         }
     }
 

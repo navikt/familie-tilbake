@@ -1,11 +1,12 @@
 package no.nav.familie.tilbake.forvaltning
 
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
 import no.nav.familie.tilbake.log.SecureLog
 import org.springframework.context.annotation.Profile
@@ -18,7 +19,7 @@ import java.util.UUID
 @Service
 @Profile("!prod")
 class ForvaltningPreprodService(
-    private val taskService: TaskService,
+    private val taskService: TracableTaskService,
     private val environment: Environment,
     private val behandlingRepository: BehandlingRepository,
     private val fagsakRepository: FagsakRepository,
@@ -28,6 +29,7 @@ class ForvaltningPreprodService(
         if (environment.activeProfiles.contains("prod")) {
             throw IllegalStateException("Kan ikke kjøre denne tjenesten i prod")
         }
+        val logContext = KravgrunnlagUtil.kravgrunnlagLogContext(kravgrunnlag)
         taskService.save(
             Task(
                 type = BehandleKravgrunnlagTask.TYPE,
@@ -37,6 +39,7 @@ class ForvaltningPreprodService(
                         this["callId"] = UUID.randomUUID()
                     },
             ),
+            logContext,
         )
     }
 

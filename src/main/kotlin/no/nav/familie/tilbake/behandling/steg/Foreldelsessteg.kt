@@ -68,7 +68,7 @@ class Foreldelsessteg(
         }
         foreldelseService.lagreVurdertForeldelse(behandlingId, (behandlingsstegDto as BehandlingsstegForeldelseDto), logContext)
 
-        oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId)
+        oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId, logContext)
 
         lagHistorikkinnslag(behandlingId, Aktør.SAKSBEHANDLER)
 

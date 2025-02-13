@@ -48,7 +48,7 @@ class FaktaFeilutbetalingssteg(
 
         faktaFeilutbetalingService.lagreFaktaomfeilutbetaling(behandlingId, behandlingsstegFaktaDto, logContext)
 
-        oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId)
+        oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId, logContext)
 
         historikkTaskService.lagHistorikkTask(
             behandlingId,

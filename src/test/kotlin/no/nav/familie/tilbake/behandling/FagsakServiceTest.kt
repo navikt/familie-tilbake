@@ -11,7 +11,6 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
@@ -20,11 +19,13 @@ import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Institusjon
 import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
+import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.integration.pdl.internal.Kjønn
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
+import no.nav.familie.tilbake.log.SecureLog
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -49,7 +50,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
     private lateinit var økonomiXmlMottattRepository: ØkonomiXmlMottattRepository
 
     @Autowired
-    private lateinit var taskService: TaskService
+    private lateinit var taskService: TracableTaskService
 
     @Autowired
     private lateinit var fagsakService: FagsakService
@@ -245,7 +246,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         properties["eksternFagsakId"] = mottattXml.eksternFagsakId
         properties["ytelsestype"] = Ytelsestype.BARNETRYGD.kode
         properties["eksternId"] = mottattXml.referanse
-        taskService.save(Task(type = OpprettBehandlingManueltTask.TYPE, properties = properties, payload = ""))
+        taskService.save(Task(type = OpprettBehandlingManueltTask.TYPE, properties = properties, payload = ""), SecureLog.Context.tom())
 
         val respons = fagsakService.kanBehandlingOpprettesManuelt(mottattXml.eksternFagsakId, Ytelsestype.BARNETRYGD)
         respons.kanBehandlingOpprettes.shouldBeFalse()

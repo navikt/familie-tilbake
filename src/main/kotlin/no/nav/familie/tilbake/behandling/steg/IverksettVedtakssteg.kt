@@ -1,10 +1,10 @@
 package no.nav.familie.tilbake.behandling.steg
 
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Iverksettingsstatus
+import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -20,7 +20,7 @@ import java.util.UUID
 class IverksettVedtakssteg(
     private val behandlingsvedtakService: BehandlingsvedtakService,
     private val fagsakRepository: FagsakRepository,
-    private val taskService: TaskService,
+    private val taskService: TracableTaskService,
 ) : IBehandlingssteg {
     private val log = TracedLogger.getLogger<IverksettVedtakssteg>()
 
@@ -45,6 +45,7 @@ class IverksettVedtakssteg(
                 payload = behandlingId.toString(),
                 properties = properties,
             ),
+            logContext,
         )
     }
 

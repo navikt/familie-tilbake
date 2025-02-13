@@ -2,7 +2,7 @@ package no.nav.familie.tilbake.kravgrunnlag
 
 import jakarta.jms.TextMessage
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.internal.TaskService
+import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleStatusmeldingTask
@@ -24,7 +24,7 @@ import java.util.UUID
     matchIfMissing = true,
 )
 class KravgrunnlagMottaker(
-    private val taskService: TaskService,
+    private val taskService: TracableTaskService,
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -34,8 +34,9 @@ class KravgrunnlagMottaker(
         val meldingFraOppdrag = melding.text as String
 
         log.info("Mottatt melding fra oppdrag")
-        SecureLog.utenContext().info(meldingFraOppdrag)
         if (meldingFraOppdrag.contains(Constants.KRAVGRUNNLAG_XML_ROOT_ELEMENT)) {
+            val logContext = KravgrunnlagUtil.kravgrunnlagLogContext(meldingFraOppdrag)
+            SecureLog.medContext(logContext) { info(meldingFraOppdrag) }
             taskService.save(
                 Task(
                     type = BehandleKravgrunnlagTask.TYPE,
@@ -45,8 +46,11 @@ class KravgrunnlagMottaker(
                             this["callId"] = UUID.randomUUID()
                         },
                 ),
+                logContext,
             )
         } else {
+            val logContext = KravgrunnlagUtil.statusmeldingLogContext(meldingFraOppdrag)
+            SecureLog.medContext(logContext) { info(meldingFraOppdrag) }
             taskService.save(
                 Task(
                     type = BehandleStatusmeldingTask.TYPE,
@@ -56,6 +60,7 @@ class KravgrunnlagMottaker(
                             this["callId"] = UUID.randomUUID()
                         },
                 ),
+                logContext,
             )
         }
     }

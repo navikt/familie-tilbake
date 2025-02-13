@@ -3,7 +3,7 @@ package no.nav.familie.tilbake.iverksettvedtak.task
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.internal.TaskService
+import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
@@ -11,6 +11,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.SendVedtaksbrevTask
 import no.nav.familie.tilbake.iverksettvedtak.IverksettelseService
 import no.nav.familie.tilbake.log.LogService
+import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
 import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -25,7 +26,7 @@ import java.util.UUID
 )
 class SendØkonomiTilbakekrevingsvedtakTask(
     private val iverksettelseService: IverksettelseService,
-    private val taskService: TaskService,
+    private val taskService: TracableTaskService,
     private val behandlingskontrollService: BehandlingskontrollService,
     private val logService: LogService,
 ) : AsyncTaskStep {
@@ -59,6 +60,7 @@ class SendØkonomiTilbakekrevingsvedtakTask(
                 payload = task.payload,
                 properties = task.metadata,
             ),
+            task.logContext(),
         )
     }
 

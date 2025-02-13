@@ -10,7 +10,6 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
@@ -18,6 +17,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
+import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
@@ -82,7 +82,7 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var avsluttBehandlingTask: AvsluttBehandlingTask
 
-    private val taskService: TaskService = mockk()
+    private val taskService: TracableTaskService = mockk()
 
     @Autowired
     private lateinit var behandlingskontrollService: BehandlingskontrollService
@@ -251,16 +251,16 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
                         )
                     },
             )
-        every { taskService.save(sendVedtakTilØkonomiTask) }.run {
+        every { taskService.save(sendVedtakTilØkonomiTask, SecureLog.Context.tom()) }.run {
             sendØkonomiTilbakekrevingsvedtakTask.doTask(sendVedtakTilØkonomiTask)
         }
 
         val vedtaksbrevTask = Task(type = SendVedtaksbrevTask.TYPE, payload = behandling.id.toString())
-        every { taskService.save(vedtaksbrevTask) }.run {
+        every { taskService.save(vedtaksbrevTask, SecureLog.Context.tom()) }.run {
             sendVedtaksbrevTask.doTask(vedtaksbrevTask)
         }
 
         val avsluttTask = Task(type = AvsluttBehandlingTask.TYPE, payload = behandling.id.toString())
-        every { taskService.save(avsluttTask) }.run { avsluttBehandlingTask.doTask(avsluttTask) }
+        every { taskService.save(avsluttTask, SecureLog.Context.tom()) }.run { avsluttBehandlingTask.doTask(avsluttTask) }
     }
 }

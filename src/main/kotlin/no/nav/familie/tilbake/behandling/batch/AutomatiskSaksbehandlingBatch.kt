@@ -2,9 +2,10 @@ package no.nav.familie.tilbake.behandling.batch
 
 import no.nav.familie.leader.LeaderClient
 import no.nav.familie.prosessering.domene.Status
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.log.SecureLog
 import org.slf4j.LoggerFactory
 import org.springframework.core.env.Environment
 import org.springframework.data.domain.Pageable
@@ -16,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional
 class AutomatiskSaksbehandlingBatch(
     private val automatiskSaksbehandlingService: AutomatiskSaksbehandlingService,
     private val fagsakRepository: FagsakRepository,
-    private val taskService: TaskService,
+    private val taskService: TracableTaskService,
     private val environment: Environment,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -54,8 +55,12 @@ class AutomatiskSaksbehandlingBatch(
                         task.type == AutomatiskSaksbehandlingTask.TYPE && task.payload == it.id.toString()
                     }
                 if (!finnesTask) {
-                    val fagsystem = fagsakRepository.findByIdOrThrow(it.fagsakId).fagsystem
-                    taskService.save(AutomatiskSaksbehandlingTask.opprettTask(it.id, fagsystem))
+                    val fagsak = fagsakRepository.findByIdOrThrow(it.fagsakId)
+                    val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, it.id.toString())
+                    taskService.save(
+                        AutomatiskSaksbehandlingTask.opprettTask(it.id, fagsak.fagsystem),
+                        logContext,
+                    )
                 } else {
                     logger.info("Det finnes allerede en feilet AutomatiskSaksbehandlingTask for samme behandlingId=${it.id}")
                 }

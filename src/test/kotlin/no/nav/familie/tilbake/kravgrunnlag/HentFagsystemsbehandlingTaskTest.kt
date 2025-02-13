@@ -12,7 +12,6 @@ import io.mockk.verify
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
@@ -20,6 +19,7 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingRequestSendtRepository
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.behandling.steg.StegService
+import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.common.exceptionhandler.UgyldigKravgrunnlagFeil
 import no.nav.familie.tilbake.data.Testdata
@@ -29,6 +29,7 @@ import no.nav.familie.tilbake.kravgrunnlag.batch.GammelKravgrunnlagService
 import no.nav.familie.tilbake.kravgrunnlag.batch.GammelKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.batch.HentFagsystemsbehandlingTask
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
+import no.nav.familie.tilbake.log.SecureLog
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -55,7 +56,7 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
     private lateinit var requestSendtRepository: HentFagsystemsbehandlingRequestSendtRepository
 
     @Autowired
-    private lateinit var taskService: TaskService
+    private lateinit var taskService: TracableTaskService
 
     @Autowired
     private lateinit var behandlingService: BehandlingService
@@ -163,5 +164,5 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
         }
     }
 
-    private fun lagTask(): Task = taskService.save(Task(type = HentFagsystemsbehandlingTask.TYPE, payload = mottattXmlId.toString()))
+    private fun lagTask(): Task = taskService.save(Task(type = HentFagsystemsbehandlingTask.TYPE, payload = mottattXmlId.toString()), SecureLog.Context.tom())
 }

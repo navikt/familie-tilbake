@@ -13,7 +13,7 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.dokumentbestilling.brevmaler.Dokumentmalstype
-import no.nav.familie.tilbake.log.LogService
+import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -32,14 +32,13 @@ class SendManueltVarselbrevTask(
     private val manueltVarselBrevService: ManueltVarselbrevService,
     private val behandlingskontrollService: BehandlingskontrollService,
     private val oppgaveTaskService: OppgaveTaskService,
-    private val logService: LogService,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val taskdata: SendManueltVarselbrevTaskdata = objectMapper.readValue(task.payload)
         val behandling = behandlingRepository.findByIdOrThrow(taskdata.behandlingId)
-        val logContext = logService.contextFraBehandling(behandling.id)
         val maltype = taskdata.maltype
         val fritekst = taskdata.fritekst
+        val logContext = task.logContext()
 
         manueltVarselBrevService.sendVarselbrev(
             behandling = behandling,
@@ -56,6 +55,7 @@ class SendManueltVarselbrevTask(
             } har sendt varselbrev til bruker",
             frist = fristTid,
             saksbehandler = behandling.ansvarligSaksbehandler,
+            logContext = task.logContext(),
         )
         // Oppdaterer fristen dersom tasken har tidligere feilet. Behandling ble satt på vent i DokumentBehandlingService.
         if (task.opprettetTid.toLocalDate() < LocalDate.now()) {

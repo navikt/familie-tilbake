@@ -6,13 +6,13 @@ import no.nav.familie.kontrakter.felles.Regelverk
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Fagsak
+import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
@@ -46,7 +46,7 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
     private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
 
     @Autowired
-    private lateinit var taskService: TaskService
+    private lateinit var taskService: TracableTaskService
 
     @Autowired
     private lateinit var brevsporingRepository: BrevsporingRepository
@@ -220,8 +220,8 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `behandleAutomatisk skal ikke opprette tasker når det allerede finnes en feilede tasker`() {
-        val task = taskService.save(Task(type = AutomatiskSaksbehandlingTask.TYPE, payload = behandling.id.toString()))
-        taskService.save(taskService.findById(task.id).copy(status = Status.FEILET))
+        val task = taskService.save(Task(type = AutomatiskSaksbehandlingTask.TYPE, payload = behandling.id.toString()), SecureLog.Context.tom())
+        taskService.save(taskService.findById(task.id).copy(status = Status.FEILET), SecureLog.Context.tom())
 
         automatiskSaksbehandlingBatch.behandleAutomatisk()
         taskService
