@@ -52,7 +52,6 @@ class Fattevedtakssteg(
         logContext: SecureLog.Context,
     ) {
         val fatteVedtaksstegDto = behandlingsstegDto as BehandlingsstegFatteVedtaksstegDto
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
 
         // Steg 1: Validere behandlingens manuelle brevmottakere
         validerManuelleBrevmottakere(
@@ -71,6 +70,7 @@ class Fattevedtakssteg(
         // Steg 3: Lagre totrinnsvurderinger
         totrinnService.lagreTotrinnsvurderinger(behandlingId, fatteVedtaksstegDto.totrinnsvurderinger, logContext)
 
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         // Steg 4: Lukk Godkjenne vedtak oppgaver
         oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId = behandlingId, oppgavetype = Oppgavetype.GodkjenneVedtak.name)
 

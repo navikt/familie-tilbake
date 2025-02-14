@@ -99,8 +99,8 @@ class HistorikkService(
             Aktør.VEDTAKSLØSNING -> Constants.BRUKER_ID_VEDTAKSLØSNINGEN
             Aktør.SAKSBEHANDLER -> behandling.ansvarligSaksbehandler
             Aktør.BESLUTTER ->
-                behandling.ansvarligBeslutter
-                    ?: beslutter
+                beslutter
+                    ?: behandling.ansvarligBeslutter
                     ?: error("Beslutter mangler ident for behandling: ${behandling.id}")
         }
 
