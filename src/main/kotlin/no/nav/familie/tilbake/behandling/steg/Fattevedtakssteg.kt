@@ -9,6 +9,7 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
+import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.BrevmottakerAdresseValidering
@@ -83,7 +84,7 @@ class Fattevedtakssteg(
                 behandlingId,
                 TilbakekrevingHistorikkinnslagstype.BEHANDLING_SENDT_TILBAKE_TIL_SAKSBEHANDLER,
                 Aktør.BESLUTTER,
-                beslutter = behandling.ansvarligBeslutter,
+                beslutter = ContextService.hentPåloggetSaksbehandler(null, logContext),
             )
             totrinnService.fjernAnsvarligBeslutter(behandlingId)
             oppgaveTaskService.opprettOppgaveTask(

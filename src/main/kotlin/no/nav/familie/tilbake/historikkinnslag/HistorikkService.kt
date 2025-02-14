@@ -99,9 +99,9 @@ class HistorikkService(
             Aktør.VEDTAKSLØSNING -> Constants.BRUKER_ID_VEDTAKSLØSNINGEN
             Aktør.SAKSBEHANDLER -> behandling.ansvarligSaksbehandler
             Aktør.BESLUTTER ->
-                behandling.ansvarligBeslutter
-                    ?: beslutter
-                    ?: error("Beslutter mangler ident for behandling: ${behandling.id}")
+                beslutter
+                    ?: behandling.ansvarligBeslutter
+                    ?: error("Behandling: ${behandling.id} mangler ansvarlig beslutter")
         }
 
     private fun hentBrevdata(
