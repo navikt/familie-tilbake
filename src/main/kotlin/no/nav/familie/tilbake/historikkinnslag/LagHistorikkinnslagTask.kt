@@ -36,7 +36,20 @@ class LagHistorikkinnslagTask(
         val opprettetTidspunkt = LocalDateTime.parse(task.metadata.getProperty("opprettetTidspunkt"))
         val beskrivelse = task.metadata.getProperty("beskrivelse")
         val brevtype = task.metadata.getProperty("brevtype")
-        val beslutter = task.metadata.getProperty(PropertyName.BESLUTTER)
+        val beslutter =
+            task.metadata.getProperty(PropertyName.BESLUTTER) ?: "TBD".takeIf {
+                historikkinnslagstype == TilbakekrevingHistorikkinnslagstype.BEHANDLING_SENDT_TILBAKE_TIL_SAKSBEHANDLER &&
+                    behandlingId.toString() in
+                    setOf(
+                        "529ba021-8a96-440c-831c-f3e847915f54",
+                        "ab9501c1-6d83-4fea-8080-96c65f73459a",
+                        "b072cc7f-b4b2-45c0-ba0c-4e24004e3758",
+                        "e9be4a9d-66a1-45d6-92ef-7a46a38829a4",
+                        "fed36879-5032-4b59-8cf6-03878a6c25f2",
+                        "0e301b5b-0f96-42b1-9910-951882aeca1f",
+                        "906b0aef-0297-4d4b-9492-c98a2dfa0c2c",
+                    )
+            }
 
         historikkService.lagHistorikkinnslag(
             behandlingId,
