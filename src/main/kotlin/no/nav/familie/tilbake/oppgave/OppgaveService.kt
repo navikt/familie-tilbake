@@ -178,7 +178,7 @@ class OppgaveService(
             log.medContext(logContext) {
                 info(
                     "Det finnes allerede en oppgave $oppgavetype for behandling $behandlingId og " +
-                            "finnes ikke noen ferdigstilleoppgaver. Eksisterende oppgaven $oppgavetype må lukke først.",
+                        "finnes ikke noen ferdigstilleoppgaver. Eksisterende oppgaven $oppgavetype må lukke først.",
                 )
             }
             return
