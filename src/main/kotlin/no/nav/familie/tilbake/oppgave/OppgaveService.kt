@@ -168,15 +168,19 @@ class OppgaveService(
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsakId = behandling.fagsakId
         val fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
-        val aktørId = personService.hentAktivAktørId(fagsak.bruker.ident, fagsak.fagsystem)
+        val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandling.id.toString())
+
+        val aktørId = personService.hentAktivAktørId(fagsak.bruker.ident, fagsak.fagsystem, logContext)
 
         // Sjekk om oppgave allerede finnes for behandling
         val (_, finnOppgaveRespons) = finnOppgave(behandling, oppgavetype, fagsak)
         if (finnOppgaveRespons.oppgaver.isNotEmpty() && !finnesFerdigstillOppgaveForBehandling(behandlingId, oppgavetype) && oppgavetype != Oppgavetype.VurderHenvendelse) {
-            logger.info(
-                "Det finnes allerede en oppgave $oppgavetype for behandling $behandlingId og " +
-                    "finnes ikke noen ferdigstilleoppgaver. Eksisterende oppgaven $oppgavetype må lukke først.",
-            )
+            log.medContext(logContext) {
+                info(
+                    "Det finnes allerede en oppgave $oppgavetype for behandling $behandlingId og " +
+                            "finnes ikke noen ferdigstilleoppgaver. Eksisterende oppgaven $oppgavetype må lukke først.",
+                )
+            }
             return
         }
         val opprettOppgave =
@@ -202,13 +206,15 @@ class OppgaveService(
                 tilordnetRessurs = saksbehandler,
                 behandlingstype = Behandlingstype.Tilbakekreving.value,
                 behandlingstema = null,
-                mappeId = finnAktuellMappe(enhet, oppgavetype),
+                mappeId = finnAktuellMappe(enhet, oppgavetype, logContext),
                 prioritet = prioritet,
             )
 
         val oppgaveResponse = integrasjonerClient.opprettOppgave(opprettOppgave)
         antallOppgaveTyper[oppgavetype]!!.increment()
-        logger.info("Ny oppgave (id=${oppgaveResponse.oppgaveId}, type=$oppgavetype, frist=$fristForFerdigstillelse) opprettet for behandling $behandlingId")
+        log.medContext(logContext) {
+            info("Ny oppgave (id=${oppgaveResponse.oppgaveId}, type=$oppgavetype, frist=$fristForFerdigstillelse) opprettet for behandling $behandlingId")
+        }
     }
 
     fun hentOppgaveSomIkkeErFerdigstilt(
