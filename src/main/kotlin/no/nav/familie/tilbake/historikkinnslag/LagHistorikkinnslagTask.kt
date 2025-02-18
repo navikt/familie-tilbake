@@ -31,7 +31,7 @@ class LagHistorikkinnslagTask(
         val behandlingId: UUID = UUID.fromString(task.payload)
         val logContext = logService.contextFraBehandling(behandlingId)
         log.medContext(logContext) {
-            info("LagHistorikkinnslagTask prosesserer med id=${task.id} og metadata ${task.metadata}")
+            info("LagHistorikkinnslagTask prosesserer med id={} og metadata {}", task.id, task.metadata.toString())
         }
 
         val historikkinnslagstype =

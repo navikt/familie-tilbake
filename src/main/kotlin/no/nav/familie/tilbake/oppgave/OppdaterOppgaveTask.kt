@@ -8,7 +8,8 @@ import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.common.exceptionhandler.ManglerOppgaveFeil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
-import org.slf4j.LoggerFactory
+import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
+import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -28,10 +29,11 @@ class OppdaterOppgaveTask(
     private val oppgavePrioritetService: OppgavePrioritetService,
     private val behandlingRepository: BehandlingRepository,
 ) : AsyncTaskStep {
-    private val log = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<OppdaterOppgaveTask>()
 
     override fun doTask(task: Task) {
-        log.info("OppdaterOppgaveTask prosesserer med id=${task.id} og metadata ${task.metadata}")
+        val logContext = task.logContext()
+        log.medContext(logContext) { info("OppdaterOppgaveTask prosesserer med id={} og metadata {}", task.id, task.metadata.toString()) }
         if (environment.activeProfiles.contains("e2e")) return
 
         val frist = task.metadata.getProperty("frist")
@@ -51,7 +53,7 @@ class OppdaterOppgaveTask(
             try {
                 oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
             } catch (e: ManglerOppgaveFeil) {
-                log.error("Fant ingen oppgave å oppdatere på behandling $behandlingId.")
+                log.medContext(logContext) { error("Fant ingen oppgave å oppdatere på behandling {}.", behandlingId.toString()) }
                 throw e
             }
 

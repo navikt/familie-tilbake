@@ -38,7 +38,7 @@ class AutomatiskSaksbehandlingTask(
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val logContext = logService.contextFraBehandling(behandling.id)
         log.medContext(logContext) {
-            info("AutomatiskSaksbehandlingTask prosesserer med id=${task.id} og metadata ${task.metadata}")
+            info("AutomatiskSaksbehandlingTask prosesserer med id={} og metadata {}", task.id, task.metadata.toString())
         }
         validerOmAutomatiskBehandlingUnder4RettsgebyrErMulig(behandling, logContext)
         automatiskSaksbehandlingService.settSaksbehandlingstypeTilAutomatiskHvisOrdinær(behandlingId)

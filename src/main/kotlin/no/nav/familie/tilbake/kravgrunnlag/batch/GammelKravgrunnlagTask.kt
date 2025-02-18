@@ -38,7 +38,7 @@ class GammelKravgrunnlagTask(
         val logContext = SecureLog.Context.utenBehandling(eksternFagsakId)
 
         log.medContext(logContext) {
-            info("GammelKravgrunnlagTask prosesserer med id=${task.id} og metadata ${task.metadata}")
+            info("GammelKravgrunnlagTask prosesserer med id={} og metadata {}", task.id, task.metadata.toString())
         }
         val ytelsestype = mottattXml.ytelsestype
         val eksternId = mottattXml.referanse

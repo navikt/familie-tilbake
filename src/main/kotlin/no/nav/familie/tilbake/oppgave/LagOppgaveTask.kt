@@ -7,7 +7,8 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.config.PropertyName
-import org.slf4j.LoggerFactory
+import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
+import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.UUID
@@ -24,10 +25,11 @@ class LagOppgaveTask(
     private val behandlingskontrollService: BehandlingskontrollService,
     private val oppgavePrioritetService: OppgavePrioritetService,
 ) : AsyncTaskStep {
-    private val log = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<LagOppgaveTask>()
 
     override fun doTask(task: Task) {
-        log.info("LagOppgaveTask prosesserer med id=${task.id} og metadata ${task.metadata}")
+        val logContext = task.logContext()
+        log.medContext(logContext) { info("LagOppgaveTask prosesserer med id={} og metadata {}", task.id, task.metadata.toString()) }
         val oppgavetype = Oppgavetype.valueOf(task.metadata.getProperty("oppgavetype"))
         val saksbehandler = task.metadata.getProperty("saksbehandler")
         val enhet = task.metadata.getProperty(PropertyName.ENHET) ?: "" // elvis-operator for bakoverkompatibilitet
@@ -55,6 +57,7 @@ class LagOppgaveTask(
             LocalDate.now().plusWeeks(fristeUker),
             saksbehandler,
             prioritet,
+            logContext,
         )
     }
 

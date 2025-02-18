@@ -8,6 +8,7 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.UUID
@@ -26,6 +27,7 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask(
     val oppgavePrioritetService: OppgavePrioritetService,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
+        val logContext = task.logContext()
         val payload = objectMapper.readValue(task.payload, FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveDto::class.java)
         val behandling = behandlingRepository.findByIdOrThrow(payload.behandlingId)
         val godkjennVedtakOppgave = oppgaveService.hentOppgaveSomIkkeErFerdigstilt(behandling = behandling, oppgavetype = Oppgavetype.GodkjenneVedtak)
@@ -46,6 +48,7 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask(
             fristForFerdigstillelse = payload.frist,
             saksbehandler = behandling.ansvarligSaksbehandler,
             prioritet = prioritet,
+            logContext = logContext,
         )
     }
 

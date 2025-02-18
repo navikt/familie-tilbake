@@ -29,7 +29,7 @@ class SendSakshendelseTilDvhTask(
         val behandlingId = UUID.fromString(task.payload)
         val logContext = logService.contextFraBehandling(behandlingId)
         log.medContext(logContext) {
-            info("SendSakshendelseTilDvhTask prosesserer med id=${task.id} og metadata ${task.metadata}")
+            info("SendSakshendelseTilDvhTask prosesserer med id={} og metadata {}", task.id, task.metadata.toString())
         }
         val behandlingstilstand: Behandlingstilstand = objectMapper.readValue(task.metadata.getProperty("behandlingstilstand"))
         kafkaProducer.sendSaksdata(

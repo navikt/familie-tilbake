@@ -4,7 +4,8 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import org.slf4j.LoggerFactory
+import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
+import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -18,10 +19,10 @@ import java.util.UUID
 class FerdigstillOppgaveTask(
     private val oppgaveService: OppgaveService,
 ) : AsyncTaskStep {
-    private val log = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<FerdigstillOppgaveTask>()
 
     override fun doTask(task: Task) {
-        log.info("FerdigstillOppgaveTask prosesserer med id=${task.id} og metadata ${task.metadata}")
+        log.medContext(task.logContext()) { info("FerdigstillOppgaveTask prosesserer med id={} og metadata {}", task.id, task.metadata.toString()) }
         val oppgavetype =
             if (task.metadata.containsKey("oppgavetype")) {
                 Oppgavetype.valueOf(task.metadata.getProperty("oppgavetype"))

@@ -103,11 +103,11 @@ class OppgaveService(
         fristForFerdigstillelse: LocalDate,
         saksbehandler: String?,
         prioritet: OppgavePrioritet,
+        logContext: SecureLog.Context,
     ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsakId = behandling.fagsakId
         val fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
-        val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandling.id.toString())
         val aktørId = personService.hentAktivAktørId(fagsak.bruker.ident, fagsak.fagsystem, logContext)
 
         // Sjekk om oppgave allerede finnes for behandling

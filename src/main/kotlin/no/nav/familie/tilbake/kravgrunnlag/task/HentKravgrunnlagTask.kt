@@ -35,7 +35,7 @@ class HentKravgrunnlagTask(
         val behandlingId = UUID.fromString(task.payload)
         val logContext = logService.contextFraBehandling(behandlingId)
         log.medContext(logContext) {
-            info("HentKravgrunnlagTask prosesserer med id=${task.id} og metadata ${task.metadata}")
+            info("HentKravgrunnlagTask prosesserer med id={} og metadata {}", task.id, task.metadata.toString())
         }
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.type != Behandlingstype.REVURDERING_TILBAKEKREVING) {

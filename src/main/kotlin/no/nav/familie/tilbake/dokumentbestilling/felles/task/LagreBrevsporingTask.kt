@@ -14,7 +14,7 @@ import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.iverksettvedtak.task.AvsluttBehandlingTask
 import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
-import org.slf4j.LoggerFactory
+import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.UUID
@@ -32,10 +32,10 @@ class LagreBrevsporingTask(
     private val historikkService: HistorikkService,
     private val behandlingRepository: BehandlingRepository,
 ) : AsyncTaskStep {
-    private val log = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<LagreBrevsporingTask>()
 
     override fun doTask(task: Task) {
-        log.info("${this::class.simpleName} prosesserer med id=${task.id} og metadata ${task.metadata}")
+        log.medContext(task.logContext()) { info("{} prosesserer med id={} og metadata {}", this::class.simpleName, task.id, task.metadata.toString()) }
         val behandlingId = UUID.fromString(task.payload)
         val dokumentId = task.metadata.getProperty("dokumentId")
         val journalpostId = task.metadata.getProperty("journalpostId")

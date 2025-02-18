@@ -23,6 +23,7 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.data.Testdata.fagsak
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.person.PersonService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -88,6 +89,7 @@ class OppgaveServiceTest {
                 LocalDate.now().plusDays(5),
                 "bob",
                 OppgavePrioritet.NORM,
+                SecureLog.Context.tom(),
             )
 
             verify { integrasjonerClient.opprettOppgave(capture(slot)) }
@@ -106,6 +108,7 @@ class OppgaveServiceTest {
                 LocalDate.now().plusDays(5),
                 "bob",
                 OppgavePrioritet.NORM,
+                SecureLog.Context.tom(),
             )
 
             verify { integrasjonerClient.opprettOppgave(capture(slot)) }
@@ -125,6 +128,7 @@ class OppgaveServiceTest {
                 LocalDate.now().plusDays(5),
                 "bob",
                 OppgavePrioritet.NORM,
+                SecureLog.Context.tom(),
             )
             verify { integrasjonerClient.opprettOppgave(capture(slot)) }
 
@@ -144,6 +148,7 @@ class OppgaveServiceTest {
                 LocalDate.now().plusDays(5),
                 "bob",
                 OppgavePrioritet.NORM,
+                SecureLog.Context.tom(),
             )
             verify { integrasjonerClient.opprettOppgave(capture(slot)) }
 
@@ -169,6 +174,7 @@ class OppgaveServiceTest {
                 LocalDate.now().plusDays(5),
                 "bob",
                 OppgavePrioritet.NORM,
+                SecureLog.Context.tom(),
             )
             verify { integrasjonerClient.opprettOppgave(capture(slot)) }
 
@@ -195,6 +201,7 @@ class OppgaveServiceTest {
                 LocalDate.now().plusDays(5),
                 "bob",
                 OppgavePrioritet.NORM,
+                SecureLog.Context.tom(),
             )
             verify { integrasjonerClient.opprettOppgave(capture(slot)) }
 
@@ -213,6 +220,7 @@ class OppgaveServiceTest {
                 LocalDate.now().plusDays(5),
                 "bob",
                 OppgavePrioritet.NORM,
+                SecureLog.Context.tom(),
             )
 
             verify(exactly = 0) { integrasjonerClient.opprettOppgave(any()) }
@@ -237,6 +245,7 @@ class OppgaveServiceTest {
                     LocalDate.now().plusDays(5),
                     "bob",
                     OppgavePrioritet.NORM,
+                    SecureLog.Context.tom(),
                 )
             }
 

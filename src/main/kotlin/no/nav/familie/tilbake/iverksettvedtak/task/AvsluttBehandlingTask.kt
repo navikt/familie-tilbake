@@ -41,7 +41,7 @@ class AvsluttBehandlingTask(
         val behandlingId = UUID.fromString(task.payload)
         val logContext = logService.contextFraBehandling(behandlingId)
         log.medContext(logContext) {
-            info("AvsluttBehandlingTask prosesserer med id=${task.id} og metadata ${task.metadata}")
+            info("AvsluttBehandlingTask prosesserer med id={} og metadata {}", task.id, task.metadata.toString())
         }
 
         var behandling = behandlingRepository.findByIdOrThrow(behandlingId)

@@ -36,7 +36,7 @@ class SendØkonomiTilbakekrevingsvedtakTask(
         val behandlingId = UUID.fromString(task.payload)
         val logContext = logService.contextFraBehandling(behandlingId)
         log.medContext(logContext) {
-            info("SendØkonomiTilbakekrevingsvedtakTask prosesserer med id=${task.id} og metadata ${task.metadata}")
+            info("SendØkonomiTilbakekrevingsvedtakTask prosesserer med id={} og metadata {}", task.id, task.metadata.toString())
         }
         iverksettelseService.sendIverksettVedtak(behandlingId)
 

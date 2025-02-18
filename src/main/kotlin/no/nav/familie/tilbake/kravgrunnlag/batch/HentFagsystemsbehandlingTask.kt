@@ -6,7 +6,7 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
-import org.slf4j.LoggerFactory
+import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
@@ -24,10 +24,10 @@ class HentFagsystemsbehandlingTask(
     private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
     private val taskService: TracableTaskService,
 ) : AsyncTaskStep {
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<HentFagsystemsbehandlingTask>()
 
     override fun doTask(task: Task) {
-        logger.info("HentFagsystemsbehandlingTask prosesserer med id=${task.id} og metadata ${task.metadata}")
+        log.medContext(task.logContext()) { info("HentFagsystemsbehandlingTask prosesserer med id={} og metadata {}", task.id, task.metadata.toString()) }
         val mottattXmlId = UUID.fromString(task.payload)
         val mottattXml = gammelKravgrunnlagService.hentFrakobletKravgrunnlag(mottattXmlId)
         task.metadata["eksternFagsakId"] = mottattXml.eksternFagsakId
@@ -42,7 +42,7 @@ class HentFagsystemsbehandlingTask(
 
     @Transactional
     override fun onCompletion(task: Task) {
-        logger.info("Oppretter GammelKravgrunnlagTask for mottattXmlId=${task.payload}")
+        log.medContext(task.logContext()) { info("Oppretter GammelKravgrunnlagTask for mottattXmlId={}", task.payload) }
         taskService.save(
             Task(
                 type = GammelKravgrunnlagTask.TYPE,

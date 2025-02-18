@@ -13,8 +13,8 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
+import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -37,10 +37,11 @@ class DistribuerDokumentVedDødsfallTask(
     private val historikkService: HistorikkService,
     private val behandlingRepository: BehandlingRepository,
 ) : AsyncTaskStep {
-    private val logger: Logger = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<DistribuerDokumentVedDødsfallTask>()
 
     override fun doTask(task: Task) {
-        logger.info("${this::class.simpleName} prosesserer med id=${task.id} og metadata ${task.metadata}")
+        val logContext = task.logContext()
+        log.medContext(logContext) { info("{} prosesserer med id={} og metadata {}", this::class.simpleName, task.id, task.metadata.toString()) }
 
         val journalpostId = task.metadata.getProperty("journalpostId")
         val fagsystem = task.metadata.getProperty("fagsystem")
@@ -48,7 +49,7 @@ class DistribuerDokumentVedDødsfallTask(
         val erTaskEldreEnn6Mnd = task.opprettetTid.isBefore(LocalDateTime.now().minusMonths(6))
 
         if (erTaskEldreEnn6Mnd) {
-            logger.info("Stopper \"DistribuerDokumentVedDødsfallTask\" fordi den er eldre enn 6 måneder.")
+            log.medContext(logContext) { info("Stopper \"DistribuerDokumentVedDødsfallTask\" fordi den er eldre enn 6 måneder.") }
             opprettHistorikkinnslag(task, TilbakekrevingHistorikkinnslagstype.DISTRIBUSJON_BREV_DØDSBO_FEILET_6_MND, true)
         } else {
             try {
@@ -59,11 +60,11 @@ class DistribuerDokumentVedDødsfallTask(
                     Distribusjonstidspunkt.valueOf(task.metadata.getProperty("distribusjonstidspunkt")),
                 )
 
-                logger.info("Task \"DistribuerDokumentVedDødsfallTask\" har kjørt suksessfullt, og brev er sendt")
+                log.medContext(logContext) { info("Task \"DistribuerDokumentVedDødsfallTask\" har kjørt suksessfullt, og brev er sendt") }
                 opprettHistorikkinnslag(task, TilbakekrevingHistorikkinnslagstype.DISTRIBUSJON_BREV_DØDSBO_SUKSESS)
             } catch (ressursException: RessursException) {
                 if (mottakerErDødUtenDødsboadresse(ressursException)) {
-                    logger.info("Klarte ikke å distribuere journalpost $journalpostId for fagsystem $fagsystem. Prøver igjen om 7 dager.")
+                    log.medContext(logContext) { info("Klarte ikke å distribuere journalpost {} for fagsystem {}. Prøver igjen om 7 dager.", journalpostId, fagsystem) }
                     throw ressursException
                 } else {
                     throw ressursException

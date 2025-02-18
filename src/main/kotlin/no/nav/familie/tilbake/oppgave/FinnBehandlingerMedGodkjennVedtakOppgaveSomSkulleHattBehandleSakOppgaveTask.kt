@@ -10,9 +10,9 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.common.exceptionhandler.ManglerOppgaveFeil
-import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
-import org.slf4j.LoggerFactory
+import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
+import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.stereotype.Service
 
 @Service
@@ -26,11 +26,11 @@ class FinnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgaveTas
     val behandlingRepository: BehandlingRepository,
     val oppgaveService: OppgaveService,
     val behandlingskontrollService: BehandlingskontrollService,
-    private val logService: LogService,
 ) : AsyncTaskStep {
-    private val logger = LoggerFactory.getLogger(FinnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgaveTask::class.java)
+    private val log = TracedLogger.getLogger<FinnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgaveTask>()
 
     override fun doTask(task: Task) {
+        val logContext = task.logContext()
         val fagsystem = Fagsystem.valueOf(task.payload)
         val behandlingerMedTilbakeførtFatteVedtakSteg = behandlingRepository.hentÅpneBehandlingerMedTilbakeførtFatteVedtakSteg(fagsystem)
         val behandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave =
@@ -48,12 +48,12 @@ class FinnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgaveTas
 
         behandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave.forEach {
             SecureLog
-                .medContext(logService.contextFraBehandling(it.id)) {
-                    info("Behandlinger som mangler oppgave eller har feil åpen oppgave for fagsystem $fagsystem")
+                .medContext(logContext) {
+                    info("Behandlinger som mangler oppgave eller har feil åpen oppgave for fagsystem {}", fagsystem)
                 }
         }
         if (behandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave.isEmpty()) {
-            logger.info("Ingen behandlinger for fagsystem $fagsystem mangler oppgave eller har feil åpen oppgave.")
+            log.medContext(logContext) { info("Ingen behandlinger for fagsystem {} mangler oppgave eller har feil åpen oppgave.", fagsystem) }
         }
     }
 

@@ -74,6 +74,7 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
                 fristForFerdigstillelse,
                 null,
                 OppgavePrioritet.NORM,
+                any(),
             )
         }
     }
@@ -98,6 +99,7 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
                 fristForFerdigstillelse,
                 null,
                 OppgavePrioritet.NORM,
+                any(),
             )
         }
     }
@@ -117,6 +119,7 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
                 fristForFerdigstillelse = dagensDato,
                 saksbehandler = null,
                 OppgavePrioritet.NORM,
+                any(),
             )
         }
     }
@@ -137,6 +140,7 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
                 fristForFerdigstillelse = dagensDato,
                 saksbehandler = null,
                 OppgavePrioritet.NORM,
+                any(),
             )
         }
     }

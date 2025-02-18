@@ -5,7 +5,8 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.config.Constants
-import org.slf4j.LoggerFactory
+import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
+import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -21,10 +22,10 @@ import java.util.UUID
 class OppdaterEnhetOppgaveTask(
     private val oppgaveService: OppgaveService,
 ) : AsyncTaskStep {
-    private val log = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<OppdaterEnhetOppgaveTask>()
 
     override fun doTask(task: Task) {
-        log.info("OppdaterEnhetOppgaveTask prosesserer med id=${task.id} og metadata ${task.metadata}")
+        log.medContext(task.logContext()) { info("OppdaterEnhetOppgaveTask prosesserer med id={} og metadata {}", task.id, task.metadata.toString()) }
         val enhetId = task.metadata.getProperty("enhetId")
         val beskrivelse = task.metadata.getProperty("beskrivelse")
         val saksbehandler = task.metadata.getProperty("saksbehandler")

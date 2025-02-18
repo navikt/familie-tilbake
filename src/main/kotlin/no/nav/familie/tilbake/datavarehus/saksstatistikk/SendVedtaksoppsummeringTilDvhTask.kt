@@ -30,7 +30,7 @@ class SendVedtaksoppsummeringTilDvhTask(
         val behandlingId = UUID.fromString(task.payload)
         val logContext = logService.contextFraBehandling(behandlingId)
         log.medContext(logContext) {
-            info("SendVedtaksoppsummeringTilDvhTask prosesserer med id=${task.id} og metadata ${task.metadata}")
+            info("SendVedtaksoppsummeringTilDvhTask prosesserer med id={} og metadata {}", task.id, task.metadata.toString())
         }
         val vedtaksoppsummering: Vedtaksoppsummering = vedtaksoppsummeringService.hentVedtaksoppsummering(behandlingId)
         validate(vedtaksoppsummering)

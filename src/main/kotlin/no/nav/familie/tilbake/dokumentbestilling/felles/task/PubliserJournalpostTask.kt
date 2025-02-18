@@ -11,8 +11,9 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
-import org.slf4j.LoggerFactory
+import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -28,10 +29,11 @@ class PubliserJournalpostTask(
     private val integrasjonerClient: IntegrasjonerClient,
     private val taskService: TracableTaskService,
 ) : AsyncTaskStep {
-    private val log = LoggerFactory.getLogger(this::class.java)
+    private val log = TracedLogger.getLogger<PubliserJournalpostTask>()
 
     override fun doTask(task: Task) {
-        log.info("${this::class.simpleName} prosesserer med id=${task.id} og metadata ${task.metadata}")
+        val logContext = task.logContext()
+        log.medContext(logContext) { info("{} prosesserer med id={} og metadata {}", this::class.simpleName, task.id, task.metadata.toString()) }
 
         val journalpostId = task.metadata.getProperty("journalpostId")
         val (behandlingId, manuellAdresse) =
@@ -39,7 +41,7 @@ class PubliserJournalpostTask(
                 .readValue(task.payload, PubliserJournalpostTaskData::class.java)
                 .let { it.behandlingId to it.manuellAdresse }
 
-        prøvDistribuerJournalpost(journalpostId, task, behandlingId, manuellAdresse)
+        prøvDistribuerJournalpost(journalpostId, task, behandlingId, manuellAdresse, logContext)
     }
 
     private fun prøvDistribuerJournalpost(
@@ -47,6 +49,7 @@ class PubliserJournalpostTask(
         task: Task,
         behandlingId: UUID,
         manuellAdresse: ManuellAdresse? = null,
+        logContext: SecureLog.Context,
     ) {
         try {
             integrasjonerClient.distribuerJournalpost(
@@ -70,9 +73,9 @@ class PubliserJournalpostTask(
                 }
 
                 dokumentetErAlleredeDistribuert(ressursException) -> {
-                    log.warn(
-                        "Journalpost med Id=$journalpostId er allerede distiribuert. Hopper over distribuering. BehandlingId=$behandlingId.",
-                    )
+                    log.medContext(logContext) {
+                        warn("Journalpost med Id={} er allerede distiribuert. Hopper over distribuering. BehandlingId={}.", journalpostId, behandlingId)
+                    }
                 }
 
                 else -> throw ressursException
