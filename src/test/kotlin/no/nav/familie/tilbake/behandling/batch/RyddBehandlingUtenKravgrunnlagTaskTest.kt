@@ -2,11 +2,14 @@ package no.nav.familie.tilbake.behandling.batch
 
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.matchers.booleans.shouldBeFalse
-import io.kotest.matchers.booleans.shouldBeTrue
 import io.mockk.clearMocks
 import io.mockk.every
+import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.verify
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
@@ -15,19 +18,18 @@ import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.common.ContextService
-import no.nav.familie.tilbake.common.fagsystem
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.oppgave.LagOppgaveTask
-import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.InnloggetBrukertilgang
-import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
+import no.nav.familie.tilbake.oppgave.OppgaveService
+import no.nav.familie.tilbake.person.PersonService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
 import java.util.Properties
 import java.util.UUID
 
@@ -50,11 +52,15 @@ internal class RyddBehandlingUtenKravgrunnlagTaskTest : OppslagSpringRunnerTest(
     @Autowired
     private lateinit var taskService: TaskService
 
+    @Autowired
+    private lateinit var oppgaveService: OppgaveService
+
+    val personService: PersonService = mockk()
+
     @BeforeEach
     fun init() {
         mockkObject(ContextService)
-        every { ContextService.hentSaksbehandler(any()) }.returns("Z0000")
-        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }.returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.SYSTEM_TILGANG to Behandlerrolle.SYSTEM)))
+        every { personService.hentAktivAktørId(any(), any(), any()) } returns "123456789"
     }
 
     @AfterEach
@@ -67,32 +73,29 @@ internal class RyddBehandlingUtenKravgrunnlagTaskTest : OppslagSpringRunnerTest(
         fagsakRepository.insert(Testdata.fagsak)
         val behandling = behandlingRepository.insert(Testdata.lagBehandling().copy(status = Behandlingsstatus.UTREDES))
         brevsporingRepository.insert(Testdata.lagBrevsporing(behandling.id))
-
-        shouldNotThrow<RuntimeException> { ryddBehandlingUtenKravgrunnlagTask.doTask(lagTask(behandling.id)) }
-
-        taskService
-            .findAll()
-            .any {
-                it.type == LagOppgaveTask.TYPE &&
-                    it.payload == behandling.id.toString()
-            }.shouldBeTrue()
-        val opprettetTask = taskService.finnTaskMedPayloadOgType(behandling.id.toString(), LagOppgaveTask.TYPE)
-
+        val fristForFerdigstillelse = LocalDate.now().plusDays(7)
+        val prioritet = OppgavePrioritet.NORM
         val beskrivelse =
-            "Tilbakekrevingsbehandlingen for stønad ${opprettetTask?.fagsystem()} opprettet ${behandling.opprettetDato} ble opprettet for over 8 uker siden og har ikke mottatt kravgrunnlag. " +
+            "Tilbakekrevingsbehandlingen for stønad ${Fagsystem.BA.name} opprettet ${behandling.opprettetDato} ble opprettet for over 8 uker siden og har ikke mottatt kravgrunnlag. " +
                 "Med mindre det er foretatt en revurdering med tilbakekrevingsbeløp i dag eller de siste dagene for stønaden, så vil det ikke oppstå et kravgrunnlag i dette tilfellet. Tilbakekrevingsbehandlingen kan derfor henlegges manuelt."
 
-        println("${opprettetTask?.metadata?.getProperty("beskrivelse")}")
-
-        Assertions.assertEquals(beskrivelse, opprettetTask?.metadata?.getProperty("beskrivelse"))
-        Assertions.assertEquals(behandlingService.hentBehandling(behandling.id).status, Behandlingsstatus.UTREDES)
+        verify(exactly = 1) {
+            oppgaveService.opprettOppgaveUtenSaksIdOgBehandlesAvApplikasjon(
+                behandling.id,
+                Oppgavetype.VurderHenvendelse,
+                behandling.behandlendeEnhet,
+                beskrivelse,
+                fristForFerdigstillelse,
+                behandling.ansvarligSaksbehandler,
+                prioritet,
+            )
+        }
     }
 
     @Test
     fun `skal hennlegge behandling uten kravgrunnlag som ikke har sendt brev`() {
         fagsakRepository.insert(Testdata.fagsak)
         val behandling = behandlingRepository.insert(Testdata.lagBehandling().copy(status = Behandlingsstatus.UTREDES))
-        // brevsporingRepository.insert(Testdata.lagBrevsporing(behandling.id))
 
         shouldNotThrow<RuntimeException> { ryddBehandlingUtenKravgrunnlagTask.doTask(lagTask(behandling.id)) }
 

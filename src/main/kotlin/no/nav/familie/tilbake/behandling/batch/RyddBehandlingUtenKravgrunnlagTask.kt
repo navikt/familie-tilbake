@@ -18,7 +18,10 @@ import no.nav.familie.tilbake.dokumentbestilling.henleggelse.SendBrevTaskdata
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
+import no.nav.familie.tilbake.oppgave.OppgavePrioritetService
+import no.nav.familie.tilbake.oppgave.OppgaveService
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Properties
 import java.util.UUID
@@ -36,6 +39,8 @@ class RyddBehandlingUtenKravgrunnlagTask(
     private val brevSporingService: BrevsporingService,
     private val oppgaveTaskService: OppgaveTaskService,
     private val logService: LogService,
+    private val oppgaveService: OppgaveService,
+    private val oppgavePrioritetService: OppgavePrioritetService,
 ) : AsyncTaskStep {
     private val log = TracedLogger.getLogger<RyddBehandlingUtenKravgrunnlagTask>()
 
@@ -48,10 +53,21 @@ class RyddBehandlingUtenKravgrunnlagTask(
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
 
         if (brevSporingService.erVarselSendt(behandlingId)) {
+            val prioritet = oppgavePrioritetService.utledOppgaveprioritet(behandling.id)
+            val fristForFerdigstillelse = LocalDate.now().plusDays(7)
+
             val beskrivelse =
                 "Tilbakekrevingsbehandlingen for stønad ${task.fagsystem()} opprettet ${behandling.opprettetDato} ble opprettet for over 8 uker siden og har ikke mottatt kravgrunnlag. " +
                     "Med mindre det er foretatt en revurdering med tilbakekrevingsbeløp i dag eller de siste dagene for stønaden, så vil det ikke oppstå et kravgrunnlag i dette tilfellet. Tilbakekrevingsbehandlingen kan derfor henlegges manuelt."
-            oppgaveTaskService.opprettOppgaveTask(behandling, Oppgavetype.VurderHenvendelse, beskrivelse = beskrivelse, logContext = logContext)
+            oppgaveService.opprettOppgaveUtenSaksIdOgBehandlesAvApplikasjon(
+                behandlingId,
+                Oppgavetype.VurderHenvendelse,
+                behandling.behandlendeEnhet,
+                beskrivelse,
+                fristForFerdigstillelse,
+                behandling.ansvarligSaksbehandler,
+                prioritet,
+            )
         } else {
             behandlingService.henleggBehandling(
                 behandling.id,
