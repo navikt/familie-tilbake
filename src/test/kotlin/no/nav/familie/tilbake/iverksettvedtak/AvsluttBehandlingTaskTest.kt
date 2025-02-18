@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.iverksettvedtak
 
+import io.kotest.inspectors.forOne
 import io.kotest.matchers.shouldBe
-import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
@@ -17,7 +17,8 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstan
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.historikkinnslag.Aktør
-import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
+import no.nav.familie.tilbake.historikkinnslag.HistorikkService
+import no.nav.familie.tilbake.historikkinnslag.Historikkinnslag
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.iverksettvedtak.task.AvsluttBehandlingTask
 import org.junit.jupiter.api.BeforeEach
@@ -41,6 +42,9 @@ internal class AvsluttBehandlingTaskTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var avsluttBehandlingTask: AvsluttBehandlingTask
+
+    @Autowired
+    private lateinit var historikkService: HistorikkService
 
     private lateinit var fagsak: Fagsak
     private lateinit var behandling: Behandling
@@ -72,18 +76,18 @@ internal class AvsluttBehandlingTaskTest : OppslagSpringRunnerTest() {
         behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         behandling.status shouldBe Behandlingsstatus.AVSLUTTET
 
-        val stegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
-        stegstilstand.size shouldBe 1
-        stegstilstand[0].behandlingssteg shouldBe Behandlingssteg.AVSLUTTET
-        stegstilstand[0].behandlingsstegsstatus shouldBe Behandlingsstegstatus.UTFØRT
+        behandlingsstegstilstandRepository.findByBehandlingId(behandlingId).forOne {
+            it.behandlingssteg shouldBe Behandlingssteg.AVSLUTTET
+            it.behandlingsstegsstatus shouldBe Behandlingsstegstatus.UTFØRT
+        }
 
-        val tasker = taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET))
-        val historikkTask = tasker.first { it.type == LagHistorikkinnslagTask.TYPE }
-        historikkTask.type shouldBe LagHistorikkinnslagTask.TYPE
-        historikkTask.payload shouldBe behandlingId.toString()
-        val taskProperty = historikkTask.metadata
-        taskProperty["aktør"] shouldBe Aktør.VEDTAKSLØSNING.name
-        taskProperty["historikkinnslagstype"] shouldBe TilbakekrevingHistorikkinnslagstype.BEHANDLING_AVSLUTTET.name
+        historikkService.hentHistorikkinnslag(behandling.id).forOne {
+            it.type shouldBe TilbakekrevingHistorikkinnslagstype.BEHANDLING_AVSLUTTET.type
+            it.tittel shouldBe TilbakekrevingHistorikkinnslagstype.BEHANDLING_AVSLUTTET.tittel
+            it.tekst shouldBe TilbakekrevingHistorikkinnslagstype.BEHANDLING_AVSLUTTET.tekst
+            it.aktør shouldBe Historikkinnslag.Aktør.VEDTAKSLØSNING
+            it.opprettetAv shouldBe Aktør.Vedtaksløsning.ident
+        }
     }
 
     @Test

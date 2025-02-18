@@ -25,7 +25,7 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.SendVedtaksbrevTask
 import no.nav.familie.tilbake.historikkinnslag.Aktør
-import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.AnnulerKravgrunnlagService
 import no.nav.familie.tilbake.kravgrunnlag.HentKravgrunnlagService
@@ -44,6 +44,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigInteger
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -58,7 +59,7 @@ class ForvaltningService(
     private val stegService: StegService,
     private val behandlingskontrollService: BehandlingskontrollService,
     private val behandlingTilstandService: BehandlingTilstandService,
-    private val historikkTaskService: HistorikkTaskService,
+    private val historikkService: HistorikkService,
     private val oppgaveTaskService: OppgaveTaskService,
     private val tellerService: TellerService,
     private val taskService: TracableTaskService,
@@ -190,10 +191,11 @@ class ForvaltningService(
         )
         behandlingTilstandService.opprettSendingAvBehandlingenHenlagt(behandlingId, logContext)
 
-        historikkTaskService.lagHistorikkTask(
+        historikkService.lagHistorikkinnslag(
             behandlingId = behandlingId,
             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
-            aktør = Aktør.SAKSBEHANDLER,
+            aktør = Aktør.Saksbehandler.fraBehandling(behandlingId, behandlingRepository),
+            opprettetTidspunkt = LocalDateTime.now(),
             beskrivelse = "",
         )
         oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId)
@@ -210,10 +212,11 @@ class ForvaltningService(
         endretKravgrunnlagEventPublisher.fireEvent(behandlingId)
         behandlingskontrollService.behandleStegPåNytt(behandlingId, Behandlingssteg.FAKTA, logContext)
 
-        historikkTaskService.lagHistorikkTask(
+        historikkService.lagHistorikkinnslag(
             behandlingId,
             TilbakekrevingHistorikkinnslagstype.BEHANDLING_FLYTTET_MED_FORVALTNING,
-            Aktør.VEDTAKSLØSNING,
+            Aktør.Vedtaksløsning,
+            LocalDateTime.now(),
         )
     }
 

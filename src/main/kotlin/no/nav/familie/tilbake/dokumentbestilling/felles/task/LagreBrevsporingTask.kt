@@ -3,18 +3,20 @@ package no.nav.familie.tilbake.dokumentbestilling.felles.task
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingService
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.historikkinnslag.Aktør
-import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.iverksettvedtak.task.AvsluttBehandlingTask
 import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -27,18 +29,20 @@ import java.util.UUID
 class LagreBrevsporingTask(
     private val brevsporingService: BrevsporingService,
     private val taskService: TracableTaskService,
-    private val historikkTaskService: HistorikkTaskService,
+    private val historikkService: HistorikkService,
+    private val behandlingRepository: BehandlingRepository,
 ) : AsyncTaskStep {
     private val log = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {
         log.info("${this::class.simpleName} prosesserer med id=${task.id} og metadata ${task.metadata}")
+        val behandlingId = UUID.fromString(task.payload)
         val dokumentId = task.metadata.getProperty("dokumentId")
         val journalpostId = task.metadata.getProperty("journalpostId")
         val brevtype = Brevtype.valueOf(task.metadata.getProperty("brevtype"))
 
         brevsporingService.lagreInfoOmUtsendtBrev(
-            UUID.fromString(task.payload),
+            behandlingId,
             dokumentId,
             journalpostId,
             brevtype,
@@ -46,6 +50,7 @@ class LagreBrevsporingTask(
     }
 
     override fun onCompletion(task: Task) {
+        val behandlingId = UUID.fromString(task.payload)
         val mottager = Brevmottager.valueOf(task.metadata.getProperty("mottager"))
         val brevtype = Brevtype.valueOf(task.metadata.getProperty("brevtype"))
         val ansvarligSaksbehandler = task.metadata.getProperty("ansvarligSaksbehandler")
@@ -54,26 +59,29 @@ class LagreBrevsporingTask(
         val opprinneligHistorikkinnslagstype = utledHistorikkinnslagType(brevtype, mottager)
 
         if (ukjentAdresse) {
-            historikkTaskService.lagHistorikkTask(
-                behandlingId = UUID.fromString(task.payload),
+            historikkService.lagHistorikkinnslag(
+                behandlingId = behandlingId,
                 historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREV_IKKE_SENDT_UKJENT_ADRESSE,
-                aktør = utledAktør(brevtype, ansvarligSaksbehandler),
+                aktør = utledAktør(brevtype, ansvarligSaksbehandler, behandlingId, behandlingRepository),
+                opprettetTidspunkt = LocalDateTime.now(),
                 beskrivelse = opprinneligHistorikkinnslagstype.tekst,
                 brevtype = brevtype,
             )
         } else if (dødsboUkjentAdresse) {
-            historikkTaskService.lagHistorikkTask(
-                behandlingId = UUID.fromString(task.payload),
+            historikkService.lagHistorikkinnslag(
+                behandlingId = behandlingId,
                 historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREV_IKKE_SENDT_DØDSBO_UKJENT_ADRESSE,
-                aktør = utledAktør(brevtype, ansvarligSaksbehandler),
+                aktør = utledAktør(brevtype, ansvarligSaksbehandler, behandlingId, behandlingRepository),
+                opprettetTidspunkt = LocalDateTime.now(),
                 beskrivelse = opprinneligHistorikkinnslagstype.tekst,
                 brevtype = brevtype,
             )
         } else {
-            historikkTaskService.lagHistorikkTask(
-                behandlingId = UUID.fromString(task.payload),
+            historikkService.lagHistorikkinnslag(
+                behandlingId = behandlingId,
                 historikkinnslagstype = opprinneligHistorikkinnslagstype,
-                aktør = utledAktør(brevtype, ansvarligSaksbehandler),
+                aktør = utledAktør(brevtype, ansvarligSaksbehandler, behandlingId, behandlingRepository),
+                opprettetTidspunkt = LocalDateTime.now(),
                 brevtype = brevtype,
             )
         }
@@ -115,13 +123,15 @@ class LagreBrevsporingTask(
         fun utledAktør(
             brevtype: Brevtype,
             ansvarligSaksbehandler: String?,
+            behandlingId: UUID,
+            behandlingRepository: BehandlingRepository,
         ): Aktør =
             when {
-                brevtype == Brevtype.INNHENT_DOKUMENTASJON -> Aktør.SAKSBEHANDLER
-                brevtype == Brevtype.KORRIGERT_VARSEL -> Aktør.SAKSBEHANDLER
+                brevtype == Brevtype.INNHENT_DOKUMENTASJON -> Aktør.Saksbehandler.fraBehandling(behandlingId, behandlingRepository)
+                brevtype == Brevtype.KORRIGERT_VARSEL -> Aktør.Saksbehandler.fraBehandling(behandlingId, behandlingRepository)
                 !ansvarligSaksbehandler.isNullOrEmpty() && ansvarligSaksbehandler != Constants.BRUKER_ID_VEDTAKSLØSNINGEN ->
-                    Aktør.SAKSBEHANDLER
-                else -> Aktør.VEDTAKSLØSNING
+                    Aktør.Saksbehandler.fraBehandling(behandlingId, behandlingRepository)
+                else -> Aktør.Vedtaksløsning
             }
 
         const val TYPE = "lagreBrevsporing"

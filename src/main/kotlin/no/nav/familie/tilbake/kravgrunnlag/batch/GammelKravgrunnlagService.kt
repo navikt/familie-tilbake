@@ -172,7 +172,7 @@ class GammelKravgrunnlagService(
         historikkService.lagHistorikkinnslag(
             behandlingId = behandlingId,
             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_HENT,
-            aktør = Aktør.VEDTAKSLØSNING,
+            aktør = Aktør.Vedtaksløsning,
             opprettetTidspunkt = LocalDateTime.now(),
         )
 
@@ -278,7 +278,7 @@ class GammelKravgrunnlagService(
         historikkService.lagHistorikkinnslag(
             behandlingId = behandlingId,
             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
-            aktør = Aktør.VEDTAKSLØSNING,
+            aktør = Aktør.Vedtaksløsning,
             beskrivelse = venteårsak.beskrivelse,
             opprettetTidspunkt = LocalDateTime.now(),
         )

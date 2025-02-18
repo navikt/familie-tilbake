@@ -13,7 +13,7 @@ import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEventPublisher
@@ -34,7 +34,7 @@ class KravgrunnlagServiceTest {
     private val taskService: TracableTaskService = mockk()
     private val tellerService: TellerService = mockk()
     private val oppgaveTaskService: OppgaveTaskService = mockk()
-    private val historikkTaskService: HistorikkTaskService = mockk()
+    private val historikkService: HistorikkService = mockk()
     private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService = mockk()
     private val endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher = mockk()
     private val behandlingService: BehandlingService = mockk()
@@ -49,7 +49,7 @@ class KravgrunnlagServiceTest {
             taskService = taskService,
             tellerService = tellerService,
             oppgaveTaskService = oppgaveTaskService,
-            historikkTaskService = historikkTaskService,
+            historikkService = historikkService,
             hentFagsystemsbehandlingService = hentFagsystemsbehandlingService,
             endretKravgrunnlagEventPublisher = endretKravgrunnlagEventPublisher,
             behandlingService = behandlingService,

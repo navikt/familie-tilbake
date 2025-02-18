@@ -14,7 +14,10 @@ import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.data.Testdata.lagBehandling
-import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.historikkinnslag.Aktør
+import no.nav.familie.tilbake.historikkinnslag.HistorikkService
+import no.nav.familie.tilbake.historikkinnslag.Historikkinnslag
+import no.nav.familie.tilbake.historikkinnslag.Historikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.oppgave.OppgaveService
@@ -23,6 +26,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import java.time.LocalDateTime
 
 class KravvedtakstatusServiceTest {
     private val kravgrunnlagRepository: KravgrunnlagRepository = mockk()
@@ -32,7 +36,7 @@ class KravvedtakstatusServiceTest {
     private val tellerService: TellerService = mockk()
     private val behandlingskontrollService: BehandlingskontrollService = mockk()
     private val behandlingService: BehandlingService = mockk()
-    private val historikkTaskService: HistorikkTaskService = mockk()
+    private val historikkService: HistorikkService = mockk()
     private val oppgaveTaskService: OppgaveTaskService = mockk()
     private val oppgaveService: OppgaveService = mockk()
     private val kravvedtakstatusService =
@@ -44,7 +48,7 @@ class KravvedtakstatusServiceTest {
             tellerService = tellerService,
             behandlingskontrollService = behandlingskontrollService,
             behandlingService = behandlingService,
-            historikkTaskService = historikkTaskService,
+            historikkService = historikkService,
             oppgaveTaskService = oppgaveTaskService,
             oppgaveService = oppgaveService,
         )
@@ -56,7 +60,15 @@ class KravvedtakstatusServiceTest {
     fun beforeAll() {
         every { kravgrunnlagRepository.update(any()) } returns kravgrunnlag
         every { behandlingskontrollService.tilbakehoppBehandlingssteg(any(), any(), any()) } just runs
-        every { historikkTaskService.lagHistorikkTask(any(), any(), any(), any(), any(), any(), any()) } just runs
+        every { historikkService.lagHistorikkinnslag(any(), any(), any(), any(), any(), any(), any()) } returns
+            Historikkinnslag(
+                behandlingId = behandling.id,
+                aktør = Historikkinnslag.Aktør.BESLUTTER,
+                type = Historikkinnslagstype.HENDELSE,
+                opprettetTid = LocalDateTime.now(),
+                tittel = "TEST",
+                opprettetAv = behandling.ansvarligSaksbehandler,
+            )
         every { oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(any()) } returns Oppgave(oppgavetype = Oppgavetype.GodkjenneVedtak.name)
         every { oppgaveTaskService.ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgave(any(), any(), any(), any()) } just runs
         every { oppgaveTaskService.oppdaterOppgaveTask(any(), any(), any(), any(), any()) } just runs

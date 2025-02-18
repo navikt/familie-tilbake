@@ -18,7 +18,7 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
 import no.nav.familie.tilbake.historikkinnslag.Aktør
-import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.log.SecureLog
@@ -26,6 +26,7 @@ import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -34,7 +35,7 @@ class BehandlingskontrollService(
     private val behandlingRepository: BehandlingRepository,
     private val behandlingTilstandService: BehandlingTilstandService,
     private val kravgrunnlagRepository: KravgrunnlagRepository,
-    private val historikkTaskService: HistorikkTaskService,
+    private val historikkService: HistorikkService,
     private val brevmottakerRepository: ManuellBrevmottakerRepository,
 ) {
     private val log = TracedLogger.getLogger<BehandlingskontrollService>()
@@ -55,13 +56,13 @@ class BehandlingskontrollService(
             val nesteStegMetaData = finnNesteBehandlingsstegMedStatus(behandling, behandlingsstegstilstand)
             persisterBehandlingsstegOgStatus(behandlingId, nesteStegMetaData, logContext)
             if (nesteStegMetaData.behandlingsstegstatus == VENTER) {
-                historikkTaskService
-                    .lagHistorikkTask(
-                        behandlingId = behandlingId,
-                        historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
-                        aktør = Aktør.VEDTAKSLØSNING,
-                        beskrivelse = nesteStegMetaData.venteårsak?.beskrivelse,
-                    )
+                historikkService.lagHistorikkinnslag(
+                    behandlingId = behandlingId,
+                    historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
+                    aktør = Aktør.Vedtaksløsning,
+                    opprettetTidspunkt = LocalDateTime.now(),
+                    beskrivelse = nesteStegMetaData.venteårsak?.beskrivelse,
+                )
             }
         } else {
             log.medContext(logContext) {
@@ -220,10 +221,11 @@ class BehandlingskontrollService(
         // oppdater tilsvarende behandlingsstatus
         oppdaterBehandlingsstatus(behandlingId, aktivtBehandlingsstegstilstand.behandlingssteg)
 
-        historikkTaskService.lagHistorikkTask(
+        historikkService.lagHistorikkinnslag(
             behandlingId = behandlingId,
             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
-            aktør = Aktør.SAKSBEHANDLER,
+            aktør = Aktør.Saksbehandler.fraBehandling(behandlingId, behandlingRepository),
+            opprettetTidspunkt = LocalDateTime.now(),
             beskrivelse = venteårsak.beskrivelse,
         )
     }

@@ -4,7 +4,6 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevsporing
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
@@ -37,24 +36,23 @@ class HistorikkService(
         aktør: Aktør,
         opprettetTidspunkt: LocalDateTime,
         beskrivelse: String? = null,
-        brevtype: String? = null,
-        beslutter: String? = null,
+        brevtype: Brevtype? = null,
         tittel: String? = null,
     ): Historikkinnslag {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        val brevdata = hentBrevdata(behandling, brevtype)
+        val brevdata = hentBrevdata(behandling, brevtype?.name)
 
         val historikkinnslag =
             Historikkinnslag(
                 behandlingId = behandlingId,
-                aktør = aktør,
+                aktør = aktør.type,
                 type = historikkinnslagstype.type,
                 tittel = tittel ?: historikkinnslagstype.tittel,
-                tekst = lagTekst(behandling, historikkinnslagstype, beskrivelse),
+                tekst = lagTekst(behandling, historikkinnslagstype, beskrivelse?.replace("\r", "")?.replace("\n", " ")),
                 steg = historikkinnslagstype.steg?.name,
                 journalpostId = brevdata?.journalpostId,
                 dokumentId = brevdata?.dokumentId,
-                opprettetAv = hentAktørIdent(behandling, aktør, beslutter),
+                opprettetAv = aktør.ident,
                 opprettetTid = opprettetTidspunkt,
             )
         return historikkinnslagRepository.insert(historikkinnslag)
@@ -88,20 +86,6 @@ class HistorikkService(
             DISTRIBUSJON_BREV_DØDSBO_FEILET_6_MND -> "${historikkinnslagstype.tekst}. $beskrivelse er ikke sendt"
             BREVMOTTAKER_ENDRET, BREVMOTTAKER_LAGT_TIL, BREVMOTTAKER_FJERNET -> beskrivelse
             else -> historikkinnslagstype.tekst
-        }
-
-    private fun hentAktørIdent(
-        behandling: Behandling,
-        aktør: Aktør,
-        beslutter: String?,
-    ): String =
-        when (aktør) {
-            Aktør.VEDTAKSLØSNING -> Constants.BRUKER_ID_VEDTAKSLØSNINGEN
-            Aktør.SAKSBEHANDLER -> behandling.ansvarligSaksbehandler
-            Aktør.BESLUTTER ->
-                beslutter
-                    ?: behandling.ansvarligBeslutter
-                    ?: error("Beslutter mangler ident for behandling: ${behandling.id}")
         }
 
     private fun hentBrevdata(

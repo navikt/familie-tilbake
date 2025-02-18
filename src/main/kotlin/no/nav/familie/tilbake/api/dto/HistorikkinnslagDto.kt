@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 data class HistorikkinnslagDto(
     val behandlingId: String,
     val type: Historikkinnslagstype,
-    val aktør: Aktør,
+    val aktør: AktørDto,
     val aktørIdent: String,
     val tittel: String,
     val tekst: String? = null,
@@ -16,13 +16,24 @@ data class HistorikkinnslagDto(
     val journalpostId: String? = null,
     val dokumentId: String? = null,
     val opprettetTid: LocalDateTime,
-)
+) {
+    enum class AktørDto {
+        SAKSBEHANDLER,
+        BESLUTTER,
+        VEDTAKSLØSNING,
+    }
+}
 
 fun Historikkinnslag.tilDto() =
     HistorikkinnslagDto(
         behandlingId = behandlingId.toString(),
         type = type,
-        aktør = aktør,
+        aktør =
+            when (aktør) {
+                Historikkinnslag.Aktør.BESLUTTER -> HistorikkinnslagDto.AktørDto.BESLUTTER
+                Historikkinnslag.Aktør.SAKSBEHANDLER -> HistorikkinnslagDto.AktørDto.SAKSBEHANDLER
+                Historikkinnslag.Aktør.VEDTAKSLØSNING -> HistorikkinnslagDto.AktørDto.VEDTAKSLØSNING
+            },
         aktørIdent = opprettetAv,
         tittel = tittel,
         tekst = tekst,

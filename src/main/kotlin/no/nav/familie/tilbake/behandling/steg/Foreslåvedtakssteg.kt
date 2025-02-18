@@ -18,7 +18,7 @@ import no.nav.familie.tilbake.config.FeatureToggleConfig
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevService
 import no.nav.familie.tilbake.historikkinnslag.Aktør
-import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEvent
 import no.nav.familie.tilbake.log.SecureLog
@@ -40,7 +40,7 @@ class Foreslåvedtakssteg(
     private val behandlingskontrollService: BehandlingskontrollService,
     private val vedtaksbrevService: VedtaksbrevService,
     private val oppgaveTaskService: OppgaveTaskService,
-    private val historikkTaskService: HistorikkTaskService,
+    private val historikkService: HistorikkService,
     private val oppgaveService: OppgaveService,
     private val totrinnService: TotrinnService,
     private val featureToggleService: FeatureToggleService,
@@ -73,10 +73,11 @@ class Foreslåvedtakssteg(
         val foreslåvedtaksstegDto = behandlingsstegDto as BehandlingsstegForeslåVedtaksstegDto
         vedtaksbrevService.lagreFriteksterFraSaksbehandler(behandlingId, foreslåvedtaksstegDto.fritekstavsnitt, logContext)
 
-        historikkTaskService.lagHistorikkTask(
+        historikkService.lagHistorikkinnslag(
             behandlingId,
             TilbakekrevingHistorikkinnslagstype.FORESLÅ_VEDTAK_VURDERT,
-            Aktør.SAKSBEHANDLER,
+            Aktør.Saksbehandler.fraBehandling(behandlingId, behandlingRepository),
+            LocalDateTime.now(),
         )
 
         flyttBehandlingVidere(behandlingId, logContext)
@@ -84,13 +85,13 @@ class Foreslåvedtakssteg(
         ferdigstillOppgave(behandling, logContext)
         opprettGodkjennevedtakOppgave(behandlingId, logContext)
 
-        historikkTaskService.lagHistorikkTask(
+        historikkService.lagHistorikkinnslag(
             behandlingId = behandlingId,
             historikkinnslagstype =
                 TilbakekrevingHistorikkinnslagstype
                     .BEHANDLING_SENDT_TIL_BESLUTTER,
-            aktør = Aktør.SAKSBEHANDLER,
-            triggerTid = LocalDateTime.now().plusSeconds(2),
+            aktør = Aktør.Saksbehandler.fraBehandling(behandlingId, behandlingRepository),
+            opprettetTidspunkt = LocalDateTime.now().plusSeconds(2),
         )
     }
 
@@ -102,10 +103,11 @@ class Foreslåvedtakssteg(
         log.medContext(logContext) {
             info("Behandling $behandlingId er på ${Behandlingssteg.FORESLÅ_VEDTAK} steg og behandler automatisk..")
         }
-        historikkTaskService.lagHistorikkTask(
+        historikkService.lagHistorikkinnslag(
             behandlingId,
             TilbakekrevingHistorikkinnslagstype.FORESLÅ_VEDTAK_VURDERT,
-            Aktør.VEDTAKSLØSNING,
+            Aktør.Vedtaksløsning,
+            LocalDateTime.now(),
         )
         flyttBehandlingVidere(behandlingId, logContext)
 
@@ -114,13 +116,13 @@ class Foreslåvedtakssteg(
         if (behandling.saksbehandlingstype != Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR) {
             ferdigstillOppgave(behandling, logContext)
             opprettGodkjennevedtakOppgave(behandlingId, logContext)
-            historikkTaskService.lagHistorikkTask(
+            historikkService.lagHistorikkinnslag(
                 behandlingId = behandlingId,
                 historikkinnslagstype =
                     TilbakekrevingHistorikkinnslagstype
                         .BEHANDLING_SENDT_TIL_BESLUTTER,
-                aktør = Aktør.VEDTAKSLØSNING,
-                triggerTid = LocalDateTime.now().plusSeconds(2),
+                aktør = Aktør.Vedtaksløsning,
+                opprettetTidspunkt = LocalDateTime.now().plusSeconds(2),
             )
         }
     }

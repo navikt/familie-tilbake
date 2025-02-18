@@ -40,12 +40,10 @@ import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 
 class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
@@ -79,7 +77,6 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
 
     private lateinit var behandling: Behandling
     private lateinit var manuellBrevmottakerService: ManuellBrevmottakerService
-    private val opprettetTidspunktSlot = mutableListOf<LocalDateTime>()
 
     private val manuellBrevmottakerRequestDto =
         ManuellBrevmottakerRequestDto(
@@ -136,7 +133,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                 behandlingId = any(),
                 historikkinnslagstype = any(),
                 aktør = any(),
-                opprettetTidspunkt = capture(opprettetTidspunktSlot),
+                opprettetTidspunkt = any(),
                 tittel = any(),
                 beskrivelse = any(),
             )
@@ -146,11 +143,6 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
         every { mockIntegrasjonerClient.validerOrganisasjon(any()) } returns true
         every { mockIntegrasjonerClient.hentOrganisasjon("123456789") } returns
             Organisasjon("123456789", navn = "Organisasjon AS")
-    }
-
-    @AfterEach
-    fun clearSlot() {
-        opprettetTidspunktSlot.clear()
     }
 
     @Test
@@ -179,8 +171,8 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
             mockHistorikkService.lagHistorikkinnslag(
                 behandlingId = behandling.id,
                 historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_LAGT_TIL,
-                aktør = Aktør.SAKSBEHANDLER,
-                opprettetTidspunkt = or(opprettetTidspunktSlot[0], opprettetTidspunktSlot[1]),
+                aktør = Aktør.Saksbehandler(behandling.ansvarligSaksbehandler),
+                opprettetTidspunkt = any(),
                 beskrivelse = any(),
                 tittel = any(),
             )
@@ -226,8 +218,8 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
             mockHistorikkService.lagHistorikkinnslag(
                 behandlingId = behandling.id,
                 historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_LAGT_TIL,
-                aktør = Aktør.SAKSBEHANDLER,
-                opprettetTidspunkt = opprettetTidspunktSlot[0],
+                aktør = Aktør.Saksbehandler(behandling.ansvarligSaksbehandler),
+                opprettetTidspunkt = any(),
                 beskrivelse = any(),
                 tittel = any(),
             )
@@ -280,8 +272,8 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
             mockHistorikkService.lagHistorikkinnslag(
                 behandlingId = behandling.id,
                 historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_LAGT_TIL,
-                aktør = Aktør.SAKSBEHANDLER,
-                opprettetTidspunkt = or(opprettetTidspunktSlot[0], opprettetTidspunktSlot[1]),
+                aktør = Aktør.Saksbehandler(behandling.ansvarligSaksbehandler),
+                opprettetTidspunkt = any(),
                 beskrivelse = any(),
                 tittel = any(),
             )
@@ -300,8 +292,8 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
             mockHistorikkService.lagHistorikkinnslag(
                 behandlingId = behandling.id,
                 historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_FJERNET,
-                aktør = Aktør.SAKSBEHANDLER,
-                opprettetTidspunkt = opprettetTidspunktSlot[2],
+                aktør = Aktør.Saksbehandler(behandling.ansvarligSaksbehandler),
+                opprettetTidspunkt = any(),
                 beskrivelse = any(),
                 tittel = any(),
             )
@@ -324,8 +316,8 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
             mockHistorikkService.lagHistorikkinnslag(
                 behandlingId = behandling.id,
                 historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_LAGT_TIL,
-                aktør = Aktør.SAKSBEHANDLER,
-                opprettetTidspunkt = opprettetTidspunktSlot[0],
+                aktør = Aktør.Saksbehandler(behandling.ansvarligSaksbehandler),
+                opprettetTidspunkt = any(),
                 beskrivelse = any(),
                 tittel = any(),
             )
@@ -343,8 +335,8 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
             mockHistorikkService.lagHistorikkinnslag(
                 behandlingId = behandling.id,
                 historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_FJERNET,
-                aktør = Aktør.SAKSBEHANDLER,
-                opprettetTidspunkt = opprettetTidspunktSlot[1],
+                aktør = Aktør.Saksbehandler(behandling.ansvarligSaksbehandler),
+                opprettetTidspunkt = any(),
                 beskrivelse = any(),
                 tittel = any(),
             )

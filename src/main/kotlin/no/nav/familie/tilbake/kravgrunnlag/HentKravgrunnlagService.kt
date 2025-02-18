@@ -65,7 +65,7 @@ class HentKravgrunnlagService(
         historikkService.lagHistorikkinnslag(
             behandlingId = behandlingId,
             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_HENT,
-            aktør = Aktør.VEDTAKSLØSNING,
+            aktør = Aktør.Vedtaksløsning,
             opprettetTidspunkt = LocalDateTime.now(),
         )
     }

@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.behandling.steg
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.inspectors.forExactly
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -57,7 +58,7 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.historikkinnslag.Aktør
-import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
+import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.iverksettvedtak.task.SendØkonomiTilbakekrevingsvedtakTask
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
@@ -113,6 +114,9 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var stegService: StegService
+
+    @Autowired
+    private lateinit var historikkService: HistorikkService
 
     private lateinit var fagsak: Fagsak
     private lateinit var behandling: Behandling
@@ -233,8 +237,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertFaktadata(behandlingsstegFaktaDto)
 
         // historikk
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT, Aktør.SAKSBEHANDLER)
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.VEDTAKSLØSNING)
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler))
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.Vedtaksløsning)
     }
 
     @Test
@@ -266,8 +270,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertFaktadata(behandlingsstegFaktaDto)
 
         // historikk
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT, Aktør.SAKSBEHANDLER)
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.VEDTAKSLØSNING)
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler))
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.Vedtaksløsning)
     }
 
     @Test
@@ -332,7 +336,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
         assertFaktadata(behandlingsstegFaktaDto)
         // historikk
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT, Aktør.SAKSBEHANDLER)
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler))
     }
 
     @Test
@@ -389,8 +393,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertForeldelsesdata(behandlingsstegForeldelseDto.foreldetPerioder[0])
 
         // historikk
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.SAKSBEHANDLER)
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VILKÅRSVURDERING_VURDERT, Aktør.VEDTAKSLØSNING)
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler))
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.VILKÅRSVURDERING_VURDERT, Aktør.Vedtaksløsning)
     }
 
     @Test
@@ -458,7 +462,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingsstatus(behandlingId, Behandlingsstatus.UTREDES)
 
         // historikk
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.SAKSBEHANDLER)
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler))
     }
 
     @Test
@@ -534,9 +538,9 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId).shouldBeNull()
 
         // historikk
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.SAKSBEHANDLER)
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VILKÅRSVURDERING_VURDERT, Aktør.SAKSBEHANDLER)
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VILKÅRSVURDERING_VURDERT, Aktør.VEDTAKSLØSNING)
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler), times = 2)
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.VILKÅRSVURDERING_VURDERT, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler))
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.VILKÅRSVURDERING_VURDERT, Aktør.Vedtaksløsning)
     }
 
     @Test
@@ -577,8 +581,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertOppgave(FerdigstillOppgaveTask.TYPE)
         assertOppgave(LagOppgaveTask.TYPE)
 
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORESLÅ_VEDTAK_VURDERT, Aktør.SAKSBEHANDLER)
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_SENDT_TIL_BESLUTTER, Aktør.SAKSBEHANDLER)
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FORESLÅ_VEDTAK_VURDERT, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler))
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.BEHANDLING_SENDT_TIL_BESLUTTER, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler))
     }
 
     @Test
@@ -624,9 +628,9 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertOppgave(FerdigstillOppgaveTask.TYPE, 3)
         assertOppgave(LagOppgaveTask.TYPE, 3)
 
-        assertHistorikkTask(
+        assertHistorikkinnslag(
             TilbakekrevingHistorikkinnslagstype.BEHANDLING_SENDT_TILBAKE_TIL_SAKSBEHANDLER,
-            Aktør.BESLUTTER,
+            Aktør.Beslutter("Z0000"),
         )
     }
 
@@ -658,7 +662,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.FORESLÅ_VEDTAK && it.godkjent }.shouldBeTrue()
 
         assertOppgave(FerdigstillOppgaveTask.TYPE)
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET, Aktør.BESLUTTER)
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET, Aktør.Beslutter(behandling.ansvarligBeslutter!!), tekst = "Resultat: Ikke fastsatt")
 
         val behandlingsresultat = behandling.sisteResultat
         behandlingsresultat.shouldNotBeNull()
@@ -1104,24 +1108,18 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         taskene.size shouldBe forventet
     }
 
-    private fun assertHistorikkTask(
+    private fun assertHistorikkinnslag(
         historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
         aktør: Aktør,
+        times: Int = 1,
+        tekst: String? = historikkinnslagstype.tekst,
     ) {
-        taskService
-            .finnTasksMedStatus(
-                listOf(
-                    Status.KLAR_TIL_PLUKK,
-                    Status.UBEHANDLET,
-                    Status.BEHANDLER,
-                    Status.FERDIG,
-                ),
-                page = Pageable.unpaged(),
-            ).any {
-                LagHistorikkinnslagTask.TYPE == it.type &&
-                    historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
-                    aktør.name == it.metadata["aktør"] &&
-                    behandlingId.toString() == it.payload
-            }.shouldBeTrue()
+        historikkService.hentHistorikkinnslag(behandlingId).forExactly(times) {
+            it.type shouldBe historikkinnslagstype.type
+            it.tittel shouldBe historikkinnslagstype.tittel
+            it.tekst shouldBe tekst
+            it.aktør shouldBe aktør.type
+            it.opprettetAv shouldBe aktør.ident
+        }
     }
 }

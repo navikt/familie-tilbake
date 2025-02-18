@@ -2,9 +2,10 @@ package no.nav.familie.tilbake.forvaltning
 
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.inspectors.forAny
+import io.kotest.inspectors.forOne
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
-import io.kotest.matchers.collections.shouldHaveSingleElement
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
@@ -29,7 +30,8 @@ import no.nav.familie.tilbake.datavarehus.saksstatistikk.SendSakshendelseTilDvhT
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevsoppsummeringRepository
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
 import no.nav.familie.tilbake.historikkinnslag.Aktør
-import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
+import no.nav.familie.tilbake.historikkinnslag.HistorikkService
+import no.nav.familie.tilbake.historikkinnslag.Historikkinnslag
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
@@ -86,6 +88,9 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var forvaltningService: ForvaltningService
+
+    @Autowired
+    private lateinit var historikkService: HistorikkService
 
     private lateinit var behandling: Behandling
 
@@ -206,20 +211,20 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         oppdatertBehandling.sisteResultat!!.type shouldBe Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD
 
         val tasker = taskService.findAll()
-        tasker.shouldHaveSingleElement {
-            LagHistorikkinnslagTask.TYPE == it.type &&
-                behandling.id.toString() == it.payload &&
-                Aktør.SAKSBEHANDLER.name == it.metadata.getProperty("aktør") &&
-                TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT.name == it.metadata.getProperty("historikkinnslagstype")
+        historikkService.hentHistorikkinnslag(behandling.id).forOne {
+            it.type shouldBe TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT.type
+            it.tittel shouldBe TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT.tittel
+            it.tekst shouldBe "Årsak: Teknisk vedlikehold"
+            it.aktør shouldBe Historikkinnslag.Aktør.SAKSBEHANDLER
+            it.opprettetAv shouldBe oppdatertBehandling.ansvarligSaksbehandler
         }
-        tasker
-            .any {
-                SendSakshendelseTilDvhTask.TASK_TYPE == it.type &&
-                    behandling.id.toString() == it.payload
-            }.shouldBeTrue()
-        tasker.shouldHaveSingleElement {
-            FerdigstillOppgaveTask.TYPE == it.type &&
-                behandling.id.toString() == it.payload
+        tasker.forAny {
+            it.type shouldBe SendSakshendelseTilDvhTask.TASK_TYPE
+            it.payload shouldBe behandling.id.toString()
+        }
+        tasker.forOne {
+            it.type shouldBe FerdigstillOppgaveTask.TYPE
+            it.payload shouldBe behandling.id.toString()
         }
     }
 
@@ -299,13 +304,12 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeNull()
         vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandling.id).shouldBeNull()
 
-        taskService.findAll().shouldHaveSingleElement {
-            it.type == LagHistorikkinnslagTask.TYPE &&
-                it.payload == behandling.id.toString() &&
-                it.metadata["historikkinnslagstype"] ==
-                TilbakekrevingHistorikkinnslagstype
-                    .BEHANDLING_FLYTTET_MED_FORVALTNING.name &&
-                it.metadata["aktør"] == Aktør.VEDTAKSLØSNING.name
+        historikkService.hentHistorikkinnslag(behandling.id).forOne {
+            it.type shouldBe TilbakekrevingHistorikkinnslagstype.BEHANDLING_FLYTTET_MED_FORVALTNING.type
+            it.tittel shouldBe TilbakekrevingHistorikkinnslagstype.BEHANDLING_FLYTTET_MED_FORVALTNING.tittel
+            it.tekst shouldBe TilbakekrevingHistorikkinnslagstype.BEHANDLING_FLYTTET_MED_FORVALTNING.tekst
+            it.aktør shouldBe Aktør.Vedtaksløsning.type
+            it.opprettetAv shouldBe Aktør.Vedtaksløsning.ident
         }
     }
 

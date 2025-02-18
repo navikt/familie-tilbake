@@ -1,13 +1,12 @@
 package no.nav.familie.tilbake.dokumentbestilling.felles.task
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.matchers.collections.shouldHaveSingleElement
+import io.kotest.inspectors.forOne
 import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstidspunkt
 import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstype
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
@@ -16,7 +15,8 @@ import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
-import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
+import no.nav.familie.tilbake.historikkinnslag.Aktør
+import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -33,7 +33,7 @@ internal class DistribuerDokumentVedDødsfallTaskTest : OppslagSpringRunnerTest(
     private lateinit var behandlingRepository: BehandlingRepository
 
     @Autowired
-    private lateinit var taskService: TaskService
+    private lateinit var historikkService: HistorikkService
 
     @Autowired
     private lateinit var distribuerDokumentVedDødsfallTask: DistribuerDokumentVedDødsfallTask
@@ -53,8 +53,9 @@ internal class DistribuerDokumentVedDødsfallTaskTest : OppslagSpringRunnerTest(
     fun `skal kjøre ferdig når adressen er blitt oppdatert`() {
         distribuerDokumentVedDødsfallTask.doTask(opprettTask("jp1"))
 
-        assertHistorikkTask(
+        assertHistorikkinnslag(
             TilbakekrevingHistorikkinnslagstype.DISTRIBUSJON_BREV_DØDSBO_SUKSESS,
+            "Vedtak om tilbakebetaling er sendt",
         )
     }
 
@@ -79,8 +80,9 @@ internal class DistribuerDokumentVedDødsfallTaskTest : OppslagSpringRunnerTest(
             ),
         )
 
-        assertHistorikkTask(
+        assertHistorikkinnslag(
             TilbakekrevingHistorikkinnslagstype.DISTRIBUSJON_BREV_DØDSBO_FEILET_6_MND,
+            "Mottaker har ikke fått dødsboadresse etter 6 måneder. Vedtak om tilbakebetaling er ikke sendt",
         )
     }
 
@@ -100,13 +102,16 @@ internal class DistribuerDokumentVedDødsfallTaskTest : OppslagSpringRunnerTest(
                 },
         )
 
-    private fun assertHistorikkTask(
+    private fun assertHistorikkinnslag(
         historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
+        tekst: String,
     ) {
-        taskService.findAll().shouldHaveSingleElement {
-            LagHistorikkinnslagTask.TYPE == it.type &&
-                historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
-                behandlingId.toString() == it.payload
+        historikkService.hentHistorikkinnslag(behandlingId).forOne {
+            it.type shouldBe historikkinnslagstype.type
+            it.tittel shouldBe historikkinnslagstype.tittel
+            it.tekst shouldBe tekst
+            it.aktør shouldBe Aktør.Vedtaksløsning.type
+            it.opprettetAv shouldBe Aktør.Vedtaksløsning.ident
         }
     }
 }

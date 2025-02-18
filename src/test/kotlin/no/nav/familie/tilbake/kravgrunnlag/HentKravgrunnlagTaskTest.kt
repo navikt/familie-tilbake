@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
+import io.kotest.inspectors.forOne
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
@@ -112,13 +113,13 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         hentKravgrunnlagTask.doTask(lagTask(revurdering.id))
         kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(revurdering.id).shouldBeTrue()
 
-        val historikkinnslagBehandling = historikkinnslagRepository.findByBehandlingId(revurdering.id).single()
-
-        historikkinnslagBehandling.type shouldBe Historikkinnslagstype.HENDELSE
-        historikkinnslagBehandling.behandlingId shouldBe revurdering.id
-        historikkinnslagBehandling.aktør shouldBe Aktør.VEDTAKSLØSNING
-        historikkinnslagBehandling.opprettetAv shouldBe Constants.BRUKER_ID_VEDTAKSLØSNINGEN
-        historikkinnslagBehandling.tittel shouldBe TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_HENT.tittel
+        historikkinnslagRepository.findByBehandlingId(revurdering.id).forOne {
+            it.type shouldBe Historikkinnslagstype.HENDELSE
+            it.tittel shouldBe TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_HENT.tittel
+            it.tekst shouldBe TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_HENT.tekst
+            it.aktør shouldBe Aktør.Vedtaksløsning.type
+            it.opprettetAv shouldBe Constants.BRUKER_ID_VEDTAKSLØSNINGEN
+        }
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(revurdering.id)
         behandlingsstegstilstand

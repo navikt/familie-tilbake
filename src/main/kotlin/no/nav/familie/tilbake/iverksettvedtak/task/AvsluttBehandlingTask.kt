@@ -12,13 +12,14 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.historikkinnslag.Aktør
-import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -30,7 +31,7 @@ import java.util.UUID
 class AvsluttBehandlingTask(
     private val behandlingRepository: BehandlingRepository,
     private val behandlingskontrollService: BehandlingskontrollService,
-    private val historikkTaskService: HistorikkTaskService,
+    private val historikkService: HistorikkService,
     private val logService: LogService,
 ) : AsyncTaskStep {
     private val log = TracedLogger.getLogger<AvsluttBehandlingTask>()
@@ -76,10 +77,11 @@ class AvsluttBehandlingTask(
                 logContext = logContext,
             )
 
-        historikkTaskService.lagHistorikkTask(
+        historikkService.lagHistorikkinnslag(
             behandlingId = behandlingId,
             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_AVSLUTTET,
-            aktør = Aktør.VEDTAKSLØSNING,
+            aktør = Aktør.Vedtaksløsning,
+            opprettetTidspunkt = LocalDateTime.now(),
         )
     }
 
