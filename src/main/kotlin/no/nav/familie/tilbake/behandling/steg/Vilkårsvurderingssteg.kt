@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.behandling.steg
 
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegVilkårsvurderingDto
+import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
@@ -16,7 +17,7 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.SkalSammenslåPer
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsoppsummering
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.historikkinnslag.Aktør
-import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEvent
 import no.nav.familie.tilbake.log.SecureLog
@@ -27,6 +28,7 @@ import org.springframework.context.event.EventListener
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -34,10 +36,11 @@ class Vilkårsvurderingssteg(
     private val behandlingskontrollService: BehandlingskontrollService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val foreldelseService: ForeldelseService,
-    private val historikkTaskService: HistorikkTaskService,
+    private val historikkService: HistorikkService,
     private val oppgaveTaskService: OppgaveTaskService,
     private val periodeService: PeriodeService,
     private val vedtaksbrevsoppsummeringRepository: VedtaksbrevsoppsummeringRepository,
+    private val behandlingRepository: BehandlingRepository,
 ) : IBehandlingssteg {
     private val log = TracedLogger.getLogger<Vilkårsvurderingssteg>()
 
@@ -53,7 +56,7 @@ class Vilkårsvurderingssteg(
             // hvis det finnes noen periode som ble vurdert før i vilkårsvurdering, må slettes
             vilkårsvurderingService.deaktiverEksisterendeVilkårsvurdering(behandlingId)
 
-            lagHistorikkinnslag(behandlingId, Aktør.VEDTAKSLØSNING)
+            lagHistorikkinnslag(behandlingId, Aktør.Vedtaksløsning)
 
             behandlingskontrollService.oppdaterBehandlingsstegStatus(
                 behandlingId,
@@ -85,7 +88,7 @@ class Vilkårsvurderingssteg(
         oppdatereVedtaksbrevsoppsummering(behandlingId)
         oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId, logContext)
 
-        lagHistorikkinnslag(behandlingId, Aktør.SAKSBEHANDLER)
+        lagHistorikkinnslag(behandlingId, Aktør.Saksbehandler.fraBehandling(behandlingId, behandlingRepository))
 
         behandlingskontrollService.oppdaterBehandlingsstegStatus(behandlingId, Behandlingsstegsinfo(VILKÅRSVURDERING, UTFØRT), logContext)
         behandlingskontrollService.fortsettBehandling(behandlingId, logContext)
@@ -105,7 +108,7 @@ class Vilkårsvurderingssteg(
         }
 
         vilkårsvurderingService.lagreFastVilkårForAutomatiskSaksbehandling(behandlingId)
-        lagHistorikkinnslag(behandlingId, Aktør.VEDTAKSLØSNING)
+        lagHistorikkinnslag(behandlingId, Aktør.Vedtaksløsning)
 
         behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
@@ -150,10 +153,11 @@ class Vilkårsvurderingssteg(
         behandlingId: UUID,
         aktør: Aktør,
     ) {
-        historikkTaskService.lagHistorikkTask(
+        historikkService.lagHistorikkinnslag(
             behandlingId,
             TilbakekrevingHistorikkinnslagstype.VILKÅRSVURDERING_VURDERT,
             aktør,
+            LocalDateTime.now(),
         )
     }
 

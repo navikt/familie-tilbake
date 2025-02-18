@@ -14,7 +14,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
-import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.totrinn.TotrinnService
@@ -30,7 +30,7 @@ class FattevedtaksstegEnhetstest {
     private val mockBehandlingRepository: BehandlingRepository = mockk()
     private val mockTotrinnService: TotrinnService = mockk()
     private val mockOppgaveTaskService: OppgaveTaskService = mockk()
-    private val mockHistorikkTaskService: HistorikkTaskService = mockk()
+    private val historikkService: HistorikkService = mockk()
     private val mockBehandlingsvedtakService: BehandlingsvedtakService = mockk()
     private val mockManuellBrevmottakerRepository: ManuellBrevmottakerRepository = mockk()
 
@@ -40,7 +40,7 @@ class FattevedtaksstegEnhetstest {
             behandlingRepository = mockBehandlingRepository,
             totrinnService = mockTotrinnService,
             oppgaveTaskService = mockOppgaveTaskService,
-            historikkTaskService = mockHistorikkTaskService,
+            historikkService = historikkService,
             behandlingsvedtakService = mockBehandlingsvedtakService,
             manuellBrevmottakerRepository = mockManuellBrevmottakerRepository,
         )

@@ -29,7 +29,7 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandReposi
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
-import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
@@ -85,7 +85,7 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     private lateinit var taskService: TracableTaskService
 
     @Autowired
-    private lateinit var historikkTaskService: HistorikkTaskService
+    private lateinit var historikkService: HistorikkService
 
     @Autowired
     private lateinit var kravvedtakstatusService: KravvedtakstatusService
@@ -120,7 +120,7 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                 taskService,
                 tellerService,
                 oppgaveTaskService,
-                historikkTaskService,
+                historikkService,
                 hentFagsystemsbehandlingService,
                 endretKravgrunnlagEventPublisher,
                 behandlingService,

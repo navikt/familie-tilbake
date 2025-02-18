@@ -42,7 +42,7 @@ import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBre
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
 import no.nav.familie.tilbake.dokumentbestilling.varsel.SendVarselbrevTask
 import no.nav.familie.tilbake.historikkinnslag.Aktør
-import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
@@ -62,6 +62,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.Properties
 import java.util.UUID
 
@@ -78,7 +79,7 @@ class BehandlingService(
     private val tellerService: TellerService,
     private val stegService: StegService,
     private val oppgaveTaskService: OppgaveTaskService,
-    private val historikkTaskService: HistorikkTaskService,
+    private val historikkService: HistorikkService,
     private val tilgangService: TilgangService,
     @Value("\${OPPRETTELSE_DAGER_BEGRENSNING:6}")
     private val opprettelseDagerBegrensning: Long,
@@ -176,10 +177,11 @@ class BehandlingService(
         behandlingRepository.insert(revurdering)
 
         val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(opprettRevurderingDto.ytelsestype)
-        historikkTaskService.lagHistorikkTask(
-            revurdering.id,
-            BEHANDLING_OPPRETTET,
-            Aktør.SAKSBEHANDLER,
+        historikkService.lagHistorikkinnslag(
+            behandlingId = revurdering.id,
+            historikkinnslagstype = BEHANDLING_OPPRETTET,
+            aktør = Aktør.Saksbehandler.fraBehandling(revurdering.id, behandlingRepository),
+            opprettetTidspunkt = LocalDateTime.now(),
         )
 
         behandlingskontrollService.fortsettBehandling(revurdering.id, logContext)
@@ -307,10 +309,11 @@ class BehandlingService(
         }
         oppdaterAnsvarligSaksbehandler(behandlingId)
 
-        historikkTaskService.lagHistorikkTask(
-            behandling.id,
-            TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT,
-            Aktør.SAKSBEHANDLER,
+        historikkService.lagHistorikkinnslag(
+            behandlingId = behandling.id,
+            historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT,
+            aktør = Aktør.Saksbehandler.fraBehandling(behandlingId, behandlingRepository),
+            opprettetTidspunkt = LocalDateTime.now(),
         )
 
         stegService.gjenopptaSteg(behandlingId, logContext)
@@ -376,14 +379,15 @@ class BehandlingService(
             when (behandlingsresultatstype) {
                 Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT,
                 Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
-                -> Aktør.VEDTAKSLØSNING
+                -> Aktør.Vedtaksløsning
 
-                else -> Aktør.SAKSBEHANDLER
+                else -> Aktør.Saksbehandler.fraBehandling(behandlingId, behandlingRepository)
             }
-        historikkTaskService.lagHistorikkTask(
+        historikkService.lagHistorikkinnslag(
             behandlingId = behandlingId,
             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
             aktør = aktør,
+            opprettetTidspunkt = LocalDateTime.now(),
             beskrivelse = henleggelsesbrevFritekstDto.begrunnelse,
         )
 
@@ -500,10 +504,11 @@ class BehandlingService(
         )
         oppdaterAnsvarligSaksbehandler(behandlingId)
 
-        historikkTaskService.lagHistorikkTask(
+        historikkService.lagHistorikkinnslag(
             behandlingId = behandlingId,
             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.ENDRET_ENHET,
-            aktør = Aktør.SAKSBEHANDLER,
+            aktør = Aktør.Saksbehandler.fraBehandling(behandlingId, behandlingRepository),
+            opprettetTidspunkt = LocalDateTime.now(),
             beskrivelse = byttEnhetDto.begrunnelse,
         )
 
@@ -528,7 +533,7 @@ class BehandlingService(
 
         val fagsak = finnEllerOpprettFagsak(opprettTilbakekrevingRequest)
         val behandling = lagreBehandling(opprettTilbakekrevingRequest, fagsak, tilbakekrevingsvalgErAutomatisk)
-        historikkTaskService.lagHistorikkTask(behandling.id, BEHANDLING_OPPRETTET, Aktør.VEDTAKSLØSNING)
+        historikkService.lagHistorikkinnslag(behandling.id, BEHANDLING_OPPRETTET, Aktør.Vedtaksløsning, LocalDateTime.now())
         behandlingskontrollService.fortsettBehandling(behandling.id, logContext)
         stegService.håndterSteg(behandling.id, logContext)
 
@@ -730,10 +735,11 @@ class BehandlingService(
         val logContext = logService.contextFraBehandling(behandling.id)
         validerKanAngreSendTilBeslutter(behandling, logContext)
 
-        historikkTaskService.lagHistorikkTask(
-            behandling.id,
-            TilbakekrevingHistorikkinnslagstype.ANGRE_SEND_TIL_BESLUTTER,
-            Aktør.SAKSBEHANDLER,
+        historikkService.lagHistorikkinnslag(
+            behandlingId = behandling.id,
+            historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.ANGRE_SEND_TIL_BESLUTTER,
+            aktør = Aktør.Saksbehandler.fraBehandling(behandlingId, behandlingRepository),
+            opprettetTidspunkt = LocalDateTime.now(),
         )
 
         oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, Oppgavetype.GodkjenneVedtak.name)

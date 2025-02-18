@@ -2,13 +2,14 @@ package no.nav.familie.tilbake.behandling.steg
 
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFaktaDto
+import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.historikkinnslag.Aktør
-import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEvent
 import no.nav.familie.tilbake.log.SecureLog
@@ -17,14 +18,16 @@ import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
 class FaktaFeilutbetalingssteg(
     private val behandlingskontrollService: BehandlingskontrollService,
     private val faktaFeilutbetalingService: FaktaFeilutbetalingService,
-    private val historikkTaskService: HistorikkTaskService,
+    private val historikkService: HistorikkService,
     private val oppgaveTaskService: OppgaveTaskService,
+    private val behandlingRepository: BehandlingRepository,
 ) : IBehandlingssteg {
     private val log = TracedLogger.getLogger<FaktaFeilutbetalingssteg>()
 
@@ -50,10 +53,11 @@ class FaktaFeilutbetalingssteg(
 
         oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId, logContext)
 
-        historikkTaskService.lagHistorikkTask(
+        historikkService.lagHistorikkinnslag(
             behandlingId,
             TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT,
-            Aktør.SAKSBEHANDLER,
+            Aktør.Saksbehandler.fraBehandling(behandlingId, behandlingRepository),
+            LocalDateTime.now(),
         )
 
         if (faktaFeilutbetalingService.hentAktivFaktaOmFeilutbetaling(behandlingId) != null) {
@@ -71,10 +75,11 @@ class FaktaFeilutbetalingssteg(
         }
         faktaFeilutbetalingService.lagreFastFaktaForAutomatiskSaksbehandling(behandlingId)
 
-        historikkTaskService.lagHistorikkTask(
+        historikkService.lagHistorikkinnslag(
             behandlingId,
             TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT,
-            Aktør.VEDTAKSLØSNING,
+            Aktør.Vedtaksløsning,
+            LocalDateTime.now(),
         )
 
         flyttBehandlingVidere(behandlingId, logContext)

@@ -1,7 +1,9 @@
 package no.nav.familie.tilbake.behandling.batch
 
 import io.kotest.assertions.throwables.shouldNotThrow
+import io.kotest.inspectors.forOne
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
@@ -16,7 +18,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.historikkinnslag.Aktør
-import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
+import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.oppgave.OppdaterOppgaveTask
@@ -44,6 +46,9 @@ internal class AutomatiskGjenopptaBehandlingTaskTest : OppslagSpringRunnerTest()
 
     @Autowired
     private lateinit var automatiskGjenopptaBehandlingTask: AutomatiskGjenopptaBehandlingTask
+
+    @Autowired
+    private lateinit var historikkService: HistorikkService
 
     @Test
     fun `skal gjenoppta behandling som venter på varsel og har allerede fått kravgrunnlag til FAKTA steg`() {
@@ -73,14 +78,7 @@ internal class AutomatiskGjenopptaBehandlingTaskTest : OppslagSpringRunnerTest()
                     it.behandlingsstegsstatus == Behandlingsstegstatus.KLAR
             }.shouldBeTrue()
 
-        taskService
-            .findAll()
-            .any {
-                it.type == LagHistorikkinnslagTask.TYPE &&
-                    it.payload == behandling.id.toString() &&
-                    it.metadata["historikkinnslagstype"] == TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT.name &&
-                    it.metadata["aktør"] == Aktør.VEDTAKSLØSNING.name
-            }.shouldBeTrue()
+        assertHistorikkinnslag(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT, Aktør.Vedtaksløsning)
 
         taskService
             .findAll()
@@ -121,23 +119,8 @@ internal class AutomatiskGjenopptaBehandlingTaskTest : OppslagSpringRunnerTest()
                     it.venteårsak == Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
             }.shouldBeTrue()
 
-        taskService
-            .findAll()
-            .any {
-                it.type == LagHistorikkinnslagTask.TYPE &&
-                    it.payload == behandling.id.toString() &&
-                    it.metadata["historikkinnslagstype"] == TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT.name &&
-                    it.metadata["aktør"] == Aktør.VEDTAKSLØSNING.name
-            }.shouldBeTrue()
-
-        taskService
-            .findAll()
-            .any {
-                it.type == LagHistorikkinnslagTask.TYPE &&
-                    it.payload == behandling.id.toString() &&
-                    it.metadata["historikkinnslagstype"] == TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT.name &&
-                    it.metadata["aktør"] == Aktør.VEDTAKSLØSNING.name
-            }.shouldBeTrue()
+        assertHistorikkinnslag(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT, Aktør.Vedtaksløsning)
+        assertHistorikkinnslag(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT, Aktør.Vedtaksløsning, "Årsak: Venter på kravgrunnlag fra økonomi")
 
         taskService
             .findAll()
@@ -184,14 +167,7 @@ internal class AutomatiskGjenopptaBehandlingTaskTest : OppslagSpringRunnerTest()
                 it.venteårsak == null && it.tidsfrist == null
             }.shouldBeTrue()
 
-        taskService
-            .findAll()
-            .any {
-                it.type == LagHistorikkinnslagTask.TYPE &&
-                    it.payload == behandling.id.toString() &&
-                    it.metadata["historikkinnslagstype"] == TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT.name &&
-                    it.metadata["aktør"] == Aktør.VEDTAKSLØSNING.name
-            }.shouldBeTrue()
+        assertHistorikkinnslag(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT, Aktør.Vedtaksløsning)
 
         taskService
             .findAll()
@@ -202,6 +178,23 @@ internal class AutomatiskGjenopptaBehandlingTaskTest : OppslagSpringRunnerTest()
                     it.metadata["frist"] == tidsfrist.toString() &&
                     it.metadata["saksbehandler"] == "VL"
             }.shouldBeTrue()
+    }
+
+    private fun assertHistorikkinnslag(
+        behandlingId: UUID,
+        innslagType: TilbakekrevingHistorikkinnslagstype,
+        aktør: Aktør,
+        tekst: String? = innslagType.tekst,
+    ) {
+        historikkService
+            .hentHistorikkinnslag(behandlingId)
+            .forOne {
+                it.type shouldBe innslagType.type
+                it.tittel shouldBe innslagType.tittel
+                it.tekst shouldBe tekst
+                it.aktør shouldBe aktør.type
+                it.opprettetAv shouldBe aktør.ident
+            }
     }
 
     private fun lagTask(behandlingId: UUID) =

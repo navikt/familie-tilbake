@@ -16,7 +16,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.exceptionhandler.UgyldigStatusmeldingFeil
 import no.nav.familie.tilbake.historikkinnslag.Aktør
-import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.Properties
 import java.util.UUID
 
@@ -42,7 +43,7 @@ class KravvedtakstatusService(
     private val tellerService: TellerService,
     private val behandlingskontrollService: BehandlingskontrollService,
     private val behandlingService: BehandlingService,
-    private val historikkTaskService: HistorikkTaskService,
+    private val historikkService: HistorikkService,
     private val oppgaveTaskService: OppgaveTaskService,
     private val oppgaveService: OppgaveService,
 ) {
@@ -192,10 +193,11 @@ class KravvedtakstatusService(
                 ),
                 logContext = logContext,
             )
-        historikkTaskService.lagHistorikkTask(
+        historikkService.lagHistorikkinnslag(
             behandlingId = behandlingId,
             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
-            aktør = Aktør.VEDTAKSLØSNING,
+            aktør = Aktør.Vedtaksløsning,
+            opprettetTidspunkt = LocalDateTime.now(),
             beskrivelse = venteårsak.beskrivelse,
         )
 

@@ -26,7 +26,7 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.data.Testdata.lagKravgrunnlag
 import no.nav.familie.tilbake.historikkinnslag.Aktør
-import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.integration.pdl.PdlClient
@@ -67,7 +67,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
 
     private lateinit var vergeService: VergeService
 
-    private val historikkTaskService: HistorikkTaskService = mockk(relaxed = true)
+    private val historikkService: HistorikkService = mockk(relaxed = true)
 
     private val vergeDto =
         VergeDto(
@@ -85,7 +85,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
             VergeService(
                 behandlingRepository,
                 fagsakRepository,
-                historikkTaskService,
+                historikkService,
                 behandlingskontrollService,
                 integrasjonerClient,
                 personService,
@@ -146,10 +146,11 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
 
         verify {
-            historikkTaskService.lagHistorikkTask(
+            historikkService.lagHistorikkinnslag(
                 behandling.id,
                 TilbakekrevingHistorikkinnslagstype.VERGE_OPPRETTET,
-                Aktør.SAKSBEHANDLER,
+                Aktør.Saksbehandler(behandling.ansvarligSaksbehandler),
+                any(),
             )
         }
     }
@@ -174,7 +175,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
             VergeService(
                 behandlingRepository,
                 fagsakRepository,
-                historikkTaskService,
+                historikkService,
                 behandlingskontrollService,
                 mockIntegrasjonerClient,
                 personService,
@@ -215,7 +216,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
             VergeService(
                 behandlingRepository,
                 fagsakRepository,
-                historikkTaskService,
+                historikkService,
                 behandlingskontrollService,
                 integrasjonerClient,
                 personService,
@@ -290,10 +291,11 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
 
         behandlingRepository.findByIdOrThrow(behandlingFørOppdatering.id).harVerge.shouldBeFalse()
         verify {
-            historikkTaskService.lagHistorikkTask(
+            historikkService.lagHistorikkinnslag(
                 behandlingFørOppdatering.id,
                 TilbakekrevingHistorikkinnslagstype.VERGE_FJERNET,
-                Aktør.SAKSBEHANDLER,
+                Aktør.Saksbehandler(behandlingFørOppdatering.ansvarligSaksbehandler),
+                any(),
             )
         }
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingFørOppdatering.id)
@@ -323,7 +325,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
         vergeService.fjernVerge(behandlingUtenVerge.id)
 
         behandlingUtenVerge.harVerge.shouldBeFalse()
-        verify(exactly = 0) { historikkTaskService.lagHistorikkTask(any(), any(), any(), any()) }
+        verify(exactly = 0) { historikkService.lagHistorikkinnslag(any(), any(), any(), any()) }
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingUtenVerge.id)
         assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)

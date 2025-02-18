@@ -7,9 +7,10 @@ import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstype
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
-import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import org.slf4j.Logger
@@ -33,7 +34,8 @@ const val ANTALL_SEKUNDER_I_EN_UKE = 604800L
 )
 class DistribuerDokumentVedDødsfallTask(
     private val integrasjonerClient: IntegrasjonerClient,
-    private val historikkTaskService: HistorikkTaskService,
+    private val historikkService: HistorikkService,
+    private val behandlingRepository: BehandlingRepository,
 ) : AsyncTaskStep {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -75,14 +77,16 @@ class DistribuerDokumentVedDødsfallTask(
         tilbakekrevingHistorikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
         feilet: Boolean = false,
     ) {
+        val behandlingId = UUID.fromString(task.payload)
         val mottager = Brevmottager.valueOf(task.metadata.getProperty("mottager"))
         val brevtype = Brevtype.valueOf(task.metadata.getProperty("brevtype"))
         val ansvarligSaksbehandler = task.metadata.getProperty("ansvarligSaksbehandler")
         val opprinneligHistorikkinnslagstype = LagreBrevsporingTask.utledHistorikkinnslagType(brevtype, mottager)
-        historikkTaskService.lagHistorikkTask(
-            behandlingId = UUID.fromString(task.payload),
+        historikkService.lagHistorikkinnslag(
+            behandlingId = behandlingId,
             historikkinnslagstype = tilbakekrevingHistorikkinnslagstype,
-            aktør = LagreBrevsporingTask.utledAktør(brevtype, ansvarligSaksbehandler),
+            aktør = LagreBrevsporingTask.utledAktør(brevtype, ansvarligSaksbehandler, behandlingId, behandlingRepository),
+            opprettetTidspunkt = LocalDateTime.now(),
             beskrivelse = opprinneligHistorikkinnslagstype.tekst,
             brevtype = if (!feilet) brevtype else null,
         )

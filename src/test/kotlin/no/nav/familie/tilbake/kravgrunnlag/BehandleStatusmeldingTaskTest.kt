@@ -1,6 +1,8 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.inspectors.forExactly
+import io.kotest.inspectors.forNone
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -8,7 +10,6 @@ import io.kotest.matchers.collections.shouldHaveSingleElement
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -34,7 +35,7 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.historikkinnslag.Aktør
-import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
+import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
@@ -44,7 +45,6 @@ import no.nav.familie.tilbake.oppgave.OppdaterOppgaveTask
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.domain.Pageable
 import java.time.LocalDate
 
 internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
@@ -74,6 +74,9 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var behandleKravgrunnlagTask: BehandleKravgrunnlagTask
+
+    @Autowired
+    private lateinit var historikkService: HistorikkService
 
     private lateinit var fagsak: Fagsak
     private lateinit var behandling: Behandling
@@ -178,17 +181,14 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         assertBehandlingstegstilstand(behandlingsstegstilstand, VARSEL, Behandlingsstegstatus.VENTER)
 
-        val venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT, venteårsak.beskrivelse)
-        taskService
-            .findAll()
-            .none {
-                it.type == OppdaterOppgaveTask.TYPE &&
-                    it.payload == behandling.id.toString() &&
-                    it.metadata["beskrivelse"] == venteårsak.beskrivelse &&
-                    it.metadata["frist"] == LocalDate.now().plusWeeks(venteårsak.defaultVenteTidIUker).toString()
-            }.shouldBeTrue()
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT, "Årsak: Venter på kravgrunnlag fra økonomi")
+        taskService.findAll().forNone {
+            it.type shouldBe OppdaterOppgaveTask.TYPE
+            it.payload shouldBe behandling.id.toString()
+            it.metadata["beskrivelse"] shouldBe Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse
+            it.metadata["frist"] shouldBe LocalDate.now().plusWeeks(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.defaultVenteTidIUker).toString()
+        }
     }
 
     @Test
@@ -217,10 +217,9 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         assertArkivertXml(2, true, Kravstatuskode.SPERRET)
         mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype).shouldBeEmpty()
 
-        val venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT, venteårsak.beskrivelse)
-        assertOppgaveTask(venteårsak.beskrivelse, LocalDate.now().plusWeeks(venteårsak.defaultVenteTidIUker))
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT, "Årsak: Venter på kravgrunnlag fra økonomi")
+        assertOppgaveTask(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse, LocalDate.now().plusWeeks(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.defaultVenteTidIUker))
     }
 
     @Test
@@ -247,10 +246,9 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         assertArkivertXml(2, true, Kravstatuskode.SPERRET)
         mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype).shouldBeEmpty()
 
-        val venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT, venteårsak.beskrivelse)
-        assertOppgaveTask(venteårsak.beskrivelse, LocalDate.now().plusWeeks(venteårsak.defaultVenteTidIUker))
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT, "Årsak: Venter på kravgrunnlag fra økonomi")
+        assertOppgaveTask(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse, LocalDate.now().plusWeeks(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.defaultVenteTidIUker))
     }
 
     @Test
@@ -289,12 +287,12 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
 
         mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype).shouldBeEmpty()
 
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
-        assertHistorikkTask(
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
+        assertHistorikkinnslag(
             TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
-            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse,
+            "Årsak: Venter på kravgrunnlag fra økonomi",
         )
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT)
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT, times = 2)
         assertOppgaveTask("Behandling er tatt av vent, pga mottatt ENDR melding", LocalDate.now())
     }
 
@@ -327,12 +325,12 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
 
         mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype).shouldBeEmpty()
 
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
-        assertHistorikkTask(
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
+        assertHistorikkinnslag(
             TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
-            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse,
+            "Årsak: Venter på kravgrunnlag fra økonomi",
         )
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT)
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT, times = 2)
         assertOppgaveTask("Behandling er tatt av vent, pga mottatt ENDR melding", LocalDate.now())
     }
 
@@ -365,8 +363,8 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         }
         assertBehandlingstegstilstand(behandlingsstegstilstand, VARSEL, Behandlingsstegstatus.UTFØRT)
 
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT, "")
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT, "Årsak: Kravgrunnlaget er nullstilt")
     }
 
     private fun settBehandlingTilForeslåVedtakSteg() {
@@ -460,26 +458,18 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
             SecureLog.Context.tom(),
         )
 
-    private fun assertHistorikkTask(
+    private fun assertHistorikkinnslag(
         historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
         beskrivelse: String? = null,
+        times: Int = 1,
     ) {
-        taskService
-            .finnTasksMedStatus(
-                listOf(
-                    Status.KLAR_TIL_PLUKK,
-                    Status.UBEHANDLET,
-                    Status.BEHANDLER,
-                    Status.FERDIG,
-                ),
-                page = Pageable.unpaged(),
-            ).any {
-                LagHistorikkinnslagTask.TYPE == it.type &&
-                    historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
-                    Aktør.VEDTAKSLØSNING.name == it.metadata["aktør"] &&
-                    beskrivelse == it.metadata["beskrivelse"] &&
-                    behandling.id.toString() == it.payload
-            }.shouldBeTrue()
+        historikkService.hentHistorikkinnslag(behandling.id).forExactly(times) {
+            historikkinnslagstype.type shouldBe it.type
+            it.tittel shouldBe historikkinnslagstype.tittel
+            it.tekst shouldBe beskrivelse
+            it.aktør shouldBe Aktør.Vedtaksløsning.type
+            it.opprettetAv shouldBe Aktør.Vedtaksløsning.ident
+        }
     }
 
     private fun assertOppgaveTask(

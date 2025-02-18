@@ -14,7 +14,7 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.BrevmottakerAdresseValidering
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
 import no.nav.familie.tilbake.historikkinnslag.Aktør
-import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
@@ -22,6 +22,7 @@ import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.totrinn.TotrinnService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -30,7 +31,7 @@ class Fattevedtakssteg(
     private val behandlingRepository: BehandlingRepository,
     private val totrinnService: TotrinnService,
     private val oppgaveTaskService: OppgaveTaskService,
-    private val historikkTaskService: HistorikkTaskService,
+    private val historikkService: HistorikkService,
     private val behandlingsvedtakService: BehandlingsvedtakService,
     private val manuellBrevmottakerRepository: ManuellBrevmottakerRepository,
 ) : IBehandlingssteg {
@@ -79,11 +80,11 @@ class Fattevedtakssteg(
         if (finnesUnderkjenteSteg) {
             behandlingskontrollService.behandleStegPåNytt(behandlingId, Behandlingssteg.FORESLÅ_VEDTAK, logContext)
 
-            historikkTaskService.lagHistorikkTask(
+            historikkService.lagHistorikkinnslag(
                 behandlingId,
                 TilbakekrevingHistorikkinnslagstype.BEHANDLING_SENDT_TILBAKE_TIL_SAKSBEHANDLER,
-                Aktør.BESLUTTER,
-                beslutter = behandling.ansvarligBeslutter,
+                Aktør.Beslutter(behandling.ansvarligBeslutter!!),
+                LocalDateTime.now(),
             )
             totrinnService.fjernAnsvarligBeslutter(behandlingId)
             oppgaveTaskService.opprettOppgaveTask(
@@ -101,10 +102,11 @@ class Fattevedtakssteg(
                 ),
                 logContext,
             )
-            historikkTaskService.lagHistorikkTask(
+            historikkService.lagHistorikkinnslag(
                 behandlingId,
                 TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET,
-                Aktør.BESLUTTER,
+                Aktør.Beslutter(behandling.ansvarligBeslutter!!),
+                LocalDateTime.now(),
             )
             // Steg 6: Opprett behandlingsvedtak og oppdater behandlingsresultat
             behandlingsvedtakService.opprettBehandlingsvedtak(behandlingId)
@@ -131,10 +133,11 @@ class Fattevedtakssteg(
             ),
             logContext,
         )
-        historikkTaskService.lagHistorikkTask(
+        historikkService.lagHistorikkinnslag(
             behandlingId,
             TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET,
-            Aktør.BESLUTTER,
+            Aktør.Beslutter(behandlingRepository.findByIdOrThrow(behandlingId).ansvarligBeslutter!!),
+            LocalDateTime.now(),
         )
         behandlingsvedtakService.opprettBehandlingsvedtak(behandlingId)
         behandlingskontrollService.fortsettBehandling(behandlingId, logContext)

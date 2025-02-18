@@ -2,13 +2,14 @@ package no.nav.familie.tilbake.behandling.steg
 
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegForeldelseDto
+import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.historikkinnslag.Aktør
-import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEvent
@@ -20,6 +21,7 @@ import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -27,10 +29,11 @@ class Foreldelsessteg(
     private val kravgrunnlagRepository: KravgrunnlagRepository,
     private val behandlingskontrollService: BehandlingskontrollService,
     private val foreldelseService: ForeldelseService,
-    private val historikkTaskService: HistorikkTaskService,
+    private val historikkService: HistorikkService,
     @Value("\${FORELDELSE_ANTALL_MÅNED:30}")
     private val foreldelseAntallMåned: Long,
     private val oppgaveTaskService: OppgaveTaskService,
+    private val behandlingRepository: BehandlingRepository,
 ) : IBehandlingssteg {
     private val log = TracedLogger.getLogger<Foreldelsessteg>()
 
@@ -43,7 +46,7 @@ class Foreldelsessteg(
             info("Behandling $behandlingId er på ${Behandlingssteg.FORELDELSE} steg")
         }
         if (!harGrunnlagForeldetPeriode(behandlingId)) {
-            lagHistorikkinnslag(behandlingId, Aktør.VEDTAKSLØSNING)
+            lagHistorikkinnslag(behandlingId, Aktør.Vedtaksløsning)
 
             behandlingskontrollService.oppdaterBehandlingsstegStatus(
                 behandlingId,
@@ -70,7 +73,7 @@ class Foreldelsessteg(
 
         oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId, logContext)
 
-        lagHistorikkinnslag(behandlingId, Aktør.SAKSBEHANDLER)
+        lagHistorikkinnslag(behandlingId, Aktør.Saksbehandler.fraBehandling(behandlingId, behandlingRepository))
 
         behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
@@ -93,7 +96,7 @@ class Foreldelsessteg(
         }
         if (harGrunnlagForeldetPeriode(behandlingId)) {
             foreldelseService.lagreFastForeldelseForAutomatiskSaksbehandling(behandlingId, logContext)
-            lagHistorikkinnslag(behandlingId, Aktør.VEDTAKSLØSNING)
+            lagHistorikkinnslag(behandlingId, Aktør.Vedtaksløsning)
 
             behandlingskontrollService.oppdaterBehandlingsstegStatus(
                 behandlingId,
@@ -136,7 +139,7 @@ class Foreldelsessteg(
         behandlingId: UUID,
         aktør: Aktør,
     ) {
-        historikkTaskService.lagHistorikkTask(behandlingId, TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, aktør)
+        historikkService.lagHistorikkinnslag(behandlingId, TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, aktør, LocalDateTime.now())
     }
 
     override fun getBehandlingssteg(): Behandlingssteg = Behandlingssteg.FORELDELSE

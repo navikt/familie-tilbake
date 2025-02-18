@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.inspectors.forExactly
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -47,7 +48,7 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import no.nav.familie.tilbake.foreldelse.VurdertForeldelseRepository
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.historikkinnslag.Aktør
-import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
+import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
@@ -112,6 +113,9 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var behandleKravgrunnlagTask: BehandleKravgrunnlagTask
 
+    @Autowired
+    private lateinit var historikkService: HistorikkService
+
     private lateinit var fagsak: Fagsak
     private lateinit var behandling: Behandling
 
@@ -151,7 +155,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
 
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.VEDTAKSLØSNING)
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.Vedtaksløsning)
         assertOppgaveTask(
             "Behandling er tatt av vent, " +
                 "men revurderingsvedtaksdato er mindre enn 10 dager fra dagens dato. " +
@@ -205,7 +209,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
 
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.VEDTAKSLØSNING)
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.Vedtaksløsning)
         assertOppgaveTask(
             "Behandling er tatt av vent, pga mottatt kravgrunnlag",
             LocalDate.now().plusDays(1),
@@ -251,7 +255,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.VARSEL, Behandlingsstegstatus.VENTER)
         behandlingsstegstilstand.any { it.behandlingssteg == Behandlingssteg.GRUNNLAG }.shouldBeFalse()
 
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.VEDTAKSLØSNING)
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.Vedtaksløsning)
         taskService.findAll().none { it.type == OppdaterOppgaveTask.TYPE }.shouldBeTrue()
         assertOpprettOppdaterPrioritetTask()
     }
@@ -291,7 +295,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.VARSEL, Behandlingsstegstatus.VENTER)
         behandlingsstegstilstand.any { it.behandlingssteg == Behandlingssteg.GRUNNLAG }.shouldBeFalse()
 
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.VEDTAKSLØSNING)
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.Vedtaksløsning)
         taskService.findAll().none { it.type == OppdaterOppgaveTask.TYPE }.shouldBeTrue()
         assertOpprettOppdaterPrioritetTask()
     }
@@ -341,7 +345,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
 
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.VEDTAKSLØSNING)
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.Vedtaksløsning, times = 2)
         assertOppdaterFaktainfoTask(kravgrunnlag.referanse)
         assertOppgaveTask(
             "Behandling er tatt av vent, " +
@@ -448,9 +452,9 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         faktaFeilutbetalingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeNull()
         foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeNull()
 
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.VEDTAKSLØSNING)
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT, Aktør.SAKSBEHANDLER)
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.SAKSBEHANDLER)
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.Vedtaksløsning, times = 2)
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler))
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler))
 
         assertOppdaterFaktainfoTask(kravgrunnlag.referanse)
         assertOpprettOppdaterPrioritetTask()
@@ -577,9 +581,9 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeNull()
         vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandling.id).shouldBeNull()
 
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.VEDTAKSLØSNING)
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT, Aktør.SAKSBEHANDLER)
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.SAKSBEHANDLER)
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.Vedtaksløsning, times = 2)
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler))
+        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler))
 
         assertOppdaterFaktainfoTask(kravgrunnlag.referanse)
         assertOpprettOppdaterPrioritetTask()
@@ -815,18 +819,18 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             }.shouldBeTrue()
     }
 
-    private fun assertHistorikkTask(
+    private fun assertHistorikkinnslag(
         historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
         aktør: Aktør,
+        times: Int = 1,
     ) {
-        taskService
-            .findAll()
-            .any {
-                LagHistorikkinnslagTask.TYPE == it.type &&
-                    historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
-                    aktør.name == it.metadata["aktør"] &&
-                    behandling.id.toString() == it.payload
-            }.shouldBeTrue()
+        historikkService.hentHistorikkinnslag(behandling.id).forExactly(times) {
+            it.type shouldBe historikkinnslagstype.type
+            it.tittel shouldBe historikkinnslagstype.tittel
+            it.tekst shouldBe historikkinnslagstype.tekst
+            it.aktør shouldBe aktør.type
+            it.opprettetAv shouldBe aktør.ident
+        }
     }
 
     private fun assertOppdaterFaktainfoTask(referanse: String) {

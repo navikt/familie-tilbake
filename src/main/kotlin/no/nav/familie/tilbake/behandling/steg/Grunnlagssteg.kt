@@ -5,7 +5,7 @@ import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.historikkinnslag.Aktør
-import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.log.SecureLog
@@ -19,7 +19,7 @@ import java.util.UUID
 class Grunnlagssteg(
     private val kravgrunnlagRepository: KravgrunnlagRepository,
     private val behandlingskontrollService: BehandlingskontrollService,
-    private val historikkTaskService: HistorikkTaskService,
+    private val historikkService: HistorikkService,
 ) : IBehandlingssteg {
     private val log = TracedLogger.getLogger<Grunnlagssteg>()
 
@@ -41,11 +41,11 @@ class Grunnlagssteg(
                 logContext,
             )
             behandlingskontrollService.fortsettBehandling(behandlingId, logContext)
-            historikkTaskService.lagHistorikkTask(
-                behandlingId,
-                TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT,
-                Aktør.VEDTAKSLØSNING,
-                triggerTid = LocalDateTime.now().plusSeconds(2),
+            historikkService.lagHistorikkinnslag(
+                behandlingId = behandlingId,
+                historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT,
+                aktør = Aktør.Vedtaksløsning,
+                opprettetTidspunkt = LocalDateTime.now().plusSeconds(2),
             )
         }
     }

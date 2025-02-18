@@ -13,7 +13,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.historikkinnslag.Aktør
-import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.log.LogService
@@ -22,13 +22,14 @@ import no.nav.familie.tilbake.person.PersonService
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
 class VergeService(
     private val behandlingRepository: BehandlingRepository,
     private val fagsakRepository: FagsakRepository,
-    private val historikkTaskService: HistorikkTaskService,
+    private val historikkService: HistorikkService,
     private val behandlingskontrollService: BehandlingskontrollService,
     private val integrasjonerClient: IntegrasjonerClient,
     private val personService: PersonService,
@@ -49,10 +50,11 @@ class VergeService(
         val verge = tilDomene(vergeDto)
         val oppdatertBehandling = behandling.copy(verger = behandling.verger.map { it.copy(aktiv = false) }.toSet() + verge)
         behandlingRepository.update(oppdatertBehandling)
-        historikkTaskService.lagHistorikkTask(
-            behandling.id,
-            TilbakekrevingHistorikkinnslagstype.VERGE_OPPRETTET,
-            Aktør.SAKSBEHANDLER,
+        historikkService.lagHistorikkinnslag(
+            behandlingId = behandling.id,
+            historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.VERGE_OPPRETTET,
+            aktør = Aktør.Saksbehandler.fraBehandling(behandlingId, behandlingRepository),
+            opprettetTidspunkt = LocalDateTime.now(),
         )
     }
 
@@ -73,10 +75,11 @@ class VergeService(
         if (finnesAktivVerge) {
             val oppdatertBehandling = behandling.copy(verger = behandling.verger.map { it.copy(aktiv = false) }.toSet())
             behandlingRepository.update(oppdatertBehandling)
-            historikkTaskService.lagHistorikkTask(
+            historikkService.lagHistorikkinnslag(
                 behandling.id,
                 TilbakekrevingHistorikkinnslagstype.VERGE_FJERNET,
-                Aktør.SAKSBEHANDLER,
+                Aktør.Saksbehandler.fraBehandling(behandlingId, behandlingRepository),
+                LocalDateTime.now(),
             )
         }
         behandlingskontrollService.oppdaterBehandlingsstegStatus(

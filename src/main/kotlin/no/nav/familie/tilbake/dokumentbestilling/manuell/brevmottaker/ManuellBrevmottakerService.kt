@@ -58,7 +58,7 @@ class ManuellBrevmottakerService(
         historikkService.lagHistorikkinnslag(
             behandlingId = behandlingId,
             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_LAGT_TIL,
-            aktør = Aktør.SAKSBEHANDLER,
+            aktør = Aktør.Saksbehandler.fraBehandling(behandlingId, behandlingRepository),
             opprettetTidspunkt = LocalDateTime.now(),
             beskrivelse = lagHistorikkBeskrivelseForBrevmottaker(manuellBrevmottaker),
             tittel = "${manuellBrevmottaker.type.visningsnavn} er lagt til som brevmottaker",
@@ -108,7 +108,7 @@ class ManuellBrevmottakerService(
         historikkService.lagHistorikkinnslag(
             behandlingId = manuellBrevmottaker.behandlingId,
             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_ENDRET,
-            aktør = Aktør.SAKSBEHANDLER,
+            aktør = Aktør.Saksbehandler.fraBehandling(behandlingId, behandlingRepository),
             opprettetTidspunkt = LocalDateTime.now(),
             beskrivelse = lagHistorikkBeskrivelseForBrevmottaker(oppdatertBrevmottaker),
             tittel = historikkinnslagtittel,
@@ -123,6 +123,7 @@ class ManuellBrevmottakerService(
         manuellBrevmottakerId: UUID,
     ) {
         val logContext = logService.contextFraBehandling(behandlingId)
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val manuellBrevmottakere = manuellBrevmottakerRepository.findByBehandlingId(behandlingId)
         if (manuellBrevmottakere.none { it.id == manuellBrevmottakerId }) {
             throw Feil(
@@ -133,6 +134,7 @@ class ManuellBrevmottakerService(
         fjernBrevmottakerOgLagHistorikkinnslag(
             manuellBrevmottakere.single { it.id == manuellBrevmottakerId },
             behandlingId,
+            Aktør.Saksbehandler.fraBehandling(behandlingId, behandlingRepository),
         )
     }
 
@@ -147,8 +149,9 @@ class ManuellBrevmottakerService(
     @Transactional
     fun fjernManuelleBrevmottakereOgTilbakeførSteg(behandlingId: UUID) {
         val logContext = logService.contextFraBehandling(behandlingId)
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         hentBrevmottakere(behandlingId).forEach { manuellBrevmottaker ->
-            fjernBrevmottakerOgLagHistorikkinnslag(manuellBrevmottaker, behandlingId)
+            fjernBrevmottakerOgLagHistorikkinnslag(manuellBrevmottaker, behandlingId, Aktør.Saksbehandler.fraBehandling(behandlingId, behandlingRepository))
         }
 
         behandlingskontrollService.oppdaterBehandlingsstegStatus(
@@ -165,11 +168,12 @@ class ManuellBrevmottakerService(
     private fun fjernBrevmottakerOgLagHistorikkinnslag(
         manuellBrevmottaker: ManuellBrevmottaker,
         behandlingId: UUID,
+        aktør: Aktør,
     ) {
         historikkService.lagHistorikkinnslag(
             behandlingId = behandlingId,
             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_FJERNET,
-            aktør = Aktør.SAKSBEHANDLER,
+            aktør = aktør,
             opprettetTidspunkt = LocalDateTime.now(),
             beskrivelse = lagHistorikkBeskrivelseForBrevmottaker(manuellBrevmottaker),
             tittel = "${manuellBrevmottaker.type.visningsnavn} er fjernet som brevmottaker",

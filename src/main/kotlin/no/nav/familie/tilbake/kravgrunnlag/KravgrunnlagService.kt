@@ -21,7 +21,7 @@ import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.historikkinnslag.Aktør
-import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
@@ -51,7 +51,7 @@ class KravgrunnlagService(
     private val taskService: TracableTaskService,
     private val tellerService: TellerService,
     private val oppgaveTaskService: OppgaveTaskService,
-    private val historikkTaskService: HistorikkTaskService,
+    private val historikkService: HistorikkService,
     private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
     private val endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher,
     private val behandlingService: BehandlingService,
@@ -100,10 +100,11 @@ class KravgrunnlagService(
         lagreKravgrunnlag(kravgrunnlag431, ytelsestype, logContext)
         mottattXmlService.arkiverMottattXml(mottattXmlId = null, mottattXml = kravgrunnlagXml, fagsystemId = fagsystemId, ytelsestype = ytelsestype)
 
-        historikkTaskService.lagHistorikkTask(
+        historikkService.lagHistorikkinnslag(
             behandling.id,
             TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT,
-            Aktør.VEDTAKSLØSNING,
+            Aktør.Vedtaksløsning,
+            LocalDateTime.now(),
         )
 
         // oppdater frist på oppgave når behandling venter på grunnlag
