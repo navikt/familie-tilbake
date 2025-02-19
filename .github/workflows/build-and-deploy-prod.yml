@@ -65,13 +65,6 @@ jobs:
           RESOURCE: .deploy/nais/app-prod-gcp-tilbake.yaml
           VAR: image= ${{ needs.build.outputs.image }}
           ENVIRONMENT: prod-gcp:tilbake
-      - name: Deploy til prod-gcp team familie
-        uses: nais/deploy/actions/deploy@v2
-        env:
-          CLUSTER: prod-gcp
-          RESOURCE: .deploy/nais/app-prod-gcp.yaml
-          VAR: image= ${{ needs.build.outputs.image }}
-          ENVIRONMENT: prod-gcp:teamfamilie
       - name: Post deploy failures to Slack
         if: failure()
         run: |
