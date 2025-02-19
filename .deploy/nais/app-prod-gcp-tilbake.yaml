@@ -115,7 +115,5 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: prod
-    - name: OPPDRAG_MQ_ENABLED
-      value: "false"
   kafka:
     pool: nav-prod
