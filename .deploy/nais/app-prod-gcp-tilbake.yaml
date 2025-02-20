@@ -95,6 +95,7 @@ spec:
       external:
         - host: tilbake-unleash-api.nav.cloud.nais.io
         - host: familie-integrasjoner.prod-fss-pub.nais.io
+        - host: familie-oppdrag.prod-fss-pub.nais.io
         - host: pdl-api.prod-fss-pub.nais.io
         - host: mpls02.adeo.no
           ports:
