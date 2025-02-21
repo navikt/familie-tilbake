@@ -50,7 +50,7 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakTaskTest {
         every { fagsakRepository.findByIdOrThrow(any()) } returns Testdata.fagsak
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns Oppgave(oppgavetype = Oppgavetype.GodkjenneVedtak.name)
         every { oppgaveService.ferdigstillOppgave(any(), any()) } just runs
-        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any(), any(), any(), any()) } just runs
+        every { oppgaveService.opprettOppgave(behandling, any(), any(), any(), any(), any(), any(), any()) } just runs
         every { oppgavePrioritetService.utledOppgaveprioritet(any()) } returns OppgavePrioritet.NORM
 
         val oppgavetypeFerdigstillSlot = slot<Oppgavetype>()
@@ -101,11 +101,7 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakTaskTest {
         every { behandlingRepository.findByIdOrThrow(any()) } returns behandling
         every { fagsakRepository.findByIdOrThrow(any()) } returns Testdata.fagsak
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns null
-<<<<<<< HEAD
-        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any(), any(), any()) } just runs
-=======
-        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any(), any(), any(), any()) } just runs
->>>>>>> 2c5afc0f (Fikset tester)
+        every { oppgaveService.opprettOppgave(behandling, any(), any(), any(), any(), any(), any(), any()) } just runs
         every { oppgavePrioritetService.utledOppgaveprioritet(any()) } returns OppgavePrioritet.NORM
         // Act
         ferdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask.doTask(
@@ -124,10 +120,6 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakTaskTest {
 
         // Assert
         verify(exactly = 0) { oppgaveService.ferdigstillOppgave(any(), any()) }
-<<<<<<< HEAD
-        verify(exactly = 1) { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any(), any(), any()) }
-=======
-        verify(exactly = 1) { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any(), any(), any(), any()) }
->>>>>>> 2c5afc0f (Fikset tester)
+        verify(exactly = 1) { oppgaveService.opprettOppgave(behandling, any(), any(), any(), any(), any(), any(), any()) }
     }
 }

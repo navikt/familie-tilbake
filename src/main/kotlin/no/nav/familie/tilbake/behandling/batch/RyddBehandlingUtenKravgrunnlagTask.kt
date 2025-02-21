@@ -66,6 +66,7 @@ class RyddBehandlingUtenKravgrunnlagTask(
                 fristForFerdigstillelse,
                 behandling.ansvarligSaksbehandler,
                 prioritet,
+                logContext,
                 behandlesAvApplikasjon = null,
                 saksId = null,
             )

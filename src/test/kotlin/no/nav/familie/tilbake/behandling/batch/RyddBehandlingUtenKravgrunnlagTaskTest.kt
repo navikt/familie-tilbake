@@ -75,9 +75,9 @@ internal class RyddBehandlingUtenKravgrunnlagTaskTest : OppslagSpringRunnerTest(
                 behandlingService,
                 behandlingRepository,
                 brevSporingService,
+                logService,
                 mockOppgaveService,
                 oppgavePrioritetService,
-                logService,
             )
     }
 
@@ -108,6 +108,7 @@ internal class RyddBehandlingUtenKravgrunnlagTaskTest : OppslagSpringRunnerTest(
                 fristForFerdigstillelse,
                 behandling.ansvarligSaksbehandler,
                 prioritet,
+                any(),
                 null,
                 null,
             )
