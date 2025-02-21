@@ -97,7 +97,7 @@ internal class RyddBehandlingUtenKravgrunnlagTaskTest : OppslagSpringRunnerTest(
             "Tilbakekrevingsbehandlingen for stønad ${Fagsystem.BA.name} opprettet ${behandling.opprettetDato} ble opprettet for over 8 uker siden og har ikke mottatt kravgrunnlag. " +
                 "Med mindre det er foretatt en revurdering med tilbakekrevingsbeløp i dag eller de siste dagene for stønaden, så vil det ikke oppstå et kravgrunnlag i dette tilfellet. Tilbakekrevingsbehandlingen kan derfor henlegges manuelt."
 
-        shouldNotThrow<RuntimeException> { ryddBehandlingUtenKravgrunnlagTask.doTask(lagTask(behandling.id)) }
+        ryddBehandlingUtenKravgrunnlagTask.doTask(lagTask(behandling.id))
 
         verify {
             mockOppgaveService.opprettOppgave(

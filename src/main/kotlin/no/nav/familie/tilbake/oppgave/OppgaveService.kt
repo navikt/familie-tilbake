@@ -116,8 +116,10 @@ class OppgaveService(
         if (finnOppgaveRespons.oppgaver.isNotEmpty() && !finnesFerdigstillOppgaveForBehandling(behandling.id, oppgavetype)) {
             log.medContext(logContext) {
                 info(
-                    "Det finnes allerede en oppgave $oppgavetype for behandling ${behandling.id} og " +
-                        "finnes ikke noen ferdigstilleoppgaver. Eksisterende oppgaven $oppgavetype må lukke først.",
+                    "Det finnes allerede en oppgave {} for behandling {} og finnes ikke noen ferdigstilleoppgaver. Eksisterende oppgaven {} må lukke først.",
+                    oppgavetype,
+                    behandling.id,
+                    oppgavetype,
                 )
             }
             return
@@ -153,7 +155,7 @@ class OppgaveService(
         val oppgaveResponse = integrasjonerClient.opprettOppgave(opprettOppgave)
         antallOppgaveTyper[oppgavetype]!!.increment()
         log.medContext(logContext) {
-            info("Ny oppgave (id=${oppgaveResponse.oppgaveId}, type=$oppgavetype, frist=$fristForFerdigstillelse) opprettet for behandling ${behandling.id}")
+            info("Ny oppgave (id={}, type={}, frist={}) opprettet for behandling {}", oppgaveResponse.oppgaveId, oppgavetype, fristForFerdigstillelse, behandling.id)
         }
     }
 
