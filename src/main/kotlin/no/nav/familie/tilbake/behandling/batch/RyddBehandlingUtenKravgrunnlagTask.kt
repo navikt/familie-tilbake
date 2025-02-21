@@ -17,7 +17,6 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingService
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.SendBrevTaskdata
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.TracedLogger
-import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.oppgave.OppgavePrioritetService
 import no.nav.familie.tilbake.oppgave.OppgaveService
 import org.springframework.stereotype.Service
@@ -37,7 +36,6 @@ class RyddBehandlingUtenKravgrunnlagTask(
     private val behandlingService: BehandlingService,
     private val behandlingRepository: BehandlingRepository,
     private val brevSporingService: BrevsporingService,
-    private val oppgaveTaskService: OppgaveTaskService,
     private val logService: LogService,
     private val oppgaveService: OppgaveService,
     private val oppgavePrioritetService: OppgavePrioritetService,

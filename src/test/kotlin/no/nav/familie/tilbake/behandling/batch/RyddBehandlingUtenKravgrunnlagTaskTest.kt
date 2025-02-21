@@ -53,9 +53,6 @@ internal class RyddBehandlingUtenKravgrunnlagTaskTest : OppslagSpringRunnerTest(
     private lateinit var brevsporingRepository: BrevsporingRepository
 
     @Autowired
-    private lateinit var oppgaveService: OppgaveService
-
-    @Autowired
     private lateinit var oppgavePrioritetService: OppgavePrioritetService
 
     @Autowired
@@ -78,7 +75,7 @@ internal class RyddBehandlingUtenKravgrunnlagTaskTest : OppslagSpringRunnerTest(
                 behandlingService,
                 behandlingRepository,
                 brevSporingService,
-                oppgaveService,
+                mockOppgaveService,
                 oppgavePrioritetService,
                 logService,
             )
@@ -104,13 +101,15 @@ internal class RyddBehandlingUtenKravgrunnlagTaskTest : OppslagSpringRunnerTest(
 
         verify {
             mockOppgaveService.opprettOppgave(
-                behandling,
+                any(),
                 Oppgavetype.VurderHenvendelse,
                 behandling.behandlendeEnhet,
                 beskrivelse,
                 fristForFerdigstillelse,
                 behandling.ansvarligSaksbehandler,
                 prioritet,
+                null,
+                null,
             )
         }
     }
