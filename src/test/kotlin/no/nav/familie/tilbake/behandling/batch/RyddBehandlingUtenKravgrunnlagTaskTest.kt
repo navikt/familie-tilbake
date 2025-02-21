@@ -21,7 +21,10 @@ import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
+import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingService
+import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.oppgave.LagOppgaveTask
+import no.nav.familie.tilbake.oppgave.OppgavePrioritetService
 import no.nav.familie.tilbake.oppgave.OppgaveService
 import no.nav.familie.tilbake.person.PersonService
 import org.junit.jupiter.api.AfterEach
@@ -44,21 +47,41 @@ internal class RyddBehandlingUtenKravgrunnlagTaskTest : OppslagSpringRunnerTest(
     private lateinit var behandlingRepository: BehandlingRepository
 
     @Autowired
+    private lateinit var brevSporingService: BrevsporingService
+
+    @Autowired
     private lateinit var brevsporingRepository: BrevsporingRepository
 
     @Autowired
+    private lateinit var oppgaveService: OppgaveService
+
+    @Autowired
+    private lateinit var oppgavePrioritetService: OppgavePrioritetService
+
+    @Autowired
+    private lateinit var logService: LogService
+
     private lateinit var ryddBehandlingUtenKravgrunnlagTask: RyddBehandlingUtenKravgrunnlagTask
 
     @Autowired
     private lateinit var taskService: TaskService
 
-    private val oppgaveService = mockk<OppgaveService>()
+    private val mockOppgaveService: OppgaveService = mockk(relaxed = true)
     private val personService = mockk<PersonService>()
 
     @BeforeEach
     fun init() {
         mockkObject(ContextService)
-        every { personService.hentAktivAktørId(any(), any(), any()) } returns "123456789"
+        every { personService.hentAktørId(any(), any(), any()) } returns listOf("123456789")
+        ryddBehandlingUtenKravgrunnlagTask =
+            RyddBehandlingUtenKravgrunnlagTask(
+                behandlingService,
+                behandlingRepository,
+                brevSporingService,
+                oppgaveService,
+                oppgavePrioritetService,
+                logService,
+            )
     }
 
     @AfterEach
@@ -79,9 +102,9 @@ internal class RyddBehandlingUtenKravgrunnlagTaskTest : OppslagSpringRunnerTest(
 
         shouldNotThrow<RuntimeException> { ryddBehandlingUtenKravgrunnlagTask.doTask(lagTask(behandling.id)) }
 
-        verify(exactly = 1) {
-            oppgaveService.opprettOppgaveUtenSaksIdOgBehandlesAvApplikasjon(
-                behandling.id,
+        verify {
+            mockOppgaveService.opprettOppgave(
+                behandling,
                 Oppgavetype.VurderHenvendelse,
                 behandling.behandlendeEnhet,
                 beskrivelse,

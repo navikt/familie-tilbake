@@ -79,7 +79,7 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakTaskTest {
 
         verify(exactly = 1) {
             oppgaveService.opprettOppgave(
-                behandlingId = any(),
+                behandling = behandling,
                 oppgavetype = capture(oppgavetypeOpprettSlot),
                 enhet = any(),
                 beskrivelse = capture(beskrivelseSlot),

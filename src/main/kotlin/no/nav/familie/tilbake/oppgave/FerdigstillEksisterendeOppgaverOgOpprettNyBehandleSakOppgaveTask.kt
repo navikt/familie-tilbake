@@ -41,7 +41,7 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask(
         }
 
         oppgaveService.opprettOppgave(
-            behandlingId = behandling.id,
+            behandling = behandling,
             oppgavetype = Oppgavetype.BehandleSak,
             enhet = behandling.behandlendeEnhet,
             beskrivelse = payload.beskrivelse,

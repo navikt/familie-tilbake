@@ -55,7 +55,7 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
 
         every { oppgavePrioritetService.utledOppgaveprioritet(any(), any()) } returns OppgavePrioritet.NORM
 
-        lagOppgaveTask = LagOppgaveTask(mockOppgaveService, behandlingskontrollService, oppgavePrioritetService)
+        lagOppgaveTask = LagOppgaveTask(mockOppgaveService, behandlingskontrollService, oppgavePrioritetService, behandlingRepository)
     }
 
     @Test
@@ -67,7 +67,7 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
 
         verify {
             mockOppgaveService.opprettOppgave(
-                behandling.id,
+                behandling,
                 Oppgavetype.BehandleSak,
                 "enhet",
                 Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING.beskrivelse,
@@ -92,7 +92,7 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
 
         verify {
             mockOppgaveService.opprettOppgave(
-                behandling.id,
+                behandling,
                 Oppgavetype.BehandleSak,
                 "enhet",
                 Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse,
@@ -112,7 +112,7 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
 
         verify {
             mockOppgaveService.opprettOppgave(
-                behandlingId = behandling.id,
+                behandling = behandling,
                 oppgavetype = Oppgavetype.BehandleSak,
                 enhet = "enhet",
                 beskrivelse = "",
@@ -133,7 +133,7 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
 
         verify {
             mockOppgaveService.opprettOppgave(
-                behandlingId = behandling.id,
+                behandling = behandling,
                 oppgavetype = Oppgavetype.BehandleSak,
                 enhet = "enhet",
                 beskrivelse = "Sendt til godkjenning av Saksbehandler Saksbehandlersen ",
