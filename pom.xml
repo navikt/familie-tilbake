@@ -244,22 +244,7 @@
         </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
-            <artifactId>kafka</artifactId>
-            <version>${felles.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.familie.felles</groupId>
-            <artifactId>log</artifactId>
-            <version>${felles.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.familie.felles</groupId>
             <artifactId>http-client</artifactId>
-            <version>${felles.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.familie.felles</groupId>
-            <artifactId>sikkerhet</artifactId>
             <version>${felles.version}</version>
         </dependency>
         <dependency>

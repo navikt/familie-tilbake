@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.config
 
-import no.nav.familie.kafka.KafkaErrorHandler
 import no.nav.familie.kontrakter.felles.Applikasjon
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -40,12 +39,11 @@ class KafkaConfig(
     fun consumerFactory(): ConsumerFactory<String, String> = DefaultKafkaConsumerFactory(consumerConfigs())
 
     @Bean
-    fun concurrentKafkaListenerContainerFactory(kafkaErrorHandler: KafkaErrorHandler): ConcurrentKafkaListenerContainerFactory<String, String> {
+    fun concurrentKafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, String> {
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
         factory.setConcurrency(1)
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL
         factory.consumerFactory = consumerFactory()
-        factory.setCommonErrorHandler(kafkaErrorHandler)
         return factory
     }
 

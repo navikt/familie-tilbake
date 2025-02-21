@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import no.nav.familie.http.client.RetryOAuth2HttpClient
 import no.nav.familie.http.config.RestTemplateAzure
-import no.nav.familie.kafka.KafkaErrorHandler
 import no.nav.familie.log.filter.LogFilter
 import no.nav.familie.prosessering.config.ProsesseringInfoProvider
 import no.nav.security.token.support.client.core.http.OAuth2HttpClient
@@ -34,7 +33,7 @@ import java.time.temporal.ChronoUnit
 @SpringBootConfiguration
 @ComponentScan(ApplicationConfig.PAKKE_NAVN, "no.nav.familie.sikkerhet", "no.nav.familie.prosessering", "no.nav.familie.unleash")
 @EnableJwtTokenValidation(ignore = ["org.springframework", "org.springdoc"])
-@Import(RestTemplateAzure::class, KafkaErrorHandler::class)
+@Import(RestTemplateAzure::class)
 @EnableOAuth2Client(cacheEnabled = true)
 @EnableScheduling
 @EnableCaching
