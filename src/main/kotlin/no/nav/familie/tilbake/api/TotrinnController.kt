@@ -5,8 +5,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.tilbake.api.dto.TotrinnsvurderingDto
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.HenteParam
-import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
+import no.nav.familie.tilbake.sikkerhet.TilgangAdvice
 import no.nav.familie.tilbake.totrinn.TotrinnService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -23,19 +22,22 @@ import java.util.UUID
 @Validated
 class TotrinnController(
     private val totrinnService: TotrinnService,
+    private val tilgangAdvice: TilgangAdvice,
 ) {
     @Operation(summary = "Hent totrinnsvurderinger")
     @GetMapping(
         path = ["/{behandlingId}/totrinn/v1"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        Behandlerrolle.VEILEDER,
-        "Henter totrinnsvurderinger for en gitt behandling",
-        AuditLoggerEvent.ACCESS,
-        HenteParam.BEHANDLING_ID,
-    )
     fun hentTotrinnsvurderinger(
         @PathVariable("behandlingId") behandlingId: UUID,
-    ): Ressurs<TotrinnsvurderingDto> = Ressurs.success(totrinnService.hentTotrinnsvurderinger(behandlingId))
+    ): Ressurs<TotrinnsvurderingDto> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+            auditLoggerEvent = AuditLoggerEvent.ACCESS,
+            handling = "Henter totrinnsvurderinger for en gitt behandling",
+        )
+        return Ressurs.success(totrinnService.hentTotrinnsvurderinger(behandlingId))
+    }
 }

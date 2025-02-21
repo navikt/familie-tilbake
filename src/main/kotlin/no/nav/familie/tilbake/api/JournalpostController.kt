@@ -6,8 +6,7 @@ import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.JournalføringService
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.HenteParam
-import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
+import no.nav.familie.tilbake.sikkerhet.TilgangAdvice
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -22,20 +21,35 @@ import java.util.UUID
 @Validated
 class JournalpostController(
     private val journalføringService: JournalføringService,
+    private val tilgangAdvice: TilgangAdvice,
 ) {
     @Operation(summary = "Hent dokument fra journalføring")
     @GetMapping("/{behandlingId}/journalpost/{journalpostId}/dokument/{dokumentInfoId}")
-    @Rolletilgangssjekk(Behandlerrolle.VEILEDER, "Henter journalført dokument", AuditLoggerEvent.ACCESS, HenteParam.BEHANDLING_ID)
     fun hentDokument(
         @PathVariable behandlingId: UUID,
         @PathVariable journalpostId: String,
         @PathVariable dokumentInfoId: String,
-    ): Ressurs<ByteArray> = Ressurs.success(journalføringService.hentDokument(journalpostId, dokumentInfoId), "OK")
+    ): Ressurs<ByteArray> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+            auditLoggerEvent = AuditLoggerEvent.ACCESS,
+            handling = "Henter journalført dokument",
+        )
+        return Ressurs.success(journalføringService.hentDokument(journalpostId, dokumentInfoId), "OK")
+    }
 
     @Operation(summary = "Hent journalpost informasjon")
     @GetMapping("/{behandlingId}/journalposter")
-    @Rolletilgangssjekk(Behandlerrolle.VEILEDER, "Henter journalført dokument", AuditLoggerEvent.ACCESS, HenteParam.BEHANDLING_ID)
     fun hentJournalposter(
         @PathVariable behandlingId: UUID,
-    ): Ressurs<List<Journalpost>> = Ressurs.success(journalføringService.hentJournalposter(behandlingId))
+    ): Ressurs<List<Journalpost>> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+            auditLoggerEvent = AuditLoggerEvent.ACCESS,
+            handling = "Henter journalført dokument",
+        )
+        return Ressurs.success(journalføringService.hentJournalposter(behandlingId))
+    }
 }

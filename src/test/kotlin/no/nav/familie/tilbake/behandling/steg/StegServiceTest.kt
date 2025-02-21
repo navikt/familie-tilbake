@@ -21,7 +21,7 @@ import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFaktaDto
-import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
+import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDtoTest
 import no.nav.familie.tilbake.api.dto.BehandlingsstegForeldelseDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegForeslåVedtaksstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegVergeDto
@@ -33,7 +33,6 @@ import no.nav.familie.tilbake.api.dto.GodTroDto
 import no.nav.familie.tilbake.api.dto.PeriodeMedTekstDto
 import no.nav.familie.tilbake.api.dto.VergeDto
 import no.nav.familie.tilbake.api.dto.VilkårsvurderingsperiodeDto
-import no.nav.familie.tilbake.api.dto.VurdertTotrinnDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.VergeService
@@ -610,7 +609,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertOppgave(FerdigstillOppgaveTask.TYPE)
         assertOppgave(LagOppgaveTask.TYPE)
 
-        stegService.håndterSteg(behandlingId, lagBehandlingsstegFatteVedtaksstegDto(godkjent = false), SecureLog.Context.tom())
+        stegService.håndterSteg(behandlingId, BehandlingsstegFatteVedtaksstegDtoTest.ny(godkjent = false), SecureLog.Context.tom())
 
         assertOppgave(FerdigstillOppgaveTask.TYPE, 2)
         assertOppgave(LagOppgaveTask.TYPE, 2)
@@ -644,7 +643,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
 
-        stegService.håndterSteg(behandlingId, lagBehandlingsstegFatteVedtaksstegDto(godkjent = true), SecureLog.Context.tom())
+        stegService.håndterSteg(behandlingId, BehandlingsstegFatteVedtaksstegDtoTest.ny(godkjent = true), SecureLog.Context.tom())
 
         val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.IVERKSETT_VEDTAK, Behandlingsstegstatus.KLAR)
@@ -685,7 +684,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
 
-        stegService.håndterSteg(behandlingId, lagBehandlingsstegFatteVedtaksstegDto(godkjent = false), SecureLog.Context.tom())
+        stegService.håndterSteg(behandlingId, BehandlingsstegFatteVedtaksstegDtoTest.ny(godkjent = false), SecureLog.Context.tom())
 
         val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
@@ -746,7 +745,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
         val exception =
             shouldThrow<RuntimeException> {
-                stegService.håndterSteg(behandlingId, lagBehandlingsstegFatteVedtaksstegDto(godkjent = true), SecureLog.Context.tom())
+                stegService.håndterSteg(behandlingId, BehandlingsstegFatteVedtaksstegDtoTest.ny(godkjent = true), SecureLog.Context.tom())
             }
 
         exception.message shouldBe "ansvarlig beslutter kan ikke være samme som ansvarlig saksbehandler"
@@ -933,7 +932,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
 
-        val behandlingsstegDto = lagBehandlingsstegFatteVedtaksstegDto(godkjent = false)
+        val behandlingsstegDto = BehandlingsstegFatteVedtaksstegDtoTest.ny(godkjent = false)
         stegService
             .kanAnsvarligSaksbehandlerOppdateres(behandlingId, behandlingsstegDto)
             .shouldBeFalse()
@@ -947,7 +946,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
 
-        val behandlingsstegDto = lagBehandlingsstegFatteVedtaksstegDto(godkjent = true)
+        val behandlingsstegDto = BehandlingsstegFatteVedtaksstegDtoTest.ny(godkjent = true)
         stegService
             .kanAnsvarligSaksbehandlerOppdateres(behandlingId, behandlingsstegDto)
             .shouldBeFalse()
@@ -1016,32 +1015,6 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                         null,
                         "God tro begrunnelse",
                     ),
-                ),
-            ),
-        )
-
-    private fun lagBehandlingsstegFatteVedtaksstegDto(godkjent: Boolean): BehandlingsstegFatteVedtaksstegDto =
-        BehandlingsstegFatteVedtaksstegDto(
-            listOf(
-                VurdertTotrinnDto(
-                    behandlingssteg = Behandlingssteg.FAKTA,
-                    godkjent = godkjent,
-                    begrunnelse = "fakta totrinn begrunnelse",
-                ),
-                VurdertTotrinnDto(
-                    behandlingssteg = Behandlingssteg.FORELDELSE,
-                    godkjent = godkjent,
-                    begrunnelse = "foreldelse totrinn begrunnelse",
-                ),
-                VurdertTotrinnDto(
-                    behandlingssteg = Behandlingssteg.VILKÅRSVURDERING,
-                    godkjent = godkjent,
-                    begrunnelse = "vilkårsvurdering totrinn begrunnelse",
-                ),
-                VurdertTotrinnDto(
-                    behandlingssteg = Behandlingssteg.FORESLÅ_VEDTAK,
-                    godkjent = godkjent,
-                    begrunnelse = "foreslåvedtak totrinn begrunnelse",
                 ),
             ),
         )

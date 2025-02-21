@@ -5,8 +5,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.tilbake.forvaltning.ForvaltningPreprodService
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.HenteParam
-import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
+import no.nav.familie.tilbake.sikkerhet.TilgangAdvice
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.context.annotation.Profile
 import org.springframework.core.env.Environment
@@ -29,6 +28,7 @@ import java.util.UUID
 class ForvaltningPreprodController(
     private val environment: Environment,
     private val forvaltningPreprodService: ForvaltningPreprodService,
+    private val tilgangAdvice: TilgangAdvice,
 ) {
     @Operation(
         description =
@@ -49,16 +49,16 @@ class ForvaltningPreprodController(
         produces = [MediaType.APPLICATION_JSON_VALUE],
         consumes = [MediaType.TEXT_XML_VALUE],
     )
-    @Rolletilgangssjekk(
-        Behandlerrolle.FORVALTER,
-        "Legg inn testkravgrunnlag - preprod",
-        AuditLoggerEvent.NONE,
-        HenteParam.BEHANDLING_ID,
-    )
     fun simulerMottakAvKravgrunnlag(
         @PathVariable behandlingId: UUID,
         @RequestBody kravgrunnlag: String,
     ): Ressurs<String> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+            auditLoggerEvent = AuditLoggerEvent.NONE,
+            handling = "Legg inn testkravgrunnlag - preprod",
+        )
         if (environment.activeProfiles.contains("prod")) {
             throw IllegalStateException("Kan ikke kjøre denne tjenesten i prod")
         }

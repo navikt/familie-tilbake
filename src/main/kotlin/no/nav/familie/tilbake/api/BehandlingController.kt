@@ -8,6 +8,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequ
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
+import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.familie.tilbake.api.dto.ByttEnhetDto
 import no.nav.familie.tilbake.api.dto.HenleggelsesbrevFritekstDto
 import no.nav.familie.tilbake.api.dto.OpprettRevurderingDto
@@ -21,8 +22,8 @@ import no.nav.familie.tilbake.forvaltning.ForvaltningService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.HenteParam
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
+import no.nav.familie.tilbake.sikkerhet.TilgangAdvice
 import no.nav.familie.tilbake.sikkerhet.TilgangService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
@@ -47,6 +48,7 @@ class BehandlingController(
     private val forvaltningService: ForvaltningService,
     private val behandlingskontrollService: BehandlingskontrollService,
     private val tilgangService: TilgangService,
+    private val tilgangAdvice: TilgangAdvice,
 ) {
     @Operation(summary = "Opprett tilbakekrevingsbehandling automatisk, kan kalles av fagsystem, batch")
     @PostMapping(
@@ -98,33 +100,39 @@ class BehandlingController(
         path = ["/v1/{behandlingId}"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        minimumBehandlerrolle = Behandlerrolle.VEILEDER,
-        handling = "Henter tilbakekrevingsbehandling",
-        AuditLoggerEvent.ACCESS,
-        henteParam = HenteParam.BEHANDLING_ID,
-    )
     fun hentBehandling(
         @PathVariable("behandlingId") behandlingId: UUID,
-    ): Ressurs<BehandlingDto> = Ressurs.success(behandlingService.hentBehandling(behandlingId))
+    ): Ressurs<BehandlingDto> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+            auditLoggerEvent = AuditLoggerEvent.ACCESS,
+            handling = "Henter tilbakekrevingsbehandling",
+        )
+        return Ressurs.success(behandlingService.hentBehandling(behandlingId))
+    }
 
     @Operation(summary = "Utfør behandlingssteg og fortsett behandling til neste steg")
     @PostMapping(
         path = ["{behandlingId}/steg/v1"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    // Rollen blir endret til BESLUTTER i Tilgangskontroll for FatteVedtak steg
-    @Rolletilgangssjekk(
-        Behandlerrolle.SAKSBEHANDLER,
-        "Utfører behandlingens aktiv steg og fortsetter den til neste steg",
-        AuditLoggerEvent.UPDATE,
-        HenteParam.BEHANDLING_ID,
-    )
     fun utførBehandlingssteg(
         @PathVariable("behandlingId") behandlingId: UUID,
         @Valid @RequestBody
         behandlingsstegDto: BehandlingsstegDto,
     ): Ressurs<String> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle =
+                if (behandlingsstegDto is BehandlingsstegFatteVedtaksstegDto) {
+                    Behandlerrolle.BESLUTTER
+                } else {
+                    Behandlerrolle.SAKSBEHANDLER
+                },
+            auditLoggerEvent = AuditLoggerEvent.UPDATE,
+            handling = "Utfører behandlingens aktiv steg og fortsetter den til neste steg",
+        )
         // Oppdaterer ansvarlig saksbehandler først slik at historikkinnslag får riktig saksbehandler
         // Hvis det feiler noe,bør det rullet tilbake helt siden begge 2 er på samme transaksjon
         if (stegService.kanAnsvarligSaksbehandlerOppdateres(behandlingId, behandlingsstegDto)) {
@@ -141,17 +149,17 @@ class BehandlingController(
         path = ["{behandlingId}/vent/v1"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        Behandlerrolle.SAKSBEHANDLER,
-        "Setter saksbehandler behandling på vent eller utvider fristen",
-        AuditLoggerEvent.UPDATE,
-        HenteParam.BEHANDLING_ID,
-    )
     fun settBehandlingPåVent(
         @PathVariable("behandlingId") behandlingId: UUID,
         @Valid @RequestBody
         behandlingPåVentDto: BehandlingPåVentDto,
     ): Ressurs<String> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.UPDATE,
+            handling = "Setter saksbehandler behandling på vent eller utvider fristen",
+        )
         behandlingService.settBehandlingPåVent(behandlingId, behandlingPåVentDto)
         return Ressurs.success("OK")
     }
@@ -161,15 +169,15 @@ class BehandlingController(
         path = ["{behandlingId}/gjenoppta/v1"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        Behandlerrolle.SAKSBEHANDLER,
-        "Saksbehandler tar behandling av vent etter å motta brukerrespons eller dokumentasjon",
-        AuditLoggerEvent.UPDATE,
-        HenteParam.BEHANDLING_ID,
-    )
     fun taBehandlingAvVent(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<String> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.UPDATE,
+            handling = "Saksbehandler tar behandling av vent etter å motta brukerrespons eller dokumentasjon",
+        )
         behandlingService.taBehandlingAvvent(behandlingId)
         return Ressurs.success("OK")
     }
@@ -179,17 +187,17 @@ class BehandlingController(
         path = ["{behandlingId}/henlegg/v1"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        Behandlerrolle.SAKSBEHANDLER,
-        "Saksbehandler henlegger behandling",
-        AuditLoggerEvent.UPDATE,
-        HenteParam.BEHANDLING_ID,
-    )
     fun henleggBehandling(
         @PathVariable("behandlingId") behandlingId: UUID,
         @Valid @RequestBody
         henleggelsesbrevFritekstDto: HenleggelsesbrevFritekstDto,
     ): Ressurs<String> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.UPDATE,
+            handling = "Saksbehandler henlegger behandling",
+        )
         behandlingService.henleggBehandling(behandlingId, henleggelsesbrevFritekstDto)
         return Ressurs.success("OK")
     }
@@ -199,17 +207,17 @@ class BehandlingController(
         path = ["{behandlingId}/bytt-enhet/v1"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        Behandlerrolle.SAKSBEHANDLER,
-        "Saksbehandler bytter enhet på behandling",
-        AuditLoggerEvent.UPDATE,
-        HenteParam.BEHANDLING_ID,
-    )
     fun byttEnhet(
         @PathVariable("behandlingId") behandlingId: UUID,
         @Valid @RequestBody
         byttEnhetDto: ByttEnhetDto,
     ): Ressurs<String> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.UPDATE,
+            handling = "Saksbehandler bytter enhet på behandling",
+        )
         behandlingService.byttBehandlendeEnhet(behandlingId, byttEnhetDto)
         return Ressurs.success("OK")
     }
@@ -219,15 +227,15 @@ class BehandlingController(
         path = ["{behandlingId}/angre-send-til-beslutter"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        Behandlerrolle.SAKSBEHANDLER,
-        "Saksbehandler angrer på send til beslutter og tar behandling tilbake til saksbehandler",
-        AuditLoggerEvent.UPDATE,
-        HenteParam.BEHANDLING_ID,
-    )
     fun angreSendTilBeslutter(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<String> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.UPDATE,
+            handling = "Saksbehandler angrer på send til beslutter og tar behandling tilbake til saksbehandler",
+        )
         behandlingService.angreSendTilBeslutter(behandlingId)
         return Ressurs.success("OK")
     }
@@ -237,15 +245,15 @@ class BehandlingController(
         path = ["{behandlingId}/flytt-behandling-til-fakta"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        Behandlerrolle.SAKSBEHANDLER,
-        "Flytter behandling tilbake til Fakta",
-        AuditLoggerEvent.UPDATE,
-        HenteParam.BEHANDLING_ID,
-    )
     fun flyttBehandlingTilFakta(
         @PathVariable behandlingId: UUID,
     ): Ressurs<String> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.UPDATE,
+            handling = "Flytter behandling tilbake til Fakta",
+        )
         val behandling = behandlingService.hentBehandling(behandlingId)
         val logContext = SecureLog.Context.medBehandling(behandling.eksternFagsakId, behandling.behandlingId.toString())
         validerKanSetteBehandlingTilbakeTilFakta(behandling, logContext)

@@ -6,8 +6,7 @@ import no.nav.familie.tilbake.api.dto.VergeDto
 import no.nav.familie.tilbake.behandling.VergeService
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.HenteParam
-import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
+import no.nav.familie.tilbake.sikkerhet.TilgangAdvice
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
@@ -25,46 +24,49 @@ import java.util.UUID
 @Validated
 class VergeController(
     private val vergeService: VergeService,
+    private val tilgangAdvice: TilgangAdvice,
 ) {
     @Operation(summary = "Opprett verge steg på behandling")
     @PostMapping
-    @Rolletilgangssjekk(
-        Behandlerrolle.SAKSBEHANDLER,
-        "Oppretter verge steg på behandling",
-        AuditLoggerEvent.CREATE,
-        HenteParam.BEHANDLING_ID,
-    )
     fun opprettVergeSteg(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<String> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.CREATE,
+            handling = "Oppretter verge steg på behandling",
+        )
         vergeService.opprettVergeSteg(behandlingId)
         return Ressurs.success("OK")
     }
 
     @Operation(summary = "Fjern verge")
     @PutMapping
-    @Rolletilgangssjekk(
-        Behandlerrolle.SAKSBEHANDLER,
-        "Deaktiverer ev. eksisterende verge.",
-        AuditLoggerEvent.UPDATE,
-        HenteParam.BEHANDLING_ID,
-    )
     fun fjernVerge(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<String> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.UPDATE,
+            handling = "Deaktiverer ev. eksisterende verge.",
+        )
         vergeService.fjernVerge(behandlingId)
         return Ressurs.success("OK")
     }
 
     @Operation(summary = "Hent verge")
     @GetMapping
-    @Rolletilgangssjekk(
-        Behandlerrolle.VEILEDER,
-        "Henter verge informasjon",
-        AuditLoggerEvent.ACCESS,
-        HenteParam.BEHANDLING_ID,
-    )
     fun hentVerge(
         @PathVariable("behandlingId") behandlingId: UUID,
-    ): Ressurs<VergeDto?> = Ressurs.success(vergeService.hentVerge(behandlingId))
+    ): Ressurs<VergeDto?> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId,
+            Behandlerrolle.VEILEDER,
+            AuditLoggerEvent.ACCESS,
+            "Henter verge informasjon",
+        )
+        return Ressurs.success(vergeService.hentVerge(behandlingId))
+    }
 }

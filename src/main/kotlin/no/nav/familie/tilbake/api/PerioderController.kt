@@ -10,8 +10,7 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.Vedtaksbrevsoppsummering
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.SkalSammenslåPerioder
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.HenteParam
-import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
+import no.nav.familie.tilbake.sikkerhet.TilgangAdvice
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
@@ -29,21 +28,22 @@ class PerioderController(
     private val vedtaksbrevsoppsummeringRepository: VedtaksbrevsoppsummeringRepository,
     private val fagsakRepository: FagsakRepository,
     private val periodeService: PeriodeService,
+    private val tilgangAdvice: TilgangAdvice,
 ) {
     @Operation(summary = "Sjekker om perioder er like - unntatt dato og beløp")
     @GetMapping(
         "/sjekk-likhet/{behandlingId}",
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        Behandlerrolle.VEILEDER,
-        "Sjekker om perioder er like - unntatt dato og beløp",
-        AuditLoggerEvent.ACCESS,
-        HenteParam.BEHANDLING_ID,
-    )
     fun erPerioderLike(
         @PathVariable behandlingId: UUID,
     ): Ressurs<Boolean> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+            auditLoggerEvent = AuditLoggerEvent.ACCESS,
+            handling = "Sjekker om perioder er like - unntatt dato og beløp",
+        )
         val erEnsligForsørgerOgPerioderLike = periodeService.erEnsligForsørgerOgPerioderLike(behandlingId)
         return Ressurs.success(
             erEnsligForsørgerOgPerioderLike == SkalSammenslåPerioder.JA,
@@ -55,15 +55,15 @@ class PerioderController(
         "/hent-sammenslatt/{behandlingId}",
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        Behandlerrolle.SAKSBEHANDLER,
-        "Sjekker om perioder er sammenslått",
-        AuditLoggerEvent.UPDATE,
-        HenteParam.BEHANDLING_ID,
-    )
     fun erPerioderSammenslått(
         @PathVariable behandlingId: UUID,
     ): Ressurs<Boolean> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.UPDATE,
+            handling = "Sjekker om perioder er sammenslått",
+        )
         val erPerioderSammenslått = periodeService.erPerioderSammenslått(behandlingId)
         return Ressurs.success(
             erPerioderSammenslått,
@@ -75,15 +75,15 @@ class PerioderController(
         "/sammensla/{behandlingId}",
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        Behandlerrolle.SAKSBEHANDLER,
-        "Oppdatere skalSammenslåPerioder",
-        AuditLoggerEvent.UPDATE,
-        HenteParam.BEHANDLING_ID,
-    )
     fun sammenslå(
         @PathVariable behandlingId: UUID,
     ): Ressurs<String> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.UPDATE,
+            handling = "Oppdatere skalSammenslåPerioder",
+        )
         val behandling = fagsakRepository.finnFagsakForBehandlingId(behandlingId)
         if (behandling.ytelsestype.tilTema() != Tema.ENF) {
             throw Exception("Kan ikke slå sammen perioder i behandling som ikke er for en enslig forsørger ytelse")
@@ -97,15 +97,15 @@ class PerioderController(
         "/angre-sammenslaing/{behandlingId}",
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        Behandlerrolle.SAKSBEHANDLER,
-        "Angre sammenslåing av perioder",
-        AuditLoggerEvent.UPDATE,
-        HenteParam.BEHANDLING_ID,
-    )
     fun angreSammenslåing(
         @PathVariable behandlingId: UUID,
     ): Ressurs<String> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.UPDATE,
+            handling = "Angre sammenslåing av perioder",
+        )
         val vedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)
         if (vedtaksbrevsoppsummering != null) {
             vedtaksbrevsoppsummeringRepository.update(vedtaksbrevsoppsummering.copy(skalSammenslåPerioder = SkalSammenslåPerioder.NEI))

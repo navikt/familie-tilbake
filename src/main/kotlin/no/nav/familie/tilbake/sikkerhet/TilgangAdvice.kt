@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.sikkerhet
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
-import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.FagsystemUtil
@@ -34,7 +33,6 @@ import kotlin.reflect.KProperty1
 import kotlin.reflect.full.declaredMemberProperties
 
 enum class HenteParam {
-    BEHANDLING_ID,
     YTELSESTYPE_OG_EKSTERN_FAGSAK_ID,
     FAGSYSTEM_OG_EKSTERN_FAGSAK_ID,
     MOTTATT_XML_ID,
@@ -66,11 +64,7 @@ class TilgangAdvice(
         joinpoint: JoinPoint,
         rolletilgangssjekk: Rolletilgangssjekk,
     ) {
-        if (ContextService.hentSaksbehandler(SecureLog.Context.tom()) == Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
-            // når behandler har system tilgang, trenges ikke det validering på fagsystem eller rolle
-            return
-        }
-
+        val saksbehandler = ContextService.hentSaksbehandler(SecureLog.Context.tom())
         val httpRequest = (RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes).request
 
         if (HttpMethod.GET.matches(httpRequest.method) || rolletilgangssjekk.henteParam != HenteParam.INGEN) {
@@ -78,72 +72,85 @@ class TilgangAdvice(
                 rolletilgangssjekk.henteParam,
                 joinpoint.args,
                 rolletilgangssjekk,
+                saksbehandler,
             )
         } else if (HttpMethod.POST.matches(httpRequest.method) || HttpMethod.PUT.matches(httpRequest.method)) {
             validateFagsystemTilgangIPostRequest(
                 joinpoint.args[0],
                 rolletilgangssjekk,
+                saksbehandler,
             )
         } else {
             logger.error("${httpRequest.requestURI} støtter ikke tilgangssjekk")
         }
     }
 
+    fun validerTilgangBehandlingID(
+        behandlingId: UUID,
+        minimumBehandlerrolle: Behandlerrolle,
+        auditLoggerEvent: AuditLoggerEvent,
+        handling: String,
+    ) {
+        val saksbehandler = ContextService.hentSaksbehandler(SecureLog.Context.tom())
+        if (saksbehandler == Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
+            // når behandler har system tilgang, trenges ikke det validering på fagsystem eller rolle
+            return
+        }
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandling.id.toString())
+
+        validate(
+            fagsystem = fagsak.fagsystem,
+            minimumBehandlerrolle = minimumBehandlerrolle,
+            fagsak = fagsak,
+            handling = handling,
+            logContext = logContext,
+            saksbehandler = saksbehandler,
+        )
+        logAccess(auditLoggerEvent, fagsak, behandling)
+    }
+
     private fun validateFagsystemTilgangIGetRequest(
         param: HenteParam,
         requestBody: Array<Any>,
         rolletilgangssjekk: Rolletilgangssjekk,
+        saksbehandler: String,
     ) {
         when (param) {
-            HenteParam.BEHANDLING_ID -> {
-                val behandlingId = requestBody.first() as UUID
-                val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-                val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-
-                var behandlerRolle = rolletilgangssjekk.minimumBehandlerrolle
-                if (requestBody.size > 1) {
-                    behandlerRolle =
-                        bestemBehandlerRolleForUtførFatteVedtakSteg(
-                            requestBody[1],
-                            rolletilgangssjekk.minimumBehandlerrolle,
-                        )
-                }
-                validate(
-                    fagsystem = fagsak.fagsystem,
-                    minimumBehandlerrolle = behandlerRolle,
-                    fagsak = fagsak,
-                    handling = rolletilgangssjekk.handling,
-                )
-                logAccess(rolletilgangssjekk, fagsak, behandling)
-            }
-
             HenteParam.YTELSESTYPE_OG_EKSTERN_FAGSAK_ID -> {
                 val ytelsestype = Ytelsestype.valueOf(requestBody.first().toString())
                 val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype)
                 val eksternFagsakId = requestBody[1].toString()
                 val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(fagsystem, eksternFagsakId)
+                val logContext = SecureLog.Context.utenBehandling(fagsak?.eksternFagsakId)
 
                 validate(
                     fagsystem = fagsystem,
                     minimumBehandlerrolle = rolletilgangssjekk.minimumBehandlerrolle,
                     fagsak = fagsak,
                     handling = rolletilgangssjekk.handling,
+                    logContext = logContext,
+                    saksbehandler = saksbehandler,
                 )
-                logAccess(rolletilgangssjekk, fagsak)
+                logAccess(rolletilgangssjekk.auditLoggerEvent, fagsak)
             }
 
             HenteParam.FAGSYSTEM_OG_EKSTERN_FAGSAK_ID -> {
                 val fagsystem = Fagsystem.valueOf(requestBody.first().toString())
                 val eksternFagsakId = requestBody[1].toString()
                 val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(fagsystem, eksternFagsakId)
+                val logContext = SecureLog.Context.utenBehandling(fagsak?.eksternFagsakId)
 
                 validate(
                     fagsystem = fagsystem,
                     minimumBehandlerrolle = rolletilgangssjekk.minimumBehandlerrolle,
                     fagsak = fagsak,
                     handling = rolletilgangssjekk.handling,
+                    logContext = logContext,
+                    saksbehandler = saksbehandler,
                 )
-                logAccess(rolletilgangssjekk, fagsak)
+                logAccess(rolletilgangssjekk.auditLoggerEvent, fagsak)
             }
 
             HenteParam.MOTTATT_XML_ID -> {
@@ -155,6 +162,8 @@ class TilgangAdvice(
                     minimumBehandlerrolle = rolletilgangssjekk.minimumBehandlerrolle,
                     fagsak = null,
                     handling = rolletilgangssjekk.handling,
+                    logContext = SecureLog.Context.tom(),
+                    saksbehandler = saksbehandler,
                 )
             }
 
@@ -176,6 +185,8 @@ class TilgangAdvice(
                     minimumBehandlerrolle = rolletilgangssjekk.minimumBehandlerrolle,
                     fagsak = null,
                     handling = rolletilgangssjekk.handling,
+                    logContext = SecureLog.Context.tom(),
+                    saksbehandler = saksbehandler,
                 )
             }
 
@@ -188,6 +199,7 @@ class TilgangAdvice(
     private fun validateFagsystemTilgangIPostRequest(
         requestBody: Any,
         rolletilgangssjekk: Rolletilgangssjekk,
+        saksbehandler: String,
     ) {
         val fields: Collection<KProperty1<out Any, *>> = requestBody::class.declaredMemberProperties
 
@@ -202,41 +214,50 @@ class TilgangAdvice(
                 val behandlingId: UUID = behandlingIdFraRequest.getter.call(requestBody) as UUID
                 val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
                 val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+                val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandling.id.toString())
 
                 validate(
                     fagsystem = fagsak.fagsystem,
                     minimumBehandlerrolle = rolletilgangssjekk.minimumBehandlerrolle,
                     fagsak = fagsak,
                     handling = rolletilgangssjekk.handling,
+                    logContext = logContext,
+                    saksbehandler = saksbehandler,
                 )
-                logAccess(rolletilgangssjekk, fagsak, behandling)
+                logAccess(rolletilgangssjekk.auditLoggerEvent, fagsak, behandling)
             }
 
             eksternBrukIdFraRequest != null -> {
                 val eksternBrukId: UUID = eksternBrukIdFraRequest.getter.call(requestBody) as UUID
                 val fagsak = fagsakRepository.finnFagsakForEksternBrukId(eksternBrukId)
+                val logContext = SecureLog.Context.utenBehandling(fagsak.eksternFagsakId)
 
                 validate(
                     fagsystem = fagsak.fagsystem,
                     minimumBehandlerrolle = rolletilgangssjekk.minimumBehandlerrolle,
                     fagsak = fagsak,
                     handling = rolletilgangssjekk.handling,
+                    logContext = logContext,
+                    saksbehandler = saksbehandler,
                 )
-                logAccess(rolletilgangssjekk, fagsak)
+                logAccess(rolletilgangssjekk.auditLoggerEvent, fagsak)
             }
 
             fagsystemFraRequest != null && eksternFagsakIdFraRequest != null -> {
                 val fagsystem = fagsystemFraRequest.getter.call(requestBody) as Fagsystem
                 val eksternFagsakId = eksternFagsakIdFraRequest.getter.call(requestBody).toString()
                 val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(fagsystem, eksternFagsakId)
+                val logContext = SecureLog.Context.utenBehandling(eksternFagsakId)
 
                 validate(
                     fagsystem = fagsystem,
                     minimumBehandlerrolle = rolletilgangssjekk.minimumBehandlerrolle,
                     fagsak = fagsak,
                     handling = rolletilgangssjekk.handling,
+                    logContext = logContext,
+                    saksbehandler = saksbehandler,
                 )
-                logAccess(rolletilgangssjekk, fagsak)
+                logAccess(rolletilgangssjekk.auditLoggerEvent, fagsak)
             }
 
             ytelsestypeFraRequest != null && eksternFagsakIdFraRequest != null -> {
@@ -244,14 +265,17 @@ class TilgangAdvice(
                 val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype)
                 val eksternFagsakId = eksternFagsakIdFraRequest.getter.call(requestBody).toString()
                 val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(fagsystem, eksternFagsakId)
+                val logContext = SecureLog.Context.utenBehandling(eksternFagsakId)
 
                 validate(
                     fagsystem = fagsystem,
                     minimumBehandlerrolle = rolletilgangssjekk.minimumBehandlerrolle,
                     fagsak = fagsak,
                     handling = rolletilgangssjekk.handling,
+                    logContext = logContext,
+                    saksbehandler = saksbehandler,
                 )
-                logAccess(rolletilgangssjekk, fagsak)
+                logAccess(rolletilgangssjekk.auditLoggerEvent, fagsak)
             }
 
             ytelsestypeFraRequest != null -> {
@@ -262,6 +286,8 @@ class TilgangAdvice(
                     minimumBehandlerrolle = rolletilgangssjekk.minimumBehandlerrolle,
                     fagsak = null,
                     handling = rolletilgangssjekk.handling,
+                    logContext = SecureLog.Context.tom(),
+                    saksbehandler = saksbehandler,
                 )
             }
 
@@ -276,6 +302,8 @@ class TilgangAdvice(
         minimumBehandlerrolle: Behandlerrolle,
         fagsak: Fagsak?,
         handling: String,
+        logContext: SecureLog.Context,
+        saksbehandler: String,
     ) {
         val brukerRolleOgFagsystemstilgang =
             ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, handling, SecureLog.Context.tom())
@@ -286,35 +314,39 @@ class TilgangAdvice(
                 brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
                 minimumBehandlerrolle = minimumBehandlerrolle,
                 handling = handling,
+                saksbehandler = saksbehandler,
             )
             return
         }
         val tilgangskontrollsfagsystem = Tilgangskontrollsfagsystem.fraFagsystem(fagsystem)
         // sjekk om saksbehandler har riktig gruppe å aksessere denne ytelsestypen
-        validateFagsystem(tilgangskontrollsfagsystem, brukerRolleOgFagsystemstilgang, handling)
+        validateFagsystem(tilgangskontrollsfagsystem, brukerRolleOgFagsystemstilgang, handling, saksbehandler)
 
         // sjekk om saksbehandler har riktig rolle å aksessere denne ytelsestypen
         validateRolle(
             brukersrolleTilFagsystemet = brukerRolleOgFagsystemstilgang.tilganger.getValue(tilgangskontrollsfagsystem),
             minimumBehandlerrolle = minimumBehandlerrolle,
             handling = handling,
+            logContext = logContext,
+            saksbehandler = saksbehandler,
         )
 
         validateEgenAnsattKode6Kode7(
             fagsak = fagsak,
             handling = handling,
+            saksbehandler = saksbehandler,
         )
     }
 
     fun logAccess(
-        rolletilgangssjekk: Rolletilgangssjekk,
+        auditLoggerEvent: AuditLoggerEvent,
         fagsak: Fagsak?,
         behandling: Behandling? = null,
     ) {
         fagsak?.let {
             auditLogger.log(
                 Sporingsdata(
-                    rolletilgangssjekk.auditLoggerEvent,
+                    auditLoggerEvent,
                     fagsak.bruker.ident,
                     CustomKeyValue("eksternFagsakId", fagsak.eksternFagsakId),
                     behandling?.let {
@@ -328,6 +360,7 @@ class TilgangAdvice(
     private fun validateEgenAnsattKode6Kode7(
         fagsak: Fagsak?,
         handling: String,
+        saksbehandler: String,
     ) {
         val personerIBehandlingen = fagsak?.bruker?.ident?.let { listOf(it) } ?: return
         val fagsakSystem = fagsak.fagsystem
@@ -335,8 +368,8 @@ class TilgangAdvice(
         val tilganger = integrasjonerClient.sjekkTilgangTilPersoner(personerIBehandlingen, fagsakSystem.tilTema())
         if (tilganger.any { !it.harTilgang }) {
             throw Feil(
-                message = "${ContextService.hentSaksbehandler(SecureLog.Context.tom())} har ikke tilgang til person i $handling",
-                frontendFeilmelding = "${ContextService.hentSaksbehandler(SecureLog.Context.tom())}  har ikke tilgang til person i $handling",
+                message = "$saksbehandler har ikke tilgang til person i $handling",
+                frontendFeilmelding = "$saksbehandler  har ikke tilgang til person i $handling",
                 logContext = SecureLog.Context.tom(),
                 httpStatus = HttpStatus.FORBIDDEN,
             )
@@ -358,11 +391,12 @@ class TilgangAdvice(
         fagsystem: Tilgangskontrollsfagsystem,
         brukerRolleOgFagsystemstilgang: InnloggetBrukertilgang,
         handling: String,
+        saksbehandler: String,
     ) {
         if (!brukerRolleOgFagsystemstilgang.tilganger.contains(fagsystem)) {
             throw Feil(
-                message = "${ContextService.hentSaksbehandler(SecureLog.Context.tom())} har ikke tilgang til $handling",
-                frontendFeilmelding = "${ContextService.hentSaksbehandler(SecureLog.Context.tom())}  har ikke tilgang til $handling",
+                message = "$saksbehandler har ikke tilgang til $handling",
+                frontendFeilmelding = "$saksbehandler  har ikke tilgang til $handling",
                 logContext = SecureLog.Context.tom(),
                 httpStatus = HttpStatus.FORBIDDEN,
             )
@@ -373,24 +407,26 @@ class TilgangAdvice(
         brukersrolleTilFagsystemet: Behandlerrolle,
         minimumBehandlerrolle: Behandlerrolle,
         handling: String,
+        logContext: SecureLog.Context,
+        saksbehandler: String,
     ) {
         if (minimumBehandlerrolle == Behandlerrolle.FORVALTER) {
             throw Feil(
                 message =
-                    "${ContextService.hentSaksbehandler(SecureLog.Context.tom())} med rolle $brukersrolleTilFagsystemet " +
+                    "$saksbehandler med rolle $brukersrolleTilFagsystemet " +
                         "har ikke tilgang til å kalle forvaltningstjeneste $handling. Krever FORVALTER.",
                 frontendFeilmelding = "Du har ikke tilgang til å $handling.",
-                logContext = SecureLog.Context.tom(),
+                logContext = logContext,
                 httpStatus = HttpStatus.FORBIDDEN,
             )
         }
         if (minimumBehandlerrolle.nivå > brukersrolleTilFagsystemet.nivå) {
             throw Feil(
                 message =
-                    "${ContextService.hentSaksbehandler(SecureLog.Context.tom())} med rolle $brukersrolleTilFagsystemet " +
+                    "$saksbehandler med rolle $brukersrolleTilFagsystemet " +
                         "har ikke tilgang til å $handling. Krever $minimumBehandlerrolle.",
                 frontendFeilmelding = "Du har ikke tilgang til å $handling.",
-                logContext = SecureLog.Context.tom(),
+                logContext = logContext,
                 httpStatus = HttpStatus.FORBIDDEN,
             )
         }
@@ -400,6 +436,7 @@ class TilgangAdvice(
         brukerRolleOgFagsystemstilgang: InnloggetBrukertilgang,
         minimumBehandlerrolle: Behandlerrolle,
         handling: String,
+        saksbehandler: String,
     ) {
         val tilganger = brukerRolleOgFagsystemstilgang.tilganger
         // Forvalter kan kun kalle forvaltningstjenestene og tjenestene som kan kalles av Veileder
@@ -408,7 +445,7 @@ class TilgangAdvice(
         ) {
             throw Feil(
                 message =
-                    "${ContextService.hentSaksbehandler(SecureLog.Context.tom())} med rolle FORVALTER " +
+                    "$saksbehandler med rolle FORVALTER " +
                         "har ikke tilgang til å $handling. Krever $minimumBehandlerrolle.",
                 frontendFeilmelding = "Du har ikke tilgang til å $handling.",
                 logContext = SecureLog.Context.tom(),
@@ -427,16 +464,5 @@ class TilgangAdvice(
             logContext = SecureLog.Context.tom(),
             httpStatus = HttpStatus.BAD_REQUEST,
         )
-    }
-
-    private fun bestemBehandlerRolleForUtførFatteVedtakSteg(
-        requestBody: Any,
-        minimumBehandlerrolle: Behandlerrolle,
-    ): Behandlerrolle {
-        // Behandlerrolle blir endret til Beslutter kun når FatteVedtak steg utføres
-        if (requestBody is BehandlingsstegFatteVedtaksstegDto) {
-            return Behandlerrolle.BESLUTTER
-        }
-        return minimumBehandlerrolle
     }
 }

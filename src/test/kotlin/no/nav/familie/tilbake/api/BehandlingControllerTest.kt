@@ -1,11 +1,14 @@
 package no.nav.familie.tilbake.api
 
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
+import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDtoTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
@@ -124,6 +127,38 @@ class BehandlingControllerTest : OppslagSpringRunnerTest() {
         val response = flyttBehandlingTilFakta(opprettTestdata(behandlingsstegsstatus = Behandlingsstegstatus.VENTER))
         assertEquals(HttpStatus.FORBIDDEN, response.statusCode)
         assertThat(response.body).contains("Behandling er på vent og kan derfor ikke flyttes tilbake til fakta")
+    }
+
+    @Test
+    fun `Saksbehandler uten beslutterrolle kan ikke godkjenne vedtak`() {
+        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }
+            .returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.ENSLIG_FORELDER to Behandlerrolle.SAKSBEHANDLER)))
+
+        val behandlingId = opprettTestdata(behandlingStatus = Behandlingsstatus.FATTER_VEDTAK)
+        val response =
+            restTemplate.exchange<Ressurs<Nothing>>(
+                localhost("/api/behandling/$behandlingId/steg/v1"),
+                HttpMethod.POST,
+                HttpEntity(BehandlingsstegFatteVedtaksstegDtoTest.ny(), headers),
+            )
+        response.statusCode shouldBe HttpStatus.FORBIDDEN
+        response.body?.melding shouldBe "saksbehandler med rolle SAKSBEHANDLER har ikke tilgang til å Utfører behandlingens aktiv steg og fortsetter den til neste steg. Krever BESLUTTER."
+    }
+
+    @Test
+    fun `Saksbehandler med beslutterrolle kan godkjenne vedtak`() {
+        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }
+            .returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.ENSLIG_FORELDER to Behandlerrolle.BESLUTTER)))
+
+        val behandlingId = opprettTestdata(behandlingStatus = Behandlingsstatus.FATTER_VEDTAK)
+        val response =
+            restTemplate.exchange<Ressurs<Nothing>>(
+                localhost("/api/behandling/$behandlingId/steg/v1"),
+                HttpMethod.POST,
+                HttpEntity(BehandlingsstegFatteVedtaksstegDtoTest.ny(), headers),
+            )
+        response.statusCode shouldBe HttpStatus.BAD_REQUEST
+        response.body?.melding shouldBe "ansvarlig beslutter kan ikke være samme som ansvarlig saksbehandler"
     }
 
     private fun flyttBehandlingTilFakta(

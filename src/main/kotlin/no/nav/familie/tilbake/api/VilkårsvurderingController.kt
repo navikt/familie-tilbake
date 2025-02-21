@@ -5,8 +5,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.tilbake.api.dto.VurdertVilkårsvurderingDto
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.HenteParam
-import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
+import no.nav.familie.tilbake.sikkerhet.TilgangAdvice
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -23,34 +22,39 @@ import java.util.UUID
 @Validated
 class VilkårsvurderingController(
     val vilkårsvurderingService: VilkårsvurderingService,
+    private val tilgangAdvice: TilgangAdvice,
 ) {
     @Operation(summary = "Hent vilkårsvurdering")
     @GetMapping(
         path = ["{behandlingId}/vilkarsvurdering/v1"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        Behandlerrolle.VEILEDER,
-        "Henter vilkårsvurdering for en gitt behandling",
-        AuditLoggerEvent.ACCESS,
-        HenteParam.BEHANDLING_ID,
-    )
     fun hentVurdertVilkårsvurdering(
         @PathVariable("behandlingId") behandlingId: UUID,
-    ): Ressurs<VurdertVilkårsvurderingDto> = Ressurs.success(vilkårsvurderingService.hentVilkårsvurdering(behandlingId))
+    ): Ressurs<VurdertVilkårsvurderingDto> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+            auditLoggerEvent = AuditLoggerEvent.ACCESS,
+            handling = "Henter vilkårsvurdering for en gitt behandling",
+        )
+        return Ressurs.success(vilkårsvurderingService.hentVilkårsvurdering(behandlingId))
+    }
 
     @Operation(summary = "Hent inaktive vilkårsvurderinger")
     @GetMapping(
         path = ["{behandlingId}/vilkarsvurdering/inaktiv"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        Behandlerrolle.VEILEDER,
-        "Henter inaktive vilkårsvurderinger for en gitt behandling",
-        AuditLoggerEvent.ACCESS,
-        HenteParam.BEHANDLING_ID,
-    )
     fun hentInaktivVilkårsvurdering(
         @PathVariable("behandlingId") behandlingId: UUID,
-    ): Ressurs<List<VurdertVilkårsvurderingDto>> = Ressurs.success(vilkårsvurderingService.hentInaktivVilkårsvurdering(behandlingId))
+    ): Ressurs<List<VurdertVilkårsvurderingDto>> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+            auditLoggerEvent = AuditLoggerEvent.ACCESS,
+            handling = "Henter inaktive vilkårsvurderinger for en gitt behandling",
+        )
+        return Ressurs.success(vilkårsvurderingService.hentInaktivVilkårsvurdering(behandlingId))
+    }
 }

@@ -14,6 +14,7 @@ import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.HenteParam
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
+import no.nav.familie.tilbake.sikkerhet.TilgangAdvice
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
@@ -41,22 +42,23 @@ class ForvaltningController(
     private val oppgaveTaskService: OppgaveTaskService,
     private val behandlingTilstandService: BehandlingTilstandService,
     private val logService: LogService,
+    private val tilgangAdvice: TilgangAdvice,
 ) {
     @Operation(summary = "Hent korrigert kravgrunnlag")
     @PutMapping(
         path = ["/behandling/{behandlingId}/kravgrunnlag/{eksternKravgrunnlagId}/v1"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        Behandlerrolle.FORVALTER,
-        "Henter korrigert kravgrunnlag fra økonomi og oppdaterer kravgrunnlag431",
-        AuditLoggerEvent.NONE,
-        HenteParam.BEHANDLING_ID,
-    )
     fun korrigerKravgrunnlag(
         @PathVariable behandlingId: UUID,
         @PathVariable eksternKravgrunnlagId: BigInteger,
     ): Ressurs<String> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+            auditLoggerEvent = AuditLoggerEvent.NONE,
+            handling = "Henter korrigert kravgrunnlag fra økonomi og oppdaterer kravgrunnlag431",
+        )
         forvaltningService.korrigerKravgrunnlag(behandlingId, eksternKravgrunnlagId)
         return Ressurs.success("OK")
     }
@@ -66,15 +68,15 @@ class ForvaltningController(
         path = ["/behandling/{behandlingId}/kravgrunnlag/v1"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        Behandlerrolle.FORVALTER,
-        "Henter korrigert kravgrunnlag fra økonomi og oppdaterer kravgrunnlag431",
-        AuditLoggerEvent.NONE,
-        HenteParam.BEHANDLING_ID,
-    )
     fun korrigerKravgrunnlag(
         @PathVariable behandlingId: UUID,
     ): Ressurs<String> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+            auditLoggerEvent = AuditLoggerEvent.NONE,
+            handling = "Henter korrigert kravgrunnlag fra økonomi og oppdaterer kravgrunnlag431",
+        )
         forvaltningService.korrigerKravgrunnlag(behandlingId)
         return Ressurs.success("OK")
     }
@@ -102,15 +104,15 @@ class ForvaltningController(
         path = ["/behandling/{behandlingId}/tving-henleggelse/v1"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        Behandlerrolle.FORVALTER,
-        "Tving henlegger behandling",
-        AuditLoggerEvent.NONE,
-        HenteParam.BEHANDLING_ID,
-    )
     fun tvingHenleggBehandling(
         @PathVariable behandlingId: UUID,
     ): Ressurs<String> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+            auditLoggerEvent = AuditLoggerEvent.NONE,
+            handling = "Tving henlegger behandling",
+        )
         forvaltningService.tvingHenleggBehandling(behandlingId)
         return Ressurs.success("OK")
     }
@@ -120,15 +122,15 @@ class ForvaltningController(
         path = ["/behandling/{behandlingId}/flytt-behandling/v1"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        Behandlerrolle.FORVALTER,
-        "Flytter behandling tilbake til Fakta",
-        AuditLoggerEvent.UPDATE,
-        HenteParam.BEHANDLING_ID,
-    )
     fun flyttBehandlingTilFakta(
         @PathVariable behandlingId: UUID,
     ): Ressurs<String> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+            auditLoggerEvent = AuditLoggerEvent.UPDATE,
+            handling = "Flytter behandling tilbake til Fakta",
+        )
         forvaltningService.flyttBehandlingsstegTilbakeTilFakta(behandlingId)
         return Ressurs.success("OK")
     }

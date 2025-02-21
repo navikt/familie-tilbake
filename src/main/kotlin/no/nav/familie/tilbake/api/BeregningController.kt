@@ -9,8 +9,7 @@ import no.nav.familie.tilbake.api.dto.BeregningsresultatDto
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.HenteParam
-import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
+import no.nav.familie.tilbake.sikkerhet.TilgangAdvice
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
@@ -28,36 +27,41 @@ import java.util.UUID
 @Validated
 class BeregningController(
     val tilbakekrevingsberegningService: TilbakekrevingsberegningService,
+    private val tilgangAdvice: TilgangAdvice,
 ) {
     @Operation(summary = "Beregn feilutbetalt beløp for nye delte perioder")
     @PostMapping(
         path = ["{behandlingId}/beregn/v1"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-        handling = "Beregner feilutbetalt beløp for nye delte perioder",
-        AuditLoggerEvent.ACCESS,
-        henteParam = HenteParam.BEHANDLING_ID,
-    )
     fun beregnBeløp(
         @PathVariable("behandlingId") behandlingId: UUID,
         @Valid @RequestBody
         perioder: List<Datoperiode>,
-    ): Ressurs<BeregnetPerioderDto> = Ressurs.success(tilbakekrevingsberegningService.beregnBeløp(behandlingId, perioder))
+    ): Ressurs<BeregnetPerioderDto> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.ACCESS,
+            handling = "Beregner feilutbetalt beløp for nye delte perioder",
+        )
+        return Ressurs.success(tilbakekrevingsberegningService.beregnBeløp(behandlingId, perioder))
+    }
 
     @Operation(summary = "Hent beregningsresultat")
     @GetMapping(
         path = ["{behandlingId}/beregn/resultat/v1"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        minimumBehandlerrolle = Behandlerrolle.VEILEDER,
-        handling = "Henter beregningsresultat",
-        AuditLoggerEvent.ACCESS,
-        henteParam = HenteParam.BEHANDLING_ID,
-    )
     fun hentBeregningsresultat(
         @PathVariable("behandlingId") behandlingId: UUID,
-    ): Ressurs<BeregningsresultatDto> = Ressurs.success(tilbakekrevingsberegningService.hentBeregningsresultat(behandlingId))
+    ): Ressurs<BeregningsresultatDto> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+            auditLoggerEvent = AuditLoggerEvent.ACCESS,
+            handling = "Henter beregningsresultat",
+        )
+        return Ressurs.success(tilbakekrevingsberegningService.hentBeregningsresultat(behandlingId))
+    }
 }

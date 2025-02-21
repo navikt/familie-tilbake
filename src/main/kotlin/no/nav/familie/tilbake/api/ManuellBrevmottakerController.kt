@@ -9,8 +9,8 @@ import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBre
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerService
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.HenteParam
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
+import no.nav.familie.tilbake.sikkerhet.TilgangAdvice
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
@@ -30,6 +30,7 @@ import java.util.UUID
 @Validated
 class ManuellBrevmottakerController(
     private val manuellBrevmottakerService: ManuellBrevmottakerService,
+    private val tilgangAdvice: TilgangAdvice,
 ) {
     @Operation(summary = "Legger til brevmottaker manuelt")
     @PostMapping(
@@ -37,17 +38,17 @@ class ManuellBrevmottakerController(
         consumes = [MediaType.APPLICATION_JSON_VALUE],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        Behandlerrolle.SAKSBEHANDLER,
-        "Legger til brevmottaker manuelt",
-        AuditLoggerEvent.CREATE,
-        HenteParam.BEHANDLING_ID,
-    )
     fun leggTilBrevmottaker(
         @PathVariable behandlingId: UUID,
         @Valid @RequestBody
         manuellBrevmottakerRequestDto: ManuellBrevmottakerRequestDto,
     ): Ressurs<UUID> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.CREATE,
+            handling = "Legger til brevmottaker manuelt",
+        )
         val id = manuellBrevmottakerService.leggTilBrevmottaker(behandlingId, manuellBrevmottakerRequestDto)
         return Ressurs.success(id, melding = "Manuell brevmottaker er lagt til.")
     }
@@ -57,21 +58,22 @@ class ManuellBrevmottakerController(
         path = ["/{behandlingId}"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-        handling = "Henter manuelle brevmottakere",
-        auditLoggerEvent = AuditLoggerEvent.ACCESS,
-        henteParam = HenteParam.BEHANDLING_ID,
-    )
     fun hentManuellBrevmottakere(
         @PathVariable behandlingId: UUID,
-    ): Ressurs<List<ManuellBrevmottakerResponsDto>> =
-        Ressurs
+    ): Ressurs<List<ManuellBrevmottakerResponsDto>> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.ACCESS,
+            handling = "Henter manuelle brevmottakere",
+        )
+        return Ressurs
             .success(
                 manuellBrevmottakerService
                     .hentBrevmottakere(behandlingId)
                     .map { ManuellBrevmottakerMapper.tilRespons(it) },
             )
+    }
 
     @Operation(summary = "Oppdaterer manuell brevmottaker")
     @PutMapping(
@@ -79,18 +81,18 @@ class ManuellBrevmottakerController(
         consumes = [MediaType.APPLICATION_JSON_VALUE],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        Behandlerrolle.SAKSBEHANDLER,
-        "Oppdaterer manuell brevmottaker",
-        AuditLoggerEvent.UPDATE,
-        HenteParam.BEHANDLING_ID,
-    )
     fun oppdaterManuellBrevmottaker(
         @PathVariable behandlingId: UUID,
         @PathVariable manuellBrevmottakerId: UUID,
         @Valid @RequestBody
         manuellBrevmottakerRequestDto: ManuellBrevmottakerRequestDto,
     ): Ressurs<String> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.UPDATE,
+            handling = "Oppdaterer manuell brevmottaker",
+        )
         manuellBrevmottakerService.oppdaterBrevmottaker(behandlingId, manuellBrevmottakerId, manuellBrevmottakerRequestDto)
         return Ressurs.success("", melding = "Manuell brevmottaker er oppdatert")
     }
@@ -112,30 +114,30 @@ class ManuellBrevmottakerController(
 
     @Operation(summary = "Opprett og aktiver brevmottaker-steg på behandling")
     @PostMapping(path = ["/{behandlingId}/aktiver"])
-    @Rolletilgangssjekk(
-        Behandlerrolle.SAKSBEHANDLER,
-        "Oppretter brevmottaker-steg på behandling",
-        AuditLoggerEvent.CREATE,
-        HenteParam.BEHANDLING_ID,
-    )
     fun opprettBrevmottakerSteg(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<String> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.CREATE,
+            handling = "Oppretter brevmottaker-steg på behandling",
+        )
         manuellBrevmottakerService.opprettBrevmottakerSteg(behandlingId)
         return Ressurs.success("OK")
     }
 
     @Operation(summary = "Fjern manuelle brevmottakere og deaktiver steg")
     @PutMapping(path = ["/{behandlingId}/deaktiver"])
-    @Rolletilgangssjekk(
-        Behandlerrolle.SAKSBEHANDLER,
-        "Fjern ev. manuelt registrerte brevmottakere og deaktiver steg.",
-        AuditLoggerEvent.UPDATE,
-        HenteParam.BEHANDLING_ID,
-    )
     fun fjernBrevmottakerSteg(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<String> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.UPDATE,
+            handling = "Fjern ev. manuelt registrerte brevmottakere og deaktiver steg.",
+        )
         manuellBrevmottakerService.fjernManuelleBrevmottakereOgTilbakeførSteg(behandlingId)
         return Ressurs.success("OK")
     }

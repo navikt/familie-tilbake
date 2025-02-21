@@ -21,8 +21,7 @@ import no.nav.familie.tilbake.kravgrunnlag.task.BehandleStatusmeldingTask
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.HenteParam
-import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
+import no.nav.familie.tilbake.sikkerhet.TilgangAdvice
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.context.annotation.Profile
 import org.springframework.core.env.Environment
@@ -48,6 +47,7 @@ class AutotestController(
     private val requestSendtRepository: HentFagsystemsbehandlingRequestSendtRepository,
     private val kafkaProducer: KafkaProducer,
     private val environment: Environment,
+    private val tilgangAdvice: TilgangAdvice,
 ) {
     @PostMapping(path = ["/opprett/kravgrunnlag/"])
     fun opprettKravgrunnlag(
@@ -89,16 +89,16 @@ class AutotestController(
         path = ["/behandling/{behandlingId}/endre/saksbehandler/{nyAnsvarligSaksbehandler}"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-        handling = "endre ansvarlig saksbehandler",
-        AuditLoggerEvent.UPDATE,
-        henteParam = HenteParam.BEHANDLING_ID,
-    )
     fun endreAnsvarligSaksbehandler(
         @PathVariable behandlingId: UUID,
         @PathVariable nyAnsvarligSaksbehandler: String,
     ): Ressurs<String> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.UPDATE,
+            handling = "endre ansvarlig saksbehandler",
+        )
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         behandlingRepository.update(behandling.copy(ansvarligSaksbehandler = nyAnsvarligSaksbehandler))
         return Ressurs.success("OK")

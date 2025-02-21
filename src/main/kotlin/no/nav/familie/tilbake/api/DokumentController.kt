@@ -17,8 +17,8 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.Avsnitt
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevService
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.HenteParam
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
+import no.nav.familie.tilbake.sikkerhet.TilgangAdvice
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
@@ -38,6 +38,7 @@ class DokumentController(
     private val henleggelsesbrevService: HenleggelsesbrevService,
     private val vedtaksbrevService: VedtaksbrevService,
     private val lagreUtkastVedtaksbrevService: LagreUtkastVedtaksbrevService,
+    private val tilgangAdvice: TilgangAdvice,
 ) {
     @Operation(summary = "Bestill brevsending")
     @PostMapping("/bestill")
@@ -105,26 +106,33 @@ class DokumentController(
         "/vedtaksbrevtekst/{behandlingId}",
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(Behandlerrolle.VEILEDER, "Henter vedtaksbrevtekst", AuditLoggerEvent.ACCESS, HenteParam.BEHANDLING_ID)
     fun hentVedtaksbrevtekst(
         @PathVariable behandlingId: UUID,
-    ): Ressurs<List<Avsnitt>> = Ressurs.success(vedtaksbrevService.hentVedtaksbrevSomTekst(behandlingId))
+    ): Ressurs<List<Avsnitt>> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+            auditLoggerEvent = AuditLoggerEvent.ACCESS,
+            handling = "Henter vedtaksbrevtekst",
+        )
+        return Ressurs.success(vedtaksbrevService.hentVedtaksbrevSomTekst(behandlingId))
+    }
 
     @Operation(summary = "Lagre utkast av vedtaksbrev")
     @PostMapping(
         "/vedtaksbrevtekst/{behandlingId}/utkast",
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        Behandlerrolle.SAKSBEHANDLER,
-        "Lagrer utkast av vedtaksbrev",
-        AuditLoggerEvent.UPDATE,
-        HenteParam.BEHANDLING_ID,
-    )
     fun lagreUtkastVedtaksbrev(
         @PathVariable behandlingId: UUID,
         @RequestBody fritekstavsnitt: FritekstavsnittDto,
     ): Ressurs<String> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.UPDATE,
+            handling = "Lagrer utkast av vedtaksbrev",
+        )
         lagreUtkastVedtaksbrevService.lagreUtkast(behandlingId, fritekstavsnitt)
         return Ressurs.success("OK")
     }

@@ -16,9 +16,6 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Varsel
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
-import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
-import no.nav.familie.tilbake.api.dto.BehandlingsstegFaktaDto
-import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.familie.tilbake.api.dto.BrukerDto
 import no.nav.familie.tilbake.api.dto.FagsakDto
 import no.nav.familie.tilbake.api.dto.HentFagsystemsbehandlingRequestDto
@@ -29,7 +26,6 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
-import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.RolleConfig
 import no.nav.familie.tilbake.data.Testdata
@@ -170,61 +166,44 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `sjekkTilgang skal sperre tilgang hvis person er kode 6`() {
-        every { mockJoinpoint.args } returns arrayOf(behandling.id)
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232"), any()) } returns listOf(Tilgang(personIdent, false, null))
-        val rolletilgangssjekk =
-            Rolletilgangssjekk(Behandlerrolle.VEILEDER, "hent behandling", AuditLoggerEvent.ACCESS, HenteParam.BEHANDLING_ID)
         val token = opprettToken("abc", listOf(BARNETRYGD_BESLUTTER_ROLLE))
-        opprettRequestContext("/api/behandling/v1/$behandling.id", HttpMethod.GET, token)
+        opprettRequestContext("/api/behandling/v1/${behandling.id}", HttpMethod.GET, token)
 
-        shouldThrow<RuntimeException> { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
-            .message shouldBe "abc har ikke tilgang til person i hent behandling"
+        val exception = shouldThrow<RuntimeException> { tilgangAdvice.validerTilgangBehandlingID(behandling.id, Behandlerrolle.VEILEDER, AuditLoggerEvent.ACCESS, "test") }
+        exception.message shouldBe "abc har ikke tilgang til person i test"
     }
 
     @Test
     fun `sjekkTilgang skal gi tilgang hvis person ikke er kode 6`() {
-        every { mockJoinpoint.args } returns arrayOf(behandling.id)
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232"), any()) } returns listOf(Tilgang(personIdent, true, null))
-        val rolletilgangssjekk =
-            Rolletilgangssjekk(Behandlerrolle.VEILEDER, "hent behandling", AuditLoggerEvent.ACCESS, HenteParam.BEHANDLING_ID)
         val token = opprettToken("abc", listOf(BARNETRYGD_BESLUTTER_ROLLE))
-        opprettRequestContext("/api/behandling/v1/$behandling.id", HttpMethod.GET, token)
+        opprettRequestContext("/api/behandling/v1/${behandling.id}", HttpMethod.GET, token)
 
-        shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
+        shouldNotThrowAny { tilgangAdvice.validerTilgangBehandlingID(behandling.id, Behandlerrolle.VEILEDER, AuditLoggerEvent.ACCESS, "test") }
     }
 
     @Test
     fun `sjekkTilgang skal ha tilgang for barnetrygd beslutter i barnetrygd hent behandling request`() {
-        val token = opprettToken("abc", listOf(BARNETRYGD_BESLUTTER_ROLLE))
-        opprettRequestContext("/api/behandling/v1/$behandling.id", HttpMethod.GET, token)
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232"), any()) } returns listOf(Tilgang(personIdent, true, null))
-        every { mockJoinpoint.args } returns arrayOf(behandling.id)
-        val rolletilgangssjekk =
-            Rolletilgangssjekk(Behandlerrolle.VEILEDER, "hent behandling", AuditLoggerEvent.ACCESS, HenteParam.BEHANDLING_ID)
+        val token = opprettToken("abc", listOf(BARNETRYGD_BESLUTTER_ROLLE))
+        opprettRequestContext("/api/behandling/v1/${behandling.id}", HttpMethod.GET, token)
 
-        shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
+        shouldNotThrowAny { tilgangAdvice.validerTilgangBehandlingID(behandling.id, Behandlerrolle.VEILEDER, AuditLoggerEvent.ACCESS, "test") }
     }
 
     @Test
     fun `sjekkTilgang skal ikke ha tilgang for enslig beslutter i barnetrygd hent behandling request`() {
-        val token = opprettToken("abc", listOf(ENSLIG_BESLUTTER_ROLLE))
-        opprettRequestContext("/api/behandling/v1/$behandling.id", HttpMethod.GET, token)
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232"), any()) } returns listOf(Tilgang(personIdent, true))
-        every { mockJoinpoint.args } returns arrayOf(behandling.id)
-        val rolletilgangssjekk =
-            Rolletilgangssjekk(
-                Behandlerrolle.VEILEDER,
-                "barnetrygd hent behandling",
-                AuditLoggerEvent.ACCESS,
-                HenteParam.BEHANDLING_ID,
-            )
+        val token = opprettToken("abc", listOf(ENSLIG_BESLUTTER_ROLLE))
+        opprettRequestContext("/api/behandling/v1/${behandling.id}", HttpMethod.GET, token)
 
         val exception =
-            shouldThrow<RuntimeException>(block = {
-                tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk)
-            })
+            shouldThrow<RuntimeException> {
+                tilgangAdvice.validerTilgangBehandlingID(behandling.id, Behandlerrolle.VEILEDER, AuditLoggerEvent.ACCESS, "test")
+            }
 
-        exception.message shouldBe "abc har ikke tilgang til ${rolletilgangssjekk.handling}"
+        exception.message shouldBe "abc har ikke tilgang til test"
     }
 
     @Test
@@ -269,233 +248,111 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `sjekkTilgang skal ha tilgang i hent behandling request når saksbehandler har tilgang til enslig og barnetrygd`() {
-        val token = opprettToken("abc", listOf(ENSLIG_SAKSBEHANDLER_ROLLE, BARNETRYGD_SAKSBEHANDLER_ROLLE))
-        opprettRequestContext("/api/behandling/v1/$behandling.id", HttpMethod.GET, token)
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232"), any()) } returns listOf(Tilgang(personIdent, true, null))
-        every { mockJoinpoint.args } returns arrayOf(behandling.id)
-        val rolletilgangssjekk =
-            Rolletilgangssjekk(Behandlerrolle.VEILEDER, "hent behandling", AuditLoggerEvent.ACCESS, HenteParam.BEHANDLING_ID)
+        val token = opprettToken("abc", listOf(ENSLIG_SAKSBEHANDLER_ROLLE, BARNETRYGD_SAKSBEHANDLER_ROLLE))
+        opprettRequestContext("/api/behandling/v1/${behandling.id}", HttpMethod.GET, token)
 
-        shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
+        shouldNotThrowAny { tilgangAdvice.validerTilgangBehandlingID(behandling.id, Behandlerrolle.VEILEDER, AuditLoggerEvent.ACCESS, "test") }
     }
 
     @Test
     fun `sjekkTilgang skal ha tilgang i hent behandling request når bruker er fagsystem`() {
-        val token = opprettToken(Constants.BRUKER_ID_VEDTAKSLØSNINGEN, listOf())
-        opprettRequestContext("/api/behandling/v1/$behandling.id", HttpMethod.GET, token)
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232"), any()) } returns listOf(Tilgang(personIdent, true, null))
-        every { mockJoinpoint.args } returns arrayOf(behandling.id)
-        val rolletilgangssjekk =
-            Rolletilgangssjekk(Behandlerrolle.VEILEDER, "hent behandling", AuditLoggerEvent.ACCESS, HenteParam.BEHANDLING_ID)
+        val token = opprettToken(Constants.BRUKER_ID_VEDTAKSLØSNINGEN, listOf())
+        opprettRequestContext("/api/behandling/v1/${behandling.id}", HttpMethod.GET, token)
 
-        shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
+        shouldNotThrowAny { tilgangAdvice.validerTilgangBehandlingID(behandling.id, Behandlerrolle.VEILEDER, AuditLoggerEvent.ACCESS, "test") }
     }
 
     @Test
     fun `sjekkTilgang skal ikke ha tilgang i hent behandling request når bruker er ukjent`() {
         val token = opprettToken("abc", listOf())
-        opprettRequestContext("/api/behandling/v1/$behandling.id", HttpMethod.GET, token)
+        opprettRequestContext("/api/behandling/v1/${behandling.id}", HttpMethod.GET, token)
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232"), any()) } returns listOf(Tilgang(personIdent, true, null))
         every { mockJoinpoint.args } returns arrayOf(behandling.id)
-        val rolletilgangssjekk =
-            Rolletilgangssjekk(Behandlerrolle.VEILEDER, "hent behandling", AuditLoggerEvent.ACCESS, HenteParam.BEHANDLING_ID)
 
         val exception =
-            shouldThrow<RuntimeException>(block = {
-                tilgangAdvice.sjekkTilgang(
-                    mockJoinpoint,
-                    rolletilgangssjekk,
-                )
-            })
+            shouldThrow<RuntimeException> {
+                tilgangAdvice.validerTilgangBehandlingID(behandling.id, Behandlerrolle.VEILEDER, AuditLoggerEvent.ACCESS, "test")
+            }
 
-        exception.message shouldBe "Bruker har mangler tilgang til hent behandling"
+        exception.message shouldBe "Bruker har mangler tilgang til test"
     }
 
     @Test
     fun `sjekkTilgang skal saksbehandler ha tilgang i Fakta utførBehandlingssteg POST request`() {
-        val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE))
-        // POST request uten body
-        opprettRequestContext("/api/behandling/$behandling.id/steg/v1/", HttpMethod.POST, token)
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232"), any()) } returns listOf(Tilgang(personIdent, true, null))
-        every { mockJoinpoint.args } returns arrayOf(behandling.id, BehandlingsstegFaktaDto(emptyList(), "testverdi"))
-        val rolletilgangssjekk =
-            Rolletilgangssjekk(
-                Behandlerrolle.SAKSBEHANDLER,
-                "Håndterer behandlingens aktiv steg og fortsetter den til neste steg",
-                AuditLoggerEvent.ACCESS,
-                HenteParam.BEHANDLING_ID,
-            )
-
-        shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
-    }
-
-    @Test
-    fun `sjekkTilgang skal saksbehandler ikke ha tilgang i Fattevedtak utførBehandlingssteg POST request`() {
         val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE))
-        // POST request uten body
-        opprettRequestContext("/api/behandling/$behandling.id/steg/v1/", HttpMethod.POST, token)
-        every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232"), any()) } returns listOf(Tilgang(personIdent, true, null))
-        every { mockJoinpoint.args } returns arrayOf(behandling.id, BehandlingsstegFatteVedtaksstegDto(emptyList()))
-        val rolletilgangssjekk =
-            Rolletilgangssjekk(
-                Behandlerrolle.SAKSBEHANDLER,
-                "Håndterer behandlingens aktiv steg og fortsetter den til neste steg",
-                AuditLoggerEvent.ACCESS,
-                HenteParam.BEHANDLING_ID,
-            )
+        opprettRequestContext("/api/behandling/${behandling.id}/steg/v1/", HttpMethod.POST, token)
 
-        val exception = shouldThrow<RuntimeException> { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
-
-        exception.message shouldBe "abc med rolle SAKSBEHANDLER har ikke tilgang til å Håndterer behandlingens aktiv " +
-            "steg og fortsetter den til neste steg. Krever BESLUTTER."
+        shouldNotThrowAny { tilgangAdvice.validerTilgangBehandlingID(behandling.id, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test") }
     }
 
     @Test
     fun `sjekkTilgang skal beslutter ha tilgang i Fattevedtak utførBehandlingssteg POST request`() {
-        val token = opprettToken("abc", listOf(BARNETRYGD_BESLUTTER_ROLLE))
-        // POST request uten body
-        opprettRequestContext("/api/behandling/$behandling.id/steg/v1/", HttpMethod.POST, token)
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232"), any()) } returns listOf(Tilgang(personIdent, true, null))
-        every { mockJoinpoint.args } returns arrayOf(behandling.id, BehandlingsstegFatteVedtaksstegDto(emptyList()))
-        val rolletilgangssjekk =
-            Rolletilgangssjekk(
-                Behandlerrolle.SAKSBEHANDLER,
-                "Håndterer behandlingens aktiv steg og fortsetter den til neste steg",
-                AuditLoggerEvent.ACCESS,
-                HenteParam.BEHANDLING_ID,
-            )
+        val token = opprettToken("abc", listOf(BARNETRYGD_BESLUTTER_ROLLE))
+        opprettRequestContext("/api/behandling/${behandling.id}/steg/v1/", HttpMethod.POST, token)
 
-        shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
+        shouldNotThrowAny { tilgangAdvice.validerTilgangBehandlingID(behandling.id, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test") }
     }
 
     @Test
     fun `sjekkTilgang skal ha tilgang i sett behandling på vent PUT request`() {
-        val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE))
-        opprettRequestContext("/api/behandling/$behandling.id/vent/v1/", HttpMethod.PUT, token)
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232"), any()) } returns listOf(Tilgang(personIdent, true, null))
-        every { mockJoinpoint.args } returns
-            arrayOf(
-                behandling.id,
-                BehandlingPåVentDto(
-                    Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-                    LocalDate.now().plusWeeks(2),
-                ),
-            )
-        val rolletilgangssjekk =
-            Rolletilgangssjekk(
-                Behandlerrolle.SAKSBEHANDLER,
-                "Setter behandling på vent",
-                AuditLoggerEvent.ACCESS,
-                HenteParam.BEHANDLING_ID,
-            )
+        val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE))
+        opprettRequestContext("/api/behandling/${behandling.id}/vent/v1/", HttpMethod.PUT, token)
 
-        shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
+        shouldNotThrowAny { tilgangAdvice.validerTilgangBehandlingID(behandling.id, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test") }
     }
 
     @Test
     fun `sjekkTilgang skal forvalter ikke ha tilgang til vanlig tjenester`() {
-        val token = opprettToken("abc", listOf(TEAMFAMILIE_FORVALTER_ROLLE))
-        opprettRequestContext("/api/behandling/$behandling.id/vent/v1/", HttpMethod.PUT, token)
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232"), any()) } returns listOf(Tilgang(personIdent, true, null))
-        every { mockJoinpoint.args } returns
-            arrayOf(
-                behandling.id,
-                BehandlingPåVentDto(
-                    Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-                    LocalDate.now().plusWeeks(2),
-                ),
-            )
-        val rolletilgangssjekk =
-            Rolletilgangssjekk(
-                Behandlerrolle.SAKSBEHANDLER,
-                "Setter behandling på vent",
-                AuditLoggerEvent.ACCESS,
-                HenteParam.BEHANDLING_ID,
-            )
+        val token = opprettToken("abc", listOf(TEAMFAMILIE_FORVALTER_ROLLE))
+        opprettRequestContext("/api/behandling/${behandling.id}/vent/v1/", HttpMethod.PUT, token)
 
-        val exception = shouldThrow<RuntimeException> { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
+        val exception = shouldThrow<RuntimeException> { tilgangAdvice.validerTilgangBehandlingID(behandling.id, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test") }
 
-        exception.message shouldBe "abc med rolle FORVALTER har ikke tilgang til å Setter behandling på vent." +
-            " Krever SAKSBEHANDLER."
+        exception.message shouldBe "abc med rolle FORVALTER har ikke tilgang til å test. Krever SAKSBEHANDLER."
     }
 
     @Test
     fun `sjekkTilgang skal saksbehandler ikke ha tilgang til forvaltningstjenester`() {
-        val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE))
-        opprettRequestContext("/api/forvaltning//behandling/$behandling.id/tving-henleggelse/v1", HttpMethod.PUT, token)
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232"), any()) } returns listOf(Tilgang(personIdent, true, null))
-        every { mockJoinpoint.args } returns arrayOf(behandling.id)
-        val rolletilgangssjekk =
-            Rolletilgangssjekk(
-                Behandlerrolle.FORVALTER,
-                "Tving henlegger behandling",
-                AuditLoggerEvent.ACCESS,
-                HenteParam.BEHANDLING_ID,
-            )
+        val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE))
+        opprettRequestContext("/api/forvaltning/behandling/${behandling.id}/tving-henleggelse/v1", HttpMethod.PUT, token)
 
-        val exception = shouldThrow<RuntimeException> { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
+        val exception = shouldThrow<RuntimeException> { tilgangAdvice.validerTilgangBehandlingID(behandling.id, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
 
-        exception.message shouldBe "abc med rolle SAKSBEHANDLER har ikke tilgang til å kalle forvaltningstjeneste " +
-            "Tving henlegger behandling. Krever FORVALTER."
+        exception.message shouldBe "abc med rolle SAKSBEHANDLER har ikke tilgang til å kalle forvaltningstjeneste test. Krever FORVALTER."
     }
 
     @Test
     fun `sjekkTilgang skal saksbehandler ha tilgang til forvaltningstjenester hvis saksbehandler har forvalter rolle også`() {
         val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE, TEAMFAMILIE_FORVALTER_ROLLE))
-        opprettRequestContext("/api/forvaltning//behandling/$behandling.id/tving-henleggelse/v1", HttpMethod.PUT, token)
+        opprettRequestContext("/api/forvaltning/behandling/${behandling.id}/tving-henleggelse/v1", HttpMethod.PUT, token)
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232"), any()) } returns listOf(Tilgang(personIdent, true, null))
-        every { mockJoinpoint.args } returns arrayOf(behandling.id)
-        val rolletilgangssjekk =
-            Rolletilgangssjekk(
-                Behandlerrolle.FORVALTER,
-                "Tving henlegger behandling",
-                AuditLoggerEvent.ACCESS,
-                HenteParam.BEHANDLING_ID,
-            )
 
-        shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
+        shouldNotThrowAny { tilgangAdvice.validerTilgangBehandlingID(behandling.id, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test") }
     }
 
     @Test
     fun `sjekkTilgang skal saksbehandler ha tilgang til vanlig tjenester selv om saksbehandler har forvalter rolle også`() {
-        val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE, TEAMFAMILIE_FORVALTER_ROLLE))
-        opprettRequestContext("/api/behandling/$behandling.id/vent/v1/", HttpMethod.PUT, token)
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232"), any()) } returns listOf(Tilgang(personIdent, true, null))
-        every { mockJoinpoint.args } returns
-            arrayOf(
-                behandling.id,
-                BehandlingPåVentDto(
-                    Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-                    LocalDate.now().plusWeeks(2),
-                ),
-            )
-        val rolletilgangssjekk =
-            Rolletilgangssjekk(
-                Behandlerrolle.SAKSBEHANDLER,
-                "Setter behandling på vent",
-                AuditLoggerEvent.ACCESS,
-                HenteParam.BEHANDLING_ID,
-            )
+        val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE, TEAMFAMILIE_FORVALTER_ROLLE))
+        opprettRequestContext("/api/behandling/${behandling.id}/vent/v1/", HttpMethod.PUT, token)
 
-        shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
+        shouldNotThrowAny { tilgangAdvice.validerTilgangBehandlingID(behandling.id, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test") }
     }
 
     @Test
     fun `sjekkTilgang skal forvalter ha tilgang til forvaltningstjenester`() {
-        val token = opprettToken("abc", listOf(TEAMFAMILIE_FORVALTER_ROLLE))
-        // POST request uten body
-        opprettRequestContext("/api/forvaltning//behandling/$behandling.id/tving-henleggelse/v1", HttpMethod.PUT, token)
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232"), any()) } returns listOf(Tilgang(personIdent, true, null))
-        every { mockJoinpoint.args } returns arrayOf(behandling.id)
-        val rolletilgangssjekk =
-            Rolletilgangssjekk(
-                Behandlerrolle.FORVALTER,
-                "Tving henlegger behandling",
-                AuditLoggerEvent.ACCESS,
-                HenteParam.BEHANDLING_ID,
-            )
+        val token = opprettToken("abc", listOf(TEAMFAMILIE_FORVALTER_ROLLE))
+        opprettRequestContext("/api/forvaltning/behandling/${behandling.id}/tving-henleggelse/v1", HttpMethod.PUT, token)
 
-        shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
+        shouldNotThrowAny { tilgangAdvice.validerTilgangBehandlingID(behandling.id, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
     }
 
     @Test

@@ -6,8 +6,7 @@ import no.nav.familie.tilbake.api.dto.tilDto
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.HenteParam
-import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
+import no.nav.familie.tilbake.sikkerhet.TilgangAdvice
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
@@ -23,20 +22,21 @@ import java.util.UUID
 @Validated
 class HistorikkController(
     private val historikkService: HistorikkService,
+    private val tilgangAdvice: TilgangAdvice,
 ) {
     @GetMapping(
         "/{behandlingId}/historikk",
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        minimumBehandlerrolle = Behandlerrolle.VEILEDER,
-        handling = "Henter historikkinnslag",
-        AuditLoggerEvent.ACCESS,
-        henteParam = HenteParam.BEHANDLING_ID,
-    )
     fun hentHistorikkinnslag(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<List<HistorikkinnslagDto?>> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+            auditLoggerEvent = AuditLoggerEvent.ACCESS,
+            handling = "Henter historikkinnslag",
+        )
         val historikkInnslagDtoSortertEtterOpprettetTidspunkt =
             historikkService
                 .hentHistorikkinnslag(behandlingId)
