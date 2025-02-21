@@ -64,6 +64,10 @@ class TilgangAdvice(
         joinpoint: JoinPoint,
         rolletilgangssjekk: Rolletilgangssjekk,
     ) {
+        if (ContextService.hentSaksbehandler(SecureLog.Context.tom()) == Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
+            // når behandler har system tilgang, trenges ikke det validering på fagsystem eller rolle
+            return
+        }
         val saksbehandler = ContextService.hentSaksbehandler(SecureLog.Context.tom())
         val httpRequest = (RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes).request
 
