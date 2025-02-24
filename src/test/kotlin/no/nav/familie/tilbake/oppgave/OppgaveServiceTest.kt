@@ -82,7 +82,7 @@ class OppgaveServiceTest {
             every { integrasjonerClient.finnMapper(any()) } returns finnMappeResponseDto
 
             oppgaveService.opprettOppgave(
-                behandling.id,
+                behandling,
                 Oppgavetype.GodkjenneVedtak,
                 "4489",
                 "",
@@ -101,7 +101,7 @@ class OppgaveServiceTest {
             val slot = CapturingSlot<OpprettOppgaveRequest>()
 
             oppgaveService.opprettOppgave(
-                behandling.id,
+                behandling,
                 Oppgavetype.GodkjenneVedtak,
                 "4483",
                 "",
@@ -121,7 +121,7 @@ class OppgaveServiceTest {
             every { integrasjonerClient.finnMapper("4489") } returns finnMappeResponseDto
 
             oppgaveService.opprettOppgave(
-                behandling.id,
+                behandling,
                 Oppgavetype.BehandleSak,
                 "4489",
                 "",
@@ -141,7 +141,7 @@ class OppgaveServiceTest {
             every { integrasjonerClient.finnMapper("4489") } returns finnMappeResponseDto
 
             oppgaveService.opprettOppgave(
-                behandling.id,
+                behandling,
                 Oppgavetype.BehandleSak,
                 "1578",
                 "",
@@ -167,7 +167,7 @@ class OppgaveServiceTest {
             every { integrasjonerClient.finnMapper("4489") } returns kunMapperSomIkkeKanBrukes
 
             oppgaveService.opprettOppgave(
-                behandling.id,
+                behandling,
                 Oppgavetype.BehandleSak,
                 "4489",
                 "",
@@ -194,7 +194,7 @@ class OppgaveServiceTest {
             every { integrasjonerClient.finnMapper("4489") } returns mapperMedOrdelingsfeilRettet
 
             oppgaveService.opprettOppgave(
-                behandling.id,
+                behandling,
                 Oppgavetype.GodkjenneVedtak,
                 "4489",
                 "",
@@ -213,7 +213,7 @@ class OppgaveServiceTest {
             every { integrasjonerClient.finnMapper("4489") } returns finnMappeResponseDto
             every { integrasjonerClient.finnOppgaver(any()) } returns FinnOppgaveResponseDto(1L, listOf(Oppgave()))
             oppgaveService.opprettOppgave(
-                behandling.id,
+                behandling,
                 Oppgavetype.GodkjenneVedtak,
                 "4483",
                 "",
@@ -238,7 +238,7 @@ class OppgaveServiceTest {
 
             shouldNotThrow<RuntimeException> {
                 oppgaveService.opprettOppgave(
-                    behandling.id,
+                    behandling,
                     Oppgavetype.GodkjenneVedtak,
                     "4489",
                     "",

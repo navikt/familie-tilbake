@@ -4,8 +4,10 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
+import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
 import no.nav.familie.tilbake.log.TracedLogger
@@ -24,6 +26,7 @@ class LagOppgaveTask(
     private val oppgaveService: OppgaveService,
     private val behandlingskontrollService: BehandlingskontrollService,
     private val oppgavePrioritetService: OppgavePrioritetService,
+    private val behandlingRepository: BehandlingRepository,
 ) : AsyncTaskStep {
     private val log = TracedLogger.getLogger<LagOppgaveTask>()
 
@@ -34,7 +37,7 @@ class LagOppgaveTask(
         val saksbehandler = task.metadata.getProperty("saksbehandler")
         val enhet = task.metadata.getProperty(PropertyName.ENHET) ?: "" // elvis-operator for bakoverkompatibilitet
         val behandlingId = UUID.fromString(task.payload)
-
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val behandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandlingId)
 
         val sendtTilBeslutningAv: String? =
@@ -50,7 +53,7 @@ class LagOppgaveTask(
         val prioritet = oppgavePrioritetService.utledOppgaveprioritet(behandlingId)
 
         oppgaveService.opprettOppgave(
-            UUID.fromString(task.payload),
+            behandling,
             oppgavetype,
             enhet,
             beskrivelse,

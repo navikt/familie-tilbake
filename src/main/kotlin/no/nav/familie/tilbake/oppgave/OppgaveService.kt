@@ -96,7 +96,7 @@ class OppgaveService(
     }
 
     fun opprettOppgave(
-        behandlingId: UUID,
+        behandling: Behandling,
         oppgavetype: Oppgavetype,
         enhet: String,
         beskrivelse: String?,
@@ -104,19 +104,22 @@ class OppgaveService(
         saksbehandler: String?,
         prioritet: OppgavePrioritet,
         logContext: SecureLog.Context,
+        behandlesAvApplikasjon: String? = "familie-tilbake",
+        saksId: String? = behandling.eksternBrukId.toString(),
     ) {
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsakId = behandling.fagsakId
         val fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
         val aktørId = personService.hentAktivAktørId(fagsak.bruker.ident, fagsak.fagsystem, logContext)
 
         // Sjekk om oppgave allerede finnes for behandling
         val (_, finnOppgaveRespons) = finnOppgave(behandling, oppgavetype, fagsak)
-        if (finnOppgaveRespons.oppgaver.isNotEmpty() && !finnesFerdigstillOppgaveForBehandling(behandlingId, oppgavetype)) {
+        if (finnOppgaveRespons.oppgaver.isNotEmpty() && !finnesFerdigstillOppgaveForBehandling(behandling.id, oppgavetype)) {
             log.medContext(logContext) {
                 info(
-                    "Det finnes allerede en oppgave $oppgavetype for behandling $behandlingId og " +
-                        "finnes ikke noen ferdigstilleoppgaver. Eksisterende oppgaven $oppgavetype må lukke først.",
+                    "Det finnes allerede en oppgave {} for behandling {} og finnes ikke noen ferdigstilleoppgaver. Eksisterende oppgaven {} må lukke først.",
+                    oppgavetype,
+                    behandling.id,
+                    oppgavetype,
                 )
             }
             return
@@ -129,10 +132,10 @@ class OppgaveService(
                         ident = aktørId,
                         gruppe = IdentGruppe.AKTOERID,
                     ),
-                saksId = behandling.eksternBrukId.toString(),
+                saksId = saksId,
                 tema = fagsak.ytelsestype.tilTema(),
                 oppgavetype = oppgavetype,
-                behandlesAvApplikasjon = "familie-tilbake",
+                behandlesAvApplikasjon = behandlesAvApplikasjon,
                 fristFerdigstillelse = fristForFerdigstillelse,
                 beskrivelse =
                     lagOppgaveTekst(
@@ -152,7 +155,7 @@ class OppgaveService(
         val oppgaveResponse = integrasjonerClient.opprettOppgave(opprettOppgave)
         antallOppgaveTyper[oppgavetype]!!.increment()
         log.medContext(logContext) {
-            info("Ny oppgave (id=${oppgaveResponse.oppgaveId}, type=$oppgavetype, frist=$fristForFerdigstillelse) opprettet for behandling $behandlingId")
+            info("Ny oppgave (id={}, type={}, frist={}) opprettet for behandling {}", oppgaveResponse.oppgaveId, oppgavetype, fristForFerdigstillelse, behandling.id)
         }
     }
 
