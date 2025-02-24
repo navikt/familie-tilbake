@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.sikkerhet
 
-import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.FagsystemUtil

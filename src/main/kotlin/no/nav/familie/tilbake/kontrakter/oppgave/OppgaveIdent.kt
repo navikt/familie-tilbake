@@ -7,8 +7,4 @@ data class OppgaveIdentV2(
 
 enum class IdentGruppe {
     AKTOERID,
-    FOLKEREGISTERIDENT,
-    NPID,
-    ORGNR,
-    SAMHANDLERNR,
 }

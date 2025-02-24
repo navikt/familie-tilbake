@@ -13,8 +13,5 @@ data class FagsystemVedtak(
 )
 
 enum class FagsystemType {
-    ORDNIÆR, // brukes for behandlinger fra ef-sak/ba-sak
     TILBAKEKREVING,
-    SANKSJON_1_MND,
-    UTESTENGELSE,
 }

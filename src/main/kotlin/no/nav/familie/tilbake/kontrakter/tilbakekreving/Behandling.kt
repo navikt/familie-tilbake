@@ -31,7 +31,6 @@ enum class Behandlingsstatus {
 }
 
 enum class Behandlingsresultatstype {
-    IKKE_FASTSATT,
     INGEN_TILBAKEBETALING,
     DELVIS_TILBAKEBETALING,
     FULL_TILBAKEBETALING,
