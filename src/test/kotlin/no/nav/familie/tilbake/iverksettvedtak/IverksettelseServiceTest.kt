@@ -10,9 +10,6 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldNotBeEmpty
 import io.kotest.matchers.types.shouldBeInstanceOf
-import no.nav.familie.kontrakter.felles.Månedsperiode
-import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.AktsomhetDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegVilkårsvurderingDto
@@ -31,6 +28,9 @@ import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.integration.økonomi.DefaultOppdragClient
 import no.nav.familie.tilbake.integration.økonomi.OppdragClient
 import no.nav.familie.tilbake.iverksettvedtak.domain.KodeResultat
+import no.nav.familie.tilbake.kontrakter.Månedsperiode
+import no.nav.familie.tilbake.kontrakter.Ressurs
+import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.GjelderType

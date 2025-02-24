@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.avstemming.task
 
-import no.nav.familie.kontrakter.felles.Fil
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -11,6 +10,7 @@ import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.common.fagsystem
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
+import no.nav.familie.tilbake.kontrakter.Fil
 import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
 import org.slf4j.LoggerFactory
 import org.springframework.core.env.Environment

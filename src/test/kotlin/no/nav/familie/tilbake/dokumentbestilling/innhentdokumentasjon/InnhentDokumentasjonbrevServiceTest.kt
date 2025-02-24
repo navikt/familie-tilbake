@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.dokumentbestilling.innhentdokumentasjon
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
-import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
@@ -17,6 +16,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmetadataUtil
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
+import no.nav.familie.tilbake.kontrakter.Fagsystem
 import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import no.nav.familie.tilbake.pdfgen.validering.PdfaValidator
 import org.junit.jupiter.api.BeforeEach

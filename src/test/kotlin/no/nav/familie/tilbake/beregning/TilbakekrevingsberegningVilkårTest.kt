@@ -1,10 +1,10 @@
 package no.nav.familie.tilbake.beregning
 
 import com.google.common.collect.Lists
-import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
 import no.nav.familie.tilbake.beregning.modell.FordeltKravgrunnlagsbeløp
 import no.nav.familie.tilbake.beregning.modell.GrunnlagsperiodeMedSkatteprosent
+import no.nav.familie.tilbake.kontrakter.Månedsperiode
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhet

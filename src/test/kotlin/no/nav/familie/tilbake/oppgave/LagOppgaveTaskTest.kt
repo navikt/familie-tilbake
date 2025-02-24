@@ -3,8 +3,6 @@ package no.nav.familie.tilbake.oppgave
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -19,6 +17,8 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
+import no.nav.familie.tilbake.kontrakter.oppgave.OppgavePrioritet
+import no.nav.familie.tilbake.kontrakter.oppgave.Oppgavetype
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

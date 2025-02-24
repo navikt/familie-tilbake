@@ -1,17 +1,6 @@
 package no.nav.familie.tilbake.oppgave
 
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype
-import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
-import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
-import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
-import no.nav.familie.kontrakter.felles.oppgave.Oppgave
-import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
-import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
-import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
-import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -22,6 +11,17 @@ import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.exceptionhandler.ManglerOppgaveFeil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
+import no.nav.familie.tilbake.kontrakter.oppgave.Behandlingstype
+import no.nav.familie.tilbake.kontrakter.oppgave.FinnOppgaveRequest
+import no.nav.familie.tilbake.kontrakter.oppgave.FinnOppgaveResponseDto
+import no.nav.familie.tilbake.kontrakter.oppgave.IdentGruppe
+import no.nav.familie.tilbake.kontrakter.oppgave.Oppgave
+import no.nav.familie.tilbake.kontrakter.oppgave.OppgaveIdentV2
+import no.nav.familie.tilbake.kontrakter.oppgave.OppgavePrioritet
+import no.nav.familie.tilbake.kontrakter.oppgave.OppgaveResponse
+import no.nav.familie.tilbake.kontrakter.oppgave.Oppgavetype
+import no.nav.familie.tilbake.kontrakter.oppgave.OpprettOppgaveRequest
+import no.nav.familie.tilbake.kontrakter.oppgave.StatusEnum
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.person.PersonService

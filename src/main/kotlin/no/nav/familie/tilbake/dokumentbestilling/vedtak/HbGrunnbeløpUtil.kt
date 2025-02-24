@@ -1,12 +1,12 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
-import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.common.DatoUtil
 import no.nav.familie.tilbake.common.Grunnbeløp
 import no.nav.familie.tilbake.common.Grunnbeløpsperioder
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.KroneFormattererMedTusenskille
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.KroneFormattererMedTusenskille.Companion.utf8nonBreakingSpace
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbGrunnbeløp
+import no.nav.familie.tilbake.kontrakter.Månedsperiode
 import java.math.BigDecimal
 
 object HbGrunnbeløpUtil {

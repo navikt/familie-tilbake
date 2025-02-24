@@ -3,8 +3,8 @@ package no.nav.familie.tilbake.dokumentbestilling.handlebars
 import com.github.jknack.handlebars.Context
 import com.github.jknack.handlebars.Helper
 import com.github.jknack.handlebars.Options
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.tilbake.common.DatoUtil.DATO_FORMAT_DATO_MÅNEDSNAVN_ÅR
+import no.nav.familie.tilbake.kontrakter.objectMapper
 import org.apache.commons.lang3.StringUtils
 import java.math.BigDecimal
 import java.text.DecimalFormat

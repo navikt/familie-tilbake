@@ -7,13 +7,6 @@ import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.kontrakter.felles.Fagsystem
-import no.nav.familie.kontrakter.felles.Språkkode
-import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
-import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
-import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
-import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -31,6 +24,13 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
+import no.nav.familie.tilbake.kontrakter.Fagsystem
+import no.nav.familie.tilbake.kontrakter.Språkkode
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Faktainfo
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.OpprettTilbakekrevingRequest
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Tilbakekrevingsvalg
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Vergetype
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEventPublisher
@@ -237,7 +237,7 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val verge =
             if (finnesVerge) {
-                no.nav.familie.kontrakter.felles.tilbakekreving.Verge(
+                no.nav.familie.tilbake.kontrakter.tilbakekreving.Verge(
                     vergetype = Vergetype.VERGE_FOR_BARN,
                     navn = "Andy",
                     personIdent = "321321321",

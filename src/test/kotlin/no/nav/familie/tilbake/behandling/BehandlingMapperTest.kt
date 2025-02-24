@@ -5,8 +5,6 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import no.nav.familie.kontrakter.felles.Regelverk
-import no.nav.familie.kontrakter.felles.klage.FagsystemType
 import no.nav.familie.tilbake.behandling.BehandlingMapper.tilVedtakForFagsystem
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
@@ -14,6 +12,8 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.config.Constants
+import no.nav.familie.tilbake.kontrakter.Regelverk
+import no.nav.familie.tilbake.kontrakter.klage.FagsystemType
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

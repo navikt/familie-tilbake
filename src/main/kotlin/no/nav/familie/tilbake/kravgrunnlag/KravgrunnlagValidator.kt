@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
-import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.common.exceptionhandler.UgyldigKravgrunnlagFeil
+import no.nav.familie.tilbake.kontrakter.Månedsperiode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagBelopDto

@@ -1,20 +1,5 @@
 package no.nav.familie.tilbake.behandling
 
-import no.nav.familie.kontrakter.felles.Fagsystem
-import no.nav.familie.kontrakter.felles.klage.FagsystemType
-import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
-import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype.DELVIS_TILBAKEBETALING
-import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype.FULL_TILBAKEBETALING
-import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype.HENLAGT
-import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype.INGEN_TILBAKEBETALING
-import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype.REVURDERING_TILBAKEKREVING
-import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype.TILBAKEKREVING
-import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsårsakstype.REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT
-import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsårsakstype.REVURDERING_KLAGE_KA
-import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsårsakstype.REVURDERING_KLAGE_NFP
-import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_FORELDELSE
-import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR
-import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegsinfoDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
@@ -36,6 +21,21 @@ import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerMapper
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
+import no.nav.familie.tilbake.kontrakter.Fagsystem
+import no.nav.familie.tilbake.kontrakter.klage.FagsystemType
+import no.nav.familie.tilbake.kontrakter.saksbehandler.Saksbehandler
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Behandlingsresultatstype.DELVIS_TILBAKEBETALING
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Behandlingsresultatstype.FULL_TILBAKEBETALING
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Behandlingsresultatstype.HENLAGT
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Behandlingsresultatstype.INGEN_TILBAKEBETALING
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Behandlingstype.REVURDERING_TILBAKEKREVING
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Behandlingstype.TILBAKEKREVING
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Behandlingsårsakstype.REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Behandlingsårsakstype.REVURDERING_KLAGE_KA
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Behandlingsårsakstype.REVURDERING_KLAGE_NFP
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_FORELDELSE
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.tilbake.log.SecureLog
 
 object BehandlingMapper {
@@ -173,12 +173,12 @@ object BehandlingMapper {
         return emptySet()
     }
 
-    fun tilBehandlingerForFagsystem(behandling: Behandling): no.nav.familie.kontrakter.felles.tilbakekreving.Behandling {
+    fun tilBehandlingerForFagsystem(behandling: Behandling): no.nav.familie.tilbake.kontrakter.tilbakekreving.Behandling {
         val resultat: Behandlingsresultat? =
             behandling.resultater.maxByOrNull {
                 it.sporbar.endret.endretTid
             }
-        return no.nav.familie.kontrakter.felles.tilbakekreving.Behandling(
+        return no.nav.familie.tilbake.kontrakter.tilbakekreving.Behandling(
             behandlingId = behandling.eksternBrukId,
             opprettetTidspunkt = behandling.opprettetTidspunkt,
             aktiv = !behandling.erAvsluttet,
@@ -190,7 +190,7 @@ object BehandlingMapper {
         )
     }
 
-    fun tilVedtakForFagsystem(behandlinger: List<Behandling>): List<no.nav.familie.kontrakter.felles.klage.FagsystemVedtak> =
+    fun tilVedtakForFagsystem(behandlinger: List<Behandling>): List<no.nav.familie.tilbake.kontrakter.klage.FagsystemVedtak> =
         behandlinger
             .filter { it.erAvsluttet }
             .filter { it.sisteResultat?.erBehandlingFastsatt() ?: false }
@@ -198,7 +198,7 @@ object BehandlingMapper {
                 val avsluttetDato = it.avsluttetDato ?: error("Mangler avsluttet dato på behandling=${it.id}")
                 val sisteResultat = it.sisteResultat ?: error("Mangler resultat på behandling=${it.id}")
 
-                no.nav.familie.kontrakter.felles.klage.FagsystemVedtak(
+                no.nav.familie.tilbake.kontrakter.klage.FagsystemVedtak(
                     eksternBehandlingId = it.eksternBrukId.toString(),
                     behandlingstype = mapType(it).visningsnavn,
                     resultat = sisteResultat.type.navn,
@@ -208,23 +208,23 @@ object BehandlingMapper {
                 )
             }
 
-    private fun mapType(behandling: Behandling): no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype =
+    private fun mapType(behandling: Behandling): no.nav.familie.tilbake.kontrakter.tilbakekreving.Behandlingstype =
         when (behandling.type) {
             Behandlingstype.TILBAKEKREVING -> TILBAKEKREVING
             Behandlingstype.REVURDERING_TILBAKEKREVING -> REVURDERING_TILBAKEKREVING
         }
 
-    private fun mapStatus(behandling: Behandling): no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus =
+    private fun mapStatus(behandling: Behandling): no.nav.familie.tilbake.kontrakter.tilbakekreving.Behandlingsstatus =
         when (behandling.status) {
-            Behandlingsstatus.AVSLUTTET -> no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus.AVSLUTTET
-            Behandlingsstatus.UTREDES -> no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus.UTREDES
-            Behandlingsstatus.FATTER_VEDTAK -> no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus.FATTER_VEDTAK
+            Behandlingsstatus.AVSLUTTET -> no.nav.familie.tilbake.kontrakter.tilbakekreving.Behandlingsstatus.AVSLUTTET
+            Behandlingsstatus.UTREDES -> no.nav.familie.tilbake.kontrakter.tilbakekreving.Behandlingsstatus.UTREDES
+            Behandlingsstatus.FATTER_VEDTAK -> no.nav.familie.tilbake.kontrakter.tilbakekreving.Behandlingsstatus.FATTER_VEDTAK
             Behandlingsstatus.IVERKSETTER_VEDTAK ->
-                no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus.IVERKSETTER_VEDTAK
-            Behandlingsstatus.OPPRETTET -> no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus.OPPRETTET
+                no.nav.familie.tilbake.kontrakter.tilbakekreving.Behandlingsstatus.IVERKSETTER_VEDTAK
+            Behandlingsstatus.OPPRETTET -> no.nav.familie.tilbake.kontrakter.tilbakekreving.Behandlingsstatus.OPPRETTET
         }
 
-    private fun mapÅrsak(behandling: Behandling): no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsårsakstype? {
+    private fun mapÅrsak(behandling: Behandling): no.nav.familie.tilbake.kontrakter.tilbakekreving.Behandlingsårsakstype? {
         if (behandling.årsaker.isEmpty()) return null
         return when (behandling.årsaker.firstOrNull()?.type) {
             Behandlingsårsakstype.REVURDERING_KLAGE_KA -> REVURDERING_KLAGE_KA
@@ -237,7 +237,7 @@ object BehandlingMapper {
         }
     }
 
-    private fun mapResultat(resultat: Behandlingsresultat?): no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype? =
+    private fun mapResultat(resultat: Behandlingsresultat?): no.nav.familie.tilbake.kontrakter.tilbakekreving.Behandlingsresultatstype? =
         when (resultat?.type) {
             Behandlingsresultatstype.DELVIS_TILBAKEBETALING -> DELVIS_TILBAKEBETALING
             Behandlingsresultatstype.FULL_TILBAKEBETALING -> FULL_TILBAKEBETALING

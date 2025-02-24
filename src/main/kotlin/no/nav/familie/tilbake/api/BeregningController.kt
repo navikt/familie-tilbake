@@ -2,11 +2,11 @@ package no.nav.familie.tilbake.api
 
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
-import no.nav.familie.kontrakter.felles.Datoperiode
-import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.tilbake.api.dto.BeregnetPerioderDto
 import no.nav.familie.tilbake.api.dto.BeregningsresultatDto
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
+import no.nav.familie.tilbake.kontrakter.Datoperiode
+import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangAdvice

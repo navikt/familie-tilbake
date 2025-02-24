@@ -1,10 +1,10 @@
 package no.nav.familie.tilbake.dokumentbestilling.felles
 
-import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
-import no.nav.familie.kontrakter.felles.tilbakekreving.Verge as VergeDto
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Vergetype
 import no.nav.familie.tilbake.behandling.domain.Verge as DomainVerge
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Verge as VergeDto
 
 object BrevmottagerUtil {
     fun getAnnenMottagersNavn(brevmetadata: Brevmetadata): String? {

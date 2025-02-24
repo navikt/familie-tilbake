@@ -5,9 +5,6 @@ import io.mockk.excludeRecords
 import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
-import no.nav.familie.kontrakter.felles.Månedsperiode
-import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
-import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
 import no.nav.familie.tilbake.api.dto.FeilutbetalingsperiodeDto
@@ -31,6 +28,9 @@ import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevUtil
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.HarBrukerUttaltSeg
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
+import no.nav.familie.tilbake.kontrakter.Månedsperiode
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Faktainfo
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.pdfgen.validering.PdfaValidator
 import org.junit.jupiter.api.BeforeEach

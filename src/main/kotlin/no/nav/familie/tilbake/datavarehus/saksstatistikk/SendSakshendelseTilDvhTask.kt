@@ -1,12 +1,12 @@
 package no.nav.familie.tilbake.datavarehus.saksstatistikk
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.sakshendelse.Behandlingstilstand
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
+import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.stereotype.Service

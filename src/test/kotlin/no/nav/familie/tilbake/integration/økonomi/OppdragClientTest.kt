@@ -13,11 +13,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
-import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.simulering.FeilutbetalingerFraSimulering
-import no.nav.familie.kontrakter.felles.simulering.FeilutbetaltPeriode
-import no.nav.familie.kontrakter.felles.simulering.HentFeilutbetalingerFraSimuleringRequest
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
@@ -26,6 +21,11 @@ import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.iverksettvedtak.TilbakekrevingsvedtakMarshaller
+import no.nav.familie.tilbake.kontrakter.Ressurs
+import no.nav.familie.tilbake.kontrakter.simulering.FeilutbetalingerFraSimulering
+import no.nav.familie.tilbake.kontrakter.simulering.FeilutbetaltPeriode
+import no.nav.familie.tilbake.kontrakter.simulering.HentFeilutbetalingerFraSimuleringRequest
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
 import no.nav.familie.tilbake.kravgrunnlag.domain.KodeAksjon
 import no.nav.familie.tilbake.log.SecureLog

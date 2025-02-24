@@ -1,15 +1,15 @@
 package no.nav.familie.tilbake.integration.økonomi
 
 import no.nav.familie.http.client.AbstractPingableRestClient
-import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.getDataOrThrow
-import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.kontrakter.felles.simulering.FeilutbetalingerFraSimulering
-import no.nav.familie.kontrakter.felles.simulering.FeilutbetaltPeriode
-import no.nav.familie.kontrakter.felles.simulering.HentFeilutbetalingerFraSimuleringRequest
 import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
 import no.nav.familie.tilbake.common.exceptionhandler.KravgrunnlagIkkeFunnetFeil
 import no.nav.familie.tilbake.common.exceptionhandler.SperretKravgrunnlagFeil
+import no.nav.familie.tilbake.kontrakter.Ressurs
+import no.nav.familie.tilbake.kontrakter.getDataOrThrow
+import no.nav.familie.tilbake.kontrakter.objectMapper
+import no.nav.familie.tilbake.kontrakter.simulering.FeilutbetalingerFraSimulering
+import no.nav.familie.tilbake.kontrakter.simulering.FeilutbetaltPeriode
+import no.nav.familie.tilbake.kontrakter.simulering.HentFeilutbetalingerFraSimuleringRequest
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagMapper
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil

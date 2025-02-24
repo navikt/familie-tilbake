@@ -1,16 +1,16 @@
 package no.nav.familie.tilbake.dokumentbestilling.felles
 
-import no.nav.familie.kontrakter.felles.Fagsystem
-import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
-import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
+import no.nav.familie.tilbake.kontrakter.Fagsystem
+import no.nav.familie.tilbake.kontrakter.organisasjon.Organisasjon
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Vergetype
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.person.PersonService
 import org.springframework.stereotype.Service
-import no.nav.familie.kontrakter.felles.tilbakekreving.Verge as VergeDto
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Verge as VergeDto
 
 @Service
 class EksterneDataForBrevService(

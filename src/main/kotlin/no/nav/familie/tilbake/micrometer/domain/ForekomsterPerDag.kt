@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.micrometer.domain
 
-import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.tilbake.kontrakter.Fagsystem
 import java.time.LocalDate
 
 class ForekomsterPerDag(

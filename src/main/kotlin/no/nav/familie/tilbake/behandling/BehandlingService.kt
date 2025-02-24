@@ -1,13 +1,5 @@
 package no.nav.familie.tilbake.behandling
 
-import no.nav.familie.kontrakter.felles.Fagsystem
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.kontrakter.felles.tilbakekreving.Brevmottaker
-import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandling
-import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettManueltTilbakekrevingRequest
-import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
-import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
@@ -46,6 +38,14 @@ import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
+import no.nav.familie.tilbake.kontrakter.Fagsystem
+import no.nav.familie.tilbake.kontrakter.oppgave.Oppgavetype
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Brevmottaker
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.HentFagsystemsbehandling
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.OpprettManueltTilbakekrevingRequest
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.OpprettTilbakekrevingRequest
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Tilbakekrevingsvalg
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.task.HentKravgrunnlagTask

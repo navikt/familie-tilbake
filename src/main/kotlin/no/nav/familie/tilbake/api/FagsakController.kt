@@ -1,15 +1,15 @@
 package no.nav.familie.tilbake.api
 
 import io.swagger.v3.oas.annotations.Operation
-import no.nav.familie.kontrakter.felles.Fagsystem
-import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.klage.FagsystemVedtak
-import no.nav.familie.kontrakter.felles.tilbakekreving.Behandling
-import no.nav.familie.kontrakter.felles.tilbakekreving.FinnesBehandlingResponse
-import no.nav.familie.kontrakter.felles.tilbakekreving.KanBehandlingOpprettesManueltRespons
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.api.dto.FagsakDto
 import no.nav.familie.tilbake.behandling.FagsakService
+import no.nav.familie.tilbake.kontrakter.Fagsystem
+import no.nav.familie.tilbake.kontrakter.Ressurs
+import no.nav.familie.tilbake.kontrakter.klage.FagsystemVedtak
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Behandling
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.FinnesBehandlingResponse
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.KanBehandlingOpprettesManueltRespons
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.HenteParam

@@ -10,10 +10,6 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.kontrakter.felles.Fagsystem
-import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
-import no.nav.familie.kontrakter.felles.tilbakekreving.ManuellAdresseInfo
-import no.nav.familie.kontrakter.felles.tilbakekreving.MottakerType.DØDSBO
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.ManuellBrevmottakerRequestDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -37,6 +33,10 @@ import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagsty
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.integration.pdl.PdlClient
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
+import no.nav.familie.tilbake.kontrakter.Fagsystem
+import no.nav.familie.tilbake.kontrakter.organisasjon.Organisasjon
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.ManuellAdresseInfo
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.MottakerType.DØDSBO
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog

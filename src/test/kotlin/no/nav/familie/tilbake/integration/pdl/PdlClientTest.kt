@@ -8,9 +8,9 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.tilbake.config.PdlConfig
 import no.nav.familie.tilbake.integration.pdl.internal.Kjønn
+import no.nav.familie.tilbake.kontrakter.Fagsystem
 import no.nav.familie.tilbake.log.SecureLog
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach

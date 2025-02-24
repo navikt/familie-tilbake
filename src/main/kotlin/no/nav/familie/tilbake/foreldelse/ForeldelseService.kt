@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.foreldelse
 
-import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.api.dto.BehandlingsstegForeldelseDto
 import no.nav.familie.tilbake.api.dto.ForeldelsesperiodeDto
 import no.nav.familie.tilbake.api.dto.VurdertForeldelseDto
@@ -14,6 +13,7 @@ import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.faktaomfeilutbetaling.LogiskPeriodeUtil
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
+import no.nav.familie.tilbake.kontrakter.Månedsperiode
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
 import no.nav.familie.tilbake.log.SecureLog

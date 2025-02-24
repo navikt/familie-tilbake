@@ -1,7 +1,6 @@
 package no.nav.familie.tilbake.avstemming
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.tilbake.avstemming.marshaller.ØkonomiKvitteringTolk
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
@@ -13,6 +12,7 @@ import no.nav.familie.tilbake.config.IntegrasjonerConfig
 import no.nav.familie.tilbake.iverksettvedtak.TilbakekrevingsvedtakMarshaller
 import no.nav.familie.tilbake.iverksettvedtak.domain.ØkonomiXmlSendt
 import no.nav.familie.tilbake.iverksettvedtak.ØkonomiXmlSendtRepository
+import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger

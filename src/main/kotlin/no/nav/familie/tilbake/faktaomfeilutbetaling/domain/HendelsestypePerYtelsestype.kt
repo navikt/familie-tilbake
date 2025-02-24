@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.faktaomfeilutbetaling.domain
 
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 
 object HendelsestypePerYtelsestype {
     private val HIERARKI =

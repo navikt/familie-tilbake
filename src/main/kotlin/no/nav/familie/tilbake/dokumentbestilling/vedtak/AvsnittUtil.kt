@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
-import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.FellesTekstformaterer
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevFelles
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevPeriodeOgFelles
@@ -9,6 +8,7 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbr
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbKravgrunnlag
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbResultat
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVedtaksbrevsperiode
+import no.nav.familie.tilbake.kontrakter.Datoperiode
 import java.math.BigDecimal
 
 internal object AvsnittUtil {

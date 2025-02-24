@@ -4,8 +4,6 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import no.nav.familie.kontrakter.felles.Datoperiode
-import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.BehandlingsstegForeldelseDto
 import no.nav.familie.tilbake.api.dto.ForeldelsesperiodeDto
@@ -14,6 +12,8 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
+import no.nav.familie.tilbake.kontrakter.Datoperiode
+import no.nav.familie.tilbake.kontrakter.Månedsperiode
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository

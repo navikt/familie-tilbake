@@ -1,10 +1,5 @@
 package no.nav.familie.tilbake.dokumentbestilling.varsel
 
-import no.nav.familie.kontrakter.felles.Datoperiode
-import no.nav.familie.kontrakter.felles.simulering.HentFeilutbetalingerFraSimuleringRequest
-import no.nav.familie.kontrakter.felles.tilbakekreving.FeilutbetaltePerioderDto
-import no.nav.familie.kontrakter.felles.tilbakekreving.ForhåndsvisVarselbrevRequest
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
@@ -22,6 +17,11 @@ import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Varselbre
 import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Vedleggsdata
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.integration.økonomi.OppdragClient
+import no.nav.familie.tilbake.kontrakter.Datoperiode
+import no.nav.familie.tilbake.kontrakter.simulering.HentFeilutbetalingerFraSimuleringRequest
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.FeilutbetaltePerioderDto
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.ForhåndsvisVarselbrevRequest
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.organisasjon.OrganisasjonService

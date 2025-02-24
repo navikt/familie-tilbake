@@ -9,8 +9,8 @@ import com.github.jknack.handlebars.context.JavaBeanValueResolver
 import com.github.jknack.handlebars.context.MapValueResolver
 import com.github.jknack.handlebars.helper.ConditionalHelpers
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader
-import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.Språkstøtte
+import no.nav.familie.tilbake.kontrakter.Språkkode
 import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.util.Locale

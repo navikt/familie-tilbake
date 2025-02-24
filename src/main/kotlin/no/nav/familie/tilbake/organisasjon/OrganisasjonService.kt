@@ -1,9 +1,9 @@
 package no.nav.familie.tilbake.organisasjon
 
-import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import no.nav.familie.tilbake.api.dto.InstitusjonDto
 import no.nav.familie.tilbake.dokumentbestilling.felles.header.Institusjon
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
+import no.nav.familie.tilbake.kontrakter.organisasjon.Organisasjon
 import org.springframework.stereotype.Service
 
 @Service

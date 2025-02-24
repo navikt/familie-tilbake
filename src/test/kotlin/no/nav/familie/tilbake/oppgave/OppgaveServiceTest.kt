@@ -7,12 +7,6 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
-import no.nav.familie.kontrakter.felles.oppgave.MappeDto
-import no.nav.familie.kontrakter.felles.oppgave.Oppgave
-import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -23,6 +17,12 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.data.Testdata.fagsak
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
+import no.nav.familie.tilbake.kontrakter.oppgave.FinnOppgaveResponseDto
+import no.nav.familie.tilbake.kontrakter.oppgave.MappeDto
+import no.nav.familie.tilbake.kontrakter.oppgave.Oppgave
+import no.nav.familie.tilbake.kontrakter.oppgave.OppgavePrioritet
+import no.nav.familie.tilbake.kontrakter.oppgave.Oppgavetype
+import no.nav.familie.tilbake.kontrakter.oppgave.OpprettOppgaveRequest
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.person.PersonService
 import org.junit.jupiter.api.BeforeEach

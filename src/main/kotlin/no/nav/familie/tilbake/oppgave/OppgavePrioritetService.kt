@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.oppgave
 
-import no.nav.familie.kontrakter.felles.oppgave.Oppgave
-import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
+import no.nav.familie.tilbake.kontrakter.oppgave.Oppgave
+import no.nav.familie.tilbake.kontrakter.oppgave.OppgavePrioritet
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import org.springframework.stereotype.Service
 import java.math.BigDecimal

@@ -1,8 +1,8 @@
 package no.nav.familie.tilbake.api
 
-import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.tilbake.config.FeatureToggleConfig
 import no.nav.familie.tilbake.config.FeatureToggleService
+import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping

@@ -1,11 +1,5 @@
 package no.nav.familie.tilbake.kravgrunnlag.batch
 
-import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype
-import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
-import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandling
-import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
-import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
@@ -24,6 +18,12 @@ import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Behandlingstype
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Faktainfo
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.HentFagsystemsbehandling
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.OpprettTilbakekrevingRequest
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Tilbakekrevingsvalg
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.kravgrunnlag.HentKravgrunnlagService
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagMapper
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository

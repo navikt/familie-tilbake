@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.dokumentbestilling.felles
 
-import no.nav.familie.kontrakter.felles.dokdist.ManuellAdresse
+import no.nav.familie.tilbake.kontrakter.dokdist.ManuellAdresse
 
 class Adresseinfo(
     val ident: String,

@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.api.dto
 
-import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
+import no.nav.familie.tilbake.kontrakter.Datoperiode
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vurdering
 import java.math.BigDecimal
 

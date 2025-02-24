@@ -1,10 +1,10 @@
 package no.nav.familie.tilbake.api.dto
 
-import no.nav.familie.kontrakter.felles.Datoperiode
-import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.HarBrukerUttaltSeg
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
+import no.nav.familie.tilbake.kontrakter.Datoperiode
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Faktainfo
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime

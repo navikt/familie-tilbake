@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
-import no.nav.familie.kontrakter.felles.Månedsperiode
+import no.nav.familie.tilbake.kontrakter.Månedsperiode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.GjelderType
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassekode

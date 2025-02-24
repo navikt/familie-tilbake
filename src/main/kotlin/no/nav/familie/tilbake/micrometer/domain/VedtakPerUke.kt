@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.micrometer.domain
 
-import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
+import no.nav.familie.tilbake.kontrakter.Fagsystem
 
 class VedtakPerUke(
     val år: Int,

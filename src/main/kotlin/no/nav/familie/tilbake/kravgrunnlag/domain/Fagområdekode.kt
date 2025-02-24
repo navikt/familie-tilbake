@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.kravgrunnlag.domain
 
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 
 enum class Fagområdekode(
     val navn: String,
