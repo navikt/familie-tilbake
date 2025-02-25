@@ -44,6 +44,7 @@ class JournalføringService(
     fun hentJournalposter(behandlingId: UUID): List<Journalpost> {
         val behandling = behandlingRepository.findById(behandlingId).orElseThrow()
         val fagsak = behandling.let { fagsakRepository.findById(it.fagsakId).orElseThrow() }
+        val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandling.id.toString())
         val journalposter =
             fagsak.let {
                 integrasjonerClient.hentJournalposterForBruker(
@@ -56,6 +57,7 @@ class JournalføringService(
                             ),
                         tema = listOf(hentTema(fagsystem = fagsak.fagsystem)),
                     ),
+                    logContext,
                 )
             }
         return journalposter.filter { it.sak?.fagsakId == fagsak.eksternFagsakId }

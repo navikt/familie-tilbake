@@ -5,7 +5,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.familie.tilbake.client.RessursException
+import no.nav.familie.tilbake.http.RessursException
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.kontrakter.dokarkiv.ArkiverDokumentResponse
@@ -100,7 +100,7 @@ class IntegrasjonerClientConfig {
 
         every { integrasjonerClient.hentDokument(any(), any()) } returns readMockfileFromResources()
 
-        every { integrasjonerClient.hentJournalposterForBruker(any()) }
+        every { integrasjonerClient.hentJournalposterForBruker(any(), any()) }
             .returns(
                 listOf(
                     Journalpost(

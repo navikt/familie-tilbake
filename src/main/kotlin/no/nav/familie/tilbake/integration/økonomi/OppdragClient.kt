@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.integration.økonomi
 
-import no.nav.familie.http.client.AbstractPingableRestClient
+import AbstractPingableRestClient
 import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
 import no.nav.familie.tilbake.common.exceptionhandler.KravgrunnlagIkkeFunnetFeil
 import no.nav.familie.tilbake.common.exceptionhandler.SperretKravgrunnlagFeil
@@ -82,13 +82,6 @@ class DefaultOppdragClient(
 ) : AbstractPingableRestClient(restOperations, "familie.oppdrag"),
     OppdragClient {
     private val logger = TracedLogger.getLogger<DefaultOppdragClient>()
-
-    override val pingUri: URI =
-        UriComponentsBuilder
-            .fromUri(familieOppdragUrl)
-            .path(PING_PATH)
-            .build()
-            .toUri()
 
     private fun iverksettelseUri(behandlingId: UUID): URI =
         UriComponentsBuilder

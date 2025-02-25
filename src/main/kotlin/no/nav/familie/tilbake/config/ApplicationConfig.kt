@@ -2,12 +2,8 @@ package no.nav.familie.tilbake.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import no.nav.familie.http.client.RetryOAuth2HttpClient
-import no.nav.familie.http.config.RestTemplateAzure
 import no.nav.familie.log.filter.LogFilter
 import no.nav.familie.prosessering.config.ProsesseringInfoProvider
-import no.nav.security.token.support.client.core.http.OAuth2HttpClient
-import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenResponse
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
@@ -21,19 +17,16 @@ import org.springframework.boot.web.servlet.server.ServletWebServerFactory
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
-import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.scheduling.annotation.EnableScheduling
-import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestTemplate
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 
 @SpringBootConfiguration
-@ComponentScan(ApplicationConfig.PAKKE_NAVN, "no.nav.familie.sikkerhet", "no.nav.familie.prosessering", "no.nav.familie.unleash")
+@ComponentScan(ApplicationConfig.PAKKE_NAVN, "no.nav.familie.prosessering", "no.nav.familie.unleash")
 @EnableJwtTokenValidation(ignore = ["org.springframework", "org.springdoc"])
-@Import(RestTemplateAzure::class)
 @EnableOAuth2Client(cacheEnabled = true)
 @EnableScheduling
 @EnableCaching
@@ -65,27 +58,10 @@ class ApplicationConfig {
     fun restTemplateBuilder(objectMapper: ObjectMapper): RestTemplateBuilder {
         val jackson2HttpMessageConverter = MappingJackson2HttpMessageConverter(objectMapper)
         return RestTemplateBuilder()
-            .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
-            .setReadTimeout(Duration.of(30, ChronoUnit.SECONDS))
+            .connectTimeout(Duration.of(2, ChronoUnit.SECONDS))
+            .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
             .additionalMessageConverters(listOf(jackson2HttpMessageConverter) + RestTemplate().messageConverters)
     }
-
-    /**
-     * Overskriver OAuth2HttpClient som settes opp i token-support som ikke kan få med objectMapper fra felles
-     * pga. .setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.NONE)
-     * og [OAuth2AccessTokenResponse] som burde settes med setters, då feltnavn heter noe annet enn feltet i json
-     */
-    @Bean
-    @Primary
-    fun oAuth2HttpClient(): OAuth2HttpClient =
-        RetryOAuth2HttpClient(
-            RestClient.create(
-                RestTemplateBuilder()
-                    .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
-                    .setReadTimeout(Duration.of(4, ChronoUnit.SECONDS))
-                    .build(),
-            ),
-        )
 
     @Bean
     fun prosesseringInfoProvider(

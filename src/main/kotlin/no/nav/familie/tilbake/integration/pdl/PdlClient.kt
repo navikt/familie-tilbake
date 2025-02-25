@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.integration.pdl
 
-import no.nav.familie.http.client.AbstractPingableRestClient
+import AbstractPingableRestClient
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.PdlConfig
 import no.nav.familie.tilbake.integration.pdl.internal.PdlAdressebeskyttelsePerson
@@ -24,7 +24,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestOperations
-import java.net.URI
 import java.time.LocalDate
 
 @Service
@@ -44,20 +43,22 @@ class PdlClient(
                 variables = PdlPersonRequestVariables(ident),
                 query = PdlConfig.hentEnkelPersonQuery,
             )
-        val respons: PdlHentPersonResponse<PdlPerson> =
+        val response: PdlHentPersonResponse<PdlPerson> =
             postForEntity(
                 pdlConfig.pdlUri,
                 pdlPersonRequest,
                 httpHeaders(mapTilTema(fagsystem)),
             )
-        if (respons.harAdvarsel()) {
+        if (response.harAdvarsel()) {
             logger.medContext(logContext) {
                 warn("Advarsel ved henting av personinfo fra PDL. Se securelogs for detaljer.")
             }
-            secureLogger.warn("Advarsel ved henting av personinfo fra PDL: ${respons.extensions?.warnings}")
+            SecureLog.medContext(logContext) {
+                warn("Advarsel ved henting av personinfo fra PDL: {}", response.extensions?.warnings.toString())
+            }
         }
-        if (!respons.harFeil()) {
-            return respons.data.person!!.let {
+        if (!response.harFeil()) {
+            return response.data.person!!.let {
                 val aktivtIdent = it.identer.first().identifikasjonsnummer ?: error("Kan ikke hente aktivt ident fra PDL")
                 Personinfo(
                     ident = aktivtIdent,
@@ -69,11 +70,11 @@ class PdlClient(
             }
         } else {
             logger.medContext(logContext) {
-                warn("Respons fra PDL:${objectMapper.writeValueAsString(respons)}")
+                warn("Response fra PDL: {}", objectMapper.writeValueAsString(response))
             }
             throw Feil(
-                message = "Feil ved oppslag på person: ${respons.errorMessages()}",
-                frontendFeilmelding = "Feil ved oppslag på person $ident: ${respons.errorMessages()}",
+                message = "Feil ved oppslag på person: ${response.errorMessages()}",
+                frontendFeilmelding = "Feil ved oppslag på person $ident: ${response.errorMessages()}",
                 logContext = logContext,
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
             )
@@ -100,7 +101,9 @@ class PdlClient(
             logger.medContext(logContext) {
                 warn("Advarsel ved henting av personidenter fra PDL. Se securelogs for detaljer.")
             }
-            secureLogger.warn("Advarsel ved henting av personidenter fra PDL: ${response.extensions?.warnings}")
+            SecureLog.medContext(logContext) {
+                warn("Advarsel ved henting av personidenter fra PDL: {}", response.extensions?.warnings.toString())
+            }
         }
         if (!response.harFeil()) return response
         throw Feil(
@@ -138,13 +141,6 @@ class PdlClient(
             add("Tema", tema.name)
             add("behandlingsnummer", tema.behandlingsnummer)
         }
-
-    override val pingUri: URI
-        get() = pdlConfig.pdlUri
-
-    override fun ping() {
-        operations.optionsForAllow(pingUri)
-    }
 
     private fun mapTilTema(fagsystem: Fagsystem): Tema =
         when (fagsystem) {

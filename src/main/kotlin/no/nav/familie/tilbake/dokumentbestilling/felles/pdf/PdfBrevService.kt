@@ -5,7 +5,6 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
-import no.nav.familie.tilbake.client.RessursException
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
@@ -13,6 +12,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.header.TekstformatererHe
 import no.nav.familie.tilbake.dokumentbestilling.felles.task.PubliserJournalpostTask
 import no.nav.familie.tilbake.dokumentbestilling.felles.task.PubliserJournalpostTaskData
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.JournalpostIdOgDokumentId
+import no.nav.familie.tilbake.http.RessursException
 import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstidspunkt
 import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstype
 import no.nav.familie.tilbake.kontrakter.objectMapper

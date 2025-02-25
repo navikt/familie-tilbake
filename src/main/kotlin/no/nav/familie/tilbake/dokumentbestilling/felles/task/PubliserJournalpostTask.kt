@@ -4,7 +4,7 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
-import no.nav.familie.tilbake.client.RessursException
+import no.nav.familie.tilbake.http.RessursException
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.kontrakter.Fagsystem
 import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstidspunkt

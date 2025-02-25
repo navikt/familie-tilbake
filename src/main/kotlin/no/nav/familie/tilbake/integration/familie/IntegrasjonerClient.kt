@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.integration.familie
 
-import no.nav.familie.http.client.AbstractPingableRestClient
+import AbstractPingableRestClient
 import no.nav.familie.tilbake.config.IntegrasjonerConfig
 import no.nav.familie.tilbake.kontrakter.Fagsystem
 import no.nav.familie.tilbake.kontrakter.Fil
@@ -25,6 +25,7 @@ import no.nav.familie.tilbake.kontrakter.oppgave.OpprettOppgaveRequest
 import no.nav.familie.tilbake.kontrakter.organisasjon.Organisasjon
 import no.nav.familie.tilbake.kontrakter.saksbehandler.Saksbehandler
 import no.nav.familie.tilbake.kontrakter.tilgangskontroll.Tilgang
+import no.nav.familie.tilbake.log.SecureLog
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpHeaders
@@ -40,13 +41,6 @@ class IntegrasjonerClient(
     @Qualifier("azure") restOperations: RestOperations,
     private val integrasjonerConfig: IntegrasjonerConfig,
 ) : AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
-    override val pingUri: URI =
-        UriComponentsBuilder
-            .fromUri(integrasjonerConfig.integrasjonUri)
-            .path(IntegrasjonerConfig.PATH_PING)
-            .build()
-            .toUri()
-
     private val arkiverUri: URI =
         UriComponentsBuilder
             .fromUri(integrasjonerConfig.integrasjonUri)
@@ -265,11 +259,17 @@ class IntegrasjonerClient(
         )
     }
 
-    fun hentJournalposterForBruker(journalposterForBrukerRequest: JournalposterForBrukerRequest): List<Journalpost> {
-        secureLogger.info(
-            "henter journalposter for bruker med ident ${journalposterForBrukerRequest.brukerId} " +
-                "og data $journalposterForBrukerRequest",
-        )
+    fun hentJournalposterForBruker(
+        journalposterForBrukerRequest: JournalposterForBrukerRequest,
+        logContext: SecureLog.Context,
+    ): List<Journalpost> {
+        SecureLog.medContext(logContext) {
+            info(
+                "henter journalposter for bruker med ident {} og data {}",
+                journalposterForBrukerRequest.brukerId,
+                journalposterForBrukerRequest.toString(),
+            )
+        }
 
         return postForEntity<Ressurs<List<Journalpost>>>(hentJournalpostUri(), journalposterForBrukerRequest).getDataOrThrow()
     }
