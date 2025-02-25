@@ -19,5 +19,9 @@ data class Oppgave(
 )
 
 enum class StatusEnum {
+    OPPRETTET,
+    AAPNET,
+    UNDER_BEHANDLING,
     FERDIGSTILT,
+    FEILREGISTRERT,
 }
