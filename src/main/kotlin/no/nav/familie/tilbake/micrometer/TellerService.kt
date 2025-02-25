@@ -2,7 +2,6 @@ package no.nav.familie.tilbake.micrometer
 
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.Tags
-import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
@@ -10,6 +9,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
+import no.nav.familie.tilbake.kontrakter.Fagsystem
 import no.nav.familie.tilbake.micrometer.domain.Meldingstelling
 import no.nav.familie.tilbake.micrometer.domain.MeldingstellingRepository
 import no.nav.familie.tilbake.micrometer.domain.Meldingstype

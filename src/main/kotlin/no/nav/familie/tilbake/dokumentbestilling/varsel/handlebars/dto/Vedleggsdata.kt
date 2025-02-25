@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto
 
-import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.Språkstøtte
+import no.nav.familie.tilbake.kontrakter.Språkkode
 import java.math.BigDecimal
 import java.time.YearMonth
 

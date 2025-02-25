@@ -23,7 +23,6 @@
         <main-class>no.nav.familie.tilbake.LauncherKt</main-class>
         <kotlin.version>2.1.0</kotlin.version>
         <common-java-modules.version>2.2021.09.17_07.09-67428a6422cc</common-java-modules.version>
-        <kontrakter.version>3.0_20250116111901_78b5a16</kontrakter.version>
         <felles.version>3.20250106100611_6ae49d2</felles.version>
         <!-- kotest.properties kan antakelig fjernes i versjon 6, for autoscan blir default false -->
         <kotest.version>5.9.1</kotest.version>
@@ -260,11 +259,6 @@
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>leader</artifactId>
             <version>${felles.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.familie.kontrakter</groupId>
-            <artifactId>felles</artifactId>
-            <version>${kontrakter.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.tjenestespesifikasjoner</groupId>

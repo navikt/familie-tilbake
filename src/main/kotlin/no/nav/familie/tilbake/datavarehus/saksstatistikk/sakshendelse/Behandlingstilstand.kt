@@ -1,11 +1,11 @@
 package no.nav.familie.tilbake.datavarehus.saksstatistikk.sakshendelse
 
-import no.nav.familie.kontrakter.felles.tilbakekreving.Periode
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Periode
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import java.math.BigDecimal
 import java.time.OffsetDateTime
 import java.util.UUID

@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.iverksettvedtak.domain
 
-import no.nav.familie.kontrakter.felles.Månedsperiode
+import no.nav.familie.tilbake.kontrakter.Månedsperiode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import java.math.BigDecimal

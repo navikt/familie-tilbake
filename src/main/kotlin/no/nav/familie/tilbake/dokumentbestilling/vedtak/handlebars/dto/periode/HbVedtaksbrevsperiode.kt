@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode
 
-import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
+import no.nav.familie.tilbake.kontrakter.Datoperiode
 import java.math.BigDecimal
 
 data class HbVedtaksbrevsperiode(

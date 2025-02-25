@@ -1,7 +1,5 @@
 package no.nav.familie.tilbake.dokumentasjonsgenerator
 
-import no.nav.familie.kontrakter.felles.Språkkode
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
@@ -15,6 +13,8 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVarsel
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevFelles
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.HarBrukerUttaltSeg
+import no.nav.familie.tilbake.kontrakter.Språkkode
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal

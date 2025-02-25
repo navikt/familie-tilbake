@@ -1,8 +1,8 @@
 package no.nav.familie.tilbake.micrometer.domain
 
-import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.tilbake.common.repository.InsertUpdateRepository
 import no.nav.familie.tilbake.common.repository.RepositoryInterface
+import no.nav.familie.tilbake.kontrakter.Fagsystem
 import org.springframework.data.jdbc.repository.query.Modifying
 import org.springframework.data.jdbc.repository.query.Query
 import java.time.LocalDate

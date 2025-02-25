@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.api.dto
 
 import jakarta.validation.constraints.Size
-import no.nav.familie.kontrakter.felles.Datoperiode
+import no.nav.familie.tilbake.kontrakter.Datoperiode
 
 class PeriodeMedTekstDto(
     val periode: Datoperiode,

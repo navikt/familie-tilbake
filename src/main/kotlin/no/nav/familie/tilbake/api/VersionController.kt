@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.api
 
 import io.swagger.v3.oas.annotations.Operation
-import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping

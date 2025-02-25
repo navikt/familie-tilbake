@@ -1,8 +1,8 @@
 package no.nav.familie.tilbake.micrometer
 
 import io.kotest.matchers.shouldBe
-import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
+import no.nav.familie.tilbake.kontrakter.Fagsystem
 import no.nav.familie.tilbake.micrometer.domain.MeldingstellingRepository
 import no.nav.familie.tilbake.micrometer.domain.Meldingstype
 import no.nav.familie.tilbake.micrometer.domain.Mottaksstatus

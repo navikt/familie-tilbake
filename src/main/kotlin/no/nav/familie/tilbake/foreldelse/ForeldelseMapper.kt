@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.foreldelse
 
-import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.api.dto.ForeldelsesperiodeDto
 import no.nav.familie.tilbake.api.dto.VurdertForeldelseDto
 import no.nav.familie.tilbake.api.dto.VurdertForeldelsesperiodeDto
@@ -8,6 +7,7 @@ import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningUtil
 import no.nav.familie.tilbake.faktaomfeilutbetaling.LogiskPeriode
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
+import no.nav.familie.tilbake.kontrakter.Månedsperiode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import java.math.RoundingMode
 import java.util.UUID

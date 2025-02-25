@@ -1,17 +1,17 @@
 package no.nav.familie.tilbake.kravgrunnlag.batch
 
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype.BARNETILSYN
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype.BARNETRYGD
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype.KONTANTSTØTTE
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype.OVERGANGSSTØNAD
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype.SKOLEPENGER
 import no.nav.familie.leader.LeaderClient
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.FagsystemUtil
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.config.PropertyName
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype.BARNETILSYN
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype.BARNETRYGD
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype.KONTANTSTØTTE
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype.OVERGANGSSTØNAD
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype.SKOLEPENGER
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattService
 import no.nav.familie.tilbake.log.SecureLog

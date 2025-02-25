@@ -1,10 +1,5 @@
 package no.nav.familie.tilbake.behandling
 
-import no.nav.familie.kontrakter.felles.Fagsystem
-import no.nav.familie.kontrakter.felles.tilbakekreving.FinnesBehandlingResponse
-import no.nav.familie.kontrakter.felles.tilbakekreving.KanBehandlingOpprettesManueltRespons
-import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.api.dto.FagsakDto
@@ -15,6 +10,11 @@ import no.nav.familie.tilbake.behandling.event.EndretPersonIdentEvent
 import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.kontrakter.Fagsystem
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.FinnesBehandlingResponse
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.KanBehandlingOpprettesManueltRespons
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.OpprettTilbakekrevingRequest
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.organisasjon.OrganisasjonService
@@ -140,7 +140,7 @@ class FagsakService(
     fun hentBehandlingerForFagsak(
         fagsystem: Fagsystem,
         eksternFagsakId: String,
-    ): List<no.nav.familie.kontrakter.felles.tilbakekreving.Behandling> {
+    ): List<no.nav.familie.tilbake.kontrakter.tilbakekreving.Behandling> {
         val fagsak =
             fagsakRepository.findByFagsystemAndEksternFagsakId(
                 fagsystem = fagsystem,
@@ -157,7 +157,7 @@ class FagsakService(
     fun hentVedtakForFagsak(
         fagsystem: Fagsystem,
         eksternFagsakId: String,
-    ): List<no.nav.familie.kontrakter.felles.klage.FagsystemVedtak> {
+    ): List<no.nav.familie.tilbake.kontrakter.klage.FagsystemVedtak> {
         val fagsak =
             fagsakRepository.findByFagsystemAndEksternFagsakId(
                 fagsystem = fagsystem,

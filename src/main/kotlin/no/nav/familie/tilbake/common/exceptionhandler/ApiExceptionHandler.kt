@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.common.exceptionhandler
 
-import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.log.SecureLog
 import org.slf4j.LoggerFactory
 import org.springframework.core.NestedExceptionUtils

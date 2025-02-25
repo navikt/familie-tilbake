@@ -1,8 +1,8 @@
 package no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak
 
 import jakarta.validation.constraints.Size
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import java.time.OffsetDateTime
 import java.util.UUID
 

@@ -4,7 +4,6 @@ import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.inspectors.forOne
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.shouldBe
-import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
@@ -20,6 +19,7 @@ import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
+import no.nav.familie.tilbake.kontrakter.Fagsystem
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.oppgave.OppdaterOppgaveTask
 import org.junit.jupiter.api.Test

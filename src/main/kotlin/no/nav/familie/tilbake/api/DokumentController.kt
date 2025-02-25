@@ -2,8 +2,6 @@ package no.nav.familie.tilbake.api
 
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
-import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.tilbakekreving.ForhåndsvisVarselbrevRequest
 import no.nav.familie.tilbake.api.dto.BestillBrevDto
 import no.nav.familie.tilbake.api.dto.ForhåndsvisningHenleggelsesbrevDto
 import no.nav.familie.tilbake.api.dto.FritekstavsnittDto
@@ -15,6 +13,8 @@ import no.nav.familie.tilbake.dokumentbestilling.henleggelse.HenleggelsesbrevSer
 import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevService
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.Avsnitt
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevService
+import no.nav.familie.tilbake.kontrakter.Ressurs
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.ForhåndsvisVarselbrevRequest
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk

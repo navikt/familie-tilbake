@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.api.dto
 
-import no.nav.familie.kontrakter.felles.Datoperiode
+import no.nav.familie.tilbake.kontrakter.Datoperiode
 import java.math.BigDecimal
 
 data class BeregnetPeriodeDto(

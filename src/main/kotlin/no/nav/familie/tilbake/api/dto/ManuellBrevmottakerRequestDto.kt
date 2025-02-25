@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.api.dto
 
-import no.nav.familie.kontrakter.felles.tilbakekreving.Brevmottaker
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.Brevmottaker
 import java.util.UUID
 
 typealias ManuellBrevmottakerRequestDto = Brevmottaker

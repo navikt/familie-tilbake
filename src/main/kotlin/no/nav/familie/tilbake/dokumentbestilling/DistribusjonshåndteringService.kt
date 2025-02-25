@@ -1,9 +1,5 @@
 package no.nav.familie.tilbake.dokumentbestilling
 
-import no.nav.familie.kontrakter.felles.dokdist.AdresseType
-import no.nav.familie.kontrakter.felles.dokdist.ManuellAdresse
-import no.nav.familie.kontrakter.felles.tilbakekreving.MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE
-import no.nav.familie.kontrakter.felles.tilbakekreving.MottakerType.DØDSBO
 import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
@@ -24,6 +20,10 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevgunnlagService
+import no.nav.familie.tilbake.kontrakter.dokdist.AdresseType
+import no.nav.familie.tilbake.kontrakter.dokdist.ManuellAdresse
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE
+import no.nav.familie.tilbake.kontrakter.tilbakekreving.MottakerType.DØDSBO
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 

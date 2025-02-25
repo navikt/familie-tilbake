@@ -5,22 +5,22 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.familie.http.client.RessursException
-import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
-import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
-import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
-import no.nav.familie.kontrakter.felles.journalpost.Journalpost
-import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
-import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
-import no.nav.familie.kontrakter.felles.journalpost.RelevantDato
-import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
-import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
-import no.nav.familie.kontrakter.felles.oppgave.Oppgave
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
-import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
+import no.nav.familie.tilbake.client.RessursException
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
+import no.nav.familie.tilbake.kontrakter.Ressurs
+import no.nav.familie.tilbake.kontrakter.dokarkiv.ArkiverDokumentResponse
+import no.nav.familie.tilbake.kontrakter.dokarkiv.v2.ArkiverDokumentRequest
+import no.nav.familie.tilbake.kontrakter.journalpost.DokumentInfo
+import no.nav.familie.tilbake.kontrakter.journalpost.Journalpost
+import no.nav.familie.tilbake.kontrakter.journalpost.Journalposttype
+import no.nav.familie.tilbake.kontrakter.journalpost.Journalstatus
+import no.nav.familie.tilbake.kontrakter.journalpost.RelevantDato
+import no.nav.familie.tilbake.kontrakter.navkontor.NavKontorEnhet
+import no.nav.familie.tilbake.kontrakter.oppgave.FinnOppgaveResponseDto
+import no.nav.familie.tilbake.kontrakter.oppgave.Oppgave
+import no.nav.familie.tilbake.kontrakter.oppgave.Oppgavetype
+import no.nav.familie.tilbake.kontrakter.organisasjon.Organisasjon
+import no.nav.familie.tilbake.kontrakter.saksbehandler.Saksbehandler
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -46,7 +46,7 @@ class IntegrasjonerClientConfig {
                         "jpUkjentDødsbo",
                         false,
                         listOf(
-                            no.nav.familie.kontrakter.felles.dokarkiv
+                            no.nav.familie.tilbake.kontrakter.dokarkiv
                                 .DokumentInfo("id"),
                         ),
                     )
@@ -55,7 +55,7 @@ class IntegrasjonerClientConfig {
                         "jpUkjentDødsbo",
                         false,
                         listOf(
-                            no.nav.familie.kontrakter.felles.dokarkiv
+                            no.nav.familie.tilbake.kontrakter.dokarkiv
                                 .DokumentInfo("id"),
                         ),
                     )
@@ -64,7 +64,7 @@ class IntegrasjonerClientConfig {
                         "jpId",
                         false,
                         listOf(
-                            no.nav.familie.kontrakter.felles.dokarkiv
+                            no.nav.familie.tilbake.kontrakter.dokarkiv
                                 .DokumentInfo("id"),
                         ),
                     )
