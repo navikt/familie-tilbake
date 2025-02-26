@@ -7,10 +7,13 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
+import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.exceptionhandler.ManglerOppgaveFeil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
+import no.nav.familie.tilbake.kontrakter.Tema
 import no.nav.familie.tilbake.kontrakter.oppgave.Behandlingstype
 import no.nav.familie.tilbake.kontrakter.oppgave.FinnOppgaveRequest
 import no.nav.familie.tilbake.kontrakter.oppgave.FinnOppgaveResponseDto
@@ -236,6 +239,31 @@ class OppgaveService(
         nyEnhet: String,
         fjernMappeFraOppgave: Boolean,
     ): OppgaveResponse = integrasjonerClient.tilordneOppgaveNyEnhet(oppgaveId, nyEnhet, fjernMappeFraOppgave)
+
+    fun oppdaterEnhetOgSaksbehandler(
+        behandlingId: UUID,
+        enhetId: String,
+        beskrivelse: String,
+        logContext: SecureLog.Context,
+        saksbehandler: String? = ContextService.hentSaksbehandler(logContext),
+    ) {
+        val oppgave = finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
+        val nyBeskrivelse =
+            LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yy hh:mm")) + ":" +
+                beskrivelse + System.lineSeparator() + oppgave.beskrivelse
+        var patchetOppgave = oppgave.copy(beskrivelse = nyBeskrivelse)
+        if (!saksbehandler.isNullOrEmpty() && saksbehandler != Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
+            patchetOppgave = patchetOppgave.copy(tilordnetRessurs = saksbehandler)
+        }
+
+        patchOppgave(patchetOppgave)
+
+        if (oppgave.tema == Tema.ENF) {
+            tilordneOppgaveNyEnhet(oppgave.id!!, enhetId, false) // ENF bruker generelle mapper
+        } else {
+            tilordneOppgaveNyEnhet(oppgave.id!!, enhetId, true) // KON og BAR bruker mapper som hører til enhetene
+        }
+    }
 
     fun ferdigstillOppgave(
         behandlingId: UUID,

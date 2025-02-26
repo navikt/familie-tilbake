@@ -17,6 +17,7 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.verify
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
@@ -81,8 +82,8 @@ import no.nav.familie.tilbake.kravgrunnlag.task.HentKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.oppgave.FerdigstillOppgaveTask
 import no.nav.familie.tilbake.oppgave.LagOppgaveTask
-import no.nav.familie.tilbake.oppgave.OppdaterEnhetOppgaveTask
 import no.nav.familie.tilbake.oppgave.OppdaterOppgaveTask
+import no.nav.familie.tilbake.oppgave.OppgaveService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.InnloggetBrukertilgang
 import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
@@ -128,6 +129,9 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var historikkService: HistorikkService
+
+    @Autowired
+    private lateinit var oppgaveService: OppgaveService
 
     private val fom: LocalDate = LocalDate.now().minusMonths(1)
     private val tom: LocalDate = LocalDate.now()
@@ -1414,11 +1418,18 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         behandling.behandlendeEnhet shouldBe "4806"
         behandling.behandlendeEnhetsNavn shouldBe "Mock Nav Drammen"
 
-        taskService
-            .finnTasksMedStatus(listOf(Status.UBEHANDLET))
-            .any {
-                it.type == OppdaterEnhetOppgaveTask.TYPE && "Endret tildelt enhet: 4806" == it.metadata["beskrivelse"] && "4806" == it.metadata["enhetId"]
-            }.shouldBeTrue()
+        verify(exactly = 1) {
+            oppgaveService.patchOppgave(
+                match {
+                    it.id == 1L &&
+                        it.beskrivelse?.endsWith("Endret tildelt enhet: 4806\nnull") ?: false &&
+                        it.tilordnetRessurs == "Z0000"
+                },
+            )
+        }
+        verify(exactly = 1) {
+            oppgaveService.tilordneOppgaveNyEnhet(1L, "4806", true)
+        }
         assertHistorikkinnslag(
             behandling.id,
             TilbakekrevingHistorikkinnslagstype.ENDRET_ENHET,
