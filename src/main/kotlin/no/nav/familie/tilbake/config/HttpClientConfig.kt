@@ -10,10 +10,9 @@ import org.springframework.web.client.RestOperations
 
 @Configuration
 class HttpClientConfig {
-    private val restTemplateBuilder = RestTemplateBuilder()
-
     @Bean("azure")
     fun restTemplateEntraIDBearer(
+        restTemplateBuilder: RestTemplateBuilder,
         consumerIdClientInterceptor: ConsumerIdClientInterceptor,
         bearerTokenClientInterceptor: BearerTokenClientInterceptor,
     ): RestOperations =
@@ -26,6 +25,7 @@ class HttpClientConfig {
 
     @Bean("azureClientCredential")
     fun restTemplateClientCredentialEntraIdBearer(
+        restTemplateBuilder: RestTemplateBuilder,
         consumerIdClientInterceptor: ConsumerIdClientInterceptor,
         bearerTokenClientInterceptor: BearerTokenClientInterceptor,
     ): RestOperations =
