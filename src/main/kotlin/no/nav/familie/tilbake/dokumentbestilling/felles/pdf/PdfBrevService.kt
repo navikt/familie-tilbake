@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.dokumentbestilling.felles.pdf
 
-import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
@@ -17,11 +16,11 @@ import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstidspunkt
 import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstype
 import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.callId
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.pdfgen.Dokumentvariant
 import no.nav.familie.tilbake.pdfgen.PdfGenerator
 import org.slf4j.LoggerFactory
-import org.slf4j.MDC
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.util.Base64
@@ -156,7 +155,7 @@ class PdfBrevService(
         mottager: Brevmottager,
     ): String {
         // alle brev kan potensielt bli sendt til både bruker og kopi verge. 2 av breva kan potensielt bli sendt flere gonger
-        val callId = MDC.get(MDCConstants.MDC_CALL_ID)
+        val callId = callId()
         return "${behandling.eksternBrukId}_${brevtype.name.lowercase()}_${mottager.name.lowercase()}_$callId"
     }
 

@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.http
 
-import org.slf4j.MDC
+import no.nav.familie.tilbake.log.callId
+import no.nav.familie.tilbake.log.requestId
 import org.springframework.http.HttpRequest
 import org.springframework.http.client.ClientHttpRequestExecution
 import org.springframework.http.client.ClientHttpRequestInterceptor
@@ -13,8 +14,8 @@ class MdcValuesPropagatingClientInterceptor : ClientHttpRequestInterceptor {
         body: ByteArray,
         execution: ClientHttpRequestExecution,
     ): ClientHttpResponse {
-        val callId = MDC.get("callId") ?: UUID.randomUUID().toString()
-        val requestId = MDC.get("requestId") ?: callId
+        val callId = callId() ?: UUID.randomUUID().toString()
+        val requestId = requestId() ?: callId
         request.headers.add("Nav-Call-Id", callId)
         request.headers.add("X-Request-ID", requestId)
 

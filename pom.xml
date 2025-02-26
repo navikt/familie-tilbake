@@ -242,11 +242,6 @@
             <version>${token-validation-spring.version}</version>
         </dependency>
         <dependency>
-            <groupId>no.nav.familie.felles</groupId>
-            <artifactId>log</artifactId>
-            <version>${felles.version}</version>
-        </dependency>
-        <dependency>
             <groupId>no.nav.security</groupId>
             <artifactId>token-validation-core</artifactId>
             <version>${token-validation-spring.version}</version>

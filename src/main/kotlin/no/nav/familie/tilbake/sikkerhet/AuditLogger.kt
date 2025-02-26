@@ -1,11 +1,10 @@
 package no.nav.familie.tilbake.sikkerhet
 
 import jakarta.servlet.http.HttpServletRequest
-import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.callId
 import org.slf4j.LoggerFactory
-import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
@@ -84,5 +83,5 @@ class AuditLogger(
             data.custom3?.let { "cs6Label=${it.key} cs6=${it.value}" },
         ).joinToString(" ")
 
-    private fun getCallId(): String = MDC.get(MDCConstants.MDC_CALL_ID) ?: throw IllegalStateException("Mangler callId")
+    private fun getCallId(): String = callId() ?: throw IllegalStateException("Mangler callId")
 }

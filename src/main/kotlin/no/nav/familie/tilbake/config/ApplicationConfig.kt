@@ -2,8 +2,8 @@ package no.nav.familie.tilbake.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import no.nav.familie.log.filter.LogFilter
 import no.nav.familie.prosessering.config.ProsesseringInfoProvider
+import no.nav.familie.tilbake.log.LogTracingHttpFilter
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
@@ -40,9 +40,9 @@ class ApplicationConfig {
     }
 
     @Bean
-    fun logFilter(): FilterRegistrationBean<LogFilter> {
-        val filterRegistration = FilterRegistrationBean<LogFilter>()
-        filterRegistration.filter = LogFilter()
+    fun logFilter(): FilterRegistrationBean<LogTracingHttpFilter> {
+        val filterRegistration = FilterRegistrationBean<LogTracingHttpFilter>()
+        filterRegistration.filter = LogTracingHttpFilter()
         filterRegistration.order = 1
         return filterRegistration
     }
