@@ -286,9 +286,9 @@
             <version>${springdoc.version}</version>
         </dependency>
         <dependency>
-            <groupId>no.nav.familie.felles</groupId>
-            <artifactId>unleash</artifactId>
-            <version>${felles.version}</version>
+            <groupId>io.getunleash</groupId>
+            <artifactId>unleash-client-java</artifactId>
+            <version>10.0.1</version>
         </dependency>
         <dependency>
             <groupId>org.messaginghub</groupId>
