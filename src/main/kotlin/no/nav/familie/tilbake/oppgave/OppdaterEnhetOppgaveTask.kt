@@ -39,13 +39,14 @@ class OppdaterEnhetOppgaveTask(
         if (!saksbehandler.isNullOrEmpty() && saksbehandler != Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
             patchetOppgave = patchetOppgave.copy(tilordnetRessurs = saksbehandler)
         }
-        oppgaveService.patchOppgave(patchetOppgave)
 
         if (oppgave.tema == Tema.ENF) {
             oppgaveService.tilordneOppgaveNyEnhet(oppgave.id!!, enhetId, false) // ENF bruker generelle mapper
         } else {
             oppgaveService.tilordneOppgaveNyEnhet(oppgave.id!!, enhetId, true) // KON og BAR bruker mapper som hører til enhetene
         }
+
+        oppgaveService.patchOppgave(patchetOppgave)
     }
 
     companion object {
