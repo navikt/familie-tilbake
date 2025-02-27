@@ -251,6 +251,11 @@
             <artifactId>logback-classic</artifactId> <!-- Mulig fiks av snyk-meldinger som gjelder logback-syslog4j -->
         </dependency>
         <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>8.0</version>
+        </dependency>
+        <dependency>
             <groupId>com.papertrailapp</groupId>
             <artifactId>logback-syslog4j</artifactId>
             <version>1.0.0</version> <!-- August, 2014, men det er den som blir brukt på NAV -->
