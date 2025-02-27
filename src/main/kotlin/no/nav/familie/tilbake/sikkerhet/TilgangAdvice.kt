@@ -33,7 +33,6 @@ import kotlin.reflect.KProperty1
 import kotlin.reflect.full.declaredMemberProperties
 
 enum class HenteParam {
-    YTELSESTYPE_OG_EKSTERN_FAGSAK_ID,
     FAGSYSTEM_OG_EKSTERN_FAGSAK_ID,
     MOTTATT_XML_ID,
     EKSTERN_KRAVGRUNNLAG_ID,
@@ -107,6 +106,28 @@ class TilgangAdvice(
         )
     }
 
+    fun validerTilgangYtelsetypeOgFagsakId(
+        ytelsestype: Ytelsestype,
+        eksternFagsakId: String,
+        minimumBehandlerrolle: Behandlerrolle,
+        auditLoggerEvent: AuditLoggerEvent,
+        handling: String,
+    ) {
+        val saksbehandler = ContextService.hentSaksbehandler(SecureLog.Context.tom())
+        val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype)
+        val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(fagsystem, eksternFagsakId)
+        val logContext = SecureLog.Context.utenBehandling(fagsak?.eksternFagsakId)
+        validate(
+            fagsystem = fagsystem,
+            minimumBehandlerrolle = minimumBehandlerrolle,
+            fagsak = fagsak,
+            handling = handling,
+            saksbehandler = saksbehandler,
+            auditLoggerEvent = auditLoggerEvent,
+            logContext = logContext,
+        )
+    }
+
     private fun validateFagsystemTilgangIGetRequest(
         param: HenteParam,
         requestBody: Array<Any>,
@@ -114,24 +135,6 @@ class TilgangAdvice(
         saksbehandler: String,
     ) {
         when (param) {
-            HenteParam.YTELSESTYPE_OG_EKSTERN_FAGSAK_ID -> {
-                val ytelsestype = Ytelsestype.valueOf(requestBody.first().toString())
-                val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype)
-                val eksternFagsakId = requestBody[1].toString()
-                val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(fagsystem, eksternFagsakId)
-                val logContext = SecureLog.Context.utenBehandling(fagsak?.eksternFagsakId)
-
-                validate(
-                    fagsystem = fagsystem,
-                    minimumBehandlerrolle = rolletilgangssjekk.minimumBehandlerrolle,
-                    fagsak = fagsak,
-                    handling = rolletilgangssjekk.handling,
-                    saksbehandler = saksbehandler,
-                    auditLoggerEvent = rolletilgangssjekk.auditLoggerEvent,
-                    logContext = logContext,
-                )
-            }
-
             HenteParam.FAGSYSTEM_OG_EKSTERN_FAGSAK_ID -> {
                 val fagsystem = Fagsystem.valueOf(requestBody.first().toString())
                 val eksternFagsakId = requestBody[1].toString()

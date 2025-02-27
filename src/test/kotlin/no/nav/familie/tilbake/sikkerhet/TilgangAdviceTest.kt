@@ -393,19 +393,11 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `sjekkTilgang skal finne personer basert på ytelsestype og eksternFagsakId for henteparam`() {
+        every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232"), any()) } returns listOf(Tilgang(personIdent, true, null))
         val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE))
         opprettRequestContext("dummy", HttpMethod.PUT, token)
-        every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232"), any()) } returns listOf(Tilgang(personIdent, true, null))
-        every { mockJoinpoint.args } returns arrayOf(Ytelsestype.BARNETRYGD, fagsak.eksternFagsakId)
-        val rolletilgangssjekk =
-            Rolletilgangssjekk(
-                Behandlerrolle.SAKSBEHANDLER,
-                "Setter behandling på vent",
-                AuditLoggerEvent.ACCESS,
-                HenteParam.YTELSESTYPE_OG_EKSTERN_FAGSAK_ID,
-            )
 
-        tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk)
+        tilgangAdvice.validerTilgangYtelsetypeOgFagsakId(Ytelsestype.BARNETRYGD, fagsak.eksternFagsakId, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test")
 
         verify { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232"), any()) }
     }

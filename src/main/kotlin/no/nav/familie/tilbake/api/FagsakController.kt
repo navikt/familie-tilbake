@@ -14,6 +14,7 @@ import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.HenteParam
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
+import no.nav.familie.tilbake.sikkerhet.TilgangAdvice
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 class FagsakController(
     private val fagsakService: FagsakService,
+    private val tilgangAdvice: TilgangAdvice,
 ) {
     @Operation(summary = "Hent fagsak informasjon med bruker og behandlinger")
     @GetMapping(
@@ -72,16 +74,19 @@ class FagsakController(
         path = ["/ytelsestype/{ytelsestype}/fagsak/{eksternFagsakId}/kanBehandlingOpprettesManuelt/v1"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        Behandlerrolle.SAKSBEHANDLER,
-        "Sjekk om det er mulig å opprette behandling manuelt",
-        AuditLoggerEvent.ACCESS,
-        HenteParam.YTELSESTYPE_OG_EKSTERN_FAGSAK_ID,
-    )
     fun kanBehandlingOpprettesManuelt(
         @PathVariable ytelsestype: Ytelsestype,
         @PathVariable eksternFagsakId: String,
-    ): Ressurs<KanBehandlingOpprettesManueltRespons> = Ressurs.success(fagsakService.kanBehandlingOpprettesManuelt(eksternFagsakId, ytelsestype))
+    ): Ressurs<KanBehandlingOpprettesManueltRespons> {
+        tilgangAdvice.validerTilgangYtelsetypeOgFagsakId(
+            ytelsestype = ytelsestype,
+            eksternFagsakId = eksternFagsakId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.ACCESS,
+            handling = "Sjekk om det er mulig å opprette behandling manuelt",
+        )
+        return Ressurs.success(fagsakService.kanBehandlingOpprettesManuelt(eksternFagsakId, ytelsestype))
+    }
 
     @Operation(summary = "Hent behandlinger, kalles av fagsystem")
     @GetMapping(

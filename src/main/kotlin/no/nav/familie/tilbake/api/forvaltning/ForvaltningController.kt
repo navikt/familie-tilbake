@@ -158,32 +158,38 @@ class ForvaltningController(
         path = ["/ytelsestype/{ytelsestype}/fagsak/{eksternFagsakId}/v1"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        Behandlerrolle.FORVALTER,
-        "Henter forvaltningsinformasjon",
-        AuditLoggerEvent.NONE,
-        HenteParam.YTELSESTYPE_OG_EKSTERN_FAGSAK_ID,
-    )
     fun hentForvaltningsinfo(
         @PathVariable ytelsestype: Ytelsestype,
         @PathVariable eksternFagsakId: String,
-    ): Ressurs<List<Behandlingsinfo>> = Ressurs.success(forvaltningService.hentForvaltningsinfo(ytelsestype, eksternFagsakId))
+    ): Ressurs<List<Behandlingsinfo>> {
+        tilgangAdvice.validerTilgangYtelsetypeOgFagsakId(
+            ytelsestype = ytelsestype,
+            eksternFagsakId = eksternFagsakId,
+            minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+            auditLoggerEvent = AuditLoggerEvent.NONE,
+            handling = "Henter forvaltningsinformasjon",
+        )
+        return Ressurs.success(forvaltningService.hentForvaltningsinfo(ytelsestype, eksternFagsakId))
+    }
 
     @Operation(summary = "Hent ikke arkiverte kravgrunnlag")
     @GetMapping(
         path = ["/ytelsestype/{ytelsestype}/fagsak/{eksternFagsakId}/ikke-arkivert-kravgrunnlag"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        Behandlerrolle.FORVALTER,
-        "Henter ikke arkiverte kravgrunnlag",
-        AuditLoggerEvent.NONE,
-        HenteParam.YTELSESTYPE_OG_EKSTERN_FAGSAK_ID,
-    )
     fun hentKravgrunnlagsinfo(
         @PathVariable ytelsestype: Ytelsestype,
         @PathVariable eksternFagsakId: String,
-    ): Ressurs<List<Kravgrunnlagsinfo>> = Ressurs.success(forvaltningService.hentIkkeArkiverteKravgrunnlag(ytelsestype, eksternFagsakId))
+    ): Ressurs<List<Kravgrunnlagsinfo>> {
+        tilgangAdvice.validerTilgangYtelsetypeOgFagsakId(
+            ytelsestype = ytelsestype,
+            eksternFagsakId = eksternFagsakId,
+            minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+            auditLoggerEvent = AuditLoggerEvent.NONE,
+            handling = "Henter ikke arkiverte kravgrunnlag",
+        )
+        return Ressurs.success(forvaltningService.hentIkkeArkiverteKravgrunnlag(ytelsestype, eksternFagsakId))
+    }
 
     @Operation(summary = "Oppretter FinnGammelBehandlingUtenOppgaveTask som logger ut gamle behandlinger uten åpen oppgave")
     @PostMapping(
