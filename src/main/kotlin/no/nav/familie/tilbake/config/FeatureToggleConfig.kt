@@ -1,7 +1,8 @@
 package no.nav.familie.tilbake.config
 
+import io.getunleash.UnleashContext
 import io.getunleash.strategy.Strategy
-import no.nav.familie.unleash.UnleashService
+import no.nav.familie.tilbake.unleash.UnleashService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -43,7 +44,10 @@ class FeatureToggleService(
 class ByClusterStrategy(
     private val clusterName: String,
 ) : Strategy {
-    override fun isEnabled(parameters: MutableMap<String, String>): Boolean {
+    override fun isEnabled(
+        parameters: MutableMap<String, String>,
+        context: UnleashContext,
+    ): Boolean {
         if (parameters.isEmpty()) return false
         return parameters["cluster"]?.contains(clusterName) ?: false
     }
