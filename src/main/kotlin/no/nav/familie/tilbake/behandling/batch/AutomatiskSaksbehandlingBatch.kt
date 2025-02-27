@@ -1,10 +1,10 @@
 package no.nav.familie.tilbake.behandling.batch
 
-import no.nav.familie.leader.LeaderClient
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.leader.LeaderClient
 import no.nav.familie.tilbake.log.SecureLog
 import org.slf4j.LoggerFactory
 import org.springframework.core.env.Environment

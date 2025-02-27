@@ -3,12 +3,12 @@ package no.nav.familie.tilbake.micrometer
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.MultiGauge
 import io.micrometer.core.instrument.Tags
-import no.nav.familie.leader.LeaderClient
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.common.fagsystem
 import no.nav.familie.tilbake.kontrakter.Fagsystem
+import no.nav.familie.tilbake.leader.LeaderClient
 import no.nav.familie.tilbake.micrometer.domain.MeldingstellingRepository
 import no.nav.familie.tilbake.micrometer.domain.Meldingstype
 import org.slf4j.LoggerFactory

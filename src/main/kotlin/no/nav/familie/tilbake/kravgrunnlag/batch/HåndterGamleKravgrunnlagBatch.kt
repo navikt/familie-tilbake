@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.kravgrunnlag.batch
 
-import no.nav.familie.leader.LeaderClient
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.FagsystemUtil
@@ -14,6 +13,7 @@ import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype.OVERGANGSST�
 import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype.SKOLEPENGER
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattService
+import no.nav.familie.tilbake.leader.LeaderClient
 import no.nav.familie.tilbake.log.SecureLog
 import org.slf4j.LoggerFactory
 import org.springframework.core.env.Environment
