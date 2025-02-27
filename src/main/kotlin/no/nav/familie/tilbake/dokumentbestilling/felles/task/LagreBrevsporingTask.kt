@@ -4,6 +4,7 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
@@ -12,7 +13,6 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
-import no.nav.familie.tilbake.iverksettvedtak.task.AvsluttBehandlingTask
 import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
 import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.stereotype.Service
@@ -31,6 +31,7 @@ class LagreBrevsporingTask(
     private val taskService: TracableTaskService,
     private val historikkService: HistorikkService,
     private val behandlingRepository: BehandlingRepository,
+    private val behandlingService: BehandlingService,
 ) : AsyncTaskStep {
     private val log = TracedLogger.getLogger<LagreBrevsporingTask>()
 
@@ -50,6 +51,7 @@ class LagreBrevsporingTask(
     }
 
     override fun onCompletion(task: Task) {
+        val logContext = task.logContext()
         val behandlingId = UUID.fromString(task.payload)
         val mottager = Brevmottager.valueOf(task.metadata.getProperty("mottager"))
         val brevtype = Brevtype.valueOf(task.metadata.getProperty("brevtype"))
@@ -87,13 +89,13 @@ class LagreBrevsporingTask(
         }
 
         if (brevtype.gjelderVarsel() && mottager != Brevmottager.VERGE) {
-            taskService.save(Task(LagreVarselbrevsporingTask.TYPE, task.payload, task.metadata), task.logContext())
+            taskService.save(Task(LagreVarselbrevsporingTask.TYPE, task.payload, task.metadata), logContext)
         }
 
         // Behandling bør avsluttes etter å sende vedtaksbrev
         // AvsluttBehandlingTask må kalles kun en gang selv om behandling har to brevmottakere
         if (brevtype == Brevtype.VEDTAK && mottager !in listOf(Brevmottager.VERGE, Brevmottager.MANUELL_TILLEGGSMOTTAKER)) {
-            taskService.save(Task(type = AvsluttBehandlingTask.TYPE, payload = task.payload, task.metadata), task.logContext())
+            behandlingService.avslutt(behandlingId, logContext)
         }
     }
 

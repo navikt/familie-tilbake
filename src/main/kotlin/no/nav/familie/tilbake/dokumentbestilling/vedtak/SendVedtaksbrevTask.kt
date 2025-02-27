@@ -4,20 +4,16 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
-import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.SendVedtaksoppsummeringTilDvhTask
-import no.nav.familie.tilbake.iverksettvedtak.task.AvsluttBehandlingTask
-import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
 import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.stereotype.Service
-import java.util.Properties
 import java.util.UUID
 
 @Service
@@ -29,29 +25,21 @@ import java.util.UUID
 )
 class SendVedtaksbrevTask(
     private val behandlingRepository: BehandlingRepository,
-    private val fagsakRepository: FagsakRepository,
     private val vedtaksbrevService: VedtaksbrevService,
     private val taskService: TracableTaskService,
+    private val behandlingService: BehandlingService,
 ) : AsyncTaskStep {
     private val log = TracedLogger.getLogger<SendVedtaksbrevTask>()
 
     override fun doTask(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandlingId.toString())
+        val logContext = task.logContext()
         if (behandling.saksbehandlingstype == Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP) {
             log.medContext(logContext) {
                 info("Behandlingen $behandlingId ble saksbehandlet automatisk, sender ikke vedtaksbrev")
             }
-            taskService.save(
-                Task(
-                    type = AvsluttBehandlingTask.TYPE,
-                    payload = task.payload,
-                    properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsak.fagsystem.name) },
-                ),
-                task.logContext(),
-            )
+            behandlingService.avslutt(behandlingId, logContext)
             return
         }
 
@@ -61,14 +49,7 @@ class SendVedtaksbrevTask(
             log.medContext(logContext) {
                 info("Sender ikke vedtaksbrev etter revurdering som følge av klage for behandling: {}", behandlingId)
             }
-            taskService.save(
-                Task(
-                    type = AvsluttBehandlingTask.TYPE,
-                    payload = task.payload,
-                    properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsak.fagsystem.name) },
-                ),
-                task.logContext(),
-            )
+            behandlingService.avslutt(behandlingId, logContext)
             return
         }
 

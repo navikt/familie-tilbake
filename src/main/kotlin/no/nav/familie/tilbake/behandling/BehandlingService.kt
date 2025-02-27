@@ -21,6 +21,7 @@ import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.ContextService
@@ -517,6 +518,52 @@ class BehandlingService(
             beskrivelse = "Endret tildelt enhet: " + byttEnhetDto.enhet,
             enhetId = byttEnhetDto.enhet,
             logContext = logContext,
+        )
+    }
+
+    @Transactional
+    fun avslutt(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) {
+        var behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        if (behandling.status == Behandlingsstatus.AVSLUTTET) {
+            log.medContext(logContext) {
+                info("Behandling er allerede avsluttet")
+            }
+            return
+        }
+
+        if (!behandling.erUnderIverksettelse) {
+            throw Feil(
+                message = "Behandling med id=$behandlingId kan ikke avsluttes",
+                logContext = logContext,
+            )
+        }
+
+        behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        behandlingRepository.update(
+            behandling.copy(
+                status = Behandlingsstatus.AVSLUTTET,
+                avsluttetDato = LocalDate.now(),
+            ),
+        )
+
+        behandlingskontrollService
+            .oppdaterBehandlingsstegStatus(
+                behandlingId,
+                Behandlingsstegsinfo(
+                    behandlingssteg = Behandlingssteg.AVSLUTTET,
+                    behandlingsstegstatus = Behandlingsstegstatus.UTFØRT,
+                ),
+                logContext = logContext,
+            )
+
+        historikkService.lagHistorikkinnslag(
+            behandlingId = behandlingId,
+            historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_AVSLUTTET,
+            aktør = Aktør.Vedtaksløsning,
+            opprettetTidspunkt = LocalDateTime.now(),
         )
     }
 
