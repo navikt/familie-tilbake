@@ -17,22 +17,11 @@ import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.log.SecureLog
-import org.aspectj.lang.JoinPoint
-import org.aspectj.lang.annotation.Aspect
-import org.aspectj.lang.annotation.Before
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Configuration
-import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
-import org.springframework.web.context.request.RequestContextHolder
-import org.springframework.web.context.request.ServletRequestAttributes
 import java.math.BigInteger
 import java.util.UUID
-import kotlin.reflect.KProperty1
-import kotlin.reflect.full.declaredMemberProperties
 
-@Aspect
 @Configuration
 class TilgangAdvice(
     private val rolleConfig: RolleConfig,
@@ -43,35 +32,6 @@ class TilgangAdvice(
     private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
     private val integrasjonerClient: IntegrasjonerClient,
 ) {
-    private val feltnavnFagsystem = "fagsystem"
-    private val feltnavnYtelsestype = "ytelsestype"
-    private val feltnavnBehandlingId = "behandlingId"
-    private val feltnavnEksternBrukId = "eksternBrukId"
-    private val feltnavnEksternFagsakId = "eksternFagsakId"
-
-    private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
-
-    @Before("@annotation(rolletilgangssjekk) ")
-    fun sjekkTilgang(
-        joinpoint: JoinPoint,
-        rolletilgangssjekk: Rolletilgangssjekk,
-    ) {
-        val saksbehandler = ContextService.hentSaksbehandler(SecureLog.Context.tom())
-        val httpRequest = (RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes).request
-
-        if (HttpMethod.GET.matches(httpRequest.method)) {
-            error("Annotasjon for rolletilgangsjekk er ikke gyldig for GET requests")
-        } else if (HttpMethod.POST.matches(httpRequest.method) || HttpMethod.PUT.matches(httpRequest.method)) {
-            validateFagsystemTilgangIPostRequest(
-                joinpoint.args[0],
-                rolletilgangssjekk,
-                saksbehandler,
-            )
-        } else {
-            logger.error("${httpRequest.requestURI} støtter ikke tilgangssjekk")
-        }
-    }
-
     fun validerTilgangBehandlingID(
         behandlingId: UUID,
         minimumBehandlerrolle: Behandlerrolle,
@@ -170,7 +130,11 @@ class TilgangAdvice(
         val ytelsestype =
             økonomiXmlMottatt?.ytelsestype
                 ?: kravgrunnlag?.fagområdekode?.ytelsestype
-                ?: kastTilgangssjekkException("Finner ikke ytelse for kravgrunnlag")
+                ?: throw Feil(
+                    message = "Ukjent ytelsestype for kravgrunnlag",
+                    httpStatus = HttpStatus.BAD_REQUEST,
+                    logContext = SecureLog.Context.utenBehandling(kravgrunnlag?.fagsystemId),
+                )
 
         validate(
             fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype),
@@ -181,108 +145,6 @@ class TilgangAdvice(
             auditLoggerEvent = auditLoggerEvent,
             logContext = SecureLog.Context.tom(),
         )
-    }
-
-    private fun validateFagsystemTilgangIPostRequest(
-        requestBody: Any,
-        rolletilgangssjekk: Rolletilgangssjekk,
-        saksbehandler: String,
-    ) {
-        val fields: Collection<KProperty1<out Any, *>> = requestBody::class.declaredMemberProperties
-
-        val ytelsestypeFraRequest: KProperty1<out Any, *>? = fields.find { feltnavnYtelsestype == it.name }
-        val fagsystemFraRequest = fields.find { feltnavnFagsystem == it.name }
-        val behandlingIdFraRequest = fields.find { feltnavnBehandlingId == it.name }
-        val eksternBrukIdFraRequest = fields.find { feltnavnEksternBrukId == it.name }
-        val eksternFagsakIdFraRequest = fields.find { feltnavnEksternFagsakId == it.name }
-
-        when {
-            behandlingIdFraRequest != null -> {
-                val behandlingId: UUID = behandlingIdFraRequest.getter.call(requestBody) as UUID
-                val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-                val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-                val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandling.id.toString())
-
-                validate(
-                    fagsystem = fagsak.fagsystem,
-                    minimumBehandlerrolle = rolletilgangssjekk.minimumBehandlerrolle,
-                    fagsak = fagsak,
-                    handling = rolletilgangssjekk.handling,
-                    saksbehandler = saksbehandler,
-                    auditLoggerEvent = rolletilgangssjekk.auditLoggerEvent,
-                    logContext = logContext,
-                )
-            }
-
-            eksternBrukIdFraRequest != null -> {
-                val eksternBrukId: UUID = eksternBrukIdFraRequest.getter.call(requestBody) as UUID
-                val fagsak = fagsakRepository.finnFagsakForEksternBrukId(eksternBrukId)
-                val logContext = SecureLog.Context.utenBehandling(fagsak.eksternFagsakId)
-
-                validate(
-                    fagsystem = fagsak.fagsystem,
-                    minimumBehandlerrolle = rolletilgangssjekk.minimumBehandlerrolle,
-                    fagsak = fagsak,
-                    handling = rolletilgangssjekk.handling,
-                    saksbehandler = saksbehandler,
-                    auditLoggerEvent = rolletilgangssjekk.auditLoggerEvent,
-                    logContext = logContext,
-                )
-            }
-
-            fagsystemFraRequest != null && eksternFagsakIdFraRequest != null -> {
-                val fagsystem = fagsystemFraRequest.getter.call(requestBody) as Fagsystem
-                val eksternFagsakId = eksternFagsakIdFraRequest.getter.call(requestBody).toString()
-                val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(fagsystem, eksternFagsakId)
-                val logContext = SecureLog.Context.utenBehandling(eksternFagsakId)
-
-                validate(
-                    fagsystem = fagsystem,
-                    minimumBehandlerrolle = rolletilgangssjekk.minimumBehandlerrolle,
-                    fagsak = fagsak,
-                    handling = rolletilgangssjekk.handling,
-                    saksbehandler = saksbehandler,
-                    auditLoggerEvent = rolletilgangssjekk.auditLoggerEvent,
-                    logContext = logContext,
-                )
-            }
-
-            ytelsestypeFraRequest != null && eksternFagsakIdFraRequest != null -> {
-                val ytelsestype = Ytelsestype.valueOf(ytelsestypeFraRequest.getter.call(requestBody).toString())
-                val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype)
-                val eksternFagsakId = eksternFagsakIdFraRequest.getter.call(requestBody).toString()
-                val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(fagsystem, eksternFagsakId)
-                val logContext = SecureLog.Context.utenBehandling(eksternFagsakId)
-
-                validate(
-                    fagsystem = fagsystem,
-                    minimumBehandlerrolle = rolletilgangssjekk.minimumBehandlerrolle,
-                    fagsak = fagsak,
-                    handling = rolletilgangssjekk.handling,
-                    saksbehandler = saksbehandler,
-                    auditLoggerEvent = rolletilgangssjekk.auditLoggerEvent,
-                    logContext = logContext,
-                )
-            }
-
-            ytelsestypeFraRequest != null -> {
-                val ytelsestype = Ytelsestype.valueOf(ytelsestypeFraRequest.getter.call(requestBody).toString())
-
-                validate(
-                    fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype),
-                    minimumBehandlerrolle = rolletilgangssjekk.minimumBehandlerrolle,
-                    fagsak = null,
-                    handling = rolletilgangssjekk.handling,
-                    saksbehandler = saksbehandler,
-                    auditLoggerEvent = rolletilgangssjekk.auditLoggerEvent,
-                    logContext = SecureLog.Context.tom(),
-                )
-            }
-
-            else -> {
-                kastTilgangssjekkException(rolletilgangssjekk.handling)
-            }
-        }
     }
 
     private fun validate(
@@ -446,17 +308,5 @@ class TilgangAdvice(
                 httpStatus = HttpStatus.FORBIDDEN,
             )
         }
-    }
-
-    private fun kastTilgangssjekkException(handling: String): Nothing {
-        val feilmelding: String =
-            "$handling kan ikke valideres for tilgangssjekk. " +
-                "Det finnes ikke en av de påkrevde parameterne i request"
-        throw Feil(
-            message = feilmelding,
-            frontendFeilmelding = feilmelding,
-            logContext = SecureLog.Context.tom(),
-            httpStatus = HttpStatus.BAD_REQUEST,
-        )
     }
 }

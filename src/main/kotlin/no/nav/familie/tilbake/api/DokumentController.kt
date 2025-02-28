@@ -17,7 +17,6 @@ import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.kontrakter.tilbakekreving.ForhåndsvisVarselbrevRequest
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
 import no.nav.familie.tilbake.sikkerhet.TilgangAdvice
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -42,11 +41,16 @@ class DokumentController(
 ) {
     @Operation(summary = "Bestill brevsending")
     @PostMapping("/bestill")
-    @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Sender brev", AuditLoggerEvent.CREATE)
     fun bestillBrev(
         @RequestBody @Valid
         bestillBrevDto: BestillBrevDto,
     ): Ressurs<Nothing?> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = bestillBrevDto.behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.CREATE,
+            handling = "Sender brev",
+        )
         val maltype: Dokumentmalstype = bestillBrevDto.brevmalkode
         dokumentbehandlingService.bestillBrev(bestillBrevDto.behandlingId, maltype, bestillBrevDto.fritekst)
         return Ressurs.success(null)
@@ -54,11 +58,16 @@ class DokumentController(
 
     @Operation(summary = "Forhåndsvis brev")
     @PostMapping("/forhandsvis")
-    @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Forhåndsviser brev", AuditLoggerEvent.ACCESS)
     fun forhåndsvisBrev(
         @RequestBody @Valid
         bestillBrevDto: BestillBrevDto,
     ): Ressurs<ByteArray> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = bestillBrevDto.behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.ACCESS,
+            handling = "Forhåndsviser brev",
+        )
         val dokument: ByteArray =
             dokumentbehandlingService.forhåndsvisBrev(
                 bestillBrevDto.behandlingId,
@@ -73,33 +82,55 @@ class DokumentController(
         "/forhandsvis-varselbrev",
         produces = [MediaType.APPLICATION_PDF_VALUE],
     )
-    @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Forhåndsviser brev", AuditLoggerEvent.ACCESS)
     fun hentForhåndsvisningVarselbrev(
         @Valid @RequestBody
         forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest,
-    ): ByteArray = varselbrevService.hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest)
+    ): ByteArray {
+        tilgangAdvice.validerTilgangFagsystemOgFagsakId(
+            fagsystem = forhåndsvisVarselbrevRequest.fagsystem,
+            eksternFagsakId = forhåndsvisVarselbrevRequest.eksternFagsakId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.ACCESS,
+            handling = "Forhåndsviser brev",
+        )
+        return varselbrevService.hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest)
+    }
 
     @Operation(summary = "Forhåndsvis henleggelsesbrev")
     @PostMapping(
         "/forhandsvis-henleggelsesbrev",
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Forhåndsviser henleggelsesbrev", AuditLoggerEvent.ACCESS)
     fun hentForhåndsvisningHenleggelsesbrev(
         @Valid @RequestBody
         dto: ForhåndsvisningHenleggelsesbrevDto,
-    ): Ressurs<ByteArray> = Ressurs.success(henleggelsesbrevService.hentForhåndsvisningHenleggelsesbrev(dto.behandlingId, dto.fritekst))
+    ): Ressurs<ByteArray> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = dto.behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.ACCESS,
+            handling = "Forhåndsviser henleggelsesbrev",
+        )
+        return Ressurs.success(henleggelsesbrevService.hentForhåndsvisningHenleggelsesbrev(dto.behandlingId, dto.fritekst))
+    }
 
     @Operation(summary = "Forhåndsvis vedtaksbrev")
     @PostMapping(
         "/forhandsvis-vedtaksbrev",
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Forhåndsviser brev", AuditLoggerEvent.ACCESS)
     fun hentForhåndsvisningVedtaksbrev(
         @Valid @RequestBody
         hentForhåndsvisningVedtaksbrevRequest: HentForhåndvisningVedtaksbrevPdfDto,
-    ): Ressurs<ByteArray> = Ressurs.success(vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(hentForhåndsvisningVedtaksbrevRequest))
+    ): Ressurs<ByteArray> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = hentForhåndsvisningVedtaksbrevRequest.behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.ACCESS,
+            handling = "Forhåndsviser brev",
+        )
+        return Ressurs.success(vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(hentForhåndsvisningVedtaksbrevRequest))
+    }
 
     @Operation(summary = "Hent vedtaksbrevtekst")
     @GetMapping(

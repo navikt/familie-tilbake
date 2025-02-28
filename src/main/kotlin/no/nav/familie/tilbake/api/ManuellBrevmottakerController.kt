@@ -9,7 +9,6 @@ import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBre
 import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
 import no.nav.familie.tilbake.sikkerhet.TilgangAdvice
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -99,15 +98,16 @@ class ManuellBrevmottakerController(
 
     @Operation(summary = "Fjerner manuell brevmottaker")
     @DeleteMapping(path = ["/{behandlingId}/{manuellBrevmottakerId}"])
-    @Rolletilgangssjekk(
-        minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-        handling = "Fjerner manuell brevmottaker",
-        auditLoggerEvent = AuditLoggerEvent.UPDATE,
-    )
     fun fjernManuellBrevmottaker(
         @PathVariable behandlingId: UUID,
         @PathVariable manuellBrevmottakerId: UUID,
     ): Ressurs<String> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.UPDATE,
+            handling = "Fjerner manuell brevmottaker",
+        )
         manuellBrevmottakerService.fjernBrevmottaker(behandlingId, manuellBrevmottakerId)
         return Ressurs.success("", melding = "Manuell brevmottaker er fjernet")
     }

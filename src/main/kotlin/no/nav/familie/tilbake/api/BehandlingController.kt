@@ -22,7 +22,6 @@ import no.nav.familie.tilbake.kontrakter.tilbakekreving.OpprettTilbakekrevingReq
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
 import no.nav.familie.tilbake.sikkerhet.TilgangAdvice
 import no.nav.familie.tilbake.sikkerhet.TilgangService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -56,11 +55,17 @@ class BehandlingController(
         consumes = [MediaType.APPLICATION_JSON_VALUE],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Oppretter tilbakekreving", AuditLoggerEvent.CREATE)
     fun opprettBehandling(
         @Valid @RequestBody
         opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
     ): Ressurs<String> {
+        tilgangAdvice.validerTilgangFagsystemOgFagsakId(
+            fagsystem = opprettTilbakekrevingRequest.fagsystem,
+            eksternFagsakId = opprettTilbakekrevingRequest.eksternFagsakId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.CREATE,
+            handling = "Oppretter tilbakekreving",
+        )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         return Ressurs.success(behandling.eksternBrukId.toString(), melding = "Behandling er opprettet.")
     }
@@ -71,11 +76,17 @@ class BehandlingController(
         consumes = [MediaType.APPLICATION_JSON_VALUE],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Oppretter tilbakekreving manuelt", AuditLoggerEvent.CREATE)
     fun opprettBehandlingManuellTask(
         @Valid @RequestBody
         opprettManueltTilbakekrevingRequest: OpprettManueltTilbakekrevingRequest,
     ): Ressurs<String> {
+        tilgangAdvice.validerTilgangYtelsetypeOgFagsakId(
+            ytelsestype = opprettManueltTilbakekrevingRequest.ytelsestype,
+            eksternFagsakId = opprettManueltTilbakekrevingRequest.eksternFagsakId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.CREATE,
+            handling = "Oppretter tilbakekreving manuelt",
+        )
         behandlingService.opprettBehandlingManuellTask(opprettManueltTilbakekrevingRequest)
         return Ressurs.success("Manuell opprettelse av tilbakekreving er startet")
     }
@@ -86,11 +97,16 @@ class BehandlingController(
         consumes = [MediaType.APPLICATION_JSON_VALUE],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Oppretter tilbakekrevingsrevurdering", AuditLoggerEvent.CREATE)
     fun opprettRevurdering(
         @Valid @RequestBody
         opprettRevurderingDto: OpprettRevurderingDto,
     ): Ressurs<String> {
+        tilgangAdvice.validerTilgangBehandlingID(
+            behandlingId = opprettRevurderingDto.originalBehandlingId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.CREATE,
+            handling = "Oppretter tilbakekrevingsrevurdering",
+        )
         val behandling = behandlingService.opprettRevurdering(opprettRevurderingDto)
         return Ressurs.success(behandling.eksternBrukId.toString(), melding = "Revurdering er opprettet.")
     }
