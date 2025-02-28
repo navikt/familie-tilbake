@@ -30,11 +30,11 @@
         <jakarta.xml.bind-api.version>4.0.2</jakarta.xml.bind-api.version>
         <jaxb-impl.version>4.0.5</jaxb-impl.version>
         <verapdf.version>1.26.5</verapdf.version>
-        <mockk.version>1.13.16</mockk.version>
+        <mockk.version>1.13.17</mockk.version>
         <spring.cloud-contract>4.2.0</spring.cloud-contract>
         <springdoc.version>2.8.5</springdoc.version>
         <testcontainers.version>1.20.5</testcontainers.version>
-        <tjenestespesifikasjoner.version>2641.575768a</tjenestespesifikasjoner.version>
+        <tjenestespesifikasjoner.version>2643.2f3e8e9</tjenestespesifikasjoner.version>
         <familie-tjenestespesifikasjoner.version>1.0_20250103091213_2eaa779</familie-tjenestespesifikasjoner.version>
         <prosessering-core.version>2.20250219093533_62416e5</prosessering-core.version>
     </properties>
@@ -154,7 +154,7 @@
         <dependency>
             <groupId>com.ibm.mq</groupId>
             <artifactId>com.ibm.mq.jakarta.client</artifactId>
-            <version>9.4.1.1</version>
+            <version>9.4.2.0</version>
         </dependency>
         <dependency>
             <groupId>jakarta.jms</groupId>
@@ -187,7 +187,7 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
-            <version>11.3.3</version>
+            <version>11.3.4</version>
             <scope>runtime</scope>
         </dependency>
 
@@ -274,7 +274,7 @@
         <dependency>
             <groupId>io.getunleash</groupId>
             <artifactId>unleash-client-java</artifactId>
-            <version>10.0.1</version>
+            <version>10.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.messaginghub</groupId>
