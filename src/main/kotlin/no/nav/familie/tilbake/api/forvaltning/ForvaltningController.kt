@@ -12,8 +12,6 @@ import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.HenteParam
-import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
 import no.nav.familie.tilbake.sikkerhet.TilgangAdvice
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -86,15 +84,15 @@ class ForvaltningController(
         path = ["/arkiver/kravgrunnlag/{mottattXmlId}/v1"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        Behandlerrolle.FORVALTER,
-        "Arkiverer mottatt kravgrunnlag",
-        AuditLoggerEvent.NONE,
-        HenteParam.MOTTATT_XML_ID,
-    )
     fun arkiverMottattKravgrunnlag(
         @PathVariable mottattXmlId: UUID,
     ): Ressurs<String> {
+        tilgangAdvice.validerTilgangMottattXMLId(
+            mottattXmlId = mottattXmlId,
+            minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+            auditLoggerEvent = AuditLoggerEvent.NONE,
+            handling = "Arkiverer mottatt kravgrunnlag",
+        )
         forvaltningService.arkiverMottattKravgrunnlag(mottattXmlId)
         return Ressurs.success("OK")
     }
@@ -140,15 +138,15 @@ class ForvaltningController(
         path = ["/annuler/kravgrunnlag/{eksternKravgrunnlagId}/v1"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        Behandlerrolle.FORVALTER,
-        "Annulerer kravgrunnlag",
-        AuditLoggerEvent.NONE,
-        HenteParam.EKSTERN_KRAVGRUNNLAG_ID,
-    )
     fun annulerKravgrunnlag(
         @PathVariable eksternKravgrunnlagId: BigInteger,
     ): Ressurs<String> {
+        tilgangAdvice.validerTilgangKravgrunnlagId(
+            eksternKravgrunnlagId = eksternKravgrunnlagId,
+            minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+            auditLoggerEvent = AuditLoggerEvent.NONE,
+            handling = "Annulerer kravgrunnlag",
+        )
         forvaltningService.annulerKravgrunnlag(eksternKravgrunnlagId)
         return Ressurs.success("OK")
     }

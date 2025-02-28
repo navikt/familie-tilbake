@@ -12,8 +12,6 @@ import no.nav.familie.tilbake.kontrakter.tilbakekreving.KanBehandlingOpprettesMa
 import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.HenteParam
-import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
 import no.nav.familie.tilbake.sikkerhet.TilgangAdvice
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -36,38 +34,43 @@ class FagsakController(
         path = ["/fagsystem/{fagsystem}/fagsak/{eksternFagsakId}/v1"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        Behandlerrolle.VEILEDER,
-        "Henter fagsak informasjon med bruker og behandlinger",
-        AuditLoggerEvent.ACCESS,
-        HenteParam.FAGSYSTEM_OG_EKSTERN_FAGSAK_ID,
-    )
     fun hentFagsak(
         @PathVariable fagsystem: Fagsystem,
         @PathVariable eksternFagsakId: String,
-    ): Ressurs<FagsakDto> = Ressurs.success(fagsakService.hentFagsak(fagsystem, eksternFagsakId))
+    ): Ressurs<FagsakDto> {
+        tilgangAdvice.validerTilgangFagsystemOgFagsakId(
+            fagsystem = fagsystem,
+            eksternFagsakId = eksternFagsakId,
+            minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+            auditLoggerEvent = AuditLoggerEvent.ACCESS,
+            handling = "Henter fagsak informasjon med bruker og behandlinger",
+        )
+        return Ressurs.success(fagsakService.hentFagsak(fagsystem, eksternFagsakId))
+    }
 
     @Operation(summary = "Sjekk om det finnes en åpen tilbakekrevingsbehandling")
     @GetMapping(
         path = ["/fagsystem/{fagsystem}/fagsak/{eksternFagsakId}/finnesApenBehandling/v1"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        Behandlerrolle.VEILEDER,
-        "Sjekk om det finnes en åpen tilbakekrevingsbehandling",
-        AuditLoggerEvent.ACCESS,
-        HenteParam.FAGSYSTEM_OG_EKSTERN_FAGSAK_ID,
-    )
     fun finnesÅpenTilbakekrevingsbehandling(
         @PathVariable fagsystem: Fagsystem,
         @PathVariable eksternFagsakId: String,
-    ): Ressurs<FinnesBehandlingResponse> =
-        Ressurs.success(
+    ): Ressurs<FinnesBehandlingResponse> {
+        tilgangAdvice.validerTilgangFagsystemOgFagsakId(
+            fagsystem = fagsystem,
+            eksternFagsakId = eksternFagsakId,
+            minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+            auditLoggerEvent = AuditLoggerEvent.ACCESS,
+            handling = "Sjekk om det finnes en åpen tilbakekrevingsbehandling",
+        )
+        return Ressurs.success(
             fagsakService.finnesÅpenTilbakekrevingsbehandling(
                 fagsystem = fagsystem,
                 eksternFagsakId = eksternFagsakId,
             ),
         )
+    }
 
     @Operation(summary = "Sjekk om det er mulig å opprette behandling manuelt")
     @GetMapping(
@@ -93,30 +96,36 @@ class FagsakController(
         path = ["/fagsystem/{fagsystem}/fagsak/{eksternFagsakId}/behandlinger/v1"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        minimumBehandlerrolle = Behandlerrolle.VEILEDER,
-        handling = "Henter behandlinger for bruk i fagsystem",
-        AuditLoggerEvent.ACCESS,
-        henteParam = HenteParam.FAGSYSTEM_OG_EKSTERN_FAGSAK_ID,
-    )
     fun hentBehandlingerForFagsystem(
         @PathVariable fagsystem: Fagsystem,
         @PathVariable eksternFagsakId: String,
-    ): Ressurs<List<Behandling>> = Ressurs.success(fagsakService.hentBehandlingerForFagsak(fagsystem, eksternFagsakId))
+    ): Ressurs<List<Behandling>> {
+        tilgangAdvice.validerTilgangFagsystemOgFagsakId(
+            fagsystem = fagsystem,
+            eksternFagsakId = eksternFagsakId,
+            minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+            auditLoggerEvent = AuditLoggerEvent.ACCESS,
+            handling = "Henter behandlinger for bruk i fagsystem",
+        )
+        return Ressurs.success(fagsakService.hentBehandlingerForFagsak(fagsystem, eksternFagsakId))
+    }
 
     @Operation(summary = "Hent behandlinger, kalles av fagsystem")
     @GetMapping(
         path = ["/fagsystem/{fagsystem}/fagsak/{eksternFagsakId}/vedtak/v1"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        minimumBehandlerrolle = Behandlerrolle.VEILEDER,
-        handling = "Henter behandlinger for bruk i fagsystem",
-        AuditLoggerEvent.ACCESS,
-        henteParam = HenteParam.FAGSYSTEM_OG_EKSTERN_FAGSAK_ID,
-    )
     fun hentVedtakForFagsystem(
         @PathVariable fagsystem: Fagsystem,
         @PathVariable eksternFagsakId: String,
-    ): Ressurs<List<FagsystemVedtak>> = Ressurs.success(fagsakService.hentVedtakForFagsak(fagsystem, eksternFagsakId))
+    ): Ressurs<List<FagsystemVedtak>> {
+        tilgangAdvice.validerTilgangFagsystemOgFagsakId(
+            fagsystem = fagsystem,
+            eksternFagsakId = eksternFagsakId,
+            minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+            auditLoggerEvent = AuditLoggerEvent.ACCESS,
+            handling = "Henter behandlinger for bruk i fagsystem",
+        )
+        return Ressurs.success(fagsakService.hentVedtakForFagsak(fagsystem, eksternFagsakId))
+    }
 }
