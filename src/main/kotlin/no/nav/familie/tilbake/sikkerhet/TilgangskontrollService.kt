@@ -23,7 +23,7 @@ import java.math.BigInteger
 import java.util.UUID
 
 @Configuration
-class TilgangAdvice(
+class TilgangskontrollService(
     private val rolleConfig: RolleConfig,
     private val fagsakRepository: FagsakRepository,
     private val behandlingRepository: BehandlingRepository,

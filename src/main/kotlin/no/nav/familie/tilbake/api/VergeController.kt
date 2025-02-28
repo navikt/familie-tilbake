@@ -6,7 +6,7 @@ import no.nav.familie.tilbake.behandling.VergeService
 import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.TilgangAdvice
+import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
@@ -24,14 +24,14 @@ import java.util.UUID
 @Validated
 class VergeController(
     private val vergeService: VergeService,
-    private val tilgangAdvice: TilgangAdvice,
+    private val tilgangskontrollService: TilgangskontrollService,
 ) {
     @Operation(summary = "Opprett verge steg på behandling")
     @PostMapping
     fun opprettVergeSteg(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<String> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
             auditLoggerEvent = AuditLoggerEvent.CREATE,
@@ -46,7 +46,7 @@ class VergeController(
     fun fjernVerge(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<String> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
             auditLoggerEvent = AuditLoggerEvent.UPDATE,
@@ -61,7 +61,7 @@ class VergeController(
     fun hentVerge(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<VergeDto?> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId,
             Behandlerrolle.VEILEDER,
             AuditLoggerEvent.ACCESS,

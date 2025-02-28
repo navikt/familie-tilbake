@@ -12,7 +12,7 @@ import no.nav.familie.tilbake.kontrakter.tilbakekreving.KanBehandlingOpprettesMa
 import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.TilgangAdvice
+import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 class FagsakController(
     private val fagsakService: FagsakService,
-    private val tilgangAdvice: TilgangAdvice,
+    private val tilgangskontrollService: TilgangskontrollService,
 ) {
     @Operation(summary = "Hent fagsak informasjon med bruker og behandlinger")
     @GetMapping(
@@ -38,7 +38,7 @@ class FagsakController(
         @PathVariable fagsystem: Fagsystem,
         @PathVariable eksternFagsakId: String,
     ): Ressurs<FagsakDto> {
-        tilgangAdvice.validerTilgangFagsystemOgFagsakId(
+        tilgangskontrollService.validerTilgangFagsystemOgFagsakId(
             fagsystem = fagsystem,
             eksternFagsakId = eksternFagsakId,
             minimumBehandlerrolle = Behandlerrolle.VEILEDER,
@@ -57,7 +57,7 @@ class FagsakController(
         @PathVariable fagsystem: Fagsystem,
         @PathVariable eksternFagsakId: String,
     ): Ressurs<FinnesBehandlingResponse> {
-        tilgangAdvice.validerTilgangFagsystemOgFagsakId(
+        tilgangskontrollService.validerTilgangFagsystemOgFagsakId(
             fagsystem = fagsystem,
             eksternFagsakId = eksternFagsakId,
             minimumBehandlerrolle = Behandlerrolle.VEILEDER,
@@ -81,7 +81,7 @@ class FagsakController(
         @PathVariable ytelsestype: Ytelsestype,
         @PathVariable eksternFagsakId: String,
     ): Ressurs<KanBehandlingOpprettesManueltRespons> {
-        tilgangAdvice.validerTilgangYtelsetypeOgFagsakId(
+        tilgangskontrollService.validerTilgangYtelsetypeOgFagsakId(
             ytelsestype = ytelsestype,
             eksternFagsakId = eksternFagsakId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
@@ -100,7 +100,7 @@ class FagsakController(
         @PathVariable fagsystem: Fagsystem,
         @PathVariable eksternFagsakId: String,
     ): Ressurs<List<Behandling>> {
-        tilgangAdvice.validerTilgangFagsystemOgFagsakId(
+        tilgangskontrollService.validerTilgangFagsystemOgFagsakId(
             fagsystem = fagsystem,
             eksternFagsakId = eksternFagsakId,
             minimumBehandlerrolle = Behandlerrolle.VEILEDER,
@@ -119,7 +119,7 @@ class FagsakController(
         @PathVariable fagsystem: Fagsystem,
         @PathVariable eksternFagsakId: String,
     ): Ressurs<List<FagsystemVedtak>> {
-        tilgangAdvice.validerTilgangFagsystemOgFagsakId(
+        tilgangskontrollService.validerTilgangFagsystemOgFagsakId(
             fagsystem = fagsystem,
             eksternFagsakId = eksternFagsakId,
             minimumBehandlerrolle = Behandlerrolle.VEILEDER,

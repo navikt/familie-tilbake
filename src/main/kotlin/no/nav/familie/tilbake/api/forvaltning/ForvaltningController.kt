@@ -12,7 +12,7 @@ import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.TilgangAdvice
+import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
@@ -40,7 +40,7 @@ class ForvaltningController(
     private val oppgaveTaskService: OppgaveTaskService,
     private val behandlingTilstandService: BehandlingTilstandService,
     private val logService: LogService,
-    private val tilgangAdvice: TilgangAdvice,
+    private val tilgangskontrollService: TilgangskontrollService,
 ) {
     @Operation(summary = "Hent korrigert kravgrunnlag")
     @PutMapping(
@@ -51,7 +51,7 @@ class ForvaltningController(
         @PathVariable behandlingId: UUID,
         @PathVariable eksternKravgrunnlagId: BigInteger,
     ): Ressurs<String> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.FORVALTER,
             auditLoggerEvent = AuditLoggerEvent.NONE,
@@ -69,7 +69,7 @@ class ForvaltningController(
     fun korrigerKravgrunnlag(
         @PathVariable behandlingId: UUID,
     ): Ressurs<String> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.FORVALTER,
             auditLoggerEvent = AuditLoggerEvent.NONE,
@@ -87,7 +87,7 @@ class ForvaltningController(
     fun arkiverMottattKravgrunnlag(
         @PathVariable mottattXmlId: UUID,
     ): Ressurs<String> {
-        tilgangAdvice.validerTilgangMottattXMLId(
+        tilgangskontrollService.validerTilgangMottattXMLId(
             mottattXmlId = mottattXmlId,
             minimumBehandlerrolle = Behandlerrolle.FORVALTER,
             auditLoggerEvent = AuditLoggerEvent.NONE,
@@ -105,7 +105,7 @@ class ForvaltningController(
     fun tvingHenleggBehandling(
         @PathVariable behandlingId: UUID,
     ): Ressurs<String> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.FORVALTER,
             auditLoggerEvent = AuditLoggerEvent.NONE,
@@ -123,7 +123,7 @@ class ForvaltningController(
     fun flyttBehandlingTilFakta(
         @PathVariable behandlingId: UUID,
     ): Ressurs<String> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.FORVALTER,
             auditLoggerEvent = AuditLoggerEvent.UPDATE,
@@ -141,7 +141,7 @@ class ForvaltningController(
     fun annulerKravgrunnlag(
         @PathVariable eksternKravgrunnlagId: BigInteger,
     ): Ressurs<String> {
-        tilgangAdvice.validerTilgangKravgrunnlagId(
+        tilgangskontrollService.validerTilgangKravgrunnlagId(
             eksternKravgrunnlagId = eksternKravgrunnlagId,
             minimumBehandlerrolle = Behandlerrolle.FORVALTER,
             auditLoggerEvent = AuditLoggerEvent.NONE,
@@ -160,7 +160,7 @@ class ForvaltningController(
         @PathVariable ytelsestype: Ytelsestype,
         @PathVariable eksternFagsakId: String,
     ): Ressurs<List<Behandlingsinfo>> {
-        tilgangAdvice.validerTilgangYtelsetypeOgFagsakId(
+        tilgangskontrollService.validerTilgangYtelsetypeOgFagsakId(
             ytelsestype = ytelsestype,
             eksternFagsakId = eksternFagsakId,
             minimumBehandlerrolle = Behandlerrolle.FORVALTER,
@@ -179,7 +179,7 @@ class ForvaltningController(
         @PathVariable ytelsestype: Ytelsestype,
         @PathVariable eksternFagsakId: String,
     ): Ressurs<List<Kravgrunnlagsinfo>> {
-        tilgangAdvice.validerTilgangYtelsetypeOgFagsakId(
+        tilgangskontrollService.validerTilgangYtelsetypeOgFagsakId(
             ytelsestype = ytelsestype,
             eksternFagsakId = eksternFagsakId,
             minimumBehandlerrolle = Behandlerrolle.FORVALTER,

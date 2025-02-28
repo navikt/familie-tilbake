@@ -7,7 +7,7 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.TilgangAdvice
+import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
@@ -23,7 +23,7 @@ import java.util.UUID
 @Validated
 class FaktaFeilutbetalingController(
     val faktaFeilutbetalingService: FaktaFeilutbetalingService,
-    private val tilgangAdvice: TilgangAdvice,
+    private val tilgangskontrollService: TilgangskontrollService,
 ) {
     @Operation(summary = "Hent fakta om feilutbetaling")
     @GetMapping(
@@ -35,7 +35,7 @@ class FaktaFeilutbetalingController(
         @PathVariable("behandlingId")
         behandlingId: UUID,
     ): Ressurs<FaktaFeilutbetalingDto> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId,
             Behandlerrolle.VEILEDER,
             AuditLoggerEvent.ACCESS,
@@ -54,7 +54,7 @@ class FaktaFeilutbetalingController(
         @PathVariable("behandlingId")
         behandlingId: UUID,
     ): Ressurs<List<FaktaFeilutbetalingDto>> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.VEILEDER,
             auditLoggerEvent = AuditLoggerEvent.ACCESS,

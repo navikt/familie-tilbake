@@ -5,7 +5,7 @@ import no.nav.familie.tilbake.api.dto.VurdertVilkårsvurderingDto
 import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.TilgangAdvice
+import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -22,7 +22,7 @@ import java.util.UUID
 @Validated
 class VilkårsvurderingController(
     val vilkårsvurderingService: VilkårsvurderingService,
-    private val tilgangAdvice: TilgangAdvice,
+    private val tilgangskontrollService: TilgangskontrollService,
 ) {
     @Operation(summary = "Hent vilkårsvurdering")
     @GetMapping(
@@ -32,7 +32,7 @@ class VilkårsvurderingController(
     fun hentVurdertVilkårsvurdering(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<VurdertVilkårsvurderingDto> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.VEILEDER,
             auditLoggerEvent = AuditLoggerEvent.ACCESS,
@@ -49,7 +49,7 @@ class VilkårsvurderingController(
     fun hentInaktivVilkårsvurdering(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<List<VurdertVilkårsvurderingDto>> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.VEILEDER,
             auditLoggerEvent = AuditLoggerEvent.ACCESS,

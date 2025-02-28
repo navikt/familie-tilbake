@@ -22,8 +22,8 @@ import no.nav.familie.tilbake.kontrakter.tilbakekreving.OpprettTilbakekrevingReq
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.TilgangAdvice
 import no.nav.familie.tilbake.sikkerhet.TilgangService
+import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -47,7 +47,7 @@ class BehandlingController(
     private val forvaltningService: ForvaltningService,
     private val behandlingskontrollService: BehandlingskontrollService,
     private val tilgangService: TilgangService,
-    private val tilgangAdvice: TilgangAdvice,
+    private val tilgangskontrollService: TilgangskontrollService,
 ) {
     @Operation(summary = "Opprett tilbakekrevingsbehandling automatisk, kan kalles av fagsystem, batch")
     @PostMapping(
@@ -59,7 +59,7 @@ class BehandlingController(
         @Valid @RequestBody
         opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
     ): Ressurs<String> {
-        tilgangAdvice.validerTilgangFagsystemOgFagsakId(
+        tilgangskontrollService.validerTilgangFagsystemOgFagsakId(
             fagsystem = opprettTilbakekrevingRequest.fagsystem,
             eksternFagsakId = opprettTilbakekrevingRequest.eksternFagsakId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
@@ -80,7 +80,7 @@ class BehandlingController(
         @Valid @RequestBody
         opprettManueltTilbakekrevingRequest: OpprettManueltTilbakekrevingRequest,
     ): Ressurs<String> {
-        tilgangAdvice.validerTilgangYtelsetypeOgFagsakId(
+        tilgangskontrollService.validerTilgangYtelsetypeOgFagsakId(
             ytelsestype = opprettManueltTilbakekrevingRequest.ytelsestype,
             eksternFagsakId = opprettManueltTilbakekrevingRequest.eksternFagsakId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
@@ -101,7 +101,7 @@ class BehandlingController(
         @Valid @RequestBody
         opprettRevurderingDto: OpprettRevurderingDto,
     ): Ressurs<String> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = opprettRevurderingDto.originalBehandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
             auditLoggerEvent = AuditLoggerEvent.CREATE,
@@ -119,7 +119,7 @@ class BehandlingController(
     fun hentBehandling(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<BehandlingDto> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.VEILEDER,
             auditLoggerEvent = AuditLoggerEvent.ACCESS,
@@ -138,7 +138,7 @@ class BehandlingController(
         @Valid @RequestBody
         behandlingsstegDto: BehandlingsstegDto,
     ): Ressurs<String> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle =
                 if (behandlingsstegDto is BehandlingsstegFatteVedtaksstegDto) {
@@ -170,7 +170,7 @@ class BehandlingController(
         @Valid @RequestBody
         behandlingPåVentDto: BehandlingPåVentDto,
     ): Ressurs<String> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
             auditLoggerEvent = AuditLoggerEvent.UPDATE,
@@ -188,7 +188,7 @@ class BehandlingController(
     fun taBehandlingAvVent(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<String> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
             auditLoggerEvent = AuditLoggerEvent.UPDATE,
@@ -208,7 +208,7 @@ class BehandlingController(
         @Valid @RequestBody
         henleggelsesbrevFritekstDto: HenleggelsesbrevFritekstDto,
     ): Ressurs<String> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
             auditLoggerEvent = AuditLoggerEvent.UPDATE,
@@ -228,7 +228,7 @@ class BehandlingController(
         @Valid @RequestBody
         byttEnhetDto: ByttEnhetDto,
     ): Ressurs<String> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
             auditLoggerEvent = AuditLoggerEvent.UPDATE,
@@ -246,7 +246,7 @@ class BehandlingController(
     fun angreSendTilBeslutter(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<String> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
             auditLoggerEvent = AuditLoggerEvent.UPDATE,
@@ -264,7 +264,7 @@ class BehandlingController(
     fun flyttBehandlingTilFakta(
         @PathVariable behandlingId: UUID,
     ): Ressurs<String> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
             auditLoggerEvent = AuditLoggerEvent.UPDATE,

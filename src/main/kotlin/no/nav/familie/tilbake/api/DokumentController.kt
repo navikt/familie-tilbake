@@ -17,7 +17,7 @@ import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.kontrakter.tilbakekreving.ForhåndsvisVarselbrevRequest
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.TilgangAdvice
+import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
@@ -37,7 +37,7 @@ class DokumentController(
     private val henleggelsesbrevService: HenleggelsesbrevService,
     private val vedtaksbrevService: VedtaksbrevService,
     private val lagreUtkastVedtaksbrevService: LagreUtkastVedtaksbrevService,
-    private val tilgangAdvice: TilgangAdvice,
+    private val tilgangskontrollService: TilgangskontrollService,
 ) {
     @Operation(summary = "Bestill brevsending")
     @PostMapping("/bestill")
@@ -45,7 +45,7 @@ class DokumentController(
         @RequestBody @Valid
         bestillBrevDto: BestillBrevDto,
     ): Ressurs<Nothing?> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = bestillBrevDto.behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
             auditLoggerEvent = AuditLoggerEvent.CREATE,
@@ -62,7 +62,7 @@ class DokumentController(
         @RequestBody @Valid
         bestillBrevDto: BestillBrevDto,
     ): Ressurs<ByteArray> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = bestillBrevDto.behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
             auditLoggerEvent = AuditLoggerEvent.ACCESS,
@@ -86,7 +86,7 @@ class DokumentController(
         @Valid @RequestBody
         forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest,
     ): ByteArray {
-        tilgangAdvice.validerTilgangFagsystemOgFagsakId(
+        tilgangskontrollService.validerTilgangFagsystemOgFagsakId(
             fagsystem = forhåndsvisVarselbrevRequest.fagsystem,
             eksternFagsakId = forhåndsvisVarselbrevRequest.eksternFagsakId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
@@ -105,7 +105,7 @@ class DokumentController(
         @Valid @RequestBody
         dto: ForhåndsvisningHenleggelsesbrevDto,
     ): Ressurs<ByteArray> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = dto.behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
             auditLoggerEvent = AuditLoggerEvent.ACCESS,
@@ -123,7 +123,7 @@ class DokumentController(
         @Valid @RequestBody
         hentForhåndsvisningVedtaksbrevRequest: HentForhåndvisningVedtaksbrevPdfDto,
     ): Ressurs<ByteArray> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = hentForhåndsvisningVedtaksbrevRequest.behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
             auditLoggerEvent = AuditLoggerEvent.ACCESS,
@@ -140,7 +140,7 @@ class DokumentController(
     fun hentVedtaksbrevtekst(
         @PathVariable behandlingId: UUID,
     ): Ressurs<List<Avsnitt>> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.VEILEDER,
             auditLoggerEvent = AuditLoggerEvent.ACCESS,
@@ -158,7 +158,7 @@ class DokumentController(
         @PathVariable behandlingId: UUID,
         @RequestBody fritekstavsnitt: FritekstavsnittDto,
     ): Ressurs<String> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
             auditLoggerEvent = AuditLoggerEvent.UPDATE,

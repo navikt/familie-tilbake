@@ -9,7 +9,7 @@ import no.nav.familie.tilbake.kontrakter.Datoperiode
 import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.TilgangAdvice
+import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
@@ -27,7 +27,7 @@ import java.util.UUID
 @Validated
 class BeregningController(
     val tilbakekrevingsberegningService: TilbakekrevingsberegningService,
-    private val tilgangAdvice: TilgangAdvice,
+    private val tilgangskontrollService: TilgangskontrollService,
 ) {
     @Operation(summary = "Beregn feilutbetalt beløp for nye delte perioder")
     @PostMapping(
@@ -39,7 +39,7 @@ class BeregningController(
         @Valid @RequestBody
         perioder: List<Datoperiode>,
     ): Ressurs<BeregnetPerioderDto> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
             auditLoggerEvent = AuditLoggerEvent.ACCESS,
@@ -56,7 +56,7 @@ class BeregningController(
     fun hentBeregningsresultat(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<BeregningsresultatDto> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.VEILEDER,
             auditLoggerEvent = AuditLoggerEvent.ACCESS,

@@ -5,7 +5,7 @@ import no.nav.familie.tilbake.forvaltning.ForvaltningPreprodService
 import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.TilgangAdvice
+import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.context.annotation.Profile
 import org.springframework.core.env.Environment
@@ -28,7 +28,7 @@ import java.util.UUID
 class ForvaltningPreprodController(
     private val environment: Environment,
     private val forvaltningPreprodService: ForvaltningPreprodService,
-    private val tilgangAdvice: TilgangAdvice,
+    private val tilgangskontrollService: TilgangskontrollService,
 ) {
     @Operation(
         description =
@@ -53,7 +53,7 @@ class ForvaltningPreprodController(
         @PathVariable behandlingId: UUID,
         @RequestBody kravgrunnlag: String,
     ): Ressurs<String> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.FORVALTER,
             auditLoggerEvent = AuditLoggerEvent.NONE,

@@ -9,7 +9,7 @@ import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBre
 import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.TilgangAdvice
+import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
@@ -29,7 +29,7 @@ import java.util.UUID
 @Validated
 class ManuellBrevmottakerController(
     private val manuellBrevmottakerService: ManuellBrevmottakerService,
-    private val tilgangAdvice: TilgangAdvice,
+    private val tilgangskontrollService: TilgangskontrollService,
 ) {
     @Operation(summary = "Legger til brevmottaker manuelt")
     @PostMapping(
@@ -42,7 +42,7 @@ class ManuellBrevmottakerController(
         @Valid @RequestBody
         manuellBrevmottakerRequestDto: ManuellBrevmottakerRequestDto,
     ): Ressurs<UUID> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
             auditLoggerEvent = AuditLoggerEvent.CREATE,
@@ -60,7 +60,7 @@ class ManuellBrevmottakerController(
     fun hentManuellBrevmottakere(
         @PathVariable behandlingId: UUID,
     ): Ressurs<List<ManuellBrevmottakerResponsDto>> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
             auditLoggerEvent = AuditLoggerEvent.ACCESS,
@@ -86,7 +86,7 @@ class ManuellBrevmottakerController(
         @Valid @RequestBody
         manuellBrevmottakerRequestDto: ManuellBrevmottakerRequestDto,
     ): Ressurs<String> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
             auditLoggerEvent = AuditLoggerEvent.UPDATE,
@@ -102,7 +102,7 @@ class ManuellBrevmottakerController(
         @PathVariable behandlingId: UUID,
         @PathVariable manuellBrevmottakerId: UUID,
     ): Ressurs<String> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
             auditLoggerEvent = AuditLoggerEvent.UPDATE,
@@ -117,7 +117,7 @@ class ManuellBrevmottakerController(
     fun opprettBrevmottakerSteg(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<String> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
             auditLoggerEvent = AuditLoggerEvent.CREATE,
@@ -132,7 +132,7 @@ class ManuellBrevmottakerController(
     fun fjernBrevmottakerSteg(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<String> {
-        tilgangAdvice.validerTilgangBehandlingID(
+        tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
             auditLoggerEvent = AuditLoggerEvent.UPDATE,

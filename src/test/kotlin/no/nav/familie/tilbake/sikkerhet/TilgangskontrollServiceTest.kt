@@ -51,7 +51,7 @@ import java.util.Calendar
         "rolle.teamfamilie.forvalter = familie123",
     ],
 )
-internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
+internal class TilgangskontrollServiceTest : OppslagSpringRunnerTest() {
     companion object {
         const val BARNETRYGD_BESLUTTER_ROLLE = "bb123"
         const val BARNETRYGD_SAKSBEHANDLER_ROLLE = "bs123"
@@ -68,7 +68,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         RequestContextHolder.currentRequestAttributes().removeAttribute(SpringTokenValidationContextHolder::class.java.name, 0)
     }
 
-    private lateinit var tilgangAdvice: TilgangAdvice
+    private lateinit var tilgangskontrollService: TilgangskontrollService
 
     @Autowired
     private lateinit var rolleConfig: RolleConfig
@@ -94,8 +94,8 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        tilgangAdvice =
-            TilgangAdvice(
+        tilgangskontrollService =
+            TilgangskontrollService(
                 rolleConfig,
                 fagsakRepository,
                 behandlingRepository,
@@ -134,7 +134,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf(BARNETRYGD_BESLUTTER_ROLLE))
         opprettRequestContext(token)
 
-        val exception = shouldThrow<RuntimeException> { tilgangAdvice.validerTilgangBehandlingID(behandling.id, Behandlerrolle.VEILEDER, AuditLoggerEvent.ACCESS, "test") }
+        val exception = shouldThrow<RuntimeException> { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.VEILEDER, AuditLoggerEvent.ACCESS, "test") }
         exception.message shouldBe "abc har ikke tilgang til person i test"
     }
 
@@ -144,7 +144,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf(BARNETRYGD_BESLUTTER_ROLLE))
         opprettRequestContext(token)
 
-        shouldNotThrowAny { tilgangAdvice.validerTilgangBehandlingID(behandling.id, Behandlerrolle.VEILEDER, AuditLoggerEvent.ACCESS, "test") }
+        shouldNotThrowAny { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.VEILEDER, AuditLoggerEvent.ACCESS, "test") }
     }
 
     @Test
@@ -155,7 +155,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
 
         val exception =
             shouldThrow<RuntimeException> {
-                tilgangAdvice.validerTilgangBehandlingID(behandling.id, Behandlerrolle.VEILEDER, AuditLoggerEvent.ACCESS, "test")
+                tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.VEILEDER, AuditLoggerEvent.ACCESS, "test")
             }
         exception.message shouldBe "abc har ikke tilgang til test"
     }
@@ -168,7 +168,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
 
         val exception =
             shouldThrow<RuntimeException> {
-                tilgangAdvice.validerTilgangBehandlingID(behandling.id, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test")
+                tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test")
             }
         exception.message shouldBe "abc med rolle VEILEDER har ikke tilgang til å test. Krever ${Behandlerrolle.SAKSBEHANDLER}."
     }
@@ -179,7 +179,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf(BARNETRYGD_BESLUTTER_ROLLE, BARNETRYGD_VEILEDER_ROLLE))
         opprettRequestContext(token)
 
-        shouldNotThrowAny { tilgangAdvice.validerTilgangBehandlingID(behandling.id, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test") }
+        shouldNotThrowAny { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test") }
     }
 
     @Test
@@ -188,7 +188,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf(ENSLIG_SAKSBEHANDLER_ROLLE, BARNETRYGD_SAKSBEHANDLER_ROLLE))
         opprettRequestContext(token)
 
-        shouldNotThrowAny { tilgangAdvice.validerTilgangBehandlingID(behandling.id, Behandlerrolle.VEILEDER, AuditLoggerEvent.ACCESS, "test") }
+        shouldNotThrowAny { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.VEILEDER, AuditLoggerEvent.ACCESS, "test") }
     }
 
     @Test
@@ -197,7 +197,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val token = opprettToken(Constants.BRUKER_ID_VEDTAKSLØSNINGEN, listOf())
         opprettRequestContext(token)
 
-        shouldNotThrowAny { tilgangAdvice.validerTilgangBehandlingID(behandling.id, Behandlerrolle.VEILEDER, AuditLoggerEvent.ACCESS, "test") }
+        shouldNotThrowAny { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.VEILEDER, AuditLoggerEvent.ACCESS, "test") }
     }
 
     @Test
@@ -208,7 +208,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
 
         val exception =
             shouldThrow<RuntimeException> {
-                tilgangAdvice.validerTilgangBehandlingID(behandling.id, Behandlerrolle.VEILEDER, AuditLoggerEvent.ACCESS, "test")
+                tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.VEILEDER, AuditLoggerEvent.ACCESS, "test")
             }
         exception.message shouldBe "Bruker har mangler tilgang til test"
     }
@@ -219,7 +219,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE))
         opprettRequestContext(token)
 
-        shouldNotThrowAny { tilgangAdvice.validerTilgangBehandlingID(behandling.id, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test") }
+        shouldNotThrowAny { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test") }
     }
 
     @Test
@@ -228,7 +228,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf(BARNETRYGD_BESLUTTER_ROLLE))
         opprettRequestContext(token)
 
-        shouldNotThrowAny { tilgangAdvice.validerTilgangBehandlingID(behandling.id, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test") }
+        shouldNotThrowAny { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test") }
     }
 
     @Test
@@ -237,7 +237,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf(TEAMFAMILIE_FORVALTER_ROLLE))
         opprettRequestContext(token)
 
-        val exception = shouldThrow<RuntimeException> { tilgangAdvice.validerTilgangBehandlingID(behandling.id, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test") }
+        val exception = shouldThrow<RuntimeException> { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test") }
         exception.message shouldBe "abc med rolle FORVALTER har ikke tilgang til å test. Krever ${Behandlerrolle.SAKSBEHANDLER}."
     }
 
@@ -247,7 +247,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE))
         opprettRequestContext(token)
 
-        val exception = shouldThrow<RuntimeException> { tilgangAdvice.validerTilgangBehandlingID(behandling.id, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
+        val exception = shouldThrow<RuntimeException> { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
         exception.message shouldBe "abc med rolle SAKSBEHANDLER har ikke tilgang til å kalle forvaltningstjeneste test. Krever ${Behandlerrolle.FORVALTER}."
     }
 
@@ -257,7 +257,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE, TEAMFAMILIE_FORVALTER_ROLLE))
         opprettRequestContext(token)
 
-        shouldNotThrowAny { tilgangAdvice.validerTilgangBehandlingID(behandling.id, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
+        shouldNotThrowAny { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
     }
 
     @Test
@@ -266,7 +266,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE, TEAMFAMILIE_FORVALTER_ROLLE))
         opprettRequestContext(token)
 
-        shouldNotThrowAny { tilgangAdvice.validerTilgangBehandlingID(behandling.id, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test") }
+        shouldNotThrowAny { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test") }
     }
 
     @Test
@@ -275,7 +275,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf(TEAMFAMILIE_FORVALTER_ROLLE))
         opprettRequestContext(token)
 
-        shouldNotThrowAny { tilgangAdvice.validerTilgangBehandlingID(behandling.id, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
+        shouldNotThrowAny { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
     }
 
     @Test
@@ -284,7 +284,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val økonomiXmlMottatt = mottattXmlRepository.insert(Testdata.økonomiXmlMottatt)
         opprettRequestContext(token)
 
-        shouldNotThrowAny { tilgangAdvice.validerTilgangMottattXMLId(økonomiXmlMottatt.id, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
+        shouldNotThrowAny { tilgangskontrollService.validerTilgangMottattXMLId(økonomiXmlMottatt.id, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
     }
 
     @Test
@@ -293,7 +293,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val økonomiXmlMottatt = mottattXmlRepository.insert(Testdata.økonomiXmlMottatt)
         opprettRequestContext(token)
 
-        shouldNotThrowAny { tilgangAdvice.validerTilgangKravgrunnlagId(økonomiXmlMottatt.eksternKravgrunnlagId!!, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
+        shouldNotThrowAny { tilgangskontrollService.validerTilgangKravgrunnlagId(økonomiXmlMottatt.eksternKravgrunnlagId!!, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
     }
 
     @Test
@@ -302,7 +302,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE))
         opprettRequestContext(token)
 
-        tilgangAdvice.validerTilgangYtelsetypeOgFagsakId(Ytelsestype.BARNETRYGD, fagsak.eksternFagsakId, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test")
+        tilgangskontrollService.validerTilgangYtelsetypeOgFagsakId(Ytelsestype.BARNETRYGD, fagsak.eksternFagsakId, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test")
 
         verify { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232"), any()) }
     }
@@ -313,7 +313,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE))
         opprettRequestContext(token)
 
-        tilgangAdvice.validerTilgangFagsystemOgFagsakId(Fagsystem.BA, fagsak.eksternFagsakId, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test")
+        tilgangskontrollService.validerTilgangFagsystemOgFagsakId(Fagsystem.BA, fagsak.eksternFagsakId, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test")
 
         verify { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232"), any()) }
     }
