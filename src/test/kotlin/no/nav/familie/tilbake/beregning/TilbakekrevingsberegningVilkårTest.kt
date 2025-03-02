@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.beregning
 
-import com.google.common.collect.Lists
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
 import no.nav.familie.tilbake.beregning.modell.FordeltKravgrunnlagsbeløp
 import no.nav.familie.tilbake.beregning.modell.GrunnlagsperiodeMedSkatteprosent
@@ -74,7 +73,7 @@ class TilbakekrevingsberegningVilkårTest {
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
                     feilutbetalt = feilUtbetaltBeløp,
-                    perioderMedSkatteprosent = Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
+                    perioderMedSkatteprosent = listOf(grunnlagsperiodeMedSkatteprosent),
                     beregnRenter = true,
                 )
 
@@ -103,7 +102,7 @@ class TilbakekrevingsberegningVilkårTest {
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
                     feilutbetalt = feilUtbetaltBeløp,
-                    perioderMedSkatteprosent = Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
+                    perioderMedSkatteprosent = listOf(grunnlagsperiodeMedSkatteprosent),
                     beregnRenter = true,
                 )
 
@@ -139,7 +138,7 @@ class TilbakekrevingsberegningVilkårTest {
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
                     feilutbetalt = feilUtbetaltBeløp,
-                    perioderMedSkatteprosent = Lists.newArrayList(grunnlagPeriodeMedSkattProsent),
+                    perioderMedSkatteprosent = listOf(grunnlagPeriodeMedSkattProsent),
                     beregnRenter = true,
                 )
 
@@ -173,7 +172,7 @@ class TilbakekrevingsberegningVilkårTest {
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
                     feilutbetalt = feilUtbetaltBeløp,
-                    perioderMedSkatteprosent = Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
+                    perioderMedSkatteprosent = listOf(grunnlagsperiodeMedSkatteprosent),
                     beregnRenter = true,
                 )
 
@@ -204,7 +203,7 @@ class TilbakekrevingsberegningVilkårTest {
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
                     feilutbetalt = feilUtbetaltBeløp,
-                    perioderMedSkatteprosent = Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
+                    perioderMedSkatteprosent = listOf(grunnlagsperiodeMedSkatteprosent),
                     beregnRenter = true,
                 )
 
@@ -235,7 +234,7 @@ class TilbakekrevingsberegningVilkårTest {
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
                     feilutbetalt = feilUtbetaltBeløp,
-                    perioderMedSkatteprosent = Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
+                    perioderMedSkatteprosent = listOf(grunnlagsperiodeMedSkatteprosent),
                     beregnRenter = true,
                 )
 
@@ -268,7 +267,7 @@ class TilbakekrevingsberegningVilkårTest {
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
                     feilutbetalt = feilUtbetaltBeløp,
-                    perioderMedSkatteprosent = Lists.newArrayList(grunnlagPeriodeMedSkattProsent),
+                    perioderMedSkatteprosent = listOf(grunnlagPeriodeMedSkattProsent),
                     beregnRenter = true,
                 )
 
@@ -304,7 +303,7 @@ class TilbakekrevingsberegningVilkårTest {
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
                     feilutbetalt = feilUtbetaltBeløp,
-                    perioderMedSkatteprosent = Lists.newArrayList(grunnlagPeriodeMedSkattProsent),
+                    perioderMedSkatteprosent = listOf(grunnlagPeriodeMedSkattProsent),
                     beregnRenter = false,
                 )
 
@@ -380,7 +379,7 @@ class TilbakekrevingsberegningVilkårTest {
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
                     feilutbetalt = feilUtbetaltBeløp,
-                    perioderMedSkatteprosent = Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
+                    perioderMedSkatteprosent = listOf(grunnlagsperiodeMedSkatteprosent),
                     beregnRenter = true,
                 )
 
@@ -411,7 +410,7 @@ class TilbakekrevingsberegningVilkårTest {
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
                     feilutbetalt = feilUtbetaltBeløp,
-                    perioderMedSkatteprosent = Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
+                    perioderMedSkatteprosent = listOf(grunnlagsperiodeMedSkatteprosent),
                     beregnRenter = true,
                 )
 
@@ -444,7 +443,7 @@ class TilbakekrevingsberegningVilkårTest {
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
                     feilutbetalt = feilUtbetaltBeløp,
-                    perioderMedSkatteprosent = Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
+                    perioderMedSkatteprosent = listOf(grunnlagsperiodeMedSkatteprosent),
                     beregnRenter = true,
                 )
 
@@ -475,7 +474,7 @@ class TilbakekrevingsberegningVilkårTest {
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
                     feilutbetalt = feilUtbetaltBeløp,
-                    perioderMedSkatteprosent = Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
+                    perioderMedSkatteprosent = listOf(grunnlagsperiodeMedSkatteprosent),
                     beregnRenter = true,
                 )
 
@@ -509,7 +508,7 @@ class TilbakekrevingsberegningVilkårTest {
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
                     feilutbetalt = feilUtbetaltBeløp,
-                    perioderMedSkatteprosent = Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
+                    perioderMedSkatteprosent = listOf(grunnlagsperiodeMedSkatteprosent),
                     beregnRenter = true,
                 )
 
@@ -543,7 +542,7 @@ class TilbakekrevingsberegningVilkårTest {
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
                     feilutbetalt = feilUtbetaltBeløp,
-                    perioderMedSkatteprosent = Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
+                    perioderMedSkatteprosent = listOf(grunnlagsperiodeMedSkatteprosent),
                     beregnRenter = true,
                 )
 
@@ -581,7 +580,7 @@ class TilbakekrevingsberegningVilkårTest {
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
                     feilutbetalt = feilutbetaltBeløp,
-                    perioderMedSkatteprosent = Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
+                    perioderMedSkatteprosent = listOf(grunnlagsperiodeMedSkatteprosent),
                     beregnRenter = true,
                 )
 

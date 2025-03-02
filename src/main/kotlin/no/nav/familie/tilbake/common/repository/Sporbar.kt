@@ -8,7 +8,8 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
 data class Sporbar(
-    val opprettetAv: String = ContextService.hentSaksbehandler(SecureLog.Context.tom()), // TODO
+    // TODO
+    val opprettetAv: String = ContextService.hentSaksbehandler(SecureLog.Context.tom()),
     val opprettetTid: LocalDateTime = SporbarUtils.now(),
     @LastModifiedBy
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
@@ -16,7 +17,8 @@ data class Sporbar(
 )
 
 data class Endret(
-    val endretAv: String = ContextService.hentSaksbehandler(SecureLog.Context.tom()), // TODO
+    // TODO
+    val endretAv: String = ContextService.hentSaksbehandler(SecureLog.Context.tom()),
     val endretTid: LocalDateTime = SporbarUtils.now(),
 )
 

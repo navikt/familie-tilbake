@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.kontrakter
 
-import no.nav.familie.tilbake.kontrakter.objectMapper
 import java.io.PrintWriter
 import java.io.StringWriter
 

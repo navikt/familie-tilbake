@@ -120,7 +120,7 @@ class ForvaltningControllerTest : OppslagSpringRunnerTest() {
             Fagsak(
                 ytelsestype = Ytelsestype.BARNETRYGD,
                 fagsystem = Fagsystem.EF,
-                eksternFagsakId = "testverdi",
+                eksternFagsakId = UUID.randomUUID().toString(),
                 bruker = Bruker(ident = "32132132111"),
             )
         val behandling = Testdata.lagBehandling(fagsakId = fagsak.id, ansvarligSaksbehandler = saksbehandler, behandlingStatus = behandlingStatus)

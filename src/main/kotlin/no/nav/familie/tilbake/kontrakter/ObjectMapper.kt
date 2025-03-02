@@ -23,7 +23,8 @@ val objectMapper: ObjectMapper
                 JavaTimeModule()
                     .addDeserializer(
                         YearMonth::class.java,
-                        YearMonthDeserializer(DateTimeFormatter.ofPattern("u-MM")), // Denne trengs for å parse år over 9999 riktig.
+                        // Denne trengs for å parse år over 9999 riktig.
+                        YearMonthDeserializer(DateTimeFormatter.ofPattern("u-MM")),
                     ),
             ).configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)

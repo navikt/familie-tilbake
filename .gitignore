@@ -1,5 +1,8 @@
 # Dev files
 *.iml
 target/
-.idea
+build/
+.idea/
+.gradle/
+.kotlin/
 .run
