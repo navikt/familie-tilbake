@@ -48,6 +48,7 @@ class VedtaksoppsummeringService(
             behandlingUuid = behandling.eksternBrukId,
             saksnummer = fagsak.eksternFagsakId,
             ytelsestype = fagsak.ytelsestype,
+            fagsystem = fagsak.fagsystem,
             ansvarligSaksbehandler = behandling.ansvarligSaksbehandler,
             ansvarligBeslutter = ansvarligBeslutter,
             behandlingstype = behandling.type,

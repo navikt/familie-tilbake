@@ -101,6 +101,7 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
         val tilstand = service.hentBehandlingensTilstand(behandling.id)
 
         tilstand.ytelsestype shouldBe Ytelsestype.BARNETRYGD
+        tilstand.fagsystem shouldBe Fagsystem.BA
         tilstand.saksnummer shouldBe "1234567"
         tilstand.behandlingUuid shouldBe behandling.eksternBrukId
         tilstand.referertFagsaksbehandling shouldBe behandling.aktivFagsystemsbehandling.eksternId
@@ -136,6 +137,7 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
         val tilstand = service.hentBehandlingensTilstand(behandling.id)
 
         tilstand.ytelsestype shouldBe Ytelsestype.BARNETRYGD
+        tilstand.fagsystem shouldBe Fagsystem.BA
         tilstand.saksnummer shouldBe "1234567"
         tilstand.behandlingUuid shouldBe behandling.eksternBrukId
         tilstand.referertFagsaksbehandling shouldBe behandling.aktivFagsystemsbehandling.eksternId
@@ -173,6 +175,7 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
         val tilstand = service.hentBehandlingensTilstand(behandling.id)
 
         tilstand.ytelsestype shouldBe Ytelsestype.BARNETRYGD
+        tilstand.fagsystem shouldBe Fagsystem.BA
         tilstand.saksnummer shouldBe Testdata.fagsak.eksternFagsakId
         tilstand.behandlingUuid shouldBe behandling.eksternBrukId
         tilstand.referertFagsaksbehandling shouldBe behandling.aktivFagsystemsbehandling.eksternId
@@ -211,6 +214,7 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
         val tilstand = service.hentBehandlingensTilstand(behandling.id)
 
         tilstand.ytelsestype shouldBe Ytelsestype.BARNETRYGD
+        tilstand.fagsystem shouldBe Fagsystem.BA
         tilstand.saksnummer shouldBe Testdata.fagsak.eksternFagsakId
         tilstand.behandlingUuid shouldBe behandling.eksternBrukId
         tilstand.referertFagsaksbehandling shouldBe behandling.aktivFagsystemsbehandling.eksternId
