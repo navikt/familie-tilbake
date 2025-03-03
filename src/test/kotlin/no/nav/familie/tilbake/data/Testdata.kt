@@ -70,18 +70,20 @@ object Testdata {
     private val bruker = Bruker(ident = "32132132111")
 
     @Deprecated("Bruk dynamisk fagsak opprettelse i stedet", replaceWith = ReplaceWith("fagsak()"))
-    val fagsak = fagsak()
+    val fagsak = fagsak("testverdi")
 
-    fun fagsak() = Fagsak(
-        ytelsestype = Ytelsestype.BARNETRYGD,
-        fagsystem = Fagsystem.BA,
-        eksternFagsakId = "testverdi",
-        bruker = bruker,
-    )
+    fun fagsak(eksternFagsakId: String = UUID.randomUUID().toString()) =
+        Fagsak(
+            ytelsestype = Ytelsestype.BARNETRYGD,
+            fagsystem = Fagsystem.BA,
+            eksternFagsakId = eksternFagsakId,
+            bruker = bruker,
+        )
 
     private val date = LocalDate.now()
 
-    private fun fagsystemsbehandling() = Fagsystemsbehandling(
+    private fun fagsystemsbehandling() =
+        Fagsystemsbehandling(
             eksternId = UUID.randomUUID().toString(),
             tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
             revurderingsvedtaksdato = date.minusDays(1),
@@ -89,20 +91,22 @@ object Testdata {
             årsak = "testverdi",
         )
 
-    val varsel = Varsel(
-        varseltekst = "testverdi",
-        varselbeløp = 123,
-        perioder = setOf(Varselsperiode(fom = date.minusMonths(2), tom = date)),
-    )
+    fun varsel() =
+        Varsel(
+            varseltekst = "testverdi",
+            varselbeløp = 123,
+            perioder = setOf(Varselsperiode(fom = date.minusMonths(2), tom = date)),
+        )
 
-    fun verge() = Verge(
-        ident = "32132132111",
-        type = Vergetype.VERGE_FOR_BARN,
-        orgNr = "testverdi",
-        navn = "testverdi",
-        kilde = "testverdi",
-        begrunnelse = "testverdi",
-    )
+    fun verge() =
+        Verge(
+            ident = "32132132111",
+            type = Vergetype.VERGE_FOR_BARN,
+            orgNr = "testverdi",
+            navn = "testverdi",
+            kilde = "testverdi",
+            begrunnelse = "testverdi",
+        )
 
     private fun behandlingsvedtak() = Behandlingsvedtak(vedtaksdato = LocalDate.now())
 
@@ -134,15 +138,18 @@ object Testdata {
         manueltOpprettet = false,
         fagsystemsbehandling = setOf(fagsystemsbehandling()),
         resultater = setOf(behandlingsresultat()),
-        varsler = setOf(varsel),
+        varsler = setOf(varsel()),
         verger = setOf(verge()),
         eksternBrukId = UUID.randomUUID(),
         begrunnelseForTilbakekreving = null,
     )
 
-    fun lagRevurdering(originalBehandlingId: UUID) =
+    fun lagRevurdering(
+        originalBehandlingId: UUID,
+        fagsakId: UUID,
+    ) =
         Behandling(
-            fagsakId = fagsak.id,
+            fagsakId = fagsakId,
             årsaker =
                 setOf(
                     Behandlingsårsak(
@@ -255,7 +262,7 @@ object Testdata {
             skatteprosent = BigDecimal("35.1100"),
         )
 
-    val kravgrunnlagsperiode432 =
+    fun getKravgrunnlagsperiode432() =
         Kravgrunnlagsperiode432(
             periode =
                 Månedsperiode(
@@ -292,7 +299,7 @@ object Testdata {
 
     fun lagKravgrunnlag(
         behandlingId: UUID,
-        perioder: Set<Kravgrunnlagsperiode432> = setOf(kravgrunnlagsperiode432),
+        perioder: Set<Kravgrunnlagsperiode432> = setOf(getKravgrunnlagsperiode432()),
         fagområdekode: Fagområdekode = Fagområdekode.EFOG,
     ) = Kravgrunnlag431(
         behandlingId = behandlingId,
@@ -378,7 +385,7 @@ object Testdata {
                 }.toSet(),
     )
 
-    val økonomiXmlMottatt =
+    fun getøkonomiXmlMottatt() =
         ØkonomiXmlMottatt(
             melding = "testverdi",
             kravstatuskode = Kravstatuskode.NYTT,
@@ -438,7 +445,7 @@ object Testdata {
             behandlendeEnhetsNavn = "testverdi",
             fagsystemsbehandling = setOf(fagsystemsbehandling()),
             resultater = setOf(behandlingsresultat()),
-            varsler = setOf(varsel),
+            varsler = setOf(varsel()),
             verger = setOf(verge()),
             vedtaksbrevOppsummering = lagVedtaksbrevsoppsummering(behandling.id),
             saksbehandlingstype = behandling.saksbehandlingstype,

@@ -31,7 +31,7 @@ internal class HåndterGamleKravgrunnlagBatchTest : OppslagSpringRunnerTest() {
     @Test
     fun `utfør skal ikke opprette tasker når det ikke finnes noen kravgrunnlag som er gamle enn bestemte uker`() {
         // Arrange
-        mottattXmlRepository.insert(Testdata.økonomiXmlMottatt)
+        mottattXmlRepository.insert(Testdata.getøkonomiXmlMottatt())
 
         // Act
         håndterGamleKravgrunnlagBatch.utfør()
@@ -43,7 +43,7 @@ internal class HåndterGamleKravgrunnlagBatchTest : OppslagSpringRunnerTest() {
     @Test
     fun `utfør skal ikke opprette tasker når det allerede finnes en feilet task på det samme kravgrunnlag`() {
         // Arrange
-        val mottattXml = mottattXmlRepository.insert(Testdata.økonomiXmlMottatt)
+        val mottattXml = mottattXmlRepository.insert(Testdata.getøkonomiXmlMottatt())
         val task = taskService.save(Task(type = GammelKravgrunnlagTask.TYPE, payload = mottattXml.id.toString()), SecureLog.Context.tom())
         taskService.save(taskService.findById(task.id).copy(status = Status.FEILET), SecureLog.Context.tom())
 
@@ -58,21 +58,21 @@ internal class HåndterGamleKravgrunnlagBatchTest : OppslagSpringRunnerTest() {
     fun `utfør skal opprette tasker når det finnes noen kravgrunnlag som er gamle enn bestemte uker`() {
         // Arrange
         val førsteXml =
-            Testdata.økonomiXmlMottatt.copy(
+            Testdata.getøkonomiXmlMottatt().copy(
                 id = UUID.randomUUID(),
                 sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusWeeks(9)),
             )
         mottattXmlRepository.insert(førsteXml)
 
         val andreXml =
-            Testdata.økonomiXmlMottatt.copy(
+            Testdata.getøkonomiXmlMottatt().copy(
                 id = UUID.randomUUID(),
                 sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusWeeks(9)),
                 ytelsestype = Ytelsestype.SKOLEPENGER,
             )
         mottattXmlRepository.insert(andreXml)
 
-        val tredjeXml = Testdata.økonomiXmlMottatt
+        val tredjeXml = Testdata.getøkonomiXmlMottatt()
         mottattXmlRepository.insert(tredjeXml)
 
         // Act
@@ -88,7 +88,7 @@ internal class HåndterGamleKravgrunnlagBatchTest : OppslagSpringRunnerTest() {
     fun `utfør skal opprette tasker av type HentFagsystemsbehandlingTask med spredt TriggerTid når flere kravgrunnlagene tilhører samme ekstern fagsak id`() {
         // Arrange
         val førsteXml =
-            Testdata.økonomiXmlMottatt.copy(
+            Testdata.getøkonomiXmlMottatt().copy(
                 id = UUID.randomUUID(),
                 eksternFagsakId = "1",
                 sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusWeeks(9)),
@@ -96,7 +96,7 @@ internal class HåndterGamleKravgrunnlagBatchTest : OppslagSpringRunnerTest() {
         mottattXmlRepository.insert(førsteXml)
 
         val andreXml =
-            Testdata.økonomiXmlMottatt.copy(
+            Testdata.getøkonomiXmlMottatt().copy(
                 id = UUID.randomUUID(),
                 eksternFagsakId = "1",
                 sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusWeeks(9)),

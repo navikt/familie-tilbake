@@ -617,7 +617,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `lagreUtkastAvFriteksterFraSaksbehandler skal lagre selv når påkrevet fritekst mangler for oppsummering`() {
         var lokalBehandling =
-            Testdata.lagRevurdering(behandling.id).copy(
+            Testdata.lagRevurdering(behandling.id, fagsak.id).copy(
                 id = UUID.randomUUID(),
                 eksternBrukId = UUID.randomUUID(),
                 avsluttetDato = null,
@@ -657,7 +657,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `lagreFriteksterFraSaksbehandler skal ikke lagre fritekster når påkrevet oppsummeringstekst mangler`() {
         var lokalBehandling =
-            Testdata.lagRevurdering(behandling.id).copy(
+            Testdata.lagRevurdering(behandling.id, fagsak.id).copy(
                 id = UUID.randomUUID(),
                 eksternBrukId = UUID.randomUUID(),
                 årsaker =

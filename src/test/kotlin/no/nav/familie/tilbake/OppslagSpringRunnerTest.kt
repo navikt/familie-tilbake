@@ -43,6 +43,7 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingSærligG
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -65,6 +66,7 @@ import org.springframework.transaction.annotation.Transactional
 @ActiveProfiles("integrasjonstest", "mock-oauth", "mock-pdl", "mock-integrasjoner", "mock-oppgave", "mock-økonomi")
 @EnableMockOAuth2Server
 abstract class OppslagSpringRunnerTest {
+    val tømDBEtterHverTest = true
     private val listAppender = initLoggingEventListAppender()
     protected var loggingEvents: MutableList<ILoggingEvent> = listAppender.list
     protected val restTemplate = TestRestTemplate()
@@ -85,11 +87,20 @@ abstract class OppslagSpringRunnerTest {
     @LocalServerPort
     private var port: Int? = 0
 
+    @AfterAll
+    fun resetAfter() {
+        if (!tømDBEtterHverTest) {
+            resetDatabase()
+        }
+    }
+
     @AfterEach
     @Transactional
     fun reset() {
         loggingEvents.clear()
-        resetDatabase()
+        if (tømDBEtterHverTest) {
+            resetDatabase()
+        }
         clearCaches()
         resetWiremockServers()
     }
