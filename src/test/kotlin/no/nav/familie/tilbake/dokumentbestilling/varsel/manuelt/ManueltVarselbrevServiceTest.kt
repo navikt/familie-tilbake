@@ -166,7 +166,7 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
                             varselbeløp = 100L,
                         ),
                     ),
-                verger = setOf(Testdata.verge),
+                verger = setOf(Testdata.verge()),
             )
         val behandling = behandlingRepository.update(behandlingCopy)
 

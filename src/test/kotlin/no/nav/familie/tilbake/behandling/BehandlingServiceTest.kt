@@ -441,7 +441,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         every { featureToggleService.isEnabled(any()) } returns false
         every { behandlingRepository.finnÅpenTilbakekrevingsbehandling(any(), any()) } returns null
         val behandling = Testdata.lagBehandling()
-        every { behandlingRepository.finnAvsluttetTilbakekrevingsbehandlinger(any(), any()) } returns listOf(behandling.copy(resultater = setOf(behandlingsresultat.copy(type = Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT))))
+        every { behandlingRepository.finnAvsluttetTilbakekrevingsbehandlinger(any(), any()) } returns listOf(behandling.copy(resultater = setOf(behandlingsresultat().copy(type = Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT))))
 
         shouldNotThrowAny { validerBehandlingService.validerOpprettBehandling(opprettTilbakekrevingRequest) }.apply {
             this.shouldNotBeNull()

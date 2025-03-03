@@ -69,18 +69,19 @@ object Testdata {
 
     private val bruker = Bruker(ident = "32132132111")
 
-    val fagsak =
-        Fagsak(
-            ytelsestype = Ytelsestype.BARNETRYGD,
-            fagsystem = Fagsystem.BA,
-            eksternFagsakId = "testverdi",
-            bruker = bruker,
-        )
+    @Deprecated("Bruk dynamisk fagsak opprettelse i stedet", replaceWith = ReplaceWith("fagsak()"))
+    val fagsak = fagsak()
+
+    fun fagsak() = Fagsak(
+        ytelsestype = Ytelsestype.BARNETRYGD,
+        fagsystem = Fagsystem.BA,
+        eksternFagsakId = "testverdi",
+        bruker = bruker,
+    )
 
     private val date = LocalDate.now()
 
-    private val fagsystemsbehandling =
-        Fagsystemsbehandling(
+    private fun fagsystemsbehandling() = Fagsystemsbehandling(
             eksternId = UUID.randomUUID().toString(),
             tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
             revurderingsvedtaksdato = date.minusDays(1),
@@ -88,32 +89,36 @@ object Testdata {
             årsak = "testverdi",
         )
 
-    val varsel =
-        Varsel(
-            varseltekst = "testverdi",
-            varselbeløp = 123,
-            perioder = setOf(Varselsperiode(fom = date.minusMonths(2), tom = date)),
-        )
+    val varsel = Varsel(
+        varseltekst = "testverdi",
+        varselbeløp = 123,
+        perioder = setOf(Varselsperiode(fom = date.minusMonths(2), tom = date)),
+    )
 
-    val verge =
-        Verge(
-            ident = "32132132111",
-            type = Vergetype.VERGE_FOR_BARN,
-            orgNr = "testverdi",
-            navn = "testverdi",
-            kilde = "testverdi",
-            begrunnelse = "testverdi",
-        )
+    fun verge() = Verge(
+        ident = "32132132111",
+        type = Vergetype.VERGE_FOR_BARN,
+        orgNr = "testverdi",
+        navn = "testverdi",
+        kilde = "testverdi",
+        begrunnelse = "testverdi",
+    )
 
-    private val behandlingsvedtak = Behandlingsvedtak(vedtaksdato = LocalDate.now())
+    private fun behandlingsvedtak() = Behandlingsvedtak(vedtaksdato = LocalDate.now())
 
-    val behandlingsresultat = Behandlingsresultat(behandlingsvedtak = behandlingsvedtak)
+    fun behandlingsresultat() = Behandlingsresultat(behandlingsvedtak = behandlingsvedtak())
 
     private val periode = Månedsperiode(LocalDate.now(), LocalDate.now().plusDays(1))
     private val periode4Mnd = Månedsperiode("2020-04", "2020-08")
 
+    @Deprecated("Bruk utgaven hvor man må sette fagsakId", replaceWith = ReplaceWith("lagBehandling(fagsakId, ansvarligSaksbehandler, behandlingStatus)"))
     fun lagBehandling(
-        fagsakId: UUID = fagsak.id,
+        ansvarligSaksbehandler: String = "saksbehandler",
+        behandlingStatus: Behandlingsstatus = Behandlingsstatus.UTREDES,
+    ) = lagBehandling(fagsak.id, ansvarligSaksbehandler, behandlingStatus)
+
+    fun lagBehandling(
+        fagsakId: UUID,
         ansvarligSaksbehandler: String = "saksbehandler",
         behandlingStatus: Behandlingsstatus = Behandlingsstatus.UTREDES,
     ) = Behandling(
@@ -127,10 +132,10 @@ object Testdata {
         behandlendeEnhet = "testverdi",
         behandlendeEnhetsNavn = "testverdi",
         manueltOpprettet = false,
-        fagsystemsbehandling = setOf(fagsystemsbehandling),
-        resultater = setOf(behandlingsresultat),
+        fagsystemsbehandling = setOf(fagsystemsbehandling()),
+        resultater = setOf(behandlingsresultat()),
         varsler = setOf(varsel),
-        verger = setOf(verge),
+        verger = setOf(verge()),
         eksternBrukId = UUID.randomUUID(),
         begrunnelseForTilbakekreving = null,
     )
@@ -151,10 +156,10 @@ object Testdata {
             behandlendeEnhet = "testverdi",
             behandlendeEnhetsNavn = "testverdi",
             manueltOpprettet = false,
-            fagsystemsbehandling = setOf(fagsystemsbehandling.copy(id = UUID.randomUUID())),
+            fagsystemsbehandling = setOf(fagsystemsbehandling()),
             resultater = emptySet(),
             varsler = emptySet(),
-            verger = setOf(verge.copy(id = UUID.randomUUID())),
+            verger = setOf(verge()),
             eksternBrukId = UUID.randomUUID(),
             begrunnelseForTilbakekreving = null,
         )
@@ -431,10 +436,10 @@ object Testdata {
             ansvarligBeslutter = "beslutter",
             behandlendeEnhet = "testverdi",
             behandlendeEnhetsNavn = "testverdi",
-            fagsystemsbehandling = setOf(fagsystemsbehandling),
-            resultater = setOf(behandlingsresultat),
+            fagsystemsbehandling = setOf(fagsystemsbehandling()),
+            resultater = setOf(behandlingsresultat()),
             varsler = setOf(varsel),
-            verger = setOf(verge),
+            verger = setOf(verge()),
             vedtaksbrevOppsummering = lagVedtaksbrevsoppsummering(behandling.id),
             saksbehandlingstype = behandling.saksbehandlingstype,
         )

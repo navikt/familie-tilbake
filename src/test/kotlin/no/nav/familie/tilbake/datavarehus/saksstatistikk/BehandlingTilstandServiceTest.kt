@@ -216,7 +216,7 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
         tilstand.referertFagsaksbehandling shouldBe behandling.aktivFagsystemsbehandling.eksternId
         tilstand.behandlingstype shouldBe behandling.type
         tilstand.behandlingsstatus shouldBe behandling.status
-        tilstand.behandlingsresultat shouldBe behandlingsresultat.type
+        tilstand.behandlingsresultat shouldBe Behandlingsresultatstype.IKKE_FASTSATT
         tilstand.venterPåBruker shouldBe true
         tilstand.venterPåØkonomi shouldBe false
         tilstand.funksjoneltTidspunkt.shouldBeBetween(
