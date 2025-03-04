@@ -177,6 +177,7 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
         vedtaksoppsummering.saksnummer shouldBe saksnummer
         vedtaksoppsummering.vedtakFattetTidspunkt.shouldNotBeNull()
         vedtaksoppsummering.ytelsestype shouldBe Ytelsestype.OVERGANGSSTØNAD
+        vedtaksoppsummering.fagsystem shouldBe Fagsystem.EF
         vedtaksoppsummering.forrigeBehandling shouldBe null
     }
 

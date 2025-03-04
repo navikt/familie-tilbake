@@ -15,6 +15,8 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 internal class VarselServiceTest : OppslagSpringRunnerTest() {
+    override val tømDBEtterHverTest = false
+
     @Autowired
     private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
 
@@ -32,10 +34,9 @@ internal class VarselServiceTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun setup() {
-        behandling = Testdata.lagBehandling()
+        val fagsak = fagsakRepository.insert(Testdata.fagsak())
+        behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId = fagsak.id))
         kravgrunnlag = Testdata.lagKravgrunnlag(behandling.id)
-        fagsakRepository.insert(Testdata.fagsak)
-        behandlingRepository.insert(behandling)
     }
 
     @Test
@@ -87,11 +88,11 @@ internal class VarselServiceTest : OppslagSpringRunnerTest() {
         varselsperioder
             .any {
                 it.fom ==
-                    Testdata.varsel.perioder
+                    Testdata.varsel().perioder
                         .first()
                         .fom &&
                     it.tom ==
-                    Testdata.varsel.perioder
+                    Testdata.varsel().perioder
                         .first()
                         .tom
             }.shouldBeTrue()

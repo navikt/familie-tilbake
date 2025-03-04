@@ -57,6 +57,8 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
+    override val tømDBEtterHverTest = false
+
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -85,11 +87,10 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        behandling = Testdata.lagBehandling()
-        fagsakRepository.insert(Testdata.fagsak)
-        behandlingRepository.insert(behandling)
+        val fagsak = fagsakRepository.insert(Testdata.fagsak())
+        behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id))
         val førstePeriode =
-            Testdata.kravgrunnlagsperiode432
+            Testdata.getKravgrunnlagsperiode432()
                 .copy(
                     id = UUID.randomUUID(),
                     periode = Månedsperiode(fom = YearMonth.of(2020, 1), tom = YearMonth.of(2020, 1)),
@@ -100,7 +101,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                         ),
                 )
         val andrePeriode =
-            Testdata.kravgrunnlagsperiode432
+            Testdata.getKravgrunnlagsperiode432()
                 .copy(
                     id = UUID.randomUUID(),
                     periode = Månedsperiode(fom = YearMonth.of(2020, 2), tom = YearMonth.of(2020, 2)),

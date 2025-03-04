@@ -77,7 +77,7 @@ internal class OppgavePrioritetServiceTest {
 
     private fun lagKravgrunnlagMedFeilutbetaling(feilutbetaling: Int): Kravgrunnlag431 {
         val periode =
-            Testdata.kravgrunnlagsperiode432.copy(
+            Testdata.getKravgrunnlagsperiode432().copy(
                 id = UUID.randomUUID(),
                 periode = Månedsperiode(YearMonth.of(2020, 1), YearMonth.of(2023, 1)),
                 beløp =

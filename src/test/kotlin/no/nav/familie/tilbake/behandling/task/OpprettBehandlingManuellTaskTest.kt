@@ -186,7 +186,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
         val respons = lagHentFagsystemsbehandlingRespons()
         requestSendt?.let { requestSendtRepository.update(it.copy(respons = objectMapper.writeValueAsString(respons))) }
 
-        val økonomiXmlMottatt = Testdata.økonomiXmlMottatt
+        val økonomiXmlMottatt = Testdata.getøkonomiXmlMottatt()
         økonomiXmlMottattRepository.insert(økonomiXmlMottatt.copy(eksternFagsakId = eksternFagsakId, referanse = eksternId))
 
         opprettBehandlingManueltTask.doTask(lagTask())
@@ -230,7 +230,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
         val respons = lagHentFagsystemsbehandlingRespons(erInstitusjon = true)
         requestSendt?.let { requestSendtRepository.update(it.copy(respons = objectMapper.writeValueAsString(respons))) }
 
-        val økonomiXmlMottatt = Testdata.økonomiXmlMottatt
+        val økonomiXmlMottatt = Testdata.getøkonomiXmlMottatt()
         økonomiXmlMottattRepository.insert(økonomiXmlMottatt.copy(eksternFagsakId = eksternFagsakId, referanse = eksternId))
 
         opprettBehandlingManueltTask.doTask(lagTask())

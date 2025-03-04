@@ -123,7 +123,7 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
                     kontrollfelt = "2019-11-22-19.09.31.458065",
                     perioder =
                         setOf(
-                            Testdata.kravgrunnlagsperiode432.copy(
+                            Testdata.getKravgrunnlagsperiode432().copy(
                                 beløp =
                                     setOf(
                                         feilKravgrunnlagBeløp,

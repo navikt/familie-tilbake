@@ -55,7 +55,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
         val feilkravgrunnlagsbeløp = Testdata.feilKravgrunnlagsbeløp433
         val yteseskravgrunnlagsbeløp = Testdata.ytelKravgrunnlagsbeløp433
         val førsteKravgrunnlagsperiode =
-            Testdata.kravgrunnlagsperiode432
+            Testdata.getKravgrunnlagsperiode432()
                 .copy(
                     periode = Månedsperiode(YearMonth.of(2017, 1), YearMonth.of(2017, 1)),
                     beløp =
@@ -65,7 +65,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
                         ),
                 )
         val andreKravgrunnlagsperiode =
-            Testdata.kravgrunnlagsperiode432
+            Testdata.getKravgrunnlagsperiode432()
                 .copy(
                     id = UUID.randomUUID(),
                     periode = Månedsperiode(YearMonth.of(2017, 2), YearMonth.of(2017, 2)),

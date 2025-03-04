@@ -321,7 +321,7 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `annulerKravgrunnlag skal annulere kravgrunnlag som er mottatt i økonomiXmlMottatt`() {
-        val økonomiXmlMottatt = økonomiXmlMottattRepository.insert(Testdata.økonomiXmlMottatt)
+        val økonomiXmlMottatt = økonomiXmlMottattRepository.insert(Testdata.getøkonomiXmlMottatt())
         shouldNotThrowAny { forvaltningService.annulerKravgrunnlag(økonomiXmlMottatt.eksternKravgrunnlagId!!) }
     }
 
@@ -354,7 +354,7 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentIkkeArkiverteKravgrunnlag skal hente Kravgrunnlagsinfo basert på eksternFagsakId og ytelsestype fra mottattXml`() {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        val mottattXml = Testdata.økonomiXmlMottatt
+        val mottattXml = Testdata.getøkonomiXmlMottatt()
         økonomiXmlMottattRepository.insert(
             mottattXml.copy(
                 eksternFagsakId = fagsak.eksternFagsakId,

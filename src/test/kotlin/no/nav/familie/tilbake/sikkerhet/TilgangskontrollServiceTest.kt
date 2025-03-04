@@ -281,7 +281,7 @@ internal class TilgangskontrollServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `sjekkTilgang skal forvalter ha tilgang til forvaltningstjeneste arkiver mottattXml med input som mottattXmlId`() {
         val token = opprettToken("abc", listOf(TEAMFAMILIE_FORVALTER_ROLLE))
-        val økonomiXmlMottatt = mottattXmlRepository.insert(Testdata.økonomiXmlMottatt)
+        val økonomiXmlMottatt = mottattXmlRepository.insert(Testdata.getøkonomiXmlMottatt())
         opprettRequestContext(token)
 
         shouldNotThrowAny { tilgangskontrollService.validerTilgangMottattXMLId(økonomiXmlMottatt.id, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
@@ -290,7 +290,7 @@ internal class TilgangskontrollServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `sjekkTilgang skal forvalter ha tilgang til forvaltningstjeneste annuler kravgrunnlag med input som eksternKravgrunnlagId`() {
         val token = opprettToken("abc", listOf(TEAMFAMILIE_FORVALTER_ROLLE))
-        val økonomiXmlMottatt = mottattXmlRepository.insert(Testdata.økonomiXmlMottatt)
+        val økonomiXmlMottatt = mottattXmlRepository.insert(Testdata.getøkonomiXmlMottatt())
         opprettRequestContext(token)
 
         shouldNotThrowAny { tilgangskontrollService.validerTilgangKravgrunnlagId(økonomiXmlMottatt.eksternKravgrunnlagId!!, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }

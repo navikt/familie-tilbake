@@ -89,7 +89,7 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
                     kontrollfelt = "2019-11-22-19.09.31.458065",
                     perioder =
                         setOf(
-                            Testdata.kravgrunnlagsperiode432.copy(
+                            Testdata.getKravgrunnlagsperiode432().copy(
                                 beløp =
                                     setOf(
                                         feilKravgrunnlagBeløp,
@@ -206,7 +206,7 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
         kravgrunnlagRepository.update(
             kravgrunnlagRepository
                 .findByBehandlingIdAndAktivIsTrue(behandling.id)
-                .copy(perioder = setOf(Testdata.kravgrunnlagsperiode432)),
+                .copy(perioder = setOf(Testdata.getKravgrunnlagsperiode432())),
         )
 
         automatiskSaksbehandlingBatch.behandleAutomatisk()
