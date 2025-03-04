@@ -132,6 +132,7 @@ class BehandlingTilstandService(
 
         return Behandlingstilstand(
             ytelsestype = fagsak.ytelsestype,
+            fagsystem = fagsak.fagsystem,
             saksnummer = fagsak.eksternFagsakId,
             behandlingUuid = behandling.eksternBrukId,
             referertFagsaksbehandling = eksternBehandling,
