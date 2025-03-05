@@ -25,7 +25,7 @@ class ValiderBrevmottakerServiceTest {
             personService,
         )
     private val behandlingId = UUID.randomUUID()
-    private val fagsak = Testdata.fagsak
+    private val fagsak = Testdata.fagsak()
     private val manuellBrevmottaker =
         ManuellBrevmottaker(
             type = MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE,

@@ -400,7 +400,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.KLAR)
 
         val førstePeriode =
-            Testdata.getKravgrunnlagsperiode432()
+            Testdata
+                .getKravgrunnlagsperiode432()
                 .copy(
                     id = UUID.randomUUID(),
                     periode =
@@ -415,7 +416,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                         ),
                 )
         val andrePeriode =
-            Testdata.getKravgrunnlagsperiode432()
+            Testdata
+                .getKravgrunnlagsperiode432()
                 .copy(
                     id = UUID.randomUUID(),
                     periode =

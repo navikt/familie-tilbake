@@ -147,29 +147,28 @@ object Testdata {
     fun lagRevurdering(
         originalBehandlingId: UUID,
         fagsakId: UUID,
-    ) =
-        Behandling(
-            fagsakId = fagsakId,
-            årsaker =
-                setOf(
-                    Behandlingsårsak(
-                        originalBehandlingId = originalBehandlingId,
-                        type = Behandlingsårsakstype.REVURDERING_KLAGE_KA,
-                    ),
+    ) = Behandling(
+        fagsakId = fagsakId,
+        årsaker =
+            setOf(
+                Behandlingsårsak(
+                    originalBehandlingId = originalBehandlingId,
+                    type = Behandlingsårsakstype.REVURDERING_KLAGE_KA,
                 ),
-            type = Behandlingstype.REVURDERING_TILBAKEKREVING,
-            opprettetDato = LocalDate.now(),
-            ansvarligSaksbehandler = "saksbehandler",
-            behandlendeEnhet = "testverdi",
-            behandlendeEnhetsNavn = "testverdi",
-            manueltOpprettet = false,
-            fagsystemsbehandling = setOf(fagsystemsbehandling()),
-            resultater = emptySet(),
-            varsler = emptySet(),
-            verger = setOf(verge()),
-            eksternBrukId = UUID.randomUUID(),
-            begrunnelseForTilbakekreving = null,
-        )
+            ),
+        type = Behandlingstype.REVURDERING_TILBAKEKREVING,
+        opprettetDato = LocalDate.now(),
+        ansvarligSaksbehandler = "saksbehandler",
+        behandlendeEnhet = "testverdi",
+        behandlendeEnhetsNavn = "testverdi",
+        manueltOpprettet = false,
+        fagsystemsbehandling = setOf(fagsystemsbehandling()),
+        resultater = emptySet(),
+        varsler = emptySet(),
+        verger = setOf(verge()),
+        eksternBrukId = UUID.randomUUID(),
+        begrunnelseForTilbakekreving = null,
+    )
 
     fun lagBehandlingsstegstilstand(behandlingId: UUID) =
         Behandlingsstegstilstand(

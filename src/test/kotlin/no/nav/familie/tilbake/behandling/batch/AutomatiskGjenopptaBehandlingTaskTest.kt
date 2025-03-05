@@ -29,6 +29,8 @@ import java.util.Properties
 import java.util.UUID
 
 internal class AutomatiskGjenopptaBehandlingTaskTest : OppslagSpringRunnerTest() {
+    override val tømDBEtterHverTest = false
+
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -52,8 +54,8 @@ internal class AutomatiskGjenopptaBehandlingTaskTest : OppslagSpringRunnerTest()
 
     @Test
     fun `skal gjenoppta behandling som venter på varsel og har allerede fått kravgrunnlag til FAKTA steg`() {
-        fagsakRepository.insert(Testdata.fagsak)
-        val behandling = behandlingRepository.insert(Testdata.lagBehandling().copy(status = Behandlingsstatus.UTREDES))
+        val fagsak = fagsakRepository.insert(Testdata.fagsak())
+        val behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId = fagsak.id).copy(status = Behandlingsstatus.UTREDES))
         val tidsfrist = LocalDate.now().minusWeeks(4)
         behandlingsstegstilstandRepository.insert(
             Testdata.lagBehandlingsstegstilstand(behandling.id).copy(
@@ -93,8 +95,8 @@ internal class AutomatiskGjenopptaBehandlingTaskTest : OppslagSpringRunnerTest()
 
     @Test
     fun `skal gjenoppta behandling som venter på varsel og har ikke fått kravgrunnlag til GRUNNLAG steg`() {
-        fagsakRepository.insert(Testdata.fagsak)
-        val behandling = behandlingRepository.insert(Testdata.lagBehandling().copy(status = Behandlingsstatus.UTREDES))
+        val fagsak = fagsakRepository.insert(Testdata.fagsak())
+        val behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId = fagsak.id).copy(status = Behandlingsstatus.UTREDES))
         val tidsfrist = LocalDate.now().minusWeeks(4)
         behandlingsstegstilstandRepository.insert(
             Testdata.lagBehandlingsstegstilstand(behandling.id).copy(
@@ -145,8 +147,8 @@ internal class AutomatiskGjenopptaBehandlingTaskTest : OppslagSpringRunnerTest()
 
     @Test
     fun `skal gjenoppta behandling som venter på avvent dokumentasjon`() {
-        fagsakRepository.insert(Testdata.fagsak)
-        val behandling = behandlingRepository.insert(Testdata.lagBehandling().copy(status = Behandlingsstatus.UTREDES))
+        val fagsak = fagsakRepository.insert(Testdata.fagsak())
+        val behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId = fagsak.id).copy(status = Behandlingsstatus.UTREDES))
         val tidsfrist = LocalDate.now().minusWeeks(1)
         behandlingsstegstilstandRepository.insert(
             Testdata.lagBehandlingsstegstilstand(behandling.id).copy(

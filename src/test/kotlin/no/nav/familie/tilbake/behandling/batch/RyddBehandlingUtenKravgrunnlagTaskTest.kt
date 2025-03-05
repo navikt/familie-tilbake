@@ -37,6 +37,8 @@ import java.util.Properties
 import java.util.UUID
 
 internal class RyddBehandlingUtenKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
+    override val tømDBEtterHverTest = false
+
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -88,8 +90,8 @@ internal class RyddBehandlingUtenKravgrunnlagTaskTest : OppslagSpringRunnerTest(
 
     @Test
     fun `skal hennlegge behandling uten kravgrunnlag som har sendt brev`() {
-        fagsakRepository.insert(Testdata.fagsak)
-        val behandling = behandlingRepository.insert(Testdata.lagBehandling().copy(status = Behandlingsstatus.UTREDES))
+        val fagsak = fagsakRepository.insert(Testdata.fagsak())
+        val behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId = fagsak.id).copy(status = Behandlingsstatus.UTREDES))
         brevsporingRepository.insert(Testdata.lagBrevsporing(behandling.id))
         val fristForFerdigstillelse = LocalDate.now().plusDays(7)
         val prioritet = OppgavePrioritet.NORM
@@ -117,8 +119,8 @@ internal class RyddBehandlingUtenKravgrunnlagTaskTest : OppslagSpringRunnerTest(
 
     @Test
     fun `skal hennlegge behandling uten kravgrunnlag som ikke har sendt brev`() {
-        fagsakRepository.insert(Testdata.fagsak)
-        val behandling = behandlingRepository.insert(Testdata.lagBehandling().copy(status = Behandlingsstatus.UTREDES))
+        val fagsak = fagsakRepository.insert(Testdata.fagsak())
+        val behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId = fagsak.id).copy(status = Behandlingsstatus.UTREDES))
 
         shouldNotThrow<RuntimeException> { ryddBehandlingUtenKravgrunnlagTask.doTask(lagTask(behandling.id)) }
 
