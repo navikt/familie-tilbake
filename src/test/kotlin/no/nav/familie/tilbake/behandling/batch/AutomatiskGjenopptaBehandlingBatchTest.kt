@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 internal class AutomatiskGjenopptaBehandlingBatchTest : OppslagSpringRunnerTest() {
+    override val tømDBEtterHverTest = false
+
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -34,8 +36,8 @@ internal class AutomatiskGjenopptaBehandlingBatchTest : OppslagSpringRunnerTest(
 
     @Test
     fun `skal lage task på behandling som venter på varsel og tidsfristen har utgått`() {
-        fagsakRepository.insert(Testdata.fagsak)
-        val behandling = behandlingRepository.insert(Testdata.lagBehandling().copy(status = Behandlingsstatus.UTREDES))
+        val fagsak = fagsakRepository.insert(Testdata.fagsak())
+        val behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId = fagsak.id).copy(status = Behandlingsstatus.UTREDES))
         behandlingsstegstilstandRepository.insert(
             Testdata.lagBehandlingsstegstilstand(behandling.id).copy(
                 behandlingssteg = Behandlingssteg.VARSEL,
@@ -56,8 +58,8 @@ internal class AutomatiskGjenopptaBehandlingBatchTest : OppslagSpringRunnerTest(
 
     @Test
     fun `skal lage task på behandling som venter på avvent dokumentasjon`() {
-        fagsakRepository.insert(Testdata.fagsak)
-        val behandling = behandlingRepository.insert(Testdata.lagBehandling().copy(status = Behandlingsstatus.UTREDES))
+        val fagsak = fagsakRepository.insert(Testdata.fagsak())
+        val behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId = fagsak.id).copy(status = Behandlingsstatus.UTREDES))
         val tidsfrist = LocalDate.now().minusWeeks(1)
         behandlingsstegstilstandRepository.insert(
             Testdata.lagBehandlingsstegstilstand(behandling.id).copy(

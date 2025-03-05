@@ -25,6 +25,10 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
+kotlin {
+    jvmToolchain(21)
+}
+
 configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
     outputToConsole.set(true)
 }

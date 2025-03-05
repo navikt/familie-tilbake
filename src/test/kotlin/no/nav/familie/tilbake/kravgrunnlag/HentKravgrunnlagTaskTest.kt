@@ -42,6 +42,8 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
+    override val tømDBEtterHverTest = false
+
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -80,9 +82,8 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        fagsak = fagsakRepository.insert(Testdata.fagsak)
-        behandling = Testdata.lagBehandling()
-        behandlingRepository.insert(behandling)
+        fagsak = fagsakRepository.insert(Testdata.fagsak())
+        behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id))
         kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
 
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
@@ -98,7 +99,7 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `doTask skal hente kravgrunnlag for revurderingstilbakekreving`() {
-        val revurdering = behandlingRepository.insert(Testdata.lagRevurdering(behandling.id))
+        val revurdering = behandlingRepository.insert(Testdata.lagRevurdering(behandling.id, fagsak.id))
         behandlingsstegstilstandRepository
             .insert(
                 Behandlingsstegstilstand(

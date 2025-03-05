@@ -24,9 +24,10 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
 
 internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
+    override val tømDBEtterHverTest = false
+
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
@@ -46,16 +47,12 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
 
     private lateinit var fagsak: Fagsak
     private lateinit var behandling: Behandling
-    private lateinit var behandlingId: UUID
     private val opprettetTidspunkt = LocalDateTime.now()
 
     @BeforeEach
     fun init() {
-        behandling = Testdata.lagBehandling()
-        behandlingId = behandling.id
-        fagsak = Testdata.fagsak
-        fagsakRepository.insert(fagsak)
-        behandlingRepository.insert(behandling)
+        fagsak = fagsakRepository.insert(Testdata.fagsak())
+        behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id))
 
         historikkService =
             HistorikkService(
@@ -69,7 +66,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
     fun `lagHistorikkinnslag skal lage historikkinnslag når behandling oppretter automatisk`() {
         val opprettetHistorikkInnslag =
             historikkService.lagHistorikkinnslag(
-                behandlingId,
+                behandling.id,
                 TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET,
                 Aktør.Vedtaksløsning,
                 opprettetTidspunkt,
@@ -85,9 +82,9 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `lagHistorikkinnslag skal lage historikkinnslag når behandling setter på vent automatisk`() {
-        behandlingskontrollService.fortsettBehandling(behandlingId, SecureLog.Context.tom())
+        behandlingskontrollService.fortsettBehandling(behandling.id, SecureLog.Context.tom())
         behandlingskontrollService.settBehandlingPåVent(
-            behandlingId,
+            behandling.id,
             Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
             LocalDate.now().plusDays(20),
             SecureLog.Context.tom(),
@@ -95,7 +92,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
 
         val opprettetHistorikkInnslag =
             historikkService.lagHistorikkinnslag(
-                behandlingId,
+                behandling.id,
                 TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
                 Aktør.Vedtaksløsning,
                 opprettetTidspunkt,
@@ -113,9 +110,9 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `lagHistorikkinnslag skal lage historikkinnslag når behandling setter på vent manuelt`() {
-        behandlingskontrollService.fortsettBehandling(behandlingId, SecureLog.Context.tom())
+        behandlingskontrollService.fortsettBehandling(behandling.id, SecureLog.Context.tom())
         behandlingskontrollService.settBehandlingPåVent(
-            behandlingId,
+            behandling.id,
             Venteårsak.AVVENTER_DOKUMENTASJON,
             LocalDate.now().plusDays(20),
             SecureLog.Context.tom(),
@@ -123,7 +120,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
 
         val opprettetHistorikkInnslag =
             historikkService.lagHistorikkinnslag(
-                behandlingId,
+                behandling.id,
                 TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
                 Aktør.Saksbehandler(behandling.ansvarligSaksbehandler),
                 opprettetTidspunkt,
@@ -143,7 +140,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
     fun `lagHistorikkinnslag skal lage historikkinnslag når behandling tar av vent manuelt`() {
         val opprettetHistorikkInnslag =
             historikkService.lagHistorikkinnslag(
-                behandlingId,
+                behandling.id,
                 TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT,
                 Aktør.Saksbehandler(behandling.ansvarligSaksbehandler),
                 opprettetTidspunkt,
@@ -161,7 +158,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
     fun `lagHistorikkinnslag skal lage historikkinnslag når behandling mottar et kravgrunnlag`() {
         val opprettetHistorikkInnslag =
             historikkService.lagHistorikkinnslag(
-                behandlingId,
+                behandling.id,
                 TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT,
                 Aktør.Vedtaksløsning,
                 opprettetTidspunkt,
@@ -179,7 +176,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
     fun `lagHistorikkinnslag skal lage historikkinnslag når behandling sender varselbrev`() {
         brevsporingRepository.insert(
             Brevsporing(
-                behandlingId = behandlingId,
+                behandlingId = behandling.id,
                 brevtype = Brevtype.VARSEL,
                 journalpostId = "testverdi",
                 dokumentId = "testverdi",
@@ -188,7 +185,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
 
         val opprettetHistorikkInnslag =
             historikkService.lagHistorikkinnslag(
-                behandlingId = behandlingId,
+                behandlingId = behandling.id,
                 historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.VARSELBREV_SENDT,
                 aktør = Aktør.Vedtaksløsning,
                 opprettetTidspunkt = opprettetTidspunkt,
@@ -208,7 +205,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `lagHistorikkinnslag skal lage historikkinnslag når behandling er automatisk henlagt`() {
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(
             behandling.copy(
                 resultater =
@@ -217,7 +214,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
         )
         val opprettetHistorikkInnslag =
             historikkService.lagHistorikkinnslag(
-                behandlingId,
+                behandling.id,
                 TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
                 Aktør.Vedtaksløsning,
                 opprettetTidspunkt,
@@ -234,7 +231,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `lagHistorikkinnslag skal lage historikkinnslag når behandling er manuelt henlagt`() {
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(
             behandling.copy(
                 resultater =
@@ -244,7 +241,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
 
         val opprettetHistorikkInnslag =
             historikkService.lagHistorikkinnslag(
-                behandlingId,
+                behandling.id,
                 TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
                 Aktør.Vedtaksløsning,
                 opprettetTidspunkt,
@@ -264,7 +261,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
     fun `lagHistorikkinnslag skal lage historikkinnslag når behandling sender henleggelsesbrev`() {
         brevsporingRepository.insert(
             Brevsporing(
-                behandlingId = behandlingId,
+                behandlingId = behandling.id,
                 brevtype = Brevtype.HENLEGGELSE,
                 journalpostId = "testverdi",
                 dokumentId = "testverdi",
@@ -273,7 +270,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
 
         val opprettetHistorikkInnslag =
             historikkService.lagHistorikkinnslag(
-                behandlingId = behandlingId,
+                behandlingId = behandling.id,
                 historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.HENLEGGELSESBREV_SENDT,
                 aktør = Aktør.Vedtaksløsning,
                 opprettetTidspunkt = opprettetTidspunkt,
@@ -295,7 +292,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
     fun `lagHistorikkinnslag skal lage historikkinnslag når behandling ikke sender henleggelsesbrev for ukjent adresse`() {
         brevsporingRepository.insert(
             Brevsporing(
-                behandlingId = behandlingId,
+                behandlingId = behandling.id,
                 brevtype = Brevtype.HENLEGGELSE,
                 journalpostId = "testverdi",
                 dokumentId = "testverdi",
@@ -304,7 +301,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
 
         val opprettetHistorikkInnslag =
             historikkService.lagHistorikkinnslag(
-                behandlingId = behandlingId,
+                behandlingId = behandling.id,
                 historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREV_IKKE_SENDT_UKJENT_ADRESSE,
                 aktør = Aktør.Vedtaksløsning,
                 opprettetTidspunkt = opprettetTidspunkt,
@@ -327,7 +324,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
     fun `lagHistorikkinnslag skal lage historikkinnslag når fakta steg er utført for behandling`() {
         val opprettetHistorikkInnslag =
             historikkService.lagHistorikkinnslag(
-                behandlingId,
+                behandling.id,
                 TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT,
                 Aktør.Saksbehandler(behandling.ansvarligSaksbehandler),
                 opprettetTidspunkt,
@@ -346,7 +343,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
     fun `lagHistorikkinnslag skal lage historikkinnslag når foreldelse steg er utført for behandling`() {
         val opprettetHistorikkInnslag =
             historikkService.lagHistorikkinnslag(
-                behandlingId,
+                behandling.id,
                 TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT,
                 Aktør.Saksbehandler(behandling.ansvarligSaksbehandler),
                 opprettetTidspunkt,
@@ -363,7 +360,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `lagHistorikkinnslag skal lage historikkinnslag når behandling er fattet`() {
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(
             behandling.copy(
                 resultater =
@@ -382,7 +379,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
         )
         val opprettetHistorikkInnslag =
             historikkService.lagHistorikkinnslag(
-                behandlingId,
+                behandling.id,
                 TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET,
                 Aktør.Beslutter(behandling.ansvarligSaksbehandler),
                 opprettetTidspunkt,
@@ -399,12 +396,12 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `lagHistorikkinnslag skal lage historikkinnslag når man bytter enhet på behandling`() {
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(behandling.copy(behandlendeEnhet = "3434"))
 
         val opprettetHistorikkInnslag =
             historikkService.lagHistorikkinnslag(
-                behandlingId,
+                behandling.id,
                 TilbakekrevingHistorikkinnslagstype.ENDRET_ENHET,
                 Aktør.Saksbehandler(behandling.ansvarligSaksbehandler),
                 opprettetTidspunkt,
@@ -430,7 +427,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
         journalpostId: String? = null,
         opprettetHistorikkInnslag: Historikkinnslag,
     ) {
-        opprettetHistorikkInnslag.behandlingId shouldBe behandlingId
+        opprettetHistorikkInnslag.behandlingId shouldBe behandling.id
         opprettetHistorikkInnslag.aktør shouldBe aktør.type
         opprettetHistorikkInnslag.opprettetAv shouldBe aktør.ident
         opprettetHistorikkInnslag.opprettetTid shouldBe opprettetTidspunkt

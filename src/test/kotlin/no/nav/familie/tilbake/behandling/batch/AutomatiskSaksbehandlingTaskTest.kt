@@ -49,6 +49,8 @@ import java.time.LocalDate
 import java.util.Properties
 
 internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
+    override val tømDBEtterHverTest = false
+
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -90,13 +92,13 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var automatiskSaksbehandlingTask: AutomatiskSaksbehandlingTask
 
-    private val fagsak: Fagsak = Testdata.fagsak
+    private lateinit var fagsak: Fagsak
     private lateinit var behandling: Behandling
 
     @BeforeEach
     fun init() {
-        behandling = Testdata.lagBehandling()
-        fagsakRepository.insert(fagsak)
+        val fagsak = fagsakRepository.insert(Testdata.fagsak())
+        behandling = Testdata.lagBehandling(fagsakId = fagsak.id)
         val fagsystemsbehandling =
             behandling.aktivFagsystemsbehandling.copy(
                 tilbakekrevingsvalg =
@@ -123,7 +125,7 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
                     kontrollfelt = "2019-11-22-19.09.31.458065",
                     perioder =
                         setOf(
-                            Testdata.kravgrunnlagsperiode432.copy(
+                            Testdata.getKravgrunnlagsperiode432().copy(
                                 beløp =
                                     setOf(
                                         feilKravgrunnlagBeløp,

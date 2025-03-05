@@ -30,6 +30,8 @@ import java.time.LocalDate
 import java.util.Properties
 
 internal class OppdaterFaktainfoTaskTest : OppslagSpringRunnerTest() {
+    override val tømDBEtterHverTest = false
+
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -53,9 +55,8 @@ internal class OppdaterFaktainfoTaskTest : OppslagSpringRunnerTest() {
     fun init() {
         hentFagsystemsbehandlingService = HentFagsystemsbehandlingService(requestSendtRepository, mockKafkaProducer)
         oppdaterFaktainfoTask = OppdaterFaktainfoTask(hentFagsystemsbehandlingService, behandlingService)
-        fagsak = Testdata.fagsak
-        behandling = Testdata.lagBehandling()
-        fagsakRepository.insert(Testdata.fagsak)
+        fagsak = fagsakRepository.insert(Testdata.fagsak())
+        behandling = Testdata.lagBehandling(fagsakId = fagsak.id)
         behandlingRepository.insert(behandling)
     }
 

@@ -239,7 +239,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `kanBehandlingOpprettesManuelt skal returnere false når det allerede finnes en opprettelse request`() {
-        val mottattXml = Testdata.økonomiXmlMottatt
+        val mottattXml = Testdata.getøkonomiXmlMottatt()
         økonomiXmlMottattRepository.insert(mottattXml)
 
         val properties = Properties()
@@ -258,7 +258,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `kanBehandlingOpprettesManuelt skal returnere true når det finnes et frakoblet grunnlag`() {
-        val mottattXml = Testdata.økonomiXmlMottatt
+        val mottattXml = Testdata.getøkonomiXmlMottatt()
         økonomiXmlMottattRepository.insert(mottattXml)
 
         val respons = fagsakService.kanBehandlingOpprettesManuelt(mottattXml.eksternFagsakId, Ytelsestype.BARNETRYGD)

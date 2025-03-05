@@ -1,7 +1,9 @@
 package no.nav.familie.tilbake.behandling.batch
 
+import io.kotest.inspectors.forAny
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.collections.shouldHaveSingleElement
+import io.kotest.matchers.shouldBe
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
@@ -33,6 +35,8 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
+    override val tømDBEtterHverTest = false
+
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -57,12 +61,13 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var automatiskSaksbehandlingBatch: AutomatiskSaksbehandlingBatch
 
-    private val fagsak: Fagsak = Testdata.fagsak
-    private val behandling: Behandling = Testdata.lagBehandling()
+    private lateinit var fagsak: Fagsak
+    private lateinit var behandling: Behandling
 
     @BeforeEach
     fun init() {
-        fagsakRepository.insert(fagsak)
+        val fagsak = fagsakRepository.insert(Testdata.fagsak())
+        behandling = Testdata.lagBehandling(fagsak.id)
         val fagsystemsbehandling =
             behandling.aktivFagsystemsbehandling.copy(
                 tilbakekrevingsvalg =
@@ -89,7 +94,7 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
                     kontrollfelt = "2019-11-22-19.09.31.458065",
                     perioder =
                         setOf(
-                            Testdata.kravgrunnlagsperiode432.copy(
+                            Testdata.getKravgrunnlagsperiode432().copy(
                                 beløp =
                                     setOf(
                                         feilKravgrunnlagBeløp,
@@ -206,7 +211,7 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
         kravgrunnlagRepository.update(
             kravgrunnlagRepository
                 .findByBehandlingIdAndAktivIsTrue(behandling.id)
-                .copy(perioder = setOf(Testdata.kravgrunnlagsperiode432)),
+                .copy(perioder = setOf(Testdata.getKravgrunnlagsperiode432())),
         )
 
         automatiskSaksbehandlingBatch.behandleAutomatisk()
@@ -226,11 +231,11 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
         automatiskSaksbehandlingBatch.behandleAutomatisk()
         taskService
             .findAll()
-            .any {
-                it.type == AutomatiskSaksbehandlingTask.TYPE &&
-                    it.payload == behandling.id.toString()
-                it.status != Status.FEILET
-            }.shouldBeFalse()
+            .forAny {
+                it.type shouldBe AutomatiskSaksbehandlingTask.TYPE
+                it.payload shouldBe behandling.id.toString()
+                it.status shouldBe Status.FEILET
+            }
     }
 
     private fun lagBehandlingsstegstilstand(

@@ -103,14 +103,14 @@ internal class GammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     private lateinit var hentFagsystemsbehandlingService: HentFagsystemsbehandlingService
     private lateinit var gammelKravgrunnlagTask: GammelKravgrunnlagTask
 
-    private var xmlMottatt: ØkonomiXmlMottatt = Testdata.økonomiXmlMottatt
+    private var xmlMottatt: ØkonomiXmlMottatt = Testdata.getøkonomiXmlMottatt()
     private lateinit var mottattXMl: String
     private lateinit var mottattXmlId: UUID
 
     @BeforeEach
     fun init() {
         mottattXMl = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
-        xmlMottatt = xmlMottattRepository.insert(Testdata.økonomiXmlMottatt.copy(melding = mottattXMl))
+        xmlMottatt = xmlMottattRepository.insert(Testdata.getøkonomiXmlMottatt().copy(melding = mottattXMl))
         mottattXmlId = xmlMottatt.id
 
         val kafkaProducer: KafkaProducer = mockk()

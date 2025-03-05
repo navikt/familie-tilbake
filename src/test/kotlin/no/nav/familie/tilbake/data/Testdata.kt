@@ -69,17 +69,20 @@ object Testdata {
 
     private val bruker = Bruker(ident = "32132132111")
 
-    val fagsak =
+    @Deprecated("Bruk dynamisk fagsak opprettelse i stedet", replaceWith = ReplaceWith("fagsak()"))
+    val fagsak = fagsak("testverdi")
+
+    fun fagsak(eksternFagsakId: String = UUID.randomUUID().toString()) =
         Fagsak(
             ytelsestype = Ytelsestype.BARNETRYGD,
             fagsystem = Fagsystem.BA,
-            eksternFagsakId = "testverdi",
+            eksternFagsakId = eksternFagsakId,
             bruker = bruker,
         )
 
     private val date = LocalDate.now()
 
-    private val fagsystemsbehandling =
+    private fun fagsystemsbehandling() =
         Fagsystemsbehandling(
             eksternId = UUID.randomUUID().toString(),
             tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
@@ -88,14 +91,14 @@ object Testdata {
             årsak = "testverdi",
         )
 
-    val varsel =
+    fun varsel() =
         Varsel(
             varseltekst = "testverdi",
             varselbeløp = 123,
             perioder = setOf(Varselsperiode(fom = date.minusMonths(2), tom = date)),
         )
 
-    val verge =
+    fun verge() =
         Verge(
             ident = "32132132111",
             type = Vergetype.VERGE_FOR_BARN,
@@ -105,15 +108,21 @@ object Testdata {
             begrunnelse = "testverdi",
         )
 
-    private val behandlingsvedtak = Behandlingsvedtak(vedtaksdato = LocalDate.now())
+    private fun behandlingsvedtak() = Behandlingsvedtak(vedtaksdato = LocalDate.now())
 
-    val behandlingsresultat = Behandlingsresultat(behandlingsvedtak = behandlingsvedtak)
+    fun behandlingsresultat() = Behandlingsresultat(behandlingsvedtak = behandlingsvedtak())
 
     private val periode = Månedsperiode(LocalDate.now(), LocalDate.now().plusDays(1))
     private val periode4Mnd = Månedsperiode("2020-04", "2020-08")
 
+    @Deprecated("Bruk utgaven hvor man må sette fagsakId", replaceWith = ReplaceWith("lagBehandling(fagsakId, ansvarligSaksbehandler, behandlingStatus)"))
     fun lagBehandling(
-        fagsakId: UUID = fagsak.id,
+        ansvarligSaksbehandler: String = "saksbehandler",
+        behandlingStatus: Behandlingsstatus = Behandlingsstatus.UTREDES,
+    ) = lagBehandling(fagsak.id, ansvarligSaksbehandler, behandlingStatus)
+
+    fun lagBehandling(
+        fagsakId: UUID,
         ansvarligSaksbehandler: String = "saksbehandler",
         behandlingStatus: Behandlingsstatus = Behandlingsstatus.UTREDES,
     ) = Behandling(
@@ -127,37 +136,39 @@ object Testdata {
         behandlendeEnhet = "testverdi",
         behandlendeEnhetsNavn = "testverdi",
         manueltOpprettet = false,
-        fagsystemsbehandling = setOf(fagsystemsbehandling),
-        resultater = setOf(behandlingsresultat),
-        varsler = setOf(varsel),
-        verger = setOf(verge),
+        fagsystemsbehandling = setOf(fagsystemsbehandling()),
+        resultater = setOf(behandlingsresultat()),
+        varsler = setOf(varsel()),
+        verger = setOf(verge()),
         eksternBrukId = UUID.randomUUID(),
         begrunnelseForTilbakekreving = null,
     )
 
-    fun lagRevurdering(originalBehandlingId: UUID) =
-        Behandling(
-            fagsakId = fagsak.id,
-            årsaker =
-                setOf(
-                    Behandlingsårsak(
-                        originalBehandlingId = originalBehandlingId,
-                        type = Behandlingsårsakstype.REVURDERING_KLAGE_KA,
-                    ),
+    fun lagRevurdering(
+        originalBehandlingId: UUID,
+        fagsakId: UUID,
+    ) = Behandling(
+        fagsakId = fagsakId,
+        årsaker =
+            setOf(
+                Behandlingsårsak(
+                    originalBehandlingId = originalBehandlingId,
+                    type = Behandlingsårsakstype.REVURDERING_KLAGE_KA,
                 ),
-            type = Behandlingstype.REVURDERING_TILBAKEKREVING,
-            opprettetDato = LocalDate.now(),
-            ansvarligSaksbehandler = "saksbehandler",
-            behandlendeEnhet = "testverdi",
-            behandlendeEnhetsNavn = "testverdi",
-            manueltOpprettet = false,
-            fagsystemsbehandling = setOf(fagsystemsbehandling.copy(id = UUID.randomUUID())),
-            resultater = emptySet(),
-            varsler = emptySet(),
-            verger = setOf(verge.copy(id = UUID.randomUUID())),
-            eksternBrukId = UUID.randomUUID(),
-            begrunnelseForTilbakekreving = null,
-        )
+            ),
+        type = Behandlingstype.REVURDERING_TILBAKEKREVING,
+        opprettetDato = LocalDate.now(),
+        ansvarligSaksbehandler = "saksbehandler",
+        behandlendeEnhet = "testverdi",
+        behandlendeEnhetsNavn = "testverdi",
+        manueltOpprettet = false,
+        fagsystemsbehandling = setOf(fagsystemsbehandling()),
+        resultater = emptySet(),
+        varsler = emptySet(),
+        verger = setOf(verge()),
+        eksternBrukId = UUID.randomUUID(),
+        begrunnelseForTilbakekreving = null,
+    )
 
     fun lagBehandlingsstegstilstand(behandlingId: UUID) =
         Behandlingsstegstilstand(
@@ -250,7 +261,7 @@ object Testdata {
             skatteprosent = BigDecimal("35.1100"),
         )
 
-    val kravgrunnlagsperiode432 =
+    fun getKravgrunnlagsperiode432() =
         Kravgrunnlagsperiode432(
             periode =
                 Månedsperiode(
@@ -287,7 +298,7 @@ object Testdata {
 
     fun lagKravgrunnlag(
         behandlingId: UUID,
-        perioder: Set<Kravgrunnlagsperiode432> = setOf(kravgrunnlagsperiode432),
+        perioder: Set<Kravgrunnlagsperiode432> = setOf(getKravgrunnlagsperiode432()),
         fagområdekode: Fagområdekode = Fagområdekode.EFOG,
     ) = Kravgrunnlag431(
         behandlingId = behandlingId,
@@ -373,7 +384,7 @@ object Testdata {
                 }.toSet(),
     )
 
-    val økonomiXmlMottatt =
+    fun getøkonomiXmlMottatt() =
         ØkonomiXmlMottatt(
             melding = "testverdi",
             kravstatuskode = Kravstatuskode.NYTT,
@@ -431,10 +442,10 @@ object Testdata {
             ansvarligBeslutter = "beslutter",
             behandlendeEnhet = "testverdi",
             behandlendeEnhetsNavn = "testverdi",
-            fagsystemsbehandling = setOf(fagsystemsbehandling),
-            resultater = setOf(behandlingsresultat),
-            varsler = setOf(varsel),
-            verger = setOf(verge),
+            fagsystemsbehandling = setOf(fagsystemsbehandling()),
+            resultater = setOf(behandlingsresultat()),
+            varsler = setOf(varsel()),
+            verger = setOf(verge()),
             vedtaksbrevOppsummering = lagVedtaksbrevsoppsummering(behandling.id),
             saksbehandlingstype = behandling.saksbehandlingstype,
         )

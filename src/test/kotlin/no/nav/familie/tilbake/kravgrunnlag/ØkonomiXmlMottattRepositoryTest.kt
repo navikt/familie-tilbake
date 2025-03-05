@@ -15,7 +15,7 @@ internal class ØkonomiXmlMottattRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var økonomiXmlMottattRepository: ØkonomiXmlMottattRepository
 
-    private val økonomiXmlMottatt = Testdata.økonomiXmlMottatt
+    private val økonomiXmlMottatt = Testdata.getøkonomiXmlMottatt()
 
     @Test
     fun `insert med gyldige verdier skal persistere en forekomst av ØkonomiXmlMottatt til basen`() {

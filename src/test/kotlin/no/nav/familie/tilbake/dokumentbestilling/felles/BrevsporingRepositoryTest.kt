@@ -5,6 +5,8 @@ import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.repository.Sporbar
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
@@ -17,6 +19,8 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class BrevsporingRepositoryTest : OppslagSpringRunnerTest() {
+    override val tømDBEtterHverTest = false
+
     @Autowired
     private lateinit var brevsporingRepository: BrevsporingRepository
 
@@ -27,11 +31,15 @@ internal class BrevsporingRepositoryTest : OppslagSpringRunnerTest() {
     private lateinit var fagsakRepository: FagsakRepository
 
     private lateinit var brevsporing: Brevsporing
+    private lateinit var behandling: Behandling
+    private lateinit var fagsak: Fagsak
 
     @BeforeEach
     fun init() {
-        fagsakRepository.insert(Testdata.fagsak)
-        val behandling = behandlingRepository.insert(Testdata.lagBehandling())
+        fagsak = Testdata.fagsak()
+        behandling = Testdata.lagBehandling(fagsak.id)
+        fagsakRepository.insert(fagsak)
+        behandlingRepository.insert(behandling)
         brevsporing = Testdata.lagBrevsporing(behandling.id)
     }
 
