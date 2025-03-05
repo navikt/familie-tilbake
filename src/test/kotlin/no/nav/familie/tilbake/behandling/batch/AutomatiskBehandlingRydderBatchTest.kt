@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 internal class AutomatiskBehandlingRydderBatchTest : OppslagSpringRunnerTest() {
+    override val tømDBEtterHverTest = false
+
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -27,12 +29,10 @@ internal class AutomatiskBehandlingRydderBatchTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `skal lage task på behandling uten kravgunnlag og 8 uker gammel`() {
-        val fagsak = Testdata.fagsak
-        fagsakRepository.insert(fagsak)
-
+        val fagsak = fagsakRepository.insert(Testdata.fagsak())
         val behandling =
             behandlingRepository.insert(
-                Testdata.lagBehandling().copy(
+                Testdata.lagBehandling(fagsakId = fagsak.id).copy(
                     status = Behandlingsstatus.UTREDES,
                     opprettetDato = LocalDate.now().minusWeeks(9),
                 ),

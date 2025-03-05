@@ -90,7 +90,8 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         val fagsak = fagsakRepository.insert(Testdata.fagsak())
         behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id))
         val førstePeriode =
-            Testdata.getKravgrunnlagsperiode432()
+            Testdata
+                .getKravgrunnlagsperiode432()
                 .copy(
                     id = UUID.randomUUID(),
                     periode = Månedsperiode(fom = YearMonth.of(2020, 1), tom = YearMonth.of(2020, 1)),
@@ -101,7 +102,8 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                         ),
                 )
         val andrePeriode =
-            Testdata.getKravgrunnlagsperiode432()
+            Testdata
+                .getKravgrunnlagsperiode432()
                 .copy(
                     id = UUID.randomUUID(),
                     periode = Månedsperiode(fom = YearMonth.of(2020, 2), tom = YearMonth.of(2020, 2)),

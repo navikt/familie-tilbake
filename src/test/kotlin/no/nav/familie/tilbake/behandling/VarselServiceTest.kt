@@ -88,11 +88,15 @@ internal class VarselServiceTest : OppslagSpringRunnerTest() {
         varselsperioder
             .any {
                 it.fom ==
-                    Testdata.varsel().perioder
+                    Testdata
+                        .varsel()
+                        .perioder
                         .first()
                         .fom &&
                     it.tom ==
-                    Testdata.varsel().perioder
+                    Testdata
+                        .varsel()
+                        .perioder
                         .first()
                         .tom
             }.shouldBeTrue()

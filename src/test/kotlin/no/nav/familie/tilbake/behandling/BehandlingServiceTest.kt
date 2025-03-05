@@ -586,7 +586,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
             ),
         )
 
-        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET))
+        taskService
+            .finnTasksMedStatus(listOf(Status.UBEHANDLET))
             .forOne {
                 it.type shouldBe OpprettBehandlingManueltTask.TYPE
                 it.metadata["eksternFagsakId"] shouldBe "testverdi"
@@ -1305,7 +1306,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         behandlingssresultat.shouldNotBeNull()
         behandlingssresultat.type shouldBe Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD
 
-        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET))
+        taskService
+            .finnTasksMedStatus(listOf(Status.UBEHANDLET))
             .forNone {
                 it.logContext().behandlingId shouldBe behandling.id.toString()
                 it.type shouldBe SendHenleggelsesbrevTask.TYPE
