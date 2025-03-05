@@ -181,12 +181,12 @@ thead {
     width:  100%
 }
 
-.beslutter{
+.venstrejustertSignatur {
     padding: 0;
     border: none;
     text-align: left;
 }
-.saksbehandler{
+.høyrejustertSignatur {
     padding: 0;
     text-align: right;
     border: none;
