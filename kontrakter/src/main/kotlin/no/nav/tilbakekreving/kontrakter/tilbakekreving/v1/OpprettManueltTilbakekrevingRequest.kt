@@ -1,4 +1,6 @@
-package no.nav.familie.tilbake.kontrakter.tilbakekreving
+package no.nav.tilbakekreving.kontrakter.tilbakekreving.v1
+
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Ytelsestype
 
 // Denne brukes fagsystemet for å kalle /api/behandling/manuelt/task/v1 tjeneste i familie-tilbake
 data class OpprettManueltTilbakekrevingRequest(

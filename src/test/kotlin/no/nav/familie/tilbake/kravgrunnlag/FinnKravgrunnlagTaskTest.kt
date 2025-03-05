@@ -24,19 +24,20 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
-import no.nav.familie.tilbake.kontrakter.Fagsystem
-import no.nav.familie.tilbake.kontrakter.Språkkode
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Faktainfo
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.OpprettTilbakekrevingRequest
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Tilbakekrevingsvalg
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Vergetype
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEventPublisher
 import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
+import no.nav.tilbakekreving.kontrakter.Fagsystem
+import no.nav.tilbakekreving.kontrakter.Språkkode
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Faktainfo
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Tilbakekrevingsvalg
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Verge
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Vergetype
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.v1.OpprettTilbakekrevingRequest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -237,7 +238,7 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val verge =
             if (finnesVerge) {
-                no.nav.familie.tilbake.kontrakter.tilbakekreving.Verge(
+                Verge(
                     vergetype = Vergetype.VERGE_FOR_BARN,
                     navn = "Andy",
                     personIdent = "321321321",

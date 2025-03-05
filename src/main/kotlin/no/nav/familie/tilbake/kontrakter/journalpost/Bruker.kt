@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.kontrakter.journalpost
 
-import no.nav.familie.tilbake.kontrakter.BrukerIdType
+import no.nav.tilbakekreving.kontrakter.BrukerIdType
 
 data class Bruker(
     val id: String,

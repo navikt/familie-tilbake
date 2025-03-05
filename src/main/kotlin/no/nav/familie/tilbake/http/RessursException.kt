@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.http
 
-import no.nav.familie.tilbake.kontrakter.Ressurs
+import no.nav.tilbakekreving.kontrakter.Ressurs
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.RestClientResponseException
 

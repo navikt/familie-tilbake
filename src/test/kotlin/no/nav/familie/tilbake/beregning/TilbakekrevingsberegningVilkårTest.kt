@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.beregning
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
 import no.nav.familie.tilbake.beregning.modell.FordeltKravgrunnlagsbeløp
 import no.nav.familie.tilbake.beregning.modell.GrunnlagsperiodeMedSkatteprosent
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhet
@@ -11,6 +10,7 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingGodTro
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vurdering
+import no.nav.tilbakekreving.kontrakter.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested

@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.config
 
-import no.nav.familie.tilbake.kontrakter.Applikasjon
+import no.nav.tilbakekreving.kontrakter.Applikasjon
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.admin.NewTopic
 import org.apache.kafka.clients.consumer.ConsumerConfig

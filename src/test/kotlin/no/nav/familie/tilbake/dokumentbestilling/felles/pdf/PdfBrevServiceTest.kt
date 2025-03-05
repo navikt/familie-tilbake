@@ -13,12 +13,12 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.header.Institusjon
-import no.nav.familie.tilbake.kontrakter.Språkkode
 import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstidspunkt
 import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstype
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.organisasjon.OrganisasjonService
+import no.nav.tilbakekreving.kontrakter.Språkkode
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Ytelsestype
 import org.junit.jupiter.api.Test
 import java.util.Base64
 

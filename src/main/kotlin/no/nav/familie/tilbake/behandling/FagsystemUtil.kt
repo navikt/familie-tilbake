@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.behandling
 
-import no.nav.familie.tilbake.kontrakter.Fagsystem
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.Fagsystem
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Ytelsestype
 
 object FagsystemUtil {
     fun hentFagsystemFraYtelsestype(type: Ytelsestype): Fagsystem =

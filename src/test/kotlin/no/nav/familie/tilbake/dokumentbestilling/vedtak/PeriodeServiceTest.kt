@@ -10,9 +10,6 @@ import no.nav.familie.tilbake.data.Testdata.lagKravgrunnlagsperiode
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.SkalSammenslåPerioder
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
 import no.nav.familie.tilbake.foreldelse.VurdertForeldelseRepository
-import no.nav.familie.tilbake.kontrakter.Fagsystem
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassekode
@@ -20,6 +17,9 @@ import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
+import no.nav.tilbakekreving.kontrakter.Fagsystem
+import no.nav.tilbakekreving.kontrakter.Månedsperiode
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Ytelsestype
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

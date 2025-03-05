@@ -2,17 +2,12 @@ package no.nav.familie.tilbake.integration.familie
 
 import AbstractPingableRestClient
 import no.nav.familie.tilbake.config.IntegrasjonerConfig
-import no.nav.familie.tilbake.kontrakter.Fagsystem
-import no.nav.familie.tilbake.kontrakter.Fil
-import no.nav.familie.tilbake.kontrakter.Ressurs
-import no.nav.familie.tilbake.kontrakter.Tema
 import no.nav.familie.tilbake.kontrakter.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.tilbake.kontrakter.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.tilbake.kontrakter.dokdist.DistribuerJournalpostRequest
 import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstidspunkt
 import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstype
 import no.nav.familie.tilbake.kontrakter.dokdist.ManuellAdresse
-import no.nav.familie.tilbake.kontrakter.getDataOrThrow
 import no.nav.familie.tilbake.kontrakter.journalpost.Journalpost
 import no.nav.familie.tilbake.kontrakter.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.tilbake.kontrakter.navkontor.NavKontorEnhet
@@ -26,6 +21,11 @@ import no.nav.familie.tilbake.kontrakter.organisasjon.Organisasjon
 import no.nav.familie.tilbake.kontrakter.saksbehandler.Saksbehandler
 import no.nav.familie.tilbake.kontrakter.tilgangskontroll.Tilgang
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.kontrakter.Fagsystem
+import no.nav.tilbakekreving.kontrakter.Fil
+import no.nav.tilbakekreving.kontrakter.Ressurs
+import no.nav.tilbakekreving.kontrakter.Tema
+import no.nav.tilbakekreving.kontrakter.getDataOrThrow
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpHeaders

@@ -26,11 +26,11 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.HendelsestypePerYtels
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.HendelsesundertypePerHendelsestype
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
-import no.nav.familie.tilbake.kontrakter.Datoperiode
-import no.nav.familie.tilbake.kontrakter.Språkkode
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
+import no.nav.tilbakekreving.kontrakter.Datoperiode
+import no.nav.tilbakekreving.kontrakter.Språkkode
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Ytelsestype
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate

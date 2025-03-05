@@ -1,8 +1,8 @@
 package no.nav.familie.tilbake.iverksettvedtak.domain
 
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
+import no.nav.tilbakekreving.kontrakter.Månedsperiode
 import java.math.BigDecimal
 
 // Brukes bare for iverksettelse

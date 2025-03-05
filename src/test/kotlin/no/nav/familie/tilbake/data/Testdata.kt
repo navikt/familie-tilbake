@@ -33,12 +33,6 @@ import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
 import no.nav.familie.tilbake.iverksettvedtak.domain.ØkonomiXmlSendt
-import no.nav.familie.tilbake.kontrakter.Fagsystem
-import no.nav.familie.tilbake.kontrakter.Fil
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Tilbakekrevingsvalg
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Vergetype
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.GjelderType
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassekode
@@ -58,6 +52,12 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingGodTro
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingSærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
+import no.nav.tilbakekreving.kontrakter.Fagsystem
+import no.nav.tilbakekreving.kontrakter.Fil
+import no.nav.tilbakekreving.kontrakter.Månedsperiode
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Tilbakekrevingsvalg
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Vergetype
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Ytelsestype
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate

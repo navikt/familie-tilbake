@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.datatype.jsr310.deser.YearMonthDeserializer
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import no.nav.tilbakekreving.kontrakter.Ressurs
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
@@ -29,3 +30,5 @@ val objectMapper: ObjectMapper
             ).configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+
+fun <T> Ressurs<T>.toJson(): String = objectMapper.writeValueAsString(this)

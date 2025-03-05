@@ -2,9 +2,9 @@ package no.nav.familie.tilbake.behandling.domain
 
 import no.nav.familie.tilbake.common.repository.Sporbar
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
-import no.nav.familie.tilbake.kontrakter.Regelverk
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Tilbakekrevingsvalg
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Vergetype
+import no.nav.tilbakekreving.kontrakter.Regelverk
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Tilbakekrevingsvalg
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Vergetype
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
 import org.springframework.data.relational.core.mapping.Column

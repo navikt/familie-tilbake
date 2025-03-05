@@ -8,7 +8,6 @@ import no.nav.familie.tilbake.common.isZero
 import no.nav.familie.tilbake.iverksettvedtak.domain.KodeResultat
 import no.nav.familie.tilbake.iverksettvedtak.domain.Tilbakekrevingsbeløp
 import no.nav.familie.tilbake.iverksettvedtak.domain.Tilbakekrevingsperiode
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
@@ -16,6 +15,7 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
+import no.nav.tilbakekreving.kontrakter.Månedsperiode
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.math.RoundingMode

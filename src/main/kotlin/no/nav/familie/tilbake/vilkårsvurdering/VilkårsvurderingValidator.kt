@@ -5,10 +5,10 @@ import no.nav.familie.tilbake.api.dto.BehandlingsstegVilkårsvurderingDto
 import no.nav.familie.tilbake.api.dto.VilkårsvurderingsperiodeDto
 import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningUtil
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn
+import no.nav.tilbakekreving.kontrakter.Månedsperiode
 import org.springframework.http.HttpStatus
 import java.math.BigDecimal
 

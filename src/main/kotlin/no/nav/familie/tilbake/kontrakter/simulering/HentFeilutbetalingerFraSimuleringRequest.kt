@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.kontrakter.simulering
 
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Ytelsestype
 import java.math.BigDecimal
 import java.time.LocalDate
 

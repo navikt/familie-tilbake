@@ -1,9 +1,9 @@
 package no.nav.familie.tilbake.behandling
 
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Behandlingstype
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.HentFagsystemsbehandling
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.OpprettTilbakekrevingRequest
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Behandlingstype
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.v1.HentFagsystemsbehandling
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.v1.OpprettTilbakekrevingRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 

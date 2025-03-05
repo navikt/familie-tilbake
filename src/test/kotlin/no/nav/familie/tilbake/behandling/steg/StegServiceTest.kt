@@ -56,10 +56,6 @@ import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.iverksettvedtak.task.SendØkonomiTilbakekrevingsvedtakTask
-import no.nav.familie.tilbake.kontrakter.Datoperiode
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
-import no.nav.familie.tilbake.kontrakter.Regelverk
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Vergetype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.oppgave.FerdigstillOppgaveTask
@@ -67,6 +63,10 @@ import no.nav.familie.tilbake.oppgave.LagOppgaveTask
 import no.nav.familie.tilbake.totrinn.TotrinnsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
+import no.nav.tilbakekreving.kontrakter.Datoperiode
+import no.nav.tilbakekreving.kontrakter.Månedsperiode
+import no.nav.tilbakekreving.kontrakter.Regelverk
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Vergetype
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

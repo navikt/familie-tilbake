@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.avstemming.domain
 
 import no.nav.familie.tilbake.common.repository.Sporbar
-import no.nav.familie.tilbake.kontrakter.Fil
+import no.nav.tilbakekreving.kontrakter.Fil
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
 import org.springframework.data.relational.core.mapping.Embedded

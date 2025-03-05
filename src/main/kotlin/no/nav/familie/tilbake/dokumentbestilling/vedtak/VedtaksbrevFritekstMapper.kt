@@ -5,7 +5,7 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Friteksttype
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.SkalSammenslåPerioder
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsoppsummering
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsperiode
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
+import no.nav.tilbakekreving.kontrakter.Månedsperiode
 import java.util.UUID
 
 object VedtaksbrevFritekstMapper {

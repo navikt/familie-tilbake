@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.kontrakter
+package no.nav.tilbakekreving.kontrakter
 
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -88,11 +88,7 @@ data class Ressurs<T>(
         }
     }
 
-    fun toJson(): String = objectMapper.writeValueAsString(this)
-
     override fun toString(): String = "Ressurs(status=$status, melding='$melding')"
-
-    fun toSecureString(): String = "Ressurs(status=$status, melding='$melding', frontendFeilmelding='$frontendFeilmelding')"
 }
 
 fun <T> Ressurs<T>.getDataOrThrow(): T =

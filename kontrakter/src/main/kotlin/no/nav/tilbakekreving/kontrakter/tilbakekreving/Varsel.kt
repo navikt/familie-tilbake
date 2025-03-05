@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.kontrakter.tilbakekreving
+package no.nav.tilbakekreving.kontrakter.tilbakekreving
 
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank

@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.kontrakter.journalpost
 
-import no.nav.familie.tilbake.kontrakter.Tema
+import no.nav.tilbakekreving.kontrakter.Tema
 
 data class JournalposterForBrukerRequest(
     val brukerId: Bruker,

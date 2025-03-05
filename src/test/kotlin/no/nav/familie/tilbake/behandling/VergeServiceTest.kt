@@ -29,12 +29,12 @@ import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.integration.pdl.PdlClient
-import no.nav.familie.tilbake.kontrakter.Applikasjon
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Vergetype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.person.PersonService
+import no.nav.tilbakekreving.kontrakter.Applikasjon
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Vergetype
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

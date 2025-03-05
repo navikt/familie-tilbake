@@ -4,7 +4,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmottagerUtil
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.BaseDokument
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.HarBrukerUttaltSeg
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Ytelsestype
 import java.math.BigDecimal
 import java.time.LocalDate
 

@@ -42,13 +42,13 @@ import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
-import no.nav.familie.tilbake.kontrakter.Språkkode
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
+import no.nav.tilbakekreving.kontrakter.Månedsperiode
+import no.nav.tilbakekreving.kontrakter.Språkkode
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Ytelsestype
 import org.apache.commons.text.WordUtils
 import org.springframework.stereotype.Service
 import java.math.BigDecimal

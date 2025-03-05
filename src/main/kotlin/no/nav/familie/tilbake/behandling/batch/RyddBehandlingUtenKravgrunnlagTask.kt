@@ -12,13 +12,13 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingService
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.SendBrevTaskdata
-import no.nav.familie.tilbake.kontrakter.Fagsystem
 import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.kontrakter.oppgave.Oppgavetype
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.oppgave.OppgavePrioritetService
 import no.nav.familie.tilbake.oppgave.OppgaveService
+import no.nav.tilbakekreving.kontrakter.Fagsystem
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime

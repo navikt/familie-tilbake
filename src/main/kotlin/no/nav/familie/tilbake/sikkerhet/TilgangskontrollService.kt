@@ -11,12 +11,11 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.RolleConfig
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
-import no.nav.familie.tilbake.kontrakter.Fagsystem
-import no.nav.familie.tilbake.kontrakter.Tema
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.kontrakter.Fagsystem
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Ytelsestype
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
 import java.math.BigInteger
@@ -234,9 +233,9 @@ class TilgangskontrollService(
 
     private fun Fagsystem.tilTema() =
         when (this) {
-            Fagsystem.BA -> Tema.BAR
-            Fagsystem.KONT, Fagsystem.KS -> Tema.KON
-            Fagsystem.EF -> Tema.ENF
+            Fagsystem.BA -> no.nav.tilbakekreving.kontrakter.Tema.BAR
+            Fagsystem.KONT, Fagsystem.KS -> no.nav.tilbakekreving.kontrakter.Tema.KON
+            Fagsystem.EF -> no.nav.tilbakekreving.kontrakter.Tema.ENF
             Fagsystem.IT01 -> throw Feil(
                 message = "Fagsystem $this støttes ikke",
                 logContext = SecureLog.Context.tom(),

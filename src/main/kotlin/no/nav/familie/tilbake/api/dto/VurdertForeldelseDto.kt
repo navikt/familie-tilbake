@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.api.dto
 
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
-import no.nav.familie.tilbake.kontrakter.Datoperiode
+import no.nav.tilbakekreving.kontrakter.Datoperiode
 import java.math.BigDecimal
 import java.time.LocalDate
 

@@ -10,8 +10,8 @@ import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.common.fagsystem
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
-import no.nav.familie.tilbake.kontrakter.Fil
 import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
+import no.nav.tilbakekreving.kontrakter.Fil
 import org.slf4j.LoggerFactory
 import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service

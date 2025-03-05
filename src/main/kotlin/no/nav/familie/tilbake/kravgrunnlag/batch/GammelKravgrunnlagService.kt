@@ -18,12 +18,6 @@ import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Behandlingstype
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Faktainfo
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.HentFagsystemsbehandling
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.OpprettTilbakekrevingRequest
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Tilbakekrevingsvalg
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.kravgrunnlag.HentKravgrunnlagService
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagMapper
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
@@ -37,6 +31,12 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottattArkiv
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Behandlingstype
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Faktainfo
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Tilbakekrevingsvalg
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.v1.HentFagsystemsbehandling
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.v1.OpprettTilbakekrevingRequest
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

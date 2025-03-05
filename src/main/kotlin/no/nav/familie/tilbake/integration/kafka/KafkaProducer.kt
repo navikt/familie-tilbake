@@ -5,9 +5,9 @@ import no.nav.familie.tilbake.config.KafkaConfig
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.sakshendelse.Behandlingstilstand
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.Vedtaksoppsummering
 import no.nav.familie.tilbake.kontrakter.objectMapper
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.HentFagsystemsbehandlingRequest
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.v1.HentFagsystemsbehandlingRequest
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.context.annotation.Profile
 import org.springframework.kafka.core.KafkaTemplate

@@ -4,8 +4,6 @@ import AbstractPingableRestClient
 import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
 import no.nav.familie.tilbake.common.exceptionhandler.KravgrunnlagIkkeFunnetFeil
 import no.nav.familie.tilbake.common.exceptionhandler.SperretKravgrunnlagFeil
-import no.nav.familie.tilbake.kontrakter.Ressurs
-import no.nav.familie.tilbake.kontrakter.getDataOrThrow
 import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.kontrakter.simulering.FeilutbetalingerFraSimulering
 import no.nav.familie.tilbake.kontrakter.simulering.FeilutbetaltPeriode
@@ -27,6 +25,8 @@ import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagHentDetaljRequest
 import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagHentDetaljResponse
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakResponse
+import no.nav.tilbakekreving.kontrakter.Ressurs
+import no.nav.tilbakekreving.kontrakter.getDataOrThrow
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagBelopDto
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagPeriodeDto

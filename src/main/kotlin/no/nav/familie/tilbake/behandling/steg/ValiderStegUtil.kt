@@ -3,8 +3,8 @@ package no.nav.familie.tilbake.behandling.steg
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
-import no.nav.familie.tilbake.kontrakter.Regelverk
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.kontrakter.Regelverk
 import java.util.UUID
 
 fun validerAtBehandlingIkkeErAvsluttet(

@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.beregning
 
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
+import no.nav.tilbakekreving.kontrakter.Månedsperiode
 import java.math.BigDecimal
 import java.math.RoundingMode
 

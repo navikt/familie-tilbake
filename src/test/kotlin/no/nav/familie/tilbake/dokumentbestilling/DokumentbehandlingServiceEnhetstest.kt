@@ -16,10 +16,10 @@ import no.nav.familie.tilbake.dokumentbestilling.innhentdokumentasjon.InnhentDok
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
 import no.nav.familie.tilbake.dokumentbestilling.varsel.manuelt.ManueltVarselbrevService
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.MottakerType
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.MottakerType
 import org.junit.jupiter.api.Test
 import java.util.UUID
 

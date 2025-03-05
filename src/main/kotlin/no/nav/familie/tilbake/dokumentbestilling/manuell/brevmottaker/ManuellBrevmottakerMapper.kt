@@ -3,8 +3,8 @@ package no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker
 import no.nav.familie.tilbake.api.dto.ManuellBrevmottakerRequestDto
 import no.nav.familie.tilbake.api.dto.ManuellBrevmottakerResponsDto
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Brevmottaker
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.ManuellAdresseInfo
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Brevmottaker
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.ManuellAdresseInfo
 import java.util.UUID
 
 object ManuellBrevmottakerMapper {

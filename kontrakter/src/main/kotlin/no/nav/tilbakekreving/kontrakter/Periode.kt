@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.kontrakter
+package no.nav.tilbakekreving.kontrakter
 
 import java.time.LocalDate
 import java.time.YearMonth
