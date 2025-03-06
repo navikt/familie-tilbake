@@ -64,6 +64,8 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
+    override val tømDBEtterHverTest = false
+
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -109,8 +111,8 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        fagsak = Testdata.fagsak
-        behandling = Testdata.lagBehandling()
+        fagsak = Testdata.fagsak()
+        behandling = Testdata.lagBehandling(fagsakId = fagsak.id)
         behandlingId = behandling.id
         fagsakRepository.insert(fagsak)
         behandlingRepository.insert(behandling)

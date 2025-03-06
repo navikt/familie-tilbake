@@ -87,6 +87,6 @@ internal class OppgavePrioritetServiceTest {
                     ),
             )
 
-        return Testdata.lagKravgrunnlag(Testdata.lagBehandling().id).copy(perioder = setOf(periode))
+        return Testdata.lagKravgrunnlag(Testdata.lagBehandling(Testdata.fagsak().id).id).copy(perioder = setOf(periode))
     }
 }

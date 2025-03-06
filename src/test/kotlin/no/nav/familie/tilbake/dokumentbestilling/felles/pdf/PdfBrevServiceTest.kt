@@ -15,7 +15,6 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.header.Institusjon
 import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstidspunkt
 import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstype
 import no.nav.familie.tilbake.micrometer.TellerService
-import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
@@ -26,7 +25,6 @@ internal class PdfBrevServiceTest {
     private val journalføringService: JournalføringService = mockk(relaxed = true)
     private val tellerService: TellerService = mockk(relaxed = true)
     private val taskService: TracableTaskService = mockk(relaxed = true)
-    private val organisasjonService: OrganisasjonService = mockk(relaxed = true)
 
     private val pdfBrevService =
         PdfBrevService(
@@ -42,10 +40,10 @@ internal class PdfBrevServiceTest {
         every { taskService.save(capture(slot), any()) } returns mockk()
 
         val brevdata = lagBrevdata()
-
+        val fagsak = Testdata.fagsak()
         pdfBrevService.sendBrev(
-            Testdata.lagBehandling(),
-            Testdata.fagsak,
+            Testdata.lagBehandling(fagsakId = fagsak.id),
+            fagsak,
             brevtype = Brevtype.VARSEL,
             brevdata,
             5L,
@@ -68,8 +66,8 @@ internal class PdfBrevServiceTest {
         val slot = CapturingSlot<Task>()
         every { taskService.save(capture(slot), any()) } returns mockk()
         val brevdata = lagBrevdata()
-
-        pdfBrevService.sendBrev(Testdata.lagBehandling(), Testdata.fagsak, brevtype = Brevtype.VEDTAK, brevdata)
+        val fagsak = Testdata.fagsak()
+        pdfBrevService.sendBrev(Testdata.lagBehandling(fagsakId = fagsak.id), fagsak, brevtype = Brevtype.VEDTAK, brevdata)
 
         val task = slot.captured
 
@@ -85,8 +83,8 @@ internal class PdfBrevServiceTest {
         val slot = CapturingSlot<Task>()
         every { taskService.save(capture(slot), any()) } returns mockk()
         val brevdata = lagBrevdata()
-
-        pdfBrevService.sendBrev(Testdata.lagBehandling(), Testdata.fagsak, brevtype = Brevtype.HENLEGGELSE, brevdata)
+        val fagsak = Testdata.fagsak()
+        pdfBrevService.sendBrev(Testdata.lagBehandling(fagsakId = fagsak.id), fagsak, brevtype = Brevtype.HENLEGGELSE, brevdata)
 
         val task = slot.captured
 
@@ -105,8 +103,8 @@ internal class PdfBrevServiceTest {
             lagBrevdata().apply {
                 metadata = this.metadata.copy(institusjon = Institusjon("876543210", "Foo & Bar AS"))
             }
-
-        pdfBrevService.sendBrev(Testdata.lagBehandling(), Testdata.fagsak, brevtype = Brevtype.HENLEGGELSE, brevdata)
+        val fagsak = Testdata.fagsak()
+        pdfBrevService.sendBrev(Testdata.lagBehandling(fagsakId = fagsak.id), fagsak, brevtype = Brevtype.HENLEGGELSE, brevdata)
 
         val task = slot.captured
 

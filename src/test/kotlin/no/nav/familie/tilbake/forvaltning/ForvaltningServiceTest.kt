@@ -13,8 +13,8 @@ import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
-import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingRequestSendtRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.common.ContextService
@@ -72,9 +72,6 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
     private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
 
     @Autowired
-    private lateinit var requestSendtRepository: HentFagsystemsbehandlingRequestSendtRepository
-
-    @Autowired
     private lateinit var faktaFeilutbetalingRepository: FaktaFeilutbetalingRepository
 
     @Autowired
@@ -93,11 +90,12 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
     private lateinit var historikkService: HistorikkService
 
     private lateinit var behandling: Behandling
+    private lateinit var fagsak: Fagsak
 
     @BeforeEach
     fun init() {
-        behandling = Testdata.lagBehandling()
-        fagsakRepository.insert(Testdata.fagsak)
+        fagsak = fagsakRepository.insert(Testdata.fagsak())
+        behandling = Testdata.lagBehandling(fagsakId = fagsak.id)
         behandlingRepository.insert(behandling)
         behandlingsstegstilstandRepository
             .insert(

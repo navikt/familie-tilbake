@@ -74,8 +74,8 @@ class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        fagsak = fagsakRepository.insert(Testdata.fagsak)
-        behandling = behandlingRepository.insert(Testdata.lagBehandling())
+        fagsak = fagsakRepository.insert(Testdata.fagsak())
+        behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId = fagsak.id))
         behandlingsstegstilstandRepository.insert(Testdata.lagBehandlingsstegstilstand(behandling.id))
         dokumentBehandlingService =
             DokumentbehandlingService(

@@ -52,6 +52,8 @@ import java.util.Calendar
     ],
 )
 internal class TilgangskontrollServiceTest : OppslagSpringRunnerTest() {
+    override val tømDBEtterHverTest = false
+
     companion object {
         const val BARNETRYGD_BESLUTTER_ROLLE = "bb123"
         const val BARNETRYGD_SAKSBEHANDLER_ROLLE = "bs123"
@@ -107,9 +109,8 @@ internal class TilgangskontrollServiceTest : OppslagSpringRunnerTest() {
 
         fagsak =
             fagsakRepository.insert(
-                Fagsak(
+                Testdata.fagsak().copy(
                     bruker = Bruker("1232"),
-                    eksternFagsakId = "123",
                     fagsystem = Fagsystem.BA,
                     ytelsestype = Ytelsestype.BARNETRYGD,
                 ),

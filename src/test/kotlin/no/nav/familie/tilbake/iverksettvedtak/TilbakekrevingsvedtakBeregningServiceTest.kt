@@ -51,6 +51,8 @@ import java.math.BigInteger
 import java.time.YearMonth
 
 internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTest() {
+    override val tømDBEtterHverTest = false
+
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -85,8 +87,8 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
 
     @BeforeEach
     fun init() {
-        behandling = Testdata.lagBehandling()
-        fagsak = Testdata.fagsak
+        fagsak = Testdata.fagsak()
+        behandling = Testdata.lagBehandling(fagsakId = fagsak.id)
         fagsakRepository.insert(fagsak)
         behandlingRepository.insert(behandling)
 

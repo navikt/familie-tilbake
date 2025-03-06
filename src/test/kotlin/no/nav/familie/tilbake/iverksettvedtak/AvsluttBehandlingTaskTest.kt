@@ -28,6 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
 
 internal class AvsluttBehandlingTaskTest : OppslagSpringRunnerTest() {
+    override val tømDBEtterHverTest = false
+
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -52,8 +54,8 @@ internal class AvsluttBehandlingTaskTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        fagsak = Testdata.fagsak
-        behandling = Testdata.lagBehandling()
+        fagsak = Testdata.fagsak()
+        behandling = Testdata.lagBehandling(fagsakId = fagsak.id)
         behandlingId = behandling.id
         fagsakRepository.insert(fagsak)
         behandlingRepository.insert(behandling)

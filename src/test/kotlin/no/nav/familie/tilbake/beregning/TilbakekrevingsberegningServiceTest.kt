@@ -41,6 +41,8 @@ import java.time.YearMonth
 import java.util.UUID
 
 class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
+    override val tømDBEtterHverTest = false
+
     @Autowired
     private lateinit var tilbakekrevingsberegningService: TilbakekrevingsberegningService
 
@@ -63,8 +65,8 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        fagsakRepository.insert(Testdata.fagsak)
-        behandling = behandlingRepository.insert(Testdata.lagBehandling())
+        val fagsak = fagsakRepository.insert(Testdata.fagsak())
+        behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId = fagsak.id))
     }
 
     @Test
