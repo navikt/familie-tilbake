@@ -48,7 +48,7 @@ På nav.no/dittnav kan du se dokumentene i saken din.
 Med vennlig hilsen
 {{{avsenderenhet}}}
 
-{venstrejustert}{{{ansvarligSaksbehandler}}}{høyrejustert}{{{ansvarligBeslutter}}}{{#if brevmetadata.finnesAnnenMottaker}}
+{{#if ansvarligBeslutter}}{venstrejustert}{{{ansvarligBeslutter}}}{høyrejustert}{{{ansvarligSaksbehandler}}}{{else}}{venstrejustert}{{{ansvarligSaksbehandler}}}{høyrejustert}{{/if}}{{#if brevmetadata.finnesAnnenMottaker}}
 
 
 Brev med likt innhold er sendt til {{{annenMottagersNavn}}}{{/if}}

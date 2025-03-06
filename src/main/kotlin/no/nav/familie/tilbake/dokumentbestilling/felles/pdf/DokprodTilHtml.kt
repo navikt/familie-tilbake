@@ -34,13 +34,13 @@ object DokprodTilHtml {
                 }
                 if (linje.startsWith("{venstrejustert}")) {
                     val la = linje.replace("{venstrejustert}", "")
-                    val saksbehandler = la.substringBefore("{høyrejustert}")
-                    val beslutter = la.substringAfter("{høyrejustert}")
+                    val venstrejustertSignatur = la.substringBefore("{høyrejustert}")
+                    val høyrejustertSignatur = la.substringAfter("{høyrejustert}")
                     builder.append(
                         """<table class="signatur">
                     <tr>
-                    <td class="saksbehandler">$saksbehandler</td>
-                    <td class="beslutter">$beslutter</td>
+                    <td class="venstrejustertSignatur">$venstrejustertSignatur</td>
+                    <td class="høyrejustertSignatur">$høyrejustertSignatur</td>
                     </tr>
                     </table>""",
                     )
