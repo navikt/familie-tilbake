@@ -11,6 +11,7 @@ import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
+import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.data.Testdata.lagBehandling
 import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
@@ -53,7 +54,7 @@ class KravvedtakstatusServiceTest {
             oppgaveService = oppgaveService,
         )
 
-    val behandling = lagBehandling()
+    val behandling = lagBehandling(fagsakId = Testdata.fagsak().id)
     val kravgrunnlag = mockk<Kravgrunnlag431>(relaxed = true)
 
     @BeforeAll
