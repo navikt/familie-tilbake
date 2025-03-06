@@ -8,6 +8,7 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.data.Testdata
@@ -25,6 +26,7 @@ internal class OppdaterAnsvarligSaksbehandlerTaskTest {
     private val mockOppgaveService: OppgaveService = mockk(relaxed = true)
     private val oppgavePrioritetService = mockk<OppgavePrioritetService>()
     private lateinit var behandling: Behandling
+    private lateinit var fagsak: Fagsak
 
     private val oppdaterAnsvarligSaksbehandlerTask =
         OppdaterAnsvarligSaksbehandlerTask(mockOppgaveService, behandlingRepository, oppgavePrioritetService)
@@ -32,8 +34,9 @@ internal class OppdaterAnsvarligSaksbehandlerTaskTest {
     @BeforeEach
     fun init() {
         clearMocks(mockOppgaveService)
-        behandling = Testdata.lagBehandling()
-        every { fagsakRepository.findByIdOrThrow(Testdata.fagsak.id) } returns Testdata.fagsak
+        fagsak = Testdata.fagsak()
+        behandling = Testdata.lagBehandling(fagsakId = fagsak.id)
+        every { fagsakRepository.findByIdOrThrow(fagsak.id) } returns fagsak
         every { behandlingRepository.findByIdOrThrow(behandling.id) } returns behandling
         every { oppgavePrioritetService.utledOppgaveprioritet(any(), any()) } returns OppgavePrioritet.NORM
     }

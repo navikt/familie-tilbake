@@ -40,6 +40,8 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
+    override val tømDBEtterHverTest = false
+
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -59,8 +61,8 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        behandling = lagBehandling()
-        fagsakRepository.insert(Testdata.fagsak)
+        val fagsak = fagsakRepository.insert(Testdata.fagsak())
+        behandling = lagBehandling(fagsak.id)
         behandlingRepository.insert(behandling)
     }
 
