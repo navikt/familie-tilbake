@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.kontrakter.klage
 
-import no.nav.familie.tilbake.kontrakter.Regelverk
+import no.nav.tilbakekreving.kontrakter.Regelverk
 import java.time.LocalDateTime
 
 data class FagsystemVedtak(

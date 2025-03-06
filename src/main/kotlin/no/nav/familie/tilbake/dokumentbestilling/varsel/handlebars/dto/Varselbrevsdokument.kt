@@ -3,8 +3,8 @@ package no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmottagerUtil
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.BaseDokument
-import no.nav.familie.tilbake.kontrakter.Datoperiode
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.Datoperiode
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Ytelsestype
 import java.time.LocalDate
 
 data class Varselbrevsdokument(

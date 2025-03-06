@@ -7,8 +7,8 @@ import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningUtil
 import no.nav.familie.tilbake.faktaomfeilutbetaling.LogiskPeriode
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
+import no.nav.tilbakekreving.kontrakter.Månedsperiode
 import java.math.RoundingMode
 import java.util.UUID
 

@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.dokumentbestilling.felles.header
 
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.Språkstøtte
-import no.nav.familie.tilbake.kontrakter.Språkkode
+import no.nav.tilbakekreving.kontrakter.Språkkode
 
 class HeaderData(
     override val språkkode: Språkkode,
