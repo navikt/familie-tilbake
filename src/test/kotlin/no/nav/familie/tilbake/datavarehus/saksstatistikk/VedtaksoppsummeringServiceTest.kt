@@ -12,6 +12,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsvedtak
+import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Iverksettingsstatus
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.data.Testdata
@@ -54,6 +55,8 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
+    override val tømDBEtterHverTest = false
+
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
@@ -76,7 +79,7 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
     private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
 
     private lateinit var vedtaksoppsummeringService: VedtaksoppsummeringService
-
+    private lateinit var fagsak: Fagsak
     private lateinit var behandling: Behandling
     private lateinit var saksnummer: String
 
@@ -93,16 +96,16 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
                 faktaFeilutbetalingRepository,
                 beregningService,
             )
-
+        fagsak = Testdata.fagsak()
         behandling =
-            Testdata.lagBehandling().copy(
+            Testdata.lagBehandling(fagsakId = fagsak.id).copy(
                 ansvarligSaksbehandler = ANSVARLIG_SAKSBEHANDLER,
                 ansvarligBeslutter = ANSVARLIG_BESLUTTER,
                 behandlendeEnhet = "8020",
             )
-        fagsakRepository.insert(Testdata.fagsak.copy(fagsystem = Fagsystem.EF, ytelsestype = Ytelsestype.OVERGANGSSTØNAD))
+        fagsakRepository.insert(fagsak.copy(fagsystem = Fagsystem.EF, ytelsestype = Ytelsestype.OVERGANGSSTØNAD))
         behandling = behandlingRepository.insert(behandling)
-        saksnummer = Testdata.fagsak.eksternFagsakId
+        saksnummer = fagsak.eksternFagsakId
         lagKravgrunnlag()
         lagFakta()
     }

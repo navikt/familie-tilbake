@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
@@ -24,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 internal class VarselbrevServiceTest : OppslagSpringRunnerTest() {
+    override val tømDBEtterHverTest = false
     private val fagsakRepository: FagsakRepository = mockk()
     private val eksterneDataForBrevService: EksterneDataForBrevService = mockk(relaxed = true)
     private val distribusjonshåndteringService: DistribusjonshåndteringService = mockk()
@@ -35,6 +37,7 @@ internal class VarselbrevServiceTest : OppslagSpringRunnerTest() {
     private lateinit var varselbrevUtil: VarselbrevUtil
 
     private lateinit var varselbrevService: VarselbrevService
+    private lateinit var fagsak: Fagsak
 
     @BeforeEach
     fun init() {
@@ -48,8 +51,8 @@ internal class VarselbrevServiceTest : OppslagSpringRunnerTest() {
             )
 
         val personinfo = Personinfo("28056325874", LocalDate.now(), "Fiona")
-
-        every { eksterneDataForBrevService.hentPerson(Testdata.fagsak.bruker.ident, any(), any()) }.returns(personinfo)
+        fagsak = Testdata.fagsak()
+        every { eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, any(), any()) }.returns(personinfo)
         every {
             eksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any(), any())
         }.returns(Adresseinfo("12345678901", "Test"))
@@ -77,7 +80,7 @@ internal class VarselbrevServiceTest : OppslagSpringRunnerTest() {
                 ),
                 Fagsystem.EF,
                 "321654",
-                Testdata.fagsak.bruker.ident,
+                fagsak.bruker.ident,
                 null,
                 fagsystemsbehandlingId = "123",
             )

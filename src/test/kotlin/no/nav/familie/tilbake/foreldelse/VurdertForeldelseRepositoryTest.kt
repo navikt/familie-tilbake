@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
@@ -13,6 +14,8 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 internal class VurdertForeldelseRepositoryTest : OppslagSpringRunnerTest() {
+    override val tømDBEtterHverTest = false
+
     @Autowired
     private lateinit var vurdertForeldelseRepository: VurdertForeldelseRepository
 
@@ -23,11 +26,12 @@ internal class VurdertForeldelseRepositoryTest : OppslagSpringRunnerTest() {
     private lateinit var fagsakRepository: FagsakRepository
 
     private lateinit var vurdertForeldelse: VurdertForeldelse
+    private lateinit var fagsak: Fagsak
 
     @BeforeEach
     fun init() {
-        fagsakRepository.insert(Testdata.fagsak)
-        val behandling = behandlingRepository.insert(Testdata.lagBehandling())
+        fagsak = fagsakRepository.insert(Testdata.fagsak())
+        val behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId = fagsak.id))
         vurdertForeldelse = Testdata.lagVurdertForeldelse(behandling.id)
     }
 

@@ -8,6 +8,7 @@ import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
@@ -26,6 +27,8 @@ import java.util.Properties
 import java.util.UUID
 
 internal class DistribuerDokumentVedDødsfallTaskTest : OppslagSpringRunnerTest() {
+    override val tømDBEtterHverTest = false
+
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -39,13 +42,14 @@ internal class DistribuerDokumentVedDødsfallTaskTest : OppslagSpringRunnerTest(
     private lateinit var distribuerDokumentVedDødsfallTask: DistribuerDokumentVedDødsfallTask
 
     private lateinit var behandling: Behandling
+    private lateinit var fagsak: Fagsak
     private lateinit var behandlingId: UUID
 
     @BeforeEach
     fun init() {
-        behandling = Testdata.lagBehandling()
+        fagsak = fagsakRepository.insert(Testdata.fagsak())
+        behandling = Testdata.lagBehandling(fagsakId = fagsak.id)
         behandlingId = behandling.id
-        fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(behandling)
     }
 
