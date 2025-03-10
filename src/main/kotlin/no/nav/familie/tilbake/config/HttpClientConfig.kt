@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.config
 
+import no.nav.familie.tilbake.http.BearerTokenClientCredentialsClientInterceptor
 import no.nav.familie.tilbake.http.BearerTokenClientInterceptor
 import no.nav.familie.tilbake.http.ConsumerIdClientInterceptor
 import no.nav.familie.tilbake.http.MdcValuesPropagatingClientInterceptor
@@ -27,7 +28,7 @@ class HttpClientConfig {
     fun restTemplateClientCredentialEntraIdBearer(
         restTemplateBuilder: RestTemplateBuilder,
         consumerIdClientInterceptor: ConsumerIdClientInterceptor,
-        bearerTokenClientInterceptor: BearerTokenClientInterceptor,
+        bearerTokenClientInterceptor: BearerTokenClientCredentialsClientInterceptor,
     ): RestOperations =
         restTemplateBuilder
             .additionalInterceptors(
