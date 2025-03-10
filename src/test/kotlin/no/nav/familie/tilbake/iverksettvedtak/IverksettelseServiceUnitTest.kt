@@ -59,7 +59,7 @@ class IverksettelseServiceUnitTest {
 
     @BeforeEach
     fun init() {
-        behandling = Testdata.lagBehandling()
+        behandling = Testdata.lagBehandling(fagsakId = Testdata.fagsak().id)
     }
 
     @Test

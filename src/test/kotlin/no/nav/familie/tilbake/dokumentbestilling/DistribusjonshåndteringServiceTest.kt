@@ -90,8 +90,8 @@ class DistribusjonshåndteringServiceTest {
             featureToggleService = featureToggleService,
         )
 
-    private val behandling = Testdata.lagBehandling()
-    private val fagsak = Testdata.fagsak
+    private val fagsak = Testdata.fagsak()
+    private val behandling = Testdata.lagBehandling(fagsakId = fagsak.id)
     private val personinfoBruker = Personinfo(fagsak.bruker.ident, LocalDate.now(), navn = "brukernavn")
     private val brukerAdresse = Adresseinfo(personinfoBruker.ident, personinfoBruker.navn)
     private val verge = behandling.aktivVerge!!

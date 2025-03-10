@@ -12,6 +12,7 @@ import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
@@ -40,8 +41,6 @@ class OppgaveServiceTest {
     private val personService: PersonService = mockk(relaxed = true)
     private val environment: Environment = mockk(relaxed = true)
     private val taskService: TaskService = mockk(relaxed = true)
-    // private val behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository = mockk(relaxed = true)
-    // private val totrinnService: TotrinnService = mockk(relaxed = true)
 
     private val mappeIdGodkjenneVedtak = 100
     private val mappeIdBehandleSak = 200
@@ -55,11 +54,13 @@ class OppgaveServiceTest {
 
     private lateinit var oppgaveService: OppgaveService
     private lateinit var behandling: Behandling
+    private lateinit var fagsak: Fagsak
 
     @BeforeEach
     fun setUp() {
         clearMocks(integrasjonerClient)
-        behandling = Testdata.lagBehandling()
+        fagsak = Testdata.fagsak()
+        behandling = Testdata.lagBehandling(fagsakId = fagsak.id)
         oppgaveService =
             OppgaveService(
                 behandlingRepository,
