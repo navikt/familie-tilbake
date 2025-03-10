@@ -13,7 +13,6 @@ import no.nav.familie.tilbake.common.exceptionhandler.ManglerOppgaveFeil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
-import no.nav.familie.tilbake.kontrakter.Tema
 import no.nav.familie.tilbake.kontrakter.oppgave.Behandlingstype
 import no.nav.familie.tilbake.kontrakter.oppgave.FinnOppgaveRequest
 import no.nav.familie.tilbake.kontrakter.oppgave.FinnOppgaveResponseDto
@@ -28,6 +27,7 @@ import no.nav.familie.tilbake.kontrakter.oppgave.StatusEnum
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.person.PersonService
+import no.nav.tilbakekreving.kontrakter.Tema
 import org.springframework.core.env.Environment
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service

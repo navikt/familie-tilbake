@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.common.exceptionhandler
 
-import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.kontrakter.Ressurs
 import org.slf4j.LoggerFactory
 import org.springframework.core.NestedExceptionUtils
 import org.springframework.http.HttpStatus
@@ -28,7 +28,10 @@ class ApiExceptionHandler {
     }
 
     @ExceptionHandler(ApiFeil::class)
-    fun handleThrowable(feil: ApiFeil): ResponseEntity<Ressurs<Nothing>> = ResponseEntity.status(feil.httpStatus).body(Ressurs.failure(frontendFeilmelding = feil.feil))
+    fun handleThrowable(feil: ApiFeil): ResponseEntity<Ressurs<Nothing>> =
+        ResponseEntity.status(feil.httpStatus).body(
+            Ressurs.failure(frontendFeilmelding = feil.feil),
+        )
 
     @ExceptionHandler(Feil::class)
     fun handleThrowable(feil: Feil): ResponseEntity<Ressurs<Nothing>> {

@@ -13,12 +13,12 @@ import no.nav.familie.tilbake.dokumentbestilling.henleggelse.HenleggelsesbrevSer
 import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevService
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.Avsnitt
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevService
-import no.nav.familie.tilbake.kontrakter.Ressurs
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.ForhåndsvisVarselbrevRequest
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.tilbakekreving.kontrakter.Ressurs
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.ForhåndsvisVarselbrevRequest
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable

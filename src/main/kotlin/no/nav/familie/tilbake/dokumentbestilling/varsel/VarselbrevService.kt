@@ -18,9 +18,9 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.Fritekstbrevsdata
 import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevUtil.Companion.TITTEL_VARSEL_TILBAKEBETALING
 import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
-import no.nav.familie.tilbake.kontrakter.Datoperiode
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.ForhåndsvisVarselbrevRequest
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.kontrakter.Datoperiode
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.ForhåndsvisVarselbrevRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 

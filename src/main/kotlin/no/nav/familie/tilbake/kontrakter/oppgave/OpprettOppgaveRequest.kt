@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.kontrakter.oppgave
 
-import no.nav.familie.tilbake.kontrakter.Tema
+import no.nav.tilbakekreving.kontrakter.Tema
 import java.time.LocalDate
 
 data class OpprettOppgaveRequest(

@@ -22,8 +22,8 @@ import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.Man
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevgunnlagService
 import no.nav.familie.tilbake.kontrakter.dokdist.AdresseType
 import no.nav.familie.tilbake.kontrakter.dokdist.ManuellAdresse
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.MottakerType.DØDSBO
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.MottakerType.DØDSBO
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 

@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.beregning.modell
 
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vurdering
+import no.nav.tilbakekreving.kontrakter.Månedsperiode
 import java.math.BigDecimal
 
 data class Beregningsresultatsperiode(

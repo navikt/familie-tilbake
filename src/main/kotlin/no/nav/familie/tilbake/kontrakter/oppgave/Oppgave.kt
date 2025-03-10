@@ -2,7 +2,7 @@ package no.nav.familie.tilbake.kontrakter.oppgave
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
-import no.nav.familie.tilbake.kontrakter.Tema
+import no.nav.tilbakekreving.kontrakter.Tema
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)

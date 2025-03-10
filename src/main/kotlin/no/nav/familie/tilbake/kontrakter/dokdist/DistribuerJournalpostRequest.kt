@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.kontrakter.dokdist
 
 import jakarta.validation.constraints.NotBlank
-import no.nav.familie.tilbake.kontrakter.Fagsystem
+import no.nav.tilbakekreving.kontrakter.Fagsystem
 
 data class DistribuerJournalpostRequest(
     @field:NotBlank val journalpostId: String,

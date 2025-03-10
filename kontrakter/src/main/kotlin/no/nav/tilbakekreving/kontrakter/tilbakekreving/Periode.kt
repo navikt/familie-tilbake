@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.kontrakter.tilbakekreving
+package no.nav.tilbakekreving.kontrakter.tilbakekreving
 
 import java.time.LocalDate
 

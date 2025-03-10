@@ -82,6 +82,8 @@ dependencies {
     api("org.apache.kafka:kafka-clients")
     api("org.springframework.kafka:spring-kafka")
 
+    api(project(":kontrakter"))
+
     api("no.nav.familie:prosessering-core:2.20250219093533_62416e5") {
         // La spring boot håndtere flyway versjon selv om den er eldre enn den som er inkludert i prosessering-core
         exclude("org.flywaydb")
