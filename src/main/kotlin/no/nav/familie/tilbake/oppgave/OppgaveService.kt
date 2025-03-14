@@ -28,7 +28,7 @@ import no.nav.familie.tilbake.kontrakter.oppgave.StatusEnum
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.person.PersonService
-import org.springframework.core.env.Environment
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -43,7 +43,8 @@ class OppgaveService(
     private val integrasjonerClient: IntegrasjonerClient,
     private val personService: PersonService,
     private val taskService: TaskService,
-    private val environment: Environment,
+    @Value("\${tilbakekreving.frontendUrl}")
+    private val frontendUrl: String,
 ) {
     private val log = TracedLogger.getLogger<OppgaveService>()
 
@@ -272,7 +273,7 @@ class OppgaveService(
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val (finnOppgaveRequest, finnOppgaveResponse) = finnOppgave(behandling, oppgavetype, fagsak)
-        val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId.toString(), behandling.id.toString())
+        val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandling.id.toString())
 
         val tilbakekrevingsOppgaver = finnOppgaveResponse.oppgaver.filtrerTilbakekrevingsOppgave()
 
@@ -347,16 +348,9 @@ class OppgaveService(
             beskrivelse + "\n"
         } else {
             ""
-        } + "--- Opprettet av familie-tilbake ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n" +
-            "https://${lagFamilieTilbakeFrontendUrl()}/fagsystem/$fagsystem/fagsak/$eksternFagsakId/behandling/" +
+        } + "--- Opprettet av tilbakekreving ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} ---\n" +
+            "$frontendUrl/fagsystem/$fagsystem/fagsak/$eksternFagsakId/behandling/" +
             eksternbrukBehandlingID
-
-    private fun lagFamilieTilbakeFrontendUrl(): String =
-        if (environment.activeProfiles.contains("prod")) {
-            "familietilbakekreving.intern.nav.no"
-        } else {
-            "familie-tilbake-frontend.intern.dev.nav.no"
-        }
 
     private fun finnesFerdigstillOppgaveForBehandling(
         behandlingId: UUID,

@@ -1,6 +1,9 @@
 application:
   name: familie-tilbake
 
+tilbakekreving:
+  frontendUrl: https://tilbakekreving.intern.nav.no
+
 server:
   port: 8030
   servlet:

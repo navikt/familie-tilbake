@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.oppgave
 
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldMatch
 import io.mockk.CapturingSlot
 import io.mockk.clearMocks
 import io.mockk.every
@@ -12,6 +13,7 @@ import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
@@ -55,11 +57,13 @@ class OppgaveServiceTest {
 
     private lateinit var oppgaveService: OppgaveService
     private lateinit var behandling: Behandling
+    private lateinit var fagsak: Fagsak
 
     @BeforeEach
     fun setUp() {
         clearMocks(integrasjonerClient)
-        behandling = Testdata.lagBehandling()
+        fagsak = fagsak()
+        behandling = Testdata.lagBehandling(fagsak.id)
         oppgaveService =
             OppgaveService(
                 behandlingRepository,
@@ -67,7 +71,7 @@ class OppgaveServiceTest {
                 integrasjonerClient,
                 personService,
                 taskService,
-                environment,
+                "https://tilbakekreving.intern.nav.no",
             )
         every { fagsakRepository.findByIdOrThrow(fagsak.id) } returns fagsak
         every { behandlingRepository.findByIdOrThrow(behandling.id) } returns behandling
@@ -76,6 +80,26 @@ class OppgaveServiceTest {
 
     @Nested
     inner class OpprettOppgave {
+        @Test
+        fun `lager gosys oppgave som forventet`() {
+            val slot = CapturingSlot<OpprettOppgaveRequest>()
+            every { integrasjonerClient.finnMapper(any()) } returns finnMappeResponseDto
+
+            oppgaveService.opprettOppgave(
+                behandling,
+                Oppgavetype.GodkjenneVedtak,
+                "4489",
+                "",
+                LocalDate.now().plusDays(5),
+                "bob",
+                OppgavePrioritet.NORM,
+                SecureLog.Context.tom(),
+            )
+
+            verify { integrasjonerClient.opprettOppgave(capture(slot)) }
+            slot.captured.beskrivelse shouldMatch Regex("\n--- Opprettet av tilbakekreving [0-9T.:-]+ ---\nhttps://tilbakekreving.intern.nav.no/fagsystem/BA/fagsak/${fagsak.eksternFagsakId}/behandling/${behandling.eksternBrukId}")
+        }
+
         @Test
         fun `skal legge godkjenneVedtak i EF-Sak-70-mappe for enhet 4489`() {
             val slot = CapturingSlot<OpprettOppgaveRequest>()

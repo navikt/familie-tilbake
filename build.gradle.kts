@@ -1,3 +1,4 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 val openHtmlToPdfVersion = "1.1.24"
@@ -21,8 +22,17 @@ plugins {
 springBoot {
     mainClass = "no.nav.familie.tilbake.LauncherKt"
 }
+
 tasks.withType<Test> {
     useJUnitPlatform()
+    testLogging.showStandardStreams = true
+    testLogging {
+        events("passed", "skipped", "failed")
+        showExceptions = true
+        showCauses = true
+        showStackTraces = true
+        exceptionFormat = TestExceptionFormat.FULL
+    }
 }
 
 kotlin {
