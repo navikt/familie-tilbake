@@ -1,11 +1,18 @@
-package no.nav.familie.tilbake.kontrakter.tilbakekreving
+package no.nav.tilbakekreving.kontrakter.tilbakekreving.v1
 
 import jakarta.validation.Valid
 import jakarta.validation.constraints.Pattern
-import no.nav.familie.tilbake.kontrakter.Fagsystem
-import no.nav.familie.tilbake.kontrakter.Regelverk
-import no.nav.familie.tilbake.kontrakter.Språkkode
+import no.nav.tilbakekreving.kontrakter.Fagsystem
+import no.nav.tilbakekreving.kontrakter.Regelverk
+import no.nav.tilbakekreving.kontrakter.Språkkode
 import java.time.LocalDate
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Behandlingstype
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Brevmottaker
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Faktainfo
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Institusjon
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Varsel
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Verge
+import no.nav.tilbakekreving.kontrakter.tilbakekreving.Ytelsestype
 
 data class OpprettTilbakekrevingRequest(
     val fagsystem: Fagsystem,

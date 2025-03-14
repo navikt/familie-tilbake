@@ -7,10 +7,10 @@ import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.common.fagsystem
-import no.nav.familie.tilbake.kontrakter.Fagsystem
 import no.nav.familie.tilbake.leader.LeaderClient
 import no.nav.familie.tilbake.micrometer.domain.MeldingstellingRepository
 import no.nav.familie.tilbake.micrometer.domain.Meldingstype
+import no.nav.tilbakekreving.kontrakter.Fagsystem
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service

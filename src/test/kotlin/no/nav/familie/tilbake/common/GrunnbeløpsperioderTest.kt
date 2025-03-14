@@ -4,7 +4,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.common.Grunnbeløpsperioder.finnGrunnbeløpsperioder
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
+import no.nav.tilbakekreving.kontrakter.Månedsperiode
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
 

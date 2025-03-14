@@ -4,9 +4,9 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.SkalSammenslåPerioder
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
-import no.nav.familie.tilbake.kontrakter.Tema
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
+import no.nav.tilbakekreving.kontrakter.Tema
 import org.springframework.stereotype.Service
 import java.util.UUID
 

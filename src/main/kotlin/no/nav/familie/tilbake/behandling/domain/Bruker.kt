@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.behandling.domain
 
-import no.nav.familie.tilbake.kontrakter.Språkkode
+import no.nav.tilbakekreving.kontrakter.Språkkode
 import org.springframework.data.relational.core.mapping.Column
 
 data class Bruker(

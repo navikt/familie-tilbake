@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.sikkerhet
 
-import no.nav.familie.tilbake.kontrakter.Fagsystem
+import no.nav.tilbakekreving.kontrakter.Fagsystem
 
 // Denne enum-en brukes kun for tilgangskontroll
 enum class Tilgangskontrollsfagsystem(
