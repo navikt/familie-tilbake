@@ -17,6 +17,8 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
+    override val tømDBEtterHverTest = false
+
     @Autowired
     private lateinit var faktaFeilutbetalingRepository: FaktaFeilutbetalingRepository
 
@@ -32,8 +34,8 @@ internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        fagsak = Testdata.fagsak
-        behandling = Testdata.lagBehandling()
+        fagsak = Testdata.fagsak()
+        behandling = Testdata.lagBehandling(fagsakId = fagsak.id)
         faktaFeilutbetaling = Testdata.lagFaktaFeilutbetaling(behandling.id)
         fagsakRepository.insert(fagsak)
         behandlingRepository.insert(behandling)
