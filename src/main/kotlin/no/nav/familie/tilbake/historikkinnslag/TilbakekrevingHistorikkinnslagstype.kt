@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.historikkinnslag
 
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.historikk.Historikkinnslagstype
 
 private const val VARSELBREV_TEKST = "Varselbrev tilbakebetaling"
 

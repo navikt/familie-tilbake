@@ -6,9 +6,9 @@ import io.mockk.slot
 import no.nav.familie.tilbake.integration.pdl.PdlClient
 import no.nav.familie.tilbake.integration.pdl.internal.Data
 import no.nav.familie.tilbake.integration.pdl.internal.IdentInformasjon
-import no.nav.familie.tilbake.integration.pdl.internal.Kjønn
 import no.nav.familie.tilbake.integration.pdl.internal.PdlHentIdenterResponse
 import no.nav.familie.tilbake.integration.pdl.internal.PdlIdenter
+import no.nav.familie.tilbake.integration.pdl.internal.PdlKjønnType
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -37,7 +37,7 @@ class PdlClientConfig {
                 ident = ident.captured ?: "32132132111",
                 fødselsdato = LocalDate.now().minusYears(20),
                 navn = "testverdi",
-                kjønn = Kjønn.MANN,
+                kjønn = PdlKjønnType.MANN,
                 dødsdato = dødsdato,
             )
         }

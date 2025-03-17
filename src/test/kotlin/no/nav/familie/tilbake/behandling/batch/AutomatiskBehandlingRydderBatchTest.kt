@@ -6,8 +6,8 @@ import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
-import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate

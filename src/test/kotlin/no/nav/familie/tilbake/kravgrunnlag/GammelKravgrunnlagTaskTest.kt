@@ -21,8 +21,6 @@ import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
 import no.nav.familie.tilbake.common.exceptionhandler.KravgrunnlagIkkeFunnetFeil
@@ -32,16 +30,18 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.HistorikkinnslagRepository
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
-import no.nav.familie.tilbake.kontrakter.Språkkode
 import no.nav.familie.tilbake.kontrakter.objectMapper
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Faktainfo
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.HentFagsystemsbehandling
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.HentFagsystemsbehandlingRespons
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.tilbake.kravgrunnlag.batch.GammelKravgrunnlagService
 import no.nav.familie.tilbake.kravgrunnlag.batch.GammelKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.kontrakter.Faktainfo
+import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandling
+import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandlingRespons
+import no.nav.tilbakekreving.kontrakter.Tilbakekrevingsvalg
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
+import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -355,7 +355,11 @@ internal class GammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                     ),
             )
 
-        return objectMapper.writeValueAsString(HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = fagsystemsbehandling))
+        return objectMapper.writeValueAsString(
+            HentFagsystemsbehandlingRespons(
+                hentFagsystemsbehandling = fagsystemsbehandling,
+            ),
+        )
     }
 
     private fun assertSteg(

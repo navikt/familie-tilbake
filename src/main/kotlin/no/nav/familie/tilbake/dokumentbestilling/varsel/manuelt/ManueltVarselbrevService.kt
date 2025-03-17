@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.dokumentbestilling.varsel.manuelt
 
-import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
@@ -8,7 +7,6 @@ import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
-import no.nav.familie.tilbake.dokumentbestilling.brevmaler.Dokumentmalstype
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmetadataUtil
@@ -24,6 +22,8 @@ import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevUtil
 import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
+import no.nav.tilbakekreving.kontrakter.brev.Dokumentmalstype
 import org.springframework.stereotype.Service
 import java.util.UUID
 

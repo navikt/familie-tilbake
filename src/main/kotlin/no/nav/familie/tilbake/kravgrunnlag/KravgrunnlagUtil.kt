@@ -4,12 +4,12 @@ import jakarta.xml.bind.JAXBContext
 import jakarta.xml.bind.JAXBException
 import jakarta.xml.bind.Unmarshaller
 import no.nav.familie.tilbake.common.exceptionhandler.UgyldigKravgrunnlagFeil
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
+import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagMelding
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagPeriodeDto

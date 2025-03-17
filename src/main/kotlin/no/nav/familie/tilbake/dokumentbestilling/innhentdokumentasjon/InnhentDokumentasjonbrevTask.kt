@@ -6,14 +6,14 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
-import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.PropertyName
-import no.nav.familie.tilbake.kontrakter.Fagsystem
 import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
+import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime

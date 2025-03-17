@@ -8,11 +8,8 @@ import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
-import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
@@ -21,6 +18,9 @@ import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.Historikkinnslag
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.iverksettvedtak.task.AvsluttBehandlingTask
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -66,8 +66,8 @@ internal class AvsluttBehandlingTaskTest : OppslagSpringRunnerTest() {
         behandlingsstegstilstandRepository.insert(
             Behandlingsstegstilstand(
                 behandlingId = behandlingId,
-                behandlingssteg = Behandlingssteg.AVSLUTTET,
-                behandlingsstegsstatus = Behandlingsstegstatus.KLAR,
+                behandlingssteg = no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg.AVSLUTTET,
+                behandlingsstegsstatus = no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus.KLAR,
             ),
         )
 
@@ -77,8 +77,8 @@ internal class AvsluttBehandlingTaskTest : OppslagSpringRunnerTest() {
         behandling.status shouldBe Behandlingsstatus.AVSLUTTET
 
         behandlingsstegstilstandRepository.findByBehandlingId(behandlingId).forOne {
-            it.behandlingssteg shouldBe Behandlingssteg.AVSLUTTET
-            it.behandlingsstegsstatus shouldBe Behandlingsstegstatus.UTFØRT
+            it.behandlingssteg shouldBe no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg.AVSLUTTET
+            it.behandlingsstegsstatus shouldBe no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus.UTFØRT
         }
 
         historikkService.hentHistorikkinnslag(behandling.id).forOne {

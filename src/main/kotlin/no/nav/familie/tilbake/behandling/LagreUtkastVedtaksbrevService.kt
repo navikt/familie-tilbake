@@ -1,11 +1,11 @@
 package no.nav.familie.tilbake.behandling
 
-import no.nav.familie.tilbake.api.dto.FritekstavsnittDto
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevService
 import no.nav.familie.tilbake.log.LogService
+import no.nav.tilbakekreving.api.v1.dto.FritekstavsnittDto
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.util.UUID

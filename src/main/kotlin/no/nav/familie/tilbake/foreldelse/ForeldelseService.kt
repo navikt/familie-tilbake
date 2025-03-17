@@ -1,23 +1,23 @@
 package no.nav.familie.tilbake.foreldelse
 
-import no.nav.familie.tilbake.api.dto.BehandlingsstegForeldelseDto
-import no.nav.familie.tilbake.api.dto.ForeldelsesperiodeDto
-import no.nav.familie.tilbake.api.dto.VurdertForeldelseDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningUtil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.faktaomfeilutbetaling.LogiskPeriodeUtil
-import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeldelseDto
+import no.nav.tilbakekreving.api.v1.dto.ForeldelsesperiodeDto
+import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelseDto
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
+import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
+import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -115,8 +115,8 @@ class ForeldelseService(
     }
 
     fun sjekkOmForeldelsePerioderErLike(behandlingId: UUID): Boolean {
-        val behandlingssteg = behandlingsstegstilstandRepository.findByBehandlingIdAndBehandlingssteg(behandlingId, Behandlingssteg.FORELDELSE)
-        if (behandlingssteg?.behandlingsstegsstatus == Behandlingsstegstatus.AUTOUTFØRT) {
+        val behandlingssteg = behandlingsstegstilstandRepository.findByBehandlingIdAndBehandlingssteg(behandlingId, no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg.FORELDELSE)
+        if (behandlingssteg?.behandlingsstegsstatus == no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus.AUTOUTFØRT) {
             return true
         }
         val vurdertForeldelse: VurdertForeldelse? = foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)

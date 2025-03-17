@@ -1,14 +1,14 @@
 package no.nav.familie.tilbake.vilkårsvurdering
 
-import no.nav.familie.tilbake.api.dto.AktsomhetDto
-import no.nav.familie.tilbake.api.dto.BehandlingsstegVilkårsvurderingDto
-import no.nav.familie.tilbake.api.dto.VilkårsvurderingsperiodeDto
 import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningUtil
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.log.SecureLog
-import no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn
+import no.nav.tilbakekreving.api.v1.dto.AktsomhetDto
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
+import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
+import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
 import org.springframework.http.HttpStatus
 import java.math.BigDecimal
 
@@ -44,10 +44,10 @@ object VilkårsvurderingValidator {
         aktsomhetDto: AktsomhetDto?,
         logContext: SecureLog.Context,
     ) {
-        if (aktsomhetDto?.særligeGrunner != null) {
-            val særligGrunner = aktsomhetDto.særligeGrunner
+        val særligeGrunner = aktsomhetDto?.særligeGrunner
+        if (særligeGrunner != null) {
             when {
-                særligGrunner.any { SærligGrunn.ANNET != it.særligGrunn && it.begrunnelse != null } -> {
+                særligeGrunner.any { SærligGrunn.ANNET != it.særligGrunn && it.begrunnelse != null } -> {
                     throw Feil(
                         message = "Begrunnelse kan fylles ut kun for ANNET begrunnelse",
                         frontendFeilmelding = "Begrunnelse kan fylles ut kun for ANNET begrunnelse",
@@ -55,7 +55,7 @@ object VilkårsvurderingValidator {
                         httpStatus = HttpStatus.BAD_REQUEST,
                     )
                 }
-                særligGrunner.any { SærligGrunn.ANNET == it.særligGrunn && it.begrunnelse == null } -> {
+                særligeGrunner.any { SærligGrunn.ANNET == it.særligGrunn && it.begrunnelse == null } -> {
                     throw Feil(
                         message = "ANNET særlig grunner må ha ANNET begrunnelse",
                         frontendFeilmelding = "ANNET særlig grunner må ha ANNET begrunnelse",
@@ -73,28 +73,27 @@ object VilkårsvurderingValidator {
         vilkårsvurderingsperiode: VilkårsvurderingsperiodeDto,
         logContext: SecureLog.Context,
     ) {
-        val feilMelding = "Beløp som skal tilbakekreves kan ikke være mer enn feilutbetalt beløp"
-        if (vilkårsvurderingsperiode.godTroDto?.beløpTilbakekreves != null) {
-            val feilutbetalteBeløp = KravgrunnlagsberegningUtil.beregnFeilutbetaltBeløp(kravgrunnlag431, periode)
-            if (vilkårsvurderingsperiode.godTroDto.beløpTilbakekreves > feilutbetalteBeløp) {
-                throw Feil(
-                    message = feilMelding,
-                    frontendFeilmelding = feilMelding,
-                    logContext = logContext,
-                    httpStatus = HttpStatus.BAD_REQUEST,
-                )
-            }
-        }
-        if (vilkårsvurderingsperiode.aktsomhetDto?.beløpTilbakekreves != null) {
-            val feilutbetalteBeløp = KravgrunnlagsberegningUtil.beregnFeilutbetaltBeløp(kravgrunnlag431, periode)
-            if (vilkårsvurderingsperiode.aktsomhetDto.beløpTilbakekreves > feilutbetalteBeløp) {
-                throw Feil(
-                    message = feilMelding,
-                    frontendFeilmelding = feilMelding,
-                    logContext = logContext,
-                    httpStatus = HttpStatus.BAD_REQUEST,
-                )
-            }
+        validerTilbakrevetBeløp(vilkårsvurderingsperiode.godTroDto?.beløpTilbakekreves, kravgrunnlag431, periode, logContext)
+        validerTilbakrevetBeløp(vilkårsvurderingsperiode.aktsomhetDto?.beløpTilbakekreves, kravgrunnlag431, periode, logContext)
+    }
+
+    fun validerTilbakrevetBeløp(
+        beløp: BigDecimal?,
+        kravgrunnlag431: Kravgrunnlag431,
+        periode: Månedsperiode,
+        logContext: SecureLog.Context,
+    ) {
+        if (beløp == null) return
+
+        val feilutbetalteBeløp = KravgrunnlagsberegningUtil.beregnFeilutbetaltBeløp(kravgrunnlag431, periode)
+        val feilmelding = "Beløp som skal tilbakekreves kan ikke være mer enn feilutbetalt beløp"
+        if (beløp > feilutbetalteBeløp) {
+            throw Feil(
+                message = feilmelding,
+                frontendFeilmelding = feilmelding,
+                logContext = logContext,
+                httpStatus = HttpStatus.BAD_REQUEST,
+            )
         }
     }
 }

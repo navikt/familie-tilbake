@@ -47,10 +47,10 @@ data class PdlNavn(
 }
 
 data class PdlKjønn(
-    @JsonProperty("kjoenn") val kjønn: Kjønn,
+    @JsonProperty("kjoenn") val kjønn: PdlKjønnType,
 )
 
-enum class Kjønn {
+enum class PdlKjønnType {
     MANN,
     KVINNE,
     UKJENT,

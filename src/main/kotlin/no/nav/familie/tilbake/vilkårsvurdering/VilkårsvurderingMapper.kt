@@ -1,25 +1,10 @@
 package no.nav.familie.tilbake.vilkårsvurdering
 
-import no.nav.familie.tilbake.api.dto.AktivitetDto
-import no.nav.familie.tilbake.api.dto.AktsomhetDto
-import no.nav.familie.tilbake.api.dto.GodTroDto
-import no.nav.familie.tilbake.api.dto.RedusertBeløpDto
-import no.nav.familie.tilbake.api.dto.SærligGrunnDto
-import no.nav.familie.tilbake.api.dto.VilkårsvurderingsperiodeDto
-import no.nav.familie.tilbake.api.dto.VurdertAktsomhetDto
-import no.nav.familie.tilbake.api.dto.VurdertGodTroDto
-import no.nav.familie.tilbake.api.dto.VurdertSærligGrunnDto
-import no.nav.familie.tilbake.api.dto.VurdertVilkårsvurderingDto
-import no.nav.familie.tilbake.api.dto.VurdertVilkårsvurderingsperiodeDto
-import no.nav.familie.tilbake.api.dto.VurdertVilkårsvurderingsresultatDto
 import no.nav.familie.tilbake.beregning.BeløpsberegningUtil
 import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningUtil
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetalingsperiode
-import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
-import no.nav.familie.tilbake.kontrakter.Fagsystem
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
@@ -27,6 +12,21 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhe
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingGodTro
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingSærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
+import no.nav.tilbakekreving.api.v1.dto.AktivitetDto
+import no.nav.tilbakekreving.api.v1.dto.AktsomhetDto
+import no.nav.tilbakekreving.api.v1.dto.GodTroDto
+import no.nav.tilbakekreving.api.v1.dto.RedusertBeløpDto
+import no.nav.tilbakekreving.api.v1.dto.SærligGrunnDto
+import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
+import no.nav.tilbakekreving.api.v1.dto.VurdertAktsomhetDto
+import no.nav.tilbakekreving.api.v1.dto.VurdertGodTroDto
+import no.nav.tilbakekreving.api.v1.dto.VurdertSærligGrunnDto
+import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingDto
+import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsperiodeDto
+import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsresultatDto
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
+import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
+import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.util.UUID
@@ -230,14 +230,28 @@ object VilkårsvurderingMapper {
             periode.beløp
                 .filter { Klassetype.SKAT == it.klassetype || Klassetype.TREK == it.klassetype }
                 .filter { it.opprinneligUtbetalingsbeløp.signum() == -1 }
-                .forEach { redusertBeløper.add(RedusertBeløpDto(true, it.opprinneligUtbetalingsbeløp.abs())) }
+                .forEach {
+                    redusertBeløper.add(
+                        RedusertBeløpDto(
+                            true,
+                            it.opprinneligUtbetalingsbeløp.abs(),
+                        ),
+                    )
+                }
         }
         // reduserte beløper for JUST(etterbetaling)
         perioder.forEach { periode ->
             periode.beløp
                 .filter { Klassetype.JUST == it.klassetype }
                 .filter { it.opprinneligUtbetalingsbeløp.signum() == 0 && it.nyttBeløp.signum() == 1 }
-                .forEach { redusertBeløper.add(RedusertBeløpDto(false, it.nyttBeløp)) }
+                .forEach {
+                    redusertBeløper.add(
+                        RedusertBeløpDto(
+                            false,
+                            it.nyttBeløp,
+                        ),
+                    )
+                }
         }
         return redusertBeløper
     }

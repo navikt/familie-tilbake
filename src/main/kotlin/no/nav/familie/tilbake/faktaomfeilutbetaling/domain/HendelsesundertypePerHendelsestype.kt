@@ -1,5 +1,8 @@
 package no.nav.familie.tilbake.faktaomfeilutbetaling.domain
 
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
+
 object HendelsesundertypePerHendelsestype {
     val HIERARKI =
         mapOf(

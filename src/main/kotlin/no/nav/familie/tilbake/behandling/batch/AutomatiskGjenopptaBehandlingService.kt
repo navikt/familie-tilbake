@@ -4,8 +4,6 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.historikkinnslag.Aktør
@@ -14,6 +12,8 @@ import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagsty
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate

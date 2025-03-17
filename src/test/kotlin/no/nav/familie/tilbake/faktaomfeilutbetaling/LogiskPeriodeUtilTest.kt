@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.faktaomfeilutbetaling
 
 import io.kotest.matchers.shouldBe
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
+import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.YearMonth

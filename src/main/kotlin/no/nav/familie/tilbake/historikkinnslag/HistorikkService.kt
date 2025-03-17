@@ -2,7 +2,6 @@ package no.nav.familie.tilbake.historikkinnslag
 
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
-import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevsporing
@@ -18,6 +17,7 @@ import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagsty
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.DISTRIBUSJON_BREV_DØDSBO_SUKSESS
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.ENDRET_ENHET
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime

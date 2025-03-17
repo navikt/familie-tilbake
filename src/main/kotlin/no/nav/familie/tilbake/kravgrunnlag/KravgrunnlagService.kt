@@ -7,14 +7,10 @@ import no.nav.familie.tilbake.behandling.FagsystemUtil
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.behandling.batch.AutomatiskSaksbehandlingTask
 import no.nav.familie.tilbake.behandling.domain.Behandling
-import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandling.task.OppdaterFaktainfoTask
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
-import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.PropertyName
@@ -22,7 +18,6 @@ import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kontrakter.oppgave.Oppgavetype
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
@@ -32,6 +27,11 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
+import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
+import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

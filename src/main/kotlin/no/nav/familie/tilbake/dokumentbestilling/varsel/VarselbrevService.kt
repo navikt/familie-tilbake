@@ -18,9 +18,9 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.Fritekstbrevsdata
 import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevUtil.Companion.TITTEL_VARSEL_TILBAKEBETALING
 import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
-import no.nav.familie.tilbake.kontrakter.Datoperiode
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.ForhåndsvisVarselbrevRequest
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.kontrakter.ForhåndsvisVarselbrevRequest
+import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -189,5 +189,11 @@ class VarselbrevService(
             Brevmottager.BRUKER
         }
 
-    private fun mapFeilutbetaltePerioder(varsel: Varsel?): List<Datoperiode> = varsel?.perioder?.map { Datoperiode(it.fom, it.tom) } ?: emptyList()
+    private fun mapFeilutbetaltePerioder(varsel: Varsel?): List<Datoperiode> =
+        varsel?.perioder?.map {
+            Datoperiode(
+                it.fom,
+                it.tom,
+            )
+        } ?: emptyList()
 }

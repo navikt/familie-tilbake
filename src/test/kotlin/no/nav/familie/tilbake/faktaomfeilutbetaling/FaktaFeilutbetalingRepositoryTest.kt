@@ -10,8 +10,8 @@ import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
-import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.HarBrukerUttaltSeg
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.VurderingAvBrukersUttalelse
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

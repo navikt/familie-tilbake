@@ -1,19 +1,19 @@
 package no.nav.familie.tilbake.api.forvaltning
 
 import io.swagger.v3.oas.annotations.Operation
-import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
 import no.nav.familie.tilbake.integration.pdl.internal.logger
-import no.nav.familie.tilbake.kontrakter.Fagsystem
 import no.nav.familie.tilbake.kontrakter.Ressurs
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
+import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
+import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping

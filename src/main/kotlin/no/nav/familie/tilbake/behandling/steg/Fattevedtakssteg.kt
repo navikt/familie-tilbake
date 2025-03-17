@@ -1,13 +1,9 @@
 package no.nav.familie.tilbake.behandling.steg
 
-import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
-import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.BrevmottakerAdresseValidering
@@ -20,6 +16,10 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.totrinn.TotrinnService
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFatteVedtaksstegDto
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime

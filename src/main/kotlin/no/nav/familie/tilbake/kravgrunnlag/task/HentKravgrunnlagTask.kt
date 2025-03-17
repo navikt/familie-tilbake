@@ -4,7 +4,6 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
-import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -12,6 +11,7 @@ import no.nav.familie.tilbake.kravgrunnlag.HentKravgrunnlagService
 import no.nav.familie.tilbake.kravgrunnlag.domain.KodeAksjon
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID

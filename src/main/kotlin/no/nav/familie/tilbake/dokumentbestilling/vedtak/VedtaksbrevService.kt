@@ -1,7 +1,5 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
-import no.nav.familie.tilbake.api.dto.FritekstavsnittDto
-import no.nav.familie.tilbake.api.dto.HentForhåndvisningVedtaksbrevPdfDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -14,6 +12,8 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepositor
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
+import no.nav.tilbakekreving.api.v1.dto.FritekstavsnittDto
+import no.nav.tilbakekreving.api.v1.dto.HentForhåndvisningVedtaksbrevPdfDto
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID

@@ -8,14 +8,7 @@ import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.kontrakter.Ressurs
-import no.nav.familie.tilbake.kontrakter.Språkkode
 import no.nav.familie.tilbake.kontrakter.objectMapper
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Faktainfo
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.HentFagsystemsbehandling
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.HentFagsystemsbehandlingRespons
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Institusjon
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.OpprettManueltTilbakekrevingRequest
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleStatusmeldingTask
 import no.nav.familie.tilbake.log.SecureLog
@@ -23,6 +16,13 @@ import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.tilbakekreving.kontrakter.Faktainfo
+import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandling
+import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandlingRespons
+import no.nav.tilbakekreving.kontrakter.Institusjon
+import no.nav.tilbakekreving.kontrakter.OpprettManueltTilbakekrevingRequest
+import no.nav.tilbakekreving.kontrakter.Tilbakekrevingsvalg
+import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import org.springframework.context.annotation.Profile
 import org.springframework.core.env.Environment
 import org.springframework.http.MediaType
@@ -128,9 +128,7 @@ class AutotestController(
                     Faktainfo(
                         revurderingsårsak = "testverdi",
                         revurderingsresultat = "OPPHØR",
-                        tilbakekrevingsvalg =
-                            Tilbakekrevingsvalg
-                                .IGNORER_TILBAKEKREVING,
+                        tilbakekrevingsvalg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
                     ),
                 institusjon = institusjon,
             )
@@ -141,7 +139,11 @@ class AutotestController(
                 eksternId,
             )
         val melding =
-            objectMapper.writeValueAsString(HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = fagsystemsbehandling))
+            objectMapper.writeValueAsString(
+                HentFagsystemsbehandlingRespons(
+                    hentFagsystemsbehandling = fagsystemsbehandling,
+                ),
+            )
         if (environment.activeProfiles.any { it.contains("e2e") }) {
             requestSendtRepository.update(requestSendt!!.copy(respons = melding))
         } else {

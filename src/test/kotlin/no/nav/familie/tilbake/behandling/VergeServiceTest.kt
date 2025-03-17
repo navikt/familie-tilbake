@@ -10,16 +10,11 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
-import no.nav.familie.tilbake.api.dto.VergeDto
-import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.event.EndretPersonIdentEventPublisher
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
-import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
@@ -30,11 +25,16 @@ import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagsty
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.integration.pdl.PdlClient
 import no.nav.familie.tilbake.kontrakter.Applikasjon
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Vergetype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.person.PersonService
+import no.nav.tilbakekreving.api.v1.dto.VergeDto
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
+import no.nav.tilbakekreving.kontrakter.verge.Vergetype
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -212,7 +212,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
         val behandlingFørOppdatering = behandlingRepository.findByIdOrThrow(behandlingId)
         val gammelVerge = behandlingFørOppdatering.aktivVerge!!
 
-        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandlingId))
+        kravgrunnlagRepository.insert(lagKravgrunnlag(behandlingId))
 
         lagBehandlingsstegstilstand(behandlingFørOppdatering.id, Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(behandlingFørOppdatering.id, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)

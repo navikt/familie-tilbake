@@ -2,7 +2,7 @@ package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevsdata
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVurderinger
-import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 
 object Vedtaksbrevsfritekst {
     private const val FRITEKST_MARKERING_START = "\\\\FRITEKST_START"

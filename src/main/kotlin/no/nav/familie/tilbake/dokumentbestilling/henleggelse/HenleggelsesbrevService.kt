@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.dokumentbestilling.henleggelse
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
-import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
@@ -23,6 +22,7 @@ import no.nav.familie.tilbake.dokumentbestilling.henleggelse.handlebars.dto.Henl
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.organisasjon.OrganisasjonService
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import org.springframework.stereotype.Service
 import java.util.UUID
 

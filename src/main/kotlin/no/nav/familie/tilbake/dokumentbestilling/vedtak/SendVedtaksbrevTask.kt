@@ -5,14 +5,14 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
-import no.nav.familie.tilbake.behandling.domain.Behandlingstype
-import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
-import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.SendVedtaksoppsummeringTilDvhTask
 import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
+import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
 import org.springframework.stereotype.Service
 import java.util.UUID
 

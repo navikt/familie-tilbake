@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode
 
-import no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
 
 data class HbSærligeGrunner(
     val størrelse: Boolean = false,

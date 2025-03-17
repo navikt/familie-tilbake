@@ -2,7 +2,6 @@ package no.nav.familie.tilbake.behandling
 
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.internal.TaskService
-import no.nav.familie.tilbake.api.dto.FagsakDto
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Institusjon
@@ -10,15 +9,17 @@ import no.nav.familie.tilbake.behandling.event.EndretPersonIdentEvent
 import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.kontrakter.Fagsystem
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.FinnesBehandlingResponse
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.KanBehandlingOpprettesManueltRespons
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.OpprettTilbakekrevingRequest
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import no.nav.familie.tilbake.person.PersonService
+import no.nav.tilbakekreving.api.v1.dto.FagsakDto
+import no.nav.tilbakekreving.kontrakter.Behandling
+import no.nav.tilbakekreving.kontrakter.FinnesBehandlingResponse
+import no.nav.tilbakekreving.kontrakter.KanBehandlingOpprettesManueltRespons
+import no.nav.tilbakekreving.kontrakter.OpprettTilbakekrevingRequest
+import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
+import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import org.springframework.context.event.EventListener
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
@@ -140,7 +141,7 @@ class FagsakService(
     fun hentBehandlingerForFagsak(
         fagsystem: Fagsystem,
         eksternFagsakId: String,
-    ): List<no.nav.familie.tilbake.kontrakter.tilbakekreving.Behandling> {
+    ): List<Behandling> {
         val fagsak =
             fagsakRepository.findByFagsystemAndEksternFagsakId(
                 fagsystem = fagsystem,

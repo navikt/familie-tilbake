@@ -1,13 +1,13 @@
 package no.nav.familie.tilbake.api
 
 import io.swagger.v3.oas.annotations.Operation
-import no.nav.familie.tilbake.api.dto.VurdertVilkårsvurderingDto
 import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingDto
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping

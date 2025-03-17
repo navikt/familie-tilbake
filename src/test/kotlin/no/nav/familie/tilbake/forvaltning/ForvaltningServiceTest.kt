@@ -15,13 +15,8 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingRequestSendtRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
-import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
-import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
-import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
@@ -32,7 +27,6 @@ import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.Historikkinnslag
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
@@ -43,6 +37,12 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.oppgave.FerdigstillOppgaveTask
 import no.nav.familie.tilbake.totrinn.TotrinnsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
+import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

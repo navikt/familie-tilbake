@@ -1,12 +1,14 @@
 package no.nav.familie.tilbake.behandling
 
-import no.nav.familie.tilbake.api.dto.BehandlingsoppsummeringDto
-import no.nav.familie.tilbake.api.dto.BrukerDto
-import no.nav.familie.tilbake.api.dto.FagsakDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
+import no.nav.familie.tilbake.integration.pdl.internal.PdlKjønnType
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.organisasjon.OrganisasjonService
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsoppsummeringDto
+import no.nav.tilbakekreving.api.v1.dto.FagsakDto
+import no.nav.tilbakekreving.kontrakter.bruker.BrukerDto
+import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 
 object FagsakMapper {
     fun tilRespons(
@@ -20,7 +22,12 @@ object FagsakMapper {
                 personIdent = fagsak.bruker.ident,
                 navn = personinfo.navn,
                 fødselsdato = personinfo.fødselsdato,
-                kjønn = personinfo.kjønn,
+                kjønn =
+                    when (personinfo.kjønn) {
+                        PdlKjønnType.MANN -> Kjønn.MANN
+                        PdlKjønnType.KVINNE -> Kjønn.KVINNE
+                        PdlKjønnType.UKJENT -> Kjønn.UKJENT
+                    },
                 dødsdato = personinfo.dødsdato,
             )
 

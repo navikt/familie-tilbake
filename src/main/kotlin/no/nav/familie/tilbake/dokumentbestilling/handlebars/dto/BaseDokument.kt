@@ -2,9 +2,9 @@ package no.nav.familie.tilbake.dokumentbestilling.handlebars.dto
 
 import no.nav.familie.tilbake.behandling.FagsystemUtil
 import no.nav.familie.tilbake.dokumentbestilling.felles.header.Institusjon
-import no.nav.familie.tilbake.kontrakter.Fagsystem
-import no.nav.familie.tilbake.kontrakter.Språkkode
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
+import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
+import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 
 private const val EF_URL = "nav.no/alene-med-barn"
 

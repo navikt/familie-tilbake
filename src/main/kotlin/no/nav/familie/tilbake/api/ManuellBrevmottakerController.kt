@@ -2,8 +2,6 @@ package no.nav.familie.tilbake.api
 
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
-import no.nav.familie.tilbake.api.dto.ManuellBrevmottakerRequestDto
-import no.nav.familie.tilbake.api.dto.ManuellBrevmottakerResponsDto
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerMapper
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerService
 import no.nav.familie.tilbake.kontrakter.Ressurs
@@ -11,6 +9,8 @@ import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.tilbakekreving.api.v1.dto.ManuellBrevmottakerRequestDto
+import no.nav.tilbakekreving.api.v1.dto.ManuellBrevmottakerResponsDto
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.DeleteMapping

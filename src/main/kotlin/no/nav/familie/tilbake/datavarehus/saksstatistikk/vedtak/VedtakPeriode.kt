@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak
 
-import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import java.math.BigDecimal
 import java.time.LocalDate
 

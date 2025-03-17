@@ -2,22 +2,22 @@ package no.nav.familie.tilbake.behandling.steg
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
-import no.nav.familie.tilbake.api.dto.VurdertTotrinnDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
 import no.nav.familie.tilbake.behandling.domain.Behandling
-import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.MottakerType
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.totrinn.TotrinnService
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFatteVedtaksstegDto
+import no.nav.tilbakekreving.api.v1.dto.VurdertTotrinnDto
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.brev.MottakerType
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.Test

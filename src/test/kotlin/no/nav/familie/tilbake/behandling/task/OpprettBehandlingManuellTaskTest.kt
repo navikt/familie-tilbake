@@ -21,23 +21,23 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.FagsystemUtil
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingRequestSendtRepository
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
-import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.integration.kafka.DefaultKafkaProducer
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.integration.kafka.KafkaProperties
-import no.nav.familie.tilbake.kontrakter.Språkkode
 import no.nav.familie.tilbake.kontrakter.objectMapper
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Faktainfo
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.HentFagsystemsbehandling
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.HentFagsystemsbehandlingRequest
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.HentFagsystemsbehandlingRespons
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Institusjon
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Tilbakekrevingsvalg
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
+import no.nav.tilbakekreving.kontrakter.Faktainfo
+import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandling
+import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandlingRequest
+import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandlingRespons
+import no.nav.tilbakekreving.kontrakter.Institusjon
+import no.nav.tilbakekreving.kontrakter.Tilbakekrevingsvalg
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
+import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
+import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.junit.jupiter.api.AfterEach
@@ -299,6 +299,9 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
                     ),
                 institusjon = institusjon,
             )
-        return HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = fagsystemsbehandling, feilMelding = feilmelding)
+        return HentFagsystemsbehandlingRespons(
+            hentFagsystemsbehandling = fagsystemsbehandling,
+            feilMelding = feilmelding,
+        )
     }
 }

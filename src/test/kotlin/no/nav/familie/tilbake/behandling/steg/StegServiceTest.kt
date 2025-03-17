@@ -16,57 +16,57 @@ import io.mockk.mockkObject
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
-import no.nav.familie.tilbake.api.dto.BehandlingsstegFaktaDto
-import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDtoTest
-import no.nav.familie.tilbake.api.dto.BehandlingsstegForeldelseDto
-import no.nav.familie.tilbake.api.dto.BehandlingsstegForeslåVedtaksstegDto
-import no.nav.familie.tilbake.api.dto.BehandlingsstegVergeDto
-import no.nav.familie.tilbake.api.dto.BehandlingsstegVilkårsvurderingDto
-import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingsperiodeDto
-import no.nav.familie.tilbake.api.dto.ForeldelsesperiodeDto
-import no.nav.familie.tilbake.api.dto.FritekstavsnittDto
-import no.nav.familie.tilbake.api.dto.GodTroDto
-import no.nav.familie.tilbake.api.dto.PeriodeMedTekstDto
-import no.nav.familie.tilbake.api.dto.VergeDto
-import no.nav.familie.tilbake.api.dto.VilkårsvurderingsperiodeDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.VergeService
 import no.nav.familie.tilbake.behandling.domain.Behandling
-import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
-import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Iverksettingsstatus
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
-import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.data.Testdata.lagKravgrunnlagsperiode
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
-import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
-import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
-import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.iverksettvedtak.task.SendØkonomiTilbakekrevingsvedtakTask
-import no.nav.familie.tilbake.kontrakter.Datoperiode
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
-import no.nav.familie.tilbake.kontrakter.Regelverk
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Vergetype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.oppgave.FerdigstillOppgaveTask
 import no.nav.familie.tilbake.oppgave.LagOppgaveTask
 import no.nav.familie.tilbake.totrinn.TotrinnsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
-import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFaktaDto
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFatteVedtaksstegDtoTest
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeldelseDto
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeslåVedtaksstegDto
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVergeDto
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
+import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingsperiodeDto
+import no.nav.tilbakekreving.api.v1.dto.ForeldelsesperiodeDto
+import no.nav.tilbakekreving.api.v1.dto.FritekstavsnittDto
+import no.nav.tilbakekreving.api.v1.dto.GodTroDto
+import no.nav.tilbakekreving.api.v1.dto.PeriodeMedTekstDto
+import no.nav.tilbakekreving.api.v1.dto.VergeDto
+import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
+import no.nav.tilbakekreving.kontrakter.Regelverk
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
+import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
+import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
+import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
+import no.nav.tilbakekreving.kontrakter.verge.Vergetype
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -551,7 +551,16 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         stegService.håndterSteg(behandling.id, lagBehandlingsstegFaktaDto(), SecureLog.Context.tom())
 
         // behandle vilkårsvurderingssteg
-        stegService.håndterSteg(behandling.id, lagBehandlingsstegVilkårsvurderingDto(Datoperiode(fom, tom)), SecureLog.Context.tom())
+        stegService.håndterSteg(
+            behandling.id,
+            lagBehandlingsstegVilkårsvurderingDto(
+                Datoperiode(
+                    fom,
+                    tom,
+                ),
+            ),
+            SecureLog.Context.tom(),
+        )
 
         val fritekstavsnitt =
             FritekstavsnittDto(
@@ -592,7 +601,16 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         stegService.håndterSteg(behandling.id, lagBehandlingsstegFaktaDto(), SecureLog.Context.tom())
 
         // behandle vilkårsvurderingssteg
-        stegService.håndterSteg(behandling.id, lagBehandlingsstegVilkårsvurderingDto(Datoperiode(fom, tom)), SecureLog.Context.tom())
+        stegService.håndterSteg(
+            behandling.id,
+            lagBehandlingsstegVilkårsvurderingDto(
+                Datoperiode(
+                    fom,
+                    tom,
+                ),
+            ),
+            SecureLog.Context.tom(),
+        )
 
         val fritekstavsnitt =
             FritekstavsnittDto(

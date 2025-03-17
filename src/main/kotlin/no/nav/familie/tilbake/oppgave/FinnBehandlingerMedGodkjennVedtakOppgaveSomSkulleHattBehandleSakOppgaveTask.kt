@@ -5,14 +5,14 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.common.exceptionhandler.ManglerOppgaveFeil
-import no.nav.familie.tilbake.kontrakter.Fagsystem
 import no.nav.familie.tilbake.kontrakter.oppgave.Oppgave
 import no.nav.familie.tilbake.kontrakter.oppgave.Oppgavetype
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import org.springframework.stereotype.Service
 
 @Service

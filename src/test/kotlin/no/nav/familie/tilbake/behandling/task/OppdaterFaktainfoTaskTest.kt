@@ -18,10 +18,10 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.kontrakter.objectMapper
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Faktainfo
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.HentFagsystemsbehandling
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.HentFagsystemsbehandlingRespons
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Tilbakekrevingsvalg
+import no.nav.tilbakekreving.kontrakter.Faktainfo
+import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandling
+import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandlingRespons
+import no.nav.tilbakekreving.kontrakter.Tilbakekrevingsvalg
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

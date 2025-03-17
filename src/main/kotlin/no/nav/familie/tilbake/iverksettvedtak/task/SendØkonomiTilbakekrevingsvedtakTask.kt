@@ -6,13 +6,13 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.SendVedtaksbrevTask
 import no.nav.familie.tilbake.iverksettvedtak.IverksettelseService
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -44,8 +44,8 @@ class SendØkonomiTilbakekrevingsvedtakTask(
             .oppdaterBehandlingsstegStatus(
                 behandlingId,
                 Behandlingsstegsinfo(
-                    behandlingssteg = Behandlingssteg.IVERKSETT_VEDTAK,
-                    behandlingsstegstatus = Behandlingsstegstatus.UTFØRT,
+                    behandlingssteg = no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg.IVERKSETT_VEDTAK,
+                    behandlingsstegstatus = no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus.UTFØRT,
                 ),
                 logContext,
             )

@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.beregning.modell
 
+import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import java.math.BigDecimal
 
 class Beregningsresultat(

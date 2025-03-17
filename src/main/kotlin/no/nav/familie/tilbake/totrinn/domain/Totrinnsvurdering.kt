@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.totrinn.domain
 
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.common.repository.Sporbar
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
 import org.springframework.data.relational.core.mapping.Embedded

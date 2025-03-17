@@ -1,8 +1,8 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
-import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevsdata
+import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 
 class Vedtaksbrevsdata(
     val vedtaksbrevsdata: HbVedtaksbrevsdata,

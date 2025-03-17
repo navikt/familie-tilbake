@@ -4,10 +4,10 @@ import io.kotest.matchers.equality.shouldBeEqualToComparingFieldsExcept
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.domain.Behandling
-import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

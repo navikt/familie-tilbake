@@ -14,13 +14,11 @@ import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.dokumentbestilling.brevmaler.Dokumentmalstype
 import no.nav.familie.tilbake.dokumentbestilling.innhentdokumentasjon.InnhentDokumentasjonbrevService
 import no.nav.familie.tilbake.dokumentbestilling.innhentdokumentasjon.InnhentDokumentasjonbrevTask
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
 import no.nav.familie.tilbake.dokumentbestilling.varsel.manuelt.ManueltVarselbrevService
 import no.nav.familie.tilbake.dokumentbestilling.varsel.manuelt.SendManueltVarselbrevTask
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.GjelderType
@@ -31,6 +29,8 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.log.LogService
+import no.nav.tilbakekreving.kontrakter.brev.Dokumentmalstype
+import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

@@ -1,8 +1,8 @@
 package no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene
 
 import no.nav.familie.tilbake.common.repository.Sporbar
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.MottakerType
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Vergetype
+import no.nav.tilbakekreving.kontrakter.brev.MottakerType
+import no.nav.tilbakekreving.kontrakter.verge.Vergetype
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
 import org.springframework.data.relational.core.mapping.Column

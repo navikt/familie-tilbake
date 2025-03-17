@@ -2,10 +2,8 @@ package no.nav.familie.tilbake.integration.familie
 
 import AbstractPingableRestClient
 import no.nav.familie.tilbake.config.IntegrasjonerConfig
-import no.nav.familie.tilbake.kontrakter.Fagsystem
 import no.nav.familie.tilbake.kontrakter.Fil
 import no.nav.familie.tilbake.kontrakter.Ressurs
-import no.nav.familie.tilbake.kontrakter.Tema
 import no.nav.familie.tilbake.kontrakter.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.tilbake.kontrakter.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.tilbake.kontrakter.dokdist.DistribuerJournalpostRequest
@@ -26,6 +24,8 @@ import no.nav.familie.tilbake.kontrakter.organisasjon.Organisasjon
 import no.nav.familie.tilbake.kontrakter.saksbehandler.Saksbehandler
 import no.nav.familie.tilbake.kontrakter.tilgangskontroll.Tilgang
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
+import no.nav.tilbakekreving.kontrakter.ytelse.Tema
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpHeaders

@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.dokumentbestilling.felles
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.FagsakRepository
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
@@ -13,6 +12,7 @@ import no.nav.familie.tilbake.dokumentbestilling.somBrevmottager
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.Vedtaksbrevgrunnlag
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.organisasjon.OrganisasjonService
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import org.springframework.stereotype.Service
 import java.util.UUID
 

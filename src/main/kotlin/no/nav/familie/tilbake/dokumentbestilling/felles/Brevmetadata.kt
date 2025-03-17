@@ -1,10 +1,10 @@
 package no.nav.familie.tilbake.dokumentbestilling.felles
 
-import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.dokumentbestilling.felles.header.Institusjon
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.Språkstøtte
-import no.nav.familie.tilbake.kontrakter.Språkkode
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
+import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
+import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 
 data class Brevmetadata(
     val sakspartId: String,

@@ -7,9 +7,9 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.header.Institusjon
 import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.FeilutbetaltPeriode
 import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
 import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Vedleggsdata
-import no.nav.familie.tilbake.kontrakter.Datoperiode
-import no.nav.familie.tilbake.kontrakter.Språkkode
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
+import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
+import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.nio.charset.StandardCharsets

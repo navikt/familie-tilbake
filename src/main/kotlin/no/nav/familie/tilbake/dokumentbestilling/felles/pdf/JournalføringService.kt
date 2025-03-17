@@ -11,8 +11,6 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.JournalpostIdOgDokumentId
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.kontrakter.BrukerIdType
-import no.nav.familie.tilbake.kontrakter.Fagsystem
-import no.nav.familie.tilbake.kontrakter.Tema
 import no.nav.familie.tilbake.kontrakter.dokarkiv.AvsenderMottaker
 import no.nav.familie.tilbake.kontrakter.dokarkiv.Dokumenttype
 import no.nav.familie.tilbake.kontrakter.dokarkiv.v2.ArkiverDokumentRequest
@@ -22,9 +20,11 @@ import no.nav.familie.tilbake.kontrakter.journalpost.AvsenderMottakerIdType
 import no.nav.familie.tilbake.kontrakter.journalpost.Bruker
 import no.nav.familie.tilbake.kontrakter.journalpost.Journalpost
 import no.nav.familie.tilbake.kontrakter.journalpost.JournalposterForBrukerRequest
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
+import no.nav.tilbakekreving.kontrakter.ytelse.Tema
+import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import org.springframework.stereotype.Service
 import java.util.UUID
 

@@ -1,14 +1,11 @@
 package no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker
 
-import no.nav.familie.tilbake.api.dto.ManuellBrevmottakerRequestDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakService
 import no.nav.familie.tilbake.behandling.ValiderBrevmottakerService
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
@@ -19,6 +16,9 @@ import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.integration.pdl.PdlClient
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.api.v1.dto.ManuellBrevmottakerRequestDto
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -156,10 +156,7 @@ class ManuellBrevmottakerService(
 
         behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
-            Behandlingsstegsinfo(
-                Behandlingssteg.BREVMOTTAKER,
-                Behandlingsstegstatus.TILBAKEFØRT,
-            ),
+            Behandlingsstegsinfo(Behandlingssteg.BREVMOTTAKER, Behandlingsstegstatus.TILBAKEFØRT),
             logContext,
         )
         behandlingskontrollService.fortsettBehandling(behandlingId, logContext)

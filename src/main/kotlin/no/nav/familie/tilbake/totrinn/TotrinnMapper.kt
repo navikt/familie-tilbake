@@ -1,10 +1,10 @@
 package no.nav.familie.tilbake.totrinn
 
-import no.nav.familie.tilbake.api.dto.Totrinnsstegsinfo
-import no.nav.familie.tilbake.api.dto.TotrinnsvurderingDto
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.totrinn.domain.Totrinnsvurdering
+import no.nav.tilbakekreving.api.v1.dto.Totrinnsstegsinfo
+import no.nav.tilbakekreving.api.v1.dto.TotrinnsvurderingDto
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 
 object TotrinnMapper {
     fun tilRespons(

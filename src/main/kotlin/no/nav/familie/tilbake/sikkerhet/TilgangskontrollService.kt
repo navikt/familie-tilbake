@@ -11,12 +11,12 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.RolleConfig
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
-import no.nav.familie.tilbake.kontrakter.Fagsystem
-import no.nav.familie.tilbake.kontrakter.Tema
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
+import no.nav.tilbakekreving.kontrakter.ytelse.Tema
+import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
 import java.math.BigInteger

@@ -2,15 +2,15 @@ package no.nav.familie.tilbake.api
 
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
-import no.nav.familie.tilbake.api.dto.BeregnetPerioderDto
-import no.nav.familie.tilbake.api.dto.BeregningsresultatDto
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
-import no.nav.familie.tilbake.kontrakter.Datoperiode
 import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.tilbakekreving.api.v1.dto.BeregnetPerioderDto
+import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatDto
+import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping

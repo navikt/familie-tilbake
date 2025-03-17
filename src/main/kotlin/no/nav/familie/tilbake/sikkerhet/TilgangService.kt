@@ -2,8 +2,8 @@ package no.nav.familie.tilbake.sikkerhet
 
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.config.RolleConfig
-import no.nav.familie.tilbake.kontrakter.Fagsystem
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import org.springframework.stereotype.Service
 
 @Service

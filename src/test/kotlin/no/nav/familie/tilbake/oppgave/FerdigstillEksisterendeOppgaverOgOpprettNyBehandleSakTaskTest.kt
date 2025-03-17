@@ -10,7 +10,6 @@ import io.mockk.verify
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
-import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.data.Testdata.lagBehandling
@@ -18,6 +17,7 @@ import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.kontrakter.oppgave.Oppgave
 import no.nav.familie.tilbake.kontrakter.oppgave.OppgavePrioritet
 import no.nav.familie.tilbake.kontrakter.oppgave.Oppgavetype
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test

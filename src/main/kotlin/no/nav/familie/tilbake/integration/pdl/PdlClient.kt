@@ -14,11 +14,11 @@ import no.nav.familie.tilbake.integration.pdl.internal.PdlPersonRequest
 import no.nav.familie.tilbake.integration.pdl.internal.PdlPersonRequestVariables
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.integration.pdl.internal.feilsjekkOgReturnerData
-import no.nav.familie.tilbake.kontrakter.Fagsystem
-import no.nav.familie.tilbake.kontrakter.Tema
 import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
+import no.nav.tilbakekreving.kontrakter.ytelse.Tema
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus

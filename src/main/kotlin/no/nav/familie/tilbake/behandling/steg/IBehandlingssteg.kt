@@ -1,9 +1,9 @@
 package no.nav.familie.tilbake.behandling.steg
 
-import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import java.util.UUID
 
 interface IBehandlingssteg {

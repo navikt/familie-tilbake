@@ -1,7 +1,8 @@
 package no.nav.familie.tilbake.foreldelse.domain
 
 import no.nav.familie.tilbake.common.repository.Sporbar
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
+import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
+import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
 import org.springframework.data.relational.core.mapping.Embedded
@@ -29,13 +30,4 @@ data class Foreldelsesperiode(
             begrunnelse == andrePeriode.begrunnelse &&
             foreldelsesfrist == andrePeriode.foreldelsesfrist &&
             oppdagelsesdato == andrePeriode.oppdagelsesdato
-}
-
-enum class Foreldelsesvurderingstype(
-    val navn: String,
-) {
-    IKKE_VURDERT("Perioden er ikke vurdert"),
-    FORELDET("Perioden er foreldet"),
-    IKKE_FORELDET("Perioden er ikke foreldet"),
-    TILLEGGSFRIST("Perioden er ikke foreldet, regel om tilleggsfrist (10 år) benyttes"),
 }

@@ -6,7 +6,6 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.http.RessursException
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
-import no.nav.familie.tilbake.kontrakter.Fagsystem
 import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstidspunkt
 import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstype
 import no.nav.familie.tilbake.kontrakter.dokdist.ManuellAdresse
@@ -14,6 +13,7 @@ import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.util.UUID

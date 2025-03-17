@@ -1,12 +1,8 @@
 package no.nav.familie.tilbake.behandling.steg
 
-import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
-import no.nav.familie.tilbake.api.dto.BehandlingsstegFaktaDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
@@ -15,6 +11,10 @@ import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEvent
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFaktaDto
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

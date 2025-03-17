@@ -3,8 +3,8 @@ package no.nav.familie.tilbake.dokumentbestilling.felles.header
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
-import no.nav.familie.tilbake.kontrakter.Språkkode
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
+import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter

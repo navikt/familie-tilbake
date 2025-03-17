@@ -1,7 +1,6 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
 import io.kotest.matchers.shouldBe
-import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.HbGrunnbeløpUtil.lagHbGrunnbeløp
@@ -21,17 +20,18 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.H
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbSærligeGrunner
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVedtaksbrevsperiode
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVurderinger
-import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.HarBrukerUttaltSeg
-import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
-import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
-import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
-import no.nav.familie.tilbake.kontrakter.Datoperiode
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
-import no.nav.familie.tilbake.kontrakter.Språkkode
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
-import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
-import no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn
-import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
+import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
+import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
+import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
+import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
+import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
+import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -74,7 +74,8 @@ class TekstformatererVedtaksbrevInntektOver6GTest {
         }
     }
 
-    private val januar = Datoperiode(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 1, 31))
+    private val januar =
+        Datoperiode(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 1, 31))
 
     private val brevmetadata =
         Brevmetadata(

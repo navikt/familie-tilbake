@@ -10,14 +10,12 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultat
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
-import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.integration.økonomi.OppdragClient
 import no.nav.familie.tilbake.iverksettvedtak.domain.KodeResultat.DELVIS_TILBAKEKREVING
 import no.nav.familie.tilbake.iverksettvedtak.domain.Tilbakekrevingsbeløp
 import no.nav.familie.tilbake.iverksettvedtak.domain.Tilbakekrevingsperiode
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
@@ -26,6 +24,8 @@ import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakResponse
+import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
+import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

@@ -8,7 +8,7 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbr
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbKravgrunnlag
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbResultat
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVedtaksbrevsperiode
-import no.nav.familie.tilbake.kontrakter.Datoperiode
+import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import java.math.BigDecimal
 
 internal object AvsnittUtil {

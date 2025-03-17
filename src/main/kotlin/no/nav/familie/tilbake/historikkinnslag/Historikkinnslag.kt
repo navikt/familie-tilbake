@@ -3,6 +3,8 @@ package no.nav.familie.tilbake.historikkinnslag
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
+import no.nav.tilbakekreving.api.v1.dto.HistorikkinnslagDto
+import no.nav.tilbakekreving.kontrakter.historikk.Historikkinnslagstype
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import java.time.LocalDateTime
@@ -59,10 +61,21 @@ sealed interface Aktør {
     }
 }
 
-enum class Historikkinnslagstype {
-    HENDELSE,
-
-    SKJERMLENKE,
-
-    BREV,
-}
+fun Historikkinnslag.tilDto() =
+    HistorikkinnslagDto(
+        behandlingId = behandlingId.toString(),
+        type = type,
+        aktør =
+            when (aktør) {
+                Historikkinnslag.Aktør.BESLUTTER -> HistorikkinnslagDto.AktørDto.BESLUTTER
+                Historikkinnslag.Aktør.SAKSBEHANDLER -> HistorikkinnslagDto.AktørDto.SAKSBEHANDLER
+                Historikkinnslag.Aktør.VEDTAKSLØSNING -> HistorikkinnslagDto.AktørDto.VEDTAKSLØSNING
+            },
+        aktørIdent = opprettetAv,
+        tittel = tittel,
+        tekst = tekst,
+        steg = steg,
+        journalpostId = journalpostId,
+        dokumentId = dokumentId,
+        opprettetTid = opprettetTid,
+    )

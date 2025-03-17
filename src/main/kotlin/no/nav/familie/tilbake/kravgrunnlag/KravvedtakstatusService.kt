@@ -1,23 +1,17 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
-import no.nav.familie.tilbake.api.dto.HenleggelsesbrevFritekstDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.FagsystemUtil
 import no.nav.familie.tilbake.behandling.domain.Behandling
-import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
-import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.exceptionhandler.UgyldigStatusmeldingFeil
 import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kontrakter.oppgave.Oppgavetype
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
@@ -25,6 +19,12 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.oppgave.OppgaveService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
+import no.nav.tilbakekreving.api.v1.dto.HenleggelsesbrevFritekstDto
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
+import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import no.nav.tilbakekreving.status.v1.KravOgVedtakstatus
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service

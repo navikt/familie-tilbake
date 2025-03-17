@@ -10,43 +10,43 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
-import no.nav.familie.tilbake.api.dto.AktivitetDto
-import no.nav.familie.tilbake.api.dto.AktsomhetDto
-import no.nav.familie.tilbake.api.dto.BehandlingsstegVilkårsvurderingDto
-import no.nav.familie.tilbake.api.dto.GodTroDto
-import no.nav.familie.tilbake.api.dto.SærligGrunnDto
-import no.nav.familie.tilbake.api.dto.VilkårsvurderingsperiodeDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetalingsperiode
-import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
-import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import no.nav.familie.tilbake.foreldelse.VurdertForeldelseRepository
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
-import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
 import no.nav.familie.tilbake.iverksettvedtak.VilkårsvurderingsPeriodeDomainUtil.lagVilkårsvurderingAktsomhet
 import no.nav.familie.tilbake.iverksettvedtak.VilkårsvurderingsPeriodeDomainUtil.lagVilkårsvurderingGodTro
 import no.nav.familie.tilbake.iverksettvedtak.VilkårsvurderingsPeriodeDomainUtil.lagVilkårsvurderingsperiode
-import no.nav.familie.tilbake.kontrakter.Datoperiode
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
-import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
-import no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
-import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
+import no.nav.tilbakekreving.api.v1.dto.AktivitetDto
+import no.nav.tilbakekreving.api.v1.dto.AktsomhetDto
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
+import no.nav.tilbakekreving.api.v1.dto.GodTroDto
+import no.nav.tilbakekreving.api.v1.dto.SærligGrunnDto
+import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
+import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
+import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
+import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -349,7 +349,9 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentVilkårsvurdering skal hente allerede lagret god tro vilkårsvurdering`() {
         val behandlingsstegVilkårsvurderingDto =
-            lagVilkårsvurderingMedGodTro(perioder = listOf(Datoperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 2))))
+            lagVilkårsvurderingMedGodTro(
+                perioder = listOf(Datoperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 2))),
+            )
         vilkårsvurderingService.lagreVilkårsvurdering(
             behandlingId = behandling.id,
             behandlingsstegVilkårsvurderingDto = behandlingsstegVilkårsvurderingDto,
@@ -382,7 +384,9 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `skal hente inaktiv vilkårsvurdering`() {
         val behandlingsstegVilkårsvurderingDto =
-            lagVilkårsvurderingMedGodTro(perioder = listOf(Datoperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 2))))
+            lagVilkårsvurderingMedGodTro(
+                perioder = listOf(Datoperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 2))),
+            )
         vilkårsvurderingService.lagreVilkårsvurdering(
             behandlingId = behandling.id,
             behandlingsstegVilkårsvurderingDto = behandlingsstegVilkårsvurderingDto,
@@ -465,13 +469,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
             .lagreVilkårsvurdering(
                 behandling.id,
                 lagVilkårsvurderingMedGodTro(
-                    perioder =
-                        listOf(
-                            Datoperiode(
-                                YearMonth.of(2020, 2),
-                                YearMonth.of(2020, 2),
-                            ),
-                        ),
+                    perioder = listOf(Datoperiode(YearMonth.of(2020, 2), YearMonth.of(2020, 2))),
                 ),
             )
         lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
@@ -537,13 +535,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
             .lagreVilkårsvurdering(
                 behandling.id,
                 lagVilkårsvurderingMedGodTro(
-                    perioder =
-                        listOf(
-                            Datoperiode(
-                                YearMonth.of(2020, 2),
-                                YearMonth.of(2020, 2),
-                            ),
-                        ),
+                    perioder = listOf(Datoperiode(YearMonth.of(2020, 2), YearMonth.of(2020, 2))),
                 ),
             )
         lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
@@ -632,12 +624,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                 vilkårsvurderingService.lagreVilkårsvurdering(
                     behandling.id,
                     lagVilkårsvurderingMedGodTro(
-                        listOf(
-                            Datoperiode(
-                                YearMonth.of(2020, 1),
-                                YearMonth.of(2020, 2),
-                            ),
-                        ),
+                        listOf(Datoperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 2))),
                         BigDecimal(30000),
                     ),
                 )

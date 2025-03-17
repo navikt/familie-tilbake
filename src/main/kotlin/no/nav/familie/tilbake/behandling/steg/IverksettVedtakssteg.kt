@@ -5,13 +5,13 @@ import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Iverksettingsstatus
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.iverksettvedtak.task.SendØkonomiTilbakekrevingsvedtakTask
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import org.springframework.stereotype.Service
 import java.util.Properties
 import java.util.UUID

@@ -19,9 +19,9 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.Fritekstbrevsdata
 import no.nav.familie.tilbake.dokumentbestilling.innhentdokumentasjon.handlebars.dto.InnhentDokumentasjonsbrevsdokument
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
-import no.nav.familie.tilbake.kontrakter.Språkkode
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.organisasjon.OrganisasjonService
+import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import org.springframework.stereotype.Service
 import java.util.UUID
 

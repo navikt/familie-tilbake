@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
-import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
-import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 
 data class HendelseMedUndertype(
     val hendelsestype: Hendelsestype,

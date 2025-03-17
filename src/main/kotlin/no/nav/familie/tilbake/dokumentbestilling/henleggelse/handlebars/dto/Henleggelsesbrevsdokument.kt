@@ -1,9 +1,9 @@
 package no.nav.familie.tilbake.dokumentbestilling.henleggelse.handlebars.dto
 
-import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmottagerUtil
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.BaseDokument
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import java.time.LocalDate
 import java.util.Objects
 

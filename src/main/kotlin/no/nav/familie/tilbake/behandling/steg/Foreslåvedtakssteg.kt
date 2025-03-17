@@ -1,15 +1,10 @@
 package no.nav.familie.tilbake.behandling.steg
 
-import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
-import no.nav.familie.tilbake.api.dto.BehandlingsstegForeslåVedtaksstegDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
-import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -26,6 +21,11 @@ import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.oppgave.OppgaveService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.totrinn.TotrinnService
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeslåVedtaksstegDto
+import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import org.springframework.context.event.EventListener
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -53,7 +53,7 @@ class Foreslåvedtakssteg(
         logContext: SecureLog.Context,
     ) {
         log.medContext(logContext) {
-            info("Behandling $behandlingId er på ${Behandlingssteg.FORESLÅ_VEDTAK} steg")
+            info("Behandling $behandlingId er på $Behandlingssteg.FORESLÅ_VEDTAK} steg")
         }
         flyttBehandlingVidere(behandlingId, logContext)
     }
@@ -65,7 +65,7 @@ class Foreslåvedtakssteg(
         logContext: SecureLog.Context,
     ) {
         log.medContext(logContext) {
-            info("Behandling $behandlingId er på ${Behandlingssteg.FORESLÅ_VEDTAK} steg")
+            info("Behandling $behandlingId er på $Behandlingssteg.FORESLÅ_VEDTAK} steg")
         }
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         validerAtDetFinnesOppgave(behandling, logContext)

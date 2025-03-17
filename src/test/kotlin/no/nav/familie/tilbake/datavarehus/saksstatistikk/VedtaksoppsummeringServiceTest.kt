@@ -9,8 +9,6 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
-import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
-import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsvedtak
 import no.nav.familie.tilbake.behandling.domain.Iverksettingsstatus
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
@@ -21,15 +19,9 @@ import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.Vedtaksoppsummer
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetalingsperiode
-import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
-import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import no.nav.familie.tilbake.foreldelse.VurdertForeldelseRepository
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
-import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
-import no.nav.familie.tilbake.kontrakter.Fagsystem
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.GjelderType
@@ -40,12 +32,21 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
-import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingGodTro
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingSærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
-import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
+import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
+import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
+import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
+import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -228,7 +229,7 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
     private fun lagVilkårMedAktsomhet() {
         val særligGrunn =
             VilkårsvurderingSærligGrunn(
-                særligGrunn = no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn.STØRRELSE_BELØP,
+                særligGrunn = SærligGrunn.STØRRELSE_BELØP,
                 begrunnelse = "særlig grunner begrunnelse",
             )
         val vilkårVurderingAktsomhet =

@@ -5,7 +5,6 @@ import no.nav.familie.tilbake.avstemming.marshaller.ØkonomiKvitteringTolk
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
-import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Institusjon
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.IntegrasjonerConfig
@@ -17,6 +16,7 @@ import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.typer.v1.MmelDto
 import org.springframework.stereotype.Service
 import java.time.LocalDate

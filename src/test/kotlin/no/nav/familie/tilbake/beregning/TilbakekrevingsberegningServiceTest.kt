@@ -11,27 +11,27 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultat
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
-import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.data.Testdata.lagFeilBeløp
 import no.nav.familie.tilbake.data.Testdata.lagYtelBeløp
 import no.nav.familie.tilbake.foreldelse.VurdertForeldelseRepository
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
-import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
-import no.nav.familie.tilbake.kontrakter.Datoperiode
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
-import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
-import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
-import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
+import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
+import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
+import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
+import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -366,9 +366,17 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
                     ),
             )
         beregnetPerioderDto.beregnetPerioder.size shouldBe 2
-        beregnetPerioderDto.beregnetPerioder[0].periode shouldBe Datoperiode(LocalDate.of(2017, 1, 1), LocalDate.of(2017, 1, 31))
+        beregnetPerioderDto.beregnetPerioder[0].periode shouldBe
+            Datoperiode(
+                LocalDate.of(2017, 1, 1),
+                LocalDate.of(2017, 1, 31),
+            )
         beregnetPerioderDto.beregnetPerioder[0].feilutbetaltBeløp shouldBe BigDecimal("10000")
-        beregnetPerioderDto.beregnetPerioder[1].periode shouldBe Datoperiode(LocalDate.of(2017, 2, 1), LocalDate.of(2017, 2, 28))
+        beregnetPerioderDto.beregnetPerioder[1].periode shouldBe
+            Datoperiode(
+                LocalDate.of(2017, 2, 1),
+                LocalDate.of(2017, 2, 28),
+            )
         beregnetPerioderDto.beregnetPerioder[1].feilutbetaltBeløp shouldBe BigDecimal("10000")
     }
 

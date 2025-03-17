@@ -1,11 +1,7 @@
 package no.nav.familie.tilbake.totrinn
 
-import no.nav.familie.tilbake.api.dto.TotrinnsvurderingDto
-import no.nav.familie.tilbake.api.dto.VurdertTotrinnDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
@@ -13,6 +9,10 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.totrinn.domain.Totrinnsvurdering
+import no.nav.tilbakekreving.api.v1.dto.TotrinnsvurderingDto
+import no.nav.tilbakekreving.api.v1.dto.VurdertTotrinnDto
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -130,7 +130,7 @@ class TotrinnService(
         behandlingsstegstilstand.any {
             behandlingssteg == it.behandlingssteg &&
                 it.behandlingssteg.kanBesluttes &&
-                it.behandlingsstegsstatus != Behandlingsstegstatus.AUTOUTFØRT
+                it.behandlingsstegsstatus != no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus.AUTOUTFØRT
         }
 
     private fun validerOmAlleBesluttendeStegFinnes(
@@ -142,7 +142,7 @@ class TotrinnService(
             behandlingsstegstilstand
                 .filter {
                     it.behandlingssteg.kanBesluttes &&
-                        it.behandlingsstegsstatus != Behandlingsstegstatus.AUTOUTFØRT
+                        it.behandlingsstegsstatus != no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus.AUTOUTFØRT
                 }.map { it.behandlingssteg }
 
         val vurderteSteg: List<Behandlingssteg> = totrinnsvurderinger.map { it.behandlingssteg }

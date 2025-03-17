@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.faktaomfeilutbetaling.domain
 
 import no.nav.familie.tilbake.common.repository.Sporbar
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
 import org.springframework.data.relational.core.mapping.Embedded
@@ -17,10 +18,3 @@ data class VurderingAvBrukersUttalelse(
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar(),
 )
-
-enum class HarBrukerUttaltSeg {
-    JA,
-    NEI,
-    IKKE_AKTUELT,
-    IKKE_VURDERT,
-}

@@ -30,7 +30,7 @@ import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBre
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevgunnlagService
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.MottakerType
+import no.nav.tilbakekreving.kontrakter.brev.MottakerType
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

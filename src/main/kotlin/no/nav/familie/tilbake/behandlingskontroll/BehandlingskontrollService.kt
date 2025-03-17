@@ -2,16 +2,7 @@ package no.nav.familie.tilbake.behandlingskontroll
 
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.AUTOUTFØRT
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.AVBRUTT
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.KLAR
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.TILBAKEFØRT
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.UTFØRT
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.VENTER
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
-import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
@@ -19,10 +10,19 @@ import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBre
 import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.tilbakekreving.kontrakter.Tilbakekrevingsvalg
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus.AUTOUTFØRT
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus.AVBRUTT
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus.KLAR
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus.TILBAKEFØRT
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus.UTFØRT
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus.VENTER
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate

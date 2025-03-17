@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak
 
-import no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
 
 class SærligeGrunner(
     var erSærligeGrunnerTilReduksjon: Boolean = false,

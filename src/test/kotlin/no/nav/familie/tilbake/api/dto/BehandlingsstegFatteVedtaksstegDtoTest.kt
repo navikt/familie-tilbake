@@ -1,6 +1,6 @@
-package no.nav.familie.tilbake.api.dto
+package no.nav.tilbakekreving.api.v1.dto
 
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 
 class BehandlingsstegFatteVedtaksstegDtoTest {
     companion object {

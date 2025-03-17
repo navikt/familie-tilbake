@@ -1,12 +1,9 @@
 package no.nav.familie.tilbake.behandling
 
-import no.nav.familie.tilbake.api.dto.VergeDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.historikkinnslag.Aktør
@@ -14,11 +11,14 @@ import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.kontrakter.Applikasjon
-import no.nav.familie.tilbake.kontrakter.Fagsystem
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Vergetype
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.person.PersonService
+import no.nav.tilbakekreving.api.v1.dto.VergeDto
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
+import no.nav.tilbakekreving.kontrakter.verge.Vergetype
+import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -128,8 +128,8 @@ class VergeService(
     ) {
         when (vergeDto.type) {
             Vergetype.ADVOKAT -> {
-                requireNotNull(vergeDto.orgNr) { "orgNr kan ikke være null for ${Vergetype.ADVOKAT}" }
-                val erGyldig = integrasjonerClient.validerOrganisasjon(vergeDto.orgNr)
+                val orgnummer = requireNotNull(vergeDto.orgNr) { "orgNr kan ikke være null for ${Vergetype.ADVOKAT}" }
+                val erGyldig = integrasjonerClient.validerOrganisasjon(orgnummer)
                 if (!erGyldig) {
                     throw Feil(
                         message = "Organisasjon ${vergeDto.orgNr} er ikke gyldig",
@@ -139,9 +139,9 @@ class VergeService(
                 }
             }
             else -> {
-                requireNotNull(vergeDto.ident) { "ident kan ikke være null for ${vergeDto.type}" }
+                val ident = requireNotNull(vergeDto.ident) { "ident kan ikke være null for ${vergeDto.type}" }
                 // Henter personen å verifisere om det finnes. Hvis det ikke finnes, kaster det en exception
-                personService.hentPersoninfo(vergeDto.ident, fagsystem, logContext)
+                personService.hentPersoninfo(ident, fagsystem, logContext)
             }
         }
     }

@@ -1,9 +1,5 @@
 package no.nav.familie.tilbake.vilkårsvurdering
 
-import no.nav.familie.tilbake.api.dto.AktsomhetDto
-import no.nav.familie.tilbake.api.dto.BehandlingsstegVilkårsvurderingDto
-import no.nav.familie.tilbake.api.dto.VilkårsvurderingsperiodeDto
-import no.nav.familie.tilbake.api.dto.VurdertVilkårsvurderingDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
@@ -14,16 +10,20 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
-import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingGodTro
-import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
+import no.nav.tilbakekreving.api.v1.dto.AktsomhetDto
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
+import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
+import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingDto
+import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID

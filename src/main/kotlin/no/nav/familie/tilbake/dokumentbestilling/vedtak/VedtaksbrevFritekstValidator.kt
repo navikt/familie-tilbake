@@ -1,9 +1,6 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
-import no.nav.familie.tilbake.api.dto.PeriodeMedTekstDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
-import no.nav.familie.tilbake.behandling.domain.Behandlingstype
-import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Friteksttype
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.SkalSammenslåPerioder
@@ -12,11 +9,14 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsperio
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype.ORDINÆR
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
-import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
 import no.nav.familie.tilbake.log.SecureLog
-import no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
+import no.nav.tilbakekreving.api.v1.dto.PeriodeMedTekstDto
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
+import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
 import org.springframework.http.HttpStatus
 
 object VedtaksbrevFritekstValidator {

@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto
 
-import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
+import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import java.math.BigDecimal
 
 data class HbTotalresultat(

@@ -6,6 +6,6 @@ data class Personinfo(
     val ident: String,
     val fødselsdato: LocalDate,
     val navn: String,
-    val kjønn: Kjønn = Kjønn.UKJENT,
+    val kjønn: PdlKjønnType = PdlKjønnType.UKJENT,
     val dødsdato: LocalDate? = null,
 )

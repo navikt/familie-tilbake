@@ -23,25 +23,11 @@ import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
-import no.nav.familie.tilbake.api.dto.BehandlingDto
-import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
-import no.nav.familie.tilbake.api.dto.BehandlingsstegsinfoDto
-import no.nav.familie.tilbake.api.dto.ByttEnhetDto
-import no.nav.familie.tilbake.api.dto.HenleggelsesbrevFritekstDto
-import no.nav.familie.tilbake.api.dto.OpprettRevurderingDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
-import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
-import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
-import no.nav.familie.tilbake.behandling.domain.Behandlingstype
-import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
-import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
-import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.Sporbar
@@ -58,25 +44,7 @@ import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBre
 import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
-import no.nav.familie.tilbake.kontrakter.Fagsystem
-import no.nav.familie.tilbake.kontrakter.Språkkode
 import no.nav.familie.tilbake.kontrakter.oppgave.Oppgavetype
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Brevmottaker
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Faktainfo
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Institusjon
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.ManuellAdresseInfo
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.MottakerType
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.OpprettManueltTilbakekrevingRequest
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.OpprettTilbakekrevingRequest
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Periode
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Tilbakekrevingsvalg
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Varsel
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Verge
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Vergetype
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype.BARNETILSYN
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype.BARNETRYGD
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype.KONTANTSTØTTE
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.task.HentKravgrunnlagTask
@@ -89,6 +57,38 @@ import no.nav.familie.tilbake.oppgave.OppgaveService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.InnloggetBrukertilgang
 import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
+import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
+import no.nav.tilbakekreving.api.v1.dto.BehandlingPåVentDto
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegsinfoDto
+import no.nav.tilbakekreving.api.v1.dto.ByttEnhetDto
+import no.nav.tilbakekreving.api.v1.dto.HenleggelsesbrevFritekstDto
+import no.nav.tilbakekreving.api.v1.dto.OpprettRevurderingDto
+import no.nav.tilbakekreving.kontrakter.Faktainfo
+import no.nav.tilbakekreving.kontrakter.Institusjon
+import no.nav.tilbakekreving.kontrakter.OpprettManueltTilbakekrevingRequest
+import no.nav.tilbakekreving.kontrakter.OpprettTilbakekrevingRequest
+import no.nav.tilbakekreving.kontrakter.Periode
+import no.nav.tilbakekreving.kontrakter.Tilbakekrevingsvalg
+import no.nav.tilbakekreving.kontrakter.Varsel
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
+import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
+import no.nav.tilbakekreving.kontrakter.brev.Brevmottaker
+import no.nav.tilbakekreving.kontrakter.brev.ManuellAdresseInfo
+import no.nav.tilbakekreving.kontrakter.brev.MottakerType
+import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
+import no.nav.tilbakekreving.kontrakter.verge.Verge
+import no.nav.tilbakekreving.kontrakter.verge.Vergetype
+import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
+import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype.BARNETILSYN
+import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype.BARNETRYGD
+import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype.KONTANTSTØTTE
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -1468,7 +1468,10 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
         val exception =
             shouldThrow<RuntimeException> {
-                behandlingService.byttBehandlendeEnhet(behandling.id, ByttEnhetDto("4806", "bytter i unittest"))
+                behandlingService.byttBehandlendeEnhet(
+                    behandling.id,
+                    ByttEnhetDto("4806", "bytter i unittest"),
+                )
             }
         exception.message shouldBe "Ikke implementert for fagsystem EF"
     }
@@ -1490,7 +1493,10 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
         val exception =
             shouldThrow<RuntimeException> {
-                behandlingService.byttBehandlendeEnhet(behandling.id, ByttEnhetDto("4806", "bytter i unittest"))
+                behandlingService.byttBehandlendeEnhet(
+                    behandling.id,
+                    ByttEnhetDto("4806", "bytter i unittest"),
+                )
             }
         exception.message shouldBe "Behandling med id=${behandling.id} er allerede ferdig behandlet."
     }

@@ -4,10 +4,10 @@ import no.nav.familie.tilbake.behandling.domain.HentFagsystemsbehandlingRequestS
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.kontrakter.objectMapper
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.HentFagsystemsbehandlingRequest
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.HentFagsystemsbehandlingRespons
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandlingRequest
+import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandlingRespons
+import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation

@@ -19,24 +19,25 @@ import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
-import no.nav.familie.tilbake.kontrakter.Fagsystem
-import no.nav.familie.tilbake.kontrakter.Språkkode
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Faktainfo
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.OpprettTilbakekrevingRequest
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Tilbakekrevingsvalg
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Vergetype
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEventPublisher
 import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
+import no.nav.tilbakekreving.kontrakter.Faktainfo
+import no.nav.tilbakekreving.kontrakter.OpprettTilbakekrevingRequest
+import no.nav.tilbakekreving.kontrakter.Tilbakekrevingsvalg
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
+import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
+import no.nav.tilbakekreving.kontrakter.verge.Verge
+import no.nav.tilbakekreving.kontrakter.verge.Vergetype
+import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
+import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -237,7 +238,7 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val verge =
             if (finnesVerge) {
-                no.nav.familie.tilbake.kontrakter.tilbakekreving.Verge(
+                Verge(
                     vergetype = Vergetype.VERGE_FOR_BARN,
                     navn = "Andy",
                     personIdent = "321321321",

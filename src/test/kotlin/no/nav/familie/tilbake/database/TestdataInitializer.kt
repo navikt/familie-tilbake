@@ -2,14 +2,14 @@ package no.nav.familie.tilbake.database
 
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
-import no.nav.familie.tilbake.kontrakter.Fagsystem
-import no.nav.familie.tilbake.kontrakter.Språkkode
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Faktainfo
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.OpprettTilbakekrevingRequest
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype.OVERGANGSSTØNAD
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagService
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.kontrakter.Faktainfo
+import no.nav.tilbakekreving.kontrakter.OpprettTilbakekrevingRequest
+import no.nav.tilbakekreving.kontrakter.Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL
+import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
+import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
+import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype.OVERGANGSSTØNAD
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationListener

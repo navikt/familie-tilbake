@@ -11,15 +11,15 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.dokumentbestilling.brevmaler.Dokumentmalstype
 import no.nav.familie.tilbake.dokumentbestilling.innhentdokumentasjon.InnhentDokumentasjonbrevService
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
 import no.nav.familie.tilbake.dokumentbestilling.varsel.manuelt.ManueltVarselbrevService
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.MottakerType
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.kontrakter.brev.Dokumentmalstype
+import no.nav.tilbakekreving.kontrakter.brev.MottakerType
 import org.junit.jupiter.api.Test
 import java.util.UUID
 

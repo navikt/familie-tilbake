@@ -5,7 +5,6 @@ import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
@@ -13,12 +12,13 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.header.Institusjon
-import no.nav.familie.tilbake.kontrakter.Språkkode
 import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstidspunkt
 import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstype
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.organisasjon.OrganisasjonService
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
+import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
+import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import org.junit.jupiter.api.Test
 import java.util.Base64
 

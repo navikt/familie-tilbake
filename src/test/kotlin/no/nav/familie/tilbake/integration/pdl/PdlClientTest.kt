@@ -9,9 +9,9 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.config.PdlConfig
-import no.nav.familie.tilbake.integration.pdl.internal.Kjønn
-import no.nav.familie.tilbake.kontrakter.Fagsystem
+import no.nav.familie.tilbake.integration.pdl.internal.PdlKjønnType
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -59,7 +59,7 @@ class PdlClientTest {
 
         respons.shouldNotBeNull()
         respons.navn shouldBe "ENGASJERT FYR"
-        respons.kjønn shouldBe Kjønn.MANN
+        respons.kjønn shouldBe PdlKjønnType.MANN
         respons.fødselsdato shouldBe LocalDate.of(1955, 9, 13)
         respons.dødsdato shouldBe null
     }
@@ -75,7 +75,7 @@ class PdlClientTest {
 
         respons.shouldNotBeNull()
         respons.navn shouldBe "ENGASJERT FYR"
-        respons.kjønn shouldBe Kjønn.MANN
+        respons.kjønn shouldBe PdlKjønnType.MANN
         respons.fødselsdato shouldBe LocalDate.of(1955, 9, 13)
         respons.dødsdato shouldBe LocalDate.of(2022, 4, 1)
     }

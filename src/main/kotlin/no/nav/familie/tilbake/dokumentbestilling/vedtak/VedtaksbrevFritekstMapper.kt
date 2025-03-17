@@ -1,11 +1,11 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
-import no.nav.familie.tilbake.api.dto.PeriodeMedTekstDto
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Friteksttype
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.SkalSammenslåPerioder
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsoppsummering
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsperiode
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
+import no.nav.tilbakekreving.api.v1.dto.PeriodeMedTekstDto
+import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import java.util.UUID
 
 object VedtaksbrevFritekstMapper {
@@ -63,11 +63,11 @@ object VedtaksbrevFritekstMapper {
         behandlingId: UUID,
         faktaAvsnittMedPeriode: PeriodeMedTekstDto,
     ): Vedtaksbrevsperiode? =
-        faktaAvsnittMedPeriode.faktaAvsnitt?.let {
+        faktaAvsnittMedPeriode.faktaAvsnitt?.let { faktaAvsnitt ->
             Vedtaksbrevsperiode(
                 behandlingId = behandlingId,
                 periode = faktaAvsnittMedPeriode.periode.toMånedsperiode(),
-                fritekst = faktaAvsnittMedPeriode.faktaAvsnitt,
+                fritekst = faktaAvsnitt,
                 fritekststype = Friteksttype.FAKTA,
             )
         }
@@ -76,11 +76,11 @@ object VedtaksbrevFritekstMapper {
         behandlingId: UUID,
         foreldelsesAvsnittMedPeriode: PeriodeMedTekstDto,
     ): Vedtaksbrevsperiode? =
-        foreldelsesAvsnittMedPeriode.foreldelseAvsnitt?.let {
+        foreldelsesAvsnittMedPeriode.foreldelseAvsnitt?.let { foreldelseAvsnitt ->
             Vedtaksbrevsperiode(
                 behandlingId = behandlingId,
                 periode = foreldelsesAvsnittMedPeriode.periode.toMånedsperiode(),
-                fritekst = foreldelsesAvsnittMedPeriode.foreldelseAvsnitt,
+                fritekst = foreldelseAvsnitt,
                 fritekststype = Friteksttype.FORELDELSE,
             )
         }
@@ -89,11 +89,11 @@ object VedtaksbrevFritekstMapper {
         behandlingId: UUID,
         vilkårAvsnittMedPeriode: PeriodeMedTekstDto,
     ): Vedtaksbrevsperiode? =
-        vilkårAvsnittMedPeriode.vilkårAvsnitt?.let {
+        vilkårAvsnittMedPeriode.vilkårAvsnitt?.let { vilkårAvsnitt ->
             Vedtaksbrevsperiode(
                 behandlingId = behandlingId,
                 periode = vilkårAvsnittMedPeriode.periode.toMånedsperiode(),
-                fritekst = vilkårAvsnittMedPeriode.vilkårAvsnitt,
+                fritekst = vilkårAvsnitt,
                 fritekststype = Friteksttype.VILKÅR,
             )
         }
@@ -102,11 +102,11 @@ object VedtaksbrevFritekstMapper {
         behandlingId: UUID,
         særligGrunnerAvsnittMedPeriode: PeriodeMedTekstDto,
     ): Vedtaksbrevsperiode? =
-        særligGrunnerAvsnittMedPeriode.særligeGrunnerAvsnitt?.let {
+        særligGrunnerAvsnittMedPeriode.særligeGrunnerAvsnitt?.let { særligeGrunnerAvsnitt ->
             Vedtaksbrevsperiode(
                 behandlingId = behandlingId,
                 periode = særligGrunnerAvsnittMedPeriode.periode.toMånedsperiode(),
-                fritekst = særligGrunnerAvsnittMedPeriode.særligeGrunnerAvsnitt,
+                fritekst = særligeGrunnerAvsnitt,
                 fritekststype = Friteksttype.SÆRLIGE_GRUNNER,
             )
         }
@@ -115,11 +115,11 @@ object VedtaksbrevFritekstMapper {
         behandlingId: UUID,
         særligGrunnerAnnetAvsnittMedPeriode: PeriodeMedTekstDto,
     ): Vedtaksbrevsperiode? =
-        særligGrunnerAnnetAvsnittMedPeriode.særligeGrunnerAnnetAvsnitt?.let {
+        særligGrunnerAnnetAvsnittMedPeriode.særligeGrunnerAnnetAvsnitt?.let { særligeGrunnerAnnetAvsnitt ->
             Vedtaksbrevsperiode(
                 behandlingId = behandlingId,
                 periode = særligGrunnerAnnetAvsnittMedPeriode.periode.toMånedsperiode(),
-                fritekst = særligGrunnerAnnetAvsnittMedPeriode.særligeGrunnerAnnetAvsnitt,
+                fritekst = særligeGrunnerAnnetAvsnitt,
                 fritekststype = Friteksttype.SÆRLIGE_GRUNNER_ANNET,
             )
         }

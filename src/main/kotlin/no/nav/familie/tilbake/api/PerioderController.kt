@@ -7,11 +7,11 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevService
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevsoppsummeringRepository
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.SkalSammenslåPerioder
 import no.nav.familie.tilbake.kontrakter.Ressurs
-import no.nav.familie.tilbake.kontrakter.Tema
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.tilbakekreving.kontrakter.ytelse.Tema
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable

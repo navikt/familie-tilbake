@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto
 
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVedtaksbrevsperiode
-import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import java.time.LocalDate
 
 class HbVedtaksbrevDatoer(

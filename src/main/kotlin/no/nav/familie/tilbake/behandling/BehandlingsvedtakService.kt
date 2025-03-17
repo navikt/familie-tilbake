@@ -2,13 +2,13 @@ package no.nav.familie.tilbake.behandling
 
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
-import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsvedtak
 import no.nav.familie.tilbake.behandling.domain.Iverksettingsstatus
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
-import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.micrometer.TellerService
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
+import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate

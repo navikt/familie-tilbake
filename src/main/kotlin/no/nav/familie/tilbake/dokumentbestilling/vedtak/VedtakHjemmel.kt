@@ -1,14 +1,14 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
-import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbHjemmel
-import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
-import no.nav.familie.tilbake.kontrakter.Språkkode
-import no.nav.familie.tilbake.kontrakter.tilbakekreving.Ytelsestype
-import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
-import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
+import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
+import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
+import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
+import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 
 object VedtakHjemmel {
     private val Vilkårsvurderingsresultat_MED_FORSETT_ALLTID_RENTER: List<Vilkårsvurderingsresultat> =

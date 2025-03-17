@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.faktaomfeilutbetaling
 
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
+import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.SortedMap

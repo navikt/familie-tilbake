@@ -1,17 +1,17 @@
 package no.nav.familie.tilbake.iverksettvedtak
 
-import no.nav.familie.tilbake.api.dto.AktsomhetDto
-import no.nav.familie.tilbake.api.dto.SærligGrunnDto
-import no.nav.familie.tilbake.api.dto.VilkårsvurderingsperiodeDto
-import no.nav.familie.tilbake.kontrakter.Datoperiode
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
-import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
-import no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingGodTro
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingSærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
-import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
+import no.nav.tilbakekreving.api.v1.dto.AktsomhetDto
+import no.nav.tilbakekreving.api.v1.dto.SærligGrunnDto
+import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
+import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
+import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.UUID

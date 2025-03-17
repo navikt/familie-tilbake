@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.common
 
-import no.nav.familie.tilbake.kontrakter.Månedsperiode
+import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import java.math.BigDecimal
 
 object Grunnbeløpsperioder {
