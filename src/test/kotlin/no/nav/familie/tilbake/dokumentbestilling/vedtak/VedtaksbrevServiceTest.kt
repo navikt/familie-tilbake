@@ -15,7 +15,6 @@ import io.mockk.spyk
 import io.mockk.verify
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
-import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsak
@@ -23,7 +22,6 @@ import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
-import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
@@ -123,9 +121,6 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
     private lateinit var sendBrevService: DistribusjonshåndteringService
 
-    @Autowired
-    private lateinit var featureToggleService: FeatureToggleService
-
     private lateinit var behandling: Behandling
     private lateinit var fagsak: Fagsak
 
@@ -139,9 +134,6 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var periodeService: PeriodeService
-
-    @Autowired
-    private lateinit var behandlingService: BehandlingService
 
     @BeforeEach
     fun init() {
@@ -170,8 +162,8 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
                 logService,
             )
 
-        fagsak = fagsakRepository.insert(Testdata.fagsak)
-        behandling = behandlingRepository.insert(Testdata.lagBehandling().copy(avsluttetDato = LocalDate.now()))
+        fagsak = fagsakRepository.insert(Testdata.fagsak())
+        behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId = fagsak.id).copy(avsluttetDato = LocalDate.now()))
         val kravgrunnlagsperiode432 =
             Testdata
                 .lagKravgrunnlag(behandling.id)
@@ -204,7 +196,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
         val personinfo = Personinfo("28056325874", LocalDate.now(), "Fiona")
 
-        every { eksterneDataForBrevService.hentPerson(Testdata.fagsak.bruker.ident, any(), any()) }.returns(personinfo)
+        every { eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, any(), any()) }.returns(personinfo)
         every { eksterneDataForBrevService.hentSaksbehandlernavn(behandling.ansvarligSaksbehandler) }
             .returns("Ansvarlig O'Saksbehandler")
         every { eksterneDataForBrevService.hentSaksbehandlernavn(behandling.ansvarligBeslutter!!) }

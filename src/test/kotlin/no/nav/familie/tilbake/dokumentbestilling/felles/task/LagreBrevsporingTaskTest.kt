@@ -9,6 +9,7 @@ import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.config.Constants
@@ -31,6 +32,8 @@ import java.util.Properties
 import java.util.UUID
 
 internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
+    override val tømDBEtterHverTest = false
+
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -53,17 +56,19 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
     private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
 
     private lateinit var behandling: Behandling
+    private lateinit var fagsak: Fagsak
 
     private val dokumentId: String = "testverdi"
     private val journalpostId: String = "testverdi"
 
     @BeforeEach
     fun init() {
+        fagsak = fagsakRepository.insert(Testdata.fagsak())
         behandling =
             Testdata.lagBehandling(
+                fagsakId = fagsak.id,
                 behandlingStatus = Behandlingsstatus.IVERKSETTER_VEDTAK,
             )
-        fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(behandling)
         behandlingsstegstilstandRepository.insert(Behandlingsstegstilstand(behandlingId = behandling.id, behandlingssteg = Behandlingssteg.AVSLUTTET, behandlingsstegsstatus = Behandlingsstegstatus.KLAR))
     }

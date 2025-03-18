@@ -47,6 +47,8 @@ import java.time.LocalDate
 import java.util.UUID
 
 class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
+    override val tømDBEtterHverTest = false
+
     @Autowired
     private lateinit var manuellBrevmottakerRepository: ManuellBrevmottakerRepository
     private val mockHistorikkService: HistorikkService = mockk(relaxed = true)
@@ -112,8 +114,8 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        fagsakRepository.insert(Testdata.fagsak)
-        behandling = behandlingRepository.insert(Testdata.lagBehandling())
+        val fagsak = fagsakRepository.insert(Testdata.fagsak())
+        behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId = fagsak.id))
 
         manuellBrevmottakerService =
             ManuellBrevmottakerService(

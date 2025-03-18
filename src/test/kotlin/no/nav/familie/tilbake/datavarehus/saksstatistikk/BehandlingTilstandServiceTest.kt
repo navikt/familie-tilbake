@@ -11,6 +11,7 @@ import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
+import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -44,6 +45,8 @@ import java.time.YearMonth
 import java.util.UUID
 
 class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
+    override val tømDBEtterHverTest = false
+
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
@@ -71,6 +74,7 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
     private lateinit var service: BehandlingTilstandService
 
     private lateinit var behandling: Behandling
+    private lateinit var fagsak: Fagsak
 
     @BeforeEach
     fun setup() {
@@ -83,25 +87,26 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
                 faktaFeilutbetalingService,
                 logService,
             )
-
-        fagsakRepository.insert(Testdata.fagsak)
-        behandling = behandlingRepository.insert(Testdata.lagBehandling())
+        fagsak = fagsakRepository.insert(Testdata.fagsak())
+        behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId = fagsak.id))
     }
 
     @Test
     fun `hentBehandlingensTilstand skal utlede behandlingtilstand for nyopprettet behandling`() {
+        val fagsak = fagsakRepository.insert(Testdata.fagsak())
         val behandling =
             behandlingService.opprettBehandling(
                 lagOpprettTilbakekrevingRequest(
                     true,
                     OPPRETT_TILBAKEKREVING_MED_VARSEL,
+                    fagsak,
                 ),
             )
         val tilstand = service.hentBehandlingensTilstand(behandling.id)
 
         tilstand.ytelsestype shouldBe Ytelsestype.BARNETRYGD
         tilstand.fagsystem shouldBe Fagsystem.BA
-        tilstand.saksnummer shouldBe "1234567"
+        tilstand.saksnummer shouldBe fagsak.eksternFagsakId
         tilstand.behandlingUuid shouldBe behandling.eksternBrukId
         tilstand.referertFagsaksbehandling shouldBe behandling.aktivFagsystemsbehandling.eksternId
         tilstand.behandlingstype shouldBe Behandlingstype.TILBAKEKREVING
@@ -126,18 +131,20 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentBehandlingensTilstand skal utlede behandlingtilstand for nyopprettet behandling uten varsel`() {
+        val fagsak = fagsakRepository.insert(Testdata.fagsak())
         val behandling =
             behandlingService.opprettBehandling(
                 lagOpprettTilbakekrevingRequest(
                     false,
                     OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
+                    fagsak,
                 ),
             )
         val tilstand = service.hentBehandlingensTilstand(behandling.id)
 
         tilstand.ytelsestype shouldBe Ytelsestype.BARNETRYGD
         tilstand.fagsystem shouldBe Fagsystem.BA
-        tilstand.saksnummer shouldBe "1234567"
+        tilstand.saksnummer shouldBe fagsak.eksternFagsakId
         tilstand.behandlingUuid shouldBe behandling.eksternBrukId
         tilstand.referertFagsaksbehandling shouldBe behandling.aktivFagsystemsbehandling.eksternId
         tilstand.behandlingstype shouldBe Behandlingstype.TILBAKEKREVING
@@ -175,7 +182,7 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
 
         tilstand.ytelsestype shouldBe Ytelsestype.BARNETRYGD
         tilstand.fagsystem shouldBe Fagsystem.BA
-        tilstand.saksnummer shouldBe Testdata.fagsak.eksternFagsakId
+        tilstand.saksnummer shouldBe fagsak.eksternFagsakId
         tilstand.behandlingUuid shouldBe behandling.eksternBrukId
         tilstand.referertFagsaksbehandling shouldBe behandling.aktivFagsystemsbehandling.eksternId
         tilstand.behandlingstype shouldBe behandling.type
@@ -214,7 +221,7 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
 
         tilstand.ytelsestype shouldBe Ytelsestype.BARNETRYGD
         tilstand.fagsystem shouldBe Fagsystem.BA
-        tilstand.saksnummer shouldBe Testdata.fagsak.eksternFagsakId
+        tilstand.saksnummer shouldBe fagsak.eksternFagsakId
         tilstand.behandlingUuid shouldBe behandling.eksternBrukId
         tilstand.referertFagsaksbehandling shouldBe behandling.aktivFagsystemsbehandling.eksternId
         tilstand.behandlingstype shouldBe behandling.type
@@ -238,6 +245,7 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
     private fun lagOpprettTilbakekrevingRequest(
         finnesVarsel: Boolean,
         tilbakekrevingsvalg: Tilbakekrevingsvalg,
+        fagsak: Fagsak,
     ): OpprettTilbakekrevingRequest {
         val fom = YearMonth.now().minusMonths(1).atDay(1)
         val tom = YearMonth.now().atEndOfMonth()
@@ -263,7 +271,7 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
         return OpprettTilbakekrevingRequest(
             ytelsestype = Ytelsestype.BARNETRYGD,
             fagsystem = Fagsystem.BA,
-            eksternFagsakId = "1234567",
+            eksternFagsakId = fagsak.eksternFagsakId,
             personIdent = "321321322",
             eksternId = UUID.randomUUID().toString(),
             manueltOpprettet = false,

@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 internal class BehandlingsstegstilstandRepositoryTest : OppslagSpringRunnerTest() {
+    override val tømDBEtterHverTest = false
+
     @Autowired
     private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
 
@@ -27,8 +29,8 @@ internal class BehandlingsstegstilstandRepositoryTest : OppslagSpringRunnerTest(
 
     @BeforeEach
     fun init() {
-        fagsakRepository.insert(Testdata.fagsak)
-        val behandling = behandlingRepository.insert(Testdata.lagBehandling())
+        val fagsak = fagsakRepository.insert(Testdata.fagsak())
+        val behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId = fagsak.id))
         behandlingsstegstilstand = Testdata.lagBehandlingsstegstilstand(behandling.id)
     }
 

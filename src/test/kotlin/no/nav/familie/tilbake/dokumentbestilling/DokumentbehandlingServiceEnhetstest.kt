@@ -39,7 +39,8 @@ class DokumentbehandlingServiceEnhetstest {
     @Test
     fun `bestillBrev skal ikke kunne bestille brev når brevmottakerne er ugyldige`() {
         // Arrange
-        val behandling = Testdata.lagBehandling()
+        val fagsak = Testdata.fagsak()
+        val behandling = Testdata.lagBehandling(fagsakId = fagsak.id)
         every { mockLogService.contextFraBehandling(any()) } returns SecureLog.Context.tom()
         every { mockBehandlingRepository.findByIdOrThrow(behandling.id) } returns behandling
         every { mockManuellBrevmottakerRepository.findByBehandlingId(any()) } returns

@@ -50,6 +50,8 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class OppdragClientTest : OppslagSpringRunnerTest() {
+    override val tømDBEtterHverTest = false
+
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -70,8 +72,8 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
     @BeforeEach
     fun init() {
         wireMockServer.start()
-        fagsak = Testdata.fagsak
-        behandling = Testdata.lagBehandling()
+        fagsak = Testdata.fagsak()
+        behandling = Testdata.lagBehandling(fagsakId = fagsak.id)
         fagsakRepository.insert(fagsak)
         behandlingRepository.insert(behandling)
         oppdragClient = DefaultOppdragClient(restOperations, URI.create(wireMockServer.baseUrl()))

@@ -5,6 +5,7 @@ import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.data.Testdata.lagKravgrunnlagsperiode
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.SkalSammenslåPerioder
@@ -49,21 +50,23 @@ class PeriodeServiceTest : OppslagSpringRunnerTest() {
 
     private lateinit var behandling: Behandling
     private lateinit var saksnummer: String
+    private lateinit var fagsak: Fagsak
 
     private val førstePeriode: Månedsperiode = Månedsperiode(YearMonth.of(2020, 4), YearMonth.of(2020, 8))
     private val andrePeriode = Månedsperiode(YearMonth.of(2020, 10), YearMonth.of(2020, 12))
 
     @BeforeEach
     fun setup() {
+        fagsak = fagsakRepository.insert(Testdata.fagsak().copy(fagsystem = Fagsystem.EF, ytelsestype = Ytelsestype.OVERGANGSSTØNAD))
         behandling =
-            Testdata.lagBehandling().copy(
+            Testdata.lagBehandling(fagsakId = fagsak.id).copy(
                 ansvarligSaksbehandler = ANSVARLIG_SAKSBEHANDLER,
                 ansvarligBeslutter = ANSVARLIG_BESLUTTER,
                 behandlendeEnhet = "8020",
             )
-        fagsakRepository.insert(Testdata.fagsak.copy(fagsystem = Fagsystem.EF, ytelsestype = Ytelsestype.OVERGANGSSTØNAD))
+
         behandling = behandlingRepository.insert(behandling)
-        saksnummer = Testdata.fagsak.eksternFagsakId
+        saksnummer = fagsak.eksternFagsakId
     }
 
     @Test

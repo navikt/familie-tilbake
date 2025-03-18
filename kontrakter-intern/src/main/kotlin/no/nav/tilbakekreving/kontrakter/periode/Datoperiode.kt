@@ -21,8 +21,7 @@ data class Datoperiode(
     override fun lagPeriode(
         fom: LocalDate,
         tom: LocalDate,
-    ): Datoperiode =
-        Datoperiode(fom, tom)
+    ): Datoperiode = Datoperiode(fom, tom)
 
     override infix fun union(annen: Periode<LocalDate>): Datoperiode = super.union(annen) as Datoperiode
 

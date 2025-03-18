@@ -15,6 +15,8 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 internal class KravgrunnlagRepositoryTest : OppslagSpringRunnerTest() {
+    override val tømDBEtterHverTest = false
+
     @Autowired
     private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
 
@@ -30,8 +32,8 @@ internal class KravgrunnlagRepositoryTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        fagsak = Testdata.fagsak
-        behandling = Testdata.lagBehandling()
+        fagsak = Testdata.fagsak()
+        behandling = Testdata.lagBehandling(fagsakId = fagsak.id)
         kravgrunnlag431 = Testdata.lagKravgrunnlag(behandling.id)
         behandling = behandling
         fagsakRepository.insert(fagsak)

@@ -7,6 +7,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.iverksettvedtak.domain.ØkonomiXmlSendt
@@ -16,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 internal class ØkonomiXmlSendtRepositoryTest : OppslagSpringRunnerTest() {
+    override val tømDBEtterHverTest = false
+
     @Autowired
     private lateinit var økonomiXmlSendtRepository: ØkonomiXmlSendtRepository
 
@@ -26,11 +29,12 @@ internal class ØkonomiXmlSendtRepositoryTest : OppslagSpringRunnerTest() {
     private lateinit var fagsakRepository: FagsakRepository
 
     private lateinit var økonomiXmlSendt: ØkonomiXmlSendt
+    private lateinit var fagsak: Fagsak
 
     @BeforeEach
     fun init() {
-        fagsakRepository.insert(Testdata.fagsak)
-        val behandling = behandlingRepository.insert(Testdata.lagBehandling())
+        fagsak = fagsakRepository.insert(Testdata.fagsak())
+        val behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId = fagsak.id))
         økonomiXmlSendt = Testdata.lagØkonomiXmlSendt(behandling.id)
     }
 
