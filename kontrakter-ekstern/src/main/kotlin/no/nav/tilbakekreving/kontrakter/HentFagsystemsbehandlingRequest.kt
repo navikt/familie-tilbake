@@ -2,10 +2,10 @@ package no.nav.tilbakekreving.kontrakter
 
 import jakarta.validation.Valid
 import jakarta.validation.constraints.Pattern
-import java.time.LocalDate
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.verge.Verge
 import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import java.time.LocalDate
 
 data class HentFagsystemsbehandlingRequest(
     val eksternFagsakId: String,

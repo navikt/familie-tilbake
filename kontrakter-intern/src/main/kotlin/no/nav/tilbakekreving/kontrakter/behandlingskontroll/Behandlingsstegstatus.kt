@@ -12,14 +12,16 @@ enum class Behandlingsstegstatus(
     ;
 
     companion object {
-        val aktiveStegStatuser = listOf(
-            VENTER,
-            KLAR
-        )
-        private val utførteStegStatuser = listOf(
-            UTFØRT,
-            AUTOUTFØRT
-        )
+        val aktiveStegStatuser =
+            listOf(
+                VENTER,
+                KLAR,
+            )
+        private val utførteStegStatuser =
+            listOf(
+                UTFØRT,
+                AUTOUTFØRT,
+            )
 
         fun erStegAktiv(status: Behandlingsstegstatus): Boolean = Behandlingsstegstatus.Companion.aktiveStegStatuser.contains(status)
 

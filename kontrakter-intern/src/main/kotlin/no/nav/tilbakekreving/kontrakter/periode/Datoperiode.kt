@@ -3,7 +3,6 @@ package no.nav.tilbakekreving.kontrakter.periode
 import java.time.LocalDate
 import java.time.YearMonth
 
-
 data class Datoperiode(
     override val fom: LocalDate,
     override val tom: LocalDate,

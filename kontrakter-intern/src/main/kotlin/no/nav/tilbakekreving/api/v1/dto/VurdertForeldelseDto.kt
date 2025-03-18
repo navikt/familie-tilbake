@@ -1,9 +1,9 @@
 package no.nav.tilbakekreving.api.v1.dto
 
-import java.math.BigDecimal
-import java.time.LocalDate
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
+import java.math.BigDecimal
+import java.time.LocalDate
 
 data class VurdertForeldelseDto(
     val foreldetPerioder: List<VurdertForeldelsesperiodeDto>,

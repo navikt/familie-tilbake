@@ -1,12 +1,12 @@
 package no.nav.tilbakekreving.api.v1.dto
 
-import java.util.UUID
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.bruker.BrukerDto
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import java.util.UUID
 
 data class FagsakDto(
     val eksternFagsakId: String,

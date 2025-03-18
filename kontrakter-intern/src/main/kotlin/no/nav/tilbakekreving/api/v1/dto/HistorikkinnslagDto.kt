@@ -1,7 +1,7 @@
 package no.nav.tilbakekreving.api.v1.dto
 
-import java.time.LocalDateTime
 import no.nav.tilbakekreving.kontrakter.historikk.Historikkinnslagstype
+import java.time.LocalDateTime
 
 data class HistorikkinnslagDto(
     val behandlingId: String,
@@ -21,4 +21,3 @@ data class HistorikkinnslagDto(
         VEDTAKSLØSNING,
     }
 }
-

@@ -39,12 +39,12 @@ enum class Behandlingssteg(
             val nesteBehandlingssteg =
                 Behandlingssteg.Companion.fraSekvens(
                     behandlingssteg.sekvens + 1,
-                    harManuelleBrevmottakere
+                    harManuelleBrevmottakere,
                 )
             if (nesteBehandlingssteg == Behandlingssteg.VERGE && !harVerge) {
                 // Hvis behandling opprettes ikke med verge, kan behandlingen flyttes til neste steg
                 return Behandlingssteg.Companion.fraSekvens(
-                    nesteBehandlingssteg.sekvens + 1
+                    nesteBehandlingssteg.sekvens + 1,
                 )
             }
             return nesteBehandlingssteg

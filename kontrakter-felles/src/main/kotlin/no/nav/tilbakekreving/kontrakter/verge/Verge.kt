@@ -10,4 +10,3 @@ data class Verge(
     @field:Pattern(regexp = "(^$|.{11})", message = "PersonIdent er ikke riktig")
     val personIdent: String? = null,
 )
-

@@ -1,7 +1,7 @@
 package no.nav.tilbakekreving.api.v1.dto
 
-import java.math.BigDecimal
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
+import java.math.BigDecimal
 
 data class BeregnetPeriodeDto(
     val periode: Datoperiode,

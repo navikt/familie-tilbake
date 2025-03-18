@@ -1,7 +1,5 @@
 package no.nav.tilbakekreving.kontrakter.periode
 
-import java.time.LocalDate
-import java.time.YearMonth
 import java.time.temporal.Temporal
 
 sealed class Periode<T> : Comparable<Periode<T>> where T : Comparable<T>, T : Temporal {

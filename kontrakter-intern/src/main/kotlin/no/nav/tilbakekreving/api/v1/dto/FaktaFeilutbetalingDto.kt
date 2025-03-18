@@ -1,13 +1,13 @@
 package no.nav.tilbakekreving.api.v1.dto
 
-import java.math.BigDecimal
-import java.time.LocalDate
-import java.time.LocalDateTime
 import no.nav.tilbakekreving.kontrakter.Faktainfo
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
+import java.math.BigDecimal
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class FaktaFeilutbetalingDto(
     val varsletBeløp: Long? = null,
@@ -39,7 +39,7 @@ data class VurderingAvBrukersUttalelseDto(
         fun ikkeVurdert(): VurderingAvBrukersUttalelseDto =
             VurderingAvBrukersUttalelseDto(
                 harBrukerUttaltSeg = HarBrukerUttaltSeg.IKKE_VURDERT,
-                beskrivelse = null
+                beskrivelse = null,
             )
     }
 }

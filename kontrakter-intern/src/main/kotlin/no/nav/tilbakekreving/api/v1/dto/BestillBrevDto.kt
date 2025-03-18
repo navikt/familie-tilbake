@@ -1,8 +1,8 @@
 package no.nav.tilbakekreving.api.v1.dto
 
 import jakarta.validation.constraints.Size
-import java.util.UUID
 import no.nav.tilbakekreving.kontrakter.brev.Dokumentmalstype
+import java.util.UUID
 
 class BestillBrevDto(
     val behandlingId: UUID,

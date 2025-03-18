@@ -1,12 +1,12 @@
 package no.nav.tilbakekreving.api.v1.dto
 
-import java.math.BigDecimal
-import java.time.LocalDateTime
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
+import java.math.BigDecimal
+import java.time.LocalDateTime
 
 data class VurdertVilkårsvurderingDto(
     val perioder: List<VurdertVilkårsvurderingsperiodeDto>,

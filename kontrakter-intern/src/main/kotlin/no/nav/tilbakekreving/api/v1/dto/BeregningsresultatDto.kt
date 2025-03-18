@@ -1,9 +1,9 @@
 package no.nav.tilbakekreving.api.v1.dto
 
-import java.math.BigDecimal
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering
+import java.math.BigDecimal
 
 data class BeregningsresultatDto(
     val beregningsresultatsperioder: List<BeregningsresultatsperiodeDto>,
