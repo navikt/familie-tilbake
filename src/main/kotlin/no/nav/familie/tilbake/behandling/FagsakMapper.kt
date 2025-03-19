@@ -7,7 +7,7 @@ import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsoppsummeringDto
 import no.nav.tilbakekreving.api.v1.dto.FagsakDto
-import no.nav.tilbakekreving.kontrakter.bruker.BrukerDto
+import no.nav.tilbakekreving.kontrakter.bruker.FrontendBrukerDto
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 
 object FagsakMapper {
@@ -18,7 +18,7 @@ object FagsakMapper {
         organisasjonService: OrganisasjonService,
     ): FagsakDto {
         val bruker =
-            BrukerDto(
+            FrontendBrukerDto(
                 personIdent = fagsak.bruker.ident,
                 navn = personinfo.navn,
                 fødselsdato = personinfo.fødselsdato,

@@ -7,6 +7,8 @@ spring:
 
 tilbakekreving:
   frontendUrl: https://tilbakekreving.ansatt.dev.nav.no
+  toggles:
+    ny-modell-enabled: true
 
 rolle:
   barnetrygd:

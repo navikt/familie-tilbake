@@ -2,7 +2,7 @@ package no.nav.tilbakekreving.api.v1.dto
 
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
-import no.nav.tilbakekreving.kontrakter.bruker.BrukerDto
+import no.nav.tilbakekreving.kontrakter.bruker.FrontendBrukerDto
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
@@ -13,7 +13,7 @@ data class FagsakDto(
     val ytelsestype: Ytelsestype,
     val fagsystem: Fagsystem,
     val språkkode: Språkkode,
-    val bruker: BrukerDto,
+    val bruker: FrontendBrukerDto,
     val behandlinger: List<BehandlingsoppsummeringDto>,
     val institusjon: InstitusjonDto? = null,
 )
