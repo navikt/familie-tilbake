@@ -21,6 +21,7 @@ class ApiExceptionHandler {
     fun handleThrowable(throwable: Throwable): ResponseEntity<Ressurs<Nothing>> {
         SecureLog.utenContext().error("En feil har oppstått", throwable)
         logger.error("En feil har oppstått: {}", rootCause(throwable))
+        logger.error("En feil har oppstått Message: {}", throwable.message)
 
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
