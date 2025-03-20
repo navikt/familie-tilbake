@@ -11,6 +11,7 @@ import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import no.nav.familie.tilbake.person.PersonService
 import no.nav.tilbakekreving.api.v1.dto.FagsakDto
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
+import kotlin.math.log
 
 @Service
 class FagsakService(
@@ -37,6 +39,8 @@ class FagsakService(
     private val personService: PersonService,
     private val organisasjonService: OrganisasjonService,
 ) {
+    private val log = TracedLogger.getLogger<FagsakService>()
+
     fun hentFagsak(fagsakId: UUID): Fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
 
     @Transactional(readOnly = true)
@@ -45,6 +49,11 @@ class FagsakService(
         eksternFagsakId: String,
     ): FagsakDto {
         val logContext = SecureLog.Context.utenBehandling(eksternFagsakId)
+        log.medContext(logContext) {
+            info("Henter fagsak for ${fagsystem.navn} og $eksternFagsakId")
+            info("Fagsystem er $fagsystem")
+            info("Ekstern fagsak id er $eksternFagsakId")
+        }
         val fagsak =
             fagsakRepository.findByFagsystemAndEksternFagsakId(
                 fagsystem = fagsystem,

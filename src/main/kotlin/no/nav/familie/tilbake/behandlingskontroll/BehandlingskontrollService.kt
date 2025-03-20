@@ -53,7 +53,7 @@ class BehandlingskontrollService(
         val aktivtStegstilstand = finnAktivStegstilstand(behandlingsstegstilstand)
 
         if (aktivtStegstilstand == null) {
-            val nesteStegMetaData = finnNesteBehandlingsstegMedStatus(behandling, behandlingsstegstilstand)
+            val nesteStegMetaData = finnNesteBehandlingsstegMedStatus(behandling, behandlingsstegstilstand, logContext)
             persisterBehandlingsstegOgStatus(behandlingId, nesteStegMetaData, logContext)
             if (nesteStegMetaData.behandlingsstegstatus == VENTER) {
                 historikkService.lagHistorikkinnslag(
@@ -366,7 +366,16 @@ class BehandlingskontrollService(
     private fun finnNesteBehandlingsstegMedStatus(
         behandling: Behandling,
         stegstilstand: List<Behandlingsstegstilstand>,
+        logContext: SecureLog.Context,
     ): Behandlingsstegsinfo {
+        log.medContext(logContext) {
+            debug(
+                "TEST DEBUG: finnNesteBehandlingsstegMedStatus1 {} harAktivtGrunnlag(behandling): {}",
+                behandling.id,
+                harAktivtGrunnlag(behandling),
+            )
+        }
+
         if (stegstilstand.isEmpty()) {
             return when {
                 // setter tidsfristen fra opprettelse dato
@@ -403,7 +412,7 @@ class BehandlingskontrollService(
                 .behandlingssteg
 
         if (Behandlingssteg.VARSEL == sisteUtførteSteg) {
-            return håndterOmSisteUtførteStegErVarsel(behandling)
+            return håndterOmSisteUtførteStegErVarsel(behandling, logContext)
         }
         return lagBehandlingsstegsinfo(
             behandlingssteg =
@@ -416,9 +425,12 @@ class BehandlingskontrollService(
         )
     }
 
-    private fun håndterOmSisteUtførteStegErVarsel(behandling: Behandling): Behandlingsstegsinfo =
+    private fun håndterOmSisteUtførteStegErVarsel(
+        behandling: Behandling,
+        logContext: SecureLog.Context,
+    ): Behandlingsstegsinfo =
         when {
-            erKravgrunnlagSperret(behandling) -> {
+            erKravgrunnlagSperret(behandling, logContext) -> {
                 val kravgrunnlag =
                     kravgrunnlagRepository
                         .findByBehandlingIdAndAktivIsTrueAndSperretTrue(behandling.id)
@@ -457,7 +469,19 @@ class BehandlingskontrollService(
 
     private fun harAktivtGrunnlag(behandling: Behandling): Boolean = kravgrunnlagRepository.existsByBehandlingIdAndAktivTrueAndSperretFalse(behandling.id)
 
-    private fun erKravgrunnlagSperret(behandling: Behandling): Boolean = kravgrunnlagRepository.existsByBehandlingIdAndAktivTrueAndSperretTrue(behandling.id)
+    private fun erKravgrunnlagSperret(
+        behandling: Behandling,
+        logContext: SecureLog.Context,
+    ): Boolean {
+        val bol = kravgrunnlagRepository.existsByBehandlingIdAndAktivTrueAndSperretTrue(behandling.id)
+        log.medContext(logContext) {
+            debug(
+                "TEST DEBUG: erKravgrunnlagSperret {} ",
+                bol,
+            )
+        }
+        return bol
+    }
 
     private fun lagBehandlingsstegsinfo(
         behandlingssteg: Behandlingssteg,

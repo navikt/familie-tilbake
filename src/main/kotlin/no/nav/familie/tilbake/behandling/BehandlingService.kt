@@ -260,6 +260,13 @@ class BehandlingService(
     ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val logContext = logService.contextFraBehandling(behandling.id)
+        log.medContext(logContext) {
+            debug(
+                "TEST DEBUG: settBehandlingPåVent {} behandlingid: {}",
+                behandling.id,
+                behandlingPåVentDto,
+            )
+        }
         sjekkOmBehandlingAlleredeErAvsluttet(behandling, logContext)
 
         if (LocalDate.now() >= behandlingPåVentDto.tidsfrist) {
@@ -571,6 +578,9 @@ class BehandlingService(
         opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
         logContext: SecureLog.Context,
     ): Behandling {
+        log.medContext(logContext) {
+            info("=====>>>> {}", opprettTilbakekrevingRequest.toString())
+        }
         validerBehandlingService.validerOpprettBehandling(opprettTilbakekrevingRequest)
 
         val fagsystem = opprettTilbakekrevingRequest.fagsystem

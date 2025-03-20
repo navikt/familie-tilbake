@@ -61,7 +61,7 @@ object KravgrunnlagUtil {
 
             (jaxbUnmarshaller.unmarshal(StringReader(kravgrunnlagXML)) as DetaljertKravgrunnlagMelding).detaljertKravgrunnlag
         } catch (e: JAXBException) {
-            SecureLog.utenContext().warn("Mottok ugyldig kravgrunnlag {}", kravgrunnlagXML, e)
+            SecureLog.utenContext().warn("Mottok ugyldig kravgrunnlag {}: {}", kravgrunnlagXML, e.message)
             throw UgyldigKravgrunnlagFeil(
                 melding = "Mottatt kravgrunnlagXML er ugyldig! Den feiler med $e",
                 logContext = SecureLog.Context.tom(),

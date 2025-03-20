@@ -85,9 +85,13 @@ class KravgrunnlagService(
         log.medContext(logContext) {
             info("Håndterer kravgrunnlag fagsystem=$fagsystem, eksternFagId=$fagsystemId, behandlingId=${behandling?.id}, ytelsestype=$ytelsestype, eksternKravgrunnlagId=${kravgrunnlag.kravgrunnlagId}")
         }
-
+        log.medContext(logContext) {
+            info("Rett før validering behandling: {}", behandling)
+        }
         KravgrunnlagValidator.validerGrunnlag(kravgrunnlag)
-
+        log.medContext(logContext) {
+            info("Håndterer kravgrunnlag: Validert! behandling: {}", behandling)
+        }
         if (behandling == null) {
             mottattXmlService.arkiverEksisterendeGrunnlag(kravgrunnlag)
             mottattXmlService.lagreMottattXml(kravgrunnlagXml, kravgrunnlag, ytelsestype)
@@ -95,7 +99,11 @@ class KravgrunnlagService(
             return
         }
         // mapper grunnlag til Kravgrunnlag431
+
         val kravgrunnlag431: Kravgrunnlag431 = KravgrunnlagMapper.tilKravgrunnlag431(kravgrunnlag, behandling.id)
+        log.medContext(logContext) {
+            info("Kravgrunnlag: {}", kravgrunnlag431)
+        }
         sjekkIdentiskKravgrunnlag(kravgrunnlag431, behandling, logContext)
         lagreKravgrunnlag(kravgrunnlag431, ytelsestype, logContext)
         mottattXmlService.arkiverMottattXml(mottattXmlId = null, mottattXml = kravgrunnlagXml, fagsystemId = fagsystemId, ytelsestype = ytelsestype)
@@ -212,10 +220,19 @@ class KravgrunnlagService(
         ytelsestype: Ytelsestype,
         logContext: SecureLog.Context,
     ) {
+        log.medContext(logContext) {
+            info("Lagrer kravgrunnlag: Ekstern kravgrunnlagId: ${kravgrunnlag431.eksternKravgrunnlagId} og behandlingId: ${kravgrunnlag431.behandlingId}")
+        }
         val finnesKravgrunnlag = kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(kravgrunnlag431.behandlingId)
         if (finnesKravgrunnlag) {
+            log.medContext(logContext) {
+                info("Lagrer kravgrunnlag: Allerede finnes: Ekstern kravgrunnlagId: ${kravgrunnlag431.eksternKravgrunnlagId} og behandlingId: ${kravgrunnlag431.behandlingId}")
+            }
             identifiserAktivtKravgrunnlagOgLagre(kravgrunnlag431, ytelsestype, logContext)
         } else {
+            log.medContext(logContext) {
+                info("Lagrer kravgrunnlag: Finnes ikke lagrer nå: Ekstern kravgrunnlagId: ${kravgrunnlag431.eksternKravgrunnlagId} og behandlingId: ${kravgrunnlag431.behandlingId}")
+            }
             kravgrunnlagRepository.insert(kravgrunnlag431)
         }
     }
@@ -307,12 +324,18 @@ class KravgrunnlagService(
         behandling: Behandling,
         logContext: SecureLog.Context,
     ) {
+        log.medContext(logContext) {
+            info("Håndterer kravgrunnlag: Kravstatus: {} , aktivVarsel: ", endretKravgrunnlag.kravstatuskode, behandling.aktivtVarsel)
+        }
         if (endretKravgrunnlag.kravstatuskode != Kravstatuskode.ENDRET ||
             // sjekker ikke identisk kravgrunnlag for behandlinger som har sendt varselbrev
             behandling.aktivtVarsel != null ||
             // sjekker ikke identisk kravgrunnlag når behandling ikke har koblet med et NYTT kravgrunnlag
             !kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(endretKravgrunnlag.behandlingId)
         ) {
+            log.medContext(logContext) {
+                info("Håndterer kravgrunnlag: NY")
+            }
             return
         }
         val forrigeKravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(endretKravgrunnlag.behandlingId)
@@ -323,6 +346,9 @@ class KravgrunnlagService(
         if (harSammeAntallPerioder) {
             for (i in perioderIEndretKravgrunnlag.indices step 1) {
                 if (!perioderIEndretKravgrunnlag[i].harIdentiskKravgrunnlagsperiode(perioderIForrigeKravgrunnlag[i])) {
+                    log.medContext(logContext) {
+                        info("Håndterer kravgrunnlag: Identisk false")
+                    }
                     erIdentiskKravgrunnlag = false
                 }
             }

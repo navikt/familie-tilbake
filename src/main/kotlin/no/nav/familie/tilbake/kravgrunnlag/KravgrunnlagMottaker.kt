@@ -33,7 +33,7 @@ class KravgrunnlagMottaker(
     fun mottaMeldingFraOppdrag(melding: TextMessage) {
         val meldingFraOppdrag = melding.text as String
 
-        log.info("Mottatt melding fra oppdrag")
+        log.info("Mottatt melding fra oppdrag: $meldingFraOppdrag")
         if (meldingFraOppdrag.contains(Constants.KRAVGRUNNLAG_XML_ROOT_ELEMENT)) {
             val logContext = KravgrunnlagUtil.kravgrunnlagLogContext(meldingFraOppdrag)
             SecureLog.medContext(logContext) { info(meldingFraOppdrag) }
