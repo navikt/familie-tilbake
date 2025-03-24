@@ -1,19 +1,21 @@
 package no.nav.familie.tilbake.sikkerhet
 
+import no.nav.familie.tilbake.TilbakekrevingService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.FagsystemUtil
 import no.nav.familie.tilbake.behandling.domain.Behandling
-import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.config.ApplicationProperties
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.RolleConfig
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import no.nav.tilbakekreving.kontrakter.ytelse.Tema
 import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
@@ -31,7 +33,32 @@ class TilgangskontrollService(
     private val auditLogger: AuditLogger,
     private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
     private val integrasjonerClient: IntegrasjonerClient,
+    private val applicationProperties: ApplicationProperties,
+    private val tilbakekrevingService: TilbakekrevingService,
 ) {
+    fun validerTilgangTilbakekreving(
+        tilbakekreving: Tilbakekreving,
+        behandlingId: UUID?,
+        minimumBehandlerrolle: Behandlerrolle,
+        auditLoggerEvent: AuditLoggerEvent,
+        handling: String,
+    ) {
+        val saksbehandler = ContextService.hentSaksbehandler(SecureLog.Context.tom())
+        val fagsystem = tilbakekreving.tilFrontendDto().fagsystem
+        val logContext = SecureLog.Context.medBehandling(tilbakekreving.eksternFagsak.eksternId, behandlingId?.toString())
+        val dto = tilbakekreving.tilFrontendDto()
+        validate(
+            fagsystem = fagsystem,
+            minimumBehandlerrolle = minimumBehandlerrolle,
+            ident = dto.bruker.personIdent,
+            eksternFagsakId = dto.eksternFagsakId,
+            handling = handling,
+            saksbehandler = saksbehandler,
+            auditLoggerEvent = auditLoggerEvent,
+            logContext = logContext,
+        )
+    }
+
     fun validerTilgangBehandlingID(
         behandlingId: UUID,
         minimumBehandlerrolle: Behandlerrolle,
@@ -46,7 +73,8 @@ class TilgangskontrollService(
         validate(
             fagsystem = fagsak.fagsystem,
             minimumBehandlerrolle = minimumBehandlerrolle,
-            fagsak = fagsak,
+            ident = fagsak.bruker.ident,
+            eksternFagsakId = fagsak.eksternFagsakId,
             handling = handling,
             saksbehandler = saksbehandler,
             auditLoggerEvent = auditLoggerEvent,
@@ -83,7 +111,8 @@ class TilgangskontrollService(
         validate(
             fagsystem = fagsystem,
             minimumBehandlerrolle = minimumBehandlerrolle,
-            fagsak = fagsak,
+            ident = fagsak?.bruker?.ident,
+            eksternFagsakId = fagsak?.eksternFagsakId,
             handling = handling,
             saksbehandler = saksbehandler,
             auditLoggerEvent = auditLoggerEvent,
@@ -103,7 +132,8 @@ class TilgangskontrollService(
         validate(
             fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(økonomiXmlMottatt.ytelsestype),
             minimumBehandlerrolle = minimumBehandlerrolle,
-            fagsak = null,
+            ident = null,
+            eksternFagsakId = null,
             handling = handling,
             saksbehandler = saksbehandler,
             auditLoggerEvent = auditLoggerEvent,
@@ -139,7 +169,8 @@ class TilgangskontrollService(
         validate(
             fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype),
             minimumBehandlerrolle = minimumBehandlerrolle,
-            fagsak = null,
+            ident = null,
+            eksternFagsakId = null,
             handling = handling,
             saksbehandler = saksbehandler,
             auditLoggerEvent = auditLoggerEvent,
@@ -150,7 +181,8 @@ class TilgangskontrollService(
     private fun validate(
         fagsystem: Fagsystem,
         minimumBehandlerrolle: Behandlerrolle,
-        fagsak: Fagsak?,
+        ident: String?,
+        eksternFagsakId: String?,
         handling: String,
         saksbehandler: String,
         auditLoggerEvent: AuditLoggerEvent,
@@ -187,41 +219,43 @@ class TilgangskontrollService(
         )
 
         validateEgenAnsattKode6Kode7(
-            fagsak = fagsak,
+            personIBehandlingen = ident,
+            fagsystem = fagsystem,
             handling = handling,
             saksbehandler = saksbehandler,
         )
-        logAccess(auditLoggerEvent, fagsak)
+        if (ident != null) {
+            logAccess(auditLoggerEvent, ident, eksternFagsakId!!)
+        }
     }
 
     fun logAccess(
         auditLoggerEvent: AuditLoggerEvent,
-        fagsak: Fagsak?,
+        ident: String,
+        eksternFagsakId: String,
         behandling: Behandling? = null,
     ) {
-        fagsak?.let {
-            auditLogger.log(
-                Sporingsdata(
-                    auditLoggerEvent,
-                    fagsak.bruker.ident,
-                    CustomKeyValue("eksternFagsakId", fagsak.eksternFagsakId),
-                    behandling?.let {
-                        CustomKeyValue("behandlingEksternBrukId", behandling.eksternBrukId.toString())
-                    },
-                ),
-            )
-        }
+        auditLogger.log(
+            Sporingsdata(
+                auditLoggerEvent,
+                ident,
+                CustomKeyValue("eksternFagsakId", eksternFagsakId),
+                behandling?.let {
+                    CustomKeyValue("behandlingEksternBrukId", behandling.eksternBrukId.toString())
+                },
+            ),
+        )
     }
 
     private fun validateEgenAnsattKode6Kode7(
-        fagsak: Fagsak?,
+        personIBehandlingen: String?,
+        fagsystem: Fagsystem,
         handling: String,
         saksbehandler: String,
     ) {
-        val personerIBehandlingen = fagsak?.bruker?.ident?.let { listOf(it) } ?: return
-        val fagsakSystem = fagsak.fagsystem
+        if (personIBehandlingen == null) return
 
-        val tilganger = integrasjonerClient.sjekkTilgangTilPersoner(personerIBehandlingen, fagsakSystem.tilTema())
+        val tilganger = integrasjonerClient.sjekkTilgangTilPersoner(listOf(personIBehandlingen), fagsystem.tilTema())
         if (tilganger.any { !it.harTilgang }) {
             throw Feil(
                 message = "$saksbehandler har ikke tilgang til person i $handling",

@@ -9,13 +9,10 @@ import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import no.nav.tilbakekreving.api.v1.dto.BehandlingsoppsummeringDto
 import no.nav.tilbakekreving.api.v1.dto.FagsakDto
 import no.nav.tilbakekreving.kontrakter.Behandling
 import no.nav.tilbakekreving.kontrakter.FinnesBehandlingResponse
 import no.nav.tilbakekreving.kontrakter.KanBehandlingOpprettesManueltRespons
-import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
-import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import org.springframework.http.MediaType
@@ -24,7 +21,6 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.util.UUID
 
 @RestController
 @RequestMapping("/api")
@@ -53,20 +49,7 @@ class FagsakController(
         )
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(fagsystem, eksternFagsakId)
         if (tilbakekreving != null) {
-            return Ressurs.success(
-                tilbakekreving.tilFrontendDto()
-                    .copy(
-                        behandlinger =
-                            listOf(
-                                BehandlingsoppsummeringDto(
-                                    UUID.fromString("abcdef12-1337-1338-1339-abcdef123456"),
-                                    UUID.fromString("abcdef12-1337-1338-1339-abcdef123456"),
-                                    Behandlingstype.TILBAKEKREVING,
-                                    Behandlingsstatus.OPPRETTET,
-                                ),
-                            ),
-                    ),
-            )
+            return Ressurs.success(tilbakekreving.tilFrontendDto())
         }
         return Ressurs.success(fagsakService.hentFagsak(fagsystem, eksternFagsakId))
     }

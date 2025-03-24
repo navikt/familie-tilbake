@@ -9,12 +9,11 @@ import java.time.LocalDate
 class Bruker(
     private val ident: String,
     val språkkode: Språkkode,
+    private var navn: String? = null,
+    private var fødselsdato: LocalDate? = null,
+    private var kjønn: Kjønn? = null,
+    private var dødsdato: LocalDate? = null,
 ) : FrontendDto<FrontendBrukerDto> {
-    private var navn: String? = null
-    private var fødselsdato: LocalDate? = null
-    private var kjønn: Kjønn? = null
-    private var dødsdato: LocalDate? = null
-
     override fun tilFrontendDto(): FrontendBrukerDto {
         return FrontendBrukerDto(
             personIdent = ident,

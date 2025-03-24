@@ -1,5 +1,7 @@
 package no.nav.familie.tilbake.api
 
+import no.nav.familie.tilbake.TilbakekrevingService
+import no.nav.familie.tilbake.config.ApplicationProperties
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.tilDto
 import no.nav.familie.tilbake.kontrakter.Ressurs
@@ -23,6 +25,8 @@ import java.util.UUID
 class HistorikkController(
     private val historikkService: HistorikkService,
     private val tilgangskontrollService: TilgangskontrollService,
+    private val applicationProperties: ApplicationProperties,
+    private val tilbakekrevingService: TilbakekrevingService,
 ) {
     @GetMapping(
         "/{behandlingId}/historikk",
@@ -31,6 +35,19 @@ class HistorikkController(
     fun hentHistorikkinnslag(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<List<HistorikkinnslagDto?>> {
+        if (applicationProperties.toggles.nyModellEnabled) {
+            val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+            if (tilbakekreving != null) {
+                tilgangskontrollService.validerTilgangTilbakekreving(
+                    tilbakekreving = tilbakekreving,
+                    behandlingId = behandlingId,
+                    minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+                    auditLoggerEvent = AuditLoggerEvent.ACCESS,
+                    handling = "Henter tilbakekrevingsbehandling",
+                )
+                return Ressurs.success(emptyList())
+            }
+        }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.VEILEDER,

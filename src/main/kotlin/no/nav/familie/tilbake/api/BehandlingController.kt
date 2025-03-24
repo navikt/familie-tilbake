@@ -2,11 +2,13 @@ package no.nav.familie.tilbake.api
 
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
+import no.nav.familie.tilbake.TilbakekrevingService
 import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.feilHvis
+import no.nav.familie.tilbake.config.ApplicationProperties
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
 import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.log.SecureLog
@@ -48,6 +50,8 @@ class BehandlingController(
     private val behandlingskontrollService: BehandlingskontrollService,
     private val tilgangService: TilgangService,
     private val tilgangskontrollService: TilgangskontrollService,
+    private val applicationProperties: ApplicationProperties,
+    private val tilbakekrevingService: TilbakekrevingService,
 ) {
     @Operation(summary = "Opprett tilbakekrevingsbehandling automatisk, kan kalles av fagsystem, batch")
     @PostMapping(
@@ -119,6 +123,19 @@ class BehandlingController(
     fun hentBehandling(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<BehandlingDto> {
+        if (applicationProperties.toggles.nyModellEnabled) {
+            val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+            if (tilbakekreving != null) {
+                tilgangskontrollService.validerTilgangTilbakekreving(
+                    tilbakekreving = tilbakekreving,
+                    behandlingId = behandlingId,
+                    minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+                    auditLoggerEvent = AuditLoggerEvent.ACCESS,
+                    handling = "Henter tilbakekrevingsbehandling",
+                )
+                return Ressurs.success(tilbakekreving.behandlingHistorikk.tilFrontendDto().first { it.behandlingId == behandlingId })
+            }
+        }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.VEILEDER,

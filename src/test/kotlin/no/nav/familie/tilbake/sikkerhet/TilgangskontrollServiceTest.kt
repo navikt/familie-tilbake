@@ -13,6 +13,7 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
+import no.nav.familie.tilbake.config.ApplicationProperties
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.RolleConfig
 import no.nav.familie.tilbake.data.Testdata
@@ -105,6 +106,13 @@ internal class TilgangskontrollServiceTest : OppslagSpringRunnerTest() {
                 auditLogger,
                 mottattXmlRepository,
                 mockIntegrasjonerClient,
+                ApplicationProperties(
+                    toggles =
+                        ApplicationProperties.Toggles(
+                            nyModellEnabled = false,
+                        ),
+                ),
+                mockk(),
             )
 
         fagsak =

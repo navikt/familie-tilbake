@@ -2,6 +2,9 @@ package no.nav.tilbakekreving.tilstand
 
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
+import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
+import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
+import no.nav.tilbakekreving.hendelse.Påminnelse
 
 sealed interface Tilstand {
     val navn: String
@@ -14,4 +17,23 @@ sealed interface Tilstand {
     ) {
         error("Forventet ikke OpprettTilbakekrevingEvent i $navn")
     }
+
+    fun håndter(
+        tilbakekreving: Tilbakekreving,
+        kravgrunnlag: KravgrunnlagHendelse,
+    ) {
+        error("Forventet ikke Kravgrunnlag i $navn")
+    }
+
+    fun håndter(
+        tilbakekreving: Tilbakekreving,
+        fagsysteminfo: FagsysteminfoHendelse,
+    ) {
+        error("Forventet ikke Fagsysteminfo i $navn")
+    }
+
+    fun håndter(
+        tilbakekreving: Tilbakekreving,
+        påminnelse: Påminnelse,
+    ) {}
 }
