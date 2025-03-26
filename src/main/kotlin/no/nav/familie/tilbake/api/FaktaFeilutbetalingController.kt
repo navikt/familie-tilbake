@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.api
 
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.constraints.NotNull
+import no.nav.familie.tilbake.TilbakekrevingService
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
@@ -24,6 +25,7 @@ import java.util.UUID
 class FaktaFeilutbetalingController(
     val faktaFeilutbetalingService: FaktaFeilutbetalingService,
     private val tilgangskontrollService: TilgangskontrollService,
+    private val tilbakekrevingService: TilbakekrevingService,
 ) {
     @Operation(summary = "Hent fakta om feilutbetaling")
     @GetMapping(
@@ -35,6 +37,17 @@ class FaktaFeilutbetalingController(
         @PathVariable("behandlingId")
         behandlingId: UUID,
     ): Ressurs<FaktaFeilutbetalingDto> {
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        if (tilbakekreving != null) {
+            tilgangskontrollService.validerTilgangTilbakekreving(
+                tilbakekreving = tilbakekreving,
+                behandlingId = behandlingId,
+                minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+                auditLoggerEvent = AuditLoggerEvent.ACCESS,
+                handling = "Henter tilbakekrevingsbehandling",
+            )
+            return Ressurs.success(tilbakekreving.behandlingHistorikk.nåværende().entry.faktasteg?.tilFrontendDto() ?: return Ressurs.failure())
+        }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId,
             Behandlerrolle.VEILEDER,

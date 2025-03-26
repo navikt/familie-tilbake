@@ -2,16 +2,18 @@ package no.nav.familie.tilbake
 
 import no.nav.familie.tilbake.config.ApplicationProperties
 import no.nav.tilbakekreving.Tilbakekreving
-import no.nav.tilbakekreving.behandling.Behandling
+import no.nav.tilbakekreving.api.v2.EksternFagsakDto
+import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
+import no.nav.tilbakekreving.api.v2.Opprettelsevalg
 import no.nav.tilbakekreving.behandling.BehandlingHistorikk
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
 import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
-import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
-import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
-import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
+import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
+import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
+import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
@@ -33,17 +35,12 @@ class TilbakekrevingService(
             override fun håndter(behov: VarselbrevBehov) {}
         }
 
-    private val eksternFagsakBehandlinger =
-        mutableListOf(
-            EksternFagsakBehandling(UUID.randomUUID().toString()),
-        )
-
     private val eksternFagsak =
         EksternFagsak(
             eksternId = "TEST-101010",
             ytelsestype = Ytelsestype.BARNETRYGD,
             fagsystem = Fagsystem.BA,
-            behandlinger = EksternFagsakBehandlingHistorikk(eksternFagsakBehandlinger),
+            behandlinger = EksternFagsakBehandlingHistorikk(mutableListOf()),
             behovObservatør = behovObservatør,
         )
     private val eksempelsaker =
@@ -52,22 +49,7 @@ class TilbakekrevingService(
                 eksternFagsak,
                 opprettet = LocalDateTime.of(2025, Month.MARCH, 15, 12, 0),
                 behandlingHistorikk =
-                    BehandlingHistorikk(
-                        mutableListOf(
-                            Behandling(
-                                internId = UUID.fromString("abcdef12-1337-1338-1339-abcdef123456"),
-                                eksternId = UUID.fromString("abcdef12-1337-1338-1339-abcdef123456"),
-                                behandlingstype = Behandlingstype.TILBAKEKREVING,
-                                opprettet = LocalDateTime.now(),
-                                enhet = null,
-                                fagsystembehandling = eksternFagsakBehandlinger.first(),
-                                årsak = Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR,
-                                begrunnelseForTilbakekreving = "WIP",
-                                ansvarligSaksbehandler = "VL",
-                                eksternFagsak = eksternFagsak,
-                            ),
-                        ),
-                    ),
+                    BehandlingHistorikk(mutableListOf()),
                 bruker =
                     Bruker(
                         ident = "20046912345",
@@ -75,7 +57,25 @@ class TilbakekrevingService(
                         fødselsdato = LocalDate.of(1969, Month.APRIL, 20),
                     ),
                 behovObservatør = behovObservatør,
-            ),
+            ).apply {
+                håndter(
+                    OpprettTilbakekrevingEvent(
+                        EksternFagsakDto(
+                            fagsystem = Fagsystem.BA,
+                            ytelsestype = Ytelsestype.BARNETRYGD,
+                            eksternId = "TEST-101010",
+                        ),
+                        opprettelsesvalg = Opprettelsevalg.OPPRETT_BEHANDLING_MED_VARSEL,
+                    ),
+                )
+                håndter(KravgrunnlagHendelse())
+                håndter(
+                    FagsysteminfoHendelse(
+                        eksternId = UUID.randomUUID().toString(),
+                    ),
+                )
+                håndter(VarselbrevSendtHendelse)
+            },
         )
 
     fun hentTilbakekreving(

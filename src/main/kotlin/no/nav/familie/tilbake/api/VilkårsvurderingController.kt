@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.api
 
 import io.swagger.v3.oas.annotations.Operation
+import no.nav.familie.tilbake.TilbakekrevingService
 import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
@@ -23,6 +24,7 @@ import java.util.UUID
 class VilkårsvurderingController(
     val vilkårsvurderingService: VilkårsvurderingService,
     private val tilgangskontrollService: TilgangskontrollService,
+    private val tilbakekrevingService: TilbakekrevingService,
 ) {
     @Operation(summary = "Hent vilkårsvurdering")
     @GetMapping(
@@ -32,6 +34,19 @@ class VilkårsvurderingController(
     fun hentVurdertVilkårsvurdering(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<VurdertVilkårsvurderingDto> {
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        if (tilbakekreving != null) {
+            tilgangskontrollService.validerTilgangTilbakekreving(
+                tilbakekreving = tilbakekreving,
+                behandlingId = behandlingId,
+                minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+                auditLoggerEvent = AuditLoggerEvent.ACCESS,
+                handling = "Henter vilkårsvurdering for en gitt behandling",
+            )
+
+            return Ressurs.success(tilbakekreving.behandlingHistorikk.finn(behandlingId).vilkårsvurderderingsteg?.tilFrontendDto() ?: return Ressurs.failure())
+        }
+
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.VEILEDER,

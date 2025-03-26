@@ -1,3 +1,5 @@
 package no.nav.tilbakekreving.hendelse
 
-class FagsysteminfoHendelse
+data class FagsysteminfoHendelse(
+    val eksternId: String,
+)

@@ -3,19 +3,28 @@ package no.nav.tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsoppsummeringDto
 import no.nav.tilbakekreving.api.v1.dto.FagsakDto
 import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
+import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.BehandlingHistorikk
+import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
+import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderderingsteg
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
+import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
+import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
+import no.nav.tilbakekreving.historikk.HistorikkReferanse
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.person.Bruker
 import no.nav.tilbakekreving.person.Bruker.Companion.tilNullableFrontendDto
 import no.nav.tilbakekreving.tilstand.Start
 import no.nav.tilbakekreving.tilstand.Tilstand
 import java.time.LocalDateTime
+import java.util.UUID
 
 class Tilbakekreving(
     val eksternFagsak: EksternFagsak,
@@ -24,9 +33,9 @@ class Tilbakekreving(
     private val behovObservatør: BehovObservatør,
     private var bruker: Bruker? = null,
 ) : FrontendDto<FagsakDto> {
-    var tilstand: Tilstand = Start
+    internal var tilstand: Tilstand = Start
 
-    fun byttTilstand(nyTilstand: Tilstand) {
+    internal fun byttTilstand(nyTilstand: Tilstand) {
         tilstand = nyTilstand
         tilstand.entering(this)
     }
@@ -41,6 +50,30 @@ class Tilbakekreving(
 
     fun håndter(fagsysteminfo: FagsysteminfoHendelse) {
         tilstand.håndter(this, fagsysteminfo)
+    }
+
+    fun håndter(varselbrevSendt: VarselbrevSendtHendelse) {
+        tilstand.håndter(this, varselbrevSendt)
+    }
+
+    fun opprettBehandling(eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>) {
+        behandlingHistorikk.lagre(
+            Behandling(
+                internId = UUID.fromString("abcdef12-1337-1338-1339-abcdef123456"),
+                eksternId = UUID.fromString("abcdef12-1337-1338-1339-abcdef123456"),
+                behandlingstype = Behandlingstype.TILBAKEKREVING,
+                opprettet = LocalDateTime.now(),
+                enhet = null,
+                årsak = Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR,
+                begrunnelseForTilbakekreving = "WIP",
+                ansvarligSaksbehandler = "VL",
+                eksternFagsak = eksternFagsak,
+                sistEndret = LocalDateTime.now(),
+                eksternFagsakBehandling = eksternFagsakBehandling,
+                faktasteg = Faktasteg(0, eksternFagsakBehandling),
+                vilkårsvurderderingsteg = Vilkårsvurderderingsteg(),
+            ),
+        )
     }
 
     fun trengerVarselbrev() {

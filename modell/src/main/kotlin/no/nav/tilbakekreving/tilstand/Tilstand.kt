@@ -5,8 +5,9 @@ import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
+import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 
-sealed interface Tilstand {
+internal sealed interface Tilstand {
     val navn: String
 
     fun entering(tilbakekreving: Tilbakekreving)
@@ -30,6 +31,13 @@ sealed interface Tilstand {
         fagsysteminfo: FagsysteminfoHendelse,
     ) {
         error("Forventet ikke Fagsysteminfo i $navn")
+    }
+
+    fun håndter(
+        tilbakekreving: Tilbakekreving,
+        varselbrevSendtHendelse: VarselbrevSendtHendelse,
+    ) {
+        error("Forventet ikke VarselbrevSendtHendelse i $navn")
     }
 
     fun håndter(

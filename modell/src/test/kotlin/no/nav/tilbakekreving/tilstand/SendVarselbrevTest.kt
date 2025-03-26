@@ -1,19 +1,18 @@
 package no.nav.tilbakekreving.tilstand
 
-import io.kotest.inspectors.forOne
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
-import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
+import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.opprettTilbakekrevingEvent
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-class AvventerFagsysteminfoTest {
+class SendVarselbrevTest {
     @Test
-    fun `tilbakekreving i AvventerKravgrunnlag går videre med Kravgrunnlag`() {
+    fun `tilbakekreving i SendVarselbrev går videre med Kravgrunnlag`() {
         val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingEvent = opprettTilbakekrevingEvent()
         val tilbakekreving = Tilbakekreving.opprett(oppsamler, opprettTilbakekrevingEvent)
@@ -24,11 +23,8 @@ class AvventerFagsysteminfoTest {
                 eksternId = UUID.randomUUID().toString(),
             ),
         )
+        tilbakekreving.håndter(VarselbrevSendtHendelse)
 
-        tilbakekreving.tilstand shouldBe SendVarselbrev
-        oppsamler.varselbrevBehov.size shouldBe 1
-        oppsamler.varselbrevBehov.forOne {
-            it shouldBe VarselbrevBehov("wip")
-        }
+        tilbakekreving.tilstand shouldBe TilBehandling
     }
 }

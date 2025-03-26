@@ -3,8 +3,13 @@ package no.nav.tilbakekreving.behandling
 import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegsinfoDto
+import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
+import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg.Companion.behandlingsstegstatus
+import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderderingsteg
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
+import no.nav.tilbakekreving.historikk.Historikk
+import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
@@ -17,20 +22,28 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class Behandling(
-    private val internId: UUID,
+    override val internId: UUID,
     private val eksternId: UUID,
     private val behandlingstype: Behandlingstype,
     private val opprettet: LocalDateTime,
     private val sistEndret: LocalDateTime = opprettet,
     private val enhet: Enhet?,
-    private val fagsystembehandling: EksternFagsakBehandling,
     private val årsak: Behandlingsårsakstype,
     private val begrunnelseForTilbakekreving: String,
     private val ansvarligSaksbehandler: String,
     // TODO: Når vi kan endre i front-end API burde vi fjerne eksternFagsakId fra behandling så vi ikke trenger det her
     private val eksternFagsak: EksternFagsak,
-) : FrontendDto<BehandlingDto> {
-    private fun behandlingsstatus() = Behandlingsstatus.UTREDES
+    private val eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
+    val faktasteg: Faktasteg,
+    val vilkårsvurderderingsteg: Vilkårsvurderderingsteg,
+) : Historikk.HistorikkInnslag<UUID>, FrontendDto<BehandlingDto> {
+    private fun behandlingsstatus() =
+        listOf(
+            faktasteg,
+            vilkårsvurderderingsteg,
+        ).firstOrNull { !it.erFullstending() }
+            ?.behandlingsstatus
+            ?: Behandlingsstatus.AVSLUTTET
 
     override fun tilFrontendDto(): BehandlingDto {
         return BehandlingDto(
@@ -58,13 +71,33 @@ class Behandling(
             behandlingsstegsinfo =
                 listOf(
                     BehandlingsstegsinfoDto(
+                        Behandlingssteg.GRUNNLAG,
+                        Behandlingsstegstatus.AUTOUTFØRT,
+                    ),
+                    BehandlingsstegsinfoDto(
+                        Behandlingssteg.VARSEL,
+                        Behandlingsstegstatus.AUTOUTFØRT,
+                    ),
+                    BehandlingsstegsinfoDto(
+                        Behandlingssteg.FAKTA,
+                        faktasteg.behandlingsstegstatus(),
+                    ),
+                    BehandlingsstegsinfoDto(
+                        Behandlingssteg.FORELDELSE,
+                        Behandlingsstegstatus.AUTOUTFØRT,
+                    ),
+                    BehandlingsstegsinfoDto(
+                        Behandlingssteg.VILKÅRSVURDERING,
+                        vilkårsvurderderingsteg.behandlingsstegstatus(),
+                    ),
+                    BehandlingsstegsinfoDto(
                         behandlingssteg = Behandlingssteg.VARSEL,
                         behandlingsstegstatus = Behandlingsstegstatus.VENTER,
                         venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
                         tidsfrist = LocalDate.now().minusDays(1),
                     ),
                 ),
-            fagsystemsbehandlingId = fagsystembehandling.eksternId,
+            fagsystemsbehandlingId = eksternFagsakBehandling.entry.eksternId,
             eksternFagsakId = eksternFagsak.eksternId,
             behandlingsårsakstype = årsak,
             støtterManuelleBrevmottakere = true,
