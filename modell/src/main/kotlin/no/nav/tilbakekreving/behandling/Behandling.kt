@@ -4,6 +4,8 @@ import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegsinfoDto
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
+import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
+import no.nav.tilbakekreving.behandling.saksbehandling.Foreslåvedtaksteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg.Companion.behandlingsstegstatus
 import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderderingsteg
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
@@ -16,8 +18,6 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
-import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -34,13 +34,17 @@ class Behandling(
     // TODO: Når vi kan endre i front-end API burde vi fjerne eksternFagsakId fra behandling så vi ikke trenger det her
     private val eksternFagsak: EksternFagsak,
     private val eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
+    var foreldelsesteg: Foreldelsesteg,
     val faktasteg: Faktasteg,
     val vilkårsvurderderingsteg: Vilkårsvurderderingsteg,
+    val foreslåvedtaksteg: Foreslåvedtaksteg,
 ) : Historikk.HistorikkInnslag<UUID>, FrontendDto<BehandlingDto> {
     private fun behandlingsstatus() =
         listOf(
             faktasteg,
+            foreldelsesteg,
             vilkårsvurderderingsteg,
+            foreslåvedtaksteg,
         ).firstOrNull { !it.erFullstending() }
             ?.behandlingsstatus
             ?: Behandlingsstatus.AVSLUTTET
@@ -84,17 +88,15 @@ class Behandling(
                     ),
                     BehandlingsstegsinfoDto(
                         Behandlingssteg.FORELDELSE,
-                        Behandlingsstegstatus.AUTOUTFØRT,
+                        foreldelsesteg.behandlingsstegstatus(),
                     ),
                     BehandlingsstegsinfoDto(
                         Behandlingssteg.VILKÅRSVURDERING,
                         vilkårsvurderderingsteg.behandlingsstegstatus(),
                     ),
                     BehandlingsstegsinfoDto(
-                        behandlingssteg = Behandlingssteg.VARSEL,
-                        behandlingsstegstatus = Behandlingsstegstatus.VENTER,
-                        venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
-                        tidsfrist = LocalDate.now().minusDays(1),
+                        Behandlingssteg.FORESLÅ_VEDTAK,
+                        foreldelsesteg.behandlingsstegstatus(),
                     ),
                 ),
             fagsystemsbehandlingId = eksternFagsakBehandling.entry.eksternId,

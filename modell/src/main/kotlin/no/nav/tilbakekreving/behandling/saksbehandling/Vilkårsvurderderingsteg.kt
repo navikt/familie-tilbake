@@ -21,7 +21,7 @@ import java.time.LocalDateTime
 class Vilkårsvurderderingsteg : Saksbehandlingsteg<VurdertVilkårsvurderingDto> {
     override val type: Behandlingssteg = Behandlingssteg.GRUNNLAG
 
-    override fun erFullstending(): Boolean = false
+    override fun erFullstending(): Boolean = true
 
     override fun tilFrontendDto(): VurdertVilkårsvurderingDto {
         return VurdertVilkårsvurderingDto(

@@ -6,6 +6,8 @@ import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.BehandlingHistorikk
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
+import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
+import no.nav.tilbakekreving.behandling.saksbehandling.Foreslåvedtaksteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderderingsteg
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.VarselbrevBehov
@@ -70,8 +72,10 @@ class Tilbakekreving(
                 eksternFagsak = eksternFagsak,
                 sistEndret = LocalDateTime.now(),
                 eksternFagsakBehandling = eksternFagsakBehandling,
+                foreldelsesteg = Foreldelsesteg(),
                 faktasteg = Faktasteg(0, eksternFagsakBehandling),
                 vilkårsvurderderingsteg = Vilkårsvurderderingsteg(),
+                foreslåvedtaksteg = Foreslåvedtaksteg(),
             ),
         )
     }
