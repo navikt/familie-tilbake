@@ -10,7 +10,7 @@ class BehandlingHistorikk(
     private val historikk: MutableList<Behandling>,
 ) : Historikk<UUID, Behandling>, FrontendDto<List<BehandlingDto>> {
     override fun finn(id: UUID): Behandling {
-        return historikk.first { it.internId == id }
+        return historikk.single { it.internId == id }
     }
 
     override fun lagre(innslag: Behandling): HistorikkReferanse<UUID, Behandling> {

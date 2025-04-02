@@ -6,9 +6,9 @@ import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
-import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.opprettTilbakekrevingEvent
 import org.junit.jupiter.api.Test
 
@@ -19,7 +19,7 @@ class AvventerKravgrunnlagHendelseTest {
         val opprettTilbakekrevingEvent = opprettTilbakekrevingEvent()
         val tilbakekreving = Tilbakekreving.opprett(oppsamler, opprettTilbakekrevingEvent)
         tilbakekreving.håndter(opprettTilbakekrevingEvent)
-        tilbakekreving.håndter(KravgrunnlagHendelse())
+        tilbakekreving.håndter(kravgrunnlag())
 
         tilbakekreving.tilstand shouldBe AvventerFagsysteminfo
         oppsamler.fagsysteminfoBehov.size shouldBe 1

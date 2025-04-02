@@ -5,10 +5,6 @@ import no.nav.tilbakekreving.api.v1.dto.FagsakDto
 import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.BehandlingHistorikk
-import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
-import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
-import no.nav.tilbakekreving.behandling.saksbehandling.Foreslåvedtaksteg
-import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderderingsteg
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
@@ -21,6 +17,7 @@ import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.person.Bruker
 import no.nav.tilbakekreving.person.Bruker.Companion.tilNullableFrontendDto
 import no.nav.tilbakekreving.tilstand.Start
@@ -31,6 +28,7 @@ import java.util.UUID
 class Tilbakekreving(
     val eksternFagsak: EksternFagsak,
     val behandlingHistorikk: BehandlingHistorikk,
+    val kravgrunnlagHistorikk: KravgrunnlagHistorikk,
     private val opprettet: LocalDateTime,
     private val behovObservatør: BehovObservatør,
     private var bruker: Bruker? = null,
@@ -60,7 +58,7 @@ class Tilbakekreving(
 
     fun opprettBehandling(eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>) {
         behandlingHistorikk.lagre(
-            Behandling(
+            Behandling.nyBehandling(
                 internId = UUID.fromString("abcdef12-1337-1338-1339-abcdef123456"),
                 eksternId = UUID.fromString("abcdef12-1337-1338-1339-abcdef123456"),
                 behandlingstype = Behandlingstype.TILBAKEKREVING,
@@ -72,10 +70,7 @@ class Tilbakekreving(
                 eksternFagsak = eksternFagsak,
                 sistEndret = LocalDateTime.now(),
                 eksternFagsakBehandling = eksternFagsakBehandling,
-                foreldelsesteg = Foreldelsesteg(),
-                faktasteg = Faktasteg(0, eksternFagsakBehandling),
-                vilkårsvurderderingsteg = Vilkårsvurderderingsteg(),
-                foreslåvedtaksteg = Foreslåvedtaksteg(),
+                kravgrunnlag = kravgrunnlagHistorikk.nåværende(),
             ),
         )
     }
@@ -116,6 +111,7 @@ class Tilbakekreving(
                     ),
                 behovObservatør = behovObservatør,
                 behandlingHistorikk = BehandlingHistorikk(mutableListOf()),
+                kravgrunnlagHistorikk = KravgrunnlagHistorikk(mutableListOf()),
             )
         }
     }

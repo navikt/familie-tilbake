@@ -10,6 +10,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg.Compan
 import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderderingsteg
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
+import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
@@ -26,7 +27,7 @@ class Behandling(
     private val eksternId: UUID,
     private val behandlingstype: Behandlingstype,
     private val opprettet: LocalDateTime,
-    private val sistEndret: LocalDateTime = opprettet,
+    private val sistEndret: LocalDateTime,
     private val enhet: Enhet?,
     private val årsak: Behandlingsårsakstype,
     private val begrunnelseForTilbakekreving: String,
@@ -108,5 +109,51 @@ class Behandling(
             begrunnelseForTilbakekreving = begrunnelseForTilbakekreving,
             saksbehandlingstype = Saksbehandlingstype.ORDINÆR,
         )
+    }
+
+    companion object {
+        fun nyBehandling(
+            internId: UUID,
+            eksternId: UUID,
+            behandlingstype: Behandlingstype,
+            opprettet: LocalDateTime,
+            sistEndret: LocalDateTime = opprettet,
+            enhet: Enhet?,
+            årsak: Behandlingsårsakstype,
+            begrunnelseForTilbakekreving: String,
+            ansvarligSaksbehandler: String,
+            eksternFagsak: EksternFagsak,
+            eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
+            kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
+        ): Behandling {
+            return Behandling(
+                internId = internId,
+                eksternId = eksternId,
+                behandlingstype = behandlingstype,
+                opprettet = opprettet,
+                sistEndret = sistEndret,
+                enhet = enhet,
+                årsak = årsak,
+                begrunnelseForTilbakekreving = begrunnelseForTilbakekreving,
+                ansvarligSaksbehandler = ansvarligSaksbehandler,
+                eksternFagsak = eksternFagsak,
+                eksternFagsakBehandling = eksternFagsakBehandling,
+                foreldelsesteg =
+                    Foreldelsesteg(
+                        vurdertePerioder =
+                            kravgrunnlag.entry.datoperioder().map {
+                                Foreldelsesteg.Foreldelseperiode(
+                                    id = UUID.randomUUID(),
+                                    periode = it,
+                                    vurdering = Foreldelsesteg.Foreldelseperiode.Vurdering.IkkeVurdert,
+                                )
+                            },
+                        kravgrunnlag = kravgrunnlag,
+                    ),
+                faktasteg = Faktasteg(0, eksternFagsakBehandling),
+                vilkårsvurderderingsteg = Vilkårsvurderderingsteg(),
+                foreslåvedtaksteg = Foreslåvedtaksteg(),
+            )
+        }
     }
 }

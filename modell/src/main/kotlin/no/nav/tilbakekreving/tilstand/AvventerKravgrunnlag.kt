@@ -12,6 +12,7 @@ object AvventerKravgrunnlag : Tilstand {
         tilbakekreving: Tilbakekreving,
         kravgrunnlag: KravgrunnlagHendelse,
     ) {
+        tilbakekreving.kravgrunnlagHistorikk.lagre(kravgrunnlag)
         tilbakekreving.byttTilstand(AvventerFagsysteminfo)
     }
 }

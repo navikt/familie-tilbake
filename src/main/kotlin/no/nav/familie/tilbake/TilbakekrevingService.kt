@@ -15,19 +15,25 @@ import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
+import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.person.Bruker
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
+import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
+import java.util.Random
 import java.util.UUID
 
 @Service
 class TilbakekrevingService(
     private val applicationProperties: ApplicationProperties,
 ) {
+    private val fnr = "20046912345"
     private val behovObservatør =
         object : BehovObservatør {
             override fun håndter(behov: FagsysteminfoBehov) {}
@@ -52,11 +58,12 @@ class TilbakekrevingService(
                     BehandlingHistorikk(mutableListOf()),
                 bruker =
                     Bruker(
-                        ident = "20046912345",
+                        ident = fnr,
                         språkkode = Språkkode.NB,
                         fødselsdato = LocalDate.of(1969, Month.APRIL, 20),
                     ),
                 behovObservatør = behovObservatør,
+                kravgrunnlagHistorikk = KravgrunnlagHistorikk(mutableListOf()),
             ).apply {
                 håndter(
                     OpprettTilbakekrevingEvent(
@@ -68,7 +75,43 @@ class TilbakekrevingService(
                         opprettelsesvalg = Opprettelsevalg.OPPRETT_BEHANDLING_MED_VARSEL,
                     ),
                 )
-                håndter(KravgrunnlagHendelse())
+                håndter(
+                    KravgrunnlagHendelse(
+                        internId = UUID.randomUUID(),
+                        vedtakId = BigInteger(128, Random()),
+                        kravstatuskode = KravgrunnlagHendelse.Kravstatuskode.NYTT,
+                        fagsystemVedtaksdato = LocalDate.now(),
+                        vedtakGjelder = KravgrunnlagHendelse.Aktør.Person(fnr),
+                        utbetalesTil = KravgrunnlagHendelse.Aktør.Person(fnr),
+                        skalBeregneRenter = false,
+                        ansvarligEnhet = "0425",
+                        kontrollfelt = UUID.randomUUID().toString(),
+                        referanse = UUID.randomUUID().toString(),
+                        kravgrunnlagId = UUID.randomUUID().toString(),
+                        perioder =
+                            listOf(
+                                KravgrunnlagHendelse.Periode(
+                                    periode =
+                                        Datoperiode(
+                                            fom = LocalDate.of(2018, 1, 1),
+                                            tom = LocalDate.of(2018, 2, 28),
+                                        ),
+                                    månedligSkattebeløp = BigDecimal("0.0"),
+                                    beløp =
+                                        listOf(
+                                            KravgrunnlagHendelse.Periode.Beløp(
+                                                klassekode = "",
+                                                klassetype = "",
+                                                opprinneligUtbetalingsbeløp = BigDecimal("12000.0"),
+                                                nyttBeløp = BigDecimal("10000.0"),
+                                                tilbakekrevesBeløp = BigDecimal("2000.0"),
+                                                skatteprosent = BigDecimal("0.0"),
+                                            ),
+                                        ),
+                                ),
+                            ),
+                    ),
+                )
                 håndter(
                     FagsysteminfoHendelse(
                         eksternId = UUID.randomUUID().toString(),
