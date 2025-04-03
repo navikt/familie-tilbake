@@ -138,18 +138,7 @@ class Behandling(
                 ansvarligSaksbehandler = ansvarligSaksbehandler,
                 eksternFagsak = eksternFagsak,
                 eksternFagsakBehandling = eksternFagsakBehandling,
-                foreldelsesteg =
-                    Foreldelsesteg(
-                        vurdertePerioder =
-                            kravgrunnlag.entry.datoperioder().map {
-                                Foreldelsesteg.Foreldelseperiode(
-                                    id = UUID.randomUUID(),
-                                    periode = it,
-                                    vurdering = Foreldelsesteg.Foreldelseperiode.Vurdering.IkkeVurdert,
-                                )
-                            },
-                        kravgrunnlag = kravgrunnlag,
-                    ),
+                foreldelsesteg = Foreldelsesteg.opprett(kravgrunnlag),
                 faktasteg = Faktasteg(0, eksternFagsakBehandling),
                 vilkårsvurderderingsteg = Vilkårsvurderderingsteg(),
                 foreslåvedtaksteg = Foreslåvedtaksteg(),

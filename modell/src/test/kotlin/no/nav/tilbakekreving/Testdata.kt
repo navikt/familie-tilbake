@@ -36,7 +36,9 @@ fun opprettTilbakekrevingEvent(
     opprettelsesvalg = opprettelsevalg,
 )
 
-fun kravgrunnlag() =
+fun kravgrunnlag(
+    perioder: List<KravgrunnlagHendelse.Periode> = listOf(kravgrunnlagPeriode()),
+) =
     KravgrunnlagHendelse(
         internId = UUID.randomUUID(),
         vedtakId = BigInteger(128, Random()),
@@ -49,26 +51,27 @@ fun kravgrunnlag() =
         kontrollfelt = UUID.randomUUID().toString(),
         referanse = UUID.randomUUID().toString(),
         kravgrunnlagId = UUID.randomUUID().toString(),
-        perioder =
-            listOf(
-                KravgrunnlagHendelse.Periode(
-                    periode =
-                        Datoperiode(
-                            fom = LocalDate.of(2018, 1, 1),
-                            tom = LocalDate.of(2018, 1, 31),
-                        ),
-                    månedligSkattebeløp = BigDecimal("0.0"),
-                    beløp =
-                        listOf(
-                            KravgrunnlagHendelse.Periode.Beløp(
-                                klassekode = "",
-                                klassetype = "",
-                                opprinneligUtbetalingsbeløp = BigDecimal("12000.0"),
-                                nyttBeløp = BigDecimal("10000.0"),
-                                tilbakekrevesBeløp = BigDecimal("2000.0"),
-                                skatteprosent = BigDecimal("0.0"),
-                            ),
-                        ),
-                ),
-            ),
+        perioder = perioder,
+    )
+
+fun kravgrunnlagPeriode(
+    periode: Datoperiode = 1.januar til 31.januar,
+    kravgrunnlagBeløp: List<KravgrunnlagHendelse.Periode.Beløp> = kravgrunnlagBeløp(),
+) =
+    KravgrunnlagHendelse.Periode(
+        periode = periode,
+        månedligSkattebeløp = BigDecimal("0.0"),
+        beløp = kravgrunnlagBeløp,
+    )
+
+fun kravgrunnlagBeløp() =
+    listOf(
+        KravgrunnlagHendelse.Periode.Beløp(
+            klassekode = "",
+            klassetype = "",
+            opprinneligUtbetalingsbeløp = BigDecimal("12000.0"),
+            nyttBeløp = BigDecimal("10000.0"),
+            tilbakekrevesBeløp = BigDecimal("2000.0"),
+            skatteprosent = BigDecimal("0.0"),
+        ),
     )

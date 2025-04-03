@@ -16,7 +16,26 @@ class Foreldelsesteg(
 ) : Saksbehandlingsteg<VurdertForeldelseDto> {
     override val type: Behandlingssteg = Behandlingssteg.FORELDELSE
 
-    override fun erFullstending(): Boolean = vurdertePerioder.all { it.vurdering != Foreldelseperiode.Vurdering.IkkeVurdert }
+    override fun erFullstending(): Boolean = vurdertePerioder.all { it.vurdering != Vurdering.IkkeVurdert }
+
+    fun vurderForeldelse(
+        periode: Datoperiode,
+        vurdering: Vurdering,
+    ) {
+        val periodeId = finnIdFor(periode) // I fremtiden ønsker vi å sende inn id, ikke periode
+        vurderForeldelse(periodeId, vurdering)
+    }
+
+    fun vurderForeldelse(
+        periodeId: UUID,
+        vurdering: Vurdering,
+    ) {
+        vurdertePerioder.single { it.id == periodeId }.vurderForeldelse(vurdering)
+    }
+
+    private fun finnIdFor(periode: Datoperiode): UUID {
+        return vurdertePerioder.single { it.periode == periode }.id
+    }
 
     override fun tilFrontendDto(): VurdertForeldelseDto {
         return VurdertForeldelseDto(
@@ -28,33 +47,62 @@ class Foreldelsesteg(
                         begrunnelse = it.vurdering.begrunnelse,
                         foreldelsesvurderingstype =
                             when (it.vurdering) {
-                                is Foreldelseperiode.Vurdering.IkkeForeldet -> Foreldelsesvurderingstype.IKKE_FORELDET
-                                is Foreldelseperiode.Vurdering.Foreldet -> Foreldelsesvurderingstype.FORELDET
-                                is Foreldelseperiode.Vurdering.IkkeVurdert -> Foreldelsesvurderingstype.IKKE_VURDERT
-                                is Foreldelseperiode.Vurdering.Tilleggsfrist -> Foreldelsesvurderingstype.TILLEGGSFRIST
+                                is Vurdering.IkkeForeldet -> Foreldelsesvurderingstype.IKKE_FORELDET
+                                is Vurdering.Foreldet -> Foreldelsesvurderingstype.FORELDET
+                                is Vurdering.IkkeVurdert -> Foreldelsesvurderingstype.IKKE_VURDERT
+                                is Vurdering.Tilleggsfrist -> Foreldelsesvurderingstype.TILLEGGSFRIST
                             },
-                        foreldelsesfrist = (it.vurdering as? Foreldelseperiode.Vurdering.Tilleggsfrist)?.frist,
+                        foreldelsesfrist = (it.vurdering as? Vurdering.Tilleggsfrist)?.frist,
                     )
                 },
         )
     }
 
-    class Foreldelseperiode(
+    class Foreldelseperiode private constructor(
         val id: UUID,
         val periode: Datoperiode,
-        val vurdering: Vurdering,
+        private var _vurdering: Vurdering,
     ) {
-        sealed interface Vurdering {
-            val begrunnelse: String? get() = null
-            val oppdaget: LocalDate? get() = null
+        val vurdering get() = _vurdering
 
-            class IkkeForeldet(override val begrunnelse: String) : Vurdering
+        fun vurderForeldelse(vurdering: Vurdering) {
+            this._vurdering = vurdering
+        }
 
-            object IkkeVurdert : Vurdering
+        companion object {
+            fun opprett(periode: Datoperiode) =
+                Foreldelseperiode(
+                    id = UUID.randomUUID(),
+                    periode = periode,
+                    _vurdering = Vurdering.IkkeVurdert,
+                )
+        }
+    }
 
-            class Tilleggsfrist(val frist: LocalDate, override val oppdaget: LocalDate) : Vurdering
+    sealed interface Vurdering {
+        val begrunnelse: String? get() = null
+        val oppdaget: LocalDate? get() = null
 
-            class Foreldet(override val begrunnelse: String, override val oppdaget: LocalDate) : Vurdering
+        class IkkeForeldet(override val begrunnelse: String) : Vurdering
+
+        object IkkeVurdert : Vurdering
+
+        class Tilleggsfrist(val frist: LocalDate, override val oppdaget: LocalDate) : Vurdering
+
+        class Foreldet(override val begrunnelse: String, override val oppdaget: LocalDate) : Vurdering
+    }
+
+    companion object {
+        fun opprett(kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>): Foreldelsesteg {
+            return Foreldelsesteg(
+                vurdertePerioder =
+                    kravgrunnlag.entry.datoperioder().map {
+                        Foreldelseperiode.opprett(
+                            periode = it,
+                        )
+                    },
+                kravgrunnlag = kravgrunnlag,
+            )
         }
     }
 }

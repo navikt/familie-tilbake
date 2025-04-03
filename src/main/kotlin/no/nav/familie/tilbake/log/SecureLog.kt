@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.log
 
 import no.nav.familie.prosessering.domene.Task
+import no.nav.tilbakekreving.Tilbakekreving
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -54,6 +55,12 @@ object SecureLog {
                 fagsystemId: String?,
                 behandlingId: String?,
             ) = Context(fagsystemId = fagsystemId, behandlingId = behandlingId)
+
+            fun fra(tilbakekreving: Tilbakekreving) =
+                medBehandling(
+                    fagsystemId = tilbakekreving.eksternFagsak.eksternId,
+                    behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.internId.toString(),
+                )
 
             fun Task.logContext(): Context =
                 medBehandling(

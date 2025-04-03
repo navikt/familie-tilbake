@@ -1,11 +1,16 @@
 package no.nav.familie.tilbake
 
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.ApplicationProperties
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.Tilbakekreving
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeldelseDto
 import no.nav.tilbakekreving.api.v2.EksternFagsakDto
 import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
 import no.nav.tilbakekreving.api.v2.Opprettelsevalg
 import no.nav.tilbakekreving.behandling.BehandlingHistorikk
+import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
 import no.nav.tilbakekreving.behov.VarselbrevBehov
@@ -15,6 +20,7 @@ import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
+import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
@@ -134,5 +140,29 @@ class TilbakekrevingService(
         if (!applicationProperties.toggles.nyModellEnabled) return null
 
         return eksempelsaker.firstOrNull { sak -> sak.tilFrontendDto().behandlinger.any { it.eksternBrukId == behandlingId } }
+    }
+
+    fun utførSteg(
+        tilbakekreving: Tilbakekreving,
+        behandlingsstegDto: BehandlingsstegDto,
+    ) {
+        val logContext = SecureLog.Context.fra(tilbakekreving)
+        return when (behandlingsstegDto) {
+            is BehandlingsstegForeldelseDto -> {
+                behandlingsstegDto.foreldetPerioder.forEach { periode ->
+                    val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
+                    behandling.foreldelsesteg.vurderForeldelse(
+                        periode.periode,
+                        when (periode.foreldelsesvurderingstype) {
+                            Foreldelsesvurderingstype.IKKE_VURDERT -> Foreldelsesteg.Vurdering.IkkeVurdert
+                            Foreldelsesvurderingstype.FORELDET -> Foreldelsesteg.Vurdering.Foreldet(periode.begrunnelse, periode.oppdagelsesdato!!)
+                            Foreldelsesvurderingstype.IKKE_FORELDET -> Foreldelsesteg.Vurdering.IkkeForeldet(periode.begrunnelse)
+                            Foreldelsesvurderingstype.TILLEGGSFRIST -> Foreldelsesteg.Vurdering.Tilleggsfrist(periode.foreldelsesfrist!!, periode.oppdagelsesdato!!)
+                        },
+                    )
+                }
+            }
+            else -> throw Feil("Vurdering for ${behandlingsstegDto.getSteg()} er ikke implementert i ny modell enda.", logContext = logContext)
+        }
     }
 }

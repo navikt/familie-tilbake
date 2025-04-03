@@ -155,6 +155,24 @@ class BehandlingController(
         @Valid @RequestBody
         behandlingsstegDto: BehandlingsstegDto,
     ): Ressurs<String> {
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        if (tilbakekreving != null) {
+            tilgangskontrollService.validerTilgangTilbakekreving(
+                tilbakekreving = tilbakekreving,
+                behandlingId = behandlingId,
+                minimumBehandlerrolle =
+                    if (behandlingsstegDto is BehandlingsstegFatteVedtaksstegDto) {
+                        Behandlerrolle.BESLUTTER
+                    } else {
+                        Behandlerrolle.SAKSBEHANDLER
+                    },
+                auditLoggerEvent = AuditLoggerEvent.UPDATE,
+                handling = "Utfører behandlingens aktiv steg og fortsetter den til neste steg",
+            )
+
+            tilbakekrevingService.utførSteg(tilbakekreving, behandlingsstegDto)
+            return Ressurs.success("OK")
+        }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle =
