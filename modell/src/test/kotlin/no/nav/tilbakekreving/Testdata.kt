@@ -4,7 +4,10 @@ import no.nav.tilbakekreving.api.v2.BrukerDto
 import no.nav.tilbakekreving.api.v2.EksternFagsakDto
 import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
 import no.nav.tilbakekreving.api.v2.Opprettelsevalg
+import no.nav.tilbakekreving.brev.Brevtype
+import no.nav.tilbakekreving.faktainfo.Faktainfo
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
+import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
@@ -28,12 +31,23 @@ fun bruker() =
         språkkode = Språkkode.NB,
     )
 
+fun faktainfo() =
+    Faktainfo(
+        revurderingsårsak = "Faktinfo årsak",
+        revurderingsresultat = "Faktinfo revurderingsresultat",
+        begrunnelse = "Faktinfo begrunnelse",
+        opprettelsevalg = Opprettelsevalg.OPPRETT_BEHANDLING_MED_VARSEL,
+    )
+
 fun opprettTilbakekrevingEvent(
     eksternFagsak: EksternFagsakDto = eksternFagsak(),
     opprettelsevalg: Opprettelsevalg = Opprettelsevalg.OPPRETT_BEHANDLING_MED_VARSEL,
 ) = OpprettTilbakekrevingEvent(
     eksternFagsak = eksternFagsak,
     opprettelsesvalg = opprettelsevalg,
+    revurderingsårsak = "Revurderingsårsak",
+    revurderingsresultat = "Revurderingsresultat",
+    varsletBeløp = 2000L,
 )
 
 fun kravgrunnlag() =
@@ -71,4 +85,10 @@ fun kravgrunnlag() =
                         ),
                 ),
             ),
+    )
+
+fun varselBrev() =
+    VarselbrevSendtHendelse(
+        internId = UUID.randomUUID(),
+        brevType = Brevtype.VARSEL,
     )

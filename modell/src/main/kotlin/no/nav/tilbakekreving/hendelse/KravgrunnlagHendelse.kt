@@ -18,15 +18,17 @@ class KravgrunnlagHendelse(
     private val ansvarligEnhet: String,
     private val kontrollfelt: String,
     // Brukes som eksternId i henting av fagsysteminfo, hva betyr det egentlig?
-    private val referanse: String,
+    val referanse: String,
     private val kravgrunnlagId: String,
-    private val perioder: List<Periode>,
+    val perioder: List<Periode>,
 ) : Historikk.HistorikkInnslag<UUID> {
     fun totaltBeløpFor(periode: Datoperiode): BigDecimal =
         perioder.single { kgPeriode -> kgPeriode.inneholder(periode) }
             .totaltBeløp()
 
     fun datoperioder() = perioder.map { it.periode }
+
+    fun totalFeilutbetalBeløpForAllePerioder() = perioder.sumOf { it.totaltBeløp() }
 
     class Periode(
         val periode: Datoperiode,

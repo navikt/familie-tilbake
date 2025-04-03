@@ -9,8 +9,10 @@ import no.nav.tilbakekreving.behandling.BehandlingHistorikk
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
 import no.nav.tilbakekreving.behov.VarselbrevBehov
+import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
+import no.nav.tilbakekreving.faktainfo.Faktainfo
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
@@ -64,6 +66,14 @@ class TilbakekrevingService(
                     ),
                 behovObservatør = behovObservatør,
                 kravgrunnlagHistorikk = KravgrunnlagHistorikk(mutableListOf()),
+                faktainfo =
+                    Faktainfo(
+                        revurderingsresultat = "",
+                        revurderingsårsak = "",
+                        opprettelsevalg = Opprettelsevalg.OPPRETT_BEHANDLING_MED_VARSEL,
+                        begrunnelse = "",
+                    ),
+                brevHistorikk = BrevHistorikk(mutableListOf(VarselbrevSendtHendelse.opprettVarselBrev(2000L))),
             ).apply {
                 håndter(
                     OpprettTilbakekrevingEvent(
@@ -73,6 +83,8 @@ class TilbakekrevingService(
                             eksternId = "TEST-101010",
                         ),
                         opprettelsesvalg = Opprettelsevalg.OPPRETT_BEHANDLING_MED_VARSEL,
+                        revurderingsårsak = "revurderingsårsak",
+                        revurderingsresultat = "revurderingsresultat",
                     ),
                 )
                 håndter(
@@ -117,7 +129,7 @@ class TilbakekrevingService(
                         eksternId = UUID.randomUUID().toString(),
                     ),
                 )
-                håndter(VarselbrevSendtHendelse)
+                håndter(VarselbrevSendtHendelse.opprettVarselBrev(2000L))
             },
         )
 

@@ -3,13 +3,16 @@ package no.nav.tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsoppsummeringDto
 import no.nav.tilbakekreving.api.v1.dto.FagsakDto
 import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
+import no.nav.tilbakekreving.api.v2.Opprettelsevalg
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.BehandlingHistorikk
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.VarselbrevBehov
+import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
+import no.nav.tilbakekreving.faktainfo.Faktainfo
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
@@ -29,9 +32,11 @@ class Tilbakekreving(
     val eksternFagsak: EksternFagsak,
     val behandlingHistorikk: BehandlingHistorikk,
     val kravgrunnlagHistorikk: KravgrunnlagHistorikk,
+    val brevHistorikk: BrevHistorikk,
     private val opprettet: LocalDateTime,
     private val behovObservatør: BehovObservatør,
     private var bruker: Bruker? = null,
+    private val faktainfo: Faktainfo,
 ) : FrontendDto<FagsakDto> {
     internal var tilstand: Tilstand = Start
 
@@ -65,12 +70,14 @@ class Tilbakekreving(
                 opprettet = LocalDateTime.now(),
                 enhet = null,
                 årsak = Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR,
-                begrunnelseForTilbakekreving = "WIP",
+                begrunnelseForTilbakekreving = faktainfo.revurderingsårsak,
                 ansvarligSaksbehandler = "VL",
                 eksternFagsak = eksternFagsak,
                 sistEndret = LocalDateTime.now(),
                 eksternFagsakBehandling = eksternFagsakBehandling,
                 kravgrunnlag = kravgrunnlagHistorikk.nåværende(),
+                faktainfo = faktainfo,
+                brev = brevHistorikk.nåværende(),
             ),
         )
     }
@@ -99,6 +106,13 @@ class Tilbakekreving(
             behovObservatør: BehovObservatør,
             opprettTilbakekrevingEvent: OpprettTilbakekrevingEvent,
         ): Tilbakekreving {
+            val brevHistorikk = BrevHistorikk(mutableListOf())
+            if (opprettTilbakekrevingEvent.opprettelsesvalg == Opprettelsevalg.OPPRETT_BEHANDLING_MED_VARSEL) {
+                brevHistorikk.lagre(
+                    VarselbrevSendtHendelse.opprettVarselBrev(opprettTilbakekrevingEvent.varsletBeløp!!),
+                )
+            }
+
             return Tilbakekreving(
                 opprettet = LocalDateTime.now(),
                 eksternFagsak =
@@ -112,6 +126,14 @@ class Tilbakekreving(
                 behovObservatør = behovObservatør,
                 behandlingHistorikk = BehandlingHistorikk(mutableListOf()),
                 kravgrunnlagHistorikk = KravgrunnlagHistorikk(mutableListOf()),
+                brevHistorikk = brevHistorikk,
+                faktainfo =
+                    Faktainfo(
+                        revurderingsresultat = opprettTilbakekrevingEvent.revurderingsresultat,
+                        revurderingsårsak = opprettTilbakekrevingEvent.revurderingsårsak,
+                        opprettelsevalg = opprettTilbakekrevingEvent.opprettelsesvalg,
+                        begrunnelse = "",
+                    ),
             )
         }
     }

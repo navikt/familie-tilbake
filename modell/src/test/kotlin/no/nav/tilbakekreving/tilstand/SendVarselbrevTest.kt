@@ -23,7 +23,7 @@ class SendVarselbrevTest {
                 eksternId = UUID.randomUUID().toString(),
             ),
         )
-        tilbakekreving.håndter(VarselbrevSendtHendelse)
+        tilbakekreving.håndter(VarselbrevSendtHendelse.opprettVarselBrev(2000L))
 
         tilbakekreving.tilstand shouldBe TilBehandling
     }
