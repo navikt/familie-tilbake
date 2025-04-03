@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake
+package no.nav.familie.tilbake.v2
 
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.ApplicationProperties
@@ -6,6 +6,7 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeldelseDto
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v2.EksternFagsakDto
 import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
 import no.nav.tilbakekreving.api.v2.Opprettelsevalg
@@ -148,21 +149,41 @@ class TilbakekrevingService(
     ) {
         val logContext = SecureLog.Context.fra(tilbakekreving)
         return when (behandlingsstegDto) {
-            is BehandlingsstegForeldelseDto -> {
-                behandlingsstegDto.foreldetPerioder.forEach { periode ->
-                    val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
-                    behandling.foreldelsesteg.vurderForeldelse(
-                        periode.periode,
-                        when (periode.foreldelsesvurderingstype) {
-                            Foreldelsesvurderingstype.IKKE_VURDERT -> Foreldelsesteg.Vurdering.IkkeVurdert
-                            Foreldelsesvurderingstype.FORELDET -> Foreldelsesteg.Vurdering.Foreldet(periode.begrunnelse, periode.oppdagelsesdato!!)
-                            Foreldelsesvurderingstype.IKKE_FORELDET -> Foreldelsesteg.Vurdering.IkkeForeldet(periode.begrunnelse)
-                            Foreldelsesvurderingstype.TILLEGGSFRIST -> Foreldelsesteg.Vurdering.Tilleggsfrist(periode.foreldelsesfrist!!, periode.oppdagelsesdato!!)
-                        },
-                    )
-                }
-            }
+            is BehandlingsstegForeldelseDto -> behandleForeldelse(behandlingsstegDto, tilbakekreving)
+            is BehandlingsstegVilkårsvurderingDto -> behandleVilkårsvurdering(behandlingsstegDto, tilbakekreving)
             else -> throw Feil("Vurdering for ${behandlingsstegDto.getSteg()} er ikke implementert i ny modell enda.", logContext = logContext)
+        }
+    }
+
+    private fun behandleVilkårsvurdering(
+        vurdering: BehandlingsstegVilkårsvurderingDto,
+        tilbakekreving: Tilbakekreving,
+    ) {
+        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
+
+        vurdering.vilkårsvurderingsperioder.forEach { periode ->
+            behandling.vilkårsvurderderingsteg.vurder(
+                periode.periode,
+                VilkårsvurderingMapperV2.tilVurdering(periode),
+            )
+        }
+    }
+
+    private fun behandleForeldelse(
+        vurdering: BehandlingsstegForeldelseDto,
+        tilbakekreving: Tilbakekreving,
+    ) {
+        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
+        vurdering.foreldetPerioder.forEach { periode ->
+            behandling.foreldelsesteg.vurderForeldelse(
+                periode.periode,
+                when (periode.foreldelsesvurderingstype) {
+                    Foreldelsesvurderingstype.IKKE_VURDERT -> Foreldelsesteg.Vurdering.IkkeVurdert
+                    Foreldelsesvurderingstype.FORELDET -> Foreldelsesteg.Vurdering.Foreldet(periode.begrunnelse, periode.oppdagelsesdato!!)
+                    Foreldelsesvurderingstype.IKKE_FORELDET -> Foreldelsesteg.Vurdering.IkkeForeldet(periode.begrunnelse)
+                    Foreldelsesvurderingstype.TILLEGGSFRIST -> Foreldelsesteg.Vurdering.Tilleggsfrist(periode.foreldelsesfrist!!, periode.oppdagelsesdato!!)
+                },
+            )
         }
     }
 }

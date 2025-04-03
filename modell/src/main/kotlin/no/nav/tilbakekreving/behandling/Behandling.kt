@@ -140,7 +140,7 @@ class Behandling(
                 eksternFagsakBehandling = eksternFagsakBehandling,
                 foreldelsesteg = Foreldelsesteg.opprett(kravgrunnlag),
                 faktasteg = Faktasteg(0, eksternFagsakBehandling),
-                vilkårsvurderderingsteg = Vilkårsvurderderingsteg(),
+                vilkårsvurderderingsteg = Vilkårsvurderderingsteg.opprett(kravgrunnlag),
                 foreslåvedtaksteg = Foreslåvedtaksteg(),
             )
         }
