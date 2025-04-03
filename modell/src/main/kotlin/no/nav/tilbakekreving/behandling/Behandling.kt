@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.behandling
 
 import no.nav.tilbakekreving.FrontendDto
+import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegsinfoDto
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
@@ -8,6 +9,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreslåvedtaksteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg.Companion.behandlingsstegstatus
 import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderderingsteg
+import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
@@ -30,7 +32,6 @@ class Behandling(
     private val sistEndret: LocalDateTime,
     private val enhet: Enhet?,
     private val årsak: Behandlingsårsakstype,
-    private val begrunnelseForTilbakekreving: String,
     private val ansvarligSaksbehandler: String,
     // TODO: Når vi kan endre i front-end API burde vi fjerne eksternFagsakId fra behandling så vi ikke trenger det her
     private val eksternFagsak: EksternFagsak,
@@ -106,7 +107,7 @@ class Behandling(
             støtterManuelleBrevmottakere = true,
             harManuelleBrevmottakere = false,
             manuelleBrevmottakere = emptyList(),
-            begrunnelseForTilbakekreving = begrunnelseForTilbakekreving,
+            begrunnelseForTilbakekreving = eksternFagsakBehandling.entry.begrunnelseForTilbakekreving,
             saksbehandlingstype = Saksbehandlingstype.ORDINÆR,
         )
     }
@@ -120,11 +121,12 @@ class Behandling(
             sistEndret: LocalDateTime = opprettet,
             enhet: Enhet?,
             årsak: Behandlingsårsakstype,
-            begrunnelseForTilbakekreving: String,
             ansvarligSaksbehandler: String,
             eksternFagsak: EksternFagsak,
             eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
             kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
+            brevHistorikk: BrevHistorikk,
+            tilbakekreving: Tilbakekreving,
         ): Behandling {
             return Behandling(
                 internId = internId,
@@ -134,12 +136,11 @@ class Behandling(
                 sistEndret = sistEndret,
                 enhet = enhet,
                 årsak = årsak,
-                begrunnelseForTilbakekreving = begrunnelseForTilbakekreving,
                 ansvarligSaksbehandler = ansvarligSaksbehandler,
                 eksternFagsak = eksternFagsak,
                 eksternFagsakBehandling = eksternFagsakBehandling,
                 foreldelsesteg = Foreldelsesteg.opprett(kravgrunnlag),
-                faktasteg = Faktasteg(0, eksternFagsakBehandling),
+                faktasteg = Faktasteg.opprett(eksternFagsakBehandling, kravgrunnlag, brevHistorikk, tilbakekreving),
                 vilkårsvurderderingsteg = Vilkårsvurderderingsteg.opprett(kravgrunnlag),
                 foreslåvedtaksteg = Foreslåvedtaksteg(),
             )

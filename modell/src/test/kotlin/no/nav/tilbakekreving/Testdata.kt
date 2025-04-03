@@ -4,6 +4,8 @@ import no.nav.tilbakekreving.api.v2.BrukerDto
 import no.nav.tilbakekreving.api.v2.EksternFagsakDto
 import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
 import no.nav.tilbakekreving.api.v2.Opprettelsevalg
+import no.nav.tilbakekreving.brev.Varselbrev
+import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
@@ -74,4 +76,20 @@ fun kravgrunnlagBeløp() =
             tilbakekrevesBeløp = BigDecimal("2000.0"),
             skatteprosent = BigDecimal("0.0"),
         ),
+    )
+
+fun fagsysteminfoHendelse() =
+    FagsysteminfoHendelse(
+        eksternId = UUID.randomUUID().toString(),
+        revurderingsårsak = "Revurderingsårsak",
+        revurderingsresultat = "Revurderingsresultat",
+        revurderingsvedtaksdato = LocalDate.now(),
+        begrunnelseForTilbakekreving = "Begrunnelse for tilbakekreving",
+    )
+
+fun varselbrev() =
+    Varselbrev(
+        internId = UUID.randomUUID(),
+        opprettetDato = LocalDate.now(),
+        varsletBeløp = 10000L,
     )

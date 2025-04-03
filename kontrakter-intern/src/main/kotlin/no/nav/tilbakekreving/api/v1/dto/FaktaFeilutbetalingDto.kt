@@ -5,6 +5,7 @@ import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
+import no.nav.tilbakekreving.midlertidig.FaktafeilutbetalingSuperDto
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -20,7 +21,7 @@ data class FaktaFeilutbetalingDto(
     val kravgrunnlagReferanse: String,
     val vurderingAvBrukersUttalelse: VurderingAvBrukersUttalelseDto,
     val opprettetTid: LocalDateTime? = null,
-) {
+) : FaktafeilutbetalingSuperDto() {
     val gjelderDødsfall get() = feilutbetaltePerioder.any { it.hendelsestype == Hendelsestype.DØDSFALL }
 }
 

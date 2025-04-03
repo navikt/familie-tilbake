@@ -10,6 +10,7 @@ import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.familie.tilbake.v2.TilbakekrevingService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
+import no.nav.tilbakekreving.midlertidig.FaktafeilutbetalingSuperDto
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -36,7 +37,7 @@ class FaktaFeilutbetalingController(
         @NotNull
         @PathVariable("behandlingId")
         behandlingId: UUID,
-    ): Ressurs<FaktaFeilutbetalingDto> {
+    ): Ressurs<FaktafeilutbetalingSuperDto> {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
         if (tilbakekreving != null) {
             tilgangskontrollService.validerTilgangTilbakekreving(

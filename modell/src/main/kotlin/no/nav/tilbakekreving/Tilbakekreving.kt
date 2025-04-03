@@ -3,10 +3,12 @@ package no.nav.tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsoppsummeringDto
 import no.nav.tilbakekreving.api.v1.dto.FagsakDto
 import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
+import no.nav.tilbakekreving.api.v2.Opprettelsevalg
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.BehandlingHistorikk
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.VarselbrevBehov
+import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
@@ -29,7 +31,9 @@ class Tilbakekreving(
     val eksternFagsak: EksternFagsak,
     val behandlingHistorikk: BehandlingHistorikk,
     val kravgrunnlagHistorikk: KravgrunnlagHistorikk,
-    private val opprettet: LocalDateTime,
+    val brevHistorikk: BrevHistorikk,
+    val opprettet: LocalDateTime,
+    val opprettelsesvalg: Opprettelsevalg,
     private val behovObservatør: BehovObservatør,
     private var bruker: Bruker? = null,
 ) : FrontendDto<FagsakDto> {
@@ -65,12 +69,13 @@ class Tilbakekreving(
                 opprettet = LocalDateTime.now(),
                 enhet = null,
                 årsak = Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR,
-                begrunnelseForTilbakekreving = "WIP",
                 ansvarligSaksbehandler = "VL",
                 eksternFagsak = eksternFagsak,
                 sistEndret = LocalDateTime.now(),
                 eksternFagsakBehandling = eksternFagsakBehandling,
                 kravgrunnlag = kravgrunnlagHistorikk.nåværende(),
+                brevHistorikk = brevHistorikk,
+                tilbakekreving = this,
             ),
         )
     }
@@ -101,6 +106,7 @@ class Tilbakekreving(
         ): Tilbakekreving {
             return Tilbakekreving(
                 opprettet = LocalDateTime.now(),
+                opprettelsesvalg = opprettTilbakekrevingEvent.opprettelsesvalg,
                 eksternFagsak =
                     EksternFagsak(
                         eksternId = opprettTilbakekrevingEvent.eksternFagsak.eksternId,
@@ -112,6 +118,7 @@ class Tilbakekreving(
                 behovObservatør = behovObservatør,
                 behandlingHistorikk = BehandlingHistorikk(mutableListOf()),
                 kravgrunnlagHistorikk = KravgrunnlagHistorikk(mutableListOf()),
+                brevHistorikk = BrevHistorikk(mutableListOf()),
             )
         }
     }
