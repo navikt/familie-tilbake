@@ -5,6 +5,7 @@ data class Faktainfo(
     val revurderingsresultat: String,
     val tilbakekrevingsvalg: Tilbakekrevingsvalg? = null,
     val konsekvensForYtelser: Set<String> = emptySet(),
+    val varsletBeløp: Long? = null,
 )
 
 enum class Tilbakekrevingsvalg {

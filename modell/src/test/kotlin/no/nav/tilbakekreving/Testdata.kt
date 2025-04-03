@@ -2,6 +2,7 @@ package no.nav.tilbakekreving
 
 import no.nav.tilbakekreving.api.v2.BrukerDto
 import no.nav.tilbakekreving.api.v2.EksternFagsakDto
+import no.nav.tilbakekreving.api.v2.FaktainfoDto
 import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
 import no.nav.tilbakekreving.api.v2.Opprettelsevalg
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
@@ -28,12 +29,20 @@ fun bruker() =
         språkkode = Språkkode.NB,
     )
 
+fun faktainfo() =
+    FaktainfoDto(
+        varsletBeløp = 2000L,
+        revurderingsårsak = "Faktinfo årsak",
+        revurderingsresultat = "Faktinfo revurderingsresultat",
+    )
+
 fun opprettTilbakekrevingEvent(
     eksternFagsak: EksternFagsakDto = eksternFagsak(),
     opprettelsevalg: Opprettelsevalg = Opprettelsevalg.OPPRETT_BEHANDLING_MED_VARSEL,
 ) = OpprettTilbakekrevingEvent(
     eksternFagsak = eksternFagsak,
     opprettelsesvalg = opprettelsevalg,
+    faktainfoDto = faktainfo(),
 )
 
 fun kravgrunnlag() =

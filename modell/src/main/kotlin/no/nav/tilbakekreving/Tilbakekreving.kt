@@ -14,6 +14,7 @@ import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
+import no.nav.tilbakekreving.kontrakter.Faktainfo
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
@@ -32,6 +33,7 @@ class Tilbakekreving(
     private val opprettet: LocalDateTime,
     private val behovObservatør: BehovObservatør,
     private var bruker: Bruker? = null,
+    private val faktainfo: Faktainfo,
 ) : FrontendDto<FagsakDto> {
     internal var tilstand: Tilstand = Start
 
@@ -71,6 +73,7 @@ class Tilbakekreving(
                 sistEndret = LocalDateTime.now(),
                 eksternFagsakBehandling = eksternFagsakBehandling,
                 kravgrunnlag = kravgrunnlagHistorikk.nåværende(),
+                faktainfo = faktainfo,
             ),
         )
     }
@@ -112,6 +115,11 @@ class Tilbakekreving(
                 behovObservatør = behovObservatør,
                 behandlingHistorikk = BehandlingHistorikk(mutableListOf()),
                 kravgrunnlagHistorikk = KravgrunnlagHistorikk(mutableListOf()),
+                faktainfo =
+                    Faktainfo(
+                        revurderingsresultat = opprettTilbakekrevingEvent.faktainfoDto.revurderingsresultat,
+                        revurderingsårsak = opprettTilbakekrevingEvent.faktainfoDto.revurderingsårsak,
+                    ),
             )
         }
     }
