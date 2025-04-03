@@ -3,6 +3,7 @@ package no.nav.familie.tilbake
 import no.nav.familie.tilbake.config.ApplicationProperties
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v2.EksternFagsakDto
+import no.nav.tilbakekreving.api.v2.FaktainfoDto
 import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
 import no.nav.tilbakekreving.api.v2.Opprettelsevalg
 import no.nav.tilbakekreving.behandling.BehandlingHistorikk
@@ -14,6 +15,7 @@ import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
+import no.nav.tilbakekreving.kontrakter.Faktainfo
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
@@ -64,6 +66,11 @@ class TilbakekrevingService(
                     ),
                 behovObservatør = behovObservatør,
                 kravgrunnlagHistorikk = KravgrunnlagHistorikk(mutableListOf()),
+                faktainfo =
+                    Faktainfo(
+                        revurderingsresultat = "",
+                        revurderingsårsak = "",
+                    ),
             ).apply {
                 håndter(
                     OpprettTilbakekrevingEvent(
@@ -73,6 +80,12 @@ class TilbakekrevingService(
                             eksternId = "TEST-101010",
                         ),
                         opprettelsesvalg = Opprettelsevalg.OPPRETT_BEHANDLING_MED_VARSEL,
+                        faktainfoDto =
+                            FaktainfoDto(
+                                varsletBeløp = 2000L,
+                                revurderingsårsak = "Faktinfoårsak",
+                                revurderingsresultat = "Faktinforesultat",
+                            ),
                     ),
                 )
                 håndter(

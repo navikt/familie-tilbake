@@ -13,6 +13,7 @@ import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
+import no.nav.tilbakekreving.kontrakter.Faktainfo
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
@@ -39,6 +40,7 @@ class Behandling(
     val faktasteg: Faktasteg,
     val vilkårsvurderderingsteg: Vilkårsvurderderingsteg,
     val foreslåvedtaksteg: Foreslåvedtaksteg,
+    val faktainfo: Faktainfo,
 ) : Historikk.HistorikkInnslag<UUID>, FrontendDto<BehandlingDto> {
     private fun behandlingsstatus() =
         listOf(
@@ -125,6 +127,7 @@ class Behandling(
             eksternFagsak: EksternFagsak,
             eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
             kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
+            faktainfo: Faktainfo,
         ): Behandling {
             return Behandling(
                 internId = internId,
@@ -150,9 +153,10 @@ class Behandling(
                             },
                         kravgrunnlag = kravgrunnlag,
                     ),
-                faktasteg = Faktasteg(0, eksternFagsakBehandling),
+                faktasteg = Faktasteg(eksternFagsakBehandling, faktainfo, kravgrunnlag),
                 vilkårsvurderderingsteg = Vilkårsvurderderingsteg(),
                 foreslåvedtaksteg = Foreslåvedtaksteg(),
+                faktainfo = faktainfo,
             )
         }
     }
