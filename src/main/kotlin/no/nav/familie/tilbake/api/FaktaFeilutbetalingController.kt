@@ -2,12 +2,12 @@ package no.nav.familie.tilbake.api
 
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.constraints.NotNull
-import no.nav.familie.tilbake.TilbakekrevingService
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
+import no.nav.familie.tilbake.v2.TilbakekrevingService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
 import org.springframework.http.MediaType
