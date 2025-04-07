@@ -7,6 +7,7 @@ import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
+import no.nav.familie.tilbake.v2.TilbakekrevingService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.api.v1.dto.BeregnetPerioderDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatDto
@@ -28,6 +29,7 @@ import java.util.UUID
 class BeregningController(
     val tilbakekrevingsberegningService: TilbakekrevingsberegningService,
     private val tilgangskontrollService: TilgangskontrollService,
+    private val tilbakekrevingService: TilbakekrevingService,
 ) {
     @Operation(summary = "Beregn feilutbetalt beløp for nye delte perioder")
     @PostMapping(
@@ -39,6 +41,17 @@ class BeregningController(
         @Valid @RequestBody
         perioder: List<Datoperiode>,
     ): Ressurs<BeregnetPerioderDto> {
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        if (tilbakekreving != null) {
+            tilgangskontrollService.validerTilgangTilbakekreving(
+                tilbakekreving = tilbakekreving,
+                behandlingId = behandlingId,
+                minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                auditLoggerEvent = AuditLoggerEvent.ACCESS,
+                handling = "Beregner feilutbetalt beløp for nye delte perioder",
+            )
+            return Ressurs.success(tilbakekreving.behandlingHistorikk.nåværende().entry.beregnSplittetPeriode(perioder))
+        }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,

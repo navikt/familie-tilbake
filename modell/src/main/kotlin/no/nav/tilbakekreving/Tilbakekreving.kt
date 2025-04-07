@@ -70,7 +70,6 @@ class Tilbakekreving(
                 enhet = null,
                 årsak = Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR,
                 ansvarligSaksbehandler = "VL",
-                eksternFagsak = eksternFagsak,
                 sistEndret = LocalDateTime.now(),
                 eksternFagsakBehandling = eksternFagsakBehandling,
                 kravgrunnlag = kravgrunnlagHistorikk.nåværende(),

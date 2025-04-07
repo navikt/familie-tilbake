@@ -4,13 +4,15 @@ import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegsinfoDto
+import no.nav.tilbakekreving.api.v1.dto.BeregnetPeriodeDto
+import no.nav.tilbakekreving.api.v1.dto.BeregnetPerioderDto
+import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
-import no.nav.tilbakekreving.behandling.saksbehandling.Foreslåvedtaksteg
+import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg.Companion.behandlingsstegstatus
-import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderderingsteg
+import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.brev.BrevHistorikk
-import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.historikk.Historikk
@@ -21,6 +23,7 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
+import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -33,23 +36,41 @@ class Behandling(
     private val enhet: Enhet?,
     private val årsak: Behandlingsårsakstype,
     private val ansvarligSaksbehandler: String,
-    // TODO: Når vi kan endre i front-end API burde vi fjerne eksternFagsakId fra behandling så vi ikke trenger det her
-    private val eksternFagsak: EksternFagsak,
     private val eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
+    val kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
     var foreldelsesteg: Foreldelsesteg,
     val faktasteg: Faktasteg,
-    val vilkårsvurderderingsteg: Vilkårsvurderderingsteg,
-    val foreslåvedtaksteg: Foreslåvedtaksteg,
+    val vilkårsvurderingsteg: Vilkårsvurderingsteg,
+    val foreslåvedtaksteg: ForeslåVedtakSteg,
 ) : Historikk.HistorikkInnslag<UUID>, FrontendDto<BehandlingDto> {
     private fun behandlingsstatus() =
         listOf(
             faktasteg,
             foreldelsesteg,
-            vilkårsvurderderingsteg,
+            vilkårsvurderingsteg,
             foreslåvedtaksteg,
         ).firstOrNull { !it.erFullstending() }
             ?.behandlingsstatus
             ?: Behandlingsstatus.AVSLUTTET
+
+    fun beregnSplittetPeriode(perioder: List<Datoperiode>): BeregnetPerioderDto =
+        BeregnetPerioderDto(
+            perioder.map {
+                BeregnetPeriodeDto(
+                    it,
+                    kravgrunnlag.entry.totaltBeløpFor(it),
+                )
+            },
+        )
+
+    fun splittForeldetPerioder(perioder: List<Datoperiode>) {
+        foreldelsesteg.splittPerioder(perioder)
+        vilkårsvurderingsteg.splittPerioder(perioder)
+    }
+
+    fun splittVilkårsvurdertePerioder(perioder: List<Datoperiode>) {
+        vilkårsvurderingsteg.splittPerioder(perioder)
+    }
 
     override fun tilFrontendDto(): BehandlingDto {
         return BehandlingDto(
@@ -94,7 +115,7 @@ class Behandling(
                     ),
                     BehandlingsstegsinfoDto(
                         Behandlingssteg.VILKÅRSVURDERING,
-                        vilkårsvurderderingsteg.behandlingsstegstatus(),
+                        vilkårsvurderingsteg.behandlingsstegstatus(),
                     ),
                     BehandlingsstegsinfoDto(
                         Behandlingssteg.FORESLÅ_VEDTAK,
@@ -102,7 +123,8 @@ class Behandling(
                     ),
                 ),
             fagsystemsbehandlingId = eksternFagsakBehandling.entry.eksternId,
-            eksternFagsakId = eksternFagsak.eksternId,
+            // TODO
+            eksternFagsakId = "TODO",
             behandlingsårsakstype = årsak,
             støtterManuelleBrevmottakere = true,
             harManuelleBrevmottakere = false,
@@ -122,12 +144,12 @@ class Behandling(
             enhet: Enhet?,
             årsak: Behandlingsårsakstype,
             ansvarligSaksbehandler: String,
-            eksternFagsak: EksternFagsak,
             eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
             kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
             brevHistorikk: BrevHistorikk,
             tilbakekreving: Tilbakekreving,
         ): Behandling {
+            val foreldelsesteg = Foreldelsesteg.opprett(kravgrunnlag)
             return Behandling(
                 internId = internId,
                 eksternId = eksternId,
@@ -137,12 +159,12 @@ class Behandling(
                 enhet = enhet,
                 årsak = årsak,
                 ansvarligSaksbehandler = ansvarligSaksbehandler,
-                eksternFagsak = eksternFagsak,
                 eksternFagsakBehandling = eksternFagsakBehandling,
-                foreldelsesteg = Foreldelsesteg.opprett(kravgrunnlag),
-                faktasteg = Faktasteg.opprett(eksternFagsakBehandling, kravgrunnlag, brevHistorikk, tilbakekreving),
-                vilkårsvurderderingsteg = Vilkårsvurderderingsteg.opprett(kravgrunnlag),
-                foreslåvedtaksteg = Foreslåvedtaksteg(),
+                kravgrunnlag = kravgrunnlag,
+                foreldelsesteg = foreldelsesteg,
+                faktasteg = Faktasteg.opprett(eksternFagsakBehandling, kravgrunnlag, brevHistorikk, LocalDateTime.now(), Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL),
+                vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(kravgrunnlag, foreldelsesteg),
+                foreslåvedtaksteg = ForeslåVedtakSteg(),
             )
         }
     }

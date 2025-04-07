@@ -11,7 +11,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 class Foreldelsesteg(
-    private val vurdertePerioder: List<Foreldelseperiode>,
+    private var vurdertePerioder: List<Foreldelseperiode>,
     private val kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
 ) : Saksbehandlingsteg<VurdertForeldelseDto> {
     override val type: Behandlingssteg = Behandlingssteg.FORELDELSE
@@ -30,10 +30,22 @@ class Foreldelsesteg(
         periodeId: UUID,
         vurdering: Vurdering,
     ) {
+        // TODO: Ordentlig feilhåndtering i stedet for NoSuchElementException ved ugyldig periode
         vurdertePerioder.single { it.id == periodeId }.vurderForeldelse(vurdering)
     }
 
+    fun splittPerioder(perioder: List<Datoperiode>) {
+        if (perioder.sortedBy { it.fom } == vurdertePerioder.map { it.periode }.sortedBy { it.fom }) return
+
+        vurdertePerioder = perioder.map { Foreldelseperiode.opprett(it) }
+    }
+
+    fun erPeriodeForeldet(periode: Datoperiode): Boolean {
+        return vurdertePerioder.single { it.periode == periode }.vurdering !is Vurdering.IkkeForeldet
+    }
+
     private fun finnIdFor(periode: Datoperiode): UUID {
+        // TODO: Ordentlig feilhåndtering i stedet for NoSuchElementException ved ugyldig periode
         return vurdertePerioder.single { it.periode == periode }.id
     }
 
@@ -52,7 +64,8 @@ class Foreldelsesteg(
                                 is Vurdering.IkkeVurdert -> Foreldelsesvurderingstype.IKKE_VURDERT
                                 is Vurdering.Tilleggsfrist -> Foreldelsesvurderingstype.TILLEGGSFRIST
                             },
-                        foreldelsesfrist = (it.vurdering as? Vurdering.Tilleggsfrist)?.frist,
+                        foreldelsesfrist = it.vurdering.frist,
+                        oppdagelsesdato = (it.vurdering as? Vurdering.Tilleggsfrist)?.oppdaget,
                     )
                 },
         )
@@ -81,15 +94,15 @@ class Foreldelsesteg(
 
     sealed interface Vurdering {
         val begrunnelse: String? get() = null
-        val oppdaget: LocalDate? get() = null
+        val frist: LocalDate? get() = null
 
         class IkkeForeldet(override val begrunnelse: String) : Vurdering
 
         object IkkeVurdert : Vurdering
 
-        class Tilleggsfrist(val frist: LocalDate, override val oppdaget: LocalDate) : Vurdering
+        class Tilleggsfrist(override val frist: LocalDate, val oppdaget: LocalDate) : Vurdering
 
-        class Foreldet(override val begrunnelse: String, override val oppdaget: LocalDate) : Vurdering
+        class Foreldet(override val begrunnelse: String, override val frist: LocalDate) : Vurdering
     }
 
     companion object {

@@ -13,9 +13,9 @@ description = "familie-tilbake"
 java.sourceCompatibility = JavaVersion.VERSION_21
 
 plugins {
-    kotlin("jvm") version "2.1.10"
+    kotlin("jvm") version "2.1.20"
     id("org.springframework.boot") version "3.4.3"
-    id("org.jetbrains.kotlin.plugin.spring") version "2.1.10"
+    id("org.jetbrains.kotlin.plugin.spring") version "2.1.20"
     id("org.jlleitschuh.gradle.ktlint") version "12.2.0"
 }
 

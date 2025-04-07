@@ -184,7 +184,7 @@ class TilbakekrevingService(
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
 
         vurdering.vilkårsvurderingsperioder.forEach { periode ->
-            behandling.vilkårsvurderderingsteg.vurder(
+            behandling.vilkårsvurderingsteg.vurder(
                 periode.periode,
                 VilkårsvurderingMapperV2.tilVurdering(periode),
             )
@@ -196,12 +196,13 @@ class TilbakekrevingService(
         tilbakekreving: Tilbakekreving,
     ) {
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
+        behandling.splittForeldetPerioder(vurdering.foreldetPerioder.map { it.periode })
         vurdering.foreldetPerioder.forEach { periode ->
             behandling.foreldelsesteg.vurderForeldelse(
                 periode.periode,
                 when (periode.foreldelsesvurderingstype) {
                     Foreldelsesvurderingstype.IKKE_VURDERT -> Foreldelsesteg.Vurdering.IkkeVurdert
-                    Foreldelsesvurderingstype.FORELDET -> Foreldelsesteg.Vurdering.Foreldet(periode.begrunnelse, periode.oppdagelsesdato!!)
+                    Foreldelsesvurderingstype.FORELDET -> Foreldelsesteg.Vurdering.Foreldet(periode.begrunnelse, periode.foreldelsesfrist!!)
                     Foreldelsesvurderingstype.IKKE_FORELDET -> Foreldelsesteg.Vurdering.IkkeForeldet(periode.begrunnelse)
                     Foreldelsesvurderingstype.TILLEGGSFRIST -> Foreldelsesteg.Vurdering.Tilleggsfrist(periode.foreldelsesfrist!!, periode.oppdagelsesdato!!)
                 },

@@ -18,9 +18,10 @@ import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.UUID
 
-class Vilkårsvurderderingsteg(
-    private val vurderinger: List<Vilkårsvurderingsperiode>,
+class Vilkårsvurderingsteg(
+    private var vurderinger: List<Vilkårsvurderingsperiode>,
     private val kravgrunnlagHendelse: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
+    private val foreldelsesteg: Foreldelsesteg,
 ) : Saksbehandlingsteg<VurdertVilkårsvurderingDto> {
     override val type: Behandlingssteg = Behandlingssteg.GRUNNLAG
 
@@ -38,12 +39,23 @@ class Vilkårsvurderderingsteg(
         id: UUID,
         vurdering: Vurdering,
     ) {
+        // TODO: Ordentlig feilhåndtering i stedet for NoSuchElementException ved ugyldig periode
         vurderinger.single { it.id == id }.vurder(vurdering)
     }
 
     private fun finnIdForPeriode(periode: Datoperiode): UUID {
+        // TODO: Ordentlig feilhåndtering i stedet for NoSuchElementException ved ugyldig periode
         return vurderinger.single { it.periode == periode }.id
     }
+
+    fun splittPerioder(perioder: List<Datoperiode>) {
+        if (perioder.sortedBy { it.fom } == vurderinger.map { it.periode }.sortedBy { it.fom }) return
+
+        vurderinger = perioder.map { Vilkårsvurderingsperiode.opprett(it) }
+    }
+
+    // TODO: Trenger først muligheten til å referere til tidligere vilkårsvurdert periode for å finne ut
+    fun harLikePerioder() = false
 
     override fun tilFrontendDto(): VurdertVilkårsvurderingDto {
         fun mapAktsomhet(aktsomhet: VurdertAktsomhet): VurdertAktsomhetDto {
@@ -81,8 +93,7 @@ class Vilkårsvurderderingsteg(
                         reduserteBeløper = listOf(),
                         aktiviteter = listOf(),
                         begrunnelse = it.begrunnelseForTilbakekreving,
-                        // TODO: Spør foreldelsevurderingen
-                        foreldet = false,
+                        foreldet = foreldelsesteg.erPeriodeForeldet(it.periode),
                         vilkårsvurderingsresultatInfo =
                             it.vurdering.let { vurdering ->
                                 when (vurdering) {
@@ -219,12 +230,16 @@ class Vilkårsvurderderingsteg(
     }
 
     companion object {
-        fun opprett(kravgrunnlagHendelse: HistorikkReferanse<UUID, KravgrunnlagHendelse>): Vilkårsvurderderingsteg {
-            return Vilkårsvurderderingsteg(
+        fun opprett(
+            kravgrunnlagHendelse: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
+            foreldelsesteg: Foreldelsesteg,
+        ): Vilkårsvurderingsteg {
+            return Vilkårsvurderingsteg(
                 kravgrunnlagHendelse.entry.datoperioder().map {
                     Vilkårsvurderingsperiode.opprett(it)
                 },
                 kravgrunnlagHendelse,
+                foreldelsesteg,
             )
         }
     }

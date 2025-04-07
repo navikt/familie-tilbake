@@ -2,7 +2,7 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 
-class Foreslåvedtaksteg : Saksbehandlingsteg<Any> {
+class ForeslåVedtakSteg : Saksbehandlingsteg<Any> {
     override val type = Behandlingssteg.FORESLÅ_VEDTAK
 
     override fun erFullstending(): Boolean = false

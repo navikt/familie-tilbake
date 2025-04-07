@@ -1,6 +1,5 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
-import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.FeilutbetalingsperiodeDto
@@ -14,13 +13,15 @@ import no.nav.tilbakekreving.kontrakter.Faktainfo
 import no.nav.tilbakekreving.kontrakter.Tilbakekrevingsvalg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
+import java.time.LocalDateTime
 import java.util.UUID
 
 class Faktasteg(
     private val eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
     private val kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
     private val brevHistorikk: BrevHistorikk,
-    private val tilbakekreving: Tilbakekreving,
+    private val tilbakekrevingOpprettet: LocalDateTime,
+    private val opprettelsesvalg: Opprettelsesvalg,
 ) : Saksbehandlingsteg<FaktaFeilutbetalingDto> {
     override val type: Behandlingssteg = Behandlingssteg.FAKTA
 
@@ -53,7 +54,7 @@ class Faktasteg(
                     revurderingsårsak = eksternFagsakBehandling.entry.revurderingsårsak,
                     revurderingsresultat = eksternFagsakBehandling.entry.revurderingsresultat,
                     tilbakekrevingsvalg =
-                        when (tilbakekreving.opprettelsesvalg) {
+                        when (opprettelsesvalg) {
                             Opprettelsesvalg.UTSETT_BEHANDLING_MED_VARSEL -> Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL
                             Opprettelsesvalg.UTSETT_BEHANDLING_UTEN_VARSEL -> Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL
                             Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL -> Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK
@@ -66,7 +67,7 @@ class Faktasteg(
                     HarBrukerUttaltSeg.IKKE_VURDERT,
                     null,
                 ),
-            opprettetTid = tilbakekreving.opprettet,
+            opprettetTid = tilbakekrevingOpprettet,
         )
     }
 
@@ -75,13 +76,15 @@ class Faktasteg(
             eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
             kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
             brevHistorikk: BrevHistorikk,
-            tilbakekreving: Tilbakekreving,
+            tilbakekrevingOpprettet: LocalDateTime,
+            opprettelsesvalg: Opprettelsesvalg,
         ): Faktasteg {
             return Faktasteg(
                 eksternFagsakBehandling = eksternFagsakBehandling,
                 kravgrunnlag = kravgrunnlag,
                 brevHistorikk = brevHistorikk,
-                tilbakekreving = tilbakekreving,
+                tilbakekrevingOpprettet = tilbakekrevingOpprettet,
+                opprettelsesvalg = opprettelsesvalg,
             )
         }
     }
