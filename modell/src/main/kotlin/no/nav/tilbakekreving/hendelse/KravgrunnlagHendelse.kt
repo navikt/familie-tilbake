@@ -18,9 +18,9 @@ class KravgrunnlagHendelse(
     private val skalBeregneRenter: Boolean,
     private val ansvarligEnhet: String,
     private val kontrollfelt: String,
+    private val kravgrunnlagId: String,
     // Brukes som eksternId i henting av fagsysteminfo, hva betyr det egentlig?
     val referanse: String,
-    private val kravgrunnlagId: String,
     val perioder: List<Periode>,
 ) : Historikk.HistorikkInnslag<UUID> {
     fun totaltBeløpFor(periode: Datoperiode): BigDecimal =
@@ -29,7 +29,7 @@ class KravgrunnlagHendelse(
 
     fun datoperioder() = perioder.map { it.periode }
 
-    fun totalFeilutbetalBeløpForAllePerioder() = perioder.sumOf { it.totaltBeløp() }
+    fun feilutbetaltBeløpForAllePerioder() = perioder.sumOf { it.totaltBeløp() }
 
     fun totaltFeilutbetaltPeriode() = datoperioder().minOf { it.fom } til datoperioder().maxOf { it.tom }
 

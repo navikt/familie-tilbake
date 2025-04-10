@@ -6,7 +6,7 @@ import java.util.UUID
 class Varselbrev(
     override val internId: UUID,
     override val opprettetDato: LocalDate,
-    val varsletBeløp: Long? = null,
+    val varsletBeløp: Long,
 ) : Brev {
     companion object {
         fun opprett(

@@ -2,9 +2,10 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
+import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.FeilutbetalingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurderingAvBrukersUttalelseDto
-import no.nav.tilbakekreving.api.v2.Opprettelsevalg
+import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
@@ -27,11 +28,15 @@ class Faktasteg(
         return true
     }
 
+    fun behandleFakta(fakta: FaktaFeilutbetalingsperiodeDto) {
+        // TODO
+    }
+
     override fun tilFrontendDto(): FaktaFeilutbetalingDto {
         return FaktaFeilutbetalingDto(
             varsletBeløp = brevHistorikk.sisteVarselbrev()?.varsletBeløp,
             totalFeilutbetaltPeriode = kravgrunnlag.entry.totaltFeilutbetaltPeriode(),
-            totaltFeilutbetaltBeløp = kravgrunnlag.entry.totalFeilutbetalBeløpForAllePerioder(),
+            totaltFeilutbetaltBeløp = kravgrunnlag.entry.feilutbetaltBeløpForAllePerioder(),
             feilutbetaltePerioder =
                 kravgrunnlag.entry.datoperioder().map {
                     FeilutbetalingsperiodeDto(
@@ -49,9 +54,9 @@ class Faktasteg(
                     revurderingsresultat = eksternFagsakBehandling.entry.revurderingsresultat,
                     tilbakekrevingsvalg =
                         when (tilbakekreving.opprettelsesvalg) {
-                            Opprettelsevalg.UTSETT_BEHANDLING_MED_VARSEL -> Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL
-                            Opprettelsevalg.UTSETT_BEHANDLING_UTEN_VARSEL -> Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL
-                            Opprettelsevalg.OPPRETT_BEHANDLING_MED_VARSEL -> Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK
+                            Opprettelsesvalg.UTSETT_BEHANDLING_MED_VARSEL -> Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL
+                            Opprettelsesvalg.UTSETT_BEHANDLING_UTEN_VARSEL -> Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL
+                            Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL -> Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK
                         },
                     konsekvensForYtelser = emptySet(),
                 ),
@@ -64,12 +69,6 @@ class Faktasteg(
             opprettetTid = tilbakekreving.opprettet,
         )
     }
-    // når kravgrunnlag kommer oppdateres Faktainfo med perioder. Eneste som kommer fra saksbehandler ved opprettelse av tilbakrekreving er:
-    // revurderingsresultat
-    // revurderingsårsak
-    // opprettelsevalg
-    // begrunnelseForTilbakekreving
-    // revurderingsvedtaksdato
 
     companion object {
         fun opprett(
@@ -85,5 +84,23 @@ class Faktasteg(
                 tilbakekreving = tilbakekreving,
             )
         }
+    }
+
+    sealed interface Vurdering {
+        val uttalelse: Uttalelse
+
+        // val feilutbetalinger: List<Feil>
+        val hendelsestype: String
+        val hendelsesundertype: String
+    }
+
+    sealed interface Uttalelse {
+        class Ja(val begrunnelse: String) : Uttalelse
+
+        data object Nei : Uttalelse
+
+        data object IkkeAktuelt : Uttalelse
+
+        data object IkkeVurdert : Uttalelse
     }
 }

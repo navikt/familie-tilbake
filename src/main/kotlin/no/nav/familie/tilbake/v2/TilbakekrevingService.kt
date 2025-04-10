@@ -10,7 +10,7 @@ import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v2.EksternFagsakDto
 import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
-import no.nav.tilbakekreving.api.v2.Opprettelsevalg
+import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.BehandlingHistorikk
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behov.BehovObservatør
@@ -75,7 +75,7 @@ class TilbakekrevingService(
                 behovObservatør = behovObservatør,
                 kravgrunnlagHistorikk = KravgrunnlagHistorikk(mutableListOf()),
                 brevHistorikk = BrevHistorikk(mutableListOf()),
-                opprettelsesvalg = Opprettelsevalg.OPPRETT_BEHANDLING_MED_VARSEL,
+                opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
             ).apply {
                 håndter(
                     OpprettTilbakekrevingEvent(
@@ -84,7 +84,7 @@ class TilbakekrevingService(
                             ytelsestype = Ytelsestype.BARNETRYGD,
                             eksternId = "TEST-101010",
                         ),
-                        opprettelsesvalg = Opprettelsevalg.OPPRETT_BEHANDLING_MED_VARSEL,
+                        opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
                     ),
                 )
                 håndter(
@@ -160,14 +160,22 @@ class TilbakekrevingService(
         return when (behandlingsstegDto) {
             is BehandlingsstegForeldelseDto -> behandleForeldelse(behandlingsstegDto, tilbakekreving)
             is BehandlingsstegVilkårsvurderingDto -> behandleVilkårsvurdering(behandlingsstegDto, tilbakekreving)
-            is BehandlingsstegFaktaDto -> behandleFakta()
+            is BehandlingsstegFaktaDto -> behandleFakta(tilbakekreving, behandlingsstegDto)
             else -> throw Feil("Vurdering for ${behandlingsstegDto.getSteg()} er ikke implementert i ny modell enda.", logContext = logContext)
         }
     }
 
     private fun behandleFakta(
-        // TODO: Fakta steg
-    ) {}
+        tilbakekreving: Tilbakekreving,
+        fakta: BehandlingsstegFaktaDto,
+    ) {
+        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
+
+        fakta.feilutbetaltePerioder.forEach {
+            behandling.faktasteg.behandleFakta(it)
+            // TODO: Fakta steg
+        }
+    }
 
     private fun behandleVilkårsvurdering(
         vurdering: BehandlingsstegVilkårsvurderingDto,

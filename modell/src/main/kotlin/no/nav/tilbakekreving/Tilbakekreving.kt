@@ -3,7 +3,7 @@ package no.nav.tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsoppsummeringDto
 import no.nav.tilbakekreving.api.v1.dto.FagsakDto
 import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
-import no.nav.tilbakekreving.api.v2.Opprettelsevalg
+import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.BehandlingHistorikk
 import no.nav.tilbakekreving.behov.BehovObservatør
@@ -33,7 +33,7 @@ class Tilbakekreving(
     val kravgrunnlagHistorikk: KravgrunnlagHistorikk,
     val brevHistorikk: BrevHistorikk,
     val opprettet: LocalDateTime,
-    val opprettelsesvalg: Opprettelsevalg,
+    val opprettelsesvalg: Opprettelsesvalg,
     private val behovObservatør: BehovObservatør,
     private var bruker: Bruker? = null,
 ) : FrontendDto<FagsakDto> {

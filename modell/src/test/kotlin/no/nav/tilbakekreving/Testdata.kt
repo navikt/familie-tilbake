@@ -3,7 +3,7 @@ package no.nav.tilbakekreving
 import no.nav.tilbakekreving.api.v2.BrukerDto
 import no.nav.tilbakekreving.api.v2.EksternFagsakDto
 import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
-import no.nav.tilbakekreving.api.v2.Opprettelsevalg
+import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
@@ -32,10 +32,10 @@ fun bruker() =
 
 fun opprettTilbakekrevingEvent(
     eksternFagsak: EksternFagsakDto = eksternFagsak(),
-    opprettelsevalg: Opprettelsevalg = Opprettelsevalg.OPPRETT_BEHANDLING_MED_VARSEL,
+    opprettelsesvalg: Opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
 ) = OpprettTilbakekrevingEvent(
     eksternFagsak = eksternFagsak,
-    opprettelsesvalg = opprettelsevalg,
+    opprettelsesvalg = opprettelsesvalg,
 )
 
 fun kravgrunnlag(

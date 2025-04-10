@@ -9,7 +9,7 @@ object SendVarselbrev : Tilstand {
 
     override fun entering(tilbakekreving: Tilbakekreving) {
         tilbakekreving.brevHistorikk.lagre(
-            Varselbrev.opprett(tilbakekreving.kravgrunnlagHistorikk.nåværende().entry.totalFeilutbetalBeløpForAllePerioder().toLong()),
+            Varselbrev.opprett(tilbakekreving.kravgrunnlagHistorikk.nåværende().entry.feilutbetaltBeløpForAllePerioder().toLong()),
         )
         tilbakekreving.trengerVarselbrev()
     }
