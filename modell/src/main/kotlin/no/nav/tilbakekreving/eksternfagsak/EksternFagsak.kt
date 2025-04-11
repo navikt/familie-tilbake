@@ -30,6 +30,10 @@ class EksternFagsak(
             EksternFagsakBehandling(
                 internId = UUID.randomUUID(),
                 eksternId = fagsysteminfo.eksternId,
+                revurderingsresultat = fagsysteminfo.revurderingsresultat,
+                revurderingsårsak = fagsysteminfo.revurderingsårsak,
+                begrunnelseForTilbakekreving = fagsysteminfo.begrunnelseForTilbakekreving,
+                revurderingsvedtaksdato = fagsysteminfo.revurderingsvedtaksdato,
             ),
         )
     }

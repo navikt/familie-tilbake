@@ -38,3 +38,5 @@ data class Datoperiode(
 
     fun toMånedsperiode() = Månedsperiode(fomMåned, tomMåned)
 }
+
+infix fun LocalDate.til(tom: LocalDate) = Datoperiode(this, tom)

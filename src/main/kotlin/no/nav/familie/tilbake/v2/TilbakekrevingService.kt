@@ -5,16 +5,19 @@ import no.nav.familie.tilbake.config.ApplicationProperties
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFaktaDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v2.EksternFagsakDto
 import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
-import no.nav.tilbakekreving.api.v2.Opprettelsevalg
+import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.BehandlingHistorikk
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
 import no.nav.tilbakekreving.behov.VarselbrevBehov
+import no.nav.tilbakekreving.brev.BrevHistorikk
+import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
@@ -71,6 +74,8 @@ class TilbakekrevingService(
                     ),
                 behovObservatør = behovObservatør,
                 kravgrunnlagHistorikk = KravgrunnlagHistorikk(mutableListOf()),
+                brevHistorikk = BrevHistorikk(mutableListOf()),
+                opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
             ).apply {
                 håndter(
                     OpprettTilbakekrevingEvent(
@@ -79,7 +84,7 @@ class TilbakekrevingService(
                             ytelsestype = Ytelsestype.BARNETRYGD,
                             eksternId = "TEST-101010",
                         ),
-                        opprettelsesvalg = Opprettelsevalg.OPPRETT_BEHANDLING_MED_VARSEL,
+                        opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
                     ),
                 )
                 håndter(
@@ -122,9 +127,13 @@ class TilbakekrevingService(
                 håndter(
                     FagsysteminfoHendelse(
                         eksternId = UUID.randomUUID().toString(),
+                        revurderingsresultat = "revurderingsresultat",
+                        revurderingsårsak = "revurderingsårsak",
+                        begrunnelseForTilbakekreving = "begrunnelseForTilbakekreving",
+                        revurderingsvedtaksdato = LocalDate.now(),
                     ),
                 )
-                håndter(VarselbrevSendtHendelse)
+                håndter(VarselbrevSendtHendelse(Varselbrev.opprett(varsletBeløp = 2000L)))
             },
         )
 
@@ -151,7 +160,20 @@ class TilbakekrevingService(
         return when (behandlingsstegDto) {
             is BehandlingsstegForeldelseDto -> behandleForeldelse(behandlingsstegDto, tilbakekreving)
             is BehandlingsstegVilkårsvurderingDto -> behandleVilkårsvurdering(behandlingsstegDto, tilbakekreving)
+            is BehandlingsstegFaktaDto -> behandleFakta(tilbakekreving, behandlingsstegDto)
             else -> throw Feil("Vurdering for ${behandlingsstegDto.getSteg()} er ikke implementert i ny modell enda.", logContext = logContext)
+        }
+    }
+
+    private fun behandleFakta(
+        tilbakekreving: Tilbakekreving,
+        fakta: BehandlingsstegFaktaDto,
+    ) {
+        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
+
+        fakta.feilutbetaltePerioder.forEach {
+            behandling.faktasteg.behandleFakta(it)
+            // TODO: Fakta steg
         }
     }
 
