@@ -142,7 +142,7 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
         val vedtakPeriode: VedtakPeriode = fellesAssertVedtakPeriode(vedtakPerioder)
         vedtakPeriode.feilutbetaltBeløp shouldBe BigDecimal.valueOf(1000)
         vedtakPeriode.rentebeløp shouldBe BigDecimal.ZERO
-        vedtakPeriode.bruttoTilbakekrevingsbeløp shouldBe BigDecimal.valueOf(1000)
+        vedtakPeriode.bruttoTilbakekrevingsbeløp shouldBe BigDecimal.ZERO
         vedtakPeriode.aktsomhet shouldBe null
         vedtakPeriode.vilkårsresultat shouldBe UtvidetVilkårsresultat.GOD_TRO
         vedtakPeriode.harBruktSjetteLedd shouldBe false
@@ -258,7 +258,7 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
     private fun lagVilkårMedGodTro() {
         val vilkårVurderingGodTro =
             VilkårsvurderingGodTro(
-                beløpTilbakekreves = BigDecimal.valueOf(1000),
+                beløpTilbakekreves = null,
                 beløpErIBehold = false,
                 begrunnelse = "god tro begrunnelse",
             )

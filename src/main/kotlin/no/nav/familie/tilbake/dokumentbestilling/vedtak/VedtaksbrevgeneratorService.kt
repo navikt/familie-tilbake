@@ -2,8 +2,6 @@ package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsak
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
-import no.nav.familie.tilbake.beregning.modell.Beregningsresultat
-import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmetadataUtil
@@ -37,6 +35,8 @@ import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import no.nav.tilbakekreving.api.v1.dto.HentForhåndvisningVedtaksbrevPdfDto
 import no.nav.tilbakekreving.api.v1.dto.PeriodeMedTekstDto
+import no.nav.tilbakekreving.beregning.modell.Beregningsresultat
+import no.nav.tilbakekreving.beregning.modell.Beregningsresultatsperiode
 import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
@@ -439,17 +439,17 @@ class VedtaksbrevgeneratorService(
     ): HbVedtaksbrevsperiode {
         val periode = resultatPeriode.periode
         val fritekster: PeriodeMedTekstDto? =
-            perioderFritekst.firstOrNull { Månedsperiode(it.periode.fom, it.periode.tom) == periode }
-        val hbFakta = utledFakta(periode, fakta, fritekster)
+            perioderFritekst.firstOrNull { it.periode == periode }
+        val hbFakta = utledFakta(periode.toMånedsperiode(), fakta, fritekster)
         val skalBrukeGrunnbeløpIVedtaksbrev = hbFakta.hendelsesundertype == Hendelsesundertype.INNTEKT_OVER_6G
         return HbVedtaksbrevsperiode(
-            periode = periode.toDatoperiode(),
+            periode = periode,
             kravgrunnlag = utledKravgrunnlag(resultatPeriode),
             fakta = hbFakta,
-            vurderinger = utledVurderinger(periode, vilkårPerioder, foreldelse, fritekster),
+            vurderinger = utledVurderinger(periode.toMånedsperiode(), vilkårPerioder, foreldelse, fritekster),
             resultat = utledResultat(resultatPeriode, foreldelse),
             førstePeriode = førstePeriode,
-            grunnbeløp = if (skalBrukeGrunnbeløpIVedtaksbrev) lagHbGrunnbeløp(periode) else null,
+            grunnbeløp = if (skalBrukeGrunnbeløpIVedtaksbrev) lagHbGrunnbeløp(periode.toMånedsperiode()) else null,
         )
     }
 
@@ -522,7 +522,7 @@ class VedtaksbrevgeneratorService(
         resultatPeriode: Beregningsresultatsperiode,
         foreldelse: VurdertForeldelse?,
     ): HbResultat {
-        val foreldelsePeriode = finnForeldelsePeriode(foreldelse, resultatPeriode.periode)
+        val foreldelsePeriode = finnForeldelsePeriode(foreldelse, resultatPeriode.periode.toMånedsperiode())
         val foreldetPeriode = foreldelsePeriode != null && foreldelsePeriode.erForeldet()
 
         return HbResultat(

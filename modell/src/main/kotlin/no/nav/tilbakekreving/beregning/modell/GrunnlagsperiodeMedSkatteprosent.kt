@@ -1,10 +1,10 @@
-package no.nav.familie.tilbake.beregning.modell
+package no.nav.tilbakekreving.beregning.modell
 
-import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
+import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import java.math.BigDecimal
 
 class GrunnlagsperiodeMedSkatteprosent(
-    val periode: Månedsperiode,
+    val periode: Datoperiode,
     val tilbakekrevingsbeløp: BigDecimal,
     val skatteprosent: BigDecimal,
 )

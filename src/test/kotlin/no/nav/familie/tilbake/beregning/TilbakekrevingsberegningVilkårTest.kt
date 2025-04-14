@@ -1,11 +1,12 @@
 package no.nav.familie.tilbake.beregning
 
-import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
-import no.nav.familie.tilbake.beregning.modell.FordeltKravgrunnlagsbeløp
-import no.nav.familie.tilbake.beregning.modell.GrunnlagsperiodeMedSkatteprosent
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingGodTro
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
+import no.nav.tilbakekreving.beregning.TilbakekrevingsberegningVilkår
+import no.nav.tilbakekreving.beregning.modell.Beregningsresultatsperiode
+import no.nav.tilbakekreving.beregning.modell.FordeltKravgrunnlagsbeløp
+import no.nav.tilbakekreving.beregning.modell.GrunnlagsperiodeMedSkatteprosent
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
@@ -50,7 +51,7 @@ class TilbakekrevingsberegningVilkårTest {
             )
 
         grunnlagsperiodeMedSkatteprosent =
-            GrunnlagsperiodeMedSkatteprosent(vilkårsvurderingsperiode.periode, BigDecimal.valueOf(10000), BigDecimal.ZERO)
+            GrunnlagsperiodeMedSkatteprosent(vilkårsvurderingsperiode.periode.toDatoperiode(), BigDecimal.valueOf(10000), BigDecimal.ZERO)
     }
 
     @Nested
@@ -129,7 +130,7 @@ class TilbakekrevingsberegningVilkårTest {
                 )
             val grunnlagPeriodeMedSkattProsent =
                 GrunnlagsperiodeMedSkatteprosent(
-                    periode = vilkårsvurdering.periode,
+                    periode = vilkårsvurdering.periode.toDatoperiode(),
                     tilbakekrevingsbeløp = feilUtbetaltBeløp,
                     skatteprosent = BigDecimal.valueOf(10),
                 )
@@ -258,7 +259,7 @@ class TilbakekrevingsberegningVilkårTest {
                 )
             val grunnlagPeriodeMedSkattProsent =
                 GrunnlagsperiodeMedSkatteprosent(
-                    periode = vilkårsvurdering.periode,
+                    periode = vilkårsvurdering.periode.toDatoperiode(),
                     tilbakekrevingsbeløp = feilUtbetaltBeløp,
                     skatteprosent = BigDecimal.valueOf(10),
                 )
@@ -294,7 +295,7 @@ class TilbakekrevingsberegningVilkårTest {
                 )
             val grunnlagPeriodeMedSkattProsent =
                 GrunnlagsperiodeMedSkatteprosent(
-                    periode = vilkårsvurdering.periode,
+                    periode = vilkårsvurdering.periode.toDatoperiode(),
                     tilbakekrevingsbeløp = feilUtbetaltBeløp,
                     skatteprosent = BigDecimal.valueOf(10),
                 )
@@ -332,7 +333,7 @@ class TilbakekrevingsberegningVilkårTest {
             val grunnlagPeriodeMedSkattProsent =
                 listOf(
                     GrunnlagsperiodeMedSkatteprosent(
-                        periode = vilkårsvurdering.periode,
+                        periode = vilkårsvurdering.periode.toDatoperiode(),
                         tilbakekrevingsbeløp = tilbakekrevingsbeløp,
                         skatteprosent = skatteprosent,
                     ),
@@ -603,7 +604,7 @@ class TilbakekrevingsberegningVilkårTest {
     ): Beregningsresultatsperiode {
         val delresultat = FordeltKravgrunnlagsbeløp(feilutbetalt, feilutbetalt, BigDecimal.ZERO)
         return TilbakekrevingsberegningVilkår.beregn(
-            vilkårVurdering = vilkårVurdering,
+            vilkårVurdering = VilkårsvurderingsperiodeAdapter(vilkårVurdering),
             delresultat = delresultat,
             perioderMedSkatteprosent = perioderMedSkatteprosent,
             beregnRenter = beregnRenter,
@@ -631,7 +632,7 @@ class TilbakekrevingsberegningVilkårTest {
         utbetaltYtelsesbeløp: BigDecimal = feilutbetalt,
         riktigYtelsesbeløp: BigDecimal = BigDecimal.ZERO,
     ) {
-        assertThat(this.periode).isEqualTo(vilkårsvurdering.periode)
+        assertThat(this.periode).isEqualTo(vilkårsvurdering.periode.toDatoperiode())
         assertThat(this.vurdering).isEqualTo(vurdering)
         assertThat(this.feilutbetaltBeløp).isEqualTo(feilutbetalt)
         assertThat(this.andelAvBeløp).isEqualTo(andelAvBeløp)

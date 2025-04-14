@@ -4,8 +4,6 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
-import no.nav.familie.tilbake.beregning.modell.Beregningsresultat
-import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.SærligeGrunner
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.UtvidetVilkårsresultat
@@ -18,6 +16,8 @@ import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingSærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
+import no.nav.tilbakekreving.beregning.modell.Beregningsresultat
+import no.nav.tilbakekreving.beregning.modell.Beregningsresultatsperiode
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.ZoneOffset
@@ -84,7 +84,7 @@ class VedtaksoppsummeringService(
     ): List<VedtakPeriode> =
         vilkårsvurdering.perioder.map { periode ->
             val beregningsresultatsperiode: Beregningsresultatsperiode =
-                beregningsresultat.beregningsresultatsperioder.first { it.periode == periode.periode }
+                beregningsresultat.beregningsresultatsperioder.first { it.periode == periode.periode.toDatoperiode() }
             val faktaFeilutbetaling =
                 faktaFeilutbetalingRepository.findFaktaFeilutbetalingByBehandlingIdAndAktivIsTrue(behandlingId)
             val faktaperiode = faktaFeilutbetaling.perioder.first { it.periode.overlapper(periode.periode) }
@@ -112,7 +112,7 @@ class VedtaksoppsummeringService(
         vurdertForeldelse.foreldelsesperioder.mapNotNull { periode ->
             if (periode.erForeldet()) {
                 val resultatPeriode: Beregningsresultatsperiode =
-                    beregningsresultat.beregningsresultatsperioder.first { it.periode == periode.periode }
+                    beregningsresultat.beregningsresultatsperioder.first { it.periode == periode.periode.toDatoperiode() }
                 val faktaFeilutbetalingEntitet =
                     faktaFeilutbetalingRepository.findFaktaFeilutbetalingByBehandlingIdAndAktivIsTrue(behandlingId)
                 val faktaPeriode = faktaFeilutbetalingEntitet.perioder.first { it.periode.overlapper(periode.periode) }

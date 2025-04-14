@@ -8,8 +8,6 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
-import no.nav.familie.tilbake.beregning.modell.Beregningsresultat
-import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.integration.økonomi.OppdragClient
@@ -24,6 +22,8 @@ import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakResponse
+import no.nav.tilbakekreving.beregning.modell.Beregningsresultat
+import no.nav.tilbakekreving.beregning.modell.Beregningsresultatsperiode
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
@@ -110,7 +110,7 @@ class IverksettelseServiceUnitTest {
             beregningsresultatsperioder =
                 listOf(
                     Beregningsresultatsperiode(
-                        periode = Månedsperiode(YearMonth.now().minusMonths(2), YearMonth.now().minusMonths(1)),
+                        periode = Månedsperiode(YearMonth.now().minusMonths(2), YearMonth.now().minusMonths(1)).toDatoperiode(),
                         vurdering = null,
                         feilutbetaltBeløp = BigDecimal(10000),
                         andelAvBeløp = BigDecimal(9983).divide(BigDecimal(10000), 2, RoundingMode.HALF_UP),
@@ -125,7 +125,7 @@ class IverksettelseServiceUnitTest {
                         riktigYtelsesbeløp = BigDecimal.ZERO,
                     ),
                     Beregningsresultatsperiode(
-                        periode = Månedsperiode(YearMonth.now().minusMonths(1), YearMonth.now()),
+                        periode = Månedsperiode(YearMonth.now().minusMonths(1), YearMonth.now()).toDatoperiode(),
                         vurdering = null,
                         feilutbetaltBeløp = BigDecimal(47),
                         andelAvBeløp = BigDecimal.ONE,

@@ -1,11 +1,11 @@
-package no.nav.familie.tilbake.beregning.modell
+package no.nav.tilbakekreving.beregning.modell
 
-import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
+import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering
 import java.math.BigDecimal
 
 data class Beregningsresultatsperiode(
-    val periode: Månedsperiode,
+    val periode: Datoperiode,
     val vurdering: Vurdering? = null,
     val feilutbetaltBeløp: BigDecimal,
     val andelAvBeløp: BigDecimal? = null,

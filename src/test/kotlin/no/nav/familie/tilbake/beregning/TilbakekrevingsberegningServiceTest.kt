@@ -9,8 +9,6 @@ import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
-import no.nav.familie.tilbake.beregning.modell.Beregningsresultat
-import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.data.Testdata.lagFeilBeløp
 import no.nav.familie.tilbake.data.Testdata.lagYtelBeløp
@@ -25,6 +23,8 @@ import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
+import no.nav.tilbakekreving.beregning.modell.Beregningsresultat
+import no.nav.tilbakekreving.beregning.modell.Beregningsresultatsperiode
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
@@ -79,7 +79,7 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         val resultat: List<Beregningsresultatsperiode> = beregningsresultat.beregningsresultatsperioder
         resultat.shouldHaveSize(1)
         val r: Beregningsresultatsperiode = resultat[0]
-        r.periode shouldBe periode
+        r.periode shouldBe periode.toDatoperiode()
         r.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(11000)
         r.vurdering shouldBe Aktsomhet.FORSETT
         r.renteprosent shouldBe BigDecimal.valueOf(10)
@@ -117,7 +117,7 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         val resultat: List<Beregningsresultatsperiode> = beregningsresultat.beregningsresultatsperioder
         resultat.shouldHaveSize(1)
         val r: Beregningsresultatsperiode = resultat[0]
-        r.periode shouldBe periode
+        r.periode shouldBe periode.toDatoperiode()
         r.tilbakekrevingsbeløp.shouldBeZero()
         r.vurdering shouldBe AnnenVurdering.FORELDET
         r.renteprosent shouldBe null
@@ -158,7 +158,7 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         val resultat: List<Beregningsresultatsperiode> = beregningsresultat.beregningsresultatsperioder
         resultat.shouldHaveSize(1)
         val r: Beregningsresultatsperiode = resultat[0]
-        r.periode shouldBe periode
+        r.periode shouldBe periode.toDatoperiode()
         r.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(11000)
         r.vurdering shouldBe Aktsomhet.FORSETT
         r.renteprosent shouldBe BigDecimal.valueOf(10)
@@ -242,7 +242,7 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         val resultat: List<Beregningsresultatsperiode> = beregningsresultat.beregningsresultatsperioder
         resultat.shouldHaveSize(1)
         val r: Beregningsresultatsperiode = resultat[0]
-        r.periode shouldBe logiskPeriode
+        r.periode shouldBe logiskPeriode.toDatoperiode()
         r.utbetaltYtelsesbeløp shouldBe utbetalt1.add(utbetalt2)
         r.riktigYtelsesbeløp shouldBe nyttBeløp1.add(nyttBeløp2)
     }
@@ -286,7 +286,7 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         val resultat: List<Beregningsresultatsperiode> = beregningsresultat.beregningsresultatsperioder
         resultat.shouldHaveSize(1)
         val r: Beregningsresultatsperiode = resultat[0]
-        r.periode shouldBe logiskPeriode
+        r.periode shouldBe logiskPeriode.toDatoperiode()
         r.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(22000)
         r.vurdering shouldBe Aktsomhet.FORSETT
         r.renteprosent shouldBe BigDecimal.valueOf(10)

@@ -1,7 +1,6 @@
 package no.nav.familie.tilbake.vilkårsvurdering
 
-import no.nav.familie.tilbake.beregning.BeløpsberegningUtil
-import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningUtil
+import no.nav.familie.tilbake.beregning.Kravgrunnlag431Adapter
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetalingsperiode
@@ -24,6 +23,8 @@ import no.nav.tilbakekreving.api.v1.dto.VurdertSærligGrunnDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsresultatDto
+import no.nav.tilbakekreving.beregning.BeløpsberegningUtil
+import no.nav.tilbakekreving.beregning.KravgrunnlagsberegningUtil
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
@@ -211,7 +212,7 @@ object VilkårsvurderingMapper {
         periode: Månedsperiode,
     ): BigDecimal =
         KravgrunnlagsberegningUtil
-            .beregnFeilutbetaltBeløp(kravgrunnlag431, periode)
+            .beregnFeilutbetaltBeløp(Kravgrunnlag431Adapter(kravgrunnlag431), periode.toDatoperiode())
             .setScale(0, RoundingMode.HALF_UP)
 
     private fun hentHendelsestype(
@@ -273,8 +274,8 @@ object VilkårsvurderingMapper {
                                 BeløpsberegningUtil
                                     .beregnBeløpForPeriode(
                                         tilbakekrevesBeløp = it.tilbakekrevesBeløp,
-                                        vurderingsperiode = vurdertVilkårsperiode,
-                                        kravgrunnlagsperiode = periode.periode,
+                                        vurderingsperiode = vurdertVilkårsperiode.toDatoperiode(),
+                                        kravgrunnlagsperiode = periode.periode.toDatoperiode(),
                                     ),
                         ),
                     )

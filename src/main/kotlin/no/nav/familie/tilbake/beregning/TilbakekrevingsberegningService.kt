@@ -2,10 +2,6 @@ package no.nav.familie.tilbake.beregning
 
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
-import no.nav.familie.tilbake.beregning.modell.Beregningsresultat
-import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
-import no.nav.familie.tilbake.beregning.modell.FordeltKravgrunnlagsbeløp
-import no.nav.familie.tilbake.beregning.modell.GrunnlagsperiodeMedSkatteprosent
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingMapper
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
@@ -23,6 +19,13 @@ import no.nav.tilbakekreving.api.v1.dto.BeregnetPeriodeDto
 import no.nav.tilbakekreving.api.v1.dto.BeregnetPerioderDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatsperiodeDto
+import no.nav.tilbakekreving.beregning.BeløpsberegningUtil
+import no.nav.tilbakekreving.beregning.KravgrunnlagsberegningUtil
+import no.nav.tilbakekreving.beregning.TilbakekrevingsberegningVilkår
+import no.nav.tilbakekreving.beregning.modell.Beregningsresultat
+import no.nav.tilbakekreving.beregning.modell.Beregningsresultatsperiode
+import no.nav.tilbakekreving.beregning.modell.FordeltKravgrunnlagsbeløp
+import no.nav.tilbakekreving.beregning.modell.GrunnlagsperiodeMedSkatteprosent
 import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
@@ -47,7 +50,7 @@ class TilbakekrevingsberegningService(
         val beregningsresultatsperioder =
             beregningsresultat.beregningsresultatsperioder.map {
                 BeregningsresultatsperiodeDto(
-                    periode = it.periode.toDatoperiode(),
+                    periode = it.periode,
                     vurdering = it.vurdering,
                     feilutbetaltBeløp = it.feilutbetaltBeløp,
                     andelAvBeløp = it.andelAvBeløp,
@@ -70,7 +73,9 @@ class TilbakekrevingsberegningService(
         val vurdertForeldelse = hentVurdertForeldelse(behandlingId)
         val vilkårsvurdering = hentVilkårsvurdering(behandlingId)
         val vurderingsperioder: List<Månedsperiode> = finnPerioder(vurdertForeldelse, vilkårsvurdering)
-        val perioderMedBeløp: Map<Månedsperiode, FordeltKravgrunnlagsbeløp> = KravgrunnlagsberegningUtil.fordelKravgrunnlagBeløpPåPerioder(kravgrunnlag, vurderingsperioder)
+        val perioderMedBeløp: Map<Månedsperiode, FordeltKravgrunnlagsbeløp> =
+            KravgrunnlagsberegningUtil.fordelKravgrunnlagBeløpPåPerioder(Kravgrunnlag431Adapter(kravgrunnlag), vurderingsperioder.map { it.toDatoperiode() })
+                .mapKeys { it.key.toMånedsperiode() }
         val beregningsresultatperioder =
             beregn(
                 kravgrunnlag,
@@ -98,14 +103,14 @@ class TilbakekrevingsberegningService(
     ): BeregnetPerioderDto {
         val logContext = logService.contextFraBehandling(behandlingId)
         // Alle familieytelsene er månedsytelser. Så periode som skal lagres bør være innenfor en måned.
-        KravgrunnlagsberegningUtil.validatePerioder(perioder, logContext)
+        validatePerioder(perioder, logContext)
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
 
         return BeregnetPerioderDto(
             beregnetPerioder =
                 perioder.map {
                     val feilutbetaltBeløp =
-                        KravgrunnlagsberegningUtil.beregnFeilutbetaltBeløp(kravgrunnlag, it.toMånedsperiode())
+                        KravgrunnlagsberegningUtil.beregnFeilutbetaltBeløp(Kravgrunnlag431Adapter(kravgrunnlag), it)
                     BeregnetPeriodeDto(
                         periode = it,
                         feilutbetaltBeløp = feilutbetaltBeløp,
@@ -176,7 +181,7 @@ class TilbakekrevingsberegningService(
             beløpPerPeriode[periode] ?: throw IllegalStateException("Periode i finnes ikke i map beløpPerPeriode")
 
         return Beregningsresultatsperiode(
-            periode = periode,
+            periode = periode.toDatoperiode(),
             feilutbetaltBeløp = delresultat.feilutbetaltBeløp,
             riktigYtelsesbeløp = delresultat.riktigYtelsesbeløp,
             utbetaltYtelsesbeløp = delresultat.utbetaltYtelsesbeløp,
@@ -202,7 +207,7 @@ class TilbakekrevingsberegningService(
         val perioderMedSkattProsent = lagGrunnlagPeriodeMedSkattProsent(vurdering.periode, kravgrunnlag)
 
         return TilbakekrevingsberegningVilkår.beregn(
-            vurdering,
+            VilkårsvurderingsperiodeAdapter(vurdering),
             delresultat,
             perioderMedSkattProsent,
             beregnRenter,
@@ -220,10 +225,10 @@ class TilbakekrevingsberegningService(
                     val maksTilbakekrevesBeløp: BigDecimal =
                         BeløpsberegningUtil.beregnBeløpForPeriode(
                             kgBeløp.tilbakekrevesBeløp,
-                            vurderingsperiode,
-                            it.periode,
+                            vurderingsperiode.toDatoperiode(),
+                            it.periode.toDatoperiode(),
                         )
-                    GrunnlagsperiodeMedSkatteprosent(it.periode, maksTilbakekrevesBeløp, kgBeløp.skatteprosent)
+                    GrunnlagsperiodeMedSkatteprosent(it.periode.toDatoperiode(), maksTilbakekrevesBeløp, kgBeløp.skatteprosent)
                 }
             }.flatten()
 

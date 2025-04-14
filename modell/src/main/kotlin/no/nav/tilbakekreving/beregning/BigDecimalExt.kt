@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.common
+package no.nav.tilbakekreving.beregning
 
 import java.math.BigDecimal
 

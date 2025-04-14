@@ -69,6 +69,17 @@ class BeregningController(
     fun hentBeregningsresultat(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<BeregningsresultatDto> {
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        if (tilbakekreving != null) {
+            tilgangskontrollService.validerTilgangTilbakekreving(
+                tilbakekreving = tilbakekreving,
+                behandlingId = behandlingId,
+                minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+                auditLoggerEvent = AuditLoggerEvent.ACCESS,
+                handling = "Henter beregningsresultat",
+            )
+            return Ressurs.success(tilbakekreving.behandlingHistorikk.nåværende().entry.foreslåvedtaksteg.tilFrontendDto())
+        }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.VEILEDER,

@@ -1,10 +1,6 @@
 package no.nav.familie.tilbake.iverksettvedtak
 
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
-import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
-import no.nav.familie.tilbake.common.isGreaterThanZero
-import no.nav.familie.tilbake.common.isLessThanZero
-import no.nav.familie.tilbake.common.isZero
 import no.nav.familie.tilbake.iverksettvedtak.domain.KodeResultat
 import no.nav.familie.tilbake.iverksettvedtak.domain.Tilbakekrevingsbeløp
 import no.nav.familie.tilbake.iverksettvedtak.domain.Tilbakekrevingsperiode
@@ -14,6 +10,10 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.tilbakekreving.beregning.isGreaterThanZero
+import no.nav.tilbakekreving.beregning.isLessThanZero
+import no.nav.tilbakekreving.beregning.isZero
+import no.nav.tilbakekreving.beregning.modell.Beregningsresultatsperiode
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
 import org.springframework.stereotype.Service
@@ -64,7 +64,7 @@ class TilbakekrevingsvedtakBeregningService(
         beregnetPeriode: Beregningsresultatsperiode,
     ): List<Tilbakekrevingsperiode> =
         kravgrunnlagsperioder
-            .filter { it.periode.snitt(beregnetPeriode.periode) != null }
+            .filter { it.periode.snitt(beregnetPeriode.periode.toMånedsperiode()) != null }
             .map { Tilbakekrevingsperiode(it.periode, BigDecimal.ZERO, lagTilbakekrevingsbeløp(it.beløp, beregnetPeriode)) }
 
     private fun lagTilbakekrevingsbeløp(

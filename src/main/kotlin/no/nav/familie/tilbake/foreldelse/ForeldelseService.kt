@@ -2,7 +2,7 @@ package no.nav.familie.tilbake.foreldelse
 
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
-import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningUtil
+import no.nav.familie.tilbake.beregning.validatePerioder
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.faktaomfeilutbetaling.LogiskPeriodeUtil
@@ -14,8 +14,6 @@ import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.ForeldelsesperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelseDto
-import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
-import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import org.springframework.stereotype.Service
@@ -61,7 +59,7 @@ class ForeldelseService(
         logContext: SecureLog.Context,
     ) {
         // Alle familieytelsene er månedsytelser. Så periode som skal lagres bør være innenfor en måned
-        KravgrunnlagsberegningUtil.validatePerioder(behandlingsstegForeldelseDto.foreldetPerioder.map { it.periode }, logContext)
+        validatePerioder(behandlingsstegForeldelseDto.foreldetPerioder.map { it.periode }, logContext)
         val vurdertForeldelse = ForeldelseMapper.tilDomene(behandlingId, behandlingsstegForeldelseDto.foreldetPerioder)
 
         nullstillVilkårsvurderingForEndringerIForeldelsesperiode(behandlingId, vurdertForeldelse)

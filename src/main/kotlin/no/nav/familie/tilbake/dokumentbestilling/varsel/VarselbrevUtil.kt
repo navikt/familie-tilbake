@@ -3,7 +3,7 @@ package no.nav.familie.tilbake.dokumentbestilling.varsel
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Varsel
-import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningUtil
+import no.nav.familie.tilbake.beregning.Kravgrunnlag431Adapter
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.Constants
@@ -21,6 +21,7 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
+import no.nav.tilbakekreving.beregning.KravgrunnlagsberegningUtil
 import no.nav.tilbakekreving.kontrakter.FeilutbetaltePerioderDto
 import no.nav.tilbakekreving.kontrakter.ForhåndsvisVarselbrevRequest
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
@@ -183,7 +184,7 @@ class VarselbrevUtil(
     ): Vedleggsdata {
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
 
-        val beregningsresultat = KravgrunnlagsberegningUtil.summerKravgrunnlagBeløpForPerioder(kravgrunnlag)
+        val beregningsresultat = KravgrunnlagsberegningUtil.summerKravgrunnlagBeløpForPerioder(Kravgrunnlag431Adapter(kravgrunnlag))
 
         val perioder =
             beregningsresultat.map {
