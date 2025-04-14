@@ -10,11 +10,11 @@ import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import java.math.BigDecimal
 
 class Kravgrunnlag431Adapter(private val kravgrunnlag431: Kravgrunnlag431) : KravgrunnlagAdapter {
-    override fun perioder(): List<no.nav.tilbakekreving.beregning.adapter.KravgrunnlagPeriodeAdapter> {
-        return kravgrunnlag431.perioder.map(::KravgrunnlagPeriodeAdapter)
+    override fun perioder(): List<KravgrunnlagPeriodeAdapter> {
+        return kravgrunnlag431.perioder.map(::PeriodeAdapter)
     }
 
-    class KravgrunnlagPeriodeAdapter(private val periode: Kravgrunnlagsperiode432) : no.nav.tilbakekreving.beregning.adapter.KravgrunnlagPeriodeAdapter {
+    class PeriodeAdapter(private val periode: Kravgrunnlagsperiode432) : KravgrunnlagPeriodeAdapter {
         override fun periode(): Datoperiode {
             return periode.periode.toDatoperiode()
         }
@@ -35,6 +35,20 @@ class Kravgrunnlag431Adapter(private val kravgrunnlag431: Kravgrunnlag431) : Kra
             return periode.beløp
                 .filter { it.klassetype == Klassetype.YTEL }
                 .sumOf(Kravgrunnlagsbeløp433::nyttBeløp)
+        }
+
+        override fun beløpTilbakekreves(): List<KravgrunnlagPeriodeAdapter.BeløpTilbakekreves> {
+            return periode.beløp.map(::KravgrunnlagBeløpAdapter)
+        }
+
+        class KravgrunnlagBeløpAdapter(val kravgrunnlagBeløp: Kravgrunnlagsbeløp433) : KravgrunnlagPeriodeAdapter.BeløpTilbakekreves {
+            override fun beløp(): BigDecimal {
+                return kravgrunnlagBeløp.tilbakekrevesBeløp
+            }
+
+            override fun skatteprosent(): BigDecimal {
+                return kravgrunnlagBeløp.skatteprosent
+            }
         }
     }
 }
