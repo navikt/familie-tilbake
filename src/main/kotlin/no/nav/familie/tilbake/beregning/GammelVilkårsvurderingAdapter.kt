@@ -5,9 +5,9 @@ import no.nav.tilbakekreving.beregning.adapter.VilkårsvurderingAdapter
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurdertPeriodeAdapter
 
 class GammelVilkårsvurderingAdapter(
-    private val vilkårsvurdering: Vilkårsvurdering,
+    private val vilkårsvurdering: Vilkårsvurdering?,
 ) : VilkårsvurderingAdapter {
     override fun perioder(): Set<VilkårsvurdertPeriodeAdapter> {
-        return vilkårsvurdering.perioder.map(::VilkårsvurderingsperiodeAdapter).toSet()
+        return vilkårsvurdering?.perioder?.map(::VilkårsvurderingsperiodeAdapter)?.toSet() ?: emptySet()
     }
 }

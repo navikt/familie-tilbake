@@ -14,18 +14,17 @@ class VilkårsvurderingBeregning(
     val kravbeløpPerPeriode: Map<Datoperiode, FordeltKravgrunnlagsbeløp>,
     val beregnRenter: Boolean,
 ) {
-    fun beregnForIkkeForeldedePerioder(): Collection<Beregningsresultatsperiode> =
-        vilkårsvurdering
-            .perioder()
-            .map { beregnIkkeForeldetPeriode(it, kravbeløpPerPeriode) }
+    internal fun beregn(): Collection<Beregningsresultatsperiode> = vilkårsvurdering
+        .perioder()
+        .map { beregnPeriode(it, kravbeløpPerPeriode) }
 
-    private fun beregnIkkeForeldetPeriode(
+    private fun beregnPeriode(
         vurdering: VilkårsvurdertPeriodeAdapter,
         kravbeløpPerPeriode: Map<Datoperiode, FordeltKravgrunnlagsbeløp>,
     ): Beregningsresultatsperiode {
-        val delresultat =
-            kravbeløpPerPeriode[vurdering.periode()]
-                ?: throw IllegalStateException("Periode i finnes ikke i map kravbeløpPerPeriode")
+        val delresultat = kravbeløpPerPeriode[vurdering.periode()]
+            ?: error("Periode i finnes ikke i map kravbeløpPerPeriode")
+
         val perioderMedSkattProsent = lagGrunnlagPeriodeMedSkattProsent(vurdering.periode())
 
         return TilbakekrevingsberegningVilkår.beregn(
@@ -43,13 +42,15 @@ class VilkårsvurderingBeregning(
             .sortedBy { it.periode().fom }
             .map {
                 it.beløpTilbakekreves().map { kgBeløp ->
-                    val maksTilbakekrevesBeløp =
-                        BeløpsberegningUtil.beregnBeløpForPeriode(
+                    GrunnlagsperiodeMedSkatteprosent(
+                        periode = it.periode(),
+                        tilbakekrevingsbeløp = BeløpsberegningUtil.beregnBeløpForPeriode(
                             kgBeløp.beløp(),
                             vurderingsperiode,
                             it.periode(),
-                        )
-                    GrunnlagsperiodeMedSkatteprosent(it.periode(), maksTilbakekrevesBeløp, kgBeløp.skatteprosent())
+                        ),
+                        skatteprosent = kgBeløp.skatteprosent(),
+                    )
                 }
             }.flatten()
 }

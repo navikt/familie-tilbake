@@ -5,12 +5,12 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 object BeløpsberegningUtil {
-    fun beregnBeløpPerMåned(
+    internal fun beregnBeløpPerMåned(
         beløp: BigDecimal,
         kravgrunnlagsperiode: Datoperiode,
     ): BigDecimal = beløp.divide(BigDecimal.valueOf(kravgrunnlagsperiode.lengdeIHeleMåneder()), 2, RoundingMode.HALF_UP)
 
-    fun beregnBeløp(
+    internal fun beregnBeløp(
         vurderingsperiode: Datoperiode,
         kravgrunnlagsperiode: Datoperiode,
         beløpPerMåned: BigDecimal,

@@ -8,27 +8,26 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 object KravgrunnlagsberegningUtil {
-    fun fordelKravgrunnlagBeløpPåPerioder(
+    internal fun fordelKravgrunnlagBeløpPåPerioder(
         kravgrunnlag: KravgrunnlagAdapter,
         vurderingsperioder: List<Datoperiode>,
-    ): Map<Datoperiode, FordeltKravgrunnlagsbeløp> =
-        vurderingsperioder.associateWith {
-            FordeltKravgrunnlagsbeløp(
-                beregnBeløp(kravgrunnlag, it, KravgrunnlagPeriodeAdapter::feilutbetaltYtelsesbeløp),
-                beregnBeløp(kravgrunnlag, it, KravgrunnlagPeriodeAdapter::utbetaltYtelsesbeløp),
-                beregnBeløp(kravgrunnlag, it, KravgrunnlagPeriodeAdapter::riktigYteslesbeløp),
-            )
-        }
+    ): Map<Datoperiode, FordeltKravgrunnlagsbeløp> = vurderingsperioder.associateWith {
+        FordeltKravgrunnlagsbeløp(
+            beregnBeløp(kravgrunnlag, it, KravgrunnlagPeriodeAdapter::feilutbetaltYtelsesbeløp),
+            beregnBeløp(kravgrunnlag, it, KravgrunnlagPeriodeAdapter::utbetaltYtelsesbeløp),
+            beregnBeløp(kravgrunnlag, it, KravgrunnlagPeriodeAdapter::riktigYteslesbeløp),
+        )
+    }
 
-    fun summerKravgrunnlagBeløpForPerioder(kravgrunnlag: KravgrunnlagAdapter): Map<Datoperiode, FordeltKravgrunnlagsbeløp> =
-        kravgrunnlag.perioder().associate {
-            it.periode() to
-                FordeltKravgrunnlagsbeløp(
-                    it.feilutbetaltYtelsesbeløp(),
-                    it.utbetaltYtelsesbeløp(),
-                    it.riktigYteslesbeløp(),
-                )
-        }
+    fun summerKravgrunnlagBeløpForPerioder(
+        kravgrunnlag: KravgrunnlagAdapter,
+    ): Map<Datoperiode, FordeltKravgrunnlagsbeløp> = kravgrunnlag.perioder().associate {
+        it.periode() to FordeltKravgrunnlagsbeløp(
+            it.feilutbetaltYtelsesbeløp(),
+            it.utbetaltYtelsesbeløp(),
+            it.riktigYteslesbeløp(),
+        )
+    }
 
     fun beregnFeilutbetaltBeløp(
         kravgrunnlag: KravgrunnlagAdapter,
@@ -39,15 +38,13 @@ object KravgrunnlagsberegningUtil {
         kravgrunnlag: KravgrunnlagAdapter,
         vurderingsperiode: Datoperiode,
         beløpsummerer: KravgrunnlagPeriodeAdapter.() -> BigDecimal,
-    ): BigDecimal {
-        return kravgrunnlag.perioder()
-            .sortedBy { it.periode().fom }
-            .filter { it.beløpsummerer().isNotZero() }
-            .sumOf {
-                val beløp = it.beløpsummerer()
-                val beløpPerMåned = BeløpsberegningUtil.beregnBeløpPerMåned(beløp, it.periode())
-                BeløpsberegningUtil.beregnBeløp(vurderingsperiode, it.periode(), beløpPerMåned)
-            }
-            .setScale(0, RoundingMode.HALF_UP)
-    }
+    ): BigDecimal = kravgrunnlag.perioder()
+        .sortedBy { it.periode().fom }
+        .filter { it.beløpsummerer().isNotZero() }
+        .sumOf {
+            val beløp = it.beløpsummerer()
+            val beløpPerMåned = BeløpsberegningUtil.beregnBeløpPerMåned(beløp, it.periode())
+            BeløpsberegningUtil.beregnBeløp(vurderingsperiode, it.periode(), beløpPerMåned)
+        }
+        .setScale(0, RoundingMode.HALF_UP)
 }

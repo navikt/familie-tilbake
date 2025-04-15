@@ -13,6 +13,7 @@ object TilbakekrevingsberegningVilkår {
     private val RENTESATS: BigDecimal = BigDecimal.valueOf(10)
     private val RENTEFAKTOR: BigDecimal = RENTESATS.divide(HUNDRE_PROSENT, 2, RoundingMode.UNNECESSARY)
 
+    // TODO: Flytt test og gjør internal
     fun beregn(
         vilkårVurdering: VilkårsvurdertPeriodeAdapter,
         delresultat: FordeltKravgrunnlagsbeløp,
