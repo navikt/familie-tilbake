@@ -74,7 +74,6 @@ class Tilbakekreving(
                 eksternFagsakBehandling = eksternFagsakBehandling,
                 kravgrunnlag = kravgrunnlagHistorikk.nåværende(),
                 brevHistorikk = brevHistorikk,
-                tilbakekreving = this,
             ),
         )
     }

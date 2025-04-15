@@ -109,11 +109,21 @@ class TilbakekrevingService(
                                             tom = LocalDate.of(2018, 2, 28),
                                         ),
                                     månedligSkattebeløp = BigDecimal("0.0"),
-                                    beløp =
+                                    feilutbetaltBeløp = listOf(
+                                        KravgrunnlagHendelse.Periode.Beløp(
+                                            klassekode = "",
+                                            klassetype = "FEIL",
+                                            opprinneligUtbetalingsbeløp = BigDecimal("12000.0"),
+                                            nyttBeløp = BigDecimal("10000.0"),
+                                            tilbakekrevesBeløp = BigDecimal("2000.0"),
+                                            skatteprosent = BigDecimal("0.0"),
+                                        ),
+                                    ),
+                                    ytelsesbeløp =
                                         listOf(
                                             KravgrunnlagHendelse.Periode.Beløp(
                                                 klassekode = "",
-                                                klassetype = "",
+                                                klassetype = "YTEL",
                                                 opprinneligUtbetalingsbeløp = BigDecimal("12000.0"),
                                                 nyttBeløp = BigDecimal("10000.0"),
                                                 tilbakekrevesBeløp = BigDecimal("2000.0"),
@@ -183,6 +193,7 @@ class TilbakekrevingService(
     ) {
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
 
+        behandling.splittVilkårsvurdertePerioder(vurdering.vilkårsvurderingsperioder.map { it.periode })
         vurdering.vilkårsvurderingsperioder.forEach { periode ->
             behandling.vilkårsvurderingsteg.vurder(
                 periode.periode,

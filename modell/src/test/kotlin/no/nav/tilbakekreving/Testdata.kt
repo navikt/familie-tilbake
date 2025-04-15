@@ -69,19 +69,32 @@ fun kravgrunnlag(
 
 fun kravgrunnlagPeriode(
     periode: Datoperiode = 1.januar til 31.januar,
-    kravgrunnlagBeløp: List<KravgrunnlagHendelse.Periode.Beløp> = kravgrunnlagBeløp(),
+    ytelsesbeløp: List<KravgrunnlagHendelse.Periode.Beløp> = ytelsesbeløp(),
 ) =
     KravgrunnlagHendelse.Periode(
         periode = periode,
         månedligSkattebeløp = BigDecimal("0.0"),
-        beløp = kravgrunnlagBeløp,
+        ytelsesbeløp = ytelsesbeløp,
+        feilutbetaltBeløp = feilutbetalteBeløp(),
     )
 
-fun kravgrunnlagBeløp() =
+fun ytelsesbeløp() =
     listOf(
         KravgrunnlagHendelse.Periode.Beløp(
             klassekode = "",
-            klassetype = "",
+            klassetype = "YTEL",
+            opprinneligUtbetalingsbeløp = BigDecimal("12000.0"),
+            nyttBeløp = BigDecimal("10000.0"),
+            tilbakekrevesBeløp = BigDecimal("2000.0"),
+            skatteprosent = BigDecimal("0.0"),
+        ),
+    )
+
+fun feilutbetalteBeløp() =
+    listOf(
+        KravgrunnlagHendelse.Periode.Beløp(
+            klassekode = "",
+            klassetype = "FEIL",
             opprinneligUtbetalingsbeløp = BigDecimal("12000.0"),
             nyttBeløp = BigDecimal("10000.0"),
             tilbakekrevesBeløp = BigDecimal("2000.0"),
@@ -121,7 +134,9 @@ fun behandling(
 ): Behandling {
     val kravgrunnlagReferanse = HistorikkStub.fakeReferanse(kravgrunnlag)
     val eksternFagsakBehandling = HistorikkStub.fakeReferanse(eksternFagsakBehandling())
+    val faktasteg = Faktasteg(eksternFagsakBehandling, kravgrunnlagReferanse, BrevHistorikk(mutableListOf()), LocalDateTime.now(), Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL)
     val foreldelsesteg = Foreldelsesteg.opprett(kravgrunnlagReferanse)
+    val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(kravgrunnlagReferanse, foreldelsesteg)
     return Behandling(
         internId = UUID.randomUUID(),
         eksternId = UUID.randomUUID(),
@@ -134,8 +149,8 @@ fun behandling(
         eksternFagsakBehandling = eksternFagsakBehandling,
         kravgrunnlag = kravgrunnlagReferanse,
         foreldelsesteg = foreldelsesteg,
-        faktasteg = Faktasteg(eksternFagsakBehandling, kravgrunnlagReferanse, BrevHistorikk(mutableListOf()), LocalDateTime.now(), Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL),
-        vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(kravgrunnlagReferanse, foreldelsesteg),
-        foreslåvedtaksteg = ForeslåVedtakSteg(),
+        faktasteg = faktasteg,
+        vilkårsvurderingsteg = vilkårsvurderingsteg,
+        foreslåVedtakSteg = ForeslåVedtakSteg(faktasteg, foreldelsesteg, vilkårsvurderingsteg, kravgrunnlagReferanse),
     )
 }

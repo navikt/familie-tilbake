@@ -41,13 +41,17 @@ class Foreldelsesteg(
     }
 
     fun erPeriodeForeldet(periode: Datoperiode): Boolean {
-        return vurdertePerioder.single { it.periode == periode }.vurdering !is Vurdering.IkkeForeldet
+        return vurdertePerioder.single { it.periode.inneholder(periode) }.vurdering !is Vurdering.IkkeForeldet
     }
 
     private fun finnIdFor(periode: Datoperiode): UUID {
         // TODO: Ordentlig feilhåndtering i stedet for NoSuchElementException ved ugyldig periode
         return vurdertePerioder.single { it.periode == periode }.id
     }
+
+    fun perioder(): List<Datoperiode> = vurdertePerioder
+        .filter { it.vurdering is Vurdering.Foreldet }
+        .map(Foreldelseperiode::periode)
 
     override fun tilFrontendDto(): VurdertForeldelseDto {
         return VurdertForeldelseDto(

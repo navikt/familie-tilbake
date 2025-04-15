@@ -78,7 +78,7 @@ class BeregningController(
                 auditLoggerEvent = AuditLoggerEvent.ACCESS,
                 handling = "Henter beregningsresultat",
             )
-            return Ressurs.success(tilbakekreving.behandlingHistorikk.nåværende().entry.foreslåvedtaksteg.tilFrontendDto())
+            return Ressurs.success(tilbakekreving.behandlingHistorikk.nåværende().entry.foreslåVedtakSteg.tilFrontendDto())
         }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,

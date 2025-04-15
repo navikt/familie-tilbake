@@ -123,4 +123,23 @@ class ForeldelsestegTest {
             foreldelsesteg.vurderForeldelse(1.januar til 28.februar, Foreldelsesteg.Vurdering.IkkeForeldet(""))
         }
     }
+
+    @Test
+    fun `sjekk foreldelse på deler av splittet periode`() {
+        val foreldelsesteg =
+            Foreldelsesteg.opprett(
+                fakeReferanse(
+                    kravgrunnlag(
+                        perioder =
+                            listOf(
+                                kravgrunnlagPeriode(1.januar til 28.februar),
+                            ),
+                    ),
+                ),
+            )
+
+        foreldelsesteg.vurderForeldelse(1.januar til 28.februar, Foreldelsesteg.Vurdering.IkkeForeldet(""))
+
+        foreldelsesteg.erPeriodeForeldet(1.januar til 31.januar) shouldBe false
+    }
 }

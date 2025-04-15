@@ -1,5 +1,7 @@
 package no.nav.tilbakekreving.hendelse
 
+import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagAdapter
+import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagPeriodeAdapter
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -22,7 +24,7 @@ class KravgrunnlagHendelse(
     // Brukes som eksternId i henting av fagsysteminfo, hva betyr det egentlig?
     val referanse: String,
     val perioder: List<Periode>,
-) : Historikk.HistorikkInnslag<UUID> {
+) : Historikk.HistorikkInnslag<UUID>, KravgrunnlagAdapter {
     fun totaltBeløpFor(periode: Datoperiode): BigDecimal =
         perioder.single { kgPeriode -> kgPeriode.inneholder(periode) }
             .totaltBeløp()
@@ -33,23 +35,56 @@ class KravgrunnlagHendelse(
 
     fun totaltFeilutbetaltPeriode() = datoperioder().minOf { it.fom } til datoperioder().maxOf { it.tom }
 
+    override fun perioder(): List<KravgrunnlagPeriodeAdapter> {
+        return perioder
+    }
+
     class Periode(
         val periode: Datoperiode,
         private val månedligSkattebeløp: BigDecimal,
-        private val beløp: List<Beløp>,
-    ) {
+        private val ytelsesbeløp: List<Beløp>,
+        private val feilutbetaltBeløp: List<Beløp>,
+    ) : KravgrunnlagPeriodeAdapter {
         fun inneholder(other: Datoperiode): Boolean = periode.inneholder(other)
 
-        fun totaltBeløp() = beløp.sumOf { it.tilbakekrevesBeløp }
+        fun totaltBeløp() = feilutbetaltBeløp.sumOf { it.tilbakekrevesBeløp }
+
+        override fun periode(): Datoperiode {
+            return periode
+        }
+
+        override fun beløpTilbakekreves(): List<KravgrunnlagPeriodeAdapter.BeløpTilbakekreves> {
+            return ytelsesbeløp + feilutbetaltBeløp
+        }
+
+        override fun feilutbetaltYtelsesbeløp(): BigDecimal {
+            return totaltBeløp()
+        }
+
+        override fun utbetaltYtelsesbeløp(): BigDecimal {
+            return ytelsesbeløp.sumOf { it.opprinneligUtbetalingsbeløp }
+        }
+
+        override fun riktigYteslesbeløp(): BigDecimal {
+            return ytelsesbeløp.sumOf { it.nyttBeløp }
+        }
 
         data class Beløp(
             private val klassekode: String,
             private val klassetype: String,
-            private val opprinneligUtbetalingsbeløp: BigDecimal,
-            private val nyttBeløp: BigDecimal,
+            val opprinneligUtbetalingsbeløp: BigDecimal,
+            val nyttBeløp: BigDecimal,
             val tilbakekrevesBeløp: BigDecimal,
             private val skatteprosent: BigDecimal,
-        )
+        ) : KravgrunnlagPeriodeAdapter.BeløpTilbakekreves {
+            override fun beløp(): BigDecimal {
+                return tilbakekrevesBeløp
+            }
+
+            override fun skatteprosent(): BigDecimal {
+                return skatteprosent
+            }
+        }
     }
 
     enum class Kravstatuskode(

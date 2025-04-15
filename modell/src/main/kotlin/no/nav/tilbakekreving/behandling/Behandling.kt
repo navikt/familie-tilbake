@@ -1,7 +1,6 @@
 package no.nav.tilbakekreving.behandling
 
 import no.nav.tilbakekreving.FrontendDto
-import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegsinfoDto
 import no.nav.tilbakekreving.api.v1.dto.BeregnetPeriodeDto
@@ -41,14 +40,14 @@ class Behandling(
     var foreldelsesteg: Foreldelsesteg,
     val faktasteg: Faktasteg,
     val vilkårsvurderingsteg: Vilkårsvurderingsteg,
-    val foreslåvedtaksteg: ForeslåVedtakSteg,
+    val foreslåVedtakSteg: ForeslåVedtakSteg,
 ) : Historikk.HistorikkInnslag<UUID>, FrontendDto<BehandlingDto> {
     private fun behandlingsstatus() =
         listOf(
             faktasteg,
             foreldelsesteg,
             vilkårsvurderingsteg,
-            foreslåvedtaksteg,
+            foreslåVedtakSteg,
         ).firstOrNull { !it.erFullstending() }
             ?.behandlingsstatus
             ?: Behandlingsstatus.AVSLUTTET
@@ -147,9 +146,10 @@ class Behandling(
             eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
             kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
             brevHistorikk: BrevHistorikk,
-            tilbakekreving: Tilbakekreving,
         ): Behandling {
             val foreldelsesteg = Foreldelsesteg.opprett(kravgrunnlag)
+            val faktasteg = Faktasteg.opprett(eksternFagsakBehandling, kravgrunnlag, brevHistorikk, LocalDateTime.now(), Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL)
+            val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(kravgrunnlag, foreldelsesteg)
             return Behandling(
                 internId = internId,
                 eksternId = eksternId,
@@ -162,9 +162,9 @@ class Behandling(
                 eksternFagsakBehandling = eksternFagsakBehandling,
                 kravgrunnlag = kravgrunnlag,
                 foreldelsesteg = foreldelsesteg,
-                faktasteg = Faktasteg.opprett(eksternFagsakBehandling, kravgrunnlag, brevHistorikk, LocalDateTime.now(), Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL),
-                vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(kravgrunnlag, foreldelsesteg),
-                foreslåvedtaksteg = ForeslåVedtakSteg(),
+                faktasteg = faktasteg,
+                vilkårsvurderingsteg = vilkårsvurderingsteg,
+                foreslåVedtakSteg = ForeslåVedtakSteg(faktasteg, foreldelsesteg, vilkårsvurderingsteg, kravgrunnlag),
             )
         }
     }
