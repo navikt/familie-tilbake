@@ -1,10 +1,10 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
-val openHtmlToPdfVersion = "1.1.24"
-val springDocVersion = "2.8.5"
-val testcontainersVersion = "1.20.5"
-val tokenValidationVersion = "5.0.17"
+val openHtmlToPdfVersion = "1.1.26"
+val springDocVersion = "2.8.6"
+val testcontainersVersion = "1.20.6"
+val tokenValidationVersion = "5.0.24"
 val veraPdfVersion = "1.26.5"
 val flywayVersion = "11.3.4"
 
@@ -14,7 +14,7 @@ java.sourceCompatibility = JavaVersion.VERSION_21
 
 plugins {
     kotlin("jvm") version "2.1.20"
-    id("org.springframework.boot") version "3.4.3"
+    id("org.springframework.boot") version "3.4.4"
     id("org.jetbrains.kotlin.plugin.spring") version "2.1.20"
     id("org.jlleitschuh.gradle.ktlint") version "12.2.0"
 }
@@ -85,7 +85,7 @@ dependencies {
     api("org.verapdf:core-jakarta:$veraPdfVersion")
     api("org.verapdf:validation-model-jakarta:$veraPdfVersion")
 
-    api("com.ibm.mq:com.ibm.mq.jakarta.client:9.4.1.1")
+    api("com.ibm.mq:com.ibm.mq.jakarta.client:9.4.2.0")
     api("jakarta.jms:jakarta.jms-api")
     api("org.apache.activemq:activemq-jms-pool")
     api("org.springframework:spring-jms")
@@ -99,12 +99,12 @@ dependencies {
     api(project(":kontrakter-intern"))
     api(project(":kontrakter-ekstern"))
     api(project(":modell"))
-    api("no.nav.familie:prosessering-core:2.20250219093533_62416e5") {
+    api("no.nav.familie:prosessering-core:2.20250409144459_df36248") {
         // La spring boot håndtere flyway versjon selv om den er eldre enn den som er inkludert i prosessering-core
         exclude("org.flywaydb")
     }
-    api("no.nav.familie.tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon:1.0_20250103091213_2eaa779")
-    api("no.nav.tjenestespesifikasjoner:avstemming-v1-tjenestespesifikasjon:2641.575768a")
+    api("no.nav.familie.tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon:1.0_20250331193934_fc4e78e")
+    api("no.nav.tjenestespesifikasjoner:avstemming-v1-tjenestespesifikasjon:2643.2f3e8e9")
 
     api("no.nav.security:token-client-core:$tokenValidationVersion")
     api("no.nav.security:token-client-spring:$tokenValidationVersion")
@@ -114,21 +114,21 @@ dependencies {
     api("ch.qos.logback:logback-classic")
     api("com.papertrailapp:logback-syslog4j:1.0.0")
     api("io.micrometer:micrometer-registry-prometheus")
-    api("net.logstash.logback:logstash-logback-encoder:8.0")
+    api("net.logstash.logback:logstash-logback-encoder:8.1")
 
-    api("io.getunleash:unleash-client-java:10.0.1")
+    api("io.getunleash:unleash-client-java:10.2.2")
     api("org.messaginghub:pooled-jms:3.1.7")
     api("org.flywaydb:flyway-core")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
 
-    testImplementation("org.junit.jupiter:junit-jupiter:5.12.0")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.12.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    testImplementation("io.mockk:mockk-jvm:1.13.16")
+    testImplementation("io.mockk:mockk-jvm:1.14.0")
     testImplementation("io.kotest:kotest-runner-junit5-jvm:5.9.1")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.springframework.cloud:spring-cloud-contract-wiremock:4.2.0")
+    testImplementation("org.springframework.cloud:spring-cloud-contract-wiremock:4.2.1")
     testImplementation("org.springframework.kafka:spring-kafka-test")
 
     testImplementation("io.jsonwebtoken:jjwt:0.12.6")
@@ -139,5 +139,5 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers:$testcontainersVersion")
 
     testImplementation("org.apache.kafka:kafka_2.13")
-    testImplementation("org.wiremock:wiremock-standalone:3.12.0")
+    testImplementation("org.wiremock:wiremock-standalone:3.12.1")
 }
