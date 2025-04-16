@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.tilstand
 
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
+import no.nav.tilbakekreving.saksbehandler.Behandler
 
 object AvventerFagsysteminfo : Tilstand {
     override val navn: String = "AvventerFagsysteminfo"
@@ -15,7 +16,7 @@ object AvventerFagsysteminfo : Tilstand {
         fagsysteminfo: FagsysteminfoHendelse,
     ) {
         val eksternBehandling = tilbakekreving.eksternFagsak.lagre(fagsysteminfo)
-        tilbakekreving.opprettBehandling(eksternBehandling)
+        tilbakekreving.opprettBehandling(eksternBehandling, Behandler.Vedtaksløsning)
         tilbakekreving.byttTilstand(SendVarselbrev)
     }
 }

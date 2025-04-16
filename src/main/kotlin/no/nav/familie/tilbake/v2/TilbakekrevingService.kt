@@ -6,13 +6,17 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFaktaDto
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeldelseDto
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeslåVedtaksstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v2.EksternFagsakDto
 import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.BehandlingHistorikk
+import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
+import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
 import no.nav.tilbakekreving.behov.VarselbrevBehov
@@ -30,6 +34,7 @@ import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.person.Bruker
+import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -163,14 +168,17 @@ class TilbakekrevingService(
     }
 
     fun utførSteg(
+        behandler: Behandler,
         tilbakekreving: Tilbakekreving,
         behandlingsstegDto: BehandlingsstegDto,
+        logContext: SecureLog.Context,
     ) {
-        val logContext = SecureLog.Context.fra(tilbakekreving)
         return when (behandlingsstegDto) {
-            is BehandlingsstegForeldelseDto -> behandleForeldelse(behandlingsstegDto, tilbakekreving)
-            is BehandlingsstegVilkårsvurderingDto -> behandleVilkårsvurdering(behandlingsstegDto, tilbakekreving)
-            is BehandlingsstegFaktaDto -> behandleFakta(tilbakekreving, behandlingsstegDto)
+            is BehandlingsstegForeldelseDto -> behandleForeldelse(tilbakekreving, behandlingsstegDto, behandler)
+            is BehandlingsstegVilkårsvurderingDto -> behandleVilkårsvurdering(tilbakekreving, behandlingsstegDto, behandler)
+            is BehandlingsstegFaktaDto -> behandleFakta(tilbakekreving, behandlingsstegDto, behandler)
+            is BehandlingsstegForeslåVedtaksstegDto -> behandleForeslåVedtak(tilbakekreving, behandlingsstegDto, behandler)
+            is BehandlingsstegFatteVedtaksstegDto -> behandleFatteVedtak(tilbakekreving, behandlingsstegDto, behandler)
             else -> throw Feil("Vurdering for ${behandlingsstegDto.getSteg()} er ikke implementert i ny modell enda.", logContext = logContext)
         }
     }
@@ -178,24 +186,27 @@ class TilbakekrevingService(
     private fun behandleFakta(
         tilbakekreving: Tilbakekreving,
         fakta: BehandlingsstegFaktaDto,
+        behandler: Behandler,
     ) {
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
 
         fakta.feilutbetaltePerioder.forEach {
-            behandling.faktasteg.behandleFakta(it)
+            behandling.håndter(behandler, it)
             // TODO: Fakta steg
         }
     }
 
     private fun behandleVilkårsvurdering(
-        vurdering: BehandlingsstegVilkårsvurderingDto,
         tilbakekreving: Tilbakekreving,
+        vurdering: BehandlingsstegVilkårsvurderingDto,
+        behandler: Behandler,
     ) {
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
 
         behandling.splittVilkårsvurdertePerioder(vurdering.vilkårsvurderingsperioder.map { it.periode })
         vurdering.vilkårsvurderingsperioder.forEach { periode ->
-            behandling.vilkårsvurderingsteg.vurder(
+            behandling.håndter(
+                behandler,
                 periode.periode,
                 VilkårsvurderingMapperV2.tilVurdering(periode),
             )
@@ -203,19 +214,62 @@ class TilbakekrevingService(
     }
 
     private fun behandleForeldelse(
-        vurdering: BehandlingsstegForeldelseDto,
         tilbakekreving: Tilbakekreving,
+        vurdering: BehandlingsstegForeldelseDto,
+        behandler: Behandler,
     ) {
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
         behandling.splittForeldetPerioder(vurdering.foreldetPerioder.map { it.periode })
         vurdering.foreldetPerioder.forEach { periode ->
-            behandling.foreldelsesteg.vurderForeldelse(
+            behandling.håndter(
+                behandler,
                 periode.periode,
                 when (periode.foreldelsesvurderingstype) {
                     Foreldelsesvurderingstype.IKKE_VURDERT -> Foreldelsesteg.Vurdering.IkkeVurdert
                     Foreldelsesvurderingstype.FORELDET -> Foreldelsesteg.Vurdering.Foreldet(periode.begrunnelse, periode.foreldelsesfrist!!)
                     Foreldelsesvurderingstype.IKKE_FORELDET -> Foreldelsesteg.Vurdering.IkkeForeldet(periode.begrunnelse)
                     Foreldelsesvurderingstype.TILLEGGSFRIST -> Foreldelsesteg.Vurdering.Tilleggsfrist(periode.foreldelsesfrist!!, periode.oppdagelsesdato!!)
+                },
+            )
+        }
+    }
+
+    private fun behandleForeslåVedtak(
+        tilbakekreving: Tilbakekreving,
+        vurdering: BehandlingsstegForeslåVedtaksstegDto,
+        behandler: Behandler,
+    ) {
+        tilbakekreving.behandlingHistorikk.nåværende().entry.håndter(
+            behandler,
+            ForeslåVedtakSteg.Vurdering.ForeslåVedtak(
+                vurdering.fritekstavsnitt.oppsummeringstekst,
+                vurdering.fritekstavsnitt.perioderMedTekst.map {
+                    ForeslåVedtakSteg.Vurdering.ForeslåVedtak.PeriodeMedTekst(
+                        periode = it.periode,
+                        faktaAvsnitt = it.faktaAvsnitt,
+                        foreldelseAvsnitt = it.foreldelseAvsnitt,
+                        vilkårAvsnitt = it.vilkårAvsnitt,
+                        særligeGrunnerAvsnitt = it.særligeGrunnerAvsnitt,
+                        særligeGrunnerAnnetAvsnitt = it.særligeGrunnerAnnetAvsnitt,
+                    )
+                },
+            ),
+        )
+    }
+
+    private fun behandleFatteVedtak(
+        tilbakekreving: Tilbakekreving,
+        vurdering: BehandlingsstegFatteVedtaksstegDto,
+        beslutter: Behandler,
+    ) {
+        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
+        for (stegVurdering in vurdering.totrinnsvurderinger) {
+            behandling.håndter(
+                beslutter = beslutter,
+                behandlingssteg = stegVurdering.behandlingssteg,
+                vurdering = when (stegVurdering.godkjent) {
+                    true -> FatteVedtakSteg.Vurdering.Godkjent
+                    else -> FatteVedtakSteg.Vurdering.Underkjent(stegVurdering.begrunnelse!!)
                 },
             )
         }

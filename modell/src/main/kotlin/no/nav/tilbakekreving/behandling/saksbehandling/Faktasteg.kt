@@ -29,7 +29,7 @@ class Faktasteg(
         return true
     }
 
-    fun behandleFakta(fakta: FaktaFeilutbetalingsperiodeDto) {
+    internal fun behandleFakta(fakta: FaktaFeilutbetalingsperiodeDto) {
         // TODO
     }
 

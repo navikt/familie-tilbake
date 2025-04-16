@@ -6,10 +6,6 @@ import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.Enhet
-import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
-import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
-import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
-import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
@@ -21,6 +17,7 @@ import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.saksbehandler.Behandler
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
@@ -134,10 +131,7 @@ fun behandling(
 ): Behandling {
     val kravgrunnlagReferanse = HistorikkStub.fakeReferanse(kravgrunnlag)
     val eksternFagsakBehandling = HistorikkStub.fakeReferanse(eksternFagsakBehandling())
-    val faktasteg = Faktasteg(eksternFagsakBehandling, kravgrunnlagReferanse, BrevHistorikk(mutableListOf()), LocalDateTime.now(), Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL)
-    val foreldelsesteg = Foreldelsesteg.opprett(kravgrunnlagReferanse)
-    val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(kravgrunnlagReferanse, foreldelsesteg)
-    return Behandling(
+    return Behandling.nyBehandling(
         internId = UUID.randomUUID(),
         eksternId = UUID.randomUUID(),
         behandlingstype = Behandlingstype.TILBAKEKREVING,
@@ -145,12 +139,9 @@ fun behandling(
         sistEndret = LocalDateTime.now(),
         enhet = Enhet("", ""),
         årsak = Behandlingsårsakstype.REVURDERING_KLAGE_KA,
-        ansvarligSaksbehandler = "Z999999",
+        ansvarligSaksbehandler = Behandler.Saksbehandler("Z999999"),
         eksternFagsakBehandling = eksternFagsakBehandling,
         kravgrunnlag = kravgrunnlagReferanse,
-        foreldelsesteg = foreldelsesteg,
-        faktasteg = faktasteg,
-        vilkårsvurderingsteg = vilkårsvurderingsteg,
-        foreslåVedtakSteg = ForeslåVedtakSteg(faktasteg, foreldelsesteg, vilkårsvurderingsteg, kravgrunnlagReferanse),
+        brevHistorikk = BrevHistorikk(mutableListOf()),
     )
 }
