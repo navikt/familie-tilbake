@@ -18,7 +18,7 @@ class Foreldelsesteg(
 
     override fun erFullstending(): Boolean = vurdertePerioder.all { it.vurdering != Vurdering.IkkeVurdert }
 
-    fun vurderForeldelse(
+    internal fun vurderForeldelse(
         periode: Datoperiode,
         vurdering: Vurdering,
     ) {
@@ -26,7 +26,7 @@ class Foreldelsesteg(
         vurderForeldelse(periodeId, vurdering)
     }
 
-    fun vurderForeldelse(
+    internal fun vurderForeldelse(
         periodeId: UUID,
         vurdering: Vurdering,
     ) {
@@ -34,7 +34,7 @@ class Foreldelsesteg(
         vurdertePerioder.single { it.id == periodeId }.vurderForeldelse(vurdering)
     }
 
-    fun splittPerioder(perioder: List<Datoperiode>) {
+    internal fun splittPerioder(perioder: List<Datoperiode>) {
         if (perioder.sortedBy { it.fom } == vurdertePerioder.map { it.periode }.sortedBy { it.fom }) return
 
         vurdertePerioder = perioder.map { Foreldelseperiode.opprett(it) }

@@ -18,7 +18,6 @@ import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.UUID
@@ -29,11 +28,11 @@ class Vilkårsvurderingsteg(
     private val kravgrunnlagHendelse: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
     private val foreldelsesteg: Foreldelsesteg,
 ) : Saksbehandlingsteg<VurdertVilkårsvurderingDto>, VilkårsvurderingAdapter {
-    override val type: Behandlingssteg = Behandlingssteg.GRUNNLAG
+    override val type: Behandlingssteg = Behandlingssteg.VILKÅRSVURDERING
 
-    override fun erFullstending(): Boolean = vurderinger.all { it.vurdering !is Vurdering.IkkeVurdert }
+    override fun erFullstending(): Boolean = vurderinger.none { it.vurdering is Vurdering.IkkeVurdert }
 
-    fun vurder(
+    internal fun vurder(
         periode: Datoperiode,
         vurdering: Vurdering,
     ) {
@@ -41,7 +40,7 @@ class Vilkårsvurderingsteg(
         vurder(id, vurdering)
     }
 
-    fun vurder(
+    internal fun vurder(
         id: UUID,
         vurdering: Vurdering,
     ) {
@@ -54,7 +53,7 @@ class Vilkårsvurderingsteg(
         return vurderinger.single { it.periode == periode }.id
     }
 
-    fun splittPerioder(perioder: List<Datoperiode>) {
+    internal fun splittPerioder(perioder: List<Datoperiode>) {
         if (perioder.sortedBy { it.fom } == vurderinger.map { it.periode }.sortedBy { it.fom }) return
 
         vurderinger = perioder.map { Vilkårsvurderingsperiode.opprett(it) }
@@ -70,73 +69,74 @@ class Vilkårsvurderingsteg(
     override fun tilFrontendDto(): VurdertVilkårsvurderingDto {
         fun mapAktsomhet(aktsomhet: VurdertAktsomhet): VurdertAktsomhetDto {
             return VurdertAktsomhetDto(
-                aktsomhet =
-                    when (aktsomhet) {
-                        is VurdertAktsomhet.Forsett -> Aktsomhet.FORSETT
-                        is VurdertAktsomhet.GrovUaktsomhet -> Aktsomhet.GROV_UAKTSOMHET
-                        is VurdertAktsomhet.SimpelUaktsomhet -> Aktsomhet.SIMPEL_UAKTSOMHET
-                    },
+                aktsomhet = when (aktsomhet) {
+                    is VurdertAktsomhet.Forsett -> Aktsomhet.FORSETT
+                    is VurdertAktsomhet.GrovUaktsomhet -> Aktsomhet.GROV_UAKTSOMHET
+                    is VurdertAktsomhet.SimpelUaktsomhet -> Aktsomhet.SIMPEL_UAKTSOMHET
+                },
                 ileggRenter = aktsomhet.skalIleggesRenter,
                 andelTilbakekreves = (aktsomhet.skalReduseres as? VurdertAktsomhet.SkalReduseres.Ja)?.prosentdel?.toBigDecimal(),
                 beløpTilbakekreves = null,
                 begrunnelse = aktsomhet.begrunnelse,
-                særligeGrunner =
-                    aktsomhet.særligeGrunner?.grunner?.map {
-                        VurdertSærligGrunnDto(
-                            særligGrunn = it,
-                            // TODO: Trenger kanskje egen sealed interface også siden bare annet skal ha grunn
-                            begrunnelse = null,
-                        )
-                    },
+                særligeGrunner = aktsomhet.særligeGrunner?.grunner?.map {
+                    VurdertSærligGrunnDto(
+                        særligGrunn = it,
+                        // TODO: Trenger kanskje egen sealed interface også siden bare annet skal ha grunn
+                        begrunnelse = null,
+                    )
+                },
                 særligeGrunnerTilReduksjon = aktsomhet.skalReduseres is VurdertAktsomhet.SkalReduseres.Ja,
                 tilbakekrevSmåbeløp = false,
                 særligeGrunnerBegrunnelse = aktsomhet.særligeGrunner?.begrunnelse,
             )
         }
         return VurdertVilkårsvurderingDto(
-            perioder =
-                vurderinger.map {
-                    VurdertVilkårsvurderingsperiodeDto(
-                        periode = it.periode,
-                        feilutbetaltBeløp = kravgrunnlagHendelse.entry.totaltBeløpFor(it.periode),
-                        hendelsestype = Hendelsestype.ANNET,
-                        reduserteBeløper = listOf(),
-                        aktiviteter = listOf(),
-                        begrunnelse = it.begrunnelseForTilbakekreving,
-                        foreldet = foreldelsesteg.erPeriodeForeldet(it.periode),
-                        vilkårsvurderingsresultatInfo =
-                            it.vurdering.let { vurdering ->
-                                when (vurdering) {
-                                    is Vurdering.FeilaktigeOpplysningerFraBruker ->
-                                        VurdertVilkårsvurderingsresultatDto(
-                                            vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
-                                            aktsomhet = mapAktsomhet(vurdering.aktsomhet),
-                                        )
-                                    is Vurdering.MangelfulleOpplysningerFraBruker ->
-                                        VurdertVilkårsvurderingsresultatDto(
-                                            vilkårsvurderingsresultat = Vilkårsvurderingsresultat.MANGELFULLE_OPPLYSNINGER_FRA_BRUKER,
-                                            aktsomhet = mapAktsomhet(vurdering.aktsomhet),
-                                        )
-                                    is Vurdering.ForstodEllerBurdeForstått ->
-                                        VurdertVilkårsvurderingsresultatDto(
-                                            vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
-                                            aktsomhet = mapAktsomhet(vurdering.aktsomhet),
-                                        )
-                                    is Vurdering.GodTro ->
-                                        VurdertVilkårsvurderingsresultatDto(
-                                            vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
-                                            godTro =
-                                                VurdertGodTroDto(
-                                                    beløpErIBehold = vurdering.beløpIBehold is Vurdering.GodTro.BeløpIBehold.Ja,
-                                                    beløpTilbakekreves = (vurdering.beløpIBehold as? Vurdering.GodTro.BeløpIBehold.Ja)?.beløp,
-                                                    begrunnelse = vurdering.begrunnelse,
-                                                ),
-                                        )
-                                    Vurdering.IkkeVurdert -> null
-                                }
-                            },
-                    )
-                },
+            perioder = vurderinger.map {
+                VurdertVilkårsvurderingsperiodeDto(
+                    periode = it.periode,
+                    feilutbetaltBeløp = kravgrunnlagHendelse.entry.totaltBeløpFor(it.periode),
+                    hendelsestype = Hendelsestype.ANNET,
+                    reduserteBeløper = listOf(),
+                    aktiviteter = listOf(),
+                    begrunnelse = it.begrunnelseForTilbakekreving,
+                    foreldet = foreldelsesteg.erPeriodeForeldet(it.periode),
+                    vilkårsvurderingsresultatInfo =
+                        it.vurdering.let { vurdering ->
+                            when (vurdering) {
+                                is Vurdering.FeilaktigeOpplysningerFraBruker ->
+                                    VurdertVilkårsvurderingsresultatDto(
+                                        vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
+                                        aktsomhet = mapAktsomhet(vurdering.aktsomhet),
+                                    )
+
+                                is Vurdering.MangelfulleOpplysningerFraBruker ->
+                                    VurdertVilkårsvurderingsresultatDto(
+                                        vilkårsvurderingsresultat = Vilkårsvurderingsresultat.MANGELFULLE_OPPLYSNINGER_FRA_BRUKER,
+                                        aktsomhet = mapAktsomhet(vurdering.aktsomhet),
+                                    )
+
+                                is Vurdering.ForstodEllerBurdeForstått ->
+                                    VurdertVilkårsvurderingsresultatDto(
+                                        vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
+                                        aktsomhet = mapAktsomhet(vurdering.aktsomhet),
+                                    )
+
+                                is Vurdering.GodTro ->
+                                    VurdertVilkårsvurderingsresultatDto(
+                                        vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
+                                        godTro =
+                                            VurdertGodTroDto(
+                                                beløpErIBehold = vurdering.beløpIBehold is Vurdering.GodTro.BeløpIBehold.Ja,
+                                                beløpTilbakekreves = (vurdering.beløpIBehold as? Vurdering.GodTro.BeløpIBehold.Ja)?.beløp,
+                                                begrunnelse = vurdering.begrunnelse,
+                                            ),
+                                    )
+
+                                Vurdering.IkkeVurdert -> null
+                            }
+                        },
+                )
+            },
             rettsgebyr = 0,
             opprettetTid = LocalDateTime.now(),
         )

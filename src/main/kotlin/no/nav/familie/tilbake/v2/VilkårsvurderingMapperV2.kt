@@ -12,7 +12,7 @@ object VilkårsvurderingMapperV2 {
                 Aktsomhet.FORSETT ->
                     Vilkårsvurderingsteg.VurdertAktsomhet.Forsett(
                         begrunnelse = aktsomhet.begrunnelse,
-                        skalIleggesRenter = aktsomhet.ileggRenter!!,
+                        skalIleggesRenter = aktsomhet.ileggRenter ?: false,
                     )
 
                 Aktsomhet.GROV_UAKTSOMHET ->

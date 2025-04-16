@@ -6,6 +6,7 @@ import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.familie.tilbake.totrinn.TotrinnService
+import no.nav.familie.tilbake.v2.TilbakekrevingService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.api.v1.dto.TotrinnsvurderingDto
 import org.springframework.http.MediaType
@@ -23,6 +24,7 @@ import java.util.UUID
 class TotrinnController(
     private val totrinnService: TotrinnService,
     private val tilgangskontrollService: TilgangskontrollService,
+    private val tilbakekrevingService: TilbakekrevingService,
 ) {
     @Operation(summary = "Hent totrinnsvurderinger")
     @GetMapping(
@@ -32,6 +34,17 @@ class TotrinnController(
     fun hentTotrinnsvurderinger(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<TotrinnsvurderingDto> {
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        if (tilbakekreving != null) {
+            tilgangskontrollService.validerTilgangTilbakekreving(
+                tilbakekreving = tilbakekreving,
+                behandlingId = behandlingId,
+                minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+                auditLoggerEvent = AuditLoggerEvent.ACCESS,
+                handling = "Henter totrinnsvurderinger for en gitt behandling",
+            )
+            return Ressurs.success(tilbakekreving.behandlingHistorikk.nåværende().entry.fatteVedtakSteg.tilFrontendDto())
+        }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.VEILEDER,

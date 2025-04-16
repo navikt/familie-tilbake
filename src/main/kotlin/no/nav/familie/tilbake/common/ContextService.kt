@@ -10,12 +10,15 @@ import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
+import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.springframework.http.HttpStatus
 
 object ContextService {
     private const val SYSTEM_NAVN = "System"
 
     fun hentSaksbehandler(logContext: SecureLog.Context): String = hentPåloggetSaksbehandler(Constants.BRUKER_ID_VEDTAKSLØSNINGEN, logContext)
+
+    fun hentBehandler(logContext: SecureLog.Context): Behandler = Behandler.Saksbehandler(hentPåloggetSaksbehandler(defaultverdi = null, logContext = logContext))
 
     fun hentPåloggetSaksbehandler(
         defaultverdi: String?,

@@ -157,6 +157,9 @@ class BehandlingController(
     ): Ressurs<String> {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
         if (tilbakekreving != null) {
+            val logContext = SecureLog.Context.fra(tilbakekreving)
+            val saksbehandler = ContextService.hentBehandler(logContext)
+
             tilgangskontrollService.validerTilgangTilbakekreving(
                 tilbakekreving = tilbakekreving,
                 behandlingId = behandlingId,
@@ -170,7 +173,7 @@ class BehandlingController(
                 handling = "Utfører behandlingens aktiv steg og fortsetter den til neste steg",
             )
 
-            tilbakekrevingService.utførSteg(tilbakekreving, behandlingsstegDto)
+            tilbakekrevingService.utførSteg(saksbehandler, tilbakekreving, behandlingsstegDto, logContext)
             return Ressurs.success("OK")
         }
         tilgangskontrollService.validerTilgangBehandlingID(

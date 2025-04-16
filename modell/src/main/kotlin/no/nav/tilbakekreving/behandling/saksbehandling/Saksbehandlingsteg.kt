@@ -19,5 +19,14 @@ internal interface Saksbehandlingsteg<FrontendDtoType> : FrontendDto<FrontendDto
                 else -> Behandlingsstegstatus.KLAR
             }
         }
+
+        fun Collection<Saksbehandlingsteg<*>>.klarTilVisning(): List<Saksbehandlingsteg<*>> {
+            val klarTilBehandling = mutableListOf<Saksbehandlingsteg<*>>()
+            for (steg in this) {
+                klarTilBehandling.add(steg)
+                if (!steg.erFullstending()) return klarTilBehandling
+            }
+            return klarTilBehandling
+        }
     }
 }

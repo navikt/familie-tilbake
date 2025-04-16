@@ -22,6 +22,7 @@ import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.person.Bruker
 import no.nav.tilbakekreving.person.Bruker.Companion.tilNullableFrontendDto
+import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.tilstand.Start
 import no.nav.tilbakekreving.tilstand.Tilstand
 import java.time.LocalDateTime
@@ -60,7 +61,10 @@ class Tilbakekreving(
         tilstand.håndter(this, varselbrevSendt)
     }
 
-    fun opprettBehandling(eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>) {
+    fun opprettBehandling(
+        eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
+        behandler: Behandler,
+    ) {
         behandlingHistorikk.lagre(
             Behandling.nyBehandling(
                 internId = UUID.fromString("abcdef12-1337-1338-1339-abcdef123456"),
@@ -69,7 +73,7 @@ class Tilbakekreving(
                 opprettet = LocalDateTime.now(),
                 enhet = null,
                 årsak = Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR,
-                ansvarligSaksbehandler = "VL",
+                ansvarligSaksbehandler = behandler,
                 sistEndret = LocalDateTime.now(),
                 eksternFagsakBehandling = eksternFagsakBehandling,
                 kravgrunnlag = kravgrunnlagHistorikk.nåværende(),
@@ -90,10 +94,9 @@ class Tilbakekreving(
             fagsystem = eksternFagsakDto.fagsystem,
             språkkode = bruker?.språkkode ?: Språkkode.NB,
             bruker = bruker.tilNullableFrontendDto(),
-            behandlinger =
-                behandlingHistorikk.tilFrontendDto().map {
-                    BehandlingsoppsummeringDto(it.behandlingId, it.eksternBrukId, it.type, it.status)
-                },
+            behandlinger = behandlingHistorikk.tilFrontendDto().map {
+                BehandlingsoppsummeringDto(it.behandlingId, it.eksternBrukId, it.type, it.status)
+            },
         )
     }
 
@@ -105,14 +108,13 @@ class Tilbakekreving(
             return Tilbakekreving(
                 opprettet = LocalDateTime.now(),
                 opprettelsesvalg = opprettTilbakekrevingEvent.opprettelsesvalg,
-                eksternFagsak =
-                    EksternFagsak(
-                        eksternId = opprettTilbakekrevingEvent.eksternFagsak.eksternId,
-                        ytelsestype = opprettTilbakekrevingEvent.eksternFagsak.ytelsestype,
-                        fagsystem = opprettTilbakekrevingEvent.eksternFagsak.fagsystem,
-                        behovObservatør = behovObservatør,
-                        behandlinger = EksternFagsakBehandlingHistorikk(mutableListOf()),
-                    ),
+                eksternFagsak = EksternFagsak(
+                    eksternId = opprettTilbakekrevingEvent.eksternFagsak.eksternId,
+                    ytelsestype = opprettTilbakekrevingEvent.eksternFagsak.ytelsestype,
+                    fagsystem = opprettTilbakekrevingEvent.eksternFagsak.fagsystem,
+                    behovObservatør = behovObservatør,
+                    behandlinger = EksternFagsakBehandlingHistorikk(mutableListOf()),
+                ),
                 behovObservatør = behovObservatør,
                 behandlingHistorikk = BehandlingHistorikk(mutableListOf()),
                 kravgrunnlagHistorikk = KravgrunnlagHistorikk(mutableListOf()),
