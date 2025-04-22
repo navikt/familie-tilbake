@@ -2,6 +2,8 @@ package no.nav.tilbakekreving
 
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.ApplicationProperties
+import no.nav.familie.tilbake.integration.pdl.PdlClient
+import no.nav.familie.tilbake.integration.pdl.internal.PdlKjønnType
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFaktaDto
@@ -16,23 +18,23 @@ import no.nav.tilbakekreving.behandling.BehandlingHistorikk
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
-import no.nav.tilbakekreving.behov.BehovObservatør
+import no.nav.tilbakekreving.behov.BrukerinfoBehov
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
 import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
+import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
-import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
+import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
-import no.nav.tilbakekreving.person.Bruker
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -46,14 +48,11 @@ import java.util.UUID
 @Service
 class TilbakekrevingService(
     private val applicationProperties: ApplicationProperties,
+    private val pdlClient: PdlClient,
 ) {
-    private val fnr = "20046912345"
-    private val behovObservatør =
-        object : BehovObservatør {
-            override fun håndter(behov: FagsysteminfoBehov) {}
+    private final val behovObservatør = Observatør()
 
-            override fun håndter(behov: VarselbrevBehov) {}
-        }
+    private val fnr = "20046912345"
 
     private val eksternFagsak =
         EksternFagsak(
@@ -70,12 +69,6 @@ class TilbakekrevingService(
                 opprettet = LocalDateTime.of(2025, Month.MARCH, 15, 12, 0),
                 behandlingHistorikk =
                     BehandlingHistorikk(mutableListOf()),
-                bruker =
-                    Bruker(
-                        ident = fnr,
-                        språkkode = Språkkode.NB,
-                        fødselsdato = LocalDate.of(1969, Month.APRIL, 20),
-                    ),
                 behovObservatør = behovObservatør,
                 kravgrunnlagHistorikk = KravgrunnlagHistorikk(mutableListOf()),
                 brevHistorikk = BrevHistorikk(mutableListOf()),
@@ -138,16 +131,6 @@ class TilbakekrevingService(
                             ),
                     ),
                 )
-                håndter(
-                    FagsysteminfoHendelse(
-                        eksternId = UUID.randomUUID().toString(),
-                        revurderingsresultat = "revurderingsresultat",
-                        revurderingsårsak = "revurderingsårsak",
-                        begrunnelseForTilbakekreving = "begrunnelseForTilbakekreving",
-                        revurderingsvedtaksdato = LocalDate.now(),
-                    ),
-                )
-                håndter(VarselbrevSendtHendelse(Varselbrev.opprett(varsletBeløp = 2000L)))
             },
         )
 
@@ -164,6 +147,55 @@ class TilbakekrevingService(
         if (!applicationProperties.toggles.nyModellEnabled) return null
 
         return eksempelsaker.firstOrNull { sak -> sak.tilFrontendDto().behandlinger.any { it.eksternBrukId == behandlingId } }
+    }
+
+    fun sjekkBehovOgHåndter(tilbakekreving: Tilbakekreving) {
+        val behovListe = behovObservatør.behovListe
+        while (behovListe.isNotEmpty()) {
+            val behov = behovListe.first()
+            when (behov) {
+                is BrukerinfoBehov -> {
+                    val personinfo = pdlClient.hentPersoninfo(
+                        ident = tilbakekreving.bruker!!.ident,
+                        fagsystem = behov.fagsystem,
+                        logContext = SecureLog.Context.fra(tilbakekreving),
+                    )
+                    tilbakekreving.håndter(
+                        BrukerinfoHendelse(
+                            ident = personinfo.ident,
+                            fødselsdato = personinfo.fødselsdato,
+                            navn = personinfo.navn,
+                            kjønn = when (personinfo.kjønn) {
+                                PdlKjønnType.MANN -> Kjønn.MANN
+                                PdlKjønnType.KVINNE -> Kjønn.KVINNE
+                                PdlKjønnType.UKJENT -> Kjønn.UKJENT
+                            },
+                            dødsdato = personinfo.dødsdato,
+                        ),
+                    )
+                }
+                is VarselbrevBehov -> {
+                    tilbakekreving.håndter(
+                        VarselbrevSendtHendelse(
+                            Varselbrev.opprett(varsletBeløp = 2000L),
+                        ),
+                    )
+                }
+                is FagsysteminfoBehov -> {
+                    tilbakekreving.håndter(
+                        FagsysteminfoHendelse(
+                            eksternId = UUID.randomUUID().toString(),
+                            ident = fnr,
+                            revurderingsresultat = "revurderingsresultat",
+                            revurderingsårsak = "revurderingsårsak",
+                            begrunnelseForTilbakekreving = "begrunnelseForTilbakekreving",
+                            revurderingsvedtaksdato = LocalDate.now(),
+                        ),
+                    )
+                }
+            }
+            behovListe.remove(behov)
+        }
     }
 
     fun utførSteg(

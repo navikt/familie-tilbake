@@ -5,18 +5,17 @@ import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
-import no.nav.tilbakekreving.behov.VarselbrevBehov
+import no.nav.tilbakekreving.behov.BrukerinfoBehov
+import no.nav.tilbakekreving.bruker
 import no.nav.tilbakekreving.brukerinfoHendelse
 import no.nav.tilbakekreving.fagsysteminfoHendelse
-import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.opprettTilbakekrevingEvent
-import no.nav.tilbakekreving.varselbrev
 import org.junit.jupiter.api.Test
 
-class SendVarselbrevTest {
+class AvventerBrukerinfoTest {
     @Test
-    fun `tilbakekreving i SendVarselbrev går videre med Kravgrunnlag`() {
+    fun `tilbakekreving med AvventerBrukerinfo går videre med brukerinfo`() {
         val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingEvent = opprettTilbakekrevingEvent()
         val tilbakekreving = Tilbakekreving.opprett(oppsamler, opprettTilbakekrevingEvent)
@@ -24,13 +23,13 @@ class SendVarselbrevTest {
         tilbakekreving.håndter(kravgrunnlag())
         tilbakekreving.håndter(fagsysteminfoHendelse())
         tilbakekreving.håndter(brukerinfoHendelse())
-        tilbakekreving.håndter(VarselbrevSendtHendelse(varselbrev()))
 
-        tilbakekreving.tilstand shouldBe TilBehandling
+        tilbakekreving.tilstand shouldBe SendVarselbrev
         oppsamler.behovListe.forOne {
             it shouldBeEqual
-                VarselbrevBehov(
-                    dummyData = "wip",
+                BrukerinfoBehov(
+                    bruker().ident,
+                    tilbakekreving.eksternFagsak.fagsystem,
                 )
         }
     }

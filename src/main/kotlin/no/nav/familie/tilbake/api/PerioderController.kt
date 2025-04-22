@@ -49,6 +49,7 @@ class PerioderController(
                 auditLoggerEvent = AuditLoggerEvent.ACCESS,
                 handling = "Sjekker om perioder er like - unntatt dato og beløp",
             )
+            tilbakekrevingService.sjekkBehovOgHåndter(tilbakekreving)
             return Ressurs.success(tilbakekreving.behandlingHistorikk.nåværende().entry.vilkårsvurderingsteg.harLikePerioder())
         }
         tilgangskontrollService.validerTilgangBehandlingID(
@@ -80,6 +81,7 @@ class PerioderController(
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
                 handling = "Sjekker om perioder er sammenslått",
             )
+            tilbakekrevingService.sjekkBehovOgHåndter(tilbakekreving)
             return Ressurs.success(tilbakekreving.behandlingHistorikk.nåværende().entry.vilkårsvurderingsteg.harLikePerioder())
         }
         tilgangskontrollService.validerTilgangBehandlingID(

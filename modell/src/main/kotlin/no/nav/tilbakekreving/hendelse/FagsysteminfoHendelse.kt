@@ -4,6 +4,7 @@ import java.time.LocalDate
 
 data class FagsysteminfoHendelse(
     val eksternId: String,
+    val ident: String,
     val revurderingsresultat: String,
     val revurderingsårsak: String,
     val begrunnelseForTilbakekreving: String,

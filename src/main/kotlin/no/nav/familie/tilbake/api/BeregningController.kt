@@ -50,6 +50,7 @@ class BeregningController(
                 auditLoggerEvent = AuditLoggerEvent.ACCESS,
                 handling = "Beregner feilutbetalt beløp for nye delte perioder",
             )
+            tilbakekrevingService.sjekkBehovOgHåndter(tilbakekreving)
             return Ressurs.success(tilbakekreving.behandlingHistorikk.nåværende().entry.beregnSplittetPeriode(perioder))
         }
         tilgangskontrollService.validerTilgangBehandlingID(
@@ -78,6 +79,7 @@ class BeregningController(
                 auditLoggerEvent = AuditLoggerEvent.ACCESS,
                 handling = "Henter beregningsresultat",
             )
+            tilbakekrevingService.sjekkBehovOgHåndter(tilbakekreving)
             return Ressurs.success(tilbakekreving.behandlingHistorikk.nåværende().entry.beregnForFrontend())
         }
         tilgangskontrollService.validerTilgangBehandlingID(

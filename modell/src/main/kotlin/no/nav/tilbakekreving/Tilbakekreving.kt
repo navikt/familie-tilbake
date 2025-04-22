@@ -12,6 +12,7 @@ import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
+import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
@@ -36,7 +37,7 @@ class Tilbakekreving(
     val opprettet: LocalDateTime,
     val opprettelsesvalg: Opprettelsesvalg,
     private val behovObservatør: BehovObservatør,
-    private var bruker: Bruker? = null,
+    var bruker: Bruker? = null,
 ) : FrontendDto<FagsakDto> {
     internal var tilstand: Tilstand = Start
 
@@ -55,6 +56,10 @@ class Tilbakekreving(
 
     fun håndter(fagsysteminfo: FagsysteminfoHendelse) {
         tilstand.håndter(this, fagsysteminfo)
+    }
+
+    fun håndter(brukerinfo: BrukerinfoHendelse) {
+        tilstand.håndter(this, brukerinfo)
     }
 
     fun håndter(varselbrevSendt: VarselbrevSendtHendelse) {
@@ -82,8 +87,18 @@ class Tilbakekreving(
         )
     }
 
+    fun opprettBruker(ident: String) {
+        this.bruker = Bruker(
+            ident = ident,
+        )
+    }
+
     fun trengerVarselbrev() {
         behovObservatør.håndter(VarselbrevBehov("wip"))
+    }
+
+    fun trengerBrukerinfo() {
+        bruker!!.trengerBrukerinfo(behovObservatør, eksternFagsak.fagsystem)
     }
 
     override fun tilFrontendDto(): FagsakDto {

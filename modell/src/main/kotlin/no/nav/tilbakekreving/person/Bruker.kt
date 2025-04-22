@@ -1,14 +1,18 @@
 package no.nav.tilbakekreving.person
 
 import no.nav.tilbakekreving.FrontendDto
+import no.nav.tilbakekreving.behov.BehovObservatør
+import no.nav.tilbakekreving.behov.BrukerinfoBehov
+import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.kontrakter.bruker.FrontendBrukerDto
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
+import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import java.time.LocalDate
 
 class Bruker(
-    private val ident: String,
-    val språkkode: Språkkode,
+    val ident: String,
+    var språkkode: Språkkode? = null,
     private var navn: String? = null,
     private var fødselsdato: LocalDate? = null,
     private var kjønn: Kjønn? = null,
@@ -22,6 +26,26 @@ class Bruker(
             kjønn = kjønn ?: Kjønn.UKJENT,
             dødsdato = dødsdato,
         )
+    }
+
+    fun trengerBrukerinfo(
+        behovObservatør: BehovObservatør,
+        fagsystem: Fagsystem,
+    ) {
+        behovObservatør.håndter(
+            BrukerinfoBehov(
+                ident = ident,
+                fagsystem = fagsystem,
+            ),
+        )
+    }
+
+    fun oppdater(hendelse: BrukerinfoHendelse) {
+        navn = hendelse.navn
+        fødselsdato = hendelse.fødselsdato
+        kjønn = hendelse.kjønn
+        dødsdato = hendelse.dødsdato ?: dødsdato
+        språkkode = hendelse.språkkode ?: språkkode
     }
 
     companion object {
