@@ -617,7 +617,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-            "Perioden ${LocalDate.of(2023, 8,1).lagDatoIkkeForeldet()}-${LocalDate.of(2023, 9,30).lagDatoIkkeForeldet()} er ikke innenfor en kalendermåned."
+            "Perioden ${LocalDate.of(2023, 8,1).lagDatoIkkeForeldet()} til ${LocalDate.of(2023, 9,30).lagDatoIkkeForeldet()} er ikke innenfor samme kalendermåned."
     }
 
     @Test
@@ -626,7 +626,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-            "Perioden ${LocalDate.of(2020, 8,15).lagDatoIkkeForeldet()}-${LocalDate.of(2020, 8,31).lagDatoIkkeForeldet()} starter ikke første dag i måned."
+            "Perioden ${LocalDate.of(2020, 8,15).lagDatoIkkeForeldet()} til ${LocalDate.of(2020, 8,31).lagDatoIkkeForeldet()} starter ikke første dag i måned."
     }
 
     @Test
@@ -635,7 +635,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-            "Perioden ${LocalDate.of(2020, 8,1).lagDatoIkkeForeldet()}-${LocalDate.of(2020, 8,28).lagDatoIkkeForeldet()} slutter ikke siste dag i måned."
+            "Perioden ${LocalDate.of(2020, 8,1).lagDatoIkkeForeldet()} til ${LocalDate.of(2020, 8,28).lagDatoIkkeForeldet()} slutter ikke siste dag i måned."
     }
 
     @Test
@@ -662,7 +662,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-            "Overlappende perioder Månedsperiode(fom=${LocalDate.of(2020,8,1).lagDatoIkkeForeldet().year}-08, tom=${LocalDate.now().lagDatoIkkeForeldet().year}-08) og Månedsperiode(fom=${LocalDate.now().lagDatoIkkeForeldet().year}-08, tom=${LocalDate.of(2020,8,31).lagDatoIkkeForeldet().year}-08)."
+            "Perioden ${LocalDate.of(2020,8,1).lagDatoIkkeForeldet().year}-08-01 til ${LocalDate.now().lagDatoIkkeForeldet().year}-08-31 overlapper med perioden ${LocalDate.now().lagDatoIkkeForeldet().year}-08-01 til ${LocalDate.of(2020,8,31).lagDatoIkkeForeldet().year}-08-31."
     }
 
     @Test

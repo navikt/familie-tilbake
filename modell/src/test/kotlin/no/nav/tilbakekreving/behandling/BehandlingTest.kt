@@ -6,9 +6,9 @@ import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.februar
 import no.nav.tilbakekreving.januar
+import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
-import no.nav.tilbakekreving.til
 import org.junit.jupiter.api.Test
 
 class BehandlingTest {

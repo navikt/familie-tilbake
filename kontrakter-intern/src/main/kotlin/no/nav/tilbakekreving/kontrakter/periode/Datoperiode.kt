@@ -23,11 +23,7 @@ data class Datoperiode(
         tom: LocalDate,
     ): Datoperiode = Datoperiode(fom, tom)
 
-    override infix fun union(annen: Periode<LocalDate>): Datoperiode = super.union(annen) as Datoperiode
-
     override infix fun snitt(annen: Periode<LocalDate>): Datoperiode? = super.snitt(annen) as Datoperiode?
-
-    override infix fun påfølgesAv(påfølgende: Periode<LocalDate>): Boolean = this.tom.plusDays(1) == påfølgende.fom
 
     override fun lengdeIHeleMåneder(): Long {
         require(fom.dayOfMonth == 1 && tom == YearMonth.from(tom).atEndOfMonth()) {

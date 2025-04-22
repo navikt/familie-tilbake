@@ -14,8 +14,8 @@ import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.log.SecureLog
-import no.nav.familie.tilbake.v2.TilbakekrevingService
 import no.nav.tilbakekreving.Tilbakekreving
+import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import no.nav.tilbakekreving.kontrakter.ytelse.Tema
 import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype

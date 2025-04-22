@@ -6,8 +6,8 @@ import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
-import no.nav.familie.tilbake.v2.TilbakekrevingService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelseDto
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated

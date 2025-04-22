@@ -3,7 +3,8 @@ package no.nav.familie.tilbake.kravgrunnlag
 import no.nav.familie.tilbake.common.exceptionhandler.UgyldigKravgrunnlagFeil
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.log.SecureLog
-import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagValidatorV2
+import no.nav.tilbakekreving.kravgrunnlag.PeriodeValidator
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagBelopDto
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagPeriodeDto
@@ -17,68 +18,14 @@ import java.time.YearMonth
 object KravgrunnlagValidator {
     @Throws(UgyldigKravgrunnlagFeil::class)
     fun validerGrunnlag(kravgrunnlag: DetaljertKravgrunnlagDto) {
-        validerReferanse(kravgrunnlag)
-        validerPeriodeInnenforMåned(kravgrunnlag)
-        validerPeriodeStarterFørsteDagIMåned(kravgrunnlag)
-        validerPeriodeSlutterSisteDagIMåned(kravgrunnlag)
-        validerOverlappendePerioder(kravgrunnlag)
+        KravgrunnlagValidatorV2.valider(kravgrunnlag, PeriodeValidator.MånedsperiodeValidator)
+            .throwOnError(SecureLog.Context.utenBehandling(kravgrunnlag.fagsystemId))
         validerSkatt(kravgrunnlag)
         validerPerioderHarFeilutbetalingspostering(kravgrunnlag)
         validerPerioderHarYtelsespostering(kravgrunnlag)
         validerPerioderHarFeilPosteringMedNegativFeilutbetaltBeløp(kravgrunnlag)
         validerYtelseMotFeilutbetaling(kravgrunnlag)
         validerYtelsesPosteringTilbakekrevesMotNyttOgOpprinneligUtbetalt(kravgrunnlag)
-    }
-
-    private fun validerReferanse(kravgrunnlag: DetaljertKravgrunnlagDto) {
-        kravgrunnlag.referanse ?: throw UgyldigKravgrunnlagFeil(
-            melding =
-                "Ugyldig kravgrunnlag for kravgrunnlagId " +
-                    "${kravgrunnlag.kravgrunnlagId}. Mangler referanse.",
-            logContext = SecureLog.Context.utenBehandling(kravgrunnlag.fagsystemId),
-        )
-    }
-
-    private fun validerPeriodeInnenforMåned(kravgrunnlag: DetaljertKravgrunnlagDto) {
-        kravgrunnlag.tilbakekrevingsPeriode.forEach {
-            val periode = it.periode
-            val fomMåned = YearMonth.of(periode.fom.year, periode.fom.month)
-            val tomMåned = YearMonth.of(periode.tom.year, periode.tom.month)
-            if (fomMåned != tomMåned) {
-                throw UgyldigKravgrunnlagFeil(
-                    melding =
-                        "Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}." +
-                            " Perioden ${periode.fom}-${periode.tom} er ikke innenfor en kalendermåned.",
-                    logContext = SecureLog.Context.utenBehandling(kravgrunnlag.fagsystemId),
-                )
-            }
-        }
-    }
-
-    private fun validerPeriodeStarterFørsteDagIMåned(kravgrunnlag: DetaljertKravgrunnlagDto) {
-        kravgrunnlag.tilbakekrevingsPeriode.forEach {
-            if (it.periode.fom.dayOfMonth != 1) {
-                throw UgyldigKravgrunnlagFeil(
-                    melding =
-                        "Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}." +
-                            " Perioden ${it.periode.fom}-${it.periode.tom} starter ikke første dag i måned.",
-                    logContext = SecureLog.Context.utenBehandling(kravgrunnlag.fagsystemId),
-                )
-            }
-        }
-    }
-
-    private fun validerPeriodeSlutterSisteDagIMåned(kravgrunnlag: DetaljertKravgrunnlagDto) {
-        kravgrunnlag.tilbakekrevingsPeriode.forEach {
-            if (it.periode.tom.dayOfMonth != YearMonth.from(it.periode.tom).lengthOfMonth()) {
-                throw UgyldigKravgrunnlagFeil(
-                    melding =
-                        "Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}." +
-                            " Perioden ${it.periode.fom}-${it.periode.tom} slutter ikke siste dag i måned.",
-                    logContext = SecureLog.Context.utenBehandling(kravgrunnlag.fagsystemId),
-                )
-            }
-        }
     }
 
     private fun validerPerioderHarFeilutbetalingspostering(kravgrunnlag: DetaljertKravgrunnlagDto) {
@@ -103,25 +50,6 @@ object KravgrunnlagValidator {
                         "Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}. " +
                             "Perioden ${it.periode.fom}-${it.periode.tom} " +
                             "mangler postering med klassetype=YTEL.",
-                    logContext = SecureLog.Context.utenBehandling(kravgrunnlag.fagsystemId),
-                )
-            }
-        }
-    }
-
-    private fun validerOverlappendePerioder(kravgrunnlag: DetaljertKravgrunnlagDto) {
-        val sortertePerioder: List<Månedsperiode> =
-            kravgrunnlag.tilbakekrevingsPeriode
-                .map { p -> Månedsperiode(p.periode.fom, p.periode.tom) }
-                .sorted()
-        for (i in 1 until sortertePerioder.size) {
-            val forrigePeriode = sortertePerioder[i - 1]
-            val nåværendePeriode = sortertePerioder[i]
-            if (nåværendePeriode.fom <= forrigePeriode.tom) {
-                throw UgyldigKravgrunnlagFeil(
-                    melding =
-                        "Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}." +
-                            " Overlappende perioder $forrigePeriode og $nåværendePeriode.",
                     logContext = SecureLog.Context.utenBehandling(kravgrunnlag.fagsystemId),
                 )
             }

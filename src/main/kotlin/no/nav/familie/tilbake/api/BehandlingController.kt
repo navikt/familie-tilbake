@@ -15,8 +15,8 @@ import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangService
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
-import no.nav.familie.tilbake.v2.TilbakekrevingService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingPåVentDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto

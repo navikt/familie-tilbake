@@ -7,8 +7,8 @@ import no.nav.familie.tilbake.kontrakter.klage.FagsystemVedtak
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
-import no.nav.familie.tilbake.v2.TilbakekrevingService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.api.v1.dto.FagsakDto
 import no.nav.tilbakekreving.kontrakter.Behandling
 import no.nav.tilbakekreving.kontrakter.FinnesBehandlingResponse

@@ -25,7 +25,7 @@ import java.time.Duration
 import java.time.temporal.ChronoUnit
 
 @SpringBootConfiguration
-@ComponentScan(ApplicationConfig.PAKKE_NAVN, "no.nav.familie.prosessering")
+@ComponentScan(ApplicationConfig.PAKKE_NAVN, "no.nav.familie.prosessering", "no.nav.tilbakekreving")
 @EnableJwtTokenValidation(ignore = ["org.springframework", "org.springdoc"])
 @EnableOAuth2Client(cacheEnabled = true)
 @EnableScheduling

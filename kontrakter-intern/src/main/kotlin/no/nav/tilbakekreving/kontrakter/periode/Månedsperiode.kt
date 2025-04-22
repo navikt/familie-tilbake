@@ -26,11 +26,7 @@ data class Månedsperiode(
         tom: YearMonth,
     ): Månedsperiode = Månedsperiode(fom, tom)
 
-    override infix fun union(annen: Periode<YearMonth>): Månedsperiode = super.union(annen) as Månedsperiode
-
     override infix fun snitt(annen: Periode<YearMonth>): Månedsperiode? = super.snitt(annen) as Månedsperiode?
-
-    override infix fun påfølgesAv(påfølgende: Periode<YearMonth>): Boolean = this.tom.plusMonths(1) == påfølgende.fom
 
     override fun lengdeIHeleMåneder(): Long = (tom.year * 12 + tom.monthValue) - (fom.year * 12 + fom.monthValue) + 1L
 

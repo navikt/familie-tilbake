@@ -1,9 +1,8 @@
-package no.nav.familie.tilbake.v2
+package no.nav.tilbakekreving
 
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.ApplicationProperties
 import no.nav.familie.tilbake.log.SecureLog
-import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFaktaDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFatteVedtaksstegDto

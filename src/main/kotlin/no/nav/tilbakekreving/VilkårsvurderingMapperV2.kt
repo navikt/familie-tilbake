@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.v2
+package no.nav.tilbakekreving
 
 import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
