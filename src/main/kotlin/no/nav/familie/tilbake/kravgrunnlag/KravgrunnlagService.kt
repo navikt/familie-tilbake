@@ -32,6 +32,8 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagValidatorV2
+import no.nav.tilbakekreving.kravgrunnlag.PeriodeValidator
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -86,7 +88,8 @@ class KravgrunnlagService(
             info("Håndterer kravgrunnlag fagsystem=$fagsystem, eksternFagId=$fagsystemId, behandlingId=${behandling?.id}, ytelsestype=$ytelsestype, eksternKravgrunnlagId=${kravgrunnlag.kravgrunnlagId}")
         }
 
-        KravgrunnlagValidator.validerGrunnlag(kravgrunnlag)
+        KravgrunnlagValidatorV2.valider(kravgrunnlag, PeriodeValidator.MånedsperiodeValidator)
+            .throwOnError(logContext)
 
         if (behandling == null) {
             mottattXmlService.arkiverEksisterendeGrunnlag(kravgrunnlag)

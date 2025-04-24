@@ -644,7 +644,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-            "Perioden ${LocalDate.of(2020, 8,1).lagDatoIkkeForeldet()}-${LocalDate.of(2020, 8,31).lagDatoIkkeForeldet()} mangler postering med klassetype=FEIL."
+            "Perioden ${LocalDate.of(2020, 8,1).lagDatoIkkeForeldet()} til ${LocalDate.of(2020, 8,31).lagDatoIkkeForeldet()} mangler postering med klassetype=FEIL."
     }
 
     @Test
@@ -653,7 +653,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-            "Perioden ${LocalDate.of(2020, 8,1).lagDatoIkkeForeldet()}-${LocalDate.of(2020, 8,31).lagDatoIkkeForeldet()} mangler postering med klassetype=YTEL."
+            "Perioden ${LocalDate.of(2020, 8,1).lagDatoIkkeForeldet()} til ${LocalDate.of(2020, 8,31).lagDatoIkkeForeldet()} mangler postering med klassetype=YTEL."
     }
 
     @Test
@@ -671,7 +671,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-            "For måned ${LocalDate.of(2020,8,1).lagDatoIkkeForeldet().year}-08 er maks skatt 0.00, men maks tilbakekreving ganget med skattesats blir 210"
+            "Maks skatt for perioden ${LocalDate.of(2020,8,1).lagDatoIkkeForeldet().year}-08-01 til ${LocalDate.of(2020,8,1).lagDatoIkkeForeldet().year}-08-31 er 0.00, men maks tilbakekreving ganget med skattesats blir 210."
     }
 
     @Test
@@ -680,7 +680,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-            "Perioden ${LocalDate.of(2020, 8,1).lagDatoIkkeForeldet()}-${LocalDate.of(2020, 8,31).lagDatoIkkeForeldet()} har FEIL postering med negativ beløp"
+            "Perioden ${LocalDate.of(2020, 8,1).lagDatoIkkeForeldet()} til ${LocalDate.of(2020, 8,31).lagDatoIkkeForeldet()} har feilpostering med negativt beløp."
     }
 
     @Test
@@ -689,24 +689,19 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-            "For perioden ${LocalDate.of(2020, 8,1).lagDatoIkkeForeldet()}-${LocalDate.of(2020, 8,31).lagDatoIkkeForeldet()} " +
-            "total tilkakekrevesBeløp i YTEL posteringer er 1500.00, " +
-            "mens total nytt beløp i FEIL posteringer er 2108.00. " +
-            "Det er forventet at disse er like."
+            "Perioden ${LocalDate.of(2020, 8, 1).lagDatoIkkeForeldet()} til ${LocalDate.of(2020, 8, 31).lagDatoIkkeForeldet()} " +
+            "har ulikt summert tilbakekrevingsbeløp i YTEL postering(1500.00) " +
+            "i forhold til summert beløpNy i FEIL postering(2108.00)."
     }
 
     @Test
     fun `doTask skal ikke lagre mottatt kravgrunnlag når mottatt xml har YTEL postering som ikke matcher beregning`() {
-        val kravgrunnlagXml =
-            readXml(
-                "/kravgrunnlagxml/" +
-                    "kravgrunnlag_YTEL_postering_som_ikke_matcher_beregning.xml",
-            )
+        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_YTEL_postering_som_ikke_matcher_beregning.xml")
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
             "Har en eller flere perioder med YTEL-postering med tilbakekrevesBeløp " +
-            "som er større enn differanse mellom nyttBeløp og opprinneligBeløp"
+            "som er større enn differanse mellom nyttBeløp og opprinneligBeløp."
     }
 
     @Test
