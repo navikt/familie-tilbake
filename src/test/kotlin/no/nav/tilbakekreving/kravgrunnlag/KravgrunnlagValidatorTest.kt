@@ -23,7 +23,7 @@ import java.util.UUID
 class KravgrunnlagValidatorTest {
     @Test
     fun `helt standard kravgrunnlag`() {
-        KravgrunnlagValidatorV2.valider(
+        KravgrunnlagValidator.valider(
             kravgrunnlag = kravgrunnlag(
                 tilbakekrevingsperioder = listOf(
                     periode(1.januar til 31.januar).medStandardFeilutbetaling(),
@@ -291,7 +291,7 @@ class KravgrunnlagValidatorTest {
 
     @Test
     fun `perioder hvor differansen mellom opprinnelig beløp og beløp som tilbakekreves er større og mindre enn beløpTilbakekreves`() {
-        KravgrunnlagValidatorV2.valider(
+        KravgrunnlagValidator.valider(
             kravgrunnlag = kravgrunnlag(
                 tilbakekrevingsperioder = listOf(
                     periode(1.januar til 31.januar)
@@ -314,7 +314,7 @@ class KravgrunnlagValidatorTest {
         periodeValidator: PeriodeValidator,
         forventetFeil: List<String>,
     ) {
-        val valideringsresultat = KravgrunnlagValidatorV2.valider(kravgrunnlag, periodeValidator)
+        val valideringsresultat = KravgrunnlagValidator.valider(kravgrunnlag, periodeValidator)
             .shouldBeInstanceOf<ValidationResult.Feil>()
         forventetFeil.forAll { forventetFeil ->
             valideringsresultat.failures.forOne {

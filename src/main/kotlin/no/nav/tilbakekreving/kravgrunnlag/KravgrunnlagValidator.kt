@@ -9,7 +9,7 @@ import no.nav.tilbakekreving.typer.v1.TypeKlasseDto
 import java.math.BigDecimal
 import java.math.RoundingMode
 
-class KravgrunnlagValidatorV2(
+class KravgrunnlagValidator(
     private val kravgrunnlag: DetaljertKravgrunnlagDto,
     private val periodeValidator: PeriodeValidator,
 ) {
@@ -145,7 +145,7 @@ class KravgrunnlagValidatorV2(
             kravgrunnlag: DetaljertKravgrunnlagDto,
             periodeValidator: PeriodeValidator,
         ): ValidationResult {
-            return KravgrunnlagValidatorV2(kravgrunnlag, periodeValidator)
+            return KravgrunnlagValidator(kravgrunnlag, periodeValidator)
                 .valider()
         }
     }
