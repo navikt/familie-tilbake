@@ -27,6 +27,12 @@ class BehandlingHistorikk(
         return HistorikkReferanse(this, historikk.last().internId)
     }
 
+    fun oppdater(innslag: Behandling): HistorikkReferanse<UUID, Behandling> {
+        val index = historikk.indexOfFirst { it.internId == innslag.internId }
+        historikk[index] = innslag
+        return HistorikkReferanse(this, innslag.internId)
+    }
+
     fun tilEntity(): List<BehandlingEntity> {
         return historikk.map { it.tilEntity() }
     }

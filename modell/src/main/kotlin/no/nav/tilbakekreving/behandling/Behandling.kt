@@ -46,20 +46,20 @@ import java.util.UUID
 
 class Behandling internal constructor(
     override val internId: UUID,
-    private val eksternId: UUID,
-    private val behandlingstype: Behandlingstype,
-    private val opprettet: LocalDateTime,
-    private val sistEndret: LocalDateTime,
-    private val enhet: Enhet?,
-    private val årsak: Behandlingsårsakstype,
-    private var ansvarligSaksbehandler: Behandler,
-    private val eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
-    private val kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
+    val eksternId: UUID,
+    val behandlingstype: Behandlingstype,
+    val opprettet: LocalDateTime,
+    val årsak: Behandlingsårsakstype,
+    var ansvarligSaksbehandler: Behandler,
+    val eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
     val foreldelsesteg: Foreldelsesteg,
     private val faktasteg: Faktasteg,
     private val vilkårsvurderingsteg: Vilkårsvurderingsteg,
     private val foreslåVedtakSteg: ForeslåVedtakSteg,
     private val fatteVedtakSteg: FatteVedtakSteg,
+    private val sistEndret: LocalDateTime,
+    private val enhet: Enhet?,
+    private val kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
 ) : Historikk.HistorikkInnslag<UUID>, FrontendDto<BehandlingDto> {
     val faktastegDto: FrontendDto<FaktaFeilutbetalingDto> get() = faktasteg
     val foreldelsestegDto: FrontendDto<VurdertForeldelseDto> get() = foreldelsesteg
