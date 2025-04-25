@@ -219,10 +219,8 @@ class TilbakekrevingService(
         fakta: BehandlingsstegFaktaDto,
         behandler: Behandler,
     ) {
-        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
-
         fakta.feilutbetaltePerioder.forEach {
-            behandling.håndter(behandler, it)
+            tilbakekreving.håndter(behandler, it)
             // TODO: Fakta steg
         }
     }
@@ -236,7 +234,7 @@ class TilbakekrevingService(
 
         behandling.splittVilkårsvurdertePerioder(vurdering.vilkårsvurderingsperioder.map { it.periode })
         vurdering.vilkårsvurderingsperioder.forEach { periode ->
-            behandling.håndter(
+            tilbakekreving.håndter(
                 behandler,
                 periode.periode,
                 VilkårsvurderingMapperV2.tilVurdering(periode),
@@ -252,7 +250,7 @@ class TilbakekrevingService(
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
         behandling.splittForeldetPerioder(vurdering.foreldetPerioder.map { it.periode })
         vurdering.foreldetPerioder.forEach { periode ->
-            behandling.håndter(
+            tilbakekreving.håndter(
                 behandler,
                 periode.periode,
                 when (periode.foreldelsesvurderingstype) {
@@ -270,7 +268,7 @@ class TilbakekrevingService(
         vurdering: BehandlingsstegForeslåVedtaksstegDto,
         behandler: Behandler,
     ) {
-        tilbakekreving.behandlingHistorikk.nåværende().entry.håndter(
+        tilbakekreving.håndter(
             behandler,
             ForeslåVedtakSteg.Vurdering.ForeslåVedtak(
                 vurdering.fritekstavsnitt.oppsummeringstekst,
@@ -293,9 +291,8 @@ class TilbakekrevingService(
         vurdering: BehandlingsstegFatteVedtaksstegDto,
         beslutter: Behandler,
     ) {
-        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
         for (stegVurdering in vurdering.totrinnsvurderinger) {
-            behandling.håndter(
+            tilbakekreving.håndter(
                 beslutter = beslutter,
                 behandlingssteg = stegVurdering.behandlingssteg,
                 vurdering = when (stegVurdering.godkjent) {

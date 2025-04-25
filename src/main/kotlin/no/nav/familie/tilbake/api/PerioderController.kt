@@ -50,7 +50,7 @@ class PerioderController(
                 handling = "Sjekker om perioder er like - unntatt dato og beløp",
             )
             tilbakekrevingService.sjekkBehovOgHåndter(tilbakekreving)
-            return Ressurs.success(tilbakekreving.behandlingHistorikk.nåværende().entry.vilkårsvurderingsteg.harLikePerioder())
+            return Ressurs.success(tilbakekreving.behandlingHistorikk.nåværende().entry.harLikePerioder())
         }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
@@ -82,7 +82,7 @@ class PerioderController(
                 handling = "Sjekker om perioder er sammenslått",
             )
             tilbakekrevingService.sjekkBehovOgHåndter(tilbakekreving)
-            return Ressurs.success(tilbakekreving.behandlingHistorikk.nåværende().entry.vilkårsvurderingsteg.harLikePerioder())
+            return Ressurs.success(tilbakekreving.behandlingHistorikk.nåværende().entry.harLikePerioder())
         }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,

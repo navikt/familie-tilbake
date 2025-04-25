@@ -1,13 +1,18 @@
 package no.nav.tilbakekreving.behandling
 
 import no.nav.tilbakekreving.FrontendDto
+import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegsinfoDto
 import no.nav.tilbakekreving.api.v1.dto.BeregnetPeriodeDto
 import no.nav.tilbakekreving.api.v1.dto.BeregnetPerioderDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatsperiodeDto
+import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingsperiodeDto
+import no.nav.tilbakekreving.api.v1.dto.TotrinnsvurderingDto
+import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelseDto
+import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
@@ -31,6 +36,7 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatu
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.saksbehandler.Saksbehandling
+import no.nav.tilbakekreving.tilstand.IverksettVedtak
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -45,12 +51,19 @@ class Behandling private constructor(
     private var ansvarligSaksbehandler: Behandler,
     private val eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
     private val kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
-    val foreldelsesteg: Foreldelsesteg,
-    val faktasteg: Faktasteg,
-    val vilkårsvurderingsteg: Vilkårsvurderingsteg,
-    val foreslåVedtakSteg: ForeslåVedtakSteg,
+    private val foreldelsesteg: Foreldelsesteg,
+    private val faktasteg: Faktasteg,
+    private val vilkårsvurderingsteg: Vilkårsvurderingsteg,
+    private val foreslåVedtakSteg: ForeslåVedtakSteg,
 ) : Historikk.HistorikkInnslag<UUID>, FrontendDto<BehandlingDto>, Saksbehandling {
-    val fatteVedtakSteg = FatteVedtakSteg.opprett(this)
+    private val fatteVedtakSteg = FatteVedtakSteg.opprett(this)
+
+    val faktastegDto: FrontendDto<FaktaFeilutbetalingDto> get() = faktasteg
+    val foreldelsestegDto: FrontendDto<VurdertForeldelseDto> get() = foreldelsesteg
+    val vilkårsvurderingsstegDto: FrontendDto<VurdertVilkårsvurderingDto> get() = vilkårsvurderingsteg
+    val fatteVedtakStegDto: FrontendDto<TotrinnsvurderingDto> get() = fatteVedtakSteg
+
+    fun harLikePerioder(): Boolean = vilkårsvurderingsteg.harLikePerioder()
 
     private fun steg() = listOf(
         faktasteg,
@@ -168,7 +181,7 @@ class Behandling private constructor(
         )
     }
 
-    fun håndter(
+    internal fun håndter(
         behandler: Behandler,
         vurdering: FaktaFeilutbetalingsperiodeDto,
     ) {
@@ -176,7 +189,7 @@ class Behandling private constructor(
         faktasteg.behandleFakta(vurdering)
     }
 
-    fun håndter(
+    internal fun håndter(
         behandler: Behandler,
         periode: Datoperiode,
         vurdering: Vilkårsvurderingsteg.Vurdering,
@@ -185,7 +198,7 @@ class Behandling private constructor(
         vilkårsvurderingsteg.vurder(periode, vurdering)
     }
 
-    fun håndter(
+    internal fun håndter(
         behandler: Behandler,
         periode: Datoperiode,
         vurdering: Foreldelsesteg.Vurdering,
@@ -194,20 +207,24 @@ class Behandling private constructor(
         foreldelsesteg.vurderForeldelse(periode, vurdering)
     }
 
-    fun håndter(
+    internal fun håndter(
         behandler: Behandler,
-        vurdering: ForeslåVedtakSteg.Vurdering.ForeslåVedtak,
+        vurdering: ForeslåVedtakSteg.Vurdering,
     ) {
         oppdaterAnsvarligSaksbehandler(behandler)
         foreslåVedtakSteg.håndter(vurdering)
     }
 
-    fun håndter(
+    internal fun håndter(
+        tilbakekreving: Tilbakekreving,
         beslutter: Behandler,
         behandlingssteg: Behandlingssteg,
         vurdering: FatteVedtakSteg.Vurdering,
     ) {
         fatteVedtakSteg.håndter(beslutter, behandlingssteg, vurdering)
+        if (fatteVedtakSteg.erFullstending()) {
+            tilbakekreving.byttTilstand(IverksettVedtak)
+        }
     }
 
     companion object {

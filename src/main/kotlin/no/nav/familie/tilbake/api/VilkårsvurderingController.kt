@@ -44,7 +44,7 @@ class VilkårsvurderingController(
                 handling = "Henter vilkårsvurdering for en gitt behandling",
             )
             tilbakekrevingService.sjekkBehovOgHåndter(tilbakekreving)
-            return Ressurs.success(tilbakekreving.behandlingHistorikk.finn(behandlingId).vilkårsvurderingsteg?.tilFrontendDto() ?: return Ressurs.failure())
+            return Ressurs.success(tilbakekreving.behandlingHistorikk.finn(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto())
         }
 
         tilgangskontrollService.validerTilgangBehandlingID(

@@ -47,7 +47,7 @@ class FaktaFeilutbetalingController(
                 handling = "Henter tilbakekrevingsbehandling",
             )
             tilbakekrevingService.sjekkBehovOgHåndter(tilbakekreving)
-            return Ressurs.success(tilbakekreving.behandlingHistorikk.nåværende().entry.faktasteg?.tilFrontendDto() ?: return Ressurs.failure())
+            return Ressurs.success(tilbakekreving.behandlingHistorikk.nåværende().entry.faktastegDto.tilFrontendDto())
         }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId,

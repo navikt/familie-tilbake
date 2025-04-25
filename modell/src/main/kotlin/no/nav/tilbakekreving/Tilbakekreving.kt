@@ -2,10 +2,15 @@ package no.nav.tilbakekreving
 
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsoppsummeringDto
 import no.nav.tilbakekreving.api.v1.dto.FagsakDto
+import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingsperiodeDto
 import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.BehandlingHistorikk
+import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
+import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
+import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
+import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.brev.BrevHistorikk
@@ -19,7 +24,9 @@ import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
+import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.person.Bruker
 import no.nav.tilbakekreving.person.Bruker.Companion.tilNullableFrontendDto
@@ -114,6 +121,36 @@ class Tilbakekreving(
             },
         )
     }
+
+    fun håndter(
+        beslutter: Behandler,
+        behandlingssteg: Behandlingssteg,
+        vurdering: FatteVedtakSteg.Vurdering,
+    ) {
+        behandlingHistorikk.nåværende().entry.håndter(this, beslutter, behandlingssteg, vurdering)
+    }
+
+    fun håndter(
+        behandler: Behandler,
+        vurdering: FaktaFeilutbetalingsperiodeDto,
+    ) = behandlingHistorikk.nåværende().entry.håndter(behandler, vurdering)
+
+    fun håndter(
+        behandler: Behandler,
+        periode: Datoperiode,
+        vurdering: Foreldelsesteg.Vurdering,
+    ) = behandlingHistorikk.nåværende().entry.håndter(behandler, periode, vurdering)
+
+    fun håndter(
+        behandler: Behandler,
+        periode: Datoperiode,
+        vurdering: Vilkårsvurderingsteg.Vurdering,
+    ) = behandlingHistorikk.nåværende().entry.håndter(behandler, periode, vurdering)
+
+    fun håndter(
+        behandler: Behandler,
+        vurdering: ForeslåVedtakSteg.Vurdering,
+    ) = behandlingHistorikk.nåværende().entry.håndter(behandler, vurdering)
 
     companion object {
         fun opprett(
