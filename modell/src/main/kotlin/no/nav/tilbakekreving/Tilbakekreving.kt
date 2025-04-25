@@ -6,6 +6,7 @@ import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingsperiodeDto
 import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.Behandling
+import no.nav.tilbakekreving.behandling.Behandling.Companion.nyBehandling
 import no.nav.tilbakekreving.behandling.BehandlingHistorikk
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
@@ -71,6 +72,14 @@ class Tilbakekreving(
 
     fun håndter(varselbrevSendt: VarselbrevSendtHendelse) {
         tilstand.håndter(this, varselbrevSendt)
+    }
+
+    fun nullstillBehandling() {
+        val nåværendeBehandling = behandlingHistorikk.nåværende().entry
+        if (nåværendeBehandling.kanNullstilles()) {
+            val nullstiltBehandling = nåværendeBehandling.lagNullstiltBehandling(brevHistorikk)
+            behandlingHistorikk.lagre(nullstiltBehandling)
+        }
     }
 
     fun opprettBehandling(

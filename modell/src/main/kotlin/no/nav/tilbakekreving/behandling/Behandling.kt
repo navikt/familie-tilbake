@@ -227,6 +227,26 @@ class Behandling private constructor(
         }
     }
 
+    fun lagNullstiltBehandling(brevHistorikk: BrevHistorikk): Behandling {
+        return nyBehandling(
+            internId = UUID.randomUUID(),
+            eksternId = eksternId,
+            behandlingstype = Behandlingstype.REVURDERING_TILBAKEKREVING,
+            opprettet = opprettet,
+            enhet = enhet,
+            årsak = årsak,
+            ansvarligSaksbehandler = ansvarligSaksbehandler,
+            sistEndret = LocalDateTime.now(),
+            eksternFagsakBehandling = eksternFagsakBehandling,
+            kravgrunnlag = kravgrunnlag,
+            brevHistorikk = brevHistorikk,
+        )
+    }
+
+    fun kanNullstilles(): Boolean {
+        return behandlingsstatus() != Behandlingsstatus.AVSLUTTET
+    }
+
     companion object {
         fun nyBehandling(
             internId: UUID,
