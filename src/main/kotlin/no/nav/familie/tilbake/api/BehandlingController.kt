@@ -133,6 +133,7 @@ class BehandlingController(
                     auditLoggerEvent = AuditLoggerEvent.ACCESS,
                     handling = "Henter tilbakekrevingsbehandling",
                 )
+                tilbakekrevingService.sjekkBehovOgHåndter(tilbakekreving)
                 return Ressurs.success(tilbakekreving.behandlingHistorikk.tilFrontendDto().first { it.behandlingId == behandlingId })
             }
         }
@@ -174,6 +175,7 @@ class BehandlingController(
             )
 
             tilbakekrevingService.utførSteg(saksbehandler, tilbakekreving, behandlingsstegDto, logContext)
+            tilbakekrevingService.sjekkBehovOgHåndter(tilbakekreving)
             return Ressurs.success("OK")
         }
         tilgangskontrollService.validerTilgangBehandlingID(

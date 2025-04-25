@@ -49,6 +49,7 @@ class FagsakController(
         )
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(fagsystem, eksternFagsakId)
         if (tilbakekreving != null) {
+            tilbakekrevingService.sjekkBehovOgHåndter(tilbakekreving)
             return Ressurs.success(tilbakekreving.tilFrontendDto())
         }
         return Ressurs.success(fagsakService.hentFagsak(fagsystem, eksternFagsakId))

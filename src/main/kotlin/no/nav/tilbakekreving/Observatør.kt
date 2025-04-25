@@ -1,6 +1,12 @@
-package no.nav.tilbakekreving.behov
+package no.nav.tilbakekreving
 
-class BehovObservatørOppsamler() : BehovObservatør {
+import no.nav.tilbakekreving.behov.Behov
+import no.nav.tilbakekreving.behov.BehovObservatør
+import no.nav.tilbakekreving.behov.BrukerinfoBehov
+import no.nav.tilbakekreving.behov.FagsysteminfoBehov
+import no.nav.tilbakekreving.behov.VarselbrevBehov
+
+class Observatør() : BehovObservatør {
     val behovListe = mutableListOf<Behov>()
 
     override fun håndter(

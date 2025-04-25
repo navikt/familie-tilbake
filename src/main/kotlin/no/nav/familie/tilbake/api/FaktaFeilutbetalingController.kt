@@ -46,6 +46,7 @@ class FaktaFeilutbetalingController(
                 auditLoggerEvent = AuditLoggerEvent.ACCESS,
                 handling = "Henter tilbakekrevingsbehandling",
             )
+            tilbakekrevingService.sjekkBehovOgHåndter(tilbakekreving)
             return Ressurs.success(tilbakekreving.behandlingHistorikk.nåværende().entry.faktasteg?.tilFrontendDto() ?: return Ressurs.failure())
         }
         tilgangskontrollService.validerTilgangBehandlingID(

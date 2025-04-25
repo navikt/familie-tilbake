@@ -22,8 +22,7 @@ class AvventerKravgrunnlagHendelseTest {
         tilbakekreving.håndter(kravgrunnlag())
 
         tilbakekreving.tilstand shouldBe AvventerFagsysteminfo
-        oppsamler.fagsysteminfoBehov.size shouldBe 1
-        oppsamler.fagsysteminfoBehov.forOne {
+        oppsamler.behovListe.forOne {
             it shouldBeEqual
                 FagsysteminfoBehov(
                     opprettTilbakekrevingEvent.eksternFagsak.eksternId,

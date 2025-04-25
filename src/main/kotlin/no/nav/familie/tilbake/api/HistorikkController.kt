@@ -45,6 +45,7 @@ class HistorikkController(
                     auditLoggerEvent = AuditLoggerEvent.ACCESS,
                     handling = "Henter tilbakekrevingsbehandling",
                 )
+                tilbakekrevingService.sjekkBehovOgHåndter(tilbakekreving)
                 return Ressurs.success(emptyList())
             }
         }

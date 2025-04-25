@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.tilstand
 
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
+import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
@@ -31,6 +32,13 @@ internal sealed interface Tilstand {
         fagsysteminfo: FagsysteminfoHendelse,
     ) {
         error("Forventet ikke Fagsysteminfo i $navn")
+    }
+
+    fun håndter(
+        tilbakekreving: Tilbakekreving,
+        brukerinfo: BrukerinfoHendelse,
+    ) {
+        error("Forventet ikke Brukerinfo i $navn")
     }
 
     fun håndter(

@@ -13,8 +13,8 @@ import java.util.UUID
 class EksternFagsak(
     val eksternId: String,
     private val ytelsestype: Ytelsestype,
-    private val fagsystem: Fagsystem,
-    private val behandlinger: EksternFagsakBehandlingHistorikk,
+    internal val fagsystem: Fagsystem,
+    val behandlinger: EksternFagsakBehandlingHistorikk,
     private val behovObservatør: BehovObservatør,
 ) : FrontendDto<EksternFagsakDto> {
     override fun tilFrontendDto(): EksternFagsakDto {

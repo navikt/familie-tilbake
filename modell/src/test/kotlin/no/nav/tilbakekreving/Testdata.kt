@@ -9,10 +9,12 @@ import no.nav.tilbakekreving.behandling.Enhet
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
+import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
+import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -103,10 +105,21 @@ fun feilutbetalteBeløp() =
 fun fagsysteminfoHendelse() =
     FagsysteminfoHendelse(
         eksternId = UUID.randomUUID().toString(),
+        ident = bruker().ident,
         revurderingsårsak = "Revurderingsårsak",
         revurderingsresultat = "Revurderingsresultat",
         revurderingsvedtaksdato = LocalDate.now(),
         begrunnelseForTilbakekreving = "Begrunnelse for tilbakekreving",
+    )
+
+fun brukerinfoHendelse() =
+    BrukerinfoHendelse(
+        ident = bruker().ident,
+        navn = "test bruker",
+        fødselsdato = LocalDate.now(),
+        kjønn = Kjønn.MANN,
+        dødsdato = null,
+        språkkode = bruker().språkkode,
     )
 
 fun varselbrev() =

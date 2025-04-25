@@ -151,6 +151,7 @@ class DokumentController(
                 auditLoggerEvent = AuditLoggerEvent.ACCESS,
                 handling = "Henter vedtaksbrevtekst",
             )
+            tilbakekrevingService.sjekkBehovOgHåndter(tilbakekreving)
             return Ressurs.success(emptyList())
         }
         tilgangskontrollService.validerTilgangBehandlingID(

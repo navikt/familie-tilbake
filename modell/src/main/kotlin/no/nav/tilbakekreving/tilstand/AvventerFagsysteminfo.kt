@@ -17,6 +17,7 @@ object AvventerFagsysteminfo : Tilstand {
     ) {
         val eksternBehandling = tilbakekreving.eksternFagsak.lagre(fagsysteminfo)
         tilbakekreving.opprettBehandling(eksternBehandling, Behandler.Vedtaksløsning)
-        tilbakekreving.byttTilstand(SendVarselbrev)
+        tilbakekreving.opprettBruker(fagsysteminfo.ident)
+        tilbakekreving.byttTilstand(AvventerBrukerinfo)
     }
 }
