@@ -62,8 +62,6 @@ jobs:
           tag: ${{ github.sha }}
           dockerfile: Dockerfile
           docker_context: .
-          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
-          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
     outputs:
       image: ${{ steps.docker-push.outputs.image }}
 
@@ -103,8 +101,6 @@ jobs:
       - name: Login GAR
         uses: nais/login@v0
         with:
-          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
-          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           team: tilbake
       - name: Checkout e2e tests
         if: "!contains(github.event.head_commit.message, 'e2e skip')"
