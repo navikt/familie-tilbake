@@ -304,6 +304,6 @@ class TilbakekrevingService(
     }
 
     fun flyttBehandlingsstegTilbakeTilFakta(tilbakekreving: Tilbakekreving) {
-        tilbakekreving.nullstillBehandling()
+        tilbakekreving.håndterNullstilling()
     }
 }

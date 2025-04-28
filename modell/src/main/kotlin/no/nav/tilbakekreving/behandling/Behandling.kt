@@ -51,7 +51,7 @@ class Behandling private constructor(
     private var ansvarligSaksbehandler: Behandler,
     private val eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
     private val kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
-    private val foreldelsesteg: Foreldelsesteg,
+    val foreldelsesteg: Foreldelsesteg,
     private val faktasteg: Faktasteg,
     private val vilkårsvurderingsteg: Vilkårsvurderingsteg,
     private val foreslåVedtakSteg: ForeslåVedtakSteg,
@@ -241,10 +241,6 @@ class Behandling private constructor(
             kravgrunnlag = kravgrunnlag,
             brevHistorikk = brevHistorikk,
         )
-    }
-
-    fun kanNullstilles(): Boolean {
-        return behandlingsstatus() != Behandlingsstatus.AVSLUTTET
     }
 
     companion object {

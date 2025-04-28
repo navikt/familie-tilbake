@@ -8,4 +8,8 @@ object TilBehandling : Tilstand {
     override fun entering(tilbakekreving: Tilbakekreving) {
         // TODO: Sende ut behov om saksbehandling
     }
+
+    override fun håndterNullstilling(tilbakekreving: Tilbakekreving) {
+        tilbakekreving.nullstillBehandling()
+    }
 }
