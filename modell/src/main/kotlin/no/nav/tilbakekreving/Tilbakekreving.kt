@@ -73,6 +73,14 @@ class Tilbakekreving(
         tilstand.håndter(this, varselbrevSendt)
     }
 
+    fun håndterNullstilling() = tilstand.håndterNullstilling(this)
+
+    fun nullstillBehandling() {
+        val nåværendeBehandling = behandlingHistorikk.nåværende().entry
+        val nullstiltBehandling = nåværendeBehandling.lagNullstiltBehandling(brevHistorikk)
+        behandlingHistorikk.lagre(nullstiltBehandling)
+    }
+
     fun opprettBehandling(
         eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
         behandler: Behandler,

@@ -51,7 +51,7 @@ class Behandling private constructor(
     private var ansvarligSaksbehandler: Behandler,
     private val eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
     private val kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
-    private val foreldelsesteg: Foreldelsesteg,
+    val foreldelsesteg: Foreldelsesteg,
     private val faktasteg: Faktasteg,
     private val vilkårsvurderingsteg: Vilkårsvurderingsteg,
     private val foreslåVedtakSteg: ForeslåVedtakSteg,
@@ -225,6 +225,22 @@ class Behandling private constructor(
         if (fatteVedtakSteg.erFullstending()) {
             tilbakekreving.byttTilstand(IverksettVedtak)
         }
+    }
+
+    fun lagNullstiltBehandling(brevHistorikk: BrevHistorikk): Behandling {
+        return nyBehandling(
+            internId = UUID.randomUUID(),
+            eksternId = eksternId,
+            behandlingstype = Behandlingstype.REVURDERING_TILBAKEKREVING,
+            opprettet = opprettet,
+            enhet = enhet,
+            årsak = årsak,
+            ansvarligSaksbehandler = ansvarligSaksbehandler,
+            sistEndret = LocalDateTime.now(),
+            eksternFagsakBehandling = eksternFagsakBehandling,
+            kravgrunnlag = kravgrunnlag,
+            brevHistorikk = brevHistorikk,
+        )
     }
 
     companion object {

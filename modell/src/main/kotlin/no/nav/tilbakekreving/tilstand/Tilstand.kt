@@ -52,4 +52,8 @@ internal sealed interface Tilstand {
         tilbakekreving: Tilbakekreving,
         påminnelse: Påminnelse,
     ) {}
+
+    fun håndterNullstilling(tilbakekreving: Tilbakekreving) {
+        error("Forventet ikke Nullstilling i $navn")
+    }
 }

@@ -11,6 +11,7 @@ import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
@@ -41,6 +42,7 @@ class ForvaltningController(
     private val behandlingTilstandService: BehandlingTilstandService,
     private val logService: LogService,
     private val tilgangskontrollService: TilgangskontrollService,
+    private val tilbakekrevingService: TilbakekrevingService,
 ) {
     @Operation(summary = "Hent korrigert kravgrunnlag")
     @PutMapping(
@@ -123,6 +125,18 @@ class ForvaltningController(
     fun flyttBehandlingTilFakta(
         @PathVariable behandlingId: UUID,
     ): Ressurs<String> {
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        if (tilbakekreving != null) {
+            tilgangskontrollService.validerTilgangBehandlingID(
+                behandlingId = behandlingId,
+                minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+                auditLoggerEvent = AuditLoggerEvent.UPDATE,
+                handling = "Flytter behandling tilbake til Fakta",
+            )
+            tilbakekrevingService.flyttBehandlingsstegTilbakeTilFakta(tilbakekreving)
+            return Ressurs.success("OK")
+        }
+
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.FORVALTER,
