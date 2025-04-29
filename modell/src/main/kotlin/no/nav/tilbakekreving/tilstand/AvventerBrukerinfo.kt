@@ -15,6 +15,7 @@ object AvventerBrukerinfo : Tilstand {
         brukerinfo: BrukerinfoHendelse,
     ) {
         tilbakekreving.bruker!!.oppdater(brukerinfo)
+        tilbakekreving.opprettBrevmottakerSteg(brukerinfo.navn, brukerinfo.ident)
         tilbakekreving.byttTilstand(SendVarselbrev)
     }
 }
