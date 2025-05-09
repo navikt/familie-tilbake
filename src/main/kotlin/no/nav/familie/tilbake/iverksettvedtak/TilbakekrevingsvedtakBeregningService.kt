@@ -98,11 +98,7 @@ class TilbakekrevingsvedtakBeregningService(
                             opprinneligTilbakekrevesbeløp
                                 .subtract(beregnetTilbakrevesbeløp)
                                 .setScale(0, RoundingMode.HALF_UP),
-                        skattBeløp =
-                            beregnSkattBeløp(
-                                beregnetTilbakrevesbeløp,
-                                it.skatteprosent,
-                            ),
+                        skattBeløp = beregnetPeriode.skattebeløp,
                         kodeResultat = utledKodeResulat(beregnetPeriode),
                     )
                 }
@@ -110,11 +106,6 @@ class TilbakekrevingsvedtakBeregningService(
                 else -> null
             }
         }
-
-    private fun beregnSkattBeløp(
-        bruttoTilbakekrevesBeløp: BigDecimal,
-        skattProsent: BigDecimal,
-    ): BigDecimal = bruttoTilbakekrevesBeløp.multiply(skattProsent).divide(BigDecimal(100), 0, RoundingMode.DOWN)
 
     private fun utledKodeResulat(beregnetPeriode: Beregningsresultatsperiode): KodeResultat =
         when {

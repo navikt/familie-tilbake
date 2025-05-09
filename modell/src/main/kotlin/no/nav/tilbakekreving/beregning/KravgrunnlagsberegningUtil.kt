@@ -8,17 +8,6 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 object KravgrunnlagsberegningUtil {
-    internal fun fordelKravgrunnlagBeløpPåPerioder(
-        kravgrunnlag: KravgrunnlagAdapter,
-        vurderingsperioder: List<Datoperiode>,
-    ): Map<Datoperiode, FordeltKravgrunnlagsbeløp> = vurderingsperioder.associateWith {
-        FordeltKravgrunnlagsbeløp(
-            beregnBeløp(kravgrunnlag, it, KravgrunnlagPeriodeAdapter::feilutbetaltYtelsesbeløp),
-            beregnBeløp(kravgrunnlag, it, KravgrunnlagPeriodeAdapter::utbetaltYtelsesbeløp),
-            beregnBeløp(kravgrunnlag, it, KravgrunnlagPeriodeAdapter::riktigYteslesbeløp),
-        )
-    }
-
     fun summerKravgrunnlagBeløpForPerioder(
         kravgrunnlag: KravgrunnlagAdapter,
     ): Map<Datoperiode, FordeltKravgrunnlagsbeløp> = kravgrunnlag.perioder().associate {
@@ -40,7 +29,7 @@ object KravgrunnlagsberegningUtil {
         beløpsummerer: KravgrunnlagPeriodeAdapter.() -> BigDecimal,
     ): BigDecimal = kravgrunnlag.perioder()
         .sortedBy { it.periode().fom }
-        .filter { it.beløpsummerer().isNotZero() }
+        .filterNot { it.beløpsummerer().isZero() }
         .sumOf {
             val beløp = it.beløpsummerer()
             val beløpPerMåned = BeløpsberegningUtil.beregnBeløpPerMåned(beløp, it.periode())
