@@ -9,8 +9,8 @@ import java.math.BigDecimal
 
 data class Tilbakekrevingsperiode(
     val periode: Månedsperiode,
-    val renter: BigDecimal = BigDecimal.ZERO,
-    val beløp: List<Tilbakekrevingsbeløp> = listOf(),
+    val renter: BigDecimal,
+    val beløp: List<Tilbakekrevingsbeløp>,
 )
 
 data class Tilbakekrevingsbeløp(
