@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.beregning
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.inspectors.forOne
 import io.kotest.matchers.bigdecimal.shouldBeZero
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -242,61 +243,77 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         lagVilkårsvurderingMedForsett(behandling.id, logiskPeriode)
         val beregningsresultat: Beregningsresultat = tilbakekrevingsberegningService.beregn(behandling.id)
         val resultat: List<Beregningsresultatsperiode> = beregningsresultat.beregningsresultatsperioder
-        resultat.shouldHaveSize(1)
-        val r: Beregningsresultatsperiode = resultat[0]
-        r.periode shouldBe logiskPeriode.toDatoperiode()
-        r.utbetaltYtelsesbeløp shouldBe utbetalt1.add(utbetalt2)
-        r.riktigYtelsesbeløp shouldBe nyttBeløp1.add(nyttBeløp2)
+        resultat shouldHaveSize 2
+        resultat.forOne {
+            it.periode shouldBe periode1.toDatoperiode()
+            it.utbetaltYtelsesbeløp shouldBe utbetalt1
+            it.riktigYtelsesbeløp shouldBe nyttBeløp1
+        }
+        resultat.forOne {
+            it.periode shouldBe periode2.toDatoperiode()
+            it.utbetaltYtelsesbeløp shouldBe utbetalt2
+            it.riktigYtelsesbeløp shouldBe nyttBeløp2
+        }
     }
 
     @Test
     fun `beregn skal beregne tilbakekrevingsbeløp for ikkeForeldetPeriode når beregnetPeriode er på tvers av grunnlagPeriode`() {
-        val periode = Månedsperiode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 31))
-        val periode1 = Månedsperiode(LocalDate.of(2019, 6, 1), LocalDate.of(2019, 6, 30))
+        val periode1 = Månedsperiode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 31))
+        val periode2 = Månedsperiode(LocalDate.of(2019, 6, 1), LocalDate.of(2019, 6, 30))
         val logiskPeriode =
             Månedsperiode(
                 LocalDate.of(2019, 5, 1),
                 LocalDate.of(2019, 6, 30),
             )
-        val grunnlagPeriode: Kravgrunnlagsperiode432 =
-            lagGrunnlagPeriode(
-                periode,
-                1000,
-                setOf(
-                    lagYtelBeløp(BigDecimal.valueOf(10000), BigDecimal.valueOf(10)),
-                    lagFeilBeløp(BigDecimal.valueOf(10000)),
+        val grunnlagPeriode = lagGrunnlagPeriode(
+            periode = periode1,
+            skattMnd = 1000,
+            beløp = setOf(
+                lagYtelBeløp(BigDecimal.valueOf(10000), BigDecimal.valueOf(10)),
+                lagFeilBeløp(BigDecimal.valueOf(10000)),
+            ),
+        )
+        val grunnlagPeriode1 = lagGrunnlagPeriode(
+            periode = periode2,
+            skattMnd = 1000,
+            beløp = setOf(
+                lagYtelBeløp(
+                    BigDecimal.valueOf(10000),
+                    BigDecimal.valueOf(10),
                 ),
-            )
-        val grunnlagPeriode1: Kravgrunnlagsperiode432 =
-            lagGrunnlagPeriode(
-                periode1,
-                1000,
-                setOf(
-                    lagYtelBeløp(
-                        BigDecimal.valueOf(10000),
-                        BigDecimal.valueOf(10),
-                    ),
-                    lagFeilBeløp(BigDecimal.valueOf(10000)),
-                ),
-            )
+                lagFeilBeløp(BigDecimal.valueOf(10000)),
+            ),
+        )
         val grunnlag: Kravgrunnlag431 = lagGrunnlag(setOf(grunnlagPeriode, grunnlagPeriode1))
         kravgrunnlagRepository.insert(grunnlag)
         lagForeldelse(behandling.id, logiskPeriode, Foreldelsesvurderingstype.IKKE_FORELDET, null)
         lagVilkårsvurderingMedForsett(behandling.id, logiskPeriode)
 
         val beregningsresultat: Beregningsresultat = tilbakekrevingsberegningService.beregn(behandling.id)
-        val resultat: List<Beregningsresultatsperiode> = beregningsresultat.beregningsresultatsperioder
-        resultat.shouldHaveSize(1)
-        val r: Beregningsresultatsperiode = resultat[0]
-        r.periode shouldBe logiskPeriode.toDatoperiode()
-        r.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(22000)
-        r.vurdering shouldBe Aktsomhet.FORSETT
-        r.renteprosent shouldBe BigDecimal.valueOf(10)
-        r.feilutbetaltBeløp shouldBe BigDecimal.valueOf(20000)
-        r.manueltSattTilbakekrevingsbeløp shouldBe null
-        r.andelAvBeløp shouldBe BigDecimal.valueOf(100)
-        r.skattebeløp shouldBe BigDecimal.valueOf(2000)
-        r.tilbakekrevingsbeløpEtterSkatt shouldBe BigDecimal.valueOf(20000)
+        val resultater = beregningsresultat.beregningsresultatsperioder
+        resultater shouldHaveSize 2
+        resultater.forOne { resultat ->
+            resultat.periode shouldBe periode1.toDatoperiode()
+            resultat.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(11000)
+            resultat.vurdering shouldBe Aktsomhet.FORSETT
+            resultat.renteprosent shouldBe BigDecimal.valueOf(10)
+            resultat.feilutbetaltBeløp shouldBe BigDecimal.valueOf(10000)
+            resultat.manueltSattTilbakekrevingsbeløp shouldBe null
+            resultat.andelAvBeløp shouldBe BigDecimal.valueOf(100)
+            resultat.skattebeløp shouldBe BigDecimal.valueOf(1000)
+            resultat.tilbakekrevingsbeløpEtterSkatt shouldBe BigDecimal.valueOf(10000)
+        }
+        resultater.forOne { resultat ->
+            resultat.periode shouldBe periode2.toDatoperiode()
+            resultat.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(11000)
+            resultat.vurdering shouldBe Aktsomhet.FORSETT
+            resultat.renteprosent shouldBe BigDecimal.valueOf(10)
+            resultat.feilutbetaltBeløp shouldBe BigDecimal.valueOf(10000)
+            resultat.manueltSattTilbakekrevingsbeløp shouldBe null
+            resultat.andelAvBeløp shouldBe BigDecimal.valueOf(100)
+            resultat.skattebeløp shouldBe BigDecimal.valueOf(1000)
+            resultat.tilbakekrevingsbeløpEtterSkatt shouldBe BigDecimal.valueOf(10000)
+        }
         beregningsresultat.vedtaksresultat shouldBe Vedtaksresultat.FULL_TILBAKEBETALING
     }
 

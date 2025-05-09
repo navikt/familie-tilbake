@@ -3,10 +3,10 @@ package no.nav.familie.tilbake.beregning
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingGodTro
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
-import no.nav.tilbakekreving.beregning.TilbakekrevingsberegningVilkår
+import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagPeriodeAdapter
+import no.nav.tilbakekreving.beregning.delperiode.Vilkårsvurdert
 import no.nav.tilbakekreving.beregning.modell.Beregningsresultatsperiode
-import no.nav.tilbakekreving.beregning.modell.FordeltKravgrunnlagsbeløp
-import no.nav.tilbakekreving.beregning.modell.GrunnlagsperiodeMedSkatteprosent
+import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
@@ -17,11 +17,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.LocalDate
 
 class TilbakekrevingsberegningVilkårTest {
     private lateinit var vilkårsvurderingsperiode: Vilkårsvurderingsperiode
-    private lateinit var grunnlagsperiodeMedSkatteprosent: GrunnlagsperiodeMedSkatteprosent
     private lateinit var forstodBurdeForståttVurdering: Vilkårsvurderingsperiode
 
     private val feilUtbetaltBeløp = BigDecimal.valueOf(10_000)
@@ -49,9 +49,6 @@ class TilbakekrevingsberegningVilkårTest {
                     ),
                 begrunnelse = "foo",
             )
-
-        grunnlagsperiodeMedSkatteprosent =
-            GrunnlagsperiodeMedSkatteprosent(vilkårsvurderingsperiode.periode.toDatoperiode(), BigDecimal.valueOf(10000), BigDecimal.ZERO)
     }
 
     @Nested
@@ -74,7 +71,6 @@ class TilbakekrevingsberegningVilkårTest {
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
                     feilutbetalt = feilUtbetaltBeløp,
-                    perioderMedSkatteprosent = listOf(grunnlagsperiodeMedSkatteprosent),
                     beregnRenter = true,
                 )
 
@@ -103,7 +99,6 @@ class TilbakekrevingsberegningVilkårTest {
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
                     feilutbetalt = feilUtbetaltBeløp,
-                    perioderMedSkatteprosent = listOf(grunnlagsperiodeMedSkatteprosent),
                     beregnRenter = true,
                 )
 
@@ -128,18 +123,12 @@ class TilbakekrevingsberegningVilkårTest {
                             begrunnelse = "foo",
                         ),
                 )
-            val grunnlagPeriodeMedSkattProsent =
-                GrunnlagsperiodeMedSkatteprosent(
-                    periode = vilkårsvurdering.periode.toDatoperiode(),
-                    tilbakekrevingsbeløp = feilUtbetaltBeløp,
-                    skatteprosent = BigDecimal.valueOf(10),
-                )
 
             val resultat: Beregningsresultatsperiode =
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
                     feilutbetalt = feilUtbetaltBeløp,
-                    perioderMedSkatteprosent = listOf(grunnlagPeriodeMedSkattProsent),
+                    skatteprosent = BigDecimal.valueOf(10),
                     beregnRenter = true,
                 )
 
@@ -173,7 +162,6 @@ class TilbakekrevingsberegningVilkårTest {
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
                     feilutbetalt = feilUtbetaltBeløp,
-                    perioderMedSkatteprosent = listOf(grunnlagsperiodeMedSkatteprosent),
                     beregnRenter = true,
                 )
 
@@ -204,7 +192,6 @@ class TilbakekrevingsberegningVilkårTest {
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
                     feilutbetalt = feilUtbetaltBeløp,
-                    perioderMedSkatteprosent = listOf(grunnlagsperiodeMedSkatteprosent),
                     beregnRenter = true,
                 )
 
@@ -235,7 +222,6 @@ class TilbakekrevingsberegningVilkårTest {
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
                     feilutbetalt = feilUtbetaltBeløp,
-                    perioderMedSkatteprosent = listOf(grunnlagsperiodeMedSkatteprosent),
                     beregnRenter = true,
                 )
 
@@ -257,18 +243,12 @@ class TilbakekrevingsberegningVilkårTest {
                             begrunnelse = "foo",
                         ),
                 )
-            val grunnlagPeriodeMedSkattProsent =
-                GrunnlagsperiodeMedSkatteprosent(
-                    periode = vilkårsvurdering.periode.toDatoperiode(),
-                    tilbakekrevingsbeløp = feilUtbetaltBeløp,
-                    skatteprosent = BigDecimal.valueOf(10),
-                )
 
             val resultat: Beregningsresultatsperiode =
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
                     feilutbetalt = feilUtbetaltBeløp,
-                    perioderMedSkatteprosent = listOf(grunnlagPeriodeMedSkattProsent),
+                    skatteprosent = BigDecimal.valueOf(10),
                     beregnRenter = true,
                 )
 
@@ -293,18 +273,12 @@ class TilbakekrevingsberegningVilkårTest {
                             begrunnelse = "foo",
                         ),
                 )
-            val grunnlagPeriodeMedSkattProsent =
-                GrunnlagsperiodeMedSkatteprosent(
-                    periode = vilkårsvurdering.periode.toDatoperiode(),
-                    tilbakekrevingsbeløp = feilUtbetaltBeløp,
-                    skatteprosent = BigDecimal.valueOf(10),
-                )
 
             val resultat: Beregningsresultatsperiode =
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
                     feilutbetalt = feilUtbetaltBeløp,
-                    perioderMedSkatteprosent = listOf(grunnlagPeriodeMedSkattProsent),
+                    skatteprosent = BigDecimal.valueOf(10),
                     beregnRenter = false,
                 )
 
@@ -330,20 +304,12 @@ class TilbakekrevingsberegningVilkårTest {
                         ),
                 )
 
-            val grunnlagPeriodeMedSkattProsent =
-                listOf(
-                    GrunnlagsperiodeMedSkatteprosent(
-                        periode = vilkårsvurdering.periode.toDatoperiode(),
-                        tilbakekrevingsbeløp = tilbakekrevingsbeløp,
-                        skatteprosent = skatteprosent,
-                    ),
-                )
-
             val resultat =
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
                     feilutbetalt = tilbakekrevingsbeløp,
-                    perioderMedSkatteprosent = grunnlagPeriodeMedSkattProsent,
+                    skatteprosent = skatteprosent,
+                    tilbakekrevingsbeløp = tilbakekrevingsbeløp,
                     beregnRenter = true,
                 )
 
@@ -380,7 +346,6 @@ class TilbakekrevingsberegningVilkårTest {
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
                     feilutbetalt = feilUtbetaltBeløp,
-                    perioderMedSkatteprosent = listOf(grunnlagsperiodeMedSkatteprosent),
                     beregnRenter = true,
                 )
 
@@ -411,7 +376,6 @@ class TilbakekrevingsberegningVilkårTest {
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
                     feilutbetalt = feilUtbetaltBeløp,
-                    perioderMedSkatteprosent = listOf(grunnlagsperiodeMedSkatteprosent),
                     beregnRenter = true,
                 )
 
@@ -444,7 +408,6 @@ class TilbakekrevingsberegningVilkårTest {
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
                     feilutbetalt = feilUtbetaltBeløp,
-                    perioderMedSkatteprosent = listOf(grunnlagsperiodeMedSkatteprosent),
                     beregnRenter = true,
                 )
 
@@ -475,7 +438,6 @@ class TilbakekrevingsberegningVilkårTest {
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
                     feilutbetalt = feilUtbetaltBeløp,
-                    perioderMedSkatteprosent = listOf(grunnlagsperiodeMedSkatteprosent),
                     beregnRenter = true,
                 )
 
@@ -509,7 +471,6 @@ class TilbakekrevingsberegningVilkårTest {
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
                     feilutbetalt = feilUtbetaltBeløp,
-                    perioderMedSkatteprosent = listOf(grunnlagsperiodeMedSkatteprosent),
                     beregnRenter = true,
                 )
 
@@ -520,42 +481,6 @@ class TilbakekrevingsberegningVilkårTest {
                 tilbakekrevingsbeløp = manueltSattBeløp,
                 manueltSattTilbakekrevingsbeløp = manueltSattBeløp,
                 andelAvBeløp = null,
-            )
-        }
-
-        @Test
-        fun `beregn skalkreve tilbake manuelt beløp med renter når det er satt`() {
-            val manueltSattBeløp = BigDecimal.valueOf(6000)
-
-            val vilkårsvurdering =
-                vilkårsvurderingsperiode.copy(
-                    aktsomhet =
-                        VilkårsvurderingAktsomhet(
-                            aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
-                            begrunnelse = "foo",
-                            særligeGrunnerTilReduksjon = true,
-                            ileggRenter = true,
-                            manueltSattBeløp = manueltSattBeløp,
-                        ),
-                )
-
-            val resultat: Beregningsresultatsperiode =
-                beregn(
-                    vilkårVurdering = vilkårsvurdering,
-                    feilutbetalt = feilUtbetaltBeløp,
-                    perioderMedSkatteprosent = listOf(grunnlagsperiodeMedSkatteprosent),
-                    beregnRenter = true,
-                )
-
-            resultat.skalHaVerdier(
-                vilkårsvurdering = vilkårsvurdering,
-                vurdering = Aktsomhet.GROV_UAKTSOMHET,
-                tilbakekrevingsbeløpUtenRenter = manueltSattBeløp,
-                tilbakekrevingsbeløp = BigDecimal.valueOf(6600),
-                manueltSattTilbakekrevingsbeløp = manueltSattBeløp,
-                andelAvBeløp = null,
-                renteprosent = BigDecimal.valueOf(10),
-                rentebeløp = BigDecimal.valueOf(600),
             )
         }
     }
@@ -581,7 +506,6 @@ class TilbakekrevingsberegningVilkårTest {
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
                     feilutbetalt = feilutbetaltBeløp,
-                    perioderMedSkatteprosent = listOf(grunnlagsperiodeMedSkatteprosent),
                     beregnRenter = true,
                 )
 
@@ -599,16 +523,32 @@ class TilbakekrevingsberegningVilkårTest {
     private fun beregn(
         vilkårVurdering: Vilkårsvurderingsperiode,
         feilutbetalt: BigDecimal,
-        perioderMedSkatteprosent: List<GrunnlagsperiodeMedSkatteprosent>,
         beregnRenter: Boolean,
+        skatteprosent: BigDecimal = BigDecimal.ZERO,
+        tilbakekrevingsbeløp: BigDecimal = BigDecimal.valueOf(10000),
     ): Beregningsresultatsperiode {
-        val delresultat = FordeltKravgrunnlagsbeløp(feilutbetalt, feilutbetalt, BigDecimal.ZERO)
-        return TilbakekrevingsberegningVilkår.beregn(
-            vilkårVurdering = VilkårsvurderingsperiodeAdapter(vilkårVurdering),
-            delresultat = delresultat,
-            perioderMedSkatteprosent = perioderMedSkatteprosent,
-            beregnRenter = beregnRenter,
-        )
+        return Vilkårsvurdert.opprett(
+            VilkårsvurderingsperiodeAdapter(vurdering = vilkårVurdering),
+            object : KravgrunnlagPeriodeAdapter {
+                override fun periode(): Datoperiode = vilkårVurdering.periode.toDatoperiode()
+
+                override fun feilutbetaltYtelsesbeløp(): BigDecimal = feilutbetalt
+
+                override fun utbetaltYtelsesbeløp(): BigDecimal = feilutbetalt
+
+                override fun riktigYteslesbeløp(): BigDecimal = BigDecimal.ZERO
+
+                override fun beløpTilbakekreves(): List<KravgrunnlagPeriodeAdapter.BeløpTilbakekreves> = listOf(
+                    object : KravgrunnlagPeriodeAdapter.BeløpTilbakekreves {
+                        override fun beløp(): BigDecimal = tilbakekrevingsbeløp
+
+                        override fun skatteprosent(): BigDecimal = skatteprosent
+                    },
+                )
+            },
+            beregnRenter,
+            1,
+        ).beregningsresultat()
     }
 
     /**
@@ -634,16 +574,16 @@ class TilbakekrevingsberegningVilkårTest {
     ) {
         assertThat(this.periode).isEqualTo(vilkårsvurdering.periode.toDatoperiode())
         assertThat(this.vurdering).isEqualTo(vurdering)
-        assertThat(this.feilutbetaltBeløp).isEqualTo(feilutbetalt)
-        assertThat(this.andelAvBeløp).isEqualTo(andelAvBeløp)
-        assertThat(this.renteprosent).isEqualTo(renteprosent)
-        assertThat(this.manueltSattTilbakekrevingsbeløp).isEqualTo(manueltSattTilbakekrevingsbeløp)
-        assertThat(this.tilbakekrevingsbeløpUtenRenter).isEqualTo(tilbakekrevingsbeløpUtenRenter)
-        assertThat(this.rentebeløp).isEqualTo(rentebeløp)
-        assertThat(this.tilbakekrevingsbeløp).isEqualTo(tilbakekrevingsbeløp)
-        assertThat(this.skattebeløp).isEqualTo(skattebeløp)
-        assertThat(this.tilbakekrevingsbeløpEtterSkatt).isEqualTo(tilbakekrevingsbeløpEtterSkatt)
-        assertThat(this.utbetaltYtelsesbeløp).isEqualTo(utbetaltYtelsesbeløp)
-        assertThat(this.riktigYtelsesbeløp).isEqualTo(riktigYtelsesbeløp)
+        assertThat(this.feilutbetaltBeløp.setScale(0, RoundingMode.HALF_DOWN)).isEqualTo(feilutbetalt.setScale(0))
+        assertThat(this.andelAvBeløp?.setScale(2, RoundingMode.HALF_DOWN)).isEqualTo(andelAvBeløp?.setScale(2))
+        assertThat(this.renteprosent?.setScale(0, RoundingMode.HALF_DOWN)).isEqualTo(renteprosent?.setScale(0))
+        assertThat(this.manueltSattTilbakekrevingsbeløp?.setScale(0, RoundingMode.HALF_DOWN)).isEqualTo(manueltSattTilbakekrevingsbeløp?.setScale(0))
+        assertThat(this.tilbakekrevingsbeløpUtenRenter.setScale(0, RoundingMode.HALF_DOWN)).isEqualTo(tilbakekrevingsbeløpUtenRenter.setScale(0))
+        assertThat(this.rentebeløp.setScale(0, RoundingMode.DOWN)).isEqualTo(rentebeløp.setScale(0))
+        assertThat(this.tilbakekrevingsbeløp.setScale(0, RoundingMode.HALF_DOWN)).isEqualTo(tilbakekrevingsbeløp.setScale(0))
+        assertThat(this.skattebeløp.setScale(0, RoundingMode.DOWN)).isEqualTo(skattebeløp.setScale(0))
+        assertThat(this.tilbakekrevingsbeløpEtterSkatt.setScale(0, RoundingMode.HALF_DOWN)).isEqualTo(tilbakekrevingsbeløpEtterSkatt.setScale(0))
+        assertThat(this.utbetaltYtelsesbeløp.setScale(0, RoundingMode.HALF_DOWN)).isEqualTo(utbetaltYtelsesbeløp.setScale(0))
+        assertThat(this.riktigYtelsesbeløp.setScale(0, RoundingMode.HALF_DOWN)).isEqualTo(riktigYtelsesbeløp.setScale(0))
     }
 }

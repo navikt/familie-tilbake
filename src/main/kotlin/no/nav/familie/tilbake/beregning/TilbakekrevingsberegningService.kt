@@ -17,7 +17,6 @@ import no.nav.tilbakekreving.api.v1.dto.BeregnetPerioderDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatsperiodeDto
 import no.nav.tilbakekreving.beregning.Beregning
-import no.nav.tilbakekreving.beregning.KravgrunnlagsberegningUtil
 import no.nav.tilbakekreving.beregning.modell.Beregningsresultat
 import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
@@ -88,7 +87,7 @@ class TilbakekrevingsberegningService(
             beregnetPerioder = perioder.map {
                 BeregnetPeriodeDto(
                     periode = it,
-                    feilutbetaltBeløp = KravgrunnlagsberegningUtil.beregnFeilutbetaltBeløp(Kravgrunnlag431Adapter(kravgrunnlag), it),
+                    feilutbetaltBeløp = Kravgrunnlag431Adapter(kravgrunnlag).feilutbetaltBeløp(it),
                 )
             },
         )

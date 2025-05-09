@@ -2,11 +2,17 @@ package no.nav.tilbakekreving.beregning
 
 import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagAdapter
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurderingAdapter
-import no.nav.tilbakekreving.beregning.adapter.VilkårsvurdertPeriodeAdapter
+import no.nav.tilbakekreving.beregning.delperiode.Delperiode
+import no.nav.tilbakekreving.beregning.delperiode.Foreldet
+import no.nav.tilbakekreving.beregning.delperiode.Vilkårsvurdert
+import no.nav.tilbakekreving.beregning.delperiode.Vilkårsvurdert.Companion.fordelRentebeløp
+import no.nav.tilbakekreving.beregning.delperiode.Vilkårsvurdert.Companion.fordelSkattebeløp
+import no.nav.tilbakekreving.beregning.delperiode.Vilkårsvurdert.Companion.fordelTilbakekrevingsbeløp
 import no.nav.tilbakekreving.beregning.modell.Beregningsresultat
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import java.math.BigDecimal
+import java.math.RoundingMode
 
 class Beregning(
     beregnRenter: Boolean,
@@ -15,29 +21,36 @@ class Beregning(
     foreldetPerioder: List<Datoperiode>,
     kravgrunnlag: KravgrunnlagAdapter,
 ) {
-    private val fordeltKravgrunnlag = KravgrunnlagsberegningUtil.fordelKravgrunnlagBeløpPåPerioder(
-        kravgrunnlag = kravgrunnlag,
-        vurderingsperioder = foreldetPerioder + vilkårsvurdering.perioder().map(VilkårsvurdertPeriodeAdapter::periode),
-    )
-    private val foreldelseBeregning = ForeldelseBeregning(fordeltKravgrunnlag, foreldetPerioder)
+    init {
+        kravgrunnlag.perioder().forEach { periode ->
+            require((foreldetPerioder + vilkårsvurdering.perioder().map { it.periode() }).any { periode.periode() in it }) {
+                "Perioden ${periode.periode()} mangler vilkårsvurdering eller foreldelse"
+            }
+        }
+    }
 
-    private val vilkårsvurderingBeregning = VilkårsvurderingBeregning(
-        kravgrunnlag = kravgrunnlag,
-        vilkårsvurdering = vilkårsvurdering,
-        kravbeløpPerPeriode = fordeltKravgrunnlag,
-        beregnRenter = beregnRenter,
-    )
+    private val fordelt: List<Delperiode> = foreldetPerioder.flatMap { foreldetPeriode ->
+        kravgrunnlag.perioder().filter { it.periode() in foreldetPeriode }
+            .map { Foreldet.opprett(it.periode(), it) }
+    } + vilkårsvurdering.perioder().flatMap { vurdering ->
+        val kgPerioder = kravgrunnlag.perioder()
+            .filter { it.periode() in vurdering.periode() }
+
+        kgPerioder.map { Vilkårsvurdert.opprett(vurdering, it, beregnRenter, kgPerioder.size) }
+    }
 
     fun beregn(): Beregningsresultat {
-        val beregningsresultatperioder = (foreldelseBeregning.beregn() + vilkårsvurderingBeregning.beregn())
-            .sortedBy { it.periode.fom }
-
+        val beregningsresultater = fordelt
+            .fordelTilbakekrevingsbeløp()
+            .fordelRentebeløp()
+            .fordelSkattebeløp()
+            .map { it.beregningsresultat() }
         return Beregningsresultat(
             vedtaksresultat = bestemVedtakResultat(
-                tilbakekrevingsbeløp = beregningsresultatperioder.sumOf { it.tilbakekrevingsbeløp },
-                feilutbetaltBeløp = beregningsresultatperioder.sumOf { it.feilutbetaltBeløp },
+                tilbakekrevingsbeløp = beregningsresultater.sumOf { it.tilbakekrevingsbeløp }.setScale(0, RoundingMode.HALF_UP),
+                feilutbetaltBeløp = beregningsresultater.sumOf { it.feilutbetaltBeløp }.setScale(0, RoundingMode.HALF_UP),
             ),
-            beregningsresultatsperioder = beregningsresultatperioder,
+            beregningsresultatsperioder = beregningsresultater,
         )
     }
 
