@@ -61,15 +61,13 @@ class TilbakekrevingsvedtakBeregningService(
                     )
 
                 Klassetype.YTEL -> {
-                    val opprinneligTilbakekrevesbeløp: BigDecimal = it.tilbakekrevesBeløp
-
                     Tilbakekrevingsbeløp(
                         klassetype = it.klassetype,
                         klassekode = it.klassekode,
                         nyttBeløp = it.nyttBeløp.setScale(0, RoundingMode.HALF_UP),
                         utbetaltBeløp = beregnetPeriode.utbetaltYtelsesbeløp,
                         tilbakekrevesBeløp = beregnetPeriode.tilbakekrevingsbeløpUtenRenter,
-                        uinnkrevdBeløp = opprinneligTilbakekrevesbeløp
+                        uinnkrevdBeløp = it.tilbakekrevesBeløp
                             .subtract(beregnetPeriode.tilbakekrevingsbeløpUtenRenter)
                             .setScale(0, RoundingMode.HALF_UP),
                         skattBeløp = beregnetPeriode.skattebeløp,

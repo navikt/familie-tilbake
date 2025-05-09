@@ -72,22 +72,6 @@ class Vilkårsvurdert(
         return andel.skatt() * forskjellMedRenter
     }
 
-    /*
-            val totalKgTilbakekrevesBeløp = perioderMedSkatteprosent.sumOf { it.tilbakekrevingsbeløp }
-        if (totalKgTilbakekrevesBeløp.isZero()) return BigDecimal.ZERO
-        val andel = bruttoTilbakekrevesBeløp.divide(totalKgTilbakekrevesBeløp, 4, RoundingMode.HALF_UP)
-
-        return perioderMedSkatteprosent
-            .filter { periode.overlapper(it.periode) }
-            .sumOf { grunnlagPeriode ->
-                grunnlagPeriode.tilbakekrevingsbeløp
-                    .multiply(andel)
-                    .multiply(grunnlagPeriode.skatteprosent)
-                    .divide(BigDecimal.valueOf(100), 6, RoundingMode.HALF_UP)
-                    .setScale(0, RoundingMode.DOWN)
-            }
-     */
-
     companion object {
         fun opprett(
             vurdering: VilkårsvurdertPeriodeAdapter,
