@@ -15,9 +15,12 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.ForeldelsesperiodeDto
+import no.nav.tilbakekreving.februar
+import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
+import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode.Companion.til
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -53,39 +56,29 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
         fagsak = fagsakRepository.insert(Testdata.fagsak())
         behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId = fagsak.id))
 
-        val kravgrunnlag431 = Testdata.lagKravgrunnlag(behandling.id)
         val feilkravgrunnlagsbeløp = Testdata.feilKravgrunnlagsbeløp433
         val yteseskravgrunnlagsbeløp = Testdata.ytelKravgrunnlagsbeløp433
         val førsteKravgrunnlagsperiode =
-            Testdata
-                .getKravgrunnlagsperiode432()
-                .copy(
-                    periode = Månedsperiode(YearMonth.of(2017, 1), YearMonth.of(2017, 1)),
-                    beløp =
-                        setOf(
-                            feilkravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
-                            yteseskravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
-                        ),
-                )
+            Testdata.lagKravgrunnlagsperiode(januar(2017) til januar(2017)).copy(
+                beløp = setOf(
+                    feilkravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
+                    yteseskravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
+                ),
+            )
         val andreKravgrunnlagsperiode =
-            Testdata
-                .getKravgrunnlagsperiode432()
-                .copy(
-                    id = UUID.randomUUID(),
-                    periode = Månedsperiode(YearMonth.of(2017, 2), YearMonth.of(2017, 2)),
-                    beløp =
-                        setOf(
-                            feilkravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
-                            yteseskravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
-                        ),
-                )
+            Testdata.lagKravgrunnlagsperiode(februar(2017) til februar(2017)).copy(
+                beløp = setOf(
+                    feilkravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
+                    yteseskravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
+                ),
+            )
         kravgrunnlagRepository.insert(
-            kravgrunnlag431.copy(
-                perioder =
-                    setOf(
-                        førsteKravgrunnlagsperiode,
-                        andreKravgrunnlagsperiode,
-                    ),
+            Testdata.lagKravgrunnlag(
+                behandlingId = behandling.id,
+                perioder = setOf(
+                    førsteKravgrunnlagsperiode,
+                    andreKravgrunnlagsperiode,
+                ),
             ),
         )
     }

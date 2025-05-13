@@ -13,9 +13,9 @@ class MånedsperiodeValidatorTest {
     @Test
     fun `månedsvalidator, flere ulike måneder`() {
         assertFeil(
-            periode = 1.januar til 28.februar,
+            periode = 1.januar() til 28.februar(),
             forventetFeilmeldinger = listOf(
-                "Perioden ${1.januar} til ${28.februar} er ikke innenfor samme kalendermåned",
+                "Perioden ${1.januar()} til ${28.februar()} er ikke innenfor samme kalendermåned",
             ),
         )
     }
@@ -23,16 +23,16 @@ class MånedsperiodeValidatorTest {
     @Test
     fun `starter ikke første dag i måned`() {
         assertFeil(
-            periode = 2.januar til 31.januar,
-            forventetFeilmeldinger = listOf("Perioden ${2.januar} til ${31.januar} starter ikke første dag i måned"),
+            periode = 2.januar() til 31.januar(),
+            forventetFeilmeldinger = listOf("Perioden ${2.januar()} til ${31.januar()} starter ikke første dag i måned"),
         )
     }
 
     @Test
     fun `slutter ikke siste dag i måned`() {
         assertFeil(
-            periode = 1.januar til 30.januar,
-            forventetFeilmeldinger = listOf("Perioden ${1.januar} til ${30.januar} slutter ikke siste dag i måned"),
+            periode = 1.januar() til 30.januar(),
+            forventetFeilmeldinger = listOf("Perioden ${1.januar()} til ${30.januar()} slutter ikke siste dag i måned"),
         )
     }
 

@@ -118,22 +118,17 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
                 tilbakekrevesBeløp = BigDecimal("100"),
             )
 
-        val kravgrunnlag =
-            Testdata
-                .lagKravgrunnlag(behandling.id)
-                .copy(
-                    kontrollfelt = "2019-11-22-19.09.31.458065",
-                    perioder =
-                        setOf(
-                            Testdata.getKravgrunnlagsperiode432().copy(
-                                beløp =
-                                    setOf(
-                                        feilKravgrunnlagBeløp,
-                                        ytelKravgrunnlagsbeløp433,
-                                    ),
-                            ),
-                        ),
-                )
+        val kravgrunnlag = Testdata.lagKravgrunnlag(behandling.id).copy(
+            kontrollfelt = "2019-11-22-19.09.31.458065",
+            perioder = setOf(
+                Testdata.lagKravgrunnlagsperiode().copy(
+                    beløp = setOf(
+                        feilKravgrunnlagBeløp,
+                        ytelKravgrunnlagsbeløp433,
+                    ),
+                ),
+            ),
+        )
 
         kravgrunnlagRepository.insert(kravgrunnlag)
         behandlingsstegstilstandRepository.insert(

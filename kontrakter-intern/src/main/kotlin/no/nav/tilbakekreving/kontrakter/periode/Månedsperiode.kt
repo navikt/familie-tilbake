@@ -31,4 +31,8 @@ data class Månedsperiode(
     override fun lengdeIHeleMåneder(): Long = (tom.year * 12 + tom.monthValue) - (fom.year * 12 + fom.monthValue) + 1L
 
     fun toDatoperiode() = Datoperiode(fomDato, tomDato)
+
+    companion object {
+        infix fun YearMonth.til(tom: YearMonth) = Månedsperiode(this, tom)
+    }
 }

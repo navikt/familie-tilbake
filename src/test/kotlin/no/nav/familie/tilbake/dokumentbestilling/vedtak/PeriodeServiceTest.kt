@@ -17,14 +17,17 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Klassekode
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
-import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
+import no.nav.tilbakekreving.april
+import no.nav.tilbakekreving.august
+import no.nav.tilbakekreving.desember
+import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode.Companion.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.oktober
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import java.time.YearMonth
 
 class PeriodeServiceTest : OppslagSpringRunnerTest() {
     @Autowired
@@ -52,8 +55,8 @@ class PeriodeServiceTest : OppslagSpringRunnerTest() {
     private lateinit var saksnummer: String
     private lateinit var fagsak: Fagsak
 
-    private val førstePeriode: Månedsperiode = Månedsperiode(YearMonth.of(2020, 4), YearMonth.of(2020, 8))
-    private val andrePeriode = Månedsperiode(YearMonth.of(2020, 10), YearMonth.of(2020, 12))
+    private val førstePeriode = april(2020) til august(2020)
+    private val andrePeriode = oktober(2020) til desember(2020)
 
     @BeforeEach
     fun setup() {
@@ -72,7 +75,7 @@ class PeriodeServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `erEnsligForsørgerOgPerioderLike - en periode skal returnere IKKE_AKTUELL`() {
         faktaFeilutbetalingRepository.insert(Testdata.lagFaktaFeilutbetaling(behandling.id))
-        val kravgrunnlag = lagKravgrunnlagsperiode(førstePeriode.fomDato, førstePeriode.tomDato)
+        val kravgrunnlag = lagKravgrunnlagsperiode(førstePeriode)
         kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id, setOf(kravgrunnlag)))
         val erEnsligForsørgerOgPerioderLike = periodeService.erEnsligForsørgerOgPerioderLike(behandling.id)
         erEnsligForsørgerOgPerioderLike shouldBe SkalSammenslåPerioder.IKKE_AKTUELT
@@ -81,10 +84,10 @@ class PeriodeServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `erEnsligForsørgerOgPerioderLike - en periode som er splittet skal returnere IKKE_AKTUELL`() {
         faktaFeilutbetalingRepository.insert(Testdata.lagFaktaFeilutbetaling(behandling.id))
-        val kravgrunnlag = lagKravgrunnlagsperiode(førstePeriode.fomDato, førstePeriode.tomDato)
+        val kravgrunnlag = lagKravgrunnlagsperiode(førstePeriode)
         kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id, setOf(kravgrunnlag)))
 
-        val vilkårsvurderingsperiode = Vilkårsvurderingsperiode(periode = Månedsperiode(førstePeriode.fomDato, førstePeriode.tomDato), vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT, begrunnelse = "begrunnelse")
+        val vilkårsvurderingsperiode = Vilkårsvurderingsperiode(periode = førstePeriode, vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT, begrunnelse = "begrunnelse")
         vilkårsvurderingRepository.insert(Vilkårsvurdering(behandlingId = behandling.id, perioder = setOf(vilkårsvurderingsperiode)))
 
         val erEnsligForsørgerOgPerioderLike = periodeService.erEnsligForsørgerOgPerioderLike(behandling.id)
@@ -94,11 +97,11 @@ class PeriodeServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `erEnsligForsørgerOgPerioderLike - har to perioder i fakta - skal returnere JA`() {
         faktaFeilutbetalingRepository.insert(Testdata.lagFaktaFeilutbetaling(behandling.id, setOf(førstePeriode, andrePeriode)))
-        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id, perioder = setOf(lagKravgrunnlagsperiode(førstePeriode.fomDato, førstePeriode.tomDato), lagKravgrunnlagsperiode(andrePeriode.fomDato, andrePeriode.tomDato))))
+        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id, perioder = setOf(lagKravgrunnlagsperiode(førstePeriode), lagKravgrunnlagsperiode(andrePeriode))))
         foreldelseRepository.insert(Testdata.lagVurdertForeldelse(behandling.id, setOf(førstePeriode, andrePeriode)))
 
-        val vilkårsvurderingsperiode = Vilkårsvurderingsperiode(periode = Månedsperiode(førstePeriode.fomDato, førstePeriode.tomDato), vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT, begrunnelse = "begrunnelse")
-        val vilkårsvurderingsperiode2 = Vilkårsvurderingsperiode(periode = Månedsperiode(andrePeriode.fomDato, andrePeriode.tomDato), vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT, begrunnelse = "begrunnelse")
+        val vilkårsvurderingsperiode = Vilkårsvurderingsperiode(periode = førstePeriode, vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT, begrunnelse = "begrunnelse")
+        val vilkårsvurderingsperiode2 = Vilkårsvurderingsperiode(periode = andrePeriode, vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT, begrunnelse = "begrunnelse")
         vilkårsvurderingRepository.insert(Vilkårsvurdering(behandlingId = behandling.id, perioder = setOf(vilkårsvurderingsperiode, vilkårsvurderingsperiode2)))
         val erEnsligForsørgerOgPerioderLike = periodeService.erEnsligForsørgerOgPerioderLike(behandling.id)
         erEnsligForsørgerOgPerioderLike shouldBe SkalSammenslåPerioder.JA
@@ -107,11 +110,11 @@ class PeriodeServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `erEnsligForsørgerOgPerioderLike - har to perioder i fakta for barnetilsyn - skal returnere JA`() {
         faktaFeilutbetalingRepository.insert(Testdata.lagFaktaFeilutbetaling(behandling.id, setOf(førstePeriode, andrePeriode)))
-        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id, perioder = setOf(lagKravgrunnlagsperiode(førstePeriode.fomDato, førstePeriode.tomDato, Klassekode.EFBT), lagKravgrunnlagsperiode(andrePeriode.fomDato, andrePeriode.tomDato, Klassekode.EFBT)), fagområdekode = Fagområdekode.EFBT))
+        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id, perioder = setOf(lagKravgrunnlagsperiode(førstePeriode, Klassekode.EFBT), lagKravgrunnlagsperiode(andrePeriode, Klassekode.EFBT)), fagområdekode = Fagområdekode.EFBT))
         foreldelseRepository.insert(Testdata.lagVurdertForeldelse(behandling.id, setOf(førstePeriode, andrePeriode)))
 
-        val vilkårsvurderingsperiode = Vilkårsvurderingsperiode(periode = Månedsperiode(førstePeriode.fomDato, førstePeriode.tomDato), vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT, begrunnelse = "begrunnelse")
-        val vilkårsvurderingsperiode2 = Vilkårsvurderingsperiode(periode = Månedsperiode(andrePeriode.fomDato, andrePeriode.tomDato), vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT, begrunnelse = "begrunnelse")
+        val vilkårsvurderingsperiode = Vilkårsvurderingsperiode(periode = førstePeriode, vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT, begrunnelse = "begrunnelse")
+        val vilkårsvurderingsperiode2 = Vilkårsvurderingsperiode(periode = andrePeriode, vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT, begrunnelse = "begrunnelse")
         vilkårsvurderingRepository.insert(Vilkårsvurdering(behandlingId = behandling.id, perioder = setOf(vilkårsvurderingsperiode, vilkårsvurderingsperiode2)))
         val erEnsligForsørgerOgPerioderLike = periodeService.erEnsligForsørgerOgPerioderLike(behandling.id)
         erEnsligForsørgerOgPerioderLike shouldBe SkalSammenslåPerioder.JA
