@@ -38,6 +38,8 @@ FAMILIE_OPPDRAG_URL: https://familie-oppdrag.dev-fss-pub.nais.io
 FAMILIE_OPPDRAG_SCOPE: api://dev-fss.teamfamilie.familie-oppdrag/.default
 SECURITYTOKENSERVICE_URL: https://api-gw-q1.oera.no/security-token-service/SecurityTokenServiceProvider/
 
+A_INNTEKT_URL: https://arbeid-og-inntekt.dev-fss-pub.nais.io
+A_INNTEKT_SCOPE: api://dev-fss.arbeid-og-inntekt/.default
 PDL_URL: https://pdl-api.dev-fss-pub.nais.io
 PDL_SCOPE: api://dev-fss.pdl.pdl-api/.default
 OPPRETTELSE_DAGER_BEGRENSNING: 1

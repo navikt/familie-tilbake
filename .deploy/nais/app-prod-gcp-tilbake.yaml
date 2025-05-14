@@ -98,6 +98,7 @@ spec:
         - host: familie-oppdrag.prod-fss-pub.nais.io
         - host: pdl-api.prod-fss-pub.nais.io
         - host: mpls02.adeo.no
+        - host: arbeid-og-inntekt.prod-fss-pub.nais.io
           ports:
             - port: 1414
   replicas:
