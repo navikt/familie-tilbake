@@ -17,10 +17,10 @@ import no.nav.tilbakekreving.api.v2.EksternFagsakDto
 import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.BehandlingHistorikk
-import no.nav.tilbakekreving.behandling.saksbehandling.BrevmottakerSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
+import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
 import no.nav.tilbakekreving.behov.BrukerinfoBehov
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
 import no.nav.tilbakekreving.behov.VarselbrevBehov
@@ -317,7 +317,7 @@ class TilbakekrevingService(
             MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE -> {
                 tilbakekreving.håndter(
                     behandler,
-                    BrevmottakerSteg.RegistrertBrevmottaker.UtenlandskAdresseMottaker(
+                    RegistrertBrevmottaker.UtenlandskAdresseMottaker(
                         id = id,
                         navn = brevmottakerDto.navn,
                         manuellAdresseInfo = brevmottakerDto.manuellAdresseInfo,
@@ -327,7 +327,7 @@ class TilbakekrevingService(
             MottakerType.FULLMEKTIG -> {
                 tilbakekreving.håndter(
                     behandler,
-                    BrevmottakerSteg.RegistrertBrevmottaker.FullmektigMottaker(
+                    RegistrertBrevmottaker.FullmektigMottaker(
                         id = id,
                         navn = brevmottakerDto.navn,
                         organisasjonsnummer = brevmottakerDto.organisasjonsnummer,
@@ -339,7 +339,7 @@ class TilbakekrevingService(
             MottakerType.VERGE -> {
                 tilbakekreving.håndter(
                     behandler,
-                    BrevmottakerSteg.RegistrertBrevmottaker.VergeMottaker(
+                    RegistrertBrevmottaker.VergeMottaker(
                         id = id,
                         navn = brevmottakerDto.navn,
                         personIdent = brevmottakerDto.personIdent,
@@ -350,7 +350,7 @@ class TilbakekrevingService(
             MottakerType.DØDSBO -> {
                 tilbakekreving.håndter(
                     behandler,
-                    BrevmottakerSteg.RegistrertBrevmottaker.DødsboMottaker(
+                    RegistrertBrevmottaker.DødsboMottaker(
                         id = id,
                         navn = brevmottakerDto.navn,
                         manuellAdresseInfo = brevmottakerDto.manuellAdresseInfo,
