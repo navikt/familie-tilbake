@@ -19,6 +19,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
+import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg.Companion.behandlingsstegstatus
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg.Companion.klarTilVisning
 import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
@@ -231,7 +232,7 @@ class Behandling private constructor(
 
     internal fun håndter(
         behandler: Behandler,
-        brevmottaker: BrevmottakerSteg.RegistrertBrevmottaker,
+        brevmottaker: RegistrertBrevmottaker,
     ) {
         if (brevmottakerSteg.erStegetAktivert()) {
             oppdaterAnsvarligSaksbehandler(behandler)
@@ -247,7 +248,7 @@ class Behandling private constructor(
     ) {
         if (brevmottakerSteg.erStegetAktivert()) {
             oppdaterAnsvarligSaksbehandler(behandler)
-            brevmottakerSteg.fjernManuelBrevmottaker(manuellBrevmottakerId)
+            brevmottakerSteg.fjernManuellBrevmottaker(manuellBrevmottakerId)
         } else {
             throw Exception("BrevmottakerSteg er ikke aktivert.")
         }
