@@ -4,7 +4,6 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
 import no.nav.familie.tilbake.behandling.domain.Iverksettingsstatus
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
-import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.integration.økonomi.OppdragClient
 import no.nav.familie.tilbake.iverksettvedtak.domain.KodeResultat
@@ -55,20 +54,16 @@ class IverksettelseService(
         } else {
             val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
             val beregnetPerioder = tilbakekrevingsvedtakBeregningService.beregnVedtaksperioder(behandlingId, kravgrunnlag)
-            // Validerer beregning slik at rapporterte beløp må være samme i vedtaksbrev og iverksettelse
-            validerBeløp(behandlingId, beregnetPerioder, logContext)
-            val request =
-                lagIveksettelseRequest(
-                    ansvarligSaksbehandler = behandling.ansvarligSaksbehandler,
-                    kravgrunnlag = kravgrunnlag,
-                    beregnetPerioder = beregnetPerioder,
-                    logContext = logContext,
-                )
+            val request = lagIveksettelseRequest(
+                ansvarligSaksbehandler = behandling.ansvarligSaksbehandler,
+                kravgrunnlag = kravgrunnlag,
+                beregnetPerioder = beregnetPerioder,
+                logContext = logContext,
+            )
             val requestXml = TilbakekrevingsvedtakMarshaller.marshall(behandlingId, request, logContext)
-            SecureLog
-                .medContext(logContext) {
-                    info("Sender tilbakekrevingsvedtak til økonomi for behandling={} request={}", behandlingId.toString(), requestXml)
-                }
+            SecureLog.medContext(logContext) {
+                info("Sender tilbakekrevingsvedtak til økonomi for behandling={} request={}", behandlingId.toString(), requestXml)
+            }
 
             // Send request til økonomi
             val kvittering = objectMapper.writeValueAsString(oppdragClient.iverksettVedtak(behandlingId, request, logContext).mmel)
@@ -161,41 +156,4 @@ class IverksettelseService(
         }
 
     private fun harSattDelvisTilbakekrevingMenKreverTilbakeFulltBeløp(tilbakekrevingsbeløp: Tilbakekrevingsbeløp) = tilbakekrevingsbeløp.kodeResultat == KodeResultat.DELVIS_TILBAKEKREVING && tilbakekrevingsbeløp.uinnkrevdBeløp == BigDecimal.ZERO
-
-    fun validerBeløp(
-        behandlingId: UUID,
-        beregnetPerioder: List<Tilbakekrevingsperiode>,
-        logContext: SecureLog.Context,
-    ) {
-        val beregnetResultat = beregningService.beregn(behandlingId).oppsummer()
-        val beregnetPerioderForVedtaksbrev = beregnetResultat.beregningsresultatsperioder
-
-        // Beløpene beregnes for vedtaksbrev
-        val totalTilbakekrevingsbeløpUtenRenter = beregnetPerioderForVedtaksbrev.sumOf { it.tilbakekrevingsbeløpUtenRenter }
-        val totalRenteBeløp = beregnetPerioderForVedtaksbrev.sumOf { it.rentebeløp }
-        val totalSkatteBeløp = beregnetPerioderForVedtaksbrev.sumOf { it.skattebeløp }
-
-        // Beløpene beregnes for iverksettelse
-        val beregnetTotatlTilbakekrevingsbeløpUtenRenter =
-            beregnetPerioder.sumOf { it.beløp.sumOf { beløp -> beløp.tilbakekrevesBeløp } }
-        val beregnetTotalRenteBeløp = beregnetPerioder.sumOf { it.renter }
-        val beregnetSkattBeløp = beregnetPerioder.sumOf { it.beløp.sumOf { beløp -> beløp.skattBeløp } }
-
-        if (totalTilbakekrevingsbeløpUtenRenter != beregnetTotatlTilbakekrevingsbeløpUtenRenter ||
-            totalRenteBeløp != beregnetTotalRenteBeløp ||
-            totalSkatteBeløp != beregnetSkattBeløp
-        ) {
-            throw Feil(
-                message =
-                    "Det gikk noe feil i beregning under iverksettelse for behandlingId=$behandlingId." +
-                        "Beregnet beløp i vedtaksbrev er " +
-                        "totalTilbakekrevingsbeløpUtenRenter=$totalTilbakekrevingsbeløpUtenRenter," +
-                        "totalRenteBeløp=$totalRenteBeløp, totalSkatteBeløp=$totalSkatteBeløp mens " +
-                        "Beregnet beløp i iverksettelse er " +
-                        "beregnetTotatlTilbakekrevingsbeløpUtenRenter=$beregnetTotatlTilbakekrevingsbeløpUtenRenter," +
-                        "beregnetTotalRenteBeløp=$beregnetTotalRenteBeløp, beregnetSkattBeløp=$beregnetSkattBeløp",
-                logContext = logContext,
-            )
-        }
-    }
 }

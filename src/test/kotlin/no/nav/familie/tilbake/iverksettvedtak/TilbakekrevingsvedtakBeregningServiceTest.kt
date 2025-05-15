@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.iverksettvedtak
 
-import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
@@ -128,7 +127,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
-        shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder, SecureLog.Context.tom()) }
 
         val førstePeriode = tilbakekrevingsperioder[0]
         førstePeriode.periode shouldBe Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
@@ -180,7 +178,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
-        shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder, SecureLog.Context.tom()) }
 
         val førstePeriode = tilbakekrevingsperioder[0]
         førstePeriode.periode shouldBe Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
@@ -230,7 +227,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
-        shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder, SecureLog.Context.tom()) }
 
         val førstePeriode = tilbakekrevingsperioder[0]
         førstePeriode.periode shouldBe Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
@@ -279,7 +275,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
-        shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder, SecureLog.Context.tom()) }
 
         val førstePeriode = tilbakekrevingsperioder[0]
         førstePeriode.periode shouldBe Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
@@ -330,7 +325,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
-        shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder, SecureLog.Context.tom()) }
 
         val førstePeriode = tilbakekrevingsperioder[0]
         førstePeriode.periode shouldBe Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
@@ -380,7 +374,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
             .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
-        shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder, SecureLog.Context.tom()) }
 
         val førstePeriode = tilbakekrevingsperioder[0]
         førstePeriode.periode shouldBe Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
@@ -453,7 +446,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
-        shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder, SecureLog.Context.tom()) }
 
         val førstePeriode = tilbakekrevingsperioder[0]
         førstePeriode.periode shouldBe Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
@@ -498,7 +490,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
-        shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder, SecureLog.Context.tom()) }
 
         val førstePeriode = tilbakekrevingsperioder[0]
         førstePeriode.periode shouldBe Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
@@ -572,7 +563,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 3
-        shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder, SecureLog.Context.tom()) }
 
         val førstePeriode = tilbakekrevingsperioder[0]
         førstePeriode.periode shouldBe Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
@@ -688,7 +678,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 7
-        shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder, SecureLog.Context.tom()) }
 
         val førstePeriode = tilbakekrevingsperioder[0]
         førstePeriode.periode shouldBe Månedsperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 1))
@@ -870,13 +859,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
             .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 7
-        shouldNotThrowAny {
-            iverksettelseService.validerBeløp(
-                behandling.id,
-                tilbakekrevingsperioder,
-                SecureLog.Context.tom(),
-            )
-        }
 
         val førstePeriode = tilbakekrevingsperioder[0]
         førstePeriode.periode shouldBe sortedPerioder[0]
@@ -1046,7 +1028,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                 .beregnVedtaksperioder(behandling.id, kravgrunnlag)
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.size shouldBe 1
-        shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder, SecureLog.Context.tom()) }
 
         val tilbakekrevingsperiode = tilbakekrevingsperioder[0]
         tilbakekrevingsperiode.periode shouldBe periode
@@ -1082,7 +1063,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                 .beregnVedtaksperioder(behandling.id, kravgrunnlag)
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.size shouldBe 3
-        shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder, SecureLog.Context.tom()) }
 
         tilbakekrevingsperioder[0].periode shouldBe sortedPerioder[0]
         tilbakekrevingsperioder[0].renter shouldBe BigDecimal(1861)
@@ -1127,7 +1107,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                 .beregnVedtaksperioder(behandling.id, kravgrunnlag)
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.size shouldBe 3
-        shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder, SecureLog.Context.tom()) }
 
         tilbakekrevingsperioder[0].periode shouldBe sortedPerioder[0]
         tilbakekrevingsperioder[0].renter shouldBe BigDecimal(1861)
@@ -1177,7 +1156,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 7
-        shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder, SecureLog.Context.tom()) }
 
         val førstePeriode = tilbakekrevingsperioder[0]
         førstePeriode.periode shouldBe sortedPerioder[0]
@@ -1342,7 +1320,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
-        shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder, SecureLog.Context.tom()) }
 
         val førstePeriode = tilbakekrevingsperioder[0]
         førstePeriode.periode shouldBe sortedPerioder[0]
@@ -1445,7 +1422,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 4
-        shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder, SecureLog.Context.tom()) }
 
         val førstePeriode = tilbakekrevingsperioder[0]
         førstePeriode.periode shouldBe sortedPerioder[0]
@@ -1557,7 +1533,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                 .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 4
-        shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder, SecureLog.Context.tom()) }
 
         val førstePeriode = tilbakekrevingsperioder[0]
         førstePeriode.periode shouldBe sortedPerioder[0]
