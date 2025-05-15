@@ -17,7 +17,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
-import java.math.RoundingMode
 import java.time.LocalDate
 
 class TilbakekrevingsberegningVilkårTest {
@@ -77,7 +76,7 @@ class TilbakekrevingsberegningVilkårTest {
             resultat.skalHaVerdier(
                 vilkårsvurdering = vilkårsvurdering,
                 vurdering = AnnenVurdering.GOD_TRO,
-                manueltSattTilbakekrevingsbeløp = manueltBeløp,
+                manueltSattTilbakekrevingsbeløp = manueltBeløp.setScale(2),
                 tilbakekrevingsbeløpUtenRenter = manueltBeløp,
                 tilbakekrevingsbeløp = manueltBeløp,
                 andelAvBeløp = null,
@@ -137,7 +136,7 @@ class TilbakekrevingsberegningVilkårTest {
                 vurdering = AnnenVurdering.GOD_TRO,
                 tilbakekrevingsbeløpUtenRenter = beløpTilbakekreves,
                 tilbakekrevingsbeløp = beløpTilbakekreves,
-                manueltSattTilbakekrevingsbeløp = beløpTilbakekreves,
+                manueltSattTilbakekrevingsbeløp = beløpTilbakekreves.setScale(2),
                 skattebeløp = BigDecimal.valueOf(899),
                 tilbakekrevingsbeløpEtterSkatt = BigDecimal.valueOf(8092),
                 andelAvBeløp = null,
@@ -479,7 +478,7 @@ class TilbakekrevingsberegningVilkårTest {
                 vurdering = Aktsomhet.GROV_UAKTSOMHET,
                 tilbakekrevingsbeløpUtenRenter = manueltSattBeløp,
                 tilbakekrevingsbeløp = manueltSattBeløp,
-                manueltSattTilbakekrevingsbeløp = manueltSattBeløp,
+                manueltSattTilbakekrevingsbeløp = manueltSattBeløp.setScale(2),
                 andelAvBeløp = null,
             )
         }
@@ -574,16 +573,16 @@ class TilbakekrevingsberegningVilkårTest {
     ) {
         assertThat(this.periode).isEqualTo(vilkårsvurdering.periode.toDatoperiode())
         assertThat(this.vurdering).isEqualTo(vurdering)
-        assertThat(this.feilutbetaltBeløp.setScale(0, RoundingMode.HALF_DOWN)).isEqualTo(feilutbetalt.setScale(0))
-        assertThat(this.andelAvBeløp?.setScale(2, RoundingMode.HALF_DOWN)).isEqualTo(andelAvBeløp?.setScale(2))
-        assertThat(this.renteprosent?.setScale(0, RoundingMode.HALF_DOWN)).isEqualTo(renteprosent?.setScale(0))
-        assertThat(this.manueltSattTilbakekrevingsbeløp?.setScale(0, RoundingMode.HALF_DOWN)).isEqualTo(manueltSattTilbakekrevingsbeløp?.setScale(0))
-        assertThat(this.tilbakekrevingsbeløpUtenRenter.setScale(0, RoundingMode.HALF_DOWN)).isEqualTo(tilbakekrevingsbeløpUtenRenter.setScale(0))
-        assertThat(this.rentebeløp.setScale(0, RoundingMode.DOWN)).isEqualTo(rentebeløp.setScale(0))
-        assertThat(this.tilbakekrevingsbeløp.setScale(0, RoundingMode.HALF_DOWN)).isEqualTo(tilbakekrevingsbeløp.setScale(0))
-        assertThat(this.skattebeløp.setScale(0, RoundingMode.DOWN)).isEqualTo(skattebeløp.setScale(0))
-        assertThat(this.tilbakekrevingsbeløpEtterSkatt.setScale(0, RoundingMode.HALF_DOWN)).isEqualTo(tilbakekrevingsbeløpEtterSkatt.setScale(0))
-        assertThat(this.utbetaltYtelsesbeløp.setScale(0, RoundingMode.HALF_DOWN)).isEqualTo(utbetaltYtelsesbeløp.setScale(0))
-        assertThat(this.riktigYtelsesbeløp.setScale(0, RoundingMode.HALF_DOWN)).isEqualTo(riktigYtelsesbeløp.setScale(0))
+        assertThat(this.feilutbetaltBeløp).isEqualTo(feilutbetalt)
+        assertThat(this.andelAvBeløp).isEqualTo(andelAvBeløp)
+        assertThat(this.renteprosent).isEqualTo(renteprosent)
+        assertThat(this.manueltSattTilbakekrevingsbeløp).isEqualTo(manueltSattTilbakekrevingsbeløp)
+        assertThat(this.tilbakekrevingsbeløpUtenRenter).isEqualTo(tilbakekrevingsbeløpUtenRenter)
+        assertThat(this.rentebeløp).isEqualTo(rentebeløp)
+        assertThat(this.tilbakekrevingsbeløp).isEqualTo(tilbakekrevingsbeløp)
+        assertThat(this.skattebeløp).isEqualTo(skattebeløp)
+        assertThat(this.tilbakekrevingsbeløpEtterSkatt).isEqualTo(tilbakekrevingsbeløpEtterSkatt)
+        assertThat(this.utbetaltYtelsesbeløp).isEqualTo(utbetaltYtelsesbeløp)
+        assertThat(this.riktigYtelsesbeløp).isEqualTo(riktigYtelsesbeløp)
     }
 }
