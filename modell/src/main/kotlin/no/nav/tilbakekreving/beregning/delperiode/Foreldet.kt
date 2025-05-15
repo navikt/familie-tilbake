@@ -8,21 +8,30 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 class Foreldet(
-    private val periode: Datoperiode,
-    private val andel: Andel,
+    override val periode: Datoperiode,
+    override val vurdertPeriode: Datoperiode,
+    override val andel: Andel,
 ) : Delperiode {
+    override fun tilbakekrevesBruttoMedRenter(): BigDecimal = BigDecimal.ZERO
+
+    override fun tilbakekrevesBrutto(): BigDecimal = BigDecimal.ZERO
+
+    override fun skatt(): BigDecimal = BigDecimal.ZERO
+
+    override fun renter(): BigDecimal = BigDecimal.ZERO
+
     override fun beregningsresultat(): Beregningsresultatsperiode {
         return Beregningsresultatsperiode(
             periode = periode,
             feilutbetaltBeløp = andel.feilutbetaltBeløp().setScale(0, RoundingMode.HALF_UP),
             riktigYtelsesbeløp = andel.riktigYtelsesbeløp().setScale(0, RoundingMode.HALF_UP),
             utbetaltYtelsesbeløp = andel.utbetaltYtelsesbeløp().setScale(0, RoundingMode.HALF_UP),
-            tilbakekrevingsbeløp = BigDecimal.ZERO,
-            tilbakekrevingsbeløpUtenRenter = BigDecimal.ZERO,
-            rentebeløp = BigDecimal.ZERO,
+            tilbakekrevingsbeløp = tilbakekrevesBruttoMedRenter(),
+            tilbakekrevingsbeløpUtenRenter = tilbakekrevesBrutto(),
+            rentebeløp = renter(),
             andelAvBeløp = BigDecimal.ZERO,
             vurdering = AnnenVurdering.FORELDET,
-            skattebeløp = BigDecimal.ZERO,
+            skattebeløp = skatt(),
             tilbakekrevingsbeløpEtterSkatt = BigDecimal.ZERO,
         )
     }
@@ -33,7 +42,7 @@ class Foreldet(
             kravgrunnlagPeriode: KravgrunnlagPeriodeAdapter,
         ): Foreldet {
             val delperiode = kravgrunnlagPeriode.periode().snitt(periode)!!
-            return Foreldet(delperiode, Andel(kravgrunnlagPeriode, delperiode))
+            return Foreldet(delperiode, periode, Andel(kravgrunnlagPeriode, delperiode))
         }
     }
 }

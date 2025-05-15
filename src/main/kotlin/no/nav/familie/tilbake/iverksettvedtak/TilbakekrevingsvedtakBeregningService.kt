@@ -8,9 +8,9 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
+import no.nav.tilbakekreving.beregning.delperiode.Delperiode
+import no.nav.tilbakekreving.beregning.delperiode.Foreldet
 import no.nav.tilbakekreving.beregning.isZero
-import no.nav.tilbakekreving.beregning.modell.Beregningsresultatsperiode
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -24,10 +24,10 @@ class TilbakekrevingsvedtakBeregningService(
         behandlingId: UUID,
         kravgrunnlag431: Kravgrunnlag431,
     ): List<Tilbakekrevingsperiode> {
-        val beregningsresultat = tilbakekrevingsberegningService.beregn(behandlingId)
+        val delperioder = tilbakekrevingsberegningService.beregn(behandlingId).beregn()
 
         val kravgrunnlagsperioder = kravgrunnlag431.perioder.toList().sortedBy { it.periode.fom }
-        val beregnetePerioder = beregningsresultat.beregningsresultatsperioder.sortedBy { it.periode.fom }
+        val beregnetePerioder = delperioder.sortedBy { it.periode.fom }
 
         return beregnetePerioder
             .map { beregnetPeriode -> lagTilbakekrevingsperioder(kravgrunnlagsperioder, beregnetPeriode) }
@@ -36,15 +36,15 @@ class TilbakekrevingsvedtakBeregningService(
 
     private fun lagTilbakekrevingsperioder(
         kravgrunnlagsperioder: List<Kravgrunnlagsperiode432>,
-        beregnetPeriode: Beregningsresultatsperiode,
+        beregnetPeriode: Delperiode,
     ): List<Tilbakekrevingsperiode> =
         kravgrunnlagsperioder
             .filter { it.periode.snitt(beregnetPeriode.periode.toMånedsperiode()) != null }
-            .map { Tilbakekrevingsperiode(it.periode, beregnetPeriode.rentebeløp, lagTilbakekrevingsbeløp(it.beløp, beregnetPeriode)) }
+            .map { Tilbakekrevingsperiode(it.periode, beregnetPeriode.renter(), lagTilbakekrevingsbeløp(it.beløp, beregnetPeriode)) }
 
     private fun lagTilbakekrevingsbeløp(
         kravgrunnlagsbeløp: Set<Kravgrunnlagsbeløp433>,
-        beregnetPeriode: Beregningsresultatsperiode,
+        beregnetPeriode: Delperiode,
     ): List<Tilbakekrevingsbeløp> =
         kravgrunnlagsbeløp.mapNotNull {
             when (it.klassetype) {
@@ -65,12 +65,12 @@ class TilbakekrevingsvedtakBeregningService(
                         klassetype = it.klassetype,
                         klassekode = it.klassekode,
                         nyttBeløp = it.nyttBeløp.setScale(0, RoundingMode.HALF_UP),
-                        utbetaltBeløp = beregnetPeriode.utbetaltYtelsesbeløp,
-                        tilbakekrevesBeløp = beregnetPeriode.tilbakekrevingsbeløpUtenRenter,
+                        utbetaltBeløp = beregnetPeriode.andel.utbetaltYtelsesbeløp(),
+                        tilbakekrevesBeløp = beregnetPeriode.tilbakekrevesBrutto(),
                         uinnkrevdBeløp = it.tilbakekrevesBeløp
-                            .subtract(beregnetPeriode.tilbakekrevingsbeløpUtenRenter)
+                            .subtract(beregnetPeriode.tilbakekrevesBrutto())
                             .setScale(0, RoundingMode.HALF_UP),
-                        skattBeløp = beregnetPeriode.skattebeløp,
+                        skattBeløp = beregnetPeriode.skatt(),
                         kodeResultat = utledKodeResulat(beregnetPeriode),
                     )
                 }
@@ -79,20 +79,10 @@ class TilbakekrevingsvedtakBeregningService(
             }
         }
 
-    private fun utledKodeResulat(beregnetPeriode: Beregningsresultatsperiode): KodeResultat =
-        when {
-            beregnetPeriode.vurdering == AnnenVurdering.FORELDET -> {
-                KodeResultat.FORELDET
-            }
-
-            beregnetPeriode.tilbakekrevingsbeløpUtenRenter.isZero() -> {
-                KodeResultat.INGEN_TILBAKEKREVING
-            }
-
-            beregnetPeriode.feilutbetaltBeløp == beregnetPeriode.tilbakekrevingsbeløpUtenRenter -> {
-                KodeResultat.FULL_TILBAKEKREVING
-            }
-
-            else -> KodeResultat.DELVIS_TILBAKEKREVING
-        }
+    private fun utledKodeResulat(beregnetPeriode: Delperiode): KodeResultat = when {
+        beregnetPeriode is Foreldet -> KodeResultat.FORELDET
+        beregnetPeriode.tilbakekrevesBrutto().isZero() -> KodeResultat.INGEN_TILBAKEKREVING
+        beregnetPeriode.andel.feilutbetaltBeløp() == beregnetPeriode.tilbakekrevesBrutto() -> KodeResultat.FULL_TILBAKEKREVING
+        else -> KodeResultat.DELVIS_TILBAKEKREVING
+    }
 }

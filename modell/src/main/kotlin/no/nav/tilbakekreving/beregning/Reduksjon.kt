@@ -39,7 +39,7 @@ sealed interface Reduksjon {
     }
 
     class IngenTilbakekreving : Reduksjon {
-        override val andel: BigDecimal? = BigDecimal.ZERO
+        override val andel: BigDecimal = BigDecimal.ZERO
 
         override fun beregn(
             kravgrunnlagBeløp: BigDecimal,

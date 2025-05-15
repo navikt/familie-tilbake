@@ -6,6 +6,7 @@ import io.kotest.matchers.bigdecimal.shouldBeZero
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
@@ -24,8 +25,7 @@ import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
-import no.nav.tilbakekreving.beregning.modell.Beregningsresultat
-import no.nav.tilbakekreving.beregning.modell.Beregningsresultatsperiode
+import no.nav.tilbakekreving.beregning.delperiode.Foreldet
 import no.nav.tilbakekreving.februar
 import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
@@ -78,18 +78,14 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         lagKravgrunnlag(periode, BigDecimal.ZERO)
         lagForeldelse(behandling.id, periode, Foreldelsesvurderingstype.IKKE_FORELDET, null)
         lagVilkårsvurderingMedForsett(behandling.id, periode)
-        val beregningsresultat: Beregningsresultat = tilbakekrevingsberegningService.beregn(behandling.id)
-        val resultat: List<Beregningsresultatsperiode> = beregningsresultat.beregningsresultatsperioder
-        resultat.shouldHaveSize(1)
-        val r: Beregningsresultatsperiode = resultat[0]
-        r.periode shouldBe periode.toDatoperiode()
-        r.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(11000)
-        r.vurdering shouldBe Aktsomhet.FORSETT
-        r.renteprosent shouldBe BigDecimal.valueOf(10)
-        r.feilutbetaltBeløp shouldBe BigDecimal.valueOf(10000)
-        r.manueltSattTilbakekrevingsbeløp shouldBe null
-        r.andelAvBeløp shouldBe BigDecimal.valueOf(100)
-        beregningsresultat.vedtaksresultat shouldBe Vedtaksresultat.FULL_TILBAKEBETALING
+        val delperioder = tilbakekrevingsberegningService.beregn(behandling.id).beregn()
+        delperioder.shouldHaveSize(1)
+        delperioder.forOne {
+            it.periode shouldBe periode.toDatoperiode()
+            it.tilbakekrevesBruttoMedRenter() shouldBe BigDecimal.valueOf(11000)
+            it.renter() shouldBe BigDecimal.valueOf(1000)
+            it.andel.feilutbetaltBeløp() shouldBe BigDecimal.valueOf(10000)
+        }
     }
 
     @Test
@@ -116,20 +112,16 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         val periode = Månedsperiode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 3))
         lagKravgrunnlag(periode, BigDecimal.ZERO)
         lagForeldelse(behandling.id, periode, Foreldelsesvurderingstype.FORELDET, periode.fom.plusMonths(8).atDay(1))
-        val beregningsresultat: Beregningsresultat = tilbakekrevingsberegningService.beregn(behandling.id)
-        val resultat: List<Beregningsresultatsperiode> = beregningsresultat.beregningsresultatsperioder
-        resultat.shouldHaveSize(1)
-        val r: Beregningsresultatsperiode = resultat[0]
-        r.periode shouldBe periode.toDatoperiode()
-        r.tilbakekrevingsbeløp.shouldBeZero()
-        r.vurdering shouldBe AnnenVurdering.FORELDET
-        r.renteprosent shouldBe null
-        r.feilutbetaltBeløp shouldBe BigDecimal.valueOf(10000)
-        r.manueltSattTilbakekrevingsbeløp shouldBe null
-        r.andelAvBeløp shouldBe BigDecimal.ZERO
-        r.rentebeløp.shouldBeZero()
-        r.tilbakekrevingsbeløpUtenRenter.shouldBeZero()
-        beregningsresultat.vedtaksresultat shouldBe Vedtaksresultat.INGEN_TILBAKEBETALING
+        val delperioder = tilbakekrevingsberegningService.beregn(behandling.id).beregn()
+        delperioder.shouldHaveSize(1)
+        delperioder.forOne {
+            it.periode shouldBe periode.toDatoperiode()
+            it.tilbakekrevesBruttoMedRenter().shouldBeZero()
+            it.shouldBeInstanceOf<Foreldet>()
+            it.renter() shouldBe BigDecimal.ZERO
+            it.andel.feilutbetaltBeløp() shouldBe BigDecimal.valueOf(10000)
+            it.tilbakekrevesBrutto().shouldBeZero()
+        }
     }
 
     @Test
@@ -157,20 +149,16 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         lagKravgrunnlag(periode, BigDecimal.valueOf(10))
         lagForeldelse(behandling.id, periode, Foreldelsesvurderingstype.IKKE_FORELDET, null)
         lagVilkårsvurderingMedForsett(behandling.id, periode)
-        val beregningsresultat: Beregningsresultat = tilbakekrevingsberegningService.beregn(behandling.id)
-        val resultat: List<Beregningsresultatsperiode> = beregningsresultat.beregningsresultatsperioder
-        resultat.shouldHaveSize(1)
-        val r: Beregningsresultatsperiode = resultat[0]
-        r.periode shouldBe periode.toDatoperiode()
-        r.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(11000)
-        r.vurdering shouldBe Aktsomhet.FORSETT
-        r.renteprosent shouldBe BigDecimal.valueOf(10)
-        r.feilutbetaltBeløp shouldBe BigDecimal.valueOf(10000)
-        r.manueltSattTilbakekrevingsbeløp shouldBe null
-        r.andelAvBeløp shouldBe BigDecimal.valueOf(100)
-        r.skattebeløp shouldBe BigDecimal.valueOf(1000)
-        r.tilbakekrevingsbeløpEtterSkatt shouldBe BigDecimal.valueOf(10000)
-        beregningsresultat.vedtaksresultat shouldBe Vedtaksresultat.FULL_TILBAKEBETALING
+        val delperioder = tilbakekrevingsberegningService.beregn(behandling.id).beregn()
+        delperioder.shouldHaveSize(1)
+        delperioder.forOne {
+            it.periode shouldBe periode.toDatoperiode()
+            it.tilbakekrevesBruttoMedRenter() shouldBe BigDecimal.valueOf(11000)
+            it.renter() shouldBe BigDecimal.valueOf(1000)
+            it.andel.feilutbetaltBeløp() shouldBe BigDecimal.valueOf(10000)
+            it.skatt() shouldBe BigDecimal.valueOf(1000)
+            it.tilbakekrevesBrutto() shouldBe BigDecimal.valueOf(10000)
+        }
     }
 
     @Test
@@ -199,12 +187,11 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         lagKravgrunnlag(periode, BigDecimal.valueOf(10))
         lagForeldelse(behandling.id, periode, Foreldelsesvurderingstype.IKKE_FORELDET, null)
         lagVilkårsvurderingMedForsett(behandling.id, periode)
-        val beregningsresultat: Beregningsresultat = tilbakekrevingsberegningService.beregn(behandling.id)
-        val resultat: List<Beregningsresultatsperiode> = beregningsresultat.beregningsresultatsperioder
-        resultat.shouldHaveSize(1)
-        val r: Beregningsresultatsperiode = resultat[0]
-        r.utbetaltYtelsesbeløp shouldBe BigDecimal.valueOf(10000)
-        r.riktigYtelsesbeløp shouldBe BigDecimal.ZERO
+        val delperioder = tilbakekrevingsberegningService.beregn(behandling.id).beregn()
+        delperioder.forOne {
+            it.andel.utbetaltYtelsesbeløp() shouldBe BigDecimal.valueOf(10000)
+            it.andel.riktigYtelsesbeløp() shouldBe BigDecimal.ZERO
+        }
     }
 
     @Test
@@ -241,18 +228,17 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         kravgrunnlagRepository.insert(grunnlag)
         lagForeldelse(behandling.id, logiskPeriode, Foreldelsesvurderingstype.IKKE_FORELDET, null)
         lagVilkårsvurderingMedForsett(behandling.id, logiskPeriode)
-        val beregningsresultat: Beregningsresultat = tilbakekrevingsberegningService.beregn(behandling.id)
-        val resultat: List<Beregningsresultatsperiode> = beregningsresultat.beregningsresultatsperioder
-        resultat shouldHaveSize 2
-        resultat.forOne {
+        val delperioder = tilbakekrevingsberegningService.beregn(behandling.id).beregn()
+        delperioder shouldHaveSize 2
+        delperioder.forOne {
             it.periode shouldBe periode1.toDatoperiode()
-            it.utbetaltYtelsesbeløp shouldBe utbetalt1
-            it.riktigYtelsesbeløp shouldBe nyttBeløp1
+            it.andel.utbetaltYtelsesbeløp() shouldBe utbetalt1
+            it.andel.riktigYtelsesbeløp() shouldBe nyttBeløp1
         }
-        resultat.forOne {
+        delperioder.forOne {
             it.periode shouldBe periode2.toDatoperiode()
-            it.utbetaltYtelsesbeløp shouldBe utbetalt2
-            it.riktigYtelsesbeløp shouldBe nyttBeløp2
+            it.andel.utbetaltYtelsesbeløp() shouldBe utbetalt2
+            it.andel.riktigYtelsesbeløp() shouldBe nyttBeløp2
         }
     }
 
@@ -289,32 +275,22 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         lagForeldelse(behandling.id, logiskPeriode, Foreldelsesvurderingstype.IKKE_FORELDET, null)
         lagVilkårsvurderingMedForsett(behandling.id, logiskPeriode)
 
-        val beregningsresultat: Beregningsresultat = tilbakekrevingsberegningService.beregn(behandling.id)
-        val resultater = beregningsresultat.beregningsresultatsperioder
-        resultater shouldHaveSize 2
-        resultater.forOne { resultat ->
+        val delperioder = tilbakekrevingsberegningService.beregn(behandling.id).beregn()
+        delperioder shouldHaveSize 2
+        delperioder.forOne { resultat ->
             resultat.periode shouldBe periode1.toDatoperiode()
-            resultat.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(11000)
-            resultat.vurdering shouldBe Aktsomhet.FORSETT
-            resultat.renteprosent shouldBe BigDecimal.valueOf(10)
-            resultat.feilutbetaltBeløp shouldBe BigDecimal.valueOf(10000)
-            resultat.manueltSattTilbakekrevingsbeløp shouldBe null
-            resultat.andelAvBeløp shouldBe BigDecimal.valueOf(100)
-            resultat.skattebeløp shouldBe BigDecimal.valueOf(1000)
-            resultat.tilbakekrevingsbeløpEtterSkatt shouldBe BigDecimal.valueOf(10000)
+            resultat.tilbakekrevesBruttoMedRenter() shouldBe BigDecimal.valueOf(11000)
+            resultat.renter() shouldBe BigDecimal.valueOf(1000)
+            resultat.andel.feilutbetaltBeløp() shouldBe BigDecimal.valueOf(10000)
+            resultat.skatt() shouldBe BigDecimal.valueOf(1000)
         }
-        resultater.forOne { resultat ->
+        delperioder.forOne { resultat ->
             resultat.periode shouldBe periode2.toDatoperiode()
-            resultat.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(11000)
-            resultat.vurdering shouldBe Aktsomhet.FORSETT
-            resultat.renteprosent shouldBe BigDecimal.valueOf(10)
-            resultat.feilutbetaltBeløp shouldBe BigDecimal.valueOf(10000)
-            resultat.manueltSattTilbakekrevingsbeløp shouldBe null
-            resultat.andelAvBeløp shouldBe BigDecimal.valueOf(100)
-            resultat.skattebeløp shouldBe BigDecimal.valueOf(1000)
-            resultat.tilbakekrevingsbeløpEtterSkatt shouldBe BigDecimal.valueOf(10000)
+            resultat.tilbakekrevesBruttoMedRenter() shouldBe BigDecimal.valueOf(11000)
+            resultat.renter() shouldBe BigDecimal.valueOf(1000)
+            resultat.andel.feilutbetaltBeløp() shouldBe BigDecimal.valueOf(10000)
+            resultat.skatt() shouldBe BigDecimal.valueOf(1000)
         }
-        beregningsresultat.vedtaksresultat shouldBe Vedtaksresultat.FULL_TILBAKEBETALING
     }
 
     @Test

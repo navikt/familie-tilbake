@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.beregning
 
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
@@ -9,6 +10,7 @@ import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagAdapter
 import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagPeriodeAdapter
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurderingAdapter
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurdertPeriodeAdapter
+import no.nav.tilbakekreving.beregning.delperiode.Delperiode
 import no.nav.tilbakekreving.beregning.modell.Beregningsresultat
 import no.nav.tilbakekreving.beregning.modell.Beregningsresultatsperiode
 import no.nav.tilbakekreving.februar
@@ -38,7 +40,18 @@ class BeregningTest {
             ),
         )
 
-        beregning.beregn() shouldBe Beregningsresultat(
+        val delperioder = beregning.beregn()
+        delperioder shouldHaveSize 1
+        delperioder[0].shouldMatch(
+            periode = 1.januar til 31.januar,
+            renter = 0.kroner,
+            tilbakekrevesBrutto = 1500.kroner,
+            tilbakekrevesBruttoMedRenter = 1500.kroner,
+            skatt = 0.kroner,
+            utbetaltYtelsesbeløp = 20000.kroner,
+            feilutbetaltBeløp = 1500.kroner,
+        )
+        beregning.oppsummer() shouldBe Beregningsresultat(
             listOf(
                 Beregningsresultatsperiode(
                     periode = 1.januar til 31.januar,
@@ -74,7 +87,18 @@ class BeregningTest {
             ),
         )
 
-        beregning.beregn() shouldBe Beregningsresultat(
+        val delperioder = beregning.beregn()
+        delperioder shouldHaveSize 1
+        delperioder[0].shouldMatch(
+            periode = 1.januar til 31.januar,
+            renter = 150.kroner,
+            tilbakekrevesBrutto = 1500.kroner,
+            tilbakekrevesBruttoMedRenter = 1650.kroner,
+            skatt = 750.kroner,
+            utbetaltYtelsesbeløp = 20000.kroner,
+            feilutbetaltBeløp = 1500.kroner,
+        )
+        beregning.oppsummer() shouldBe Beregningsresultat(
             listOf(
                 Beregningsresultatsperiode(
                     periode = 1.januar til 31.januar,
@@ -111,37 +135,42 @@ class BeregningTest {
             ),
         )
 
-        beregning.beregn() shouldBe Beregningsresultat(
+        val delperiode = beregning.beregn()
+        delperiode[0].shouldMatch(
+            periode = 1.januar til 31.januar,
+            renter = 0.kroner,
+            tilbakekrevesBrutto = 1000.kroner,
+            tilbakekrevesBruttoMedRenter = 1000.kroner,
+            skatt = 0.kroner,
+            utbetaltYtelsesbeløp = 20000.kroner,
+            feilutbetaltBeløp = 1500.kroner,
+        )
+        delperiode[1].shouldMatch(
+            periode = 1.februar til 28.februar,
+            renter = 0.kroner,
+            tilbakekrevesBrutto = 999.kroner,
+            tilbakekrevesBruttoMedRenter = 999.kroner,
+            skatt = 0.kroner,
+            utbetaltYtelsesbeløp = 20000.kroner,
+            feilutbetaltBeløp = 1500.kroner,
+        )
+
+        beregning.oppsummer() shouldBe Beregningsresultat(
             listOf(
                 Beregningsresultatsperiode(
-                    periode = 1.januar til 31.januar,
+                    periode = 1.januar til 28.februar,
                     vurdering = AnnenVurdering.GOD_TRO,
-                    feilutbetaltBeløp = 1500.kroner,
+                    feilutbetaltBeløp = 3000.kroner,
                     andelAvBeløp = null,
                     renteprosent = null,
-                    manueltSattTilbakekrevingsbeløp = 999.50.kroner,
-                    tilbakekrevingsbeløpUtenRenter = 1000.kroner,
+                    manueltSattTilbakekrevingsbeløp = 1999.0.kroner,
+                    tilbakekrevingsbeløpUtenRenter = 1999.kroner,
                     rentebeløp = 0.kroner,
-                    tilbakekrevingsbeløp = 1000.kroner,
+                    tilbakekrevingsbeløp = 1999.kroner,
                     skattebeløp = 0.kroner,
-                    tilbakekrevingsbeløpEtterSkatt = 1000.kroner,
-                    utbetaltYtelsesbeløp = 20000.kroner,
-                    riktigYtelsesbeløp = 18500.kroner,
-                ),
-                Beregningsresultatsperiode(
-                    periode = 1.februar til 28.februar,
-                    vurdering = AnnenVurdering.GOD_TRO,
-                    feilutbetaltBeløp = 1500.kroner,
-                    andelAvBeløp = null,
-                    renteprosent = null,
-                    manueltSattTilbakekrevingsbeløp = 999.50.kroner,
-                    tilbakekrevingsbeløpUtenRenter = 999.kroner,
-                    rentebeløp = 0.kroner,
-                    tilbakekrevingsbeløp = 999.kroner,
-                    skattebeløp = 0.kroner,
-                    tilbakekrevingsbeløpEtterSkatt = 999.kroner,
-                    utbetaltYtelsesbeløp = 20000.kroner,
-                    riktigYtelsesbeløp = 18500.kroner,
+                    tilbakekrevingsbeløpEtterSkatt = 1999.kroner,
+                    utbetaltYtelsesbeløp = 40000.kroner,
+                    riktigYtelsesbeløp = 37000.kroner,
                 ),
             ),
             Vedtaksresultat.DELVIS_TILBAKEBETALING,
@@ -163,12 +192,32 @@ class BeregningTest {
             ),
         )
 
-        beregning.beregn() shouldBe Beregningsresultat(
+        val delperioder = beregning.beregn()
+        delperioder shouldHaveSize 2
+        delperioder[0].shouldMatch(
+            periode = 1.januar til 31.januar,
+            renter = 0.kroner,
+            tilbakekrevesBrutto = 0.kroner,
+            tilbakekrevesBruttoMedRenter = 0.kroner,
+            skatt = 0.kroner,
+            utbetaltYtelsesbeløp = 20000.kroner,
+            feilutbetaltBeløp = 1500.kroner,
+        )
+        delperioder[1].shouldMatch(
+            periode = 1.februar til 28.februar,
+            renter = 0.kroner,
+            tilbakekrevesBrutto = 0.kroner,
+            tilbakekrevesBruttoMedRenter = 0.kroner,
+            skatt = 0.kroner,
+            utbetaltYtelsesbeløp = 20000.kroner,
+            feilutbetaltBeløp = 1500.kroner,
+        )
+        beregning.oppsummer() shouldBe Beregningsresultat(
             listOf(
                 Beregningsresultatsperiode(
-                    periode = 1.januar til 31.januar,
+                    periode = 1.januar til 28.februar,
                     vurdering = AnnenVurdering.GOD_TRO,
-                    feilutbetaltBeløp = 1500.kroner,
+                    feilutbetaltBeløp = 3000.kroner,
                     andelAvBeløp = 0.prosent,
                     renteprosent = null,
                     manueltSattTilbakekrevingsbeløp = null,
@@ -177,23 +226,8 @@ class BeregningTest {
                     tilbakekrevingsbeløp = 0.kroner,
                     skattebeløp = 0.kroner,
                     tilbakekrevingsbeløpEtterSkatt = 0.kroner,
-                    utbetaltYtelsesbeløp = 20000.kroner,
-                    riktigYtelsesbeløp = 18500.kroner,
-                ),
-                Beregningsresultatsperiode(
-                    periode = 1.februar til 28.februar,
-                    vurdering = AnnenVurdering.GOD_TRO,
-                    feilutbetaltBeløp = 1500.kroner,
-                    andelAvBeløp = 0.prosent,
-                    renteprosent = null,
-                    manueltSattTilbakekrevingsbeløp = null,
-                    tilbakekrevingsbeløpUtenRenter = 0.kroner,
-                    rentebeløp = 0.kroner,
-                    tilbakekrevingsbeløp = 0.kroner,
-                    skattebeløp = 0.kroner,
-                    tilbakekrevingsbeløpEtterSkatt = 0.kroner,
-                    utbetaltYtelsesbeløp = 20000.kroner,
-                    riktigYtelsesbeløp = 18500.kroner,
+                    utbetaltYtelsesbeløp = 40000.kroner,
+                    riktigYtelsesbeløp = 37000.kroner,
                 ),
             ),
             Vedtaksresultat.INGEN_TILBAKEBETALING,
@@ -215,37 +249,42 @@ class BeregningTest {
             ),
         )
 
-        beregning.beregn() shouldBe Beregningsresultat(
+        val delperioder = beregning.beregn()
+        delperioder shouldHaveSize 2
+        delperioder[0].shouldMatch(
+            periode = 1.januar til 31.januar,
+            renter = 0.kroner,
+            tilbakekrevesBrutto = 750.kroner,
+            tilbakekrevesBruttoMedRenter = 750.kroner,
+            skatt = 0.kroner,
+            utbetaltYtelsesbeløp = 20000.kroner,
+            feilutbetaltBeløp = 1499.kroner,
+        )
+        delperioder[1].shouldMatch(
+            periode = 1.februar til 28.februar,
+            renter = 0.kroner,
+            tilbakekrevesBrutto = 749.kroner,
+            tilbakekrevesBruttoMedRenter = 749.kroner,
+            skatt = 0.kroner,
+            utbetaltYtelsesbeløp = 20000.kroner,
+            feilutbetaltBeløp = 1499.kroner,
+        )
+        beregning.oppsummer() shouldBe Beregningsresultat(
             listOf(
                 Beregningsresultatsperiode(
-                    periode = 1.januar til 31.januar,
+                    periode = 1.januar til 28.februar,
                     vurdering = Aktsomhet.SIMPEL_UAKTSOMHET,
-                    feilutbetaltBeløp = 1499.kroner,
+                    feilutbetaltBeløp = 2998.kroner,
                     andelAvBeløp = 50.prosent,
                     renteprosent = null,
                     manueltSattTilbakekrevingsbeløp = null,
-                    tilbakekrevingsbeløpUtenRenter = 750.kroner,
+                    tilbakekrevingsbeløpUtenRenter = 1499.kroner,
                     rentebeløp = 0.kroner,
-                    tilbakekrevingsbeløp = 750.kroner,
+                    tilbakekrevingsbeløp = 1499.kroner,
                     skattebeløp = 0.kroner,
-                    tilbakekrevingsbeløpEtterSkatt = 750.kroner,
-                    utbetaltYtelsesbeløp = 20000.kroner,
-                    riktigYtelsesbeløp = 18501.kroner,
-                ),
-                Beregningsresultatsperiode(
-                    periode = 1.februar til 28.februar,
-                    vurdering = Aktsomhet.SIMPEL_UAKTSOMHET,
-                    feilutbetaltBeløp = 1499.kroner,
-                    andelAvBeløp = 50.prosent,
-                    renteprosent = null,
-                    manueltSattTilbakekrevingsbeløp = null,
-                    tilbakekrevingsbeløpUtenRenter = 749.kroner,
-                    rentebeløp = 0.kroner,
-                    tilbakekrevingsbeløp = 749.kroner,
-                    skattebeløp = 0.kroner,
-                    tilbakekrevingsbeløpEtterSkatt = 749.kroner,
-                    utbetaltYtelsesbeløp = 20000.kroner,
-                    riktigYtelsesbeløp = 18501.kroner,
+                    tilbakekrevingsbeløpEtterSkatt = 1499.kroner,
+                    utbetaltYtelsesbeløp = 40000.kroner,
+                    riktigYtelsesbeløp = 37002.kroner,
                 ),
             ),
             Vedtaksresultat.DELVIS_TILBAKEBETALING,
@@ -267,52 +306,53 @@ class BeregningTest {
                 1.mars til 31.mars medTilbakekrevesBeløp 18609.kroner medSkatteprosent 50.prosent medOriginaltUtbetaltBeløp 44093.kroner medRiktigYtelsesbeløp 25484.kroner,
             ),
         )
-        beregning.beregn() shouldBe Beregningsresultat(
+
+        val delperioder = beregning.beregn()
+        delperioder shouldHaveSize 3
+        delperioder[0].shouldMatch(
+            periode = 1.januar til 31.januar,
+            renter = 1861.kroner,
+            tilbakekrevesBrutto = 18609.kroner,
+            tilbakekrevesBruttoMedRenter = 20470.kroner,
+            skatt = 9305.kroner,
+            utbetaltYtelsesbeløp = 44093.kroner,
+            feilutbetaltBeløp = 18609.kroner,
+        )
+        delperioder[1].shouldMatch(
+            periode = 1.februar til 28.februar,
+            renter = 1861.kroner,
+            tilbakekrevesBrutto = 18609.kroner,
+            tilbakekrevesBruttoMedRenter = 20470.kroner,
+            skatt = 9304.kroner,
+            utbetaltYtelsesbeløp = 44093.kroner,
+            feilutbetaltBeløp = 18609.kroner,
+        )
+        delperioder[2].shouldMatch(
+            periode = 1.mars til 31.mars,
+            renter = 1860.kroner,
+            tilbakekrevesBrutto = 18609.kroner,
+            tilbakekrevesBruttoMedRenter = 20469.kroner,
+            skatt = 9304.kroner,
+            utbetaltYtelsesbeløp = 44093.kroner,
+            feilutbetaltBeløp = 18609.kroner,
+        )
+
+        beregning.oppsummer() shouldBe Beregningsresultat(
             listOf(
                 Beregningsresultatsperiode(
-                    periode = 1.januar til 31.januar,
+                    periode = 1.januar til 31.mars,
                     vurdering = Aktsomhet.GROV_UAKTSOMHET,
-                    feilutbetaltBeløp = 18609.kroner,
+                    feilutbetaltBeløp = 55827.kroner,
                     andelAvBeløp = 100.prosent,
                     renteprosent = 10.prosent,
                     manueltSattTilbakekrevingsbeløp = null,
-                    tilbakekrevingsbeløpUtenRenter = 18609.kroner,
-                    rentebeløp = 1861.kroner,
-                    tilbakekrevingsbeløp = 20470.kroner,
-                    skattebeløp = 9305.kroner,
-                    tilbakekrevingsbeløpEtterSkatt = 11165.kroner,
-                    utbetaltYtelsesbeløp = 44093.kroner,
-                    riktigYtelsesbeløp = 25484.kroner,
-                ),
-                Beregningsresultatsperiode(
-                    periode = 1.februar til 28.februar,
-                    vurdering = Aktsomhet.GROV_UAKTSOMHET,
-                    feilutbetaltBeløp = 18609.kroner,
-                    andelAvBeløp = 100.prosent,
-                    renteprosent = 10.prosent,
-                    manueltSattTilbakekrevingsbeløp = null,
-                    tilbakekrevingsbeløpUtenRenter = 18609.kroner,
-                    rentebeløp = 1861.kroner,
-                    tilbakekrevingsbeløp = 20470.kroner,
-                    skattebeløp = 9304.kroner,
-                    tilbakekrevingsbeløpEtterSkatt = 11166.kroner,
-                    utbetaltYtelsesbeløp = 44093.kroner,
-                    riktigYtelsesbeløp = 25484.kroner,
-                ),
-                Beregningsresultatsperiode(
-                    periode = 1.mars til 31.mars,
-                    vurdering = Aktsomhet.GROV_UAKTSOMHET,
-                    feilutbetaltBeløp = 18609.kroner,
-                    andelAvBeløp = 100.prosent,
-                    renteprosent = 10.prosent,
-                    manueltSattTilbakekrevingsbeløp = null,
-                    tilbakekrevingsbeløpUtenRenter = 18609.kroner,
-                    rentebeløp = 1860.kroner,
-                    tilbakekrevingsbeløp = 20469.kroner,
-                    skattebeløp = 9304.kroner,
-                    tilbakekrevingsbeløpEtterSkatt = 11165.kroner,
-                    utbetaltYtelsesbeløp = 44093.kroner,
-                    riktigYtelsesbeløp = 25484.kroner,
+                    tilbakekrevingsbeløpUtenRenter = 55827.kroner,
+                    rentebeløp = 5582.kroner,
+                    tilbakekrevingsbeløp = 61409.kroner,
+                    skattebeløp = 27913.kroner,
+                    tilbakekrevingsbeløpEtterSkatt = 33496.kroner,
+                    utbetaltYtelsesbeløp = 132279.kroner,
+                    riktigYtelsesbeløp = 76452.kroner,
                 ),
             ),
             Vedtaksresultat.FULL_TILBAKEBETALING,
@@ -334,37 +374,42 @@ class BeregningTest {
             ),
         )
 
-        beregning.beregn() shouldBe Beregningsresultat(
+        val delperioder = beregning.beregn()
+        delperioder.size shouldBe 2
+        delperioder[0].shouldMatch(
+            periode = 1.januar til 31.januar,
+            renter = 0.kroner,
+            tilbakekrevesBrutto = 878.kroner,
+            tilbakekrevesBruttoMedRenter = 878.kroner,
+            skatt = 386.kroner,
+            utbetaltYtelsesbeløp = 19950.kroner,
+            feilutbetaltBeløp = 1755.kroner,
+        )
+        delperioder[1].shouldMatch(
+            periode = 1.februar til 28.februar,
+            renter = 0.kroner,
+            tilbakekrevesBrutto = 877.kroner,
+            tilbakekrevesBruttoMedRenter = 877.kroner,
+            skatt = 438.kroner,
+            utbetaltYtelsesbeløp = 19950.kroner,
+            feilutbetaltBeløp = 1755.kroner,
+        )
+        beregning.oppsummer() shouldBe Beregningsresultat(
             listOf(
                 Beregningsresultatsperiode(
-                    periode = 1.januar til 31.januar,
+                    periode = 1.januar til 28.februar,
                     vurdering = Aktsomhet.SIMPEL_UAKTSOMHET,
-                    feilutbetaltBeløp = 1755.kroner,
+                    feilutbetaltBeløp = 3510.kroner,
                     andelAvBeløp = 50.prosent,
                     renteprosent = null,
                     manueltSattTilbakekrevingsbeløp = null,
-                    tilbakekrevingsbeløpUtenRenter = 878.kroner,
+                    tilbakekrevingsbeløpUtenRenter = 1755.kroner,
                     rentebeløp = 0.kroner,
-                    tilbakekrevingsbeløp = 878.kroner,
-                    skattebeløp = 386.kroner,
-                    tilbakekrevingsbeløpEtterSkatt = 492.kroner,
-                    utbetaltYtelsesbeløp = 19950.kroner,
-                    riktigYtelsesbeløp = 18195.kroner,
-                ),
-                Beregningsresultatsperiode(
-                    periode = 1.februar til 28.februar,
-                    vurdering = Aktsomhet.SIMPEL_UAKTSOMHET,
-                    feilutbetaltBeløp = 1755.kroner,
-                    andelAvBeløp = 50.prosent,
-                    renteprosent = null,
-                    manueltSattTilbakekrevingsbeløp = null,
-                    tilbakekrevingsbeløpUtenRenter = 877.kroner,
-                    rentebeløp = 0.kroner,
-                    tilbakekrevingsbeløp = 877.kroner,
-                    skattebeløp = 438.kroner,
-                    tilbakekrevingsbeløpEtterSkatt = 439.kroner,
-                    utbetaltYtelsesbeløp = 19950.kroner,
-                    riktigYtelsesbeløp = 18195.kroner,
+                    tilbakekrevingsbeløp = 1755.kroner,
+                    skattebeløp = 824.kroner,
+                    tilbakekrevingsbeløpEtterSkatt = 931.kroner,
+                    utbetaltYtelsesbeløp = 39900.kroner,
+                    riktigYtelsesbeløp = 36390.kroner,
                 ),
             ),
             Vedtaksresultat.DELVIS_TILBAKEBETALING,
@@ -427,6 +472,24 @@ class BeregningTest {
     fun medBeløpIBehold(beløp: BigDecimal) = Vilkårsvurderingsteg.Vurdering.GodTro.BeløpIBehold.Ja(beløp)
 
     fun utenBeløpIBehold() = Vilkårsvurderingsteg.Vurdering.GodTro.BeløpIBehold.Nei
+
+    fun Delperiode.shouldMatch(
+        periode: Datoperiode,
+        renter: BigDecimal,
+        tilbakekrevesBrutto: BigDecimal,
+        tilbakekrevesBruttoMedRenter: BigDecimal,
+        skatt: BigDecimal,
+        utbetaltYtelsesbeløp: BigDecimal,
+        feilutbetaltBeløp: BigDecimal,
+    ) {
+        this.periode shouldBe periode
+        this.renter() shouldBe renter
+        this.tilbakekrevesBrutto() shouldBe tilbakekrevesBrutto
+        this.tilbakekrevesBruttoMedRenter() shouldBe tilbakekrevesBruttoMedRenter
+        this.skatt() shouldBe skatt
+        this.andel.utbetaltYtelsesbeløp() shouldBe utbetaltYtelsesbeløp
+        this.andel.feilutbetaltBeløp() shouldBe feilutbetaltBeløp
+    }
 
     class TestKravgrunnlagPeriode(
         private val periode: Datoperiode,

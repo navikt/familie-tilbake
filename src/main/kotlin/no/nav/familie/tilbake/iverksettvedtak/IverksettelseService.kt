@@ -167,7 +167,7 @@ class IverksettelseService(
         beregnetPerioder: List<Tilbakekrevingsperiode>,
         logContext: SecureLog.Context,
     ) {
-        val beregnetResultat = beregningService.beregn(behandlingId)
+        val beregnetResultat = beregningService.beregn(behandlingId).oppsummer()
         val beregnetPerioderForVedtaksbrev = beregnetResultat.beregningsresultatsperioder
 
         // Beløpene beregnes for vedtaksbrev

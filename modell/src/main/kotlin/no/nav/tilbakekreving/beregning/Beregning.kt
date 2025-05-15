@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.beregning
 import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagAdapter
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurderingAdapter
 import no.nav.tilbakekreving.beregning.delperiode.Delperiode
+import no.nav.tilbakekreving.beregning.delperiode.Delperiode.Companion.oppsummer
 import no.nav.tilbakekreving.beregning.delperiode.Foreldet
 import no.nav.tilbakekreving.beregning.delperiode.Vilkårsvurdert
 import no.nav.tilbakekreving.beregning.delperiode.Vilkårsvurdert.Companion.fordelRentebeløp
@@ -11,7 +12,6 @@ import no.nav.tilbakekreving.beregning.delperiode.Vilkårsvurdert.Companion.ford
 import no.nav.tilbakekreving.beregning.modell.Beregningsresultat
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
-import java.math.BigDecimal
 import java.math.RoundingMode
 
 class Beregning(
@@ -39,25 +39,27 @@ class Beregning(
         kgPerioder.map { Vilkårsvurdert.opprett(vurdering, it, beregnRenter, kgPerioder.size) }
     }
 
-    fun beregn(): Beregningsresultat {
-        val beregningsresultater = fordelt
+    fun beregn(): List<Delperiode> {
+        return fordelt
             .fordelTilbakekrevingsbeløp()
             .fordelRentebeløp()
             .fordelSkattebeløp()
-            .map { it.beregningsresultat() }
+    }
+
+    fun oppsummer(): Beregningsresultat {
+        val delperioder = beregn()
+        val beregningsresultater = delperioder.oppsummer()
         return Beregningsresultat(
-            vedtaksresultat = bestemVedtakResultat(
-                tilbakekrevingsbeløp = beregningsresultater.sumOf { it.tilbakekrevingsbeløp }.setScale(0, RoundingMode.HALF_UP),
-                feilutbetaltBeløp = beregningsresultater.sumOf { it.feilutbetaltBeløp }.setScale(0, RoundingMode.HALF_UP),
-            ),
+            vedtaksresultat = bestemVedtakResultat(delperioder),
             beregningsresultatsperioder = beregningsresultater,
         )
     }
 
-    private fun bestemVedtakResultat(
-        tilbakekrevingsbeløp: BigDecimal,
-        feilutbetaltBeløp: BigDecimal?,
-    ): Vedtaksresultat {
+    fun vedtaksresultat(): Vedtaksresultat = bestemVedtakResultat(beregn())
+
+    private fun bestemVedtakResultat(delperioder: List<Delperiode>): Vedtaksresultat {
+        val tilbakekrevingsbeløp = delperioder.sumOf { it.tilbakekrevesBruttoMedRenter() }.setScale(0, RoundingMode.HALF_UP)
+        val feilutbetaltBeløp = delperioder.sumOf { it.andel.feilutbetaltBeløp() }.setScale(0, RoundingMode.HALF_UP)
         return when {
             tilbakekrevLavtBeløp -> Vedtaksresultat.INGEN_TILBAKEBETALING
             tilbakekrevingsbeløp.isZero() -> Vedtaksresultat.INGEN_TILBAKEBETALING

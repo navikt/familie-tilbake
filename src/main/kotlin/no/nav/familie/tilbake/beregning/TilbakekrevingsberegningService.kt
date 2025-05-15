@@ -17,7 +17,6 @@ import no.nav.tilbakekreving.api.v1.dto.BeregnetPerioderDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatsperiodeDto
 import no.nav.tilbakekreving.beregning.Beregning
-import no.nav.tilbakekreving.beregning.modell.Beregningsresultat
 import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import org.springframework.stereotype.Service
@@ -33,7 +32,7 @@ class TilbakekrevingsberegningService(
     private val logService: LogService,
 ) {
     fun hentBeregningsresultat(behandlingId: UUID): BeregningsresultatDto {
-        val beregningsresultat = beregn(behandlingId)
+        val beregningsresultat = beregn(behandlingId).oppsummer()
         val beregningsresultatsperioder = beregningsresultat.beregningsresultatsperioder.map {
             BeregningsresultatsperiodeDto(
                 periode = it.periode,
@@ -54,7 +53,7 @@ class TilbakekrevingsberegningService(
         )
     }
 
-    fun beregn(behandlingId: UUID): Beregningsresultat {
+    fun beregn(behandlingId: UUID): Beregning {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
         val kravgrunnlagAdapter = Kravgrunnlag431Adapter(kravgrunnlag)
@@ -71,7 +70,7 @@ class TilbakekrevingsberegningService(
             kravgrunnlag = kravgrunnlagAdapter,
             vilkårsvurdering = vilkårsvurderingAdapter,
             foreldetPerioder = foreldetPerioder,
-        ).beregn()
+        )
     }
 
     fun beregnBeløp(
