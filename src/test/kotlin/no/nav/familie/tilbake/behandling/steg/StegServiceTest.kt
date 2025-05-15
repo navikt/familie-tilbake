@@ -41,6 +41,9 @@ import no.nav.familie.tilbake.oppgave.FerdigstillOppgaveTask
 import no.nav.familie.tilbake.oppgave.LagOppgaveTask
 import no.nav.familie.tilbake.totrinn.TotrinnsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
+import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingGodTro
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFaktaDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFatteVedtaksstegDtoTest
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeldelseDto
@@ -68,6 +71,7 @@ import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode.Companion.til
+import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.verge.Vergetype
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import org.junit.jupiter.api.AfterEach
@@ -585,25 +589,13 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         // behandle vilkårsvurderingssteg
         stegService.håndterSteg(
             behandling.id,
-            lagBehandlingsstegVilkårsvurderingDto(
-                Datoperiode(
-                    fom,
-                    tom,
-                ),
-            ),
+            lagBehandlingsstegVilkårsvurderingDto(fom til tom),
             SecureLog.Context.tom(),
         )
 
-        val fritekstavsnitt =
-            FritekstavsnittDto(
-                perioderMedTekst =
-                    listOf(
-                        PeriodeMedTekstDto(
-                            periode = Datoperiode(fom, tom),
-                            faktaAvsnitt = "fakta tekst",
-                        ),
-                    ),
-            )
+        val fritekstavsnitt = FritekstavsnittDto(
+            perioderMedTekst = listOf(PeriodeMedTekstDto(periode = fom til tom, faktaAvsnitt = "fakta tekst")),
+        )
         stegService.håndterSteg(behandling.id, BehandlingsstegForeslåVedtaksstegDto(fritekstavsnitt = fritekstavsnitt), SecureLog.Context.tom())
 
         assertOppgave(FerdigstillOppgaveTask.TYPE)
@@ -636,6 +628,23 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `håndterSteg skal utføre fatte vedtak og forsette til iverksette vedtak når beslutter godkjenner alt`() {
         kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
+
+        vilkårsvurderingRepository.insert(
+            Vilkårsvurdering(
+                behandlingId = behandling.id,
+                perioder = setOf(
+                    Vilkårsvurderingsperiode(
+                        periode = januar(2023) til januar(2023),
+                        begrunnelse = "",
+                        vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
+                        godTro = VilkårsvurderingGodTro(
+                            beløpErIBehold = false,
+                            begrunnelse = "",
+                        ),
+                    ),
+                ),
+            ),
+        )
 
         lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)

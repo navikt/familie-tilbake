@@ -559,7 +559,11 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `lagreUtkastAvFriteksterFraSaksbehandler skal lagre selv når påkrevet fritekst mangler for alle fakta perioder`() {
-        val (_, behandling) = nyBehandling(lagFaktaVurdering = false, lagVilkårsvurdering = false)
+        val (_, behandling) = nyBehandling(
+            lagFaktaVurdering = false,
+            lagVilkårsvurdering = false,
+            kravgrunnlagPerioder = listOf(januar(2021) til januar(2021)),
+        )
         lagFakta(behandling.id, januar(2021) til januar(2021))
         lagVilkårsvurdering(behandling.id, januar(2021) til januar(2021))
 
@@ -604,24 +608,28 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `lagreUtkastAvFriteksterFraSaksbehandler skal lagre selv når påkrevet fritekst mangler for oppsummering`() {
-        val (fagsak, behandling) = nyBehandling()
+        val (fagsak, behandling) = nyBehandling(kravgrunnlagPerioder = listOf(januar(2021) til januar(2021)))
         val revurdering = behandlingRepository.insert(
             Testdata.lagRevurdering(behandling.id, fagsak.id).copy(
                 id = UUID.randomUUID(),
                 eksternBrukId = UUID.randomUUID(),
                 avsluttetDato = null,
-                årsaker =
-                    setOf(
-                        Behandlingsårsak(
-                            originalBehandlingId = behandling.id,
-                            type = Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR,
-                        ),
+                årsaker = setOf(
+                    Behandlingsårsak(
+                        originalBehandlingId = behandling.id,
+                        type = Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR,
                     ),
+                ),
             ),
         )
 
         // Er nødt til å opprette kravgrunnlag for revurderingen
-        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id).copy(id = UUID.randomUUID(), behandlingId = revurdering.id, perioder = emptySet()))
+        kravgrunnlagRepository.insert(
+            Testdata.lagKravgrunnlag(
+                behandlingId = revurdering.id,
+                perioder = setOf(Testdata.lagKravgrunnlagsperiode(januar(2021) til januar(2021))),
+            ),
+        )
 
         lagFakta(revurdering.id, januar(2021) til januar(2021))
         lagVilkårsvurdering(revurdering.id, januar(2021) til januar(2021))
@@ -749,10 +757,11 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     fun nyBehandling(
         lagFaktaVurdering: Boolean = true,
         lagVilkårsvurdering: Boolean = true,
-        kravgrunnlagPerioder: List<Månedsperiode> = listOf(mars(2021) til mars(2021)),
+        kravgrunnlagPerioder: List<Månedsperiode> = listOf(januar(2021) til januar(2021)),
     ): Pair<Fagsak, Behandling> {
         val fagsak = fagsakRepository.insert(Testdata.fagsak())
         val behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId = fagsak.id).copy(avsluttetDato = 20.april(2024)))
+        val fullPeriode = kravgrunnlagPerioder.minOf { it.fom } til kravgrunnlagPerioder.maxOf { it.tom }
         kravgrunnlagRepository.insert(
             Testdata.lagKravgrunnlag(
                 behandlingId = behandling.id,
@@ -763,7 +772,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
             vilkårsvurderingRepository.insert(
                 Testdata.lagVilkårsvurdering(
                     behandlingId = behandling.id,
-                    perioder = setOf(Testdata.vilkårsperiode(mars(2021) til april(2021), godTro = null)),
+                    perioder = setOf(Testdata.vilkårsperiode(fullPeriode, godTro = null)),
                 ),
             )
         }
@@ -772,7 +781,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
                 Testdata.lagFaktaFeilutbetaling(behandling.id).copy(
                     perioder = setOf(
                         FaktaFeilutbetalingsperiode(
-                            periode = mars(2021) til april(2021),
+                            periode = fullPeriode,
                             hendelsestype = Hendelsestype.ANNET,
                             hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
                         ),
