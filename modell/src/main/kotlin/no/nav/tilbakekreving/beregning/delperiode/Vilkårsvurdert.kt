@@ -4,6 +4,7 @@ import no.nav.tilbakekreving.beregning.HUNDRE_PROSENT
 import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagPeriodeAdapter
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurdertPeriodeAdapter
+import no.nav.tilbakekreving.beregning.fraksjon
 import no.nav.tilbakekreving.beregning.isZero
 import no.nav.tilbakekreving.beregning.modell.Beregningsresultatsperiode
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
@@ -30,7 +31,8 @@ class Vilkårsvurdert(
     private var rentebeløpAvrunding = BigDecimal.ZERO
     private val rentebeløp = beregnRentebeløp(tilbakekrevingsbeløp)
 
-    override fun tilbakekrevesBrutto(): BigDecimal = tilbakekrevingsbeløp.setScale(0, RoundingMode.DOWN) + tilbakekrevingsbeløpAvrunding
+    override fun tilbakekrevesBrutto(): BigDecimal =
+        tilbakekrevingsbeløp.setScale(0, RoundingMode.DOWN) + tilbakekrevingsbeløpAvrunding
 
     override fun tilbakekrevesBruttoMedRenter(): BigDecimal = tilbakekrevesBrutto() + renter()
 
@@ -49,7 +51,8 @@ class Vilkårsvurdert(
             riktigYtelsesbeløp = andel.riktigYtelsesbeløp(),
             utbetaltYtelsesbeløp = andel.utbetaltYtelsesbeløp(),
             andelAvBeløp = vurdering.reduksjon().andel,
-            manueltSattTilbakekrevingsbeløp = tilbakekrevingsbeløp.takeIf { vurdering.reduksjon() is Reduksjon.ManueltBeløp }?.setScale(2, RoundingMode.DOWN),
+            manueltSattTilbakekrevingsbeløp = tilbakekrevingsbeløp.takeIf { vurdering.reduksjon() is Reduksjon.ManueltBeløp }
+                ?.setScale(2, RoundingMode.DOWN),
             tilbakekrevingsbeløpUtenRenter = tilbakekrevesBrutto(),
             rentebeløp = renter(),
             tilbakekrevingsbeløpEtterSkatt = tilbakekrevesNetto(),
@@ -84,7 +87,9 @@ class Vilkårsvurdert(
             beregnRenter: Boolean,
             antallKravgrunnlagGjelder: Int,
         ): Vilkårsvurdert {
-            val delperiode = kravgrunnlagPeriode.periode().snitt(vurdering.periode())!!
+            val delperiode = requireNotNull(kravgrunnlagPeriode.periode().snitt(vurdering.periode())) {
+                "Finner ingen kravgrunnlagsperiode som er dekket av vilkårsvurderingsperioden ${vurdering.periode()}, kravgrunnlagsperiode=${kravgrunnlagPeriode.periode()}"
+            }
             return Vilkårsvurdert(
                 periode = delperiode,
                 vurdertPeriode = vurdering.periode(),
@@ -98,29 +103,40 @@ class Vilkårsvurdert(
             )
         }
 
-        fun <T : Iterable<Delperiode>> T.fordelTilbakekrevingsbeløp(): T = fordel(Vilkårsvurdert::tilbakekrevingsbeløp, RoundingMode.HALF_DOWN) {
-            tilbakekrevingsbeløpAvrunding = BigDecimal.ONE
+        fun <T : Iterable<Delperiode>> T.fordelTilbakekrevingsbeløp(): T = apply {
+            fordel(Vilkårsvurdert::tilbakekrevingsbeløp, RoundingMode.HALF_DOWN) {
+                tilbakekrevingsbeløpAvrunding = BigDecimal.ONE
+            }
         }
 
-        fun <T : Iterable<Delperiode>> T.fordelRentebeløp(): T = fordel(Vilkårsvurdert::rentebeløp, RoundingMode.DOWN) {
-            rentebeløpAvrunding = BigDecimal.ONE
+        fun <T : Iterable<Delperiode>> T.fordelRentebeløp(): T = apply {
+            fordel(Vilkårsvurdert::rentebeløp, RoundingMode.DOWN) {
+                rentebeløpAvrunding = BigDecimal.ONE
+            }
         }
 
-        fun <T : Iterable<Delperiode>> T.fordelSkattebeløp(): T = fordel(Vilkårsvurdert::skattebeløp, RoundingMode.DOWN) {
-            skattebeløpAvrunding = BigDecimal.ONE
+        fun <T : Iterable<Delperiode>> T.fordelSkattebeløp(): T = apply {
+            fordel(Vilkårsvurdert::skattebeløp, RoundingMode.DOWN) {
+                skattebeløpAvrunding = BigDecimal.ONE
+            }
         }
 
-        private fun <T : Iterable<Delperiode>> T.fordel(
-            getter: Vilkårsvurdert.() -> BigDecimal,
+        private fun Iterable<Delperiode>.fordel(
+            verdi: Vilkårsvurdert.() -> BigDecimal,
             avrunding: RoundingMode,
             økAvrunding: Vilkårsvurdert.() -> Unit,
-        ): T {
-            val diff = filterIsInstance<Vilkårsvurdert>().sumOf { it.getter() - it.getter().setScale(0, RoundingMode.DOWN) }
+        ) {
+            val overflødigeKronerEtterAvrunding = filterIsInstance<Vilkårsvurdert>().sumOf { it.verdi().fraksjon() }
+                .setScale(0, avrunding)
+                .toInt()
+
+            val høyesteFraksjon = compareByDescending<Vilkårsvurdert> { it.verdi().fraksjon() }
+                .thenBy { it.periode.fom }
+
             filterIsInstance<Vilkårsvurdert>()
-                .sortedWith(compareByDescending<Vilkårsvurdert> { it.getter() - it.getter().setScale(0, RoundingMode.DOWN) }.thenBy { it.periode.fom })
-                .take(diff.setScale(0, avrunding).toInt())
+                .sortedWith(høyesteFraksjon)
+                .take(overflødigeKronerEtterAvrunding)
                 .forEach { it.økAvrunding() }
-            return this
         }
     }
 }

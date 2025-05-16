@@ -74,7 +74,7 @@ class BeregningTest {
     }
 
     @Test
-    fun `skatt pårvirkes ikke av renter`() {
+    fun `skatt påvirkes ikke av renter`() {
         val beregning = Beregning(
             beregnRenter = true,
             tilbakekrevLavtBeløp = false,
@@ -292,7 +292,7 @@ class BeregningTest {
     }
 
     @Test
-    fun `beregnVedtaksperioder som beregner flere perioder i separate vilkårsperioder med 100 prosent tilbakekreving og renter skal skal avrunde hver renteperiode ned`() {
+    fun `beregnVedtaksperioder som beregner flere perioder i separate vilkårsperioder med 100 prosent tilbakekreving og renter skal avrunde hver renteperiode ned`() {
         val beregning = Beregning(
             beregnRenter = true,
             tilbakekrevLavtBeløp = false,

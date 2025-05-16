@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.beregning
 
 import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagAdapter
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurderingAdapter
+import no.nav.tilbakekreving.beregning.adapter.VilkårsvurdertPeriodeAdapter
 import no.nav.tilbakekreving.beregning.delperiode.Delperiode
 import no.nav.tilbakekreving.beregning.delperiode.Delperiode.Companion.oppsummer
 import no.nav.tilbakekreving.beregning.delperiode.Foreldet
@@ -22,9 +23,10 @@ class Beregning(
     kravgrunnlag: KravgrunnlagAdapter,
 ) {
     init {
-        kravgrunnlag.perioder().forEach { periode ->
-            require((foreldetPerioder + vilkårsvurdering.perioder().map { it.periode() }).any { periode.periode() in it }) {
-                "Perioden ${periode.periode()} mangler vilkårsvurdering eller foreldelse"
+        kravgrunnlag.perioder().forEach { kravgrunnlagsperiode ->
+            val vurdertePerioder = foreldetPerioder + vilkårsvurdering.perioder().map(VilkårsvurdertPeriodeAdapter::periode)
+            require(vurdertePerioder.any { kravgrunnlagsperiode.periode() in it }) {
+                "Perioden ${kravgrunnlagsperiode.periode()} mangler vilkårsvurdering eller foreldelse"
             }
         }
     }
@@ -54,14 +56,14 @@ class Beregning(
         val delperioder = beregn()
         val beregningsresultater = delperioder.oppsummer()
         return Beregningsresultat(
-            vedtaksresultat = bestemVedtakResultat(delperioder),
+            vedtaksresultat = bestemVedtaksresultat(delperioder),
             beregningsresultatsperioder = beregningsresultater,
         )
     }
 
-    fun vedtaksresultat(): Vedtaksresultat = bestemVedtakResultat(beregn())
+    fun vedtaksresultat(): Vedtaksresultat = bestemVedtaksresultat(beregn())
 
-    private fun bestemVedtakResultat(delperioder: List<Delperiode>): Vedtaksresultat {
+    private fun bestemVedtaksresultat(delperioder: List<Delperiode>): Vedtaksresultat {
         val tilbakekrevingsbeløp = delperioder.sumOf { it.tilbakekrevesBruttoMedRenter() }.setScale(0, RoundingMode.HALF_UP)
         val feilutbetaltBeløp = delperioder.sumOf { it.andel.feilutbetaltBeløp() }.setScale(0, RoundingMode.HALF_UP)
         return when {

@@ -41,7 +41,9 @@ class Foreldet(
             periode: Datoperiode,
             kravgrunnlagPeriode: KravgrunnlagPeriodeAdapter,
         ): Foreldet {
-            val delperiode = kravgrunnlagPeriode.periode().snitt(periode)!!
+            val delperiode = requireNotNull(kravgrunnlagPeriode.periode().snitt(periode)) {
+                "Finner ingen kravgrunnlagsperiode som er dekket av foreldelsesperioden $periode, kravgrunnlagsperiode=${kravgrunnlagPeriode.periode()}"
+            }
             return Foreldet(delperiode, periode, Andel(kravgrunnlagPeriode, delperiode))
         }
     }

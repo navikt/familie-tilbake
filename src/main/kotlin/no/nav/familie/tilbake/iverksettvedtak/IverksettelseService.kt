@@ -62,7 +62,7 @@ class IverksettelseService(
             )
             val requestXml = TilbakekrevingsvedtakMarshaller.marshall(behandlingId, request, logContext)
             SecureLog.medContext(logContext) {
-                info("Sender tilbakekrevingsvedtak til økonomi for behandling={} request={}", behandlingId.toString(), requestXml)
+                info("Sender tilbakekrevingsvedtak til økonomi for behandlingId={} request={}", behandlingId.toString(), requestXml)
             }
 
             // Send request til økonomi

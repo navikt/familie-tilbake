@@ -18,7 +18,7 @@ sealed interface Reduksjon {
         ): BigDecimal {
             return kravgrunnlagBeløp
                 .multiply(andel)
-                .divide(BigDecimal.valueOf(100))
+                .divide(HUNDRE_PROSENT)
         }
     }
 
@@ -30,7 +30,7 @@ sealed interface Reduksjon {
     }
 
     class FullstendigRefusjon : Reduksjon {
-        override val andel = BigDecimal.valueOf(100)
+        override val andel = HUNDRE_PROSENT
 
         override fun beregn(
             kravgrunnlagBeløp: BigDecimal,
