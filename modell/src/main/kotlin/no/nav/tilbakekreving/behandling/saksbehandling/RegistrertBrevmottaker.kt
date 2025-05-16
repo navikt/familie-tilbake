@@ -15,8 +15,24 @@ import java.util.UUID
 sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerResponsDto>> {
     val id: UUID
 
-    fun oppdaterRegistrertBrevmottaker(nyBrevmottaker: RegistrertBrevmottaker): RegistrertBrevmottaker {
-        throw IllegalArgumentException("Ugyldig mottaker $nyBrevmottaker")
+    fun oppdaterRegistrertBrevmottaker(nyBrevmottaker: RegistrertBrevmottaker): RegistrertBrevmottaker
+
+    fun kombiner(annen: VergeMottaker): RegistrertBrevmottaker {
+        throw IllegalArgumentException("Ugyldig mottaker $annen")
+    }
+
+    fun kombiner(annen: FullmektigMottaker): RegistrertBrevmottaker {
+        throw IllegalArgumentException("Ugyldig mottaker $annen")
+    }
+
+    fun kombiner(annen: DefaultMottaker): RegistrertBrevmottaker = this
+
+    fun kombiner(annen: UtenlandskAdresseMottaker): RegistrertBrevmottaker {
+        throw IllegalArgumentException("Ugyldig mottaker $annen")
+    }
+
+    fun kombiner(annen: DødsboMottaker): RegistrertBrevmottaker {
+        throw IllegalArgumentException("Ugyldig mottaker $annen")
     }
 
     class DefaultMottaker(
@@ -26,31 +42,7 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
     ) : RegistrertBrevmottaker {
         override fun oppdaterRegistrertBrevmottaker(
             nyBrevmottaker: RegistrertBrevmottaker,
-        ): RegistrertBrevmottaker = when (nyBrevmottaker) {
-            is VergeMottaker -> DefaultBrukerAdresseOgVergeMottaker(
-                UUID.randomUUID(),
-                defaultMottaker = this,
-                verge = nyBrevmottaker,
-            )
-            is FullmektigMottaker -> DefaultBrukerAdresseOgFullmektigMottaker(
-                UUID.randomUUID(),
-                defaultMottaker = this,
-                fullmektig = nyBrevmottaker,
-            )
-            is UtenlandskAdresseMottaker -> UtenlandskAdresseMottaker(
-                UUID.randomUUID(),
-                navn = nyBrevmottaker.navn,
-                manuellAdresseInfo = nyBrevmottaker.manuellAdresseInfo,
-            )
-            is DødsboMottaker -> DødsboMottaker(
-                UUID.randomUUID(),
-                navn = nyBrevmottaker.navn,
-                manuellAdresseInfo = nyBrevmottaker.manuellAdresseInfo,
-            )
-            else -> {
-                throw IllegalArgumentException("Ugyldig mottaker $nyBrevmottaker")
-            }
-        }
+        ): RegistrertBrevmottaker = nyBrevmottaker.kombiner(this)
 
         override fun tilFrontendDto(): List<ManuellBrevmottakerResponsDto> {
             return listOf(
@@ -75,20 +67,22 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
     ) : RegistrertBrevmottaker {
         override fun oppdaterRegistrertBrevmottaker(
             nyBrevmottaker: RegistrertBrevmottaker,
-        ): RegistrertBrevmottaker = when (nyBrevmottaker) {
-            is VergeMottaker -> UtenlandskAdresseOgVergeMottaker(
-                UUID.randomUUID(),
-                utenlandskAdresse = this,
-                verge = nyBrevmottaker,
-            )
+        ): RegistrertBrevmottaker = nyBrevmottaker.kombiner(this)
 
-            is FullmektigMottaker -> UtenlandskAdresseOgFullmektigMottaker(
-                UUID.randomUUID(),
+        override fun kombiner(annen: FullmektigMottaker): RegistrertBrevmottaker {
+            return UtenlandskAdresseOgFullmektigMottaker(
+                id = UUID.randomUUID(),
                 utenlandskAdresse = this,
-                fullmektig = nyBrevmottaker,
+                fullmektig = annen,
             )
+        }
 
-            else -> nyBrevmottaker
+        override fun kombiner(annen: VergeMottaker): RegistrertBrevmottaker {
+            return UtenlandskAdresseOgVergeMottaker(
+                id = UUID.randomUUID(),
+                utenlandskAdresse = this,
+                verge = annen,
+            )
         }
 
         override fun tilFrontendDto(): List<ManuellBrevmottakerResponsDto> {
@@ -129,6 +123,24 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
                 ),
             )
         }
+
+        override fun kombiner(annen: DefaultMottaker): RegistrertBrevmottaker {
+            return DefaultBrukerAdresseOgFullmektigMottaker(
+                id = UUID.randomUUID(),
+                defaultMottaker = annen,
+                fullmektig = this,
+            )
+        }
+
+        override fun kombiner(annen: UtenlandskAdresseMottaker): RegistrertBrevmottaker {
+            return UtenlandskAdresseOgFullmektigMottaker(
+                id = UUID.randomUUID(),
+                utenlandskAdresse = annen,
+                fullmektig = this,
+            )
+        }
+
+        override fun oppdaterRegistrertBrevmottaker(nyBrevmottaker: RegistrertBrevmottaker): RegistrertBrevmottaker = nyBrevmottaker.kombiner(this)
     }
 
     class VergeMottaker(
@@ -153,6 +165,24 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
                 ),
             )
         }
+
+        override fun kombiner(annen: DefaultMottaker): RegistrertBrevmottaker {
+            return DefaultBrukerAdresseOgVergeMottaker(
+                id = UUID.randomUUID(),
+                defaultMottaker = annen,
+                verge = this,
+            )
+        }
+
+        override fun kombiner(annen: UtenlandskAdresseMottaker): RegistrertBrevmottaker {
+            return UtenlandskAdresseOgVergeMottaker(
+                id = UUID.randomUUID(),
+                utenlandskAdresse = annen,
+                verge = this
+            )
+        }
+
+        override fun oppdaterRegistrertBrevmottaker(nyBrevmottaker: RegistrertBrevmottaker): RegistrertBrevmottaker = nyBrevmottaker.kombiner(this)
     }
 
     class DødsboMottaker(
@@ -175,6 +205,20 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
                 ),
             )
         }
+
+        override fun kombiner(annen: VergeMottaker): RegistrertBrevmottaker {
+            return this
+        }
+
+        override fun kombiner(annen: UtenlandskAdresseMottaker): RegistrertBrevmottaker {
+            return this
+        }
+
+        override fun kombiner(annen: FullmektigMottaker): RegistrertBrevmottaker {
+            return this
+        }
+
+        override fun oppdaterRegistrertBrevmottaker(nyBrevmottaker: RegistrertBrevmottaker): RegistrertBrevmottaker = nyBrevmottaker.kombiner(this)
     }
 
     class UtenlandskAdresseOgVergeMottaker(
@@ -182,25 +226,11 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
         val utenlandskAdresse: UtenlandskAdresseMottaker,
         val verge: VergeMottaker,
     ) : RegistrertBrevmottaker {
-        override fun oppdaterRegistrertBrevmottaker(
-            nyBrevmottaker: RegistrertBrevmottaker,
-        ): RegistrertBrevmottaker = when (nyBrevmottaker) {
-            is UtenlandskAdresseMottaker -> UtenlandskAdresseOgVergeMottaker(
-                UUID.randomUUID(),
-                utenlandskAdresse = nyBrevmottaker,
-                verge = verge,
-            )
-            is FullmektigMottaker -> UtenlandskAdresseOgFullmektigMottaker(
-                UUID.randomUUID(),
-                utenlandskAdresse = utenlandskAdresse,
-                fullmektig = nyBrevmottaker,
-            )
-            else -> nyBrevmottaker
-        }
-
         override fun tilFrontendDto(): List<ManuellBrevmottakerResponsDto> {
             return utenlandskAdresse.tilFrontendDto() + verge.tilFrontendDto()
         }
+
+        override fun oppdaterRegistrertBrevmottaker(nyBrevmottaker: RegistrertBrevmottaker): RegistrertBrevmottaker = nyBrevmottaker.kombiner(utenlandskAdresse)
     }
 
     class UtenlandskAdresseOgFullmektigMottaker(
@@ -208,25 +238,11 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
         val utenlandskAdresse: UtenlandskAdresseMottaker,
         val fullmektig: FullmektigMottaker,
     ) : RegistrertBrevmottaker {
-        override fun oppdaterRegistrertBrevmottaker(
-            nyBrevmottaker: RegistrertBrevmottaker,
-        ): RegistrertBrevmottaker = when (nyBrevmottaker) {
-            is UtenlandskAdresseMottaker -> UtenlandskAdresseOgFullmektigMottaker(
-                UUID.randomUUID(),
-                utenlandskAdresse = nyBrevmottaker,
-                fullmektig = fullmektig,
-            )
-            is VergeMottaker -> UtenlandskAdresseOgVergeMottaker(
-                UUID.randomUUID(),
-                utenlandskAdresse = utenlandskAdresse,
-                verge = nyBrevmottaker,
-            )
-            else -> nyBrevmottaker
-        }
-
         override fun tilFrontendDto(): List<ManuellBrevmottakerResponsDto> {
             return utenlandskAdresse.tilFrontendDto() + fullmektig.tilFrontendDto()
         }
+
+        override fun oppdaterRegistrertBrevmottaker(nyBrevmottaker: RegistrertBrevmottaker): RegistrertBrevmottaker = nyBrevmottaker.kombiner(utenlandskAdresse)
     }
 
     class DefaultBrukerAdresseOgVergeMottaker(
@@ -234,21 +250,7 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
         val defaultMottaker: DefaultMottaker,
         val verge: VergeMottaker,
     ) : RegistrertBrevmottaker {
-        override fun oppdaterRegistrertBrevmottaker(
-            nyBrevmottaker: RegistrertBrevmottaker,
-        ): RegistrertBrevmottaker = when (nyBrevmottaker) {
-            is UtenlandskAdresseMottaker -> UtenlandskAdresseOgVergeMottaker(
-                UUID.randomUUID(),
-                utenlandskAdresse = nyBrevmottaker,
-                verge = verge,
-            )
-            is FullmektigMottaker -> DefaultBrukerAdresseOgFullmektigMottaker(
-                UUID.randomUUID(),
-                defaultMottaker = defaultMottaker,
-                fullmektig = nyBrevmottaker,
-            )
-            else -> nyBrevmottaker
-        }
+        override fun oppdaterRegistrertBrevmottaker(nyBrevmottaker: RegistrertBrevmottaker): RegistrertBrevmottaker = nyBrevmottaker.kombiner(verge)
 
         override fun tilFrontendDto(): List<ManuellBrevmottakerResponsDto> {
             return defaultMottaker.tilFrontendDto() + verge.tilFrontendDto()
@@ -260,21 +262,7 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
         val defaultMottaker: DefaultMottaker,
         val fullmektig: FullmektigMottaker,
     ) : RegistrertBrevmottaker {
-        override fun oppdaterRegistrertBrevmottaker(
-            nyBrevmottaker: RegistrertBrevmottaker,
-        ): RegistrertBrevmottaker = when (nyBrevmottaker) {
-            is UtenlandskAdresseMottaker -> UtenlandskAdresseOgFullmektigMottaker(
-                UUID.randomUUID(),
-                utenlandskAdresse = nyBrevmottaker,
-                fullmektig = fullmektig,
-            )
-            is VergeMottaker -> DefaultBrukerAdresseOgVergeMottaker(
-                UUID.randomUUID(),
-                defaultMottaker = defaultMottaker,
-                verge = nyBrevmottaker,
-            )
-            else -> nyBrevmottaker
-        }
+        override fun oppdaterRegistrertBrevmottaker(nyBrevmottaker: RegistrertBrevmottaker): RegistrertBrevmottaker = nyBrevmottaker.kombiner(fullmektig)
 
         override fun tilFrontendDto(): List<ManuellBrevmottakerResponsDto> {
             return defaultMottaker.tilFrontendDto() + fullmektig.tilFrontendDto()
