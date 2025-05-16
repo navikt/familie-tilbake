@@ -16,77 +16,16 @@ class BrevmottakerSteg(
     }
 
     internal fun håndter(nyBrevmottaker: RegistrertBrevmottaker) {
-        if (registrertBrevmottaker == defaultMottaker) {
-            registrertBrevmottaker = håndterNyMottaker(nyBrevmottaker)
-        } else {
-            registrertBrevmottaker = oppdaterRegistrertBrevmottaker(registrertBrevmottaker, nyBrevmottaker)
+        if (!aktivert) {
+            throw Exception("BrevmottakerSteg er ikke aktivert.")
         }
-    }
-
-    private fun håndterNyMottaker(nyBrevmottaker: RegistrertBrevmottaker): RegistrertBrevmottaker =
-        when (nyBrevmottaker) {
-            is RegistrertBrevmottaker.FullmektigMottaker -> RegistrertBrevmottaker.DefaultBrukerAdresseOgFullmektigMottaker(
-                id = UUID.randomUUID(),
-                defaultMottaker = defaultMottaker as RegistrertBrevmottaker.DefaultMottaker,
-                fullmektig = nyBrevmottaker,
-            )
-
-            is RegistrertBrevmottaker.VergeMottaker -> RegistrertBrevmottaker.DefaultBrukerAdresseOgVergeMottaker(
-                id = UUID.randomUUID(),
-                defaultMottaker = defaultMottaker as RegistrertBrevmottaker.DefaultMottaker,
-                verge = nyBrevmottaker,
-            )
-
-            else -> nyBrevmottaker
+        registrertBrevmottaker = when (nyBrevmottaker) {
+            is RegistrertBrevmottaker.DødsboMottaker -> registrertBrevmottaker.kombiner(nyBrevmottaker)
+            is RegistrertBrevmottaker.FullmektigMottaker -> registrertBrevmottaker.kombiner(nyBrevmottaker)
+            is RegistrertBrevmottaker.UtenlandskAdresseMottaker -> registrertBrevmottaker.kombiner(nyBrevmottaker)
+            is RegistrertBrevmottaker.VergeMottaker -> registrertBrevmottaker.kombiner(nyBrevmottaker)
+            else -> throw Exception("Kan ikke motta brevmottaker av type ${nyBrevmottaker.javaClass.simpleName}.")
         }
-
-    private fun oppdaterRegistrertBrevmottaker(
-        eksisterendeBrevmottaker: RegistrertBrevmottaker,
-        nyBrevmottaker: RegistrertBrevmottaker,
-    ): RegistrertBrevmottaker = when (eksisterendeBrevmottaker) {
-        is RegistrertBrevmottaker.UtenlandskAdresseMottaker -> when (nyBrevmottaker) {
-            is RegistrertBrevmottaker.VergeMottaker -> RegistrertBrevmottaker.UtenlandskAdresseOgVergeMottaker(
-                UUID.randomUUID(),
-                utenlandskAdresse = eksisterendeBrevmottaker,
-                verge = nyBrevmottaker,
-            )
-            is RegistrertBrevmottaker.FullmektigMottaker -> RegistrertBrevmottaker.UtenlandskAdresseOgFullmektigMottaker(
-                UUID.randomUUID(),
-                utenlandskAdresse = eksisterendeBrevmottaker,
-                fullmektig = nyBrevmottaker,
-            )
-            else -> nyBrevmottaker
-        }
-
-        is RegistrertBrevmottaker.DefaultBrukerAdresseOgVergeMottaker -> when (nyBrevmottaker) {
-            is RegistrertBrevmottaker.UtenlandskAdresseMottaker -> RegistrertBrevmottaker.UtenlandskAdresseOgVergeMottaker(
-                UUID.randomUUID(),
-                utenlandskAdresse = nyBrevmottaker,
-                verge = eksisterendeBrevmottaker.verge,
-            )
-            is RegistrertBrevmottaker.FullmektigMottaker -> RegistrertBrevmottaker.DefaultBrukerAdresseOgFullmektigMottaker(
-                UUID.randomUUID(),
-                defaultMottaker = eksisterendeBrevmottaker.defaultMottaker,
-                fullmektig = nyBrevmottaker,
-            )
-            else -> nyBrevmottaker
-        }
-
-        is RegistrertBrevmottaker.DefaultBrukerAdresseOgFullmektigMottaker -> when (nyBrevmottaker) {
-            is RegistrertBrevmottaker.UtenlandskAdresseMottaker -> RegistrertBrevmottaker.UtenlandskAdresseOgFullmektigMottaker(
-                UUID.randomUUID(),
-                utenlandskAdresse = nyBrevmottaker,
-                fullmektig = eksisterendeBrevmottaker.fullmektig,
-            )
-            is RegistrertBrevmottaker.VergeMottaker -> RegistrertBrevmottaker.DefaultBrukerAdresseOgVergeMottaker(
-                UUID.randomUUID(),
-                defaultMottaker = eksisterendeBrevmottaker.defaultMottaker,
-                verge = nyBrevmottaker,
-            )
-            else -> nyBrevmottaker
-        }
-
-        else -> nyBrevmottaker
     }
 
     override fun tilFrontendDto(): List<ManuellBrevmottakerResponsDto> {
@@ -106,61 +45,16 @@ class BrevmottakerSteg(
 
     fun hentRegistrertBrevmottaker() = registrertBrevmottaker
 
-    fun fjernManuellBrevmottaker(manuellBrevmottakerId: UUID) {
+    fun fjernManuellBrevmottaker(brevmottakerId: UUID) {
+        if (!aktivert) {
+            throw Exception("BrevmottakerSteg er ikke aktivert.")
+        }
+
         if (registrertBrevmottaker == defaultMottaker) {
-            return
+            throw Exception("Kan ikke fjerne defaultMotatker.")
         }
 
-        val eksisterende = registrertBrevmottaker
-
-        registrertBrevmottaker = when (eksisterende) {
-            is RegistrertBrevmottaker.UtenlandskAdresseOgVergeMottaker ->
-                when (manuellBrevmottakerId) {
-                    eksisterende.utenlandskAdresse.id -> lagDefaultBrevmottakerOgVergeMottaker(eksisterende.verge)
-                    eksisterende.verge.id -> eksisterende.utenlandskAdresse
-                    else -> throw IllegalArgumentException("Ugyldig brevmottaker-id: $manuellBrevmottakerId")
-                }
-
-            is RegistrertBrevmottaker.UtenlandskAdresseOgFullmektigMottaker ->
-                when (manuellBrevmottakerId) {
-                    eksisterende.utenlandskAdresse.id -> lagDefaultBrevmottakerOgFullmektigMottaker(eksisterende.fullmektig)
-                    eksisterende.fullmektig.id -> eksisterende.utenlandskAdresse
-                    else -> throw IllegalArgumentException("Ugyldig brevmottaker-id: $manuellBrevmottakerId")
-                }
-            is RegistrertBrevmottaker.DefaultBrukerAdresseOgVergeMottaker ->
-                when (manuellBrevmottakerId) {
-                    eksisterende.verge.id -> eksisterende.defaultMottaker
-                    else -> throw IllegalArgumentException("Ugyldig brevmottaker-id: $manuellBrevmottakerId")
-                }
-
-            is RegistrertBrevmottaker.DefaultBrukerAdresseOgFullmektigMottaker ->
-                when (manuellBrevmottakerId) {
-                    eksisterende.fullmektig.id -> eksisterende.defaultMottaker
-                    else -> throw IllegalArgumentException("Ugyldig brevmottaker-id: $manuellBrevmottakerId")
-                }
-
-            else -> defaultMottaker
-        }
-    }
-
-    private fun lagDefaultBrevmottakerOgVergeMottaker(
-        verge: RegistrertBrevmottaker.VergeMottaker,
-    ): RegistrertBrevmottaker.DefaultBrukerAdresseOgVergeMottaker {
-        return RegistrertBrevmottaker.DefaultBrukerAdresseOgVergeMottaker(
-            id = UUID.randomUUID(),
-            defaultMottaker = defaultMottaker as RegistrertBrevmottaker.DefaultMottaker,
-            verge = verge,
-        )
-    }
-
-    private fun lagDefaultBrevmottakerOgFullmektigMottaker(
-        fullmektig: RegistrertBrevmottaker.FullmektigMottaker,
-    ): RegistrertBrevmottaker.DefaultBrukerAdresseOgFullmektigMottaker {
-        return RegistrertBrevmottaker.DefaultBrukerAdresseOgFullmektigMottaker(
-            id = UUID.randomUUID(),
-            defaultMottaker = defaultMottaker as RegistrertBrevmottaker.DefaultMottaker,
-            fullmektig = fullmektig,
-        )
+        registrertBrevmottaker = registrertBrevmottaker.fjernBrevmottaker(brevmottakerId, defaultMottaker)
     }
 
     companion object {

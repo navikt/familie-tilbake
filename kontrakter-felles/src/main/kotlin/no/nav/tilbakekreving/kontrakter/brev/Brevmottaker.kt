@@ -31,15 +31,10 @@ data class Brevmottaker(
 enum class MottakerType(
     val visningsnavn: String,
 ) {
-    BRUKER("Bruker"),
     BRUKER_MED_UTENLANDSK_ADRESSE("Bruker med utenlandsk adresse"),
     FULLMEKTIG("Fullmektig"),
     VERGE("Verge"),
     DØDSBO("Dødsbo"),
-    BRUKER_OG_VERGE("Bruker og verge"),
-    BRUKER_OG_FULLMEKTIG("Bruker og fullmektig"),
-    UTENLANDSK_ADRESSE_OG_VERGE("Bruker med utenlandsk adresse og verge"),
-    UTENLANDSK_ADRESSE_OG_FULLMEKTIG("Bruker med utenlandsk fullmektig"),
 }
 
 data class ManuellAdresseInfo(

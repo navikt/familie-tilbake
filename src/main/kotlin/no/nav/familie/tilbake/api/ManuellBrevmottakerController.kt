@@ -52,9 +52,9 @@ class ManuellBrevmottakerController(
             val saksbehandler = ContextService.hentBehandler(logContext)
             tilgangskontrollService.validerTilgangBehandlingID(
                 behandlingId = behandlingId,
-                minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+                minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
-                handling = "Flytter behandling tilbake til Fakta",
+                handling = "Legger til brevmottaker manuelt",
             )
             val id = UUID.randomUUID()
             tilbakekrevingService.behandleBrevmottaker(saksbehandler, tilbakekreving, manuellBrevmottakerRequestDto, id)
@@ -111,9 +111,9 @@ class ManuellBrevmottakerController(
             val saksbehandler = ContextService.hentBehandler(logContext)
             tilgangskontrollService.validerTilgangBehandlingID(
                 behandlingId = behandlingId,
-                minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+                minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
-                handling = "Flytter behandling tilbake til Fakta",
+                handling = "Oppdaterer manuell brevmottaker",
             )
             tilbakekrevingService.behandleBrevmottaker(saksbehandler, tilbakekreving, manuellBrevmottakerRequestDto, manuellBrevmottakerId)
             return Ressurs.success("", melding = "Manuell brevmottaker er oppdatert")
@@ -141,9 +141,9 @@ class ManuellBrevmottakerController(
             val saksbehandler = ContextService.hentBehandler(logContext)
             tilgangskontrollService.validerTilgangBehandlingID(
                 behandlingId = behandlingId,
-                minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+                minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
-                handling = "Flytter behandling tilbake til Fakta",
+                handling = "Fjerner manuell brevmottaker",
             )
             tilbakekrevingService.fjernManuelBrevmottaker(saksbehandler, tilbakekreving, manuellBrevmottakerId)
             return Ressurs.success("", melding = "Manuell brevmottaker er oppdatert")
@@ -168,9 +168,9 @@ class ManuellBrevmottakerController(
         if (tilbakekreving != null) {
             tilgangskontrollService.validerTilgangBehandlingID(
                 behandlingId = behandlingId,
-                minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+                minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
-                handling = "Flytter behandling tilbake til Fakta",
+                handling = "Oppretter brevmottaker-steg på behandling",
             )
             tilbakekrevingService.aktiverBrevmottakerSteg(tilbakekreving)
             return Ressurs.success("OK")
@@ -195,9 +195,9 @@ class ManuellBrevmottakerController(
         if (tilbakekreving != null) {
             tilgangskontrollService.validerTilgangBehandlingID(
                 behandlingId = behandlingId,
-                minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+                minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
-                handling = "Flytter behandling tilbake til Fakta",
+                handling = "Fjern ev. manuelt registrerte brevmottakere og deaktiver steg.",
             )
             tilbakekrevingService.deaktiverBrevmottakerSteg(tilbakekreving)
             return Ressurs.success("OK")

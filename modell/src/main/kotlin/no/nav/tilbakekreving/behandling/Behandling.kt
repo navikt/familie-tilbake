@@ -234,24 +234,16 @@ class Behandling private constructor(
         behandler: Behandler,
         brevmottaker: RegistrertBrevmottaker,
     ) {
-        if (brevmottakerSteg.erStegetAktivert()) {
-            oppdaterAnsvarligSaksbehandler(behandler)
-            brevmottakerSteg.håndter(brevmottaker)
-        } else {
-            throw Exception("BrevmottakerSteg er ikke aktivert.")
-        }
+        oppdaterAnsvarligSaksbehandler(behandler)
+        brevmottakerSteg.håndter(brevmottaker)
     }
 
     internal fun fjernManuelBrevmottaker(
         behandler: Behandler,
         manuellBrevmottakerId: UUID,
     ) {
-        if (brevmottakerSteg.erStegetAktivert()) {
-            oppdaterAnsvarligSaksbehandler(behandler)
-            brevmottakerSteg.fjernManuellBrevmottaker(manuellBrevmottakerId)
-        } else {
-            throw Exception("BrevmottakerSteg er ikke aktivert.")
-        }
+        oppdaterAnsvarligSaksbehandler(behandler)
+        brevmottakerSteg.fjernManuellBrevmottaker(manuellBrevmottakerId)
     }
 
     internal fun opprettBrevmottaker(
