@@ -16,10 +16,14 @@ class BrevmottakerSteg(
     }
 
     internal fun håndter(nyBrevmottaker: RegistrertBrevmottaker) {
-        if (registrertBrevmottaker == defaultMottaker) {
+        if (!aktivert) {
+            throw Exception("BrevmottakerSteg er ikke aktivert.")
+        }
+        registrertBrevmottaker = registrertBrevmottaker.oppdaterRegistrertBrevmottaker(nyBrevmottaker)
+        /*if (registrertBrevmottaker == defaultMottaker) {
             registrertBrevmottaker = håndterNyMottaker(nyBrevmottaker)
         } else {
-            registrertBrevmottaker = oppdaterRegistrertBrevmottaker(registrertBrevmottaker, nyBrevmottaker)
+            registrertBrevmottaker = registrertBrevmottaker.oppdaterRegistrertBrevmottaker(nyBrevmottaker)
         }
     }
 
@@ -38,55 +42,8 @@ class BrevmottakerSteg(
             )
 
             else -> nyBrevmottaker
-        }
 
-    private fun oppdaterRegistrertBrevmottaker(
-        eksisterendeBrevmottaker: RegistrertBrevmottaker,
-        nyBrevmottaker: RegistrertBrevmottaker,
-    ): RegistrertBrevmottaker = when (eksisterendeBrevmottaker) {
-        is RegistrertBrevmottaker.UtenlandskAdresseMottaker -> when (nyBrevmottaker) {
-            is RegistrertBrevmottaker.VergeMottaker -> RegistrertBrevmottaker.UtenlandskAdresseOgVergeMottaker(
-                UUID.randomUUID(),
-                utenlandskAdresse = eksisterendeBrevmottaker,
-                verge = nyBrevmottaker,
-            )
-            is RegistrertBrevmottaker.FullmektigMottaker -> RegistrertBrevmottaker.UtenlandskAdresseOgFullmektigMottaker(
-                UUID.randomUUID(),
-                utenlandskAdresse = eksisterendeBrevmottaker,
-                fullmektig = nyBrevmottaker,
-            )
-            else -> nyBrevmottaker
-        }
-
-        is RegistrertBrevmottaker.DefaultBrukerAdresseOgVergeMottaker -> when (nyBrevmottaker) {
-            is RegistrertBrevmottaker.UtenlandskAdresseMottaker -> RegistrertBrevmottaker.UtenlandskAdresseOgVergeMottaker(
-                UUID.randomUUID(),
-                utenlandskAdresse = nyBrevmottaker,
-                verge = eksisterendeBrevmottaker.verge,
-            )
-            is RegistrertBrevmottaker.FullmektigMottaker -> RegistrertBrevmottaker.DefaultBrukerAdresseOgFullmektigMottaker(
-                UUID.randomUUID(),
-                defaultMottaker = eksisterendeBrevmottaker.defaultMottaker,
-                fullmektig = nyBrevmottaker,
-            )
-            else -> nyBrevmottaker
-        }
-
-        is RegistrertBrevmottaker.DefaultBrukerAdresseOgFullmektigMottaker -> when (nyBrevmottaker) {
-            is RegistrertBrevmottaker.UtenlandskAdresseMottaker -> RegistrertBrevmottaker.UtenlandskAdresseOgFullmektigMottaker(
-                UUID.randomUUID(),
-                utenlandskAdresse = nyBrevmottaker,
-                fullmektig = eksisterendeBrevmottaker.fullmektig,
-            )
-            is RegistrertBrevmottaker.VergeMottaker -> RegistrertBrevmottaker.DefaultBrukerAdresseOgVergeMottaker(
-                UUID.randomUUID(),
-                defaultMottaker = eksisterendeBrevmottaker.defaultMottaker,
-                verge = nyBrevmottaker,
-            )
-            else -> nyBrevmottaker
-        }
-
-        else -> nyBrevmottaker
+         */
     }
 
     override fun tilFrontendDto(): List<ManuellBrevmottakerResponsDto> {
@@ -107,6 +64,10 @@ class BrevmottakerSteg(
     fun hentRegistrertBrevmottaker() = registrertBrevmottaker
 
     fun fjernManuellBrevmottaker(manuellBrevmottakerId: UUID) {
+        if (!aktivert) {
+            throw Exception("BrevmottakerSteg er ikke aktivert.")
+        }
+
         if (registrertBrevmottaker == defaultMottaker) {
             return
         }

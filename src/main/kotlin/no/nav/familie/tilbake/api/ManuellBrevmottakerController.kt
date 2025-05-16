@@ -52,7 +52,7 @@ class ManuellBrevmottakerController(
             val saksbehandler = ContextService.hentBehandler(logContext)
             tilgangskontrollService.validerTilgangBehandlingID(
                 behandlingId = behandlingId,
-                minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+                minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
                 handling = "Flytter behandling tilbake til Fakta",
             )
@@ -111,7 +111,7 @@ class ManuellBrevmottakerController(
             val saksbehandler = ContextService.hentBehandler(logContext)
             tilgangskontrollService.validerTilgangBehandlingID(
                 behandlingId = behandlingId,
-                minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+                minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
                 handling = "Flytter behandling tilbake til Fakta",
             )
@@ -141,7 +141,7 @@ class ManuellBrevmottakerController(
             val saksbehandler = ContextService.hentBehandler(logContext)
             tilgangskontrollService.validerTilgangBehandlingID(
                 behandlingId = behandlingId,
-                minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+                minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
                 handling = "Flytter behandling tilbake til Fakta",
             )
@@ -168,7 +168,7 @@ class ManuellBrevmottakerController(
         if (tilbakekreving != null) {
             tilgangskontrollService.validerTilgangBehandlingID(
                 behandlingId = behandlingId,
-                minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+                minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
                 handling = "Flytter behandling tilbake til Fakta",
             )
@@ -195,7 +195,7 @@ class ManuellBrevmottakerController(
         if (tilbakekreving != null) {
             tilgangskontrollService.validerTilgangBehandlingID(
                 behandlingId = behandlingId,
-                minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+                minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
                 handling = "Flytter behandling tilbake til Fakta",
             )

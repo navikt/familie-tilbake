@@ -1,9 +1,8 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
-import io.kotest.assertions.fail
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.tilbakekreving.kontrakter.brev.ManuellAdresseInfo
-import no.nav.tilbakekreving.kontrakter.brev.MottakerType
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
@@ -28,7 +27,9 @@ class BrevmottakerStegTest {
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
 
-        brevmottakerSteg.hentRegistrertBrevmottaker().type shouldBe MottakerType.BRUKER
+        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.DefaultMottaker> {
+            it.navn shouldBe "test bruker"
+        }
     }
 
     @Test
@@ -36,6 +37,7 @@ class BrevmottakerStegTest {
         val navn = "test bruker"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
+        brevmottakerSteg.aktiverSteg()
 
         brevmottakerSteg.håndter(
             RegistrertBrevmottaker.UtenlandskAdresseMottaker(
@@ -44,13 +46,9 @@ class BrevmottakerStegTest {
                 manuellAdresseInfo = adresseInfo,
             ),
         )
-        brevmottakerSteg.hentRegistrertBrevmottaker().type shouldBe MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE
 
-        when (val mottaker = brevmottakerSteg.hentRegistrertBrevmottaker()) {
-            is RegistrertBrevmottaker.UtenlandskAdresseMottaker -> {
-                mottaker.navn shouldBe "Navn"
-            }
-            else -> fail("Forventet UtenlandskAdresseMottaker, men fikk ${mottaker::class}")
+        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.UtenlandskAdresseMottaker> {
+            it.navn shouldBe "Navn"
         }
     }
 
@@ -59,6 +57,7 @@ class BrevmottakerStegTest {
         val navn = "test bruker"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
+        brevmottakerSteg.aktiverSteg()
 
         brevmottakerSteg.håndter(
             RegistrertBrevmottaker.VergeMottaker(
@@ -68,14 +67,10 @@ class BrevmottakerStegTest {
                 manuellAdresseInfo = adresseInfo,
             ),
         )
-        brevmottakerSteg.hentRegistrertBrevmottaker().type shouldBe MottakerType.BRUKER_OG_VERGE
 
-        when (val mottaker = brevmottakerSteg.hentRegistrertBrevmottaker()) {
-            is RegistrertBrevmottaker.DefaultBrukerAdresseOgVergeMottaker -> {
-                mottaker.defaultMottaker.navn shouldBe "test bruker"
-                mottaker.verge.navn shouldBe "Verge"
-            }
-            else -> fail("Forventet DefaultBrukerAdresseOgVergeMottaker, men fikk ${mottaker::class}")
+        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.DefaultBrukerAdresseOgVergeMottaker> {
+            it.defaultMottaker.navn shouldBe "test bruker"
+            it.verge.navn shouldBe "Verge"
         }
     }
 
@@ -84,6 +79,7 @@ class BrevmottakerStegTest {
         val navn = "test bruker"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
+        brevmottakerSteg.aktiverSteg()
 
         brevmottakerSteg.håndter(
             RegistrertBrevmottaker.FullmektigMottaker(
@@ -93,14 +89,10 @@ class BrevmottakerStegTest {
                 manuellAdresseInfo = adresseInfo,
             ),
         )
-        brevmottakerSteg.hentRegistrertBrevmottaker().type shouldBe MottakerType.BRUKER_OG_FULLMEKTIG
 
-        when (val mottaker = brevmottakerSteg.hentRegistrertBrevmottaker()) {
-            is RegistrertBrevmottaker.DefaultBrukerAdresseOgFullmektigMottaker -> {
-                mottaker.defaultMottaker.navn shouldBe "test bruker"
-                mottaker.fullmektig.navn shouldBe "fullmektig"
-            }
-            else -> fail("Forventet DefaultBrukerAdresseOgFullmektigMottaker, men fikk ${mottaker::class}")
+        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.DefaultBrukerAdresseOgFullmektigMottaker> {
+            it.defaultMottaker.navn shouldBe "test bruker"
+            it.fullmektig.navn shouldBe "fullmektig"
         }
     }
 
@@ -109,6 +101,7 @@ class BrevmottakerStegTest {
         val navn = "dødsbo adresse"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
+        brevmottakerSteg.aktiverSteg()
 
         brevmottakerSteg.håndter(
             RegistrertBrevmottaker.DødsboMottaker(
@@ -117,13 +110,9 @@ class BrevmottakerStegTest {
                 manuellAdresseInfo = adresseInfo,
             ),
         )
-        brevmottakerSteg.hentRegistrertBrevmottaker().type shouldBe MottakerType.DØDSBO
 
-        when (val mottaker = brevmottakerSteg.hentRegistrertBrevmottaker()) {
-            is RegistrertBrevmottaker.DødsboMottaker -> {
-                mottaker.navn shouldBe "dødsbo adresse"
-            }
-            else -> fail("Forventet DødsboMottaker, men fikk ${mottaker::class}")
+        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.DødsboMottaker> {
+            it.navn shouldBe "dødsbo adresse"
         }
     }
 
@@ -132,6 +121,7 @@ class BrevmottakerStegTest {
         val navn = "test bruker"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
+        brevmottakerSteg.aktiverSteg()
 
         brevmottakerSteg.håndter(
             RegistrertBrevmottaker.VergeMottaker(
@@ -150,14 +140,9 @@ class BrevmottakerStegTest {
             ),
         )
 
-        brevmottakerSteg.hentRegistrertBrevmottaker().type shouldBe MottakerType.UTENLANDSK_ADRESSE_OG_VERGE
-
-        when (val mottaker = brevmottakerSteg.hentRegistrertBrevmottaker()) {
-            is RegistrertBrevmottaker.UtenlandskAdresseOgVergeMottaker -> {
-                mottaker.utenlandskAdresse.navn shouldBe "Navn"
-                mottaker.verge.navn shouldBe "Verge"
-            }
-            else -> fail("Forventet UtenlandskAdresseOgVergeMottaker, men fikk ${mottaker::class}")
+        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.UtenlandskAdresseOgVergeMottaker> {
+            it.utenlandskAdresse.navn shouldBe "Navn"
+            it.verge.navn shouldBe "Verge"
         }
     }
 
@@ -166,6 +151,7 @@ class BrevmottakerStegTest {
         val navn = "test bruker"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
+        brevmottakerSteg.aktiverSteg()
 
         brevmottakerSteg.håndter(
             RegistrertBrevmottaker.FullmektigMottaker(
@@ -184,14 +170,128 @@ class BrevmottakerStegTest {
             ),
         )
 
-        brevmottakerSteg.hentRegistrertBrevmottaker().type shouldBe MottakerType.UTENLANDSK_ADRESSE_OG_FULLMEKTIG
+        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.UtenlandskAdresseOgFullmektigMottaker> {
+            it.utenlandskAdresse.navn shouldBe "Navn"
+            it.fullmektig.navn shouldBe "Fullmektig"
+        }
+    }
 
-        when (val mottaker = brevmottakerSteg.hentRegistrertBrevmottaker()) {
-            is RegistrertBrevmottaker.UtenlandskAdresseOgFullmektigMottaker -> {
-                mottaker.utenlandskAdresse.navn shouldBe "Navn"
-                mottaker.fullmektig.navn shouldBe "Fullmektig"
-            }
-            else -> fail("Forventet UtenlandskAdresseOgFullmektigMottaker, men fikk ${mottaker::class}")
+    @Test
+    fun `endre UTENLANDSK_ADRESSE_OG_FULLMEKTIG til UTENLANDSK_ADRESSE_OG_VERGE`() {
+        val navn = "test bruker"
+        val ident = "12312312312"
+        val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
+        brevmottakerSteg.aktiverSteg()
+
+        brevmottakerSteg.håndter(
+            RegistrertBrevmottaker.FullmektigMottaker(
+                id = UUID.randomUUID(),
+                personIdent = "43214321321",
+                navn = "Fullmektig",
+                manuellAdresseInfo = adresseInfo,
+            ),
+        )
+
+        brevmottakerSteg.håndter(
+            RegistrertBrevmottaker.UtenlandskAdresseMottaker(
+                id = UUID.randomUUID(),
+                navn = "Navn",
+                manuellAdresseInfo = adresseInfo,
+            ),
+        )
+
+        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.UtenlandskAdresseOgFullmektigMottaker>()
+
+        brevmottakerSteg.håndter(
+            RegistrertBrevmottaker.VergeMottaker(
+                id = UUID.randomUUID(),
+                navn = "Verge",
+                manuellAdresseInfo = adresseInfo,
+            ),
+        )
+
+        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.UtenlandskAdresseOgVergeMottaker> {
+            it.utenlandskAdresse.navn shouldBe "Navn"
+            it.verge.navn shouldBe "Verge"
+        }
+    }
+
+    @Test
+    fun `endre UTENLANDSK_ADRESSE_OG_VERGE til UTENLANDSK_ADRESSE_OG_FULLMEKTIG`() {
+        val navn = "test bruker"
+        val ident = "12312312312"
+        val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
+        brevmottakerSteg.aktiverSteg()
+
+        brevmottakerSteg.håndter(
+            RegistrertBrevmottaker.VergeMottaker(
+                id = UUID.randomUUID(),
+                personIdent = "43214321321",
+                navn = "Verge",
+                manuellAdresseInfo = adresseInfo,
+            ),
+        )
+
+        brevmottakerSteg.håndter(
+            RegistrertBrevmottaker.UtenlandskAdresseMottaker(
+                id = UUID.randomUUID(),
+                navn = "Navn",
+                manuellAdresseInfo = adresseInfo,
+            ),
+        )
+
+        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.UtenlandskAdresseOgVergeMottaker>()
+
+        brevmottakerSteg.håndter(
+            RegistrertBrevmottaker.FullmektigMottaker(
+                id = UUID.randomUUID(),
+                navn = "Fullmektig",
+                manuellAdresseInfo = adresseInfo,
+            ),
+        )
+
+        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.UtenlandskAdresseOgFullmektigMottaker> {
+            it.utenlandskAdresse.navn shouldBe "Navn"
+            it.fullmektig.navn shouldBe "Fullmektig"
+        }
+    }
+
+    @Test
+    fun `endre UTENLANDSK_ADRESSE_OG_VERGE til Dødsbo`() {
+        val navn = "test bruker"
+        val ident = "12312312312"
+        val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
+        brevmottakerSteg.aktiverSteg()
+
+        brevmottakerSteg.håndter(
+            RegistrertBrevmottaker.VergeMottaker(
+                id = UUID.randomUUID(),
+                personIdent = "43214321321",
+                navn = "Verge",
+                manuellAdresseInfo = adresseInfo,
+            ),
+        )
+
+        brevmottakerSteg.håndter(
+            RegistrertBrevmottaker.UtenlandskAdresseMottaker(
+                id = UUID.randomUUID(),
+                navn = "Navn",
+                manuellAdresseInfo = adresseInfo,
+            ),
+        )
+
+        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.UtenlandskAdresseOgVergeMottaker>()
+
+        brevmottakerSteg.håndter(
+            RegistrertBrevmottaker.DødsboMottaker(
+                id = UUID.randomUUID(),
+                navn = "Dødsbo",
+                manuellAdresseInfo = adresseInfo,
+            ),
+        )
+
+        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.DødsboMottaker> {
+            it.navn shouldBe "Dødsbo"
         }
     }
 
@@ -202,6 +302,7 @@ class BrevmottakerStegTest {
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
         val fullmektigId = UUID.randomUUID()
         val utenlandskAdresseId = UUID.randomUUID()
+        brevmottakerSteg.aktiverSteg()
 
         brevmottakerSteg.håndter(
             RegistrertBrevmottaker.FullmektigMottaker(
@@ -222,13 +323,8 @@ class BrevmottakerStegTest {
 
         brevmottakerSteg.fjernManuellBrevmottaker(fullmektigId)
 
-        brevmottakerSteg.hentRegistrertBrevmottaker().type shouldBe MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE
-
-        when (val mottaker = brevmottakerSteg.hentRegistrertBrevmottaker()) {
-            is RegistrertBrevmottaker.UtenlandskAdresseMottaker -> {
-                mottaker.id shouldBe utenlandskAdresseId
-            }
-            else -> fail("Forventet BRUKER_MED_UTENLANDSK_ADRESSE, men fikk ${mottaker::class}")
+        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.UtenlandskAdresseMottaker> {
+            it.id shouldBe utenlandskAdresseId
         }
     }
 
@@ -238,6 +334,7 @@ class BrevmottakerStegTest {
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
         val vergeId = UUID.randomUUID()
+        brevmottakerSteg.aktiverSteg()
 
         brevmottakerSteg.håndter(
             RegistrertBrevmottaker.VergeMottaker(
@@ -250,13 +347,8 @@ class BrevmottakerStegTest {
 
         brevmottakerSteg.fjernManuellBrevmottaker(vergeId)
 
-        brevmottakerSteg.hentRegistrertBrevmottaker().type shouldBe MottakerType.BRUKER
-
-        when (val mottaker = brevmottakerSteg.hentRegistrertBrevmottaker()) {
-            is RegistrertBrevmottaker.DefaultMottaker -> {
-                mottaker.navn shouldBe "test bruker"
-            }
-            else -> fail("Forventet DefaultMottaker, men fikk ${mottaker::class}")
+        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.DefaultMottaker> {
+            it.navn shouldBe "test bruker"
         }
     }
 }

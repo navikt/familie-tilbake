@@ -175,8 +175,8 @@ class Tilbakekreving(
 
     fun håndter(
         behandler: Behandler,
-        brevmottakerDto: RegistrertBrevmottaker,
-    ) = behandlingHistorikk.nåværende().entry.håndter(behandler, brevmottakerDto)
+        brevmottaker: RegistrertBrevmottaker,
+    ) = behandlingHistorikk.nåværende().entry.håndter(behandler, brevmottaker)
 
     fun aktiverBrevmottakerSteg() = behandlingHistorikk.nåværende().entry.aktiverBrevmottakerSteg()
 
