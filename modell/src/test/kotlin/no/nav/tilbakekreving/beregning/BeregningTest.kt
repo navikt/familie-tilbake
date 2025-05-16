@@ -416,6 +416,80 @@ class BeregningTest {
         )
     }
 
+    @Test
+    fun `perioder ute av rekkefølge`() {
+        val beregning = Beregning(
+            beregnRenter = true,
+            tilbakekrevLavtBeløp = false,
+            vilkårsvurdering = vurdering(
+                1.februar til 28.februar burdeForstått medForsett(ileggesRenter = false),
+                1.januar til 31.januar burdeForstått medForsett(ileggesRenter = false),
+            ),
+            foreldetPerioder = emptyList(),
+            kravgrunnlag = perioder(
+                1.januar til 31.januar medTilbakekrevesBeløp 1755.kroner medOriginaltUtbetaltBeløp 19950.kroner medRiktigYtelsesbeløp 18195.kroner,
+                1.februar til 28.februar medTilbakekrevesBeløp 1755.kroner medOriginaltUtbetaltBeløp 19950.kroner medRiktigYtelsesbeløp 18195.kroner,
+            ),
+        )
+
+        val delperioder = beregning.beregn()
+        delperioder.size shouldBe 2
+        delperioder[0].shouldMatch(
+            periode = 1.januar til 31.januar,
+            renter = 0.kroner,
+            tilbakekrevesBrutto = 1755.kroner,
+            tilbakekrevesBruttoMedRenter = 1755.kroner,
+            skatt = 0.kroner,
+            utbetaltYtelsesbeløp = 19950.kroner,
+            feilutbetaltBeløp = 1755.kroner,
+        )
+        delperioder[1].shouldMatch(
+            periode = 1.februar til 28.februar,
+            renter = 0.kroner,
+            tilbakekrevesBrutto = 1755.kroner,
+            tilbakekrevesBruttoMedRenter = 1755.kroner,
+            skatt = 0.kroner,
+            utbetaltYtelsesbeløp = 19950.kroner,
+            feilutbetaltBeløp = 1755.kroner,
+        )
+
+        beregning.oppsummer() shouldBe Beregningsresultat(
+            listOf(
+                Beregningsresultatsperiode(
+                    periode = 1.januar til 31.januar,
+                    vurdering = Aktsomhet.FORSETT,
+                    feilutbetaltBeløp = 1755.kroner,
+                    andelAvBeløp = 100.prosent,
+                    renteprosent = null,
+                    manueltSattTilbakekrevingsbeløp = null,
+                    tilbakekrevingsbeløpUtenRenter = 1755.kroner,
+                    rentebeløp = 0.kroner,
+                    tilbakekrevingsbeløp = 1755.kroner,
+                    skattebeløp = 0.kroner,
+                    tilbakekrevingsbeløpEtterSkatt = 1755.kroner,
+                    utbetaltYtelsesbeløp = 19950.kroner,
+                    riktigYtelsesbeløp = 18195.kroner,
+                ),
+                Beregningsresultatsperiode(
+                    periode = 1.februar til 28.februar,
+                    vurdering = Aktsomhet.FORSETT,
+                    feilutbetaltBeløp = 1755.kroner,
+                    andelAvBeløp = 100.prosent,
+                    renteprosent = null,
+                    manueltSattTilbakekrevingsbeløp = null,
+                    tilbakekrevingsbeløpUtenRenter = 1755.kroner,
+                    rentebeløp = 0.kroner,
+                    tilbakekrevingsbeløp = 1755.kroner,
+                    skattebeløp = 0.kroner,
+                    tilbakekrevingsbeløpEtterSkatt = 1755.kroner,
+                    utbetaltYtelsesbeløp = 19950.kroner,
+                    riktigYtelsesbeløp = 18195.kroner,
+                ),
+            ),
+            Vedtaksresultat.FULL_TILBAKEBETALING,
+        )
+    }
+
     fun perioder(
         vararg perioder: TestKravgrunnlagPeriode,
     ) = object : KravgrunnlagAdapter {

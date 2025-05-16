@@ -29,15 +29,19 @@ class Beregning(
         }
     }
 
-    private val fordelt: List<Delperiode> = foreldetPerioder.flatMap { foreldetPeriode ->
-        kravgrunnlag.perioder().filter { it.periode() in foreldetPeriode }
+    private val foreldet = foreldetPerioder.flatMap { foreldetPeriode ->
+        kravgrunnlag.perioder()
+            .filter { it.periode() in foreldetPeriode }
             .map { Foreldet.opprett(it.periode(), it) }
-    } + vilkårsvurdering.perioder().flatMap { vurdering ->
+    }
+    private val vilkårsvurdert = vilkårsvurdering.perioder().flatMap { vurdering ->
         val kgPerioder = kravgrunnlag.perioder()
             .filter { it.periode() in vurdering.periode() }
 
         kgPerioder.map { Vilkårsvurdert.opprett(vurdering, it, beregnRenter, kgPerioder.size) }
     }
+
+    private val fordelt: List<Delperiode> = (foreldet + vilkårsvurdert).sortedBy { it.periode.fom }
 
     fun beregn(): List<Delperiode> {
         return fordelt
