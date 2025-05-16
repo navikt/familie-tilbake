@@ -10,6 +10,7 @@ import no.nav.tilbakekreving.behandling.BehandlingHistorikk
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
+import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
 import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.VarselbrevBehov
@@ -27,6 +28,7 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
+import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.person.Bruker
 import no.nav.tilbakekreving.person.Bruker.Companion.tilNullableFrontendDto
@@ -81,6 +83,13 @@ class Tilbakekreving(
         behandlingHistorikk.lagre(nullstiltBehandling)
     }
 
+    fun opprettBrevmottakerSteg(
+        navn: String,
+        ident: String,
+    ) {
+        behandlingHistorikk.nåværende().entry.opprettBrevmottaker(navn, ident)
+    }
+
     fun opprettBehandling(
         eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
         behandler: Behandler,
@@ -114,6 +123,10 @@ class Tilbakekreving(
 
     fun trengerBrukerinfo() {
         bruker!!.trengerBrukerinfo(behovObservatør, eksternFagsak.fagsystem)
+    }
+
+    fun hentFagsysteminfo(): Fagsystem {
+        return eksternFagsak.fagsystem
     }
 
     override fun tilFrontendDto(): FagsakDto {
@@ -159,6 +172,22 @@ class Tilbakekreving(
         behandler: Behandler,
         vurdering: ForeslåVedtakSteg.Vurdering,
     ) = behandlingHistorikk.nåværende().entry.håndter(behandler, vurdering)
+
+    fun håndter(
+        behandler: Behandler,
+        brevmottaker: RegistrertBrevmottaker,
+    ) = behandlingHistorikk.nåværende().entry.håndter(behandler, brevmottaker)
+
+    fun aktiverBrevmottakerSteg() = behandlingHistorikk.nåværende().entry.aktiverBrevmottakerSteg()
+
+    fun deaktiverBrevmottakerSteg() = behandlingHistorikk.nåværende().entry.deaktiverBrevmottakerSteg()
+
+    fun fjernManuelBrevmottaker(
+        behandler: Behandler,
+        manuellBrevmottakerId: UUID,
+    ) {
+        behandlingHistorikk.nåværende().entry.fjernManuelBrevmottaker(behandler, manuellBrevmottakerId)
+    }
 
     companion object {
         fun opprett(

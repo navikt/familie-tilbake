@@ -31,6 +31,7 @@ data class Brevmottaker(
 enum class MottakerType(
     val visningsnavn: String,
 ) {
+    BRUKER("Bruker"),
     BRUKER_MED_UTENLANDSK_ADRESSE("Bruker med utenlandsk adresse"),
     FULLMEKTIG("Fullmektig"),
     VERGE("Verge"),

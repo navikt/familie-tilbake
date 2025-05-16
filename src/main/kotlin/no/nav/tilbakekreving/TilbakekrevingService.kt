@@ -4,6 +4,7 @@ import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.ApplicationProperties
 import no.nav.familie.tilbake.integration.pdl.PdlClient
 import no.nav.familie.tilbake.integration.pdl.internal.PdlKjønnType
+import no.nav.familie.tilbake.kontrakter.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFaktaDto
@@ -11,6 +12,7 @@ import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeslåVedtaksstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
+import no.nav.tilbakekreving.api.v1.dto.ManuellBrevmottakerRequestDto
 import no.nav.tilbakekreving.api.v2.EksternFagsakDto
 import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
@@ -18,6 +20,7 @@ import no.nav.tilbakekreving.behandling.BehandlingHistorikk
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
+import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
 import no.nav.tilbakekreving.behov.BrukerinfoBehov
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
 import no.nav.tilbakekreving.behov.VarselbrevBehov
@@ -29,6 +32,7 @@ import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
+import no.nav.tilbakekreving.kontrakter.brev.MottakerType
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
@@ -303,7 +307,105 @@ class TilbakekrevingService(
         }
     }
 
+    fun behandleBrevmottaker(
+        behandler: Behandler,
+        tilbakekreving: Tilbakekreving,
+        brevmottakerDto: ManuellBrevmottakerRequestDto,
+        id: UUID,
+    ) {
+        when (brevmottakerDto.type) {
+            MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE -> {
+                tilbakekreving.håndter(
+                    behandler,
+                    RegistrertBrevmottaker.UtenlandskAdresseMottaker(
+                        id = id,
+                        navn = brevmottakerDto.navn,
+                        manuellAdresseInfo = brevmottakerDto.manuellAdresseInfo,
+                    ),
+                )
+            }
+            MottakerType.FULLMEKTIG -> {
+                tilbakekreving.håndter(
+                    behandler,
+                    RegistrertBrevmottaker.FullmektigMottaker(
+                        id = id,
+                        navn = brevmottakerDto.navn,
+                        organisasjonsnummer = brevmottakerDto.organisasjonsnummer,
+                        personIdent = brevmottakerDto.personIdent,
+                        manuellAdresseInfo = brevmottakerDto.manuellAdresseInfo,
+                    ),
+                )
+            }
+            MottakerType.VERGE -> {
+                tilbakekreving.håndter(
+                    behandler,
+                    RegistrertBrevmottaker.VergeMottaker(
+                        id = id,
+                        navn = brevmottakerDto.navn,
+                        personIdent = brevmottakerDto.personIdent,
+                        manuellAdresseInfo = brevmottakerDto.manuellAdresseInfo,
+                    ),
+                )
+            }
+            MottakerType.DØDSBO -> {
+                tilbakekreving.håndter(
+                    behandler,
+                    RegistrertBrevmottaker.DødsboMottaker(
+                        id = id,
+                        navn = brevmottakerDto.navn,
+                        manuellAdresseInfo = brevmottakerDto.manuellAdresseInfo,
+                    ),
+                )
+            }
+            else -> throw IllegalArgumentException("Default eller ugydlig mottaker type ${brevmottakerDto.type}")
+        }
+    }
+
     fun flyttBehandlingsstegTilbakeTilFakta(tilbakekreving: Tilbakekreving) {
         tilbakekreving.håndterNullstilling()
+    }
+
+    fun aktiverBrevmottakerSteg(tilbakekreving: Tilbakekreving) {
+        validerBrevmottaker(tilbakekreving)
+        tilbakekreving.aktiverBrevmottakerSteg()
+    }
+
+    fun deaktiverBrevmottakerSteg(tilbakekreving: Tilbakekreving) {
+        tilbakekreving.deaktiverBrevmottakerSteg()
+    }
+
+    fun fjernManuelBrevmottaker(
+        behandler: Behandler,
+        tilbakekreving: Tilbakekreving,
+        manuellBrevmottakerId: UUID,
+    ) {
+        tilbakekreving.fjernManuelBrevmottaker(behandler, manuellBrevmottakerId)
+    }
+
+    private fun validerBrevmottaker(tilbakekreving: Tilbakekreving) {
+        val behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.internId
+
+        val personIdenter = listOfNotNull(tilbakekreving.bruker!!.ident)
+        if (personIdenter.isEmpty()) return
+        val strengtFortroligePersonIdenter =
+            pdlClient.hentAdressebeskyttelseBolk(personIdenter, tilbakekreving.hentFagsysteminfo(), SecureLog.Context.fra(tilbakekreving))
+                .filter { (_, person) ->
+                    person.adressebeskyttelse.any { adressebeskyttelse ->
+                        adressebeskyttelse.gradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG ||
+                            adressebeskyttelse.gradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND
+                    }
+                }.map { it.key }
+
+        if (strengtFortroligePersonIdenter.isNotEmpty()) {
+            val melding =
+                "Behandlingen (id: $behandlingId) inneholder person med strengt fortrolig adressebeskyttelse og kan ikke kombineres med manuelle brevmottakere."
+            val frontendFeilmelding =
+                "Behandlingen inneholder person med strengt fortrolig adressebeskyttelse og kan ikke kombineres med manuelle brevmottakere."
+            throw Feil(
+                message = melding,
+                frontendFeilmelding = frontendFeilmelding,
+                logContext = SecureLog.Context.fra(tilbakekreving),
+            )
+        }
     }
 }
