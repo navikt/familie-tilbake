@@ -8,11 +8,17 @@ import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagAdapter
 import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagPeriodeAdapter
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import java.math.BigDecimal
+import java.math.RoundingMode
 
 class Kravgrunnlag431Adapter(private val kravgrunnlag431: Kravgrunnlag431) : KravgrunnlagAdapter {
     override fun perioder(): List<KravgrunnlagPeriodeAdapter> {
         return kravgrunnlag431.perioder.map(::PeriodeAdapter)
     }
+
+    fun feilutbetaltBeløp(periode: Datoperiode) = perioder()
+        .filter { it.periode() in periode }
+        .sumOf(KravgrunnlagPeriodeAdapter::feilutbetaltYtelsesbeløp)
+        .setScale(0, RoundingMode.HALF_UP)
 
     class PeriodeAdapter(private val periode: Kravgrunnlagsperiode432) : KravgrunnlagPeriodeAdapter {
         override fun periode(): Datoperiode {

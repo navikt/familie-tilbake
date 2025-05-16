@@ -1,6 +1,6 @@
 package no.nav.tilbakekreving.kravgrunnlag
 
-import no.nav.tilbakekreving.beregning.TilbakekrevingsberegningVilkår
+import no.nav.tilbakekreving.beregning.HUNDRE_PROSENT
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagBelopDto
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
@@ -60,7 +60,7 @@ class KravgrunnlagValidator(
     ) {
         val totalSkatt = periode.tilbakekrevingsBelop
             .sumOf { it.belopTilbakekreves.multiply(it.skattProsent) }
-            .divide(TilbakekrevingsberegningVilkår.HUNDRE_PROSENT, 0, RoundingMode.DOWN)
+            .divide(HUNDRE_PROSENT, 0, RoundingMode.DOWN)
 
         failOn(totalSkatt > periode.belopSkattMnd) {
             "Maks skatt for perioden ${periode.periode.fom} til ${periode.periode.tom} er ${periode.belopSkattMnd}, " +

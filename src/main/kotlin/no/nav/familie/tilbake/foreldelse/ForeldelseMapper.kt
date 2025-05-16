@@ -8,7 +8,6 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.tilbakekreving.api.v1.dto.ForeldelsesperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelsesperiodeDto
-import no.nav.tilbakekreving.beregning.KravgrunnlagsberegningUtil
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import java.math.RoundingMode
 import java.util.UUID
@@ -23,12 +22,7 @@ object ForeldelseMapper {
             vurdertForeldelse?.foreldelsesperioder?.map {
                 VurdertForeldelsesperiodeDto(
                     periode = it.periode.toDatoperiode(),
-                    feilutbetaltBeløp =
-                        KravgrunnlagsberegningUtil
-                            .beregnFeilutbetaltBeløp(
-                                Kravgrunnlag431Adapter(kravgrunnlag431),
-                                it.periode.toDatoperiode(),
-                            ).setScale(0, RoundingMode.HALF_UP),
+                    feilutbetaltBeløp = Kravgrunnlag431Adapter(kravgrunnlag431).feilutbetaltBeløp(it.periode.toDatoperiode()),
                     begrunnelse = it.begrunnelse,
                     foreldelsesvurderingstype = it.foreldelsesvurderingstype,
                     foreldelsesfrist = it.foreldelsesfrist,

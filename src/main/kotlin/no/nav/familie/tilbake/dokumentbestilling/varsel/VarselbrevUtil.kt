@@ -21,7 +21,6 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
-import no.nav.tilbakekreving.beregning.KravgrunnlagsberegningUtil
 import no.nav.tilbakekreving.kontrakter.FeilutbetaltePerioderDto
 import no.nav.tilbakekreving.kontrakter.ForhåndsvisVarselbrevRequest
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
@@ -182,19 +181,16 @@ class VarselbrevUtil(
         varselbrevsdokument: Varselbrevsdokument,
         behandlingId: UUID,
     ): Vedleggsdata {
-        val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
+        val kravgrunnlag = Kravgrunnlag431Adapter(kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId))
 
-        val beregningsresultat = KravgrunnlagsberegningUtil.summerKravgrunnlagBeløpForPerioder(Kravgrunnlag431Adapter(kravgrunnlag))
-
-        val perioder =
-            beregningsresultat.map {
-                FeilutbetaltPeriode(
-                    YearMonth.from(it.key.fom),
-                    it.value.riktigYtelsesbeløp,
-                    it.value.utbetaltYtelsesbeløp,
-                    it.value.feilutbetaltBeløp,
-                )
-            }
+        val perioder = kravgrunnlag.perioder().map {
+            FeilutbetaltPeriode(
+                YearMonth.from(it.periode().fom),
+                it.riktigYteslesbeløp(),
+                it.utbetaltYtelsesbeløp(),
+                it.feilutbetaltYtelsesbeløp(),
+            )
+        }
 
         return Vedleggsdata(varselbrevsdokument.språkkode, varselbrevsdokument.isYtelseMedSkatt, perioder)
     }

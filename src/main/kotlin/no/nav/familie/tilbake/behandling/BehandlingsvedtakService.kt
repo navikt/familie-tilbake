@@ -24,8 +24,8 @@ class BehandlingsvedtakService(
     fun opprettBehandlingsvedtak(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
 
-        val beregningsresultat = tilbakeBeregningService.beregn(behandlingId)
-        val behandlingsresultatstype = utledBehandlingsresultatstype(beregningsresultat.vedtaksresultat)
+        val beregning = tilbakeBeregningService.beregn(behandlingId)
+        val behandlingsresultatstype = utledBehandlingsresultatstype(beregning.vedtaksresultat())
 
         val behandlingsvedtak =
             Behandlingsvedtak(

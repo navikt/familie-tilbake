@@ -32,6 +32,8 @@ data class Datoperiode(
         return (tom.year * 12 + tom.monthValue) - (fom.year * 12 + fom.monthValue) + 1L
     }
 
+    operator fun contains(other: Datoperiode) = snitt(other) != null
+
     fun toMånedsperiode() = Månedsperiode(fomMåned, tomMåned)
 }
 

@@ -174,7 +174,7 @@ class VedtaksbrevgeneratorService(
                 vedtaksbrevgrunnlag.fagsystem,
                 logContext,
             )
-        val beregnetResultat = tilbakekrevingBeregningService.beregn(vedtaksbrevgrunnlag.behandling.id)
+        val beregnetResultat = tilbakekrevingBeregningService.beregn(vedtaksbrevgrunnlag.behandling.id).oppsummer()
         val brevMetadata: Brevmetadata =
             (
                 forhåndsgenerertMetadata ?: lagMetadataForVedtaksbrev(
@@ -366,7 +366,7 @@ class VedtaksbrevgeneratorService(
         totaltTilbakekrevesMedRenter: BigDecimal,
     ): VedtakHjemmel.EffektForBruker {
         val behandlingÅrsak: Behandlingsårsak = vedtaksbrevgrunnlag.behandling.årsaker.first()
-        val originaltBeregnetResultat = tilbakekrevingBeregningService.beregn(behandlingÅrsak.originalBehandlingId!!)
+        val originaltBeregnetResultat = tilbakekrevingBeregningService.beregn(behandlingÅrsak.originalBehandlingId!!).oppsummer()
         val originalBeregningsresultatsperioder = originaltBeregnetResultat.beregningsresultatsperioder
 
         val originalBehandlingTotaltMedRenter: BigDecimal =

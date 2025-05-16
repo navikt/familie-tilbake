@@ -8,14 +8,9 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
-import no.nav.familie.tilbake.log.SecureLog
-import no.nav.familie.tilbake.log.TracedLogger
-import no.nav.tilbakekreving.beregning.isGreaterThanZero
-import no.nav.tilbakekreving.beregning.isLessThanZero
+import no.nav.tilbakekreving.beregning.delperiode.Delperiode
+import no.nav.tilbakekreving.beregning.delperiode.Foreldet
 import no.nav.tilbakekreving.beregning.isZero
-import no.nav.tilbakekreving.beregning.modell.Beregningsresultatsperiode
-import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -25,51 +20,31 @@ import java.util.UUID
 class TilbakekrevingsvedtakBeregningService(
     private val tilbakekrevingsberegningService: TilbakekrevingsberegningService,
 ) {
-    private val log = TracedLogger.getLogger<TilbakekrevingsvedtakBeregningService>()
-
     fun beregnVedtaksperioder(
         behandlingId: UUID,
         kravgrunnlag431: Kravgrunnlag431,
     ): List<Tilbakekrevingsperiode> {
-        val logContext = SecureLog.Context.medBehandling(kravgrunnlag431.fagsystemId, behandlingId.toString())
-        val beregningsresultat = tilbakekrevingsberegningService.beregn(behandlingId)
+        val delperioder = tilbakekrevingsberegningService.beregn(behandlingId).beregn()
 
         val kravgrunnlagsperioder = kravgrunnlag431.perioder.toList().sortedBy { it.periode.fom }
-        val beregnetePerioder = beregningsresultat.beregningsresultatsperioder.sortedBy { it.periode.fom }
-
-        // oppretter kravgrunnlagsperioderMedSkatt basert på månedligSkattebeløp
-        var kravgrunnlagsperioderMedSkatt = kravgrunnlagsperioder.associate { it.periode to it.månedligSkattebeløp }
+        val beregnetePerioder = delperioder.sortedBy { it.periode.fom }
 
         return beregnetePerioder
-            .map { beregnetPeriode ->
-                var perioder = lagTilbakekrevingsperioder(kravgrunnlagsperioder, beregnetPeriode)
-
-                // avrunding tilbakekrevesbeløp og uinnkrevd beløp
-                perioder = justerAvrunding(beregnetPeriode, perioder)
-
-                // skatt
-                // oppdaterer kravgrunnlagsperioderMedSkatt med gjenstående skatt
-                // (ved å trekke totalSkattBeløp fra månedligeSkattebeløp)
-                kravgrunnlagsperioderMedSkatt = oppdaterGjenståendeSkattetrekk(perioder, kravgrunnlagsperioderMedSkatt)
-                perioder = justerAvrundingSkatt(beregnetPeriode, perioder, kravgrunnlagsperioderMedSkatt)
-
-                // renter
-                perioder = beregnRenter(beregnetPeriode, perioder)
-                justerAvrundingRenter(beregnetPeriode, perioder, logContext)
-            }.flatten()
+            .map { beregnetPeriode -> lagTilbakekrevingsperioder(kravgrunnlagsperioder, beregnetPeriode) }
+            .flatten()
     }
 
     private fun lagTilbakekrevingsperioder(
         kravgrunnlagsperioder: List<Kravgrunnlagsperiode432>,
-        beregnetPeriode: Beregningsresultatsperiode,
+        beregnetPeriode: Delperiode,
     ): List<Tilbakekrevingsperiode> =
         kravgrunnlagsperioder
             .filter { it.periode.snitt(beregnetPeriode.periode.toMånedsperiode()) != null }
-            .map { Tilbakekrevingsperiode(it.periode, BigDecimal.ZERO, lagTilbakekrevingsbeløp(it.beløp, beregnetPeriode)) }
+            .map { Tilbakekrevingsperiode(it.periode, beregnetPeriode.renter(), lagTilbakekrevingsbeløp(it.beløp, beregnetPeriode)) }
 
     private fun lagTilbakekrevingsbeløp(
         kravgrunnlagsbeløp: Set<Kravgrunnlagsbeløp433>,
-        beregnetPeriode: Beregningsresultatsperiode,
+        beregnetPeriode: Delperiode,
     ): List<Tilbakekrevingsbeløp> =
         kravgrunnlagsbeløp.mapNotNull {
             when (it.klassetype) {
@@ -84,25 +59,18 @@ class TilbakekrevingsvedtakBeregningService(
                         skattBeløp = BigDecimal.ZERO,
                         kodeResultat = utledKodeResulat(beregnetPeriode),
                     )
-                Klassetype.YTEL -> {
-                    val beregnetTilbakrevesbeløp = beregnTilbakekrevesbeløp(beregnetPeriode, it)
-                    val opprinneligTilbakekrevesbeløp: BigDecimal = it.tilbakekrevesBeløp
 
+                Klassetype.YTEL -> {
                     Tilbakekrevingsbeløp(
                         klassetype = it.klassetype,
                         klassekode = it.klassekode,
                         nyttBeløp = it.nyttBeløp.setScale(0, RoundingMode.HALF_UP),
-                        utbetaltBeløp = it.opprinneligUtbetalingsbeløp.setScale(0, RoundingMode.HALF_UP),
-                        tilbakekrevesBeløp = beregnetTilbakrevesbeløp,
-                        uinnkrevdBeløp =
-                            opprinneligTilbakekrevesbeløp
-                                .subtract(beregnetTilbakrevesbeløp)
-                                .setScale(0, RoundingMode.HALF_UP),
-                        skattBeløp =
-                            beregnSkattBeløp(
-                                beregnetTilbakrevesbeløp,
-                                it.skatteprosent,
-                            ),
+                        utbetaltBeløp = beregnetPeriode.andel.utbetaltYtelsesbeløp(),
+                        tilbakekrevesBeløp = beregnetPeriode.tilbakekrevesBrutto(),
+                        uinnkrevdBeløp = it.tilbakekrevesBeløp
+                            .subtract(beregnetPeriode.tilbakekrevesBrutto())
+                            .setScale(0, RoundingMode.HALF_UP),
+                        skattBeløp = beregnetPeriode.skatt(),
                         kodeResultat = utledKodeResulat(beregnetPeriode),
                     )
                 }
@@ -111,211 +79,10 @@ class TilbakekrevingsvedtakBeregningService(
             }
         }
 
-    private fun beregnSkattBeløp(
-        bruttoTilbakekrevesBeløp: BigDecimal,
-        skattProsent: BigDecimal,
-    ): BigDecimal = bruttoTilbakekrevesBeløp.multiply(skattProsent).divide(BigDecimal(100), 0, RoundingMode.DOWN)
-
-    private fun utledKodeResulat(beregnetPeriode: Beregningsresultatsperiode): KodeResultat =
-        when {
-            beregnetPeriode.vurdering == AnnenVurdering.FORELDET -> {
-                KodeResultat.FORELDET
-            }
-            beregnetPeriode.tilbakekrevingsbeløpUtenRenter.isZero() -> {
-                KodeResultat.INGEN_TILBAKEKREVING
-            }
-            beregnetPeriode.feilutbetaltBeløp == beregnetPeriode.tilbakekrevingsbeløpUtenRenter -> {
-                KodeResultat.FULL_TILBAKEKREVING
-            }
-            else -> KodeResultat.DELVIS_TILBAKEKREVING
-        }
-
-    private fun justerAvrunding(
-        beregnetPeriode: Beregningsresultatsperiode,
-        perioder: List<Tilbakekrevingsperiode>,
-    ): List<Tilbakekrevingsperiode> {
-        val tilbakekrevingsbeløpUtenRenter = beregnetPeriode.tilbakekrevingsbeløpUtenRenter
-        val totalTilbakekrevingsbeløp = beregnTotalTilbakekrevesbeløp(perioder)
-        val differanse = totalTilbakekrevingsbeløp.subtract(tilbakekrevingsbeløpUtenRenter)
-
-        return when {
-            differanse.isGreaterThanZero() -> justerNed(differanse, perioder)
-            differanse.isLessThanZero() -> justerOpp(differanse, perioder)
-            else -> perioder
-        }
-    }
-
-    private fun justerNed(
-        differanse: BigDecimal,
-        perioder: List<Tilbakekrevingsperiode>,
-    ): List<Tilbakekrevingsperiode> {
-        var diff = differanse
-        return perioder.map { periode ->
-            var justertebeløp = periode.beløp
-            while (diff.isGreaterThanZero()) {
-                justertebeløp =
-                    justertebeløp.map { beløp ->
-                        if (Klassetype.FEIL == beløp.klassetype) {
-                            beløp
-                        } else {
-                            diff = diff.subtract(BigDecimal.ONE)
-                            beløp.copy(
-                                tilbakekrevesBeløp = beløp.tilbakekrevesBeløp.subtract(BigDecimal.ONE),
-                                uinnkrevdBeløp = beløp.uinnkrevdBeløp.add(BigDecimal.ONE),
-                            )
-                        }
-                    }
-            }
-            periode.copy(beløp = justertebeløp)
-        }
-    }
-
-    private fun justerOpp(
-        differanse: BigDecimal,
-        perioder: List<Tilbakekrevingsperiode>,
-    ): List<Tilbakekrevingsperiode> {
-        var diff = differanse
-        return perioder.map { periode ->
-            var justertebeløp = periode.beløp
-            while (diff.isLessThanZero()) {
-                justertebeløp =
-                    justertebeløp.map { beløp ->
-                        if (Klassetype.FEIL == beløp.klassetype) {
-                            beløp
-                        } else {
-                            diff = diff.add(BigDecimal.ONE)
-                            beløp.copy(
-                                tilbakekrevesBeløp = beløp.tilbakekrevesBeløp.add(BigDecimal.ONE),
-                                uinnkrevdBeløp = beløp.uinnkrevdBeløp.subtract(BigDecimal.ONE),
-                            )
-                        }
-                    }
-            }
-            periode.copy(beløp = justertebeløp)
-        }
-    }
-
-    private fun oppdaterGjenståendeSkattetrekk(
-        perioder: List<Tilbakekrevingsperiode>,
-        kravgrunnlagsperioderMedSkatt: Map<Månedsperiode, BigDecimal>,
-    ): Map<Månedsperiode, BigDecimal> {
-        val grunnlagsperioderMedSkatt = kravgrunnlagsperioderMedSkatt.toMutableMap()
-        perioder.forEach {
-            val skattBeløp =
-                it.beløp
-                    .filter { beløp -> Klassetype.YTEL == beløp.klassetype }
-                    .sumOf { ytelsebeløp -> ytelsebeløp.skattBeløp }
-            val gjenståendeSkattBeløp = kravgrunnlagsperioderMedSkatt.getNotNull(it.periode).subtract(skattBeløp)
-            grunnlagsperioderMedSkatt[it.periode] = gjenståendeSkattBeløp
-        }
-        return grunnlagsperioderMedSkatt
-    }
-
-    private fun justerAvrundingSkatt(
-        beregnetPeriode: Beregningsresultatsperiode,
-        perioder: List<Tilbakekrevingsperiode>,
-        kravgrunnlagsperioderMedSkatt: Map<Månedsperiode, BigDecimal>,
-    ): List<Tilbakekrevingsperiode> {
-        val grunnlagsperioderMedSkatt = kravgrunnlagsperioderMedSkatt.toMutableMap()
-        val totalSkattBeløp = perioder.sumOf { it.beløp.sumOf { beløp -> beløp.skattBeløp } }
-        val beregnetSkattBeløp = beregnetPeriode.skattebeløp
-        var differanse = totalSkattBeløp.subtract(beregnetSkattBeløp)
-
-        return perioder.map {
-            val periode = it.periode
-            var justertebeløp = it.beløp
-            justertebeløp =
-                justertebeløp.map { beløp ->
-                    if (Klassetype.FEIL == beløp.klassetype) {
-                        beløp
-                    } else {
-                        val justerSkattOpp =
-                            differanse.isLessThanZero() &&
-                                grunnlagsperioderMedSkatt.getNotNull(periode) >= BigDecimal.ONE
-                        val justerSkattNed =
-                            differanse.isGreaterThanZero() &&
-                                beløp.skattBeløp.compareTo(BigDecimal.ONE) >= 1
-                        if (justerSkattOpp || justerSkattNed) {
-                            val justering = BigDecimal(differanse.signum()).negate()
-                            grunnlagsperioderMedSkatt[periode] = grunnlagsperioderMedSkatt.getNotNull(periode).add(justering)
-                            differanse = differanse.add(justering)
-                            beløp.copy(skattBeløp = beløp.skattBeløp.add(justering))
-                        } else {
-                            beløp
-                        }
-                    }
-                }
-            it.copy(beløp = justertebeløp)
-        }
-    }
-
-    private fun beregnTilbakekrevesbeløp(
-        beregnetPeriode: Beregningsresultatsperiode,
-        kravgrunnlagsbeløp: Kravgrunnlagsbeløp433,
-    ): BigDecimal =
-        kravgrunnlagsbeløp.tilbakekrevesBeløp
-            .multiply(beregnetPeriode.tilbakekrevingsbeløpUtenRenter)
-            .divide(beregnetPeriode.feilutbetaltBeløp, 0, RoundingMode.HALF_UP)
-
-    private fun beregnTotalTilbakekrevesbeløp(perioder: List<Tilbakekrevingsperiode>): BigDecimal = perioder.sumOf { it.beløp.sumOf { beløp -> beløp.tilbakekrevesBeløp } }
-
-    private fun summerTilbakekrevesbeløp(periode: Tilbakekrevingsperiode): BigDecimal = periode.beløp.sumOf { it.tilbakekrevesBeløp }
-
-    private fun Map<Månedsperiode, BigDecimal>.getNotNull(key: Månedsperiode) = requireNotNull(this[key])
-
-    private fun beregnRenter(
-        beregnetPeriode: Beregningsresultatsperiode,
-        perioder: List<Tilbakekrevingsperiode>,
-    ): List<Tilbakekrevingsperiode> =
-        perioder.map {
-            val tilbakekrevesbeløp = summerTilbakekrevesbeløp(it)
-            var renteBeløp = BigDecimal.ZERO
-            if (beregnetPeriode.tilbakekrevingsbeløpUtenRenter != BigDecimal.ZERO) {
-                renteBeløp =
-                    beregnetPeriode.rentebeløp
-                        .multiply(tilbakekrevesbeløp)
-                        .divide(beregnetPeriode.tilbakekrevingsbeløpUtenRenter, 0, RoundingMode.HALF_UP)
-            }
-            it.copy(renter = renteBeløp)
-        }
-
-    private fun justerAvrundingRenter(
-        beregnetPeriode: Beregningsresultatsperiode,
-        perioder: List<Tilbakekrevingsperiode>,
-        logContext: SecureLog.Context,
-    ): List<Tilbakekrevingsperiode> {
-        val totalBeregnetRenteBeløp = beregnetPeriode.rentebeløp
-        val totalBeregnetRenterIIverksettelse = perioder.sumOf { it.renter }
-        log.medContext(logContext) {
-            info(
-                "Total beregnet renteBeløp som sendes i vedtaksbrev er $totalBeregnetRenteBeløp " +
-                    "mens total beregnet renteBeløp under iverksettelse er $totalBeregnetRenterIIverksettelse ",
-            )
-        }
-        var differanse = totalBeregnetRenteBeløp.minus(totalBeregnetRenterIIverksettelse)
-
-        return when {
-            differanse.isGreaterThanZero() -> {
-                perioder.map { periode ->
-                    var renteBeløp = periode.renter
-                    while (differanse.isGreaterThanZero()) {
-                        renteBeløp = renteBeløp.add(BigDecimal.ONE)
-                        differanse = differanse.minus(BigDecimal.ONE)
-                    }
-                    periode.copy(renter = renteBeløp)
-                }
-            }
-            differanse.isLessThanZero() -> {
-                perioder.map { periode ->
-                    var renteBeløp = periode.renter
-                    while (differanse.isLessThanZero()) {
-                        renteBeløp = renteBeløp.minus(BigDecimal.ONE)
-                        differanse = differanse.plus(BigDecimal.ONE)
-                    }
-                    periode.copy(renter = renteBeløp)
-                }
-            }
-            else -> perioder
-        }
+    private fun utledKodeResulat(beregnetPeriode: Delperiode): KodeResultat = when {
+        beregnetPeriode is Foreldet -> KodeResultat.FORELDET
+        beregnetPeriode.tilbakekrevesBrutto().isZero() -> KodeResultat.INGEN_TILBAKEKREVING
+        beregnetPeriode.andel.feilutbetaltBeløp() == beregnetPeriode.tilbakekrevesBrutto() -> KodeResultat.FULL_TILBAKEKREVING
+        else -> KodeResultat.DELVIS_TILBAKEKREVING
     }
 }
