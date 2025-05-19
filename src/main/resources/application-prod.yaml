@@ -35,8 +35,10 @@ rolle:
 
 SECURITYTOKENSERVICE_URL:  https://security-token-service.nais.adeo.no/SecurityTokenServiceProvider/
 
-A_INNTEKT_URL: https://arbeid-og-inntekt.prod-fss-pub.nais.io
-A_INNTEKT_SCOPE: api://prod-fss.arbeid-og-inntekt/.default
+ainntekt:
+  baseUrl: https://arbeid-og-inntekt.prod-fss-pub.nais.io
+  scope: api://prod-fss.arbeid-og-inntekt/.default
+
 PDL_URL: https://pdl-api.prod-fss-pub.nais.io
 PDL_SCOPE: api://prod-fss.pdl.pdl-api/.default
 

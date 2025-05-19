@@ -1,26 +1,26 @@
 package no.nav.familie.tilbake.proxy.aInntekt
 
 import no.nav.familie.tilbake.kontrakter.PersonIdent
-import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.PostMapping
+import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.api.v1.dto.ProxyLenkeDto
 import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/ainntekt")
-@ProtectedWithClaims(issuer = "azuread")
-@Validated
 class ArbeidOgInntektController(
-    private val client: ArbeidOgInntektClient,
+    private val service: ArbeidOgInntektService,
 ) {
     /**
      * Brukes for å generere en url til arbeid-og-inntekt
      * for å kunne sende saksbehandleren til identen sin side på arbeid og inntekt
      */
-    @PostMapping("generer-url")
     fun hentUrlTilArbeidOgInntekt(
         @RequestBody request: PersonIdent,
-    ): String = client.hentUrlTilArbeidOgInntekt(request.ident)
+        @RequestHeader("x-fagsak-id") fagsakId: String?,
+        @RequestHeader("x-behandling-id") behandlingId: String?,
+    ): ProxyLenkeDto {
+        val logContext = SecureLog.Context.medBehandling(fagsakId, behandlingId)
+        return ProxyLenkeDto(ainntektUrl = service.hentAInntektUrl(request.ident, logContext))
+    }
 }
