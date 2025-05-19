@@ -13,4 +13,16 @@ class Beregningsresultat(
     private val totaltSkattetrekk = beregningsresultatsperioder.sumOf { it.skattebeløp }
     val totaltTilbakekrevesBeløpMedRenterUtenSkatt: BigDecimal = totaltTilbakekrevesMedRenter.subtract(totaltSkattetrekk)
     val totaltFeilutbetaltBeløp = beregningsresultatsperioder.sumOf { it.feilutbetaltBeløp }
+
+    override fun toString(): String {
+        val perioder = beregningsresultatsperioder.joinToString("\n")
+        return "Resultat: ${vedtaksresultat}\n$perioder"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Beregningsresultat) return false
+
+        return vedtaksresultat == other.vedtaksresultat && beregningsresultatsperioder == other.beregningsresultatsperioder
+    }
 }

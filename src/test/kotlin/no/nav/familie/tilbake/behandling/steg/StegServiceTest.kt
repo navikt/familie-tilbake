@@ -41,6 +41,9 @@ import no.nav.familie.tilbake.oppgave.FerdigstillOppgaveTask
 import no.nav.familie.tilbake.oppgave.LagOppgaveTask
 import no.nav.familie.tilbake.totrinn.TotrinnsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
+import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingGodTro
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFaktaDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFatteVedtaksstegDtoTest
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeldelseDto
@@ -54,6 +57,8 @@ import no.nav.tilbakekreving.api.v1.dto.GodTroDto
 import no.nav.tilbakekreving.api.v1.dto.PeriodeMedTekstDto
 import no.nav.tilbakekreving.api.v1.dto.VergeDto
 import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
+import no.nav.tilbakekreving.februar
+import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.Regelverk
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
@@ -65,6 +70,8 @@ import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
+import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode.Companion.til
+import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.verge.Vergetype
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import org.junit.jupiter.api.AfterEach
@@ -74,7 +81,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Pageable
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.time.YearMonth
 import java.util.UUID
 
 internal class StegServiceTest : OppslagSpringRunnerTest() {
@@ -122,8 +128,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     private lateinit var fagsak: Fagsak
     private lateinit var behandling: Behandling
 
-    private val fom = YearMonth.now().minusMonths(1).atDay(1)
-    private val tom = YearMonth.now().atEndOfMonth()
+    private val fom = 1.januar(2023)
+    private val tom = 31.januar(2023)
 
     @BeforeEach
     fun init() {
@@ -399,38 +405,18 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.KLAR)
 
-        val førstePeriode =
-            Testdata
-                .getKravgrunnlagsperiode432()
-                .copy(
-                    id = UUID.randomUUID(),
-                    periode =
-                        Månedsperiode(
-                            fom = LocalDate.of(2018, 1, 1),
-                            tom = LocalDate.of(2018, 1, 31),
-                        ),
-                    beløp =
-                        setOf(
-                            Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
-                            Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
-                        ),
-                )
-        val andrePeriode =
-            Testdata
-                .getKravgrunnlagsperiode432()
-                .copy(
-                    id = UUID.randomUUID(),
-                    periode =
-                        Månedsperiode(
-                            fom = LocalDate.of(2018, 2, 1),
-                            tom = LocalDate.of(2018, 2, 28),
-                        ),
-                    beløp =
-                        setOf(
-                            Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
-                            Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
-                        ),
-                )
+        val førstePeriode = Testdata.lagKravgrunnlagsperiode(februar() til februar()).copy(
+            beløp = setOf(
+                Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
+                Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
+            ),
+        )
+        val andrePeriode = Testdata.lagKravgrunnlagsperiode(februar() til februar()).copy(
+            beløp = setOf(
+                Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
+                Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
+            ),
+        )
 
         val kravgrunnlag431 = Testdata.lagKravgrunnlag(behandling.id).copy(perioder = setOf(førstePeriode, andrePeriode))
         kravgrunnlagRepository.insert(kravgrunnlag431)
@@ -470,7 +456,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         val tom = LocalDate.of(2010, 1, 31)
 
         lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
-        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id, setOf(lagKravgrunnlagsperiode(fom, tom))))
+        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id, setOf(lagKravgrunnlagsperiode(januar(2010) til januar(2010)))))
         stegService.håndterSteg(behandling.id, lagBehandlingsstegFaktaDto(fom, tom), SecureLog.Context.tom())
 
         // foreldelsesteg vurderte som IKKE_FORELDET med første omgang
@@ -603,25 +589,13 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         // behandle vilkårsvurderingssteg
         stegService.håndterSteg(
             behandling.id,
-            lagBehandlingsstegVilkårsvurderingDto(
-                Datoperiode(
-                    fom,
-                    tom,
-                ),
-            ),
+            lagBehandlingsstegVilkårsvurderingDto(fom til tom),
             SecureLog.Context.tom(),
         )
 
-        val fritekstavsnitt =
-            FritekstavsnittDto(
-                perioderMedTekst =
-                    listOf(
-                        PeriodeMedTekstDto(
-                            periode = Datoperiode(fom, tom),
-                            faktaAvsnitt = "fakta tekst",
-                        ),
-                    ),
-            )
+        val fritekstavsnitt = FritekstavsnittDto(
+            perioderMedTekst = listOf(PeriodeMedTekstDto(periode = fom til tom, faktaAvsnitt = "fakta tekst")),
+        )
         stegService.håndterSteg(behandling.id, BehandlingsstegForeslåVedtaksstegDto(fritekstavsnitt = fritekstavsnitt), SecureLog.Context.tom())
 
         assertOppgave(FerdigstillOppgaveTask.TYPE)
@@ -654,6 +628,23 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `håndterSteg skal utføre fatte vedtak og forsette til iverksette vedtak når beslutter godkjenner alt`() {
         kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
+
+        vilkårsvurderingRepository.insert(
+            Vilkårsvurdering(
+                behandlingId = behandling.id,
+                perioder = setOf(
+                    Vilkårsvurderingsperiode(
+                        periode = januar(2023) til januar(2023),
+                        begrunnelse = "",
+                        vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
+                        godTro = VilkårsvurderingGodTro(
+                            beløpErIBehold = false,
+                            begrunnelse = "",
+                        ),
+                    ),
+                ),
+            ),
+        )
 
         lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)

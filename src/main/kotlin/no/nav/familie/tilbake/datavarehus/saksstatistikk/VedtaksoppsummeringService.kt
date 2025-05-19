@@ -65,7 +65,7 @@ class VedtaksoppsummeringService(
     private fun hentVedtakPerioder(behandlingId: UUID): List<VedtakPeriode> {
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
         val vurdertForeldelse = foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
-        val beregningsresultat = beregningService.beregn(behandlingId)
+        val beregningsresultat = beregningService.beregn(behandlingId).oppsummer()
         val vilkårsperioder =
             vilkårsvurdering?.let {
                 hentVilkårPerioder(behandlingId, beregningsresultat, it)

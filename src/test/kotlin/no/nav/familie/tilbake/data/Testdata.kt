@@ -42,6 +42,7 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhe
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingGodTro
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingSærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
+import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.Tilbakekrevingsvalg
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
@@ -52,6 +53,7 @@ import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
+import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode.Companion.til
 import no.nav.tilbakekreving.kontrakter.verge.Vergetype
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
@@ -61,7 +63,6 @@ import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
-import java.time.YearMonth
 import java.util.UUID
 
 object Testdata {
@@ -261,44 +262,22 @@ object Testdata {
             skatteprosent = BigDecimal("35.1100"),
         )
 
-    fun getKravgrunnlagsperiode432() =
-        Kravgrunnlagsperiode432(
-            periode =
-                Månedsperiode(
-                    YearMonth.now().minusMonths(1),
-                    YearMonth.now(),
-                ),
-            beløp =
-                setOf(
-                    lagFeilKravgrunnlagsbeløp(),
-                    lagYtelKravgrunnlagsbeløp(),
-                ),
-            månedligSkattebeløp = BigDecimal("123.11"),
-        )
-
     fun lagKravgrunnlagsperiode(
-        fom: LocalDate,
-        tom: LocalDate,
+        periode: Månedsperiode = januar(2023) til januar(2023),
         klassekode: Klassekode = Klassekode.KL_KODE_FEIL_BA,
         beløp: Int = 10000,
-    ): Kravgrunnlagsperiode432 =
-        Kravgrunnlagsperiode432(
-            periode =
-                Månedsperiode(
-                    fom,
-                    tom,
-                ),
-            beløp =
-                setOf(
-                    lagFeilKravgrunnlagsbeløp(klassekode, beløp.toBigDecimal()),
-                    lagYtelKravgrunnlagsbeløp(klassekode),
-                ),
-            månedligSkattebeløp = BigDecimal("123.11"),
-        )
+    ): Kravgrunnlagsperiode432 = Kravgrunnlagsperiode432(
+        periode = periode,
+        beløp = setOf(
+            lagFeilKravgrunnlagsbeløp(klassekode, beløp.toBigDecimal()),
+            lagYtelKravgrunnlagsbeløp(klassekode),
+        ),
+        månedligSkattebeløp = BigDecimal("123.11"),
+    )
 
     fun lagKravgrunnlag(
         behandlingId: UUID,
-        perioder: Set<Kravgrunnlagsperiode432> = setOf(getKravgrunnlagsperiode432()),
+        perioder: Set<Kravgrunnlagsperiode432> = setOf(lagKravgrunnlagsperiode()),
         fagområdekode: Fagområdekode = Fagområdekode.EFOG,
     ) = Kravgrunnlag431(
         behandlingId = behandlingId,
@@ -351,20 +330,21 @@ object Testdata {
             vilkårsvurderingSærligeGrunner = setOf(vilkårsvurderingSærligGrunn),
         )
 
-    val vilkårsperiode =
-        Vilkårsvurderingsperiode(
-            periode = Månedsperiode(LocalDate.now(), LocalDate.now().plusDays(1)),
-            vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
-            begrunnelse = "testverdi",
-            aktsomhet = vilkårsvurderingAktsomhet,
-            godTro = vilkårsvurderingGodTro,
-        )
+    fun vilkårsperiode(
+        periode: Månedsperiode = januar() til januar(),
+        godTro: VilkårsvurderingGodTro? = vilkårsvurderingGodTro,
+    ) = Vilkårsvurderingsperiode(
+        periode = periode,
+        vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
+        begrunnelse = "testverdi",
+        aktsomhet = vilkårsvurderingAktsomhet,
+        godTro = godTro,
+    )
 
-    fun lagVilkårsvurdering(behandlingId: UUID) =
-        Vilkårsvurdering(
-            behandlingId = behandlingId,
-            perioder = setOf(vilkårsperiode),
-        )
+    fun lagVilkårsvurdering(
+        behandlingId: UUID,
+        perioder: Set<Vilkårsvurderingsperiode> = setOf(vilkårsperiode()),
+    ) = Vilkårsvurdering(behandlingId = behandlingId, perioder = perioder)
 
     fun lagFaktaFeilutbetaling(
         behandlingId: UUID,

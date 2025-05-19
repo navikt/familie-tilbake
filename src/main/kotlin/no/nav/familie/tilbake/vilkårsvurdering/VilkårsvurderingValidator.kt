@@ -7,7 +7,6 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.api.v1.dto.AktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
-import no.nav.tilbakekreving.beregning.KravgrunnlagsberegningUtil
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
 import org.springframework.http.HttpStatus
@@ -86,7 +85,7 @@ object VilkårsvurderingValidator {
     ) {
         if (beløp == null) return
 
-        val feilutbetalteBeløp = KravgrunnlagsberegningUtil.beregnFeilutbetaltBeløp(Kravgrunnlag431Adapter(kravgrunnlag431), periode.toDatoperiode())
+        val feilutbetalteBeløp = Kravgrunnlag431Adapter(kravgrunnlag431).feilutbetaltBeløp(periode.toDatoperiode())
         val feilmelding = "Beløp som skal tilbakekreves kan ikke være mer enn feilutbetalt beløp"
         if (beløp > feilutbetalteBeløp) {
             throw Feil(

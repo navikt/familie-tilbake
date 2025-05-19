@@ -19,10 +19,12 @@ import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEventPublishe
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
+import no.nav.tilbakekreving.januar
+import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode.Companion.til
 import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 class KravgrunnlagServiceTest {
@@ -57,23 +59,19 @@ class KravgrunnlagServiceTest {
 
     @Test
     fun `Skal finne år for feilutbetaling i kravgrunnlagsperioder `() {
-        val fom = LocalDate.now().minusYears(10)
-        val tom = LocalDate.now()
+        val kravgrunnlagsperioder = setOf(Testdata.lagKravgrunnlagsperiode(januar(2010) til januar(2020)))
 
-        val kravgrunnlagsperioder: Set<Kravgrunnlagsperiode432> =
-            setOf(Testdata.lagKravgrunnlagsperiode(fom, tom))
-
-        kravgrunnlagsperioder.finnÅrForNyesteFeilutbetalingsperiode() shouldBe tom.year
+        kravgrunnlagsperioder.finnÅrForNyesteFeilutbetalingsperiode() shouldBe 2020
     }
 
     @Test
     fun `Skal finne riktig (nyeste) år med feilutbetaling i kravgrunnlagsperioder `() {
-        val now = LocalDate.now()
+        val now = YearMonth.now()
         val forventetTom = now.minusYears(2)
 
-        val eldstePeriode = Testdata.lagKravgrunnlagsperiode(now.minusYears(5), now.minusYears(5))
-        val gammelPeriode = Testdata.lagKravgrunnlagsperiode(now.minusYears(4), now.minusYears(4))
-        val nyestePeriode = Testdata.lagKravgrunnlagsperiode(now.minusYears(3), forventetTom)
+        val eldstePeriode = Testdata.lagKravgrunnlagsperiode(now.minusYears(5) til now.minusYears(5))
+        val gammelPeriode = Testdata.lagKravgrunnlagsperiode(now.minusYears(4) til now.minusYears(4))
+        val nyestePeriode = Testdata.lagKravgrunnlagsperiode(now.minusYears(3) til forventetTom)
 
         val kravgrunnlagsperioder: Set<Kravgrunnlagsperiode432> =
             setOf(eldstePeriode, nyestePeriode, gammelPeriode)
@@ -83,11 +81,7 @@ class KravgrunnlagServiceTest {
 
     @Test
     fun `Er under fire rettsgebyr og refererer til samme fagsystembehandling `() {
-        val fom = LocalDate.of(2022, 1, 1)
-        val tom = LocalDate.of(2022, 1, 1)
-
-        val kravgrunnlagsperioder: Set<Kravgrunnlagsperiode432> =
-            setOf(Testdata.lagKravgrunnlagsperiode(fom = fom, tom = tom, beløp = 1000))
+        val kravgrunnlagsperioder = setOf(Testdata.lagKravgrunnlagsperiode(januar(2022) til januar(2022), beløp = 1000))
 
         val behandling = Testdata.lagBehandling()
 
@@ -102,13 +96,9 @@ class KravgrunnlagServiceTest {
 
     @Test
     fun `Feiler fordi beløp er 1 kr over fire rettsgebyr`() {
-        val fom = LocalDate.of(2022, 1, 1)
-        val tom = LocalDate.of(2022, 1, 1)
-
         // 1223
 
-        val kravgrunnlagsperioder: Set<Kravgrunnlagsperiode432> =
-            setOf(Testdata.lagKravgrunnlagsperiode(fom = fom, tom = tom, beløp = 1223 * 4 + 1))
+        val kravgrunnlagsperioder = setOf(Testdata.lagKravgrunnlagsperiode(januar(2022) til januar(2022), beløp = 1223 * 4 + 1))
 
         val behandling = Testdata.lagBehandling()
 
@@ -129,14 +119,9 @@ class KravgrunnlagServiceTest {
 
     @Test
     fun `Skal ikke finne rettsgebyr for år vi ikke har registrert `() {
-        val fom = LocalDate.of(2017, 1, 1)
-        val tom = LocalDate.of(2017, 1, 1)
+        val kravgrunnlagsperioder = setOf(Testdata.lagKravgrunnlagsperiode(januar(2017) til januar(2017)))
 
-        val kravgrunnlagsperioder: Set<Kravgrunnlagsperiode432> =
-            setOf(Testdata.lagKravgrunnlagsperiode(fom, tom))
-
-        val kravgrunnlag =
-            Testdata.lagKravgrunnlag(behandlingId = UUID.randomUUID(), perioder = kravgrunnlagsperioder)
+        val kravgrunnlag = Testdata.lagKravgrunnlag(behandlingId = UUID.randomUUID(), perioder = kravgrunnlagsperioder)
 
         kravgrunnlagService.kanBehandlesAutomatiskBasertPåRettsgebyrOgFagsystemreferanse(
             kravgrunnlag,

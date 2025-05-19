@@ -26,8 +26,8 @@ class KravgrunnlagValidatorTest {
         KravgrunnlagValidator.valider(
             kravgrunnlag = kravgrunnlag(
                 tilbakekrevingsperioder = listOf(
-                    periode(1.januar til 31.januar).medStandardFeilutbetaling(),
-                    periode(1.februar til 28.februar).medStandardFeilutbetaling(),
+                    periode(1.januar() til 31.januar()).medStandardFeilutbetaling(),
+                    periode(1.februar() til 28.februar()).medStandardFeilutbetaling(),
                 ),
             ),
             periodeValidator = PeriodeValidator.MånedsperiodeValidator,
@@ -52,14 +52,14 @@ class KravgrunnlagValidatorTest {
         assertFeil(
             kravgrunnlag = kravgrunnlag(
                 tilbakekrevingsperioder = listOf(
-                    periode(periode = 1.januar til 28.februar).medStandardFeilutbetaling(),
-                    periode(periode = 1.mars til 30.april).medStandardFeilutbetaling(),
+                    periode(periode = 1.januar() til 28.februar()).medStandardFeilutbetaling(),
+                    periode(periode = 1.mars() til 30.april()).medStandardFeilutbetaling(),
                 ),
             ),
             periodeValidator = PeriodeValidator.MånedsperiodeValidator,
             forventetFeil = listOf(
-                "Perioden ${1.januar} til ${28.februar} er ikke innenfor samme kalendermåned",
-                "Perioden ${1.mars} til ${30.april} er ikke innenfor samme kalendermåned",
+                "Perioden ${1.januar()} til ${28.februar()} er ikke innenfor samme kalendermåned",
+                "Perioden ${1.mars()} til ${30.april()} er ikke innenfor samme kalendermåned",
             ),
         )
     }
@@ -69,13 +69,13 @@ class KravgrunnlagValidatorTest {
         assertFeil(
             kravgrunnlag = kravgrunnlag(
                 tilbakekrevingsperioder = listOf(
-                    periode(1.januar til 28.februar).medStandardFeilutbetaling(),
-                    periode(1.mars til 31.mars).medStandardFeilutbetaling(),
+                    periode(1.januar() til 28.februar()).medStandardFeilutbetaling(),
+                    periode(1.mars() til 31.mars()).medStandardFeilutbetaling(),
                 ),
             ),
             periodeValidator = PeriodeValidator.MånedsperiodeValidator,
             forventetFeil = listOf(
-                "Perioden ${1.januar} til ${28.februar} er ikke innenfor samme kalendermåned",
+                "Perioden ${1.januar()} til ${28.februar()} er ikke innenfor samme kalendermåned",
             ),
         )
     }
@@ -85,13 +85,13 @@ class KravgrunnlagValidatorTest {
         assertFeil(
             kravgrunnlag = kravgrunnlag(
                 tilbakekrevingsperioder = listOf(
-                    periode(1.januar til 27.februar).medStandardFeilutbetaling(),
+                    periode(1.januar() til 27.februar()).medStandardFeilutbetaling(),
                 ),
             ),
             periodeValidator = PeriodeValidator.MånedsperiodeValidator,
             forventetFeil = listOf(
-                "Perioden ${1.januar} til ${27.februar} er ikke innenfor samme kalendermåned",
-                "Perioden ${1.januar} til ${27.februar} slutter ikke siste dag i måned",
+                "Perioden ${1.januar()} til ${27.februar()} er ikke innenfor samme kalendermåned",
+                "Perioden ${1.januar()} til ${27.februar()} slutter ikke siste dag i måned",
             ),
         )
     }
@@ -101,13 +101,13 @@ class KravgrunnlagValidatorTest {
         assertFeil(
             kravgrunnlag(
                 tilbakekrevingsperioder = listOf(
-                    periode(1.januar til 31.januar).medStandardFeilutbetaling(),
-                    periode(1.januar til 31.januar).medStandardFeilutbetaling(),
+                    periode(1.januar() til 31.januar()).medStandardFeilutbetaling(),
+                    periode(1.januar() til 31.januar()).medStandardFeilutbetaling(),
                 ),
             ),
             periodeValidator = PeriodeValidator.MånedsperiodeValidator,
             forventetFeil = listOf(
-                "Perioden ${1.januar} til ${31.januar} overlapper med perioden ${1.januar} til ${31.januar}",
+                "Perioden ${1.januar()} til ${31.januar()} overlapper med perioden ${1.januar()} til ${31.januar()}",
             ),
         )
     }
@@ -117,15 +117,15 @@ class KravgrunnlagValidatorTest {
         assertFeil(
             kravgrunnlag(
                 tilbakekrevingsperioder = listOf(
-                    periode(1.januar til 31.januar).medStandardFeilutbetaling(),
-                    periode(30.januar til 28.februar).medStandardFeilutbetaling(),
+                    periode(1.januar() til 31.januar()).medStandardFeilutbetaling(),
+                    periode(30.januar() til 28.februar()).medStandardFeilutbetaling(),
                 ),
             ),
             periodeValidator = PeriodeValidator.MånedsperiodeValidator,
             forventetFeil = listOf(
-                "Perioden ${1.januar} til ${31.januar} overlapper med perioden ${30.januar} til ${28.februar}",
-                "Perioden ${30.januar} til ${28.februar} er ikke innenfor samme kalendermåned",
-                "Perioden ${30.januar} til ${28.februar} starter ikke første dag i måned",
+                "Perioden ${1.januar()} til ${31.januar()} overlapper med perioden ${30.januar()} til ${28.februar()}",
+                "Perioden ${30.januar()} til ${28.februar()} er ikke innenfor samme kalendermåned",
+                "Perioden ${30.januar()} til ${28.februar()} starter ikke første dag i måned",
             ),
         )
     }
@@ -135,14 +135,14 @@ class KravgrunnlagValidatorTest {
         assertFeil(
             kravgrunnlag(
                 tilbakekrevingsperioder = listOf(
-                    periode(1.januar til 31.januar).medStandardFeilutbetaling(),
-                    periode(1.februar til 28.februar).medStandardFeilutbetaling(),
-                    periode(1.januar til 31.januar).medStandardFeilutbetaling(),
+                    periode(1.januar() til 31.januar()).medStandardFeilutbetaling(),
+                    periode(1.februar() til 28.februar()).medStandardFeilutbetaling(),
+                    periode(1.januar() til 31.januar()).medStandardFeilutbetaling(),
                 ),
             ),
             periodeValidator = PeriodeValidator.MånedsperiodeValidator,
             forventetFeil = listOf(
-                "Perioden ${1.januar} til ${31.januar} overlapper med perioden ${1.januar} til ${31.januar}",
+                "Perioden ${1.januar()} til ${31.januar()} overlapper med perioden ${1.januar()} til ${31.januar()}",
             ),
         )
     }
@@ -152,7 +152,7 @@ class KravgrunnlagValidatorTest {
         assertFeil(
             kravgrunnlag(
                 tilbakekrevingsperioder = listOf(
-                    periode(1.januar til 31.januar, beløpSkattMåned = 299)
+                    periode(1.januar() til 31.januar(), beløpSkattMåned = 299)
                         .medStandardFeilutbetaling(
                             tilbakekreves = 3000,
                             skatteprosent = 10,
@@ -171,14 +171,14 @@ class KravgrunnlagValidatorTest {
         assertFeil(
             kravgrunnlag = kravgrunnlag(
                 tilbakekrevingsperioder = listOf(
-                    periode(1.januar til 31.januar)
+                    periode(1.januar() til 31.januar())
                         .medYtelsesutbetaling(),
                 ),
             ),
             periodeValidator = PeriodeValidator.MånedsperiodeValidator,
             forventetFeil = listOf(
-                "Perioden ${1.januar} til ${31.januar} mangler postering med klassetype=FEIL",
-                "Perioden ${1.januar} til ${31.januar} har ulikt summert tilbakekrevingsbeløp i YTEL postering(3000.00) i forhold til summert beløpNy i FEIL postering(0.00)",
+                "Perioden ${1.januar()} til ${31.januar()} mangler postering med klassetype=FEIL",
+                "Perioden ${1.januar()} til ${31.januar()} har ulikt summert tilbakekrevingsbeløp i YTEL postering(3000.00) i forhold til summert beløpNy i FEIL postering(0.00)",
             ),
         )
     }
@@ -188,7 +188,7 @@ class KravgrunnlagValidatorTest {
         assertFeil(
             kravgrunnlag = kravgrunnlag(
                 tilbakekrevingsperioder = listOf(
-                    periode(1.januar til 31.januar)
+                    periode(1.januar() til 31.januar())
                         .medFeilutbetaling(
                             skatteprosent = 10,
                             beløpTilbakekreves = 3000,
@@ -197,8 +197,8 @@ class KravgrunnlagValidatorTest {
             ),
             periodeValidator = PeriodeValidator.MånedsperiodeValidator,
             forventetFeil = listOf(
-                "Perioden ${1.januar} til ${31.januar} mangler postering med klassetype=YTEL",
-                "Perioden ${1.januar} til ${31.januar} har ulikt summert tilbakekrevingsbeløp i YTEL postering(0.00) i forhold til summert beløpNy i FEIL postering(3000.00)",
+                "Perioden ${1.januar()} til ${31.januar()} mangler postering med klassetype=YTEL",
+                "Perioden ${1.januar()} til ${31.januar()} har ulikt summert tilbakekrevingsbeløp i YTEL postering(0.00) i forhold til summert beløpNy i FEIL postering(3000.00)",
             ),
         )
     }
@@ -208,15 +208,15 @@ class KravgrunnlagValidatorTest {
         assertFeil(
             kravgrunnlag = kravgrunnlag(
                 tilbakekrevingsperioder = listOf(
-                    periode(1.januar til 31.januar)
+                    periode(1.januar() til 31.januar())
                         .medFeilutbetaling(beløpNy = -1)
                         .medYtelsesutbetaling(beløpNy = 27000, originaltBeløp = 30000, beløpTilbakekreves = 3000),
                 ),
             ),
             periodeValidator = PeriodeValidator.MånedsperiodeValidator,
             forventetFeil = listOf(
-                "Perioden ${1.januar} til ${31.januar} har feilpostering med negativt beløp",
-                "Perioden ${1.januar} til ${31.januar} har ulikt summert tilbakekrevingsbeløp i YTEL postering(3000.00) i forhold til summert beløpNy i FEIL postering(-1.00)",
+                "Perioden ${1.januar()} til ${31.januar()} har feilpostering med negativt beløp",
+                "Perioden ${1.januar()} til ${31.januar()} har ulikt summert tilbakekrevingsbeløp i YTEL postering(3000.00) i forhold til summert beløpNy i FEIL postering(-1.00)",
             ),
         )
     }
@@ -226,14 +226,14 @@ class KravgrunnlagValidatorTest {
         assertFeil(
             kravgrunnlag = kravgrunnlag(
                 tilbakekrevingsperioder = listOf(
-                    periode(1.januar til 31.januar)
+                    periode(1.januar() til 31.januar())
                         .medFeilutbetaling(beløpNy = 1400)
                         .medYtelsesutbetaling(
                             originaltBeløp = 30000,
                             beløpNy = 28500,
                             beløpTilbakekreves = 1500,
                         ),
-                    periode(1.februar til 28.februar)
+                    periode(1.februar() til 28.februar())
                         .medFeilutbetaling(beløpNy = 1300)
                         .medYtelsesutbetaling(
                             originaltBeløp = 30000,
@@ -244,8 +244,8 @@ class KravgrunnlagValidatorTest {
             ),
             periodeValidator = PeriodeValidator.MånedsperiodeValidator,
             forventetFeil = listOf(
-                "Perioden ${1.januar} til ${31.januar} har ulikt summert tilbakekrevingsbeløp i YTEL postering(1500.00) i forhold til summert beløpNy i FEIL postering(1400.00)",
-                "Perioden ${1.februar} til ${28.februar} har ulikt summert tilbakekrevingsbeløp i YTEL postering(1400.00) i forhold til summert beløpNy i FEIL postering(1300.00)",
+                "Perioden ${1.januar()} til ${31.januar()} har ulikt summert tilbakekrevingsbeløp i YTEL postering(1500.00) i forhold til summert beløpNy i FEIL postering(1400.00)",
+                "Perioden ${1.februar()} til ${28.februar()} har ulikt summert tilbakekrevingsbeløp i YTEL postering(1400.00) i forhold til summert beløpNy i FEIL postering(1300.00)",
             ),
         )
     }
@@ -255,7 +255,7 @@ class KravgrunnlagValidatorTest {
         assertFeil(
             kravgrunnlag = kravgrunnlag(
                 tilbakekrevingsperioder = listOf(
-                    periode(1.januar til 31.januar)
+                    periode(1.januar() til 31.januar())
                         .medFeilutbetaling(
                             beløpNy = 3000,
                         )
@@ -266,7 +266,7 @@ class KravgrunnlagValidatorTest {
             ),
             periodeValidator = PeriodeValidator.MånedsperiodeValidator,
             forventetFeil = listOf(
-                "Perioden ${1.januar} til ${31.januar} har ulikt summert tilbakekrevingsbeløp i YTEL postering(2900.00) " +
+                "Perioden ${1.januar()} til ${31.januar()} har ulikt summert tilbakekrevingsbeløp i YTEL postering(2900.00) " +
                     "i forhold til summert beløpNy i FEIL postering(3000.00)",
             ),
         )
@@ -277,7 +277,7 @@ class KravgrunnlagValidatorTest {
         assertFeil(
             kravgrunnlag = kravgrunnlag(
                 tilbakekrevingsperioder = listOf(
-                    periode(1.januar til 31.januar)
+                    periode(1.januar() til 31.januar())
                         .medFeilutbetaling(beløpNy = 3100)
                         .medYtelsesutbetaling(beløpTilbakekreves = 3100),
                 ),
@@ -294,13 +294,13 @@ class KravgrunnlagValidatorTest {
         KravgrunnlagValidator.valider(
             kravgrunnlag = kravgrunnlag(
                 tilbakekrevingsperioder = listOf(
-                    periode(1.januar til 31.januar)
+                    periode(1.januar() til 31.januar())
                         .medFeilutbetaling(beløpNy = 3100)
                         .medYtelsesutbetaling(beløpTilbakekreves = 3100),
-                    periode(1.februar til 28.februar)
+                    periode(1.februar() til 28.februar())
                         .medFeilutbetaling(beløpNy = 3100)
                         .medYtelsesutbetaling(beløpTilbakekreves = 3100),
-                    periode(1.mars til 31.mars)
+                    periode(1.mars() til 31.mars())
                         .medFeilutbetaling(beløpNy = 2900)
                         .medYtelsesutbetaling(beløpTilbakekreves = 2900),
                 ),
@@ -329,7 +329,7 @@ class KravgrunnlagValidatorTest {
     private fun kravgrunnlag(
         referanse: String? = UUID.randomUUID().toString(),
         tilbakekrevingsperioder: List<DetaljertKravgrunnlagPeriodeDto> = listOf(
-            periode(1.januar til 31.januar).medStandardFeilutbetaling(),
+            periode(1.januar() til 31.januar()).medStandardFeilutbetaling(),
         ),
     ) = DetaljertKravgrunnlagDto().apply {
         this.kravgrunnlagId = BigInteger.ZERO

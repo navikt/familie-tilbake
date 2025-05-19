@@ -102,7 +102,7 @@ class Behandling private constructor(
     }
 
     fun beregnForFrontend(): BeregningsresultatDto {
-        val beregning = lagBeregning().beregn()
+        val beregning = lagBeregning().oppsummer()
         return BeregningsresultatDto(
             beregning.beregningsresultatsperioder.map {
                 BeregningsresultatsperiodeDto(

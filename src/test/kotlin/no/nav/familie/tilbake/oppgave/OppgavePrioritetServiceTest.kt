@@ -9,11 +9,11 @@ import no.nav.familie.tilbake.kontrakter.oppgave.Oppgave
 import no.nav.familie.tilbake.kontrakter.oppgave.OppgavePrioritet
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
-import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
+import no.nav.tilbakekreving.januar
+import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode.Companion.til
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
-import java.time.YearMonth
 import java.util.UUID
 
 internal class OppgavePrioritetServiceTest {
@@ -76,16 +76,12 @@ internal class OppgavePrioritetServiceTest {
     }
 
     private fun lagKravgrunnlagMedFeilutbetaling(feilutbetaling: Int): Kravgrunnlag431 {
-        val periode =
-            Testdata.getKravgrunnlagsperiode432().copy(
-                id = UUID.randomUUID(),
-                periode = Månedsperiode(YearMonth.of(2020, 1), YearMonth.of(2023, 1)),
-                beløp =
-                    setOf(
-                        lagFeilBeløp(BigDecimal(feilutbetaling)),
-                        lagYtelBeløp(BigDecimal(feilutbetaling), BigDecimal(10)),
-                    ),
-            )
+        val periode = Testdata.lagKravgrunnlagsperiode(januar(2020) til januar(2023)).copy(
+            beløp = setOf(
+                lagFeilBeløp(BigDecimal(feilutbetaling)),
+                lagYtelBeløp(BigDecimal(feilutbetaling), BigDecimal(10)),
+            ),
+        )
 
         return Testdata.lagKravgrunnlag(Testdata.lagBehandling(Testdata.fagsak().id).id).copy(perioder = setOf(periode))
     }

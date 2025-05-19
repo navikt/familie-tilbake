@@ -23,8 +23,6 @@ import no.nav.tilbakekreving.api.v1.dto.VurdertSærligGrunnDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsresultatDto
-import no.nav.tilbakekreving.beregning.BeløpsberegningUtil
-import no.nav.tilbakekreving.beregning.KravgrunnlagsberegningUtil
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
@@ -41,6 +39,7 @@ object VilkårsvurderingMapper {
         kravgrunnlag431: Kravgrunnlag431,
     ): VurdertVilkårsvurderingDto {
         // allerede behandlet perioder uten perioder som er foreldet
+        val kravgrunnlagAdapter = Kravgrunnlag431Adapter(kravgrunnlag431)
         val vilkårsvurdertePerioder =
             vilkårsvurdering
                 ?.perioder
@@ -48,7 +47,7 @@ object VilkårsvurderingMapper {
                 ?.map {
                     VurdertVilkårsvurderingsperiodeDto(
                         periode = it.periode.toDatoperiode(),
-                        feilutbetaltBeløp = beregnFeilutbetaltBeløp(kravgrunnlag431, it.periode),
+                        feilutbetaltBeløp = kravgrunnlagAdapter.feilutbetaltBeløp(it.periode.toDatoperiode()),
                         hendelsestype =
                             hentHendelsestype(
                                 faktaFeilutbetaling.perioder,
@@ -66,7 +65,7 @@ object VilkårsvurderingMapper {
             perioder.map {
                 VurdertVilkårsvurderingsperiodeDto(
                     periode = it.toDatoperiode(),
-                    feilutbetaltBeløp = beregnFeilutbetaltBeløp(kravgrunnlag431, it),
+                    feilutbetaltBeløp = kravgrunnlagAdapter.feilutbetaltBeløp(it.toDatoperiode()),
                     hendelsestype = hentHendelsestype(faktaFeilutbetaling.perioder, it),
                     reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, it),
                     aktiviteter = hentAktiviteter(kravgrunnlag431, it),
@@ -78,7 +77,7 @@ object VilkårsvurderingMapper {
             foreldetPerioderMedBegrunnelse.map { (periode, begrunnelse) ->
                 VurdertVilkårsvurderingsperiodeDto(
                     periode = periode.toDatoperiode(),
-                    feilutbetaltBeløp = beregnFeilutbetaltBeløp(kravgrunnlag431, periode),
+                    feilutbetaltBeløp = kravgrunnlagAdapter.feilutbetaltBeløp(periode.toDatoperiode()),
                     hendelsestype = hentHendelsestype(faktaFeilutbetaling.perioder, periode),
                     reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, periode),
                     aktiviteter = hentAktiviteter(kravgrunnlag431, periode),
@@ -207,14 +206,6 @@ object VilkårsvurderingMapper {
                 )
             }?.toSet() ?: emptySet()
 
-    private fun beregnFeilutbetaltBeløp(
-        kravgrunnlag431: Kravgrunnlag431,
-        periode: Månedsperiode,
-    ): BigDecimal =
-        KravgrunnlagsberegningUtil
-            .beregnFeilutbetaltBeløp(Kravgrunnlag431Adapter(kravgrunnlag431), periode.toDatoperiode())
-            .setScale(0, RoundingMode.HALF_UP)
-
     private fun hentHendelsestype(
         faktaPerioder: Set<FaktaFeilutbetalingsperiode>,
         vurdertVilkårsperiode: Månedsperiode,
@@ -270,13 +261,7 @@ object VilkårsvurderingMapper {
                     aktiviteter.add(
                         AktivitetDto(
                             aktivitet = it.klassekode.aktivitet,
-                            beløp =
-                                BeløpsberegningUtil
-                                    .beregnBeløpForPeriode(
-                                        tilbakekrevesBeløp = it.tilbakekrevesBeløp,
-                                        vurderingsperiode = vurdertVilkårsperiode.toDatoperiode(),
-                                        kravgrunnlagsperiode = periode.periode.toDatoperiode(),
-                                    ),
+                            beløp = it.tilbakekrevesBeløp.setScale(0, RoundingMode.HALF_UP),
                         ),
                     )
                 }
