@@ -7,6 +7,7 @@ val testcontainersVersion = "1.20.6"
 val tokenValidationVersion = "5.0.24"
 val veraPdfVersion = "1.26.5"
 val flywayVersion = "11.3.4"
+val ktorVersion = "3.1.3"
 
 group = "no.nav"
 description = "familie-tilbake"
@@ -48,6 +49,7 @@ subprojects {
 }
 
 repositories {
+    mavenCentral()
     mavenLocal()
     maven {
         url = uri("https://repo.maven.apache.org/maven2/")
@@ -64,6 +66,12 @@ repositories {
 
 dependencies {
     implementation(platform(SpringBootPlugin.BOM_COORDINATES))
+
+    implementation("io.ktor:ktor-client-core:$ktorVersion")
+    implementation("io.ktor:ktor-client-cio:$ktorVersion")
+    implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
+
     api("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocVersion")
     api("org.springdoc:springdoc-openapi-starter-common:$springDocVersion")
     api("org.springframework.boot:spring-boot-starter-actuator")
