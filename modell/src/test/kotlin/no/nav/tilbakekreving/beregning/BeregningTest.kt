@@ -490,6 +490,64 @@ class BeregningTest {
         )
     }
 
+    @Test
+    fun `sammenslåing av perioder som er foreldet`() {
+        val beregning = Beregning(
+            beregnRenter = true,
+            tilbakekrevLavtBeløp = false,
+            vilkårsvurdering = vurdering(),
+            foreldetPerioder = listOf(
+                1.januar til 28.februar,
+            ),
+            kravgrunnlag = perioder(
+                1.januar til 31.januar medTilbakekrevesBeløp 2000.kroner,
+                1.februar til 28.februar medTilbakekrevesBeløp 2000.kroner,
+            ),
+        )
+
+        val delperioder = beregning.beregn()
+        delperioder.size shouldBe 2
+        delperioder[0].shouldMatch(
+            periode = 1.januar til 31.januar,
+            renter = 0.kroner,
+            tilbakekrevesBrutto = 0.kroner,
+            tilbakekrevesBruttoMedRenter = 0.kroner,
+            skatt = 0.kroner,
+            utbetaltYtelsesbeløp = 20000.kroner,
+            feilutbetaltBeløp = 2000.kroner,
+        )
+        delperioder[1].shouldMatch(
+            periode = 1.februar til 28.februar,
+            renter = 0.kroner,
+            tilbakekrevesBrutto = 0.kroner,
+            tilbakekrevesBruttoMedRenter = 0.kroner,
+            skatt = 0.kroner,
+            utbetaltYtelsesbeløp = 20000.kroner,
+            feilutbetaltBeløp = 2000.kroner,
+        )
+
+        beregning.oppsummer() shouldBe Beregningsresultat(
+            beregningsresultatsperioder = listOf(
+                Beregningsresultatsperiode(
+                    periode = 1.januar til 28.februar,
+                    vurdering = AnnenVurdering.FORELDET,
+                    feilutbetaltBeløp = 4000.kroner,
+                    andelAvBeløp = 0.prosent,
+                    renteprosent = null,
+                    manueltSattTilbakekrevingsbeløp = null,
+                    tilbakekrevingsbeløpUtenRenter = 0.kroner,
+                    rentebeløp = 0.kroner,
+                    tilbakekrevingsbeløp = 0.kroner,
+                    skattebeløp = 0.kroner,
+                    tilbakekrevingsbeløpEtterSkatt = 0.kroner,
+                    utbetaltYtelsesbeløp = 40000.kroner,
+                    riktigYtelsesbeløp = 36000.kroner,
+                ),
+            ),
+            vedtaksresultat = Vedtaksresultat.INGEN_TILBAKEBETALING,
+        )
+    }
+
     fun perioder(
         vararg perioder: TestKravgrunnlagPeriode,
     ) = object : KravgrunnlagAdapter {
