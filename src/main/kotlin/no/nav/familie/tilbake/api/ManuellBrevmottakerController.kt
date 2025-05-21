@@ -2,13 +2,16 @@ package no.nav.familie.tilbake.api
 
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
+import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerMapper
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerService
 import no.nav.familie.tilbake.kontrakter.Ressurs
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.api.v1.dto.ManuellBrevmottakerRequestDto
 import no.nav.tilbakekreving.api.v1.dto.ManuellBrevmottakerResponsDto
 import org.springframework.http.MediaType
@@ -30,6 +33,7 @@ import java.util.UUID
 class ManuellBrevmottakerController(
     private val manuellBrevmottakerService: ManuellBrevmottakerService,
     private val tilgangskontrollService: TilgangskontrollService,
+    private val tilbakekrevingService: TilbakekrevingService,
 ) {
     @Operation(summary = "Legger til brevmottaker manuelt")
     @PostMapping(
@@ -42,6 +46,21 @@ class ManuellBrevmottakerController(
         @Valid @RequestBody
         manuellBrevmottakerRequestDto: ManuellBrevmottakerRequestDto,
     ): Ressurs<UUID> {
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        if (tilbakekreving != null) {
+            val logContext = SecureLog.Context.fra(tilbakekreving)
+            val saksbehandler = ContextService.hentBehandler(logContext)
+            tilgangskontrollService.validerTilgangBehandlingID(
+                behandlingId = behandlingId,
+                minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                auditLoggerEvent = AuditLoggerEvent.UPDATE,
+                handling = "Legger til brevmottaker manuelt",
+            )
+            val id = UUID.randomUUID()
+            tilbakekrevingService.behandleBrevmottaker(saksbehandler, tilbakekreving, manuellBrevmottakerRequestDto, id)
+            return Ressurs.success(id, melding = "Manuell brevmottaker er lagt til.")
+        }
+
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
@@ -86,6 +105,20 @@ class ManuellBrevmottakerController(
         @Valid @RequestBody
         manuellBrevmottakerRequestDto: ManuellBrevmottakerRequestDto,
     ): Ressurs<String> {
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        if (tilbakekreving != null) {
+            val logContext = SecureLog.Context.fra(tilbakekreving)
+            val saksbehandler = ContextService.hentBehandler(logContext)
+            tilgangskontrollService.validerTilgangBehandlingID(
+                behandlingId = behandlingId,
+                minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                auditLoggerEvent = AuditLoggerEvent.UPDATE,
+                handling = "Oppdaterer manuell brevmottaker",
+            )
+            tilbakekrevingService.behandleBrevmottaker(saksbehandler, tilbakekreving, manuellBrevmottakerRequestDto, manuellBrevmottakerId)
+            return Ressurs.success("", melding = "Manuell brevmottaker er oppdatert")
+        }
+
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
@@ -102,6 +135,20 @@ class ManuellBrevmottakerController(
         @PathVariable behandlingId: UUID,
         @PathVariable manuellBrevmottakerId: UUID,
     ): Ressurs<String> {
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        if (tilbakekreving != null) {
+            val logContext = SecureLog.Context.fra(tilbakekreving)
+            val saksbehandler = ContextService.hentBehandler(logContext)
+            tilgangskontrollService.validerTilgangBehandlingID(
+                behandlingId = behandlingId,
+                minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                auditLoggerEvent = AuditLoggerEvent.UPDATE,
+                handling = "Fjerner manuell brevmottaker",
+            )
+            tilbakekrevingService.fjernManuelBrevmottaker(saksbehandler, tilbakekreving, manuellBrevmottakerId)
+            return Ressurs.success("", melding = "Manuell brevmottaker er oppdatert")
+        }
+
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
@@ -117,6 +164,18 @@ class ManuellBrevmottakerController(
     fun opprettBrevmottakerSteg(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<String> {
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        if (tilbakekreving != null) {
+            tilgangskontrollService.validerTilgangBehandlingID(
+                behandlingId = behandlingId,
+                minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                auditLoggerEvent = AuditLoggerEvent.UPDATE,
+                handling = "Oppretter brevmottaker-steg på behandling",
+            )
+            tilbakekrevingService.aktiverBrevmottakerSteg(tilbakekreving)
+            return Ressurs.success("OK")
+        }
+
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
@@ -132,6 +191,18 @@ class ManuellBrevmottakerController(
     fun fjernBrevmottakerSteg(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<String> {
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        if (tilbakekreving != null) {
+            tilgangskontrollService.validerTilgangBehandlingID(
+                behandlingId = behandlingId,
+                minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                auditLoggerEvent = AuditLoggerEvent.UPDATE,
+                handling = "Fjern ev. manuelt registrerte brevmottakere og deaktiver steg.",
+            )
+            tilbakekrevingService.deaktiverBrevmottakerSteg(tilbakekreving)
+            return Ressurs.success("OK")
+        }
+
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
