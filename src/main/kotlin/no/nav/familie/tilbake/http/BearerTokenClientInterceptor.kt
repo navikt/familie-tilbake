@@ -26,7 +26,7 @@ class BearerTokenClientInterceptor(
     }
 
     private fun clientPropertiesFor(uri: URI): ClientProperties {
-        val clientProperties = clientConfigurationProperties.findByURI(uri)
+        val clientProperties = findByURI(uri)
         return if (clientProperties.size == 1) {
             clientProperties.first()
         } else {
