@@ -34,7 +34,7 @@ class Beregning(
     private val foreldet = foreldetPerioder.flatMap { foreldetPeriode ->
         kravgrunnlag.perioder()
             .filter { it.periode() in foreldetPeriode }
-            .map { Foreldet.opprett(it.periode(), it) }
+            .map { Foreldet.opprett(foreldetPeriode, it) }
     }
     private val vilkårsvurdert = vilkårsvurdering.perioder().flatMap { vurdering ->
         val kgPerioder = kravgrunnlag.perioder()

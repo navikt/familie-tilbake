@@ -38,13 +38,13 @@ class Foreldet(
 
     companion object {
         fun opprett(
-            periode: Datoperiode,
+            vurdertPeriode: Datoperiode,
             kravgrunnlagPeriode: KravgrunnlagPeriodeAdapter,
         ): Foreldet {
-            val delperiode = requireNotNull(kravgrunnlagPeriode.periode().snitt(periode)) {
-                "Finner ingen kravgrunnlagsperiode som er dekket av foreldelsesperioden $periode, kravgrunnlagsperiode=${kravgrunnlagPeriode.periode()}"
+            val delperiode = requireNotNull(kravgrunnlagPeriode.periode().snitt(vurdertPeriode)) {
+                "Finner ingen kravgrunnlagsperiode som er dekket av foreldelsesperioden $vurdertPeriode, kravgrunnlagsperiode=${kravgrunnlagPeriode.periode()}"
             }
-            return Foreldet(delperiode, periode, Andel(kravgrunnlagPeriode, delperiode))
+            return Foreldet(delperiode, vurdertPeriode, Andel(kravgrunnlagPeriode, delperiode))
         }
     }
 }

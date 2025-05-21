@@ -5,6 +5,8 @@ import no.nav.tilbakekreving.Tilbakekreving
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
+import org.springframework.web.context.request.RequestAttributes
+import org.springframework.web.context.request.RequestContextHolder
 import java.util.Properties
 
 object SecureLog {
@@ -54,7 +56,23 @@ object SecureLog {
             fun medBehandling(
                 fagsystemId: String?,
                 behandlingId: String?,
-            ) = Context(fagsystemId = fagsystemId, behandlingId = behandlingId)
+            ): Context {
+                val requestContext = RequestContextHolder.getRequestAttributes()
+                val currentLogContext = requestContext?.getAttribute("logContext", RequestAttributes.SCOPE_REQUEST) as Context?
+                requestContext?.setAttribute(
+                    "logContext",
+                    Context(
+                        fagsystemId = fagsystemId ?: currentLogContext?.fagsystemId,
+                        behandlingId = behandlingId ?: currentLogContext?.behandlingId,
+                    ),
+                    RequestAttributes.SCOPE_REQUEST,
+                )
+                return Context(fagsystemId = fagsystemId, behandlingId = behandlingId)
+            }
+
+            fun springContext(): Context = RequestContextHolder.getRequestAttributes()
+                ?.getAttribute("logContext", RequestAttributes.SCOPE_REQUEST) as Context?
+                ?: tom()
 
             fun fra(tilbakekreving: Tilbakekreving) =
                 medBehandling(
