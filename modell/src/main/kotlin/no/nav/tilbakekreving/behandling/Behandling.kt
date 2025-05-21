@@ -14,10 +14,12 @@ import no.nav.tilbakekreving.api.v1.dto.TotrinnsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
+import no.nav.tilbakekreving.behandling.saksbehandling.BrevmottakerSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
+import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg.Companion.behandlingsstegstatus
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg.Companion.klarTilVisning
 import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
@@ -62,6 +64,7 @@ class Behandling private constructor(
     val foreldelsestegDto: FrontendDto<VurdertForeldelseDto> get() = foreldelsesteg
     val vilkårsvurderingsstegDto: FrontendDto<VurdertVilkårsvurderingDto> get() = vilkårsvurderingsteg
     val fatteVedtakStegDto: FrontendDto<TotrinnsvurderingDto> get() = fatteVedtakSteg
+    lateinit var brevmottakerSteg: BrevmottakerSteg
 
     fun harLikePerioder(): Boolean = vilkårsvurderingsteg.harLikePerioder()
 
@@ -226,6 +229,33 @@ class Behandling private constructor(
             tilbakekreving.byttTilstand(IverksettVedtak)
         }
     }
+
+    internal fun håndter(
+        behandler: Behandler,
+        brevmottaker: RegistrertBrevmottaker,
+    ) {
+        oppdaterAnsvarligSaksbehandler(behandler)
+        brevmottakerSteg.håndter(brevmottaker)
+    }
+
+    internal fun fjernManuelBrevmottaker(
+        behandler: Behandler,
+        manuellBrevmottakerId: UUID,
+    ) {
+        oppdaterAnsvarligSaksbehandler(behandler)
+        brevmottakerSteg.fjernManuellBrevmottaker(manuellBrevmottakerId)
+    }
+
+    internal fun opprettBrevmottaker(
+        navn: String,
+        ident: String,
+    ) {
+        brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
+    }
+
+    fun aktiverBrevmottakerSteg() = brevmottakerSteg.aktiverSteg()
+
+    fun deaktiverBrevmottakerSteg() = brevmottakerSteg.deaktiverSteg()
 
     fun lagNullstiltBehandling(brevHistorikk: BrevHistorikk): Behandling {
         return nyBehandling(
