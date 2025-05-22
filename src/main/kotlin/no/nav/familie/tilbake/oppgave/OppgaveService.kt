@@ -250,8 +250,16 @@ class OppgaveService(
     ) {
         val oppgave = finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
         SecureLog.medContext(logContext) {
-            info("oppgave for behandling {}: type: {}, tema: {}, beskrivelse: {}, opprettetTid: {}, tilordnetRessurs: {}, Saksbehandler: {} ",
-                behandlingId, oppgave.oppgavetype, oppgave.tema, oppgave.beskrivelse, oppgave.opprettetTidspunkt, oppgave.tilordnetRessurs, saksbehandler)
+            info(
+                "oppgave for behandling {}: type: {}, tema: {}, beskrivelse: {}, opprettetTid: {}, tilordnetRessurs: {}, Saksbehandler: {} ",
+                behandlingId,
+                oppgave.oppgavetype,
+                oppgave.tema,
+                oppgave.beskrivelse,
+                oppgave.opprettetTidspunkt,
+                oppgave.tilordnetRessurs,
+                saksbehandler,
+            )
         }
         val nyBeskrivelse =
             LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yy hh:mm")) + ":" +
@@ -261,7 +269,7 @@ class OppgaveService(
             patchetOppgave = patchetOppgave.copy(tilordnetRessurs = saksbehandler)
         }
         SecureLog.medContext(logContext) {
-            info("BehandlingId: {}, Ny tilordnetRessurs: {} ",behandlingId, oppgave.tilordnetRessurs)
+            info("BehandlingId: {}, Ny tilordnetRessurs: {} ", behandlingId, oppgave.tilordnetRessurs)
         }
         patchOppgave(patchetOppgave)
 
