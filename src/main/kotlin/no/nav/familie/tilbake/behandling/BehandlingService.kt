@@ -513,21 +513,12 @@ class BehandlingService(
             beskrivelse = byttEnhetDto.begrunnelse,
         )
 
-        val result = oppgaveService.oppdaterEnhetOgSaksbehandler(
+        oppgaveService.oppdaterEnhetOgSaksbehandler(
             behandlingId = behandlingId,
             beskrivelse = "Endret tildelt enhet: " + byttEnhetDto.enhet,
             enhetId = byttEnhetDto.enhet,
             logContext = logContext,
         )
-
-        SecureLog.medContext(logContext) {
-            info(
-                "BehandlingId: {}, resultToString: {}, result: {}",
-                behandlingId,
-                result.toString(),
-                result,
-            )
-        }
     }
 
     @Transactional
