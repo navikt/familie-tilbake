@@ -40,7 +40,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
-import kotlin.math.log
 
 @RestController
 @RequestMapping("/api/behandling")
@@ -287,7 +286,10 @@ class BehandlingController(
         SecureLog.medContext(logContext) {
             info("TilgangbehandlingId for behandling {} Validert", behandlingId)
         }
-        behandlingService.byttBehandlendeEnhet(behandlingId, byttEnhetDto)
+        val result = behandlingService.byttBehandlendeEnhet(behandlingId, byttEnhetDto)
+        SecureLog.medContext(logContext) {
+            info("Controller for behandling {}, resultToString: {}, result: {}", behandlingId, result.toString(), result)
+        }
 
         return Ressurs.success("OK")
     }
