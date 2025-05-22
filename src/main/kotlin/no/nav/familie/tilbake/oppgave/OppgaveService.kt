@@ -251,8 +251,9 @@ class OppgaveService(
         val oppgave = finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
         SecureLog.medContext(logContext) {
             info(
-                "oppgave for behandling {}: type: {}, tema: {}, beskrivelse: {}, opprettetTid: {}, tilordnetRessurs: {}, Saksbehandler: {} ",
+                "oppgave for behandling {}, oppgaveId: {}, type: {}, tema: {}, beskrivelse: {}, opprettetTid: {}, tilordnetRessurs: {}, Saksbehandler: {} ",
                 behandlingId,
+                oppgave.id,
                 oppgave.oppgavetype,
                 oppgave.tema,
                 oppgave.beskrivelse,
@@ -269,14 +270,44 @@ class OppgaveService(
             patchetOppgave = patchetOppgave.copy(tilordnetRessurs = saksbehandler)
         }
         SecureLog.medContext(logContext) {
-            info("BehandlingId: {}, Ny tilordnetRessurs: {} ", behandlingId, oppgave.tilordnetRessurs)
+            info(
+                "BehandlingId: {}, oppgaveId: {}, Ny tilordnetRessurs: {}, nyBeskrivelse: {} ",
+                behandlingId,
+                patchetOppgave.id,
+                oppgave.tilordnetRessurs,
+                patchetOppgave.beskrivelse,
+            )
         }
-        patchOppgave(patchetOppgave)
+
+        val oppgaveId = patchOppgave(patchetOppgave)
+        SecureLog.medContext(logContext) {
+            info(
+                "BehandlingId: {}, oppgaveId: {},",
+                behandlingId,
+                oppgaveId,
+            )
+        }
 
         if (oppgave.tema == Tema.ENF) {
-            tilordneOppgaveNyEnhet(oppgave.id!!, enhetId, false) // ENF bruker generelle mapper
+            val response = tilordneOppgaveNyEnhet(oppgave.id!!, enhetId, false) // ENF bruker generelle mapper
+            SecureLog.medContext(logContext) {
+                info(
+                    "BehandlingId: {}, oppgaveId: {}, responseOppgaveId: {}",
+                    behandlingId,
+                    oppgave.id,
+                    response.oppgaveId,
+                )
+            }
         } else {
-            tilordneOppgaveNyEnhet(oppgave.id!!, enhetId, true) // KON og BAR bruker mapper som hører til enhetene
+            val response = tilordneOppgaveNyEnhet(oppgave.id!!, enhetId, true) // KON og BAR bruker mapper som hører til enhetene
+            SecureLog.medContext(logContext) {
+                info(
+                    "BehandlingId: {}, oppgaveId: {}, responseOppgaveId: {}",
+                    behandlingId,
+                    oppgave.id,
+                    response.oppgaveId,
+                )
+            }
         }
     }
 
