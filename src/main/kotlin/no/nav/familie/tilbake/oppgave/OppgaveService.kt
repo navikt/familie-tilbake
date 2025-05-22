@@ -249,19 +249,7 @@ class OppgaveService(
         saksbehandler: String? = ContextService.hentSaksbehandler(logContext),
     ) {
         val oppgave = finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
-        SecureLog.medContext(logContext) {
-            info(
-                "oppgave for behandling {}, oppgaveId: {}, type: {}, tema: {}, beskrivelse: {}, opprettetTid: {}, tilordnetRessurs: {}, Saksbehandler: {} ",
-                behandlingId,
-                oppgave.id,
-                oppgave.oppgavetype,
-                oppgave.tema,
-                oppgave.beskrivelse,
-                oppgave.opprettetTidspunkt,
-                oppgave.tilordnetRessurs,
-                saksbehandler,
-            )
-        }
+
         val nyBeskrivelse =
             LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yy hh:mm")) + ":" +
                 beskrivelse + System.lineSeparator() + oppgave.beskrivelse
@@ -269,45 +257,20 @@ class OppgaveService(
         if (!saksbehandler.isNullOrEmpty() && saksbehandler != Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
             patchetOppgave = patchetOppgave.copy(tilordnetRessurs = saksbehandler)
         }
-        SecureLog.medContext(logContext) {
-            info(
-                "BehandlingId: {}, oppgaveId: {}, Ny tilordnetRessurs: {}, nyBeskrivelse: {} ",
-                behandlingId,
-                patchetOppgave.id,
-                oppgave.tilordnetRessurs,
-                patchetOppgave.beskrivelse,
-            )
-        }
 
-        val oppgaveId = patchOppgave(patchetOppgave)
+        patchOppgave(patchetOppgave)
+
         SecureLog.medContext(logContext) {
             info(
-                "BehandlingId: {}, oppgaveId: {},",
+                "Oppdater enhet og saksbehandler for behandling {}, ",
                 behandlingId,
-                oppgaveId,
             )
         }
 
         if (oppgave.tema == Tema.ENF) {
-            val response = tilordneOppgaveNyEnhet(oppgave.id!!, enhetId, false) // ENF bruker generelle mapper
-            SecureLog.medContext(logContext) {
-                info(
-                    "BehandlingId: {}, oppgaveId: {}, responseOppgaveId: {}",
-                    behandlingId,
-                    oppgave.id,
-                    response.oppgaveId,
-                )
-            }
+            tilordneOppgaveNyEnhet(oppgave.id!!, enhetId, false) // ENF bruker generelle mapper
         } else {
-            val response = tilordneOppgaveNyEnhet(oppgave.id!!, enhetId, true) // KON og BAR bruker mapper som hører til enhetene
-            SecureLog.medContext(logContext) {
-                info(
-                    "BehandlingId: {}, oppgaveId: {}, responseOppgaveId: {}",
-                    behandlingId,
-                    oppgave.id,
-                    response.oppgaveId,
-                )
-            }
+            tilordneOppgaveNyEnhet(oppgave.id!!, enhetId, true) // KON og BAR bruker mapper som hører til enhetene
         }
     }
 
