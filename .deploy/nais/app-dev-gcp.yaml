@@ -109,8 +109,8 @@ spec:
         - host: familie-integrasjoner.dev-fss-pub.nais.io
         - host: familie-oppdrag.dev-fss-pub.nais.io
         - host: pdl-api.dev-fss-pub.nais.io
-        - host: b27apvl220.preprod.local
         - host: arbeid-og-inntekt.dev-fss-pub.nais.io
+        - host: b27apvl220.preprod.local
           ports:
             - port: 1413
   replicas:
