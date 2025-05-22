@@ -249,6 +249,10 @@ class OppgaveService(
         saksbehandler: String? = ContextService.hentSaksbehandler(logContext),
     ) {
         val oppgave = finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
+        SecureLog.medContext(logContext) {
+            info("oppgave for behandling {}: type: {}, tema: {}, beskrivelse: {}, opprettetTid: {}, tilordnetRessurs: {}, Saksbehandler: {} ",
+                behandlingId, oppgave.oppgavetype, oppgave.tema, oppgave.beskrivelse, oppgave.opprettetTidspunkt, oppgave.tilordnetRessurs, saksbehandler)
+        }
         val nyBeskrivelse =
             LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yy hh:mm")) + ":" +
                 beskrivelse + System.lineSeparator() + oppgave.beskrivelse
@@ -256,7 +260,9 @@ class OppgaveService(
         if (!saksbehandler.isNullOrEmpty() && saksbehandler != Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
             patchetOppgave = patchetOppgave.copy(tilordnetRessurs = saksbehandler)
         }
-
+        SecureLog.medContext(logContext) {
+            info("BehandlingId: {}, Ny tilordnetRessurs: {} ",behandlingId, oppgave.tilordnetRessurs)
+        }
         patchOppgave(patchetOppgave)
 
         if (oppgave.tema == Tema.ENF) {

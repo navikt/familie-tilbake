@@ -10,7 +10,9 @@ import no.nav.familie.tilbake.common.exceptionhandler.feilHvis
 import no.nav.familie.tilbake.config.ApplicationProperties
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
 import no.nav.familie.tilbake.kontrakter.Ressurs
+import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangService
@@ -38,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
+import kotlin.math.log
 
 @RestController
 @RequestMapping("/api/behandling")
@@ -52,7 +55,10 @@ class BehandlingController(
     private val tilgangskontrollService: TilgangskontrollService,
     private val applicationProperties: ApplicationProperties,
     private val tilbakekrevingService: TilbakekrevingService,
+    private val logService: LogService,
 ) {
+    private val log = TracedLogger.getLogger<BehandlingController>()
+
     @Operation(summary = "Opprett tilbakekrevingsbehandling automatisk, kan kalles av fagsystem, batch")
     @PostMapping(
         path = ["/v1"],
@@ -268,13 +274,21 @@ class BehandlingController(
         @Valid @RequestBody
         byttEnhetDto: ByttEnhetDto,
     ): Ressurs<String> {
+        val logContext = logService.contextFraBehandling(behandlingId)
+        SecureLog.medContext(logContext) {
+            info("Bytte enhet for behandling {}. Ny enhet: {}", behandlingId, byttEnhetDto.enhet)
+        }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
             auditLoggerEvent = AuditLoggerEvent.UPDATE,
             handling = "Saksbehandler bytter enhet på behandling",
         )
+        SecureLog.medContext(logContext) {
+            info("TilgangbehandlingId for behandling {} Validert", behandlingId)
+        }
         behandlingService.byttBehandlendeEnhet(behandlingId, byttEnhetDto)
+
         return Ressurs.success("OK")
     }
 
