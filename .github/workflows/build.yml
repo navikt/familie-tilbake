@@ -131,7 +131,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: "!contains(github.event.head_commit.message, 'e2e skip')"
         run: cd tilbake-e2e/autotest; mvn -B --no-transfer-progress --settings .m2/maven-settings.xml -Dtest="**" test
-        timeout-minutes: 1
       - name: Samle Docker-logs ved feil
         if: failure()
         uses: jwalton/gh-docker-logs@v2
