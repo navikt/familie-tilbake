@@ -80,11 +80,11 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         lagVilkårsvurderingMedForsett(behandling.id, periode)
         val delperioder = tilbakekrevingsberegningService.beregn(behandling.id).beregn()
         delperioder.shouldHaveSize(1)
-        delperioder.forOne {
+        delperioder[0].also {
             it.periode shouldBe periode.toDatoperiode()
             it.tilbakekrevesBruttoMedRenter() shouldBe BigDecimal.valueOf(11000)
             it.renter() shouldBe BigDecimal.valueOf(1000)
-            it.andel.feilutbetaltBeløp() shouldBe BigDecimal.valueOf(10000)
+            it.feilutbetaltBeløp() shouldBe BigDecimal.valueOf(10000)
         }
     }
 
@@ -114,13 +114,13 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         lagForeldelse(behandling.id, periode, Foreldelsesvurderingstype.FORELDET, periode.fom.plusMonths(8).atDay(1))
         val delperioder = tilbakekrevingsberegningService.beregn(behandling.id).beregn()
         delperioder.shouldHaveSize(1)
-        delperioder.forOne {
+        delperioder[0].also {
             it.periode shouldBe periode.toDatoperiode()
             it.tilbakekrevesBruttoMedRenter().shouldBeZero()
             it.shouldBeInstanceOf<Foreldet>()
             it.renter() shouldBe BigDecimal.ZERO
-            it.andel.feilutbetaltBeløp() shouldBe BigDecimal.valueOf(10000)
-            it.tilbakekrevesBrutto().shouldBeZero()
+            it.feilutbetaltBeløp() shouldBe BigDecimal.valueOf(10000)
+            it.beløp().single().tilbakekrevesBrutto().shouldBeZero()
         }
     }
 
@@ -151,13 +151,13 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         lagVilkårsvurderingMedForsett(behandling.id, periode)
         val delperioder = tilbakekrevingsberegningService.beregn(behandling.id).beregn()
         delperioder.shouldHaveSize(1)
-        delperioder.forOne {
+        delperioder[0].also {
             it.periode shouldBe periode.toDatoperiode()
             it.tilbakekrevesBruttoMedRenter() shouldBe BigDecimal.valueOf(11000)
             it.renter() shouldBe BigDecimal.valueOf(1000)
-            it.andel.feilutbetaltBeløp() shouldBe BigDecimal.valueOf(10000)
-            it.skatt() shouldBe BigDecimal.valueOf(1000)
-            it.tilbakekrevesBrutto() shouldBe BigDecimal.valueOf(10000)
+            it.feilutbetaltBeløp() shouldBe BigDecimal.valueOf(10000)
+            it.beløp().single().skatt() shouldBe BigDecimal.valueOf(1000)
+            it.beløp().single().tilbakekrevesBrutto() shouldBe BigDecimal.valueOf(10000)
         }
     }
 
@@ -189,8 +189,8 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         lagVilkårsvurderingMedForsett(behandling.id, periode)
         val delperioder = tilbakekrevingsberegningService.beregn(behandling.id).beregn()
         delperioder.forOne {
-            it.andel.utbetaltYtelsesbeløp() shouldBe BigDecimal.valueOf(10000)
-            it.andel.riktigYtelsesbeløp() shouldBe BigDecimal.ZERO
+            it.beløp().single().utbetaltYtelsesbeløp() shouldBe BigDecimal.valueOf(10000)
+            it.beløp().single().riktigYtelsesbeløp() shouldBe BigDecimal.ZERO
         }
     }
 
@@ -232,13 +232,13 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         delperioder shouldHaveSize 2
         delperioder.forOne {
             it.periode shouldBe periode1.toDatoperiode()
-            it.andel.utbetaltYtelsesbeløp() shouldBe utbetalt1
-            it.andel.riktigYtelsesbeløp() shouldBe nyttBeløp1
+            it.beløp().single().utbetaltYtelsesbeløp() shouldBe utbetalt1
+            it.beløp().single().riktigYtelsesbeløp() shouldBe nyttBeløp1
         }
         delperioder.forOne {
             it.periode shouldBe periode2.toDatoperiode()
-            it.andel.utbetaltYtelsesbeløp() shouldBe utbetalt2
-            it.andel.riktigYtelsesbeløp() shouldBe nyttBeløp2
+            it.beløp().single().utbetaltYtelsesbeløp() shouldBe utbetalt2
+            it.beløp().single().riktigYtelsesbeløp() shouldBe nyttBeløp2
         }
     }
 
@@ -277,19 +277,19 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
 
         val delperioder = tilbakekrevingsberegningService.beregn(behandling.id).beregn()
         delperioder shouldHaveSize 2
-        delperioder.forOne { resultat ->
+        delperioder[0].also { resultat ->
             resultat.periode shouldBe periode1.toDatoperiode()
             resultat.tilbakekrevesBruttoMedRenter() shouldBe BigDecimal.valueOf(11000)
             resultat.renter() shouldBe BigDecimal.valueOf(1000)
-            resultat.andel.feilutbetaltBeløp() shouldBe BigDecimal.valueOf(10000)
-            resultat.skatt() shouldBe BigDecimal.valueOf(1000)
+            resultat.feilutbetaltBeløp() shouldBe BigDecimal.valueOf(10000)
+            resultat.beløp().single().skatt() shouldBe BigDecimal.valueOf(1000)
         }
-        delperioder.forOne { resultat ->
+        delperioder[1].also { resultat ->
             resultat.periode shouldBe periode2.toDatoperiode()
             resultat.tilbakekrevesBruttoMedRenter() shouldBe BigDecimal.valueOf(11000)
             resultat.renter() shouldBe BigDecimal.valueOf(1000)
-            resultat.andel.feilutbetaltBeløp() shouldBe BigDecimal.valueOf(10000)
-            resultat.skatt() shouldBe BigDecimal.valueOf(1000)
+            resultat.feilutbetaltBeløp() shouldBe BigDecimal.valueOf(10000)
+            resultat.beløp().single().skatt() shouldBe BigDecimal.valueOf(1000)
         }
     }
 

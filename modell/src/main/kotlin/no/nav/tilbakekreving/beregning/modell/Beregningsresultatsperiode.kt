@@ -27,7 +27,7 @@ data class Beregningsresultatsperiode(
         feilutbetaltBeløp = feilutbetaltBeløp + other.feilutbetaltBeløp,
         andelAvBeløp = andelAvBeløp,
         renteprosent = renteprosent,
-        manueltSattTilbakekrevingsbeløp = sumNullable(manueltSattTilbakekrevingsbeløp, other.manueltSattTilbakekrevingsbeløp),
+        manueltSattTilbakekrevingsbeløp = manueltSattTilbakekrevingsbeløp,
         tilbakekrevingsbeløpUtenRenter = tilbakekrevingsbeløpUtenRenter + other.tilbakekrevingsbeløpUtenRenter,
         rentebeløp = rentebeløp + other.rentebeløp,
         tilbakekrevingsbeløp = tilbakekrevingsbeløp + other.tilbakekrevingsbeløp,
@@ -36,15 +36,4 @@ data class Beregningsresultatsperiode(
         utbetaltYtelsesbeløp = utbetaltYtelsesbeløp + other.utbetaltYtelsesbeløp,
         riktigYtelsesbeløp = riktigYtelsesbeløp + other.riktigYtelsesbeløp,
     )
-
-    private fun sumNullable(
-        a: BigDecimal?,
-        b: BigDecimal?,
-    ): BigDecimal? {
-        return when {
-            a == null -> b
-            b == null -> a
-            else -> a + b
-        }
-    }
 }

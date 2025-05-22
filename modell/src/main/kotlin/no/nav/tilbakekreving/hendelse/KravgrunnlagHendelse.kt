@@ -61,14 +61,6 @@ class KravgrunnlagHendelse(
             return totaltBeløp()
         }
 
-        override fun utbetaltYtelsesbeløp(): BigDecimal {
-            return ytelsesbeløp.sumOf { it.opprinneligUtbetalingsbeløp }
-        }
-
-        override fun riktigYteslesbeløp(): BigDecimal {
-            return ytelsesbeløp.sumOf { it.nyttBeløp }
-        }
-
         data class Beløp(
             private val klassekode: String,
             private val klassetype: String,
@@ -77,13 +69,15 @@ class KravgrunnlagHendelse(
             val tilbakekrevesBeløp: BigDecimal,
             private val skatteprosent: BigDecimal,
         ) : KravgrunnlagPeriodeAdapter.BeløpTilbakekreves {
-            override fun beløp(): BigDecimal {
-                return tilbakekrevesBeløp
-            }
+            override fun klassekode() = klassekode
 
-            override fun skatteprosent(): BigDecimal {
-                return skatteprosent
-            }
+            override fun tilbakekrevesBeløp(): BigDecimal = tilbakekrevesBeløp
+
+            override fun skatteprosent(): BigDecimal = skatteprosent
+
+            override fun utbetaltYtelsesbeløp(): BigDecimal = opprinneligUtbetalingsbeløp
+
+            override fun riktigYteslesbeløp(): BigDecimal = nyttBeløp
         }
     }
 

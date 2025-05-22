@@ -65,7 +65,7 @@ class Beregning(
 
     private fun bestemVedtaksresultat(delperioder: List<Delperiode>): Vedtaksresultat {
         val tilbakekrevingsbeløp = delperioder.sumOf { it.tilbakekrevesBruttoMedRenter() }.setScale(0, RoundingMode.HALF_UP)
-        val feilutbetaltBeløp = delperioder.sumOf { it.andel.feilutbetaltBeløp() }.setScale(0, RoundingMode.HALF_UP)
+        val feilutbetaltBeløp = delperioder.sumOf { it.feilutbetaltBeløp() }.setScale(0, RoundingMode.HALF_UP)
         return when {
             tilbakekrevLavtBeløp -> Vedtaksresultat.INGEN_TILBAKEBETALING
             tilbakekrevingsbeløp.isZero() -> Vedtaksresultat.INGEN_TILBAKEBETALING

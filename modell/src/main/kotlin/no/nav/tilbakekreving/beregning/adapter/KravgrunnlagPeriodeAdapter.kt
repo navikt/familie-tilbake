@@ -8,14 +8,16 @@ interface KravgrunnlagPeriodeAdapter {
 
     fun feilutbetaltYtelsesbeløp(): BigDecimal
 
-    fun utbetaltYtelsesbeløp(): BigDecimal
-
-    fun riktigYteslesbeløp(): BigDecimal
-
     fun beløpTilbakekreves(): List<BeløpTilbakekreves>
 
     interface BeløpTilbakekreves {
-        fun beløp(): BigDecimal
+        fun klassekode(): String
+
+        fun tilbakekrevesBeløp(): BigDecimal
+
+        fun utbetaltYtelsesbeløp(): BigDecimal
+
+        fun riktigYteslesbeløp(): BigDecimal
 
         fun skatteprosent(): BigDecimal
     }
