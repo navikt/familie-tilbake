@@ -97,6 +97,7 @@ spec:
         - host: familie-integrasjoner.prod-fss-pub.nais.io
         - host: familie-oppdrag.prod-fss-pub.nais.io
         - host: pdl-api.prod-fss-pub.nais.io
+        - host: arbeid-og-inntekt.prod-fss-pub.nais.io
         - host: mpls02.adeo.no
           ports:
             - port: 1414

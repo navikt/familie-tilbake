@@ -18,7 +18,7 @@ class BearerTokenClientCredentialsClientInterceptor(
         body: ByteArray,
         execution: ClientHttpRequestExecution,
     ): ClientHttpResponse {
-        val clientProperties = clientPropertiesForGrantType(clientConfigurationProperties.findByURI(request.uri), GrantType.CLIENT_CREDENTIALS, request.uri)
+        val clientProperties = clientPropertiesForGrantType(findByURI(request.uri), GrantType.CLIENT_CREDENTIALS, request.uri)
         request.headers.setBearerAuth(
             genererAccessToken(clientProperties),
         )
