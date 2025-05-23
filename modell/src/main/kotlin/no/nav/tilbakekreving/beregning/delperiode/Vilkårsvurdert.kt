@@ -35,6 +35,12 @@ class Vilkårsvurdert(
 
     override fun feilutbetaltBeløp(): BigDecimal = kravgrunnlagPeriode.feilutbetaltYtelsesbeløp().setScale(0, RoundingMode.HALF_UP)
 
+    fun validerIkkeManueltBeløpOgUlikeKlassekoder() {
+        if (vurdering.reduksjon() is Reduksjon.ManueltBeløp && beløp.size > 1) {
+            throw RuntimeException("Fant periode med manuelt satt tilbakekrevingsbeløp og flere beløp i perioden. Denne koden har nå en bug som må fikses.")
+        }
+    }
+
     override fun beregningsresultat(): Beregningsresultatsperiode {
         return Beregningsresultatsperiode(
             periode = periode,

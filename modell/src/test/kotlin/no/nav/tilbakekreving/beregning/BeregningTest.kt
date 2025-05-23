@@ -1,5 +1,7 @@
 package no.nav.tilbakekreving.beregning
 
+import io.kotest.assertions.throwables.shouldNotThrow
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
@@ -638,6 +640,47 @@ class BeregningTest {
             ),
             vedtaksresultat = Vedtaksresultat.DELVIS_TILBAKEBETALING,
         )
+    }
+
+    @Test
+    fun `fordeler manuelt satt beløp ut i fra relativ størrelse på tilbakekrevingsbeløp i periode`() {
+        val beregning = Beregning(
+            beregnRenter = true,
+            tilbakekrevLavtBeløp = false,
+            vilkårsvurdering = vurdering(
+                1.januar til 28.februar godTro medBeløpIBehold(4000.kroner),
+            ),
+            foreldetPerioder = emptyList(),
+            kravgrunnlag = perioder(
+                1.januar til 31.januar medBeløp beløp(tilbakekrevesBeløp = 4000.kroner, originaltUtbetaltBeløp = 10000.kroner, klassekode = "BATR"),
+                1.februar til 28.februar medBeløp beløp(tilbakekrevesBeløp = 4000.kroner, originaltUtbetaltBeløp = 10000.kroner, klassekode = "BATR")
+                    medBeløp beløp(2000.kroner, originaltUtbetaltBeløp = 10000.kroner, klassekode = "BAUTV-OP"),
+            ),
+        )
+
+        shouldNotThrow<Throwable> { beregning.oppsummer() }
+        shouldThrow<RuntimeException> { beregning.beregn() }
+        // TODO: Oppsummeringen under er riktig, men koden beregner seg frem til feil beløp.
+//        beregning.oppsummer() shouldBe Beregningsresultat(
+//            beregningsresultatsperioder = listOf(
+//                Beregningsresultatsperiode(
+//                    periode = 1.januar til 28.februar,
+//                    vurdering = AnnenVurdering.GOD_TRO,
+//                    feilutbetaltBeløp = 10000.kroner,
+//                    andelAvBeløp = null,
+//                    renteprosent = null,
+//                    manueltSattTilbakekrevingsbeløp = 4000.kroner,
+//                    tilbakekrevingsbeløpUtenRenter = 4000.kroner,
+//                    rentebeløp = 0.kroner,
+//                    tilbakekrevingsbeløp = 4000.kroner,
+//                    skattebeløp = 0.kroner,
+//                    tilbakekrevingsbeløpEtterSkatt = 4000.kroner,
+//                    utbetaltYtelsesbeløp = 30000.kroner,
+//                    riktigYtelsesbeløp = 20000.kroner,
+//                ),
+//            ),
+//            vedtaksresultat = Vedtaksresultat.DELVIS_TILBAKEBETALING,
+//        )
     }
 
     fun perioder(

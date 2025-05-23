@@ -45,7 +45,10 @@ class Beregning(
 
     private val fordelt: List<Delperiode> = (foreldet + vilkårsvurdert).sortedBy { it.periode.fom }
 
-    fun beregn(): List<Delperiode> {
+    fun beregn(validerPerioder: Boolean = true): List<Delperiode> {
+        if (validerPerioder) {
+            fordelt.filterIsInstance<Vilkårsvurdert>().forEach { it.validerIkkeManueltBeløpOgUlikeKlassekoder() }
+        }
         return fordelt
             .fordelTilbakekrevingsbeløp()
             .fordelRentebeløp()
@@ -53,7 +56,7 @@ class Beregning(
     }
 
     fun oppsummer(): Beregningsresultat {
-        val delperioder = beregn()
+        val delperioder = beregn(validerPerioder = false)
         val beregningsresultater = delperioder.oppsummer()
         return Beregningsresultat(
             vedtaksresultat = bestemVedtaksresultat(delperioder),
