@@ -4,12 +4,11 @@ import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagAdapter
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurderingAdapter
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurdertPeriodeAdapter
 import no.nav.tilbakekreving.beregning.delperiode.Delperiode
-import no.nav.tilbakekreving.beregning.delperiode.Delperiode.Companion.oppsummer
 import no.nav.tilbakekreving.beregning.delperiode.Foreldet
 import no.nav.tilbakekreving.beregning.delperiode.Vilkårsvurdert
-import no.nav.tilbakekreving.beregning.delperiode.Vilkårsvurdert.Companion.fordelRentebeløp
-import no.nav.tilbakekreving.beregning.delperiode.Vilkårsvurdert.Companion.fordelSkattebeløp
-import no.nav.tilbakekreving.beregning.delperiode.Vilkårsvurdert.Companion.fordelTilbakekrevingsbeløp
+import no.nav.tilbakekreving.beregning.delperiode.Vilkårsvurdert.Utbetalingsperiode.Companion.fordelRentebeløp
+import no.nav.tilbakekreving.beregning.delperiode.Vilkårsvurdert.Utbetalingsperiode.Companion.fordelSkattebeløp
+import no.nav.tilbakekreving.beregning.delperiode.Vilkårsvurdert.Utbetalingsperiode.Companion.fordelTilbakekrevingsbeløp
 import no.nav.tilbakekreving.beregning.modell.Beregningsresultat
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
@@ -31,33 +30,37 @@ class Beregning(
         }
     }
 
-    private val foreldet = foreldetPerioder.flatMap { foreldetPeriode ->
-        kravgrunnlag.perioder()
-            .filter { it.periode() in foreldetPeriode }
-            .map { Foreldet.opprett(foreldetPeriode, it) }
-    }
-    private val vilkårsvurdert = vilkårsvurdering.perioder().flatMap { vurdering ->
-        val kgPerioder = kravgrunnlag.perioder()
-            .filter { it.periode() in vurdering.periode() }
+    private val foreldet = foreldetPerioder
+        .sortedBy { it.fom }
+        .map { foreldetPeriode ->
+            val relevanteKravgrunnlag = kravgrunnlag.perioder()
+                .filter { it.periode() in foreldetPeriode }
 
-        kgPerioder.map { Vilkårsvurdert.opprett(vurdering, it, beregnRenter, kgPerioder.size) }
-    }
-
-    private val fordelt: List<Delperiode> = (foreldet + vilkårsvurdert).sortedBy { it.periode.fom }
-
-    fun beregn(validerPerioder: Boolean = true): List<Delperiode> {
-        if (validerPerioder) {
-            fordelt.filterIsInstance<Vilkårsvurdert>().forEach { it.validerIkkeManueltBeløpOgUlikeKlassekoder() }
+            Foreldet.opprett(foreldetPeriode, relevanteKravgrunnlag)
         }
-        return fordelt
+    private val vilkårsvurdert = vilkårsvurdering.perioder()
+        .sortedBy { it.periode().fom }
+        .map { vurdering ->
+            val kgPerioder = kravgrunnlag.perioder()
+                .filter { it.periode() in vurdering.periode() }
+
+            Vilkårsvurdert(vurdering, beregnRenter, kgPerioder)
+        }
+
+    private val allePerioder get() = (foreldet + vilkårsvurdert).sortedBy { it.periode.fom }
+
+    fun beregn(): List<Delperiode> {
+        vilkårsvurdert.flatMap { it.delperioder }
             .fordelTilbakekrevingsbeløp()
             .fordelRentebeløp()
             .fordelSkattebeløp()
+
+        return allePerioder.flatMap { it.delperioder }
     }
 
     fun oppsummer(): Beregningsresultat {
-        val delperioder = beregn(validerPerioder = false)
-        val beregningsresultater = delperioder.oppsummer()
+        val delperioder = beregn()
+        val beregningsresultater = foreldet.map { it.beregningsresultat() } + vilkårsvurdert.map { it.beregningsresultat() }
         return Beregningsresultat(
             vedtaksresultat = bestemVedtaksresultat(delperioder),
             beregningsresultatsperioder = beregningsresultater,

@@ -117,7 +117,7 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         delperioder[0].also {
             it.periode shouldBe periode.toDatoperiode()
             it.tilbakekrevesBruttoMedRenter().shouldBeZero()
-            it.shouldBeInstanceOf<Foreldet>()
+            it.shouldBeInstanceOf<Foreldet.ForeldetPeriode>()
             it.renter() shouldBe BigDecimal.ZERO
             it.feilutbetaltBeløp() shouldBe BigDecimal.valueOf(10000)
             it.beløp().single().tilbakekrevesBrutto().shouldBeZero()

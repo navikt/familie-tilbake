@@ -10,49 +10,68 @@ import java.math.RoundingMode
 
 class Foreldet(
     override val periode: Datoperiode,
-    override val vurdertPeriode: Datoperiode,
-    val beløp: List<Delperiode.Beløp>,
-    val kravgrunnlagPeriode: KravgrunnlagPeriodeAdapter,
-) : Delperiode {
-    override fun renter(): BigDecimal = BigDecimal.ZERO
-
-    override fun tilbakekrevesBruttoMedRenter(): BigDecimal = BigDecimal.ZERO
-
-    override fun beløpForKlassekode(klassekode: String): Delperiode.Beløp = beløp.forKlassekode(klassekode)
-
-    override fun beløp(): List<Delperiode.Beløp> {
-        return beløp
-    }
-
-    override fun feilutbetaltBeløp(): BigDecimal {
-        return kravgrunnlagPeriode.feilutbetaltYtelsesbeløp().setScale(0, RoundingMode.HALF_UP)
-    }
-
+    override val delperioder: List<ForeldetPeriode>,
+) : Vurderingsperiode<Foreldet.ForeldetPeriode> {
     override fun beregningsresultat(): Beregningsresultatsperiode {
         return Beregningsresultatsperiode(
             periode = periode,
-            feilutbetaltBeløp = feilutbetaltBeløp(),
-            riktigYtelsesbeløp = beløp.sumOf { it.riktigYtelsesbeløp() }.setScale(0, RoundingMode.HALF_UP),
-            utbetaltYtelsesbeløp = beløp.sumOf { it.utbetaltYtelsesbeløp() }.setScale(0, RoundingMode.HALF_UP),
-            tilbakekrevingsbeløp = tilbakekrevesBruttoMedRenter(),
-            tilbakekrevingsbeløpUtenRenter = beløp().sumOf { it.tilbakekrevesBrutto() },
-            rentebeløp = renter(),
+            feilutbetaltBeløp = delperioder.sumOf { it.feilutbetaltBeløp() },
+            riktigYtelsesbeløp = delperioder.sumOf { it.summer(ForeldetBeløp::riktigYtelsesbeløp) }.setScale(0, RoundingMode.HALF_UP),
+            utbetaltYtelsesbeløp = delperioder.sumOf { it.summer(ForeldetBeløp::utbetaltYtelsesbeløp) }.setScale(0, RoundingMode.HALF_UP),
+            tilbakekrevingsbeløp = delperioder.sumOf { it.tilbakekrevesBruttoMedRenter() },
+            tilbakekrevingsbeløpUtenRenter = delperioder.sumOf { it.summer(ForeldetBeløp::tilbakekrevesBrutto) },
+            rentebeløp = delperioder.sumOf { it.renter() },
             andelAvBeløp = BigDecimal.ZERO,
             vurdering = AnnenVurdering.FORELDET,
-            skattebeløp = beløp().sumOf { it.skatt() },
+            skattebeløp = delperioder.sumOf { it.summer(ForeldetBeløp::skatt) },
             tilbakekrevingsbeløpEtterSkatt = BigDecimal.ZERO,
         )
+    }
+
+    class ForeldetPeriode(
+        override val vurdertPeriode: Datoperiode,
+        override val periode: Datoperiode,
+        private val beløp: List<ForeldetBeløp>,
+        val kravgrunnlagPeriode: KravgrunnlagPeriodeAdapter,
+    ) : Delperiode {
+        override fun renter(): BigDecimal = BigDecimal.ZERO
+
+        override fun tilbakekrevesBruttoMedRenter(): BigDecimal = BigDecimal.ZERO
+
+        override fun beløpForKlassekode(klassekode: String): Delperiode.Beløp = beløp.forKlassekode(klassekode)
+
+        fun summer(hentBeløp: ForeldetBeløp.() -> BigDecimal) = beløp.sumOf { it.hentBeløp() }
+
+        override fun beløp(): List<Delperiode.Beløp> {
+            return beløp
+        }
+
+        override fun feilutbetaltBeløp(): BigDecimal {
+            return kravgrunnlagPeriode.feilutbetaltYtelsesbeløp().setScale(0, RoundingMode.HALF_UP)
+        }
     }
 
     companion object {
         fun opprett(
             vurdertPeriode: Datoperiode,
-            kravgrunnlagPeriode: KravgrunnlagPeriodeAdapter,
+            kravgrunnlagPerioder: List<KravgrunnlagPeriodeAdapter>,
         ): Foreldet {
-            val delperiode = requireNotNull(kravgrunnlagPeriode.periode().snitt(vurdertPeriode)) {
-                "Finner ingen kravgrunnlagsperiode som er dekket av foreldelsesperioden $vurdertPeriode, kravgrunnlagsperiode=${kravgrunnlagPeriode.periode()}"
-            }
-            return Foreldet(delperiode, vurdertPeriode, kravgrunnlagPeriode.beløpTilbakekreves().map { ForeldetBeløp(it.klassekode(), delperiode, it) }, kravgrunnlagPeriode)
+            return Foreldet(
+                vurdertPeriode,
+                kravgrunnlagPerioder.map { kravgrunnlagPeriode ->
+                    val delperiode = requireNotNull(kravgrunnlagPeriode.periode().snitt(vurdertPeriode)) {
+                        "Finner ingen kravgrunnlagsperiode som er dekket av foreldelsesperioden $vurdertPeriode, kravgrunnlagsperiode=${kravgrunnlagPeriode.periode()}"
+                    }
+                    ForeldetPeriode(
+                        vurdertPeriode,
+                        delperiode,
+                        kravgrunnlagPeriode.beløpTilbakekreves().map {
+                            ForeldetBeløp(it.klassekode(), delperiode, it)
+                        },
+                        kravgrunnlagPeriode,
+                    )
+                },
+            )
         }
     }
 }

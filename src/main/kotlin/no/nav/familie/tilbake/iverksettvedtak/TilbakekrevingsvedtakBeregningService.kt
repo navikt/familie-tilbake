@@ -81,7 +81,7 @@ class TilbakekrevingsvedtakBeregningService(
         }
 
     private fun utledKodeResulat(beregnetPeriode: Delperiode): KodeResultat = when {
-        beregnetPeriode is Foreldet -> KodeResultat.FORELDET
+        beregnetPeriode is Foreldet.ForeldetPeriode -> KodeResultat.FORELDET
         beregnetPeriode.beløp().sumOf { it.tilbakekrevesBrutto() }.isZero() -> KodeResultat.INGEN_TILBAKEKREVING
         beregnetPeriode.feilutbetaltBeløp() == beregnetPeriode.beløp().sumOf { it.tilbakekrevesBrutto() } -> KodeResultat.FULL_TILBAKEKREVING
         else -> KodeResultat.DELVIS_TILBAKEKREVING

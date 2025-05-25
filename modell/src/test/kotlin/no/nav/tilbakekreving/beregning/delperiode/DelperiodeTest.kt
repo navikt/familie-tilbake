@@ -4,7 +4,6 @@ import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.prosent
 import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagPeriodeAdapter
-import no.nav.tilbakekreving.beregning.delperiode.Delperiode.Companion.oppsummer
 import no.nav.tilbakekreving.beregning.modell.Beregningsresultatsperiode
 import no.nav.tilbakekreving.februar
 import no.nav.tilbakekreving.januar
@@ -22,19 +21,15 @@ class DelperiodeTest {
         val foreldelser = listOf(
             Foreldet.opprett(
                 foreldelsesperiode,
-                KravgrunnlagPeriode(1.januar til 31.januar),
-            ),
-            Foreldet.opprett(
-                foreldelsesperiode,
-                KravgrunnlagPeriode(1.februar til 28.februar),
-            ),
-            Foreldet.opprett(
-                foreldelsesperiode,
-                KravgrunnlagPeriode(1.mars til 31.mars),
+                listOf(
+                    KravgrunnlagPeriode(1.januar til 31.januar),
+                    KravgrunnlagPeriode(1.februar til 28.februar),
+                    KravgrunnlagPeriode(1.mars til 31.mars),
+                ),
             ),
         )
 
-        foreldelser.oppsummer() shouldBe listOf(
+        foreldelser.map { it.beregningsresultat() } shouldBe listOf(
             Beregningsresultatsperiode(
                 periode = foreldelsesperiode,
                 vurdering = AnnenVurdering.FORELDET,

@@ -1,8 +1,8 @@
 package no.nav.tilbakekreving.beregning.delperiode
 
 import no.nav.tilbakekreving.beregning.HUNDRE_PROSENT
+import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagPeriodeAdapter
-import no.nav.tilbakekreving.beregning.adapter.VilkårsvurdertPeriodeAdapter
 import no.nav.tilbakekreving.beregning.isZero
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import java.math.BigDecimal
@@ -12,13 +12,14 @@ class JusterbartBeløp(
     override val klassekode: String,
     override val periode: Datoperiode,
     private val beløpTilbakekreves: KravgrunnlagPeriodeAdapter.BeløpTilbakekreves,
-    vurdering: VilkårsvurdertPeriodeAdapter,
-    antallKravgrunnlagGjelder: Int,
+    ignoreresPgaLavtBeløp: Boolean,
+    reduksjon: Reduksjon,
+    andelAvBeløp: BigDecimal,
 ) : Delperiode.Beløp {
     private var tilbakekrevingsbeløpAvrunding = BigDecimal.ZERO
     val tilbakekrevingsbeløp = when {
-        vurdering.ignoreresPgaLavtBeløp() -> BigDecimal.ZERO
-        else -> vurdering.reduksjon().beregn(beløpTilbakekreves.tilbakekrevesBeløp(), antallKravgrunnlagGjelder)
+        ignoreresPgaLavtBeløp -> BigDecimal.ZERO
+        else -> reduksjon.beregn(beløpTilbakekreves.tilbakekrevesBeløp(), andelAvBeløp)
     }
 
     private var skattebeløpAvrunding = BigDecimal.ZERO
