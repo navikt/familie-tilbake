@@ -14,10 +14,6 @@ class VilkårsvurderingsperiodeAdapter(private val vurdering: Vilkårsvurderings
         return vurdering.periode.toDatoperiode()
     }
 
-    override fun ignoreresPgaLavtBeløp(): Boolean {
-        return vurdering.aktsomhet?.tilbakekrevSmåbeløp == false
-    }
-
     override fun renter(): Boolean {
         val aktsomhet = vurdering.aktsomhet ?: return false
         return aktsomhet.aktsomhet == Aktsomhet.FORSETT && aktsomhet.ileggRenter ?: true || aktsomhet.ileggRenter ?: false
@@ -25,6 +21,7 @@ class VilkårsvurderingsperiodeAdapter(private val vurdering: Vilkårsvurderings
 
     override fun reduksjon(): Reduksjon {
         return when {
+            vurdering.aktsomhet?.tilbakekrevSmåbeløp == false -> Reduksjon.IngenTilbakekreving()
             vurdering.aktsomhet != null -> {
                 vurdering.aktsomhet.manueltSattBeløp?.let(Reduksjon::ManueltBeløp)
                     ?: finnAndelForAktsomhet(vurdering.aktsomhet)

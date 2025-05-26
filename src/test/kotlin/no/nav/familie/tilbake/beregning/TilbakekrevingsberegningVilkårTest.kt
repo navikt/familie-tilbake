@@ -528,27 +528,28 @@ class TilbakekrevingsberegningVilkårTest {
     ): Beregningsresultatsperiode {
         return Vilkårsvurdert.opprett(
             VilkårsvurderingsperiodeAdapter(vurdering = vilkårVurdering),
-            object : KravgrunnlagPeriodeAdapter {
-                override fun periode(): Datoperiode = vilkårVurdering.periode.toDatoperiode()
+            listOf(
+                object : KravgrunnlagPeriodeAdapter {
+                    override fun periode(): Datoperiode = vilkårVurdering.periode.toDatoperiode()
 
-                override fun feilutbetaltYtelsesbeløp(): BigDecimal = feilutbetalt
+                    override fun feilutbetaltYtelsesbeløp(): BigDecimal = feilutbetalt
 
-                override fun beløpTilbakekreves(): List<KravgrunnlagPeriodeAdapter.BeløpTilbakekreves> = listOf(
-                    object : KravgrunnlagPeriodeAdapter.BeløpTilbakekreves {
-                        override fun klassekode(): String = "EFOG"
+                    override fun beløpTilbakekreves(): List<KravgrunnlagPeriodeAdapter.BeløpTilbakekreves> = listOf(
+                        object : KravgrunnlagPeriodeAdapter.BeløpTilbakekreves {
+                            override fun klassekode(): String = "EFOG"
 
-                        override fun tilbakekrevesBeløp(): BigDecimal = tilbakekrevingsbeløp
+                            override fun tilbakekrevesBeløp(): BigDecimal = tilbakekrevingsbeløp
 
-                        override fun skatteprosent(): BigDecimal = skatteprosent
+                            override fun skatteprosent(): BigDecimal = skatteprosent
 
-                        override fun utbetaltYtelsesbeløp(): BigDecimal = feilutbetalt
+                            override fun utbetaltYtelsesbeløp(): BigDecimal = feilutbetalt
 
-                        override fun riktigYteslesbeløp() = BigDecimal.ZERO
-                    },
-                )
-            },
+                            override fun riktigYteslesbeløp() = BigDecimal.ZERO
+                        },
+                    )
+                },
+            ),
             beregnRenter,
-            1,
         ).beregningsresultat()
     }
 
