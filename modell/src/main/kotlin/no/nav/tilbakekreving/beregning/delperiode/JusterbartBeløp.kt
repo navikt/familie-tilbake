@@ -1,25 +1,22 @@
 package no.nav.tilbakekreving.beregning.delperiode
 
 import no.nav.tilbakekreving.beregning.HUNDRE_PROSENT
+import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagPeriodeAdapter
-import no.nav.tilbakekreving.beregning.adapter.VilkårsvurdertPeriodeAdapter
 import no.nav.tilbakekreving.beregning.isZero
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import java.math.BigDecimal
 import java.math.RoundingMode
 
 class JusterbartBeløp(
-    override val klassekode: String,
-    override val periode: Datoperiode,
-    private val beløpTilbakekreves: KravgrunnlagPeriodeAdapter.BeløpTilbakekreves,
-    vurdering: VilkårsvurdertPeriodeAdapter,
-    antallKravgrunnlagGjelder: Int,
-) : Delperiode.Beløp {
+    klassekode: String,
+    periode: Datoperiode,
+    beløpTilbakekreves: KravgrunnlagPeriodeAdapter.BeløpTilbakekreves,
+    reduksjon: Reduksjon,
+    andelAvBeløp: BigDecimal,
+) : Delperiode.Beløp(klassekode, periode, beløpTilbakekreves) {
     private var tilbakekrevingsbeløpAvrunding = BigDecimal.ZERO
-    val tilbakekrevingsbeløp = when {
-        vurdering.ignoreresPgaLavtBeløp() -> BigDecimal.ZERO
-        else -> vurdering.reduksjon().beregn(beløpTilbakekreves.tilbakekrevesBeløp(), antallKravgrunnlagGjelder)
-    }
+    val tilbakekrevingsbeløp = reduksjon.beregn(beløpTilbakekreves.tilbakekrevesBeløp(), andelAvBeløp)
 
     private var skattebeløpAvrunding = BigDecimal.ZERO
     private val skattebeløp = beregnSkattebeløp(tilbakekrevingsbeløp)
@@ -40,10 +37,6 @@ class JusterbartBeløp(
     override fun tilbakekrevesBrutto(): BigDecimal = tilbakekrevingsbeløp.setScale(0, RoundingMode.DOWN) + tilbakekrevingsbeløpAvrunding
 
     override fun skatt(): BigDecimal = skattebeløp.setScale(0, RoundingMode.DOWN) + skattebeløpAvrunding
-
-    override fun utbetaltYtelsesbeløp(): BigDecimal = beløpTilbakekreves.utbetaltYtelsesbeløp()
-
-    override fun riktigYtelsesbeløp(): BigDecimal = beløpTilbakekreves.riktigYteslesbeløp()
 
     companion object {
         fun Iterable<JusterbartBeløp>.fordelTilbakekrevingsbeløp() {

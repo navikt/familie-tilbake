@@ -4,12 +4,12 @@ import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagAdapter
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurderingAdapter
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurdertPeriodeAdapter
 import no.nav.tilbakekreving.beregning.delperiode.Delperiode
-import no.nav.tilbakekreving.beregning.delperiode.Delperiode.Companion.oppsummer
 import no.nav.tilbakekreving.beregning.delperiode.Foreldet
 import no.nav.tilbakekreving.beregning.delperiode.Vilkårsvurdert
-import no.nav.tilbakekreving.beregning.delperiode.Vilkårsvurdert.Companion.fordelRentebeløp
-import no.nav.tilbakekreving.beregning.delperiode.Vilkårsvurdert.Companion.fordelSkattebeløp
-import no.nav.tilbakekreving.beregning.delperiode.Vilkårsvurdert.Companion.fordelTilbakekrevingsbeløp
+import no.nav.tilbakekreving.beregning.delperiode.Vilkårsvurdert.Utbetalingsperiode.Companion.fordelRentebeløp
+import no.nav.tilbakekreving.beregning.delperiode.Vilkårsvurdert.Utbetalingsperiode.Companion.fordelSkattebeløp
+import no.nav.tilbakekreving.beregning.delperiode.Vilkårsvurdert.Utbetalingsperiode.Companion.fordelTilbakekrevingsbeløp
+import no.nav.tilbakekreving.beregning.delperiode.Vurderingsperiode
 import no.nav.tilbakekreving.beregning.modell.Beregningsresultat
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
@@ -31,46 +31,49 @@ class Beregning(
         }
     }
 
-    private val foreldet = foreldetPerioder.flatMap { foreldetPeriode ->
-        kravgrunnlag.perioder()
-            .filter { it.periode() in foreldetPeriode }
-            .map { Foreldet.opprett(foreldetPeriode, it) }
-    }
-    private val vilkårsvurdert = vilkårsvurdering.perioder().flatMap { vurdering ->
-        val kgPerioder = kravgrunnlag.perioder()
-            .filter { it.periode() in vurdering.periode() }
+    private val foreldetUtbetalinger = foreldetPerioder
+        .sortedBy { it.fom }
+        .map { foreldetPeriode ->
+            val relevanteKravgrunnlag = kravgrunnlag.perioder()
+                .filter { it.periode() in foreldetPeriode }
 
-        kgPerioder.map { Vilkårsvurdert.opprett(vurdering, it, beregnRenter, kgPerioder.size) }
-    }
-
-    private val fordelt: List<Delperiode> = (foreldet + vilkårsvurdert).sortedBy { it.periode.fom }
-
-    fun beregn(validerPerioder: Boolean = true): List<Delperiode> {
-        if (validerPerioder) {
-            fordelt.filterIsInstance<Vilkårsvurdert>().forEach { it.validerIkkeManueltBeløpOgUlikeKlassekoder() }
+            Foreldet.opprett(foreldetPeriode, relevanteKravgrunnlag)
         }
-        return fordelt
+    private val vilkårsvurderteUtbetalinger = vilkårsvurdering.perioder()
+        .sortedBy { it.periode().fom }
+        .map { vurdering ->
+            val relevanteKravgrunnlag = kravgrunnlag.perioder()
+                .filter { it.periode() in vurdering.periode() }
+
+            Vilkårsvurdert(vurdering, beregnRenter, relevanteKravgrunnlag)
+        }
+
+    private val allePerioder get() = (foreldetUtbetalinger + vilkårsvurderteUtbetalinger).sortedBy { it.periode.fom }
+
+    fun beregn(): List<Delperiode<*>> {
+        vilkårsvurderteUtbetalinger.flatMap { it.delperioder }
             .fordelTilbakekrevingsbeløp()
             .fordelRentebeløp()
             .fordelSkattebeløp()
+
+        return allePerioder.flatMap { it.delperioder }
     }
 
     fun oppsummer(): Beregningsresultat {
-        val delperioder = beregn(validerPerioder = false)
-        val beregningsresultater = delperioder.oppsummer()
+        val delperioder = beregn()
         return Beregningsresultat(
             vedtaksresultat = bestemVedtaksresultat(delperioder),
-            beregningsresultatsperioder = beregningsresultater,
+            beregningsresultatsperioder = allePerioder.map(Vurderingsperiode<*, *>::beregningsresultat),
         )
     }
 
     fun vedtaksresultat(): Vedtaksresultat = bestemVedtaksresultat(beregn())
 
-    private fun bestemVedtaksresultat(delperioder: List<Delperiode>): Vedtaksresultat {
+    private fun bestemVedtaksresultat(delperioder: List<Delperiode<*>>): Vedtaksresultat {
         val tilbakekrevingsbeløp = delperioder.sumOf { it.tilbakekrevesBruttoMedRenter() }.setScale(0, RoundingMode.HALF_UP)
         val feilutbetaltBeløp = delperioder.sumOf { it.feilutbetaltBeløp() }.setScale(0, RoundingMode.HALF_UP)
         return when {
-            tilbakekrevLavtBeløp -> Vedtaksresultat.INGEN_TILBAKEBETALING
+            !tilbakekrevLavtBeløp -> Vedtaksresultat.INGEN_TILBAKEBETALING
             tilbakekrevingsbeløp.isZero() -> Vedtaksresultat.INGEN_TILBAKEBETALING
             tilbakekrevingsbeløp < feilutbetaltBeløp -> Vedtaksresultat.DELVIS_TILBAKEBETALING
             else -> return Vedtaksresultat.FULL_TILBAKEBETALING

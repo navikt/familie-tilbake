@@ -1,47 +1,44 @@
 package no.nav.tilbakekreving.beregning.delperiode
 
-import no.nav.tilbakekreving.beregning.modell.Beregningsresultatsperiode
+import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagPeriodeAdapter
+import no.nav.tilbakekreving.beregning.delperiode.Delperiode.Beløp.Companion.forKlassekode
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import java.math.BigDecimal
+import java.math.RoundingMode
 
-sealed interface Delperiode {
-    val periode: Datoperiode
-    val vurdertPeriode: Datoperiode
+sealed class Delperiode<B : Delperiode.Beløp>(
+    private val kravgrunnlagPeriode: KravgrunnlagPeriodeAdapter,
+    private val beløp: List<B>,
+) {
+    abstract val periode: Datoperiode
 
-    fun beregningsresultat(): Beregningsresultatsperiode
+    abstract fun renter(): BigDecimal
 
-    fun renter(): BigDecimal
+    abstract fun tilbakekrevesBruttoMedRenter(): BigDecimal
 
-    fun tilbakekrevesBruttoMedRenter(): BigDecimal
+    fun beløp(): List<B> = beløp
 
-    fun feilutbetaltBeløp(): BigDecimal
+    fun feilutbetaltBeløp(): BigDecimal = kravgrunnlagPeriode.feilutbetaltYtelsesbeløp().setScale(0, RoundingMode.HALF_UP)
 
-    fun beløp(): List<Beløp>
+    fun summer(hentBeløp: B.() -> BigDecimal) = beløp().sumOf { it.hentBeløp() }
 
-    fun beløpForKlassekode(klassekode: String): Beløp
+    fun beløpForKlassekode(klassekode: String): B = beløp().forKlassekode(klassekode)
 
-    interface Beløp {
-        val klassekode: String
+    abstract class Beløp(
+        val klassekode: String,
+        val periode: Datoperiode,
+        protected val beløpTilbakekreves: KravgrunnlagPeriodeAdapter.BeløpTilbakekreves,
+    ) {
+        abstract fun tilbakekrevesBrutto(): BigDecimal
 
-        val periode: Datoperiode
+        abstract fun skatt(): BigDecimal
 
-        fun tilbakekrevesBrutto(): BigDecimal
+        fun utbetaltYtelsesbeløp(): BigDecimal = beløpTilbakekreves.utbetaltYtelsesbeløp()
 
-        fun riktigYtelsesbeløp(): BigDecimal
-
-        fun utbetaltYtelsesbeløp(): BigDecimal
-
-        fun skatt(): BigDecimal
+        fun riktigYtelsesbeløp(): BigDecimal = beløpTilbakekreves.riktigYteslesbeløp()
 
         companion object {
-            fun Iterable<Beløp>.forKlassekode(klassekode: String) = single { it.klassekode == klassekode }
+            fun <T : Beløp> Iterable<T>.forKlassekode(klassekode: String) = single { it.klassekode == klassekode }
         }
-    }
-
-    companion object {
-        fun Iterable<Delperiode>.oppsummer() = groupBy { it.vurdertPeriode }
-            .mapValues { (_, perioder) -> perioder.map { it.beregningsresultat() }.reduce(Beregningsresultatsperiode::plus) }
-            .values
-            .toList()
     }
 }
