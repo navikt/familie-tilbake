@@ -9,12 +9,12 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 class JusterbartBeløp(
-    override val klassekode: String,
-    override val periode: Datoperiode,
-    private val beløpTilbakekreves: KravgrunnlagPeriodeAdapter.BeløpTilbakekreves,
+    klassekode: String,
+    periode: Datoperiode,
+    beløpTilbakekreves: KravgrunnlagPeriodeAdapter.BeløpTilbakekreves,
     reduksjon: Reduksjon,
     andelAvBeløp: BigDecimal,
-) : Delperiode.Beløp {
+) : Delperiode.Beløp(klassekode, periode, beløpTilbakekreves) {
     private var tilbakekrevingsbeløpAvrunding = BigDecimal.ZERO
     val tilbakekrevingsbeløp = reduksjon.beregn(beløpTilbakekreves.tilbakekrevesBeløp(), andelAvBeløp)
 
@@ -37,10 +37,6 @@ class JusterbartBeløp(
     override fun tilbakekrevesBrutto(): BigDecimal = tilbakekrevingsbeløp.setScale(0, RoundingMode.DOWN) + tilbakekrevingsbeløpAvrunding
 
     override fun skatt(): BigDecimal = skattebeløp.setScale(0, RoundingMode.DOWN) + skattebeløpAvrunding
-
-    override fun utbetaltYtelsesbeløp(): BigDecimal = beløpTilbakekreves.utbetaltYtelsesbeløp()
-
-    override fun riktigYtelsesbeløp(): BigDecimal = beløpTilbakekreves.riktigYteslesbeløp()
 
     companion object {
         fun Iterable<JusterbartBeløp>.fordelTilbakekrevingsbeløp() {

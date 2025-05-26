@@ -4,7 +4,6 @@ import no.nav.tilbakekreving.beregning.HUNDRE_PROSENT
 import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagPeriodeAdapter
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurdertPeriodeAdapter
-import no.nav.tilbakekreving.beregning.delperiode.Delperiode.Beløp.Companion.forKlassekode
 import no.nav.tilbakekreving.beregning.delperiode.JusterbartBeløp.Companion.fordelSkattebeløp
 import no.nav.tilbakekreving.beregning.delperiode.JusterbartBeløp.Companion.fordelTilbakekrevingsbeløp
 import no.nav.tilbakekreving.beregning.modell.Beregningsresultatsperiode
@@ -16,7 +15,7 @@ class Vilkårsvurdert(
     private val vurdering: VilkårsvurdertPeriodeAdapter,
     private val beregnRenter: Boolean,
     kravgrunnlagPerioder: List<KravgrunnlagPeriodeAdapter>,
-) : Vurderingsperiode<Vilkårsvurdert.Utbetalingsperiode> {
+) : Vurderingsperiode<JusterbartBeløp, Vilkårsvurdert.Utbetalingsperiode> {
     override val periode get() = vurdering.periode()
     override val delperioder: List<Utbetalingsperiode> = kravgrunnlagPerioder.map { kravgrunnlagPeriode ->
         val delperiode = requireNotNull(kravgrunnlagPeriode.periode().snitt(vurdering.periode())) {
@@ -60,25 +59,19 @@ class Vilkårsvurdert(
 
     class Utbetalingsperiode(
         override val periode: Datoperiode,
-        private val beløp: List<JusterbartBeløp>,
-        private val kravgrunnlagPeriode: KravgrunnlagPeriodeAdapter,
+        val beløp: List<JusterbartBeløp>,
+        kravgrunnlagPeriode: KravgrunnlagPeriodeAdapter,
         private val beregnRenter: Boolean,
         private val vurdering: VilkårsvurdertPeriodeAdapter,
-    ) : Delperiode {
+    ) : Delperiode<JusterbartBeløp>(kravgrunnlagPeriode, beløp) {
         private var rentebeløpAvrunding = BigDecimal.ZERO
         private val rentebeløp = beregnRentebeløp(beløp.sumOf { it.tilbakekrevingsbeløp })
-
-        fun summer(hentBeløp: JusterbartBeløp.() -> BigDecimal) = beløp.sumOf { it.hentBeløp() }
-
-        override fun beløpForKlassekode(klassekode: String): Delperiode.Beløp = beløp.forKlassekode(klassekode)
 
         override fun tilbakekrevesBruttoMedRenter(): BigDecimal = beløp().sumOf { it.tilbakekrevesBrutto() } + renter()
 
         fun tilbakekrevesNetto(): BigDecimal = tilbakekrevesBruttoMedRenter() - beløp().sumOf { it.skatt() }
 
         override fun renter(): BigDecimal = rentebeløp.setScale(0, RoundingMode.DOWN) + rentebeløpAvrunding
-
-        override fun beløp(): List<Delperiode.Beløp> = beløp
 
         private fun beregnRentebeløp(
             beløp: BigDecimal,
@@ -87,8 +80,6 @@ class Vilkårsvurdert(
         } else {
             BigDecimal.ZERO
         }
-
-        override fun feilutbetaltBeløp(): BigDecimal = kravgrunnlagPeriode.feilutbetaltYtelsesbeløp().setScale(0, RoundingMode.HALF_UP)
 
         companion object {
             fun <T : Iterable<Utbetalingsperiode>> T.fordelTilbakekrevingsbeløp(): T = apply {

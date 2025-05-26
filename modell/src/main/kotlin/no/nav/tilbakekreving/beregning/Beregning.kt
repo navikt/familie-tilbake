@@ -50,7 +50,7 @@ class Beregning(
 
     private val allePerioder get() = (foreldetUtbetalinger + vilkårsvurderteUtbetalinger).sortedBy { it.periode.fom }
 
-    fun beregn(): List<Delperiode> {
+    fun beregn(): List<Delperiode<*>> {
         vilkårsvurderteUtbetalinger.flatMap { it.delperioder }
             .fordelTilbakekrevingsbeløp()
             .fordelRentebeløp()
@@ -63,13 +63,13 @@ class Beregning(
         val delperioder = beregn()
         return Beregningsresultat(
             vedtaksresultat = bestemVedtaksresultat(delperioder),
-            beregningsresultatsperioder = allePerioder.map(Vurderingsperiode<*>::beregningsresultat),
+            beregningsresultatsperioder = allePerioder.map(Vurderingsperiode<*, *>::beregningsresultat),
         )
     }
 
     fun vedtaksresultat(): Vedtaksresultat = bestemVedtaksresultat(beregn())
 
-    private fun bestemVedtaksresultat(delperioder: List<Delperiode>): Vedtaksresultat {
+    private fun bestemVedtaksresultat(delperioder: List<Delperiode<*>>): Vedtaksresultat {
         val tilbakekrevingsbeløp = delperioder.sumOf { it.tilbakekrevesBruttoMedRenter() }.setScale(0, RoundingMode.HALF_UP)
         val feilutbetaltBeløp = delperioder.sumOf { it.feilutbetaltBeløp() }.setScale(0, RoundingMode.HALF_UP)
         return when {

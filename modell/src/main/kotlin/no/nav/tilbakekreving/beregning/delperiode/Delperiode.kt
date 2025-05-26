@@ -1,36 +1,44 @@
 package no.nav.tilbakekreving.beregning.delperiode
 
+import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagPeriodeAdapter
+import no.nav.tilbakekreving.beregning.delperiode.Delperiode.Beløp.Companion.forKlassekode
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import java.math.BigDecimal
+import java.math.RoundingMode
 
-sealed interface Delperiode {
-    val periode: Datoperiode
+sealed class Delperiode<B : Delperiode.Beløp>(
+    private val kravgrunnlagPeriode: KravgrunnlagPeriodeAdapter,
+    private val beløp: List<B>,
+) {
+    abstract val periode: Datoperiode
 
-    fun renter(): BigDecimal
+    abstract fun renter(): BigDecimal
 
-    fun tilbakekrevesBruttoMedRenter(): BigDecimal
+    abstract fun tilbakekrevesBruttoMedRenter(): BigDecimal
 
-    fun feilutbetaltBeløp(): BigDecimal
+    fun beløp(): List<B> = beløp
 
-    fun beløp(): List<Beløp>
+    fun feilutbetaltBeløp(): BigDecimal = kravgrunnlagPeriode.feilutbetaltYtelsesbeløp().setScale(0, RoundingMode.HALF_UP)
 
-    fun beløpForKlassekode(klassekode: String): Beløp
+    fun summer(hentBeløp: B.() -> BigDecimal) = beløp().sumOf { it.hentBeløp() }
 
-    interface Beløp {
-        val klassekode: String
+    fun beløpForKlassekode(klassekode: String): B = beløp().forKlassekode(klassekode)
 
-        val periode: Datoperiode
+    abstract class Beløp(
+        val klassekode: String,
+        val periode: Datoperiode,
+        protected val beløpTilbakekreves: KravgrunnlagPeriodeAdapter.BeløpTilbakekreves,
+    ) {
+        abstract fun tilbakekrevesBrutto(): BigDecimal
 
-        fun tilbakekrevesBrutto(): BigDecimal
+        abstract fun skatt(): BigDecimal
 
-        fun riktigYtelsesbeløp(): BigDecimal
+        fun utbetaltYtelsesbeløp(): BigDecimal = beløpTilbakekreves.utbetaltYtelsesbeløp()
 
-        fun utbetaltYtelsesbeløp(): BigDecimal
-
-        fun skatt(): BigDecimal
+        fun riktigYtelsesbeløp(): BigDecimal = beløpTilbakekreves.riktigYteslesbeløp()
 
         companion object {
-            fun Iterable<Beløp>.forKlassekode(klassekode: String) = single { it.klassekode == klassekode }
+            fun <T : Beløp> Iterable<T>.forKlassekode(klassekode: String) = single { it.klassekode == klassekode }
         }
     }
 }
