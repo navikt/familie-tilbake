@@ -12,7 +12,6 @@ import io.ktor.http.takeFrom
 import io.ktor.http.toURI
 import jakarta.annotation.PreDestroy
 import no.nav.familie.tilbake.http.BearerTokenClientCredentialsClientInterceptor
-import no.nav.familie.tilbake.integration.pdl.internal.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
@@ -32,7 +31,6 @@ class ArbeidOgInntektClient(
     suspend fun hentAInntektUrl(
         personIdent: String,
     ): String {
-        logger.info("Henter A-inntekt url")
         val clientProperties = tokenClient.clientPropertiesForGrantType(tokenClient.findByURI(redirectUri.toURI()), GrantType.CLIENT_CREDENTIALS, redirectUri.toURI())
         val token = tokenClient.genererAccessToken(clientProperties)
         return httpClient

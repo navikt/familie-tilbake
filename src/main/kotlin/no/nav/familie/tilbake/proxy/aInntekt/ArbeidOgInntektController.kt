@@ -1,7 +1,6 @@
 package no.nav.familie.tilbake.proxy.aInntekt
 
 import no.nav.familie.tilbake.kontrakter.PersonIdent
-import no.nav.familie.tilbake.log.SecureLog
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.api.v1.dto.ProxyLenkeDto
 import org.springframework.web.bind.annotation.GetMapping
@@ -24,8 +23,5 @@ class ArbeidOgInntektController(
         @RequestHeader("x-person-ident") personIdent: PersonIdent,
         @RequestHeader("x-fagsak-id") fagsakId: String?,
         @RequestHeader("x-behandling-id") behandlingId: String?,
-    ): ProxyLenkeDto {
-        val logContext = SecureLog.Context.medBehandling(fagsakId, behandlingId)
-        return ProxyLenkeDto(ainntektUrl = service.hentAInntektUrl(personIdent.ident, logContext))
-    }
+    ): ProxyLenkeDto = ProxyLenkeDto(ainntektUrl = service.hentAInntektUrl(personIdent.ident, fagsakId, behandlingId))
 }

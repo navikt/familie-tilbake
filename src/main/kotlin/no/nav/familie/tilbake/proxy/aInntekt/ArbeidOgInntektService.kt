@@ -15,11 +15,17 @@ class ArbeidOgInntektService(
 
     fun hentAInntektUrl(
         personIdent: String,
-        logContext: SecureLog.Context,
-    ): String =
-        runBlocking {
+        fagsakId: String?,
+        behandlingId: String?,
+    ): String {
+        val logContext = SecureLog.Context.medBehandling(fagsakId, behandlingId)
+        return runBlocking {
             try {
-                client.hentAInntektUrl(personIdent)
+                val response = client.hentAInntektUrl(personIdent)
+                logger.medContext(logContext) {
+                    info("Hentet a-inntekt url")
+                }
+                response
             } catch (e: Exception) {
                 logger.medContext(logContext) {
                     error("Feil ved henting av a-inntekt url fra Arbeid og Inntekt. Se Securelogs for detaljer.", e)
@@ -33,4 +39,5 @@ class ArbeidOgInntektService(
                 )
             }
         }
+    }
 }
