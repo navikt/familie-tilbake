@@ -9,6 +9,7 @@ import no.nav.tilbakekreving.beregning.delperiode.Vilkårsvurdert
 import no.nav.tilbakekreving.beregning.delperiode.Vilkårsvurdert.Utbetalingsperiode.Companion.fordelRentebeløp
 import no.nav.tilbakekreving.beregning.delperiode.Vilkårsvurdert.Utbetalingsperiode.Companion.fordelSkattebeløp
 import no.nav.tilbakekreving.beregning.delperiode.Vilkårsvurdert.Utbetalingsperiode.Companion.fordelTilbakekrevingsbeløp
+import no.nav.tilbakekreving.beregning.delperiode.Vurderingsperiode
 import no.nav.tilbakekreving.beregning.modell.Beregningsresultat
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
@@ -30,7 +31,7 @@ class Beregning(
         }
     }
 
-    private val foreldet = foreldetPerioder
+    private val foreldetUtbetalinger = foreldetPerioder
         .sortedBy { it.fom }
         .map { foreldetPeriode ->
             val relevanteKravgrunnlag = kravgrunnlag.perioder()
@@ -38,19 +39,19 @@ class Beregning(
 
             Foreldet.opprett(foreldetPeriode, relevanteKravgrunnlag)
         }
-    private val vilkårsvurdert = vilkårsvurdering.perioder()
+    private val vilkårsvurderteUtbetalinger = vilkårsvurdering.perioder()
         .sortedBy { it.periode().fom }
         .map { vurdering ->
-            val kgPerioder = kravgrunnlag.perioder()
+            val relevanteKravgrunnlag = kravgrunnlag.perioder()
                 .filter { it.periode() in vurdering.periode() }
 
-            Vilkårsvurdert(vurdering, beregnRenter, kgPerioder)
+            Vilkårsvurdert(vurdering, beregnRenter, relevanteKravgrunnlag)
         }
 
-    private val allePerioder get() = (foreldet + vilkårsvurdert).sortedBy { it.periode.fom }
+    private val allePerioder get() = (foreldetUtbetalinger + vilkårsvurderteUtbetalinger).sortedBy { it.periode.fom }
 
     fun beregn(): List<Delperiode> {
-        vilkårsvurdert.flatMap { it.delperioder }
+        vilkårsvurderteUtbetalinger.flatMap { it.delperioder }
             .fordelTilbakekrevingsbeløp()
             .fordelRentebeløp()
             .fordelSkattebeløp()
@@ -60,10 +61,9 @@ class Beregning(
 
     fun oppsummer(): Beregningsresultat {
         val delperioder = beregn()
-        val beregningsresultater = foreldet.map { it.beregningsresultat() } + vilkårsvurdert.map { it.beregningsresultat() }
         return Beregningsresultat(
             vedtaksresultat = bestemVedtaksresultat(delperioder),
-            beregningsresultatsperioder = beregningsresultater,
+            beregningsresultatsperioder = allePerioder.map(Vurderingsperiode<*>::beregningsresultat),
         )
     }
 
@@ -73,7 +73,7 @@ class Beregning(
         val tilbakekrevingsbeløp = delperioder.sumOf { it.tilbakekrevesBruttoMedRenter() }.setScale(0, RoundingMode.HALF_UP)
         val feilutbetaltBeløp = delperioder.sumOf { it.feilutbetaltBeløp() }.setScale(0, RoundingMode.HALF_UP)
         return when {
-            tilbakekrevLavtBeløp -> Vedtaksresultat.INGEN_TILBAKEBETALING
+            !tilbakekrevLavtBeløp -> Vedtaksresultat.INGEN_TILBAKEBETALING
             tilbakekrevingsbeløp.isZero() -> Vedtaksresultat.INGEN_TILBAKEBETALING
             tilbakekrevingsbeløp < feilutbetaltBeløp -> Vedtaksresultat.DELVIS_TILBAKEBETALING
             else -> return Vedtaksresultat.FULL_TILBAKEBETALING

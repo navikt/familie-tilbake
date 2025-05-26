@@ -32,7 +32,7 @@ class BeregningTest {
     fun `fordeler enkelt beløp`() {
         val beregning = Beregning(
             beregnRenter = true,
-            tilbakekrevLavtBeløp = false,
+            tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
                 1.januar til 31.januar burdeForstått medForsett(ileggesRenter = false),
             ),
@@ -82,7 +82,7 @@ class BeregningTest {
     fun `skatt påvirkes ikke av renter`() {
         val beregning = Beregning(
             beregnRenter = true,
-            tilbakekrevLavtBeløp = false,
+            tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
                 1.januar til 31.januar burdeForstått medForsett(ileggesRenter = true),
             ),
@@ -132,7 +132,7 @@ class BeregningTest {
     fun `fordeler manuelt beløp over flere perioder`() {
         val beregning = Beregning(
             beregnRenter = true,
-            tilbakekrevLavtBeløp = false,
+            tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
                 1.januar til 28.februar godTro medBeløpIBehold(beløp = 1999.kroner),
             ),
@@ -195,7 +195,7 @@ class BeregningTest {
     fun `beløp ikke i behold`() {
         val beregning = Beregning(
             beregnRenter = true,
-            tilbakekrevLavtBeløp = false,
+            tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
                 1.januar til 28.februar godTro utenBeløpIBehold(),
             ),
@@ -258,7 +258,7 @@ class BeregningTest {
     fun `fordeler krone ut over to perioder`() {
         val beregning = Beregning(
             beregnRenter = true,
-            tilbakekrevLavtBeløp = false,
+            tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
                 1.januar til 28.februar burdeForstått medSimpelUaktsomhet(prosentdel = 50.prosent),
             ),
@@ -321,7 +321,7 @@ class BeregningTest {
     fun `beregnVedtaksperioder som beregner flere perioder i separate vilkårsperioder med 100 prosent tilbakekreving og renter skal avrunde hver renteperiode ned`() {
         val beregning = Beregning(
             beregnRenter = true,
-            tilbakekrevLavtBeløp = false,
+            tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
                 1.januar til 31.mars burdeForstått medGrovUaktsomhet(ileggesRenter = true),
             ),
@@ -398,7 +398,7 @@ class BeregningTest {
     fun `beregnVedtaksperioder skal beregne EF perioder med 50 prosent tilbakekreving og skatt avrunding`() {
         val beregning = Beregning(
             beregnRenter = true,
-            tilbakekrevLavtBeløp = false,
+            tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
                 1.januar til 28.februar burdeForstått medSimpelUaktsomhet(prosentdel = 50.prosent),
             ),
@@ -461,7 +461,7 @@ class BeregningTest {
     fun `perioder ute av rekkefølge`() {
         val beregning = Beregning(
             beregnRenter = true,
-            tilbakekrevLavtBeløp = false,
+            tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
                 1.februar til 28.februar burdeForstått medForsett(ileggesRenter = false),
                 1.januar til 31.januar burdeForstått medForsett(ileggesRenter = false),
@@ -541,7 +541,7 @@ class BeregningTest {
     fun `sammenslåing av perioder som er foreldet`() {
         val beregning = Beregning(
             beregnRenter = true,
-            tilbakekrevLavtBeløp = false,
+            tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(),
             foreldetPerioder = listOf(
                 1.januar til 28.februar,
@@ -605,7 +605,7 @@ class BeregningTest {
     fun `tilbakekreving av utvidet barnetrygd`() {
         val beregning = Beregning(
             beregnRenter = true,
-            tilbakekrevLavtBeløp = false,
+            tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
                 1.januar til 31.januar burdeForstått medSimpelUaktsomhet(prosentdel = 50.prosent),
             ),
@@ -663,7 +663,7 @@ class BeregningTest {
     fun `fordeler manuelt satt beløp ut i fra relativ størrelse på tilbakekrevingsbeløp i periode`() {
         val beregning = Beregning(
             beregnRenter = true,
-            tilbakekrevLavtBeløp = false,
+            tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
                 1.januar til 28.februar godTro medBeløpIBehold(4000.kroner),
             ),

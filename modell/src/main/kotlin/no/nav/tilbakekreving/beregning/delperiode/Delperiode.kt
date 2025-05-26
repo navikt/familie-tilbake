@@ -5,7 +5,6 @@ import java.math.BigDecimal
 
 sealed interface Delperiode {
     val periode: Datoperiode
-    val vurdertPeriode: Datoperiode
 
     fun renter(): BigDecimal
 

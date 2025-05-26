@@ -7,8 +7,6 @@ import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering
 interface VilkårsvurdertPeriodeAdapter {
     fun periode(): Datoperiode
 
-    fun ignoreresPgaLavtBeløp(): Boolean
-
     fun renter(): Boolean
 
     fun reduksjon(): Reduksjon

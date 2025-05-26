@@ -66,7 +66,7 @@ class TilbakekrevingsberegningService(
 
         return Beregning(
             beregnRenter = skalBeregneRenter(kravgrunnlag.fagområdekode),
-            tilbakekrevLavtBeløp = behandling.saksbehandlingstype == Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP,
+            tilbakekrevLavtBeløp = behandling.saksbehandlingstype != Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP,
             kravgrunnlag = kravgrunnlagAdapter,
             vilkårsvurdering = vilkårsvurderingAdapter,
             foreldetPerioder = foreldetPerioder,

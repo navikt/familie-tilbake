@@ -160,8 +160,6 @@ class Vilkårsvurderingsteg(
 
         override fun renter(): Boolean = vurdering.renter()
 
-        override fun ignoreresPgaLavtBeløp(): Boolean = false
-
         override fun vurdering(): Vurderingstype = vurdering.vurderingstype()
 
         companion object {

@@ -12,15 +12,11 @@ class JusterbartBeløp(
     override val klassekode: String,
     override val periode: Datoperiode,
     private val beløpTilbakekreves: KravgrunnlagPeriodeAdapter.BeløpTilbakekreves,
-    ignoreresPgaLavtBeløp: Boolean,
     reduksjon: Reduksjon,
     andelAvBeløp: BigDecimal,
 ) : Delperiode.Beløp {
     private var tilbakekrevingsbeløpAvrunding = BigDecimal.ZERO
-    val tilbakekrevingsbeløp = when {
-        ignoreresPgaLavtBeløp -> BigDecimal.ZERO
-        else -> reduksjon.beregn(beløpTilbakekreves.tilbakekrevesBeløp(), andelAvBeløp)
-    }
+    val tilbakekrevingsbeløp = reduksjon.beregn(beløpTilbakekreves.tilbakekrevesBeløp(), andelAvBeløp)
 
     private var skattebeløpAvrunding = BigDecimal.ZERO
     private val skattebeløp = beregnSkattebeløp(tilbakekrevingsbeløp)

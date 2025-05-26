@@ -30,7 +30,6 @@ class Vilkårsvurdert(
                     klassekode = beløp.klassekode(),
                     periode = delperiode,
                     beløpTilbakekreves = beløp,
-                    ignoreresPgaLavtBeløp = vurdering.ignoreresPgaLavtBeløp(),
                     reduksjon = vurdering.reduksjon(),
                     andelAvBeløp = beløp.tilbakekrevesBeløp().divide(totaltFeilutbetaltBeløp, 6, RoundingMode.HALF_DOWN),
                 )
@@ -66,7 +65,6 @@ class Vilkårsvurdert(
         private val beregnRenter: Boolean,
         private val vurdering: VilkårsvurdertPeriodeAdapter,
     ) : Delperiode {
-        override val vurdertPeriode: Datoperiode = vurdering.periode()
         private var rentebeløpAvrunding = BigDecimal.ZERO
         private val rentebeløp = beregnRentebeløp(beløp.sumOf { it.tilbakekrevingsbeløp })
 

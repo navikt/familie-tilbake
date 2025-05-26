@@ -29,7 +29,6 @@ class Foreldet(
     }
 
     class ForeldetPeriode(
-        override val vurdertPeriode: Datoperiode,
         override val periode: Datoperiode,
         private val beløp: List<ForeldetBeløp>,
         val kravgrunnlagPeriode: KravgrunnlagPeriodeAdapter,
@@ -63,7 +62,6 @@ class Foreldet(
                         "Finner ingen kravgrunnlagsperiode som er dekket av foreldelsesperioden $vurdertPeriode, kravgrunnlagsperiode=${kravgrunnlagPeriode.periode()}"
                     }
                     ForeldetPeriode(
-                        vurdertPeriode,
                         delperiode,
                         kravgrunnlagPeriode.beløpTilbakekreves().map {
                             ForeldetBeløp(it.klassekode(), delperiode, it)
