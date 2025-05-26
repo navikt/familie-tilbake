@@ -33,9 +33,11 @@ import no.nav.tilbakekreving.api.v1.dto.ForeldelsesperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.GodTroDto
 import no.nav.tilbakekreving.api.v1.dto.SærligGrunnDto
 import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
+import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
+import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn.ANNET
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn.GRAD_AV_UAKTSOMHET
@@ -76,11 +78,10 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
     private lateinit var fagsak: Fagsak
     private lateinit var behandling: Behandling
 
-    private val perioder =
-        listOf(
-            Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)),
-            Månedsperiode(YearMonth.of(2021, 2), YearMonth.of(2021, 2)),
-        )
+    private val perioder = listOf(
+        Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)),
+        Månedsperiode(YearMonth.of(2021, 2), YearMonth.of(2021, 2)),
+    )
 
     private lateinit var kravgrunnlag: Kravgrunnlag431
 
@@ -92,15 +93,14 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         behandlingRepository.insert(behandling)
 
         val månedligSkattBeløp = BigDecimal.ZERO
-        val kravgrunnlagsbeløpene =
-            listOf(
-                Kravgrunnlagsbeløp(klassetype = Klassetype.FEIL, nyttBeløp = BigDecimal(5000)),
-                Kravgrunnlagsbeløp(
-                    klassetype = Klassetype.YTEL,
-                    opprinneligUtbetalingsbeløp = BigDecimal(5000),
-                    tilbakekrevesBeløp = BigDecimal(5000),
-                ),
-            )
+        val kravgrunnlagsbeløpene = listOf(
+            Kravgrunnlagsbeløp(klassetype = Klassetype.FEIL, nyttBeløp = BigDecimal(5000)),
+            Kravgrunnlagsbeløp(
+                klassetype = Klassetype.YTEL,
+                opprinneligUtbetalingsbeløp = BigDecimal(5000),
+                tilbakekrevesBeløp = BigDecimal(5000),
+            ),
+        )
 
         kravgrunnlag = lagKravgrunnlag(perioder, månedligSkattBeløp, kravgrunnlagsbeløpene)
         kravgrunnlagRepository.insert(kravgrunnlag)
@@ -109,22 +109,20 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
     @Test
     fun `beregnVedtaksperioder skal beregne når vilkårsvurderte med 50 prosent andel tilbakekrevesbeløp`() {
         lagAktsomhetVilkårsvurdering(
-            perioder =
-                listOf(
-                    Månedsperiode(
-                        YearMonth.of(2021, 1),
-                        YearMonth.of(2021, 2),
-                    ),
+            perioder = listOf(
+                Månedsperiode(
+                    YearMonth.of(2021, 1),
+                    YearMonth.of(2021, 2),
                 ),
+            ),
             aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
             andelTilbakreves = BigDecimal(50),
             særligeGrunnerTilReduksjon = true,
         )
 
-        val tilbakekrevingsperioder =
-            vedtakBeregningService
-                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
-                .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder = vedtakBeregningService
+            .beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
 
@@ -132,9 +130,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         førstePeriode.periode shouldBe Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
         førstePeriode.renter shouldBe BigDecimal.ZERO
         var feilPostering = førstePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_BA,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(5000),
+            kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING,
+        )
         var ytelsePostering = førstePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.BATR,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(5000),
             tilbakekrevesBeløp = BigDecimal(2500),
@@ -146,9 +150,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         andrePeriode.periode shouldBe Månedsperiode(YearMonth.of(2021, 2), YearMonth.of(2021, 2))
         andrePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = andrePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_BA,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(5000),
+            kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING,
+        )
         ytelsePostering = andrePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.BATR,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(5000),
             tilbakekrevesBeløp = BigDecimal(2500),
@@ -160,22 +170,20 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
     @Test
     fun `beregnVedtaksperioder skal beregne når vilkårsvurderte med 33 prosent andel tilbakekrevesbeløp`() {
         lagAktsomhetVilkårsvurdering(
-            perioder =
-                listOf(
-                    Månedsperiode(
-                        YearMonth.of(2021, 1),
-                        YearMonth.of(2021, 2),
-                    ),
+            perioder = listOf(
+                Månedsperiode(
+                    YearMonth.of(2021, 1),
+                    YearMonth.of(2021, 2),
                 ),
+            ),
             aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
             andelTilbakreves = BigDecimal(33),
             særligeGrunnerTilReduksjon = true,
         )
 
-        val tilbakekrevingsperioder =
-            vedtakBeregningService
-                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
-                .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder = vedtakBeregningService
+            .beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
 
@@ -183,9 +191,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         førstePeriode.periode shouldBe Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
         førstePeriode.renter shouldBe BigDecimal.ZERO
         var feilPostering = førstePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_BA,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(5000),
+            kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING,
+        )
         var ytelsePostering = førstePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.BATR,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(5000),
             tilbakekrevesBeløp = BigDecimal(1650),
@@ -197,9 +211,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         andrePeriode.periode shouldBe Månedsperiode(YearMonth.of(2021, 2), YearMonth.of(2021, 2))
         andrePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = andrePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_BA,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(5000),
+            kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING,
+        )
         ytelsePostering = andrePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.BATR,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(5000),
             tilbakekrevesBeløp = BigDecimal(1650),
@@ -211,20 +231,18 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
     @Test
     fun `beregnVedtaksperioder skal beregne når vilkårsvurderte med Forsett aktsomhet`() {
         lagAktsomhetVilkårsvurdering(
-            perioder =
-                listOf(
-                    Månedsperiode(
-                        YearMonth.of(2021, 1),
-                        YearMonth.of(2021, 2),
-                    ),
+            perioder = listOf(
+                Månedsperiode(
+                    YearMonth.of(2021, 1),
+                    YearMonth.of(2021, 2),
                 ),
+            ),
             aktsomhet = Aktsomhet.FORSETT,
         )
 
-        val tilbakekrevingsperioder =
-            vedtakBeregningService
-                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
-                .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder = vedtakBeregningService
+            .beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
 
@@ -232,9 +250,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         førstePeriode.periode shouldBe Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
         førstePeriode.renter shouldBe BigDecimal.ZERO
         var feilPostering = førstePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_BA,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(5000),
+            kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
+        )
         var ytelsePostering = førstePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.BATR,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(5000),
             tilbakekrevesBeløp = BigDecimal(5000),
@@ -246,9 +270,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         andrePeriode.periode shouldBe Månedsperiode(YearMonth.of(2021, 2), YearMonth.of(2021, 2))
         andrePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = andrePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_BA,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(5000),
+            kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
+        )
         ytelsePostering = andrePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.BATR,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(5000),
             tilbakekrevesBeløp = BigDecimal(5000),
@@ -260,19 +290,17 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
     @Test
     fun `beregnVedtaksperioder skal beregne når vilkårsvurderte med God tro og ingen tilbakekreving`() {
         lagGodTroVilkårsvurdering(
-            perioder =
-                listOf(
-                    Månedsperiode(
-                        YearMonth.of(2021, 1),
-                        YearMonth.of(2021, 2),
-                    ),
+            perioder = listOf(
+                Månedsperiode(
+                    YearMonth.of(2021, 1),
+                    YearMonth.of(2021, 2),
                 ),
+            ),
         )
 
-        val tilbakekrevingsperioder =
-            vedtakBeregningService
-                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
-                .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder = vedtakBeregningService
+            .beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
 
@@ -280,9 +308,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         førstePeriode.periode shouldBe Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
         førstePeriode.renter shouldBe BigDecimal.ZERO
         var feilPostering = førstePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.INGEN_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_BA,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(5000),
+            kodeResultat = KodeResultat.INGEN_TILBAKEKREVING,
+        )
         var ytelsePostering = førstePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.BATR,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(5000),
             tilbakekrevesBeløp = BigDecimal.ZERO,
@@ -294,9 +328,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         andrePeriode.periode shouldBe Månedsperiode(YearMonth.of(2021, 2), YearMonth.of(2021, 2))
         andrePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = andrePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.INGEN_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_BA,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(5000),
+            kodeResultat = KodeResultat.INGEN_TILBAKEKREVING,
+        )
         ytelsePostering = andrePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.BATR,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(5000),
             tilbakekrevesBeløp = BigDecimal.ZERO,
@@ -308,21 +348,19 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
     @Test
     fun `beregnVedtaksperioder skal beregne når vilkårsvurderte med God tro og bestemt tilbakekrevesbeløp`() {
         lagGodTroVilkårsvurdering(
-            perioder =
-                listOf(
-                    Månedsperiode(
-                        YearMonth.of(2021, 1),
-                        YearMonth.of(2021, 2),
-                    ),
+            perioder = listOf(
+                Månedsperiode(
+                    YearMonth.of(2021, 1),
+                    YearMonth.of(2021, 2),
                 ),
+            ),
             beløpErIBehold = true,
             beløpTilbakekreves = BigDecimal(3000),
         )
 
-        val tilbakekrevingsperioder =
-            vedtakBeregningService
-                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
-                .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder = vedtakBeregningService
+            .beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
 
@@ -330,9 +368,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         førstePeriode.periode shouldBe Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
         førstePeriode.renter shouldBe BigDecimal.ZERO
         var feilPostering = førstePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_BA,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(5000),
+            kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING,
+        )
         var ytelsePostering = førstePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.BATR,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(5000),
             tilbakekrevesBeløp = BigDecimal(1500),
@@ -344,9 +388,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         andrePeriode.periode shouldBe Månedsperiode(YearMonth.of(2021, 2), YearMonth.of(2021, 2))
         andrePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = andrePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_BA,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(5000),
+            kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING,
+        )
         ytelsePostering = andrePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.BATR,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(5000),
             tilbakekrevesBeløp = BigDecimal(1500),
@@ -358,13 +408,12 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
     @Test
     fun `beregnVedtaksperioder skal beregne når vilkårsvurderte med God tro og bestemt tilbakekrevesbeløp med avrunding`() {
         lagGodTroVilkårsvurdering(
-            perioder =
-                listOf(
-                    Månedsperiode(
-                        YearMonth.of(2021, 1),
-                        YearMonth.of(2021, 2),
-                    ),
+            perioder = listOf(
+                Månedsperiode(
+                    YearMonth.of(2021, 1),
+                    YearMonth.of(2021, 2),
                 ),
+            ),
             beløpErIBehold = true,
             beløpTilbakekreves = BigDecimal(1999),
         )
@@ -379,9 +428,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         førstePeriode.periode shouldBe Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
         førstePeriode.renter shouldBe BigDecimal.ZERO
         var feilPostering = førstePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_BA,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(5000),
+            kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING,
+        )
         var ytelsePostering = førstePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.BATR,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(5000),
             tilbakekrevesBeløp = BigDecimal(1000),
@@ -393,9 +448,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         andrePeriode.periode shouldBe Månedsperiode(YearMonth.of(2021, 2), YearMonth.of(2021, 2))
         andrePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = andrePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_BA,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(5000),
+            kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING,
+        )
         ytelsePostering = andrePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.BATR,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(5000),
             tilbakekrevesBeløp = BigDecimal(999),
@@ -409,41 +470,38 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         val månedligSkattBeløp = BigDecimal(500)
 
         kravgrunnlagRepository.deleteById(kravgrunnlag.id)
-        val kravgrunnlagsbeløpene =
-            listOf(
-                Kravgrunnlagsbeløp(
-                    klassetype = Klassetype.FEIL,
-                    nyttBeløp = BigDecimal(5000),
-                    skatteprosent = BigDecimal(10),
-                ),
-                Kravgrunnlagsbeløp(
-                    klassetype = Klassetype.YTEL,
-                    opprinneligUtbetalingsbeløp = BigDecimal(5000),
-                    tilbakekrevesBeløp = BigDecimal(5000),
-                    skatteprosent = BigDecimal(10),
-                ),
-            )
+        val kravgrunnlagsbeløpene = listOf(
+            Kravgrunnlagsbeløp(
+                klassetype = Klassetype.FEIL,
+                nyttBeløp = BigDecimal(5000),
+                skatteprosent = BigDecimal(10),
+            ),
+            Kravgrunnlagsbeløp(
+                klassetype = Klassetype.YTEL,
+                opprinneligUtbetalingsbeløp = BigDecimal(5000),
+                tilbakekrevesBeløp = BigDecimal(5000),
+                skatteprosent = BigDecimal(10),
+            ),
+        )
 
         val kravgrunnlag = lagKravgrunnlag(perioder, månedligSkattBeløp, kravgrunnlagsbeløpene)
         kravgrunnlagRepository.insert(kravgrunnlag)
 
         lagAktsomhetVilkårsvurdering(
-            perioder =
-                listOf(
-                    Månedsperiode(
-                        YearMonth.of(2021, 1),
-                        YearMonth.of(2021, 2),
-                    ),
+            perioder = listOf(
+                Månedsperiode(
+                    YearMonth.of(2021, 1),
+                    YearMonth.of(2021, 2),
                 ),
+            ),
             aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
             andelTilbakreves = BigDecimal(50),
             særligeGrunnerTilReduksjon = true,
         )
 
-        val tilbakekrevingsperioder =
-            vedtakBeregningService
-                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
-                .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder = vedtakBeregningService
+            .beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
 
@@ -451,9 +509,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         førstePeriode.periode shouldBe Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
         førstePeriode.renter shouldBe BigDecimal.ZERO
         var feilPostering = førstePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_BA,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(5000),
+            kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING,
+        )
         var ytelsePostering = førstePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.BATR,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(5000),
             tilbakekrevesBeløp = BigDecimal(2500),
@@ -466,9 +530,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         andrePeriode.periode shouldBe Månedsperiode(YearMonth.of(2021, 2), YearMonth.of(2021, 2))
         andrePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = andrePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_BA,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(5000),
+            kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING,
+        )
         ytelsePostering = andrePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.BATR,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(5000),
             tilbakekrevesBeløp = BigDecimal(2500),
@@ -484,10 +554,9 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
 
         lagAktsomhetVilkårsvurdering(listOf(perioder[1]), Aktsomhet.GROV_UAKTSOMHET)
 
-        val tilbakekrevingsperioder =
-            vedtakBeregningService
-                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
-                .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder = vedtakBeregningService
+            .beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
 
@@ -495,9 +564,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         førstePeriode.periode shouldBe Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
         førstePeriode.renter shouldBe BigDecimal.ZERO
         var feilPostering = førstePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.FORELDET)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_BA,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(5000),
+            kodeResultat = KodeResultat.FORELDET,
+        )
         var ytelsePostering = førstePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.BATR,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(5000),
             tilbakekrevesBeløp = BigDecimal(0),
@@ -510,9 +585,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         andrePeriode.periode shouldBe Månedsperiode(YearMonth.of(2021, 2), YearMonth.of(2021, 2))
         andrePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = andrePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_BA,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(5000),
+            kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
+        )
         ytelsePostering = andrePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.BATR,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(5000),
             tilbakekrevesBeløp = BigDecimal(5000),
@@ -527,27 +608,25 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         kravgrunnlagRepository.deleteById(kravgrunnlag.id)
 
         val månedligSkattBeløp = BigDecimal(750)
-        val perioder =
-            listOf(
-                Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)),
-                Månedsperiode(YearMonth.of(2021, 2), YearMonth.of(2021, 2)),
-                Månedsperiode(YearMonth.of(2021, 3), YearMonth.of(2021, 3)),
-            )
+        val perioder = listOf(
+            Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)),
+            Månedsperiode(YearMonth.of(2021, 2), YearMonth.of(2021, 2)),
+            Månedsperiode(YearMonth.of(2021, 3), YearMonth.of(2021, 3)),
+        )
 
-        val kravgrunnlagsbeløpene =
-            listOf(
-                Kravgrunnlagsbeløp(
-                    klassetype = Klassetype.FEIL,
-                    nyttBeløp = BigDecimal(5000),
-                    skatteprosent = BigDecimal(15),
-                ),
-                Kravgrunnlagsbeløp(
-                    klassetype = Klassetype.YTEL,
-                    opprinneligUtbetalingsbeløp = BigDecimal(5000),
-                    tilbakekrevesBeløp = BigDecimal(5000),
-                    skatteprosent = BigDecimal(15),
-                ),
-            )
+        val kravgrunnlagsbeløpene = listOf(
+            Kravgrunnlagsbeløp(
+                klassetype = Klassetype.FEIL,
+                nyttBeløp = BigDecimal(5000),
+                skatteprosent = BigDecimal(15),
+            ),
+            Kravgrunnlagsbeløp(
+                klassetype = Klassetype.YTEL,
+                opprinneligUtbetalingsbeløp = BigDecimal(5000),
+                tilbakekrevesBeløp = BigDecimal(5000),
+                skatteprosent = BigDecimal(15),
+            ),
+        )
         val kravgrunnlag = lagKravgrunnlag(perioder, månedligSkattBeløp, kravgrunnlagsbeløpene)
         kravgrunnlagRepository.insert(kravgrunnlag)
 
@@ -557,10 +636,9 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
             Aktsomhet.GROV_UAKTSOMHET,
         )
 
-        val tilbakekrevingsperioder =
-            vedtakBeregningService
-                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
-                .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder = vedtakBeregningService
+            .beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 3
 
@@ -568,9 +646,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         førstePeriode.periode shouldBe Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
         førstePeriode.renter shouldBe BigDecimal.ZERO
         var feilPostering = førstePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_BA,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(5000),
+            kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
+        )
         var ytelsePostering = førstePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.BATR,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(5000),
             tilbakekrevesBeløp = BigDecimal(5000),
@@ -583,9 +667,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         andrePeriode.periode shouldBe Månedsperiode(YearMonth.of(2021, 2), YearMonth.of(2021, 2))
         andrePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = andrePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_BA,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(5000),
+            kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
+        )
         ytelsePostering = andrePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.BATR,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(5000),
             tilbakekrevesBeløp = BigDecimal(5000),
@@ -598,9 +688,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         tredjePeriode.periode shouldBe Månedsperiode(YearMonth.of(2021, 3), YearMonth.of(2021, 3))
         tredjePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = tredjePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_BA,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(5000),
+            kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
+        )
         ytelsePostering = tredjePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.BATR,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(5000),
             tilbakekrevesBeløp = BigDecimal(5000),
@@ -614,29 +710,27 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
     fun `beregnVedtaksperioder skal beregne med 2 foreldet, 2 god tro og 3 periode med 100 prosent tilbakekreving`() {
         kravgrunnlagRepository.deleteById(kravgrunnlag.id)
 
-        val perioder =
-            listOf(
-                Månedsperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 1)),
-                Månedsperiode(YearMonth.of(2020, 3), YearMonth.of(2020, 3)),
-                Månedsperiode(YearMonth.of(2020, 5), YearMonth.of(2020, 5)),
-                Månedsperiode(YearMonth.of(2020, 7), YearMonth.of(2020, 7)),
-                Månedsperiode(YearMonth.of(2020, 9), YearMonth.of(2020, 9)),
-                Månedsperiode(YearMonth.of(2020, 11), YearMonth.of(2020, 11)),
-                Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)),
-            )
+        val perioder = listOf(
+            Månedsperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 1)),
+            Månedsperiode(YearMonth.of(2020, 3), YearMonth.of(2020, 3)),
+            Månedsperiode(YearMonth.of(2020, 5), YearMonth.of(2020, 5)),
+            Månedsperiode(YearMonth.of(2020, 7), YearMonth.of(2020, 7)),
+            Månedsperiode(YearMonth.of(2020, 9), YearMonth.of(2020, 9)),
+            Månedsperiode(YearMonth.of(2020, 11), YearMonth.of(2020, 11)),
+            Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)),
+        )
 
-        val kravgrunnlagsbeløpene =
-            listOf(
-                Kravgrunnlagsbeløp(
-                    klassetype = Klassetype.FEIL,
-                    nyttBeløp = BigDecimal(952.38),
-                ),
-                Kravgrunnlagsbeløp(
-                    klassetype = Klassetype.YTEL,
-                    opprinneligUtbetalingsbeløp = BigDecimal(952.38),
-                    tilbakekrevesBeløp = BigDecimal(952.38),
-                ),
-            )
+        val kravgrunnlagsbeløpene = listOf(
+            Kravgrunnlagsbeløp(
+                klassetype = Klassetype.FEIL,
+                nyttBeløp = BigDecimal(952.38),
+            ),
+            Kravgrunnlagsbeløp(
+                klassetype = Klassetype.YTEL,
+                opprinneligUtbetalingsbeløp = BigDecimal(952.38),
+                tilbakekrevesBeløp = BigDecimal(952.38),
+            ),
+        )
         val kravgrunnlag = lagKravgrunnlag(perioder, BigDecimal.ZERO, kravgrunnlagsbeløpene)
         kravgrunnlagRepository.insert(kravgrunnlag)
 
@@ -644,26 +738,24 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         lagForeldelse(listOf(perioder[0], perioder[1]))
 
         // 3,4 beregnet periode er godtro med ingen tilbakekreving
-        val godtroPerioder =
-            listOf(perioder[2], perioder[3]).map {
-                VilkårsvurderingsperiodeDto(
-                    periode = it.toDatoperiode(),
-                    begrunnelse = "testverdi",
-                    godTroDto = GodTroDto(begrunnelse = "testverdi", beløpErIBehold = false),
-                    vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
-                )
-            }
+        val godtroPerioder = listOf(perioder[2], perioder[3]).map {
+            VilkårsvurderingsperiodeDto(
+                periode = it.toDatoperiode(),
+                begrunnelse = "testverdi",
+                godTroDto = GodTroDto(begrunnelse = "testverdi", beløpErIBehold = false),
+                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
+            )
+        }
 
         // 5,6,7 beregnet periode er Forsett aktsomhet med Full tilbakekreving
-        val aktsomhetPerioder =
-            listOf(perioder[4], perioder[5], perioder[6]).map {
-                VilkårsvurderingsperiodeDto(
-                    periode = it.toDatoperiode(),
-                    begrunnelse = "testverdi",
-                    aktsomhetDto = AktsomhetDto(aktsomhet = Aktsomhet.FORSETT, begrunnelse = "testverdi"),
-                    vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
-                )
-            }
+        val aktsomhetPerioder = listOf(perioder[4], perioder[5], perioder[6]).map {
+            VilkårsvurderingsperiodeDto(
+                periode = it.toDatoperiode(),
+                begrunnelse = "testverdi",
+                aktsomhetDto = AktsomhetDto(aktsomhet = Aktsomhet.FORSETT, begrunnelse = "testverdi"),
+                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
+            )
+        }
         vilkårsvurderingService.lagreVilkårsvurdering(
             behandling.id,
             BehandlingsstegVilkårsvurderingDto(
@@ -672,10 +764,9 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
             ),
         )
 
-        val tilbakekrevingsperioder =
-            vedtakBeregningService
-                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
-                .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder = vedtakBeregningService
+            .beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 7
 
@@ -683,9 +774,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         førstePeriode.periode shouldBe Månedsperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 1))
         førstePeriode.renter shouldBe BigDecimal.ZERO
         var feilPostering = førstePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(952), kodeResultat = KodeResultat.FORELDET)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_BA,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(952),
+            kodeResultat = KodeResultat.FORELDET,
+        )
         var ytelsePostering = førstePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.BATR,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(952),
             tilbakekrevesBeløp = BigDecimal.ZERO,
@@ -697,9 +794,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         andrePeriode.periode shouldBe Månedsperiode(YearMonth.of(2020, 3), YearMonth.of(2020, 3))
         andrePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = andrePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(952), kodeResultat = KodeResultat.FORELDET)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_BA,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(952),
+            kodeResultat = KodeResultat.FORELDET,
+        )
         ytelsePostering = andrePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.BATR,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(952),
             tilbakekrevesBeløp = BigDecimal.ZERO,
@@ -711,9 +814,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         tredjePeriode.periode shouldBe Månedsperiode(YearMonth.of(2020, 5), YearMonth.of(2020, 5))
         tredjePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = tredjePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(952), kodeResultat = KodeResultat.INGEN_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_BA,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(952),
+            kodeResultat = KodeResultat.INGEN_TILBAKEKREVING,
+        )
         ytelsePostering = tredjePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.BATR,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(952),
             tilbakekrevesBeløp = BigDecimal.ZERO,
@@ -725,9 +834,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         fjerdePeriode.periode shouldBe Månedsperiode(YearMonth.of(2020, 7), YearMonth.of(2020, 7))
         fjerdePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = fjerdePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(952), kodeResultat = KodeResultat.INGEN_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_BA,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(952),
+            kodeResultat = KodeResultat.INGEN_TILBAKEKREVING,
+        )
         ytelsePostering = fjerdePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.BATR,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(952),
             tilbakekrevesBeløp = BigDecimal.ZERO,
@@ -739,9 +854,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         femtePeriode.periode shouldBe Månedsperiode(YearMonth.of(2020, 9), YearMonth.of(2020, 9))
         femtePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = femtePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(952), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_BA,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(952),
+            kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
+        )
         ytelsePostering = femtePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.BATR,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(952),
             tilbakekrevesBeløp = BigDecimal(952),
@@ -753,9 +874,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         sjettePeriode.periode shouldBe Månedsperiode(YearMonth.of(2020, 11), YearMonth.of(2020, 11))
         sjettePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = sjettePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(952), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_BA,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(952),
+            kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
+        )
         ytelsePostering = sjettePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.BATR,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(952),
             tilbakekrevesBeløp = BigDecimal(952),
@@ -767,9 +894,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         sjuendePeriode.periode shouldBe Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
         sjuendePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = sjuendePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(952), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_BA,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(952),
+            kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
+        )
         ytelsePostering = sjuendePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.BATR,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(952),
             tilbakekrevesBeløp = BigDecimal(952),
@@ -865,12 +998,14 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         førstePeriode.renter shouldBe BigDecimal.ZERO
         var feilPostering = førstePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_EFOG,
             beløp = feilPostering,
             nyttBeløp = BigDecimal(486),
             kodeResultat = KodeResultat.INGEN_TILBAKEKREVING,
         )
         var ytelsePostering = førstePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.EFOG,
             beløp = ytelsePostering,
             nyttBeløp = BigDecimal(1544),
             utbetaltBeløp = BigDecimal(2030),
@@ -884,12 +1019,14 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         andrePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = andrePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_EFOG,
             beløp = feilPostering,
             nyttBeløp = BigDecimal(17336),
             kodeResultat = KodeResultat.INGEN_TILBAKEKREVING,
         )
         ytelsePostering = andrePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.EFOG,
             beløp = ytelsePostering,
             nyttBeløp = BigDecimal(3574),
             utbetaltBeløp = BigDecimal(20910),
@@ -903,12 +1040,14 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         tredjePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = tredjePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_EFOG,
             beløp = feilPostering,
             nyttBeløp = BigDecimal(17241),
             kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING,
         )
         ytelsePostering = tredjePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.EFOG,
             beløp = ytelsePostering,
             nyttBeløp = BigDecimal(5658),
             utbetaltBeløp = BigDecimal(22899),
@@ -923,12 +1062,14 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         fjerdePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = fjerdePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_EFOG,
             beløp = feilPostering,
             nyttBeløp = BigDecimal(17241),
             kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING,
         )
         ytelsePostering = fjerdePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.EFOG,
             beløp = ytelsePostering,
             nyttBeløp = BigDecimal(5658),
             utbetaltBeløp = BigDecimal(22899),
@@ -943,12 +1084,14 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         femtePeriode.renter shouldBe BigDecimal(1724)
         feilPostering = femtePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_EFOG,
             beløp = feilPostering,
             nyttBeløp = BigDecimal(17241),
             kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
         )
         ytelsePostering = femtePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.EFOG,
             beløp = ytelsePostering,
             nyttBeløp = BigDecimal(5658),
             utbetaltBeløp = BigDecimal(22899),
@@ -963,12 +1106,14 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         sjettePeriode.renter shouldBe BigDecimal(1724)
         feilPostering = sjettePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_EFOG,
             beløp = feilPostering,
             nyttBeløp = BigDecimal(17241),
             kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
         )
         ytelsePostering = sjettePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.EFOG,
             beløp = ytelsePostering,
             nyttBeløp = BigDecimal(5658),
             utbetaltBeløp = BigDecimal(22899),
@@ -983,12 +1128,14 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         sjuendePeriode.renter shouldBe BigDecimal(1736)
         feilPostering = sjuendePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_EFOG,
             beløp = feilPostering,
             nyttBeløp = BigDecimal(17364),
             kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
         )
         ytelsePostering = sjuendePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.EFOG,
             beløp = ytelsePostering,
             nyttBeløp = BigDecimal(25485),
             utbetaltBeløp = BigDecimal(42849),
@@ -1005,11 +1152,10 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         fagsakRepository.update(fagsakRepository.findByIdOrThrow(fagsak.id).copy(fagsystem = Fagsystem.EF))
 
         val kravgrunnlagxml = readXml("/kravgrunnlagxml/kravgrunnlag_EF_med_renter_avrundingsfeil_ned.xml")
-        val kravgrunnlag =
-            KravgrunnlagMapper.tilKravgrunnlag431(
-                KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
-                behandling.id,
-            )
+        val kravgrunnlag = KravgrunnlagMapper.tilKravgrunnlag431(
+            KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
+            behandling.id,
+        )
         kravgrunnlagRepository.insert(kravgrunnlag)
 
         val periode = kravgrunnlag.perioder.first().periode
@@ -1018,15 +1164,12 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
 
         vilkårsvurderingService.lagreVilkårsvurdering(
             behandling.id,
-            BehandlingsstegVilkårsvurderingDto(
-                listOf(grovUaktsomhetPeriode),
-            ),
+            BehandlingsstegVilkårsvurderingDto(listOf(grovUaktsomhetPeriode)),
         )
 
-        val tilbakekrevingsperioder =
-            vedtakBeregningService
-                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
-                .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder = vedtakBeregningService
+            .beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.size shouldBe 1
 
         val tilbakekrevingsperiode = tilbakekrevingsperioder[0]
@@ -1040,11 +1183,10 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         fagsakRepository.update(fagsakRepository.findByIdOrThrow(fagsak.id).copy(fagsystem = Fagsystem.EF))
 
         val kravgrunnlagxml = readXml("/kravgrunnlagxml/kravgrunnlag_EF_med_3_perioder_med_renter_avrunding_ned.xml")
-        val kravgrunnlag =
-            KravgrunnlagMapper.tilKravgrunnlag431(
-                KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
-                behandling.id,
-            )
+        val kravgrunnlag = KravgrunnlagMapper.tilKravgrunnlag431(
+            KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
+            behandling.id,
+        )
         kravgrunnlagRepository.insert(kravgrunnlag)
 
         val sortedPerioder = kravgrunnlag.perioder.map { it.periode }.sortedBy { it.fom }
@@ -1053,15 +1195,12 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
 
         vilkårsvurderingService.lagreVilkårsvurdering(
             behandling.id,
-            BehandlingsstegVilkårsvurderingDto(
-                listOf(grovUaktsomhetPeriode),
-            ),
+            BehandlingsstegVilkårsvurderingDto(listOf(grovUaktsomhetPeriode)),
         )
 
-        val tilbakekrevingsperioder =
-            vedtakBeregningService
-                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
-                .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder = vedtakBeregningService
+            .beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.size shouldBe 3
 
         tilbakekrevingsperioder[0].periode shouldBe sortedPerioder[0]
@@ -1082,11 +1221,10 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         fagsakRepository.update(fagsakRepository.findByIdOrThrow(fagsak.id).copy(fagsystem = Fagsystem.EF))
 
         val kravgrunnlagxml = readXml("/kravgrunnlagxml/kravgrunnlag_EF_med_3_perioder_med_renter_avrunding_ned.xml")
-        val kravgrunnlag =
-            KravgrunnlagMapper.tilKravgrunnlag431(
-                KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
-                behandling.id,
-            )
+        val kravgrunnlag = KravgrunnlagMapper.tilKravgrunnlag431(
+            KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
+            behandling.id,
+        )
         kravgrunnlagRepository.insert(kravgrunnlag)
 
         val sortedPerioder = kravgrunnlag.perioder.map { it.periode }.sortedBy { it.fom }
@@ -1097,15 +1235,12 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
 
         vilkårsvurderingService.lagreVilkårsvurdering(
             behandling.id,
-            BehandlingsstegVilkårsvurderingDto(
-                listOf(grovUaktsomhetPeriode1, grovUaktsomhetPeriode2, grovUaktsomhetPeriode3),
-            ),
+            BehandlingsstegVilkårsvurderingDto(listOf(grovUaktsomhetPeriode1, grovUaktsomhetPeriode2, grovUaktsomhetPeriode3)),
         )
 
-        val tilbakekrevingsperioder =
-            vedtakBeregningService
-                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
-                .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder = vedtakBeregningService
+            .beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.size shouldBe 3
 
         tilbakekrevingsperioder[0].periode shouldBe sortedPerioder[0]
@@ -1122,38 +1257,32 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         fagsakRepository.update(fagsakRepository.findByIdOrThrow(fagsak.id).copy(fagsystem = Fagsystem.EF))
 
         val kravgrunnlagxml = readXml("/kravgrunnlagxml/kravgrunnlag_EF_med_renter_avrunding.xml")
-        val kravgrunnlag =
-            KravgrunnlagMapper.tilKravgrunnlag431(
-                KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
-                behandling.id,
-            )
+        val kravgrunnlag = KravgrunnlagMapper.tilKravgrunnlag431(
+            KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
+            behandling.id,
+        )
         kravgrunnlagRepository.insert(kravgrunnlag)
 
         val sortedPerioder = kravgrunnlag.perioder.map { it.periode }.sortedBy { it.fom }
 
-        val aktsomhetPeriode =
-            VilkårsvurderingsperiodeDto(
-                periode =
-                    Datoperiode(
-                        sortedPerioder[0].fom,
-                        sortedPerioder[6].tom,
-                    ),
-                begrunnelse = "testverdi",
-                aktsomhetDto =
-                    AktsomhetDto(
-                        aktsomhet = Aktsomhet.FORSETT,
-                        begrunnelse = "fortsett begrunnelse",
-                    ),
-                vilkårsvurderingsresultat =
-                    Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
-            )
+        val aktsomhetPeriode = VilkårsvurderingsperiodeDto(
+            periode = Datoperiode(
+                sortedPerioder[0].fom,
+                sortedPerioder[6].tom,
+            ),
+            begrunnelse = "testverdi",
+            aktsomhetDto = AktsomhetDto(
+                aktsomhet = Aktsomhet.FORSETT,
+                begrunnelse = "fortsett begrunnelse",
+            ),
+            vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
+        )
 
         vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, BehandlingsstegVilkårsvurderingDto(listOf(aktsomhetPeriode)))
 
-        val tilbakekrevingsperioder =
-            vedtakBeregningService
-                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
-                .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder = vedtakBeregningService
+            .beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 7
 
@@ -1161,9 +1290,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         førstePeriode.periode shouldBe sortedPerioder[0]
         førstePeriode.renter shouldBe BigDecimal(21)
         var feilPostering = førstePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(209), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_EFOG,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(209),
+            kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
+        )
         var ytelsePostering = førstePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.EFOG,
             beløp = ytelsePostering,
             nyttBeløp = BigDecimal(4028),
             utbetaltBeløp = BigDecimal(4237),
@@ -1177,9 +1312,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         andrePeriode.periode shouldBe sortedPerioder[1]
         andrePeriode.renter shouldBe BigDecimal(21)
         feilPostering = andrePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(208), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_EFOG,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(208),
+            kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
+        )
         ytelsePostering = andrePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.EFOG,
             beløp = ytelsePostering,
             nyttBeløp = BigDecimal(5070),
             utbetaltBeløp = BigDecimal(5278),
@@ -1193,9 +1334,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         tredjePeriode.periode shouldBe sortedPerioder[2]
         tredjePeriode.renter shouldBe BigDecimal(438)
         feilPostering = tredjePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(4375), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_EFOG,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(4375),
+            kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
+        )
         ytelsePostering = tredjePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.EFOG,
             beløp = ytelsePostering,
             nyttBeløp = BigDecimal(5070),
             utbetaltBeløp = BigDecimal(9445),
@@ -1209,9 +1356,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         fjerdePeriode.periode shouldBe sortedPerioder[3]
         fjerdePeriode.renter shouldBe BigDecimal(437)
         feilPostering = fjerdePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(4375), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_EFOG,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(4375),
+            kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
+        )
         ytelsePostering = fjerdePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.EFOG,
             beløp = ytelsePostering,
             nyttBeløp = BigDecimal(5070),
             utbetaltBeløp = BigDecimal(9445),
@@ -1225,9 +1378,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         femtePeriode.periode shouldBe sortedPerioder[4]
         femtePeriode.renter shouldBe BigDecimal(437)
         feilPostering = femtePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(4375), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_EFOG,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(4375),
+            kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
+        )
         ytelsePostering = femtePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.EFOG,
             beløp = ytelsePostering,
             nyttBeløp = BigDecimal(5070),
             utbetaltBeløp = BigDecimal(9445),
@@ -1241,9 +1400,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         sjettePeriode.periode shouldBe sortedPerioder[5]
         sjettePeriode.renter shouldBe BigDecimal(375)
         feilPostering = sjettePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(3750), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_EFOG,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(3750),
+            kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
+        )
         ytelsePostering = sjettePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.EFOG,
             beløp = ytelsePostering,
             nyttBeløp = BigDecimal(10695),
             utbetaltBeløp = BigDecimal(14445),
@@ -1257,9 +1422,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         sjuendePeriode.periode shouldBe sortedPerioder[6]
         sjuendePeriode.renter shouldBe BigDecimal(375)
         feilPostering = sjuendePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(3750), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_EFOG,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(3750),
+            kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
+        )
         ytelsePostering = sjuendePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.EFOG,
             beløp = ytelsePostering,
             nyttBeløp = BigDecimal(10695),
             utbetaltBeløp = BigDecimal(14445),
@@ -1276,48 +1447,41 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         fagsakRepository.update(fagsakRepository.findByIdOrThrow(fagsak.id).copy(fagsystem = Fagsystem.EF))
 
         val kravgrunnlagxml = readXml("/kravgrunnlagxml/kravgrunnlag_EF_med_skatt_avrunding.xml")
-        val kravgrunnlag =
-            KravgrunnlagMapper.tilKravgrunnlag431(
-                KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
-                behandling.id,
-            )
+        val kravgrunnlag = KravgrunnlagMapper.tilKravgrunnlag431(
+            KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
+            behandling.id,
+        )
         kravgrunnlagRepository.insert(kravgrunnlag)
 
         val sortedPerioder = kravgrunnlag.perioder.map { it.periode }.sortedBy { it.fom }
 
-        val aktsomhetPeriode =
-            VilkårsvurderingsperiodeDto(
-                periode =
-                    Datoperiode(
-                        sortedPerioder[0].fom,
-                        sortedPerioder[1].tom,
+        val aktsomhetPeriode = VilkårsvurderingsperiodeDto(
+            periode = Datoperiode(
+                sortedPerioder[0].fom,
+                sortedPerioder[1].tom,
+            ),
+            begrunnelse = "testverdi",
+            aktsomhetDto = AktsomhetDto(
+                aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
+                begrunnelse = "simpel uaktsomhet begrunnelse",
+                tilbakekrevSmåbeløp = true,
+                særligeGrunnerBegrunnelse = "test",
+                særligeGrunnerTilReduksjon = true,
+                særligeGrunner = listOf(
+                    SærligGrunnDto(
+                        HELT_ELLER_DELVIS_NAVS_FEIL,
                     ),
-                begrunnelse = "testverdi",
-                aktsomhetDto =
-                    AktsomhetDto(
-                        aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
-                        begrunnelse = "simpel uaktsomhet begrunnelse",
-                        tilbakekrevSmåbeløp = true,
-                        særligeGrunnerBegrunnelse = "test",
-                        særligeGrunnerTilReduksjon = true,
-                        særligeGrunner =
-                            listOf(
-                                SærligGrunnDto(
-                                    HELT_ELLER_DELVIS_NAVS_FEIL,
-                                ),
-                            ),
-                        andelTilbakekreves = BigDecimal(50),
-                    ),
-                vilkårsvurderingsresultat =
-                    Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
-            )
+                ),
+                andelTilbakekreves = BigDecimal(50),
+            ),
+            vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
+        )
 
         vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, BehandlingsstegVilkårsvurderingDto(listOf(aktsomhetPeriode)))
 
-        val tilbakekrevingsperioder =
-            vedtakBeregningService
-                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
-                .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder = vedtakBeregningService
+            .beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
 
@@ -1325,9 +1489,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         førstePeriode.periode shouldBe sortedPerioder[0]
         førstePeriode.renter shouldBe BigDecimal(0)
         var feilPostering = førstePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(1755), kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_EFOG,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(1755),
+            kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING,
+        )
         var ytelsePostering = førstePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.EFOG,
             beløp = ytelsePostering,
             nyttBeløp = BigDecimal(18195),
             utbetaltBeløp = BigDecimal(19950),
@@ -1341,9 +1511,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         andrePeriode.periode shouldBe sortedPerioder[1]
         andrePeriode.renter shouldBe BigDecimal(0)
         feilPostering = andrePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(1755), kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_EFOG,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(1755),
+            kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING,
+        )
         ytelsePostering = andrePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.EFOG,
             beløp = ytelsePostering,
             nyttBeløp = BigDecimal(18195),
             utbetaltBeløp = BigDecimal(19950),
@@ -1360,66 +1536,58 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         fagsakRepository.update(fagsakRepository.findByIdOrThrow(fagsak.id).copy(fagsystem = Fagsystem.EF))
 
         val kravgrunnlagxml = readXml("/kravgrunnlagxml/kravgrunnlag_EF_med_skatt_avrunding_3.xml")
-        val kravgrunnlag =
-            KravgrunnlagMapper.tilKravgrunnlag431(
-                KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
-                behandling.id,
-            )
+        val kravgrunnlag = KravgrunnlagMapper.tilKravgrunnlag431(
+            KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
+            behandling.id,
+        )
         kravgrunnlagRepository.insert(kravgrunnlag)
 
         val sortedPerioder = kravgrunnlag.perioder.map { it.periode }.sortedBy { it.fom }
 
-        val aktsomhetPeriode =
-            VilkårsvurderingsperiodeDto(
-                periode =
-                    Datoperiode(
-                        sortedPerioder[0].fom,
-                        sortedPerioder[2].tom,
-                    ),
-                begrunnelse = "testverdi",
-                aktsomhetDto =
-                    AktsomhetDto(
-                        aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
-                        begrunnelse = "simpel uaktsomhet begrunnelse",
-                        tilbakekrevSmåbeløp = true,
-                        særligeGrunnerBegrunnelse = "test",
-                        særligeGrunnerTilReduksjon = false,
-                        særligeGrunner = listOf(SærligGrunnDto(GRAD_AV_UAKTSOMHET), SærligGrunnDto(HELT_ELLER_DELVIS_NAVS_FEIL)),
-                        andelTilbakekreves = BigDecimal(100),
-                    ),
-                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
-            )
+        val aktsomhetPeriode = VilkårsvurderingsperiodeDto(
+            periode = Datoperiode(
+                sortedPerioder[0].fom,
+                sortedPerioder[2].tom,
+            ),
+            begrunnelse = "testverdi",
+            aktsomhetDto = AktsomhetDto(
+                aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
+                begrunnelse = "simpel uaktsomhet begrunnelse",
+                tilbakekrevSmåbeløp = true,
+                særligeGrunnerBegrunnelse = "test",
+                særligeGrunnerTilReduksjon = false,
+                særligeGrunner = listOf(SærligGrunnDto(GRAD_AV_UAKTSOMHET), SærligGrunnDto(HELT_ELLER_DELVIS_NAVS_FEIL)),
+                andelTilbakekreves = BigDecimal(100),
+            ),
+            vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
+        )
 
-        val aktsomhetPeriode1 =
-            VilkårsvurderingsperiodeDto(
-                periode =
-                    Datoperiode(
-                        sortedPerioder[3].fom,
-                        sortedPerioder[3].tom,
-                    ),
-                begrunnelse = "testverdi",
-                aktsomhetDto =
-                    AktsomhetDto(
-                        aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
-                        begrunnelse = "simpel uaktsomhet begrunnelse",
-                        tilbakekrevSmåbeløp = true,
-                        særligeGrunnerBegrunnelse = "test",
-                        særligeGrunnerTilReduksjon = true,
-                        særligeGrunner = listOf(SærligGrunnDto(HELT_ELLER_DELVIS_NAVS_FEIL)),
-                        andelTilbakekreves = BigDecimal(68),
-                    ),
-                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
-            )
+        val aktsomhetPeriode1 = VilkårsvurderingsperiodeDto(
+            periode = Datoperiode(
+                sortedPerioder[3].fom,
+                sortedPerioder[3].tom,
+            ),
+            begrunnelse = "testverdi",
+            aktsomhetDto = AktsomhetDto(
+                aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
+                begrunnelse = "simpel uaktsomhet begrunnelse",
+                tilbakekrevSmåbeløp = true,
+                særligeGrunnerBegrunnelse = "test",
+                særligeGrunnerTilReduksjon = true,
+                særligeGrunner = listOf(SærligGrunnDto(HELT_ELLER_DELVIS_NAVS_FEIL)),
+                andelTilbakekreves = BigDecimal(68),
+            ),
+            vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
+        )
 
         vilkårsvurderingService.lagreVilkårsvurdering(
             behandling.id,
             BehandlingsstegVilkårsvurderingDto(listOf(aktsomhetPeriode, aktsomhetPeriode1)),
         )
 
-        val tilbakekrevingsperioder =
-            vedtakBeregningService
-                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
-                .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder = vedtakBeregningService
+            .beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 4
 
@@ -1427,9 +1595,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         førstePeriode.periode shouldBe sortedPerioder[0]
         førstePeriode.renter shouldBe BigDecimal(0)
         var feilPostering = førstePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(637), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_EFOG,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(637),
+            kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
+        )
         var ytelsePostering = førstePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.EFOG,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(8782),
             tilbakekrevesBeløp = BigDecimal(637),
@@ -1442,9 +1616,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         andrePeriode.periode shouldBe sortedPerioder[1]
         andrePeriode.renter shouldBe BigDecimal(0)
         feilPostering = andrePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(1087), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_EFOG,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(1087),
+            kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
+        )
         ytelsePostering = andrePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.EFOG,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(8782),
             tilbakekrevesBeløp = BigDecimal(1087),
@@ -1457,9 +1637,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         tredjePeriode.periode shouldBe sortedPerioder[2]
         tredjePeriode.renter shouldBe BigDecimal(0)
         feilPostering = tredjePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(2250), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_EFOG,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(2250),
+            kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
+        )
         ytelsePostering = tredjePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.EFOG,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(8782),
             tilbakekrevesBeløp = BigDecimal(2250),
@@ -1472,9 +1658,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         fjerdePeriode.periode shouldBe sortedPerioder[3]
         fjerdePeriode.renter shouldBe BigDecimal(0)
         feilPostering = fjerdePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(8782), kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_EFOG,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(8782),
+            kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING,
+        )
         ytelsePostering = fjerdePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.EFOG,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(8782),
             tilbakekrevesBeløp = BigDecimal(5972),
@@ -1490,47 +1682,41 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         fagsakRepository.update(fagsakRepository.findByIdOrThrow(fagsak.id).copy(fagsystem = Fagsystem.EF))
 
         val kravgrunnlagxml = readXml("/kravgrunnlagxml/kravgrunnlag_EF_med_skatt_avrunding_2.xml")
-        val kravgrunnlag =
-            KravgrunnlagMapper.tilKravgrunnlag431(
-                KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
-                behandling.id,
-            )
+        val kravgrunnlag = KravgrunnlagMapper.tilKravgrunnlag431(
+            KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
+            behandling.id,
+        )
         kravgrunnlagRepository.insert(kravgrunnlag)
 
         val sortedPerioder = kravgrunnlag.perioder.map { it.periode }.sortedBy { it.fom }
 
-        val aktsomhetPeriode =
-            VilkårsvurderingsperiodeDto(
-                periode =
-                    Datoperiode(
-                        sortedPerioder[0].fom,
-                        sortedPerioder[3].tom,
+        val aktsomhetPeriode = VilkårsvurderingsperiodeDto(
+            periode = Datoperiode(
+                sortedPerioder[0].fom,
+                sortedPerioder[3].tom,
+            ),
+            begrunnelse = "testverdi",
+            aktsomhetDto = AktsomhetDto(
+                aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
+                begrunnelse = "simpel uaktsomhet begrunnelse",
+                tilbakekrevSmåbeløp = true,
+                særligeGrunnerBegrunnelse = "test",
+                særligeGrunnerTilReduksjon = true,
+                særligeGrunner = listOf(
+                    SærligGrunnDto(
+                        HELT_ELLER_DELVIS_NAVS_FEIL,
                     ),
-                begrunnelse = "testverdi",
-                aktsomhetDto =
-                    AktsomhetDto(
-                        aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
-                        begrunnelse = "simpel uaktsomhet begrunnelse",
-                        tilbakekrevSmåbeløp = true,
-                        særligeGrunnerBegrunnelse = "test",
-                        særligeGrunnerTilReduksjon = true,
-                        særligeGrunner =
-                            listOf(
-                                SærligGrunnDto(
-                                    HELT_ELLER_DELVIS_NAVS_FEIL,
-                                ),
-                            ),
-                        andelTilbakekreves = BigDecimal(100),
-                    ),
-                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
-            )
+                ),
+                andelTilbakekreves = BigDecimal(100),
+            ),
+            vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
+        )
 
         vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, BehandlingsstegVilkårsvurderingDto(listOf(aktsomhetPeriode)))
 
-        val tilbakekrevingsperioder =
-            vedtakBeregningService
-                .beregnVedtaksperioder(behandling.id, kravgrunnlag)
-                .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder = vedtakBeregningService
+            .beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 4
 
@@ -1538,9 +1724,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         førstePeriode.periode shouldBe sortedPerioder[0]
         førstePeriode.renter shouldBe BigDecimal(0)
         var feilPostering = førstePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(2962), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_EFOG,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(2962),
+            kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
+        )
         var ytelsePostering = førstePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.EFOG,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(12607),
             tilbakekrevesBeløp = BigDecimal(2962),
@@ -1553,9 +1745,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         andrePeriode.periode shouldBe sortedPerioder[1]
         andrePeriode.renter shouldBe BigDecimal(0)
         feilPostering = andrePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(1725), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_EFOG,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(1725),
+            kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
+        )
         ytelsePostering = andrePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.EFOG,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(12607),
             tilbakekrevesBeløp = BigDecimal(1725),
@@ -1568,9 +1766,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         tredjePeriode.periode shouldBe sortedPerioder[2]
         tredjePeriode.renter shouldBe BigDecimal(0)
         feilPostering = tredjePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(1050), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_EFOG,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(1050),
+            kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
+        )
         ytelsePostering = tredjePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.EFOG,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(12607),
             tilbakekrevesBeløp = BigDecimal(1050),
@@ -1583,9 +1787,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         fjerdePeriode.periode shouldBe sortedPerioder[3]
         fjerdePeriode.renter shouldBe BigDecimal(0)
         feilPostering = fjerdePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
-        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(150), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_EFOG,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(150),
+            kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
+        )
         ytelsePostering = fjerdePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(
+            klassekode = Klassekode.EFOG,
             beløp = ytelsePostering,
             utbetaltBeløp = BigDecimal(12607),
             tilbakekrevesBeløp = BigDecimal(150),
@@ -1595,18 +1805,84 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         )
     }
 
+    @Test
+    fun `barnetrygd og utvidet barnetrygd i samme kravgrunnlagsperiode`() {
+        kravgrunnlagRepository.deleteById(kravgrunnlag.id)
+        fagsakRepository.update(fagsakRepository.findByIdOrThrow(fagsak.id).copy(fagsystem = Fagsystem.EF))
+
+        val kravgrunnlagxml = readXml("/kravgrunnlagxml/BA_utvidet_barnetrygd.xml")
+        val kravgrunnlag = KravgrunnlagMapper.tilKravgrunnlag431(
+            KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
+            behandling.id,
+        )
+        kravgrunnlagRepository.insert(kravgrunnlag)
+
+        val sortedPerioder = kravgrunnlag.perioder.map { it.periode }.sortedBy { it.fom }
+
+        val aktsomhetPeriode = VilkårsvurderingsperiodeDto(
+            periode = 1.januar() til 31.januar(),
+            begrunnelse = "testverdi",
+            aktsomhetDto = AktsomhetDto(
+                aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
+                begrunnelse = "simpel uaktsomhet begrunnelse",
+                tilbakekrevSmåbeløp = true,
+                særligeGrunnerBegrunnelse = "test",
+                særligeGrunnerTilReduksjon = true,
+                særligeGrunner = listOf(SærligGrunnDto(HELT_ELLER_DELVIS_NAVS_FEIL)),
+                andelTilbakekreves = BigDecimal(50),
+            ),
+            vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
+        )
+
+        vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, BehandlingsstegVilkårsvurderingDto(listOf(aktsomhetPeriode)))
+
+        val tilbakekrevingsperioder = vedtakBeregningService
+            .beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            .sortedBy { it.periode.fom }
+        tilbakekrevingsperioder.shouldNotBeNull()
+        tilbakekrevingsperioder.size shouldBe 1
+
+        val førstePeriode = tilbakekrevingsperioder[0]
+        førstePeriode.periode shouldBe sortedPerioder[0]
+        førstePeriode.renter shouldBe BigDecimal(0)
+        val feilPostering = førstePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
+        assertBeløp(
+            klassekode = Klassekode.KL_KODE_FEIL_BA,
+            beløp = feilPostering,
+            nyttBeløp = BigDecimal(2500),
+            kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING,
+        )
+        val ytelsePosteringer = førstePeriode.beløp.filter { Klassetype.YTEL == it.klassetype }
+        assertBeløp(
+            klassekode = Klassekode.BATR,
+            beløp = ytelsePosteringer[0],
+            utbetaltBeløp = BigDecimal(1000),
+            tilbakekrevesBeløp = BigDecimal(500),
+            uinnkrevdBeløp = BigDecimal(500),
+            skattBeløp = BigDecimal(0),
+            kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING,
+        )
+        assertBeløp(
+            klassekode = Klassekode.BAUTV_OP,
+            beløp = ytelsePosteringer[1],
+            utbetaltBeløp = BigDecimal(1500),
+            tilbakekrevesBeløp = BigDecimal(750),
+            uinnkrevdBeløp = BigDecimal(750),
+            skattBeløp = BigDecimal(0),
+            kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING,
+        )
+    }
+
     private fun lagForeldelse(perioder: List<Månedsperiode>) {
-        val foreldelsesdata =
-            BehandlingsstegForeldelseDto(
-                perioder.map {
-                    ForeldelsesperiodeDto(
-                        periode = it.toDatoperiode(),
-                        begrunnelse = "testverdi",
-                        foreldelsesvurderingstype =
-                            Foreldelsesvurderingstype.FORELDET,
-                    )
-                },
-            )
+        val foreldelsesdata = BehandlingsstegForeldelseDto(
+            perioder.map {
+                ForeldelsesperiodeDto(
+                    periode = it.toDatoperiode(),
+                    begrunnelse = "testverdi",
+                    foreldelsesvurderingstype = Foreldelsesvurderingstype.FORELDET,
+                )
+            },
+        )
         foreldelsesService.lagreVurdertForeldelse(behandling.id, foreldelsesdata, SecureLog.Context.tom())
     }
 
@@ -1617,31 +1893,28 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         beløpTilbakekreves: BigDecimal? = null,
         særligeGrunnerTilReduksjon: Boolean = false,
     ) {
-        val vilkårsperioder =
-            perioder.map {
-                VilkårsvurderingsperiodeDto(
-                    periode = it.toDatoperiode(),
+        val vilkårsperioder = perioder.map {
+            VilkårsvurderingsperiodeDto(
+                periode = it.toDatoperiode(),
+                begrunnelse = "testverdi",
+                aktsomhetDto = AktsomhetDto(
+                    aktsomhet = aktsomhet,
+                    andelTilbakekreves = andelTilbakreves,
+                    beløpTilbakekreves = beløpTilbakekreves,
                     begrunnelse = "testverdi",
-                    aktsomhetDto =
-                        AktsomhetDto(
-                            aktsomhet = aktsomhet,
-                            andelTilbakekreves = andelTilbakreves,
-                            beløpTilbakekreves = beløpTilbakekreves,
-                            begrunnelse = "testverdi",
-                            særligeGrunnerTilReduksjon = særligeGrunnerTilReduksjon,
-                            tilbakekrevSmåbeløp = true,
-                            særligeGrunnerBegrunnelse = "testverdi",
-                            særligeGrunner =
-                                listOf(
-                                    SærligGrunnDto(
-                                        ANNET,
-                                        "testverdi",
-                                    ),
-                                ),
+                    særligeGrunnerTilReduksjon = særligeGrunnerTilReduksjon,
+                    tilbakekrevSmåbeløp = true,
+                    særligeGrunnerBegrunnelse = "testverdi",
+                    særligeGrunner = listOf(
+                        SærligGrunnDto(
+                            ANNET,
+                            "testverdi",
                         ),
-                    vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
-                )
-            }
+                    ),
+                ),
+                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
+            )
+        }
         vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, BehandlingsstegVilkårsvurderingDto(vilkårsperioder))
     }
 
@@ -1650,20 +1923,18 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         beløpErIBehold: Boolean = false,
         beløpTilbakekreves: BigDecimal? = null,
     ) {
-        val vilkårsperioder =
-            perioder.map {
-                VilkårsvurderingsperiodeDto(
-                    periode = it.toDatoperiode(),
+        val vilkårsperioder = perioder.map {
+            VilkårsvurderingsperiodeDto(
+                periode = it.toDatoperiode(),
+                begrunnelse = "testverdi",
+                godTroDto = GodTroDto(
                     begrunnelse = "testverdi",
-                    godTroDto =
-                        GodTroDto(
-                            begrunnelse = "testverdi",
-                            beløpErIBehold = beløpErIBehold,
-                            beløpTilbakekreves = beløpTilbakekreves,
-                        ),
-                    vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
-                )
-            }
+                    beløpErIBehold = beløpErIBehold,
+                    beløpTilbakekreves = beløpTilbakekreves,
+                ),
+                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
+            )
+        }
         vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, BehandlingsstegVilkårsvurderingDto(vilkårsperioder))
     }
 
@@ -1671,56 +1942,58 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         perioder: List<Månedsperiode>,
         månedligSkattBeløp: BigDecimal,
         kravgrunnlagsbeløpene: List<Kravgrunnlagsbeløp>,
-    ): Kravgrunnlag431 =
-        Kravgrunnlag431(
-            behandlingId = behandling.id,
-            vedtakId = BigInteger.ZERO,
-            kravstatuskode = Kravstatuskode.NYTT,
-            fagområdekode = Fagområdekode.BA,
-            fagsystemId = fagsak.eksternFagsakId,
-            gjelderVedtakId = "testverdi",
-            gjelderType = GjelderType.PERSON,
-            utbetalesTilId = "testverdi",
-            utbetIdType = GjelderType.PERSON,
-            ansvarligEnhet = "testverdi",
-            bostedsenhet = "testverdi",
-            behandlingsenhet = "testverdi",
-            kontrollfelt = "testverdi",
-            referanse = behandling.aktivFagsystemsbehandling.eksternId,
-            eksternKravgrunnlagId = BigInteger.ZERO,
-            saksbehandlerId = "testverdi",
-            perioder = lagKravgrunnlagsperiode(perioder, månedligSkattBeløp, kravgrunnlagsbeløpene),
-        )
+    ): Kravgrunnlag431 = Kravgrunnlag431(
+        behandlingId = behandling.id,
+        vedtakId = BigInteger.ZERO,
+        kravstatuskode = Kravstatuskode.NYTT,
+        fagområdekode = Fagområdekode.BA,
+        fagsystemId = fagsak.eksternFagsakId,
+        gjelderVedtakId = "testverdi",
+        gjelderType = GjelderType.PERSON,
+        utbetalesTilId = "testverdi",
+        utbetIdType = GjelderType.PERSON,
+        ansvarligEnhet = "testverdi",
+        bostedsenhet = "testverdi",
+        behandlingsenhet = "testverdi",
+        kontrollfelt = "testverdi",
+        referanse = behandling.aktivFagsystemsbehandling.eksternId,
+        eksternKravgrunnlagId = BigInteger.ZERO,
+        saksbehandlerId = "testverdi",
+        perioder = lagKravgrunnlagsperiode(perioder, månedligSkattBeløp, kravgrunnlagsbeløpene),
+    )
 
     private fun lagKravgrunnlagsperiode(
         perioder: List<Månedsperiode>,
         månedligSkattBeløp: BigDecimal,
         kravgrunnlagsbeløpene: List<Kravgrunnlagsbeløp>,
-    ): Set<Kravgrunnlagsperiode432> =
-        perioder
-            .map {
-                Kravgrunnlagsperiode432(
-                    periode = it,
-                    månedligSkattebeløp = månedligSkattBeløp,
-                    beløp = lagKravgrunnlagsbeløp(kravgrunnlagsbeløpene),
-                )
-            }.toSet()
+    ): Set<Kravgrunnlagsperiode432> = perioder.map {
+        Kravgrunnlagsperiode432(
+            periode = it,
+            månedligSkattebeløp = månedligSkattBeløp,
+            beløp = lagKravgrunnlagsbeløp(kravgrunnlagsbeløpene),
+        )
+    }.toSet()
 
-    private fun lagKravgrunnlagsbeløp(kravgrunnlagsbeløpene: List<Kravgrunnlagsbeløp>): Set<Kravgrunnlagsbeløp433> =
-        kravgrunnlagsbeløpene
-            .map {
-                Kravgrunnlagsbeløp433(
-                    klassekode = Klassekode.BATR,
-                    klassetype = it.klassetype,
-                    opprinneligUtbetalingsbeløp = it.opprinneligUtbetalingsbeløp,
-                    nyttBeløp = it.nyttBeløp,
-                    tilbakekrevesBeløp = it.tilbakekrevesBeløp,
-                    uinnkrevdBeløp = it.uinnkrevdBeløp,
-                    skatteprosent = it.skatteprosent,
-                )
-            }.toSet()
+    private fun lagKravgrunnlagsbeløp(
+        kravgrunnlagsbeløpene: List<Kravgrunnlagsbeløp>,
+    ): Set<Kravgrunnlagsbeløp433> = kravgrunnlagsbeløpene.map {
+        Kravgrunnlagsbeløp433(
+            klassekode = when (it.klassetype) {
+                Klassetype.FEIL -> Klassekode.KL_KODE_FEIL_BA
+                Klassetype.YTEL -> Klassekode.BATR
+                else -> error("Not implemented.")
+            },
+            klassetype = it.klassetype,
+            opprinneligUtbetalingsbeløp = it.opprinneligUtbetalingsbeløp,
+            nyttBeløp = it.nyttBeløp,
+            tilbakekrevesBeløp = it.tilbakekrevesBeløp,
+            uinnkrevdBeløp = it.uinnkrevdBeløp,
+            skatteprosent = it.skatteprosent,
+        )
+    }.toSet()
 
     private fun assertBeløp(
+        klassekode: Klassekode,
         beløp: Tilbakekrevingsbeløp,
         nyttBeløp: BigDecimal = BigDecimal.ZERO,
         utbetaltBeløp: BigDecimal = BigDecimal.ZERO,
@@ -1729,6 +2002,7 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         skattBeløp: BigDecimal = BigDecimal.ZERO,
         kodeResultat: KodeResultat,
     ) {
+        beløp.klassekode shouldBe klassekode
         beløp.nyttBeløp shouldBe nyttBeløp
         beløp.utbetaltBeløp shouldBe utbetaltBeløp
         beløp.utbetaltBeløp shouldBe utbetaltBeløp

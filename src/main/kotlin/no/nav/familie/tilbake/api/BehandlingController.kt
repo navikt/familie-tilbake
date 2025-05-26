@@ -274,6 +274,7 @@ class BehandlingController(
             auditLoggerEvent = AuditLoggerEvent.UPDATE,
             handling = "Saksbehandler bytter enhet på behandling",
         )
+
         behandlingService.byttBehandlendeEnhet(behandlingId, byttEnhetDto)
         return Ressurs.success("OK")
     }

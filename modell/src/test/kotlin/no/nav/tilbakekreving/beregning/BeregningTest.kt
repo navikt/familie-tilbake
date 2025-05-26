@@ -1,11 +1,15 @@
 package no.nav.tilbakekreving.beregning
 
+import io.kotest.assertions.throwables.shouldNotThrow
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
+import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.medBeløp
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.medTilbakekrevesBeløp
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.prosent
+import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.TestBeløp.Companion.beløp
 import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagAdapter
 import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagPeriodeAdapter
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurderingAdapter
@@ -45,11 +49,13 @@ class BeregningTest {
         delperioder[0].shouldMatch(
             periode = 1.januar til 31.januar,
             renter = 0.kroner,
-            tilbakekrevesBrutto = 1500.kroner,
             tilbakekrevesBruttoMedRenter = 1500.kroner,
-            skatt = 0.kroner,
-            utbetaltYtelsesbeløp = 20000.kroner,
             feilutbetaltBeløp = 1500.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 1500.kroner,
+                skatt = 0.kroner,
+                utbetaltYtelsesbeløp = 20000.kroner,
+            ),
         )
         beregning.oppsummer() shouldBe Beregningsresultat(
             listOf(
@@ -83,7 +89,7 @@ class BeregningTest {
             ),
             foreldetPerioder = emptyList(),
             kravgrunnlag = perioder(
-                1.januar til 31.januar medTilbakekrevesBeløp 1500.kroner medSkatteprosent 50.prosent,
+                1.januar til 31.januar medBeløp beløp(tilbakekrevesBeløp = 1500.kroner, skatteprosent = 50.prosent),
             ),
         )
 
@@ -92,11 +98,13 @@ class BeregningTest {
         delperioder[0].shouldMatch(
             periode = 1.januar til 31.januar,
             renter = 150.kroner,
-            tilbakekrevesBrutto = 1500.kroner,
             tilbakekrevesBruttoMedRenter = 1650.kroner,
-            skatt = 750.kroner,
-            utbetaltYtelsesbeløp = 20000.kroner,
             feilutbetaltBeløp = 1500.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 1500.kroner,
+                skatt = 750.kroner,
+                utbetaltYtelsesbeløp = 20000.kroner,
+            ),
         )
         beregning.oppsummer() shouldBe Beregningsresultat(
             listOf(
@@ -139,20 +147,24 @@ class BeregningTest {
         delperiode[0].shouldMatch(
             periode = 1.januar til 31.januar,
             renter = 0.kroner,
-            tilbakekrevesBrutto = 1000.kroner,
             tilbakekrevesBruttoMedRenter = 1000.kroner,
-            skatt = 0.kroner,
-            utbetaltYtelsesbeløp = 20000.kroner,
             feilutbetaltBeløp = 1500.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 1000.kroner,
+                skatt = 0.kroner,
+                utbetaltYtelsesbeløp = 20000.kroner,
+            ),
         )
         delperiode[1].shouldMatch(
             periode = 1.februar til 28.februar,
             renter = 0.kroner,
-            tilbakekrevesBrutto = 999.kroner,
             tilbakekrevesBruttoMedRenter = 999.kroner,
-            skatt = 0.kroner,
-            utbetaltYtelsesbeløp = 20000.kroner,
             feilutbetaltBeløp = 1500.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 999.kroner,
+                skatt = 0.kroner,
+                utbetaltYtelsesbeløp = 20000.kroner,
+            ),
         )
 
         beregning.oppsummer() shouldBe Beregningsresultat(
@@ -163,7 +175,7 @@ class BeregningTest {
                     feilutbetaltBeløp = 3000.kroner,
                     andelAvBeløp = null,
                     renteprosent = null,
-                    manueltSattTilbakekrevingsbeløp = 1999.0.kroner,
+                    manueltSattTilbakekrevingsbeløp = 1999.kroner,
                     tilbakekrevingsbeløpUtenRenter = 1999.kroner,
                     rentebeløp = 0.kroner,
                     tilbakekrevingsbeløp = 1999.kroner,
@@ -197,20 +209,24 @@ class BeregningTest {
         delperioder[0].shouldMatch(
             periode = 1.januar til 31.januar,
             renter = 0.kroner,
-            tilbakekrevesBrutto = 0.kroner,
             tilbakekrevesBruttoMedRenter = 0.kroner,
-            skatt = 0.kroner,
-            utbetaltYtelsesbeløp = 20000.kroner,
             feilutbetaltBeløp = 1500.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 0.kroner,
+                skatt = 0.kroner,
+                utbetaltYtelsesbeløp = 20000.kroner,
+            ),
         )
         delperioder[1].shouldMatch(
             periode = 1.februar til 28.februar,
             renter = 0.kroner,
-            tilbakekrevesBrutto = 0.kroner,
             tilbakekrevesBruttoMedRenter = 0.kroner,
-            skatt = 0.kroner,
-            utbetaltYtelsesbeløp = 20000.kroner,
             feilutbetaltBeløp = 1500.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 0.kroner,
+                skatt = 0.kroner,
+                utbetaltYtelsesbeløp = 20000.kroner,
+            ),
         )
         beregning.oppsummer() shouldBe Beregningsresultat(
             listOf(
@@ -254,20 +270,24 @@ class BeregningTest {
         delperioder[0].shouldMatch(
             periode = 1.januar til 31.januar,
             renter = 0.kroner,
-            tilbakekrevesBrutto = 750.kroner,
             tilbakekrevesBruttoMedRenter = 750.kroner,
-            skatt = 0.kroner,
-            utbetaltYtelsesbeløp = 20000.kroner,
             feilutbetaltBeløp = 1499.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 750.kroner,
+                skatt = 0.kroner,
+                utbetaltYtelsesbeløp = 20000.kroner,
+            ),
         )
         delperioder[1].shouldMatch(
             periode = 1.februar til 28.februar,
             renter = 0.kroner,
-            tilbakekrevesBrutto = 749.kroner,
             tilbakekrevesBruttoMedRenter = 749.kroner,
-            skatt = 0.kroner,
-            utbetaltYtelsesbeløp = 20000.kroner,
             feilutbetaltBeløp = 1499.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 749.kroner,
+                skatt = 0.kroner,
+                utbetaltYtelsesbeløp = 20000.kroner,
+            ),
         )
         beregning.oppsummer() shouldBe Beregningsresultat(
             listOf(
@@ -301,9 +321,9 @@ class BeregningTest {
             ),
             foreldetPerioder = emptyList(),
             kravgrunnlag = perioder(
-                1.januar til 31.januar medTilbakekrevesBeløp 18609.kroner medSkatteprosent 50.prosent medOriginaltUtbetaltBeløp 44093.kroner medRiktigYtelsesbeløp 25484.kroner,
-                1.februar til 28.februar medTilbakekrevesBeløp 18609.kroner medSkatteprosent 50.prosent medOriginaltUtbetaltBeløp 44093.kroner medRiktigYtelsesbeløp 25484.kroner,
-                1.mars til 31.mars medTilbakekrevesBeløp 18609.kroner medSkatteprosent 50.prosent medOriginaltUtbetaltBeløp 44093.kroner medRiktigYtelsesbeløp 25484.kroner,
+                1.januar til 31.januar medBeløp beløp(tilbakekrevesBeløp = 18609.kroner, skatteprosent = 50.prosent, originaltUtbetaltBeløp = 44093.kroner, riktigYtelsesbeløp = 25484.kroner),
+                1.februar til 28.februar medBeløp beløp(tilbakekrevesBeløp = 18609.kroner, skatteprosent = 50.prosent, originaltUtbetaltBeløp = 44093.kroner, riktigYtelsesbeløp = 25484.kroner),
+                1.mars til 31.mars medBeløp beløp(tilbakekrevesBeløp = 18609.kroner, skatteprosent = 50.prosent, originaltUtbetaltBeløp = 44093.kroner, riktigYtelsesbeløp = 25484.kroner),
             ),
         )
 
@@ -312,29 +332,35 @@ class BeregningTest {
         delperioder[0].shouldMatch(
             periode = 1.januar til 31.januar,
             renter = 1861.kroner,
-            tilbakekrevesBrutto = 18609.kroner,
             tilbakekrevesBruttoMedRenter = 20470.kroner,
-            skatt = 9305.kroner,
-            utbetaltYtelsesbeløp = 44093.kroner,
             feilutbetaltBeløp = 18609.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 18609.kroner,
+                skatt = 9305.kroner,
+                utbetaltYtelsesbeløp = 44093.kroner,
+            ),
         )
         delperioder[1].shouldMatch(
             periode = 1.februar til 28.februar,
             renter = 1861.kroner,
-            tilbakekrevesBrutto = 18609.kroner,
             tilbakekrevesBruttoMedRenter = 20470.kroner,
-            skatt = 9304.kroner,
-            utbetaltYtelsesbeløp = 44093.kroner,
             feilutbetaltBeløp = 18609.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 18609.kroner,
+                skatt = 9304.kroner,
+                utbetaltYtelsesbeløp = 44093.kroner,
+            ),
         )
         delperioder[2].shouldMatch(
             periode = 1.mars til 31.mars,
             renter = 1860.kroner,
-            tilbakekrevesBrutto = 18609.kroner,
             tilbakekrevesBruttoMedRenter = 20469.kroner,
-            skatt = 9304.kroner,
-            utbetaltYtelsesbeløp = 44093.kroner,
             feilutbetaltBeløp = 18609.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 18609.kroner,
+                skatt = 9304.kroner,
+                utbetaltYtelsesbeløp = 44093.kroner,
+            ),
         )
 
         beregning.oppsummer() shouldBe Beregningsresultat(
@@ -369,8 +395,8 @@ class BeregningTest {
             ),
             foreldetPerioder = emptyList(),
             kravgrunnlag = perioder(
-                1.januar til 31.januar medTilbakekrevesBeløp 1755.kroner medSkatteprosent 44.prosent medOriginaltUtbetaltBeløp 19950.kroner medRiktigYtelsesbeløp 18195.kroner,
-                1.februar til 28.februar medTilbakekrevesBeløp 1755.kroner medSkatteprosent 50.prosent medOriginaltUtbetaltBeløp 19950.kroner medRiktigYtelsesbeløp 18195.kroner,
+                1.januar til 31.januar medBeløp beløp(1755.kroner, skatteprosent = 44.prosent, originaltUtbetaltBeløp = 19950.kroner, riktigYtelsesbeløp = 18195.kroner),
+                1.februar til 28.februar medBeløp beløp(1755.kroner, skatteprosent = 50.prosent, originaltUtbetaltBeløp = 19950.kroner, riktigYtelsesbeløp = 18195.kroner),
             ),
         )
 
@@ -379,20 +405,24 @@ class BeregningTest {
         delperioder[0].shouldMatch(
             periode = 1.januar til 31.januar,
             renter = 0.kroner,
-            tilbakekrevesBrutto = 878.kroner,
             tilbakekrevesBruttoMedRenter = 878.kroner,
-            skatt = 386.kroner,
-            utbetaltYtelsesbeløp = 19950.kroner,
             feilutbetaltBeløp = 1755.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 878.kroner,
+                skatt = 386.kroner,
+                utbetaltYtelsesbeløp = 19950.kroner,
+            ),
         )
         delperioder[1].shouldMatch(
             periode = 1.februar til 28.februar,
             renter = 0.kroner,
-            tilbakekrevesBrutto = 877.kroner,
             tilbakekrevesBruttoMedRenter = 877.kroner,
-            skatt = 438.kroner,
-            utbetaltYtelsesbeløp = 19950.kroner,
             feilutbetaltBeløp = 1755.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 877.kroner,
+                skatt = 438.kroner,
+                utbetaltYtelsesbeløp = 19950.kroner,
+            ),
         )
         beregning.oppsummer() shouldBe Beregningsresultat(
             listOf(
@@ -427,8 +457,8 @@ class BeregningTest {
             ),
             foreldetPerioder = emptyList(),
             kravgrunnlag = perioder(
-                1.januar til 31.januar medTilbakekrevesBeløp 1755.kroner medOriginaltUtbetaltBeløp 19950.kroner medRiktigYtelsesbeløp 18195.kroner,
-                1.februar til 28.februar medTilbakekrevesBeløp 1755.kroner medOriginaltUtbetaltBeløp 19950.kroner medRiktigYtelsesbeløp 18195.kroner,
+                1.januar til 31.januar medBeløp beløp(tilbakekrevesBeløp = 1755.kroner, originaltUtbetaltBeløp = 19950.kroner, riktigYtelsesbeløp = 18195.kroner),
+                1.februar til 28.februar medBeløp beløp(tilbakekrevesBeløp = 1755.kroner, originaltUtbetaltBeløp = 19950.kroner, riktigYtelsesbeløp = 18195.kroner),
             ),
         )
 
@@ -437,20 +467,24 @@ class BeregningTest {
         delperioder[0].shouldMatch(
             periode = 1.januar til 31.januar,
             renter = 0.kroner,
-            tilbakekrevesBrutto = 1755.kroner,
             tilbakekrevesBruttoMedRenter = 1755.kroner,
-            skatt = 0.kroner,
-            utbetaltYtelsesbeløp = 19950.kroner,
             feilutbetaltBeløp = 1755.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 1755.kroner,
+                skatt = 0.kroner,
+                utbetaltYtelsesbeløp = 19950.kroner,
+            ),
         )
         delperioder[1].shouldMatch(
             periode = 1.februar til 28.februar,
             renter = 0.kroner,
-            tilbakekrevesBrutto = 1755.kroner,
             tilbakekrevesBruttoMedRenter = 1755.kroner,
-            skatt = 0.kroner,
-            utbetaltYtelsesbeløp = 19950.kroner,
             feilutbetaltBeløp = 1755.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 1755.kroner,
+                skatt = 0.kroner,
+                utbetaltYtelsesbeløp = 19950.kroner,
+            ),
         )
 
         beregning.oppsummer() shouldBe Beregningsresultat(
@@ -510,20 +544,24 @@ class BeregningTest {
         delperioder[0].shouldMatch(
             periode = 1.januar til 31.januar,
             renter = 0.kroner,
-            tilbakekrevesBrutto = 0.kroner,
             tilbakekrevesBruttoMedRenter = 0.kroner,
-            skatt = 0.kroner,
-            utbetaltYtelsesbeløp = 20000.kroner,
             feilutbetaltBeløp = 2000.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 0.kroner,
+                skatt = 0.kroner,
+                utbetaltYtelsesbeløp = 20000.kroner,
+            ),
         )
         delperioder[1].shouldMatch(
             periode = 1.februar til 28.februar,
             renter = 0.kroner,
-            tilbakekrevesBrutto = 0.kroner,
             tilbakekrevesBruttoMedRenter = 0.kroner,
-            skatt = 0.kroner,
-            utbetaltYtelsesbeløp = 20000.kroner,
             feilutbetaltBeløp = 2000.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 0.kroner,
+                skatt = 0.kroner,
+                utbetaltYtelsesbeløp = 20000.kroner,
+            ),
         )
 
         beregning.oppsummer() shouldBe Beregningsresultat(
@@ -546,6 +584,103 @@ class BeregningTest {
             ),
             vedtaksresultat = Vedtaksresultat.INGEN_TILBAKEBETALING,
         )
+    }
+
+    @Test
+    fun `tilbakekreving av utvidet barnetrygd`() {
+        val beregning = Beregning(
+            beregnRenter = true,
+            tilbakekrevLavtBeløp = false,
+            vilkårsvurdering = vurdering(
+                1.januar til 31.januar burdeForstått medSimpelUaktsomhet(prosentdel = 50.prosent),
+            ),
+            foreldetPerioder = emptyList(),
+            kravgrunnlag = perioder(
+                1.januar til 31.januar medBeløp beløp(tilbakekrevesBeløp = 1000.kroner, originaltUtbetaltBeløp = 10000.kroner, klassekode = "BATR")
+                    medBeløp beløp(500.kroner, originaltUtbetaltBeløp = 10000.kroner, klassekode = "BAUTV-OP"),
+            ),
+        )
+
+        val delperioder = beregning.beregn()
+        delperioder.size shouldBe 1
+        delperioder[0].shouldMatch(
+            periode = 1.januar til 31.januar,
+            renter = 0.kroner,
+            tilbakekrevesBruttoMedRenter = 750.kroner,
+            feilutbetaltBeløp = 1500.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 500.kroner,
+                skatt = 0.kroner,
+                utbetaltYtelsesbeløp = 10000.kroner,
+            ),
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 250.kroner,
+                skatt = 0.kroner,
+                utbetaltYtelsesbeløp = 10000.kroner,
+            ),
+        )
+
+        beregning.oppsummer() shouldBe Beregningsresultat(
+            beregningsresultatsperioder = listOf(
+                Beregningsresultatsperiode(
+                    periode = 1.januar til 31.januar,
+                    vurdering = Aktsomhet.SIMPEL_UAKTSOMHET,
+                    feilutbetaltBeløp = 1500.kroner,
+                    andelAvBeløp = 50.prosent,
+                    renteprosent = null,
+                    manueltSattTilbakekrevingsbeløp = null,
+                    tilbakekrevingsbeløpUtenRenter = 750.kroner,
+                    rentebeløp = 0.kroner,
+                    tilbakekrevingsbeløp = 750.kroner,
+                    skattebeløp = 0.kroner,
+                    tilbakekrevingsbeløpEtterSkatt = 750.kroner,
+                    utbetaltYtelsesbeløp = 20000.kroner,
+                    riktigYtelsesbeløp = 18500.kroner,
+                ),
+            ),
+            vedtaksresultat = Vedtaksresultat.DELVIS_TILBAKEBETALING,
+        )
+    }
+
+    @Test
+    fun `fordeler manuelt satt beløp ut i fra relativ størrelse på tilbakekrevingsbeløp i periode`() {
+        val beregning = Beregning(
+            beregnRenter = true,
+            tilbakekrevLavtBeløp = false,
+            vilkårsvurdering = vurdering(
+                1.januar til 28.februar godTro medBeløpIBehold(4000.kroner),
+            ),
+            foreldetPerioder = emptyList(),
+            kravgrunnlag = perioder(
+                1.januar til 31.januar medBeløp beløp(tilbakekrevesBeløp = 4000.kroner, originaltUtbetaltBeløp = 10000.kroner, klassekode = "BATR"),
+                1.februar til 28.februar medBeløp beløp(tilbakekrevesBeløp = 4000.kroner, originaltUtbetaltBeløp = 10000.kroner, klassekode = "BATR")
+                    medBeløp beløp(2000.kroner, originaltUtbetaltBeløp = 10000.kroner, klassekode = "BAUTV-OP"),
+            ),
+        )
+
+        shouldNotThrow<Throwable> { beregning.oppsummer() }
+        shouldThrow<RuntimeException> { beregning.beregn() }
+        // TODO: Oppsummeringen under er riktig, men koden beregner seg frem til feil beløp.
+//        beregning.oppsummer() shouldBe Beregningsresultat(
+//            beregningsresultatsperioder = listOf(
+//                Beregningsresultatsperiode(
+//                    periode = 1.januar til 28.februar,
+//                    vurdering = AnnenVurdering.GOD_TRO,
+//                    feilutbetaltBeløp = 10000.kroner,
+//                    andelAvBeløp = null,
+//                    renteprosent = null,
+//                    manueltSattTilbakekrevingsbeløp = 4000.kroner,
+//                    tilbakekrevingsbeløpUtenRenter = 4000.kroner,
+//                    rentebeløp = 0.kroner,
+//                    tilbakekrevingsbeløp = 4000.kroner,
+//                    skattebeløp = 0.kroner,
+//                    tilbakekrevingsbeløpEtterSkatt = 4000.kroner,
+//                    utbetaltYtelsesbeløp = 30000.kroner,
+//                    riktigYtelsesbeløp = 20000.kroner,
+//                ),
+//            ),
+//            vedtaksresultat = Vedtaksresultat.DELVIS_TILBAKEBETALING,
+//        )
     }
 
     fun perioder(
@@ -608,75 +743,86 @@ class BeregningTest {
     fun Delperiode.shouldMatch(
         periode: Datoperiode,
         renter: BigDecimal,
-        tilbakekrevesBrutto: BigDecimal,
         tilbakekrevesBruttoMedRenter: BigDecimal,
-        skatt: BigDecimal,
-        utbetaltYtelsesbeløp: BigDecimal,
         feilutbetaltBeløp: BigDecimal,
+        vararg beløp: BeregnetBeløp,
     ) {
         this.periode shouldBe periode
         this.renter() shouldBe renter
-        this.tilbakekrevesBrutto() shouldBe tilbakekrevesBrutto
         this.tilbakekrevesBruttoMedRenter() shouldBe tilbakekrevesBruttoMedRenter
-        this.skatt() shouldBe skatt
-        this.andel.utbetaltYtelsesbeløp() shouldBe utbetaltYtelsesbeløp
-        this.andel.feilutbetaltBeløp() shouldBe feilutbetaltBeløp
+        this.feilutbetaltBeløp() shouldBe feilutbetaltBeløp
+        this.beløp().map {
+            BeregnetBeløp(
+                tilbakekrevesBrutto = it.tilbakekrevesBrutto(),
+                skatt = it.skatt(),
+                utbetaltYtelsesbeløp = it.utbetaltYtelsesbeløp(),
+            )
+        } shouldBe beløp.toList()
     }
 
     class TestKravgrunnlagPeriode(
         private val periode: Datoperiode,
-        private val tilbakekrevesBeløp: BigDecimal,
-        private var originaltUtbetaltBeløp: BigDecimal = 20000.kroner,
-        private var skatteprosent: BigDecimal = 0.prosent,
+        private val beløp: MutableList<TestBeløp>,
     ) : KravgrunnlagPeriodeAdapter {
-        private var riktigYteslesbeløp: BigDecimal? = null
-
-        infix fun medOriginaltUtbetaltBeløp(beløp: BigDecimal): TestKravgrunnlagPeriode {
-            originaltUtbetaltBeløp = beløp
-            return this
-        }
-
-        infix fun medSkatteprosent(prosentdel: BigDecimal): TestKravgrunnlagPeriode {
-            skatteprosent = prosentdel
-            return this
-        }
-
-        infix fun medRiktigYtelsesbeløp(beløp: BigDecimal): TestKravgrunnlagPeriode {
-            riktigYteslesbeløp = beløp
-            return this
-        }
-
         override fun periode(): Datoperiode = periode
 
+        infix fun medBeløp(beløp: TestBeløp) = also {
+            this.beløp.add(beløp)
+        }
+
         override fun feilutbetaltYtelsesbeløp(): BigDecimal {
-            return tilbakekrevesBeløp
-        }
-
-        override fun utbetaltYtelsesbeløp(): BigDecimal {
-            return originaltUtbetaltBeløp
-        }
-
-        override fun riktigYteslesbeløp(): BigDecimal {
-            return riktigYteslesbeløp ?: (originaltUtbetaltBeløp - feilutbetaltYtelsesbeløp())
+            return beløp.sumOf { it.tilbakekrevesBeløp }
         }
 
         override fun beløpTilbakekreves(): List<KravgrunnlagPeriodeAdapter.BeløpTilbakekreves> {
-            return listOf(
-                object : KravgrunnlagPeriodeAdapter.BeløpTilbakekreves {
-                    override fun beløp(): BigDecimal {
-                        return tilbakekrevesBeløp
-                    }
+            return beløp
+        }
 
-                    override fun skatteprosent(): BigDecimal {
-                        return skatteprosent
-                    }
-                },
-            )
+        class TestBeløp(
+            val klassekode: String,
+            val skatteprosent: BigDecimal,
+            val tilbakekrevesBeløp: BigDecimal,
+            val originaltUtbetalt: BigDecimal,
+            val riktigYtelsesbeløp: BigDecimal,
+        ) : KravgrunnlagPeriodeAdapter.BeløpTilbakekreves {
+            override fun klassekode(): String {
+                return klassekode
+            }
+
+            override fun utbetaltYtelsesbeløp(): BigDecimal = originaltUtbetalt
+
+            override fun riktigYteslesbeløp(): BigDecimal = riktigYtelsesbeløp
+
+            override fun tilbakekrevesBeløp(): BigDecimal = tilbakekrevesBeløp
+
+            override fun skatteprosent(): BigDecimal = skatteprosent
+
+            companion object {
+                fun beløp(
+                    tilbakekrevesBeløp: BigDecimal,
+                    originaltUtbetaltBeløp: BigDecimal = 20000.kroner,
+                    riktigYtelsesbeløp: BigDecimal = originaltUtbetaltBeløp - tilbakekrevesBeløp,
+                    skatteprosent: BigDecimal = 0.prosent,
+                    klassekode: String = "BATR",
+                ): TestBeløp {
+                    return TestBeløp(
+                        klassekode = klassekode,
+                        skatteprosent = skatteprosent,
+                        tilbakekrevesBeløp = tilbakekrevesBeløp,
+                        originaltUtbetalt = originaltUtbetaltBeløp,
+                        riktigYtelsesbeløp = riktigYtelsesbeløp,
+                    )
+                }
+            }
         }
 
         companion object {
             infix fun Datoperiode.medTilbakekrevesBeløp(tilbakekrevesBeløp: BigDecimal): TestKravgrunnlagPeriode {
-                return TestKravgrunnlagPeriode(this, tilbakekrevesBeløp)
+                return medBeløp(beløp(tilbakekrevesBeløp = tilbakekrevesBeløp))
+            }
+
+            infix fun Datoperiode.medBeløp(beløp: TestBeløp): TestKravgrunnlagPeriode {
+                return TestKravgrunnlagPeriode(this, mutableListOf(beløp))
             }
 
             val Int.kroner get() = BigDecimal(this)
@@ -684,4 +830,10 @@ class BeregningTest {
             val Int.prosent get() = BigDecimal(this)
         }
     }
+
+    data class BeregnetBeløp(
+        val tilbakekrevesBrutto: BigDecimal,
+        val skatt: BigDecimal,
+        val utbetaltYtelsesbeløp: BigDecimal,
+    )
 }

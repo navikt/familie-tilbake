@@ -186,8 +186,8 @@ class VarselbrevUtil(
         val perioder = kravgrunnlag.perioder().map {
             FeilutbetaltPeriode(
                 YearMonth.from(it.periode().fom),
-                it.riktigYteslesbeløp(),
-                it.utbetaltYtelsesbeløp(),
+                it.beløpTilbakekreves().sumOf { beløp -> beløp.riktigYteslesbeløp() },
+                it.beløpTilbakekreves().sumOf { beløp -> beløp.utbetaltYtelsesbeløp() },
                 it.feilutbetaltYtelsesbeløp(),
             )
         }

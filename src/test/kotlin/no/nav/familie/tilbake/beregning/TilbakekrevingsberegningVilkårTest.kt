@@ -76,7 +76,7 @@ class TilbakekrevingsberegningVilkårTest {
             resultat.skalHaVerdier(
                 vilkårsvurdering = vilkårsvurdering,
                 vurdering = AnnenVurdering.GOD_TRO,
-                manueltSattTilbakekrevingsbeløp = manueltBeløp.setScale(2),
+                manueltSattTilbakekrevingsbeløp = manueltBeløp,
                 tilbakekrevingsbeløpUtenRenter = manueltBeløp,
                 tilbakekrevingsbeløp = manueltBeløp,
                 andelAvBeløp = null,
@@ -136,7 +136,7 @@ class TilbakekrevingsberegningVilkårTest {
                 vurdering = AnnenVurdering.GOD_TRO,
                 tilbakekrevingsbeløpUtenRenter = beløpTilbakekreves,
                 tilbakekrevingsbeløp = beløpTilbakekreves,
-                manueltSattTilbakekrevingsbeløp = beløpTilbakekreves.setScale(2),
+                manueltSattTilbakekrevingsbeløp = beløpTilbakekreves,
                 skattebeløp = BigDecimal.valueOf(899),
                 tilbakekrevingsbeløpEtterSkatt = BigDecimal.valueOf(8092),
                 andelAvBeløp = null,
@@ -478,7 +478,7 @@ class TilbakekrevingsberegningVilkårTest {
                 vurdering = Aktsomhet.GROV_UAKTSOMHET,
                 tilbakekrevingsbeløpUtenRenter = manueltSattBeløp,
                 tilbakekrevingsbeløp = manueltSattBeløp,
-                manueltSattTilbakekrevingsbeløp = manueltSattBeløp.setScale(2),
+                manueltSattTilbakekrevingsbeløp = manueltSattBeløp,
                 andelAvBeløp = null,
             )
         }
@@ -533,15 +533,17 @@ class TilbakekrevingsberegningVilkårTest {
 
                 override fun feilutbetaltYtelsesbeløp(): BigDecimal = feilutbetalt
 
-                override fun utbetaltYtelsesbeløp(): BigDecimal = feilutbetalt
-
-                override fun riktigYteslesbeløp(): BigDecimal = BigDecimal.ZERO
-
                 override fun beløpTilbakekreves(): List<KravgrunnlagPeriodeAdapter.BeløpTilbakekreves> = listOf(
                     object : KravgrunnlagPeriodeAdapter.BeløpTilbakekreves {
-                        override fun beløp(): BigDecimal = tilbakekrevingsbeløp
+                        override fun klassekode(): String = "EFOG"
+
+                        override fun tilbakekrevesBeløp(): BigDecimal = tilbakekrevingsbeløp
 
                         override fun skatteprosent(): BigDecimal = skatteprosent
+
+                        override fun utbetaltYtelsesbeløp(): BigDecimal = feilutbetalt
+
+                        override fun riktigYteslesbeløp() = BigDecimal.ZERO
                     },
                 )
             },

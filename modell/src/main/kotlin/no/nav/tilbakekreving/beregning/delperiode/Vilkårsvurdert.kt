@@ -4,8 +4,9 @@ import no.nav.tilbakekreving.beregning.HUNDRE_PROSENT
 import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagPeriodeAdapter
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurdertPeriodeAdapter
-import no.nav.tilbakekreving.beregning.fraksjon
-import no.nav.tilbakekreving.beregning.isZero
+import no.nav.tilbakekreving.beregning.delperiode.Delperiode.Beløp.Companion.forKlassekode
+import no.nav.tilbakekreving.beregning.delperiode.JusterbartBeløp.Companion.fordelSkattebeløp
+import no.nav.tilbakekreving.beregning.delperiode.JusterbartBeløp.Companion.fordelTilbakekrevingsbeløp
 import no.nav.tilbakekreving.beregning.modell.Beregningsresultatsperiode
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import java.math.BigDecimal
@@ -14,49 +15,46 @@ import java.math.RoundingMode
 class Vilkårsvurdert(
     override val periode: Datoperiode,
     override val vurdertPeriode: Datoperiode,
-    override val andel: Andel,
     private val vurdering: VilkårsvurdertPeriodeAdapter,
     private val beregnRenter: Boolean,
-    private val antallKravgrunnlagGjelder: Int,
+    private val kravgrunnlagPeriode: KravgrunnlagPeriodeAdapter,
+    private val beløp: List<JusterbartBeløp>,
 ) : Delperiode {
-    private var tilbakekrevingsbeløpAvrunding = BigDecimal.ZERO
-    private val tilbakekrevingsbeløp = when {
-        vurdering.ignoreresPgaLavtBeløp() -> BigDecimal.ZERO
-        else -> vurdering.reduksjon().beregn(andel.feilutbetaltBeløp(), antallKravgrunnlagGjelder)
-    }
-
-    private var skattebeløpAvrunding = BigDecimal.ZERO
-    private val skattebeløp = beregnSkattebeløp(tilbakekrevingsbeløp)
-
     private var rentebeløpAvrunding = BigDecimal.ZERO
-    private val rentebeløp = beregnRentebeløp(tilbakekrevingsbeløp)
+    private val rentebeløp = beregnRentebeløp(beløp.sumOf { it.tilbakekrevingsbeløp })
 
-    override fun tilbakekrevesBrutto(): BigDecimal =
-        tilbakekrevingsbeløp.setScale(0, RoundingMode.DOWN) + tilbakekrevingsbeløpAvrunding
+    override fun beløpForKlassekode(klassekode: String): Delperiode.Beløp = beløp.forKlassekode(klassekode)
 
-    override fun tilbakekrevesBruttoMedRenter(): BigDecimal = tilbakekrevesBrutto() + renter()
+    override fun tilbakekrevesBruttoMedRenter(): BigDecimal = beløp().sumOf { it.tilbakekrevesBrutto() } + renter()
 
-    private fun tilbakekrevesNetto(): BigDecimal = tilbakekrevesBruttoMedRenter() - skatt()
+    private fun tilbakekrevesNetto(): BigDecimal = tilbakekrevesBruttoMedRenter() - beløp().sumOf { it.skatt() }
 
     override fun renter(): BigDecimal = rentebeløp.setScale(0, RoundingMode.DOWN) + rentebeløpAvrunding
 
-    override fun skatt(): BigDecimal = skattebeløp.setScale(0, RoundingMode.DOWN) + skattebeløpAvrunding
+    override fun beløp(): List<Delperiode.Beløp> = beløp
+
+    override fun feilutbetaltBeløp(): BigDecimal = kravgrunnlagPeriode.feilutbetaltYtelsesbeløp().setScale(0, RoundingMode.HALF_UP)
+
+    fun validerIkkeManueltBeløpOgUlikeKlassekoder() {
+        if (vurdering.reduksjon() is Reduksjon.ManueltBeløp && beløp.size > 1) {
+            throw RuntimeException("Fant periode med manuelt satt tilbakekrevingsbeløp og flere beløp i perioden. Denne koden har nå en bug som må fikses.")
+        }
+    }
 
     override fun beregningsresultat(): Beregningsresultatsperiode {
         return Beregningsresultatsperiode(
             periode = periode,
             vurdering = vurdering.vurdering(),
             renteprosent = if (beregnRenter && vurdering.renter()) RENTESATS else null,
-            feilutbetaltBeløp = andel.feilutbetaltBeløp(),
-            riktigYtelsesbeløp = andel.riktigYtelsesbeløp(),
-            utbetaltYtelsesbeløp = andel.utbetaltYtelsesbeløp(),
+            feilutbetaltBeløp = feilutbetaltBeløp(),
+            riktigYtelsesbeløp = beløp.sumOf { it.riktigYtelsesbeløp() },
+            utbetaltYtelsesbeløp = beløp.sumOf { it.utbetaltYtelsesbeløp() },
             andelAvBeløp = vurdering.reduksjon().andel,
-            manueltSattTilbakekrevingsbeløp = tilbakekrevingsbeløp.takeIf { vurdering.reduksjon() is Reduksjon.ManueltBeløp }
-                ?.setScale(2, RoundingMode.DOWN),
-            tilbakekrevingsbeløpUtenRenter = tilbakekrevesBrutto(),
+            manueltSattTilbakekrevingsbeløp = (vurdering.reduksjon() as? Reduksjon.ManueltBeløp)?.beløp,
+            tilbakekrevingsbeløpUtenRenter = beløp().sumOf { it.tilbakekrevesBrutto() },
             rentebeløp = renter(),
             tilbakekrevingsbeløpEtterSkatt = tilbakekrevesNetto(),
-            skattebeløp = skatt(),
+            skattebeløp = beløp().sumOf { it.skatt() },
             tilbakekrevingsbeløp = tilbakekrevesBruttoMedRenter(),
         )
     }
@@ -67,14 +65,6 @@ class Vilkårsvurdert(
         beløp.multiply(RENTEFAKTOR)
     } else {
         BigDecimal.ZERO
-    }
-
-    private fun beregnSkattebeløp(
-        tilbakekrevesBeløp: BigDecimal,
-    ): BigDecimal {
-        if (tilbakekrevesBeløp.isZero()) return BigDecimal.ZERO
-        val forskjellMedRenter = tilbakekrevesBeløp.divide(andel.feilutbetaltBeløp(), 4, RoundingMode.HALF_UP)
-        return andel.skatt() * forskjellMedRenter
     }
 
     companion object {
@@ -93,50 +83,27 @@ class Vilkårsvurdert(
             return Vilkårsvurdert(
                 periode = delperiode,
                 vurdertPeriode = vurdering.periode(),
-                andel = Andel(
-                    kravgrunnlagPeriode = kravgrunnlagPeriode,
-                    delperiode = delperiode,
-                ),
                 vurdering = vurdering,
                 beregnRenter = beregnRenter,
-                antallKravgrunnlagGjelder = antallKravgrunnlagGjelder,
+                beløp = kravgrunnlagPeriode.beløpTilbakekreves().map {
+                    JusterbartBeløp(it.klassekode(), delperiode, it, vurdering, antallKravgrunnlagGjelder)
+                },
+                kravgrunnlagPeriode = kravgrunnlagPeriode,
             )
         }
 
-        fun <T : Iterable<Delperiode>> T.fordelTilbakekrevingsbeløp(): T = apply {
-            fordel(Vilkårsvurdert::tilbakekrevingsbeløp, RoundingMode.HALF_DOWN) {
-                tilbakekrevingsbeløpAvrunding = BigDecimal.ONE
-            }
-        }
-
         fun <T : Iterable<Delperiode>> T.fordelRentebeløp(): T = apply {
-            fordel(Vilkårsvurdert::rentebeløp, RoundingMode.DOWN) {
+            fordel(Vilkårsvurdert::rentebeløp, Vilkårsvurdert::periode, RoundingMode.DOWN) {
                 rentebeløpAvrunding = BigDecimal.ONE
             }
         }
 
-        fun <T : Iterable<Delperiode>> T.fordelSkattebeløp(): T = apply {
-            fordel(Vilkårsvurdert::skattebeløp, RoundingMode.DOWN) {
-                skattebeløpAvrunding = BigDecimal.ONE
-            }
+        fun <T : Iterable<Delperiode>> T.fordelTilbakekrevingsbeløp(): T = apply {
+            filterIsInstance<Vilkårsvurdert>().flatMap { it.beløp }.fordelTilbakekrevingsbeløp()
         }
 
-        private fun Iterable<Delperiode>.fordel(
-            verdi: Vilkårsvurdert.() -> BigDecimal,
-            avrunding: RoundingMode,
-            økAvrunding: Vilkårsvurdert.() -> Unit,
-        ) {
-            val overflødigeKronerEtterAvrunding = filterIsInstance<Vilkårsvurdert>().sumOf { it.verdi().fraksjon() }
-                .setScale(0, avrunding)
-                .toInt()
-
-            val høyesteFraksjon = compareByDescending<Vilkårsvurdert> { it.verdi().fraksjon() }
-                .thenBy { it.periode.fom }
-
-            filterIsInstance<Vilkårsvurdert>()
-                .sortedWith(høyesteFraksjon)
-                .take(overflødigeKronerEtterAvrunding)
-                .forEach { it.økAvrunding() }
+        fun <T : Iterable<Delperiode>> T.fordelSkattebeløp(): T = apply {
+            filterIsInstance<Vilkårsvurdert>().flatMap { it.beløp }.fordelSkattebeløp()
         }
     }
 }

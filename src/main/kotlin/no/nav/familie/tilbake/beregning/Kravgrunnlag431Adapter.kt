@@ -31,30 +31,20 @@ class Kravgrunnlag431Adapter(private val kravgrunnlag431: Kravgrunnlag431) : Kra
                 .sumOf(Kravgrunnlagsbeløp433::nyttBeløp)
         }
 
-        override fun utbetaltYtelsesbeløp(): BigDecimal {
-            return periode.beløp
-                .filter { it.klassetype == Klassetype.YTEL }
-                .sumOf(Kravgrunnlagsbeløp433::opprinneligUtbetalingsbeløp)
-        }
-
-        override fun riktigYteslesbeløp(): BigDecimal {
-            return periode.beløp
-                .filter { it.klassetype == Klassetype.YTEL }
-                .sumOf(Kravgrunnlagsbeløp433::nyttBeløp)
-        }
-
         override fun beløpTilbakekreves(): List<KravgrunnlagPeriodeAdapter.BeløpTilbakekreves> {
-            return periode.beløp.map(::KravgrunnlagBeløpAdapter)
+            return periode.beløp.filter { it.klassetype == Klassetype.YTEL }.map(::KravgrunnlagBeløpAdapter)
         }
 
         class KravgrunnlagBeløpAdapter(val kravgrunnlagBeløp: Kravgrunnlagsbeløp433) : KravgrunnlagPeriodeAdapter.BeløpTilbakekreves {
-            override fun beløp(): BigDecimal {
-                return kravgrunnlagBeløp.tilbakekrevesBeløp
-            }
+            override fun klassekode(): String = kravgrunnlagBeløp.klassekode.tilKlassekodeNavn()
 
-            override fun skatteprosent(): BigDecimal {
-                return kravgrunnlagBeløp.skatteprosent
-            }
+            override fun tilbakekrevesBeløp(): BigDecimal = kravgrunnlagBeløp.tilbakekrevesBeløp.setScale(0, RoundingMode.HALF_DOWN)
+
+            override fun utbetaltYtelsesbeløp(): BigDecimal = kravgrunnlagBeløp.opprinneligUtbetalingsbeløp.setScale(0, RoundingMode.HALF_DOWN)
+
+            override fun riktigYteslesbeløp(): BigDecimal = kravgrunnlagBeløp.nyttBeløp.setScale(0, RoundingMode.HALF_DOWN)
+
+            override fun skatteprosent(): BigDecimal = kravgrunnlagBeløp.skatteprosent
         }
     }
 }

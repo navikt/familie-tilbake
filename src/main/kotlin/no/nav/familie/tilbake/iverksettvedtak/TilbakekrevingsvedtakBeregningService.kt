@@ -61,16 +61,17 @@ class TilbakekrevingsvedtakBeregningService(
                     )
 
                 Klassetype.YTEL -> {
+                    val beløp = beregnetPeriode.beløpForKlassekode(it.klassekode.tilKlassekodeNavn())
                     Tilbakekrevingsbeløp(
                         klassetype = it.klassetype,
                         klassekode = it.klassekode,
                         nyttBeløp = it.nyttBeløp.setScale(0, RoundingMode.HALF_UP),
-                        utbetaltBeløp = beregnetPeriode.andel.utbetaltYtelsesbeløp(),
-                        tilbakekrevesBeløp = beregnetPeriode.tilbakekrevesBrutto(),
+                        utbetaltBeløp = beløp.utbetaltYtelsesbeløp(),
+                        tilbakekrevesBeløp = beløp.tilbakekrevesBrutto(),
                         uinnkrevdBeløp = it.tilbakekrevesBeløp
-                            .subtract(beregnetPeriode.tilbakekrevesBrutto())
+                            .subtract(beløp.tilbakekrevesBrutto())
                             .setScale(0, RoundingMode.HALF_UP),
-                        skattBeløp = beregnetPeriode.skatt(),
+                        skattBeløp = beløp.skatt(),
                         kodeResultat = utledKodeResulat(beregnetPeriode),
                     )
                 }
@@ -81,8 +82,8 @@ class TilbakekrevingsvedtakBeregningService(
 
     private fun utledKodeResulat(beregnetPeriode: Delperiode): KodeResultat = when {
         beregnetPeriode is Foreldet -> KodeResultat.FORELDET
-        beregnetPeriode.tilbakekrevesBrutto().isZero() -> KodeResultat.INGEN_TILBAKEKREVING
-        beregnetPeriode.andel.feilutbetaltBeløp() == beregnetPeriode.tilbakekrevesBrutto() -> KodeResultat.FULL_TILBAKEKREVING
+        beregnetPeriode.beløp().sumOf { it.tilbakekrevesBrutto() }.isZero() -> KodeResultat.INGEN_TILBAKEKREVING
+        beregnetPeriode.feilutbetaltBeløp() == beregnetPeriode.beløp().sumOf { it.tilbakekrevesBrutto() } -> KodeResultat.FULL_TILBAKEKREVING
         else -> KodeResultat.DELVIS_TILBAKEKREVING
     }
 }

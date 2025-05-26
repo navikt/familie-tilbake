@@ -249,6 +249,7 @@ class OppgaveService(
         saksbehandler: String? = ContextService.hentSaksbehandler(logContext),
     ) {
         val oppgave = finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
+
         val nyBeskrivelse =
             LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yy hh:mm")) + ":" +
                 beskrivelse + System.lineSeparator() + oppgave.beskrivelse
@@ -258,6 +259,13 @@ class OppgaveService(
         }
 
         patchOppgave(patchetOppgave)
+
+        SecureLog.medContext(logContext) {
+            info(
+                "Oppdater enhet og saksbehandler for behandling {}, ",
+                behandlingId,
+            )
+        }
 
         if (oppgave.tema == Tema.ENF) {
             tilordneOppgaveNyEnhet(oppgave.id!!, enhetId, false) // ENF bruker generelle mapper

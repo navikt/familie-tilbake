@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.beregning.delperiode
 
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
+import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.prosent
 import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagPeriodeAdapter
 import no.nav.tilbakekreving.beregning.delperiode.Delperiode.Companion.oppsummer
 import no.nav.tilbakekreving.beregning.modell.Beregningsresultatsperiode
@@ -57,10 +58,20 @@ class DelperiodeTest {
 
         override fun feilutbetaltYtelsesbeløp(): BigDecimal = 2000.kroner
 
-        override fun utbetaltYtelsesbeløp(): BigDecimal = 20000.kroner
+        override fun beløpTilbakekreves(): List<KravgrunnlagPeriodeAdapter.BeløpTilbakekreves> = listOf(
+            object : KravgrunnlagPeriodeAdapter.BeløpTilbakekreves {
+                override fun tilbakekrevesBeløp(): BigDecimal = 2000.kroner
 
-        override fun riktigYteslesbeløp(): BigDecimal = 18000.kroner
+                override fun riktigYteslesbeløp(): BigDecimal = 18000.kroner
 
-        override fun beløpTilbakekreves(): List<KravgrunnlagPeriodeAdapter.BeløpTilbakekreves> = emptyList()
+                override fun utbetaltYtelsesbeløp(): BigDecimal = 20000.kroner
+
+                override fun skatteprosent(): BigDecimal = 0.prosent
+
+                override fun klassekode(): String {
+                    return "BATR"
+                }
+            },
+        )
     }
 }
