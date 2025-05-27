@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class ArbeidOgInntektClient(
-    @Value("ainntekt.baseUrl")
+    @Value("\${ainntekt.baseUrl}")
     private val baseUrl: String,
     private val tokenClient: BearerTokenClientCredentialsClientInterceptor,
 ) {
