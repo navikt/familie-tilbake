@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.kravgrunnlag
 
+import no.nav.tilbakekreving.entities.KravgrunnlagHistorikkEntity
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
@@ -19,5 +20,9 @@ class KravgrunnlagHistorikk(
 
     override fun nåværende(): HistorikkReferanse<UUID, KravgrunnlagHendelse> {
         return HistorikkReferanse(this, historikk.last().internId)
+    }
+
+    fun tilEntity(): KravgrunnlagHistorikkEntity {
+        return KravgrunnlagHistorikkEntity(historikk.map { it.tilEntity() })
     }
 }

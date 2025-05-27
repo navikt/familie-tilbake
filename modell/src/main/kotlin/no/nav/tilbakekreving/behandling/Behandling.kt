@@ -28,6 +28,7 @@ import no.nav.tilbakekreving.behov.IverksettelseBehov
 import no.nav.tilbakekreving.beregning.Beregning
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
+import no.nav.tilbakekreving.entities.BehandlingEntity
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
@@ -69,6 +70,25 @@ class Behandling private constructor(
     lateinit var brevmottakerSteg: BrevmottakerSteg
 
     fun harLikePerioder(): Boolean = vilkårsvurderingsteg.harLikePerioder()
+
+    fun tilEntity(): BehandlingEntity {
+        return BehandlingEntity(
+            internId = internId,
+            eksternId = eksternId,
+            behandlingstype = behandlingstype.name,
+            opprettet = opprettet,
+            sistEndret = sistEndret,
+            enhet = enhet?.tilEntity(),
+            årsak = årsak.name,
+            ansvarligSaksbehandler = ansvarligSaksbehandler.ident,
+            eksternFagsakBehandlingRef = eksternFagsakBehandling.entry.internId,
+            kravgrunnlagRef = kravgrunnlag.entry.internId,
+            foreldelsesteg = foreldelsesteg.tilEntity(),
+            faktasteg = faktasteg.tilEntity(),
+            vilkårsvurderingsteg = vilkårsvurderingsteg.tilEntity(),
+            foreslåVedtakSteg = foreslåVedtakSteg.tilEntity(),
+        )
+    }
 
     private fun steg() = listOf(
         faktasteg,

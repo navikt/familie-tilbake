@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.eksternfagsak
 
+import no.nav.tilbakekreving.entities.EksternFagsakBehandlingHistorikkEntity
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import java.util.UUID
@@ -18,5 +19,9 @@ class EksternFagsakBehandlingHistorikk(
 
     override fun nåværende(): HistorikkReferanse<UUID, EksternFagsakBehandling> {
         return HistorikkReferanse(this, historikk.last().internId)
+    }
+
+    fun tilEntity(): EksternFagsakBehandlingHistorikkEntity {
+        return EksternFagsakBehandlingHistorikkEntity(historikk.map { it.tilEntity() })
     }
 }

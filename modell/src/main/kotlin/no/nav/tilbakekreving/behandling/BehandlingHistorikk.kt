@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.behandling
 
 import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
+import no.nav.tilbakekreving.entities.BehandlingHistorikkEntity
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import java.util.UUID
@@ -24,5 +25,9 @@ class BehandlingHistorikk(
 
     override fun nåværende(): HistorikkReferanse<UUID, Behandling> {
         return HistorikkReferanse(this, historikk.last().internId)
+    }
+
+    fun tilEntity(): BehandlingHistorikkEntity {
+        return BehandlingHistorikkEntity(historikk.map { it.tilEntity() })
     }
 }

@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.brev
 
+import no.nav.tilbakekreving.entities.BrevEntity
 import java.time.LocalDate
 import java.util.UUID
 
@@ -18,5 +19,14 @@ class Varselbrev(
                 opprettetDato = LocalDate.now(),
             )
         }
+    }
+
+    override fun tilEntity(): BrevEntity {
+        return BrevEntity(
+            brevType = "VARSEL_BREV",
+            internId = internId,
+            opprettetDato = opprettetDato,
+            varsletBeløp = varsletBeløp,
+        )
     }
 }
