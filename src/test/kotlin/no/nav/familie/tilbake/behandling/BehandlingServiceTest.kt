@@ -1439,7 +1439,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
             )
         }
         verify(exactly = 1) {
-            oppgaveService.tilordneOppgaveNyEnhet(1L, "4806", true)
+            oppgaveService.tilordneOppgaveNyEnhet(1L, "4806", true, false)
         }
         assertHistorikkinnslag(
             behandling.id,
