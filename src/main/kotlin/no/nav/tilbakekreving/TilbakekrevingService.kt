@@ -55,6 +55,7 @@ class TilbakekrevingService(
     private val pdlClient: PdlClient,
 ) {
     private final val behovObservatør = Observatør()
+    private final val valkeyClient = ValkeyClient
 
     private val fnr = "20046912345"
 
@@ -69,7 +70,7 @@ class TilbakekrevingService(
     private val eksempelsaker =
         listOf(
             Tilbakekreving(
-                eksternFagsak,
+                eksternFagsak = eksternFagsak,
                 opprettet = LocalDateTime.of(2025, Month.MARCH, 15, 12, 0),
                 behandlingHistorikk =
                     BehandlingHistorikk(mutableListOf()),
@@ -200,6 +201,7 @@ class TilbakekrevingService(
             }
             behovListe.remove(behov)
         }
+        valkeyClient.lagreTilstand(tilbakekreving.id, tilbakekreving.tilEntity())
     }
 
     fun utførSteg(
@@ -227,6 +229,7 @@ class TilbakekrevingService(
             tilbakekreving.håndter(behandler, it)
             // TODO: Fakta steg
         }
+        valkeyClient.lagreTilstand(tilbakekreving.id, tilbakekreving.tilEntity())
     }
 
     private fun behandleVilkårsvurdering(
@@ -244,6 +247,7 @@ class TilbakekrevingService(
                 VilkårsvurderingMapperV2.tilVurdering(periode),
             )
         }
+        valkeyClient.lagreTilstand(tilbakekreving.id, tilbakekreving.tilEntity())
     }
 
     private fun behandleForeldelse(
@@ -265,6 +269,7 @@ class TilbakekrevingService(
                 },
             )
         }
+        valkeyClient.lagreTilstand(tilbakekreving.id, tilbakekreving.tilEntity())
     }
 
     private fun behandleForeslåVedtak(
@@ -288,6 +293,7 @@ class TilbakekrevingService(
                 },
             ),
         )
+        valkeyClient.lagreTilstand(tilbakekreving.id, tilbakekreving.tilEntity())
     }
 
     private fun behandleFatteVedtak(
@@ -305,6 +311,7 @@ class TilbakekrevingService(
                 },
             )
         }
+        valkeyClient.lagreTilstand(tilbakekreving.id, tilbakekreving.tilEntity())
     }
 
     fun behandleBrevmottaker(
@@ -359,19 +366,23 @@ class TilbakekrevingService(
             }
             else -> throw IllegalArgumentException("Default eller ugydlig mottaker type ${brevmottakerDto.type}")
         }
+        valkeyClient.lagreTilstand(tilbakekreving.id, tilbakekreving.tilEntity())
     }
 
     fun flyttBehandlingsstegTilbakeTilFakta(tilbakekreving: Tilbakekreving) {
         tilbakekreving.håndterNullstilling()
+        valkeyClient.lagreTilstand(tilbakekreving.id, tilbakekreving.tilEntity())
     }
 
     fun aktiverBrevmottakerSteg(tilbakekreving: Tilbakekreving) {
         validerBrevmottaker(tilbakekreving)
         tilbakekreving.aktiverBrevmottakerSteg()
+        valkeyClient.lagreTilstand(tilbakekreving.id, tilbakekreving.tilEntity())
     }
 
     fun deaktiverBrevmottakerSteg(tilbakekreving: Tilbakekreving) {
         tilbakekreving.deaktiverBrevmottakerSteg()
+        valkeyClient.lagreTilstand(tilbakekreving.id, tilbakekreving.tilEntity())
     }
 
     fun fjernManuelBrevmottaker(
@@ -380,6 +391,7 @@ class TilbakekrevingService(
         manuellBrevmottakerId: UUID,
     ) {
         tilbakekreving.fjernManuelBrevmottaker(behandler, manuellBrevmottakerId)
+        valkeyClient.lagreTilstand(tilbakekreving.id, tilbakekreving.tilEntity())
     }
 
     private fun validerBrevmottaker(tilbakekreving: Tilbakekreving) {

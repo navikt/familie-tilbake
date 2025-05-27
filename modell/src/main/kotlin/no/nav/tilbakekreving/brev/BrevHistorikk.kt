@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.brev
 
+import no.nav.tilbakekreving.entities.BrevHistorikkEntity
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import java.util.UUID
@@ -22,5 +23,9 @@ class BrevHistorikk(
 
     fun sisteVarselbrev(): Varselbrev? {
         return historikk.filterIsInstance<Varselbrev>().lastOrNull()
+    }
+
+    fun tilEntity(): BrevHistorikkEntity {
+        return BrevHistorikkEntity(historikk.map { it.tilEntity() })
     }
 }
