@@ -14,9 +14,6 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandReposi
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
-import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.MANUELL_TILLEGGSMOTTAKER
-import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.VERGE
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.historikkinnslag.Aktør
@@ -25,6 +22,7 @@ import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagsty
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -192,8 +190,8 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
     @Test
     fun `onCompletion skal lage AvsluttBehandlingTask ved brevtype VEDTAK, men kun når mottakeren ikke er en tilleggsmottaker`() {
         lagreBrevsporingTask.onCompletion(opprettTask(behandling.id, Brevtype.VEDTAK))
-        lagreBrevsporingTask.onCompletion(opprettTask(behandling.id, Brevtype.VEDTAK, brevmottager = MANUELL_TILLEGGSMOTTAKER))
-        lagreBrevsporingTask.onCompletion(opprettTask(behandling.id, Brevtype.VEDTAK, brevmottager = VERGE))
+        lagreBrevsporingTask.onCompletion(opprettTask(behandling.id, Brevtype.VEDTAK, brevmottager = Brevmottager.MANUELL_TILLEGGSMOTTAKER))
+        lagreBrevsporingTask.onCompletion(opprettTask(behandling.id, Brevtype.VEDTAK, brevmottager = Brevmottager.VERGE))
 
         behandlingsstegstilstandRepository.findByBehandlingIdAndBehandlingssteg(behandling.id, Behandlingssteg.AVSLUTTET)?.behandlingsstegsstatus shouldBe Behandlingsstegstatus.UTFØRT
         assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.BEHANDLING_AVSLUTTET, Aktør.Vedtaksløsning)

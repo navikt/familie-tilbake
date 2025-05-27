@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
-import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbHjemmel
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
@@ -9,6 +8,7 @@ import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.pdf.dokumentbestilling.vedtak.handlebars.dto.HbHjemmel
 
 object VedtakHjemmel {
     private val Vilkårsvurderingsresultat_MED_FORSETT_ALLTID_RENTER: List<Vilkårsvurderingsresultat> =
@@ -38,7 +38,12 @@ object VedtakHjemmel {
         val hjemler: MutableList<Hjemler> = ArrayList()
         if (vedtaksbrevgrunnlag.vilkårsvurderingsperioder.isNotEmpty()) {
             when {
-                barnetrygd && ignorerteSmåbeløp -> hjemler.addAll(setOf(Hjemler.BARNETRYGD_13, Hjemler.FOLKETRYGD_22_15_SJETTE))
+                barnetrygd && ignorerteSmåbeløp -> hjemler.addAll(
+                    setOf(
+                        Hjemler.BARNETRYGD_13,
+                        Hjemler.FOLKETRYGD_22_15_SJETTE,
+                    ),
+                )
                 ignorerteSmåbeløp -> hjemler.add(Hjemler.FOLKETRYGD_22_15_SJETTE)
                 barnetrygd -> hjemler.addAll(setOf(Hjemler.BARNETRYGD_13, Hjemler.FOLKETRYGD_22_15))
                 kontantstøtte -> hjemler.addAll(setOf(Hjemler.KONTANTSTØTTE_11, Hjemler.FOLKETRYGD_22_15))

@@ -8,12 +8,10 @@ import no.nav.familie.tilbake.behandling.domain.Institusjon
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
-import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevsporing
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsoppsummering
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsperiode
-import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
@@ -23,6 +21,8 @@ import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
+import no.nav.tilbakekreving.pdf.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection

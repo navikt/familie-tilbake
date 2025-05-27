@@ -7,20 +7,20 @@ import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
-import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
-import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
-import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmottagerUtil
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
-import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.Brevdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
-import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.Fritekstbrevsdata
 import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevUtil.Companion.TITTEL_VARSEL_TILBAKEBETALING
-import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.kontrakter.ForhåndsvisVarselbrevRequest
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmetadata
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.Brevdata
+import no.nav.tilbakekreving.pdf.dokumentbestilling.fritekstbrev.Fritekstbrevsdata
+import no.nav.tilbakekreving.pdf.dokumentbestilling.varsel.TekstformatererVarselbrev
+import no.nav.tilbakekreving.pdf.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -164,14 +164,13 @@ class VarselbrevService(
     private fun lagVarselbrevForForhåndsvisning(request: ForhåndsvisVarselbrevRequest): Varselbrevsdokument {
         val brevmottager = utledBrevmottager(request)
         val personinfo = eksterneDataForBrevService.hentPerson(request.ident, request.fagsystem, SecureLog.Context.tom())
-        val adresseinfo: Adresseinfo =
-            eksterneDataForBrevService.hentAdresse(
-                personinfo,
-                brevmottager,
-                request.verge,
-                request.fagsystem,
-                SecureLog.Context.tom(),
-            )
+        val adresseinfo = eksterneDataForBrevService.hentAdresse(
+            personinfo,
+            brevmottager,
+            request.verge,
+            request.fagsystem,
+            SecureLog.Context.tom(),
+        )
 
         return varselbrevUtil.sammenstillInfoForForhåndvisningVarselbrev(
             adresseinfo,

@@ -6,6 +6,7 @@ import no.nav.familie.tilbake.config.FeatureToggleConfig
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.FagsystemUtil
 import no.nav.tilbakekreving.kontrakter.OpprettTilbakekrevingRequest
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service

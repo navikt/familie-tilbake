@@ -13,6 +13,9 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.Vedtaksbrevgrunnlag
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmetadata
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -31,7 +34,7 @@ class BrevmetadataUtil(
         manuellAdresseinfo: Adresseinfo? = null,
         annenMottakersNavn: String? = null,
     ): Brevmetadata? {
-        require(brevmottager != brevmottager.MANUELL || manuellAdresseinfo != null) {
+        require(brevmottager !in arrayOf(Brevmottager.MANUELL_BRUKER, Brevmottager.MANUELL_TILLEGGSMOTTAKER) || manuellAdresseinfo != null) {
             "For en manuelt registrert brevmottaker kan ikke manuellAdresseinfo være null"
         }
 
@@ -154,12 +157,3 @@ class BrevmetadataUtil(
             else -> ""
         }
 }
-
-private val Brevmottager.MANUELL
-    get() =
-        when (this) {
-            Brevmottager.MANUELL_BRUKER,
-            Brevmottager.MANUELL_TILLEGGSMOTTAKER,
-            -> this
-            else -> null
-        }

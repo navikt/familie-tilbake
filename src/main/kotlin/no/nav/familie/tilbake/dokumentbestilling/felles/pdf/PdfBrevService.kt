@@ -5,21 +5,26 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.config.PropertyName
-import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
-import no.nav.familie.tilbake.dokumentbestilling.felles.header.TekstformatererHeader
 import no.nav.familie.tilbake.dokumentbestilling.felles.task.PubliserJournalpostTask
 import no.nav.familie.tilbake.dokumentbestilling.felles.task.PubliserJournalpostTaskData
-import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.JournalpostIdOgDokumentId
 import no.nav.familie.tilbake.http.RessursException
+import no.nav.familie.tilbake.kontrakter.dokdist.AdresseType
 import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstidspunkt
 import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstype
+import no.nav.familie.tilbake.kontrakter.dokdist.ManuellAdresse
 import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.callId
 import no.nav.familie.tilbake.micrometer.TellerService
-import no.nav.familie.tilbake.pdfgen.Dokumentvariant
-import no.nav.familie.tilbake.pdfgen.PdfGenerator
+import no.nav.tilbakekreving.pdf.Dokumentvariant
+import no.nav.tilbakekreving.pdf.PdfGenerator
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.header.TekstformatererHeader
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.Brevdata
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.DokprodTilHtml
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.Dokumentkategori
+import no.nav.tilbakekreving.pdf.dokumentbestilling.fritekstbrev.JournalpostIdOgDokumentId
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -74,7 +79,20 @@ class PdfBrevService(
             objectMapper.writeValueAsString(
                 PubliserJournalpostTaskData(
                     behandlingId = behandling.id,
-                    manuellAdresse = brevdata.metadata.mottageradresse.manuellAdresse,
+                    manuellAdresse = brevdata.metadata.mottageradresse.manuellAdresse?.let {
+                        ManuellAdresse(
+                            adresseType = when (it.land) {
+                                "NO" -> AdresseType.norskPostadresse
+                                else -> AdresseType.utenlandskPostadresse
+                            },
+                            adresselinje1 = it.adresselinje1,
+                            adresselinje2 = it.adresselinje2,
+                            adresselinje3 = it.adresselinje3,
+                            postnummer = it.postnummer,
+                            poststed = it.poststed,
+                            land = it.land,
+                        )
+                    },
                 ),
             )
         val properties: Properties =

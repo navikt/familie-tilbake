@@ -14,9 +14,7 @@ import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
-import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmetadataUtil
-import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
@@ -24,7 +22,6 @@ import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevUtil
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.log.SecureLog
-import no.nav.familie.tilbake.pdfgen.validering.PdfaValidator
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
 import no.nav.tilbakekreving.api.v1.dto.FeilutbetalingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurderingAvBrukersUttalelseDto
@@ -33,6 +30,9 @@ import no.nav.tilbakekreving.kontrakter.Tilbakekrevingsvalg
 import no.nav.tilbakekreving.kontrakter.brev.Dokumentmalstype
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
+import no.nav.tilbakekreving.pdf.validering.PdfaValidator
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

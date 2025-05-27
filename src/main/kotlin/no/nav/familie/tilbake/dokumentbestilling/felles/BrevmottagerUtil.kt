@@ -3,26 +3,12 @@ package no.nav.familie.tilbake.dokumentbestilling.felles
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.tilbakekreving.kontrakter.verge.Vergetype
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.behandling.domain.Verge as DomainVerge
 import no.nav.tilbakekreving.kontrakter.verge.Verge as VergeDto
 
 object BrevmottagerUtil {
-    fun getAnnenMottagersNavn(brevmetadata: Brevmetadata): String? {
-        if (brevmetadata.annenMottakersNavn != null) {
-            return brevmetadata.annenMottakersNavn
-        }
-
-        val mottagernavn: String = brevmetadata.mottageradresse.mottagernavn
-        val brukernavn = brevmetadata.sakspartsnavn
-        val vergenavn = brevmetadata.vergenavn
-
-        return if (mottagernavn.equals(brukernavn, ignoreCase = true)) {
-            if (brevmetadata.finnesVerge) vergenavn else ""
-        } else {
-            brukernavn
-        }
-    }
-
     fun getVergenavn(
         verge: DomainVerge?,
         adresseinfo: Adresseinfo,

@@ -10,7 +10,6 @@ import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
-import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
@@ -19,6 +18,7 @@ import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEventPublishe
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
+import no.nav.tilbakekreving.Rettsgebyr
 import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode.Companion.til
 import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
@@ -114,7 +114,7 @@ class KravgrunnlagServiceTest {
     @Test
     fun `Henter ut riktig rettsgebyr for 2022`() {
         val rettsgebyr2022 = 1223
-        Constants.rettsgebyrForÅr(2022) shouldBe rettsgebyr2022
+        Rettsgebyr.rettsgebyrForÅr(2022) shouldBe rettsgebyr2022
     }
 
     @Test

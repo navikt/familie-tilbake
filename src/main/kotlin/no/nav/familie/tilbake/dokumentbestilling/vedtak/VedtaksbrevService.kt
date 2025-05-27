@@ -14,6 +14,9 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.tilbakekreving.api.v1.dto.FritekstavsnittDto
 import no.nav.tilbakekreving.api.v1.dto.HentForhåndvisningVedtaksbrevPdfDto
+import no.nav.tilbakekreving.pdf.dokumentbestilling.vedtak.Avsnitt
+import no.nav.tilbakekreving.pdf.dokumentbestilling.vedtak.AvsnittUtil
+import no.nav.tilbakekreving.pdf.dokumentbestilling.vedtak.TekstformatererVedtaksbrev
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -91,9 +94,7 @@ class VedtaksbrevService(
         val skalSammenslåPerioder = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)?.skalSammenslåPerioder ?: SkalSammenslåPerioder.IKKE_AKTUELT
         val vedtaksbrevsoppsummering = VedtaksbrevFritekstMapper.tilDomene(behandlingId, fritekstavsnittDto.oppsummeringstekst, skalSammenslåPerioder)
 
-        val vedtaksbrevsperioder =
-            VedtaksbrevFritekstMapper
-                .tilDomeneVedtaksbrevsperiode(behandlingId, fritekstavsnittDto.perioderMedTekst)
+        val vedtaksbrevsperioder = VedtaksbrevFritekstMapper.tilDomeneVedtaksbrevsperiode(behandlingId, fritekstavsnittDto.perioderMedTekst)
 
         // Valider om obligatoriske fritekster er satt
         val faktaFeilutbetaling = faktaRepository.findFaktaFeilutbetalingByBehandlingIdAndAktivIsTrue(behandlingId)
