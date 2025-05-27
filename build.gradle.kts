@@ -97,6 +97,7 @@ dependencies {
 
     api("com.fasterxml.jackson.core:jackson-databind")
     api("com.fasterxml.jackson.module:jackson-module-kotlin")
+    api("io.lettuce:lettuce-core:6.6.0.RELEASE")
 
     api("com.ibm.mq:com.ibm.mq.jakarta.client:9.4.2.1")
     api("jakarta.jms:jakarta.jms-api")

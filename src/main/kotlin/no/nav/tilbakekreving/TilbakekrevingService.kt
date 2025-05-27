@@ -68,23 +68,26 @@ class TilbakekrevingService(
             behandlinger = EksternFagsakBehandlingHistorikk(mutableListOf()),
             behovObservatør = behovObservatør,
         )
-    private val eksempelsaker = mutableListOf(
-        Tilbakekreving(
-            eksternFagsak,
-            opprettet = LocalDateTime.of(2025, Month.MARCH, 15, 12, 0),
-            behandlingHistorikk =
-                BehandlingHistorikk(mutableListOf()),
-            behovObservatør = behovObservatør,
-            kravgrunnlagHistorikk = KravgrunnlagHistorikk(mutableListOf()),
-            brevHistorikk = BrevHistorikk(mutableListOf()),
-            opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
-        ).apply {
-            håndter(
-                OpprettTilbakekrevingHendelse(
-                    opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
-                    eksternFagsak = OpprettTilbakekrevingHendelse.EksternFagsak(
-                        ytelse = Ytelse.Barnetrygd,
-                        eksternId = "TEST-101010",
+    private val eksempelsaker =
+        listOf(
+            Tilbakekreving(
+                eksternFagsak,
+                opprettet = LocalDateTime.of(2025, Month.MARCH, 15, 12, 0),
+                behandlingHistorikk =
+                    BehandlingHistorikk(mutableListOf()),
+                behovObservatør = behovObservatør,
+                kravgrunnlagHistorikk = KravgrunnlagHistorikk(mutableListOf()),
+                brevHistorikk = BrevHistorikk(mutableListOf()),
+                opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
+            ).apply {
+                håndter(
+                    OpprettTilbakekrevingEvent(
+                        EksternFagsakDto(
+                            fagsystem = Fagsystem.BA,
+                            ytelsestype = Ytelsestype.BARNETRYGD,
+                            eksternId = "TEST-101010",
+                        ),
+                        opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
                     ),
                 ),
             )
