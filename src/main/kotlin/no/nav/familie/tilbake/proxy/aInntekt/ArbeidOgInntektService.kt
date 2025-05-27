@@ -30,11 +30,11 @@ class ArbeidOgInntektService(
                 logger.medContext(logContext) {
                     error("Feil ved henting av a-inntekt url fra Arbeid og Inntekt. Se Securelogs for detaljer.", e)
                 }
-                val feilmelding = "Feil ved henting av a-inntekt url fra Arbeid og Inntekt"
+                val frontendFeilmelding = "Feil ved henting av a-inntekt url fra Arbeid og Inntekt"
                 throw Feil(
-                    message = feilmelding,
+                    message = e.message ?: frontendFeilmelding,
                     logContext = logContext,
-                    frontendFeilmelding = feilmelding,
+                    frontendFeilmelding = frontendFeilmelding,
                     httpStatus = HttpStatus.BAD_GATEWAY,
                 )
             }
