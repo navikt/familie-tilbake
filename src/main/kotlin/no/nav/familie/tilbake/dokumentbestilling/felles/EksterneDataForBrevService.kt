@@ -9,6 +9,8 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.person.PersonService
 import no.nav.tilbakekreving.kontrakter.verge.Vergetype
 import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
 import org.springframework.stereotype.Service
 import no.nav.tilbakekreving.kontrakter.verge.Verge as VergeDto
 

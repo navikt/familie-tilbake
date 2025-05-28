@@ -2,7 +2,6 @@ package no.nav.familie.tilbake.sikkerhet
 
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
-import no.nav.familie.tilbake.behandling.FagsystemUtil
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
@@ -14,6 +13,7 @@ import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.FagsystemUtil
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem

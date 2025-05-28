@@ -15,7 +15,6 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
-import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
@@ -31,6 +30,7 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Klassekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
+import no.nav.tilbakekreving.Rettsgebyr
 import no.nav.tilbakekreving.api.v1.dto.AktivitetDto
 import no.nav.tilbakekreving.api.v1.dto.AktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
@@ -131,7 +131,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)
 
         val vurdertVilkårsvurderingDto = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
-        vurdertVilkårsvurderingDto.rettsgebyr shouldBe Constants.rettsgebyr
+        vurdertVilkårsvurderingDto.rettsgebyr shouldBe Rettsgebyr.rettsgebyr
         vurdertVilkårsvurderingDto.perioder.shouldNotBeEmpty()
         vurdertVilkårsvurderingDto.perioder.size shouldBe 1
         val vurdertPeriode = vurdertVilkårsvurderingDto.perioder[0]
@@ -154,7 +154,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)
 
         val vurdertVilkårsvurderingDto = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
-        vurdertVilkårsvurderingDto.rettsgebyr shouldBe Constants.rettsgebyr
+        vurdertVilkårsvurderingDto.rettsgebyr shouldBe Rettsgebyr.rettsgebyr
         vurdertVilkårsvurderingDto.perioder.shouldNotBeEmpty()
         vurdertVilkårsvurderingDto.perioder.size shouldBe 2
 
@@ -190,7 +190,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, behandlingsstegVilkårsvurderingDto)
 
         val vurdertVilkårsvurderingDto = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
-        vurdertVilkårsvurderingDto.rettsgebyr shouldBe Constants.rettsgebyr
+        vurdertVilkårsvurderingDto.rettsgebyr shouldBe Rettsgebyr.rettsgebyr
         vurdertVilkårsvurderingDto.perioder.shouldNotBeEmpty()
         vurdertVilkårsvurderingDto.perioder.size shouldBe 2
 
@@ -262,7 +262,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         kravgrunnlagRepository.update(kravgrunnlag431.copy(perioder = setOf(førstePeriode, andrePeriode)))
 
         val vurdertVilkårsvurderingDto = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
-        vurdertVilkårsvurderingDto.rettsgebyr shouldBe Constants.rettsgebyr
+        vurdertVilkårsvurderingDto.rettsgebyr shouldBe Rettsgebyr.rettsgebyr
         vurdertVilkårsvurderingDto.perioder.shouldNotBeEmpty()
         vurdertVilkårsvurderingDto.perioder.size shouldBe 1
         val vurdertPeriode = vurdertVilkårsvurderingDto.perioder[0]
@@ -299,7 +299,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         )
 
         val vurdertVilkårsvurderingDto = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
-        vurdertVilkårsvurderingDto.rettsgebyr shouldBe Constants.rettsgebyr
+        vurdertVilkårsvurderingDto.rettsgebyr shouldBe Rettsgebyr.rettsgebyr
         vurdertVilkårsvurderingDto.perioder.shouldNotBeEmpty()
         vurdertVilkårsvurderingDto.perioder.size shouldBe 1
         val vurdertPeriode = vurdertVilkårsvurderingDto.perioder[0]
@@ -343,7 +343,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         )
 
         val vurdertVilkårsvurderingDto = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
-        vurdertVilkårsvurderingDto.rettsgebyr shouldBe Constants.rettsgebyr
+        vurdertVilkårsvurderingDto.rettsgebyr shouldBe Rettsgebyr.rettsgebyr
         vurdertVilkårsvurderingDto.perioder.shouldNotBeEmpty()
         vurdertVilkårsvurderingDto.perioder.size shouldBe 1
         val vurdertPeriode = vurdertVilkårsvurderingDto.perioder[0]

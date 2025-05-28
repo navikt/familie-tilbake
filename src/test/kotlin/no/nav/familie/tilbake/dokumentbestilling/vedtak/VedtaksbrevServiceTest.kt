@@ -24,12 +24,9 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandReposi
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
-import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmetadataUtil
-import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
-import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.Brevdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
@@ -41,7 +38,6 @@ import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
-import no.nav.familie.tilbake.pdfgen.validering.PdfaValidator
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
@@ -72,6 +68,13 @@ import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import no.nav.tilbakekreving.mars
 import no.nav.tilbakekreving.oktober
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.Brevdata
+import no.nav.tilbakekreving.pdf.dokumentbestilling.vedtak.Avsnittstype
+import no.nav.tilbakekreving.pdf.dokumentbestilling.vedtak.Underavsnitt
+import no.nav.tilbakekreving.pdf.dokumentbestilling.vedtak.Underavsnittstype
+import no.nav.tilbakekreving.pdf.validering.PdfaValidator
 import org.apache.commons.lang3.RandomStringUtils
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

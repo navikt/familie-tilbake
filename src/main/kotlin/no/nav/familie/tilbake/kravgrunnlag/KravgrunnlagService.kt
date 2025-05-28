@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.kravgrunnlag
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
-import no.nav.familie.tilbake.behandling.FagsystemUtil
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.behandling.batch.AutomatiskSaksbehandlingTask
 import no.nav.familie.tilbake.behandling.domain.Behandling
@@ -12,7 +11,6 @@ import no.nav.familie.tilbake.behandling.task.OppdaterFaktainfoTask
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
-import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
@@ -27,6 +25,8 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
+import no.nav.tilbakekreving.FagsystemUtil
+import no.nav.tilbakekreving.Rettsgebyr
 import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
@@ -182,7 +182,7 @@ class KravgrunnlagService(
         return try {
             val år = kravgrunnlag431.perioder.finnÅrForNyesteFeilutbetalingsperiode() ?: return false
             val rettsgebyr =
-                Constants.rettsgebyrForÅr(år) ?: throw Feil(
+                Rettsgebyr.rettsgebyrForÅr(år) ?: throw Feil(
                     message = "Rettsgebyr for år $år er ikke satt",
                     logContext = SecureLog.Context.utenBehandling(kravgrunnlag431.fagsystemId),
                 )

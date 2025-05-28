@@ -2,7 +2,6 @@ package no.nav.familie.tilbake.kravgrunnlag
 
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
-import no.nav.familie.tilbake.behandling.FagsystemUtil
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
@@ -19,6 +18,7 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.oppgave.OppgaveService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
+import no.nav.tilbakekreving.FagsystemUtil
 import no.nav.tilbakekreving.api.v1.dto.HenleggelsesbrevFritekstDto
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg

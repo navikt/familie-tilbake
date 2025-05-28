@@ -1,7 +1,6 @@
 package no.nav.familie.tilbake.behandling.domain
 
 import no.nav.familie.tilbake.common.repository.Sporbar
-import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
 import no.nav.tilbakekreving.kontrakter.Regelverk
 import no.nav.tilbakekreving.kontrakter.Tilbakekrevingsvalg
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
@@ -9,6 +8,7 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
 import no.nav.tilbakekreving.kontrakter.verge.Vergetype
+import no.nav.tilbakekreving.pdf.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
 import org.springframework.data.relational.core.mapping.Column

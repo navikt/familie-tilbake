@@ -1,11 +1,9 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
-val openHtmlToPdfVersion = "1.1.26"
 val springDocVersion = "2.8.6"
 val testcontainersVersion = "1.20.6"
 val tokenValidationVersion = "5.0.24"
-val veraPdfVersion = "1.26.5"
 val flywayVersion = "11.3.4"
 val ktorVersion = "3.1.3"
 
@@ -46,6 +44,23 @@ configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
 
 subprojects {
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
+    apply(plugin = "org.jetbrains.kotlin.jvm")
+
+    group = "no.nav"
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        testImplementation("org.junit.jupiter:junit-jupiter:5.12.2")
+        testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+        testImplementation("io.kotest:kotest-assertions-core:5.9.1")
+    }
+
+    tasks.test {
+        useJUnitPlatform()
+    }
 }
 
 repositories {
@@ -83,16 +98,6 @@ dependencies {
     api("com.fasterxml.jackson.core:jackson-databind")
     api("com.fasterxml.jackson.module:jackson-module-kotlin")
 
-    api("com.github.jknack:handlebars:4.4.0")
-    api("com.github.jknack:handlebars-jackson2:4.3.1")
-
-    api("io.github.openhtmltopdf:openhtmltopdf-core:$openHtmlToPdfVersion")
-    api("io.github.openhtmltopdf:openhtmltopdf-pdfbox:$openHtmlToPdfVersion")
-    api("io.github.openhtmltopdf:openhtmltopdf-slf4j:$openHtmlToPdfVersion")
-    api("io.github.openhtmltopdf:openhtmltopdf-svg-support:$openHtmlToPdfVersion")
-    api("org.verapdf:core-jakarta:$veraPdfVersion")
-    api("org.verapdf:validation-model-jakarta:$veraPdfVersion")
-
     api("com.ibm.mq:com.ibm.mq.jakarta.client:9.4.2.0")
     api("jakarta.jms:jakarta.jms-api")
     api("org.apache.activemq:activemq-jms-pool")
@@ -107,6 +112,8 @@ dependencies {
     api(project(":kontrakter-intern"))
     api(project(":kontrakter-ekstern"))
     api(project(":modell"))
+    api(project(":felles"))
+    api(project(":pdf"))
     api("no.nav.familie:prosessering-core:2.20250409144459_df36248") {
         // La spring boot håndtere flyway versjon selv om den er eldre enn den som er inkludert i prosessering-core
         exclude("org.flywaydb")

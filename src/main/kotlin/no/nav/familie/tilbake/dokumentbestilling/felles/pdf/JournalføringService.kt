@@ -5,10 +5,6 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Verge
-import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
-import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
-import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
-import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.JournalpostIdOgDokumentId
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.kontrakter.BrukerIdType
 import no.nav.familie.tilbake.kontrakter.dokarkiv.AvsenderMottaker
@@ -25,6 +21,11 @@ import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import no.nav.tilbakekreving.kontrakter.ytelse.Tema
 import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmetadata
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.Dokumentkategori
+import no.nav.tilbakekreving.pdf.dokumentbestilling.fritekstbrev.JournalpostIdOgDokumentId
 import org.springframework.stereotype.Service
 import java.util.UUID
 

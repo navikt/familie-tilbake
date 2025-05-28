@@ -6,7 +6,6 @@ import no.nav.familie.tilbake.behandling.LagreUtkastVedtaksbrevService
 import no.nav.familie.tilbake.dokumentbestilling.DokumentbehandlingService
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.HenleggelsesbrevService
 import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevService
-import no.nav.familie.tilbake.dokumentbestilling.vedtak.Avsnitt
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevService
 import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
@@ -20,6 +19,7 @@ import no.nav.tilbakekreving.api.v1.dto.FritekstavsnittDto
 import no.nav.tilbakekreving.api.v1.dto.HentForhåndvisningVedtaksbrevPdfDto
 import no.nav.tilbakekreving.kontrakter.ForhåndsvisVarselbrevRequest
 import no.nav.tilbakekreving.kontrakter.brev.Dokumentmalstype
+import no.nav.tilbakekreving.pdf.dokumentbestilling.vedtak.Avsnitt
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable

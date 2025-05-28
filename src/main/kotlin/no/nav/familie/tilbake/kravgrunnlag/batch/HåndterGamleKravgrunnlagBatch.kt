@@ -2,13 +2,13 @@ package no.nav.familie.tilbake.kravgrunnlag.batch
 
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.tilbake.behandling.FagsystemUtil
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattService
 import no.nav.familie.tilbake.leader.LeaderClient
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.FagsystemUtil
 import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype.BARNETILSYN
 import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype.BARNETRYGD
