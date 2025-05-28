@@ -12,17 +12,17 @@ abstract class AbstractBearerTokenInterceptor(
     protected val oAuth2AccessTokenService: OAuth2AccessTokenService,
     protected val clientConfigurationProperties: ClientConfigurationProperties,
 ) : ClientHttpRequestInterceptor {
-    fun genererAccessToken(clientProperties: ClientProperties): String =
+    protected fun genererAccessToken(clientProperties: ClientProperties): String =
         oAuth2AccessTokenService
             .getAccessToken(clientProperties)
             .access_token ?: throw JwtTokenValidatorException("Kunne ikke hente accesstoken")
 
-    fun findByURI(uri: URI) =
-        clientConfigurationProperties.registration
+    protected fun ClientConfigurationProperties.findByURI(uri: URI) =
+        registration
             .values
             .filter { uri.toString().startsWith(it.resourceUrl.toString()) }
 
-    fun clientPropertiesForGrantType(
+    protected fun clientPropertiesForGrantType(
         values: List<ClientProperties>,
         grantType: GrantType,
         uri: URI,
