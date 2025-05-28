@@ -12,16 +12,10 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmetadataUtil
-import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.BRUKER
-import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.MANUELL_BRUKER
-import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.MANUELL_TILLEGGSMOTTAKER
-import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.VERGE
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingService
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
-import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.Brevdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.JournalføringService
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.HenleggelsesbrevService
@@ -31,6 +25,9 @@ import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.Man
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevgunnlagService
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.tilbakekreving.kontrakter.brev.MottakerType
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.Brevdata
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -104,10 +101,10 @@ class DistribusjonshåndteringServiceTest {
         every { eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem, any()) } returns
             personinfoBruker
         every {
-            eksterneDataForBrevService.hentAdresse(personinfoBruker, BRUKER, behandling.aktivVerge, any(), any())
+            eksterneDataForBrevService.hentAdresse(personinfoBruker, Brevmottager.BRUKER, behandling.aktivVerge, any(), any())
         } returns brukerAdresse
         every {
-            eksterneDataForBrevService.hentAdresse(personinfoBruker, VERGE, behandling.aktivVerge, any(), any())
+            eksterneDataForBrevService.hentAdresse(personinfoBruker, Brevmottager.VERGE, behandling.aktivVerge, any(), any())
         } returns vergeAdresse
         every { eksterneDataForBrevService.hentSaksbehandlernavn(any()) } returns behandling.ansvarligSaksbehandler
         every { eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(any(), any()) } returns behandling.ansvarligSaksbehandler
@@ -121,7 +118,7 @@ class DistribusjonshåndteringServiceTest {
 
         every { behandlingRepository.findById(any()) } returns Optional.of(behandlingUtenVerge)
         every {
-            eksterneDataForBrevService.hentAdresse(personinfoBruker, BRUKER, behandlingUtenVerge.aktivVerge, any(), any())
+            eksterneDataForBrevService.hentAdresse(personinfoBruker, Brevmottager.BRUKER, behandlingUtenVerge.aktivVerge, any(), any())
         } returns brukerAdresse
 
         val task = SendHenleggelsesbrevTask.opprettTask(behandling.id, fagsak.fagsystem, "fritekst")
@@ -204,8 +201,8 @@ class DistribusjonshåndteringServiceTest {
             it.contains("manuell_bruker") || it.contains("manuell_tilleggsmottaker")
         }
 
-        val brevdataTilBruker = brevdata.first { it.mottager == MANUELL_BRUKER }
-        val brevdataTilManuellVerge = brevdata.first { it.mottager == MANUELL_TILLEGGSMOTTAKER }
+        val brevdataTilBruker = brevdata.first { it.mottager == Brevmottager.MANUELL_BRUKER }
+        val brevdataTilManuellVerge = brevdata.first { it.mottager == Brevmottager.MANUELL_TILLEGGSMOTTAKER }
 
         val (brødtekstTilManuellVerge, annenMottakerOppgittTilVerge) =
             brevdataTilManuellVerge.brevtekst

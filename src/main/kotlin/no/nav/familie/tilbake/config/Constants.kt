@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.config
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.Rettsgebyr
 import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
@@ -11,15 +12,6 @@ import java.time.LocalDate
 import java.time.Period
 
 object Constants {
-    private val rettsgebyrForDato =
-        listOf(
-            Datobeløp(LocalDate.of(2021, 1, 1), 1199),
-            Datobeløp(LocalDate.of(2022, 1, 1), 1223),
-            Datobeløp(LocalDate.of(2023, 1, 1), 1243),
-            Datobeløp(LocalDate.of(2024, 1, 1), 1277),
-            Datobeløp(LocalDate.of(2025, 1, 1), 1314),
-        )
-
     private val brukersSvarfrist: Period = Period.ofWeeks(2)
 
     fun brukersSvarfrist(): LocalDate = LocalDate.now().plus(brukersSvarfrist)
@@ -33,32 +25,23 @@ object Constants {
 
     const val STATUSMELDING_XML_ROOT_ELEMENT: String = "urn:endringKravOgVedtakstatus"
 
-    fun rettsgebyrForÅr(år: Int) = rettsgebyrForDato.filter { it.gyldigFra.year <= år }.maxByOrNull { it.gyldigFra }?.beløp
-
-    val rettsgebyr = rettsgebyrForDato.filter { it.gyldigFra <= LocalDate.now() }.maxByOrNull { it.gyldigFra }!!.beløp
-
-    private class Datobeløp(
-        val gyldigFra: LocalDate,
-        val beløp: Long,
-    )
-
     const val BRUKER_ID_VEDTAKSLØSNINGEN = "VL"
 
     val MAKS_FEILUTBETALTBELØP_PER_YTELSE =
         mapOf<Ytelsestype, BigDecimal>(
             Ytelsestype.BARNETRYGD to BigDecimal.valueOf(500),
-            Ytelsestype.BARNETILSYN to BigDecimal.valueOf(rettsgebyr).multiply(BigDecimal(0.5)),
+            Ytelsestype.BARNETILSYN to BigDecimal.valueOf(Rettsgebyr.rettsgebyr).multiply(BigDecimal(0.5)),
             Ytelsestype.OVERGANGSSTØNAD to
                 BigDecimal
-                    .valueOf(rettsgebyr)
+                    .valueOf(Rettsgebyr.rettsgebyr)
                     .multiply(BigDecimal(0.5)),
             Ytelsestype.SKOLEPENGER to
                 BigDecimal
-                    .valueOf(rettsgebyr)
+                    .valueOf(Rettsgebyr.rettsgebyr)
                     .multiply(BigDecimal(0.5)),
             Ytelsestype.KONTANTSTØTTE to
                 BigDecimal
-                    .valueOf(rettsgebyr)
+                    .valueOf(Rettsgebyr.rettsgebyr)
                     .multiply(BigDecimal(0.5)),
         )
 

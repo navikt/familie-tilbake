@@ -4,9 +4,7 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
-import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.FeatureToggleService
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -20,8 +18,6 @@ import java.util.UUID
 class SendVarselbrevTask(
     private val varselbrevService: VarselbrevService,
     private val behandlingRepository: BehandlingRepository,
-    private val fagsakRepository: FagsakRepository,
-    private val featureToggleService: FeatureToggleService,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val behandlingId = UUID.fromString(task.payload)

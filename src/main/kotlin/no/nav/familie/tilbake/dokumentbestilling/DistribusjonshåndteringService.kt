@@ -5,25 +5,24 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
-import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmetadataUtil
-import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
-import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.BRUKER
-import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.INSTITUSJON
-import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.MANUELL_BRUKER
-import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.MANUELL_TILLEGGSMOTTAKER
-import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.VERGE
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
-import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.Brevdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevgunnlagService
-import no.nav.familie.tilbake.kontrakter.dokdist.AdresseType
-import no.nav.familie.tilbake.kontrakter.dokdist.ManuellAdresse
 import no.nav.tilbakekreving.kontrakter.brev.MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE
 import no.nav.tilbakekreving.kontrakter.brev.MottakerType.DØDSBO
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmetadata
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager.BRUKER
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager.INSTITUSJON
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager.MANUELL_BRUKER
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager.MANUELL_TILLEGGSMOTTAKER
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager.VERGE
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.HbManuellAdresse
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.Brevdata
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -137,12 +136,7 @@ val Brevmottaker?.manuellAdresse: Adresseinfo?
                 mottagernavn = mottaker.navn,
                 manuellAdresse =
                     if (mottaker.hasManuellAdresse()) {
-                        ManuellAdresse(
-                            adresseType =
-                                when (mottaker.landkode) {
-                                    "NO" -> AdresseType.norskPostadresse
-                                    else -> AdresseType.utenlandskPostadresse
-                                },
+                        HbManuellAdresse(
                             adresselinje1 = mottaker.adresselinje1,
                             adresselinje2 = mottaker.adresselinje2,
                             postnummer = mottaker.postnummer,

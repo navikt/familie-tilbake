@@ -1,7 +1,6 @@
 package no.nav.familie.tilbake.vilkårsvurdering
 
 import no.nav.familie.tilbake.beregning.Kravgrunnlag431Adapter
-import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetalingsperiode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
@@ -11,6 +10,7 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhe
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingGodTro
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingSærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
+import no.nav.tilbakekreving.Rettsgebyr
 import no.nav.tilbakekreving.api.v1.dto.AktivitetDto
 import no.nav.tilbakekreving.api.v1.dto.AktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.GodTroDto
@@ -92,7 +92,7 @@ object VilkårsvurderingMapper {
 
         return VurdertVilkårsvurderingDto(
             perioder = samletPerioder.sortedBy { it.periode.fom },
-            rettsgebyr = Constants.rettsgebyr,
+            rettsgebyr = Rettsgebyr.rettsgebyr,
             opprettetTid = vilkårsvurdering?.sporbar?.opprettetTid,
         )
     }
