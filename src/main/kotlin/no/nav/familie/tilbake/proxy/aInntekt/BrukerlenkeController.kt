@@ -2,26 +2,26 @@ package no.nav.familie.tilbake.proxy.aInntekt
 
 import no.nav.familie.tilbake.kontrakter.PersonIdent
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import no.nav.tilbakekreving.api.v1.dto.ProxyLenkeDto
+import no.nav.tilbakekreving.api.v1.dto.BrukerlenkeDto
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/arbeid-og-inntekt")
+@RequestMapping("/api/brukerlenke")
 @ProtectedWithClaims(issuer = "azuread")
-class ArbeidOgInntektController(
-    private val service: ArbeidOgInntektService,
+class BrukerlenkeController(
+    private val service: BrukerlenkeService,
 ) {
     /**
      * Brukes for å generere en url til arbeid-og-inntekt
      * for å kunne sende saksbehandleren til identen sin side på arbeid og inntekt
      */
-    @GetMapping("/brukerlenke")
+    @GetMapping("/ainntekt")
     fun hentUrlTilArbeidOgInntekt(
         @RequestHeader("x-person-ident") personIdent: PersonIdent,
         @RequestHeader("x-fagsak-id") fagsakId: String?,
         @RequestHeader("x-behandling-id") behandlingId: String?,
-    ): ProxyLenkeDto = ProxyLenkeDto(ainntektUrl = service.hentAInntektUrl(personIdent.ident, fagsakId, behandlingId))
+    ): BrukerlenkeDto = BrukerlenkeDto(url = service.hentAInntektUrl(personIdent.ident, fagsakId, behandlingId))
 }

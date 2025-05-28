@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 
 @Service
-class ArbeidOgInntektService(
+class BrukerlenkeService(
     private val client: ArbeidOgInntektClient,
 ) {
     private val logger = TracedLogger.getLogger<ArbeidOgInntektClient>()
