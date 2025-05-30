@@ -74,7 +74,6 @@ spring:
 
 ainntekt:
   baseUrl: https://dummy.nais.io
-  scope: api://dummy/.default
 
 STS_URL: http://nav-auth-mock:8200/nais-sts/token
 PDL_URL: http://familie-mock-server:1337/rest/api/pdl/

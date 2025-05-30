@@ -34,4 +34,3 @@ NAIS_CLUSTER_NAME: dev-gcp
 
 ainntekt:
   baseUrl: http://mock-ainntekt-server
-  scope: mock-scope
