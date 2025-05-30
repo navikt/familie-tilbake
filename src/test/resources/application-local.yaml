@@ -54,3 +54,7 @@ unleash.enabled: false
 UNLEASH_SERVER_API_URL: http://localhost:4242/api
 UNLEASH_SERVER_API_TOKEN: token
 NAIS_CLUSTER_NAME: dev-gcp
+
+ainntekt:
+  baseUrl: http://localhost:8080/mock-path
+  scope: api://mock/.default
