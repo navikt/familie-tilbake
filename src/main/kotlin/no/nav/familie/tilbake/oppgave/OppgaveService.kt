@@ -239,7 +239,8 @@ class OppgaveService(
         oppgaveId: Long,
         nyEnhet: String,
         fjernMappeFraOppgave: Boolean,
-    ): OppgaveResponse = integrasjonerClient.tilordneOppgaveNyEnhet(oppgaveId, nyEnhet, fjernMappeFraOppgave)
+        nullstillTilordnetRessurs: Boolean,
+    ): OppgaveResponse = integrasjonerClient.tilordneOppgaveNyEnhet(oppgaveId, nyEnhet, fjernMappeFraOppgave, nullstillTilordnetRessurs)
 
     fun oppdaterEnhetOgSaksbehandler(
         behandlingId: UUID,
@@ -268,9 +269,11 @@ class OppgaveService(
         }
 
         if (oppgave.tema == Tema.ENF) {
-            tilordneOppgaveNyEnhet(oppgave.id!!, enhetId, false) // ENF bruker generelle mapper
+            tilordneOppgaveNyEnhet(oppgave.id!!, enhetId, false, false) // ENF bruker generelle mapper
+        } else if (oppgave.tema == Tema.BAR) {
+            tilordneOppgaveNyEnhet(oppgave.id!!, enhetId, true, true) // BAR bruker mapper som hører til enhetene og nullstiller tilordnetRessurs
         } else {
-            tilordneOppgaveNyEnhet(oppgave.id!!, enhetId, true) // KON og BAR bruker mapper som hører til enhetene
+            tilordneOppgaveNyEnhet(oppgave.id!!, enhetId, true, false) // KON bruker mapper som hører til enhetene
         }
     }
 
