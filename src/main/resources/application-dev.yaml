@@ -40,7 +40,6 @@ SECURITYTOKENSERVICE_URL: https://api-gw-q1.oera.no/security-token-service/Secur
 
 ainntekt:
   baseUrl: https://arbeid-og-inntekt.dev-fss-pub.nais.io
-  scope: api://dev-fss.arbeid-og-inntekt/.default
 
 PDL_URL: https://pdl-api.dev-fss-pub.nais.io
 PDL_SCOPE: api://dev-fss.pdl.pdl-api/.default

@@ -57,4 +57,3 @@ NAIS_CLUSTER_NAME: dev-gcp
 
 ainntekt:
   baseUrl: http://localhost:8080/mock-path
-  scope: api://mock/.default
