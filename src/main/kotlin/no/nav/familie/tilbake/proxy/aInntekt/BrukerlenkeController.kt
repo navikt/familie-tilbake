@@ -19,7 +19,7 @@ class BrukerlenkeController(
      * Brukes for å generere en url til arbeid-og-inntekt
      * for å kunne sende saksbehandleren til identen sin side på arbeid og inntekt
      */
-    @GetMapping("/ainntekt")
+    @GetMapping("/")
     fun hentUrlTilArbeidOgInntekt(
         @RequestHeader("x-person-ident") personIdent: PersonIdent,
         @RequestHeader("x-fagsak-id") fagsakId: String?,
