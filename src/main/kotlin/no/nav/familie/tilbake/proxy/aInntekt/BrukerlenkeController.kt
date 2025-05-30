@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.proxy.aInntekt
 
 import no.nav.familie.tilbake.kontrakter.PersonIdent
+import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.api.v1.dto.BrukerlenkeDto
 import org.springframework.web.bind.annotation.GetMapping
@@ -23,5 +24,5 @@ class BrukerlenkeController(
         @RequestHeader("x-person-ident") personIdent: PersonIdent,
         @RequestHeader("x-fagsak-id") fagsakId: String?,
         @RequestHeader("x-behandling-id") behandlingId: String?,
-    ): BrukerlenkeDto = BrukerlenkeDto(url = service.hentAInntektUrl(personIdent.ident, fagsakId, behandlingId))
+    ): Ressurs<BrukerlenkeDto> = Ressurs.success(BrukerlenkeDto(url = service.hentAInntektUrl(personIdent.ident, fagsakId, behandlingId)))
 }
