@@ -148,6 +148,12 @@ class TilbakekrevingService(
         return eksempelsaker.firstOrNull { it.tilFrontendDto().fagsystem == fagsystem && it.tilFrontendDto().eksternFagsakId == eksternFagsakId }
     }
 
+    fun gjennopprettTilbakekreving(id: UUID): Tilbakekreving?{
+        val tilbakekreving = valkeyClient.henteTilstand(id)?.fraEntity(behovObservatør)
+        return tilbakekreving
+
+    }
+
     fun hentTilbakekreving(behandlingId: UUID): Tilbakekreving? {
         if (!applicationProperties.toggles.nyModellEnabled) return null
 
@@ -364,7 +370,6 @@ class TilbakekrevingService(
                     ),
                 )
             }
-            else -> throw IllegalArgumentException("Default eller ugydlig mottaker type ${brevmottakerDto.type}")
         }
         valkeyClient.lagreTilstand(tilbakekreving.id, tilbakekreving.tilEntity())
     }
