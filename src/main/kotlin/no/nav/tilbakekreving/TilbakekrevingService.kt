@@ -146,6 +146,12 @@ class TilbakekrevingService(
         return eksempelsaker.map { it.tilbakekreving }.firstOrNull { it.tilFrontendDto().fagsystem == fagsystem && it.tilFrontendDto().eksternFagsakId == eksternFagsakId }
     }
 
+    fun gjennopprettTilbakekreving(id: UUID): Tilbakekreving?{
+        val tilbakekreving = valkeyClient.henteTilstand(id)?.fraEntity(behovObservatør)
+        return tilbakekreving
+
+    }
+
     fun hentTilbakekreving(behandlingId: UUID): Tilbakekreving? {
         if (!applicationProperties.toggles.nyModellEnabled) return null
 

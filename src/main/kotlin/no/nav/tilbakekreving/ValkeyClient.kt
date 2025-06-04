@@ -19,15 +19,15 @@ object ValkeyClient {
         tilbakekrevingEntity: TilbakekrevingEntity,
     ) {
         val json = objectMapper.writeValueAsString(tilbakekrevingEntity)
-        commands.set("saks:$tilbakekrevingId", json)
+        commands.set("tilbakekreving:$tilbakekrevingId", json)
     }
 
-    fun henteTilstand(tilbakekrevingId: String): TilbakekrevingEntity? {
-        val json = commands.get("saks:$tilbakekrevingId") ?: return null
+    fun henteTilstand(tilbakekrevingId: UUID): TilbakekrevingEntity? {
+        val json = commands.get("tilbakekreving:$tilbakekrevingId") ?: return null
         return objectMapper.readValue(json)
     }
 
     fun fjerneTilstand(tilbakekrevingId: String) {
-        commands.del("saks:$tilbakekrevingId")
+        commands.del("tilbakekreving:$tilbakekrevingId")
     }
 }

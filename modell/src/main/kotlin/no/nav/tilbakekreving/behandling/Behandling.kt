@@ -29,6 +29,8 @@ import no.nav.tilbakekreving.beregning.Beregning
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
 import no.nav.tilbakekreving.entities.BehandlingEntity
+import no.nav.tilbakekreving.entities.EksternFagsakEntity
+import no.nav.tilbakekreving.entities.KravgrunnlagHistorikkEntity
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
@@ -80,13 +82,13 @@ class Behandling private constructor(
             sistEndret = sistEndret,
             enhet = enhet?.tilEntity(),
             årsak = årsak.name,
-            ansvarligSaksbehandler = ansvarligSaksbehandler.ident,
-            eksternFagsakBehandlingRef = eksternFagsakBehandling.entry.internId,
-            kravgrunnlagRef = kravgrunnlag.entry.internId,
-            foreldelsesteg = foreldelsesteg.tilEntity(),
-            faktasteg = faktasteg.tilEntity(),
-            vilkårsvurderingsteg = vilkårsvurderingsteg.tilEntity(),
-            foreslåVedtakSteg = foreslåVedtakSteg.tilEntity(),
+            ansvarligSaksbehandlerEntity = ansvarligSaksbehandler.tilEntity(),
+            eksternFagsakBehandlingRefEntity = eksternFagsakBehandling.entry.tilEntity(),
+            kravgrunnlagHendelseRefEntity = kravgrunnlag.entry.tilEntity(),
+            foreldelsestegEntity = foreldelsesteg.tilEntity(),
+            faktastegEntity = faktasteg.tilEntity(),
+            vilkårsvurderingstegEntity = vilkårsvurderingsteg.tilEntity(),
+            foreslåVedtakStegEntity = foreslåVedtakSteg.tilEntity(),
         )
     }
 
@@ -342,6 +344,32 @@ class Behandling private constructor(
                 faktasteg = faktasteg,
                 vilkårsvurderingsteg = vilkårsvurderingsteg,
                 foreslåVedtakSteg = foreslåVedtakSteg,
+            )
+        }
+
+        fun fraEntity(
+            behandlingEntity: BehandlingEntity,
+            eksternFagsakEntity: EksternFagsakEntity,
+            kravgrunnlagHistorikkEntity: KravgrunnlagHistorikkEntity,
+        ): Behandling {
+            val eksternFagsakBehandling = eksternFagsakEntity.behandlinger.fraEntity().nåværende()
+            val kravgrunnlag = kravgrunnlagHistorikkEntity.fraEntity().nåværende()
+
+            return Behandling(
+                internId = behandlingEntity.internId,
+                eksternId = behandlingEntity.eksternId,
+                behandlingstype = Behandlingstype.valueOf(behandlingEntity.behandlingstype),
+                opprettet = behandlingEntity.opprettet,
+                sistEndret = behandlingEntity.sistEndret,
+                enhet = behandlingEntity.enhet?.fraEntity(),
+                årsak = Behandlingsårsakstype.valueOf(behandlingEntity.årsak),
+                ansvarligSaksbehandler = behandlingEntity.ansvarligSaksbehandlerEntity.fraEntity(),
+                eksternFagsakBehandling = eksternFagsakBehandling,
+                kravgrunnlag = kravgrunnlag,
+                foreldelsesteg = behandlingEntity.foreldelsestegEntity.fraEntity(kravgrunnlag),
+                faktasteg = behandlingEntity.faktastegEntity.fraEntity(eksternFagsakBehandling, kravgrunnlag),
+                vilkårsvurderingsteg = Vilkårsvurderingsteg.fraEntity(behandlingEntity.vilkårsvurderingstegEntity, kravgrunnlag),
+                foreslåVedtakSteg = behandlingEntity.foreslåVedtakStegEntity.fraEntity(),
             )
         }
     }

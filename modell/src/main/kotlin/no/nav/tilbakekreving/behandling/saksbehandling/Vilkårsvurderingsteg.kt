@@ -10,6 +10,8 @@ import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurderingAdapter
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurdertPeriodeAdapter
 import no.nav.tilbakekreving.entities.BeløpIBeholdEntity
+import no.nav.tilbakekreving.entities.BeløpIBeholdJaEntity
+import no.nav.tilbakekreving.entities.BeløpIBeholdNeiEntity
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.FeilaktigeOpplysningerFraBrukerEntity
 import no.nav.tilbakekreving.entities.ForsettEntity
@@ -17,10 +19,8 @@ import no.nav.tilbakekreving.entities.ForstodEllerBurdeForståttEntity
 import no.nav.tilbakekreving.entities.GodTroEntity
 import no.nav.tilbakekreving.entities.GrovUaktsomhetEntity
 import no.nav.tilbakekreving.entities.IkkeVurdertEntity
-import no.nav.tilbakekreving.entities.JaEntity
 import no.nav.tilbakekreving.entities.JaEntitySkalReduseres
 import no.nav.tilbakekreving.entities.MangelfulleOpplysningerFraBrukerEntity
-import no.nav.tilbakekreving.entities.NeiEntity
 import no.nav.tilbakekreving.entities.NeiEntitySkalReduseres
 import no.nav.tilbakekreving.entities.SimpelUaktsomhetEntity
 import no.nav.tilbakekreving.entities.SkalReduseresEntity
@@ -208,6 +208,15 @@ class Vilkårsvurderingsteg(
                     _vurdering = Vurdering.IkkeVurdert,
                 )
             }
+
+            fun fraEntity(entity: VilkårsvurderingsperiodeEntity): Vilkårsvurderingsperiode {
+                return Vilkårsvurderingsperiode(
+                    id = entity.id,
+                    periode = entity.periode.fraEntity(),
+                    begrunnelseForTilbakekreving = entity.begrunnelseForTilbakekreving,
+                    _vurdering = entity.vurdering.fraEntity(),
+                )
+            }
         }
     }
 
@@ -237,7 +246,7 @@ class Vilkårsvurderingsteg(
                     }
 
                     override fun tilEntity(): BeløpIBeholdEntity {
-                        return JaEntity(
+                        return BeløpIBeholdJaEntity(
                             beløp = beløp,
                         )
                     }
@@ -249,7 +258,7 @@ class Vilkårsvurderingsteg(
                     }
 
                     override fun tilEntity(): BeløpIBeholdEntity {
-                        return NeiEntity
+                        return BeløpIBeholdNeiEntity
                     }
                 }
             }
@@ -447,6 +456,17 @@ class Vilkårsvurderingsteg(
                 },
                 kravgrunnlagHendelse,
                 foreldelsesteg,
+            )
+        }
+
+        fun fraEntity(
+            entity: VilkårsvurderingstegEntity,
+            kravgrunnlagHendelse: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
+        ): Vilkårsvurderingsteg {
+            return Vilkårsvurderingsteg(
+                vurderinger = entity.vurderinger.map { Vilkårsvurderingsperiode.fraEntity(it) },
+                kravgrunnlagHendelse = kravgrunnlagHendelse,
+                foreldelsesteg = entity.foreldelsesteg.fraEntity(kravgrunnlagHendelse),
             )
         }
     }
