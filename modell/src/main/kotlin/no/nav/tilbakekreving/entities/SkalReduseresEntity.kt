@@ -1,13 +1,17 @@
 package no.nav.tilbakekreving.entities
 
+import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
+
 sealed class SkalReduseresEntity {
-    abstract val type: String
+    abstract fun fraEntity(): Vilkårsvurderingsteg.VurdertAktsomhet.SkalReduseres
 }
 
 data class JaEntitySkalReduseres(val prosentdel: Int) : SkalReduseresEntity() {
-    override val type: String = "Ja"
+    override fun fraEntity(): Vilkårsvurderingsteg.VurdertAktsomhet.SkalReduseres =
+        Vilkårsvurderingsteg.VurdertAktsomhet.SkalReduseres.Ja(prosentdel)
 }
 
 object NeiEntitySkalReduseres : SkalReduseresEntity() {
-    override val type: String = "Nei"
+    override fun fraEntity(): Vilkårsvurderingsteg.VurdertAktsomhet.SkalReduseres =
+        Vilkårsvurderingsteg.VurdertAktsomhet.SkalReduseres.Nei
 }

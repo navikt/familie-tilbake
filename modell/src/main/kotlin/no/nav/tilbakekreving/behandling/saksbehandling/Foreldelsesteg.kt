@@ -117,6 +117,13 @@ class Foreldelsesteg(
                     periode = periode,
                     _vurdering = Vurdering.IkkeVurdert,
                 )
+
+            fun fraEntity(foreldelseperiodeEntity: ForeldelseperiodeEntity): Foreldelseperiode =
+                Foreldelseperiode(
+                    id = foreldelseperiodeEntity.id,
+                    periode = foreldelseperiodeEntity.periode.fraEntity(),
+                    _vurdering = foreldelseperiodeEntity.foreldelsesvurdering.fraEntity(),
+                )
         }
     }
 

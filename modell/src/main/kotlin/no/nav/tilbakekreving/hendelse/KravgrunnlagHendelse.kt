@@ -6,7 +6,7 @@ import no.nav.tilbakekreving.entities.AktørEntity
 import no.nav.tilbakekreving.entities.BeløpEntity
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.KravgrunnlagHendelseEntity
-import no.nav.tilbakekreving.entities.PeriodeEntity
+import no.nav.tilbakekreving.entities.KravgrunnlagPeriodeEntity
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -50,8 +50,8 @@ class KravgrunnlagHendelse(
             vedtakId = vedtakId,
             kravstatuskode = kravstatuskode.name,
             fagsystemVedtaksdato = fagsystemVedtaksdato,
-            vedtakGjelder = hentAktørEntity(vedtakGjelder),
-            utbetalesTil = hentAktørEntity(utbetalesTil),
+            vedtakGjelder = tilAktørEntity(vedtakGjelder),
+            utbetalesTil = tilAktørEntity(utbetalesTil),
             skalBeregneRenter = skalBeregneRenter,
             ansvarligEnhet = ansvarligEnhet,
             kontrollfelt = kontrollfelt,
@@ -61,7 +61,7 @@ class KravgrunnlagHendelse(
         )
     }
 
-    private fun hentAktørEntity(aktør: Aktør): AktørEntity = when (aktør) {
+    private fun tilAktørEntity(aktør: Aktør): AktørEntity = when (aktør) {
         is Aktør.Person -> AktørEntity("Person", aktør.ident)
         is Aktør.Organisasjon -> AktørEntity("Organisasjon", aktør.ident)
         is Aktør.Samhandler -> AktørEntity("Samhandler", aktør.ident)
@@ -90,8 +90,8 @@ class KravgrunnlagHendelse(
             return totaltBeløp()
         }
 
-        fun tilEntity(): PeriodeEntity {
-            return PeriodeEntity(
+        fun tilEntity(): KravgrunnlagPeriodeEntity {
+            return KravgrunnlagPeriodeEntity(
                 periode = DatoperiodeEntity(periode.fom, periode.tom),
                 månedligSkattebeløp = månedligSkattebeløp,
                 ytelsesbeløp = ytelsesbeløp.map { it.tilEntity() },
@@ -142,6 +142,13 @@ class KravgrunnlagHendelse(
         MANUELL("Manuell behandling"),
         NY("Nytt kravgrunnlag"),
         SPERRET("Kravgrunnlag sperret"),
+        ;
+
+        companion object {
+            fun fraNavn(navn: String): Kravstatuskode {
+                return entries.find { it.navn == navn }!!
+            }
+        }
     }
 
     sealed interface Aktør {
