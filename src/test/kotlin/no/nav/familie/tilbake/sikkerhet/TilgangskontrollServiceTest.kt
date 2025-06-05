@@ -13,7 +13,7 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
-import no.nav.familie.tilbake.config.ApplicationProperties
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.RolleConfig
 import no.nav.familie.tilbake.data.Testdata
@@ -24,9 +24,16 @@ import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
+import no.nav.tilbakekreving.Tilbakekreving
+import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
+import no.nav.tilbakekreving.behandling.BehandlingHistorikk
+import no.nav.tilbakekreving.brev.BrevHistorikk
+import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
+import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -36,6 +43,7 @@ import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.test.context.TestPropertySource
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
+import java.time.LocalDateTime
 import java.util.Calendar
 
 @TestPropertySource(
@@ -94,6 +102,7 @@ internal class TilgangskontrollServiceTest : OppslagSpringRunnerTest() {
 
     private lateinit var fagsak: Fagsak
     private lateinit var behandling: Behandling
+    private lateinit var tilbakekreving: Tilbakekreving
 
     @BeforeEach
     fun init() {
@@ -106,15 +115,23 @@ internal class TilgangskontrollServiceTest : OppslagSpringRunnerTest() {
                 auditLogger,
                 mottattXmlRepository,
                 mockIntegrasjonerClient,
-                ApplicationProperties(
-                    toggles =
-                        ApplicationProperties.Toggles(
-                            nyModellEnabled = false,
-                        ),
-                ),
-                mockk(),
             )
-
+        tilbakekreving =
+            Tilbakekreving(
+                eksternFagsak = EksternFagsak(
+                    "1abc",
+                    Ytelsestype.BARNETRYGD,
+                    Fagsystem.BA,
+                    EksternFagsakBehandlingHistorikk(mutableListOf()),
+                    mockk(relaxed = true),
+                ),
+                behandlingHistorikk = BehandlingHistorikk(mutableListOf()),
+                kravgrunnlagHistorikk = KravgrunnlagHistorikk(mutableListOf()),
+                brevHistorikk = BrevHistorikk(mutableListOf()),
+                opprettet = LocalDateTime.now(),
+                opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
+                behovObservatør = mockk(relaxed = true),
+            )
         fagsak =
             fagsakRepository.insert(
                 Testdata.fagsak().copy(
@@ -325,6 +342,24 @@ internal class TilgangskontrollServiceTest : OppslagSpringRunnerTest() {
         tilgangskontrollService.validerTilgangFagsystemOgFagsakId(Fagsystem.BA, fagsak.eksternFagsakId, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test")
 
         verify { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232"), any()) }
+    }
+
+    @Test
+    fun `validerTilgangTilbakekreving gir tilgang til behandler med kode 6 og 7`() {
+        every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(any(), any()) } returns listOf(Tilgang(personIdent, true, null))
+        val token = opprettToken("abc", listOf(ENSLIG_SAKSBEHANDLER_ROLLE, BARNETRYGD_SAKSBEHANDLER_ROLLE, TEAMFAMILIE_FORVALTER_ROLLE))
+        opprettRequestContext(token)
+
+        shouldNotThrowAny { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving, behandling.id, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
+    }
+
+    @Test
+    fun `validerTilgangTilbakekreving gir ikke tilgang til behandler uten forvaltningstilgang`() {
+        every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(any(), any()) } returns listOf(Tilgang(personIdent, false, null))
+        val token = opprettToken("abc", listOf(ENSLIG_SAKSBEHANDLER_ROLLE, BARNETRYGD_SAKSBEHANDLER_ROLLE, TEAMFAMILIE_FORVALTER_ROLLE))
+        opprettRequestContext(token)
+
+        shouldThrow<Feil> { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving, behandling.id, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
     }
 
     private fun opprettToken(

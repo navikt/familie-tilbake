@@ -6,7 +6,6 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.ApplicationProperties
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.RolleConfig
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
@@ -15,7 +14,6 @@ import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.FagsystemUtil
 import no.nav.tilbakekreving.Tilbakekreving
-import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import no.nav.tilbakekreving.kontrakter.ytelse.Tema
 import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
@@ -33,8 +31,6 @@ class TilgangskontrollService(
     private val auditLogger: AuditLogger,
     private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
     private val integrasjonerClient: IntegrasjonerClient,
-    private val applicationProperties: ApplicationProperties,
-    private val tilbakekrevingService: TilbakekrevingService,
 ) {
     fun validerTilgangTilbakekreving(
         tilbakekreving: Tilbakekreving,
@@ -203,20 +199,20 @@ class TilgangskontrollService(
                 handling = handling,
                 saksbehandler = saksbehandler,
             )
-            return
-        }
-        val tilgangskontrollsfagsystem = Tilgangskontrollsfagsystem.fraFagsystem(fagsystem)
-        // sjekk om saksbehandler har riktig gruppe å aksessere denne ytelsestypen
-        validateFagsystem(tilgangskontrollsfagsystem, brukerRolleOgFagsystemstilgang, handling, saksbehandler)
+        } else {
+            val tilgangskontrollsfagsystem = Tilgangskontrollsfagsystem.fraFagsystem(fagsystem)
+            // sjekk om saksbehandler har riktig gruppe å aksessere denne ytelsestypen
+            validateFagsystem(tilgangskontrollsfagsystem, brukerRolleOgFagsystemstilgang, handling, saksbehandler)
 
-        // sjekk om saksbehandler har riktig rolle å aksessere denne ytelsestypen
-        validateRolle(
-            brukersrolleTilFagsystemet = brukerRolleOgFagsystemstilgang.tilganger.getValue(tilgangskontrollsfagsystem),
-            minimumBehandlerrolle = minimumBehandlerrolle,
-            handling = handling,
-            logContext = logContext,
-            saksbehandler = saksbehandler,
-        )
+            // sjekk om saksbehandler har riktig rolle å aksessere denne ytelsestypen
+            validateRolle(
+                brukersrolleTilFagsystemet = brukerRolleOgFagsystemstilgang.tilganger.getValue(tilgangskontrollsfagsystem),
+                minimumBehandlerrolle = minimumBehandlerrolle,
+                handling = handling,
+                logContext = logContext,
+                saksbehandler = saksbehandler,
+            )
+        }
 
         validateEgenAnsattKode6Kode7(
             personIBehandlingen = ident,
@@ -224,6 +220,7 @@ class TilgangskontrollService(
             handling = handling,
             saksbehandler = saksbehandler,
         )
+
         if (ident != null) {
             logAccess(auditLoggerEvent, ident, eksternFagsakId!!)
         }
