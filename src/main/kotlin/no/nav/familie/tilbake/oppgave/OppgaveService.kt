@@ -149,7 +149,7 @@ class OppgaveService(
                         beskrivelse,
                     ),
                 enhetsnummer = behandling.behandlendeEnhet,
-                tilordnetRessurs = if (behandling.id.toString() == "0b9ceb97-0a34-45c3-a84a-9cab635840e4") null else saksbehandler,
+                tilordnetRessurs = saksbehandler,
                 behandlingstype = Behandlingstype.Tilbakekreving.value,
                 behandlingstema = null,
                 mappeId = finnAktuellMappe(enhet, oppgavetype, logContext),
