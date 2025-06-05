@@ -10,9 +10,7 @@ import io.mockk.verify
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
-import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.data.Testdata.lagBehandling
 import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.kontrakter.oppgave.Oppgave
 import no.nav.familie.tilbake.kontrakter.oppgave.OppgavePrioritet
@@ -22,6 +20,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.util.Optional
 
 class FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakTaskTest {
     val behandlingRepository: BehandlingRepository = mockk()
@@ -44,10 +43,11 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakTaskTest {
 
     @Test
     fun `doTask - skal ferdigstille alle åpne tasker og opprette ny oppgave dersom den ikke eksisterer`() {
-        val behandling = lagBehandling()
+        val fagsak = Testdata.fagsak()
+        val behandling = Testdata.lagBehandling(fagsakId = fagsak.id)
         // Arrange
-        every { behandlingRepository.findByIdOrThrow(any()) } returns behandling
-        every { fagsakRepository.findByIdOrThrow(any()) } returns Testdata.fagsak
+        every { behandlingRepository.findById(any()) } returns Optional.of(behandling)
+        every { fagsakRepository.findById(any()) } returns Optional.of(fagsak)
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns Oppgave(oppgavetype = Oppgavetype.GodkjenneVedtak.name)
         every { oppgaveService.ferdigstillOppgave(any(), any()) } just runs
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } just runs
@@ -98,10 +98,11 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakTaskTest {
 
     @Test
     fun `doTask - skal ikke ferdigstille dersom det ikke finnes noen åpen GodkjenneVedtak-oppgaven`() {
-        val behandling = lagBehandling()
+        val fagsak = Testdata.fagsak()
+        val behandling = Testdata.lagBehandling(fagsakId = fagsak.id)
         // Arrange
-        every { behandlingRepository.findByIdOrThrow(any()) } returns behandling
-        every { fagsakRepository.findByIdOrThrow(any()) } returns Testdata.fagsak
+        every { behandlingRepository.findById(any()) } returns Optional.of(behandling)
+        every { fagsakRepository.findById(any()) } returns Optional.of(fagsak)
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns null
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } just runs
         every { oppgavePrioritetService.utledOppgaveprioritet(any()) } returns OppgavePrioritet.NORM

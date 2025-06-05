@@ -9,7 +9,6 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
-import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.innhentdokumentasjon.InnhentDokumentasjonbrevService
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
@@ -21,6 +20,7 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.kontrakter.brev.Dokumentmalstype
 import no.nav.tilbakekreving.kontrakter.brev.MottakerType
 import org.junit.jupiter.api.Test
+import java.util.Optional
 import java.util.UUID
 
 class DokumentbehandlingServiceEnhetstest {
@@ -42,7 +42,7 @@ class DokumentbehandlingServiceEnhetstest {
         val fagsak = Testdata.fagsak()
         val behandling = Testdata.lagBehandling(fagsakId = fagsak.id)
         every { mockLogService.contextFraBehandling(any()) } returns SecureLog.Context.tom()
-        every { mockBehandlingRepository.findByIdOrThrow(behandling.id) } returns behandling
+        every { mockBehandlingRepository.findById(behandling.id) } returns Optional.of(behandling)
         every { mockManuellBrevmottakerRepository.findByBehandlingId(any()) } returns
             listOf(
                 ManuellBrevmottaker(

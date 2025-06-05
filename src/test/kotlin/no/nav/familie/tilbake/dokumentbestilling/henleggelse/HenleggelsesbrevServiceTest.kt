@@ -12,7 +12,6 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Verge
-import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
@@ -32,6 +31,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
+import java.util.Optional
 
 class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
     override val tømDBEtterHverTest = false
@@ -76,8 +76,8 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
             )
         fagsak = Testdata.fagsak()
         behandling = Testdata.lagBehandling(fagsakId = fagsak.id)
-        every { fagsakRepository.findByIdOrThrow(fagsak.id) } returns fagsak
-        every { behandlingRepository.findByIdOrThrow(behandling.id) } returns behandling
+        every { fagsakRepository.findById(fagsak.id) } returns Optional.of(fagsak)
+        every { behandlingRepository.findById(behandling.id) } returns Optional.of(behandling)
         val personinfo = Personinfo("DUMMY_FNR_1", LocalDate.now(), "Fiona")
         val ident = fagsak.bruker.ident
         every { eksterneDataForBrevService.hentPerson(ident, Fagsystem.BA, any()) } returns personinfo
@@ -114,8 +114,7 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentForhåndsvisningHenleggelsesbrev skal returnere pdf for henleggelsebrev for tilbakekreving revurdering`() {
-        every { behandlingRepository.findByIdOrThrow(behandling.id) }
-            .returns(behandling.copy(type = Behandlingstype.REVURDERING_TILBAKEKREVING))
+        every { behandlingRepository.findById(behandling.id) } returns Optional.of(behandling.copy(type = Behandlingstype.REVURDERING_TILBAKEKREVING))
 
         val bytes =
             henleggelsesbrevService.hentForhåndsvisningHenleggelsesbrev(
@@ -146,8 +145,7 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `sendHenleggelsebrev skal ikke sende henleggelsesbrev for tilbakekreving revurdering uten fritekst`() {
-        every { behandlingRepository.findByIdOrThrow(behandling.id) }
-            .returns(behandling.copy(type = Behandlingstype.REVURDERING_TILBAKEKREVING))
+        every { behandlingRepository.findById(behandling.id) } returns Optional.of(behandling.copy(type = Behandlingstype.REVURDERING_TILBAKEKREVING))
 
         val e =
             shouldThrow<IllegalStateException> {

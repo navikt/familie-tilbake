@@ -9,7 +9,6 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
-import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.kontrakter.oppgave.Oppgave
@@ -18,6 +17,7 @@ import no.nav.familie.tilbake.kontrakter.oppgave.OppgaveResponse
 import no.nav.familie.tilbake.kontrakter.oppgave.Oppgavetype
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.Optional
 import java.util.Properties
 
 internal class OppdaterAnsvarligSaksbehandlerTaskTest {
@@ -36,8 +36,8 @@ internal class OppdaterAnsvarligSaksbehandlerTaskTest {
         clearMocks(mockOppgaveService)
         fagsak = Testdata.fagsak()
         behandling = Testdata.lagBehandling(fagsakId = fagsak.id)
-        every { fagsakRepository.findByIdOrThrow(fagsak.id) } returns fagsak
-        every { behandlingRepository.findByIdOrThrow(behandling.id) } returns behandling
+        every { fagsakRepository.findById(fagsak.id) } returns Optional.of(fagsak)
+        every { behandlingRepository.findById(behandling.id) } returns Optional.of(behandling)
         every { oppgavePrioritetService.utledOppgaveprioritet(any(), any()) } returns OppgavePrioritet.NORM
     }
 

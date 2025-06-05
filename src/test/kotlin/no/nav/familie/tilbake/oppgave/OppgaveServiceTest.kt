@@ -15,7 +15,6 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
-import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.data.Testdata.fagsak
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
@@ -33,6 +32,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.core.env.Environment
 import java.time.LocalDate
+import java.util.Optional
 import java.util.Properties
 
 class OppgaveServiceTest {
@@ -73,8 +73,8 @@ class OppgaveServiceTest {
                 taskService,
                 "https://tilbakekreving.intern.nav.no",
             )
-        every { fagsakRepository.findByIdOrThrow(fagsak.id) } returns fagsak
-        every { behandlingRepository.findByIdOrThrow(behandling.id) } returns behandling
+        every { fagsakRepository.findById(fagsak.id) } returns Optional.of(fagsak)
+        every { behandlingRepository.findById(behandling.id) } returns Optional.of(behandling)
         every { taskService.finnTasksMedStatus(any(), any(), any()) } returns emptyList()
     }
 
@@ -284,8 +284,8 @@ class OppgaveServiceTest {
         @Test
         fun `ferdigstillOppgave skal ikke ferdigstille hvis det er mer enn én oppgave`() {
             // Arrange
-            every { behandlingRepository.findByIdOrThrow(any()) } returns behandling
-            every { fagsakRepository.findByIdOrThrow(any()) } returns fagsak
+            every { behandlingRepository.findById(any()) } returns Optional.of(behandling)
+            every { fagsakRepository.findById(any()) } returns Optional.of(fagsak)
             every { integrasjonerClient.finnOppgaver(any()) } returns
                 FinnOppgaveResponseDto(
                     2L,
@@ -301,8 +301,8 @@ class OppgaveServiceTest {
         @Test
         fun `ferdigstillOppgave skal ferdigstille hvis det ikke er mer enn én oppgave av familie tilbake sine oppgavetyper`() {
             // Arrange
-            every { behandlingRepository.findByIdOrThrow(any()) } returns behandling
-            every { fagsakRepository.findByIdOrThrow(any()) } returns fagsak
+            every { behandlingRepository.findById(any()) } returns Optional.of(behandling)
+            every { fagsakRepository.findById(any()) } returns Optional.of(fagsak)
             every { integrasjonerClient.finnOppgaver(any()) } returns
                 FinnOppgaveResponseDto(
                     2L,
