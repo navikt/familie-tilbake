@@ -105,7 +105,7 @@ class Foreldelsesteg(
                     is Vurdering.IkkeForeldet -> ForeldelsesvurderingEntity("IKKE_FORELDET", begrunnelse = _vurdering.begrunnelse)
                     is Vurdering.IkkeVurdert -> ForeldelsesvurderingEntity("IKKE_VURDERT")
                     is Vurdering.Tilleggsfrist -> ForeldelsesvurderingEntity("TILLEGGSFRIST", frist = _vurdering.frist, oppdaget = (_vurdering as Vurdering.Tilleggsfrist).oppdaget)
-                    is Vurdering.Foreldet -> ForeldelsesvurderingEntity("FORELDET", begrunnelse = _vurdering.begrunnelse, frist = _vurdering.frist)
+                    is Vurdering.Foreldet -> ForeldelsesvurderingEntity("FORELDET", begrunnelse = _vurdering.begrunnelse)
                 },
             )
         }
@@ -137,7 +137,7 @@ class Foreldelsesteg(
 
         class Tilleggsfrist(override val frist: LocalDate, val oppdaget: LocalDate) : Vurdering
 
-        class Foreldet(override val begrunnelse: String, override val frist: LocalDate) : Vurdering
+        class Foreldet(override val begrunnelse: String) : Vurdering
     }
 
     companion object {

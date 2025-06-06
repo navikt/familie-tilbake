@@ -48,7 +48,7 @@ class KravgrunnlagHendelse(
         return KravgrunnlagHendelseEntity(
             internId = internId,
             vedtakId = vedtakId,
-            kravstatuskode = kravstatuskode.name,
+            kravstatuskode = kravstatuskode.navn,
             fagsystemVedtaksdato = fagsystemVedtaksdato,
             vedtakGjelder = tilAktørEntity(vedtakGjelder),
             utbetalesTil = tilAktørEntity(utbetalesTil),

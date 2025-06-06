@@ -148,10 +148,9 @@ class TilbakekrevingService(
         return eksempelsaker.firstOrNull { it.tilFrontendDto().fagsystem == fagsystem && it.tilFrontendDto().eksternFagsakId == eksternFagsakId }
     }
 
-    fun gjennopprettTilbakekreving(id: UUID): Tilbakekreving?{
+    fun gjennopprettTilbakekreving(id: UUID): Tilbakekreving? {
         val tilbakekreving = valkeyClient.henteTilstand(id)?.fraEntity(behovObservatør)
         return tilbakekreving
-
     }
 
     fun hentTilbakekreving(behandlingId: UUID): Tilbakekreving? {
@@ -269,7 +268,7 @@ class TilbakekrevingService(
                 periode.periode,
                 when (periode.foreldelsesvurderingstype) {
                     Foreldelsesvurderingstype.IKKE_VURDERT -> Foreldelsesteg.Vurdering.IkkeVurdert
-                    Foreldelsesvurderingstype.FORELDET -> Foreldelsesteg.Vurdering.Foreldet(periode.begrunnelse, periode.foreldelsesfrist!!)
+                    Foreldelsesvurderingstype.FORELDET -> Foreldelsesteg.Vurdering.Foreldet(periode.begrunnelse)
                     Foreldelsesvurderingstype.IKKE_FORELDET -> Foreldelsesteg.Vurdering.IkkeForeldet(periode.begrunnelse)
                     Foreldelsesvurderingstype.TILLEGGSFRIST -> Foreldelsesteg.Vurdering.Tilleggsfrist(periode.foreldelsesfrist!!, periode.oppdagelsesdato!!)
                 },
@@ -424,5 +423,20 @@ class TilbakekrevingService(
                 logContext = SecureLog.Context.fra(tilbakekreving),
             )
         }
+    }
+
+    fun <T> håndterHendleseForTest(
+        hendelse: T,
+        tilbakekreving: Tilbakekreving,
+    ) {
+        when (hendelse) {
+            is OpprettTilbakekrevingEvent -> tilbakekreving.håndter(hendelse as OpprettTilbakekrevingEvent)
+            is KravgrunnlagHendelse -> tilbakekreving.håndter(hendelse as KravgrunnlagHendelse)
+            is FagsysteminfoHendelse -> tilbakekreving.håndter(hendelse as FagsysteminfoHendelse)
+            is BrukerinfoHendelse -> tilbakekreving.håndter(hendelse as BrukerinfoHendelse)
+            is VarselbrevSendtHendelse -> tilbakekreving.håndter(hendelse as VarselbrevSendtHendelse)
+        }
+
+        valkeyClient.lagreTilstand(tilbakekreving.id, tilbakekreving.tilEntity())
     }
 }
