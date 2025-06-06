@@ -7,6 +7,7 @@ import no.nav.tilbakekreving.api.v1.dto.VurderingAvBrukersUttalelseDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
+import no.nav.tilbakekreving.entities.FaktastegEntity
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.Faktainfo
@@ -68,6 +69,16 @@ class Faktasteg(
                     null,
                 ),
             opprettetTid = tilbakekrevingOpprettet,
+        )
+    }
+
+    fun tilEntity(): FaktastegEntity {
+        return FaktastegEntity(
+            eksternFagsakBehandlingRef = eksternFagsakBehandling.entry.internId,
+            kravgrunnlagRef = kravgrunnlag.entry.internId,
+            brevHistorikk = brevHistorikk.tilEntity(),
+            tilbakekrevingOpprettet = tilbakekrevingOpprettet,
+            opprettelsesvalg = opprettelsesvalg.name,
         )
     }
 

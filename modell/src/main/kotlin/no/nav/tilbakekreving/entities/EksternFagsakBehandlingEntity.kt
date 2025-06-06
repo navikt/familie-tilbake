@@ -1,26 +1,24 @@
-package no.nav.tilbakekreving.eksternfagsak
+package no.nav.tilbakekreving.entities
 
-import no.nav.tilbakekreving.entities.EksternFagsakBehandlingEntity
-import no.nav.tilbakekreving.historikk.Historikk
+import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
 import java.time.LocalDate
 import java.util.UUID
 
-class EksternFagsakBehandling(
-    override val internId: UUID,
-    internal val eksternId: String,
+data class EksternFagsakBehandlingEntity(
+    val internId: UUID,
+    val eksternId: String,
     val revurderingsresultat: String,
     val revurderingsårsak: String,
     val begrunnelseForTilbakekreving: String,
     val revurderingsvedtaksdato: LocalDate,
-) : Historikk.HistorikkInnslag<UUID> {
-    fun tilEntity(): EksternFagsakBehandlingEntity {
-        return EksternFagsakBehandlingEntity(
+) {
+    fun tilDomain(): EksternFagsakBehandling =
+        EksternFagsakBehandling(
             internId = internId,
             eksternId = eksternId,
             revurderingsresultat = revurderingsresultat,
             revurderingsårsak = revurderingsårsak,
-            revurderingsvedtaksdato = revurderingsvedtaksdato,
             begrunnelseForTilbakekreving = begrunnelseForTilbakekreving,
+            revurderingsvedtaksdato = revurderingsvedtaksdato,
         )
-    }
 }
