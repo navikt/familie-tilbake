@@ -1,5 +1,7 @@
 package no.nav.tilbakekreving.entities
 
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
 
 data class ForeslåVedtakStegEntity(
@@ -12,6 +14,15 @@ data class ForeslåVedtakStegEntity(
     }
 }
 
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.PROPERTY,
+    property = "type",
+)
+@JsonSubTypes(
+    JsonSubTypes.Type(value = ForeslåVedtakVurderingEntity.ForeslåVedtakEntity::class, name = "ForeslåVedtakEntity"),
+    JsonSubTypes.Type(value = ForeslåVedtakVurderingEntity.IkkeVurdertEntity::class, name = "IkkeVurdertEntity"),
+)
 sealed interface ForeslåVedtakVurderingEntity {
     fun fraEntity(): ForeslåVedtakSteg.Vurdering
 

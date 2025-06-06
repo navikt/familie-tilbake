@@ -96,7 +96,9 @@ dependencies {
     api("org.springframework.retry:spring-retry")
 
     api("com.fasterxml.jackson.core:jackson-databind")
+    api("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     api("com.fasterxml.jackson.module:jackson-module-kotlin")
+
     api("io.lettuce:lettuce-core:6.6.0.RELEASE")
 
     api("com.ibm.mq:com.ibm.mq.jakarta.client:9.4.2.1")

@@ -341,7 +341,7 @@ class Vilkårsvurderingsteg(
             }
 
             override fun tilEntity(): VurderingEntity {
-                return IkkeVurdertEntity
+                return IkkeVurdertEntity()
             }
         }
     }

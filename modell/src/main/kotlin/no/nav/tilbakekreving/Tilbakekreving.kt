@@ -53,6 +53,8 @@ class Tilbakekreving(
 ) : FrontendDto<FagsakDto> {
     internal var tilstand: Tilstand = Start
 
+    fun hentTilstandsnavn() = tilstand.navn
+
     internal fun byttTilstand(nyTilstand: Tilstand) {
         tilstand = nyTilstand
         tilstand.entering(this)
@@ -206,8 +208,8 @@ class Tilbakekreving(
             kravgrunnlagHistorikk = this.kravgrunnlagHistorikk.tilEntity(),
             brevHistorikk = this.brevHistorikk.tilEntity(),
             opprettet = this.opprettet,
-            opprettelsesvalg = opprettelsesvalg.name,
-            bruker = bruker?.tilEntity(),
+            opprettelsesvalg = this.opprettelsesvalg.name,
+            bruker = this.bruker?.tilEntity(),
         )
     }
 

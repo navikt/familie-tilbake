@@ -1,5 +1,7 @@
 package no.nav.tilbakekreving
 
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.lettuce.core.RedisClient
@@ -13,6 +15,8 @@ object ValkeyClient {
     private val connection: StatefulRedisConnection<String, String> = redisClient.connect()
     private val commands: RedisCommands<String, String> = connection.sync()
     private val objectMapper = jacksonObjectMapper()
+        .registerModule(JavaTimeModule())
+        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
     fun lagreTilstand(
         tilbakekrevingId: UUID,

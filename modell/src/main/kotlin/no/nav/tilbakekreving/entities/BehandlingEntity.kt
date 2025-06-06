@@ -18,4 +18,5 @@ data class BehandlingEntity(
     val faktastegEntity: FaktastegEntity,
     val vilkårsvurderingstegEntity: VilkårsvurderingstegEntity,
     val foreslåVedtakStegEntity: ForeslåVedtakStegEntity,
+    val fatteVedtakStegEntity: FatteVedtakStegEntity,
 )
