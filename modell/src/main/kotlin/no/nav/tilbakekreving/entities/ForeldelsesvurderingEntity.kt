@@ -14,7 +14,7 @@ data class ForeldelsesvurderingEntity(
             type.contains("IKKE_FORELDET") -> Vurdering.IkkeForeldet(begrunnelse!!)
             type.contains("IKKE_VURDERT") -> Vurdering.IkkeVurdert
             type.contains("TILLEGGSFRIST") -> Vurdering.Tilleggsfrist(frist!!, oppdaget!!)
-            type.contains("FORELDET") -> Vurdering.Foreldet(begrunnelse!!, frist!!)
+            type.contains("FORELDET") -> Vurdering.Foreldet(begrunnelse!!)
             else -> throw IllegalArgumentException("Ugyldig type: $type")
         }
         return vurdering

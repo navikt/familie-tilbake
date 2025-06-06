@@ -9,7 +9,6 @@ import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 class ForeldelsestegTest {
     @Test
@@ -84,7 +83,7 @@ class ForeldelsestegTest {
         )
         foreldelsesteg.vurderForeldelse(
             1.januar til 31.januar,
-            Foreldelsesteg.Vurdering.Foreldet("Deler av perioden er foreldet fordi grunner", LocalDate.now().minusDays(7)),
+            Foreldelsesteg.Vurdering.Foreldet("Deler av perioden er foreldet fordi grunner"),
         )
         foreldelsesteg.erFullstending() shouldBe false
 

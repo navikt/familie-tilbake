@@ -40,7 +40,6 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.saksbehandler.Behandler
-import no.nav.tilbakekreving.saksbehandler.Saksbehandling
 import no.nav.tilbakekreving.tilstand.IverksettVedtak
 import java.time.LocalDateTime
 import java.util.UUID
@@ -58,11 +57,10 @@ class Behandling private constructor(
     private val kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
     val foreldelsesteg: Foreldelsesteg,
     private val faktasteg: Faktasteg,
-    private val vilkårsvurderingsteg: Vilkårsvurderingsteg,
-    private val foreslåVedtakSteg: ForeslåVedtakSteg,
-) : Historikk.HistorikkInnslag<UUID>, FrontendDto<BehandlingDto>, Saksbehandling {
-    private val fatteVedtakSteg = FatteVedtakSteg.opprett(this)
-
+    val vilkårsvurderingsteg: Vilkårsvurderingsteg,
+    val foreslåVedtakSteg: ForeslåVedtakSteg,
+    val fatteVedtakSteg: FatteVedtakSteg,
+) : Historikk.HistorikkInnslag<UUID>, FrontendDto<BehandlingDto> {
     val faktastegDto: FrontendDto<FaktaFeilutbetalingDto> get() = faktasteg
     val foreldelsestegDto: FrontendDto<VurdertForeldelseDto> get() = foreldelsesteg
     val vilkårsvurderingsstegDto: FrontendDto<VurdertVilkårsvurderingDto> get() = vilkårsvurderingsteg
@@ -87,6 +85,7 @@ class Behandling private constructor(
             faktastegEntity = faktasteg.tilEntity(),
             vilkårsvurderingstegEntity = vilkårsvurderingsteg.tilEntity(),
             foreslåVedtakStegEntity = foreslåVedtakSteg.tilEntity(),
+            fatteVedtakStegEntity = fatteVedtakSteg.tilEntity(),
         )
     }
 
@@ -143,14 +142,6 @@ class Behandling private constructor(
             beregning.vedtaksresultat,
             faktasteg.tilFrontendDto().vurderingAvBrukersUttalelse,
         )
-    }
-
-    override fun ansvarligSaksbehandler(): Behandler {
-        return ansvarligSaksbehandler
-    }
-
-    override fun oppdaterAnsvarligSaksbehandler(behandler: Behandler) {
-        ansvarligSaksbehandler = behandler
     }
 
     override fun tilFrontendDto(): BehandlingDto {
@@ -210,7 +201,7 @@ class Behandling private constructor(
         behandler: Behandler,
         vurdering: FaktaFeilutbetalingsperiodeDto,
     ) {
-        oppdaterAnsvarligSaksbehandler(behandler)
+        this.ansvarligSaksbehandler = behandler
         faktasteg.behandleFakta(vurdering)
     }
 
@@ -219,7 +210,7 @@ class Behandling private constructor(
         periode: Datoperiode,
         vurdering: Vilkårsvurderingsteg.Vurdering,
     ) {
-        oppdaterAnsvarligSaksbehandler(behandler)
+        this.ansvarligSaksbehandler = behandler
         vilkårsvurderingsteg.vurder(periode, vurdering)
     }
 
@@ -228,7 +219,7 @@ class Behandling private constructor(
         periode: Datoperiode,
         vurdering: Foreldelsesteg.Vurdering,
     ) {
-        oppdaterAnsvarligSaksbehandler(behandler)
+        this.ansvarligSaksbehandler = behandler
         foreldelsesteg.vurderForeldelse(periode, vurdering)
     }
 
@@ -236,7 +227,7 @@ class Behandling private constructor(
         behandler: Behandler,
         vurdering: ForeslåVedtakSteg.Vurdering,
     ) {
-        oppdaterAnsvarligSaksbehandler(behandler)
+        this.ansvarligSaksbehandler = behandler
         foreslåVedtakSteg.håndter(vurdering)
     }
 
@@ -246,7 +237,7 @@ class Behandling private constructor(
         behandlingssteg: Behandlingssteg,
         vurdering: FatteVedtakSteg.Vurdering,
     ) {
-        fatteVedtakSteg.håndter(beslutter, behandlingssteg, vurdering)
+        fatteVedtakSteg.håndter(beslutter, ansvarligSaksbehandler, behandlingssteg, vurdering)
         if (fatteVedtakSteg.erFullstending()) {
             tilbakekreving.byttTilstand(IverksettVedtak)
         }
@@ -256,7 +247,7 @@ class Behandling private constructor(
         behandler: Behandler,
         brevmottaker: RegistrertBrevmottaker,
     ) {
-        oppdaterAnsvarligSaksbehandler(behandler)
+        this.ansvarligSaksbehandler = behandler
         brevmottakerSteg.håndter(brevmottaker)
     }
 
@@ -264,7 +255,7 @@ class Behandling private constructor(
         behandler: Behandler,
         manuellBrevmottakerId: UUID,
     ) {
-        oppdaterAnsvarligSaksbehandler(behandler)
+        this.ansvarligSaksbehandler = behandler
         brevmottakerSteg.fjernManuellBrevmottaker(manuellBrevmottakerId)
     }
 
@@ -313,7 +304,7 @@ class Behandling private constructor(
             val faktasteg = Faktasteg.opprett(eksternFagsakBehandling, kravgrunnlag, brevHistorikk, LocalDateTime.now(), Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL)
             val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(kravgrunnlag, foreldelsesteg)
             val foreslåVedtakSteg = ForeslåVedtakSteg.opprett()
-
+            val fatteVedtakSteg = FatteVedtakSteg.opprett()
             return Behandling(
                 internId = internId,
                 eksternId = eksternId,
@@ -329,6 +320,7 @@ class Behandling private constructor(
                 faktasteg = faktasteg,
                 vilkårsvurderingsteg = vilkårsvurderingsteg,
                 foreslåVedtakSteg = foreslåVedtakSteg,
+                fatteVedtakSteg = fatteVedtakSteg,
             )
         }
 
@@ -339,7 +331,6 @@ class Behandling private constructor(
         ): Behandling {
             val eksternFagsakBehandling = eksternFagsakEntity.behandlinger.fraEntity().nåværende()
             val kravgrunnlag = kravgrunnlagHistorikkEntity.fraEntity().nåværende()
-
             return Behandling(
                 internId = behandlingEntity.internId,
                 eksternId = behandlingEntity.eksternId,
@@ -355,6 +346,7 @@ class Behandling private constructor(
                 faktasteg = behandlingEntity.faktastegEntity.fraEntity(eksternFagsakBehandling, kravgrunnlag),
                 vilkårsvurderingsteg = Vilkårsvurderingsteg.fraEntity(behandlingEntity.vilkårsvurderingstegEntity, kravgrunnlag),
                 foreslåVedtakSteg = behandlingEntity.foreslåVedtakStegEntity.fraEntity(),
+                fatteVedtakSteg = FatteVedtakSteg.fraEntity(behandlingEntity.fatteVedtakStegEntity),
             )
         }
     }

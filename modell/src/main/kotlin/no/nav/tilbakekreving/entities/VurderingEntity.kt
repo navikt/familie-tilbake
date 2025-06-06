@@ -1,8 +1,22 @@
 package no.nav.tilbakekreving.entities
 
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
 import java.math.BigDecimal
 
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.PROPERTY,
+    property = "type",
+)
+@JsonSubTypes(
+    JsonSubTypes.Type(value = GodTroEntity::class, name = "GodTro"),
+    JsonSubTypes.Type(value = ForstodEllerBurdeForståttEntity::class, name = "ForstodEllerBurdeForstått"),
+    JsonSubTypes.Type(value = MangelfulleOpplysningerFraBrukerEntity::class, name = "MangelfulleOpplysningerFraBruker"),
+    JsonSubTypes.Type(value = FeilaktigeOpplysningerFraBrukerEntity::class, name = "FeilaktigeOpplysningerFraBruker"),
+    JsonSubTypes.Type(value = IkkeVurdertEntity::class, name = "IkkeVurdert"),
+)
 sealed class VurderingEntity {
     abstract val begrunnelse: String?
 
@@ -57,13 +71,22 @@ data class FeilaktigeOpplysningerFraBrukerEntity(
     }
 }
 
-object IkkeVurdertEntity : VurderingEntity() {
-    override val begrunnelse: String? = null
-
+data class IkkeVurdertEntity(
+    override val begrunnelse: String? = null,
+) : VurderingEntity() {
     override fun fraEntity(): Vilkårsvurderingsteg.Vurdering =
         Vilkårsvurderingsteg.Vurdering.IkkeVurdert
 }
 
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.PROPERTY,
+    property = "type",
+)
+@JsonSubTypes(
+    JsonSubTypes.Type(value = BeløpIBeholdJaEntity::class, name = "Ja"),
+    JsonSubTypes.Type(value = BeløpIBeholdNeiEntity::class, name = "Nei"),
+)
 sealed class BeløpIBeholdEntity {
     abstract fun fraEntity(): Vilkårsvurderingsteg.Vurdering.GodTro.BeløpIBehold
 }

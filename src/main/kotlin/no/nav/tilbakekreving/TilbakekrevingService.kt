@@ -414,21 +414,4 @@ class TilbakekrevingService(
             )
         }
     }
-
-    fun lesKravgrunnlag() {
-        val ikkeHåndterteKravgrunnlag = kravgrunnlagBufferRepository.hentUlesteKravgrunnlag()
-        ikkeHåndterteKravgrunnlag.forEach { entity ->
-            val kravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(entity.kravgrunnlag)
-
-            val tilbakekreving = Tilbakekreving.opprett(
-                behovObservatør = behovObservatør,
-                opprettTilbakekrevingEvent = KravgrunnlagMapper.tilOpprettTilbakekrevingHendelse(kravgrunnlag),
-            )
-
-            tilbakekreving.håndter(KravgrunnlagMapper.tilKravgrunnlagHendelse(kravgrunnlag))
-
-            eksempelsaker.add(tilbakekreving)
-            kravgrunnlagBufferRepository.markerLest(entity.kravgrunnlagId)
-        }
-    }
 }
