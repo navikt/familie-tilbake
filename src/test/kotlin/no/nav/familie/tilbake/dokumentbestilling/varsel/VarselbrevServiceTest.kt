@@ -15,8 +15,8 @@ import no.nav.tilbakekreving.kontrakter.FeilutbetaltePerioderDto
 import no.nav.tilbakekreving.kontrakter.ForhåndsvisVarselbrevRequest
 import no.nav.tilbakekreving.kontrakter.Periode
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
 import no.nav.tilbakekreving.pdf.validering.PdfaValidator
 import org.junit.jupiter.api.BeforeEach
@@ -63,7 +63,7 @@ internal class VarselbrevServiceTest : OppslagSpringRunnerTest() {
         val forhåndsvisVarselbrevRequest =
             ForhåndsvisVarselbrevRequest(
                 "Dette er et varsel!",
-                Ytelsestype.BARNETRYGD,
+                YtelsestypeDTO.BARNETRYGD,
                 "1570",
                 "Bodø",
                 "321321",
@@ -78,7 +78,7 @@ internal class VarselbrevServiceTest : OppslagSpringRunnerTest() {
                         ),
                     ),
                 ),
-                Fagsystem.EF,
+                FagsystemDTO.EF,
                 "321654",
                 fagsak.bruker.ident,
                 null,

@@ -1,7 +1,7 @@
 package no.nav.tilbakekreving.pdf.dokumentbestilling.varsel.handlebars.dto
 
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmetadata
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.getAnnenMottagersNavn
 import no.nav.tilbakekreving.pdf.handlebars.dto.BaseDokument
@@ -27,7 +27,7 @@ data class Varselbrevsdokument(
     ) {
     val finnesVerge: Boolean = brevmetadata.finnesVerge
 
-    val harVedlegg: Boolean = brevmetadata.ytelsestype in setOf(Ytelsestype.BARNETILSYN, Ytelsestype.OVERGANGSSTØNAD)
+    val harVedlegg: Boolean = brevmetadata.ytelsestype in setOf(YtelsestypeDTO.BARNETILSYN, YtelsestypeDTO.OVERGANGSSTØNAD)
 
     private val datoerHvisSammenhengendePeriode: Datoperiode? =
         if (feilutbetaltePerioder.size == 1) {
@@ -42,16 +42,16 @@ data class Varselbrevsdokument(
     val annenMottagersNavn: String? = getAnnenMottagersNavn(brevmetadata)
 
     @Suppress("unused") // Handlebars
-    val isYtelseMedSkatt = ytelsestype == Ytelsestype.OVERGANGSSTØNAD
+    val isYtelseMedSkatt = ytelsestype == YtelsestypeDTO.OVERGANGSSTØNAD
 
     @Suppress("unused") // Handlebars
-    val isRentepliktig = ytelsestype != Ytelsestype.BARNETRYGD && ytelsestype != Ytelsestype.KONTANTSTØTTE
+    val isRentepliktig = ytelsestype != YtelsestypeDTO.BARNETRYGD && ytelsestype != YtelsestypeDTO.KONTANTSTØTTE
 
     @Suppress("unused") // Handlebars
-    val isBarnetrygd = ytelsestype == Ytelsestype.BARNETRYGD
+    val isBarnetrygd = ytelsestype == YtelsestypeDTO.BARNETRYGD
 
     @Suppress("unused") // Handlebars
-    val isKontantstøtte = ytelsestype == Ytelsestype.KONTANTSTØTTE
+    val isKontantstøtte = ytelsestype == YtelsestypeDTO.KONTANTSTØTTE
 
     @Suppress("unused") // Handlebars
     val isFinnesVerge

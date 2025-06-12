@@ -1,9 +1,9 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
+import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.common.repository.InsertUpdateRepository
 import no.nav.familie.tilbake.common.repository.RepositoryInterface
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottattArkiv
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID

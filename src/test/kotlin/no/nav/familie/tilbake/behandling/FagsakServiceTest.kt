@@ -25,8 +25,8 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -80,8 +80,8 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
         fagsakDto.eksternFagsakId shouldBe eksternFagsakId
         fagsakDto.språkkode shouldBe Språkkode.NB
-        fagsakDto.ytelsestype shouldBe Ytelsestype.BARNETRYGD
-        fagsakDto.fagsystem shouldBe Fagsystem.BA
+        fagsakDto.ytelsestype shouldBe YtelsestypeDTO.BARNETRYGD
+        fagsakDto.fagsystem shouldBe FagsystemDTO.BA
         fagsakDto.institusjon shouldBe null
 
         val brukerDto = fagsakDto.bruker
@@ -109,8 +109,8 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
         fagsakDto.eksternFagsakId shouldBe eksternFagsakId
         fagsakDto.språkkode shouldBe Språkkode.NB
-        fagsakDto.ytelsestype shouldBe Ytelsestype.BARNETRYGD
-        fagsakDto.fagsystem shouldBe Fagsystem.BA
+        fagsakDto.ytelsestype shouldBe YtelsestypeDTO.BARNETRYGD
+        fagsakDto.fagsystem shouldBe FagsystemDTO.BA
 
         val brukerDto = fagsakDto.bruker
         brukerDto.personIdent shouldBe "doed1234"
@@ -140,8 +140,8 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
         fagsakDto.eksternFagsakId shouldBe eksternFagsakId
         fagsakDto.språkkode shouldBe Språkkode.NB
-        fagsakDto.ytelsestype shouldBe Ytelsestype.BARNETRYGD
-        fagsakDto.fagsystem shouldBe Fagsystem.BA
+        fagsakDto.ytelsestype shouldBe YtelsestypeDTO.BARNETRYGD
+        fagsakDto.fagsystem shouldBe FagsystemDTO.BA
 
         val brukerDto = fagsakDto.bruker
         brukerDto.personIdent shouldBe "12345678910"
@@ -164,8 +164,8 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
         fagsakDto.eksternFagsakId shouldBe eksternFagsakId
         fagsakDto.språkkode shouldBe Språkkode.NB
-        fagsakDto.ytelsestype shouldBe Ytelsestype.BARNETRYGD
-        fagsakDto.fagsystem shouldBe Fagsystem.BA
+        fagsakDto.ytelsestype shouldBe YtelsestypeDTO.BARNETRYGD
+        fagsakDto.fagsystem shouldBe FagsystemDTO.BA
         fagsakDto.institusjon shouldNotBe null
         fagsakDto.institusjon!!.organisasjonsnummer shouldBe "998765432"
         fagsakDto.institusjon!!.navn shouldBe "Testinstitusjon"
@@ -288,7 +288,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
                 eksternFagsakId = eksternFagsakId,
                 bruker = Bruker(personIdent, Språkkode.NB),
                 ytelsestype = ytelsestype,
-                fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype),
+                fagsystem = Fagsystem.forDTO(FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype.tilDTO())),
                 institusjon = institusjon,
             )
         fagsakRepository.insert(fagsak)

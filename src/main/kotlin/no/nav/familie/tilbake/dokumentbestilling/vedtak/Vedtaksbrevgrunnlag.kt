@@ -1,5 +1,7 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
+import no.nav.familie.tilbake.behandling.Fagsystem
+import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsak
 import no.nav.familie.tilbake.behandling.domain.Bruker
@@ -19,8 +21,6 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
 import no.nav.tilbakekreving.pdf.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
 import org.springframework.data.annotation.Id

@@ -4,36 +4,44 @@ import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.api.v2.EksternFagsakDto
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
+import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import java.time.LocalDate
 import java.util.UUID
 
 class EksternFagsak(
     val eksternId: String,
-    private val ytelsestype: Ytelsestype,
-    internal val fagsystem: Fagsystem,
+    internal val ytelse: Ytelse,
     val behandlinger: EksternFagsakBehandlingHistorikk,
     private val behovObservatør: BehovObservatør,
 ) : FrontendDto<EksternFagsakDto> {
     override fun tilFrontendDto(): EksternFagsakDto {
         return EksternFagsakDto(
             eksternId = eksternId,
-            ytelsestype = ytelsestype,
-            fagsystem = fagsystem,
+            ytelsestype = ytelse.tilYtelseDTO(),
+            fagsystem = ytelse.tilDTO(),
         )
     }
 
     fun lagre(fagsysteminfo: FagsysteminfoHendelse): HistorikkReferanse<UUID, EksternFagsakBehandling> {
         return behandlinger.lagre(
-            EksternFagsakBehandling(
+            EksternFagsakBehandling.Behandling(
                 internId = UUID.randomUUID(),
-                eksternId = fagsysteminfo.eksternId,
-                revurderingsresultat = fagsysteminfo.revurderingsresultat,
+                eksternId = fagsysteminfo.behandlingId,
                 revurderingsårsak = fagsysteminfo.revurderingsårsak,
+                revurderingsresultat = fagsysteminfo.revurderingsresultat,
                 begrunnelseForTilbakekreving = fagsysteminfo.begrunnelseForTilbakekreving,
                 revurderingsvedtaksdato = fagsysteminfo.revurderingsvedtaksdato,
+            ),
+        )
+    }
+
+    fun lagreTomBehandling(revurderingsdatoFraKravgrunnlag: LocalDate?): HistorikkReferanse<UUID, EksternFagsakBehandling> {
+        return behandlinger.lagre(
+            EksternFagsakBehandling.Ukjent(
+                internId = UUID.randomUUID(),
+                revurderingsdatoFraKravgrunnlag = revurderingsdatoFraKravgrunnlag,
             ),
         )
     }
@@ -42,8 +50,7 @@ class EksternFagsak(
         behovObservatør.håndter(
             FagsysteminfoBehov(
                 eksternFagsakId = eksternId,
-                fagsystem = fagsystem,
-                ytelsestype = ytelsestype,
+                ytelse = ytelse,
             ),
         )
     }

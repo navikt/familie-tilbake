@@ -5,12 +5,15 @@ spring:
   datasource:
     hikari:
       initialization-fail-timeout: 10000
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.jms.activemq.ActiveMQAutoConfiguration
 
 prosessering:
   enabled: false
 
 unleash:
   enabled: false
+
 
 no.nav.security.jwt:
   issuer.azuread:
@@ -34,3 +37,10 @@ NAIS_CLUSTER_NAME: dev-gcp
 
 ainntekt:
   baseUrl: http://mock-ainntekt-server
+
+
+tilbakekreving:
+  kravgrunnlag:
+    - LOCAL_TILLEGGSSTONADER.KRAVGRUNNLAG
+  toggles:
+    ny-modell-enabled: true

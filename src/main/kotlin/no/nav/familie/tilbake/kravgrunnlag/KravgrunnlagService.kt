@@ -3,7 +3,9 @@ package no.nav.familie.tilbake.kravgrunnlag
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
+import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
+import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.batch.AutomatiskSaksbehandlingTask
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.steg.StegService
@@ -31,7 +33,6 @@ import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagValidator
 import no.nav.tilbakekreving.kravgrunnlag.PeriodeValidator
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
@@ -72,7 +73,7 @@ class KravgrunnlagService(
         val ytelsestype: Ytelsestype = KravgrunnlagUtil.tilYtelsestype(kravgrunnlag.kodeFagomraade)
 
         val behandling: Behandling? = finnÅpenBehandling(ytelsestype, fagsystemId)
-        val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype)
+        val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype.tilDTO())
         log.medContext(logContext) {
             info("BehandleKravgrunnlagTask prosesserer med id={} og metadata {}", taskId, taskMetadata.toString())
         }
@@ -94,7 +95,7 @@ class KravgrunnlagService(
         if (behandling == null) {
             mottattXmlService.arkiverEksisterendeGrunnlag(kravgrunnlag)
             mottattXmlService.lagreMottattXml(kravgrunnlagXml, kravgrunnlag, ytelsestype)
-            tellerService.tellUkobletKravgrunnlag(fagsystem)
+            tellerService.tellUkobletKravgrunnlag(Fagsystem.forDTO(fagsystem))
             return
         }
         // mapper grunnlag til Kravgrunnlag431
@@ -151,13 +152,13 @@ class KravgrunnlagService(
         stegService.håndterSteg(behandling.id, logContext) // Kjører automatisk frem til fakta-steg = KLAR
         if (behandling.saksbehandlingstype == Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR) {
             if (kanBehandlesAutomatiskBasertPåRettsgebyrOgFagsystemreferanse(kravgrunnlag431, behandling)) {
-                taskService.save(AutomatiskSaksbehandlingTask.opprettTask(behandling.id, fagsystem), logContext)
+                taskService.save(AutomatiskSaksbehandlingTask.opprettTask(behandling.id, Fagsystem.forDTO(fagsystem)), logContext)
             } else {
                 behandlingService.oppdaterSaksbehandlingtype(behandling.id, Saksbehandlingstype.ORDINÆR)
                 oppgaveTaskService.opprettOppgaveTask(behandling, Oppgavetype.BehandleSak, logContext = logContext)
             }
         }
-        tellerService.tellKobletKravgrunnlag(fagsystem)
+        tellerService.tellKobletKravgrunnlag(Fagsystem.forDTO(fagsystem))
     }
 
     fun kanBehandlesAutomatiskBasertPåRettsgebyrOgFagsystemreferanse(
@@ -263,7 +264,7 @@ class KravgrunnlagService(
                         setProperty("eksternFagsakId", kravgrunnlag431.fagsystemId)
                         setProperty("ytelsestype", ytelsestype.name)
                         setProperty("eksternId", kravgrunnlag431.referanse)
-                        setProperty(PropertyName.FAGSYSTEM, FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype).name)
+                        setProperty(PropertyName.FAGSYSTEM, FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype.tilDTO()).name)
                     },
             ),
             logContext,

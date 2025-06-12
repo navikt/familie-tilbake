@@ -1,11 +1,11 @@
 package no.nav.familie.tilbake.kontrakter.dokdist
 
 import jakarta.validation.constraints.NotBlank
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 
 data class DistribuerJournalpostRequest(
     @field:NotBlank val journalpostId: String,
-    val bestillendeFagsystem: Fagsystem,
+    val bestillendeFagsystem: FagsystemDTO,
     @field:NotBlank val dokumentProdApp: String,
     val distribusjonstype: Distribusjonstype?,
     val distribusjonstidspunkt: Distribusjonstidspunkt = Distribusjonstidspunkt.KJERNETID,

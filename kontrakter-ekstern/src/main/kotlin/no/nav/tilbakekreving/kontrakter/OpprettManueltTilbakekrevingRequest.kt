@@ -1,11 +1,11 @@
 package no.nav.tilbakekreving.kontrakter
 
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 
 // Denne brukes fagsystemet for å kalle /api/behandling/manuelt/task/v1 tjeneste i familie-tilbake
 data class OpprettManueltTilbakekrevingRequest(
     val eksternFagsakId: String,
-    val ytelsestype: Ytelsestype,
+    val ytelsestype: YtelsestypeDTO,
     // Fagsystemreferanse til behandlingen, må være samme id som brukes mot datavarehus og økonomi
     val eksternId: String,
 )

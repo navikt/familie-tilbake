@@ -136,7 +136,7 @@ class InnhentDokumentasjonbrevService(
                     ansvarligSaksbehandler = ansvarligSaksbehandler,
                     saksnummer = fagsak.eksternFagsakId,
                     språkkode = fagsak.bruker.språkkode,
-                    ytelsestype = fagsak.ytelsestype,
+                    ytelsestype = fagsak.ytelsestype.tilDTO(),
                     gjelderDødsfall = gjelderDødsfall,
                     institusjon =
                         fagsak.institusjon?.let {

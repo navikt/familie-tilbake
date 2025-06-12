@@ -14,8 +14,8 @@ class KravgrunnlagHendelse(
     override val internId: UUID,
     private val vedtakId: BigInteger,
     private val kravstatuskode: Kravstatuskode,
-    private val fagsystemVedtaksdato: LocalDate,
-    private val vedtakGjelder: Aktør,
+    internal val fagsystemVedtaksdato: LocalDate?,
+    val vedtakGjelder: Aktør,
     private val utbetalesTil: Aktør,
     private val skalBeregneRenter: Boolean,
     private val ansvarligEnhet: String,
@@ -91,7 +91,7 @@ class KravgrunnlagHendelse(
         ENDRET("Endret kravgrunnlag"),
         FEIL("Feil på kravgrunnlag"),
         MANUELL("Manuell behandling"),
-        NYTT("Nytt kravgrunnlag"),
+        NY("Nytt kravgrunnlag"),
         SPERRET("Kravgrunnlag sperret"),
     }
 

@@ -8,7 +8,7 @@ import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.pdf.HendelsestypePerYtelsestype
 import no.nav.tilbakekreving.pdf.HendelsesundertypePerHendelsestype
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
@@ -51,56 +51,56 @@ class DokumentasjonsgeneratorPeriodeFakta {
 
     @Test
     fun `list ut permutasjoner for BA bokmål`() {
-        val felles: HbVedtaksbrevFelles = lagFelles(Ytelsestype.BARNETRYGD, Språkkode.NB)
+        val felles: HbVedtaksbrevFelles = lagFelles(YtelsestypeDTO.BARNETRYGD, Språkkode.NB)
         val resultat: Map<HendelseMedUndertype, String> = lagFaktatekster(felles)
         prettyPrint(resultat)
     }
 
     @Test
     fun `list ut permutasjoner for BA nynorsk`() {
-        val felles: HbVedtaksbrevFelles = lagFelles(Ytelsestype.BARNETRYGD, Språkkode.NN)
+        val felles: HbVedtaksbrevFelles = lagFelles(YtelsestypeDTO.BARNETRYGD, Språkkode.NN)
         val resultat: Map<HendelseMedUndertype, String> = lagFaktatekster(felles)
         prettyPrint(resultat)
     }
 
     @Test
     fun `list ut permutasjoner for EFOG bokmål`() {
-        val felles: HbVedtaksbrevFelles = lagFelles(Ytelsestype.OVERGANGSSTØNAD, Språkkode.NB)
+        val felles: HbVedtaksbrevFelles = lagFelles(YtelsestypeDTO.OVERGANGSSTØNAD, Språkkode.NB)
         val resultat: Map<HendelseMedUndertype, String> = lagFaktatekster(felles)
         prettyPrint(resultat)
     }
 
     @Test
     fun `list ut permutasjoner for EFOG nynorsk`() {
-        val felles: HbVedtaksbrevFelles = lagFelles(Ytelsestype.OVERGANGSSTØNAD, Språkkode.NN)
+        val felles: HbVedtaksbrevFelles = lagFelles(YtelsestypeDTO.OVERGANGSSTØNAD, Språkkode.NN)
         val resultat: Map<HendelseMedUndertype, String> = lagFaktatekster(felles)
         prettyPrint(resultat)
     }
 
     @Test
     fun `list ut permutasjoner for EFBT bokmål`() {
-        val felles: HbVedtaksbrevFelles = lagFelles(Ytelsestype.BARNETILSYN, Språkkode.NB)
+        val felles: HbVedtaksbrevFelles = lagFelles(YtelsestypeDTO.BARNETILSYN, Språkkode.NB)
         val resultat: Map<HendelseMedUndertype, String> = lagFaktatekster(felles)
         prettyPrint(resultat)
     }
 
     @Test
     fun `list ut permutasjoner for EFBT nynorsk`() {
-        val felles: HbVedtaksbrevFelles = lagFelles(Ytelsestype.BARNETILSYN, Språkkode.NN)
+        val felles: HbVedtaksbrevFelles = lagFelles(YtelsestypeDTO.BARNETILSYN, Språkkode.NN)
         val resultat: Map<HendelseMedUndertype, String> = lagFaktatekster(felles)
         prettyPrint(resultat)
     }
 
     @Test
     fun `list ut permutasjoner for EFSP bokmål`() {
-        val felles: HbVedtaksbrevFelles = lagFelles(Ytelsestype.SKOLEPENGER, Språkkode.NB)
+        val felles: HbVedtaksbrevFelles = lagFelles(YtelsestypeDTO.SKOLEPENGER, Språkkode.NB)
         val resultat: Map<HendelseMedUndertype, String> = lagFaktatekster(felles)
         prettyPrint(resultat)
     }
 
     @Test
     fun `list ut permutasjoner for EFSP nynorsk`() {
-        val felles: HbVedtaksbrevFelles = lagFelles(Ytelsestype.SKOLEPENGER, Språkkode.NN)
+        val felles: HbVedtaksbrevFelles = lagFelles(YtelsestypeDTO.SKOLEPENGER, Språkkode.NN)
         val resultat: Map<HendelseMedUndertype, String> = lagFaktatekster(felles)
         prettyPrint(resultat)
     }
@@ -158,7 +158,7 @@ class DokumentasjonsgeneratorPeriodeFakta {
         )
 
     private fun lagFelles(
-        ytelsestype: Ytelsestype,
+        ytelsestype: YtelsestypeDTO,
         språkkode: Språkkode,
     ): HbVedtaksbrevFelles {
         val datoer =
@@ -197,7 +197,7 @@ class DokumentasjonsgeneratorPeriodeFakta {
     }
 
     private fun lagMetadata(
-        ytelsestype: Ytelsestype,
+        ytelsestype: YtelsestypeDTO,
         språkkode: Språkkode,
     ): Brevmetadata =
         Brevmetadata(
@@ -212,7 +212,7 @@ class DokumentasjonsgeneratorPeriodeFakta {
             gjelderDødsfall = false,
         )
 
-    private fun getFeilutbetalingsårsaker(ytelseType: Ytelsestype): List<HendelseMedUndertype> {
+    private fun getFeilutbetalingsårsaker(ytelseType: YtelsestypeDTO): List<HendelseMedUndertype> {
         val hendelseTyper: Set<Hendelsestype> = HendelsestypePerYtelsestype.getHendelsestyper(ytelseType)
         val hendelseUndertypePrHendelsestype = HendelsesundertypePerHendelsestype.HIERARKI
         val resultat: List<HendelseMedUndertype> =

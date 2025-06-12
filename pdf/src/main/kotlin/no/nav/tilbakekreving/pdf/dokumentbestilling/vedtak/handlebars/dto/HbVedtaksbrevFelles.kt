@@ -1,7 +1,7 @@
 package no.nav.tilbakekreving.pdf.dokumentbestilling.vedtak.handlebars.dto
 
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmetadata
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.getAnnenMottagersNavn
 import no.nav.tilbakekreving.pdf.handlebars.dto.BaseDokument
@@ -44,10 +44,10 @@ data class HbVedtaksbrevFelles(
     val annenMottagersNavn: String? = getAnnenMottagersNavn(brevmetadata)
 
     @Suppress("unused") // Handlebars
-    val skattepliktig = Ytelsestype.OVERGANGSSTØNAD == brevmetadata.ytelsestype
+    val skattepliktig = YtelsestypeDTO.OVERGANGSSTØNAD == brevmetadata.ytelsestype
 
     @Suppress("unused") // Handlebars
-    val isSkalIkkeViseSkatt = Ytelsestype.OVERGANGSSTØNAD != brevmetadata.ytelsestype || !totalresultat.harSkattetrekk
+    val isSkalIkkeViseSkatt = YtelsestypeDTO.OVERGANGSSTØNAD != brevmetadata.ytelsestype || !totalresultat.harSkattetrekk
 
     val harVedlegg = vedtaksbrevstype == Vedtaksbrevstype.ORDINÆR
     val hovedresultat = totalresultat.hovedresultat

@@ -9,7 +9,7 @@ import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmetadata
 import no.nav.tilbakekreving.pdf.dokumentbestilling.vedtak.handlebars.dto.HbBehandling
@@ -43,54 +43,54 @@ import java.time.YearMonth
 class DokumentasjonsgeneratorVedtaksslutt {
     @Test
     fun `list ut vedtak slutt EFOG bokmål`() {
-        lagVedtakSluttTekster(Ytelsestype.OVERGANGSSTØNAD, Språkkode.NB, Vedtaksresultat.FULL_TILBAKEBETALING)
-        lagVedtakSluttTekster(Ytelsestype.OVERGANGSSTØNAD, Språkkode.NB, Vedtaksresultat.INGEN_TILBAKEBETALING)
+        lagVedtakSluttTekster(YtelsestypeDTO.OVERGANGSSTØNAD, Språkkode.NB, Vedtaksresultat.FULL_TILBAKEBETALING)
+        lagVedtakSluttTekster(YtelsestypeDTO.OVERGANGSSTØNAD, Språkkode.NB, Vedtaksresultat.INGEN_TILBAKEBETALING)
     }
 
     @Test
     fun `list ut vedtak slutt EFOG nynorsk`() {
-        lagVedtakSluttTekster(Ytelsestype.OVERGANGSSTØNAD, Språkkode.NN, Vedtaksresultat.FULL_TILBAKEBETALING)
-        lagVedtakSluttTekster(Ytelsestype.OVERGANGSSTØNAD, Språkkode.NN, Vedtaksresultat.INGEN_TILBAKEBETALING)
+        lagVedtakSluttTekster(YtelsestypeDTO.OVERGANGSSTØNAD, Språkkode.NN, Vedtaksresultat.FULL_TILBAKEBETALING)
+        lagVedtakSluttTekster(YtelsestypeDTO.OVERGANGSSTØNAD, Språkkode.NN, Vedtaksresultat.INGEN_TILBAKEBETALING)
     }
 
     @Test
     fun `list ut vedtak slutt EFBT bokmål`() {
-        lagVedtakSluttTekster(Ytelsestype.BARNETILSYN, Språkkode.NB, Vedtaksresultat.FULL_TILBAKEBETALING, false)
-        lagVedtakSluttTekster(Ytelsestype.BARNETILSYN, Språkkode.NB, Vedtaksresultat.INGEN_TILBAKEBETALING, false)
+        lagVedtakSluttTekster(YtelsestypeDTO.BARNETILSYN, Språkkode.NB, Vedtaksresultat.FULL_TILBAKEBETALING, false)
+        lagVedtakSluttTekster(YtelsestypeDTO.BARNETILSYN, Språkkode.NB, Vedtaksresultat.INGEN_TILBAKEBETALING, false)
     }
 
     @Test
     fun `list ut vedtak slutt EFBT nynorsk`() {
-        lagVedtakSluttTekster(Ytelsestype.BARNETILSYN, Språkkode.NN, Vedtaksresultat.FULL_TILBAKEBETALING, false)
-        lagVedtakSluttTekster(Ytelsestype.BARNETILSYN, Språkkode.NN, Vedtaksresultat.INGEN_TILBAKEBETALING, false)
+        lagVedtakSluttTekster(YtelsestypeDTO.BARNETILSYN, Språkkode.NN, Vedtaksresultat.FULL_TILBAKEBETALING, false)
+        lagVedtakSluttTekster(YtelsestypeDTO.BARNETILSYN, Språkkode.NN, Vedtaksresultat.INGEN_TILBAKEBETALING, false)
     }
 
     @Test
     fun `list ut vedtak slutt BA bokmål`() {
-        lagVedtakSluttTekster(Ytelsestype.BARNETRYGD, Språkkode.NB, Vedtaksresultat.FULL_TILBAKEBETALING, false)
-        lagVedtakSluttTekster(Ytelsestype.BARNETRYGD, Språkkode.NB, Vedtaksresultat.INGEN_TILBAKEBETALING, false)
+        lagVedtakSluttTekster(YtelsestypeDTO.BARNETRYGD, Språkkode.NB, Vedtaksresultat.FULL_TILBAKEBETALING, false)
+        lagVedtakSluttTekster(YtelsestypeDTO.BARNETRYGD, Språkkode.NB, Vedtaksresultat.INGEN_TILBAKEBETALING, false)
     }
 
     @Test
     fun `list ut vedtak slutt BA nynorsk`() {
-        lagVedtakSluttTekster(Ytelsestype.BARNETRYGD, Språkkode.NN, Vedtaksresultat.FULL_TILBAKEBETALING, false)
-        lagVedtakSluttTekster(Ytelsestype.BARNETRYGD, Språkkode.NN, Vedtaksresultat.INGEN_TILBAKEBETALING, false)
+        lagVedtakSluttTekster(YtelsestypeDTO.BARNETRYGD, Språkkode.NN, Vedtaksresultat.FULL_TILBAKEBETALING, false)
+        lagVedtakSluttTekster(YtelsestypeDTO.BARNETRYGD, Språkkode.NN, Vedtaksresultat.INGEN_TILBAKEBETALING, false)
     }
 
     @Test
     fun `list ut vedtak slutt EFSP bokmål`() {
-        lagVedtakSluttTekster(Ytelsestype.SKOLEPENGER, Språkkode.NB, Vedtaksresultat.FULL_TILBAKEBETALING, false)
-        lagVedtakSluttTekster(Ytelsestype.SKOLEPENGER, Språkkode.NB, Vedtaksresultat.INGEN_TILBAKEBETALING, false)
+        lagVedtakSluttTekster(YtelsestypeDTO.SKOLEPENGER, Språkkode.NB, Vedtaksresultat.FULL_TILBAKEBETALING, false)
+        lagVedtakSluttTekster(YtelsestypeDTO.SKOLEPENGER, Språkkode.NB, Vedtaksresultat.INGEN_TILBAKEBETALING, false)
     }
 
     @Test
     fun `list ut vedtak slutt EFSP nynorsk`() {
-        lagVedtakSluttTekster(Ytelsestype.SKOLEPENGER, Språkkode.NN, Vedtaksresultat.FULL_TILBAKEBETALING, false)
-        lagVedtakSluttTekster(Ytelsestype.SKOLEPENGER, Språkkode.NN, Vedtaksresultat.INGEN_TILBAKEBETALING, false)
+        lagVedtakSluttTekster(YtelsestypeDTO.SKOLEPENGER, Språkkode.NN, Vedtaksresultat.FULL_TILBAKEBETALING, false)
+        lagVedtakSluttTekster(YtelsestypeDTO.SKOLEPENGER, Språkkode.NN, Vedtaksresultat.INGEN_TILBAKEBETALING, false)
     }
 
     private fun lagVedtakSluttTekster(
-        ytelsetype: Ytelsestype,
+        ytelsetype: YtelsestypeDTO,
         språkkode: Språkkode,
         resultatType: Vedtaksresultat,
     ) {
@@ -100,7 +100,7 @@ class DokumentasjonsgeneratorVedtaksslutt {
     }
 
     private fun lagVedtakSluttTekster(
-        ytelsetype: Ytelsestype,
+        ytelsetype: YtelsestypeDTO,
         språkkode: Språkkode,
         resultatType: Vedtaksresultat,
         medSkattetrekk: Boolean,
@@ -140,7 +140,7 @@ class DokumentasjonsgeneratorVedtaksslutt {
     }
 
     private fun lagVedtakSluttTekster(
-        ytelsetype: Ytelsestype,
+        ytelsetype: YtelsestypeDTO,
         språkkode: Språkkode,
         resultatType: Vedtaksresultat,
         flerePerioder: Boolean,
@@ -169,7 +169,7 @@ class DokumentasjonsgeneratorVedtaksslutt {
     }
 
     private fun lagFellesdel(
-        ytelsetype: Ytelsestype,
+        ytelsetype: YtelsestypeDTO,
         språkkode: Språkkode,
         vedtakResultatType: Vedtaksresultat,
         medSkattetrekk: Boolean,
@@ -225,7 +225,7 @@ class DokumentasjonsgeneratorVedtaksslutt {
         )
 
     private fun lagMetadata(
-        ytelsestype: Ytelsestype,
+        ytelsestype: YtelsestypeDTO,
         språkkode: Språkkode,
         medVerge: Boolean,
     ): Brevmetadata {

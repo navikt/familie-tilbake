@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.micrometer.domain
 
+import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 
 class BehandlingerPerSteg(
     val fagsystem: Fagsystem,

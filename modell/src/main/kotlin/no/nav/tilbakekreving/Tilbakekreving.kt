@@ -3,7 +3,6 @@ package no.nav.tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsoppsummeringDto
 import no.nav.tilbakekreving.api.v1.dto.FagsakDto
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingsperiodeDto
-import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.BehandlingHistorikk
@@ -18,9 +17,11 @@ import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
+import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
+import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
@@ -28,7 +29,6 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.person.Bruker
 import no.nav.tilbakekreving.person.Bruker.Companion.tilNullableFrontendDto
@@ -55,7 +55,7 @@ class Tilbakekreving(
         tilstand.entering(this)
     }
 
-    fun håndter(opprettTilbakekrevingEvent: OpprettTilbakekrevingEvent) {
+    fun håndter(opprettTilbakekrevingEvent: OpprettTilbakekrevingHendelse) {
         tilstand.håndter(this, opprettTilbakekrevingEvent)
     }
 
@@ -122,11 +122,11 @@ class Tilbakekreving(
     }
 
     fun trengerBrukerinfo() {
-        bruker!!.trengerBrukerinfo(behovObservatør, eksternFagsak.fagsystem)
+        bruker!!.trengerBrukerinfo(behovObservatør, eksternFagsak.ytelse)
     }
 
-    fun hentFagsysteminfo(): Fagsystem {
-        return eksternFagsak.fagsystem
+    fun hentFagsysteminfo(): Ytelse {
+        return eksternFagsak.ytelse
     }
 
     override fun tilFrontendDto(): FagsakDto {
@@ -192,15 +192,14 @@ class Tilbakekreving(
     companion object {
         fun opprett(
             behovObservatør: BehovObservatør,
-            opprettTilbakekrevingEvent: OpprettTilbakekrevingEvent,
+            opprettTilbakekrevingEvent: OpprettTilbakekrevingHendelse,
         ): Tilbakekreving {
-            return Tilbakekreving(
+            val tilbakekreving = Tilbakekreving(
                 opprettet = LocalDateTime.now(),
                 opprettelsesvalg = opprettTilbakekrevingEvent.opprettelsesvalg,
                 eksternFagsak = EksternFagsak(
                     eksternId = opprettTilbakekrevingEvent.eksternFagsak.eksternId,
-                    ytelsestype = opprettTilbakekrevingEvent.eksternFagsak.ytelsestype,
-                    fagsystem = opprettTilbakekrevingEvent.eksternFagsak.fagsystem,
+                    ytelse = opprettTilbakekrevingEvent.eksternFagsak.ytelse,
                     behovObservatør = behovObservatør,
                     behandlinger = EksternFagsakBehandlingHistorikk(mutableListOf()),
                 ),
@@ -209,6 +208,8 @@ class Tilbakekreving(
                 kravgrunnlagHistorikk = KravgrunnlagHistorikk(mutableListOf()),
                 brevHistorikk = BrevHistorikk(mutableListOf()),
             )
+            tilbakekreving.håndter(opprettTilbakekrevingEvent)
+            return tilbakekreving
         }
     }
 }

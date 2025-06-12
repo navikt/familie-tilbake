@@ -7,7 +7,6 @@ import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandlingRequest
 import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandlingRespons
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
@@ -48,7 +47,7 @@ class HentFagsystemsbehandlingService(
                 ),
             )
 
-        val request = HentFagsystemsbehandlingRequest(eksternFagsakId, ytelsestype, eksternId)
+        val request = HentFagsystemsbehandlingRequest(eksternFagsakId, ytelsestype.tilDTO(), eksternId)
         kafkaProducer.sendHentFagsystemsbehandlingRequest(requestSendt.id, request, SecureLog.Context.medBehandling(eksternFagsakId, requestSendt.id.toString()))
     }
 

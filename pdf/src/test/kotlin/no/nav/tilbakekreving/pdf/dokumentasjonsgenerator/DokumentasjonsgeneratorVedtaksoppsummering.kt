@@ -3,7 +3,7 @@ package no.nav.tilbakekreving.pdf.dokumentasjonsgenerator
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmetadata
 import no.nav.tilbakekreving.pdf.dokumentbestilling.vedtak.handlebars.dto.HbBehandling
@@ -45,7 +45,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
 
     @Test
     fun `list ut vedtak start for BA bokmål`() {
-        val ytelseType = Ytelsestype.BARNETRYGD
+        val ytelseType = YtelsestypeDTO.BARNETRYGD
         val nb: Språkkode = Språkkode.NB
         for (resultatType in tilbakekrevingsResultat) {
             for (medVarsel in trueFalse) {
@@ -57,7 +57,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
 
     @Test
     fun `list ut vedtak start for BA nynorsk`() {
-        val ytelseType: Ytelsestype = Ytelsestype.BARNETRYGD
+        val ytelseType: YtelsestypeDTO = YtelsestypeDTO.BARNETRYGD
         val språkkode: Språkkode = Språkkode.NN
         for (resultatType in tilbakekrevingsResultat) {
             for (medVarsel in trueFalse) {
@@ -69,7 +69,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
 
     @Test
     fun `list ut vedtak start for EFBT bokmål`() {
-        val ytelseType: Ytelsestype = Ytelsestype.BARNETILSYN
+        val ytelseType: YtelsestypeDTO = YtelsestypeDTO.BARNETILSYN
         val nb: Språkkode = Språkkode.NB
         for (resultatType in tilbakekrevingsResultat) {
             for (medVarsel in trueFalse) {
@@ -81,7 +81,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
 
     @Test
     fun `list ut vedtak start for EFBT nynorsk`() {
-        val ytelseType: Ytelsestype = Ytelsestype.BARNETILSYN
+        val ytelseType: YtelsestypeDTO = YtelsestypeDTO.BARNETILSYN
         val språkkode: Språkkode = Språkkode.NN
         for (resultatType in tilbakekrevingsResultat) {
             for (medVarsel in trueFalse) {
@@ -93,7 +93,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
 
     @Test
     fun `list ut vedtak start for EFOG bokmål`() {
-        val ytelseType: Ytelsestype = Ytelsestype.OVERGANGSSTØNAD
+        val ytelseType: YtelsestypeDTO = YtelsestypeDTO.OVERGANGSSTØNAD
         val nb: Språkkode = Språkkode.NB
         for (resultatType in tilbakekrevingsResultat) {
             for (medVarsel in trueFalse) {
@@ -105,7 +105,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
 
     @Test
     fun `list ut vedtak start for EFOG nynorsk`() {
-        val ytelseType: Ytelsestype = Ytelsestype.OVERGANGSSTØNAD
+        val ytelseType: YtelsestypeDTO = YtelsestypeDTO.OVERGANGSSTØNAD
         val språkkode: Språkkode = Språkkode.NN
         for (resultatType in tilbakekrevingsResultat) {
             for (medVarsel in trueFalse) {
@@ -117,7 +117,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
 
     @Test
     fun `list ut vedtak start for EFSP bokmål`() {
-        val ytelseType: Ytelsestype = Ytelsestype.SKOLEPENGER
+        val ytelseType: YtelsestypeDTO = YtelsestypeDTO.SKOLEPENGER
         val nb: Språkkode = Språkkode.NB
         for (resultatType in tilbakekrevingsResultat) {
             for (medVarsel in trueFalse) {
@@ -129,7 +129,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
 
     @Test
     fun `list ut vedtak start for EFSP nynorsk`() {
-        val ytelseType: Ytelsestype = Ytelsestype.SKOLEPENGER
+        val ytelseType: YtelsestypeDTO = YtelsestypeDTO.SKOLEPENGER
         val språkkode: Språkkode = Språkkode.NN
         for (resultatType in tilbakekrevingsResultat) {
             for (medVarsel in trueFalse) {
@@ -140,7 +140,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
     }
 
     private fun listVedtakStartAllePermutasjoner(
-        ytelseType: Ytelsestype,
+        ytelseType: YtelsestypeDTO,
         nb: Språkkode,
         resultatType: Vedtaksresultat,
         medVarsel: Boolean,
@@ -152,7 +152,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
     }
 
     private fun listVedtakStartUtenRenterUtenSkatt(
-        ytelseType: Ytelsestype,
+        ytelseType: YtelsestypeDTO,
         nb: Språkkode,
         resultatType: Vedtaksresultat,
         medVarsel: Boolean,
@@ -161,7 +161,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
     }
 
     private fun listVedtakStartUtenSkatt(
-        ytelseType: Ytelsestype,
+        ytelseType: YtelsestypeDTO,
         nb: Språkkode,
         resultatType: Vedtaksresultat,
         medVarsel: Boolean,
@@ -171,7 +171,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
     }
 
     private fun listVedtakStartMedKorrigertBeløpAllePermutasjoner(
-        ytelseType: Ytelsestype,
+        ytelseType: YtelsestypeDTO,
         nb: Språkkode,
         resultatType: Vedtaksresultat,
     ) {
@@ -182,7 +182,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
     }
 
     private fun listVedtakStartMedKorrigertBeløpUtenRenterUtenSkatt(
-        ytelseType: Ytelsestype,
+        ytelseType: YtelsestypeDTO,
         nb: Språkkode,
         resultatType: Vedtaksresultat,
     ) {
@@ -190,7 +190,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
     }
 
     private fun listVedtakStartMedKorrigertBeløpUtenSkatt(
-        ytelseType: Ytelsestype,
+        ytelseType: YtelsestypeDTO,
         nb: Språkkode,
         resultatType: Vedtaksresultat,
     ) {
@@ -199,7 +199,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
     }
 
     private fun genererVedtakStart(
-        ytelseType: Ytelsestype,
+        ytelseType: YtelsestypeDTO,
         språkkode: Språkkode,
         tilbakebetaling: Vedtaksresultat,
         medVarsel: Boolean,
@@ -212,7 +212,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
     }
 
     private fun genererVedtakStartMedKorrigertBeløp(
-        ytelseType: Ytelsestype,
+        ytelseType: YtelsestypeDTO,
         språkkode: Språkkode,
         tilbakebetaling: Vedtaksresultat,
         renter: Long,
@@ -224,7 +224,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
     }
 
     private fun genererVedtakStart(
-        ytelseType: Ytelsestype,
+        ytelseType: YtelsestypeDTO,
         språkkode: Språkkode,
         tilbakebetaling: Vedtaksresultat,
         medVarsel: Boolean,
@@ -295,7 +295,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
     }
 
     private fun lagMetadata(
-        ytelsestype: Ytelsestype,
+        ytelsestype: YtelsestypeDTO,
         språkkode: Språkkode,
     ): Brevmetadata =
         Brevmetadata(

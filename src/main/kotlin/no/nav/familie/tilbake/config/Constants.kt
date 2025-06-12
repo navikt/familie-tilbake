@@ -1,12 +1,12 @@
 package no.nav.familie.tilbake.config
 
+import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.Rettsgebyr
 import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.Period

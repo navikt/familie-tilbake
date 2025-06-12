@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.kravgrunnlag.batch
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
+import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
@@ -36,7 +37,6 @@ import no.nav.tilbakekreving.kontrakter.Tilbakekrevingsvalg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -236,8 +236,8 @@ class GammelKravgrunnlagService(
         fagsystemsbehandlingData: HentFagsystemsbehandling,
     ): OpprettTilbakekrevingRequest =
         OpprettTilbakekrevingRequest(
-            fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype),
-            ytelsestype = ytelsestype,
+            fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype.tilDTO()),
+            ytelsestype = ytelsestype.tilDTO(),
             eksternFagsakId = eksternFagsakId,
             eksternId = eksternId,
             behandlingstype = Behandlingstype.TILBAKEKREVING,

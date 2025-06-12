@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.behandling
 import no.nav.familie.tilbake.behandling.domain.HentFagsystemsbehandlingRequestSendt
 import no.nav.familie.tilbake.common.repository.InsertUpdateRepository
 import no.nav.familie.tilbake.common.repository.RepositoryInterface
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import org.springframework.stereotype.Repository
 import java.util.UUID
 

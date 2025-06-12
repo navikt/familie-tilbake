@@ -84,11 +84,8 @@ import no.nav.tilbakekreving.kontrakter.brev.MottakerType
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.verge.Verge
 import no.nav.tilbakekreving.kontrakter.verge.Vergetype
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype.BARNETILSYN
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype.BARNETRYGD
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype.KONTANTSTØTTE
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -160,8 +157,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = false,
                 finnesVarsel = true,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
 
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
@@ -192,8 +189,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = true,
                 finnesVarsel = true,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
 
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
@@ -224,8 +221,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = false,
                 finnesVarsel = false,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
 
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
@@ -257,8 +254,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVarsel = true,
                 manueltOpprettet = false,
                 finnesInstitusjon = true,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
 
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
@@ -291,8 +288,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 manueltOpprettet = false,
                 finnesInstitusjon = false,
                 finnesManuelleBrevmottakere = true,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
 
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
@@ -317,8 +314,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = true,
                 finnesVarsel = true,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
         behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
@@ -337,8 +334,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = true,
                 finnesVarsel = true,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
 
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
@@ -360,8 +357,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = true,
                 finnesVarsel = true,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
 
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
@@ -369,7 +366,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         behandlingRepository.update(lagretBehandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
         val kontantstøtteOpprettTilbakekrevingRequest =
-            opprettTilbakekrevingRequest.copy(fagsystem = Fagsystem.KONT, ytelsestype = KONTANTSTØTTE)
+            opprettTilbakekrevingRequest.copy(fagsystem = FagsystemDTO.KONT, ytelsestype = YtelsestypeDTO.KONTANTSTØTTE)
 
         val opprettetBehandling =
             behandlingService.opprettBehandling(
@@ -387,8 +384,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = true,
                 finnesVarsel = true,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
         val behandlingRepository = mockk<BehandlingRepository>()
         val featureToggleService = mockk<FeatureToggleService>()
@@ -411,8 +408,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = true,
                 finnesVarsel = true,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
         val behandlingRepository = mockk<BehandlingRepository>()
         val featureToggleService = mockk<FeatureToggleService>()
@@ -436,8 +433,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = true,
                 finnesVarsel = true,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
         val behandlingRepository = mockk<BehandlingRepository>()
         val featureToggleService = mockk<FeatureToggleService>()
@@ -461,8 +458,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = false,
                 finnesVarsel = true,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
         val forrigeBehandling = behandlingService.opprettBehandling(forrigeOpprettTilbakekrevingRequest)
 
@@ -476,8 +473,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = false,
                 finnesVarsel = true,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
         val behandling = behandlingService.opprettBehandling(nyOpprettTilbakekrevingRequest)
         assertBehandling(behandling, nyOpprettTilbakekrevingRequest)
@@ -506,8 +503,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = false,
                 finnesVarsel = false,
                 manueltOpprettet = true,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
 
         val exception = shouldThrow<RuntimeException> { behandlingService.opprettBehandling(opprettTilbakekrevingRequest) }
@@ -522,14 +519,14 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = false,
                 finnesVarsel = false,
                 manueltOpprettet = true,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
         val økonomiXmlMottatt = Testdata.getøkonomiXmlMottatt()
         økonomiXmlMottattRepository.insert(
             økonomiXmlMottatt.copy(
                 eksternFagsakId = opprettTilbakekrevingRequest.eksternFagsakId,
-                ytelsestype = opprettTilbakekrevingRequest.ytelsestype,
+                ytelsestype = Ytelsestype.forDTO(opprettTilbakekrevingRequest.ytelsestype),
                 referanse = opprettTilbakekrevingRequest.eksternId,
             ),
         )
@@ -560,7 +557,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
             behandlingService.opprettBehandlingManuellTask(
                 OpprettManueltTilbakekrevingRequest(
                     eksternFagsakId = "testverdi",
-                    ytelsestype = BARNETRYGD,
+                    ytelsestype = YtelsestypeDTO.BARNETRYGD,
                     eksternId = "testverdi",
                 ),
             )
@@ -573,7 +570,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         økonomiXmlMottattRepository.insert(
             økonomiXmlMottatt.copy(
                 eksternFagsakId = "testverdi",
-                ytelsestype = BARNETRYGD,
+                ytelsestype = Ytelsestype.BARNETRYGD,
                 referanse = "testverdi",
             ),
         )
@@ -581,7 +578,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         behandlingService.opprettBehandlingManuellTask(
             OpprettManueltTilbakekrevingRequest(
                 eksternFagsakId = "testverdi",
-                ytelsestype = BARNETRYGD,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
                 eksternId = "testverdi",
             ),
         )
@@ -591,7 +588,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
             .forOne {
                 it.type shouldBe OpprettBehandlingManueltTask.TYPE
                 it.metadata["eksternFagsakId"] shouldBe "testverdi"
-                it.metadata["ytelsestype"] shouldBe BARNETRYGD.name
+                it.metadata["ytelsestype"] shouldBe YtelsestypeDTO.BARNETRYGD.name
                 it.metadata["eksternId"] shouldBe "testverdi"
                 it.metadata["ansvarligSaksbehandler"] shouldBe "Z0000"
             }
@@ -658,8 +655,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = true,
                 finnesVarsel = true,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         val behandlingDto = behandlingService.hentBehandling(behandling.id)
@@ -687,8 +684,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = true,
                 finnesVarsel = true,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         val behandlingDto = behandlingService.hentBehandling(behandling.id)
@@ -715,8 +712,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = false,
                 finnesVarsel = true,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
@@ -748,8 +745,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = false,
                 finnesVarsel = true,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
@@ -771,8 +768,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = false,
                 finnesVarsel = true,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
@@ -791,8 +788,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = false,
                 finnesVarsel = true,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
@@ -818,8 +815,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = false,
                 finnesVarsel = true,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
@@ -838,8 +835,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = false,
                 finnesVarsel = true,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
@@ -860,8 +857,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = false,
                 finnesVarsel = true,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
@@ -887,8 +884,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = false,
                 finnesVarsel = true,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
@@ -968,8 +965,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = true,
                 finnesVarsel = true,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
@@ -994,8 +991,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = true,
                 finnesVarsel = true,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
@@ -1020,8 +1017,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = true,
                 finnesVarsel = true,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
@@ -1077,8 +1074,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = true,
                 finnesVarsel = false,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id).copy(behandlingId = behandling.id))
@@ -1115,8 +1112,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = true,
                 finnesVarsel = true,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
@@ -1157,8 +1154,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = true,
                 finnesVarsel = true,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
@@ -1202,8 +1199,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = false,
                 finnesVarsel = true,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
         var behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
@@ -1269,8 +1266,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = false,
                 finnesVarsel = false,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
         var behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
@@ -1329,8 +1326,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = false,
                 finnesVarsel = false,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
@@ -1355,8 +1352,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = false,
                 finnesVarsel = false,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         val kravgrunnlag = Testdata.lagKravgrunnlag(behandling.id)
@@ -1383,8 +1380,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = false,
                 finnesVarsel = false,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
         var behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
@@ -1411,8 +1408,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = false,
                 finnesVarsel = false,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
         var behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
@@ -1457,11 +1454,11 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = false,
                 finnesVarsel = false,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             ).copy(
-                fagsystem = Fagsystem.EF,
-                ytelsestype = BARNETILSYN,
+                fagsystem = FagsystemDTO.EF,
+                ytelsestype = YtelsestypeDTO.BARNETILSYN,
             )
         var behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
@@ -1484,8 +1481,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 finnesVerge = false,
                 finnesVarsel = false,
                 manueltOpprettet = false,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
         var behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
@@ -1507,8 +1504,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
             lagOpprettTilbakekrevingRequest(
                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
                 finnesInstitusjon = true,
-                fagsystem = Fagsystem.BA,
-                ytelsestype = BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
             )
 
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
@@ -1572,7 +1569,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         fagsak.eksternFagsakId shouldBe opprettTilbakekrevingRequest.eksternFagsakId
         fagsak.ytelsestype.name shouldBe opprettTilbakekrevingRequest.ytelsestype.name
-        fagsak.fagsystem shouldBe opprettTilbakekrevingRequest.fagsystem
+        fagsak.fagsystem shouldBe Fagsystem.forDTO(opprettTilbakekrevingRequest.fagsystem)
         fagsak.bruker.språkkode shouldBe opprettTilbakekrevingRequest.språkkode
         fagsak.bruker.ident shouldBe opprettTilbakekrevingRequest.personIdent
         if (finnesInstitusjon) {
@@ -1655,8 +1652,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         manueltOpprettet: Boolean = false,
         finnesInstitusjon: Boolean = false,
         finnesManuelleBrevmottakere: Boolean = false,
-        fagsystem: Fagsystem,
-        ytelsestype: Ytelsestype,
+        fagsystem: FagsystemDTO,
+        ytelsestype: YtelsestypeDTO,
     ): OpprettTilbakekrevingRequest {
         val varsel =
             if (finnesVarsel) {
@@ -1727,7 +1724,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         )
     }
 
-    private fun lagOpprettRevurderingDto(originalBehandlingId: UUID): OpprettRevurderingDto = OpprettRevurderingDto(BARNETRYGD, originalBehandlingId, Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR)
+    private fun lagOpprettRevurderingDto(originalBehandlingId: UUID): OpprettRevurderingDto = OpprettRevurderingDto(YtelsestypeDTO.BARNETRYGD, originalBehandlingId, Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR)
 
     private fun assertAnsvarligSaksbehandler(behandling: Behandling) {
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)

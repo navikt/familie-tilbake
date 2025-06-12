@@ -123,7 +123,7 @@ internal class OppdaterFaktainfoTaskTest : OppslagSpringRunnerTest() {
             HentFagsystemsbehandling(
                 eksternFagsakId = fagsak.eksternFagsakId,
                 eksternId = eksternId,
-                ytelsestype = fagsak.ytelsestype,
+                ytelsestype = fagsak.ytelsestype.tilDTO(),
                 personIdent = fagsak.bruker.ident,
                 språkkode = fagsak.bruker.språkkode,
                 enhetId = behandling.behandlendeEnhet,

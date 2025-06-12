@@ -1,8 +1,8 @@
 package no.nav.tilbakekreving.behov
 
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
+import no.nav.tilbakekreving.fagsystem.Ytelse
 
 data class BrukerinfoBehov(
     val ident: String,
-    val fagsystem: Fagsystem,
+    val ytelse: Ytelse,
 ) : Behov

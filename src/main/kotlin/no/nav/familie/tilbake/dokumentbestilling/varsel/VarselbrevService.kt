@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.dokumentbestilling.varsel
 
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Varsel
@@ -163,12 +164,12 @@ class VarselbrevService(
 
     private fun lagVarselbrevForForhåndsvisning(request: ForhåndsvisVarselbrevRequest): Varselbrevsdokument {
         val brevmottager = utledBrevmottager(request)
-        val personinfo = eksterneDataForBrevService.hentPerson(request.ident, request.fagsystem, SecureLog.Context.tom())
+        val personinfo = eksterneDataForBrevService.hentPerson(request.ident, Fagsystem.forDTO(request.fagsystem), SecureLog.Context.tom())
         val adresseinfo = eksterneDataForBrevService.hentAdresse(
             personinfo,
             brevmottager,
             request.verge,
-            request.fagsystem,
+            Fagsystem.forDTO(request.fagsystem),
             SecureLog.Context.tom(),
         )
 

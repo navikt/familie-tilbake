@@ -12,7 +12,7 @@ import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmetadata
 import no.nav.tilbakekreving.pdf.dokumentbestilling.vedtak.handlebars.dto.HbBehandling
@@ -50,7 +50,7 @@ class TekstformatererVedtaksbrevVedleggTest {
             ansvarligSaksbehandler = "Bob",
             saksnummer = "1232456",
             språkkode = Språkkode.NB,
-            ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
+            ytelsestype = YtelsestypeDTO.OVERGANGSSTØNAD,
             gjelderDødsfall = false,
         )
 
@@ -76,7 +76,7 @@ class TekstformatererVedtaksbrevVedleggTest {
 
     @Test
     fun `lagVedtaksbrevVedleggHtml skal generere vedlegg med en periode uten skatt`() {
-        val data = getVedtaksbrevData(Språkkode.NB, 10000, 30001, 30001, 0, 0, Ytelsestype.BARNETRYGD)
+        val data = getVedtaksbrevData(Språkkode.NB, 10000, 30001, 30001, 0, 0, YtelsestypeDTO.BARNETRYGD)
 
         val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsvedleggHtml(data)
 
@@ -93,7 +93,7 @@ class TekstformatererVedtaksbrevVedleggTest {
         tilbakekreves: Int,
         renter: Int,
         skatt: Int,
-        ytelsestype: Ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
+        ytelsestype: YtelsestypeDTO = YtelsestypeDTO.OVERGANGSSTØNAD,
     ): HbVedtaksbrevsdata {
         val vedtaksbrevData =
             lagTestBuilder()
@@ -165,7 +165,7 @@ class TekstformatererVedtaksbrevVedleggTest {
 
     private fun lagTestBuilder(
         språkkode: Språkkode = Språkkode.NB,
-        ytelsestype: Ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
+        ytelsestype: YtelsestypeDTO = YtelsestypeDTO.OVERGANGSSTØNAD,
     ) = HbVedtaksbrevFelles(
         brevmetadata = brevmetadata.copy(språkkode = språkkode, ytelsestype = ytelsestype),
         hjemmel = HbHjemmel("Folketrygdloven"),

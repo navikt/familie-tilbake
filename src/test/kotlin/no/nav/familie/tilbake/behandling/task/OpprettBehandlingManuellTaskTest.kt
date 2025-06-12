@@ -18,8 +18,10 @@ import no.nav.familie.tilbake.behandling.BehandlingManuellOpprettelseService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingRequestSendtRepository
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
+import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.integration.kafka.DefaultKafkaProducer
@@ -37,7 +39,6 @@ import no.nav.tilbakekreving.kontrakter.Institusjon
 import no.nav.tilbakekreving.kontrakter.Tilbakekrevingsvalg
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.junit.jupiter.api.AfterEach
@@ -212,7 +213,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
 
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         fagsak.bruker.språkkode shouldBe fagsystemsbehandling.språkkode
-        fagsak.fagsystem shouldBe FagsystemUtil.hentFagsystemFraYtelsestype(fagsystemsbehandling.ytelsestype)
+        fagsak.fagsystem shouldBe Fagsystem.forDTO(FagsystemUtil.hentFagsystemFraYtelsestype(fagsystemsbehandling.ytelsestype))
         fagsak.institusjon shouldBe null
     }
 
@@ -256,7 +257,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
 
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         fagsak.bruker.språkkode shouldBe fagsystemsbehandling.språkkode
-        fagsak.fagsystem shouldBe FagsystemUtil.hentFagsystemFraYtelsestype(fagsystemsbehandling.ytelsestype)
+        fagsak.fagsystem shouldBe Fagsystem.forDTO(FagsystemUtil.hentFagsystemFraYtelsestype(fagsystemsbehandling.ytelsestype))
         fagsak.institusjon shouldNotBe null
         fagsak.institusjon!!.organisasjonsnummer shouldBe "987654321"
     }
@@ -282,7 +283,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
         val fagsystemsbehandling =
             HentFagsystemsbehandling(
                 eksternFagsakId = eksternFagsakId,
-                ytelsestype = ytelsestype,
+                ytelsestype = ytelsestype.tilDTO(),
                 eksternId = eksternId,
                 personIdent = "testverdi",
                 språkkode = Språkkode.NB,

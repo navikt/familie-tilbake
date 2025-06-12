@@ -338,7 +338,7 @@ internal class GammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         val fagsystemsbehandling =
             HentFagsystemsbehandling(
                 eksternFagsakId = xmlMottatt.eksternFagsakId,
-                ytelsestype = xmlMottatt.ytelsestype,
+                ytelsestype = xmlMottatt.ytelsestype.tilDTO(),
                 eksternId = xmlMottatt.referanse,
                 personIdent = "testverdi",
                 språkkode = Språkkode.NB,

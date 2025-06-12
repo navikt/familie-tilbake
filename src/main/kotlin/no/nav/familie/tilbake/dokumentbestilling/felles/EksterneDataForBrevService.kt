@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.dokumentbestilling.felles
 
+import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
@@ -8,7 +9,6 @@ import no.nav.familie.tilbake.kontrakter.organisasjon.Organisasjon
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.person.PersonService
 import no.nav.tilbakekreving.kontrakter.verge.Vergetype
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
 import org.springframework.stereotype.Service

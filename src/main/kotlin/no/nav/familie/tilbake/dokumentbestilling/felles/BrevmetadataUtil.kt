@@ -81,7 +81,7 @@ class BrevmetadataUtil(
                 ansvarligSaksbehandler = hentAnsvarligSaksbehandlerNavn(persistertSaksbehandlerId, vedtaksbrevgrunnlag, logContext),
                 saksnummer = vedtaksbrevgrunnlag?.eksternFagsakId ?: fagsak.eksternFagsakId,
                 språkkode = vedtaksbrevgrunnlag?.bruker?.språkkode ?: fagsak.bruker.språkkode,
-                ytelsestype = vedtaksbrevgrunnlag?.ytelsestype ?: fagsak.ytelsestype,
+                ytelsestype = vedtaksbrevgrunnlag?.ytelsestype?.tilDTO() ?: fagsak.ytelsestype.tilDTO(),
                 gjelderDødsfall = gjelderDødsfall,
                 institusjon =
                     (vedtaksbrevgrunnlag?.institusjon ?: fagsak.institusjon)?.let {

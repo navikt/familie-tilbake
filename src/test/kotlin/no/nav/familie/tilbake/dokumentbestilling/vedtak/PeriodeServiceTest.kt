@@ -4,6 +4,8 @@ import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.Fagsystem
+import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.data.Testdata
@@ -22,8 +24,6 @@ import no.nav.tilbakekreving.august
 import no.nav.tilbakekreving.desember
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode.Companion.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import no.nav.tilbakekreving.oktober
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

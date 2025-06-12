@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.sikkerhet
 
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 
 // Denne enum-en brukes kun for tilgangskontroll
 enum class Tilgangskontrollsfagsystem(
@@ -23,7 +23,7 @@ enum class Tilgangskontrollsfagsystem(
             throw IllegalArgumentException("Fagsystem finnes ikke for kode $kode")
         }
 
-        fun fraFagsystem(kontraktFagsystem: Fagsystem): Tilgangskontrollsfagsystem {
+        fun fraFagsystem(kontraktFagsystem: FagsystemDTO): Tilgangskontrollsfagsystem {
             for (fagsystem in values()) {
                 if (fagsystem.kode == kontraktFagsystem.name) {
                     return fagsystem

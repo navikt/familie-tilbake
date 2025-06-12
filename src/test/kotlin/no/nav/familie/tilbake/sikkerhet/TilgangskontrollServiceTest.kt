@@ -10,6 +10,8 @@ import io.mockk.verify
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.Fagsystem
+import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
@@ -30,9 +32,9 @@ import no.nav.tilbakekreving.behandling.BehandlingHistorikk
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
+import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -120,8 +122,7 @@ internal class TilgangskontrollServiceTest : OppslagSpringRunnerTest() {
             Tilbakekreving(
                 eksternFagsak = EksternFagsak(
                     "1abc",
-                    Ytelsestype.BARNETRYGD,
-                    Fagsystem.BA,
+                    Ytelse.Barnetrygd,
                     EksternFagsakBehandlingHistorikk(mutableListOf()),
                     mockk(relaxed = true),
                 ),
@@ -339,7 +340,7 @@ internal class TilgangskontrollServiceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE))
         opprettRequestContext(token)
 
-        tilgangskontrollService.validerTilgangFagsystemOgFagsakId(Fagsystem.BA, fagsak.eksternFagsakId, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test")
+        tilgangskontrollService.validerTilgangFagsystemOgFagsakId(FagsystemDTO.BA, fagsak.eksternFagsakId, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test")
 
         verify { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232"), any()) }
     }

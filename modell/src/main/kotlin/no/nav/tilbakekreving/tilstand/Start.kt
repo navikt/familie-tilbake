@@ -1,8 +1,8 @@
 package no.nav.tilbakekreving.tilstand
 
 import no.nav.tilbakekreving.Tilbakekreving
-import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
+import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 
 object Start : Tilstand {
     override val navn: String = "Start"
@@ -11,7 +11,7 @@ object Start : Tilstand {
 
     override fun håndter(
         tilbakekreving: Tilbakekreving,
-        hendelse: OpprettTilbakekrevingEvent,
+        hendelse: OpprettTilbakekrevingHendelse,
     ) {
         when (hendelse.opprettelsesvalg) {
             Opprettelsesvalg.UTSETT_BEHANDLING_MED_VARSEL -> tilbakekreving.byttTilstand(AvventerUtsattBehandlingMedVarsel)

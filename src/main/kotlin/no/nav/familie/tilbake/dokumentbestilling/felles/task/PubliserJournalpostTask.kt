@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.dokumentbestilling.felles.task
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.http.RessursException
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
@@ -13,7 +14,6 @@ import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
 import no.nav.familie.tilbake.log.TracedLogger
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -54,7 +54,7 @@ class PubliserJournalpostTask(
         try {
             integrasjonerClient.distribuerJournalpost(
                 journalpostId,
-                Fagsystem.valueOf(task.metadata.getProperty("fagsystem")),
+                Fagsystem.valueOf(task.metadata.getProperty("fagsystem")).tilDTO(),
                 Distribusjonstype.valueOf(task.metadata.getProperty("distribusjonstype")),
                 Distribusjonstidspunkt.valueOf(task.metadata.getProperty("distribusjonstidspunkt")),
                 manuellAdresse,

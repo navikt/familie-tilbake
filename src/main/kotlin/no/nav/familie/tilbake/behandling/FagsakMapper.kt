@@ -48,8 +48,8 @@ object FagsakMapper {
 
         return FagsakDto(
             eksternFagsakId = fagsak.eksternFagsakId,
-            ytelsestype = fagsak.ytelsestype,
-            fagsystem = fagsak.fagsystem,
+            ytelsestype = fagsak.ytelsestype.tilDTO(),
+            fagsystem = fagsak.fagsystem.tilDTO(),
             språkkode = fagsak.bruker.språkkode,
             bruker = bruker,
             behandlinger = behandlingListe,

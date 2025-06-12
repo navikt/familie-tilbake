@@ -2,6 +2,8 @@ package no.nav.familie.tilbake.kravgrunnlag
 
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
+import no.nav.familie.tilbake.behandling.Fagsystem
+import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
@@ -24,7 +26,6 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import no.nav.tilbakekreving.status.v1.KravOgVedtakstatus
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -81,14 +82,14 @@ class KravvedtakstatusService(
                     )
             håndterStatusmeldingerUtenBehandling(kravgrunnlagXmlListe, kravOgVedtakstatus)
             mottattXmlService.arkiverMottattXml(kravgrunnlagXmlListe.maxByOrNull { it.kontrollfelt!! }?.id, statusmeldingXml, fagsystemId, ytelsestype)
-            tellerService.tellUkobletStatusmelding(FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype))
+            tellerService.tellUkobletStatusmelding(Fagsystem.forDTO(FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype.tilDTO())))
             return
         }
         val kravgrunnlag431: Kravgrunnlag431 = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
         val logContext = SecureLog.Context.medBehandling(kravgrunnlag431.fagsystemId, behandling.id.toString())
         håndterStatusmeldingerMedBehandling(kravgrunnlag431, kravOgVedtakstatus, behandling, logContext)
         mottattXmlService.arkiverMottattXml(mottattXmlId = null, statusmeldingXml, fagsystemId, ytelsestype)
-        tellerService.tellKobletStatusmelding(FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype))
+        tellerService.tellKobletStatusmelding(Fagsystem.forDTO(FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype.tilDTO())))
     }
 
     private fun validerStatusmelding(kravOgVedtakstatus: KravOgVedtakstatus) {

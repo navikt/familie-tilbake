@@ -4,6 +4,7 @@ import jakarta.validation.Valid
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingRequestSendtRepository
+import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
@@ -135,7 +136,7 @@ class AutotestController(
         val requestSendt =
             requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(
                 eksternFagsakId,
-                ytelsestype,
+                Ytelsestype.forDTO(ytelsestype),
                 eksternId,
             )
         val melding =

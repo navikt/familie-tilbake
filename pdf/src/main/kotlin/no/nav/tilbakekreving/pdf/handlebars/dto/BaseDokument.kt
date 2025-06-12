@@ -2,14 +2,14 @@ package no.nav.tilbakekreving.pdf.handlebars.dto
 
 import no.nav.tilbakekreving.FagsystemUtil
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.header.Institusjon
 
 private const val EF_URL = "nav.no/alene-med-barn"
 
 open class BaseDokument(
-    val ytelsestype: Ytelsestype,
+    val ytelsestype: YtelsestypeDTO,
     override val språkkode: Språkkode,
     val behandlendeEnhetsNavn: String,
     val ansvarligSaksbehandler: String,
@@ -17,14 +17,14 @@ open class BaseDokument(
     val institusjon: Institusjon? = null,
 ) : Språkstøtte {
     val avsenderenhet =
-        if (FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype) == Fagsystem.EF) {
+        if (FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype) == FagsystemDTO.EF) {
             "Nav Arbeid og ytelser"
         } else {
             behandlendeEnhetsNavn
         }
     private val infoMap =
         mapOf(
-            Ytelsestype.BARNETRYGD to
+            YtelsestypeDTO.BARNETRYGD to
                 Ytelsesinfo(
                     "nav.no/barnetrygd",
                     mapOf(
@@ -42,7 +42,7 @@ open class BaseDokument(
                             ),
                     ),
                 ),
-            Ytelsestype.OVERGANGSSTØNAD to
+            YtelsestypeDTO.OVERGANGSSTØNAD to
                 Ytelsesinfo(
                     EF_URL,
                     mapOf(
@@ -60,7 +60,7 @@ open class BaseDokument(
                             ),
                     ),
                 ),
-            Ytelsestype.BARNETILSYN to
+            YtelsestypeDTO.BARNETILSYN to
                 Ytelsesinfo(
                     EF_URL,
                     mapOf(
@@ -78,7 +78,7 @@ open class BaseDokument(
                             ),
                     ),
                 ),
-            Ytelsestype.SKOLEPENGER to
+            YtelsestypeDTO.SKOLEPENGER to
                 Ytelsesinfo(
                     EF_URL,
                     mapOf(
@@ -96,7 +96,7 @@ open class BaseDokument(
                             ),
                     ),
                 ),
-            Ytelsestype.KONTANTSTØTTE to
+            YtelsestypeDTO.KONTANTSTØTTE to
                 Ytelsesinfo(
                     "nav.no/kontantstotte",
                     mapOf(

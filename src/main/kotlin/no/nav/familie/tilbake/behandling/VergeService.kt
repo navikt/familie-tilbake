@@ -18,7 +18,6 @@ import no.nav.tilbakekreving.api.v1.dto.VergeDto
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.verge.Vergetype
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

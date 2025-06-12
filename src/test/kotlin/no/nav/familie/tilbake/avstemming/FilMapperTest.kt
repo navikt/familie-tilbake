@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.avstemming
 
 import io.kotest.matchers.shouldBe
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.familie.tilbake.behandling.Ytelsestype
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate

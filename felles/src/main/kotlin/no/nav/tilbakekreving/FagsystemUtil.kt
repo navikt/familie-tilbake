@@ -1,15 +1,16 @@
 package no.nav.tilbakekreving
 
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 
 object FagsystemUtil {
-    fun hentFagsystemFraYtelsestype(type: Ytelsestype): Fagsystem =
+    fun hentFagsystemFraYtelsestype(type: YtelsestypeDTO): FagsystemDTO =
         when (type) {
-            Ytelsestype.BARNETRYGD -> Fagsystem.BA
-            Ytelsestype.KONTANTSTØTTE -> Fagsystem.KONT
-            Ytelsestype.OVERGANGSSTØNAD -> Fagsystem.EF
-            Ytelsestype.BARNETILSYN -> Fagsystem.EF
-            Ytelsestype.SKOLEPENGER -> Fagsystem.EF
+            YtelsestypeDTO.BARNETRYGD -> FagsystemDTO.BA
+            YtelsestypeDTO.KONTANTSTØTTE -> FagsystemDTO.KONT
+            YtelsestypeDTO.OVERGANGSSTØNAD -> FagsystemDTO.EF
+            YtelsestypeDTO.BARNETILSYN -> FagsystemDTO.EF
+            YtelsestypeDTO.SKOLEPENGER -> FagsystemDTO.EF
+            YtelsestypeDTO.TILLEGGSTØNADER -> FagsystemDTO.TS
         }
 }

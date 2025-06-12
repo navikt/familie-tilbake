@@ -32,7 +32,7 @@ import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagHentDetaljRequest
 import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagHentDetaljResponse
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakResponse
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.HentKravgrunnlagDetaljDto
 import no.nav.tilbakekreving.typer.v1.MmelDto
@@ -279,7 +279,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
             oppdragClient
                 .hentFeilutbetalingerFraSimulering(
                     HentFeilutbetalingerFraSimuleringRequest(
-                        Ytelsestype.OVERGANGSSTØNAD,
+                        YtelsestypeDTO.OVERGANGSSTØNAD,
                         "123",
                         "1",
                     ),
@@ -299,7 +299,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
             shouldThrow<RuntimeException> {
                 oppdragClient.hentFeilutbetalingerFraSimulering(
                     HentFeilutbetalingerFraSimuleringRequest(
-                        Ytelsestype.OVERGANGSSTØNAD,
+                        YtelsestypeDTO.OVERGANGSSTØNAD,
                         "123",
                         "1",
                     ),

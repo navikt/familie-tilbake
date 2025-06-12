@@ -1,6 +1,8 @@
 package no.nav.familie.tilbake.api.forvaltning
 
 import io.swagger.v3.oas.annotations.Operation
+import no.nav.familie.tilbake.behandling.Fagsystem
+import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
 import no.nav.familie.tilbake.integration.pdl.internal.logger
@@ -13,8 +15,7 @@ import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -209,9 +210,9 @@ class ForvaltningController(
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun finnGamleÅpneBehandlingerUtenOppgave(
-        @PathVariable fagsystem: Fagsystem,
+        @PathVariable fagsystem: FagsystemDTO,
     ) {
-        oppgaveTaskService.opprettFinnGammelBehandlingUtenOppgaveTask(fagsystem)
+        oppgaveTaskService.opprettFinnGammelBehandlingUtenOppgaveTask(Fagsystem.forDTO(fagsystem))
     }
 
     @Operation(summary = "Manuellt ufører iverksettingssteget uten å sende til oppdrag")
@@ -263,9 +264,9 @@ class ForvaltningController(
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun finnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave(
-        @PathVariable fagsystem: Fagsystem,
+        @PathVariable fagsystem: FagsystemDTO,
     ) {
-        oppgaveTaskService.finnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave(fagsystem)
+        oppgaveTaskService.finnBehandlingerMedGodkjennVedtakOppgaveSomSkulleHattBehandleSakOppgave(Fagsystem.forDTO(fagsystem))
     }
 
     @Operation(summary = "Ferdigstiller åpen GodkjenneVedtak-oppgave og oppretter BehandleSak-oppgave for behandlinger")

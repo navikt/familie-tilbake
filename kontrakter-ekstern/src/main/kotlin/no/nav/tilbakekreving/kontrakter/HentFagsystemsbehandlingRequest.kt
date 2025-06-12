@@ -4,12 +4,12 @@ import jakarta.validation.Valid
 import jakarta.validation.constraints.Pattern
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.verge.Verge
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import java.time.LocalDate
 
 data class HentFagsystemsbehandlingRequest(
     val eksternFagsakId: String,
-    val ytelsestype: Ytelsestype,
+    val ytelsestype: YtelsestypeDTO,
     val eksternId: String,
 )
 
@@ -20,7 +20,7 @@ data class HentFagsystemsbehandlingRespons(
 
 data class HentFagsystemsbehandling(
     val eksternFagsakId: String,
-    val ytelsestype: Ytelsestype,
+    val ytelsestype: YtelsestypeDTO,
     val regelverk: Regelverk? = null,
     val eksternId: String,
     val personIdent: String,

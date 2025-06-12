@@ -2,14 +2,16 @@ package no.nav.familie.tilbake.database
 
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
+import no.nav.familie.tilbake.behandling.Ytelsestype
+import no.nav.familie.tilbake.behandling.Ytelsestype.OVERGANGSSTØNAD
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.kontrakter.Faktainfo
 import no.nav.tilbakekreving.kontrakter.OpprettTilbakekrevingRequest
 import no.nav.tilbakekreving.kontrakter.Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype.OVERGANGSSTØNAD
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationListener
@@ -35,8 +37,8 @@ class TestdataInitializer : ApplicationListener<ContextRefreshedEvent> {
 
     val opprettTilbakekrevingRequest =
         OpprettTilbakekrevingRequest(
-            ytelsestype = OVERGANGSSTØNAD,
-            fagsystem = Fagsystem.EF,
+            ytelsestype = YtelsestypeDTO.OVERGANGSSTØNAD,
+            fagsystem = FagsystemDTO.EF,
             eksternFagsakId = "1234567",
             personIdent = "321321322",
             eksternId = "f5ed9439-54da-4f50-8457-534c417e3430",
@@ -60,7 +62,7 @@ class TestdataInitializer : ApplicationListener<ContextRefreshedEvent> {
         if (åpenTilbakekrevingsbehandling == null) {
             behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
-            val behandling = behandlingRepository.finnNyesteTilbakekrevingsbehandlingForYtelsestypeAndEksternFagsakId(opprettTilbakekrevingRequest.ytelsestype, opprettTilbakekrevingRequest.eksternFagsakId)
+            val behandling = behandlingRepository.finnNyesteTilbakekrevingsbehandlingForYtelsestypeAndEksternFagsakId(Ytelsestype.forDTO(opprettTilbakekrevingRequest.ytelsestype), opprettTilbakekrevingRequest.eksternFagsakId)
             logger.info("Opprettet dummy-behandling. Hvis frontend kjøres lokalt kan du gå til: http://localhost:4000/fagsystem/${opprettTilbakekrevingRequest.fagsystem}/fagsak/${opprettTilbakekrevingRequest.eksternFagsakId}/behandling/${behandling?.eksternBrukId}")
 
             val mottattXml = readXml("/kravgrunnlagxml/kravgrunnlag_lokal_kjøring.xml")

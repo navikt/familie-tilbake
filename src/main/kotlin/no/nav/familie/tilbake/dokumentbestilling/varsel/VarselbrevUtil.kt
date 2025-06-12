@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.dokumentbestilling.varsel
 
+import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Varsel
@@ -19,7 +20,6 @@ import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.FeilutbetaltePerioderDto
 import no.nav.tilbakekreving.kontrakter.ForhåndsvisVarselbrevRequest
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmetadata
 import no.nav.tilbakekreving.pdf.dokumentbestilling.varsel.TekstformatererVarselbrev
@@ -48,7 +48,7 @@ class VarselbrevUtil(
         request: ForhåndsvisVarselbrevRequest,
         personinfo: Personinfo,
     ): Varselbrevsdokument {
-        val tittel = getTittelForVarselbrev(request.ytelsestype.navn[request.språkkode]!!, false)
+        val tittel = getTittelForVarselbrev(Ytelsestype.forDTO(request.ytelsestype).navn[request.språkkode]!!, false)
         val vergenavn = BrevmottagerUtil.getVergenavn(request.verge, adresseinfo)
         val ansvarligSaksbehandler =
             eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(
@@ -114,7 +114,7 @@ class VarselbrevUtil(
             ansvarligSaksbehandler = ansvarligSaksbehandler,
             saksnummer = fagsak.eksternFagsakId,
             språkkode = fagsak.bruker.språkkode,
-            ytelsestype = fagsak.ytelsestype,
+            ytelsestype = fagsak.ytelsestype.tilDTO(),
             tittel = getTittelForVarselbrev(fagsak.ytelsesnavn, erKorrigert),
             gjelderDødsfall = gjelderDødsfall,
             institusjon =
@@ -170,7 +170,7 @@ class VarselbrevUtil(
         validerKorrektTotalbeløp(
             perioder,
             varsletTotalbeløp,
-            varselbrevsdokument.ytelsestype,
+            Ytelsestype.forDTO(varselbrevsdokument.ytelsestype),
             varselbrevsdokument.brevmetadata.saksnummer,
             eksternBehandlingId,
             SecureLog.Context.utenBehandling(eksternBehandlingId),

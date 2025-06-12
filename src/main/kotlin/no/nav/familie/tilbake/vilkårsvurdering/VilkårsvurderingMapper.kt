@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.vilkårsvurdering
 
+import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.familie.tilbake.beregning.Kravgrunnlag431Adapter
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetalingsperiode
@@ -25,7 +26,6 @@ import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsresultatDto
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.util.UUID

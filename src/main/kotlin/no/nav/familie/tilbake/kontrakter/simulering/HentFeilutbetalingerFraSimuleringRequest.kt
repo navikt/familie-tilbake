@@ -1,11 +1,11 @@
 package no.nav.familie.tilbake.kontrakter.simulering
 
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import java.math.BigDecimal
 import java.time.LocalDate
 
 data class HentFeilutbetalingerFraSimuleringRequest(
-    val ytelsestype: Ytelsestype,
+    val ytelsestype: YtelsestypeDTO,
     val eksternFagsakId: String,
     val fagsystemsbehandlingId: String,
 )

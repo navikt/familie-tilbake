@@ -2,7 +2,7 @@ package no.nav.tilbakekreving.pdf.dokumentbestilling.felles.header
 
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmetadata
 import org.junit.jupiter.api.Test
@@ -20,7 +20,7 @@ class TekstformatererHeaderTest {
             ansvarligSaksbehandler = "Bob",
             saksnummer = "1232456",
             språkkode = Språkkode.NB,
-            ytelsestype = Ytelsestype.BARNETILSYN,
+            ytelsestype = YtelsestypeDTO.BARNETILSYN,
             gjelderDødsfall = false,
         )
 

@@ -37,12 +37,12 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR
 import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype.ORDINÆR
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 
 object BehandlingMapper {
     fun tilDomeneBehandling(
         opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
-        fagsystem: Fagsystem,
+        fagsystem: FagsystemDTO,
         fagsak: Fagsak,
         ansvarligSaksbehandler: Saksbehandler,
         erAutomatiskOgFeatureTogglePå: Boolean,
@@ -59,7 +59,7 @@ object BehandlingMapper {
                 konsekvenser = fagsystemskonsekvenser,
             )
         val varsler = tilDomeneVarsel(opprettTilbakekrevingRequest)
-        val verger = tilDomeneVerge(fagsystem, opprettTilbakekrevingRequest)
+        val verger = tilDomeneVerge(Fagsystem.forDTO(fagsystem), opprettTilbakekrevingRequest)
 
         return Behandling(
             fagsakId = fagsak.id,

@@ -4,14 +4,14 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.bruker.FrontendBrukerDto
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import java.util.UUID
 
 data class FagsakDto(
     val eksternFagsakId: String,
-    val ytelsestype: Ytelsestype,
-    val fagsystem: Fagsystem,
+    val ytelsestype: YtelsestypeDTO,
+    val fagsystem: FagsystemDTO,
     val språkkode: Språkkode,
     val bruker: FrontendBrukerDto,
     val behandlinger: List<BehandlingsoppsummeringDto>,

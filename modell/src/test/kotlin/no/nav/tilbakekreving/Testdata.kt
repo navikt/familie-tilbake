@@ -1,25 +1,23 @@
 package no.nav.tilbakekreving
 
 import no.nav.tilbakekreving.api.v2.BrukerDto
-import no.nav.tilbakekreving.api.v2.EksternFagsakDto
-import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.Enhet
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
+import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
+import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -28,44 +26,41 @@ import java.time.LocalDateTime
 import java.util.Random
 import java.util.UUID
 
-fun eksternFagsak() =
-    EksternFagsakDto(
-        eksternId = "101010",
-        ytelsestype = Ytelsestype.BARNETRYGD,
-        fagsystem = Fagsystem.BA,
-    )
+fun eksternFagsak(ytelse: Ytelse = Ytelse.Barnetrygd) = OpprettTilbakekrevingHendelse.EksternFagsak(
+    eksternId = "101010",
+    ytelse = ytelse,
+)
 
-fun bruker() =
-    BrukerDto(
-        ident = "31126900011",
-        språkkode = Språkkode.NB,
-    )
+fun bruker() = BrukerDto(
+    ident = "31126900011",
+    språkkode = Språkkode.NB,
+)
 
-fun opprettTilbakekrevingEvent(
-    eksternFagsak: EksternFagsakDto = eksternFagsak(),
+fun opprettTilbakekrevingHendelse(
+    eksternFagsak: OpprettTilbakekrevingHendelse.EksternFagsak = eksternFagsak(),
     opprettelsesvalg: Opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
-) = OpprettTilbakekrevingEvent(
+) = OpprettTilbakekrevingHendelse(
     eksternFagsak = eksternFagsak,
     opprettelsesvalg = opprettelsesvalg,
 )
 
 fun kravgrunnlag(
+    vedtakGjelder: KravgrunnlagHendelse.Aktør = KravgrunnlagHendelse.Aktør.Person(bruker().ident),
     perioder: List<KravgrunnlagHendelse.Periode> = listOf(kravgrunnlagPeriode()),
-) =
-    KravgrunnlagHendelse(
-        internId = UUID.randomUUID(),
-        vedtakId = BigInteger(128, Random()),
-        kravstatuskode = KravgrunnlagHendelse.Kravstatuskode.NYTT,
-        fagsystemVedtaksdato = LocalDate.now(),
-        vedtakGjelder = KravgrunnlagHendelse.Aktør.Person(bruker().ident),
-        utbetalesTil = KravgrunnlagHendelse.Aktør.Person(bruker().ident),
-        skalBeregneRenter = false,
-        ansvarligEnhet = "0425",
-        kontrollfelt = UUID.randomUUID().toString(),
-        referanse = UUID.randomUUID().toString(),
-        kravgrunnlagId = UUID.randomUUID().toString(),
-        perioder = perioder,
-    )
+) = KravgrunnlagHendelse(
+    internId = UUID.randomUUID(),
+    vedtakId = BigInteger(128, Random()),
+    kravstatuskode = KravgrunnlagHendelse.Kravstatuskode.NY,
+    fagsystemVedtaksdato = LocalDate.now(),
+    vedtakGjelder = vedtakGjelder,
+    utbetalesTil = KravgrunnlagHendelse.Aktør.Person(bruker().ident),
+    skalBeregneRenter = false,
+    ansvarligEnhet = "0425",
+    kontrollfelt = UUID.randomUUID().toString(),
+    referanse = UUID.randomUUID().toString(),
+    kravgrunnlagId = UUID.randomUUID().toString(),
+    perioder = perioder,
+)
 
 fun kravgrunnlagPeriode(
     periode: Datoperiode = 1.januar til 31.januar,
@@ -104,7 +99,7 @@ fun feilutbetalteBeløp() =
 
 fun fagsysteminfoHendelse() =
     FagsysteminfoHendelse(
-        eksternId = UUID.randomUUID().toString(),
+        behandlingId = UUID.randomUUID().toString(),
         ident = bruker().ident,
         revurderingsårsak = "Revurderingsårsak",
         revurderingsresultat = "Revurderingsresultat",
@@ -130,7 +125,7 @@ fun varselbrev() =
     )
 
 fun eksternFagsakBehandling(): EksternFagsakBehandling {
-    return EksternFagsakBehandling(
+    return EksternFagsakBehandling.Behandling(
         internId = UUID.randomUUID(),
         eksternId = UUID.randomUUID().toString(),
         revurderingsårsak = "Revurderingsårsak",

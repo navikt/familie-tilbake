@@ -151,8 +151,10 @@ dependencies {
 
     testImplementation("org.testcontainers:junit-jupiter:$testcontainersVersion")
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
+    testImplementation("org.testcontainers:activemq:$testcontainersVersion")
     testImplementation("org.testcontainers:testcontainers:$testcontainersVersion")
 
     testImplementation("org.apache.kafka:kafka_2.13")
     testImplementation("org.wiremock:wiremock-standalone:3.13.0")
+    testImplementation("org.apache.activemq:activemq-client")
 }

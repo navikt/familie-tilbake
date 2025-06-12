@@ -17,7 +17,7 @@ import no.nav.familie.tilbake.integration.pdl.internal.feilsjekkOgReturnerData
 import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.Tema
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
@@ -35,7 +35,7 @@ class PdlClient(
 
     fun hentPersoninfo(
         ident: String,
-        fagsystem: Fagsystem,
+        fagsystem: FagsystemDTO,
         logContext: SecureLog.Context,
     ): Personinfo {
         val pdlPersonRequest =
@@ -83,7 +83,7 @@ class PdlClient(
 
     fun hentIdenter(
         personIdent: String,
-        fagsystem: Fagsystem,
+        fagsystem: FagsystemDTO,
         logContext: SecureLog.Context,
     ): PdlHentIdenterResponse {
         val pdlPersonRequest =
@@ -116,7 +116,7 @@ class PdlClient(
 
     fun hentAdressebeskyttelseBolk(
         personIdentList: List<String>,
-        fagsystem: Fagsystem,
+        fagsystem: FagsystemDTO,
         logContext: SecureLog.Context,
     ): Map<String, PdlAdressebeskyttelsePerson> {
         val pdlRequest =
@@ -142,11 +142,11 @@ class PdlClient(
             add("behandlingsnummer", tema.behandlingsnummer)
         }
 
-    private fun mapTilTema(fagsystem: Fagsystem): Tema =
+    private fun mapTilTema(fagsystem: FagsystemDTO): Tema =
         when (fagsystem) {
-            Fagsystem.EF -> Tema.ENF
-            Fagsystem.KONT -> Tema.KON
-            Fagsystem.BA -> Tema.BAR
-            else -> error("Ugyldig fagsystem=${fagsystem.navn}")
+            FagsystemDTO.EF -> Tema.ENF
+            FagsystemDTO.KONT -> Tema.KON
+            FagsystemDTO.BA -> Tema.BAR
+            else -> error("Ugyldig fagsystem=${fagsystem.name}")
         }
 }

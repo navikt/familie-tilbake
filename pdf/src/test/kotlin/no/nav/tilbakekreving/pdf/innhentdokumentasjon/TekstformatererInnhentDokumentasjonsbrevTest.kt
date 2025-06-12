@@ -2,7 +2,7 @@ package no.nav.tilbakekreving.pdf.innhentdokumentasjon
 
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmetadata
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.header.Institusjon
@@ -23,7 +23,7 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
             ansvarligSaksbehandler = "Bob",
             saksnummer = "1232456",
             språkkode = Språkkode.NB,
-            ytelsestype = Ytelsestype.BARNETILSYN,
+            ytelsestype = YtelsestypeDTO.BARNETILSYN,
             gjelderDødsfall = false,
         )
     private val innhentDokumentasjonsbrevsdokument =
@@ -100,7 +100,7 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
     fun `lagInnhentDokumentasjonBrevFritekst skal generere innhentdokumentasjonbrev nynorsk`() {
         val brevMetadata = metadata.copy(språkkode = Språkkode.NN)
         val dokument = innhentDokumentasjonsbrevsdokument.copy(
-            brevmetadata = brevMetadata.copy(ytelsestype = Ytelsestype.BARNETRYGD),
+            brevmetadata = brevMetadata.copy(ytelsestype = YtelsestypeDTO.BARNETRYGD),
         )
 
         val generertBrev = TekstformatererInnhentDokumentasjonsbrev.lagFritekst(dokument)
@@ -113,7 +113,7 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
     fun `lagInnhentDokumentasjonBrevFritekst skal generere innhentdokumentasjonbrev nynorsk dødsfall bruker`() {
         val brevMetadata = metadata.copy(språkkode = Språkkode.NN, gjelderDødsfall = true)
         val dokument = innhentDokumentasjonsbrevsdokument.copy(
-            brevmetadata = brevMetadata.copy(ytelsestype = Ytelsestype.BARNETRYGD),
+            brevmetadata = brevMetadata.copy(ytelsestype = YtelsestypeDTO.BARNETRYGD),
         )
 
         val generertBrev = TekstformatererInnhentDokumentasjonsbrev.lagFritekst(dokument)
@@ -126,7 +126,7 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
     fun `lagInnhentDokumentasjonBrevFritekst skal generere innhentdokumentasjonbrev nynorsk institusjon`() {
         val brevMetadata = metadata.copy(språkkode = Språkkode.NN, institusjon = Institusjon("123", "123"))
         val dokument = innhentDokumentasjonsbrevsdokument.copy(
-            brevmetadata = brevMetadata.copy(ytelsestype = Ytelsestype.BARNETRYGD),
+            brevmetadata = brevMetadata.copy(ytelsestype = YtelsestypeDTO.BARNETRYGD),
         )
 
         val generertBrev = TekstformatererInnhentDokumentasjonsbrev.lagFritekst(dokument)

@@ -1,10 +1,10 @@
 package no.nav.tilbakekreving.tilstand
 
 import no.nav.tilbakekreving.Tilbakekreving
-import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
+import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 
@@ -15,7 +15,7 @@ internal sealed interface Tilstand {
 
     fun håndter(
         tilbakekreving: Tilbakekreving,
-        hendelse: OpprettTilbakekrevingEvent,
+        hendelse: OpprettTilbakekrevingHendelse,
     ) {
         error("Forventet ikke OpprettTilbakekrevingEvent i $navn")
     }
