@@ -16,7 +16,6 @@ data class BrukerEntity(
     var dødsdato: String? = null,
 ) {
     fun fraEntity(): Bruker {
-        println("====>>> dødsdato: $dødsdato")
         return Bruker(
             ident = ident,
             språkkode = språkkode?.let { Språkkode.valueOf(it) },
