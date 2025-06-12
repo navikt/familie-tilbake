@@ -1,10 +1,12 @@
 package no.nav.tilbakekreving.entities
 
+import kotlinx.serialization.Serializable
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 
+@Serializable
 data class EksternFagsakEntity(
     val eksternId: String,
     val ytelsestype: String,

@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.entities
 
+import kotlinx.serialization.Serializable
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behov.BehovObservatør
@@ -12,14 +13,15 @@ import no.nav.tilbakekreving.tilstand.TilBehandling
 import java.time.LocalDateTime
 import java.util.UUID
 
+@Serializable
 data class TilbakekrevingEntity(
-    val id: UUID = UUID.randomUUID(),
+    val id: String,
     val nåværendeTilstand: String,
     val eksternFagsak: EksternFagsakEntity,
     val behandlingHistorikk: BehandlingHistorikkEntity,
     val kravgrunnlagHistorikk: KravgrunnlagHistorikkEntity,
     val brevHistorikk: BrevHistorikkEntity,
-    val opprettet: LocalDateTime,
+    val opprettet: String,
     val opprettelsesvalg: String,
     var bruker: BrukerEntity? = null,
 ) {
@@ -27,12 +29,12 @@ data class TilbakekrevingEntity(
         behovObservatør: BehovObservatør,
     ): Tilbakekreving {
         val tilbakekreving = Tilbakekreving(
-            id = id,
+            id = UUID.fromString(id),
             eksternFagsak = eksternFagsak.fraEntity(behovObservatør),
             behandlingHistorikk = behandlingHistorikk.fraEntity(eksternFagsak, kravgrunnlagHistorikk),
             kravgrunnlagHistorikk = kravgrunnlagHistorikk.fraEntity(),
             brevHistorikk = brevHistorikk.fraEntity(),
-            opprettet = opprettet,
+            opprettet = LocalDateTime.parse(opprettet),
             opprettelsesvalg = Opprettelsesvalg.valueOf(opprettelsesvalg),
             bruker = bruker?.fraEntity(),
             behovObservatør = behovObservatør,

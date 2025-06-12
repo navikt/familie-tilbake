@@ -108,6 +108,7 @@ dependencies {
 
     api("org.postgresql:postgresql")
     api("org.springframework.boot:spring-boot-starter-data-jdbc")
+    api(("com.zaxxer:HikariCP:6.3.0"))
 
     api("org.apache.kafka:kafka-clients")
     api("org.springframework.kafka:spring-kafka")

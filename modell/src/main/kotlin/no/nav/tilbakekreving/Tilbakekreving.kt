@@ -202,12 +202,12 @@ class Tilbakekreving(
     fun tilEntity(): TilbakekrevingEntity {
         return TilbakekrevingEntity(
             nåværendeTilstand = tilstand.navn,
-            id = this.id,
+            id = this.id.toString(),
             eksternFagsak = this.eksternFagsak.tilEntity(),
             behandlingHistorikk = this.behandlingHistorikk.tilEntity(),
             kravgrunnlagHistorikk = this.kravgrunnlagHistorikk.tilEntity(),
             brevHistorikk = this.brevHistorikk.tilEntity(),
-            opprettet = this.opprettet,
+            opprettet = this.opprettet.toString(),
             opprettelsesvalg = this.opprettelsesvalg.name,
             bruker = this.bruker?.tilEntity(),
         )

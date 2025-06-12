@@ -82,7 +82,7 @@ class Foreldelsesteg(
     fun tilEntity(): ForeldelsestegEntity {
         return ForeldelsestegEntity(
             vurdertePerioder = vurdertePerioder.map { it.tilEntity() },
-            kravgrunnlagRef = kravgrunnlag.entry.internId,
+            kravgrunnlagRef = kravgrunnlag.entry.internId.toString(),
         )
     }
 
@@ -99,13 +99,13 @@ class Foreldelsesteg(
 
         fun tilEntity(): ForeldelseperiodeEntity {
             return ForeldelseperiodeEntity(
-                id = id,
-                periode = DatoperiodeEntity(periode.fom, periode.tom),
+                id = id.toString(),
+                periode = DatoperiodeEntity(periode.fom.toString(), periode.tom.toString()),
                 foreldelsesvurdering = when (_vurdering) {
-                    is Vurdering.IkkeForeldet -> ForeldelsesvurderingEntity("IKKE_FORELDET", begrunnelse = _vurdering.begrunnelse)
-                    is Vurdering.IkkeVurdert -> ForeldelsesvurderingEntity("IKKE_VURDERT")
-                    is Vurdering.Tilleggsfrist -> ForeldelsesvurderingEntity("TILLEGGSFRIST", frist = _vurdering.frist, oppdaget = (_vurdering as Vurdering.Tilleggsfrist).oppdaget)
-                    is Vurdering.Foreldet -> ForeldelsesvurderingEntity("FORELDET", begrunnelse = _vurdering.begrunnelse)
+                    is Vurdering.IkkeForeldet -> ForeldelsesvurderingEntity(type = "IKKE_FORELDET", begrunnelse = _vurdering.begrunnelse)
+                    is Vurdering.IkkeVurdert -> ForeldelsesvurderingEntity(type = "IKKE_VURDERT")
+                    is Vurdering.Tilleggsfrist -> ForeldelsesvurderingEntity(type = "TILLEGGSFRIST", frist = _vurdering.frist.toString(), oppdaget = (_vurdering as Vurdering.Tilleggsfrist).oppdaget.toString())
+                    is Vurdering.Foreldet -> ForeldelsesvurderingEntity(type = "FORELDET", begrunnelse = _vurdering.begrunnelse)
                 },
             )
         }
@@ -120,7 +120,7 @@ class Foreldelsesteg(
 
             fun fraEntity(foreldelseperiodeEntity: ForeldelseperiodeEntity): Foreldelseperiode =
                 Foreldelseperiode(
-                    id = foreldelseperiodeEntity.id,
+                    id = UUID.fromString(foreldelseperiodeEntity.id),
                     periode = foreldelseperiodeEntity.periode.fraEntity(),
                     _vurdering = foreldelseperiodeEntity.foreldelsesvurdering.fraEntity(),
                 )

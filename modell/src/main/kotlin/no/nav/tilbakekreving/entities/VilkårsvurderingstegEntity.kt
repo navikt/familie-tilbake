@@ -1,9 +1,10 @@
 package no.nav.tilbakekreving.entities
 
-import java.util.UUID
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class VilkårsvurderingstegEntity(
     val vurderinger: List<VilkårsvurderingsperiodeEntity>,
-    val kravgrunnlagHendelseRef: UUID,
+    val kravgrunnlagHendelseRef: String,
     val foreldelsesteg: ForeldelsestegEntity,
 )

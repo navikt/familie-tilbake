@@ -55,7 +55,7 @@ class Vilkårsvurderingsteg(
     fun tilEntity(): VilkårsvurderingstegEntity {
         return VilkårsvurderingstegEntity(
             vurderinger = vurderinger.map { it.tilEntity() },
-            kravgrunnlagHendelseRef = kravgrunnlagHendelse.entry.internId,
+            kravgrunnlagHendelseRef = kravgrunnlagHendelse.entry.internId.toString(),
             foreldelsesteg = foreldelsesteg.tilEntity(),
         )
     }
@@ -192,8 +192,8 @@ class Vilkårsvurderingsteg(
 
         fun tilEntity(): VilkårsvurderingsperiodeEntity {
             return VilkårsvurderingsperiodeEntity(
-                id = id,
-                periode = DatoperiodeEntity(periode.fom, periode.tom),
+                id = id.toString(),
+                periode = DatoperiodeEntity(periode.fom.toString(), periode.tom.toString()),
                 begrunnelseForTilbakekreving = begrunnelseForTilbakekreving,
                 vurdering = _vurdering.tilEntity(),
             )
@@ -211,7 +211,7 @@ class Vilkårsvurderingsteg(
 
             fun fraEntity(entity: VilkårsvurderingsperiodeEntity): Vilkårsvurderingsperiode {
                 return Vilkårsvurderingsperiode(
-                    id = entity.id,
+                    id = UUID.fromString(entity.id),
                     periode = entity.periode.fraEntity(),
                     begrunnelseForTilbakekreving = entity.begrunnelseForTilbakekreving,
                     _vurdering = entity.vurdering.fraEntity(),
@@ -247,7 +247,7 @@ class Vilkårsvurderingsteg(
 
                     override fun tilEntity(): BeløpIBeholdEntity {
                         return BeløpIBeholdJaEntity(
-                            beløp = beløp,
+                            beløp = beløp.toString(),
                         )
                     }
                 }

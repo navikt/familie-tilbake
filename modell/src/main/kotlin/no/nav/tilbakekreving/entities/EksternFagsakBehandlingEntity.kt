@@ -1,24 +1,26 @@
 package no.nav.tilbakekreving.entities
 
+import kotlinx.serialization.Serializable
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
 import java.time.LocalDate
 import java.util.UUID
 
+@Serializable
 data class EksternFagsakBehandlingEntity(
-    val internId: UUID,
+    val internId: String,
     val eksternId: String,
     val revurderingsresultat: String,
     val revurderingsårsak: String,
     val begrunnelseForTilbakekreving: String,
-    val revurderingsvedtaksdato: LocalDate,
+    val revurderingsvedtaksdato: String,
 ) {
-    fun tilDomain(): EksternFagsakBehandling =
+    fun fraEntity(): EksternFagsakBehandling =
         EksternFagsakBehandling(
-            internId = internId,
+            internId = UUID.fromString(internId),
             eksternId = eksternId,
             revurderingsresultat = revurderingsresultat,
             revurderingsårsak = revurderingsårsak,
             begrunnelseForTilbakekreving = begrunnelseForTilbakekreving,
-            revurderingsvedtaksdato = revurderingsvedtaksdato,
+            revurderingsvedtaksdato = LocalDate.parse(revurderingsvedtaksdato),
         )
 }

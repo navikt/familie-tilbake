@@ -51,6 +51,7 @@ class TilbakekrevingService(
     private val pdlClient: PdlClient,
     private val kravgrunnlagBufferRepository: KravgrunnlagBufferRepository,
     private val iverksettService: IverksettService,
+    private val snapshotRepo: TilbakekrevingSnapshot,
 ) {
     private val fnr = "20046912345"
 
@@ -146,8 +147,12 @@ class TilbakekrevingService(
         return eksempelsaker.map { it.tilbakekreving }.firstOrNull { it.tilFrontendDto().fagsystem == fagsystem && it.tilFrontendDto().eksternFagsakId == eksternFagsakId }
     }
 
-    fun gjennopprettTilbakekreving(id: UUID): Tilbakekreving?{
-        val tilbakekreving = valkeyClient.henteTilstand(id)?.fraEntity(behovObservatør)
+    fun gjennopprettTilbakekreving(
+        id: UUID,
+        // Denne kan fjernes når vi har en bedre måte å teste på
+        snapshotRepo: TilbakekrevingSnapshot,
+    ): Tilbakekreving? {
+        val tilbakekreving = snapshotRepo.henteTilstand(id)?.fraEntity(behovObservatør)
         return tilbakekreving
 
     }
@@ -237,6 +242,7 @@ class TilbakekrevingService(
             }
             lagre(observatør, tilbakekreving)
         }
+        snapshotRepo.lagreTilstand(tilbakekreving.tilEntity())
     }
 
     fun utførSteg(
@@ -244,8 +250,10 @@ class TilbakekrevingService(
         tilbakekreving: Tilbakekreving,
         behandlingsstegDto: BehandlingsstegDto,
         logContext: SecureLog.Context,
+        // denne er for test. Må fjernes når vi har en bedre måte å teste på
+        snapshot: TilbakekrevingSnapshot?,
     ) {
-        return when (behandlingsstegDto) {
+        val result = when (behandlingsstegDto) {
             is BehandlingsstegForeldelseDto -> behandleForeldelse(tilbakekreving, behandlingsstegDto, behandler)
             is BehandlingsstegVilkårsvurderingDto -> behandleVilkårsvurdering(tilbakekreving, behandlingsstegDto, behandler)
             is BehandlingsstegFaktaDto -> behandleFakta(tilbakekreving, behandlingsstegDto, behandler)
@@ -253,6 +261,8 @@ class TilbakekrevingService(
             is BehandlingsstegFatteVedtaksstegDto -> behandleFatteVedtak(tilbakekreving, behandlingsstegDto, behandler)
             else -> throw Feil("Vurdering for ${behandlingsstegDto.getSteg()} er ikke implementert i ny modell enda.", logContext = logContext)
         }
+        snapshot?.lagreTilstand(tilbakekreving.tilEntity())
+        return result
     }
 
     private fun behandleFakta(
@@ -400,19 +410,23 @@ class TilbakekrevingService(
 
             else -> throw IllegalArgumentException("Default eller ugydlig mottaker type ${brevmottakerDto.type}")
         }
+        snapshotRepo.lagreTilstand(tilbakekreving.tilEntity())
     }
 
     fun flyttBehandlingsstegTilbakeTilFakta(tilbakekreving: Tilbakekreving) {
         tilbakekreving.håndterNullstilling()
+        snapshotRepo.lagreTilstand(tilbakekreving.tilEntity())
     }
 
     fun aktiverBrevmottakerSteg(tilbakekreving: Tilbakekreving) {
         validerBrevmottaker(tilbakekreving)
         tilbakekreving.aktiverBrevmottakerSteg()
+        snapshotRepo.lagreTilstand(tilbakekreving.tilEntity())
     }
 
     fun deaktiverBrevmottakerSteg(tilbakekreving: Tilbakekreving) {
         tilbakekreving.deaktiverBrevmottakerSteg()
+        snapshotRepo.lagreTilstand(tilbakekreving.tilEntity())
     }
 
     fun fjernManuelBrevmottaker(
@@ -421,6 +435,7 @@ class TilbakekrevingService(
         manuellBrevmottakerId: UUID,
     ) {
         tilbakekreving.fjernManuelBrevmottaker(behandler, manuellBrevmottakerId)
+        snapshotRepo.lagreTilstand(tilbakekreving.tilEntity())
     }
 
     private fun validerBrevmottaker(tilbakekreving: Tilbakekreving) {

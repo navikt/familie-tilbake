@@ -73,11 +73,11 @@ class Behandling private constructor(
 
     fun tilEntity(): BehandlingEntity {
         return BehandlingEntity(
-            internId = internId,
-            eksternId = eksternId,
+            internId = internId.toString(),
+            eksternId = eksternId.toString(),
             behandlingstype = behandlingstype.name,
-            opprettet = opprettet,
-            sistEndret = sistEndret,
+            opprettet = opprettet.toString(),
+            sistEndret = sistEndret.toString(),
             enhet = enhet?.tilEntity(),
             årsak = årsak.name,
             ansvarligSaksbehandlerEntity = ansvarligSaksbehandler.tilEntity(),
@@ -355,11 +355,11 @@ class Behandling private constructor(
             val eksternFagsakBehandling = eksternFagsakEntity.behandlinger.fraEntity().nåværende()
             val kravgrunnlag = kravgrunnlagHistorikkEntity.fraEntity().nåværende()
             return Behandling(
-                internId = behandlingEntity.internId,
-                eksternId = behandlingEntity.eksternId,
+                internId = UUID.fromString(behandlingEntity.internId),
+                eksternId = UUID.fromString(behandlingEntity.eksternId),
                 behandlingstype = Behandlingstype.valueOf(behandlingEntity.behandlingstype),
-                opprettet = behandlingEntity.opprettet,
-                sistEndret = behandlingEntity.sistEndret,
+                opprettet = LocalDateTime.parse(behandlingEntity.opprettet),
+                sistEndret = LocalDateTime.parse(behandlingEntity.sistEndret),
                 enhet = behandlingEntity.enhet?.fraEntity(),
                 årsak = Behandlingsårsakstype.valueOf(behandlingEntity.årsak),
                 ansvarligSaksbehandler = behandlingEntity.ansvarligSaksbehandlerEntity.fraEntity(),
