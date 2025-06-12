@@ -22,7 +22,7 @@ import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
 import java.math.BigInteger
-import java.util.*
+import java.util.UUID
 
 @Configuration
 class TilgangskontrollService(
