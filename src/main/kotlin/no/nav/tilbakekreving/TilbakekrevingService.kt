@@ -432,6 +432,7 @@ class TilbakekrevingService(
     fun <T> håndterHendleseForTest(
         hendelse: T,
         tilbakekreving: Tilbakekreving,
+        snapshot: TilbakekrevingSnapshot,
     ) {
         when (hendelse) {
             is OpprettTilbakekrevingEvent -> tilbakekreving.håndter(hendelse as OpprettTilbakekrevingEvent)
@@ -441,6 +442,6 @@ class TilbakekrevingService(
             is VarselbrevSendtHendelse -> tilbakekreving.håndter(hendelse as VarselbrevSendtHendelse)
         }
 
-        valkeyClient.lagreTilstand(tilbakekreving.id, tilbakekreving.tilEntity())
+        snapshot.lagreTilstand(tilbakekreving.tilEntity())
     }
 }
