@@ -61,11 +61,15 @@ data class Ressurs<T>(
                 stacktrace = error?.textValue(),
             )
 
-        fun <T> ikkeTilgang(melding: String): Ressurs<T> =
+        fun <T> ikkeTilgang(
+            melding: String,
+            frontendFeilMelding: String,
+        ): Ressurs<T> =
             Ressurs(
                 data = null,
                 status = Status.IKKE_TILGANG,
                 melding = melding,
+                frontendFeilmelding = frontendFeilMelding,
                 stacktrace = null,
             )
 
