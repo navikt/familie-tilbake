@@ -13,8 +13,12 @@ import no.nav.tilbakekreving.api.v1.dto.GodTroDto
 import no.nav.tilbakekreving.api.v1.dto.PeriodeMedTekstDto
 import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertTotrinnDto
+import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
+import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
+import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
+import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
@@ -40,14 +44,29 @@ class GjennoppretteTilbakekrevingTest : OppslagSpringRunnerTest() {
 
     val behandler = Behandler.Saksbehandler("Z999999")
 
-    fun lagTilbakekrevingKlarTilBehandling(): Tilbakekreving {
+    private fun <T> håndterHendleseForTest(
+        hendelse: T,
+        tilbakekreving: Tilbakekreving,
+    ) {
+        when (hendelse) {
+            is OpprettTilbakekrevingEvent -> tilbakekreving.håndter(hendelse as OpprettTilbakekrevingEvent)
+            is KravgrunnlagHendelse -> tilbakekreving.håndter(hendelse as KravgrunnlagHendelse)
+            is FagsysteminfoHendelse -> tilbakekreving.håndter(hendelse as FagsysteminfoHendelse)
+            is BrukerinfoHendelse -> tilbakekreving.håndter(hendelse as BrukerinfoHendelse)
+            is VarselbrevSendtHendelse -> tilbakekreving.håndter(hendelse as VarselbrevSendtHendelse)
+        }
+
+        snapshot.lagreTilstand(tilbakekreving.tilEntity())
+    }
+
+    private fun lagTilbakekrevingKlarTilBehandling(): Tilbakekreving {
         val opprettEvent = opprettTilbakekrevingEvent(opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL)
         val tilbakekreving = Tilbakekreving.opprett(BehovObservatørOppsamler(), opprettEvent)
-        tilbakekrevingService.håndterHendleseForTest(opprettEvent, tilbakekreving, snapshot)
-        tilbakekrevingService.håndterHendleseForTest(kravgrunnlag(), tilbakekreving, snapshot)
-        tilbakekrevingService.håndterHendleseForTest(fagsysteminfoHendelse(), tilbakekreving, snapshot)
-        tilbakekrevingService.håndterHendleseForTest(brukerinfoHendelse(), tilbakekreving, snapshot)
-        tilbakekrevingService.håndterHendleseForTest(VarselbrevSendtHendelse(varselbrev()), tilbakekreving, snapshot)
+        håndterHendleseForTest(opprettEvent, tilbakekreving)
+        håndterHendleseForTest(kravgrunnlag(), tilbakekreving)
+        håndterHendleseForTest(fagsysteminfoHendelse(), tilbakekreving)
+        håndterHendleseForTest(brukerinfoHendelse(), tilbakekreving)
+        håndterHendleseForTest(VarselbrevSendtHendelse(varselbrev()), tilbakekreving)
         return tilbakekreving
     }
 
@@ -60,27 +79,27 @@ class GjennoppretteTilbakekrevingTest : OppslagSpringRunnerTest() {
         var gjennopprettetTilbakekreving = tilbakekrevingService.gjennopprettTilbakekreving(tilbakekreving.id, snapshot)
         gjennopprettetTilbakekreving shouldBe null
 
-        tilbakekrevingService.håndterHendleseForTest(opprettEvent, tilbakekreving, snapshot)
+        håndterHendleseForTest(opprettEvent, tilbakekreving)
         gjennopprettetTilbakekreving = tilbakekrevingService.gjennopprettTilbakekreving(tilbakekreving.id, snapshot)
         tilbakekreving.hentTilstandsnavn() shouldBe AvventerKravgrunnlag.navn
         gjennopprettetTilbakekreving!!.hentTilstandsnavn() shouldBe tilbakekreving.hentTilstandsnavn()
 
-        tilbakekrevingService.håndterHendleseForTest(kravgrunnlag(), tilbakekreving, snapshot)
+        håndterHendleseForTest(kravgrunnlag(), tilbakekreving)
         gjennopprettetTilbakekreving = tilbakekrevingService.gjennopprettTilbakekreving(tilbakekreving.id, snapshot)
         tilbakekreving.hentTilstandsnavn() shouldBe AvventerFagsysteminfo.navn
         gjennopprettetTilbakekreving!!.hentTilstandsnavn() shouldBe tilbakekreving.hentTilstandsnavn()
 
-        tilbakekrevingService.håndterHendleseForTest(fagsysteminfoHendelse(), tilbakekreving, snapshot)
+        håndterHendleseForTest(fagsysteminfoHendelse(), tilbakekreving)
         gjennopprettetTilbakekreving = tilbakekrevingService.gjennopprettTilbakekreving(tilbakekreving.id, snapshot)
         tilbakekreving.hentTilstandsnavn() shouldBe AvventerBrukerinfo.navn
         gjennopprettetTilbakekreving!!.hentTilstandsnavn() shouldBe tilbakekreving.hentTilstandsnavn()
 
-        tilbakekrevingService.håndterHendleseForTest(brukerinfoHendelse(), tilbakekreving, snapshot)
+        håndterHendleseForTest(brukerinfoHendelse(), tilbakekreving)
         gjennopprettetTilbakekreving = tilbakekrevingService.gjennopprettTilbakekreving(tilbakekreving.id, snapshot)
         tilbakekreving.hentTilstandsnavn() shouldBe SendVarselbrev.navn
         gjennopprettetTilbakekreving!!.hentTilstandsnavn() shouldBe tilbakekreving.hentTilstandsnavn()
 
-        tilbakekrevingService.håndterHendleseForTest(VarselbrevSendtHendelse(varselbrev()), tilbakekreving, snapshot)
+        håndterHendleseForTest(VarselbrevSendtHendelse(varselbrev()), tilbakekreving)
         gjennopprettetTilbakekreving = tilbakekrevingService.gjennopprettTilbakekreving(tilbakekreving.id, snapshot)
         tilbakekreving.hentTilstandsnavn() shouldBe TilBehandling.navn
         gjennopprettetTilbakekreving!!.hentTilstandsnavn() shouldBe tilbakekreving.hentTilstandsnavn()
