@@ -32,7 +32,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 class GjennoppretteTilbakekrevingTest : OppslagSpringRunnerTest() {
-
     @Autowired
     lateinit var tilbakekrevingService: TilbakekrevingService
 
@@ -50,25 +49,6 @@ class GjennoppretteTilbakekrevingTest : OppslagSpringRunnerTest() {
         tilbakekrevingService.håndterHendleseForTest(brukerinfoHendelse(), tilbakekreving, snapshot)
         tilbakekrevingService.håndterHendleseForTest(VarselbrevSendtHendelse(varselbrev()), tilbakekreving, snapshot)
         return tilbakekreving
-    }
-
-    @Test
-    fun testForTest() {
-        val opprettEvent = opprettTilbakekrevingEvent(opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL)
-        val tilbakekreving = Tilbakekreving.opprett(BehovObservatørOppsamler(), opprettEvent)
-
-        tilbakekreving.håndter(opprettEvent)
-        tilbakekreving.håndter(kravgrunnlag())
-        tilbakekreving.håndter(fagsysteminfoHendelse())
-        tilbakekreving.håndter(brukerinfoHendelse())
-
-        tilbakekreving.hentTilstandsnavn() shouldBe SendVarselbrev.navn
-
-        val tilabkekrevingEntity = tilbakekreving.tilEntity()
-        snapshot.lagreTilstand(tilabkekrevingEntity)
-        val gjennopprettTilbakekreving = tilbakekrevingService.gjennopprettTilbakekreving(tilbakekreving.id, snapshot)
-
-        gjennopprettTilbakekreving?.hentTilstandsnavn() shouldBe tilbakekreving.hentTilstandsnavn()
     }
 
     @Test
