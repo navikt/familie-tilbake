@@ -27,26 +27,11 @@ import no.nav.tilbakekreving.tilstand.AvventerKravgrunnlag
 import no.nav.tilbakekreving.tilstand.SendVarselbrev
 import no.nav.tilbakekreving.tilstand.Start
 import no.nav.tilbakekreving.tilstand.TilBehandling
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.jdbc.DataSourceBuilder
-import org.springframework.jdbc.core.JdbcTemplate
 import java.time.LocalDate
 
 class GjennoppretteTilbakekrevingTest : OppslagSpringRunnerTest() {
-    @BeforeEach
-    fun setup() {
-        val dataSource = DataSourceBuilder.create()
-            .url("jdbc:postgresql://localhost:5432/familie-tilbake")
-            .username("postgres")
-            .password("test")
-            .driverClassName("org.postgresql.Driver")
-            .build()
-
-        val jdbcTemplate = JdbcTemplate(dataSource)
-        snapshot = TilbakekrevingSnapshot(jdbcTemplate)
-    }
 
     @Autowired
     lateinit var tilbakekrevingService: TilbakekrevingService
