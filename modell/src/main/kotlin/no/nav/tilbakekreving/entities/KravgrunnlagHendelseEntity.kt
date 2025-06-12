@@ -1,16 +1,18 @@
 package no.nav.tilbakekreving.entities
 
+import kotlinx.serialization.Serializable
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse.Kravstatuskode
 import java.math.BigInteger
 import java.time.LocalDate
 import java.util.UUID
 
+@Serializable
 data class KravgrunnlagHendelseEntity(
-    val internId: UUID,
-    val vedtakId: BigInteger,
+    val internId: String,
+    val vedtakId: String,
     val kravstatuskode: String,
-    val fagsystemVedtaksdato: LocalDate,
+    val fagsystemVedtaksdato: String,
     val vedtakGjelder: AktørEntity,
     val utbetalesTil: AktørEntity,
     val skalBeregneRenter: Boolean,
@@ -22,10 +24,10 @@ data class KravgrunnlagHendelseEntity(
 ) {
     fun fraEntity(): KravgrunnlagHendelse {
         return KravgrunnlagHendelse(
-            internId = internId,
-            vedtakId = vedtakId,
+            internId = UUID.fromString(internId),
+            vedtakId = BigInteger(vedtakId),
             kravstatuskode = Kravstatuskode.fraNavn(kravstatuskode),
-            fagsystemVedtaksdato = fagsystemVedtaksdato,
+            fagsystemVedtaksdato = LocalDate.parse(fagsystemVedtaksdato),
             vedtakGjelder = vedtakGjelder.fraEntity(),
             utbetalesTil = utbetalesTil.fraEntity(),
             skalBeregneRenter = skalBeregneRenter,
@@ -33,7 +35,7 @@ data class KravgrunnlagHendelseEntity(
             kontrollfelt = kontrollfelt,
             kravgrunnlagId = kravgrunnlagId,
             referanse = referanse,
-            perioder = perioder.map { it.tilDomain() },
+            perioder = perioder.map { it.fraEntity() },
         )
     }
 }

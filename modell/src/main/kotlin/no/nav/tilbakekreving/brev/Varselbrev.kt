@@ -24,8 +24,8 @@ class Varselbrev(
     override fun tilEntity(): BrevEntity {
         return BrevEntity(
             brevType = "VARSEL_BREV",
-            internId = internId,
-            opprettetDato = opprettetDato,
+            internId = internId.toString(),
+            opprettetDato = opprettetDato.toString(),
             varsletBeløp = varsletBeløp,
         )
     }

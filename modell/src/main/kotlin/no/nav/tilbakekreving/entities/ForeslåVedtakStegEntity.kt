@@ -2,8 +2,10 @@ package no.nav.tilbakekreving.entities
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import kotlinx.serialization.Serializable
 import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
 
+@Serializable
 data class ForeslåVedtakStegEntity(
     val vurdering: ForeslåVedtakVurderingEntity,
 ) {
@@ -23,9 +25,11 @@ data class ForeslåVedtakStegEntity(
     JsonSubTypes.Type(value = ForeslåVedtakVurderingEntity.ForeslåVedtakEntity::class, name = "ForeslåVedtakEntity"),
     JsonSubTypes.Type(value = ForeslåVedtakVurderingEntity.IkkeVurdertEntity::class, name = "IkkeVurdertEntity"),
 )
+@Serializable
 sealed interface ForeslåVedtakVurderingEntity {
     fun fraEntity(): ForeslåVedtakSteg.Vurdering
 
+    @Serializable
     class ForeslåVedtakEntity(
         val oppsummeringstekst: String?,
         val perioderMedTekst: List<PeriodeMedTekstEntity>,
@@ -37,6 +41,7 @@ sealed interface ForeslåVedtakVurderingEntity {
             )
         }
 
+        @Serializable
         class PeriodeMedTekstEntity(
             val periode: DatoperiodeEntity,
             val faktaAvsnitt: String?,
@@ -57,6 +62,7 @@ sealed interface ForeslåVedtakVurderingEntity {
         }
     }
 
+    @Serializable
     data object IkkeVurdertEntity : ForeslåVedtakVurderingEntity {
         override fun fraEntity(): ForeslåVedtakSteg.Vurdering =
             ForeslåVedtakSteg.Vurdering.IkkeVurdert

@@ -46,9 +46,9 @@ class Bruker(
             ident = ident,
             språkkode = språkkode?.name,
             navn = navn,
-            fødselsdato = fødselsdato,
+            fødselsdato = fødselsdato?.let { fødselsdato.toString() },
             kjønn = kjønn?.name,
-            dødsdato = dødsdato,
+            dødsdato = dødsdato?.let { dødsdato.toString() },
         )
     }
 

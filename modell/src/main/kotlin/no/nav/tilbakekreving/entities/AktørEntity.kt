@@ -1,7 +1,9 @@
 package no.nav.tilbakekreving.entities
 
+import kotlinx.serialization.Serializable
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 
+@Serializable
 data class AktørEntity(
     val aktørType: String,
     val ident: String,

@@ -43,7 +43,7 @@ class ForeslåVedtakSteg(
             ) {
                 fun tilEntity(): ForeslåVedtakEntity.PeriodeMedTekstEntity {
                     return ForeslåVedtakEntity.PeriodeMedTekstEntity(
-                        periode = DatoperiodeEntity(periode.fom, periode.tom),
+                        periode = DatoperiodeEntity(periode.fom.toString(), periode.tom.toString()),
                         faktaAvsnitt = faktaAvsnitt,
                         foreldelseAvsnitt = foreldelseAvsnitt,
                         vilkårAvsnitt = vilkårAvsnitt,

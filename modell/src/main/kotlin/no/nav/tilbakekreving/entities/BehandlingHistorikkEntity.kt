@@ -1,8 +1,10 @@
 package no.nav.tilbakekreving.entities
 
+import kotlinx.serialization.Serializable
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.BehandlingHistorikk
 
+@Serializable
 data class BehandlingHistorikkEntity(
     val historikk: List<BehandlingEntity>,
 ) {

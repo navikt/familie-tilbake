@@ -74,10 +74,10 @@ class Faktasteg(
 
     fun tilEntity(): FaktastegEntity {
         return FaktastegEntity(
-            eksternFagsakBehandlingRef = eksternFagsakBehandling.entry.internId,
-            kravgrunnlagRef = kravgrunnlag.entry.internId,
+            eksternFagsakBehandlingRef = eksternFagsakBehandling.entry.internId.toString(),
+            kravgrunnlagRef = kravgrunnlag.entry.internId.toString(),
             brevHistorikk = brevHistorikk.tilEntity(),
-            tilbakekrevingOpprettet = tilbakekrevingOpprettet,
+            tilbakekrevingOpprettet = tilbakekrevingOpprettet.toString(),
             opprettelsesvalg = opprettelsesvalg.name,
         )
     }

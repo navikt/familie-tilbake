@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.entities
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import kotlinx.serialization.Serializable
 import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
 import java.math.BigDecimal
 
@@ -17,12 +18,14 @@ import java.math.BigDecimal
     JsonSubTypes.Type(value = FeilaktigeOpplysningerFraBrukerEntity::class, name = "FeilaktigeOpplysningerFraBruker"),
     JsonSubTypes.Type(value = IkkeVurdertEntity::class, name = "IkkeVurdert"),
 )
+@Serializable
 sealed class VurderingEntity {
     abstract val begrunnelse: String?
 
     abstract fun fraEntity(): Vilkårsvurderingsteg.Vurdering
 }
 
+@Serializable
 data class GodTroEntity(
     val beløpIBehold: BeløpIBeholdEntity,
     override val begrunnelse: String,
@@ -35,6 +38,7 @@ data class GodTroEntity(
     }
 }
 
+@Serializable
 data class ForstodEllerBurdeForståttEntity(
     override val begrunnelse: String,
     val aktsomhet: VurdertAktsomhetEntity,
@@ -47,6 +51,7 @@ data class ForstodEllerBurdeForståttEntity(
     }
 }
 
+@Serializable
 data class MangelfulleOpplysningerFraBrukerEntity(
     override val begrunnelse: String,
     val aktsomhet: VurdertAktsomhetEntity,
@@ -59,6 +64,7 @@ data class MangelfulleOpplysningerFraBrukerEntity(
     }
 }
 
+@Serializable
 data class FeilaktigeOpplysningerFraBrukerEntity(
     override val begrunnelse: String,
     val aktsomhet: VurdertAktsomhetEntity,
@@ -71,6 +77,7 @@ data class FeilaktigeOpplysningerFraBrukerEntity(
     }
 }
 
+@Serializable
 data class IkkeVurdertEntity(
     override val begrunnelse: String? = null,
 ) : VurderingEntity() {
@@ -87,15 +94,20 @@ data class IkkeVurdertEntity(
     JsonSubTypes.Type(value = BeløpIBeholdJaEntity::class, name = "Ja"),
     JsonSubTypes.Type(value = BeløpIBeholdNeiEntity::class, name = "Nei"),
 )
+@Serializable
 sealed class BeløpIBeholdEntity {
     abstract fun fraEntity(): Vilkårsvurderingsteg.Vurdering.GodTro.BeløpIBehold
 }
 
-data class BeløpIBeholdJaEntity(val beløp: BigDecimal) : BeløpIBeholdEntity() {
+@Serializable
+data class BeløpIBeholdJaEntity(
+    val beløp: String,
+) : BeløpIBeholdEntity() {
     override fun fraEntity(): Vilkårsvurderingsteg.Vurdering.GodTro.BeløpIBehold =
-        Vilkårsvurderingsteg.Vurdering.GodTro.BeløpIBehold.Ja(beløp)
+        Vilkårsvurderingsteg.Vurdering.GodTro.BeløpIBehold.Ja(BigDecimal(beløp))
 }
 
+@Serializable
 object BeløpIBeholdNeiEntity : BeløpIBeholdEntity() {
     override fun fraEntity(): Vilkårsvurderingsteg.Vurdering.GodTro.BeløpIBehold =
         Vilkårsvurderingsteg.Vurdering.GodTro.BeløpIBehold.Nei

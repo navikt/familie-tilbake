@@ -46,10 +46,10 @@ class KravgrunnlagHendelse(
 
     fun tilEntity(): KravgrunnlagHendelseEntity {
         return KravgrunnlagHendelseEntity(
-            internId = internId,
-            vedtakId = vedtakId,
+            internId = internId.toString(),
+            vedtakId = vedtakId.toString(),
             kravstatuskode = kravstatuskode.navn,
-            fagsystemVedtaksdato = fagsystemVedtaksdato,
+            fagsystemVedtaksdato = fagsystemVedtaksdato.toString(),
             vedtakGjelder = tilAktørEntity(vedtakGjelder),
             utbetalesTil = tilAktørEntity(utbetalesTil),
             skalBeregneRenter = skalBeregneRenter,
@@ -92,8 +92,8 @@ class KravgrunnlagHendelse(
 
         fun tilEntity(): KravgrunnlagPeriodeEntity {
             return KravgrunnlagPeriodeEntity(
-                periode = DatoperiodeEntity(periode.fom, periode.tom),
-                månedligSkattebeløp = månedligSkattebeløp,
+                periode = DatoperiodeEntity(periode.fom.toString(), periode.tom.toString()),
+                månedligSkattebeløp = månedligSkattebeløp.toString(),
                 ytelsesbeløp = ytelsesbeløp.map { it.tilEntity() },
                 feilutbetaltBeløp = feilutbetaltBeløp.map { it.tilEntity() },
             )
@@ -121,10 +121,10 @@ class KravgrunnlagHendelse(
                 return BeløpEntity(
                     klassekode = klassekode,
                     klassetype = klassetype,
-                    opprinneligUtbetalingsbeløp = opprinneligUtbetalingsbeløp,
-                    nyttBeløp = nyttBeløp,
-                    tilbakekrevesBeløp = tilbakekrevesBeløp,
-                    skatteprosent = skatteprosent,
+                    opprinneligUtbetalingsbeløp = opprinneligUtbetalingsbeløp.toString(),
+                    nyttBeløp = nyttBeløp.toString(),
+                    tilbakekrevesBeløp = tilbakekrevesBeløp.toString(),
+                    skatteprosent = skatteprosent.toString(),
                 )
             }
         }

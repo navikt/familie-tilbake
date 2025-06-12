@@ -1,8 +1,10 @@
 package no.nav.tilbakekreving.entities
 
+import kotlinx.serialization.Serializable
 import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
 
+@Serializable
 sealed class VurdertAktsomhetEntity {
     abstract val begrunnelse: String
     abstract val skalIleggesRenter: Boolean
@@ -13,6 +15,7 @@ sealed class VurdertAktsomhetEntity {
     abstract fun fraEntity(): Vilkårsvurderingsteg.VurdertAktsomhet
 }
 
+@Serializable
 data class SimpelUaktsomhetEntity(
     override val begrunnelse: String,
     override val skalReduseres: SkalReduseresEntity,
@@ -31,6 +34,7 @@ data class SimpelUaktsomhetEntity(
     }
 }
 
+@Serializable
 data class GrovUaktsomhetEntity(
     override val begrunnelse: String,
     override val skalReduseres: SkalReduseresEntity,
@@ -50,6 +54,7 @@ data class GrovUaktsomhetEntity(
     }
 }
 
+@Serializable
 data class ForsettEntity(
     override val begrunnelse: String,
     override val skalIleggesRenter: Boolean,
@@ -66,6 +71,7 @@ data class ForsettEntity(
     }
 }
 
+@Serializable
 data class SærligeGrunnerEntity(
     val begrunnelse: String,
     val grunner: List<String>,

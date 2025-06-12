@@ -1,14 +1,14 @@
 package no.nav.tilbakekreving.entities
 
-import java.time.LocalDateTime
-import java.util.UUID
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class BehandlingEntity(
-    val internId: UUID,
-    val eksternId: UUID,
+    val internId: String,
+    val eksternId: String,
     val behandlingstype: String,
-    val opprettet: LocalDateTime,
-    val sistEndret: LocalDateTime,
+    val opprettet: String,
+    val sistEndret: String,
     val enhet: EnhetEntity?,
     val årsak: String,
     var ansvarligSaksbehandlerEntity: BehandlerEntity,

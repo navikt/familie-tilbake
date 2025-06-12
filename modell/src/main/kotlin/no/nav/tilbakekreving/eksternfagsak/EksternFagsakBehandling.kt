@@ -42,11 +42,11 @@ sealed class EksternFagsakBehandling(
 ) : Historikk.HistorikkInnslag<UUID> {
     fun tilEntity(): EksternFagsakBehandlingEntity {
         return EksternFagsakBehandlingEntity(
-            internId = internId,
+            internId = internId.toString(),
             eksternId = eksternId,
             revurderingsresultat = revurderingsresultat,
             revurderingsårsak = revurderingsårsak,
-            revurderingsvedtaksdato = revurderingsvedtaksdato,
+            revurderingsvedtaksdato = revurderingsvedtaksdato.toString(),
             begrunnelseForTilbakekreving = begrunnelseForTilbakekreving,
         )
     }

@@ -1,9 +1,10 @@
 package no.nav.tilbakekreving.entities
 
-import java.util.UUID
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class ForeldelseperiodeEntity(
-    val id: UUID,
+    val id: String,
     val periode: DatoperiodeEntity,
     val foreldelsesvurdering: ForeldelsesvurderingEntity,
 )

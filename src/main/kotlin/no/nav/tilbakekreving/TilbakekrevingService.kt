@@ -55,7 +55,7 @@ import java.util.UUID
 class TilbakekrevingService(
     private val applicationProperties: ApplicationProperties,
     private val pdlClient: PdlClient,
-    private val kravgrunnlagBufferRepository: KravgrunnlagBufferRepository,
+    private val snapshotRepo: TilbakekrevingSnapshot,
 ) {
     private final val behovObservatør = Observatør()
 
@@ -148,8 +148,12 @@ class TilbakekrevingService(
         return eksempelsaker.firstOrNull { it.tilFrontendDto().fagsystem == fagsystem && it.tilFrontendDto().eksternFagsakId == eksternFagsakId }
     }
 
-    fun gjennopprettTilbakekreving(id: UUID): Tilbakekreving?{
-        val tilbakekreving = valkeyClient.henteTilstand(id)?.fraEntity(behovObservatør)
+    fun gjennopprettTilbakekreving(
+        id: UUID,
+        // Denne kan fjernes når vi har en bedre måte å teste på
+        snapshotRepo: TilbakekrevingSnapshot,
+    ): Tilbakekreving? {
+        val tilbakekreving = snapshotRepo.henteTilstand(id)?.fraEntity(behovObservatør)
         return tilbakekreving
 
     }
@@ -207,6 +211,7 @@ class TilbakekrevingService(
             }
             behovListe.remove(behov)
         }
+        snapshotRepo.lagreTilstand(tilbakekreving.tilEntity())
     }
 
     fun utførSteg(
@@ -214,8 +219,10 @@ class TilbakekrevingService(
         tilbakekreving: Tilbakekreving,
         behandlingsstegDto: BehandlingsstegDto,
         logContext: SecureLog.Context,
+        // denne er for test. Må fjernes når vi har en bedre måte å teste på
+        snapshot: TilbakekrevingSnapshot?,
     ) {
-        return when (behandlingsstegDto) {
+        val result = when (behandlingsstegDto) {
             is BehandlingsstegForeldelseDto -> behandleForeldelse(tilbakekreving, behandlingsstegDto, behandler)
             is BehandlingsstegVilkårsvurderingDto -> behandleVilkårsvurdering(tilbakekreving, behandlingsstegDto, behandler)
             is BehandlingsstegFaktaDto -> behandleFakta(tilbakekreving, behandlingsstegDto, behandler)
@@ -223,6 +230,8 @@ class TilbakekrevingService(
             is BehandlingsstegFatteVedtaksstegDto -> behandleFatteVedtak(tilbakekreving, behandlingsstegDto, behandler)
             else -> throw Feil("Vurdering for ${behandlingsstegDto.getSteg()} er ikke implementert i ny modell enda.", logContext = logContext)
         }
+        snapshot?.lagreTilstand(tilbakekreving.tilEntity())
+        return result
     }
 
     private fun behandleFakta(
@@ -365,19 +374,23 @@ class TilbakekrevingService(
                 )
             }
         }
+        snapshotRepo.lagreTilstand(tilbakekreving.tilEntity())
     }
 
     fun flyttBehandlingsstegTilbakeTilFakta(tilbakekreving: Tilbakekreving) {
         tilbakekreving.håndterNullstilling()
+        snapshotRepo.lagreTilstand(tilbakekreving.tilEntity())
     }
 
     fun aktiverBrevmottakerSteg(tilbakekreving: Tilbakekreving) {
         validerBrevmottaker(tilbakekreving)
         tilbakekreving.aktiverBrevmottakerSteg()
+        snapshotRepo.lagreTilstand(tilbakekreving.tilEntity())
     }
 
     fun deaktiverBrevmottakerSteg(tilbakekreving: Tilbakekreving) {
         tilbakekreving.deaktiverBrevmottakerSteg()
+        snapshotRepo.lagreTilstand(tilbakekreving.tilEntity())
     }
 
     fun fjernManuelBrevmottaker(
@@ -386,6 +399,7 @@ class TilbakekrevingService(
         manuellBrevmottakerId: UUID,
     ) {
         tilbakekreving.fjernManuelBrevmottaker(behandler, manuellBrevmottakerId)
+        snapshotRepo.lagreTilstand(tilbakekreving.tilEntity())
     }
 
     private fun validerBrevmottaker(tilbakekreving: Tilbakekreving) {
@@ -413,5 +427,20 @@ class TilbakekrevingService(
                 logContext = SecureLog.Context.fra(tilbakekreving),
             )
         }
+    }
+
+    fun <T> håndterHendleseForTest(
+        hendelse: T,
+        tilbakekreving: Tilbakekreving,
+    ) {
+        when (hendelse) {
+            is OpprettTilbakekrevingEvent -> tilbakekreving.håndter(hendelse as OpprettTilbakekrevingEvent)
+            is KravgrunnlagHendelse -> tilbakekreving.håndter(hendelse as KravgrunnlagHendelse)
+            is FagsysteminfoHendelse -> tilbakekreving.håndter(hendelse as FagsysteminfoHendelse)
+            is BrukerinfoHendelse -> tilbakekreving.håndter(hendelse as BrukerinfoHendelse)
+            is VarselbrevSendtHendelse -> tilbakekreving.håndter(hendelse as VarselbrevSendtHendelse)
+        }
+
+        valkeyClient.lagreTilstand(tilbakekreving.id, tilbakekreving.tilEntity())
     }
 }
