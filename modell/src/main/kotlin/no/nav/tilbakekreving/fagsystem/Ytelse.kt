@@ -4,14 +4,14 @@ import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 
 sealed interface Ytelse {
-    fun tilDTO(): FagsystemDTO
+    fun tilFagsystemDTO(): FagsystemDTO
 
     fun tilYtelseDTO(): YtelsestypeDTO
 
     fun integrererMotFagsystem(): Boolean
 
     object Barnetrygd : Ytelse {
-        override fun tilDTO(): FagsystemDTO = FagsystemDTO.BA
+        override fun tilFagsystemDTO(): FagsystemDTO = FagsystemDTO.BA
 
         override fun tilYtelseDTO(): YtelsestypeDTO = YtelsestypeDTO.BARNETRYGD
 
@@ -19,7 +19,7 @@ sealed interface Ytelse {
     }
 
     object Tillegsstønader : Ytelse {
-        override fun tilDTO(): FagsystemDTO = FagsystemDTO.TS
+        override fun tilFagsystemDTO(): FagsystemDTO = FagsystemDTO.TS
 
         override fun tilYtelseDTO(): YtelsestypeDTO = YtelsestypeDTO.TILLEGGSTØNADER
 

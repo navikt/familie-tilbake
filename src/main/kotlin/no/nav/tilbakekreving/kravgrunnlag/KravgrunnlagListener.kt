@@ -11,7 +11,6 @@ class KravgrunnlagListener(private val kravgrunnlagBufferRepository: Kravgrunnla
     override fun onMessage(message: Message) {
         require(message is TextMessage) { "Mottok melding som ikke er TextMessage" }
         val kravgrunnlagXML = message.text
-        println(kravgrunnlagXML)
         val kravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagXML)
         kravgrunnlagBufferRepository.lagre(KravgrunnlagBufferRepository.Entity(kravgrunnlagXML, kravgrunnlag.kravgrunnlagId.toString()))
     }

@@ -20,7 +20,7 @@ class EksternFagsak(
         return EksternFagsakDto(
             eksternId = eksternId,
             ytelsestype = ytelse.tilYtelseDTO(),
-            fagsystem = ytelse.tilDTO(),
+            fagsystem = ytelse.tilFagsystemDTO(),
         )
     }
 

@@ -159,7 +159,7 @@ class TilbakekrevingService(
                 is BrukerinfoBehov -> {
                     val personinfo = pdlClient.hentPersoninfo(
                         ident = tilbakekreving.bruker!!.ident,
-                        fagsystem = behov.ytelse.tilDTO(),
+                        fagsystem = behov.ytelse.tilFagsystemDTO(),
                         logContext = SecureLog.Context.fra(tilbakekreving),
                     )
                     tilbakekreving.håndter(
@@ -386,7 +386,7 @@ class TilbakekrevingService(
         val personIdenter = listOfNotNull(tilbakekreving.bruker!!.ident)
         if (personIdenter.isEmpty()) return
         val strengtFortroligePersonIdenter =
-            pdlClient.hentAdressebeskyttelseBolk(personIdenter, tilbakekreving.hentFagsysteminfo().tilDTO(), SecureLog.Context.fra(tilbakekreving))
+            pdlClient.hentAdressebeskyttelseBolk(personIdenter, tilbakekreving.hentFagsysteminfo().tilFagsystemDTO(), SecureLog.Context.fra(tilbakekreving))
                 .filter { (_, person) ->
                     person.adressebeskyttelse.any { adressebeskyttelse ->
                         adressebeskyttelse.gradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG ||
