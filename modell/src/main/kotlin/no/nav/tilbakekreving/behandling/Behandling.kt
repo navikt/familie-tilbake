@@ -26,6 +26,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.beregning.Beregning
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
+import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
 import no.nav.tilbakekreving.entities.BehandlingEntity
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.historikk.Historikk
@@ -325,9 +326,10 @@ class Behandling private constructor(
 
         fun fraEntity(
             behandlingEntity: BehandlingEntity,
-            eksternFagsak: HistorikkReferanse<UUID, EksternFagsakBehandling>,
+            eksternFagsakBehandlingHistorikk: EksternFagsakBehandlingHistorikk,
             kravgrunnlagHistorikk: KravgrunnlagHistorikk,
         ): Behandling {
+            val eksternFagsak = eksternFagsakBehandlingHistorikk.nåværende()
             val kravgrunnlag = kravgrunnlagHistorikk.nåværende()
             return Behandling(
                 internId = UUID.fromString(behandlingEntity.internId),

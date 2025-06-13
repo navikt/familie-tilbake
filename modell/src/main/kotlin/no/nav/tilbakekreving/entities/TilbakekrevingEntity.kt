@@ -35,13 +35,13 @@ data class TilbakekrevingEntity(
             historikk = kravgrunnlagHistorikkEntities.map { it.fraEntity() }.toMutableList(),
         )
 
-        val eksternFagsakBehandling = EksternFagsakBehandlingHistorikk(eksternFagsak.behandlinger.map { it.fraEntity() }.toMutableList()).nåværende()
+        val eksternFagsakBehandlingHistorikk = EksternFagsakBehandlingHistorikk(eksternFagsak.behandlinger.map { it.fraEntity() }.toMutableList())
 
         val behandlingHistorikk = BehandlingHistorikk(
             historikk = behandlingHistorikkEntities.map {
                 Behandling.fraEntity(
                     behandlingEntity = it,
-                    eksternFagsak = eksternFagsakBehandling,
+                    eksternFagsakBehandlingHistorikk = eksternFagsakBehandlingHistorikk,
                     kravgrunnlagHistorikk = kravgrunnlagHistorikk,
                 )
             }.toMutableList(),

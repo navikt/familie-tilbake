@@ -46,22 +46,22 @@ fun opprettTilbakekrevingHendelse(
 )
 
 fun kravgrunnlag(
+    vedtakGjelder: KravgrunnlagHendelse.Aktør = KravgrunnlagHendelse.Aktør.Person(bruker().ident),
     perioder: List<KravgrunnlagHendelse.Periode> = listOf(kravgrunnlagPeriode()),
-) =
-    KravgrunnlagHendelse(
-        internId = UUID.randomUUID(),
-        vedtakId = BigInteger(128, Random()),
-        kravstatuskode = KravgrunnlagHendelse.Kravstatuskode.NY,
-        fagsystemVedtaksdato = LocalDate.now(),
-        vedtakGjelder = KravgrunnlagHendelse.Aktør.Person(bruker().ident),
-        utbetalesTil = KravgrunnlagHendelse.Aktør.Person(bruker().ident),
-        skalBeregneRenter = false,
-        ansvarligEnhet = "0425",
-        kontrollfelt = UUID.randomUUID().toString(),
-        referanse = UUID.randomUUID().toString(),
-        kravgrunnlagId = UUID.randomUUID().toString(),
-        perioder = perioder,
-    )
+) = KravgrunnlagHendelse(
+    internId = UUID.randomUUID(),
+    vedtakId = BigInteger(128, Random()),
+    kravstatuskode = KravgrunnlagHendelse.Kravstatuskode.NY,
+    fagsystemVedtaksdato = LocalDate.now(),
+    vedtakGjelder = vedtakGjelder,
+    utbetalesTil = KravgrunnlagHendelse.Aktør.Person(bruker().ident),
+    skalBeregneRenter = false,
+    ansvarligEnhet = "0425",
+    kontrollfelt = UUID.randomUUID().toString(),
+    referanse = UUID.randomUUID().toString(),
+    kravgrunnlagId = UUID.randomUUID().toString(),
+    perioder = perioder,
+)
 
 fun kravgrunnlagPeriode(
     periode: Datoperiode = 1.januar() til 31.januar(),
