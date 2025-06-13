@@ -60,7 +60,7 @@ class EksternFagsak(
         return EksternFagsakEntity(
             eksternId = eksternId,
             ytelseEntity = ytelse.tilEntity(),
-            behandlinger = behandlinger.henHistorikk(),
+            behandlinger = behandlinger.tilEntity(),
         )
     }
 }

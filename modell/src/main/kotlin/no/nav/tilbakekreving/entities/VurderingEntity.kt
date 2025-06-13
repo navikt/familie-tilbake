@@ -1,104 +1,72 @@
 package no.nav.tilbakekreving.entities
 
-import com.fasterxml.jackson.annotation.JsonSubTypes
-import com.fasterxml.jackson.annotation.JsonTypeInfo
 import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
 import java.math.BigDecimal
 
-@JsonTypeInfo(
-    use = JsonTypeInfo.Id.NAME,
-    include = JsonTypeInfo.As.PROPERTY,
-    property = "type",
-)
-@JsonSubTypes(
-    JsonSubTypes.Type(value = GodTroEntity::class, name = "GodTro"),
-    JsonSubTypes.Type(value = ForstodEllerBurdeForståttEntity::class, name = "ForstodEllerBurdeForstått"),
-    JsonSubTypes.Type(value = MangelfulleOpplysningerFraBrukerEntity::class, name = "MangelfulleOpplysningerFraBruker"),
-    JsonSubTypes.Type(value = FeilaktigeOpplysningerFraBrukerEntity::class, name = "FeilaktigeOpplysningerFraBruker"),
-    JsonSubTypes.Type(value = IkkeVurdertEntity::class, name = "IkkeVurdert"),
-)
-sealed class VurderingEntity {
-    abstract val begrunnelse: String?
+data class VurderingEntity(
+    val vurderingType: VurderingType,
+    val begrunnelse: String?,
+    val beløpIBehold: BeløpIBeholdEntity?,
+    val aktsomhet: VurdertAktsomhetEntity?,
+) {
+    fun fraEntity(): Vilkårsvurderingsteg.Vurdering {
+        return when (vurderingType) {
+            VurderingType.GOD_TRO -> {
+                Vilkårsvurderingsteg.Vurdering.GodTro(
+                    beløpIBehold =
+                        requireNotNull(beløpIBehold) { "beløpbIBehold kreves i GOD_TRO " }.fraEntity(),
+                    begrunnelse = requireNotNull(begrunnelse) { "begrunnesle kreves i GOD_TRO " },
+                )
+            }
+            VurderingType.FORSTOD_ELLER_BURDE_FORSTÅTT -> {
+                Vilkårsvurderingsteg.Vurdering.ForstodEllerBurdeForstått(
+                    begrunnelse = requireNotNull(begrunnelse) { "begrunnesle kreves i FORSTOD_ELLER_BURDE_FORSTÅTT " },
+                    aktsomhet = requireNotNull(aktsomhet) { "aktsomhet kreves i FORSTOD_ELLER_BURDE_FORSTÅTT " }.fraEntity(),
+                )
+            }
+            VurderingType.MANGELFULLE_OPPLYSNINGER_FRA_BRUKER -> {
+                Vilkårsvurderingsteg.Vurdering.MangelfulleOpplysningerFraBruker(
+                    begrunnelse = requireNotNull(begrunnelse) { "begrunnelse kreves i MANGELFULLE_OPPLYSNINGER_FRA_BRUKER" },
+                    aktsomhet = requireNotNull(aktsomhet) { "aktsomhet kreves i MANGELFULLE_OPPLYSNINGER_FRA_BRUKER" }.fraEntity(),
+                )
+            }
+            VurderingType.FEILAKTIGE_OPPLYSNINGER_FRA_BRUKER -> {
+                Vilkårsvurderingsteg.Vurdering.FeilaktigeOpplysningerFraBruker(
+                    begrunnelse = requireNotNull(begrunnelse) { "begrunnelse kreves i FEILAKTIGE_OPPLYSNINGER_FRA_BRUKER" },
+                    aktsomhet = requireNotNull(aktsomhet) { "aktsomhet kreves i FEILAKTIGE_OPPLYSNINGER_FRA_BRUKER" }.fraEntity(),
+                )
+            }
 
-    abstract fun fraEntity(): Vilkårsvurderingsteg.Vurdering
-}
-
-data class GodTroEntity(
-    val beløpIBehold: BeløpIBeholdEntity,
-    override val begrunnelse: String,
-) : VurderingEntity() {
-    override fun fraEntity(): Vilkårsvurderingsteg.Vurdering {
-        return Vilkårsvurderingsteg.Vurdering.GodTro(
-            beløpIBehold = beløpIBehold.fraEntity(),
-            begrunnelse = begrunnelse,
-        )
+            VurderingType.IKKE_VURDERT -> Vilkårsvurderingsteg.Vurdering.IkkeVurdert
+        }
     }
 }
 
-data class ForstodEllerBurdeForståttEntity(
-    override val begrunnelse: String,
-    val aktsomhet: VurdertAktsomhetEntity,
-) : VurderingEntity() {
-    override fun fraEntity(): Vilkårsvurderingsteg.Vurdering {
-        return Vilkårsvurderingsteg.Vurdering.ForstodEllerBurdeForstått(
-            begrunnelse = begrunnelse,
-            aktsomhet = aktsomhet.fraEntity(),
-        )
+data class BeløpIBeholdEntity(
+    val beholdType: BeholdType,
+    val beløp: BigDecimal?,
+) {
+    fun fraEntity(): Vilkårsvurderingsteg.Vurdering.GodTro.BeløpIBehold {
+        return when (beholdType) {
+            BeholdType.JA -> {
+                Vilkårsvurderingsteg.Vurdering.GodTro.BeløpIBehold.Ja(requireNotNull(beløp) { "Beløp kreves i BeløpIBehold" })
+            }
+            BeholdType.NEI -> {
+                Vilkårsvurderingsteg.Vurdering.GodTro.BeløpIBehold.Nei
+            }
+        }
     }
 }
 
-data class MangelfulleOpplysningerFraBrukerEntity(
-    override val begrunnelse: String,
-    val aktsomhet: VurdertAktsomhetEntity,
-) : VurderingEntity() {
-    override fun fraEntity(): Vilkårsvurderingsteg.Vurdering {
-        return Vilkårsvurderingsteg.Vurdering.MangelfulleOpplysningerFraBruker(
-            begrunnelse = begrunnelse,
-            aktsomhet = aktsomhet.fraEntity(),
-        )
-    }
+enum class VurderingType {
+    GOD_TRO,
+    FORSTOD_ELLER_BURDE_FORSTÅTT,
+    MANGELFULLE_OPPLYSNINGER_FRA_BRUKER,
+    FEILAKTIGE_OPPLYSNINGER_FRA_BRUKER,
+    IKKE_VURDERT,
 }
 
-data class FeilaktigeOpplysningerFraBrukerEntity(
-    override val begrunnelse: String,
-    val aktsomhet: VurdertAktsomhetEntity,
-) : VurderingEntity() {
-    override fun fraEntity(): Vilkårsvurderingsteg.Vurdering {
-        return Vilkårsvurderingsteg.Vurdering.FeilaktigeOpplysningerFraBruker(
-            begrunnelse = begrunnelse,
-            aktsomhet = aktsomhet.fraEntity(),
-        )
-    }
-}
-
-data class IkkeVurdertEntity(
-    override val begrunnelse: String? = null,
-) : VurderingEntity() {
-    override fun fraEntity(): Vilkårsvurderingsteg.Vurdering =
-        Vilkårsvurderingsteg.Vurdering.IkkeVurdert
-}
-
-@JsonTypeInfo(
-    use = JsonTypeInfo.Id.NAME,
-    include = JsonTypeInfo.As.PROPERTY,
-    property = "type",
-)
-@JsonSubTypes(
-    JsonSubTypes.Type(value = BeløpIBeholdJaEntity::class, name = "Ja"),
-    JsonSubTypes.Type(value = BeløpIBeholdNeiEntity::class, name = "Nei"),
-)
-sealed class BeløpIBeholdEntity {
-    abstract fun fraEntity(): Vilkårsvurderingsteg.Vurdering.GodTro.BeløpIBehold
-}
-
-data class BeløpIBeholdJaEntity(
-    val beløp: BigDecimal,
-) : BeløpIBeholdEntity() {
-    override fun fraEntity(): Vilkårsvurderingsteg.Vurdering.GodTro.BeløpIBehold =
-        Vilkårsvurderingsteg.Vurdering.GodTro.BeløpIBehold.Ja(beløp)
-}
-
-object BeløpIBeholdNeiEntity : BeløpIBeholdEntity() {
-    override fun fraEntity(): Vilkårsvurderingsteg.Vurdering.GodTro.BeløpIBehold =
-        Vilkårsvurderingsteg.Vurdering.GodTro.BeløpIBehold.Nei
+enum class BeholdType {
+    JA,
+    NEI,
 }

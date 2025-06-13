@@ -1,6 +1,3 @@
-plugins {
-    kotlin("plugin.serialization") version "1.9.23"
-}
 dependencies {
     api(project(":kontrakter-intern"))
     api(project(":kontrakter-ekstern-v2"))

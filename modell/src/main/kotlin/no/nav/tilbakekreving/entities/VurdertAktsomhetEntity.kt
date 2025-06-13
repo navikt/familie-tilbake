@@ -3,84 +3,53 @@ package no.nav.tilbakekreving.entities
 import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
 
-sealed class VurdertAktsomhetEntity {
-    abstract val begrunnelse: String
-    abstract val skalIleggesRenter: Boolean
-    abstract val skalReduseres: SkalReduseresEntity
-    abstract val vurderingstype: String
-    abstract val type: String
-
-    abstract fun fraEntity(): Vilkårsvurderingsteg.VurdertAktsomhet
-}
-
-data class SimpelUaktsomhetEntity(
-    override val begrunnelse: String,
-    override val skalReduseres: SkalReduseresEntity,
+data class VurdertAktsomhetEntity(
+    val aktsomhetType: AktsomhetType,
+    val begrunnelse: String,
+    val skalIleggesRenter: Boolean?,
+    val skalReduseres: SkalReduseresEntity?,
     val særligGrunner: SærligeGrunnerEntity?,
-) : VurdertAktsomhetEntity() {
-    override val type = "SimpelUaktsomhet"
-    override val vurderingstype: String = "SimpelUaktsomhet"
-    override val skalIleggesRenter: Boolean = false
-
-    override fun fraEntity(): Vilkårsvurderingsteg.VurdertAktsomhet {
-        if (særligGrunner != null) {
-            return Vilkårsvurderingsteg.VurdertAktsomhet.SimpelUaktsomhet(
-                begrunnelse = begrunnelse,
-                særligeGrunner = særligGrunner.fraEntity(),
-                skalReduseres = skalReduseres.fraEntity(),
-            )
-        } else {
-            throw IllegalArgumentException("SærligGrunner kreves for SimpelUaktsomhet")
+) {
+    fun fraEntity(): Vilkårsvurderingsteg.VurdertAktsomhet {
+        return when (aktsomhetType) {
+            AktsomhetType.SIMPEL_UAKTSOMHET -> {
+                Vilkårsvurderingsteg.VurdertAktsomhet.SimpelUaktsomhet(
+                    begrunnelse = begrunnelse,
+                    særligeGrunner = requireNotNull(særligGrunner) { "SærligGrunner kreves for SimpelUaktsomhet" }.fraEntity(),
+                    skalReduseres = requireNotNull(skalReduseres) { "skalReduseres kreves for SimpelUaktsomhet" }.fraEntity(),
+                )
+            }
+            AktsomhetType.GROV_UAKTSOMHET -> {
+                Vilkårsvurderingsteg.VurdertAktsomhet.GrovUaktsomhet(
+                    begrunnelse = begrunnelse,
+                    særligeGrunner = requireNotNull(særligGrunner) { "SærligGrunner kreves for GrovUaktsomhet" }.fraEntity(),
+                    skalReduseres = requireNotNull(skalReduseres) { "skalReduseres kreves for GrovUaktsomhet" }.fraEntity(),
+                    skalIleggesRenter = requireNotNull(skalIleggesRenter) { "skalIleggesRenter kreves for GrovUaktsomhet" },
+                )
+            }
+            AktsomhetType.FORSETT -> {
+                Vilkårsvurderingsteg.VurdertAktsomhet.Forsett(
+                    begrunnelse = begrunnelse,
+                    skalIleggesRenter = requireNotNull(skalIleggesRenter) { "skalIleggesRenter kreves for FORSETT" },
+                )
+            }
         }
-    }
-}
-
-data class GrovUaktsomhetEntity(
-    override val begrunnelse: String,
-    override val skalReduseres: SkalReduseresEntity,
-    override val skalIleggesRenter: Boolean,
-    val særligGrunner: SærligeGrunnerEntity?,
-) : VurdertAktsomhetEntity() {
-    override val vurderingstype: String = "GrovUaktsomhet"
-    override val type: String = "GrovUaktsomhet"
-
-    override fun fraEntity(): Vilkårsvurderingsteg.VurdertAktsomhet {
-        if (særligGrunner != null) {
-            return Vilkårsvurderingsteg.VurdertAktsomhet.GrovUaktsomhet(
-                begrunnelse = begrunnelse,
-                særligeGrunner = særligGrunner.fraEntity(),
-                skalReduseres = skalReduseres.fraEntity(),
-                skalIleggesRenter = skalIleggesRenter,
-            )
-        } else {
-            throw IllegalArgumentException("SærligGrunner kreves for GrovUaktsomhet")
-        }
-    }
-}
-
-data class ForsettEntity(
-    override val begrunnelse: String,
-    override val skalIleggesRenter: Boolean,
-) : VurdertAktsomhetEntity() {
-    override val skalReduseres: SkalReduseresEntity = NeiEntitySkalReduseres
-    override val vurderingstype: String = "Forsett"
-    override val type: String = "Forsett"
-
-    override fun fraEntity(): Vilkårsvurderingsteg.VurdertAktsomhet {
-        return Vilkårsvurderingsteg.VurdertAktsomhet.Forsett(
-            begrunnelse = begrunnelse,
-            skalIleggesRenter = skalIleggesRenter,
-        )
     }
 }
 
 data class SærligeGrunnerEntity(
     val begrunnelse: String,
-    val grunner: List<String>,
+    val grunner: List<SærligGrunn>,
 ) {
     fun fraEntity(): Vilkårsvurderingsteg.VurdertAktsomhet.SærligeGrunner =
         Vilkårsvurderingsteg.VurdertAktsomhet.SærligeGrunner(
             begrunnelse = begrunnelse,
-            grunner = grunner.map { SærligGrunn.valueOf(it) }.toSet(),
+            grunner = grunner.toSet(),
         )
+}
+
+enum class AktsomhetType {
+    SIMPEL_UAKTSOMHET,
+    GROV_UAKTSOMHET,
+    FORSETT,
 }

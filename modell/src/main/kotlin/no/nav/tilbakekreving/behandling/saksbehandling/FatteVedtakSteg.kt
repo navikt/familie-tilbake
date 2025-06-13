@@ -5,10 +5,11 @@ import no.nav.tilbakekreving.api.v1.dto.Totrinnsstegsinfo
 import no.nav.tilbakekreving.api.v1.dto.TotrinnsvurderingDto
 import no.nav.tilbakekreving.entities.FatteVedtakStegEntity
 import no.nav.tilbakekreving.entities.VurdertStegEntity
+import no.nav.tilbakekreving.entities.VurdertStegType
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.saksbehandler.Behandler
 
-class FatteVedtakSteg private constructor(
+class FatteVedtakSteg internal constructor(
     private val vurderteSteg: List<VurdertSteg>,
     private var _ansvarligBeslutter: Behandler?,
 ) : Saksbehandlingsteg<TotrinnsvurderingDto> {
@@ -40,7 +41,7 @@ class FatteVedtakSteg private constructor(
         )
     }
 
-    private class VurdertSteg(
+    class VurdertSteg(
         private val steg: Behandlingssteg,
         private var vurdering: Vurdering,
     ) : FrontendDto<Totrinnsstegsinfo> {
@@ -72,27 +73,12 @@ class FatteVedtakSteg private constructor(
             return VurdertStegEntity(
                 steg = steg,
                 vurdering = when (this.vurdering) {
-                    is Vurdering.IkkeVurdert -> "Ikke Vurdert"
-                    is Vurdering.Godkjent -> "Godkjent"
-                    is Vurdering.Underkjent -> "Underkjent"
+                    is Vurdering.IkkeVurdert -> VurdertStegType.IKKE_VURDERT
+                    is Vurdering.Godkjent -> VurdertStegType.GODKJENT
+                    is Vurdering.Underkjent -> VurdertStegType.UNDERKJENT
                 },
                 begrunnelse = (vurdering as? Vurdering.Underkjent)?.begrunnelse,
             )
-        }
-
-        companion object {
-            fun fraEntity(entity: VurdertStegEntity): VurdertSteg {
-                val vurdering = when {
-                    entity.vurdering.equals("Ikke Vurdert") -> Vurdering.IkkeVurdert
-                    entity.vurdering.equals("Godkjent") -> Vurdering.Godkjent
-                    entity.vurdering.equals("Underkjent") -> Vurdering.Underkjent(entity.begrunnelse!!)
-                    else -> throw IllegalArgumentException("Ugyldig vurdering ${entity.vurdering}")
-                }
-                return VurdertSteg(
-                    steg = entity.steg,
-                    vurdering = vurdering,
-                )
-            }
         }
     }
 
@@ -126,13 +112,6 @@ class FatteVedtakSteg private constructor(
                     ),
                 ),
                 _ansvarligBeslutter = null,
-            )
-        }
-
-        fun fraEntity(entity: FatteVedtakStegEntity): FatteVedtakSteg {
-            return FatteVedtakSteg(
-                vurderteSteg = entity.vurderteStegEntities.map { VurdertSteg.fraEntity(it) },
-                _ansvarligBeslutter = entity.ansvarligBeslutter?.fraEntity(),
             )
         }
     }

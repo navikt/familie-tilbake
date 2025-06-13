@@ -83,11 +83,10 @@ class Foreldelsesteg(
     fun tilEntity(): ForeldelsesstegEntity {
         return ForeldelsesstegEntity(
             vurdertePerioder = vurdertePerioder.map { it.tilEntity() },
-            kravgrunnlagRef = kravgrunnlag.entry.internId.toString(),
         )
     }
 
-    class Foreldelseperiode private constructor(
+    class Foreldelseperiode internal constructor(
         val id: UUID,
         val periode: Datoperiode,
         private var _vurdering: Vurdering,
@@ -100,14 +99,9 @@ class Foreldelsesteg(
 
         fun tilEntity(): ForeldelseperiodeEntity {
             return ForeldelseperiodeEntity(
-                id = id.toString(),
+                id = id,
                 periode = DatoperiodeEntity(periode.fom, periode.tom),
-                foreldelsesvurdering = when (_vurdering) {
-                    is Vurdering.IkkeForeldet -> ForeldelsesvurderingEntity(type = ForeldelsesvurderingType.IKKE_FORELDET, begrunnelse = _vurdering.begrunnelse)
-                    is Vurdering.IkkeVurdert -> ForeldelsesvurderingEntity(type = ForeldelsesvurderingType.IKKE_VURDERT)
-                    is Vurdering.Tilleggsfrist -> ForeldelsesvurderingEntity(type = ForeldelsesvurderingType.TILLEGGSFRIST, frist = _vurdering.frist, oppdaget = (_vurdering as Vurdering.Tilleggsfrist).oppdaget)
-                    is Vurdering.Foreldet -> ForeldelsesvurderingEntity(type = ForeldelsesvurderingType.FORELDET, begrunnelse = _vurdering.begrunnelse)
-                },
+                foreldelsesvurdering = _vurdering.tilEntity(),
             )
         }
 
@@ -118,13 +112,6 @@ class Foreldelsesteg(
                     periode = periode,
                     _vurdering = Vurdering.IkkeVurdert,
                 )
-
-            fun fraEntity(foreldelseperiodeEntity: ForeldelseperiodeEntity): Foreldelseperiode =
-                Foreldelseperiode(
-                    id = UUID.fromString(foreldelseperiodeEntity.id),
-                    periode = foreldelseperiodeEntity.periode.fraEntity(),
-                    _vurdering = foreldelseperiodeEntity.foreldelsesvurdering.fraEntity(),
-                )
         }
     }
 
@@ -132,13 +119,51 @@ class Foreldelsesteg(
         val begrunnelse: String? get() = null
         val frist: LocalDate? get() = null
 
-        class IkkeForeldet(override val begrunnelse: String) : Vurdering
+        fun tilEntity(): ForeldelsesvurderingEntity
 
-        object IkkeVurdert : Vurdering
+        class IkkeForeldet(override val begrunnelse: String) : Vurdering {
+            override fun tilEntity(): ForeldelsesvurderingEntity {
+                return ForeldelsesvurderingEntity(
+                    type = ForeldelsesvurderingType.IKKE_FORELDET,
+                    begrunnelse = begrunnelse,
+                    frist = null,
+                    oppdaget = null,
+                )
+            }
+        }
 
-        class Tilleggsfrist(override val frist: LocalDate, val oppdaget: LocalDate) : Vurdering
+        object IkkeVurdert : Vurdering {
+            override fun tilEntity(): ForeldelsesvurderingEntity {
+                return ForeldelsesvurderingEntity(
+                    type = ForeldelsesvurderingType.IKKE_VURDERT,
+                    begrunnelse = null,
+                    frist = null,
+                    oppdaget = null,
+                )
+            }
+        }
 
-        class Foreldet(override val begrunnelse: String) : Vurdering
+        class Tilleggsfrist(override val frist: LocalDate, val oppdaget: LocalDate) : Vurdering {
+            override fun tilEntity(): ForeldelsesvurderingEntity {
+                return ForeldelsesvurderingEntity(
+                    type = ForeldelsesvurderingType.TILLEGGSFRIST,
+                    frist = frist,
+                    oppdaget = oppdaget,
+                    begrunnelse = null,
+                )
+            }
+        }
+
+        class Foreldet(override val begrunnelse: String) : Vurdering {
+            override fun tilEntity(): ForeldelsesvurderingEntity {
+                return ForeldelsesvurderingEntity(
+                    type = ForeldelsesvurderingType.FORELDET,
+                    begrunnelse = begrunnelse,
+                    frist = null,
+                    oppdaget = null,
+                )
+            }
+        }
     }
 
     companion object {

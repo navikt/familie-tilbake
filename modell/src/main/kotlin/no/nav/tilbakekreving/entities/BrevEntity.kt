@@ -6,16 +6,22 @@ import java.time.LocalDate
 import java.util.UUID
 
 data class BrevEntity(
-    val brevType: String,
-    val internId: String,
+    val brevType: Brevtype,
+    val internId: UUID,
     val opprettetDato: LocalDate,
-    val varsletBeløp: Long? = null,
+    val varsletBeløp: Long?,
 ) {
     fun fraEntity(): Brev {
-        val brev = when {
-            brevType.equals("VARSEL_BREV") -> Varselbrev(UUID.fromString(internId), opprettetDato, varsletBeløp!!)
-            else -> throw IllegalArgumentException("Ugyldig brevType=$brevType")
+        return when (brevType) {
+            Brevtype.VARSEL_BREV -> Varselbrev(
+                requireNotNull(internId) { "internId kreves for Brev" },
+                requireNotNull(opprettetDato) { "opprettetDato kreves for Brev" },
+                requireNotNull(varsletBeløp) { "varsletBeløp kreves for Brev" },
+            )
         }
-        return brev
     }
+}
+
+enum class Brevtype {
+    VARSEL_BREV,
 }

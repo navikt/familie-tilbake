@@ -7,10 +7,9 @@ import java.util.UUID
 
 data class ForeldelsesstegEntity(
     val vurdertePerioder: List<ForeldelseperiodeEntity>,
-    val kravgrunnlagRef: String,
 ) {
     fun fraEntity(kravgrunnlagHendelse: HistorikkReferanse<UUID, KravgrunnlagHendelse>): Foreldelsesteg = Foreldelsesteg(
-        vurdertePerioder = vurdertePerioder.map { Foreldelsesteg.Foreldelseperiode.fraEntity(it) },
+        vurdertePerioder = vurdertePerioder.map { it.fraEntity() },
         kravgrunnlag = kravgrunnlagHendelse,
     )
 }

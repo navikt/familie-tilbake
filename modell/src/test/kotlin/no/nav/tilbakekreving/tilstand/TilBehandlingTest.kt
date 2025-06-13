@@ -59,7 +59,7 @@ class TilBehandlingTest {
         val exception = shouldThrow<IllegalStateException> {
             tilbakekreving.håndterNullstilling()
         }
-        exception.message shouldBe "Forventet ikke Nullstilling i IverksettVedtak"
+        exception.message shouldBe "Forventet ikke Nullstilling i ${tilbakekreving.tilstand.tilbakekrevingTilstand}"
     }
 
     private fun tilbakekrevingTilGodkjenning(

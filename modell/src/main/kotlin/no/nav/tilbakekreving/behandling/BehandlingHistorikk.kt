@@ -27,7 +27,7 @@ class BehandlingHistorikk(
         return HistorikkReferanse(this, historikk.last().internId)
     }
 
-    fun hentHistorikk(): List<BehandlingEntity> {
+    fun tilEntity(): List<BehandlingEntity> {
         return historikk.map { it.tilEntity() }
     }
 }

@@ -7,20 +7,20 @@ import java.time.LocalDate
 
 data class BrukerEntity(
     val ident: String,
-    var språkkode: String? = null,
-    var navn: String? = null,
-    var fødselsdato: LocalDate? = null,
-    var kjønn: String? = null,
-    var dødsdato: LocalDate? = null,
+    var språkkode: Språkkode?,
+    var navn: String?,
+    var fødselsdato: LocalDate?,
+    var kjønn: Kjønn?,
+    var dødsdato: LocalDate?,
 ) {
     fun fraEntity(): Bruker {
         return Bruker(
             ident = ident,
-            språkkode = språkkode?.let { Språkkode.valueOf(it) },
+            språkkode = språkkode,
             navn = navn,
-            fødselsdato = fødselsdato?.let { it },
-            kjønn = kjønn?.let { Kjønn.valueOf(it) },
-            dødsdato = dødsdato?.let { it },
+            fødselsdato = fødselsdato,
+            kjønn = kjønn,
+            dødsdato = dødsdato,
         )
     }
 }

@@ -2,8 +2,8 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.ForeslåVedtakStegEntity
-import no.nav.tilbakekreving.entities.ForeslåVedtakVurderingEntity
-import no.nav.tilbakekreving.entities.ForeslåVedtakVurderingEntity.ForeslåVedtakEntity
+import no.nav.tilbakekreving.entities.ForeslåVedtakVurderingType
+import no.nav.tilbakekreving.entities.PeriodeMedTekstEntity
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 
@@ -19,15 +19,13 @@ class ForeslåVedtakSteg(
     }
 
     fun tilEntity(): ForeslåVedtakStegEntity {
-        return ForeslåVedtakStegEntity(
-            vurdering.tilEntity(),
-        )
+        return vurdering.tilEntity()
     }
 
     override fun tilFrontendDto() {}
 
     sealed interface Vurdering {
-        fun tilEntity(): ForeslåVedtakVurderingEntity
+        fun tilEntity(): ForeslåVedtakStegEntity
 
         class ForeslåVedtak(
             private val oppsummeringstekst: String?,
@@ -41,8 +39,8 @@ class ForeslåVedtakSteg(
                 val særligeGrunnerAvsnitt: String?,
                 val særligeGrunnerAnnetAvsnitt: String?,
             ) {
-                fun tilEntity(): ForeslåVedtakEntity.PeriodeMedTekstEntity {
-                    return ForeslåVedtakEntity.PeriodeMedTekstEntity(
+                fun tilEntity(): PeriodeMedTekstEntity {
+                    return PeriodeMedTekstEntity(
                         periode = DatoperiodeEntity(periode.fom, periode.tom),
                         faktaAvsnitt = faktaAvsnitt,
                         foreldelseAvsnitt = foreldelseAvsnitt,
@@ -53,8 +51,9 @@ class ForeslåVedtakSteg(
                 }
             }
 
-            override fun tilEntity(): ForeslåVedtakVurderingEntity {
-                return ForeslåVedtakEntity(
+            override fun tilEntity(): ForeslåVedtakStegEntity {
+                return ForeslåVedtakStegEntity(
+                    foreslåVedtakVurderingType = ForeslåVedtakVurderingType.FORESLÅVEDTAK,
                     oppsummeringstekst = oppsummeringstekst,
                     perioderMedTekst = perioderMedTekst.map { it.tilEntity() },
                 )
@@ -62,7 +61,12 @@ class ForeslåVedtakSteg(
         }
 
         data object IkkeVurdert : Vurdering {
-            override fun tilEntity(): ForeslåVedtakVurderingEntity = ForeslåVedtakVurderingEntity.IkkeVurdertEntity
+            override fun tilEntity(): ForeslåVedtakStegEntity =
+                ForeslåVedtakStegEntity(
+                    foreslåVedtakVurderingType = ForeslåVedtakVurderingType.IKKE_VURDERT,
+                    oppsummeringstekst = null,
+                    perioderMedTekst = null,
+                )
         }
     }
 

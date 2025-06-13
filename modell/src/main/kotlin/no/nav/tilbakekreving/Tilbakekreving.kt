@@ -39,8 +39,8 @@ import no.nav.tilbakekreving.tilstand.Tilstand
 import java.time.LocalDateTime
 import java.util.UUID
 
-class Tilbakekreving(
-    val id: UUID = UUID.randomUUID(),
+class Tilbakekreving internal constructor(
+    val id: UUID,
     val fagsystemId: String,
     val eksternFagsak: EksternFagsak,
     val behandlingHistorikk: BehandlingHistorikk,
@@ -50,11 +50,8 @@ class Tilbakekreving(
     val opprettelsesvalg: Opprettelsesvalg,
     private val behovObservatør: BehovObservatør,
     var bruker: Bruker? = null,
+    internal var tilstand: Tilstand,
 ) : FrontendDto<FagsakDto> {
-    internal var tilstand: Tilstand = Start
-
-    fun hentTilstandsnavn() = tilstand.navn
-
     internal fun byttTilstand(nyTilstand: Tilstand) {
         tilstand = nyTilstand
         tilstand.entering(this)
@@ -201,14 +198,15 @@ class Tilbakekreving(
 
     fun tilEntity(): TilbakekrevingEntity {
         return TilbakekrevingEntity(
-            nåværendeTilstand = tilstand.navn,
+            nåværendeTilstand = tilstand.tilbakekrevingTilstand,
             id = this.id,
+            fagsystemId = fagsystemId,
             eksternFagsak = this.eksternFagsak.tilEntity(),
-            behandlingHistorikkEntities = this.behandlingHistorikk.hentHistorikk(),
-            kravgrunnlagHistorikkEntities = this.kravgrunnlagHistorikk.hentHistorikk(),
-            brevHistorikkEntities = this.brevHistorikk.hentHistorikk(),
+            behandlingHistorikkEntities = this.behandlingHistorikk.tilEntity(),
+            kravgrunnlagHistorikkEntities = this.kravgrunnlagHistorikk.tilEntity(),
+            brevHistorikkEntities = this.brevHistorikk.tilEntity(),
             opprettet = this.opprettet,
-            opprettelsesvalg = this.opprettelsesvalg.name,
+            opprettelsesvalg = this.opprettelsesvalg,
             bruker = this.bruker?.tilEntity(),
         )
     }
@@ -219,6 +217,7 @@ class Tilbakekreving(
             opprettTilbakekrevingEvent: OpprettTilbakekrevingHendelse,
         ): Tilbakekreving {
             val tilbakekreving = Tilbakekreving(
+                id = UUID.randomUUID(),
                 opprettet = LocalDateTime.now(),
                 // TODO: Lesbar ID
                 fagsystemId = UUID.randomUUID().toString(),
@@ -233,6 +232,7 @@ class Tilbakekreving(
                 behandlingHistorikk = BehandlingHistorikk(mutableListOf()),
                 kravgrunnlagHistorikk = KravgrunnlagHistorikk(mutableListOf()),
                 brevHistorikk = BrevHistorikk(mutableListOf()),
+                tilstand = Start,
             )
             tilbakekreving.håndter(opprettTilbakekrevingEvent)
             return tilbakekreving

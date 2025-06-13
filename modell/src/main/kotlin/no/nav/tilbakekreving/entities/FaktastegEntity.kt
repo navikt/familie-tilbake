@@ -10,19 +10,17 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 data class FaktastegEntity(
-    val eksternFagsakBehandlingRef: String,
-    val kravgrunnlagRef: String,
-    val brevHistorikk: List<BrevEntity>,
     val tilbakekrevingOpprettet: LocalDateTime,
     val opprettelsesvalg: Opprettelsesvalg,
 ) {
     fun fraEntity(
         eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
         kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
+        brevHistorikk: BrevHistorikk,
     ): Faktasteg = Faktasteg(
         eksternFagsakBehandling = eksternFagsakBehandling,
         kravgrunnlag = kravgrunnlag,
-        brevHistorikk = BrevHistorikk(brevHistorikk.map { it.fraEntity() }.toMutableList()),
+        brevHistorikk = brevHistorikk,
         tilbakekrevingOpprettet = tilbakekrevingOpprettet,
         opprettelsesvalg = opprettelsesvalg,
     )

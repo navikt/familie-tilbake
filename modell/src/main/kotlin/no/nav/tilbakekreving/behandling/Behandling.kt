@@ -28,7 +28,6 @@ import no.nav.tilbakekreving.behov.IverksettelseBehov
 import no.nav.tilbakekreving.beregning.Beregning
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
-import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
 import no.nav.tilbakekreving.entities.BehandlingEntity
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.historikk.Historikk
@@ -40,13 +39,12 @@ import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
-import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.tilstand.IverksettVedtak
 import java.time.LocalDateTime
 import java.util.UUID
 
-class Behandling private constructor(
+class Behandling internal constructor(
     override val internId: UUID,
     private val eksternId: UUID,
     private val behandlingstype: Behandlingstype,
@@ -61,7 +59,7 @@ class Behandling private constructor(
     private val faktasteg: Faktasteg,
     private val vilkårsvurderingsteg: Vilkårsvurderingsteg,
     private val foreslåVedtakSteg: ForeslåVedtakSteg,
-    val fatteVedtakSteg: FatteVedtakSteg,
+    private val fatteVedtakSteg: FatteVedtakSteg,
 ) : Historikk.HistorikkInnslag<UUID>, FrontendDto<BehandlingDto> {
     val faktastegDto: FrontendDto<FaktaFeilutbetalingDto> get() = faktasteg
     val foreldelsestegDto: FrontendDto<VurdertForeldelseDto> get() = foreldelsesteg
@@ -73,13 +71,13 @@ class Behandling private constructor(
 
     fun tilEntity(): BehandlingEntity {
         return BehandlingEntity(
-            internId = internId.toString(),
-            eksternId = eksternId.toString(),
-            behandlingstype = behandlingstype.name,
-            opprettet = opprettet.toString(),
-            sistEndret = sistEndret.toString(),
+            internId = internId,
+            eksternId = eksternId,
+            behandlingstype = behandlingstype,
+            opprettet = opprettet,
+            sistEndret = sistEndret,
             enhet = enhet?.tilEntity(),
-            årsak = årsak.name,
+            årsak = årsak,
             ansvarligSaksbehandlerEntity = ansvarligSaksbehandler.tilEntity(),
             eksternFagsakBehandlingRefEntity = eksternFagsakBehandling.entry.tilEntity(),
             kravgrunnlagHendelseRefEntity = kravgrunnlag.entry.tilEntity(),
@@ -159,11 +157,11 @@ class Behandling private constructor(
         )
     }
 
-    override fun ansvarligSaksbehandler(): Behandler {
+    fun ansvarligSaksbehandler(): Behandler {
         return ansvarligSaksbehandler
     }
 
-    override fun oppdaterAnsvarligSaksbehandler(behandler: Behandler) {
+    fun oppdaterAnsvarligSaksbehandler(behandler: Behandler) {
         ansvarligSaksbehandler = behandler
     }
 
@@ -344,32 +342,6 @@ class Behandling private constructor(
                 vilkårsvurderingsteg = vilkårsvurderingsteg,
                 foreslåVedtakSteg = foreslåVedtakSteg,
                 fatteVedtakSteg = fatteVedtakSteg,
-            )
-        }
-
-        fun fraEntity(
-            behandlingEntity: BehandlingEntity,
-            eksternFagsakBehandlingHistorikk: EksternFagsakBehandlingHistorikk,
-            kravgrunnlagHistorikk: KravgrunnlagHistorikk,
-        ): Behandling {
-            val eksternFagsak = eksternFagsakBehandlingHistorikk.nåværende()
-            val kravgrunnlag = kravgrunnlagHistorikk.nåværende()
-            return Behandling(
-                internId = UUID.fromString(behandlingEntity.internId),
-                eksternId = UUID.fromString(behandlingEntity.eksternId),
-                behandlingstype = Behandlingstype.valueOf(behandlingEntity.behandlingstype),
-                opprettet = LocalDateTime.parse(behandlingEntity.opprettet),
-                sistEndret = LocalDateTime.parse(behandlingEntity.sistEndret),
-                enhet = behandlingEntity.enhet?.fraEntity(),
-                årsak = Behandlingsårsakstype.valueOf(behandlingEntity.årsak),
-                ansvarligSaksbehandler = behandlingEntity.ansvarligSaksbehandlerEntity.fraEntity(),
-                eksternFagsakBehandling = eksternFagsak,
-                kravgrunnlag = kravgrunnlag,
-                foreldelsesteg = behandlingEntity.foreldelsestegEntity.fraEntity(kravgrunnlag),
-                faktasteg = behandlingEntity.faktastegEntity.fraEntity(eksternFagsak, kravgrunnlag),
-                vilkårsvurderingsteg = Vilkårsvurderingsteg.fraEntity(behandlingEntity.vilkårsvurderingstegEntity, kravgrunnlag),
-                foreslåVedtakSteg = behandlingEntity.foreslåVedtakStegEntity.fraEntity(),
-                fatteVedtakSteg = FatteVedtakSteg.fraEntity(behandlingEntity.fatteVedtakStegEntity),
             )
         }
     }
