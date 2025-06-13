@@ -193,7 +193,7 @@ class Vilkårsvurderingsteg(
         fun tilEntity(): VilkårsvurderingsperiodeEntity {
             return VilkårsvurderingsperiodeEntity(
                 id = id.toString(),
-                periode = DatoperiodeEntity(periode.fom.toString(), periode.tom.toString()),
+                periode = DatoperiodeEntity(periode.fom, periode.tom),
                 begrunnelseForTilbakekreving = begrunnelseForTilbakekreving,
                 vurdering = _vurdering.tilEntity(),
             )
@@ -247,7 +247,7 @@ class Vilkårsvurderingsteg(
 
                     override fun tilEntity(): BeløpIBeholdEntity {
                         return BeløpIBeholdJaEntity(
-                            beløp = beløp.toString(),
+                            beløp = beløp,
                         )
                     }
                 }

@@ -47,9 +47,9 @@ class KravgrunnlagHendelse(
     fun tilEntity(): KravgrunnlagHendelseEntity {
         return KravgrunnlagHendelseEntity(
             internId = internId.toString(),
-            vedtakId = vedtakId.toString(),
+            vedtakId = vedtakId,
             kravstatuskode = kravstatuskode.navn,
-            fagsystemVedtaksdato = fagsystemVedtaksdato.toString(),
+            fagsystemVedtaksdato = fagsystemVedtaksdato,
             vedtakGjelder = tilAktørEntity(vedtakGjelder),
             utbetalesTil = tilAktørEntity(utbetalesTil),
             skalBeregneRenter = skalBeregneRenter,
@@ -92,8 +92,8 @@ class KravgrunnlagHendelse(
 
         fun tilEntity(): KravgrunnlagPeriodeEntity {
             return KravgrunnlagPeriodeEntity(
-                periode = DatoperiodeEntity(periode.fom.toString(), periode.tom.toString()),
-                månedligSkattebeløp = månedligSkattebeløp.toString(),
+                periode = DatoperiodeEntity(periode.fom, periode.tom),
+                månedligSkattebeløp = månedligSkattebeløp,
                 ytelsesbeløp = ytelsesbeløp.map { it.tilEntity() },
                 feilutbetaltBeløp = feilutbetaltBeløp.map { it.tilEntity() },
             )
@@ -121,10 +121,10 @@ class KravgrunnlagHendelse(
                 return BeløpEntity(
                     klassekode = klassekode,
                     klassetype = klassetype,
-                    opprinneligUtbetalingsbeløp = opprinneligUtbetalingsbeløp.toString(),
-                    nyttBeløp = nyttBeløp.toString(),
-                    tilbakekrevesBeløp = tilbakekrevesBeløp.toString(),
-                    skatteprosent = skatteprosent.toString(),
+                    opprinneligUtbetalingsbeløp = opprinneligUtbetalingsbeløp,
+                    nyttBeløp = nyttBeløp,
+                    tilbakekrevesBeløp = tilbakekrevesBeløp,
+                    skatteprosent = skatteprosent,
                 )
             }
         }
@@ -146,7 +146,8 @@ class KravgrunnlagHendelse(
 
         companion object {
             fun fraNavn(navn: String): Kravstatuskode {
-                return entries.find { it.navn == navn }!!
+                return entries.find { it.navn == navn }
+                    ?: throw IllegalArgumentException("Ingen kravstatuskode med navn=$navn ble funnet")
             }
         }
     }

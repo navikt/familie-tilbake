@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.eksternfagsak
 
 import no.nav.tilbakekreving.entities.EksternFagsakBehandlingEntity
+import no.nav.tilbakekreving.entities.EksternFagsakBehandlingType
 import no.nav.tilbakekreving.historikk.Historikk
 import java.time.LocalDate
 import java.util.UUID
@@ -33,21 +34,29 @@ sealed class EksternFagsakBehandling(
         override val begrunnelseForTilbakekreving: String = "Ukjent - finn i fagsystem"
         override val revurderingsvedtaksdato: LocalDate = revurderingsdatoFraKravgrunnlag ?: LocalDate.MIN
     }
-}
-    internal val eksternId: String,
-    val revurderingsresultat: String,
-    val revurderingsårsak: String,
-    val begrunnelseForTilbakekreving: String,
-    val revurderingsvedtaksdato: LocalDate,
-) : Historikk.HistorikkInnslag<UUID> {
+
     fun tilEntity(): EksternFagsakBehandlingEntity {
-        return EksternFagsakBehandlingEntity(
-            internId = internId.toString(),
-            eksternId = eksternId,
-            revurderingsresultat = revurderingsresultat,
-            revurderingsårsak = revurderingsårsak,
-            revurderingsvedtaksdato = revurderingsvedtaksdato.toString(),
-            begrunnelseForTilbakekreving = begrunnelseForTilbakekreving,
-        )
+        return when (this) {
+            is Behandling -> EksternFagsakBehandlingEntity(
+                type = EksternFagsakBehandlingType.BEHANDLING,
+                internId = internId.toString(),
+                eksternId = eksternId,
+                revurderingsresultat = revurderingsresultat,
+                revurderingsårsak = revurderingsårsak,
+                begrunnelseForTilbakekreving = begrunnelseForTilbakekreving,
+                revurderingsvedtaksdato = revurderingsvedtaksdato.toString(),
+            )
+
+            is Ukjent -> EksternFagsakBehandlingEntity(
+                type = EksternFagsakBehandlingType.UKJENT,
+                internId = internId.toString(),
+                eksternId = eksternId,
+                revurderingsresultat = revurderingsresultat,
+                revurderingsårsak = revurderingsårsak,
+                begrunnelseForTilbakekreving = begrunnelseForTilbakekreving,
+                revurderingsvedtaksdato = revurderingsvedtaksdato.toString(),
+                revurderingsdatoFraKravgrunnlag = revurderingsdatoFraKravgrunnlag?.toString(),
+            )
+        }
     }
 }

@@ -4,5 +4,5 @@ plugins {
 dependencies {
     api(project(":kontrakter-intern"))
     api(project(":kontrakter-ekstern-v2"))
-    implementation("io.ktor:ktor-serialization-kotlinx-json:3.1.3")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 }

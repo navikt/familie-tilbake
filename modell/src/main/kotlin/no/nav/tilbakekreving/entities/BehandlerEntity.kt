@@ -1,9 +1,7 @@
 package no.nav.tilbakekreving.entities
 
-import kotlinx.serialization.Serializable
 import no.nav.tilbakekreving.saksbehandler.Behandler
 
-@Serializable
 data class BehandlerEntity(
     val type: String,
     val ident: String,

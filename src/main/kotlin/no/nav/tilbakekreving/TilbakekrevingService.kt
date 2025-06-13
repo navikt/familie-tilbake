@@ -55,6 +55,7 @@ import java.util.UUID
 class TilbakekrevingService(
     private val applicationProperties: ApplicationProperties,
     private val pdlClient: PdlClient,
+    private val kravgrunnlagBufferRepository: KravgrunnlagBufferRepository,
     private val snapshotRepo: TilbakekrevingSnapshot,
 ) {
     private final val behovObservatør = Observatør()
@@ -68,26 +69,24 @@ class TilbakekrevingService(
             behandlinger = EksternFagsakBehandlingHistorikk(mutableListOf()),
             behovObservatør = behovObservatør,
         )
-    private val eksempelsaker =
-        listOf(
-            Tilbakekreving(
-                eksternFagsak,
-                opprettet = LocalDateTime.of(2025, Month.MARCH, 15, 12, 0),
-                behandlingHistorikk =
-                    BehandlingHistorikk(mutableListOf()),
-                behovObservatør = behovObservatør,
-                kravgrunnlagHistorikk = KravgrunnlagHistorikk(mutableListOf()),
-                brevHistorikk = BrevHistorikk(mutableListOf()),
-                opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
-            ).apply {
-                håndter(
-                    OpprettTilbakekrevingEvent(
-                        EksternFagsakDto(
-                            fagsystem = Fagsystem.BA,
-                            ytelsestype = Ytelsestype.BARNETRYGD,
-                            eksternId = "TEST-101010",
-                        ),
-                        opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
+    private val eksempelsaker = mutableListOf(
+        Tilbakekreving(
+            id = UUID.randomUUID(),
+            eksternFagsak = eksternFagsak,
+            opprettet = LocalDateTime.of(2025, Month.MARCH, 15, 12, 0),
+            behandlingHistorikk =
+                BehandlingHistorikk(mutableListOf()),
+            behovObservatør = behovObservatør,
+            kravgrunnlagHistorikk = KravgrunnlagHistorikk(mutableListOf()),
+            brevHistorikk = BrevHistorikk(mutableListOf()),
+            opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
+        ).apply {
+            håndter(
+                OpprettTilbakekrevingHendelse(
+                    opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
+                    eksternFagsak = OpprettTilbakekrevingHendelse.EksternFagsak(
+                        ytelse = Ytelse.Barnetrygd,
+                        eksternId = "TEST-101010",
                     ),
                 ),
             )
@@ -150,12 +149,11 @@ class TilbakekrevingService(
 
     fun gjennopprettTilbakekreving(
         id: UUID,
-        // Denne kan fjernes når vi har en bedre måte å teste på
+        // TODO Denne kan fjernes når vi har en bedre måte å teste på
         snapshotRepo: TilbakekrevingSnapshot,
     ): Tilbakekreving? {
         val tilbakekreving = snapshotRepo.henteTilstand(id)?.fraEntity(behovObservatør)
         return tilbakekreving
-
     }
 
     fun hentTilbakekreving(behandlingId: UUID): Tilbakekreving? {
@@ -275,7 +273,7 @@ class TilbakekrevingService(
                 periode.periode,
                 when (periode.foreldelsesvurderingstype) {
                     Foreldelsesvurderingstype.IKKE_VURDERT -> Foreldelsesteg.Vurdering.IkkeVurdert
-                    Foreldelsesvurderingstype.FORELDET -> Foreldelsesteg.Vurdering.Foreldet(periode.begrunnelse, periode.foreldelsesfrist!!)
+                    Foreldelsesvurderingstype.FORELDET -> Foreldelsesteg.Vurdering.Foreldet(periode.begrunnelse)
                     Foreldelsesvurderingstype.IKKE_FORELDET -> Foreldelsesteg.Vurdering.IkkeForeldet(periode.begrunnelse)
                     Foreldelsesvurderingstype.TILLEGGSFRIST -> Foreldelsesteg.Vurdering.Tilleggsfrist(periode.foreldelsesfrist!!, periode.oppdagelsesdato!!)
                 },
@@ -429,19 +427,20 @@ class TilbakekrevingService(
         }
     }
 
-    fun <T> håndterHendleseForTest(
-        hendelse: T,
-        tilbakekreving: Tilbakekreving,
-        snapshot: TilbakekrevingSnapshot,
-    ) {
-        when (hendelse) {
-            is OpprettTilbakekrevingEvent -> tilbakekreving.håndter(hendelse as OpprettTilbakekrevingEvent)
-            is KravgrunnlagHendelse -> tilbakekreving.håndter(hendelse as KravgrunnlagHendelse)
-            is FagsysteminfoHendelse -> tilbakekreving.håndter(hendelse as FagsysteminfoHendelse)
-            is BrukerinfoHendelse -> tilbakekreving.håndter(hendelse as BrukerinfoHendelse)
-            is VarselbrevSendtHendelse -> tilbakekreving.håndter(hendelse as VarselbrevSendtHendelse)
-        }
+    fun lesKravgrunnlag() {
+        val ikkeHåndterteKravgrunnlag = kravgrunnlagBufferRepository.hentUlesteKravgrunnlag()
+        ikkeHåndterteKravgrunnlag.forEach { entity ->
+            val kravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(entity.kravgrunnlag)
 
-        snapshot.lagreTilstand(tilbakekreving.tilEntity())
+            val tilbakekreving = Tilbakekreving.opprett(
+                behovObservatør = behovObservatør,
+                opprettTilbakekrevingEvent = KravgrunnlagMapper.tilOpprettTilbakekrevingHendelse(kravgrunnlag),
+            )
+
+            tilbakekreving.håndter(KravgrunnlagMapper.tilKravgrunnlagHendelse(kravgrunnlag))
+
+            eksempelsaker.add(tilbakekreving)
+            kravgrunnlagBufferRepository.markerLest(entity.kravgrunnlagId)
+        }
     }
 }

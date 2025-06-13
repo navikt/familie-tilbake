@@ -1,8 +1,5 @@
 package no.nav.tilbakekreving.entities
 
-import kotlinx.serialization.Serializable
-
-@Serializable
 data class BehandlingEntity(
     val internId: String,
     val eksternId: String,
@@ -14,7 +11,7 @@ data class BehandlingEntity(
     var ansvarligSaksbehandlerEntity: BehandlerEntity,
     val eksternFagsakBehandlingRefEntity: EksternFagsakBehandlingEntity,
     val kravgrunnlagHendelseRefEntity: KravgrunnlagHendelseEntity,
-    val foreldelsestegEntity: ForeldelsestegEntity,
+    val foreldelsestegEntity: ForeldelsesstegEntity,
     val faktastegEntity: FaktastegEntity,
     val vilkårsvurderingstegEntity: VilkårsvurderingstegEntity,
     val foreslåVedtakStegEntity: ForeslåVedtakStegEntity,

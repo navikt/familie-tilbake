@@ -13,7 +13,6 @@ import no.nav.tilbakekreving.api.v1.dto.GodTroDto
 import no.nav.tilbakekreving.api.v1.dto.PeriodeMedTekstDto
 import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertTotrinnDto
-import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
@@ -49,7 +48,6 @@ class GjennoppretteTilbakekrevingTest : OppslagSpringRunnerTest() {
         tilbakekreving: Tilbakekreving,
     ) {
         when (hendelse) {
-            is OpprettTilbakekrevingEvent -> tilbakekreving.håndter(hendelse as OpprettTilbakekrevingEvent)
             is KravgrunnlagHendelse -> tilbakekreving.håndter(hendelse as KravgrunnlagHendelse)
             is FagsysteminfoHendelse -> tilbakekreving.håndter(hendelse as FagsysteminfoHendelse)
             is BrukerinfoHendelse -> tilbakekreving.håndter(hendelse as BrukerinfoHendelse)
@@ -60,7 +58,7 @@ class GjennoppretteTilbakekrevingTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagTilbakekrevingKlarTilBehandling(): Tilbakekreving {
-        val opprettEvent = opprettTilbakekrevingEvent(opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL)
+        val opprettEvent = opprettTilbakekrevingHendelse(opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL)
         val tilbakekreving = Tilbakekreving.opprett(BehovObservatørOppsamler(), opprettEvent)
         håndterHendleseForTest(opprettEvent, tilbakekreving)
         håndterHendleseForTest(kravgrunnlag(), tilbakekreving)
@@ -72,7 +70,7 @@ class GjennoppretteTilbakekrevingTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `gjennopprette tilbakekreving etter at hendelsene er håndtert`() {
-        val opprettEvent = opprettTilbakekrevingEvent(opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL)
+        val opprettEvent = opprettTilbakekrevingHendelse(opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL)
         val tilbakekreving = Tilbakekreving.opprett(BehovObservatørOppsamler(), opprettEvent)
 
         tilbakekreving.hentTilstandsnavn() shouldBe Start.navn

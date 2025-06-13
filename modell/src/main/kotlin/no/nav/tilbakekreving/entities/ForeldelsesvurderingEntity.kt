@@ -1,24 +1,45 @@
 package no.nav.tilbakekreving.entities
 
-import kotlinx.serialization.Serializable
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg.Vurdering
 import java.time.LocalDate
 
-@Serializable
 data class ForeldelsesvurderingEntity(
-    val type: String,
+    val type: ForeldelsesvurderingType,
     val begrunnelse: String? = null,
-    val frist: String? = null,
-    val oppdaget: String? = null,
+    val frist: LocalDate? = null,
+    val oppdaget: LocalDate? = null,
 ) {
     fun fraEntity(): Vurdering {
-        val vurdering = when {
-            type.contains("IKKE_FORELDET") -> Vurdering.IkkeForeldet(begrunnelse!!)
-            type.contains("IKKE_VURDERT") -> Vurdering.IkkeVurdert
-            type.contains("TILLEGGSFRIST") -> Vurdering.Tilleggsfrist(LocalDate.parse(frist!!), LocalDate.parse(oppdaget!!))
-            type.contains("FORELDET") -> Vurdering.Foreldet(begrunnelse!!)
-            else -> throw IllegalArgumentException("Ugyldig type: $type")
+        return when (type) {
+            ForeldelsesvurderingType.IKKE_FORELDET -> {
+                if (begrunnelse != null) {
+                    Vurdering.IkkeForeldet(begrunnelse)
+                } else {
+                    throw IllegalArgumentException("Begrunnelse kreves for IKKE_FORELDET")
+                }
+            }
+            ForeldelsesvurderingType.TILLEGGSFRIST -> {
+                if (frist != null && oppdaget != null) {
+                    Vurdering.Tilleggsfrist(frist, oppdaget)
+                } else {
+                    throw IllegalArgumentException("Frist og oppdaget kreves for TILLEGGSFRIST")
+                }
+            }
+            ForeldelsesvurderingType.FORELDET -> {
+                if (begrunnelse != null) {
+                    Vurdering.Foreldet(begrunnelse)
+                } else {
+                    throw IllegalArgumentException("Begrunnelse kreves for FORELDET")
+                }
+            }
+            ForeldelsesvurderingType.IKKE_VURDERT -> Vurdering.IkkeVurdert
         }
-        return vurdering
     }
+}
+
+enum class ForeldelsesvurderingType {
+    IKKE_FORELDET,
+    TILLEGGSFRIST,
+    FORELDET,
+    IKKE_VURDERT,
 }

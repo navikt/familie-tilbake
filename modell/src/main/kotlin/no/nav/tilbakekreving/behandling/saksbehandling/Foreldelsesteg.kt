@@ -4,8 +4,9 @@ import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelsesperiodeDto
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.ForeldelseperiodeEntity
-import no.nav.tilbakekreving.entities.ForeldelsestegEntity
+import no.nav.tilbakekreving.entities.ForeldelsesstegEntity
 import no.nav.tilbakekreving.entities.ForeldelsesvurderingEntity
+import no.nav.tilbakekreving.entities.ForeldelsesvurderingType
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
@@ -79,8 +80,8 @@ class Foreldelsesteg(
         )
     }
 
-    fun tilEntity(): ForeldelsestegEntity {
-        return ForeldelsestegEntity(
+    fun tilEntity(): ForeldelsesstegEntity {
+        return ForeldelsesstegEntity(
             vurdertePerioder = vurdertePerioder.map { it.tilEntity() },
             kravgrunnlagRef = kravgrunnlag.entry.internId.toString(),
         )
@@ -100,12 +101,12 @@ class Foreldelsesteg(
         fun tilEntity(): ForeldelseperiodeEntity {
             return ForeldelseperiodeEntity(
                 id = id.toString(),
-                periode = DatoperiodeEntity(periode.fom.toString(), periode.tom.toString()),
+                periode = DatoperiodeEntity(periode.fom, periode.tom),
                 foreldelsesvurdering = when (_vurdering) {
-                    is Vurdering.IkkeForeldet -> ForeldelsesvurderingEntity(type = "IKKE_FORELDET", begrunnelse = _vurdering.begrunnelse)
-                    is Vurdering.IkkeVurdert -> ForeldelsesvurderingEntity(type = "IKKE_VURDERT")
-                    is Vurdering.Tilleggsfrist -> ForeldelsesvurderingEntity(type = "TILLEGGSFRIST", frist = _vurdering.frist.toString(), oppdaget = (_vurdering as Vurdering.Tilleggsfrist).oppdaget.toString())
-                    is Vurdering.Foreldet -> ForeldelsesvurderingEntity(type = "FORELDET", begrunnelse = _vurdering.begrunnelse)
+                    is Vurdering.IkkeForeldet -> ForeldelsesvurderingEntity(type = ForeldelsesvurderingType.IKKE_FORELDET, begrunnelse = _vurdering.begrunnelse)
+                    is Vurdering.IkkeVurdert -> ForeldelsesvurderingEntity(type = ForeldelsesvurderingType.IKKE_VURDERT)
+                    is Vurdering.Tilleggsfrist -> ForeldelsesvurderingEntity(type = ForeldelsesvurderingType.TILLEGGSFRIST, frist = _vurdering.frist, oppdaget = (_vurdering as Vurdering.Tilleggsfrist).oppdaget)
+                    is Vurdering.Foreldet -> ForeldelsesvurderingEntity(type = ForeldelsesvurderingType.FORELDET, begrunnelse = _vurdering.begrunnelse)
                 },
             )
         }

@@ -4,8 +4,8 @@ import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.api.v2.EksternFagsakDto
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
-import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.entities.EksternFagsakEntity
+import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import java.time.LocalDate
@@ -59,9 +59,8 @@ class EksternFagsak(
     fun tilEntity(): EksternFagsakEntity {
         return EksternFagsakEntity(
             eksternId = eksternId,
-            ytelsestype = ytelsestype.kode,
-            fagsystem = fagsystem.navn,
-            behandlinger = behandlinger.tilEntity(),
+            ytelseEntity = ytelse.tilEntity(),
+            behandlinger = behandlinger.henHistorikk(),
         )
     }
 }

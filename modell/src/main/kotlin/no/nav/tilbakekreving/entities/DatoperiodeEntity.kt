@@ -1,15 +1,13 @@
 package no.nav.tilbakekreving.entities
 
-import kotlinx.serialization.Serializable
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import java.time.LocalDate
 
-@Serializable
 data class DatoperiodeEntity(
-    val fom: String,
-    val tom: String,
+    val fom: LocalDate,
+    val tom: LocalDate,
 ) {
     fun fraEntity(): Datoperiode {
-        return Datoperiode(LocalDate.parse(fom), LocalDate.parse(tom))
+        return Datoperiode(fom, tom)
     }
 }

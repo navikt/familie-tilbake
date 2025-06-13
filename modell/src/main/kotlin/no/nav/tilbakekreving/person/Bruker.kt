@@ -3,8 +3,8 @@ package no.nav.tilbakekreving.person
 import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.BrukerinfoBehov
-import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.entities.BrukerEntity
+import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.kontrakter.bruker.FrontendBrukerDto
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
@@ -46,9 +46,9 @@ class Bruker(
             ident = ident,
             språkkode = språkkode?.name,
             navn = navn,
-            fødselsdato = fødselsdato?.let { fødselsdato.toString() },
+            fødselsdato = fødselsdato?.let { fødselsdato },
             kjønn = kjønn?.name,
-            dødsdato = dødsdato?.let { dødsdato.toString() },
+            dødsdato = dødsdato?.let { dødsdato },
         )
     }
 
