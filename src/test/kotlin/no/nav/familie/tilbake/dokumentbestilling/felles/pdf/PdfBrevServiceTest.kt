@@ -13,7 +13,7 @@ import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstype
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmetadata
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
@@ -126,7 +126,7 @@ internal class PdfBrevServiceTest {
                     behandlendeEnhetsNavn = "",
                     ansvarligSaksbehandler = "Bob",
                     språkkode = Språkkode.NB,
-                    ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
+                    ytelsestype = YtelsestypeDTO.OVERGANGSSTØNAD,
                     saksnummer = "1232456",
                     behandlingstype = Behandlingstype.TILBAKEKREVING,
                     gjelderDødsfall = false,

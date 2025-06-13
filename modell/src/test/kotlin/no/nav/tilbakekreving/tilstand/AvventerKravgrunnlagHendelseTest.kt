@@ -6,29 +6,26 @@ import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kravgrunnlag
-import no.nav.tilbakekreving.opprettTilbakekrevingEvent
+import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import org.junit.jupiter.api.Test
 
 class AvventerKravgrunnlagHendelseTest {
     @Test
     fun `tilbakekreving i AvventerKravgrunnlag går videre med Kravgrunnlag`() {
         val oppsamler = BehovObservatørOppsamler()
-        val opprettTilbakekrevingEvent = opprettTilbakekrevingEvent()
+        val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
         val tilbakekreving = Tilbakekreving.opprett(oppsamler, opprettTilbakekrevingEvent)
-        tilbakekreving.håndter(opprettTilbakekrevingEvent)
+
         tilbakekreving.håndter(kravgrunnlag())
 
         tilbakekreving.tilstand shouldBe AvventerFagsysteminfo
         oppsamler.behovListe.forOne {
-            it shouldBeEqual
-                FagsysteminfoBehov(
-                    opprettTilbakekrevingEvent.eksternFagsak.eksternId,
-                    Fagsystem.BA,
-                    Ytelsestype.BARNETRYGD,
-                )
+            it shouldBeEqual FagsysteminfoBehov(
+                eksternFagsakId = opprettTilbakekrevingEvent.eksternFagsak.eksternId,
+                ytelse = Ytelse.Barnetrygd,
+            )
         }
     }
 }

@@ -7,6 +7,7 @@ import io.mockk.slot
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
+import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
@@ -21,7 +22,6 @@ import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.tilbakekreving.Rettsgebyr
 import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode.Companion.til
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.YearMonth

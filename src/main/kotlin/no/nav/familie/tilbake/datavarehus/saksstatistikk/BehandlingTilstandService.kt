@@ -87,7 +87,7 @@ class BehandlingTilstandService(
                     setProperty("beskrivelse", hendelsesbeskrivelse)
                     setProperty(
                         PropertyName.FAGSYSTEM,
-                        FagsystemUtil.hentFagsystemFraYtelsestype(behandlingstilstand.ytelsestype).name,
+                        FagsystemUtil.hentFagsystemFraYtelsestype(behandlingstilstand.ytelsestype.tilDTO()).name,
                     )
                 },
             )

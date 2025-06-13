@@ -4,6 +4,7 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
@@ -13,7 +14,6 @@ import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstidspunkt
 import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstype
 import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
 import no.nav.familie.tilbake.log.TracedLogger
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -55,7 +55,7 @@ class DistribuerDokumentVedDødsfallTask(
             try {
                 integrasjonerClient.distribuerJournalpost(
                     journalpostId,
-                    Fagsystem.valueOf(fagsystem),
+                    Fagsystem.valueOf(fagsystem).tilDTO(),
                     Distribusjonstype.valueOf(task.metadata.getProperty("distribusjonstype")),
                     Distribusjonstidspunkt.valueOf(task.metadata.getProperty("distribusjonstidspunkt")),
                 )

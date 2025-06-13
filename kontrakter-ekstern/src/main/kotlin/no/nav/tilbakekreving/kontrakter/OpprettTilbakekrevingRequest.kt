@@ -5,14 +5,14 @@ import jakarta.validation.constraints.Pattern
 import no.nav.tilbakekreving.kontrakter.brev.Brevmottaker
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.verge.Verge
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import java.time.LocalDate
 
 data class OpprettTilbakekrevingRequest(
-    val fagsystem: Fagsystem,
+    val fagsystem: FagsystemDTO,
     val regelverk: Regelverk? = null,
-    val ytelsestype: Ytelsestype,
+    val ytelsestype: YtelsestypeDTO,
     val eksternFagsakId: String,
     @field:Pattern(regexp = "(^$|.{11})", message = "PersonIdent er ikke riktig")
     val personIdent: String,

@@ -13,6 +13,7 @@ import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.data.Testdata
@@ -26,7 +27,6 @@ import no.nav.familie.tilbake.oppgave.OppgavePrioritetService
 import no.nav.familie.tilbake.oppgave.OppgaveService
 import no.nav.familie.tilbake.person.PersonService
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach

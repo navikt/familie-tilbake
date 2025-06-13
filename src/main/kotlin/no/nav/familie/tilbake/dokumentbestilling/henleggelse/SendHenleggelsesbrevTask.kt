@@ -6,11 +6,11 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.kontrakter.objectMapper
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.util.Properties

@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.api
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
 import no.nav.familie.tilbake.behandling.BehandlingService
+import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.common.ContextService
@@ -85,7 +86,7 @@ class BehandlingController(
         opprettManueltTilbakekrevingRequest: OpprettManueltTilbakekrevingRequest,
     ): Ressurs<String> {
         tilgangskontrollService.validerTilgangYtelsetypeOgFagsakId(
-            ytelsestype = opprettManueltTilbakekrevingRequest.ytelsestype,
+            ytelsestype = Ytelsestype.forDTO(opprettManueltTilbakekrevingRequest.ytelsestype),
             eksternFagsakId = opprettManueltTilbakekrevingRequest.eksternFagsakId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
             auditLoggerEvent = AuditLoggerEvent.CREATE,

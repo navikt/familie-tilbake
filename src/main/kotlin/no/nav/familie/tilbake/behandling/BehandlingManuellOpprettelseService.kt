@@ -4,7 +4,6 @@ import no.nav.tilbakekreving.FagsystemUtil
 import no.nav.tilbakekreving.kontrakter.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandling
 import no.nav.tilbakekreving.kontrakter.OpprettTilbakekrevingRequest
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -39,8 +38,8 @@ class BehandlingManuellOpprettelseService(
         ansvarligSaksbehandler: String,
     ): OpprettTilbakekrevingRequest =
         OpprettTilbakekrevingRequest(
-            fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype),
-            ytelsestype = ytelsestype,
+            fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype.tilDTO()),
+            ytelsestype = ytelsestype.tilDTO(),
             eksternFagsakId = eksternFagsakId,
             eksternId = eksternId,
             behandlingstype = Behandlingstype.TILBAKEKREVING,

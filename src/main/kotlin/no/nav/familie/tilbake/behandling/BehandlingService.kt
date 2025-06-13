@@ -57,8 +57,6 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.brev.Brevmottaker
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -123,7 +121,7 @@ class BehandlingService(
         val kanBehandlingOpprettesManuelt =
             fagsakService.kanBehandlingOpprettesManuelt(
                 opprettManueltTilbakekrevingRequest.eksternFagsakId,
-                opprettManueltTilbakekrevingRequest.ytelsestype,
+                Ytelsestype.forDTO(opprettManueltTilbakekrevingRequest.ytelsestype),
             )
         if (!kanBehandlingOpprettesManuelt.kanBehandlingOpprettes) {
             throw Feil(
@@ -219,14 +217,14 @@ class BehandlingService(
         val kanEndres: Boolean = kanBehandlingEndres(behandling, fagsak.fagsystem, logContext)
 
         val behandlerrolle =
-            tilgangService.finnBehandlerrolle(fagsak.fagsystem) ?: throw Feil(
+            tilgangService.finnBehandlerrolle(fagsak.fagsystem.tilDTO()) ?: throw Feil(
                 message = "Kunne ikke finne Behandlerrolle",
                 logContext = logContext,
             )
 
         val kanSetteBehandlingTilbakeTilFakta = kanSetteBehandlingTilbakeTilFakta(behandling, behandlerrolle, logContext)
         val kanRevurderingOpprettes: Boolean =
-            tilgangService.tilgangTilÅOppretteRevurdering(fagsak.fagsystem) && kanRevurderingOpprettes(behandling)
+            tilgangService.tilgangTilÅOppretteRevurdering(fagsak.fagsystem.tilDTO()) && kanRevurderingOpprettes(behandling)
         val støtterManuelleBrevmottakere =
             sjekkOmManuelleBrevmottakereErStøttet(
                 behandling = behandling,
@@ -574,7 +572,7 @@ class BehandlingService(
     ): Behandling {
         validerBehandlingService.validerOpprettBehandling(opprettTilbakekrevingRequest)
 
-        val fagsystem = opprettTilbakekrevingRequest.fagsystem
+        val fagsystem = Fagsystem.forDTO(opprettTilbakekrevingRequest.fagsystem)
         val tilbakekrevingsvalgErAutomatisk = opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK
 
         logOppretterBehandling(tilbakekrevingsvalgErAutomatisk, opprettTilbakekrevingRequest)
@@ -632,10 +630,10 @@ class BehandlingService(
     private fun finnEllerOpprettFagsak(
         request: OpprettTilbakekrevingRequest,
     ): Fagsak {
-        val eksisterendeFagsak = fagsakService.finnFagsak(request.fagsystem, request.eksternFagsakId)
+        val eksisterendeFagsak = fagsakService.finnFagsak(Fagsystem.forDTO(request.fagsystem), request.eksternFagsakId)
         val fagsak =
             eksisterendeFagsak
-                ?: fagsakService.opprettFagsak(request, request.ytelsestype, request.fagsystem)
+                ?: fagsakService.opprettFagsak(request, Ytelsestype.forDTO(request.ytelsestype), Fagsystem.forDTO(request.fagsystem))
         return fagsak
     }
 
@@ -737,7 +735,7 @@ class BehandlingService(
             return false
         }
 
-        return when (tilgangService.finnBehandlerrolle(fagsystem)) {
+        return when (tilgangService.finnBehandlerrolle(fagsystem.tilDTO())) {
             Behandlerrolle.SAKSBEHANDLER -> (Behandlingsstatus.UTREDES == behandling.status)
             Behandlerrolle.BESLUTTER, Behandlerrolle.SYSTEM -> true
             else -> false

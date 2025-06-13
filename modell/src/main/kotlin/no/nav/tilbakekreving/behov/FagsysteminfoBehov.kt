@@ -1,10 +1,8 @@
 package no.nav.tilbakekreving.behov
 
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.fagsystem.Ytelse
 
 data class FagsysteminfoBehov(
     val eksternFagsakId: String,
-    val fagsystem: Fagsystem,
-    val ytelsestype: Ytelsestype,
+    val ytelse: Ytelse,
 ) : Behov

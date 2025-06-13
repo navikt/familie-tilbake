@@ -14,6 +14,7 @@ import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingRequestSendtRepository
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
+import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
@@ -36,8 +37,8 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatu
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.verge.Verge
 import no.nav.tilbakekreving.kontrakter.verge.Vergetype
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -249,8 +250,8 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val request =
             OpprettTilbakekrevingRequest(
-                ytelsestype = Ytelsestype.BARNETRYGD,
-                fagsystem = Fagsystem.BA,
+                ytelsestype = YtelsestypeDTO.BARNETRYGD,
+                fagsystem = FagsystemDTO.BA,
                 eksternFagsakId = eksternFagsakId,
                 personIdent = "321321322",
                 eksternId = "0",

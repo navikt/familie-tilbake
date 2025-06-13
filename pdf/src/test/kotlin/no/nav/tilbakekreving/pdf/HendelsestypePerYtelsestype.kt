@@ -1,12 +1,12 @@
 package no.nav.tilbakekreving.pdf
 
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 
 object HendelsestypePerYtelsestype {
     private val HIERARKI =
         mapOf(
-            Ytelsestype.BARNETRYGD to
+            YtelsestypeDTO.BARNETRYGD to
                 setOf(
                     Hendelsestype.ANNET,
                     Hendelsestype.SATSER,
@@ -20,7 +20,7 @@ object HendelsestypePerYtelsestype {
                     Hendelsestype.BARNS_ALDER,
                     Hendelsestype.UTVIDET,
                 ),
-            Ytelsestype.OVERGANGSSTØNAD to
+            YtelsestypeDTO.OVERGANGSSTØNAD to
                 setOf(
                     Hendelsestype.ANNET,
                     Hendelsestype.MEDLEMSKAP,
@@ -33,7 +33,7 @@ object HendelsestypePerYtelsestype {
                     Hendelsestype.PENSJONSYTELSER,
                     Hendelsestype.DØDSFALL,
                 ),
-            Ytelsestype.BARNETILSYN to
+            YtelsestypeDTO.BARNETILSYN to
                 setOf(
                     Hendelsestype.ANNET,
                     Hendelsestype.MEDLEMSKAP,
@@ -42,7 +42,7 @@ object HendelsestypePerYtelsestype {
                     Hendelsestype.STØNAD_TIL_BARNETILSYN,
                     Hendelsestype.DØDSFALL,
                 ),
-            Ytelsestype.SKOLEPENGER to
+            YtelsestypeDTO.SKOLEPENGER to
                 setOf(
                     Hendelsestype.ANNET,
                     Hendelsestype.MEDLEMSKAP,
@@ -51,7 +51,7 @@ object HendelsestypePerYtelsestype {
                     Hendelsestype.DØDSFALL,
                     Hendelsestype.SKOLEPENGER,
                 ),
-            Ytelsestype.KONTANTSTØTTE to
+            YtelsestypeDTO.KONTANTSTØTTE to
                 setOf(
                     Hendelsestype.VILKÅR_BARN,
                     Hendelsestype.VILKÅR_SØKER,
@@ -64,5 +64,5 @@ object HendelsestypePerYtelsestype {
                 ),
         )
 
-    fun getHendelsestyper(ytelsestype: Ytelsestype): Set<Hendelsestype> = HIERARKI[ytelsestype] ?: error("Ikke-støttet ytelsestype: $ytelsestype")
+    fun getHendelsestyper(ytelsestype: YtelsestypeDTO): Set<Hendelsestype> = HIERARKI[ytelsestype] ?: error("Ikke-støttet ytelsestype: $ytelsestype")
 }

@@ -18,8 +18,6 @@ import no.nav.tilbakekreving.kontrakter.Behandling
 import no.nav.tilbakekreving.kontrakter.FinnesBehandlingResponse
 import no.nav.tilbakekreving.kontrakter.KanBehandlingOpprettesManueltRespons
 import no.nav.tilbakekreving.kontrakter.OpprettTilbakekrevingRequest
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import org.springframework.context.event.EventListener
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus

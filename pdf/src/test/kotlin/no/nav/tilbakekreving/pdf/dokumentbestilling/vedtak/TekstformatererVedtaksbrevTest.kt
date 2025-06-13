@@ -14,7 +14,7 @@ import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmetadata
 import no.nav.tilbakekreving.pdf.dokumentbestilling.vedtak.handlebars.dto.HbBehandling
@@ -59,7 +59,7 @@ class TekstformatererVedtaksbrevTest {
             ansvarligSaksbehandler = "Ansvarlig Saksbehandler",
             saksnummer = "1232456",
             språkkode = Språkkode.NB,
-            ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
+            ytelsestype = YtelsestypeDTO.OVERGANGSSTØNAD,
             gjelderDødsfall = false,
         )
 
@@ -931,7 +931,7 @@ class TekstformatererVedtaksbrevTest {
         @Test
         fun `skal generere vedtaksbrev for_KS_og forsett`() {
             val vedtaksbrevData = felles.copy(
-                brevmetadata = brevmetadata.copy(ytelsestype = Ytelsestype.KONTANTSTØTTE),
+                brevmetadata = brevmetadata.copy(ytelsestype = YtelsestypeDTO.KONTANTSTØTTE),
                 fagsaksvedtaksdato = LocalDate.now(),
                 totalresultat = HbTotalresultat(
                     hovedresultat = Vedtaksresultat.FULL_TILBAKEBETALING,
@@ -1131,7 +1131,7 @@ class TekstformatererVedtaksbrevTest {
                 ),
             )
             val vedtaksbrevData = felles.copy(
-                brevmetadata = brevmetadata.copy(ytelsestype = Ytelsestype.BARNETRYGD, gjelderDødsfall = true),
+                brevmetadata = brevmetadata.copy(ytelsestype = YtelsestypeDTO.BARNETRYGD, gjelderDødsfall = true),
                 fagsaksvedtaksdato = LocalDate.now(),
                 totalresultat = HbTotalresultat(
                     hovedresultat = Vedtaksresultat.INGEN_TILBAKEBETALING,
@@ -1183,7 +1183,7 @@ class TekstformatererVedtaksbrevTest {
             )
             val vedtaksbrevData = felles.copy(
                 brevmetadata = brevmetadata.copy(
-                    ytelsestype = Ytelsestype.BARNETRYGD,
+                    ytelsestype = YtelsestypeDTO.BARNETRYGD,
                     gjelderDødsfall = true,
                     språkkode = Språkkode.NN,
                 ),
@@ -1272,7 +1272,7 @@ class TekstformatererVedtaksbrevTest {
         @Test
         fun `lagVedtaksbrevFritekst skal generere fritekst og uten perioder vedtaksbrev revurdering for OS med full tilbakebetaling`() {
             val fritekstVedtaksbrevsdata: HbVedtaksbrevsdata =
-                lagFritekstVedtaksbrevData(Ytelsestype.OVERGANGSSTØNAD, Vedtaksresultat.FULL_TILBAKEBETALING)
+                lagFritekstVedtaksbrevData(YtelsestypeDTO.OVERGANGSSTØNAD, Vedtaksresultat.FULL_TILBAKEBETALING)
 
             val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(fritekstVedtaksbrevsdata)
 
@@ -1284,7 +1284,7 @@ class TekstformatererVedtaksbrevTest {
         @Test
         fun `lagVedtaksbrevFritekst skal generere fritekst og uten perioder vedtaksbrev revurdering for KS med ingen tilbakebetaling`() {
             val fritekstVedtaksbrevsdata = lagFritekstVedtaksbrevData(
-                ytelsestype = Ytelsestype.KONTANTSTØTTE,
+                ytelsestype = YtelsestypeDTO.KONTANTSTØTTE,
                 hovedresultat = Vedtaksresultat.INGEN_TILBAKEBETALING,
             )
 
@@ -1296,7 +1296,7 @@ class TekstformatererVedtaksbrevTest {
         }
 
         private fun lagFritekstVedtaksbrevData(
-            ytelsestype: Ytelsestype,
+            ytelsestype: YtelsestypeDTO,
             hovedresultat: Vedtaksresultat,
         ): HbVedtaksbrevsdata =
             HbVedtaksbrevsdata(
@@ -1325,7 +1325,7 @@ class TekstformatererVedtaksbrevTest {
         @Test
         fun `skal generere vedtaksbrev overskrift_OVERGANGSSTØNAD_full tilbakebetaling`() {
             val data: HbVedtaksbrevsdata =
-                lagBrevOverskriftTestoppsett(Ytelsestype.OVERGANGSSTØNAD, Vedtaksresultat.FULL_TILBAKEBETALING, Språkkode.NB)
+                lagBrevOverskriftTestoppsett(YtelsestypeDTO.OVERGANGSSTØNAD, Vedtaksresultat.FULL_TILBAKEBETALING, Språkkode.NB)
 
             val overskrift = TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(data)
 
@@ -1337,7 +1337,7 @@ class TekstformatererVedtaksbrevTest {
         fun `skal generere vedtaksbrev overskrift_kontantstøtte_full tilbakebetaling nynorsk`() {
             val data =
                 lagBrevOverskriftTestoppsett(
-                    Ytelsestype.KONTANTSTØTTE,
+                    YtelsestypeDTO.KONTANTSTØTTE,
                     Vedtaksresultat.FULL_TILBAKEBETALING,
                     Språkkode.NN,
                 )
@@ -1351,7 +1351,7 @@ class TekstformatererVedtaksbrevTest {
         @Test
         fun `skal generere vedtaksbrev overskrift_KONTANTSTØTTE_ingen tilbakebetaling`() {
             val data: HbVedtaksbrevsdata =
-                lagBrevOverskriftTestoppsett(Ytelsestype.OVERGANGSSTØNAD, Vedtaksresultat.INGEN_TILBAKEBETALING, Språkkode.NB)
+                lagBrevOverskriftTestoppsett(YtelsestypeDTO.OVERGANGSSTØNAD, Vedtaksresultat.INGEN_TILBAKEBETALING, Språkkode.NB)
 
             val overskrift = TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(data)
 
@@ -1360,7 +1360,7 @@ class TekstformatererVedtaksbrevTest {
         }
 
         private fun lagBrevOverskriftTestoppsett(
-            ytelsestype: Ytelsestype,
+            ytelsestype: YtelsestypeDTO,
             hovedresultat: Vedtaksresultat,
             språkkode: Språkkode,
         ): HbVedtaksbrevsdata =

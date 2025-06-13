@@ -27,7 +27,7 @@ import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmetadata
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
@@ -257,7 +257,7 @@ class VedtaksbrevgeneratorService(
 
         val klagefristIUker =
             when (brevmetadata.ytelsestype) {
-                Ytelsestype.KONTANTSTØTTE -> KLAGEFRIST_UKER_KONTANTSTØTTE
+                YtelsestypeDTO.KONTANTSTØTTE -> KLAGEFRIST_UKER_KONTANTSTØTTE
                 else -> KLAGEFRIST_UKER
             }
 
@@ -420,7 +420,7 @@ class VedtaksbrevgeneratorService(
             ansvarligSaksbehandler = ansvarligSaksbehandler,
             saksnummer = vedtaksbrevgrunnlag.eksternFagsakId,
             språkkode = språkkode,
-            ytelsestype = vedtaksbrevgrunnlag.ytelsestype,
+            ytelsestype = vedtaksbrevgrunnlag.ytelsestype.tilDTO(),
             gjelderDødsfall = personinfo.dødsdato != null,
             institusjon =
                 vedtaksbrevgrunnlag.institusjon?.let {

@@ -3,6 +3,8 @@ package no.nav.familie.tilbake.sikkerhet
 import io.ktor.util.toLowerCasePreservingASCIIRules
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.Fagsystem
+import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
@@ -16,9 +18,8 @@ import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.FagsystemUtil
 import no.nav.tilbakekreving.Tilbakekreving
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.Tema
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
 import java.math.BigInteger
@@ -70,7 +71,7 @@ class TilgangskontrollService(
         val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandling.id.toString())
 
         validate(
-            fagsystem = fagsak.fagsystem,
+            fagsystem = fagsak.fagsystem.tilDTO(),
             minimumBehandlerrolle = minimumBehandlerrolle,
             ident = fagsak.bruker.ident,
             eksternFagsakId = fagsak.eksternFagsakId,
@@ -89,7 +90,7 @@ class TilgangskontrollService(
         handling: String,
     ) {
         validerTilgangFagsystemOgFagsakId(
-            fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype),
+            fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype.tilDTO()),
             eksternFagsakId = eksternFagsakId,
             minimumBehandlerrolle = minimumBehandlerrolle,
             auditLoggerEvent = auditLoggerEvent,
@@ -98,14 +99,14 @@ class TilgangskontrollService(
     }
 
     fun validerTilgangFagsystemOgFagsakId(
-        fagsystem: Fagsystem,
+        fagsystem: FagsystemDTO,
         eksternFagsakId: String,
         minimumBehandlerrolle: Behandlerrolle,
         auditLoggerEvent: AuditLoggerEvent,
         handling: String,
     ) {
         val saksbehandler = ContextService.hentSaksbehandler(SecureLog.Context.tom())
-        val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(fagsystem, eksternFagsakId)
+        val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(Fagsystem.forDTO(fagsystem), eksternFagsakId)
         val logContext = SecureLog.Context.utenBehandling(fagsak?.eksternFagsakId)
         validate(
             fagsystem = fagsystem,
@@ -129,7 +130,7 @@ class TilgangskontrollService(
         val økonomiXmlMottatt = økonomiXmlMottattRepository.findByIdOrThrow(mottattXmlId)
 
         validate(
-            fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(økonomiXmlMottatt.ytelsestype),
+            fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(økonomiXmlMottatt.ytelsestype.tilDTO()),
             minimumBehandlerrolle = minimumBehandlerrolle,
             ident = null,
             eksternFagsakId = null,
@@ -166,7 +167,7 @@ class TilgangskontrollService(
                 )
 
         validate(
-            fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype),
+            fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype.tilDTO()),
             minimumBehandlerrolle = minimumBehandlerrolle,
             ident = null,
             eksternFagsakId = null,
@@ -178,7 +179,7 @@ class TilgangskontrollService(
     }
 
     private fun validate(
-        fagsystem: Fagsystem,
+        fagsystem: FagsystemDTO,
         minimumBehandlerrolle: Behandlerrolle,
         ident: String?,
         eksternFagsakId: String?,
@@ -255,13 +256,13 @@ class TilgangskontrollService(
 
     private fun validateEgenAnsattKode6Kode7(
         personIBehandlingen: String?,
-        fagsystem: Fagsystem,
+        fagsystem: FagsystemDTO,
         handling: String,
         saksbehandler: String,
     ) {
         if (personIBehandlingen == null) return
 
-        val tilganger = integrasjonerClient.sjekkTilgangTilPersoner(listOf(personIBehandlingen), fagsystem.tilTema())
+        val tilganger = integrasjonerClient.sjekkTilgangTilPersoner(listOf(personIBehandlingen), Fagsystem.forDTO(fagsystem).tilTema())
         if (tilganger.any { !it.harTilgang }) {
             throw ForbiddenError(
                 message = "$saksbehandler har ikke tilgang til person i $handling",

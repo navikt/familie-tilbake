@@ -1,6 +1,6 @@
 package no.nav.tilbakekreving.pdf.dokumentbestilling.innhentdokumentasjon.handlebars.dto
 
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmetadata
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.getAnnenMottagersNavn
 import no.nav.tilbakekreving.pdf.handlebars.dto.BaseDokument
@@ -24,13 +24,13 @@ data class InnhentDokumentasjonsbrevsdokument(
     val annenMottagersNavn: String? = getAnnenMottagersNavn(brevmetadata)
 
     @Suppress("unused") // Handlebars
-    val isRentepliktig = ytelsestype != Ytelsestype.BARNETRYGD && ytelsestype != Ytelsestype.KONTANTSTØTTE
+    val isRentepliktig = ytelsestype != YtelsestypeDTO.BARNETRYGD && ytelsestype != YtelsestypeDTO.KONTANTSTØTTE
 
     @Suppress("unused") // Handlebars
-    val isBarnetrygd = ytelsestype == Ytelsestype.BARNETRYGD
+    val isBarnetrygd = ytelsestype == YtelsestypeDTO.BARNETRYGD
 
     @Suppress("unused") // Handlebars
-    val isKontantstøtte = ytelsestype == Ytelsestype.KONTANTSTØTTE
+    val isKontantstøtte = ytelsestype == YtelsestypeDTO.KONTANTSTØTTE
 
     init {
         if (finnesVerge) {

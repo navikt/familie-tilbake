@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.micrometer
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.Tags
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Fagsak
@@ -13,7 +14,6 @@ import no.nav.familie.tilbake.micrometer.domain.MeldingstellingRepository
 import no.nav.familie.tilbake.micrometer.domain.Meldingstype
 import no.nav.familie.tilbake.micrometer.domain.Mottaksstatus
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate

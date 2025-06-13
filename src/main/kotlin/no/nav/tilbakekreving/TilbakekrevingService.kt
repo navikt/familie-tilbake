@@ -5,6 +5,7 @@ import no.nav.familie.tilbake.config.ApplicationProperties
 import no.nav.familie.tilbake.integration.pdl.PdlClient
 import no.nav.familie.tilbake.integration.pdl.internal.PdlKjønnType
 import no.nav.familie.tilbake.kontrakter.personopplysning.ADRESSEBESKYTTELSEGRADERING
+import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFaktaDto
@@ -13,8 +14,6 @@ import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeslåVedtaksstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.ManuellBrevmottakerRequestDto
-import no.nav.tilbakekreving.api.v2.EksternFagsakDto
-import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.BehandlingHistorikk
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
@@ -28,17 +27,20 @@ import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
+import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
+import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.kontrakter.brev.MottakerType
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagMapper
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -53,6 +55,7 @@ import java.util.UUID
 class TilbakekrevingService(
     private val applicationProperties: ApplicationProperties,
     private val pdlClient: PdlClient,
+    private val kravgrunnlagBufferRepository: KravgrunnlagBufferRepository,
 ) {
     private final val behovObservatør = Observatør()
 
@@ -61,85 +64,80 @@ class TilbakekrevingService(
     private val eksternFagsak =
         EksternFagsak(
             eksternId = "TEST-101010",
-            ytelsestype = Ytelsestype.BARNETRYGD,
-            fagsystem = Fagsystem.BA,
+            ytelse = Ytelse.Barnetrygd,
             behandlinger = EksternFagsakBehandlingHistorikk(mutableListOf()),
             behovObservatør = behovObservatør,
         )
-    private val eksempelsaker =
-        listOf(
-            Tilbakekreving(
-                eksternFagsak,
-                opprettet = LocalDateTime.of(2025, Month.MARCH, 15, 12, 0),
-                behandlingHistorikk =
-                    BehandlingHistorikk(mutableListOf()),
-                behovObservatør = behovObservatør,
-                kravgrunnlagHistorikk = KravgrunnlagHistorikk(mutableListOf()),
-                brevHistorikk = BrevHistorikk(mutableListOf()),
-                opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
-            ).apply {
-                håndter(
-                    OpprettTilbakekrevingEvent(
-                        EksternFagsakDto(
-                            fagsystem = Fagsystem.BA,
-                            ytelsestype = Ytelsestype.BARNETRYGD,
-                            eksternId = "TEST-101010",
-                        ),
-                        opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
+    private val eksempelsaker = mutableListOf(
+        Tilbakekreving(
+            eksternFagsak,
+            opprettet = LocalDateTime.of(2025, Month.MARCH, 15, 12, 0),
+            behandlingHistorikk =
+                BehandlingHistorikk(mutableListOf()),
+            behovObservatør = behovObservatør,
+            kravgrunnlagHistorikk = KravgrunnlagHistorikk(mutableListOf()),
+            brevHistorikk = BrevHistorikk(mutableListOf()),
+            opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
+        ).apply {
+            håndter(
+                OpprettTilbakekrevingHendelse(
+                    opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
+                    eksternFagsak = OpprettTilbakekrevingHendelse.EksternFagsak(
+                        ytelse = Ytelse.Barnetrygd,
+                        eksternId = "TEST-101010",
                     ),
-                )
-                håndter(
-                    KravgrunnlagHendelse(
-                        internId = UUID.randomUUID(),
-                        vedtakId = BigInteger(128, Random()),
-                        kravstatuskode = KravgrunnlagHendelse.Kravstatuskode.NYTT,
-                        fagsystemVedtaksdato = LocalDate.now(),
-                        vedtakGjelder = KravgrunnlagHendelse.Aktør.Person(fnr),
-                        utbetalesTil = KravgrunnlagHendelse.Aktør.Person(fnr),
-                        skalBeregneRenter = false,
-                        ansvarligEnhet = "0425",
-                        kontrollfelt = UUID.randomUUID().toString(),
-                        referanse = UUID.randomUUID().toString(),
-                        kravgrunnlagId = UUID.randomUUID().toString(),
-                        perioder =
-                            listOf(
-                                KravgrunnlagHendelse.Periode(
-                                    periode =
-                                        Datoperiode(
-                                            fom = LocalDate.of(2018, 1, 1),
-                                            tom = LocalDate.of(2018, 2, 28),
-                                        ),
-                                    månedligSkattebeløp = BigDecimal("0.0"),
-                                    feilutbetaltBeløp = listOf(
-                                        KravgrunnlagHendelse.Periode.Beløp(
-                                            klassekode = "",
-                                            klassetype = "FEIL",
-                                            opprinneligUtbetalingsbeløp = BigDecimal("12000.0"),
-                                            nyttBeløp = BigDecimal("10000.0"),
-                                            tilbakekrevesBeløp = BigDecimal("2000.0"),
-                                            skatteprosent = BigDecimal("0.0"),
-                                        ),
-                                    ),
-                                    ytelsesbeløp =
-                                        listOf(
-                                            KravgrunnlagHendelse.Periode.Beløp(
-                                                klassekode = "",
-                                                klassetype = "YTEL",
-                                                opprinneligUtbetalingsbeløp = BigDecimal("12000.0"),
-                                                nyttBeløp = BigDecimal("10000.0"),
-                                                tilbakekrevesBeløp = BigDecimal("2000.0"),
-                                                skatteprosent = BigDecimal("0.0"),
-                                            ),
-                                        ),
+                ),
+            )
+            håndter(
+                KravgrunnlagHendelse(
+                    internId = UUID.randomUUID(),
+                    vedtakId = BigInteger(128, Random()),
+                    kravstatuskode = KravgrunnlagHendelse.Kravstatuskode.NY,
+                    fagsystemVedtaksdato = LocalDate.now(),
+                    vedtakGjelder = KravgrunnlagHendelse.Aktør.Person(fnr),
+                    utbetalesTil = KravgrunnlagHendelse.Aktør.Person(fnr),
+                    skalBeregneRenter = false,
+                    ansvarligEnhet = "0425",
+                    kontrollfelt = UUID.randomUUID().toString(),
+                    referanse = UUID.randomUUID().toString(),
+                    kravgrunnlagId = UUID.randomUUID().toString(),
+                    perioder = listOf(
+                        KravgrunnlagHendelse.Periode(
+                            periode =
+                                Datoperiode(
+                                    fom = LocalDate.of(2018, 1, 1),
+                                    tom = LocalDate.of(2018, 2, 28),
+                                ),
+                            månedligSkattebeløp = BigDecimal("0.0"),
+                            feilutbetaltBeløp = listOf(
+                                KravgrunnlagHendelse.Periode.Beløp(
+                                    klassekode = "",
+                                    klassetype = "FEIL",
+                                    opprinneligUtbetalingsbeløp = BigDecimal("12000.0"),
+                                    nyttBeløp = BigDecimal("10000.0"),
+                                    tilbakekrevesBeløp = BigDecimal("2000.0"),
+                                    skatteprosent = BigDecimal("0.0"),
                                 ),
                             ),
+                            ytelsesbeløp = listOf(
+                                KravgrunnlagHendelse.Periode.Beløp(
+                                    klassekode = "",
+                                    klassetype = "YTEL",
+                                    opprinneligUtbetalingsbeløp = BigDecimal("12000.0"),
+                                    nyttBeløp = BigDecimal("10000.0"),
+                                    tilbakekrevesBeløp = BigDecimal("2000.0"),
+                                    skatteprosent = BigDecimal("0.0"),
+                                ),
+                            ),
+                        ),
                     ),
-                )
-            },
-        )
+                ),
+            )
+        },
+    )
 
     fun hentTilbakekreving(
-        fagsystem: Fagsystem,
+        fagsystem: FagsystemDTO,
         eksternFagsakId: String,
     ): Tilbakekreving? {
         if (!applicationProperties.toggles.nyModellEnabled) return null
@@ -161,7 +159,7 @@ class TilbakekrevingService(
                 is BrukerinfoBehov -> {
                     val personinfo = pdlClient.hentPersoninfo(
                         ident = tilbakekreving.bruker!!.ident,
-                        fagsystem = behov.fagsystem,
+                        fagsystem = behov.ytelse.tilFagsystemDTO(),
                         logContext = SecureLog.Context.fra(tilbakekreving),
                     )
                     tilbakekreving.håndter(
@@ -188,7 +186,7 @@ class TilbakekrevingService(
                 is FagsysteminfoBehov -> {
                     tilbakekreving.håndter(
                         FagsysteminfoHendelse(
-                            eksternId = UUID.randomUUID().toString(),
+                            behandlingId = UUID.randomUUID().toString(),
                             ident = fnr,
                             revurderingsresultat = "revurderingsresultat",
                             revurderingsårsak = "revurderingsårsak",
@@ -388,7 +386,7 @@ class TilbakekrevingService(
         val personIdenter = listOfNotNull(tilbakekreving.bruker!!.ident)
         if (personIdenter.isEmpty()) return
         val strengtFortroligePersonIdenter =
-            pdlClient.hentAdressebeskyttelseBolk(personIdenter, tilbakekreving.hentFagsysteminfo(), SecureLog.Context.fra(tilbakekreving))
+            pdlClient.hentAdressebeskyttelseBolk(personIdenter, tilbakekreving.hentFagsysteminfo().tilFagsystemDTO(), SecureLog.Context.fra(tilbakekreving))
                 .filter { (_, person) ->
                     person.adressebeskyttelse.any { adressebeskyttelse ->
                         adressebeskyttelse.gradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG ||
@@ -406,6 +404,23 @@ class TilbakekrevingService(
                 frontendFeilmelding = frontendFeilmelding,
                 logContext = SecureLog.Context.fra(tilbakekreving),
             )
+        }
+    }
+
+    fun lesKravgrunnlag() {
+        val ikkeHåndterteKravgrunnlag = kravgrunnlagBufferRepository.hentUlesteKravgrunnlag()
+        ikkeHåndterteKravgrunnlag.forEach { entity ->
+            val kravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(entity.kravgrunnlag)
+
+            val tilbakekreving = Tilbakekreving.opprett(
+                behovObservatør = behovObservatør,
+                opprettTilbakekrevingEvent = KravgrunnlagMapper.tilOpprettTilbakekrevingHendelse(kravgrunnlag),
+            )
+
+            tilbakekreving.håndter(KravgrunnlagMapper.tilKravgrunnlagHendelse(kravgrunnlag))
+
+            eksempelsaker.add(tilbakekreving)
+            kravgrunnlagBufferRepository.markerLest(entity.kravgrunnlagId)
         }
     }
 }

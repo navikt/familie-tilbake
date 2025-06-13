@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.micrometer.domain
 
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
+import no.nav.familie.tilbake.behandling.Fagsystem
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDate

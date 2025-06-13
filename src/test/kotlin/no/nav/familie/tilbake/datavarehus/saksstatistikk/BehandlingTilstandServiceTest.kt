@@ -9,6 +9,8 @@ import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.Fagsystem
+import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Fagsak
@@ -33,8 +35,8 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -269,8 +271,8 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
             )
 
         return OpprettTilbakekrevingRequest(
-            ytelsestype = Ytelsestype.BARNETRYGD,
-            fagsystem = Fagsystem.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+            fagsystem = FagsystemDTO.BA,
             eksternFagsakId = fagsak.eksternFagsakId,
             personIdent = "321321322",
             eksternId = UUID.randomUUID().toString(),

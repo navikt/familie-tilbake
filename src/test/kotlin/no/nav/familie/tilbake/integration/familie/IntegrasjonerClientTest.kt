@@ -18,7 +18,7 @@ import no.nav.familie.tilbake.kontrakter.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstidspunkt
 import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstype
 import no.nav.familie.tilbake.kontrakter.organisasjon.Organisasjon
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -84,7 +84,7 @@ internal class IntegrasjonerClientTest {
         integrasjonerClient
             .distribuerJournalpost(
                 "3216354",
-                Fagsystem.EF,
+                FagsystemDTO.EF,
                 Distribusjonstype.VIKTIG,
                 Distribusjonstidspunkt.KJERNETID,
             ).shouldNotBeNull()
@@ -100,7 +100,7 @@ internal class IntegrasjonerClientTest {
         shouldThrow<IllegalStateException> {
             integrasjonerClient.distribuerJournalpost(
                 "3216354",
-                Fagsystem.EF,
+                FagsystemDTO.EF,
                 Distribusjonstype.VIKTIG,
                 Distribusjonstidspunkt.KJERNETID,
             )

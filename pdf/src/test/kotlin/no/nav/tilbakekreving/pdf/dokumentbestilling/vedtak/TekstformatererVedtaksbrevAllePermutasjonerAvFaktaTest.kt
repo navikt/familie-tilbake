@@ -9,7 +9,7 @@ import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.pdf.HendelsestypePerYtelsestype
 import no.nav.tilbakekreving.pdf.HendelsesundertypePerHendelsestype
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
@@ -52,14 +52,14 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
             ansvarligSaksbehandler = "Bob",
             saksnummer = "1232456",
             språkkode = Språkkode.NB,
-            ytelsestype = Ytelsestype.BARNETRYGD,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
             gjelderDødsfall = false,
         )
 
     @Test
     fun `lagDeltekst skal støtte alle permutasjoner av fakta for EFOG`() {
         lagTeksterOgValider(
-            Ytelsestype.OVERGANGSSTØNAD,
+            YtelsestypeDTO.OVERGANGSSTØNAD,
             Språkkode.NB,
             HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING),
         )
@@ -68,7 +68,7 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
     @Test
     fun `lagDeltekst skal støtte alle permutasjoner av fakta for EFOG nynorsk`() {
         lagTeksterOgValider(
-            Ytelsestype.OVERGANGSSTØNAD,
+            YtelsestypeDTO.OVERGANGSSTØNAD,
             Språkkode.NN,
             HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING),
         )
@@ -77,7 +77,7 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
     @Test
     fun `lagDeltekst skal støtte alle permutasjoner av fakta for EFBT`() {
         lagTeksterOgValider(
-            Ytelsestype.BARNETILSYN,
+            YtelsestypeDTO.BARNETILSYN,
             Språkkode.NB,
             HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING),
         )
@@ -86,7 +86,7 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
     @Test
     fun `lagDeltekst skal støtte alle permutasjoner av fakta for EFBT nynorsk`() {
         lagTeksterOgValider(
-            Ytelsestype.BARNETILSYN,
+            YtelsestypeDTO.BARNETILSYN,
             Språkkode.NN,
             HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING),
         )
@@ -95,7 +95,7 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
     @Test
     fun `lagDeltekst skal støtte alle permutasjoner av fakta for EFSP`() {
         lagTeksterOgValider(
-            Ytelsestype.SKOLEPENGER,
+            YtelsestypeDTO.SKOLEPENGER,
             Språkkode.NB,
             HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING),
         )
@@ -104,7 +104,7 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
     @Test
     fun `lagDeltekst skal støtte alle permutasjoner av fakta for EFSP nynorsk`() {
         lagTeksterOgValider(
-            Ytelsestype.SKOLEPENGER,
+            YtelsestypeDTO.SKOLEPENGER,
             Språkkode.NN,
             HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING),
         )
@@ -112,17 +112,17 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
 
     @Test
     fun `lagDeltekst skal støtte alle permutasjoner av fakta for BA`() {
-        lagTeksterOgValider(Ytelsestype.BARNETRYGD, Språkkode.NB)
+        lagTeksterOgValider(YtelsestypeDTO.BARNETRYGD, Språkkode.NB)
     }
 
     @Test
     fun `lagDeltekst skal støtte alle permutasjoner av fakta for BA nynorsk`() {
-        lagTeksterOgValider(Ytelsestype.BARNETRYGD, Språkkode.NN)
+        lagTeksterOgValider(YtelsestypeDTO.BARNETRYGD, Språkkode.NN)
     }
 
     @SafeVarargs
     private fun lagTeksterOgValider(
-        ytelsestype: Ytelsestype,
+        ytelsestype: YtelsestypeDTO,
         språkkode: Språkkode,
         vararg unntak: HendelseMedUndertype,
     ) {
@@ -162,7 +162,7 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
 
     private fun lagFaktatekster(
         felles: HbVedtaksbrevFelles,
-        ytelsestype: Ytelsestype,
+        ytelsestype: YtelsestypeDTO,
     ): Map<HendelseMedUndertype, String> {
         val resultat: MutableMap<HendelseMedUndertype, String> = LinkedHashMap()
         for (undertype in getFeilutbetalingsårsaker(ytelsestype)) {
@@ -203,7 +203,7 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
 
     private fun lagFellesBuilder(
         språkkode: Språkkode,
-        ytelsestype: Ytelsestype,
+        ytelsestype: YtelsestypeDTO,
     ) = HbVedtaksbrevFelles(
         brevmetadata = brevmetadata.copy(språkkode = språkkode, ytelsestype = ytelsestype),
         hjemmel = HbHjemmel("Folketrygdloven"),
@@ -239,7 +239,7 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
         harBrukerUttaltSeg = HarBrukerUttaltSeg.JA,
     )
 
-    private fun getFeilutbetalingsårsaker(ytelsestype: Ytelsestype): List<HendelseMedUndertype> =
+    private fun getFeilutbetalingsårsaker(ytelsestype: YtelsestypeDTO): List<HendelseMedUndertype> =
         HendelsestypePerYtelsestype
             .getHendelsestyper(ytelsestype)
             .map { hendelsestype ->

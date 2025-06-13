@@ -1,13 +1,13 @@
 package no.nav.familie.tilbake.person
 
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.familie.tilbake.behandling.event.EndretPersonIdentEventPublisher
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.integration.pdl.PdlClient
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.kontrakter.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.tilbake.log.SecureLog
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import org.springframework.stereotype.Service
 
 @Service
@@ -21,7 +21,7 @@ class PersonService(
         fagsystem: Fagsystem,
         logContext: SecureLog.Context,
     ): Personinfo {
-        val personInfo = pdlClient.hentPersoninfo(personIdent, fagsystem, logContext)
+        val personInfo = pdlClient.hentPersoninfo(personIdent, fagsystem.tilDTO(), logContext)
         // fire event for å oppdatere personIdent når lagret personIdent ikke matcher med PDL.
         if (personIdent != personInfo.ident) {
             val fagsak =
@@ -37,7 +37,7 @@ class PersonService(
         fagsystem: Fagsystem,
         logContext: SecureLog.Context,
     ): List<String> {
-        val adresseBeskyttelseBolk = pdlClient.hentAdressebeskyttelseBolk(personIdenter, fagsystem, logContext)
+        val adresseBeskyttelseBolk = pdlClient.hentAdressebeskyttelseBolk(personIdenter, fagsystem.tilDTO(), logContext)
         return adresseBeskyttelseBolk
             .filter { (_, person) ->
                 person.adressebeskyttelse.any { adressebeskyttelse ->
@@ -52,7 +52,7 @@ class PersonService(
         fagsystem: Fagsystem,
         logContext: SecureLog.Context,
     ): List<String> {
-        val hentIdenter = pdlClient.hentIdenter(personIdent, fagsystem, logContext)
+        val hentIdenter = pdlClient.hentIdenter(personIdent, fagsystem.tilDTO(), logContext)
         return hentIdenter.data.pdlIdenter!!
             .identer
             .filter { it.gruppe == "AKTORID" }

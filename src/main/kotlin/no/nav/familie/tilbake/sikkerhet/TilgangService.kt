@@ -3,16 +3,16 @@ package no.nav.familie.tilbake.sikkerhet
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.config.RolleConfig
 import no.nav.familie.tilbake.log.SecureLog
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import org.springframework.stereotype.Service
 
 @Service
 class TilgangService(
     private val rolleConfig: RolleConfig,
 ) {
-    fun tilgangTilÅOppretteRevurdering(fagsystem: Fagsystem): Boolean = finnBehandlerrolle(fagsystem) !in listOf(Behandlerrolle.VEILEDER, Behandlerrolle.FORVALTER)
+    fun tilgangTilÅOppretteRevurdering(fagsystem: FagsystemDTO): Boolean = finnBehandlerrolle(fagsystem) !in listOf(Behandlerrolle.VEILEDER, Behandlerrolle.FORVALTER)
 
-    fun finnBehandlerrolle(fagsystem: Fagsystem): Behandlerrolle? {
+    fun finnBehandlerrolle(fagsystem: FagsystemDTO): Behandlerrolle? {
         val inloggetBrukerstilgang =
             ContextService
                 .hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, "henter behandling", SecureLog.Context.tom())

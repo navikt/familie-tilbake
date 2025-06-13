@@ -2,10 +2,10 @@ package no.nav.familie.tilbake.micrometer
 
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
+import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.familie.tilbake.micrometer.domain.MeldingstellingRepository
 import no.nav.familie.tilbake.micrometer.domain.Meldingstype
 import no.nav.familie.tilbake.micrometer.domain.Mottaksstatus
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 

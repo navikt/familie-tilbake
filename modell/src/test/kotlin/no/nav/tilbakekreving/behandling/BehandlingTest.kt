@@ -18,7 +18,7 @@ class BehandlingTest {
         val behandling =
             behandling(
                 kravgrunnlag(
-                    listOf(
+                    perioder = listOf(
                         kravgrunnlagPeriode(1.januar til 28.februar),
                     ),
                 ),
@@ -50,7 +50,7 @@ class BehandlingTest {
         val behandling =
             behandling(
                 kravgrunnlag(
-                    listOf(
+                    perioder = listOf(
                         kravgrunnlagPeriode(1.januar til 28.februar),
                     ),
                 ),

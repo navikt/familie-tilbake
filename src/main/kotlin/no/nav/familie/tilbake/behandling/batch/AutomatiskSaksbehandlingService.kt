@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.behandling.batch
 
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -13,7 +14,6 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.kontrakter.Regelverk
 import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

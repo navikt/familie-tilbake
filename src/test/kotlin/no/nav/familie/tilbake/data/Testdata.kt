@@ -1,6 +1,8 @@
 package no.nav.familie.tilbake.data
 
 import no.nav.familie.tilbake.avstemming.domain.Avstemmingsfil
+import no.nav.familie.tilbake.behandling.Fagsystem
+import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingsvedtak
@@ -58,8 +60,6 @@ import no.nav.tilbakekreving.kontrakter.verge.Vergetype
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate

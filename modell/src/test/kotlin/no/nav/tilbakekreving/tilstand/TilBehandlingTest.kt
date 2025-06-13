@@ -5,7 +5,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingsperiodeDto
-import no.nav.tilbakekreving.api.v2.OpprettTilbakekrevingEvent
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
@@ -13,6 +12,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.brukerinfoHendelse
 import no.nav.tilbakekreving.fagsysteminfoHendelse
+import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
@@ -20,7 +20,7 @@ import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
-import no.nav.tilbakekreving.opprettTilbakekrevingEvent
+import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.varselbrev
 import org.junit.jupiter.api.Test
@@ -29,8 +29,8 @@ class TilBehandlingTest {
     @Test
     fun `behanlding kan nullstilles når den er i TilBehandling tilstand`() {
         val oppsamler = BehovObservatørOppsamler()
-        val opprettTilbakekrevingEvent = opprettTilbakekrevingEvent()
-        val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingEvent)
+        val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
+        val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingHendelse)
 
         tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.FAKTA, FatteVedtakSteg.Vurdering.Godkjent)
         tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.FORELDELSE, FatteVedtakSteg.Vurdering.Godkjent)
@@ -46,8 +46,8 @@ class TilBehandlingTest {
     @Test
     fun `behanlding kan ikke nullstilles når den ikke er i TilBehandling tilstand`() {
         val oppsamler = BehovObservatørOppsamler()
-        val opprettTilbakekrevingEvent = opprettTilbakekrevingEvent()
-        val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingEvent)
+        val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
+        val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingHendelse)
 
         tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.FAKTA, FatteVedtakSteg.Vurdering.Godkjent)
         tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.FORELDELSE, FatteVedtakSteg.Vurdering.Godkjent)
@@ -64,9 +64,8 @@ class TilBehandlingTest {
 
     private fun tilbakekrevingTilGodkjenning(
         oppsamler: BehovObservatørOppsamler,
-        opprettTilbakekrevingEvent: OpprettTilbakekrevingEvent,
-    ) = Tilbakekreving.opprett(oppsamler, opprettTilbakekrevingEvent).apply {
-        håndter(opprettTilbakekrevingEvent)
+        opprettTilbakekrevingHendelse: OpprettTilbakekrevingHendelse,
+    ) = Tilbakekreving.opprett(oppsamler, opprettTilbakekrevingHendelse).apply {
         håndter(kravgrunnlag())
         håndter(fagsysteminfoHendelse())
         håndter(brukerinfoHendelse())

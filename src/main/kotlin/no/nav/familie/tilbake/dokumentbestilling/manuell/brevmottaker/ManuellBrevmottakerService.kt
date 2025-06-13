@@ -221,7 +221,7 @@ class ManuellBrevmottakerService(
             pdlClient
                 .hentPersoninfo(
                     ident = it,
-                    fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId),
+                    fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId).tilDTO(),
                     logContext = logContext,
                 ).navn
         } ?: dto.organisasjonsnummer?.let {

@@ -3,7 +3,7 @@ package no.nav.tilbakekreving.pdf.dokumentbestilling.varsel
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmetadata
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.header.Institusjon
@@ -27,7 +27,7 @@ class TekstformatererVarselbrevTest {
             ansvarligSaksbehandler = "Bob",
             saksnummer = "1232456",
             språkkode = Språkkode.NB,
-            ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
+            ytelsestype = YtelsestypeDTO.OVERGANGSSTØNAD,
             gjelderDødsfall = false,
         )
 
@@ -146,7 +146,7 @@ class TekstformatererVarselbrevTest {
 
     @Test
     fun `lagVarselbrevsfritekst skal generere varseltekst for enkelt periode barnetrygd`() {
-        val metadata = metadata.copy(ytelsestype = Ytelsestype.BARNETRYGD)
+        val metadata = metadata.copy(ytelsestype = YtelsestypeDTO.BARNETRYGD)
         val varselbrevsdokument = varselbrevsdokument.copy(
             brevmetadata = metadata,
             feilutbetaltePerioder = lagFeilutbetalingerMedKunEnPeriode(),
@@ -158,7 +158,7 @@ class TekstformatererVarselbrevTest {
 
     @Test
     fun `lagVarselbrevsfritekst skal generere varseltekst for enkelt periode kontantstøtte`() {
-        val metadata = metadata.copy(ytelsestype = Ytelsestype.KONTANTSTØTTE)
+        val metadata = metadata.copy(ytelsestype = YtelsestypeDTO.KONTANTSTØTTE)
         val varselbrevsdokument = varselbrevsdokument.copy(
             brevmetadata = metadata,
             feilutbetaltePerioder = lagFeilutbetalingerMedKunEnPeriode(),
@@ -217,7 +217,7 @@ class TekstformatererVarselbrevTest {
     @Test
     fun `lagVarselbrevsfritekst skal generere varselbrev for verge`() {
         val metadata = metadata.copy(
-            ytelsestype = Ytelsestype.BARNETRYGD,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
             vergenavn = "John Doe",
             finnesVerge = true,
             finnesAnnenMottaker = true,

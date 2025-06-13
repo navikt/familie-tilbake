@@ -4,11 +4,32 @@ import no.nav.tilbakekreving.historikk.Historikk
 import java.time.LocalDate
 import java.util.UUID
 
-class EksternFagsakBehandling(
+sealed class EksternFagsakBehandling(
     override val internId: UUID,
-    internal val eksternId: String,
-    val revurderingsresultat: String,
-    val revurderingsårsak: String,
-    val begrunnelseForTilbakekreving: String,
-    val revurderingsvedtaksdato: LocalDate,
-) : Historikk.HistorikkInnslag<UUID>
+) : Historikk.HistorikkInnslag<UUID> {
+    internal abstract val eksternId: String
+    abstract val revurderingsresultat: String
+    abstract val revurderingsårsak: String
+    abstract val begrunnelseForTilbakekreving: String
+    abstract val revurderingsvedtaksdato: LocalDate
+
+    class Behandling(
+        internId: UUID,
+        override val eksternId: String,
+        override val revurderingsresultat: String,
+        override val revurderingsårsak: String,
+        override val begrunnelseForTilbakekreving: String,
+        override val revurderingsvedtaksdato: LocalDate,
+    ) : EksternFagsakBehandling(internId)
+
+    class Ukjent(
+        internId: UUID,
+        val revurderingsdatoFraKravgrunnlag: LocalDate?,
+    ) : EksternFagsakBehandling(internId) {
+        override val eksternId: String = "Ukjent"
+        override val revurderingsresultat: String = "Ukjent"
+        override val revurderingsårsak: String = "Ukjent - finn i fagsystem"
+        override val begrunnelseForTilbakekreving: String = "Ukjent - finn i fagsystem"
+        override val revurderingsvedtaksdato: LocalDate = revurderingsdatoFraKravgrunnlag ?: LocalDate.MIN
+    }
+}

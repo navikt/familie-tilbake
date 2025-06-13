@@ -3,11 +3,11 @@ package no.nav.tilbakekreving.person
 import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.BrukerinfoBehov
+import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.kontrakter.bruker.FrontendBrukerDto
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import java.time.LocalDate
 
 class Bruker(
@@ -30,12 +30,12 @@ class Bruker(
 
     fun trengerBrukerinfo(
         behovObservatør: BehovObservatør,
-        fagsystem: Fagsystem,
+        ytelse: Ytelse,
     ) {
         behovObservatør.håndter(
             BrukerinfoBehov(
                 ident = ident,
-                fagsystem = fagsystem,
+                ytelse = ytelse,
             ),
         )
     }

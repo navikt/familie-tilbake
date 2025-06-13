@@ -2,7 +2,7 @@ package no.nav.tilbakekreving.pdf.dokumentbestilling.felles
 
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.header.Institusjon
 import no.nav.tilbakekreving.pdf.handlebars.dto.Språkstøtte
 
@@ -19,7 +19,7 @@ data class Brevmetadata(
     val ansvarligSaksbehandler: String,
     val saksnummer: String,
     override val språkkode: Språkkode,
-    val ytelsestype: Ytelsestype,
+    val ytelsestype: YtelsestypeDTO,
     val behandlingstype: Behandlingstype? = null,
     val tittel: String? = null,
     val gjelderDødsfall: Boolean,

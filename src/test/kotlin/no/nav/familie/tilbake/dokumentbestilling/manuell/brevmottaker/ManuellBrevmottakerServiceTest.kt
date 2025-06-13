@@ -39,7 +39,7 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatu
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.brev.ManuellAdresseInfo
 import no.nav.tilbakekreving.kontrakter.brev.MottakerType.DØDSBO
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -407,7 +407,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
         manuellBrevmottakerService.leggTilBrevmottaker(behandling.id, requestMedPersonIdent)
 
         var lagretMottaker = manuellBrevmottakerService.hentBrevmottakere(behandling.id).single()
-        lagretMottaker.navn shouldBe mockPdlClient.hentPersoninfo("12345678910", Fagsystem.BA, SecureLog.Context.tom()).navn
+        lagretMottaker.navn shouldBe mockPdlClient.hentPersoninfo("12345678910", FagsystemDTO.BA, SecureLog.Context.tom()).navn
 
         val requestMedOrgnrUtenKontaktperson =
             manuellBrevmottakerRequestDto.copy(

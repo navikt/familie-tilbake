@@ -4,6 +4,7 @@ import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.avstemming.task.AvstemmingTask
+import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.common.repository.Sporbar
 import no.nav.familie.tilbake.data.Testdata
@@ -11,7 +12,6 @@ import no.nav.familie.tilbake.kravgrunnlag.batch.GammelKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.batch.HentFagsystemsbehandlingTask
 import no.nav.familie.tilbake.kravgrunnlag.batch.HåndterGamleKravgrunnlagBatch
 import no.nav.familie.tilbake.log.SecureLog
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

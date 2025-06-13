@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
 import io.kotest.matchers.shouldBe
+import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
@@ -12,7 +13,6 @@ import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID

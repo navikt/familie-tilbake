@@ -29,7 +29,7 @@ class ValiderBehandlingService(
         }
 
         val åpenTilbakekrevingsbehandling: Behandling? =
-            behandlingRepository.finnÅpenTilbakekrevingsbehandling(request.ytelsestype, request.eksternFagsakId)
+            behandlingRepository.finnÅpenTilbakekrevingsbehandling(Ytelsestype.forDTO(request.ytelsestype), request.eksternFagsakId)
         if (åpenTilbakekrevingsbehandling != null) {
             val feilMelding =
                 "Det finnes allerede en åpen behandling for ytelsestype=${request.ytelsestype} " +
@@ -46,7 +46,7 @@ class ValiderBehandlingService(
         // hvis toggelen KAN_OPPRETTE_BEH_MED_EKSTERNID_SOM_HAR_AVSLUTTET_TBK er på,
         // sjekker ikke om det finnes en avsluttet tilbakekreving for eksternId
         if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_OPPRETTE_BEH_MED_EKSTERNID_SOM_HAR_AVSLUTTET_TBK)) {
-            val avsluttetBehandlinger = behandlingRepository.finnAvsluttetTilbakekrevingsbehandlinger(request.eksternId, request.fagsystem)
+            val avsluttetBehandlinger = behandlingRepository.finnAvsluttetTilbakekrevingsbehandlinger(request.eksternId, Fagsystem.forDTO(request.fagsystem))
             if (avsluttetBehandlinger.isNotEmpty()) {
                 val sisteAvsluttetBehandling: Behandling = avsluttetBehandlinger.first()
                 val erSisteBehandlingHenlagt: Boolean =
@@ -68,7 +68,7 @@ class ValiderBehandlingService(
         // uten kravgrunnlag er det ikke mulig å opprette behandling manuelt
         if (request.manueltOpprettet &&
             !økonomiXmlMottattRepository
-                .existsByEksternFagsakIdAndYtelsestypeAndReferanse(request.eksternFagsakId, request.ytelsestype, request.eksternId)
+                .existsByEksternFagsakIdAndYtelsestypeAndReferanse(request.eksternFagsakId, Ytelsestype.forDTO(request.ytelsestype), request.eksternId)
         ) {
             val feilMelding =
                 "Det finnes intet kravgrunnlag for ytelsestype=${request.ytelsestype},eksternFagsakId=${request.eksternFagsakId} " +

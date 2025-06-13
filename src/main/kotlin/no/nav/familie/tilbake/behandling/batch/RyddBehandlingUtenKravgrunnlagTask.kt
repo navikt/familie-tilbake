@@ -5,6 +5,7 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
+import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.familie.tilbake.common.fagsystem
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.PropertyName
@@ -18,7 +19,6 @@ import no.nav.familie.tilbake.oppgave.OppgavePrioritetService
 import no.nav.familie.tilbake.oppgave.OppgaveService
 import no.nav.tilbakekreving.api.v1.dto.HenleggelsesbrevFritekstDto
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime

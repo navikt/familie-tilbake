@@ -11,7 +11,7 @@ import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmetadata
 import no.nav.tilbakekreving.pdf.dokumentbestilling.vedtak.AvsnittUtil
@@ -46,46 +46,46 @@ import java.time.YearMonth
 class DokumentasjonsgeneratorPeriodeVilkår {
     @Test
     fun `generer vilkår for BA bokmål`() {
-        lagVilkårstekster(Ytelsestype.BARNETRYGD, Språkkode.NB)
+        lagVilkårstekster(YtelsestypeDTO.BARNETRYGD, Språkkode.NB)
     }
 
     @Test
     fun `generer vilkår for BA nynorsk`() {
-        lagVilkårstekster(Ytelsestype.BARNETRYGD, Språkkode.NN)
+        lagVilkårstekster(YtelsestypeDTO.BARNETRYGD, Språkkode.NN)
     }
 
     @Test
     fun `generer vilkår for EFOG bokmål`() {
-        lagVilkårstekster(Ytelsestype.OVERGANGSSTØNAD, Språkkode.NB)
+        lagVilkårstekster(YtelsestypeDTO.OVERGANGSSTØNAD, Språkkode.NB)
     }
 
     @Test
     fun `generer vilkår for EFOG nynorsk`() {
-        lagVilkårstekster(Ytelsestype.OVERGANGSSTØNAD, Språkkode.NN)
+        lagVilkårstekster(YtelsestypeDTO.OVERGANGSSTØNAD, Språkkode.NN)
     }
 
     @Test
     fun `generer vilkår for EFBT bokmål`() {
-        lagVilkårstekster(Ytelsestype.BARNETILSYN, Språkkode.NB)
+        lagVilkårstekster(YtelsestypeDTO.BARNETILSYN, Språkkode.NB)
     }
 
     @Test
     fun `generer vilkår for EFBT nynorsk`() {
-        lagVilkårstekster(Ytelsestype.BARNETILSYN, Språkkode.NN)
+        lagVilkårstekster(YtelsestypeDTO.BARNETILSYN, Språkkode.NN)
     }
 
     @Test
     fun `generer vilkår for EFSP bokmål`() {
-        lagVilkårstekster(Ytelsestype.SKOLEPENGER, Språkkode.NB)
+        lagVilkårstekster(YtelsestypeDTO.SKOLEPENGER, Språkkode.NB)
     }
 
     @Test
     fun `generer vilkår for EFSP nynorsk`() {
-        lagVilkårstekster(Ytelsestype.SKOLEPENGER, Språkkode.NN)
+        lagVilkårstekster(YtelsestypeDTO.SKOLEPENGER, Språkkode.NN)
     }
 
     private fun lagVilkårstekster(
-        ytelsetype: Ytelsestype,
+        ytelsetype: YtelsestypeDTO,
         språkkode: Språkkode,
     ) {
         vilkårResultat.forEach { resultat ->
@@ -165,7 +165,7 @@ class DokumentasjonsgeneratorPeriodeVilkår {
     }
 
     private fun lagResultatOgVurderingTekster(
-        ytelsetype: Ytelsestype,
+        ytelsetype: YtelsestypeDTO,
         språkkode: Språkkode,
         resultat: Vilkårsvurderingsresultat,
         vurdering: Vurdering,
@@ -202,7 +202,7 @@ class DokumentasjonsgeneratorPeriodeVilkår {
     }
 
     private fun lagPeriodeOgFelles(
-        ytelsetype: Ytelsestype,
+        ytelsetype: YtelsestypeDTO,
         språkkode: Språkkode,
         vilkårResultat: Vilkårsvurderingsresultat?,
         vurdering: Vurdering,
@@ -276,7 +276,7 @@ class DokumentasjonsgeneratorPeriodeVilkår {
     }
 
     private fun lagFelles(
-        ytelsestype: Ytelsestype,
+        ytelsestype: YtelsestypeDTO,
         språkkode: Språkkode,
     ): HbVedtaksbrevFelles {
         val datoer =
@@ -312,7 +312,7 @@ class DokumentasjonsgeneratorPeriodeVilkår {
     }
 
     private fun lagMetadata(
-        ytelsestype: Ytelsestype,
+        ytelsestype: YtelsestypeDTO,
         språkkode: Språkkode,
     ): Brevmetadata =
         Brevmetadata(

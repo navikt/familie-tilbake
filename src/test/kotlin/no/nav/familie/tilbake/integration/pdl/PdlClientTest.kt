@@ -11,7 +11,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.config.PdlConfig
 import no.nav.familie.tilbake.integration.pdl.internal.PdlKjønnType
 import no.nav.familie.tilbake.log.SecureLog
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -55,7 +55,7 @@ class PdlClientTest {
                 .willReturn(okJson(readFile("pdlOkResponseEnkel.json"))),
         )
 
-        val respons = pdlClient.hentPersoninfo("11111122222", Fagsystem.BA, SecureLog.Context.tom())
+        val respons = pdlClient.hentPersoninfo("11111122222", FagsystemDTO.BA, SecureLog.Context.tom())
 
         respons.shouldNotBeNull()
         respons.navn shouldBe "ENGASJERT FYR"
@@ -71,7 +71,7 @@ class PdlClientTest {
                 .willReturn(okJson(readFile("pdlOkResponseDødPerson.json"))),
         )
 
-        val respons = pdlClient.hentPersoninfo("11111122222", Fagsystem.BA, SecureLog.Context.tom())
+        val respons = pdlClient.hentPersoninfo("11111122222", FagsystemDTO.BA, SecureLog.Context.tom())
 
         respons.shouldNotBeNull()
         respons.navn shouldBe "ENGASJERT FYR"
@@ -90,7 +90,7 @@ class PdlClientTest {
         val exception =
             shouldThrow<RuntimeException>(
                 block =
-                    { pdlClient.hentPersoninfo("11111122222", Fagsystem.BA, SecureLog.Context.tom()) },
+                    { pdlClient.hentPersoninfo("11111122222", FagsystemDTO.BA, SecureLog.Context.tom()) },
             )
         exception.message shouldBe "Feil ved oppslag på person: Person ikke funnet"
     }

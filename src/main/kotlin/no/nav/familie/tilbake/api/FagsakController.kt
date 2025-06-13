@@ -2,6 +2,8 @@ package no.nav.familie.tilbake.api
 
 import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.tilbake.behandling.FagsakService
+import no.nav.familie.tilbake.behandling.Fagsystem
+import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.kontrakter.klage.FagsystemVedtak
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
@@ -13,8 +15,7 @@ import no.nav.tilbakekreving.api.v1.dto.FagsakDto
 import no.nav.tilbakekreving.kontrakter.Behandling
 import no.nav.tilbakekreving.kontrakter.FinnesBehandlingResponse
 import no.nav.tilbakekreving.kontrakter.KanBehandlingOpprettesManueltRespons
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -37,7 +38,7 @@ class FagsakController(
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun hentFagsak(
-        @PathVariable fagsystem: Fagsystem,
+        @PathVariable fagsystem: FagsystemDTO,
         @PathVariable eksternFagsakId: String,
     ): Ressurs<FagsakDto> {
         tilgangskontrollService.validerTilgangFagsystemOgFagsakId(
@@ -52,7 +53,7 @@ class FagsakController(
             tilbakekrevingService.sjekkBehovOgHåndter(tilbakekreving)
             return Ressurs.success(tilbakekreving.tilFrontendDto())
         }
-        return Ressurs.success(fagsakService.hentFagsak(fagsystem, eksternFagsakId))
+        return Ressurs.success(fagsakService.hentFagsak(Fagsystem.forDTO(fagsystem), eksternFagsakId))
     }
 
     @Operation(summary = "Sjekk om det finnes en åpen tilbakekrevingsbehandling")
@@ -61,7 +62,7 @@ class FagsakController(
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun finnesÅpenTilbakekrevingsbehandling(
-        @PathVariable fagsystem: Fagsystem,
+        @PathVariable fagsystem: FagsystemDTO,
         @PathVariable eksternFagsakId: String,
     ): Ressurs<FinnesBehandlingResponse> {
         tilgangskontrollService.validerTilgangFagsystemOgFagsakId(
@@ -73,7 +74,7 @@ class FagsakController(
         )
         return Ressurs.success(
             fagsakService.finnesÅpenTilbakekrevingsbehandling(
-                fagsystem = fagsystem,
+                fagsystem = Fagsystem.forDTO(fagsystem),
                 eksternFagsakId = eksternFagsakId,
             ),
         )
@@ -104,7 +105,7 @@ class FagsakController(
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun hentBehandlingerForFagsystem(
-        @PathVariable fagsystem: Fagsystem,
+        @PathVariable fagsystem: FagsystemDTO,
         @PathVariable eksternFagsakId: String,
     ): Ressurs<List<Behandling>> {
         tilgangskontrollService.validerTilgangFagsystemOgFagsakId(
@@ -114,7 +115,7 @@ class FagsakController(
             auditLoggerEvent = AuditLoggerEvent.ACCESS,
             handling = "Henter behandlinger for bruk i fagsystem",
         )
-        return Ressurs.success(fagsakService.hentBehandlingerForFagsak(fagsystem, eksternFagsakId))
+        return Ressurs.success(fagsakService.hentBehandlingerForFagsak(Fagsystem.forDTO(fagsystem), eksternFagsakId))
     }
 
     @Operation(summary = "Hent behandlinger, kalles av fagsystem")
@@ -123,7 +124,7 @@ class FagsakController(
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun hentVedtakForFagsystem(
-        @PathVariable fagsystem: Fagsystem,
+        @PathVariable fagsystem: FagsystemDTO,
         @PathVariable eksternFagsakId: String,
     ): Ressurs<List<FagsystemVedtak>> {
         tilgangskontrollService.validerTilgangFagsystemOgFagsakId(
@@ -133,6 +134,6 @@ class FagsakController(
             auditLoggerEvent = AuditLoggerEvent.ACCESS,
             handling = "Henter behandlinger for bruk i fagsystem",
         )
-        return Ressurs.success(fagsakService.hentVedtakForFagsak(fagsystem, eksternFagsakId))
+        return Ressurs.success(fagsakService.hentVedtakForFagsak(Fagsystem.forDTO(fagsystem), eksternFagsakId))
     }
 }

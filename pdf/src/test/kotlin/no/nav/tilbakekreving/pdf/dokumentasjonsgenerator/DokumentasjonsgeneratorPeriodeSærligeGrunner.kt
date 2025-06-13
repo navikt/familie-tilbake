@@ -10,7 +10,7 @@ import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmetadata
 import no.nav.tilbakekreving.pdf.dokumentbestilling.vedtak.AvsnittUtil
@@ -264,7 +264,7 @@ class DokumentasjonsgeneratorPeriodeSærligeGrunner {
             ansvarligSaksbehandler = "Bob",
             saksnummer = "1232456",
             språkkode = språkkode,
-            ytelsestype = Ytelsestype.BARNETRYGD,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
             gjelderDødsfall = false,
         )
 

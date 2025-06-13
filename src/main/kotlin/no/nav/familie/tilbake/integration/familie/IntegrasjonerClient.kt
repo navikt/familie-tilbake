@@ -24,7 +24,7 @@ import no.nav.familie.tilbake.kontrakter.organisasjon.Organisasjon
 import no.nav.familie.tilbake.kontrakter.saksbehandler.Saksbehandler
 import no.nav.familie.tilbake.kontrakter.tilgangskontroll.Tilgang
 import no.nav.familie.tilbake.log.SecureLog
-import no.nav.tilbakekreving.kontrakter.ytelse.Fagsystem
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.Tema
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.cache.annotation.Cacheable
@@ -172,7 +172,7 @@ class IntegrasjonerClient(
 
     fun distribuerJournalpost(
         journalpostId: String,
-        fagsystem: Fagsystem,
+        fagsystem: FagsystemDTO,
         distribusjonstype: Distribusjonstype,
         distribusjonstidspunkt: Distribusjonstidspunkt,
         manuellAdresse: ManuellAdresse? = null,

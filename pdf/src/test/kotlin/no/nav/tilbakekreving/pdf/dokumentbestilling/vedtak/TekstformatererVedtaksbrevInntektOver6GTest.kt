@@ -12,7 +12,7 @@ import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
-import no.nav.tilbakekreving.kontrakter.ytelse.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmetadata
 import no.nav.tilbakekreving.pdf.dokumentbestilling.vedtak.HbGrunnbeløpUtil.lagHbGrunnbeløp
@@ -87,7 +87,7 @@ class TekstformatererVedtaksbrevInntektOver6GTest {
             ansvarligSaksbehandler = "Ansvarlig Saksbehandler",
             saksnummer = "1232456",
             språkkode = Språkkode.NB,
-            ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
+            ytelsestype = YtelsestypeDTO.OVERGANGSSTØNAD,
             gjelderDødsfall = false,
         )
 
