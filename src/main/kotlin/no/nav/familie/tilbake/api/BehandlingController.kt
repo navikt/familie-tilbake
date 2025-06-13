@@ -175,7 +175,7 @@ class BehandlingController(
                 handling = "Utfører behandlingens aktiv steg og fortsetter den til neste steg",
             )
 
-            tilbakekrevingService.utførSteg(saksbehandler, tilbakekreving, behandlingsstegDto, logContext)
+            tilbakekrevingService.utførSteg(saksbehandler, tilbakekreving, behandlingsstegDto, logContext, null)
             tilbakekrevingService.sjekkBehovOgHåndter(tilbakekreving)
             return Ressurs.success("OK")
         }

@@ -56,6 +56,7 @@ class TilbakekrevingService(
     private val applicationProperties: ApplicationProperties,
     private val pdlClient: PdlClient,
     private val kravgrunnlagBufferRepository: KravgrunnlagBufferRepository,
+    private val snapshotRepo: TilbakekrevingSnapshot,
 ) {
     private final val behovObservatør = Observatør()
 
@@ -70,7 +71,8 @@ class TilbakekrevingService(
         )
     private val eksempelsaker = mutableListOf(
         Tilbakekreving(
-            eksternFagsak,
+            id = UUID.randomUUID(),
+            eksternFagsak = eksternFagsak,
             opprettet = LocalDateTime.of(2025, Month.MARCH, 15, 12, 0),
             behandlingHistorikk =
                 BehandlingHistorikk(mutableListOf()),
@@ -145,6 +147,15 @@ class TilbakekrevingService(
         return eksempelsaker.firstOrNull { it.tilFrontendDto().fagsystem == fagsystem && it.tilFrontendDto().eksternFagsakId == eksternFagsakId }
     }
 
+    fun gjennopprettTilbakekreving(
+        id: UUID,
+        // TODO Denne kan fjernes når vi har en bedre måte å teste på
+        snapshotRepo: TilbakekrevingSnapshot,
+    ): Tilbakekreving? {
+        val tilbakekreving = snapshotRepo.henteTilstand(id)?.fraEntity(behovObservatør)
+        return tilbakekreving
+    }
+
     fun hentTilbakekreving(behandlingId: UUID): Tilbakekreving? {
         if (!applicationProperties.toggles.nyModellEnabled) return null
 
@@ -198,6 +209,7 @@ class TilbakekrevingService(
             }
             behovListe.remove(behov)
         }
+        snapshotRepo.lagreTilstand(tilbakekreving.tilEntity())
     }
 
     fun utførSteg(
@@ -205,8 +217,10 @@ class TilbakekrevingService(
         tilbakekreving: Tilbakekreving,
         behandlingsstegDto: BehandlingsstegDto,
         logContext: SecureLog.Context,
+        // denne er for test. Må fjernes når vi har en bedre måte å teste på
+        snapshot: TilbakekrevingSnapshot?,
     ) {
-        return when (behandlingsstegDto) {
+        val result = when (behandlingsstegDto) {
             is BehandlingsstegForeldelseDto -> behandleForeldelse(tilbakekreving, behandlingsstegDto, behandler)
             is BehandlingsstegVilkårsvurderingDto -> behandleVilkårsvurdering(tilbakekreving, behandlingsstegDto, behandler)
             is BehandlingsstegFaktaDto -> behandleFakta(tilbakekreving, behandlingsstegDto, behandler)
@@ -214,6 +228,8 @@ class TilbakekrevingService(
             is BehandlingsstegFatteVedtaksstegDto -> behandleFatteVedtak(tilbakekreving, behandlingsstegDto, behandler)
             else -> throw Feil("Vurdering for ${behandlingsstegDto.getSteg()} er ikke implementert i ny modell enda.", logContext = logContext)
         }
+        snapshot?.lagreTilstand(tilbakekreving.tilEntity())
+        return result
     }
 
     private fun behandleFakta(
@@ -257,7 +273,7 @@ class TilbakekrevingService(
                 periode.periode,
                 when (periode.foreldelsesvurderingstype) {
                     Foreldelsesvurderingstype.IKKE_VURDERT -> Foreldelsesteg.Vurdering.IkkeVurdert
-                    Foreldelsesvurderingstype.FORELDET -> Foreldelsesteg.Vurdering.Foreldet(periode.begrunnelse, periode.foreldelsesfrist!!)
+                    Foreldelsesvurderingstype.FORELDET -> Foreldelsesteg.Vurdering.Foreldet(periode.begrunnelse)
                     Foreldelsesvurderingstype.IKKE_FORELDET -> Foreldelsesteg.Vurdering.IkkeForeldet(periode.begrunnelse)
                     Foreldelsesvurderingstype.TILLEGGSFRIST -> Foreldelsesteg.Vurdering.Tilleggsfrist(periode.foreldelsesfrist!!, periode.oppdagelsesdato!!)
                 },
@@ -355,21 +371,24 @@ class TilbakekrevingService(
                     ),
                 )
             }
-            else -> throw IllegalArgumentException("Default eller ugydlig mottaker type ${brevmottakerDto.type}")
         }
+        snapshotRepo.lagreTilstand(tilbakekreving.tilEntity())
     }
 
     fun flyttBehandlingsstegTilbakeTilFakta(tilbakekreving: Tilbakekreving) {
         tilbakekreving.håndterNullstilling()
+        snapshotRepo.lagreTilstand(tilbakekreving.tilEntity())
     }
 
     fun aktiverBrevmottakerSteg(tilbakekreving: Tilbakekreving) {
         validerBrevmottaker(tilbakekreving)
         tilbakekreving.aktiverBrevmottakerSteg()
+        snapshotRepo.lagreTilstand(tilbakekreving.tilEntity())
     }
 
     fun deaktiverBrevmottakerSteg(tilbakekreving: Tilbakekreving) {
         tilbakekreving.deaktiverBrevmottakerSteg()
+        snapshotRepo.lagreTilstand(tilbakekreving.tilEntity())
     }
 
     fun fjernManuelBrevmottaker(
@@ -378,6 +397,7 @@ class TilbakekrevingService(
         manuellBrevmottakerId: UUID,
     ) {
         tilbakekreving.fjernManuelBrevmottaker(behandler, manuellBrevmottakerId)
+        snapshotRepo.lagreTilstand(tilbakekreving.tilEntity())
     }
 
     private fun validerBrevmottaker(tilbakekreving: Tilbakekreving) {

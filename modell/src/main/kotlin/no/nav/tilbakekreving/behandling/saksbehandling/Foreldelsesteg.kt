@@ -2,6 +2,11 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelsesperiodeDto
+import no.nav.tilbakekreving.entities.DatoperiodeEntity
+import no.nav.tilbakekreving.entities.ForeldelseperiodeEntity
+import no.nav.tilbakekreving.entities.ForeldelsesstegEntity
+import no.nav.tilbakekreving.entities.ForeldelsesvurderingEntity
+import no.nav.tilbakekreving.entities.ForeldelsesvurderingType
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
@@ -75,6 +80,13 @@ class Foreldelsesteg(
         )
     }
 
+    fun tilEntity(): ForeldelsesstegEntity {
+        return ForeldelsesstegEntity(
+            vurdertePerioder = vurdertePerioder.map { it.tilEntity() },
+            kravgrunnlagRef = kravgrunnlag.entry.internId.toString(),
+        )
+    }
+
     class Foreldelseperiode private constructor(
         val id: UUID,
         val periode: Datoperiode,
@@ -86,12 +98,32 @@ class Foreldelsesteg(
             this._vurdering = vurdering
         }
 
+        fun tilEntity(): ForeldelseperiodeEntity {
+            return ForeldelseperiodeEntity(
+                id = id.toString(),
+                periode = DatoperiodeEntity(periode.fom, periode.tom),
+                foreldelsesvurdering = when (_vurdering) {
+                    is Vurdering.IkkeForeldet -> ForeldelsesvurderingEntity(type = ForeldelsesvurderingType.IKKE_FORELDET, begrunnelse = _vurdering.begrunnelse)
+                    is Vurdering.IkkeVurdert -> ForeldelsesvurderingEntity(type = ForeldelsesvurderingType.IKKE_VURDERT)
+                    is Vurdering.Tilleggsfrist -> ForeldelsesvurderingEntity(type = ForeldelsesvurderingType.TILLEGGSFRIST, frist = _vurdering.frist, oppdaget = (_vurdering as Vurdering.Tilleggsfrist).oppdaget)
+                    is Vurdering.Foreldet -> ForeldelsesvurderingEntity(type = ForeldelsesvurderingType.FORELDET, begrunnelse = _vurdering.begrunnelse)
+                },
+            )
+        }
+
         companion object {
             fun opprett(periode: Datoperiode) =
                 Foreldelseperiode(
                     id = UUID.randomUUID(),
                     periode = periode,
                     _vurdering = Vurdering.IkkeVurdert,
+                )
+
+            fun fraEntity(foreldelseperiodeEntity: ForeldelseperiodeEntity): Foreldelseperiode =
+                Foreldelseperiode(
+                    id = UUID.fromString(foreldelseperiodeEntity.id),
+                    periode = foreldelseperiodeEntity.periode.fraEntity(),
+                    _vurdering = foreldelseperiodeEntity.foreldelsesvurdering.fraEntity(),
                 )
         }
     }
@@ -106,7 +138,7 @@ class Foreldelsesteg(
 
         class Tilleggsfrist(override val frist: LocalDate, val oppdaget: LocalDate) : Vurdering
 
-        class Foreldet(override val begrunnelse: String, override val frist: LocalDate) : Vurdering
+        class Foreldet(override val begrunnelse: String) : Vurdering
     }
 
     companion object {
