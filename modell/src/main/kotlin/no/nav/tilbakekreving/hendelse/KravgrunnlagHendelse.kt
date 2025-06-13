@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.hendelse
 import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagAdapter
 import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagPeriodeAdapter
 import no.nav.tilbakekreving.entities.AktørEntity
+import no.nav.tilbakekreving.entities.AktørType
 import no.nav.tilbakekreving.entities.BeløpEntity
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.KravgrunnlagHendelseEntity
@@ -46,9 +47,9 @@ class KravgrunnlagHendelse(
 
     fun tilEntity(): KravgrunnlagHendelseEntity {
         return KravgrunnlagHendelseEntity(
-            internId = internId.toString(),
+            internId = internId,
             vedtakId = vedtakId,
-            kravstatuskode = kravstatuskode.navn,
+            kravstatuskode = kravstatuskode,
             fagsystemVedtaksdato = fagsystemVedtaksdato,
             vedtakGjelder = tilAktørEntity(vedtakGjelder),
             utbetalesTil = tilAktørEntity(utbetalesTil),
@@ -62,10 +63,10 @@ class KravgrunnlagHendelse(
     }
 
     private fun tilAktørEntity(aktør: Aktør): AktørEntity = when (aktør) {
-        is Aktør.Person -> AktørEntity("Person", aktør.ident)
-        is Aktør.Organisasjon -> AktørEntity("Organisasjon", aktør.ident)
-        is Aktør.Samhandler -> AktørEntity("Samhandler", aktør.ident)
-        is Aktør.Applikasjonsbruker -> AktørEntity("Applikasjonsbruker", aktør.ident)
+        is Aktør.Person -> AktørEntity(AktørType.Person, aktør.ident)
+        is Aktør.Organisasjon -> AktørEntity(AktørType.Organisasjon, aktør.ident)
+        is Aktør.Samhandler -> AktørEntity(AktørType.Samhandler, aktør.ident)
+        is Aktør.Applikasjonsbruker -> AktørEntity(AktørType.Applikasjonsbruker, aktør.ident)
     }
 
     class Periode(
@@ -142,14 +143,6 @@ class KravgrunnlagHendelse(
         MANUELL("Manuell behandling"),
         NY("Nytt kravgrunnlag"),
         SPERRET("Kravgrunnlag sperret"),
-        ;
-
-        companion object {
-            fun fraNavn(navn: String): Kravstatuskode {
-                return entries.find { it.navn == navn }
-                    ?: throw IllegalArgumentException("Ingen kravstatuskode med navn=$navn ble funnet")
-            }
-        }
     }
 
     sealed interface Aktør {

@@ -25,7 +25,7 @@ class BrevHistorikk(
         return historikk.filterIsInstance<Varselbrev>().lastOrNull()
     }
 
-    fun hentHistorikk(): List<BrevEntity> {
+    fun tilEntity(): List<BrevEntity> {
         return historikk.map { it.tilEntity() }
     }
 }

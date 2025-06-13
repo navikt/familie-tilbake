@@ -3,9 +3,10 @@ package no.nav.tilbakekreving.tilstand
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
+import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 
 object SendVarselbrev : Tilstand {
-    override val navn = "SendVarselbrev"
+    override val tilbakekrevingTilstand: TilbakekrevingTilstand = TilbakekrevingTilstand.SEND_VARSELBREV
 
     override fun entering(tilbakekreving: Tilbakekreving) {
         tilbakekreving.brevHistorikk.lagre(

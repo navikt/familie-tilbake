@@ -9,25 +9,17 @@ import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsresultatDto
 import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurderingAdapter
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurdertPeriodeAdapter
+import no.nav.tilbakekreving.entities.AktsomhetType
+import no.nav.tilbakekreving.entities.BeholdType
 import no.nav.tilbakekreving.entities.BeløpIBeholdEntity
-import no.nav.tilbakekreving.entities.BeløpIBeholdJaEntity
-import no.nav.tilbakekreving.entities.BeløpIBeholdNeiEntity
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
-import no.nav.tilbakekreving.entities.FeilaktigeOpplysningerFraBrukerEntity
-import no.nav.tilbakekreving.entities.ForsettEntity
-import no.nav.tilbakekreving.entities.ForstodEllerBurdeForståttEntity
-import no.nav.tilbakekreving.entities.GodTroEntity
-import no.nav.tilbakekreving.entities.GrovUaktsomhetEntity
-import no.nav.tilbakekreving.entities.IkkeVurdertEntity
-import no.nav.tilbakekreving.entities.JaEntitySkalReduseres
-import no.nav.tilbakekreving.entities.MangelfulleOpplysningerFraBrukerEntity
-import no.nav.tilbakekreving.entities.NeiEntitySkalReduseres
-import no.nav.tilbakekreving.entities.SimpelUaktsomhetEntity
+import no.nav.tilbakekreving.entities.SkalReduseres
 import no.nav.tilbakekreving.entities.SkalReduseresEntity
 import no.nav.tilbakekreving.entities.SærligeGrunnerEntity
 import no.nav.tilbakekreving.entities.VilkårsvurderingsperiodeEntity
 import no.nav.tilbakekreving.entities.VilkårsvurderingstegEntity
 import no.nav.tilbakekreving.entities.VurderingEntity
+import no.nav.tilbakekreving.entities.VurderingType
 import no.nav.tilbakekreving.entities.VurdertAktsomhetEntity
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
@@ -55,7 +47,7 @@ class Vilkårsvurderingsteg(
     fun tilEntity(): VilkårsvurderingstegEntity {
         return VilkårsvurderingstegEntity(
             vurderinger = vurderinger.map { it.tilEntity() },
-            kravgrunnlagHendelseRef = kravgrunnlagHendelse.entry.internId.toString(),
+            kravgrunnlagHendelseRef = kravgrunnlagHendelse.entry.internId,
             foreldelsesteg = foreldelsesteg.tilEntity(),
         )
     }
@@ -192,7 +184,7 @@ class Vilkårsvurderingsteg(
 
         fun tilEntity(): VilkårsvurderingsperiodeEntity {
             return VilkårsvurderingsperiodeEntity(
-                id = id.toString(),
+                id = id,
                 periode = DatoperiodeEntity(periode.fom, periode.tom),
                 begrunnelseForTilbakekreving = begrunnelseForTilbakekreving,
                 vurdering = _vurdering.tilEntity(),
@@ -211,7 +203,7 @@ class Vilkårsvurderingsteg(
 
             fun fraEntity(entity: VilkårsvurderingsperiodeEntity): Vilkårsvurderingsperiode {
                 return Vilkårsvurderingsperiode(
-                    id = UUID.fromString(entity.id),
+                    id = entity.id,
                     periode = entity.periode.fraEntity(),
                     begrunnelseForTilbakekreving = entity.begrunnelseForTilbakekreving,
                     _vurdering = entity.vurdering.fraEntity(),
@@ -246,7 +238,8 @@ class Vilkårsvurderingsteg(
                     }
 
                     override fun tilEntity(): BeløpIBeholdEntity {
-                        return BeløpIBeholdJaEntity(
+                        return BeløpIBeholdEntity(
+                            beholdType = BeholdType.JA,
                             beløp = beløp,
                         )
                     }
@@ -258,7 +251,7 @@ class Vilkårsvurderingsteg(
                     }
 
                     override fun tilEntity(): BeløpIBeholdEntity {
-                        return BeløpIBeholdNeiEntity
+                        return BeløpIBeholdEntity(beholdType = BeholdType.NEI)
                     }
                 }
             }
@@ -270,9 +263,11 @@ class Vilkårsvurderingsteg(
             override fun vurderingstype(): Vurderingstype = AnnenVurdering.GOD_TRO
 
             override fun tilEntity(): VurderingEntity {
-                return GodTroEntity(
-                    beløpIBehold = beløpIBehold.tilEntity(),
+                return VurderingEntity(
+                    vurderingType = VurderingType.GOD_TRO,
                     begrunnelse = begrunnelse,
+                    beløpIBehold = beløpIBehold.tilEntity(),
+                    aktsomhet = null,
                 )
             }
         }
@@ -288,9 +283,11 @@ class Vilkårsvurderingsteg(
             override fun vurderingstype(): Vurderingstype = aktsomhet.vurderingstype
 
             override fun tilEntity(): VurderingEntity {
-                return ForstodEllerBurdeForståttEntity(
+                return VurderingEntity(
+                    vurderingType = VurderingType.FORSTOD_ELLER_BURDE_FORSTÅTT,
                     begrunnelse = begrunnelse,
                     aktsomhet = aktsomhet.tilEntity(),
+                    beløpIBehold = null,
                 )
             }
         }
@@ -306,9 +303,11 @@ class Vilkårsvurderingsteg(
             override fun vurderingstype(): Vurderingstype = aktsomhet.vurderingstype
 
             override fun tilEntity(): VurderingEntity {
-                return MangelfulleOpplysningerFraBrukerEntity(
+                return VurderingEntity(
+                    vurderingType = VurderingType.MANGELFULLE_OPPLYSNINGER_FRA_BRUKER,
                     begrunnelse = begrunnelse,
                     aktsomhet = aktsomhet.tilEntity(),
+                    beløpIBehold = null,
                 )
             }
         }
@@ -324,9 +323,11 @@ class Vilkårsvurderingsteg(
             override fun vurderingstype(): Vurderingstype = aktsomhet.vurderingstype
 
             override fun tilEntity(): VurderingEntity {
-                return FeilaktigeOpplysningerFraBrukerEntity(
+                return VurderingEntity(
+                    vurderingType = VurderingType.FEILAKTIGE_OPPLYSNINGER_FRA_BRUKER,
                     begrunnelse = begrunnelse,
                     aktsomhet = aktsomhet.tilEntity(),
+                    beløpIBehold = null,
                 )
             }
         }
@@ -341,7 +342,12 @@ class Vilkårsvurderingsteg(
             }
 
             override fun tilEntity(): VurderingEntity {
-                return IkkeVurdertEntity()
+                return VurderingEntity(
+                    vurderingType = VurderingType.IKKE_VURDERT,
+                    begrunnelse = null,
+                    beløpIBehold = null,
+                    aktsomhet = null,
+                )
             }
         }
     }
@@ -364,10 +370,12 @@ class Vilkårsvurderingsteg(
             override val vurderingstype: Vurderingstype = Aktsomhet.SIMPEL_UAKTSOMHET
 
             override fun tilEntity(): VurdertAktsomhetEntity {
-                return SimpelUaktsomhetEntity(
+                return VurdertAktsomhetEntity(
+                    aktsomhetType = AktsomhetType.SIMPEL_UAKTSOMHET,
                     begrunnelse = begrunnelse,
                     skalReduseres = skalReduseres.tilEntity(),
                     særligGrunner = særligeGrunner.tilEntity(),
+                    skalIleggesRenter = null,
                 )
             }
         }
@@ -381,7 +389,8 @@ class Vilkårsvurderingsteg(
             override val vurderingstype: Vurderingstype = Aktsomhet.GROV_UAKTSOMHET
 
             override fun tilEntity(): VurdertAktsomhetEntity {
-                return GrovUaktsomhetEntity(
+                return VurdertAktsomhetEntity(
+                    aktsomhetType = AktsomhetType.GROV_UAKTSOMHET,
                     begrunnelse = begrunnelse,
                     skalReduseres = skalReduseres.tilEntity(),
                     skalIleggesRenter = skalIleggesRenter,
@@ -399,9 +408,12 @@ class Vilkårsvurderingsteg(
             override val vurderingstype: Vurderingstype = Aktsomhet.FORSETT
 
             override fun tilEntity(): VurdertAktsomhetEntity {
-                return ForsettEntity(
+                return VurdertAktsomhetEntity(
+                    aktsomhetType = AktsomhetType.FORSETT,
                     begrunnelse = begrunnelse,
                     skalIleggesRenter = skalIleggesRenter,
+                    skalReduseres = null,
+                    særligGrunner = null,
                 )
             }
         }
@@ -429,7 +441,7 @@ class Vilkårsvurderingsteg(
                 }
 
                 override fun tilEntity(): SkalReduseresEntity {
-                    return JaEntitySkalReduseres(prosentdel)
+                    return SkalReduseresEntity(no.nav.tilbakekreving.entities.SkalReduseres.Ja, prosentdel)
                 }
             }
 
@@ -439,7 +451,7 @@ class Vilkårsvurderingsteg(
                 }
 
                 override fun tilEntity(): SkalReduseresEntity {
-                    return NeiEntitySkalReduseres
+                    return SkalReduseresEntity(no.nav.tilbakekreving.entities.SkalReduseres.Nei, null)
                 }
             }
         }

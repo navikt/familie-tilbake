@@ -21,7 +21,7 @@ class EksternFagsakBehandlingHistorikk(
         return HistorikkReferanse(this, historikk.last().internId)
     }
 
-    fun henHistorikk(): List<EksternFagsakBehandlingEntity> {
-        return historikk.map { it.tilEntity() }
+    fun tilEntity(): List<EksternFagsakBehandlingEntity> {
+        return historikk.mapNotNull { it.tilEntity() }
     }
 }

@@ -73,13 +73,13 @@ class Behandling private constructor(
 
     fun tilEntity(): BehandlingEntity {
         return BehandlingEntity(
-            internId = internId.toString(),
-            eksternId = eksternId.toString(),
-            behandlingstype = behandlingstype.name,
-            opprettet = opprettet.toString(),
-            sistEndret = sistEndret.toString(),
+            internId = internId,
+            eksternId = eksternId,
+            behandlingstype = behandlingstype,
+            opprettet = opprettet,
+            sistEndret = sistEndret,
             enhet = enhet?.tilEntity(),
-            årsak = årsak.name,
+            årsak = årsak,
             ansvarligSaksbehandlerEntity = ansvarligSaksbehandler.tilEntity(),
             eksternFagsakBehandlingRefEntity = eksternFagsakBehandling.entry.tilEntity(),
             kravgrunnlagHendelseRefEntity = kravgrunnlag.entry.tilEntity(),
@@ -159,11 +159,11 @@ class Behandling private constructor(
         )
     }
 
-    override fun ansvarligSaksbehandler(): Behandler {
+    fun ansvarligSaksbehandler(): Behandler {
         return ansvarligSaksbehandler
     }
 
-    override fun oppdaterAnsvarligSaksbehandler(behandler: Behandler) {
+    fun oppdaterAnsvarligSaksbehandler(behandler: Behandler) {
         ansvarligSaksbehandler = behandler
     }
 
@@ -309,6 +309,12 @@ class Behandling private constructor(
         )
     }
 
+    fun hentVilkårsvurderingsteg() = vilkårsvurderingsteg
+
+    fun hentForeslåVedtakSteg() = foreslåVedtakSteg
+
+    fun hentFatteVedtakSteg() = fatteVedtakSteg
+
     companion object {
         fun nyBehandling(
             internId: UUID,
@@ -351,22 +357,23 @@ class Behandling private constructor(
             behandlingEntity: BehandlingEntity,
             eksternFagsakBehandlingHistorikk: EksternFagsakBehandlingHistorikk,
             kravgrunnlagHistorikk: KravgrunnlagHistorikk,
+            brevHistorikk: BrevHistorikk,
         ): Behandling {
             val eksternFagsak = eksternFagsakBehandlingHistorikk.nåværende()
             val kravgrunnlag = kravgrunnlagHistorikk.nåværende()
             return Behandling(
-                internId = UUID.fromString(behandlingEntity.internId),
-                eksternId = UUID.fromString(behandlingEntity.eksternId),
-                behandlingstype = Behandlingstype.valueOf(behandlingEntity.behandlingstype),
-                opprettet = LocalDateTime.parse(behandlingEntity.opprettet),
-                sistEndret = LocalDateTime.parse(behandlingEntity.sistEndret),
+                internId = behandlingEntity.internId,
+                eksternId = behandlingEntity.eksternId,
+                behandlingstype = behandlingEntity.behandlingstype,
+                opprettet = behandlingEntity.opprettet,
+                sistEndret = behandlingEntity.sistEndret,
                 enhet = behandlingEntity.enhet?.fraEntity(),
-                årsak = Behandlingsårsakstype.valueOf(behandlingEntity.årsak),
+                årsak = behandlingEntity.årsak,
                 ansvarligSaksbehandler = behandlingEntity.ansvarligSaksbehandlerEntity.fraEntity(),
                 eksternFagsakBehandling = eksternFagsak,
                 kravgrunnlag = kravgrunnlag,
                 foreldelsesteg = behandlingEntity.foreldelsestegEntity.fraEntity(kravgrunnlag),
-                faktasteg = behandlingEntity.faktastegEntity.fraEntity(eksternFagsak, kravgrunnlag),
+                faktasteg = behandlingEntity.faktastegEntity.fraEntity(eksternFagsak, kravgrunnlag, brevHistorikk),
                 vilkårsvurderingsteg = Vilkårsvurderingsteg.fraEntity(behandlingEntity.vilkårsvurderingstegEntity, kravgrunnlag),
                 foreslåVedtakSteg = behandlingEntity.foreslåVedtakStegEntity.fraEntity(),
                 fatteVedtakSteg = FatteVedtakSteg.fraEntity(behandlingEntity.fatteVedtakStegEntity),

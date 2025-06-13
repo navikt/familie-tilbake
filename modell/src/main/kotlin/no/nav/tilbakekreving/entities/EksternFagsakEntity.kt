@@ -13,7 +13,7 @@ data class EksternFagsakEntity(
         behovObservatør: BehovObservatør,
     ): EksternFagsak {
         val eksternFagsakBehandlingHistorikk = EksternFagsakBehandlingHistorikk(
-            behandlinger.map { it.fraEntity() }.toMutableList(),
+            historikk = behandlinger.map { it.fraEntity() }.toMutableList(),
         )
         return EksternFagsak(
             eksternId = eksternId,

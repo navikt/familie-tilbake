@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Repository
-class TilbakekrevingSnapshot(
+class TilbakekrevingRepository(
     private val jdbcTemplate: JdbcTemplate,
 ) {
     private val objectMapper = jacksonObjectMapper()
@@ -20,6 +20,44 @@ class TilbakekrevingSnapshot(
         .registerModule(JavaTimeModule())
         .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+
+    @Transactional
+    fun lagre(
+        tilbakekrevingId: UUID,
+        behandlingId: UUID,
+        tilbakekrevingEntity: TilbakekrevingEntity,
+    ) {
+        jdbcTemplate.update(
+            """
+        INSERT INTO tilbakekreving_behandling(tilbakekreving_id, behandling_id)
+        VALUES (?, ?)
+        ON CONFLICT (tilbakekreving_id, behandling_id) DO NOTHING
+            """.trimIndent(),
+            tilbakekrevingId,
+            behandlingId,
+        )
+
+        lagreTilstand(tilbakekrevingEntity)
+    }
+
+    fun hentTilbakekreving(behandlingId: UUID): TilbakekrevingEntity? {
+        val tilbakekrevingId: UUID? = jdbcTemplate.query(
+            "SELECT tilbakekreving_id FROM tilbakekreving_behandling WHERE behandling_id = ?",
+            arrayOf(behandlingId),
+        ) { rs, _ -> rs.getObject("tilbakekreving_id", UUID::class.java) }
+            .firstOrNull()
+
+        return tilbakekrevingId?.let { hentTilbakekrevingMedTilbakekrevingId(it) }
+    }
+
+    fun hentAlleTilbakekrevinger(): List<TilbakekrevingEntity>? {
+        return jdbcTemplate.query(
+            "SELECT * FROM tilbakekreving_snapshot",
+        ) { rs, _ ->
+            val jsonText = rs.getString("snapshot")
+            objectMapper.readValue(jsonText, TilbakekrevingEntity::class.java)
+        }.toList()
+    }
 
     @Transactional
     fun lagreTilstand(snapshot: TilbakekrevingEntity) {
@@ -35,7 +73,7 @@ class TilbakekrevingSnapshot(
         )
     }
 
-    fun henteTilstand(id: UUID): TilbakekrevingEntity? {
+    fun hentTilbakekrevingMedTilbakekrevingId(id: UUID): TilbakekrevingEntity? {
         return jdbcTemplate.query(
             "SELECT snapshot FROM tilbakekreving_snapshot WHERE id = ?",
             arrayOf(id),

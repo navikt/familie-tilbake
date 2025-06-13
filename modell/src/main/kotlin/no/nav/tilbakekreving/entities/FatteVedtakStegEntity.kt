@@ -9,6 +9,12 @@ data class FatteVedtakStegEntity(
 
 data class VurdertStegEntity(
     val steg: Behandlingssteg,
-    val vurdering: String,
+    val vurdering: VurdertStegType,
     val begrunnelse: String?,
 )
+
+enum class VurdertStegType {
+    IKKE_VURDERT,
+    GODKJENT,
+    UNDERKJENT,
+}

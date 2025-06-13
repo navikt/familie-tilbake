@@ -39,23 +39,21 @@ sealed class EksternFagsakBehandling(
         return when (this) {
             is Behandling -> EksternFagsakBehandlingEntity(
                 type = EksternFagsakBehandlingType.BEHANDLING,
-                internId = internId.toString(),
+                internId = internId,
                 eksternId = eksternId,
                 revurderingsresultat = revurderingsresultat,
                 revurderingsårsak = revurderingsårsak,
                 begrunnelseForTilbakekreving = begrunnelseForTilbakekreving,
-                revurderingsvedtaksdato = revurderingsvedtaksdato.toString(),
+                revurderingsvedtaksdato = revurderingsvedtaksdato,
             )
-
             is Ukjent -> EksternFagsakBehandlingEntity(
                 type = EksternFagsakBehandlingType.UKJENT,
-                internId = internId.toString(),
-                eksternId = eksternId,
-                revurderingsresultat = revurderingsresultat,
-                revurderingsårsak = revurderingsårsak,
-                begrunnelseForTilbakekreving = begrunnelseForTilbakekreving,
-                revurderingsvedtaksdato = revurderingsvedtaksdato.toString(),
-                revurderingsdatoFraKravgrunnlag = revurderingsdatoFraKravgrunnlag?.toString(),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
             )
         }
     }

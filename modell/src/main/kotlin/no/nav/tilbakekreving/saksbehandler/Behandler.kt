@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.saksbehandler
 
 import no.nav.tilbakekreving.entities.BehandlerEntity
+import no.nav.tilbakekreving.entities.BehandlerType
 
 sealed interface Behandler {
     val ident: String
@@ -13,7 +14,7 @@ sealed interface Behandler {
         }
 
         override fun tilEntity(): BehandlerEntity {
-            return BehandlerEntity("Saksbehandler", ident)
+            return BehandlerEntity(BehandlerType.SAKSBEHANDLER, ident)
         }
 
         override fun hashCode(): Int = ident.hashCode()
@@ -23,7 +24,7 @@ sealed interface Behandler {
         override val ident: String = "VL"
 
         override fun tilEntity(): BehandlerEntity {
-            return BehandlerEntity("Vedtaksløsning", ident)
+            return BehandlerEntity(BehandlerType.VEDTAKSLØSNING, ident)
         }
     }
 }

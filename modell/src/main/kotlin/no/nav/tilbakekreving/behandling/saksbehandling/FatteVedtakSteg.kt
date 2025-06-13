@@ -5,6 +5,7 @@ import no.nav.tilbakekreving.api.v1.dto.Totrinnsstegsinfo
 import no.nav.tilbakekreving.api.v1.dto.TotrinnsvurderingDto
 import no.nav.tilbakekreving.entities.FatteVedtakStegEntity
 import no.nav.tilbakekreving.entities.VurdertStegEntity
+import no.nav.tilbakekreving.entities.VurdertStegType
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.saksbehandler.Behandler
 
@@ -72,9 +73,9 @@ class FatteVedtakSteg private constructor(
             return VurdertStegEntity(
                 steg = steg,
                 vurdering = when (this.vurdering) {
-                    is Vurdering.IkkeVurdert -> "Ikke Vurdert"
-                    is Vurdering.Godkjent -> "Godkjent"
-                    is Vurdering.Underkjent -> "Underkjent"
+                    is Vurdering.IkkeVurdert -> VurdertStegType.IKKE_VURDERT
+                    is Vurdering.Godkjent -> VurdertStegType.GODKJENT
+                    is Vurdering.Underkjent -> VurdertStegType.UNDERKJENT
                 },
                 begrunnelse = (vurdering as? Vurdering.Underkjent)?.begrunnelse,
             )
@@ -82,11 +83,10 @@ class FatteVedtakSteg private constructor(
 
         companion object {
             fun fraEntity(entity: VurdertStegEntity): VurdertSteg {
-                val vurdering = when {
-                    entity.vurdering.equals("Ikke Vurdert") -> Vurdering.IkkeVurdert
-                    entity.vurdering.equals("Godkjent") -> Vurdering.Godkjent
-                    entity.vurdering.equals("Underkjent") -> Vurdering.Underkjent(entity.begrunnelse!!)
-                    else -> throw IllegalArgumentException("Ugyldig vurdering ${entity.vurdering}")
+                val vurdering = when (entity.vurdering) {
+                    VurdertStegType.IKKE_VURDERT -> Vurdering.IkkeVurdert
+                    VurdertStegType.GODKJENT -> Vurdering.Godkjent
+                    VurdertStegType.UNDERKJENT -> Vurdering.Underkjent(entity.begrunnelse!!)
                 }
                 return VurdertSteg(
                     steg = entity.steg,

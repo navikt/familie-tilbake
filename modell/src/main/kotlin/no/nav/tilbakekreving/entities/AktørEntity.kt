@@ -3,17 +3,22 @@ package no.nav.tilbakekreving.entities
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 
 data class AktørEntity(
-    val aktørType: String,
+    val aktørType: AktørType,
     val ident: String,
 ) {
     fun fraEntity(): KravgrunnlagHendelse.Aktør {
-        val aktør = when {
-            aktørType.equals("Person") -> KravgrunnlagHendelse.Aktør.Person(ident)
-            aktørType.equals("Organisasjon") -> KravgrunnlagHendelse.Aktør.Organisasjon(ident)
-            aktørType.equals("Samhandler") -> KravgrunnlagHendelse.Aktør.Samhandler(ident)
-            aktørType.equals("Applikasjonsbruker") -> KravgrunnlagHendelse.Aktør.Applikasjonsbruker(ident)
-            else -> throw IllegalArgumentException("Ugildig aktør type: $aktørType")
+        return when (aktørType) {
+            AktørType.Person -> KravgrunnlagHendelse.Aktør.Person(ident)
+            AktørType.Organisasjon -> KravgrunnlagHendelse.Aktør.Organisasjon(ident)
+            AktørType.Samhandler -> KravgrunnlagHendelse.Aktør.Samhandler(ident)
+            AktørType.Applikasjonsbruker -> KravgrunnlagHendelse.Aktør.Applikasjonsbruker(ident)
         }
-        return aktør
     }
+}
+
+enum class AktørType {
+    Person,
+    Organisasjon,
+    Samhandler,
+    Applikasjonsbruker,
 }

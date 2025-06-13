@@ -44,11 +44,11 @@ class Bruker(
     fun tilEntity(): BrukerEntity {
         return BrukerEntity(
             ident = ident,
-            språkkode = språkkode?.name,
+            språkkode = språkkode,
             navn = navn,
-            fødselsdato = fødselsdato?.let { fødselsdato },
-            kjønn = kjønn?.name,
-            dødsdato = dødsdato?.let { dødsdato },
+            fødselsdato = fødselsdato,
+            kjønn = kjønn,
+            dødsdato = dødsdato,
         )
     }
 

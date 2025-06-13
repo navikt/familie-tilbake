@@ -2,16 +2,18 @@ package no.nav.tilbakekreving.entities
 
 import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
 
-sealed class SkalReduseresEntity {
-    abstract fun fraEntity(): Vilkårsvurderingsteg.VurdertAktsomhet.SkalReduseres
+data class SkalReduseresEntity(
+    val type: SkalReduseres,
+    val prosentdel: Int?,
+) {
+    fun fraEntity(): Vilkårsvurderingsteg.VurdertAktsomhet.SkalReduseres = when (type) {
+        SkalReduseres.Ja ->
+            Vilkårsvurderingsteg.VurdertAktsomhet.SkalReduseres.Ja(requireNotNull(prosentdel) { "prosentdel kreves for SkalReduseres" })
+        SkalReduseres.Nei -> Vilkårsvurderingsteg.VurdertAktsomhet.SkalReduseres.Nei
+    }
 }
 
-data class JaEntitySkalReduseres(val prosentdel: Int) : SkalReduseresEntity() {
-    override fun fraEntity(): Vilkårsvurderingsteg.VurdertAktsomhet.SkalReduseres =
-        Vilkårsvurderingsteg.VurdertAktsomhet.SkalReduseres.Ja(prosentdel)
-}
-
-object NeiEntitySkalReduseres : SkalReduseresEntity() {
-    override fun fraEntity(): Vilkårsvurderingsteg.VurdertAktsomhet.SkalReduseres =
-        Vilkårsvurderingsteg.VurdertAktsomhet.SkalReduseres.Nei
+enum class SkalReduseres {
+    Ja,
+    Nei,
 }

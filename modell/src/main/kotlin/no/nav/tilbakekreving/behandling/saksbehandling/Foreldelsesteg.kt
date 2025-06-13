@@ -100,7 +100,7 @@ class Foreldelsesteg(
 
         fun tilEntity(): ForeldelseperiodeEntity {
             return ForeldelseperiodeEntity(
-                id = id.toString(),
+                id = id,
                 periode = DatoperiodeEntity(periode.fom, periode.tom),
                 foreldelsesvurdering = when (_vurdering) {
                     is Vurdering.IkkeForeldet -> ForeldelsesvurderingEntity(type = ForeldelsesvurderingType.IKKE_FORELDET, begrunnelse = _vurdering.begrunnelse)
@@ -121,7 +121,7 @@ class Foreldelsesteg(
 
             fun fraEntity(foreldelseperiodeEntity: ForeldelseperiodeEntity): Foreldelseperiode =
                 Foreldelseperiode(
-                    id = UUID.fromString(foreldelseperiodeEntity.id),
+                    id = foreldelseperiodeEntity.id,
                     periode = foreldelseperiodeEntity.periode.fraEntity(),
                     _vurdering = foreldelseperiodeEntity.foreldelsesvurdering.fraEntity(),
                 )
