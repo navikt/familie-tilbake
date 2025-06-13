@@ -134,7 +134,6 @@ class BehandlingController(
                     auditLoggerEvent = AuditLoggerEvent.ACCESS,
                     handling = "Henter tilbakekrevingsbehandling",
                 )
-                tilbakekrevingService.sjekkBehovOgHåndter(tilbakekreving)
                 return Ressurs.success(tilbakekreving.behandlingHistorikk.tilFrontendDto().first { it.behandlingId == behandlingId })
             }
         }
@@ -157,8 +156,7 @@ class BehandlingController(
         @Valid @RequestBody
         behandlingsstegDto: BehandlingsstegDto,
     ): Ressurs<String> {
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
-        if (tilbakekreving != null) {
+        val håndtert = tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving ->
             val logContext = SecureLog.Context.fra(tilbakekreving)
             val saksbehandler = ContextService.hentBehandler(logContext)
 
@@ -176,7 +174,9 @@ class BehandlingController(
             )
 
             tilbakekrevingService.utførSteg(saksbehandler, tilbakekreving, behandlingsstegDto, logContext)
-            tilbakekrevingService.sjekkBehovOgHåndter(tilbakekreving)
+            true
+        }
+        if (håndtert ?: false) {
             return Ressurs.success("OK")
         }
         tilgangskontrollService.validerTilgangBehandlingID(

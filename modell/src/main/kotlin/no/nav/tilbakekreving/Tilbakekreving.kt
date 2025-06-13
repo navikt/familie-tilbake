@@ -39,6 +39,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class Tilbakekreving(
+    val fagsystemId: String,
     val eksternFagsak: EksternFagsak,
     val behandlingHistorikk: BehandlingHistorikk,
     val kravgrunnlagHistorikk: KravgrunnlagHistorikk,
@@ -196,6 +197,8 @@ class Tilbakekreving(
         ): Tilbakekreving {
             val tilbakekreving = Tilbakekreving(
                 opprettet = LocalDateTime.now(),
+                // TODO: Lesbar ID
+                fagsystemId = UUID.randomUUID().toString(),
                 opprettelsesvalg = opprettTilbakekrevingEvent.opprettelsesvalg,
                 eksternFagsak = EksternFagsak(
                     eksternId = opprettTilbakekrevingEvent.eksternFagsak.eksternId,

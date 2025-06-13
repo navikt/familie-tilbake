@@ -15,7 +15,6 @@ import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeslåVedtaksstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.ManuellBrevmottakerRequestDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
-import no.nav.tilbakekreving.behandling.BehandlingHistorikk
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
@@ -23,10 +22,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
 import no.nav.tilbakekreving.behov.BrukerinfoBehov
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
 import no.nav.tilbakekreving.behov.VarselbrevBehov
-import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.brev.Varselbrev
-import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
-import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
@@ -39,15 +35,12 @@ import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
-import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagMapper
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.Month
 import java.util.Random
 import java.util.UUID
 
@@ -57,37 +50,29 @@ class TilbakekrevingService(
     private val pdlClient: PdlClient,
     private val kravgrunnlagBufferRepository: KravgrunnlagBufferRepository,
 ) {
-    private final val behovObservatør = Observatør()
-
     private val fnr = "20046912345"
 
-    private val eksternFagsak =
-        EksternFagsak(
-            eksternId = "TEST-101010",
-            ytelse = Ytelse.Barnetrygd,
-            behandlinger = EksternFagsakBehandlingHistorikk(mutableListOf()),
-            behovObservatør = behovObservatør,
-        )
+    private data class InMemorySak(
+        val observatør: Observatør,
+        val tilbakekreving: Tilbakekreving,
+    )
+
     private val eksempelsaker = mutableListOf(
-        Tilbakekreving(
-            eksternFagsak,
-            opprettet = LocalDateTime.of(2025, Month.MARCH, 15, 12, 0),
-            behandlingHistorikk =
-                BehandlingHistorikk(mutableListOf()),
-            behovObservatør = behovObservatør,
-            kravgrunnlagHistorikk = KravgrunnlagHistorikk(mutableListOf()),
-            brevHistorikk = BrevHistorikk(mutableListOf()),
-            opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
-        ).apply {
-            håndter(
-                OpprettTilbakekrevingHendelse(
-                    opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
-                    eksternFagsak = OpprettTilbakekrevingHendelse.EksternFagsak(
-                        ytelse = Ytelse.Barnetrygd,
-                        eksternId = "TEST-101010",
-                    ),
+        testsak(),
+    )
+
+    private fun testsak(): InMemorySak {
+        val behovObservatør = Observatør()
+        val tilbakekreving = Tilbakekreving.opprett(
+            behovObservatør,
+            OpprettTilbakekrevingHendelse(
+                opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
+                eksternFagsak = OpprettTilbakekrevingHendelse.EksternFagsak(
+                    eksternId = "TEST-101010",
+                    ytelse = Ytelse.Barnetrygd,
                 ),
-            )
+            ),
+        ).apply {
             håndter(
                 KravgrunnlagHendelse(
                     internId = UUID.randomUUID(),
@@ -133,8 +118,22 @@ class TilbakekrevingService(
                     ),
                 ),
             )
-        },
-    )
+        }
+        return InMemorySak(behovObservatør, tilbakekreving)
+    }
+
+    fun opprettTilbakekreving(
+        opprettTilbakekrevingHendelse: OpprettTilbakekrevingHendelse,
+        håndter: (Tilbakekreving) -> Unit,
+    ) {
+        val observatør = Observatør()
+        val tilbakekreving = Tilbakekreving.opprett(observatør, opprettTilbakekrevingHendelse)
+        håndter(tilbakekreving)
+        eksempelsaker.add(InMemorySak(observatør, tilbakekreving))
+        lagre(observatør, tilbakekreving)
+
+        sjekkBehovOgHåndter(tilbakekreving, observatør)
+    }
 
     fun hentTilbakekreving(
         fagsystem: FagsystemDTO,
@@ -142,23 +141,49 @@ class TilbakekrevingService(
     ): Tilbakekreving? {
         if (!applicationProperties.toggles.nyModellEnabled) return null
 
-        return eksempelsaker.firstOrNull { it.tilFrontendDto().fagsystem == fagsystem && it.tilFrontendDto().eksternFagsakId == eksternFagsakId }
+        return eksempelsaker.map { it.tilbakekreving }.firstOrNull { it.tilFrontendDto().fagsystem == fagsystem && it.tilFrontendDto().eksternFagsakId == eksternFagsakId }
     }
 
     fun hentTilbakekreving(behandlingId: UUID): Tilbakekreving? {
         if (!applicationProperties.toggles.nyModellEnabled) return null
 
-        return eksempelsaker.firstOrNull { sak -> sak.tilFrontendDto().behandlinger.any { it.eksternBrukId == behandlingId } }
+        return eksempelsaker.map { it.tilbakekreving }.firstOrNull { sak -> sak.tilFrontendDto().behandlinger.any { it.eksternBrukId == behandlingId } }
     }
 
-    fun sjekkBehovOgHåndter(tilbakekreving: Tilbakekreving) {
-        val behovListe = behovObservatør.behovListe
-        while (behovListe.isNotEmpty()) {
-            val behov = behovListe.first()
+    fun <T> hentTilbakekreving(
+        behandlingId: UUID,
+        håndter: (Tilbakekreving) -> T,
+    ): T? {
+        val sak = eksempelsaker.firstOrNull { sak -> sak.tilbakekreving.tilFrontendDto().behandlinger.any { it.eksternBrukId == behandlingId } } ?: return null
+
+        val result = håndter(sak.tilbakekreving)
+        lagre(sak.observatør, sak.tilbakekreving)
+        return result
+    }
+
+    fun lagre(
+        observatør: Observatør,
+        tilbakekreving: Tilbakekreving,
+    ) {
+        val eksisterendeSak = eksempelsaker.find { it.tilbakekreving.fagsystemId == tilbakekreving.fagsystemId }
+        if (eksisterendeSak == null) {
+            eksempelsaker.add(InMemorySak(observatør, tilbakekreving))
+        } else {
+            eksempelsaker.remove(eksisterendeSak)
+            eksempelsaker.add(InMemorySak(eksisterendeSak.observatør, tilbakekreving))
+        }
+    }
+
+    fun sjekkBehovOgHåndter(
+        tilbakekreving: Tilbakekreving,
+        observatør: Observatør,
+    ) {
+        while (observatør.harUbesvarteBehov()) {
+            val behov = observatør.nesteBehov()
             when (behov) {
                 is BrukerinfoBehov -> {
                     val personinfo = pdlClient.hentPersoninfo(
-                        ident = tilbakekreving.bruker!!.ident,
+                        ident = behov.ident,
                         fagsystem = behov.ytelse.tilFagsystemDTO(),
                         logContext = SecureLog.Context.fra(tilbakekreving),
                     )
@@ -176,6 +201,7 @@ class TilbakekrevingService(
                         ),
                     )
                 }
+
                 is VarselbrevBehov -> {
                     tilbakekreving.håndter(
                         VarselbrevSendtHendelse(
@@ -183,6 +209,7 @@ class TilbakekrevingService(
                         ),
                     )
                 }
+
                 is FagsysteminfoBehov -> {
                     tilbakekreving.håndter(
                         FagsysteminfoHendelse(
@@ -196,7 +223,7 @@ class TilbakekrevingService(
                     )
                 }
             }
-            behovListe.remove(behov)
+            lagre(observatør, tilbakekreving)
         }
     }
 
@@ -322,6 +349,7 @@ class TilbakekrevingService(
                     ),
                 )
             }
+
             MottakerType.FULLMEKTIG -> {
                 tilbakekreving.håndter(
                     behandler,
@@ -334,6 +362,7 @@ class TilbakekrevingService(
                     ),
                 )
             }
+
             MottakerType.VERGE -> {
                 tilbakekreving.håndter(
                     behandler,
@@ -345,6 +374,7 @@ class TilbakekrevingService(
                     ),
                 )
             }
+
             MottakerType.DØDSBO -> {
                 tilbakekreving.håndter(
                     behandler,
@@ -355,6 +385,7 @@ class TilbakekrevingService(
                     ),
                 )
             }
+
             else -> throw IllegalArgumentException("Default eller ugydlig mottaker type ${brevmottakerDto.type}")
         }
     }
@@ -411,15 +442,10 @@ class TilbakekrevingService(
         val ikkeHåndterteKravgrunnlag = kravgrunnlagBufferRepository.hentUlesteKravgrunnlag()
         ikkeHåndterteKravgrunnlag.forEach { entity ->
             val kravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(entity.kravgrunnlag)
+            opprettTilbakekreving(KravgrunnlagMapper.tilOpprettTilbakekrevingHendelse(kravgrunnlag)) { tilbakekreving ->
+                tilbakekreving.håndter(KravgrunnlagMapper.tilKravgrunnlagHendelse(kravgrunnlag))
+            }
 
-            val tilbakekreving = Tilbakekreving.opprett(
-                behovObservatør = behovObservatør,
-                opprettTilbakekrevingEvent = KravgrunnlagMapper.tilOpprettTilbakekrevingHendelse(kravgrunnlag),
-            )
-
-            tilbakekreving.håndter(KravgrunnlagMapper.tilKravgrunnlagHendelse(kravgrunnlag))
-
-            eksempelsaker.add(tilbakekreving)
             kravgrunnlagBufferRepository.markerLest(entity.kravgrunnlagId)
         }
     }

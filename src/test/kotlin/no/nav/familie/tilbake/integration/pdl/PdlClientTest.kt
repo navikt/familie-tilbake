@@ -33,7 +33,7 @@ class PdlClientTest {
             wiremockServerItem = WireMockServer(wireMockConfig().dynamicPort())
             wiremockServerItem.start()
 
-            pdlClient = PdlClient(PdlConfig(URI.create(wiremockServerItem.baseUrl())), restOperations)
+            pdlClient = PdlClientImpl(PdlConfig(URI.create(wiremockServerItem.baseUrl())), restOperations)
         }
 
         @AfterAll

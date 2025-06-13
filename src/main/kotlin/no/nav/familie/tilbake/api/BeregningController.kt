@@ -41,8 +41,7 @@ class BeregningController(
         @Valid @RequestBody
         perioder: List<Datoperiode>,
     ): Ressurs<BeregnetPerioderDto> {
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
-        if (tilbakekreving != null) {
+        val resultat = tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving ->
             tilgangskontrollService.validerTilgangTilbakekreving(
                 tilbakekreving = tilbakekreving,
                 behandlingId = behandlingId,
@@ -50,8 +49,10 @@ class BeregningController(
                 auditLoggerEvent = AuditLoggerEvent.ACCESS,
                 handling = "Beregner feilutbetalt beløp for nye delte perioder",
             )
-            tilbakekrevingService.sjekkBehovOgHåndter(tilbakekreving)
-            return Ressurs.success(tilbakekreving.behandlingHistorikk.nåværende().entry.beregnSplittetPeriode(perioder))
+            tilbakekreving.behandlingHistorikk.nåværende().entry.beregnSplittetPeriode(perioder)
+        }
+        if (resultat != null) {
+            return Ressurs.success(resultat)
         }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
@@ -79,7 +80,6 @@ class BeregningController(
                 auditLoggerEvent = AuditLoggerEvent.ACCESS,
                 handling = "Henter beregningsresultat",
             )
-            tilbakekrevingService.sjekkBehovOgHåndter(tilbakekreving)
             return Ressurs.success(tilbakekreving.behandlingHistorikk.nåværende().entry.beregnForFrontend())
         }
         tilgangskontrollService.validerTilgangBehandlingID(

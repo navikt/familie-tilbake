@@ -1,11 +1,6 @@
 package no.nav.tilbakekreving.e2e
 
-import io.kotest.assertions.nondeterministic.eventually
-import io.kotest.assertions.nondeterministic.eventuallyConfig
-import io.kotest.common.runBlocking
 import io.kotest.matchers.nulls.shouldNotBeNull
-import io.kotest.matchers.shouldBe
-import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.april
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.NyKlassekode
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp
@@ -13,26 +8,17 @@ import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp.Com
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
-import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
 import no.nav.tilbakekreving.mai
 import no.nav.tilbakekreving.mars
 import no.nav.tilbakekreving.util.kroner
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
-import kotlin.time.Duration.Companion.milliseconds
 
 class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
-    @Autowired
-    private lateinit var kravgrunnlagBufferRepository: KravgrunnlagBufferRepository
-
-    @Autowired
-    private lateinit var tilbakekrevingService: TilbakekrevingService
-
     @Test
     fun `kan lese kravgrunnlag for tilleggstønader`() {
         val fagsystemId = UUID.randomUUID().toString()
-        sendMessage(
+        sendKravgrunnlagOgAvventLesing(
             "LOCAL_TILLEGGSSTONADER.KRAVGRUNNLAG",
             KravgrunnlagGenerator.forTillegstønader(
                 fagsystemId = fagsystemId,
@@ -70,21 +56,6 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
                 ),
             ),
         )
-
-        runBlocking {
-            eventually(
-                eventuallyConfig {
-                    duration = 1000.milliseconds
-                    interval = 10.milliseconds
-                },
-            ) {
-                kravgrunnlagBufferRepository.hent().size shouldBe 1
-            }
-        }
-
-        tilbakekrevingService.lesKravgrunnlag()
-
-        kravgrunnlagBufferRepository.hentUlesteKravgrunnlag().size shouldBe 0
 
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId)
         tilbakekreving.shouldNotBeNull()
