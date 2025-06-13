@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.sikkerhet
 
+import io.ktor.util.toLowerCasePreservingASCIIRules
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.Fagsystem
@@ -7,6 +8,7 @@ import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.common.exceptionhandler.ForbiddenError
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.RolleConfig
@@ -42,7 +44,8 @@ class TilgangskontrollService(
     ) {
         val saksbehandler = ContextService.hentSaksbehandler(SecureLog.Context.tom())
         val fagsystem = tilbakekreving.tilFrontendDto().fagsystem
-        val logContext = SecureLog.Context.medBehandling(tilbakekreving.eksternFagsak.eksternId, behandlingId?.toString())
+        val logContext =
+            SecureLog.Context.medBehandling(tilbakekreving.eksternFagsak.eksternId, behandlingId?.toString())
         val dto = tilbakekreving.tilFrontendDto()
         validate(
             fagsystem = fagsystem,
@@ -190,7 +193,11 @@ class TilgangskontrollService(
             return
         }
         val brukerRolleOgFagsystemstilgang =
-            ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, handling, SecureLog.Context.tom())
+            ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(
+                rolleConfig,
+                handling,
+                SecureLog.Context.tom(),
+            )
 
         // når behandler har forvaltningstilgang, blir rollen bare validert
         if (brukerRolleOgFagsystemstilgang.tilganger.contains(Tilgangskontrollsfagsystem.FORVALTER_TILGANG)) {
@@ -207,7 +214,9 @@ class TilgangskontrollService(
 
             // sjekk om saksbehandler har riktig rolle å aksessere denne ytelsestypen
             validateRolle(
-                brukersrolleTilFagsystemet = brukerRolleOgFagsystemstilgang.tilganger.getValue(tilgangskontrollsfagsystem),
+                brukersrolleTilFagsystemet = brukerRolleOgFagsystemstilgang.tilganger.getValue(
+                    tilgangskontrollsfagsystem,
+                ),
                 minimumBehandlerrolle = minimumBehandlerrolle,
                 handling = handling,
                 logContext = logContext,
@@ -255,11 +264,10 @@ class TilgangskontrollService(
 
         val tilganger = integrasjonerClient.sjekkTilgangTilPersoner(listOf(personIBehandlingen), Fagsystem.forDTO(fagsystem).tilTema())
         if (tilganger.any { !it.harTilgang }) {
-            throw Feil(
+            throw ForbiddenError(
                 message = "$saksbehandler har ikke tilgang til person i $handling",
                 frontendFeilmelding = "$saksbehandler  har ikke tilgang til person i $handling",
                 logContext = SecureLog.Context.tom(),
-                httpStatus = HttpStatus.FORBIDDEN,
             )
         }
     }
@@ -282,11 +290,10 @@ class TilgangskontrollService(
         saksbehandler: String,
     ) {
         if (!brukerRolleOgFagsystemstilgang.tilganger.contains(fagsystem)) {
-            throw Feil(
+            throw ForbiddenError(
                 message = "$saksbehandler har ikke tilgang til $handling",
                 frontendFeilmelding = "$saksbehandler  har ikke tilgang til $handling",
                 logContext = SecureLog.Context.tom(),
-                httpStatus = HttpStatus.FORBIDDEN,
             )
         }
     }
@@ -299,23 +306,19 @@ class TilgangskontrollService(
         saksbehandler: String,
     ) {
         if (minimumBehandlerrolle == Behandlerrolle.FORVALTER) {
-            throw Feil(
+            throw ForbiddenError(
                 message =
-                    "$saksbehandler med rolle $brukersrolleTilFagsystemet " +
-                        "har ikke tilgang til å kalle forvaltningstjeneste $handling. Krever FORVALTER.",
-                frontendFeilmelding = "Du har ikke tilgang til å $handling.",
+                    "$saksbehandler med rolle $brukersrolleTilFagsystemet har ikke tilgang til å kalle forvaltningstjeneste $handling. Krever FORVALTER.",
+                frontendFeilmelding = "Du har rollen $brukersrolleTilFagsystemet og trenger rollen FORVALTER når du ${handling.toLowerCasePreservingASCIIRules()}.",
                 logContext = logContext,
-                httpStatus = HttpStatus.FORBIDDEN,
             )
         }
         if (minimumBehandlerrolle.nivå > brukersrolleTilFagsystemet.nivå) {
-            throw Feil(
+            throw ForbiddenError(
                 message =
-                    "$saksbehandler med rolle $brukersrolleTilFagsystemet " +
-                        "har ikke tilgang til å $handling. Krever $minimumBehandlerrolle.",
-                frontendFeilmelding = "Du har ikke tilgang til å $handling.",
+                    "$saksbehandler med rolle $brukersrolleTilFagsystemet har ikke tilgang til å $handling. Krever $minimumBehandlerrolle.",
+                frontendFeilmelding = "Du har rollen $brukersrolleTilFagsystemet og trenger rollen $minimumBehandlerrolle når du ${handling.toLowerCasePreservingASCIIRules()}.",
                 logContext = logContext,
-                httpStatus = HttpStatus.FORBIDDEN,
             )
         }
     }
@@ -331,13 +334,11 @@ class TilgangskontrollService(
         if (minimumBehandlerrolle.nivå > Behandlerrolle.FORVALTER.nivå &&
             tilganger.all { it.value == Behandlerrolle.FORVALTER }
         ) {
-            throw Feil(
+            throw ForbiddenError(
                 message =
-                    "$saksbehandler med rolle FORVALTER " +
-                        "har ikke tilgang til å $handling. Krever $minimumBehandlerrolle.",
-                frontendFeilmelding = "Du har ikke tilgang til å $handling.",
+                    "$saksbehandler med rolle FORVALTER har ikke tilgang til å $handling. Krever $minimumBehandlerrolle.",
+                frontendFeilmelding = "Du har rollen FORVALTER og trenger rollen $minimumBehandlerrolle når du ${handling.toLowerCasePreservingASCIIRules()}.",
                 logContext = SecureLog.Context.tom(),
-                httpStatus = HttpStatus.FORBIDDEN,
             )
         }
     }
