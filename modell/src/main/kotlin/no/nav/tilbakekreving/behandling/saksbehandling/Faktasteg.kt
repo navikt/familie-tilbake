@@ -76,9 +76,9 @@ class Faktasteg(
         return FaktastegEntity(
             eksternFagsakBehandlingRef = eksternFagsakBehandling.entry.internId.toString(),
             kravgrunnlagRef = kravgrunnlag.entry.internId.toString(),
-            brevHistorikk = brevHistorikk.tilEntity(),
-            tilbakekrevingOpprettet = tilbakekrevingOpprettet.toString(),
-            opprettelsesvalg = opprettelsesvalg.name,
+            brevHistorikk = brevHistorikk.hentHistorikk(),
+            tilbakekrevingOpprettet = tilbakekrevingOpprettet,
+            opprettelsesvalg = opprettelsesvalg,
         )
     }
 

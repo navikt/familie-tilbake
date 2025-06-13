@@ -29,8 +29,6 @@ import no.nav.tilbakekreving.beregning.Beregning
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
 import no.nav.tilbakekreving.entities.BehandlingEntity
-import no.nav.tilbakekreving.entities.EksternFagsakEntity
-import no.nav.tilbakekreving.entities.KravgrunnlagHistorikkEntity
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
@@ -41,6 +39,7 @@ import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.tilstand.IverksettVedtak
 import java.time.LocalDateTime
@@ -349,11 +348,10 @@ class Behandling private constructor(
 
         fun fraEntity(
             behandlingEntity: BehandlingEntity,
-            eksternFagsakEntity: EksternFagsakEntity,
-            kravgrunnlagHistorikkEntity: KravgrunnlagHistorikkEntity,
+            eksternFagsak: HistorikkReferanse<UUID, EksternFagsakBehandling>,
+            kravgrunnlagHistorikk: KravgrunnlagHistorikk,
         ): Behandling {
-            val eksternFagsakBehandling = eksternFagsakEntity.behandlinger.fraEntity().nåværende()
-            val kravgrunnlag = kravgrunnlagHistorikkEntity.fraEntity().nåværende()
+            val kravgrunnlag = kravgrunnlagHistorikk.nåværende()
             return Behandling(
                 internId = UUID.fromString(behandlingEntity.internId),
                 eksternId = UUID.fromString(behandlingEntity.eksternId),
@@ -363,10 +361,10 @@ class Behandling private constructor(
                 enhet = behandlingEntity.enhet?.fraEntity(),
                 årsak = Behandlingsårsakstype.valueOf(behandlingEntity.årsak),
                 ansvarligSaksbehandler = behandlingEntity.ansvarligSaksbehandlerEntity.fraEntity(),
-                eksternFagsakBehandling = eksternFagsakBehandling,
+                eksternFagsakBehandling = eksternFagsak,
                 kravgrunnlag = kravgrunnlag,
                 foreldelsesteg = behandlingEntity.foreldelsestegEntity.fraEntity(kravgrunnlag),
-                faktasteg = behandlingEntity.faktastegEntity.fraEntity(eksternFagsakBehandling, kravgrunnlag),
+                faktasteg = behandlingEntity.faktastegEntity.fraEntity(eksternFagsak, kravgrunnlag),
                 vilkårsvurderingsteg = Vilkårsvurderingsteg.fraEntity(behandlingEntity.vilkårsvurderingstegEntity, kravgrunnlag),
                 foreslåVedtakSteg = behandlingEntity.foreslåVedtakStegEntity.fraEntity(),
                 fatteVedtakSteg = FatteVedtakSteg.fraEntity(behandlingEntity.fatteVedtakStegEntity),

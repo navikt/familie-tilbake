@@ -70,7 +70,7 @@ class FatteVedtakSteg private constructor(
 
         fun tilEntity(): VurdertStegEntity {
             return VurdertStegEntity(
-                steg = steg.name,
+                steg = steg,
                 vurdering = when (this.vurdering) {
                     is Vurdering.IkkeVurdert -> "Ikke Vurdert"
                     is Vurdering.Godkjent -> "Godkjent"
@@ -89,7 +89,7 @@ class FatteVedtakSteg private constructor(
                     else -> throw IllegalArgumentException("Ugyldig vurdering ${entity.vurdering}")
                 }
                 return VurdertSteg(
-                    steg = Behandlingssteg.valueOf(entity.steg),
+                    steg = entity.steg,
                     vurdering = vurdering,
                 )
             }

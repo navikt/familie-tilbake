@@ -1,16 +1,14 @@
 package no.nav.tilbakekreving.entities
 
-import kotlinx.serialization.Serializable
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 
-@Serializable
 data class FatteVedtakStegEntity(
     val vurderteStegEntities: List<VurdertStegEntity>,
     val ansvarligBeslutter: BehandlerEntity?,
 )
 
-@Serializable
 data class VurdertStegEntity(
-    val steg: String,
+    val steg: Behandlingssteg,
     val vurdering: String,
     val begrunnelse: String?,
 )

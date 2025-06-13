@@ -149,12 +149,11 @@ class TilbakekrevingService(
 
     fun gjennopprettTilbakekreving(
         id: UUID,
-        // Denne kan fjernes når vi har en bedre måte å teste på
+        // TODO Denne kan fjernes når vi har en bedre måte å teste på
         snapshotRepo: TilbakekrevingSnapshot,
     ): Tilbakekreving? {
         val tilbakekreving = snapshotRepo.henteTilstand(id)?.fraEntity(behovObservatør)
         return tilbakekreving
-
     }
 
     fun hentTilbakekreving(behandlingId: UUID): Tilbakekreving? {
@@ -306,7 +305,7 @@ class TilbakekrevingService(
                 periode.periode,
                 when (periode.foreldelsesvurderingstype) {
                     Foreldelsesvurderingstype.IKKE_VURDERT -> Foreldelsesteg.Vurdering.IkkeVurdert
-                    Foreldelsesvurderingstype.FORELDET -> Foreldelsesteg.Vurdering.Foreldet(periode.begrunnelse, periode.foreldelsesfrist!!)
+                    Foreldelsesvurderingstype.FORELDET -> Foreldelsesteg.Vurdering.Foreldet(periode.begrunnelse)
                     Foreldelsesvurderingstype.IKKE_FORELDET -> Foreldelsesteg.Vurdering.IkkeForeldet(periode.begrunnelse)
                     Foreldelsesvurderingstype.TILLEGGSFRIST -> Foreldelsesteg.Vurdering.Tilleggsfrist(periode.foreldelsesfrist!!, periode.oppdagelsesdato!!)
                 },

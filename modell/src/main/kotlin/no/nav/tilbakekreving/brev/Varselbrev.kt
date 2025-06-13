@@ -25,7 +25,7 @@ class Varselbrev(
         return BrevEntity(
             brevType = "VARSEL_BREV",
             internId = internId.toString(),
-            opprettetDato = opprettetDato.toString(),
+            opprettetDato = opprettetDato,
             varsletBeløp = varsletBeløp,
         )
     }

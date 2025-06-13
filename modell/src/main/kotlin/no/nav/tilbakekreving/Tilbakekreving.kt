@@ -17,8 +17,8 @@ import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
-import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.entities.TilbakekrevingEntity
+import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
@@ -202,12 +202,12 @@ class Tilbakekreving(
     fun tilEntity(): TilbakekrevingEntity {
         return TilbakekrevingEntity(
             nåværendeTilstand = tilstand.navn,
-            id = this.id.toString(),
+            id = this.id,
             eksternFagsak = this.eksternFagsak.tilEntity(),
-            behandlingHistorikk = this.behandlingHistorikk.tilEntity(),
-            kravgrunnlagHistorikk = this.kravgrunnlagHistorikk.tilEntity(),
-            brevHistorikk = this.brevHistorikk.tilEntity(),
-            opprettet = this.opprettet.toString(),
+            behandlingHistorikkEntities = this.behandlingHistorikk.hentHistorikk(),
+            kravgrunnlagHistorikkEntities = this.kravgrunnlagHistorikk.hentHistorikk(),
+            brevHistorikkEntities = this.brevHistorikk.hentHistorikk(),
+            opprettet = this.opprettet,
             opprettelsesvalg = this.opprettelsesvalg.name,
             bruker = this.bruker?.tilEntity(),
         )

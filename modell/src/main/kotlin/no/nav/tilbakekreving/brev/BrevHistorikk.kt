@@ -1,6 +1,6 @@
 package no.nav.tilbakekreving.brev
 
-import no.nav.tilbakekreving.entities.BrevHistorikkEntity
+import no.nav.tilbakekreving.entities.BrevEntity
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import java.util.UUID
@@ -25,7 +25,7 @@ class BrevHistorikk(
         return historikk.filterIsInstance<Varselbrev>().lastOrNull()
     }
 
-    fun tilEntity(): BrevHistorikkEntity {
-        return BrevHistorikkEntity(historikk.map { it.tilEntity() })
+    fun hentHistorikk(): List<BrevEntity> {
+        return historikk.map { it.tilEntity() }
     }
 }

@@ -1,9 +1,7 @@
 package no.nav.tilbakekreving.entities
 
-import kotlinx.serialization.Serializable
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 
-@Serializable
 data class AktørEntity(
     val aktørType: String,
     val ident: String,
@@ -14,7 +12,7 @@ data class AktørEntity(
             aktørType.equals("Organisasjon") -> KravgrunnlagHendelse.Aktør.Organisasjon(ident)
             aktørType.equals("Samhandler") -> KravgrunnlagHendelse.Aktør.Samhandler(ident)
             aktørType.equals("Applikasjonsbruker") -> KravgrunnlagHendelse.Aktør.Applikasjonsbruker(ident)
-            else -> throw IllegalArgumentException("ugildig aktør type: $aktørType")
+            else -> throw IllegalArgumentException("Ugildig aktør type: $aktørType")
         }
         return aktør
     }

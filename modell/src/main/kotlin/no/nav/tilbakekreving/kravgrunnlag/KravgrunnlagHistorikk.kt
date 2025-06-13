@@ -1,6 +1,6 @@
 package no.nav.tilbakekreving.kravgrunnlag
 
-import no.nav.tilbakekreving.entities.KravgrunnlagHistorikkEntity
+import no.nav.tilbakekreving.entities.KravgrunnlagHendelseEntity
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
@@ -22,7 +22,7 @@ class KravgrunnlagHistorikk(
         return HistorikkReferanse(this, historikk.last().internId)
     }
 
-    fun tilEntity(): KravgrunnlagHistorikkEntity {
-        return KravgrunnlagHistorikkEntity(historikk.map { it.tilEntity() })
+    fun hentHistorikk(): List<KravgrunnlagHendelseEntity> {
+        return historikk.map { it.tilEntity() }
     }
 }
