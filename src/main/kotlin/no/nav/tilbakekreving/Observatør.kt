@@ -7,7 +7,11 @@ import no.nav.tilbakekreving.behov.FagsysteminfoBehov
 import no.nav.tilbakekreving.behov.VarselbrevBehov
 
 class Observatør() : BehovObservatør {
-    val behovListe = mutableListOf<Behov>()
+    private val behovListe = mutableListOf<Behov>()
+
+    fun harUbesvarteBehov() = behovListe.isNotEmpty()
+
+    fun nesteBehov() = behovListe.removeAt(0)
 
     override fun håndter(
         behov: FagsysteminfoBehov,
