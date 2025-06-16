@@ -47,6 +47,19 @@ class ApiExceptionHandler {
         )
     }
 
+    @ExceptionHandler(ForbiddenError::class)
+    fun handleThrowable(feil: ForbiddenError): ResponseEntity<Ressurs<Nothing>> {
+        SecureLog.medContext(feil.logContext) {
+            warn("En håndtert feil har oppstått: {}", feil.message, feil)
+        }
+        logger.medContext(feil.logContext) {
+            info("En håndtert feil har oppstått exception={}: {}", rootCause(feil), feil.message)
+        }
+        return ResponseEntity
+            .status(HttpStatus.FORBIDDEN)
+            .body(Ressurs.ikkeTilgang(melding = feil.message ?: "Ikke tilgang", frontendFeilMelding = feil.frontendFeilmelding))
+    }
+
     @ExceptionHandler(IntegrasjonException::class)
     fun handleThrowable(feil: IntegrasjonException): ResponseEntity<Ressurs<Nothing>> {
         SecureLog.medContext(feil.logContext) {

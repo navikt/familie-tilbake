@@ -15,7 +15,7 @@ import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
-import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.common.exceptionhandler.ForbiddenError
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.RolleConfig
 import no.nav.familie.tilbake.data.Testdata
@@ -362,7 +362,7 @@ internal class TilgangskontrollServiceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf(ENSLIG_SAKSBEHANDLER_ROLLE, BARNETRYGD_SAKSBEHANDLER_ROLLE, TEAMFAMILIE_FORVALTER_ROLLE))
         opprettRequestContext(token)
 
-        shouldThrow<Feil> { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving, behandling.id, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
+        shouldThrow<ForbiddenError> { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving, behandling.id, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
     }
 
     private fun opprettToken(

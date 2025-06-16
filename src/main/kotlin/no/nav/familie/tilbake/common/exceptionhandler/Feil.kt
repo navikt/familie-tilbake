@@ -21,6 +21,13 @@ class Feil(
         this(message, null, httpStatus, logContext, throwable)
 }
 
+class ForbiddenError(
+    message: String,
+    val frontendFeilmelding: String,
+    val logContext: SecureLog.Context,
+    throwable: Throwable? = null,
+) : RuntimeException(message, throwable)
+
 @OptIn(ExperimentalContracts::class)
 inline fun feilHvis(
     boolean: Boolean,

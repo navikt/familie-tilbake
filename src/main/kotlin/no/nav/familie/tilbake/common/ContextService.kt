@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.common
 
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.common.exceptionhandler.ForbiddenError
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.RolleConfig
 import no.nav.familie.tilbake.log.SecureLog
@@ -11,7 +12,6 @@ import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import no.nav.tilbakekreving.saksbehandler.Behandler
-import org.springframework.http.HttpStatus
 
 object ContextService {
     private const val SYSTEM_NAVN = "System"
@@ -179,11 +179,10 @@ object ContextService {
             )
         }
         if (brukerTilganger.isEmpty()) {
-            throw Feil(
+            throw ForbiddenError(
                 message = "Bruker har mangler tilgang til $handling",
                 frontendFeilmelding = "Bruker har mangler tilgang til $handling",
                 logContext = logContext,
-                httpStatus = HttpStatus.FORBIDDEN,
             )
         }
 
