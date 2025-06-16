@@ -43,7 +43,6 @@ class TotrinnController(
                 auditLoggerEvent = AuditLoggerEvent.ACCESS,
                 handling = "Henter totrinnsvurderinger for en gitt behandling",
             )
-            tilbakekrevingService.sjekkBehovOgHåndter(tilbakekreving)
             return Ressurs.success(tilbakekreving.behandlingHistorikk.nåværende().entry.fatteVedtakStegDto.tilFrontendDto())
         }
         tilgangskontrollService.validerTilgangBehandlingID(

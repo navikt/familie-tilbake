@@ -47,6 +47,7 @@ import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import java.time.LocalDateTime
 import java.util.Calendar
+import java.util.UUID
 
 @TestPropertySource(
     properties = [
@@ -120,6 +121,7 @@ internal class TilgangskontrollServiceTest : OppslagSpringRunnerTest() {
             )
         tilbakekreving =
             Tilbakekreving(
+                fagsystemId = UUID.randomUUID().toString(),
                 eksternFagsak = EksternFagsak(
                     "1abc",
                     Ytelse.Barnetrygd,
