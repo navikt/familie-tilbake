@@ -21,6 +21,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
 import no.nav.tilbakekreving.behov.BrukerinfoBehov
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
+import no.nav.tilbakekreving.behov.IverksettelseBehov
 import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.fagsystem.Ytelse
@@ -49,6 +50,7 @@ class TilbakekrevingService(
     private val applicationProperties: ApplicationProperties,
     private val pdlClient: PdlClient,
     private val kravgrunnlagBufferRepository: KravgrunnlagBufferRepository,
+    private val iverksettService: IverksettService,
 ) {
     private val fnr = "20046912345"
 
@@ -132,7 +134,7 @@ class TilbakekrevingService(
         eksempelsaker.add(InMemorySak(observatør, tilbakekreving))
         lagre(observatør, tilbakekreving)
 
-        sjekkBehovOgHåndter(tilbakekreving, observatør)
+        sjekkBehovOgHåndter(tilbakekreving, observatør, SecureLog.Context.fra(tilbakekreving))
     }
 
     fun hentTilbakekreving(
@@ -158,6 +160,7 @@ class TilbakekrevingService(
 
         val result = håndter(sak.tilbakekreving)
         lagre(sak.observatør, sak.tilbakekreving)
+        sjekkBehovOgHåndter(sak.tilbakekreving, sak.observatør, SecureLog.Context.fra(sak.tilbakekreving))
         return result
     }
 
@@ -174,9 +177,10 @@ class TilbakekrevingService(
         }
     }
 
-    fun sjekkBehovOgHåndter(
+    private fun sjekkBehovOgHåndter(
         tilbakekreving: Tilbakekreving,
         observatør: Observatør,
+        logContext: SecureLog.Context,
     ) {
         while (observatør.harUbesvarteBehov()) {
             val behov = observatør.nesteBehov()
@@ -222,6 +226,8 @@ class TilbakekrevingService(
                         ),
                     )
                 }
+
+                is IverksettelseBehov -> iverksettService.iverksett(behov, logContext)
             }
             lagre(observatør, tilbakekreving)
         }

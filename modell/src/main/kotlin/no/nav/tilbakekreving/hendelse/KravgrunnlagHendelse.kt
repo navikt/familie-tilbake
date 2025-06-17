@@ -20,7 +20,7 @@ class KravgrunnlagHendelse(
     private val skalBeregneRenter: Boolean,
     private val ansvarligEnhet: String,
     private val kontrollfelt: String,
-    private val kravgrunnlagId: String,
+    internal val kravgrunnlagId: String,
     // Brukes som eksternId i henting av fagsysteminfo, hva betyr det egentlig?
     val referanse: String,
     val perioder: List<Periode>,

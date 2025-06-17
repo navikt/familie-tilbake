@@ -788,7 +788,7 @@ class BeregningTest {
 
     fun utenBeløpIBehold() = Vilkårsvurderingsteg.Vurdering.GodTro.BeløpIBehold.Nei
 
-    fun Delperiode<*>.shouldMatch(
+    fun Delperiode<out Delperiode.Beløp>.shouldMatch(
         periode: Datoperiode,
         renter: BigDecimal,
         tilbakekrevesBruttoMedRenter: BigDecimal,

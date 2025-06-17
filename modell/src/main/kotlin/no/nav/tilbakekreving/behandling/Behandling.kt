@@ -23,6 +23,8 @@ import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg.Companion.behandlingsstegstatus
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg.Companion.klarTilVisning
 import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
+import no.nav.tilbakekreving.behov.BehovObservatør
+import no.nav.tilbakekreving.behov.IverksettelseBehov
 import no.nav.tilbakekreving.beregning.Beregning
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
@@ -120,6 +122,19 @@ class Behandling private constructor(
             },
             beregning.vedtaksresultat,
             faktasteg.tilFrontendDto().vurderingAvBrukersUttalelse,
+        )
+    }
+
+    fun trengerIverksettelse(behovObservatør: BehovObservatør) {
+        val beregning = lagBeregning()
+        val delperioder = beregning.beregn()
+        behovObservatør.håndter(
+            IverksettelseBehov(
+                behandlingId = internId,
+                kravgrunnlagId = kravgrunnlag.entry.kravgrunnlagId,
+                delperioder = delperioder,
+                ansvarligSaksbehandler = ansvarligSaksbehandler().ident,
+            ),
         )
     }
 

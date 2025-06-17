@@ -2,14 +2,29 @@ package no.nav.tilbakekreving.e2e
 
 import io.kotest.assertions.nondeterministic.eventually
 import io.kotest.assertions.nondeterministic.eventuallyConfig
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import jakarta.jms.ConnectionFactory
 import kotlinx.coroutines.runBlocking
+import no.nav.familie.tilbake.api.BehandlingController
+import no.nav.familie.tilbake.common.ContextService
+import no.nav.familie.tilbake.config.OppdragClientMock
 import no.nav.familie.tilbake.config.PdlClientMock
+import no.nav.familie.tilbake.kontrakter.Ressurs
+import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
+import no.nav.familie.tilbake.sikkerhet.InnloggetBrukertilgang
+import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
 import no.nav.tilbakekreving.TilbakekrevingService
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
+import no.nav.tilbakekreving.behandling.Behandling
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
 import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
+import java.util.UUID
 import kotlin.time.Duration.Companion.milliseconds
 
 open class TilbakekrevingE2EBase : E2EBase() {
@@ -24,6 +39,12 @@ open class TilbakekrevingE2EBase : E2EBase() {
 
     @Autowired
     protected lateinit var pdlClient: PdlClientMock
+
+    @Autowired
+    protected lateinit var oppdragClient: OppdragClientMock
+
+    @Autowired
+    protected lateinit var behandlingController: BehandlingController
 
     @AfterEach
     fun reset() {
@@ -64,5 +85,40 @@ open class TilbakekrevingE2EBase : E2EBase() {
         tilbakekrevingService.lesKravgrunnlag()
 
         kravgrunnlagBufferRepository.hentUlesteKravgrunnlag().size shouldBe 0
+    }
+
+    fun behandlingIdFor(
+        fagsystemId: String,
+        fagsystem: FagsystemDTO,
+    ): UUID? {
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(fagsystem, fagsystemId) ?: return null
+        return tilbakekreving.behandlingHistorikk.nåværende().entry.tilFrontendDto().behandlingId
+    }
+
+    fun behandling(behandlingId: UUID): Behandling {
+        return tilbakekrevingService.hentTilbakekreving(behandlingId).shouldNotBeNull().behandlingHistorikk.nåværende().entry
+    }
+
+    fun somSaksbehandler(
+        ident: String,
+        callback: () -> Unit,
+    ) {
+        mockkObject(ContextService)
+        every { ContextService.hentPåloggetSaksbehandler(any(), any()) } returns ident
+        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) } returns InnloggetBrukertilgang(
+            Tilgangskontrollsfagsystem.entries.associateWith { Behandlerrolle.BESLUTTER },
+        )
+        callback()
+        unmockkObject(ContextService)
+    }
+
+    fun utførSteg(
+        ident: String,
+        behandlingId: UUID,
+        stegData: BehandlingsstegDto,
+    ) {
+        somSaksbehandler(ident) {
+            behandlingController.utførBehandlingssteg(behandlingId, stegData).status shouldBe Ressurs.Status.SUKSESS
+        }
     }
 }

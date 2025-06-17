@@ -262,7 +262,7 @@ class TilgangskontrollService(
     ) {
         if (personIBehandlingen == null) return
 
-        val tilganger = integrasjonerClient.sjekkTilgangTilPersoner(listOf(personIBehandlingen), Fagsystem.forDTO(fagsystem).tilTema())
+        val tilganger = integrasjonerClient.sjekkTilgangTilPersoner(listOf(personIBehandlingen), fagsystem.tilTema())
         if (tilganger.any { !it.harTilgang }) {
             throw ForbiddenError(
                 message = "$saksbehandler har ikke tilgang til person i $handling",
@@ -272,12 +272,13 @@ class TilgangskontrollService(
         }
     }
 
-    private fun Fagsystem.tilTema() =
+    private fun FagsystemDTO.tilTema() =
         when (this) {
-            Fagsystem.BA -> Tema.BAR
-            Fagsystem.KONT, Fagsystem.KS -> Tema.KON
-            Fagsystem.EF -> Tema.ENF
-            Fagsystem.IT01 -> throw Feil(
+            FagsystemDTO.BA -> Tema.BAR
+            FagsystemDTO.KONT -> Tema.KON
+            FagsystemDTO.EF -> Tema.ENF
+            FagsystemDTO.TS -> Tema.TSO
+            FagsystemDTO.IT01 -> throw Feil(
                 message = "Fagsystem $this støttes ikke",
                 logContext = SecureLog.Context.tom(),
             )

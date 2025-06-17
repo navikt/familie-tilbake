@@ -8,4 +8,5 @@ enum class Tema(
     ENF("EF", "B288"),
     KON("KONT", "B278"),
     OPP("OPP", "B288"),
+    TSO("TSO", "B289"),
 }

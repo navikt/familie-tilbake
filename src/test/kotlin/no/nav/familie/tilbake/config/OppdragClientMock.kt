@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.config
 
+import io.kotest.matchers.maps.shouldContainKey
 import no.nav.familie.tilbake.integration.økonomi.OppdragClient
 import no.nav.familie.tilbake.kontrakter.simulering.FeilutbetalingerFraSimulering
 import no.nav.familie.tilbake.kontrakter.simulering.HentFeilutbetalingerFraSimuleringRequest
@@ -121,5 +122,9 @@ class OppdragClientMock : OppdragClient {
         logContext: SecureLog.Context,
     ): FeilutbetalingerFraSimulering {
         TODO("Not yet implemented")
+    }
+
+    fun shouldHaveIverksettelse(behandlingId: UUID) {
+        iverksettelseRequests.shouldContainKey(behandlingId)
     }
 }

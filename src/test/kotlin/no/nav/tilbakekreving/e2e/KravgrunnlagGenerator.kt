@@ -12,6 +12,7 @@ object KravgrunnlagGenerator {
     fun forTillegstønader(
         vedtakId: String = Random.nextInt(100000, 999999).toString(),
         fagsystemId: String = Random.nextInt(100000, 999999).toString(),
+        kravgrunnlagId: String = Random.nextInt(100000, 999999).toString(),
         referanse: String = Random.nextInt(1000, 9999).toString(),
         fødselsnummer: String = "40026912345",
         perioder: List<Tilbakekrevingsperiode>,
@@ -22,7 +23,7 @@ object KravgrunnlagGenerator {
         val xml = """<?xml version="1.0" encoding="utf-8"?>
         <urn:detaljertKravgrunnlagMelding xmlns:mmel="urn:no:nav:tilbakekreving:typer:v1" xmlns:urn="urn:no:nav:tilbakekreving:kravgrunnlag:detalj:v1">
             <urn:detaljertKravgrunnlag>
-                <urn:kravgrunnlagId>539005</urn:kravgrunnlagId>
+                <urn:kravgrunnlagId>$kravgrunnlagId</urn:kravgrunnlagId>
                 <urn:vedtakId>$vedtakId</urn:vedtakId>
                 <urn:kodeStatusKrav>NY</urn:kodeStatusKrav>
                 <urn:kodeFagomraade>TILLST</urn:kodeFagomraade>

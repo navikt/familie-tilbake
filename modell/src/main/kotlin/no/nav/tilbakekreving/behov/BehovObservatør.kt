@@ -12,4 +12,6 @@ interface BehovObservatør {
     fun håndter(
         behov: BrukerinfoBehov,
     )
+
+    fun håndter(behov: IverksettelseBehov)
 }

@@ -4,6 +4,7 @@ import no.nav.tilbakekreving.behov.Behov
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.BrukerinfoBehov
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
+import no.nav.tilbakekreving.behov.IverksettelseBehov
 import no.nav.tilbakekreving.behov.VarselbrevBehov
 
 class Observatør() : BehovObservatør {
@@ -28,6 +29,10 @@ class Observatør() : BehovObservatør {
     override fun håndter(
         behov: BrukerinfoBehov,
     ) {
+        behovListe.add(behov)
+    }
+
+    override fun håndter(behov: IverksettelseBehov) {
         behovListe.add(behov)
     }
 }

@@ -95,10 +95,11 @@ class Tilbakekreving(
         eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
         behandler: Behandler,
     ) {
+        val behandlingId = UUID.randomUUID()
         behandlingHistorikk.lagre(
             Behandling.nyBehandling(
-                internId = UUID.fromString("abcdef12-1337-1338-1339-abcdef123456"),
-                eksternId = UUID.fromString("abcdef12-1337-1338-1339-abcdef123456"),
+                internId = behandlingId,
+                eksternId = behandlingId,
                 behandlingstype = Behandlingstype.TILBAKEKREVING,
                 opprettet = LocalDateTime.now(),
                 enhet = null,
@@ -124,6 +125,10 @@ class Tilbakekreving(
 
     fun trengerBrukerinfo() {
         bruker!!.trengerBrukerinfo(behovObservatør, eksternFagsak.ytelse)
+    }
+
+    fun trengerIverksettelse() {
+        behandlingHistorikk.nåværende().entry.trengerIverksettelse(behovObservatør)
     }
 
     fun hentFagsysteminfo(): Ytelse {

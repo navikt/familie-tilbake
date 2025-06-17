@@ -36,7 +36,7 @@ class TilbakekrevingsvedtakBeregningService(
 
     private fun lagTilbakekrevingsperioder(
         kravgrunnlagsperioder: List<Kravgrunnlagsperiode432>,
-        beregnetPeriode: Delperiode<*>,
+        beregnetPeriode: Delperiode<out Delperiode.Beløp>,
     ): List<Tilbakekrevingsperiode> =
         kravgrunnlagsperioder
             .filter { it.periode.snitt(beregnetPeriode.periode.toMånedsperiode()) != null }
@@ -44,7 +44,7 @@ class TilbakekrevingsvedtakBeregningService(
 
     private fun lagTilbakekrevingsbeløp(
         kravgrunnlagsbeløp: Set<Kravgrunnlagsbeløp433>,
-        beregnetPeriode: Delperiode<*>,
+        beregnetPeriode: Delperiode<out Delperiode.Beløp>,
     ): List<Tilbakekrevingsbeløp> =
         kravgrunnlagsbeløp.mapNotNull {
             when (it.klassetype) {
@@ -80,7 +80,7 @@ class TilbakekrevingsvedtakBeregningService(
             }
         }
 
-    private fun utledKodeResulat(beregnetPeriode: Delperiode<*>): KodeResultat = when {
+    private fun utledKodeResulat(beregnetPeriode: Delperiode<out Delperiode.Beløp>): KodeResultat = when {
         beregnetPeriode is Foreldet.ForeldetPeriode -> KodeResultat.FORELDET
         beregnetPeriode.beløp().sumOf { it.tilbakekrevesBrutto() }.isZero() -> KodeResultat.INGEN_TILBAKEKREVING
         beregnetPeriode.feilutbetaltBeløp() == beregnetPeriode.beløp().sumOf { it.tilbakekrevesBrutto() } -> KodeResultat.FULL_TILBAKEKREVING

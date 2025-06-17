@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.kravgrunnlag
 
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.RowMapper
+import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Repository
 import java.sql.ResultSet
 
@@ -23,6 +24,11 @@ class KravgrunnlagBufferRepository(
 
     fun markerLest(kravgrunnlagId: String) {
         jdbcTemplate.update("UPDATE kravgrunnlag_buffer SET lest=true WHERE kravgrunnlag_id=?;", kravgrunnlagId)
+    }
+
+    fun hentKravgrunnlag(kravgrunnlagId: String): Entity? {
+        return jdbcTemplate.query("SELECT * FROM kravgrunnlag_buffer WHERE kravgrunnlag_id=?;", Mapper, kravgrunnlagId)
+            .singleOrNull()
     }
 
     object Mapper : RowMapper<Entity> {

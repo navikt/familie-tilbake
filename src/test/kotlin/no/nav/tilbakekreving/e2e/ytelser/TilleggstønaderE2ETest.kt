@@ -4,7 +4,6 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.config.PdlClientMock
-import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.api.v1.dto.AktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFaktaDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFatteVedtaksstegDto
@@ -31,7 +30,6 @@ import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
-import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.util.kroner
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -69,18 +67,20 @@ class TilleggstønaderE2ETest : TilbakekrevingE2EBase() {
             ),
         )
 
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
-        val frontendDto = tilbakekreving.tilFrontendDto()
+        val frontendDto = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId)
+            .shouldNotBeNull()
+            .tilFrontendDto()
         frontendDto.behandlinger shouldHaveSize 1
         frontendDto.behandlinger.single().status shouldBe Behandlingsstatus.UTREDES
+        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
 
         // TODO: må implementeres
 //        tilbakekreving kanBehandle Behandlingssteg.FAKTA
 //        tilbakekreving avventerBehandling Behandlingssteg.FORELDELSE
-        tilbakekrevingService.utførSteg(
-            behandler = Behandler.Saksbehandler("Z999999"),
-            tilbakekreving = tilbakekreving,
-            behandlingsstegDto = BehandlingsstegFaktaDto(
+        utførSteg(
+            ident = "Z999999",
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegFaktaDto(
                 feilutbetaltePerioder = listOf(
                     FaktaFeilutbetalingsperiodeDto(
                         periode = 1.januar(2021) til 1.januar(2021),
@@ -90,16 +90,15 @@ class TilleggstønaderE2ETest : TilbakekrevingE2EBase() {
                 ),
                 begrunnelse = "Begrunnelse",
             ),
-            logContext = SecureLog.Context.tom(),
         )
 
-        tilbakekreving kanBehandle Behandlingssteg.FORELDELSE
-        tilbakekreving avventerBehandling Behandlingssteg.VILKÅRSVURDERING
+        behandling(behandlingId) kanBehandle Behandlingssteg.FORELDELSE
+        behandling(behandlingId) avventerBehandling Behandlingssteg.VILKÅRSVURDERING
 
-        tilbakekrevingService.utførSteg(
-            behandler = Behandler.Saksbehandler("Z999999"),
-            tilbakekreving = tilbakekreving,
-            behandlingsstegDto = BehandlingsstegForeldelseDto(
+        utførSteg(
+            ident = "Z999999",
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegForeldelseDto(
                 foreldetPerioder = listOf(
                     ForeldelsesperiodeDto(
                         periode = 1.januar(2021) til 1.januar(2021),
@@ -110,16 +109,15 @@ class TilleggstønaderE2ETest : TilbakekrevingE2EBase() {
                     ),
                 ),
             ),
-            logContext = SecureLog.Context.tom(),
         )
 
-        tilbakekreving kanBehandle Behandlingssteg.VILKÅRSVURDERING
-        tilbakekreving avventerBehandling Behandlingssteg.FORESLÅ_VEDTAK
+        behandling(behandlingId) kanBehandle Behandlingssteg.VILKÅRSVURDERING
+        behandling(behandlingId) avventerBehandling Behandlingssteg.FORESLÅ_VEDTAK
 
-        tilbakekrevingService.utførSteg(
-            behandler = Behandler.Saksbehandler("Z999999"),
-            tilbakekreving = tilbakekreving,
-            behandlingsstegDto = BehandlingsstegVilkårsvurderingDto(
+        utførSteg(
+            ident = "Z999999",
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegVilkårsvurderingDto(
                 vilkårsvurderingsperioder = listOf(
                     VilkårsvurderingsperiodeDto(
                         periode = 1.januar(2021) til 1.januar(2021),
@@ -140,30 +138,28 @@ class TilleggstønaderE2ETest : TilbakekrevingE2EBase() {
                     ),
                 ),
             ),
-            logContext = SecureLog.Context.tom(),
         )
 
-        tilbakekreving kanBehandle Behandlingssteg.FORESLÅ_VEDTAK
-        tilbakekreving avventerBehandling Behandlingssteg.FATTE_VEDTAK
+        behandling(behandlingId) kanBehandle Behandlingssteg.FORESLÅ_VEDTAK
+        behandling(behandlingId) avventerBehandling Behandlingssteg.FATTE_VEDTAK
 
-        tilbakekrevingService.utførSteg(
-            behandler = Behandler.Saksbehandler("Z999999"),
-            tilbakekreving = tilbakekreving,
-            behandlingsstegDto = BehandlingsstegForeslåVedtaksstegDto(
+        utførSteg(
+            ident = "Z999999",
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegForeslåVedtaksstegDto(
                 fritekstavsnitt = FritekstavsnittDto(
                     oppsummeringstekst = null,
                     perioderMedTekst = emptyList(),
                 ),
             ),
-            logContext = SecureLog.Context.tom(),
         )
-        tilbakekreving kanBehandle Behandlingssteg.FATTE_VEDTAK
-        tilbakekreving avventerBehandling Behandlingssteg.IVERKSETT_VEDTAK
+        behandling(behandlingId) kanBehandle Behandlingssteg.FATTE_VEDTAK
+        behandling(behandlingId) avventerBehandling Behandlingssteg.IVERKSETT_VEDTAK
 
-        tilbakekrevingService.utførSteg(
-            behandler = Behandler.Saksbehandler("Z111111"),
-            tilbakekreving = tilbakekreving,
-            behandlingsstegDto = BehandlingsstegFatteVedtaksstegDto(
+        utførSteg(
+            ident = "Z111111",
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegFatteVedtaksstegDto(
                 totrinnsvurderinger = listOf(
                     VurdertTotrinnDto(behandlingssteg = Behandlingssteg.FAKTA, godkjent = true, begrunnelse = null),
                     VurdertTotrinnDto(behandlingssteg = Behandlingssteg.FORELDELSE, godkjent = true, begrunnelse = null),
@@ -171,7 +167,7 @@ class TilleggstønaderE2ETest : TilbakekrevingE2EBase() {
                     VurdertTotrinnDto(behandlingssteg = Behandlingssteg.FORESLÅ_VEDTAK, godkjent = true, begrunnelse = null),
                 ),
             ),
-            logContext = SecureLog.Context.tom(),
         )
+        oppdragClient.shouldHaveIverksettelse(behandlingId)
     }
 }
