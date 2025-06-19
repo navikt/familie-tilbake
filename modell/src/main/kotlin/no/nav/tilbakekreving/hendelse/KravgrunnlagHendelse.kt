@@ -33,11 +33,11 @@ class KravgrunnlagHendelse(
 ) : Historikk.HistorikkInnslag<UUID>, KravgrunnlagAdapter {
     fun totaltBeløpFor(periode: Datoperiode): BigDecimal =
         perioder.single { kgPeriode -> kgPeriode.inneholder(periode) }
-            .totaltBeløp()
+            .feilutbetaltYtelsesbeløp()
 
     fun datoperioder() = perioder.map { it.periode }
 
-    fun feilutbetaltBeløpForAllePerioder() = perioder.sumOf { it.totaltBeløp() }
+    fun feilutbetaltBeløpForAllePerioder() = perioder.sumOf { it.feilutbetaltYtelsesbeløp() }
 
     fun totaltFeilutbetaltPeriode() = datoperioder().minOf { it.fom } til datoperioder().maxOf { it.tom }
 
@@ -77,8 +77,6 @@ class KravgrunnlagHendelse(
     ) : KravgrunnlagPeriodeAdapter {
         fun inneholder(other: Datoperiode): Boolean = periode.inneholder(other)
 
-        fun totaltBeløp() = feilutbetaltBeløp.sumOf { it.tilbakekrevesBeløp }
-
         override fun periode(): Datoperiode {
             return periode
         }
@@ -88,7 +86,7 @@ class KravgrunnlagHendelse(
         }
 
         override fun feilutbetaltYtelsesbeløp(): BigDecimal {
-            return totaltBeløp()
+            return ytelsesbeløp.sumOf { it.tilbakekrevesBeløp }
         }
 
         fun tilEntity(): KravgrunnlagPeriodeEntity {

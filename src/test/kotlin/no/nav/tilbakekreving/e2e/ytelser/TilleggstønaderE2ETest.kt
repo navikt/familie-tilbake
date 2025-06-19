@@ -1,9 +1,12 @@
 package no.nav.tilbakekreving.e2e.ytelser
 
+import io.kotest.inspectors.forOne
+import io.kotest.inspectors.forSingle
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.config.PdlClientMock
+import no.nav.familie.tilbake.kravgrunnlag.domain.KodeAksjon
 import no.nav.tilbakekreving.api.v1.dto.AktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFaktaDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFatteVedtaksstegDto
@@ -32,19 +35,24 @@ import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresu
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.util.kroner
 import org.junit.jupiter.api.Test
-import java.util.UUID
+import java.math.BigInteger
+import java.time.LocalDate
 import kotlin.random.Random
 
 class TilleggstønaderE2ETest : TilbakekrevingE2EBase() {
     @Test
     fun `kravgrunnlag fører til sak klar til behandling`() {
         val fnr = Random.nextLong(0, 31129999999).toString().padStart(11, '0')
-        val fagsystemId = UUID.randomUUID().toString()
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
+        val ansvarligEnhet = KravgrunnlagGenerator.nextPaddedId(4)
         sendKravgrunnlagOgAvventLesing(
             "LOCAL_TILLEGGSSTONADER.KRAVGRUNNLAG",
             KravgrunnlagGenerator.forTillegstønader(
                 fødselsnummer = fnr,
                 fagsystemId = fagsystemId,
+                vedtakId = vedtakId,
+                ansvarligEnhet = ansvarligEnhet,
                 perioder = listOf(
                     KravgrunnlagGenerator.Tilbakekrevingsperiode(
                         1.januar(2021) til 1.januar(2021),
@@ -168,6 +176,42 @@ class TilleggstønaderE2ETest : TilbakekrevingE2EBase() {
                 ),
             ),
         )
-        oppdragClient.shouldHaveIverksettelse(behandlingId)
+        oppdragClient.shouldHaveIverksettelse(behandlingId) { vedtak ->
+            vedtak.vedtakId shouldBe BigInteger(vedtakId)
+            vedtak.kodeAksjon shouldBe KodeAksjon.FATTE_VEDTAK.kode
+            vedtak.kodeHjemmel shouldBe "22-15"
+            vedtak.datoVedtakFagsystem shouldBe LocalDate.now()
+            vedtak.enhetAnsvarlig = ansvarligEnhet
+            vedtak.kontrollfelt = "2025-12-24-11.12.13.123456"
+            vedtak.saksbehId = "Z999999"
+            vedtak.tilbakekrevingsperiode.forSingle { periode ->
+                periode.periode.fom shouldBe 1.januar(2021)
+                periode.periode.tom shouldBe 1.januar(2021)
+                periode.belopRenter shouldBe 0.kroner
+                periode.tilbakekrevingsbelop shouldHaveSize 2
+                periode.tilbakekrevingsbelop.forOne { beløp ->
+                    beløp.kodeKlasse shouldBe "TSTBASISP4-OP"
+                    beløp.belopNy = 18000.kroner
+                    beløp.belopOpprUtbet = 20000.kroner
+                    beløp.belopTilbakekreves = 2000.kroner
+                    beløp.belopUinnkrevd = 0.kroner
+                    beløp.belopSkatt = 0.kroner
+                    beløp.kodeResultat shouldBe "FULL_TILBAKEKREV"
+                    beløp.kodeAarsak = "ANNET"
+                    beløp.kodeSkyld = "IKKE_FORDELT"
+                }
+                periode.tilbakekrevingsbelop.forOne { beløp ->
+                    beløp.kodeKlasse shouldBe "KL_KODE_FEIL_ARBYT"
+                    beløp.belopNy = 2000.kroner
+                    beløp.belopOpprUtbet = 0.kroner
+                    beløp.belopTilbakekreves = 0.kroner
+                    beløp.belopUinnkrevd = 0.kroner
+                    beløp.belopSkatt = 0.kroner
+                    beløp.kodeResultat shouldBe null
+                    beløp.kodeAarsak = "ANNET"
+                    beløp.kodeSkyld = "IKKE_FORDELT"
+                }
+            }
+        }
     }
 }
