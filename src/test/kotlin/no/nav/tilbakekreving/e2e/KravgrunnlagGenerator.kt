@@ -6,14 +6,20 @@ import no.nav.tilbakekreving.util.kroner
 import no.nav.tilbakekreving.util.prosent
 import org.intellij.lang.annotations.Language
 import java.math.BigDecimal
-import kotlin.random.Random
 
 object KravgrunnlagGenerator {
+    private val idIndexes = Array(10) { 0 }
+
+    fun nextPaddedId(width: Int) = (idIndexes[width - 1]++)
+        .toString()
+        .padStart(width, '0')
+
     fun forTillegstønader(
-        vedtakId: String = Random.nextInt(100000, 999999).toString(),
-        fagsystemId: String = Random.nextInt(100000, 999999).toString(),
-        kravgrunnlagId: String = Random.nextInt(100000, 999999).toString(),
-        referanse: String = Random.nextInt(1000, 9999).toString(),
+        vedtakId: String = nextPaddedId(6),
+        fagsystemId: String = nextPaddedId(6),
+        kravgrunnlagId: String = nextPaddedId(6),
+        referanse: String = nextPaddedId(4),
+        ansvarligEnhet: String = nextPaddedId(4),
         fødselsnummer: String = "40026912345",
         perioder: List<Tilbakekrevingsperiode>,
     ): String {
@@ -33,7 +39,7 @@ object KravgrunnlagGenerator {
                 <urn:typeGjelderId>PERSON</urn:typeGjelderId>
                 <urn:utbetalesTilId>$fødselsnummer</urn:utbetalesTilId>
                 <urn:typeUtbetId>PERSON</urn:typeUtbetId>
-                <urn:enhetAnsvarlig>8020</urn:enhetAnsvarlig>
+                <urn:enhetAnsvarlig>$ansvarligEnhet</urn:enhetAnsvarlig>
                 <urn:enhetBosted>8020</urn:enhetBosted>
                 <urn:enhetBehandl>8020</urn:enhetBehandl>
                 <urn:kontrollfelt>2025-12-24-11.12.13.123456</urn:kontrollfelt>

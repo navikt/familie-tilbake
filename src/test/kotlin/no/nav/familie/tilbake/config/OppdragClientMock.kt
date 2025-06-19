@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.config
 
-import io.kotest.matchers.maps.shouldContainKey
+import io.kotest.matchers.maps.shouldHaveKey
+import io.kotest.matchers.nulls.shouldNotBeNull
 import no.nav.familie.tilbake.integration.økonomi.OppdragClient
 import no.nav.familie.tilbake.kontrakter.simulering.FeilutbetalingerFraSimulering
 import no.nav.familie.tilbake.kontrakter.simulering.HentFeilutbetalingerFraSimuleringRequest
@@ -16,6 +17,7 @@ import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagBelopDto
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagPeriodeDto
+import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsvedtakDto
 import no.nav.tilbakekreving.typer.v1.MmelDto
 import no.nav.tilbakekreving.typer.v1.PeriodeDto
 import no.nav.tilbakekreving.typer.v1.TypeGjelderDto
@@ -124,7 +126,12 @@ class OppdragClientMock : OppdragClient {
         TODO("Not yet implemented")
     }
 
-    fun shouldHaveIverksettelse(behandlingId: UUID) {
-        iverksettelseRequests.shouldContainKey(behandlingId)
+    fun shouldHaveIverksettelse(
+        behandlingId: UUID,
+        callback: (vedtak: TilbakekrevingsvedtakDto) -> Unit = {},
+    ) {
+        iverksettelseRequests.shouldHaveKey(behandlingId)
+        val iverksettelse = iverksettelseRequests[behandlingId].shouldNotBeNull()
+        callback(iverksettelse.tilbakekrevingsvedtak)
     }
 }
