@@ -1,5 +1,7 @@
 package no.nav.tilbakekreving.eksternfagsak
 
+import no.nav.tilbakekreving.entities.EksternFagsakBehandlingEntity
+import no.nav.tilbakekreving.entities.EksternFagsakBehandlingType
 import no.nav.tilbakekreving.historikk.Historikk
 import java.time.LocalDate
 import java.util.UUID
@@ -31,5 +33,28 @@ sealed class EksternFagsakBehandling(
         override val revurderingsårsak: String = "Ukjent - finn i fagsystem"
         override val begrunnelseForTilbakekreving: String = "Ukjent - finn i fagsystem"
         override val revurderingsvedtaksdato: LocalDate = revurderingsdatoFraKravgrunnlag ?: LocalDate.MIN
+    }
+
+    fun tilEntity(): EksternFagsakBehandlingEntity {
+        return when (this) {
+            is Behandling -> EksternFagsakBehandlingEntity(
+                type = EksternFagsakBehandlingType.BEHANDLING,
+                internId = internId,
+                eksternId = eksternId,
+                revurderingsresultat = revurderingsresultat,
+                revurderingsårsak = revurderingsårsak,
+                begrunnelseForTilbakekreving = begrunnelseForTilbakekreving,
+                revurderingsvedtaksdato = revurderingsvedtaksdato,
+            )
+            is Ukjent -> EksternFagsakBehandlingEntity(
+                type = EksternFagsakBehandlingType.UKJENT,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+            )
+        }
     }
 }

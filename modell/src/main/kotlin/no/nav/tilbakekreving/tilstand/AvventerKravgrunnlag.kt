@@ -4,10 +4,11 @@ import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.UtenforScope
 import no.nav.tilbakekreving.feil.UtenforScopeException
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
+import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.saksbehandler.Behandler
 
 object AvventerKravgrunnlag : Tilstand {
-    override val navn: String = "AvventerKravgrunnlag"
+    override val tilbakekrevingTilstand: TilbakekrevingTilstand = TilbakekrevingTilstand.AVVENTER_KRAVGRUNNLAG
 
     override fun entering(tilbakekreving: Tilbakekreving) {}
 

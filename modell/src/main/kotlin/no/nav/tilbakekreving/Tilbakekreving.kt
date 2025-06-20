@@ -17,6 +17,7 @@ import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
+import no.nav.tilbakekreving.entities.TilbakekrevingEntity
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
@@ -39,6 +40,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class Tilbakekreving(
+    val id: UUID = UUID.randomUUID(),
     val fagsystemId: String,
     val eksternFagsak: EksternFagsak,
     val behandlingHistorikk: BehandlingHistorikk,
@@ -50,6 +52,8 @@ class Tilbakekreving(
     var bruker: Bruker? = null,
 ) : FrontendDto<FagsakDto> {
     internal var tilstand: Tilstand = Start
+
+    fun hentTilstand() = tilstand.tilbakekrevingTilstand
 
     internal fun byttTilstand(nyTilstand: Tilstand) {
         tilstand = nyTilstand
@@ -193,6 +197,21 @@ class Tilbakekreving(
         manuellBrevmottakerId: UUID,
     ) {
         behandlingHistorikk.nåværende().entry.fjernManuelBrevmottaker(behandler, manuellBrevmottakerId)
+    }
+
+    fun tilEntity(): TilbakekrevingEntity {
+        return TilbakekrevingEntity(
+            nåværendeTilstand = tilstand.tilbakekrevingTilstand,
+            id = this.id,
+            fagsystemId = fagsystemId,
+            eksternFagsak = this.eksternFagsak.tilEntity(),
+            behandlingHistorikkEntities = this.behandlingHistorikk.tilEntity(),
+            kravgrunnlagHistorikkEntities = this.kravgrunnlagHistorikk.tilEntity(),
+            brevHistorikkEntities = this.brevHistorikk.tilEntity(),
+            opprettet = this.opprettet,
+            opprettelsesvalg = this.opprettelsesvalg,
+            bruker = this.bruker?.tilEntity(),
+        )
     }
 
     companion object {

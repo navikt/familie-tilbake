@@ -14,7 +14,6 @@ import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeslåVedtaksstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.ManuellBrevmottakerRequestDto
-import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
@@ -24,25 +23,19 @@ import no.nav.tilbakekreving.behov.FagsysteminfoBehov
 import no.nav.tilbakekreving.behov.IverksettelseBehov
 import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.brev.Varselbrev
-import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
-import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.kontrakter.brev.MottakerType
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
-import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagMapper
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.springframework.stereotype.Service
-import java.math.BigDecimal
-import java.math.BigInteger
 import java.time.LocalDate
-import java.util.Random
 import java.util.UUID
 
 @Service
@@ -51,78 +44,9 @@ class TilbakekrevingService(
     private val pdlClient: PdlClient,
     private val kravgrunnlagBufferRepository: KravgrunnlagBufferRepository,
     private val iverksettService: IverksettService,
+    private val tilbakekrevingRepository: TilbakekrevingRepository,
 ) {
     private val fnr = "20046912345"
-
-    private data class InMemorySak(
-        val observatør: Observatør,
-        val tilbakekreving: Tilbakekreving,
-    )
-
-    private val eksempelsaker = mutableListOf(
-        testsak(),
-    )
-
-    private fun testsak(): InMemorySak {
-        val behovObservatør = Observatør()
-        val tilbakekreving = Tilbakekreving.opprett(
-            behovObservatør,
-            OpprettTilbakekrevingHendelse(
-                opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
-                eksternFagsak = OpprettTilbakekrevingHendelse.EksternFagsak(
-                    eksternId = "TEST-101010",
-                    ytelse = Ytelse.Barnetrygd,
-                ),
-            ),
-        ).apply {
-            håndter(
-                KravgrunnlagHendelse(
-                    internId = UUID.randomUUID(),
-                    vedtakId = BigInteger(128, Random()),
-                    kravstatuskode = KravgrunnlagHendelse.Kravstatuskode.NY,
-                    fagsystemVedtaksdato = LocalDate.now(),
-                    vedtakGjelder = KravgrunnlagHendelse.Aktør.Person(fnr),
-                    utbetalesTil = KravgrunnlagHendelse.Aktør.Person(fnr),
-                    skalBeregneRenter = false,
-                    ansvarligEnhet = "0425",
-                    kontrollfelt = UUID.randomUUID().toString(),
-                    referanse = UUID.randomUUID().toString(),
-                    kravgrunnlagId = UUID.randomUUID().toString(),
-                    perioder = listOf(
-                        KravgrunnlagHendelse.Periode(
-                            periode =
-                                Datoperiode(
-                                    fom = LocalDate.of(2018, 1, 1),
-                                    tom = LocalDate.of(2018, 2, 28),
-                                ),
-                            månedligSkattebeløp = BigDecimal("0.0"),
-                            feilutbetaltBeløp = listOf(
-                                KravgrunnlagHendelse.Periode.Beløp(
-                                    klassekode = "",
-                                    klassetype = "FEIL",
-                                    opprinneligUtbetalingsbeløp = BigDecimal("12000.0"),
-                                    nyttBeløp = BigDecimal("10000.0"),
-                                    tilbakekrevesBeløp = BigDecimal("2000.0"),
-                                    skatteprosent = BigDecimal("0.0"),
-                                ),
-                            ),
-                            ytelsesbeløp = listOf(
-                                KravgrunnlagHendelse.Periode.Beløp(
-                                    klassekode = "",
-                                    klassetype = "YTEL",
-                                    opprinneligUtbetalingsbeløp = BigDecimal("12000.0"),
-                                    nyttBeløp = BigDecimal("10000.0"),
-                                    tilbakekrevesBeløp = BigDecimal("2000.0"),
-                                    skatteprosent = BigDecimal("0.0"),
-                                ),
-                            ),
-                        ),
-                    ),
-                ),
-            )
-        }
-        return InMemorySak(behovObservatør, tilbakekreving)
-    }
 
     fun opprettTilbakekreving(
         opprettTilbakekrevingHendelse: OpprettTilbakekrevingHendelse,
@@ -131,7 +55,6 @@ class TilbakekrevingService(
         val observatør = Observatør()
         val tilbakekreving = Tilbakekreving.opprett(observatør, opprettTilbakekrevingHendelse)
         håndter(tilbakekreving)
-        eksempelsaker.add(InMemorySak(observatør, tilbakekreving))
         lagre(observatør, tilbakekreving)
 
         sjekkBehovOgHåndter(tilbakekreving, observatør, SecureLog.Context.fra(tilbakekreving))
@@ -143,38 +66,42 @@ class TilbakekrevingService(
     ): Tilbakekreving? {
         if (!applicationProperties.toggles.nyModellEnabled) return null
 
-        return eksempelsaker.map { it.tilbakekreving }.firstOrNull { it.tilFrontendDto().fagsystem == fagsystem && it.tilFrontendDto().eksternFagsakId == eksternFagsakId }
+        val tilbakekrevinger = tilbakekrevingRepository.hentAlleTilbakekrevinger()?.map { it.fraEntity(Observatør()) }
+        return tilbakekrevinger?.map { it }?.firstOrNull {
+            it.tilFrontendDto().fagsystem == fagsystem && it.tilFrontendDto().eksternFagsakId == eksternFagsakId
+        }
     }
 
     fun hentTilbakekreving(behandlingId: UUID): Tilbakekreving? {
         if (!applicationProperties.toggles.nyModellEnabled) return null
 
-        return eksempelsaker.map { it.tilbakekreving }.firstOrNull { sak -> sak.tilFrontendDto().behandlinger.any { it.eksternBrukId == behandlingId } }
+        return tilbakekrevingRepository.hentTilbakekreving(behandlingId)?.fraEntity(Observatør())
     }
 
     fun <T> hentTilbakekreving(
         behandlingId: UUID,
         håndter: (Tilbakekreving) -> T,
     ): T? {
-        val sak = eksempelsaker.firstOrNull { sak -> sak.tilbakekreving.tilFrontendDto().behandlinger.any { it.eksternBrukId == behandlingId } } ?: return null
-
-        val result = håndter(sak.tilbakekreving)
-        lagre(sak.observatør, sak.tilbakekreving)
-        sjekkBehovOgHåndter(sak.tilbakekreving, sak.observatør, SecureLog.Context.fra(sak.tilbakekreving))
-        return result
+        val observatør = Observatør()
+        return tilbakekrevingRepository.hentTilbakekreving(behandlingId)
+            ?.fraEntity(observatør)
+            ?.let { tilbakekreving ->
+                val resultat = håndter(tilbakekreving)
+                lagre(observatør, tilbakekreving)
+                sjekkBehovOgHåndter(tilbakekreving, observatør, SecureLog.Context.fra(tilbakekreving))
+                resultat
+            }
     }
 
     fun lagre(
         observatør: Observatør,
         tilbakekreving: Tilbakekreving,
     ) {
-        val eksisterendeSak = eksempelsaker.find { it.tilbakekreving.fagsystemId == tilbakekreving.fagsystemId }
-        if (eksisterendeSak == null) {
-            eksempelsaker.add(InMemorySak(observatør, tilbakekreving))
-        } else {
-            eksempelsaker.remove(eksisterendeSak)
-            eksempelsaker.add(InMemorySak(eksisterendeSak.observatør, tilbakekreving))
-        }
+        tilbakekrevingRepository.lagre(
+            tilbakekreving.id,
+            tilbakekreving.behandlingHistorikk.nåværende().entry.internId,
+            tilbakekreving.tilEntity(),
+        )
     }
 
     private fun sjekkBehovOgHåndter(
@@ -239,7 +166,7 @@ class TilbakekrevingService(
         behandlingsstegDto: BehandlingsstegDto,
         logContext: SecureLog.Context,
     ) {
-        return when (behandlingsstegDto) {
+        val result = when (behandlingsstegDto) {
             is BehandlingsstegForeldelseDto -> behandleForeldelse(tilbakekreving, behandlingsstegDto, behandler)
             is BehandlingsstegVilkårsvurderingDto -> behandleVilkårsvurdering(tilbakekreving, behandlingsstegDto, behandler)
             is BehandlingsstegFaktaDto -> behandleFakta(tilbakekreving, behandlingsstegDto, behandler)
@@ -247,6 +174,8 @@ class TilbakekrevingService(
             is BehandlingsstegFatteVedtaksstegDto -> behandleFatteVedtak(tilbakekreving, behandlingsstegDto, behandler)
             else -> throw Feil("Vurdering for ${behandlingsstegDto.getSteg()} er ikke implementert i ny modell enda.", logContext = logContext)
         }
+        tilbakekrevingRepository.lagreTilstand(tilbakekreving.tilEntity())
+        return result
     }
 
     private fun behandleFakta(
@@ -290,7 +219,7 @@ class TilbakekrevingService(
                 periode.periode,
                 when (periode.foreldelsesvurderingstype) {
                     Foreldelsesvurderingstype.IKKE_VURDERT -> Foreldelsesteg.Vurdering.IkkeVurdert
-                    Foreldelsesvurderingstype.FORELDET -> Foreldelsesteg.Vurdering.Foreldet(periode.begrunnelse, periode.foreldelsesfrist!!)
+                    Foreldelsesvurderingstype.FORELDET -> Foreldelsesteg.Vurdering.Foreldet(periode.begrunnelse)
                     Foreldelsesvurderingstype.IKKE_FORELDET -> Foreldelsesteg.Vurdering.IkkeForeldet(periode.begrunnelse)
                     Foreldelsesvurderingstype.TILLEGGSFRIST -> Foreldelsesteg.Vurdering.Tilleggsfrist(periode.foreldelsesfrist!!, periode.oppdagelsesdato!!)
                 },
@@ -394,19 +323,23 @@ class TilbakekrevingService(
 
             else -> throw IllegalArgumentException("Default eller ugydlig mottaker type ${brevmottakerDto.type}")
         }
+        tilbakekrevingRepository.lagreTilstand(tilbakekreving.tilEntity())
     }
 
     fun flyttBehandlingsstegTilbakeTilFakta(tilbakekreving: Tilbakekreving) {
         tilbakekreving.håndterNullstilling()
+        tilbakekrevingRepository.lagreTilstand(tilbakekreving.tilEntity())
     }
 
     fun aktiverBrevmottakerSteg(tilbakekreving: Tilbakekreving) {
         validerBrevmottaker(tilbakekreving)
         tilbakekreving.aktiverBrevmottakerSteg()
+        tilbakekrevingRepository.lagreTilstand(tilbakekreving.tilEntity())
     }
 
     fun deaktiverBrevmottakerSteg(tilbakekreving: Tilbakekreving) {
         tilbakekreving.deaktiverBrevmottakerSteg()
+        tilbakekrevingRepository.lagreTilstand(tilbakekreving.tilEntity())
     }
 
     fun fjernManuelBrevmottaker(
@@ -415,6 +348,7 @@ class TilbakekrevingService(
         manuellBrevmottakerId: UUID,
     ) {
         tilbakekreving.fjernManuelBrevmottaker(behandler, manuellBrevmottakerId)
+        tilbakekrevingRepository.lagreTilstand(tilbakekreving.tilEntity())
     }
 
     private fun validerBrevmottaker(tilbakekreving: Tilbakekreving) {

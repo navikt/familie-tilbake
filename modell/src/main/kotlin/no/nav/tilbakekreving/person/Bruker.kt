@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.person
 import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.BrukerinfoBehov
+import no.nav.tilbakekreving.entities.BrukerEntity
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.kontrakter.bruker.FrontendBrukerDto
@@ -37,6 +38,17 @@ class Bruker(
                 ident = ident,
                 ytelse = ytelse,
             ),
+        )
+    }
+
+    fun tilEntity(): BrukerEntity {
+        return BrukerEntity(
+            ident = ident,
+            språkkode = språkkode,
+            navn = navn,
+            fødselsdato = fødselsdato,
+            kjønn = kjønn,
+            dødsdato = dødsdato,
         )
     }
 
