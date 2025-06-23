@@ -2,6 +2,11 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelsesperiodeDto
+import no.nav.tilbakekreving.entities.DatoperiodeEntity
+import no.nav.tilbakekreving.entities.ForeldelseperiodeEntity
+import no.nav.tilbakekreving.entities.ForeldelsesstegEntity
+import no.nav.tilbakekreving.entities.ForeldelsesvurderingEntity
+import no.nav.tilbakekreving.entities.ForeldelsesvurderingType
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
@@ -75,7 +80,13 @@ class Foreldelsesteg(
         )
     }
 
-    class Foreldelseperiode private constructor(
+    fun tilEntity(): ForeldelsesstegEntity {
+        return ForeldelsesstegEntity(
+            vurdertePerioder = vurdertePerioder.map { it.tilEntity() },
+        )
+    }
+
+    class Foreldelseperiode internal constructor(
         val id: UUID,
         val periode: Datoperiode,
         private var _vurdering: Vurdering,
@@ -84,6 +95,14 @@ class Foreldelsesteg(
 
         fun vurderForeldelse(vurdering: Vurdering) {
             this._vurdering = vurdering
+        }
+
+        fun tilEntity(): ForeldelseperiodeEntity {
+            return ForeldelseperiodeEntity(
+                id = id,
+                periode = DatoperiodeEntity(periode.fom, periode.tom),
+                foreldelsesvurdering = _vurdering.tilEntity(),
+            )
         }
 
         companion object {
@@ -100,13 +119,51 @@ class Foreldelsesteg(
         val begrunnelse: String? get() = null
         val frist: LocalDate? get() = null
 
-        class IkkeForeldet(override val begrunnelse: String) : Vurdering
+        fun tilEntity(): ForeldelsesvurderingEntity
 
-        object IkkeVurdert : Vurdering
+        class IkkeForeldet(override val begrunnelse: String) : Vurdering {
+            override fun tilEntity(): ForeldelsesvurderingEntity {
+                return ForeldelsesvurderingEntity(
+                    type = ForeldelsesvurderingType.IKKE_FORELDET,
+                    begrunnelse = begrunnelse,
+                    frist = null,
+                    oppdaget = null,
+                )
+            }
+        }
 
-        class Tilleggsfrist(override val frist: LocalDate, val oppdaget: LocalDate) : Vurdering
+        object IkkeVurdert : Vurdering {
+            override fun tilEntity(): ForeldelsesvurderingEntity {
+                return ForeldelsesvurderingEntity(
+                    type = ForeldelsesvurderingType.IKKE_VURDERT,
+                    begrunnelse = null,
+                    frist = null,
+                    oppdaget = null,
+                )
+            }
+        }
 
-        class Foreldet(override val begrunnelse: String, override val frist: LocalDate) : Vurdering
+        class Tilleggsfrist(override val frist: LocalDate, val oppdaget: LocalDate) : Vurdering {
+            override fun tilEntity(): ForeldelsesvurderingEntity {
+                return ForeldelsesvurderingEntity(
+                    type = ForeldelsesvurderingType.TILLEGGSFRIST,
+                    frist = frist,
+                    oppdaget = oppdaget,
+                    begrunnelse = null,
+                )
+            }
+        }
+
+        class Foreldet(override val begrunnelse: String) : Vurdering {
+            override fun tilEntity(): ForeldelsesvurderingEntity {
+                return ForeldelsesvurderingEntity(
+                    type = ForeldelsesvurderingType.FORELDET,
+                    begrunnelse = begrunnelse,
+                    frist = null,
+                    oppdaget = null,
+                )
+            }
+        }
     }
 
     companion object {

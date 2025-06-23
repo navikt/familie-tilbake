@@ -2,6 +2,12 @@ package no.nav.tilbakekreving.hendelse
 
 import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagAdapter
 import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagPeriodeAdapter
+import no.nav.tilbakekreving.entities.AktørEntity
+import no.nav.tilbakekreving.entities.AktørType
+import no.nav.tilbakekreving.entities.BeløpEntity
+import no.nav.tilbakekreving.entities.DatoperiodeEntity
+import no.nav.tilbakekreving.entities.KravgrunnlagHendelseEntity
+import no.nav.tilbakekreving.entities.KravgrunnlagPeriodeEntity
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -39,6 +45,30 @@ class KravgrunnlagHendelse(
         return perioder
     }
 
+    fun tilEntity(): KravgrunnlagHendelseEntity {
+        return KravgrunnlagHendelseEntity(
+            internId = internId,
+            vedtakId = vedtakId,
+            kravstatuskode = kravstatuskode,
+            fagsystemVedtaksdato = fagsystemVedtaksdato,
+            vedtakGjelder = tilAktørEntity(vedtakGjelder),
+            utbetalesTil = tilAktørEntity(utbetalesTil),
+            skalBeregneRenter = skalBeregneRenter,
+            ansvarligEnhet = ansvarligEnhet,
+            kontrollfelt = kontrollfelt,
+            kravgrunnlagId = kravgrunnlagId,
+            referanse = referanse,
+            perioder = perioder.map { it.tilEntity() },
+        )
+    }
+
+    private fun tilAktørEntity(aktør: Aktør): AktørEntity = when (aktør) {
+        is Aktør.Person -> AktørEntity(AktørType.Person, aktør.ident)
+        is Aktør.Organisasjon -> AktørEntity(AktørType.Organisasjon, aktør.ident)
+        is Aktør.Samhandler -> AktørEntity(AktørType.Samhandler, aktør.ident)
+        is Aktør.Applikasjonsbruker -> AktørEntity(AktørType.Applikasjonsbruker, aktør.ident)
+    }
+
     class Periode(
         val periode: Datoperiode,
         private val månedligSkattebeløp: BigDecimal,
@@ -61,6 +91,15 @@ class KravgrunnlagHendelse(
             return totaltBeløp()
         }
 
+        fun tilEntity(): KravgrunnlagPeriodeEntity {
+            return KravgrunnlagPeriodeEntity(
+                periode = DatoperiodeEntity(periode.fom, periode.tom),
+                månedligSkattebeløp = månedligSkattebeløp,
+                ytelsesbeløp = ytelsesbeløp.map { it.tilEntity() },
+                feilutbetaltBeløp = feilutbetaltBeløp.map { it.tilEntity() },
+            )
+        }
+
         data class Beløp(
             private val klassekode: String,
             private val klassetype: String,
@@ -78,6 +117,17 @@ class KravgrunnlagHendelse(
             override fun utbetaltYtelsesbeløp(): BigDecimal = opprinneligUtbetalingsbeløp
 
             override fun riktigYteslesbeløp(): BigDecimal = nyttBeløp
+
+            fun tilEntity(): BeløpEntity {
+                return BeløpEntity(
+                    klassekode = klassekode,
+                    klassetype = klassetype,
+                    opprinneligUtbetalingsbeløp = opprinneligUtbetalingsbeløp,
+                    nyttBeløp = nyttBeløp,
+                    tilbakekrevesBeløp = tilbakekrevesBeløp,
+                    skatteprosent = skatteprosent,
+                )
+            }
         }
     }
 

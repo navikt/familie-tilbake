@@ -7,9 +7,10 @@ import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
+import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 
 internal sealed interface Tilstand {
-    val navn: String
+    val tilbakekrevingTilstand: TilbakekrevingTilstand
 
     fun entering(tilbakekreving: Tilbakekreving)
 
@@ -17,35 +18,35 @@ internal sealed interface Tilstand {
         tilbakekreving: Tilbakekreving,
         hendelse: OpprettTilbakekrevingHendelse,
     ) {
-        error("Forventet ikke OpprettTilbakekrevingEvent i $navn")
+        error("Forventet ikke OpprettTilbakekrevingEvent i $tilbakekrevingTilstand")
     }
 
     fun håndter(
         tilbakekreving: Tilbakekreving,
         kravgrunnlag: KravgrunnlagHendelse,
     ) {
-        error("Forventet ikke Kravgrunnlag i $navn")
+        error("Forventet ikke Kravgrunnlag i $tilbakekrevingTilstand")
     }
 
     fun håndter(
         tilbakekreving: Tilbakekreving,
         fagsysteminfo: FagsysteminfoHendelse,
     ) {
-        error("Forventet ikke Fagsysteminfo i $navn")
+        error("Forventet ikke Fagsysteminfo i $tilbakekrevingTilstand")
     }
 
     fun håndter(
         tilbakekreving: Tilbakekreving,
         brukerinfo: BrukerinfoHendelse,
     ) {
-        error("Forventet ikke Brukerinfo i $navn")
+        error("Forventet ikke Brukerinfo i $tilbakekrevingTilstand")
     }
 
     fun håndter(
         tilbakekreving: Tilbakekreving,
         varselbrevSendtHendelse: VarselbrevSendtHendelse,
     ) {
-        error("Forventet ikke VarselbrevSendtHendelse i $navn")
+        error("Forventet ikke VarselbrevSendtHendelse i $tilbakekrevingTilstand")
     }
 
     fun håndter(
@@ -54,6 +55,6 @@ internal sealed interface Tilstand {
     ) {}
 
     fun håndterNullstilling(tilbakekreving: Tilbakekreving) {
-        error("Forventet ikke Nullstilling i $navn")
+        error("Forventet ikke Nullstilling i $tilbakekrevingTilstand")
     }
 }

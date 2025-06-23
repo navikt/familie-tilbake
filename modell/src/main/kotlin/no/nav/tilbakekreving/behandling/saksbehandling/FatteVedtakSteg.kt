@@ -3,14 +3,15 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.api.v1.dto.Totrinnsstegsinfo
 import no.nav.tilbakekreving.api.v1.dto.TotrinnsvurderingDto
+import no.nav.tilbakekreving.entities.FatteVedtakStegEntity
+import no.nav.tilbakekreving.entities.VurdertStegEntity
+import no.nav.tilbakekreving.entities.VurdertStegType
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.saksbehandler.Behandler
-import no.nav.tilbakekreving.saksbehandler.Saksbehandling
 
-class FatteVedtakSteg private constructor(
+class FatteVedtakSteg internal constructor(
     private val vurderteSteg: List<VurdertSteg>,
     private var _ansvarligBeslutter: Behandler?,
-    private val saksbehandling: Saksbehandling,
 ) : Saksbehandlingsteg<TotrinnsvurderingDto> {
     override val type: Behandlingssteg = Behandlingssteg.FATTE_VEDTAK
     val ansvarligBeslutter: Behandler? = _ansvarligBeslutter
@@ -19,10 +20,11 @@ class FatteVedtakSteg private constructor(
 
     internal fun håndter(
         beslutter: Behandler,
+        ansvarligSaksbehandler: Behandler,
         behandlingssteg: Behandlingssteg,
         vurdering: Vurdering,
     ) {
-        if (saksbehandling.ansvarligSaksbehandler() == beslutter) error("Beslutter kan ikke være ansvarlig saksbehandler")
+        if (ansvarligSaksbehandler == beslutter) error("Beslutter kan ikke være ansvarlig saksbehandler")
         _ansvarligBeslutter = beslutter
         vurderteSteg.single { it.erFor(behandlingssteg) }
             .oppdaterVurdering(vurdering)
@@ -32,7 +34,14 @@ class FatteVedtakSteg private constructor(
         return TotrinnsvurderingDto(vurderteSteg.map(VurdertSteg::tilFrontendDto))
     }
 
-    private class VurdertSteg(
+    fun tilEntity(): FatteVedtakStegEntity {
+        return FatteVedtakStegEntity(
+            vurderteStegEntities = vurderteSteg.map { it.tilEntity() },
+            ansvarligBeslutter = _ansvarligBeslutter?.tilEntity(),
+        )
+    }
+
+    class VurdertSteg(
         private val steg: Behandlingssteg,
         private var vurdering: Vurdering,
     ) : FrontendDto<Totrinnsstegsinfo> {
@@ -59,6 +68,18 @@ class FatteVedtakSteg private constructor(
                 begrunnelse = (vurdering as? Vurdering.Underkjent)?.begrunnelse,
             )
         }
+
+        fun tilEntity(): VurdertStegEntity {
+            return VurdertStegEntity(
+                steg = steg,
+                vurdering = when (this.vurdering) {
+                    is Vurdering.IkkeVurdert -> VurdertStegType.IKKE_VURDERT
+                    is Vurdering.Godkjent -> VurdertStegType.GODKJENT
+                    is Vurdering.Underkjent -> VurdertStegType.UNDERKJENT
+                },
+                begrunnelse = (vurdering as? Vurdering.Underkjent)?.begrunnelse,
+            )
+        }
     }
 
     sealed interface Vurdering {
@@ -70,7 +91,7 @@ class FatteVedtakSteg private constructor(
     }
 
     companion object {
-        fun opprett(saksbehandling: Saksbehandling): FatteVedtakSteg {
+        fun opprett(): FatteVedtakSteg {
             return FatteVedtakSteg(
                 vurderteSteg = listOf(
                     VurdertSteg(
@@ -91,7 +112,6 @@ class FatteVedtakSteg private constructor(
                     ),
                 ),
                 _ansvarligBeslutter = null,
-                saksbehandling = saksbehandling,
             )
         }
     }

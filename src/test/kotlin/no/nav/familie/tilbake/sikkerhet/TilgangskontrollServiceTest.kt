@@ -28,14 +28,10 @@ import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
-import no.nav.tilbakekreving.behandling.BehandlingHistorikk
-import no.nav.tilbakekreving.brev.BrevHistorikk
-import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
-import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
 import no.nav.tilbakekreving.fagsystem.Ytelse
+import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
-import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -45,9 +41,7 @@ import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.test.context.TestPropertySource
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
-import java.time.LocalDateTime
 import java.util.Calendar
-import java.util.UUID
 
 @TestPropertySource(
     properties = [
@@ -119,20 +113,16 @@ internal class TilgangskontrollServiceTest : OppslagSpringRunnerTest() {
                 mottattXmlRepository,
                 mockIntegrasjonerClient,
             )
+
         tilbakekreving =
-            Tilbakekreving(
-                fagsystemId = UUID.randomUUID().toString(),
-                eksternFagsak = EksternFagsak(
-                    "1abc",
-                    Ytelse.Barnetrygd,
-                    EksternFagsakBehandlingHistorikk(mutableListOf()),
-                    mockk(relaxed = true),
+            Tilbakekreving.opprett(
+                opprettTilbakekrevingEvent = OpprettTilbakekrevingHendelse(
+                    opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
+                    eksternFagsak = OpprettTilbakekrevingHendelse.EksternFagsak(
+                        "1abc",
+                        Ytelse.Barnetrygd,
+                    ),
                 ),
-                behandlingHistorikk = BehandlingHistorikk(mutableListOf()),
-                kravgrunnlagHistorikk = KravgrunnlagHistorikk(mutableListOf()),
-                brevHistorikk = BrevHistorikk(mutableListOf()),
-                opprettet = LocalDateTime.now(),
-                opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
                 behovObservatør = mockk(relaxed = true),
             )
         fagsak =
