@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.foreldelse
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -166,7 +167,8 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
             )
 
         val vurdertForeldelse = foreldelsesRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
-        vurdertForeldelse.shouldNotBeNull()
+            .singleOrNull()
+            .shouldNotBeNull()
         vurdertForeldelse.foreldelsesperioder.size shouldBe 1
         val vurdertForeldelsesperiode = vurdertForeldelse.foreldelsesperioder.toList()[0]
         vurdertForeldelsesperiode.begrunnelse shouldBe "foreldelses begrunnelse"
@@ -251,7 +253,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
             ),
             SecureLog.Context.tom(),
         )
-        vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeNull()
+        vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeEmpty()
     }
 
     @Test
@@ -294,7 +296,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
         foreldelseService.lagreVurdertForeldelse(behandling.id, BehandlingsstegForeldelseDto(listOf(likForeldelsesperiode, likForeldelsesperiode2)), SecureLog.Context.tom())
         vilkårsvurderingRepository.insert(Testdata.lagVilkårsvurdering(behandling.id))
 
-        foreldelseService.sjekkOmForeldelsePerioderErLike(behandling.id) shouldBe true
+        foreldelseService.sjekkOmForeldelsePerioderErLike(behandling.id, SecureLog.Context.tom()) shouldBe true
 
         val ulikForeldelsesperiode =
             lagForeldelsesperiode(
@@ -304,7 +306,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
             )
         foreldelseService.lagreVurdertForeldelse(behandling.id, BehandlingsstegForeldelseDto(listOf(likForeldelsesperiode, likForeldelsesperiode2, ulikForeldelsesperiode)), SecureLog.Context.tom())
 
-        foreldelseService.sjekkOmForeldelsePerioderErLike(behandling.id) shouldBe false
+        foreldelseService.sjekkOmForeldelsePerioderErLike(behandling.id, SecureLog.Context.tom()) shouldBe false
     }
 
     private fun lagForeldelsesperiode(

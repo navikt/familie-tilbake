@@ -450,7 +450,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         )
 
         faktaFeilutbetalingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeNull()
-        foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeNull()
+        foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeEmpty()
 
         assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.Vedtaksløsning, times = 2)
         assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler))
@@ -577,8 +577,8 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         )
 
         faktaFeilutbetalingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeNull()
-        foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeNull()
-        vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeNull()
+        foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeEmpty()
+        vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeEmpty()
         vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandling.id).shouldBeNull()
 
         assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.Vedtaksløsning, times = 2)

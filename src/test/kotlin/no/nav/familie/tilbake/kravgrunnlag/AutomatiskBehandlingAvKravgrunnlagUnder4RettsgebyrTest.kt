@@ -101,7 +101,7 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
         automatiskSaksbehandlingTask.doTask(automatiskSaksbehandlingTasks.first())
 
         assertFakta()
-        foreldelseService.hentAktivVurdertForeldelse(behandlingId)?.foreldelsesperioder shouldBe null
+        foreldelseService.hentAktivVurdertForeldelse(behandlingId, SecureLog.Context.tom())?.foreldelsesperioder shouldBe null
 
         assertVilkårsvurdering()
         sendVedtaksbrev()

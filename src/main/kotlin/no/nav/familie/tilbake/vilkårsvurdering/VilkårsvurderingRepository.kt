@@ -12,7 +12,7 @@ import java.util.UUID
 interface VilkårsvurderingRepository :
     RepositoryInterface<Vilkårsvurdering, UUID>,
     InsertUpdateRepository<Vilkårsvurdering> {
-    fun findByBehandlingIdAndAktivIsTrue(behandlingId: UUID): Vilkårsvurdering?
+    fun findByBehandlingIdAndAktivIsTrue(behandlingId: UUID): List<Vilkårsvurdering>
 
     fun findByBehandlingId(behandlingId: UUID): List<Vilkårsvurdering>
 }

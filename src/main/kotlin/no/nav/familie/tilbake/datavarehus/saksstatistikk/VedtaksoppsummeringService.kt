@@ -4,6 +4,7 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
+import no.nav.familie.tilbake.common.expectSingleOrNull
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.SærligeGrunner
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.UtvidetVilkårsresultat
@@ -12,6 +13,7 @@ import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.Vedtaksoppsummer
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
 import no.nav.familie.tilbake.foreldelse.VurdertForeldelseRepository
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingSærligGrunn
@@ -35,6 +37,7 @@ class VedtaksoppsummeringService(
     fun hentVedtaksoppsummering(behandlingId: UUID): Vedtaksoppsummering {
         val behandling: Behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandling.id.toString())
         val eksternBehandling = behandling.aktivFagsystemsbehandling.eksternId
         val behandlingsvedtak =
             behandling.sisteResultat?.behandlingsvedtak
@@ -58,13 +61,18 @@ class VedtaksoppsummeringService(
             behandlendeEnhet = behandling.behandlendeEnhet,
             erBehandlingManueltOpprettet = behandling.manueltOpprettet,
             forrigeBehandling = forrigeBehandling?.let(Behandling::eksternBrukId),
-            perioder = hentVedtakPerioder(behandlingId),
+            perioder = hentVedtakPerioder(behandlingId, logContext),
         )
     }
 
-    private fun hentVedtakPerioder(behandlingId: UUID): List<VedtakPeriode> {
+    private fun hentVedtakPerioder(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ): List<VedtakPeriode> {
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
+            .expectSingleOrNull(logContext) { "id=${it.id}, ${it.sporbar.opprettetTid}" }
         val vurdertForeldelse = foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
+            .expectSingleOrNull(logContext) { "id=${it.id}, ${it.sporbar.opprettetTid}" }
         val beregningsresultat = beregningService.beregn(behandlingId).oppsummer()
         val vilkårsperioder =
             vilkårsvurdering?.let {

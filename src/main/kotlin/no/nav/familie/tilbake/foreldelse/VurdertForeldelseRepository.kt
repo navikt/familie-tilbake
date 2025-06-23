@@ -10,7 +10,7 @@ import java.util.UUID
 interface VurdertForeldelseRepository :
     RepositoryInterface<VurdertForeldelse, UUID>,
     InsertUpdateRepository<VurdertForeldelse> {
-    fun findByBehandlingIdAndAktivIsTrue(behandlingId: UUID): VurdertForeldelse?
+    fun findByBehandlingIdAndAktivIsTrue(behandlingId: UUID): List<VurdertForeldelse>
 
     fun findByBehandlingId(behandlingId: UUID): List<VurdertForeldelse>
 }

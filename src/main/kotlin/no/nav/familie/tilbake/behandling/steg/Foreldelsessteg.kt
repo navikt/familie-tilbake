@@ -9,6 +9,7 @@ import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEvent
+import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
@@ -34,6 +35,7 @@ class Foreldelsessteg(
     private val foreldelseAntallMåned: Long,
     private val oppgaveTaskService: OppgaveTaskService,
     private val behandlingRepository: BehandlingRepository,
+    private val logService: LogService,
 ) : IBehandlingssteg {
     private val log = TracedLogger.getLogger<Foreldelsessteg>()
 
@@ -146,6 +148,7 @@ class Foreldelsessteg(
 
     @EventListener
     fun deaktiverEksisterendeVurdertForeldelse(endretKravgrunnlagEvent: EndretKravgrunnlagEvent) {
-        foreldelseService.deaktiverEksisterendeVurdertForeldelse(behandlingId = endretKravgrunnlagEvent.behandlingId)
+        val logContext = logService.contextFraBehandling(endretKravgrunnlagEvent.behandlingId)
+        foreldelseService.deaktiverEksisterendeVurdertForeldelse(behandlingId = endretKravgrunnlagEvent.behandlingId, logContext)
     }
 }

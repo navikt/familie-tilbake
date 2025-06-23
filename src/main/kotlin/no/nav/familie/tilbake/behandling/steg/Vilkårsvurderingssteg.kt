@@ -13,6 +13,7 @@ import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEvent
+import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
@@ -41,6 +42,7 @@ class Vilkårsvurderingssteg(
     private val periodeService: PeriodeService,
     private val vedtaksbrevsoppsummeringRepository: VedtaksbrevsoppsummeringRepository,
     private val behandlingRepository: BehandlingRepository,
+    private val logService: LogService,
 ) : IBehandlingssteg {
     private val log = TracedLogger.getLogger<Vilkårsvurderingssteg>()
 
@@ -52,9 +54,9 @@ class Vilkårsvurderingssteg(
         log.medContext(logContext) {
             info("Behandling $behandlingId er på $VILKÅRSVURDERING steg")
         }
-        if (harAllePerioderForeldet(behandlingId)) {
+        if (harAllePerioderForeldet(behandlingId, logContext)) {
             // hvis det finnes noen periode som ble vurdert før i vilkårsvurdering, må slettes
-            vilkårsvurderingService.deaktiverEksisterendeVilkårsvurdering(behandlingId)
+            vilkårsvurderingService.deaktiverEksisterendeVilkårsvurdering(behandlingId, logContext)
 
             lagHistorikkinnslag(behandlingId, Aktør.Vedtaksløsning)
 
@@ -76,7 +78,7 @@ class Vilkårsvurderingssteg(
         log.medContext(logContext) {
             info("Behandling $behandlingId er på $VILKÅRSVURDERING steg")
         }
-        if (harAllePerioderForeldet(behandlingId)) {
+        if (harAllePerioderForeldet(behandlingId, logContext)) {
             throw Feil(
                 message = "Alle perioder er foreldet for $behandlingId,kan ikke behandle vilkårsvurdering",
                 frontendFeilmelding = "Alle perioder er foreldet for $behandlingId,kan ikke behandle vilkårsvurdering",
@@ -102,7 +104,7 @@ class Vilkårsvurderingssteg(
         log.medContext(logContext) {
             info("Behandling $behandlingId er på $VILKÅRSVURDERING steg og behandler automatisk..")
         }
-        if (harAllePerioderForeldet(behandlingId)) {
+        if (harAllePerioderForeldet(behandlingId, logContext)) {
             utførSteg(behandlingId, logContext)
             return
         }
@@ -140,12 +142,16 @@ class Vilkårsvurderingssteg(
 
     @EventListener
     fun deaktiverEksisterendeVilkårsvurdering(endretKravgrunnlagEvent: EndretKravgrunnlagEvent) {
-        vilkårsvurderingService.deaktiverEksisterendeVilkårsvurdering(endretKravgrunnlagEvent.behandlingId)
+        val logContext = logService.contextFraBehandling(endretKravgrunnlagEvent.behandlingId)
+        vilkårsvurderingService.deaktiverEksisterendeVilkårsvurdering(endretKravgrunnlagEvent.behandlingId, logContext)
     }
 
-    private fun harAllePerioderForeldet(behandlingId: UUID): Boolean =
+    private fun harAllePerioderForeldet(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ): Boolean =
         foreldelseService
-            .hentAktivVurdertForeldelse(behandlingId)
+            .hentAktivVurdertForeldelse(behandlingId, logContext)
             ?.foreldelsesperioder
             ?.all { it.erForeldet() } ?: false
 

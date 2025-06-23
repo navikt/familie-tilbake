@@ -4,6 +4,7 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.SkalSammenslåPerioder
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
 import no.nav.tilbakekreving.kontrakter.ytelse.Tema
 import org.springframework.stereotype.Service
@@ -19,9 +20,10 @@ class PeriodeService(
 ) {
     fun erEnsligForsørgerOgPerioderLike(behandlingId: UUID): SkalSammenslåPerioder {
         val fagsak = fagsakRepository.finnFagsakForBehandlingId(behandlingId)
+        val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandlingId.toString())
         return when {
             harKunEnPeriode(behandlingId) -> SkalSammenslåPerioder.IKKE_AKTUELT
-            erPerioderLike(behandlingId) && fagsak.ytelsestype.tilTema() == Tema.ENF -> SkalSammenslåPerioder.JA
+            erPerioderLike(behandlingId, logContext) && fagsak.ytelsestype.tilTema() == Tema.ENF -> SkalSammenslåPerioder.JA
             else -> SkalSammenslåPerioder.IKKE_AKTUELT
         }
     }
@@ -33,10 +35,13 @@ class PeriodeService(
         return harEnFaktaPeriode || harEnVilkårsperiode
     }
 
-    private fun erPerioderLike(behandlingId: UUID) =
+    private fun erPerioderLike(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ) =
         faktaFeilutbetalingService.sjekkOmFaktaPerioderErLike(behandlingId) &&
-            foreldelseService.sjekkOmForeldelsePerioderErLike(behandlingId) &&
-            vilkårsvurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandlingId)
+            foreldelseService.sjekkOmForeldelsePerioderErLike(behandlingId, logContext) &&
+            vilkårsvurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandlingId, logContext)
 
     fun erPerioderSammenslått(behandlingId: UUID): Boolean {
         val vedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)

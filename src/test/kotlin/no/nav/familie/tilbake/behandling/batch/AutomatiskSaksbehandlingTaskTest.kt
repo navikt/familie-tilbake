@@ -1,7 +1,9 @@
 package no.nav.familie.tilbake.behandling.batch
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.inspectors.forOne
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSingleElement
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -196,16 +198,17 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
                 Hendelsesundertype.ANNET_FRITEKST == it.hendelsesundertype
         }
 
-        foreldelsesRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeNull()
+        foreldelsesRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeEmpty()
 
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
-        vilkårsvurdering.shouldNotBeNull()
-        vilkårsvurdering.perioder.shouldHaveSingleElement {
-            Constants.AUTOMATISK_SAKSBEHANDLING_BEGRUNNELSE == it.begrunnelse &&
-                Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT == it.vilkårsvurderingsresultat &&
-                it.aktsomhet != null &&
-                it.aktsomhet!!.aktsomhet == Aktsomhet.SIMPEL_UAKTSOMHET
-            !it.aktsomhet!!.tilbakekrevSmåbeløp
+            .singleOrNull()
+            .shouldNotBeNull()
+        vilkårsvurdering.perioder.forOne {
+            it.begrunnelse shouldBe Constants.AUTOMATISK_SAKSBEHANDLING_BEGRUNNELSE
+            it.vilkårsvurderingsresultat shouldBe Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT
+            it.aktsomhet.shouldNotBeNull()
+            it.aktsomhet.aktsomhet shouldBe Aktsomhet.SIMPEL_UAKTSOMHET
+            it.aktsomhet.tilbakekrevSmåbeløp shouldBe false
         }
 
         vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandling.id).shouldBeNull()

@@ -1,17 +1,17 @@
 package no.nav.familie.tilbake.beregning
 
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.common.expectSingleOrNull
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingMapper
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.foreldelse.VurdertForeldelseRepository
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
-import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
 import no.nav.familie.tilbake.log.LogService
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
-import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
 import no.nav.tilbakekreving.api.v1.dto.BeregnetPeriodeDto
 import no.nav.tilbakekreving.api.v1.dto.BeregnetPerioderDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatDto
@@ -56,9 +56,14 @@ class TilbakekrevingsberegningService(
     fun beregn(behandlingId: UUID): Beregning {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
+        val logContext = SecureLog.Context.medBehandling(kravgrunnlag.fagsystemId, behandling.id.toString())
         val kravgrunnlagAdapter = Kravgrunnlag431Adapter(kravgrunnlag)
-        val vilkårsvurderingAdapter = GammelVilkårsvurderingAdapter(hentVilkårsvurdering(behandlingId))
-        val foreldetPerioder = hentVurdertForeldelse(behandlingId)?.let { vurdering ->
+        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
+            .expectSingleOrNull(logContext) { "id=${it.id}, ${it.sporbar.opprettetTid}" }
+        val foreldelse = vurdertForeldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
+            .expectSingleOrNull(logContext) { "id=${it.id}, ${it.sporbar.opprettetTid}" }
+        val vilkårsvurderingAdapter = GammelVilkårsvurderingAdapter(vilkårsvurdering)
+        val foreldetPerioder = foreldelse?.let { vurdering ->
             vurdering.foreldelsesperioder
                 .filter(Foreldelsesperiode::erForeldet)
                 .map { it.periode.toDatoperiode() }
@@ -97,8 +102,4 @@ class TilbakekrevingsberegningService(
             Fagområdekode.BA, Fagområdekode.KS -> false
             else -> true
         }
-
-    private fun hentVilkårsvurdering(behandlingId: UUID): Vilkårsvurdering? = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
-
-    private fun hentVurdertForeldelse(behandlingId: UUID): VurdertForeldelse? = vurdertForeldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
 }

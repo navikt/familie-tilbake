@@ -29,6 +29,7 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
 import no.nav.tilbakekreving.Rettsgebyr
 import no.nav.tilbakekreving.api.v1.dto.AktivitetDto
@@ -460,7 +461,9 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
 
         // endret begge perioder til IKKE_FORELDET
-        val vurdertForeldelse = foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId = behandling.id)!!
+        val vurdertForeldelse = foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId = behandling.id)
+            .singleOrNull()
+            .shouldNotBeNull()
         oppdaterForeldelsesvurdering(
             vurdertForeldelse,
             Foreldelsesvurderingstype.IKKE_FORELDET,
@@ -525,7 +528,9 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
 
         // endret begge perioder til FORELDET
-        val vurdertForeldelse = foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId = behandling.id)!!
+        val vurdertForeldelse = foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId = behandling.id)
+            .singleOrNull()
+            .shouldNotBeNull()
         oppdaterForeldelsesvurdering(vurdertForeldelse, Foreldelsesvurderingstype.FORELDET, Foreldelsesvurderingstype.FORELDET)
 
         vurdertVilkårsvurderingDto = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
@@ -621,7 +626,8 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         )
 
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
-        vilkårsvurdering.shouldNotBeNull()
+            .singleOrNull()
+            .shouldNotBeNull()
 
         vilkårsvurdering.perioder.shouldNotBeEmpty()
         vilkårsvurdering.perioder.size shouldBe 1
@@ -670,7 +676,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
 
         vilkårsvurderingRepository.insert(vilkårsvurdering)
 
-        val erLike = vilkårsvurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandling.id)
+        val erLike = vilkårsvurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandling.id, SecureLog.Context.tom())
         Assertions.assertFalse(erLike)
     }
 
@@ -694,7 +700,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
 
         vilkårsvurderingRepository.insert(vilkårsvurdering)
 
-        val erLike = vilkårsvurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandling.id)
+        val erLike = vilkårsvurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandling.id, SecureLog.Context.tom())
         Assertions.assertTrue(erLike)
     }
 
@@ -720,7 +726,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
 
         vilkårsvurderingRepository.insert(vilkårsvurdering)
 
-        val erLike = vilkårsvurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandling.id)
+        val erLike = vilkårsvurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandling.id, SecureLog.Context.tom())
         Assertions.assertFalse(erLike)
     }
 
