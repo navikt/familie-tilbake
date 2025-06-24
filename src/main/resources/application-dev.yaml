@@ -14,6 +14,10 @@ oppdrag.mq:
 
 tilbakekreving:
   frontendUrl: https://tilbakekreving.ansatt.dev.nav.no
+  kravgrunnlag:
+    - Q1_TILLEGGSSTONADER.KRAVGRUNNLAG
+  toggles:
+    ny-modell-enabled: true
 
 rolle:
   barnetrygd:

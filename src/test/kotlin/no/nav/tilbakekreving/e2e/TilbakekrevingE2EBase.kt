@@ -22,6 +22,7 @@ import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagMediator
 import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
@@ -30,6 +31,9 @@ import kotlin.time.Duration.Companion.milliseconds
 open class TilbakekrevingE2EBase : E2EBase() {
     @Autowired
     protected lateinit var kravgrunnlagBufferRepository: KravgrunnlagBufferRepository
+
+    @Autowired
+    private lateinit var kravgrunnlagMediator: KravgrunnlagMediator
 
     @Autowired
     protected lateinit var tilbakekrevingService: TilbakekrevingService
@@ -82,7 +86,7 @@ open class TilbakekrevingE2EBase : E2EBase() {
             }
         }
 
-        tilbakekrevingService.lesKravgrunnlag()
+        kravgrunnlagMediator.lesKravgrunnlag()
 
         kravgrunnlagBufferRepository.hentUlesteKravgrunnlag().size shouldBe 0
     }

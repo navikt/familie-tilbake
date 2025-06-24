@@ -5,8 +5,8 @@ import no.nav.familie.tilbake.config.ApplicationProperties
 import no.nav.familie.tilbake.integration.pdl.PdlClient
 import no.nav.familie.tilbake.integration.pdl.internal.PdlKjønnType
 import no.nav.familie.tilbake.kontrakter.personopplysning.ADRESSEBESKYTTELSEGRADERING
-import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFaktaDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFatteVedtaksstegDto
@@ -31,8 +31,6 @@ import no.nav.tilbakekreving.kontrakter.brev.MottakerType
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
-import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
-import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagMapper
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -42,11 +40,11 @@ import java.util.UUID
 class TilbakekrevingService(
     private val applicationProperties: ApplicationProperties,
     private val pdlClient: PdlClient,
-    private val kravgrunnlagBufferRepository: KravgrunnlagBufferRepository,
     private val iverksettService: IverksettService,
     private val tilbakekrevingRepository: TilbakekrevingRepository,
 ) {
     private val fnr = "20046912345"
+    private val logger = TracedLogger.getLogger<TilbakekrevingService>()
 
     fun opprettTilbakekreving(
         opprettTilbakekrevingHendelse: OpprettTilbakekrevingHendelse,
@@ -55,9 +53,15 @@ class TilbakekrevingService(
         val observatør = Observatør()
         val tilbakekreving = Tilbakekreving.opprett(observatør, opprettTilbakekrevingHendelse)
         håndter(tilbakekreving)
+
+        val logContext = SecureLog.Context.fra(tilbakekreving)
+        logger.medContext(logContext) { info("Lagrer tilbakekreving") }
         lagre(observatør, tilbakekreving)
 
+        logger.medContext(logContext) { info("Håndterer behov") }
         sjekkBehovOgHåndter(tilbakekreving, observatør, SecureLog.Context.fra(tilbakekreving))
+
+        logger.medContext(logContext) { info("Tilbakekreving ferdig opprettet") }
     }
 
     fun hentTilbakekreving(
@@ -375,18 +379,6 @@ class TilbakekrevingService(
                 frontendFeilmelding = frontendFeilmelding,
                 logContext = SecureLog.Context.fra(tilbakekreving),
             )
-        }
-    }
-
-    fun lesKravgrunnlag() {
-        val ikkeHåndterteKravgrunnlag = kravgrunnlagBufferRepository.hentUlesteKravgrunnlag()
-        ikkeHåndterteKravgrunnlag.forEach { entity ->
-            val kravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(entity.kravgrunnlag)
-            opprettTilbakekreving(KravgrunnlagMapper.tilOpprettTilbakekrevingHendelse(kravgrunnlag)) { tilbakekreving ->
-                tilbakekreving.håndter(KravgrunnlagMapper.tilKravgrunnlagHendelse(kravgrunnlag))
-            }
-
-            kravgrunnlagBufferRepository.markerLest(entity.kravgrunnlagId)
         }
     }
 }
