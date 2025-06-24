@@ -52,6 +52,15 @@ class VilkårsvurderingService(
                     logContext = logContext,
                 )
         val kravgrunnlag431 = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
+        if (behandlingId.toString() == "f35358d6-5dfd-4c97-bc84-08735b54c2f2") {
+            vilkårsvurderingRepository.deleteById(UUID.fromString("ec3cbcc2-a4ca-427c-89f8-aca7a1393b0a"))
+            SecureLog.medContext(logContext) {
+                warn(
+                    "Slettet duplikat vilkårsvurdering. Gjenstående vurderinger: {}",
+                    vilkårsvurderingRepository.findByBehandlingId(behandlingId).joinToString(", ") { "id=${it.id}, ${it.sporbar.opprettetTid}" },
+                )
+            }
+        }
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
             .expectSingleOrNull(logContext) { "id=${it.id}, ${it.sporbar.opprettetTid}" }
         val vurdertForeldelse = foreldelseService.hentAktivVurdertForeldelse(behandlingId, logContext)
