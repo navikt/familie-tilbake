@@ -46,6 +46,7 @@ fun opprettTilbakekrevingHendelse(
 
 fun kravgrunnlag(
     vedtakGjelder: KravgrunnlagHendelse.Aktør = KravgrunnlagHendelse.Aktør.Person(bruker().ident),
+    utbetalesTil: KravgrunnlagHendelse.Aktør = KravgrunnlagHendelse.Aktør.Person(bruker().ident),
     perioder: List<KravgrunnlagHendelse.Periode> = listOf(kravgrunnlagPeriode()),
 ) = KravgrunnlagHendelse(
     internId = UUID.randomUUID(),
@@ -53,7 +54,7 @@ fun kravgrunnlag(
     kravstatuskode = KravgrunnlagHendelse.Kravstatuskode.NY,
     fagsystemVedtaksdato = LocalDate.now(),
     vedtakGjelder = vedtakGjelder,
-    utbetalesTil = KravgrunnlagHendelse.Aktør.Person(bruker().ident),
+    utbetalesTil = utbetalesTil,
     skalBeregneRenter = false,
     ansvarligEnhet = "0425",
     kontrollfelt = UUID.randomUUID().toString(),

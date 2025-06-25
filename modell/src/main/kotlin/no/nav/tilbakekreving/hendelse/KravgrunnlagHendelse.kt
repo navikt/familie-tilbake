@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.hendelse
 
+import no.nav.tilbakekreving.UtenforScope
 import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagAdapter
 import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagPeriodeAdapter
 import no.nav.tilbakekreving.entities.AktørEntity
@@ -8,6 +9,7 @@ import no.nav.tilbakekreving.entities.BeløpEntity
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.KravgrunnlagHendelseEntity
 import no.nav.tilbakekreving.entities.KravgrunnlagPeriodeEntity
+import no.nav.tilbakekreving.feil.UtenforScopeException
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -31,6 +33,16 @@ class KravgrunnlagHendelse(
     val referanse: String,
     val perioder: List<Periode>,
 ) : Historikk.HistorikkInnslag<UUID>, KravgrunnlagAdapter {
+    init {
+        if (vedtakGjelder !is Aktør.Person || utbetalesTil !is Aktør.Person) {
+            throw UtenforScopeException(UtenforScope.KravgrunnlagIkkePerson)
+        }
+
+        if (vedtakGjelder.ident != utbetalesTil.ident) {
+            throw UtenforScopeException(UtenforScope.KravgrunnlagBrukerIkkeLikMottaker)
+        }
+    }
+
     fun totaltBeløpFor(periode: Datoperiode): BigDecimal =
         perioder.single { kgPeriode -> kgPeriode.inneholder(periode) }
             .feilutbetaltYtelsesbeløp()
