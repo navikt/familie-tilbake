@@ -18,6 +18,7 @@ import no.nav.familie.tilbake.sikkerhet.TilgangService
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.TilbakekrevingService
+import no.nav.tilbakekreving.UtenforScope
 import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingPåVentDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
@@ -25,6 +26,7 @@ import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.tilbakekreving.api.v1.dto.ByttEnhetDto
 import no.nav.tilbakekreving.api.v1.dto.HenleggelsesbrevFritekstDto
 import no.nav.tilbakekreving.api.v1.dto.OpprettRevurderingDto
+import no.nav.tilbakekreving.feil.UtenforScopeException
 import no.nav.tilbakekreving.kontrakter.OpprettManueltTilbakekrevingRequest
 import no.nav.tilbakekreving.kontrakter.OpprettTilbakekrevingRequest
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
@@ -106,6 +108,9 @@ class BehandlingController(
         @Valid @RequestBody
         opprettRevurderingDto: OpprettRevurderingDto,
     ): Ressurs<String> {
+        tilbakekrevingService.hentTilbakekreving(opprettRevurderingDto.originalBehandlingId) {
+            throw UtenforScopeException(UtenforScope.Revurdering)
+        }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = opprettRevurderingDto.originalBehandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,

@@ -1,7 +1,10 @@
 package no.nav.tilbakekreving.e2e
 
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
+import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp.Companion.medFeilutbetaling
+import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
+import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.util.kroner
 import no.nav.tilbakekreving.util.prosent
 import org.intellij.lang.annotations.Language
@@ -21,7 +24,18 @@ object KravgrunnlagGenerator {
         referanse: String = nextPaddedId(4),
         ansvarligEnhet: String = nextPaddedId(4),
         fødselsnummer: String = "40026912345",
-        perioder: List<Tilbakekrevingsperiode>,
+        perioder: List<Tilbakekrevingsperiode> = listOf(
+            Tilbakekrevingsperiode(
+                1.januar(2021) til 1.januar(2021),
+                tilbakekrevingsbeløp = listOf(
+                    Tilbakekrevingsbeløp.forKlassekode(
+                        klassekode = NyKlassekode.TSTBASISP4_OP,
+                        beløpTilbakekreves = 2000.kroner,
+                        beløpOpprinneligUtbetalt = 20000.kroner,
+                    ),
+                ).medFeilutbetaling(NyKlassekode.KL_KODE_FEIL_ARBYT),
+            ),
+        ),
     ): String {
         val perioderXML = perioder.joinToString("\n") { it.toXML() }
 

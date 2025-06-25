@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.e2e.ytelser
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.inspectors.forOne
 import io.kotest.inspectors.forSingle
 import io.kotest.matchers.collections.shouldHaveSize
@@ -7,32 +8,22 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.config.PdlClientMock
 import no.nav.familie.tilbake.kravgrunnlag.domain.KodeAksjon
-import no.nav.tilbakekreving.api.v1.dto.AktsomhetDto
-import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFaktaDto
-import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFatteVedtaksstegDto
-import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeldelseDto
-import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeslåVedtaksstegDto
-import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
-import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingsperiodeDto
-import no.nav.tilbakekreving.api.v1.dto.ForeldelsesperiodeDto
-import no.nav.tilbakekreving.api.v1.dto.FritekstavsnittDto
-import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
-import no.nav.tilbakekreving.api.v1.dto.VurdertTotrinnDto
+import no.nav.tilbakekreving.UtenforScope
+import no.nav.tilbakekreving.api.v1.dto.OpprettRevurderingDto
+import no.nav.tilbakekreving.e2e.BehandlingsstegGenerator
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp.Companion.medFeilutbetaling
 import no.nav.tilbakekreving.e2e.TilbakekrevingE2EBase
 import no.nav.tilbakekreving.e2e.avventerBehandling
 import no.nav.tilbakekreving.e2e.kanBehandle
+import no.nav.tilbakekreving.feil.UtenforScopeException
 import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
-import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
-import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
-import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.til
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.util.kroner
 import org.junit.jupiter.api.Test
 import java.math.BigInteger
@@ -47,7 +38,7 @@ class TilleggstønaderE2ETest : TilbakekrevingE2EBase() {
         val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
         val ansvarligEnhet = KravgrunnlagGenerator.nextPaddedId(4)
         sendKravgrunnlagOgAvventLesing(
-            "LOCAL_TILLEGGSSTONADER.KRAVGRUNNLAG",
+            TILLEGGSTØNADER_KØ_NAVN,
             KravgrunnlagGenerator.forTillegstønader(
                 fødselsnummer = fnr,
                 fagsystemId = fagsystemId,
@@ -88,16 +79,7 @@ class TilleggstønaderE2ETest : TilbakekrevingE2EBase() {
         utførSteg(
             ident = "Z999999",
             behandlingId = behandlingId,
-            stegData = BehandlingsstegFaktaDto(
-                feilutbetaltePerioder = listOf(
-                    FaktaFeilutbetalingsperiodeDto(
-                        periode = 1.januar(2021) til 1.januar(2021),
-                        hendelsestype = Hendelsestype.ANNET,
-                        hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
-                    ),
-                ),
-                begrunnelse = "Begrunnelse",
-            ),
+            stegData = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(1.januar(2021) til 1.januar(2021)),
         )
 
         behandling(behandlingId) kanBehandle Behandlingssteg.FORELDELSE
@@ -106,17 +88,7 @@ class TilleggstønaderE2ETest : TilbakekrevingE2EBase() {
         utførSteg(
             ident = "Z999999",
             behandlingId = behandlingId,
-            stegData = BehandlingsstegForeldelseDto(
-                foreldetPerioder = listOf(
-                    ForeldelsesperiodeDto(
-                        periode = 1.januar(2021) til 1.januar(2021),
-                        begrunnelse = "Utbetalingen er ikke foreldet",
-                        foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_FORELDET,
-                        foreldelsesfrist = null,
-                        oppdagelsesdato = null,
-                    ),
-                ),
-            ),
+            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(1.januar(2021) til 1.januar(2021)),
         )
 
         behandling(behandlingId) kanBehandle Behandlingssteg.VILKÅRSVURDERING
@@ -125,27 +97,7 @@ class TilleggstønaderE2ETest : TilbakekrevingE2EBase() {
         utførSteg(
             ident = "Z999999",
             behandlingId = behandlingId,
-            stegData = BehandlingsstegVilkårsvurderingDto(
-                vilkårsvurderingsperioder = listOf(
-                    VilkårsvurderingsperiodeDto(
-                        periode = 1.januar(2021) til 1.januar(2021),
-                        vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
-                        begrunnelse = "Jepp",
-                        godTroDto = null,
-                        aktsomhetDto = AktsomhetDto(
-                            aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
-                            ileggRenter = false,
-                            andelTilbakekreves = null,
-                            beløpTilbakekreves = null,
-                            begrunnelse = "Jaha",
-                            særligeGrunner = emptyList(),
-                            særligeGrunnerTilReduksjon = false,
-                            tilbakekrevSmåbeløp = true,
-                            særligeGrunnerBegrunnelse = "Særlige grunner",
-                        ),
-                    ),
-                ),
-            ),
+            stegData = BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving(1.januar(2021) til 1.januar(2021)),
         )
 
         behandling(behandlingId) kanBehandle Behandlingssteg.FORESLÅ_VEDTAK
@@ -154,12 +106,7 @@ class TilleggstønaderE2ETest : TilbakekrevingE2EBase() {
         utførSteg(
             ident = "Z999999",
             behandlingId = behandlingId,
-            stegData = BehandlingsstegForeslåVedtaksstegDto(
-                fritekstavsnitt = FritekstavsnittDto(
-                    oppsummeringstekst = null,
-                    perioderMedTekst = emptyList(),
-                ),
-            ),
+            stegData = BehandlingsstegGenerator.lagForeslåVedtakVurdering(),
         )
         behandling(behandlingId) kanBehandle Behandlingssteg.FATTE_VEDTAK
         behandling(behandlingId) avventerBehandling Behandlingssteg.IVERKSETT_VEDTAK
@@ -167,14 +114,7 @@ class TilleggstønaderE2ETest : TilbakekrevingE2EBase() {
         utførSteg(
             ident = "Z111111",
             behandlingId = behandlingId,
-            stegData = BehandlingsstegFatteVedtaksstegDto(
-                totrinnsvurderinger = listOf(
-                    VurdertTotrinnDto(behandlingssteg = Behandlingssteg.FAKTA, godkjent = true, begrunnelse = null),
-                    VurdertTotrinnDto(behandlingssteg = Behandlingssteg.FORELDELSE, godkjent = true, begrunnelse = null),
-                    VurdertTotrinnDto(behandlingssteg = Behandlingssteg.VILKÅRSVURDERING, godkjent = true, begrunnelse = null),
-                    VurdertTotrinnDto(behandlingssteg = Behandlingssteg.FORESLÅ_VEDTAK, godkjent = true, begrunnelse = null),
-                ),
-            ),
+            stegData = BehandlingsstegGenerator.lagGodkjennVedtakVurdering(),
         )
         oppdragClient.shouldHaveIverksettelse(behandlingId) { vedtak ->
             vedtak.vedtakId shouldBe BigInteger(vedtakId)
@@ -213,5 +153,49 @@ class TilleggstønaderE2ETest : TilbakekrevingE2EBase() {
                 }
             }
         }
+    }
+
+    @Test
+    fun `revurdering av vedtak med full utbetaling fører til ingen tilbakekreving`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        sendKravgrunnlagOgAvventLesing(
+            queueName = TILLEGGSTØNADER_KØ_NAVN,
+            kravgrunnlag = KravgrunnlagGenerator.forTillegstønader(
+                fagsystemId = fagsystemId,
+            ),
+        )
+
+        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+
+        utførSteg(ident = "Z999999", behandlingId = behandlingId, stegData = BehandlingsstegGenerator.lagFaktastegVurderingFritekst())
+        utførSteg(ident = "Z999999", behandlingId = behandlingId, stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering())
+        utførSteg(ident = "Z999999", behandlingId = behandlingId, stegData = BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving())
+        utførSteg(ident = "Z999999", behandlingId = behandlingId, stegData = BehandlingsstegGenerator.lagForeslåVedtakVurdering())
+        utførSteg(ident = "Z111111", behandlingId = behandlingId, stegData = BehandlingsstegGenerator.lagGodkjennVedtakVurdering())
+
+        oppdragClient.shouldHaveIverksettelse(behandlingId) { vedtak ->
+            vedtak.tilbakekrevingsperiode shouldHaveSize 1
+            val tilbakekrevingsperiode = vedtak.tilbakekrevingsperiode.single()
+            tilbakekrevingsperiode.tilbakekrevingsbelop shouldHaveSize 2
+            tilbakekrevingsperiode.tilbakekrevingsbelop.forOne { beløp ->
+                beløp.kodeResultat shouldBe "FULL_TILBAKEKREV"
+            }
+        }
+
+        val exception = shouldThrow<UtenforScopeException> {
+            behandlingController.opprettRevurdering(
+                OpprettRevurderingDto(
+                    YtelsestypeDTO.TILLEGGSTØNADER,
+                    behandlingId,
+                    Behandlingsårsakstype.REVURDERING_KLAGE_KA,
+                ),
+            )
+        }
+
+        exception.utenforScope shouldBe UtenforScope.Revurdering
+    }
+
+    companion object {
+        const val TILLEGGSTØNADER_KØ_NAVN = "LOCAL_TILLEGGSSTONADER.KRAVGRUNNLAG"
     }
 }
