@@ -147,6 +147,7 @@ class PdlClientImpl(
             FagsystemDTO.EF -> Tema.ENF
             FagsystemDTO.KONT -> Tema.KON
             FagsystemDTO.BA -> Tema.BAR
+            FagsystemDTO.TS -> Tema.TSO
             else -> error("Ugyldig fagsystem=${fagsystem.name}")
         }
 }
