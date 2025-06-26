@@ -32,11 +32,13 @@ class PdlClientMock : PdlClient {
         logContext: SecureLog.Context,
     ): Personinfo {
         hentPersoninfoHitsInternal.add(PersoninfoHit(ident, fagsystem))
-        val identerDødePersoner = listOf("doed1234")
-        val dødsdato = if (identerDødePersoner.contains(ident)) {
+        val dødsdato = if (ident == "doed1234") {
             LocalDate.of(2022, 4, 1)
         } else {
             null
+        }
+        if (ident.startsWith("feil")) {
+            throw Exception("Tvungen feil for testing")
         }
         return Personinfo(
             ident = ident,

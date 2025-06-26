@@ -1,6 +1,8 @@
 package no.nav.tilbakekreving.e2e
 
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import no.nav.tilbakekreving.TilbakekrevingRepository
 import no.nav.tilbakekreving.april
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.NyKlassekode
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp
@@ -8,18 +10,26 @@ import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp.Com
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagMediator
 import no.nav.tilbakekreving.mai
 import no.nav.tilbakekreving.mars
 import no.nav.tilbakekreving.util.kroner
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
 
 class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
+    @Autowired
+    private lateinit var tilbakekrevingRepository: TilbakekrevingRepository
+
+    @Autowired
+    private lateinit var kravgrunnlagMediator: KravgrunnlagMediator
+
     @Test
     fun `kan lese kravgrunnlag for tilleggstønader`() {
         val fagsystemId = UUID.randomUUID().toString()
         sendKravgrunnlagOgAvventLesing(
-            "LOCAL_TILLEGGSSTONADER.KRAVGRUNNLAG",
+            QUEUE_NAME,
             KravgrunnlagGenerator.forTillegstønader(
                 fagsystemId = fagsystemId,
                 perioder = listOf(
@@ -59,5 +69,19 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
 
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId)
         tilbakekreving.shouldNotBeNull()
+    }
+
+    @Test
+    fun `lagrer bare en gang dersom noe feiler under håndtering av kravgrunnlag`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        sendKravgrunnlagOgAvventLesing(QUEUE_NAME, KravgrunnlagGenerator.forTillegstønader(fagsystemId = fagsystemId, fødselsnummer = "feil1234567"))
+
+        kravgrunnlagMediator.lesKravgrunnlag()
+
+        tilbakekrevingRepository.hentAlleTilbakekrevinger()?.count { it.eksternFagsak.eksternId == fagsystemId } shouldBe 1
+    }
+
+    companion object {
+        const val QUEUE_NAME = "LOCAL_TILLEGGSSTONADER.KRAVGRUNNLAG"
     }
 }

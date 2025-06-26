@@ -18,6 +18,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
+import no.nav.tilbakekreving.behov.Behov
 import no.nav.tilbakekreving.behov.BrukerinfoBehov
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
 import no.nav.tilbakekreving.behov.IverksettelseBehov
@@ -56,7 +57,7 @@ class TilbakekrevingService(
 
         val logContext = SecureLog.Context.fra(tilbakekreving)
         logger.medContext(logContext) { info("Lagrer tilbakekreving") }
-        lagre(observatør, tilbakekreving)
+        lagre(tilbakekreving)
 
         logger.medContext(logContext) { info("Håndterer behov") }
         sjekkBehovOgHåndter(tilbakekreving, observatør, SecureLog.Context.fra(tilbakekreving))
@@ -91,14 +92,13 @@ class TilbakekrevingService(
             ?.fraEntity(observatør)
             ?.let { tilbakekreving ->
                 val resultat = håndter(tilbakekreving)
-                lagre(observatør, tilbakekreving)
+                lagre(tilbakekreving)
                 sjekkBehovOgHåndter(tilbakekreving, observatør, SecureLog.Context.fra(tilbakekreving))
                 resultat
             }
     }
 
     fun lagre(
-        observatør: Observatør,
         tilbakekreving: Tilbakekreving,
     ) {
         tilbakekrevingRepository.lagre(
@@ -114,53 +114,68 @@ class TilbakekrevingService(
         logContext: SecureLog.Context,
     ) {
         while (observatør.harUbesvarteBehov()) {
-            val behov = observatør.nesteBehov()
-            when (behov) {
-                is BrukerinfoBehov -> {
-                    val personinfo = pdlClient.hentPersoninfo(
-                        ident = behov.ident,
-                        fagsystem = behov.ytelse.tilFagsystemDTO(),
-                        logContext = SecureLog.Context.fra(tilbakekreving),
-                    )
-                    tilbakekreving.håndter(
-                        BrukerinfoHendelse(
-                            ident = personinfo.ident,
-                            fødselsdato = personinfo.fødselsdato,
-                            navn = personinfo.navn,
-                            kjønn = when (personinfo.kjønn) {
-                                PdlKjønnType.MANN -> Kjønn.MANN
-                                PdlKjønnType.KVINNE -> Kjønn.KVINNE
-                                PdlKjønnType.UKJENT -> Kjønn.UKJENT
-                            },
-                            dødsdato = personinfo.dødsdato,
-                        ),
-                    )
+            try {
+                val behov = observatør.nesteBehov()
+                håndterBehov(tilbakekreving, behov, logContext)
+                lagre(tilbakekreving)
+            } catch (e: Exception) {
+                logger.medContext(logContext) {
+                    warn("Feilet under håndtering av behov", e)
                 }
-
-                is VarselbrevBehov -> {
-                    tilbakekreving.håndter(
-                        VarselbrevSendtHendelse(
-                            Varselbrev.opprett(varsletBeløp = 2000L),
-                        ),
-                    )
-                }
-
-                is FagsysteminfoBehov -> {
-                    tilbakekreving.håndter(
-                        FagsysteminfoHendelse(
-                            behandlingId = UUID.randomUUID().toString(),
-                            ident = fnr,
-                            revurderingsresultat = "revurderingsresultat",
-                            revurderingsårsak = "revurderingsårsak",
-                            begrunnelseForTilbakekreving = "begrunnelseForTilbakekreving",
-                            revurderingsvedtaksdato = LocalDate.now(),
-                        ),
-                    )
-                }
-
-                is IverksettelseBehov -> iverksettService.iverksett(behov, logContext)
+                break
             }
-            lagre(observatør, tilbakekreving)
+        }
+    }
+
+    private fun håndterBehov(
+        tilbakekreving: Tilbakekreving,
+        behov: Behov,
+        logContext: SecureLog.Context,
+    ) {
+        when (behov) {
+            is BrukerinfoBehov -> {
+                val personinfo = pdlClient.hentPersoninfo(
+                    ident = behov.ident,
+                    fagsystem = behov.ytelse.tilFagsystemDTO(),
+                    logContext = SecureLog.Context.fra(tilbakekreving),
+                )
+                tilbakekreving.håndter(
+                    BrukerinfoHendelse(
+                        ident = personinfo.ident,
+                        fødselsdato = personinfo.fødselsdato,
+                        navn = personinfo.navn,
+                        kjønn = when (personinfo.kjønn) {
+                            PdlKjønnType.MANN -> Kjønn.MANN
+                            PdlKjønnType.KVINNE -> Kjønn.KVINNE
+                            PdlKjønnType.UKJENT -> Kjønn.UKJENT
+                        },
+                        dødsdato = personinfo.dødsdato,
+                    ),
+                )
+            }
+
+            is VarselbrevBehov -> {
+                tilbakekreving.håndter(
+                    VarselbrevSendtHendelse(
+                        Varselbrev.opprett(varsletBeløp = 2000L),
+                    ),
+                )
+            }
+
+            is FagsysteminfoBehov -> {
+                tilbakekreving.håndter(
+                    FagsysteminfoHendelse(
+                        behandlingId = UUID.randomUUID().toString(),
+                        ident = fnr,
+                        revurderingsresultat = "revurderingsresultat",
+                        revurderingsårsak = "revurderingsårsak",
+                        begrunnelseForTilbakekreving = "begrunnelseForTilbakekreving",
+                        revurderingsvedtaksdato = LocalDate.now(),
+                    ),
+                )
+            }
+
+            is IverksettelseBehov -> iverksettService.iverksett(behov, logContext)
         }
     }
 
