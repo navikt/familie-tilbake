@@ -41,6 +41,17 @@ class FagsakController(
         @PathVariable fagsystem: FagsystemDTO,
         @PathVariable eksternFagsakId: String,
     ): Ressurs<FagsakDto> {
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(fagsystem, eksternFagsakId)
+        if (tilbakekreving != null) {
+            tilgangskontrollService.validerTilgangTilbakekreving(
+                tilbakekreving = tilbakekreving,
+                behandlingId = null,
+                minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+                auditLoggerEvent = AuditLoggerEvent.ACCESS,
+                handling = "Henter fagsak informasjon med bruker og behandlinger",
+            )
+            return Ressurs.success(tilbakekreving.tilFrontendDto())
+        }
         tilgangskontrollService.validerTilgangFagsystemOgFagsakId(
             fagsystem = fagsystem,
             eksternFagsakId = eksternFagsakId,
@@ -48,10 +59,6 @@ class FagsakController(
             auditLoggerEvent = AuditLoggerEvent.ACCESS,
             handling = "Henter fagsak informasjon med bruker og behandlinger",
         )
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(fagsystem, eksternFagsakId)
-        if (tilbakekreving != null) {
-            return Ressurs.success(tilbakekreving.tilFrontendDto())
-        }
         return Ressurs.success(fagsakService.hentFagsak(Fagsystem.forDTO(fagsystem), eksternFagsakId))
     }
 
