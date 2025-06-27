@@ -72,9 +72,11 @@ class TilbakekrevingService(
         if (!applicationProperties.toggles.nyModellEnabled) return null
 
         val tilbakekrevinger = tilbakekrevingRepository.hentAlleTilbakekrevinger()?.map { it.fraEntity(Observatør()) }
-        return tilbakekrevinger?.map { it }?.firstOrNull {
-            it.tilFrontendDto().fagsystem == fagsystem && it.tilFrontendDto().eksternFagsakId == eksternFagsakId
-        }
+        return tilbakekrevinger
+            ?.onEach { logger.medContext(SecureLog.Context.fra(it)) { info("Sjekker om tilbakekreving er lik {}, {}", fagsystem, eksternFagsakId) } }
+            ?.firstOrNull {
+                it.tilFrontendDto().fagsystem == fagsystem && it.tilFrontendDto().eksternFagsakId == eksternFagsakId
+            }
     }
 
     fun hentTilbakekreving(behandlingId: UUID): Tilbakekreving? {
