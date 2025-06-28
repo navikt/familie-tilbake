@@ -1,5 +1,7 @@
 package no.nav.familie.tilbake.beregning
 
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import no.nav.tilbakekreving.beregning.Reduksjon
@@ -9,18 +11,18 @@ import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering
 
-class VilkårsvurderingsperiodeAdapter(private val vurdering: Vilkårsvurderingsperiode) : VilkårsvurdertPeriodeAdapter {
-    override fun periode(): Datoperiode {
-        return vurdering.periode.toDatoperiode()
-    }
+class VilkårsvurderingsperiodeAdapter(
+    private val vurdering: Vilkårsvurderingsperiode,
+) : VilkårsvurdertPeriodeAdapter {
+    override fun periode(): Datoperiode = vurdering.periode.toDatoperiode()
 
     override fun renter(): Boolean {
         val aktsomhet = vurdering.aktsomhet ?: return false
         return aktsomhet.aktsomhet == Aktsomhet.FORSETT && aktsomhet.ileggRenter ?: true || aktsomhet.ileggRenter ?: false
     }
 
-    override fun reduksjon(): Reduksjon {
-        return when {
+    override fun reduksjon(): Reduksjon =
+        when {
             vurdering.aktsomhet?.tilbakekrevSmåbeløp == false -> Reduksjon.IngenTilbakekreving()
             vurdering.aktsomhet != null -> {
                 vurdering.aktsomhet.manueltSattBeløp?.let(Reduksjon::ManueltBeløp)
@@ -32,9 +34,8 @@ class VilkårsvurderingsperiodeAdapter(private val vurdering: Vilkårsvurderings
                     false -> Reduksjon.IngenTilbakekreving()
                 }
             }
-            else -> error("Vurdering mangler vurdering av aktsomhet og god tro. Kan ikke beregne reduksjon.")
+            else -> throw Feil("Vurdering mangler vurdering av aktsomhet og god tro. Kan ikke beregne reduksjon.", logContext = SecureLog.Context.tom())
         }
-    }
 
     private fun finnAndelForAktsomhet(aktsomhet: VilkårsvurderingAktsomhet): Reduksjon =
         if (Aktsomhet.SIMPEL_UAKTSOMHET == aktsomhet.aktsomhet && !aktsomhet.tilbakekrevSmåbeløp) {
@@ -45,11 +46,10 @@ class VilkårsvurderingsperiodeAdapter(private val vurdering: Vilkårsvurderings
             Reduksjon.Prosentdel(aktsomhet.andelTilbakekreves ?: error("Særlige grunner til reduksjon er satt, men andel mangler."))
         }
 
-    override fun vurdering(): Vurdering {
-        return when {
+    override fun vurdering(): Vurdering =
+        when {
             vurdering.aktsomhet != null -> vurdering.aktsomhet.aktsomhet
             vurdering.godTro != null -> AnnenVurdering.GOD_TRO
             else -> throw IllegalArgumentException("Vurdering skal peke til GodTro-entiet eller Aktsomhet-entitet")
         }
-    }
 }
