@@ -38,6 +38,7 @@ import no.nav.tilbakekreving.tilstand.Start
 import no.nav.tilbakekreving.tilstand.Tilstand
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.tilbakekreving.tilstand.IverksettVedtak
 
 class Tilbakekreving internal constructor(
     val id: UUID,
@@ -155,7 +156,11 @@ class Tilbakekreving internal constructor(
         behandlingssteg: Behandlingssteg,
         vurdering: FatteVedtakSteg.Vurdering,
     ) {
-        behandlingHistorikk.nåværende().entry.håndter(this, beslutter, behandlingssteg, vurdering)
+        val behandling = behandlingHistorikk.nåværende().entry
+        behandling.håndter(beslutter, behandlingssteg, vurdering)
+        if (behandling.kanUtbetales()) {
+            byttTilstand(IverksettVedtak)
+        }
     }
 
     fun håndter(

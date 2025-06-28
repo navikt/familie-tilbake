@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.behandling
 
+import java.time.LocalDate
 import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
@@ -43,6 +44,8 @@ import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.tilstand.IverksettVedtak
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.tilbakekreving.feil.UgyldigOperasjonException
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 
 class Behandling internal constructor(
     override val internId: UUID,
@@ -60,6 +63,7 @@ class Behandling internal constructor(
     private val vilkårsvurderingsteg: Vilkårsvurderingsteg,
     private val foreslåVedtakSteg: ForeslåVedtakSteg,
     private val fatteVedtakSteg: FatteVedtakSteg,
+    private var påVent: PåVent?,
 ) : Historikk.HistorikkInnslag<UUID>, FrontendDto<BehandlingDto> {
     val faktastegDto: FrontendDto<FaktaFeilutbetalingDto> get() = faktasteg
     val foreldelsestegDto: FrontendDto<VurdertForeldelseDto> get() = foreldelsesteg
@@ -86,6 +90,7 @@ class Behandling internal constructor(
             vilkårsvurderingstegEntity = vilkårsvurderingsteg.tilEntity(),
             foreslåVedtakStegEntity = foreslåVedtakSteg.tilEntity(),
             fatteVedtakStegEntity = fatteVedtakSteg.tilEntity(),
+            påVentEntity = påVent?.tilEntity(),
         )
     }
 
@@ -181,7 +186,7 @@ class Behandling internal constructor(
             resultatstype = null,
             ansvarligSaksbehandler = ansvarligSaksbehandler.ident,
             ansvarligBeslutter = fatteVedtakSteg.ansvarligBeslutter?.ident,
-            erBehandlingPåVent = false,
+            erBehandlingPåVent = påVent != null,
             kanHenleggeBehandling = false,
             kanRevurderingOpprettes = true,
             harVerge = false,
@@ -222,6 +227,7 @@ class Behandling internal constructor(
         behandler: Behandler,
         vurdering: FaktaFeilutbetalingsperiodeDto,
     ) {
+        validerBehandlingstatus(håndtertSteg = "fakta")
         this.ansvarligSaksbehandler = behandler
         faktasteg.behandleFakta(vurdering)
     }
@@ -231,6 +237,7 @@ class Behandling internal constructor(
         periode: Datoperiode,
         vurdering: Vilkårsvurderingsteg.Vurdering,
     ) {
+        validerBehandlingstatus("vilkårsvurdering")
         this.ansvarligSaksbehandler = behandler
         vilkårsvurderingsteg.vurder(periode, vurdering)
     }
@@ -240,6 +247,7 @@ class Behandling internal constructor(
         periode: Datoperiode,
         vurdering: Foreldelsesteg.Vurdering,
     ) {
+        validerBehandlingstatus("foreldelse")
         this.ansvarligSaksbehandler = behandler
         foreldelsesteg.vurderForeldelse(periode, vurdering)
     }
@@ -248,20 +256,18 @@ class Behandling internal constructor(
         behandler: Behandler,
         vurdering: ForeslåVedtakSteg.Vurdering,
     ) {
+        validerBehandlingstatus("vedtaksforslag")
         this.ansvarligSaksbehandler = behandler
         foreslåVedtakSteg.håndter(vurdering)
     }
 
     internal fun håndter(
-        tilbakekreving: Tilbakekreving,
         beslutter: Behandler,
         behandlingssteg: Behandlingssteg,
         vurdering: FatteVedtakSteg.Vurdering,
     ) {
+        validerBehandlingstatus("behandlingsutfall")
         fatteVedtakSteg.håndter(beslutter, ansvarligSaksbehandler, behandlingssteg, vurdering)
-        if (fatteVedtakSteg.erFullstending()) {
-            tilbakekreving.byttTilstand(IverksettVedtak)
-        }
     }
 
     internal fun håndter(
@@ -287,6 +293,28 @@ class Behandling internal constructor(
         brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
     }
 
+    fun settPåVent(
+        årsak: Venteårsak,
+        utløpsdato: LocalDate,
+        begrunnelse: String?
+    ) {
+        påVent = PåVent(
+            årsak = årsak,
+            utløpsdato = utløpsdato,
+            begrunnelse = begrunnelse,
+        )
+    }
+
+    fun taAvVent() {
+        påVent = null
+    }
+
+    private fun validerBehandlingstatus(håndtertSteg: String) {
+        if (påVent != null) {
+            throw UgyldigOperasjonException("Behandling er satt på vent. Kan ikke håndtere $håndtertSteg.")
+        }
+    }
+
     fun aktiverBrevmottakerSteg() = brevmottakerSteg.aktiverSteg()
 
     fun deaktiverBrevmottakerSteg() = brevmottakerSteg.deaktiverSteg()
@@ -306,6 +334,8 @@ class Behandling internal constructor(
             brevHistorikk = brevHistorikk,
         )
     }
+
+    fun kanUtbetales(): Boolean = fatteVedtakSteg.erFullstending()
 
     companion object {
         fun nyBehandling(
@@ -342,6 +372,7 @@ class Behandling internal constructor(
                 vilkårsvurderingsteg = vilkårsvurderingsteg,
                 foreslåVedtakSteg = foreslåVedtakSteg,
                 fatteVedtakSteg = fatteVedtakSteg,
+                påVent = null,
             )
         }
     }
