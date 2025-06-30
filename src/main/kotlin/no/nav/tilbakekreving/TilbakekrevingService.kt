@@ -26,6 +26,7 @@ import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
+import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.kontrakter.brev.MottakerType
@@ -44,7 +45,7 @@ class TilbakekrevingService(
     private val iverksettService: IverksettService,
     private val tilbakekrevingRepository: TilbakekrevingRepository,
 ) {
-    private val fnr = "20046912345"
+    private val aktør = KravgrunnlagHendelse.Aktør.Person(ident = "20046912345")
     private val logger = TracedLogger.getLogger<TilbakekrevingService>()
 
     fun opprettTilbakekreving(
@@ -164,7 +165,7 @@ class TilbakekrevingService(
                 tilbakekreving.håndter(
                     FagsysteminfoHendelse(
                         behandlingId = UUID.randomUUID().toString(),
-                        ident = fnr,
+                        aktør = aktør,
                         revurderingsresultat = "revurderingsresultat",
                         revurderingsårsak = "revurderingsårsak",
                         begrunnelseForTilbakekreving = "begrunnelseForTilbakekreving",
@@ -371,7 +372,7 @@ class TilbakekrevingService(
     private fun validerBrevmottaker(tilbakekreving: Tilbakekreving) {
         val behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.internId
 
-        val personIdenter = listOfNotNull(tilbakekreving.bruker!!.ident)
+        val personIdenter = listOfNotNull(tilbakekreving.bruker!!.aktør.ident)
         if (personIdenter.isEmpty()) return
         val strengtFortroligePersonIdenter =
             pdlClient.hentAdressebeskyttelseBolk(personIdenter, tilbakekreving.hentFagsysteminfo().tilFagsystemDTO(), SecureLog.Context.fra(tilbakekreving))

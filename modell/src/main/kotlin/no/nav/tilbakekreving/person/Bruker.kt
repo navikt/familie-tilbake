@@ -6,13 +6,14 @@ import no.nav.tilbakekreving.behov.BrukerinfoBehov
 import no.nav.tilbakekreving.entities.BrukerEntity
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
+import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.bruker.FrontendBrukerDto
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import java.time.LocalDate
 
 class Bruker(
-    val ident: String,
+    val aktør: KravgrunnlagHendelse.Aktør,
     var språkkode: Språkkode? = null,
     private var navn: String? = null,
     private var fødselsdato: LocalDate? = null,
@@ -21,7 +22,7 @@ class Bruker(
 ) : FrontendDto<FrontendBrukerDto> {
     override fun tilFrontendDto(): FrontendBrukerDto {
         return FrontendBrukerDto(
-            personIdent = ident,
+            personIdent = aktør.ident,
             navn = navn ?: "Ukjent",
             fødselsdato = fødselsdato,
             kjønn = kjønn ?: Kjønn.UKJENT,
@@ -35,7 +36,7 @@ class Bruker(
     ) {
         behovObservatør.håndter(
             BrukerinfoBehov(
-                ident = ident,
+                ident = aktør.ident,
                 ytelse = ytelse,
             ),
         )
@@ -43,7 +44,7 @@ class Bruker(
 
     fun tilEntity(): BrukerEntity {
         return BrukerEntity(
-            ident = ident,
+            aktørEntity = aktør.tilEntity(),
             språkkode = språkkode,
             navn = navn,
             fødselsdato = fødselsdato,

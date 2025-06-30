@@ -63,8 +63,8 @@ class KravgrunnlagHendelse(
             vedtakId = vedtakId,
             kravstatuskode = kravstatuskode,
             fagsystemVedtaksdato = fagsystemVedtaksdato,
-            vedtakGjelder = tilAktørEntity(vedtakGjelder),
-            utbetalesTil = tilAktørEntity(utbetalesTil),
+            vedtakGjelder = vedtakGjelder.tilEntity(),
+            utbetalesTil = utbetalesTil.tilEntity(),
             skalBeregneRenter = skalBeregneRenter,
             ansvarligEnhet = ansvarligEnhet,
             kontrollfelt = kontrollfelt,
@@ -72,13 +72,6 @@ class KravgrunnlagHendelse(
             referanse = referanse,
             perioder = perioder.map { it.tilEntity() },
         )
-    }
-
-    private fun tilAktørEntity(aktør: Aktør): AktørEntity = when (aktør) {
-        is Aktør.Person -> AktørEntity(AktørType.Person, aktør.ident)
-        is Aktør.Organisasjon -> AktørEntity(AktørType.Organisasjon, aktør.ident)
-        is Aktør.Samhandler -> AktørEntity(AktørType.Samhandler, aktør.ident)
-        is Aktør.Applikasjonsbruker -> AktørEntity(AktørType.Applikasjonsbruker, aktør.ident)
     }
 
     class Periode(
@@ -158,12 +151,30 @@ class KravgrunnlagHendelse(
     sealed interface Aktør {
         val ident: String
 
-        data class Person(override val ident: String) : Aktør
+        fun tilEntity(): AktørEntity
 
-        data class Organisasjon(override val ident: String) : Aktør
+        data class Person(override val ident: String) : Aktør {
+            override fun tilEntity(): AktørEntity {
+                return AktørEntity(AktørType.Person, ident)
+            }
+        }
 
-        data class Samhandler(override val ident: String) : Aktør
+        data class Organisasjon(override val ident: String) : Aktør {
+            override fun tilEntity(): AktørEntity {
+                return AktørEntity(AktørType.Organisasjon, ident)
+            }
+        }
 
-        data class Applikasjonsbruker(override val ident: String) : Aktør
+        data class Samhandler(override val ident: String) : Aktør {
+            override fun tilEntity(): AktørEntity {
+                return AktørEntity(AktørType.Samhandler, ident)
+            }
+        }
+
+        data class Applikasjonsbruker(override val ident: String) : Aktør {
+            override fun tilEntity(): AktørEntity {
+                return AktørEntity(AktørType.Applikasjonsbruker, ident)
+            }
+        }
     }
 }

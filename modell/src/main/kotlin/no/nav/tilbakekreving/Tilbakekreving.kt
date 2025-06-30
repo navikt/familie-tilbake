@@ -114,9 +114,9 @@ class Tilbakekreving internal constructor(
         )
     }
 
-    fun opprettBruker(ident: String) {
+    fun opprettBruker(aktør: KravgrunnlagHendelse.Aktør) {
         this.bruker = Bruker(
-            ident = ident,
+            aktør = aktør,
         )
     }
 
@@ -129,7 +129,11 @@ class Tilbakekreving internal constructor(
     }
 
     fun trengerIverksettelse() {
-        behandlingHistorikk.nåværende().entry.trengerIverksettelse(behovObservatør)
+        behandlingHistorikk.nåværende().entry.trengerIverksettelse(
+            behovObservatør,
+            ytelsestype = eksternFagsak.ytelse.tilYtelsestype(),
+            aktør = requireNotNull(bruker) { "Aktør kreves for Iverksettelse." }.aktør,
+        )
     }
 
     fun hentFagsysteminfo(): Ytelse {

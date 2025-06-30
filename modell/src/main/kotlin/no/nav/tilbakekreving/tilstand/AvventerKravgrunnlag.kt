@@ -20,7 +20,7 @@ object AvventerKravgrunnlag : Tilstand {
             else -> {
                 val eksternBehandling = tilbakekreving.eksternFagsak.lagreTomBehandling(kravgrunnlag.fagsystemVedtaksdato)
                 tilbakekreving.opprettBehandling(eksternBehandling, Behandler.Vedtaksløsning)
-                tilbakekreving.opprettBruker(kravgrunnlag.vedtakGjelder.ident)
+                tilbakekreving.opprettBruker(kravgrunnlag.vedtakGjelder)
                 tilbakekreving.byttTilstand(AvventerBrukerinfo)
             }
         }

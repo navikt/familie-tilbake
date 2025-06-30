@@ -1,7 +1,6 @@
 package no.nav.tilbakekreving.fagsystem
 
 import no.nav.tilbakekreving.entities.YtelseEntity
-import no.nav.tilbakekreving.entities.YtelseType
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 
@@ -12,6 +11,8 @@ sealed interface Ytelse {
 
     fun integrererMotFagsystem(): Boolean
 
+    fun tilYtelsestype(): Ytelsestype
+
     fun tilEntity(): YtelseEntity
 
     object Barnetrygd : Ytelse {
@@ -21,7 +22,9 @@ sealed interface Ytelse {
 
         override fun integrererMotFagsystem(): Boolean = true
 
-        override fun tilEntity(): YtelseEntity = YtelseEntity(YtelseType.BARNETRYGD)
+        override fun tilYtelsestype(): Ytelsestype = Ytelsestype.BARNETRYGD
+
+        override fun tilEntity(): YtelseEntity = YtelseEntity(Ytelsestype.BARNETRYGD)
     }
 
     object Tilleggsstønad : Ytelse {
@@ -31,6 +34,13 @@ sealed interface Ytelse {
 
         override fun integrererMotFagsystem(): Boolean = false
 
-        override fun tilEntity(): YtelseEntity = YtelseEntity(YtelseType.TILLEGGSSTØNAD)
+        override fun tilYtelsestype(): Ytelsestype = Ytelsestype.TILLEGGSSTØNAD
+
+        override fun tilEntity(): YtelseEntity = YtelseEntity(Ytelsestype.TILLEGGSSTØNAD)
     }
+}
+
+enum class Ytelsestype(val kode: String) {
+    BARNETRYGD("BA"),
+    TILLEGGSSTØNAD("TSO"),
 }
