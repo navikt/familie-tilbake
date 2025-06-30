@@ -6,6 +6,7 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
 import no.nav.familie.tilbake.kravgrunnlag.domain.KodeAksjon
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
+import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakResponse
 import no.nav.tilbakekreving.behov.IverksettelseBehov
 import no.nav.tilbakekreving.beregning.delperiode.Delperiode
 import no.nav.tilbakekreving.beregning.delperiode.Foreldet
@@ -20,6 +21,8 @@ import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.Tilbakekrevingsperi
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsvedtakDto
 import no.nav.tilbakekreving.typer.v1.PeriodeDto
 import no.nav.tilbakekreving.typer.v1.TypeKlasseDto
+import no.nav.tilbakekreving.vedtak.IverksattVedtak
+import no.nav.tilbakekreving.vedtak.IverksettRepository
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -28,28 +31,53 @@ import java.time.LocalDate
 @Service
 class IverksettService(
     private val kravgrunnlagBufferRepository: KravgrunnlagBufferRepository,
+    private val iverksettRepository: IverksettRepository,
     private val oppdragClient: OppdragClient,
 ) {
     fun iverksett(
         iverksettelseBehov: IverksettelseBehov,
         logContext: SecureLog.Context,
     ) {
+        val behandlingId = iverksettelseBehov.behandlingId
         val entity = kravgrunnlagBufferRepository.hentKravgrunnlag(iverksettelseBehov.kravgrunnlagId)
             ?: error("Fant ikke kravgrunnlag for $${iverksettelseBehov.kravgrunnlagId}")
         val kravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(entity.kravgrunnlag)
 
-        oppdragClient.iverksettVedtak(
-            behandlingId = iverksettelseBehov.behandlingId,
-            tilbakekrevingsvedtakRequest = lagIveksettelseRequest(
-                ansvarligSaksbehandler = iverksettelseBehov.ansvarligSaksbehandler,
-                kravgrunnlag = kravgrunnlag,
-                beregnetPerioder = iverksettelseBehov.delperioder,
-            ),
+        val request = lagIverksettelseRequest(
+            ansvarligSaksbehandler = iverksettelseBehov.ansvarligSaksbehandler,
+            kravgrunnlag = kravgrunnlag,
+            beregnetPerioder = iverksettelseBehov.delperioder,
+        )
+
+        val kvittering = oppdragClient.iverksettVedtak(
+            behandlingId = behandlingId,
+            tilbakekrevingsvedtakRequest = request,
             logContext = logContext,
         )
+
+        lagreIverksattVedtak(iverksettelseBehov, kravgrunnlag, request, kvittering)
     }
 
-    private fun lagIveksettelseRequest(
+    fun lagreIverksattVedtak(
+        iverksettelseBehov: IverksettelseBehov,
+        kravgrunnlag: DetaljertKravgrunnlagDto,
+        request: TilbakekrevingsvedtakRequest,
+        kvittering: TilbakekrevingsvedtakResponse,
+    ) {
+        val iverksattVedtak = IverksattVedtak(
+            behandlingId = iverksettelseBehov.behandlingId,
+            vedtakId = kravgrunnlag.vedtakId,
+            aktør = iverksettelseBehov.aktør.tilEntity(),
+            opprettetTid = kravgrunnlag.datoVedtakFagsystem,
+            ytelsestype = iverksettelseBehov.ytelsestype,
+            kvittering = kvittering.mmel.alvorlighetsgrad,
+            tilbakekrevingsperioder = request.tilbakekrevingsvedtak.tilbakekrevingsperiode,
+            behandlingstype = iverksettelseBehov.behandlingstype,
+        )
+        iverksettRepository.lagreIverksattVedtak(iverksattVedtak)
+    }
+
+    private fun lagIverksettelseRequest(
         ansvarligSaksbehandler: String,
         kravgrunnlag: DetaljertKravgrunnlagDto,
         beregnetPerioder: List<Delperiode<out Delperiode.Beløp>>,

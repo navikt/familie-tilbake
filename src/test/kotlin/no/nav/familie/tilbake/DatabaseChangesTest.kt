@@ -7,7 +7,7 @@ import java.nio.file.Paths
 class DatabaseChangesTest {
     companion object {
         // Denne knekker bygg med høyere db-versjon enn main. Oppdater kun når du er klar for å merge db-endringer.
-        const val MERGED_DB_VERSION = 44
+        const val MERGED_DB_VERSION = 45
     }
 
     /**

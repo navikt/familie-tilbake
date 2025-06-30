@@ -29,6 +29,7 @@ import no.nav.tilbakekreving.beregning.Beregning
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
 import no.nav.tilbakekreving.entities.BehandlingEntity
+import no.nav.tilbakekreving.fagsystem.Ytelsestype
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
@@ -144,7 +145,11 @@ class Behandling internal constructor(
         )
     }
 
-    fun trengerIverksettelse(behovObservatør: BehovObservatør) {
+    fun trengerIverksettelse(
+        behovObservatør: BehovObservatør,
+        ytelsestype: Ytelsestype,
+        aktør: KravgrunnlagHendelse.Aktør,
+    ) {
         val beregning = lagBeregning()
         val delperioder = beregning.beregn()
         behovObservatør.håndter(
@@ -153,6 +158,9 @@ class Behandling internal constructor(
                 kravgrunnlagId = kravgrunnlag.entry.kravgrunnlagId,
                 delperioder = delperioder,
                 ansvarligSaksbehandler = ansvarligSaksbehandler().ident,
+                ytelsestype = ytelsestype,
+                aktør = aktør,
+                behandlingstype = behandlingstype,
             ),
         )
     }

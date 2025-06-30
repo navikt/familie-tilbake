@@ -6,7 +6,7 @@ import no.nav.tilbakekreving.person.Bruker
 import java.time.LocalDate
 
 data class BrukerEntity(
-    val ident: String,
+    val aktørEntity: AktørEntity,
     var språkkode: Språkkode?,
     var navn: String?,
     var fødselsdato: LocalDate?,
@@ -15,7 +15,7 @@ data class BrukerEntity(
 ) {
     fun fraEntity(): Bruker {
         return Bruker(
-            ident = ident,
+            aktør = aktørEntity.fraEntity(),
             språkkode = språkkode,
             navn = navn,
             fødselsdato = fødselsdato,

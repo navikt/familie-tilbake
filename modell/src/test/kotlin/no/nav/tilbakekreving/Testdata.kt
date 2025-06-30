@@ -101,7 +101,7 @@ fun feilutbetalteBeløp() =
 fun fagsysteminfoHendelse() =
     FagsysteminfoHendelse(
         behandlingId = UUID.randomUUID().toString(),
-        ident = bruker().ident,
+        aktør = KravgrunnlagHendelse.Aktør.Person(bruker().ident),
         revurderingsårsak = "Revurderingsårsak",
         revurderingsresultat = "Revurderingsresultat",
         revurderingsvedtaksdato = LocalDate.now(),

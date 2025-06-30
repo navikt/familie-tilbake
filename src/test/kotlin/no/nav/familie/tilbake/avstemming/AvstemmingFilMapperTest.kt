@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
 
-class FilMapperTest {
+class AvstemmingFilMapperTest {
     @Test
     fun `tilFlatfil skal liste ut med forventet format for datoer og tall skal multipliseres med 100`() {
         val avstemmingsfil = FilMapper(listOf(testRad()))

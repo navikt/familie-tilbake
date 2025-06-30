@@ -3,7 +3,7 @@ package no.nav.tilbakekreving.hendelse
 import java.time.LocalDate
 
 data class FagsysteminfoHendelse(
-    val ident: String,
+    val aktør: KravgrunnlagHendelse.Aktør,
     val behandlingId: String,
     val revurderingsresultat: String,
     val revurderingsårsak: String,
