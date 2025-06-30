@@ -6,6 +6,7 @@ import no.nav.familie.tilbake.integration.pdl.internal.PdlKjønnType
 import no.nav.familie.tilbake.kontrakter.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFaktaDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFatteVedtaksstegDto
@@ -26,7 +27,6 @@ import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
-import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.kontrakter.brev.MottakerType
@@ -45,7 +45,7 @@ class TilbakekrevingService(
     private val iverksettService: IverksettService,
     private val tilbakekrevingRepository: TilbakekrevingRepository,
 ) {
-    private val aktør = KravgrunnlagHendelse.Aktør.Person(ident = "20046912345")
+    private val aktør = Aktør.Person(ident = "20046912345")
     private val logger = TracedLogger.getLogger<TilbakekrevingService>()
 
     fun opprettTilbakekreving(

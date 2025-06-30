@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.behandling
 
 import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.Tilbakekreving
+import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegsinfoDto
 import no.nav.tilbakekreving.api.v1.dto.BeregnetPeriodeDto
@@ -148,7 +149,7 @@ class Behandling internal constructor(
     fun trengerIverksettelse(
         behovObservatør: BehovObservatør,
         ytelsestype: Ytelsestype,
-        aktør: KravgrunnlagHendelse.Aktør,
+        aktør: Aktør,
     ) {
         val beregning = lagBeregning()
         val delperioder = beregning.beregn()

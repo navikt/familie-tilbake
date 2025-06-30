@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving
 
+import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.api.v2.BrukerDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.Behandling
@@ -45,8 +46,8 @@ fun opprettTilbakekrevingHendelse(
 )
 
 fun kravgrunnlag(
-    vedtakGjelder: KravgrunnlagHendelse.Aktør = KravgrunnlagHendelse.Aktør.Person(bruker().ident),
-    utbetalesTil: KravgrunnlagHendelse.Aktør = KravgrunnlagHendelse.Aktør.Person(bruker().ident),
+    vedtakGjelder: Aktør = Aktør.Person(bruker().ident),
+    utbetalesTil: Aktør = Aktør.Person(bruker().ident),
     perioder: List<KravgrunnlagHendelse.Periode> = listOf(kravgrunnlagPeriode()),
 ) = KravgrunnlagHendelse(
     internId = UUID.randomUUID(),
@@ -101,7 +102,7 @@ fun feilutbetalteBeløp() =
 fun fagsysteminfoHendelse() =
     FagsysteminfoHendelse(
         behandlingId = UUID.randomUUID().toString(),
-        aktør = KravgrunnlagHendelse.Aktør.Person(bruker().ident),
+        aktør = Aktør.Person(bruker().ident),
         revurderingsårsak = "Revurderingsårsak",
         revurderingsresultat = "Revurderingsresultat",
         revurderingsvedtaksdato = LocalDate.now(),
