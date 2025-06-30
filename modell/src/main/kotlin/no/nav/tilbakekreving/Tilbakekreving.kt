@@ -1,5 +1,8 @@
 package no.nav.tilbakekreving
 
+import no.nav.tilbakekreving.aktør.Aktør
+import no.nav.tilbakekreving.aktør.Bruker
+import no.nav.tilbakekreving.aktør.Bruker.Companion.tilNullableFrontendDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsoppsummeringDto
 import no.nav.tilbakekreving.api.v1.dto.FagsakDto
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingsperiodeDto
@@ -31,8 +34,6 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
-import no.nav.tilbakekreving.person.Bruker
-import no.nav.tilbakekreving.person.Bruker.Companion.tilNullableFrontendDto
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.tilstand.Start
 import no.nav.tilbakekreving.tilstand.Tilstand
@@ -114,7 +115,7 @@ class Tilbakekreving internal constructor(
         )
     }
 
-    fun opprettBruker(aktør: KravgrunnlagHendelse.Aktør) {
+    fun opprettBruker(aktør: Aktør) {
         this.bruker = Bruker(
             aktør = aktør,
         )

@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.kravgrunnlag
 
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
@@ -54,10 +55,10 @@ object KravgrunnlagMapper {
         typeGjelder: TypeGjelderDto,
         gjelderId: String,
     ) = when (typeGjelder) {
-        TypeGjelderDto.PERSON -> KravgrunnlagHendelse.Aktør.Person(gjelderId)
-        TypeGjelderDto.ORGANISASJON -> KravgrunnlagHendelse.Aktør.Organisasjon(gjelderId)
-        TypeGjelderDto.SAMHANDLER -> KravgrunnlagHendelse.Aktør.Samhandler(gjelderId)
-        TypeGjelderDto.APPBRUKER -> KravgrunnlagHendelse.Aktør.Applikasjonsbruker(gjelderId)
+        TypeGjelderDto.PERSON -> Aktør.Person(gjelderId)
+        TypeGjelderDto.ORGANISASJON -> Aktør.Organisasjon(gjelderId)
+        TypeGjelderDto.SAMHANDLER -> Aktør.Samhandler(gjelderId)
+        TypeGjelderDto.APPBRUKER -> Aktør.Applikasjonsbruker(gjelderId)
     }
 
     private fun Iterable<DetaljertKravgrunnlagBelopDto>.tilBeløp() = map {

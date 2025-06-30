@@ -1,8 +1,8 @@
 package no.nav.tilbakekreving.entities
 
+import no.nav.tilbakekreving.aktør.Bruker
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
-import no.nav.tilbakekreving.person.Bruker
 import java.time.LocalDate
 
 data class BrukerEntity(

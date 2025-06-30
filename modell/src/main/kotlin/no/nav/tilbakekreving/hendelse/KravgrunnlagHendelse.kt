@@ -1,10 +1,9 @@
 package no.nav.tilbakekreving.hendelse
 
 import no.nav.tilbakekreving.UtenforScope
+import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagAdapter
 import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagPeriodeAdapter
-import no.nav.tilbakekreving.entities.AktørEntity
-import no.nav.tilbakekreving.entities.AktørType
 import no.nav.tilbakekreving.entities.BeløpEntity
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.KravgrunnlagHendelseEntity
@@ -146,35 +145,5 @@ class KravgrunnlagHendelse(
         MANUELL("Manuell behandling"),
         NY("Nytt kravgrunnlag"),
         SPERRET("Kravgrunnlag sperret"),
-    }
-
-    sealed interface Aktør {
-        val ident: String
-
-        fun tilEntity(): AktørEntity
-
-        data class Person(override val ident: String) : Aktør {
-            override fun tilEntity(): AktørEntity {
-                return AktørEntity(AktørType.Person, ident)
-            }
-        }
-
-        data class Organisasjon(override val ident: String) : Aktør {
-            override fun tilEntity(): AktørEntity {
-                return AktørEntity(AktørType.Organisasjon, ident)
-            }
-        }
-
-        data class Samhandler(override val ident: String) : Aktør {
-            override fun tilEntity(): AktørEntity {
-                return AktørEntity(AktørType.Samhandler, ident)
-            }
-        }
-
-        data class Applikasjonsbruker(override val ident: String) : Aktør {
-            override fun tilEntity(): AktørEntity {
-                return AktørEntity(AktørType.Applikasjonsbruker, ident)
-            }
-        }
     }
 }

@@ -1,4 +1,4 @@
-package no.nav.tilbakekreving.person
+package no.nav.tilbakekreving.aktør
 
 import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.behov.BehovObservatør
@@ -6,14 +6,13 @@ import no.nav.tilbakekreving.behov.BrukerinfoBehov
 import no.nav.tilbakekreving.entities.BrukerEntity
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
-import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.bruker.FrontendBrukerDto
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import java.time.LocalDate
 
 class Bruker(
-    val aktør: KravgrunnlagHendelse.Aktør,
+    val aktør: Aktør,
     var språkkode: Språkkode? = null,
     private var navn: String? = null,
     private var fødselsdato: LocalDate? = null,
