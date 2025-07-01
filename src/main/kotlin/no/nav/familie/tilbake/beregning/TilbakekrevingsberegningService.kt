@@ -19,6 +19,7 @@ import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatsperiodeDto
 import no.nav.tilbakekreving.beregning.Beregning
 import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -31,7 +32,10 @@ class TilbakekrevingsberegningService(
     private val faktaFeilutbetalingService: FaktaFeilutbetalingService,
     private val logService: LogService,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     fun hentBeregningsresultat(behandlingId: UUID): BeregningsresultatDto {
+        logger.info("======>>>> hent beregningsresultat: $behandlingId")
         val beregningsresultat = beregn(behandlingId).oppsummer()
         val beregningsresultatsperioder = beregningsresultat.beregningsresultatsperioder.map {
             BeregningsresultatsperiodeDto(
@@ -45,12 +49,13 @@ class TilbakekrevingsberegningService(
             )
         }
         val vurderingAvBrukersUttalelse = faktaFeilutbetalingService.hentAktivFaktaOmFeilutbetaling(behandlingId)?.vurderingAvBrukersUttalelse
-
-        return BeregningsresultatDto(
+        val res = BeregningsresultatDto(
             beregningsresultatsperioder = beregningsresultatsperioder,
             vedtaksresultat = beregningsresultat.vedtaksresultat,
             vurderingAvBrukersUttalelse = FaktaFeilutbetalingMapper.tilDto(vurderingAvBrukersUttalelse),
         )
+        logger.info("========>>> Res: {${res.beregningsresultatsperioder.size}")
+        return res
     }
 
     fun beregn(behandlingId: UUID): Beregning {
@@ -68,6 +73,9 @@ class TilbakekrevingsberegningService(
                 .filter(Foreldelsesperiode::erForeldet)
                 .map { it.periode.toDatoperiode() }
         } ?: emptyList()
+        logger.info("=======>>>>> Beregn: $behandlingId")
+        logger.info("=======>>>>> Beregn: $behandlingId Vilkårsvurdering: $vilkårsvurdering")
+        logger.info("=======>>>>> Beregn: $behandlingId Foreldelse: $foreldelse")
 
         return Beregning(
             beregnRenter = skalBeregneRenter(kravgrunnlag.fagområdekode),
