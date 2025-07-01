@@ -31,8 +31,10 @@ data class BehandlingEntity(
         kravgrunnlagHistorikk: KravgrunnlagHistorikk,
         brevHistorikk: BrevHistorikk,
     ): Behandling {
+        // TODO: Ikke nåværende, men etter id fra entity
         val eksternFagsak = eksternFagsakBehandlingHistorikk.nåværende()
         val kravgrunnlag = kravgrunnlagHistorikk.nåværende()
+        val foreldelsessteg = foreldelsestegEntity.fraEntity(kravgrunnlag)
         return Behandling(
             internId = internId,
             eksternId = eksternId,
@@ -44,9 +46,9 @@ data class BehandlingEntity(
             ansvarligSaksbehandler = ansvarligSaksbehandlerEntity.fraEntity(),
             eksternFagsakBehandling = eksternFagsak,
             kravgrunnlag = kravgrunnlag,
-            foreldelsesteg = foreldelsestegEntity.fraEntity(kravgrunnlag),
+            foreldelsesteg = foreldelsessteg,
             faktasteg = faktastegEntity.fraEntity(eksternFagsak, kravgrunnlag, brevHistorikk),
-            vilkårsvurderingsteg = vilkårsvurderingstegEntity.fraEntity(kravgrunnlag),
+            vilkårsvurderingsteg = vilkårsvurderingstegEntity.fraEntity(kravgrunnlag, foreldelsessteg),
             foreslåVedtakSteg = foreslåVedtakStegEntity.fraEntity(),
             fatteVedtakSteg = fatteVedtakStegEntity.fraEntity(),
         )

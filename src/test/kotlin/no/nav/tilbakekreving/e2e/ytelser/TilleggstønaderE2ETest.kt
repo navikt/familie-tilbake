@@ -91,6 +91,8 @@ class TilleggstønaderE2ETest : TilbakekrevingE2EBase() {
             stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(1.januar(2021) til 1.januar(2021)),
         )
 
+        behandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto().perioder[0].foreldet shouldBe false
+
         behandling(behandlingId) kanBehandle Behandlingssteg.VILKÅRSVURDERING
         behandling(behandlingId) avventerBehandling Behandlingssteg.FORESLÅ_VEDTAK
 

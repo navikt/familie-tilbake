@@ -47,7 +47,6 @@ class Vilkårsvurderingsteg(
     fun tilEntity(): VilkårsvurderingstegEntity {
         return VilkårsvurderingstegEntity(
             vurderinger = vurderinger.map { it.tilEntity() },
-            foreldelsesteg = foreldelsesteg.tilEntity(),
         )
     }
 
