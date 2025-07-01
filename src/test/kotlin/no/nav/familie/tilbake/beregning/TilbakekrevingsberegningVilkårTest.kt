@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.beregning
 
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingGodTro
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
@@ -527,7 +528,7 @@ class TilbakekrevingsberegningVilkårTest {
         tilbakekrevingsbeløp: BigDecimal = BigDecimal.valueOf(10000),
     ): Beregningsresultatsperiode {
         return Vilkårsvurdert.opprett(
-            VilkårsvurderingsperiodeAdapter(vurdering = vilkårVurdering),
+            VilkårsvurderingsperiodeAdapter(logContext = SecureLog.Context.tom(), vurdering = vilkårVurdering),
             listOf(
                 object : KravgrunnlagPeriodeAdapter {
                     override fun periode(): Datoperiode = vilkårVurdering.periode.toDatoperiode()

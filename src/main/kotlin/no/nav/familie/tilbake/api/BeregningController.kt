@@ -12,7 +12,6 @@ import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.api.v1.dto.BeregnetPerioderDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
-import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -32,8 +31,6 @@ class BeregningController(
     private val tilgangskontrollService: TilgangskontrollService,
     private val tilbakekrevingService: TilbakekrevingService,
 ) {
-    private val logger = LoggerFactory.getLogger(this::class.java)
-
     @Operation(summary = "Beregn feilutbetalt beløp for nye delte perioder")
     @PostMapping(
         path = ["{behandlingId}/beregn/v1"],
@@ -91,7 +88,6 @@ class BeregningController(
             auditLoggerEvent = AuditLoggerEvent.ACCESS,
             handling = "Henter beregningsresultat",
         )
-        logger.info("======>>>> Controller hent beregningsresultat: $behandlingId")
         return Ressurs.success(tilbakekrevingsberegningService.hentBeregningsresultat(behandlingId))
     }
 }
