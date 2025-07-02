@@ -62,7 +62,7 @@ class TilbakekrevingsberegningService(
             .expectSingleOrNull(logContext) { "id=${it.id}, ${it.sporbar.opprettetTid}" }
         val foreldelse = vurdertForeldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
             .expectSingleOrNull(logContext) { "id=${it.id}, ${it.sporbar.opprettetTid}" }
-        val vilkårsvurderingAdapter = GammelVilkårsvurderingAdapter(vilkårsvurdering)
+        val vilkårsvurderingAdapter = GammelVilkårsvurderingAdapter(vilkårsvurdering, logContext)
         val foreldetPerioder = foreldelse?.let { vurdering ->
             vurdering.foreldelsesperioder
                 .filter(Foreldelsesperiode::erForeldet)

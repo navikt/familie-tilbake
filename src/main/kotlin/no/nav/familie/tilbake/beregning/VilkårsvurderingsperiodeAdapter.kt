@@ -1,5 +1,7 @@
 package no.nav.familie.tilbake.beregning
 
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import no.nav.tilbakekreving.beregning.Reduksjon
@@ -9,7 +11,10 @@ import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering
 
-class VilkårsvurderingsperiodeAdapter(private val vurdering: Vilkårsvurderingsperiode) : VilkårsvurdertPeriodeAdapter {
+class VilkårsvurderingsperiodeAdapter(
+    private val vurdering: Vilkårsvurderingsperiode,
+    private val logContext: SecureLog.Context,
+) : VilkårsvurdertPeriodeAdapter {
     override fun periode(): Datoperiode {
         return vurdering.periode.toDatoperiode()
     }
@@ -28,11 +33,11 @@ class VilkårsvurderingsperiodeAdapter(private val vurdering: Vilkårsvurderings
             }
             vurdering.godTro != null -> {
                 when (vurdering.godTro.beløpErIBehold) {
-                    true -> Reduksjon.ManueltBeløp(vurdering.godTro.beløpTilbakekreves ?: error("Beløp er i behold, men beløp som skal tilbakekreves er ikke satt."))
+                    true -> Reduksjon.ManueltBeløp(vurdering.godTro.beløpTilbakekreves ?: throw Feil(logContext = logContext, message = "Beløp er i behold, men beløp som skal tilbakekreves er ikke satt. Gjelder periode fra ${periode().fom} til ${periode().tom}", frontendFeilmelding = "Beløp er i behold, men beløp som skal tilbakekreves er ikke satt. Gjelder periode fra ${periode().fom} til ${periode().tom}"))
                     false -> Reduksjon.IngenTilbakekreving()
                 }
             }
-            else -> error("Vurdering mangler vurdering av aktsomhet og god tro. Kan ikke beregne reduksjon.")
+            else -> throw Feil(logContext = logContext, message = "Vurdering mangler vurdering av aktsomhet og god tro. Kan ikke beregne reduksjon. Gjelder periode fra ${periode().fom} til ${periode().tom}", frontendFeilmelding = "Vurdering mangler vurdering av aktsomhet og god tro. Kan ikke beregne reduksjon. Gjelder periode fra ${periode().fom} til ${periode().tom}")
         }
     }
 
