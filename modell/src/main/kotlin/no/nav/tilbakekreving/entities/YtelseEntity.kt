@@ -8,12 +8,12 @@ data class YtelseEntity(
     fun fraEntity(): Ytelse {
         return when (type) {
             YtelseType.BARNETRYGD -> Ytelse.Barnetrygd
-            YtelseType.TILLEGGSSTØNADER -> Ytelse.Tillegsstønader
+            YtelseType.TILLEGGSSTØNAD -> Ytelse.Tilleggsstønad
         }
     }
 }
 
 enum class YtelseType {
     BARNETRYGD,
-    TILLEGGSSTØNADER,
+    TILLEGGSSTØNAD,
 }

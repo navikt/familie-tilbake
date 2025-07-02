@@ -30,7 +30,7 @@ import java.math.BigInteger
 import java.time.LocalDate
 import kotlin.random.Random
 
-class TilleggstønaderE2ETest : TilbakekrevingE2EBase() {
+class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
     @Test
     fun `kravgrunnlag fører til sak klar til behandling`() {
         val fnr = Random.nextLong(0, 31129999999).toString().padStart(11, '0')
@@ -38,8 +38,8 @@ class TilleggstønaderE2ETest : TilbakekrevingE2EBase() {
         val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
         val ansvarligEnhet = KravgrunnlagGenerator.nextPaddedId(4)
         sendKravgrunnlagOgAvventLesing(
-            TILLEGGSTØNADER_KØ_NAVN,
-            KravgrunnlagGenerator.forTillegstønader(
+            TILLEGGSSTØNADER_KØ_NAVN,
+            KravgrunnlagGenerator.forTilleggsstønader(
                 fødselsnummer = fnr,
                 fagsystemId = fagsystemId,
                 vedtakId = vedtakId,
@@ -161,8 +161,8 @@ class TilleggstønaderE2ETest : TilbakekrevingE2EBase() {
     fun `revurdering av vedtak med full utbetaling fører til ingen tilbakekreving`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSTØNADER_KØ_NAVN,
-            kravgrunnlag = KravgrunnlagGenerator.forTillegstønader(
+            queueName = TILLEGGSSTØNADER_KØ_NAVN,
+            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
             ),
         )
@@ -187,7 +187,7 @@ class TilleggstønaderE2ETest : TilbakekrevingE2EBase() {
         val exception = shouldThrow<UtenforScopeException> {
             behandlingController.opprettRevurdering(
                 OpprettRevurderingDto(
-                    YtelsestypeDTO.TILLEGGSTØNADER,
+                    YtelsestypeDTO.TILLEGGSSTØNAD,
                     behandlingId,
                     Behandlingsårsakstype.REVURDERING_KLAGE_KA,
                 ),
@@ -198,6 +198,6 @@ class TilleggstønaderE2ETest : TilbakekrevingE2EBase() {
     }
 
     companion object {
-        const val TILLEGGSTØNADER_KØ_NAVN = "LOCAL_TILLEGGSSTONADER.KRAVGRUNNLAG"
+        const val TILLEGGSSTØNADER_KØ_NAVN = "LOCAL_TILLEGGSSTONADER.KRAVGRUNNLAG"
     }
 }

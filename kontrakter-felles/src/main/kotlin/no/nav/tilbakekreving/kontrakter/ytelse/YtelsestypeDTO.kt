@@ -6,5 +6,5 @@ enum class YtelsestypeDTO {
     BARNETILSYN,
     SKOLEPENGER,
     KONTANTSTØTTE,
-    TILLEGGSTØNADER,
+    TILLEGGSSTØNAD,
 }

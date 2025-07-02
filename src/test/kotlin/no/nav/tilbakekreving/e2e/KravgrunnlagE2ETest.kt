@@ -26,11 +26,11 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
     private lateinit var kravgrunnlagMediator: KravgrunnlagMediator
 
     @Test
-    fun `kan lese kravgrunnlag for tilleggstønader`() {
+    fun `kan lese kravgrunnlag for tilleggsstønader`() {
         val fagsystemId = UUID.randomUUID().toString()
         sendKravgrunnlagOgAvventLesing(
             QUEUE_NAME,
-            KravgrunnlagGenerator.forTillegstønader(
+            KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
                 perioder = listOf(
                     Tilbakekrevingsperiode(
@@ -74,7 +74,7 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
     @Test
     fun `lagrer bare en gang dersom noe feiler under håndtering av kravgrunnlag`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        sendKravgrunnlagOgAvventLesing(QUEUE_NAME, KravgrunnlagGenerator.forTillegstønader(fagsystemId = fagsystemId, fødselsnummer = "feil1234567"))
+        sendKravgrunnlagOgAvventLesing(QUEUE_NAME, KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId, fødselsnummer = "feil1234567"))
 
         kravgrunnlagMediator.lesKravgrunnlag()
 

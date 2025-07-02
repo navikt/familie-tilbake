@@ -17,7 +17,7 @@ object KravgrunnlagGenerator {
         .toString()
         .padStart(width, '0')
 
-    fun forTillegstønader(
+    fun forTilleggsstønader(
         vedtakId: String = nextPaddedId(6),
         fagsystemId: String = nextPaddedId(6),
         kravgrunnlagId: String = nextPaddedId(6),

@@ -24,13 +24,13 @@ sealed interface Ytelse {
         override fun tilEntity(): YtelseEntity = YtelseEntity(YtelseType.BARNETRYGD)
     }
 
-    object Tillegsstønader : Ytelse {
+    object Tilleggsstønad : Ytelse {
         override fun tilFagsystemDTO(): FagsystemDTO = FagsystemDTO.TS
 
-        override fun tilYtelseDTO(): YtelsestypeDTO = YtelsestypeDTO.TILLEGGSTØNADER
+        override fun tilYtelseDTO(): YtelsestypeDTO = YtelsestypeDTO.TILLEGGSSTØNAD
 
         override fun integrererMotFagsystem(): Boolean = false
 
-        override fun tilEntity(): YtelseEntity = YtelseEntity(YtelseType.TILLEGGSSTØNADER)
+        override fun tilEntity(): YtelseEntity = YtelseEntity(YtelseType.TILLEGGSSTØNAD)
     }
 }

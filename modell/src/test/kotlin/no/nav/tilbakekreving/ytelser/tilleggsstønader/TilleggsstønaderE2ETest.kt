@@ -11,13 +11,13 @@ import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import org.junit.jupiter.api.Test
 
-class TillegsstønaderE2ETest {
+class TilleggsstønaderE2ETest {
     @Test
     fun `hopper over innhenting av fagsystem info`() {
         val observatør = BehovObservatørOppsamler()
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse(
             eksternFagsak = eksternFagsak(
-                ytelse = Ytelse.Tillegsstønader,
+                ytelse = Ytelse.Tilleggsstønad,
             ),
         )
         val tilbakekreving = Tilbakekreving.opprett(observatør, opprettTilbakekrevingHendelse)
