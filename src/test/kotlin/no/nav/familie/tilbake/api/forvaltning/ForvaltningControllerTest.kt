@@ -59,7 +59,7 @@ class ForvaltningControllerTest : OppslagSpringRunnerTest() {
     @Test
     fun `Forvalter kan sette behandling på vent tilbake til fakta`() {
         every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }
-            .returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.ENSLIG_FORELDER to Behandlerrolle.VEILEDER, Tilgangskontrollsfagsystem.FORVALTER_TILGANG to Behandlerrolle.FORVALTER)))
+            .returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.ENSLIG_FORELDER to Behandlerrolle.FORVALTER, Tilgangskontrollsfagsystem.FORVALTER_TILGANG to Behandlerrolle.FORVALTER)))
 
         val response = flyttBehandlingTilFakta()
         assertEquals(HttpStatus.OK, response.statusCode)
@@ -97,7 +97,7 @@ class ForvaltningControllerTest : OppslagSpringRunnerTest() {
     @Test
     fun `Forvalter kan sette behandling tilbake til fakta når behandling ikke er under utredning`() {
         every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }
-            .returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.FORVALTER_TILGANG to Behandlerrolle.FORVALTER)))
+            .returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.ENSLIG_FORELDER to Behandlerrolle.FORVALTER, Tilgangskontrollsfagsystem.FORVALTER_TILGANG to Behandlerrolle.FORVALTER)))
         val response = flyttBehandlingTilFakta(opprettTestdata(behandlingStatus = Behandlingsstatus.FATTER_VEDTAK))
         assertEquals(HttpStatus.OK, response.statusCode)
     }

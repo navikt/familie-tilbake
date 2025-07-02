@@ -44,3 +44,10 @@ tilbakekreving:
     - LOCAL_TILLEGGSSTONADER.KRAVGRUNNLAG
   toggles:
     ny-modell-enabled: true
+  tilgangsstyring:
+    ts:
+      grupper:
+        veileder: ${rolle.teamfamilie.forvalter}
+        forvalter: ${rolle.teamfamilie.forvalter}
+        saksbehandler: ${rolle.teamfamilie.forvalter}
+        beslutter: ${rolle.teamfamilie.forvalter}

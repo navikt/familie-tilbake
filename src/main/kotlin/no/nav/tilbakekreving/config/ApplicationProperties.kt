@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.config
+package no.nav.tilbakekreving.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 
@@ -8,8 +8,5 @@ data class ApplicationProperties(
         nyModellEnabled = false,
     ),
     val kravgrunnlag: List<String> = emptyList(),
-) {
-    data class Toggles(
-        val nyModellEnabled: Boolean,
-    )
-}
+    val tilgangsstyring: Tilgangsstyring,
+)

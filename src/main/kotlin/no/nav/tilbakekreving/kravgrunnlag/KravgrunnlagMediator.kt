@@ -1,8 +1,8 @@
 package no.nav.tilbakekreving.kravgrunnlag
 
-import no.nav.familie.tilbake.config.ApplicationProperties
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
 import no.nav.tilbakekreving.TilbakekrevingService
+import no.nav.tilbakekreving.config.ApplicationProperties
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 

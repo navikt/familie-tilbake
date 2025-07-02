@@ -1,21 +1,20 @@
 package no.nav.familie.tilbake.sikkerhet
 
 import no.nav.familie.tilbake.common.ContextService
-import no.nav.familie.tilbake.config.RolleConfig
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import org.springframework.stereotype.Service
 
 @Service
 class TilgangService(
-    private val rolleConfig: RolleConfig,
+    private val applicationProperties: ApplicationProperties,
 ) {
     fun tilgangTilÅOppretteRevurdering(fagsystem: FagsystemDTO): Boolean = finnBehandlerrolle(fagsystem) !in listOf(Behandlerrolle.VEILEDER, Behandlerrolle.FORVALTER)
 
     fun finnBehandlerrolle(fagsystem: FagsystemDTO): Behandlerrolle? {
-        val inloggetBrukerstilgang =
-            ContextService
-                .hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, "henter behandling", SecureLog.Context.tom())
+        val inloggetBrukerstilgang = ContextService
+            .hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(applicationProperties.tilgangsstyring, "henter behandling", SecureLog.Context.tom())
 
         val tilganger = inloggetBrukerstilgang.tilganger
         var behandlerrolle: Behandlerrolle? = Behandlerrolle.VEILEDER
@@ -32,9 +31,8 @@ class TilgangService(
     }
 
     fun harInnloggetBrukerForvalterRolle(): Boolean {
-        val innloggetBrukerstilgang =
-            ContextService
-                .hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, "henter behandling", SecureLog.Context.tom())
+        val innloggetBrukerstilgang = ContextService
+            .hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(applicationProperties.tilgangsstyring, "henter behandling", SecureLog.Context.tom())
 
         return innloggetBrukerstilgang.tilganger.containsKey(Tilgangskontrollsfagsystem.FORVALTER_TILGANG)
     }

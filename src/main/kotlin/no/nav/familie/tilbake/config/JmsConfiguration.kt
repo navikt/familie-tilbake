@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.config
 
+import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagListener
 import org.springframework.context.annotation.Configuration
 import org.springframework.jms.annotation.JmsListenerConfigurer

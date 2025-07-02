@@ -9,6 +9,7 @@ enum class Tilgangskontrollsfagsystem(
     BARNETRYGD("BA"),
     ENSLIG_FORELDER("EF"),
     KONTANTSTØTTE("KONT"),
+    TILLEGGSSTØNAD("TS"),
     FORVALTER_TILGANG("FT"), // brukes internt bare for tilgangsskontroll
     SYSTEM_TILGANG(""), // brukes internt bare for tilgangsskontroll
     ;
@@ -24,7 +25,7 @@ enum class Tilgangskontrollsfagsystem(
         }
 
         fun fraFagsystem(kontraktFagsystem: FagsystemDTO): Tilgangskontrollsfagsystem {
-            for (fagsystem in values()) {
+            for (fagsystem in entries) {
                 if (fagsystem.kode == kontraktFagsystem.name) {
                     return fagsystem
                 }

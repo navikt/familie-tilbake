@@ -17,7 +17,6 @@ import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.exceptionhandler.ForbiddenError
 import no.nav.familie.tilbake.config.Constants
-import no.nav.familie.tilbake.config.RolleConfig
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.kontrakter.tilgangskontroll.Tilgang
@@ -28,6 +27,7 @@ import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
+import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
@@ -55,6 +55,8 @@ import java.util.Calendar
         "rolle.kontantstøtte.saksbehandler = ks123",
         "rolle.kontantstøtte.veileder = kv123",
         "rolle.teamfamilie.forvalter = familie123",
+        "tilbakekreving.tilgangsstyring.grupper.ts.saksbehandler = ts-saksbehandler",
+        "tilbakekreving.tilgangsstyring.grupper.ts.beslutter = ts-beslutter",
     ],
 )
 internal class TilgangskontrollServiceTest : OppslagSpringRunnerTest() {
@@ -67,6 +69,10 @@ internal class TilgangskontrollServiceTest : OppslagSpringRunnerTest() {
 
         const val ENSLIG_BESLUTTER_ROLLE = "eb123"
         const val ENSLIG_SAKSBEHANDLER_ROLLE = "es123"
+        const val ENSLIG_VEILEDER_ROLLE = "ev123"
+
+        const val TILLEGSSTØNADER_BESLUTTER_ROLLE = "ts-beslutter"
+        const val TILLEGSSTØNADER_SAKSBEHANDLER_ROLLE = "ts-saksbehandler"
 
         const val TEAMFAMILIE_FORVALTER_ROLLE = "familie123"
     }
@@ -79,7 +85,7 @@ internal class TilgangskontrollServiceTest : OppslagSpringRunnerTest() {
     private lateinit var tilgangskontrollService: TilgangskontrollService
 
     @Autowired
-    private lateinit var rolleConfig: RolleConfig
+    private lateinit var applicationProperties: ApplicationProperties
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
@@ -99,52 +105,37 @@ internal class TilgangskontrollServiceTest : OppslagSpringRunnerTest() {
 
     private lateinit var fagsak: Fagsak
     private lateinit var behandling: Behandling
-    private lateinit var tilbakekreving: Tilbakekreving
 
     @BeforeEach
     fun init() {
-        tilgangskontrollService =
-            TilgangskontrollService(
-                rolleConfig,
-                fagsakRepository,
-                behandlingRepository,
-                kravgrunnlagRepository,
-                auditLogger,
-                mottattXmlRepository,
-                mockIntegrasjonerClient,
-            )
+        tilgangskontrollService = TilgangskontrollService(
+            applicationProperties,
+            fagsakRepository,
+            behandlingRepository,
+            kravgrunnlagRepository,
+            auditLogger,
+            mottattXmlRepository,
+            mockIntegrasjonerClient,
+        )
 
-        tilbakekreving =
-            Tilbakekreving.opprett(
-                opprettTilbakekrevingEvent = OpprettTilbakekrevingHendelse(
-                    opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
-                    eksternFagsak = OpprettTilbakekrevingHendelse.EksternFagsak(
-                        "1abc",
-                        Ytelse.Barnetrygd,
-                    ),
-                ),
-                behovObservatør = mockk(relaxed = true),
-            )
-        fagsak =
-            fagsakRepository.insert(
-                Testdata.fagsak().copy(
-                    bruker = Bruker("1232"),
-                    fagsystem = Fagsystem.BA,
-                    ytelsestype = Ytelsestype.BARNETRYGD,
-                ),
-            )
-        behandling =
-            behandlingRepository.insert(
-                Behandling(
-                    fagsakId = fagsak.id,
-                    type = Behandlingstype.TILBAKEKREVING,
-                    ansvarligSaksbehandler = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
-                    behandlendeEnhet = "8020",
-                    behandlendeEnhetsNavn = "Oslo",
-                    manueltOpprettet = false,
-                    begrunnelseForTilbakekreving = null,
-                ),
-            )
+        fagsak = fagsakRepository.insert(
+            Testdata.fagsak().copy(
+                bruker = Bruker("1232"),
+                fagsystem = Fagsystem.BA,
+                ytelsestype = Ytelsestype.BARNETRYGD,
+            ),
+        )
+        behandling = behandlingRepository.insert(
+            Behandling(
+                fagsakId = fagsak.id,
+                type = Behandlingstype.TILBAKEKREVING,
+                ansvarligSaksbehandler = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
+                behandlendeEnhet = "8020",
+                behandlendeEnhetsNavn = "Oslo",
+                manueltOpprettet = false,
+                begrunnelseForTilbakekreving = null,
+            ),
+        )
     }
 
     @Test
@@ -267,7 +258,7 @@ internal class TilgangskontrollServiceTest : OppslagSpringRunnerTest() {
         opprettRequestContext(token)
 
         val exception = shouldThrow<RuntimeException> { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
-        exception.message shouldBe "abc med rolle SAKSBEHANDLER har ikke tilgang til å kalle forvaltningstjeneste test. Krever ${Behandlerrolle.FORVALTER}."
+        exception.message shouldBe "abc uten rolle ${Behandlerrolle.FORVALTER} har ikke tilgang til å kalle forvaltningstjeneste test."
     }
 
     @Test
@@ -343,7 +334,7 @@ internal class TilgangskontrollServiceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf(ENSLIG_SAKSBEHANDLER_ROLLE, BARNETRYGD_SAKSBEHANDLER_ROLLE, TEAMFAMILIE_FORVALTER_ROLLE))
         opprettRequestContext(token)
 
-        shouldNotThrowAny { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving, behandling.id, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
+        shouldNotThrowAny { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving(Ytelse.Barnetrygd), behandling.id, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
     }
 
     @Test
@@ -352,7 +343,43 @@ internal class TilgangskontrollServiceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf(ENSLIG_SAKSBEHANDLER_ROLLE, BARNETRYGD_SAKSBEHANDLER_ROLLE, TEAMFAMILIE_FORVALTER_ROLLE))
         opprettRequestContext(token)
 
-        shouldThrow<ForbiddenError> { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving, behandling.id, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
+        shouldThrow<ForbiddenError> { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving(Ytelse.Barnetrygd), behandling.id, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
+    }
+
+    @Test
+    fun `forvalterrolle sammen med veileder burde ikke gi tilgang til hva som helst`() {
+        every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(any(), any()) } returns listOf(Tilgang(personIdent, true, null))
+        val token = opprettToken("abc", listOf(ENSLIG_VEILEDER_ROLLE, TEAMFAMILIE_FORVALTER_ROLLE))
+        opprettRequestContext(token)
+
+        shouldThrow<ForbiddenError> { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving(Ytelse.Barnetrygd), behandling.id, Behandlerrolle.BESLUTTER, AuditLoggerEvent.ACCESS, "test") }
+    }
+
+    @Test
+    fun `tilleggsstønader - krever beslutter rolle, men har saksbehandler`() {
+        every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(any(), any()) } returns listOf(Tilgang(personIdent, true, null))
+        val token = opprettToken("abc", listOf(TILLEGSSTØNADER_SAKSBEHANDLER_ROLLE))
+        opprettRequestContext(token)
+
+        shouldThrow<ForbiddenError> { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving(Ytelse.Tilleggsstønad), behandling.id, Behandlerrolle.BESLUTTER, AuditLoggerEvent.ACCESS, "test") }
+    }
+
+    @Test
+    fun `tilleggsstønader - krever saksbehandler rolle, har tilgang`() {
+        every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(any(), any()) } returns listOf(Tilgang(personIdent, true, null))
+        val token = opprettToken("abc", listOf(TILLEGSSTØNADER_SAKSBEHANDLER_ROLLE))
+        opprettRequestContext(token)
+
+        shouldNotThrowAny { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving(Ytelse.Tilleggsstønad), behandling.id, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test") }
+    }
+
+    @Test
+    fun `tilleggsstønader - krever beslutter rolle, har tilgang`() {
+        every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(any(), any()) } returns listOf(Tilgang(personIdent, true, null))
+        val token = opprettToken("abc", listOf(TILLEGSSTØNADER_BESLUTTER_ROLLE))
+        opprettRequestContext(token)
+
+        shouldNotThrowAny { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving(Ytelse.Tilleggsstønad), behandling.id, Behandlerrolle.BESLUTTER, AuditLoggerEvent.ACCESS, "test") }
     }
 
     private fun opprettToken(
@@ -378,5 +405,18 @@ internal class TilgangskontrollServiceTest : OppslagSpringRunnerTest() {
         RequestContextHolder
             .currentRequestAttributes()
             .setAttribute(SpringTokenValidationContextHolder::class.java.name, tokenValidationContext, 0)
+    }
+
+    private fun tilbakekreving(ytelse: Ytelse): Tilbakekreving {
+        return Tilbakekreving.opprett(
+            opprettTilbakekrevingEvent = OpprettTilbakekrevingHendelse(
+                opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
+                eksternFagsak = OpprettTilbakekrevingHendelse.EksternFagsak(
+                    "1abc",
+                    ytelse,
+                ),
+            ),
+            behovObservatør = mockk(relaxed = true),
+        )
     }
 }

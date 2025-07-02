@@ -11,13 +11,13 @@ import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.exceptionhandler.ForbiddenError
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
-import no.nav.familie.tilbake.config.RolleConfig
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.FagsystemUtil
 import no.nav.tilbakekreving.Tilbakekreving
+import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.Tema
 import org.springframework.context.annotation.Configuration
@@ -27,7 +27,7 @@ import java.util.UUID
 
 @Configuration
 class TilgangskontrollService(
-    private val rolleConfig: RolleConfig,
+    private val applicationProperties: ApplicationProperties,
     private val fagsakRepository: FagsakRepository,
     private val behandlingRepository: BehandlingRepository,
     private val kravgrunnlagRepository: KravgrunnlagRepository,
@@ -44,8 +44,7 @@ class TilgangskontrollService(
     ) {
         val saksbehandler = ContextService.hentSaksbehandler(SecureLog.Context.tom())
         val fagsystem = tilbakekreving.tilFrontendDto().fagsystem
-        val logContext =
-            SecureLog.Context.medBehandling(tilbakekreving.eksternFagsak.eksternId, behandlingId?.toString())
+        val logContext = SecureLog.Context.medBehandling(tilbakekreving.eksternFagsak.eksternId, behandlingId?.toString())
         val dto = tilbakekreving.tilFrontendDto()
         validate(
             fagsystem = fagsystem,
@@ -192,37 +191,31 @@ class TilgangskontrollService(
             // når behandler har system tilgang, trenges ikke det validering på fagsystem eller rolle
             return
         }
-        val brukerRolleOgFagsystemstilgang =
-            ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(
-                rolleConfig,
-                handling,
-                SecureLog.Context.tom(),
-            )
 
-        // når behandler har forvaltningstilgang, blir rollen bare validert
-        if (brukerRolleOgFagsystemstilgang.tilganger.contains(Tilgangskontrollsfagsystem.FORVALTER_TILGANG)) {
-            validateForvaltingsrolle(
-                brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
-                minimumBehandlerrolle = minimumBehandlerrolle,
-                handling = handling,
-                saksbehandler = saksbehandler,
-            )
-        } else {
-            val tilgangskontrollsfagsystem = Tilgangskontrollsfagsystem.fraFagsystem(fagsystem)
-            // sjekk om saksbehandler har riktig gruppe å aksessere denne ytelsestypen
-            validateFagsystem(tilgangskontrollsfagsystem, brukerRolleOgFagsystemstilgang, handling, saksbehandler)
+        val brukerRolleOgFagsystemstilgang = ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(
+            applicationProperties.tilgangsstyring,
+            handling,
+            SecureLog.Context.tom(),
+        )
 
-            // sjekk om saksbehandler har riktig rolle å aksessere denne ytelsestypen
-            validateRolle(
-                brukersrolleTilFagsystemet = brukerRolleOgFagsystemstilgang.tilganger.getValue(
-                    tilgangskontrollsfagsystem,
-                ),
-                minimumBehandlerrolle = minimumBehandlerrolle,
-                handling = handling,
-                logContext = logContext,
-                saksbehandler = saksbehandler,
-            )
-        }
+        validateForvaltingsrolle(
+            brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
+            minimumBehandlerrolle = minimumBehandlerrolle,
+            handling = handling,
+            saksbehandler = saksbehandler,
+        )
+        // sjekk om saksbehandler har riktig gruppe å aksessere denne ytelsestypen
+        val tilgangskontrollsfagsystem = Tilgangskontrollsfagsystem.fraFagsystem(fagsystem)
+        validateFagsystem(tilgangskontrollsfagsystem, brukerRolleOgFagsystemstilgang, handling, saksbehandler)
+
+        // sjekk om saksbehandler har riktig rolle å aksessere denne ytelsestypen
+        validateRolle(
+            brukersrolleTilFagsystemet = brukerRolleOgFagsystemstilgang.tilganger.getValue(tilgangskontrollsfagsystem),
+            minimumBehandlerrolle = minimumBehandlerrolle,
+            handling = handling,
+            logContext = logContext,
+            saksbehandler = saksbehandler,
+        )
 
         validateEgenAnsattKode6Kode7(
             personIBehandlingen = ident,
@@ -261,7 +254,6 @@ class TilgangskontrollService(
         saksbehandler: String,
     ) {
         if (personIBehandlingen == null) return
-
         val tilganger = integrasjonerClient.sjekkTilgangTilPersoner(listOf(personIBehandlingen), fagsystem.tilTema())
         if (tilganger.any { !it.harTilgang }) {
             throw ForbiddenError(
@@ -306,18 +298,9 @@ class TilgangskontrollService(
         logContext: SecureLog.Context,
         saksbehandler: String,
     ) {
-        if (minimumBehandlerrolle == Behandlerrolle.FORVALTER) {
-            throw ForbiddenError(
-                message =
-                    "$saksbehandler med rolle $brukersrolleTilFagsystemet har ikke tilgang til å kalle forvaltningstjeneste $handling. Krever FORVALTER.",
-                frontendFeilmelding = "Du har rollen $brukersrolleTilFagsystemet og trenger rollen FORVALTER når du ${handling.toLowerCasePreservingASCIIRules()}.",
-                logContext = logContext,
-            )
-        }
         if (minimumBehandlerrolle.nivå > brukersrolleTilFagsystemet.nivå) {
             throw ForbiddenError(
-                message =
-                    "$saksbehandler med rolle $brukersrolleTilFagsystemet har ikke tilgang til å $handling. Krever $minimumBehandlerrolle.",
+                message = "$saksbehandler med rolle $brukersrolleTilFagsystemet har ikke tilgang til å $handling. Krever $minimumBehandlerrolle.",
                 frontendFeilmelding = "Du har rollen $brukersrolleTilFagsystemet og trenger rollen $minimumBehandlerrolle når du ${handling.toLowerCasePreservingASCIIRules()}.",
                 logContext = logContext,
             )
@@ -332,12 +315,9 @@ class TilgangskontrollService(
     ) {
         val tilganger = brukerRolleOgFagsystemstilgang.tilganger
         // Forvalter kan kun kalle forvaltningstjenestene og tjenestene som kan kalles av Veileder
-        if (minimumBehandlerrolle.nivå > Behandlerrolle.FORVALTER.nivå &&
-            tilganger.all { it.value == Behandlerrolle.FORVALTER }
-        ) {
+        if (minimumBehandlerrolle == Behandlerrolle.FORVALTER && tilganger[Tilgangskontrollsfagsystem.FORVALTER_TILGANG] != Behandlerrolle.FORVALTER) {
             throw ForbiddenError(
-                message =
-                    "$saksbehandler med rolle FORVALTER har ikke tilgang til å $handling. Krever $minimumBehandlerrolle.",
+                message = "$saksbehandler uten rolle ${Behandlerrolle.FORVALTER} har ikke tilgang til å kalle forvaltningstjeneste $handling.",
                 frontendFeilmelding = "Du har rollen FORVALTER og trenger rollen $minimumBehandlerrolle når du ${handling.toLowerCasePreservingASCIIRules()}.",
                 logContext = SecureLog.Context.tom(),
             )

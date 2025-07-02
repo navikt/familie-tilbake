@@ -3,6 +3,21 @@ application:
 
 tilbakekreving:
   frontendUrl: https://tilbakekreving.intern.nav.no
+  tilgangsstyring:
+    grupper:
+      ba:
+        veileder: ${rolle.barnetrygd.veileder}
+        beslutter: ${rolle.barnetrygd.beslutter}
+        saksbehandler: ${rolle.barnetrygd.saksbehandler}
+      ef:
+        veileder: ${rolle.enslig.veileder}
+        beslutter: ${rolle.enslig.beslutter}
+        saksbehandler: ${rolle.enslig.saksbehandler}
+      kont:
+        veileder: ${rolle.kontantstøtte.veileder}
+        beslutter: ${rolle.kontantstøtte.beslutter}
+        saksbehandler: ${rolle.kontantstøtte.saksbehandler}
+    forvalterGruppe: ${rolle.teamfamilie.forvalter}
 
 server:
   port: 8030

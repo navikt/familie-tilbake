@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.api
 
-import no.nav.familie.tilbake.config.ApplicationProperties
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.tilDto
 import no.nav.familie.tilbake.kontrakter.Ressurs
@@ -10,6 +9,7 @@ import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.api.v1.dto.HistorikkinnslagDto
+import no.nav.tilbakekreving.config.ApplicationProperties
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping

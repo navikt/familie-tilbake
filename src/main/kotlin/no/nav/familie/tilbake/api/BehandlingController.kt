@@ -8,7 +8,6 @@ import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.feilHvis
-import no.nav.familie.tilbake.config.ApplicationProperties
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
 import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.log.SecureLog
@@ -26,6 +25,7 @@ import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.tilbakekreving.api.v1.dto.ByttEnhetDto
 import no.nav.tilbakekreving.api.v1.dto.HenleggelsesbrevFritekstDto
 import no.nav.tilbakekreving.api.v1.dto.OpprettRevurderingDto
+import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.feil.UtenforScopeException
 import no.nav.tilbakekreving.kontrakter.OpprettManueltTilbakekrevingRequest
 import no.nav.tilbakekreving.kontrakter.OpprettTilbakekrevingRequest
@@ -318,6 +318,7 @@ class BehandlingController(
             handling = "Flytter behandling tilbake til Fakta",
         )
         val behandling = behandlingService.hentBehandling(behandlingId)
+
         val logContext = SecureLog.Context.medBehandling(behandling.eksternFagsakId, behandling.behandlingId.toString())
         validerKanSetteBehandlingTilbakeTilFakta(behandling, logContext)
         forvaltningService.flyttBehandlingsstegTilbakeTilFakta(behandlingId)
