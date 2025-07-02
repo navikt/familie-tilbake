@@ -263,7 +263,7 @@ object Testdata {
         )
 
     fun lagKravgrunnlagsperiode(
-        periode: Månedsperiode = januar(2023) til januar(2023),
+        periode: Månedsperiode = januar(2025) til januar(2025),
         klassekode: Klassekode = Klassekode.KL_KODE_FEIL_BA,
         beløp: Int = 10000,
     ): Kravgrunnlagsperiode432 = Kravgrunnlagsperiode432(

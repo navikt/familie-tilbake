@@ -127,8 +127,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     private lateinit var fagsak: Fagsak
     private lateinit var behandling: Behandling
 
-    private val fom = 1.januar(2023)
-    private val tom = 31.januar(2023)
+    private val fom = 1.januar(2025)
+    private val tom = 31.januar(2025)
 
     @BeforeEach
     fun init() {
@@ -633,7 +633,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                 behandlingId = behandling.id,
                 perioder = setOf(
                     Vilkårsvurderingsperiode(
-                        periode = januar(2023) til januar(2023),
+                        periode = januar(2025) til januar(2025),
                         begrunnelse = "",
                         vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
                         godTro = VilkårsvurderingGodTro(
