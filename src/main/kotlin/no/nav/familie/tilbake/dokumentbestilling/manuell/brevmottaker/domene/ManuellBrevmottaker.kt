@@ -39,7 +39,20 @@ data class ManuellBrevmottaker(
                 landkode.isNullOrBlank()
         )
 
-    fun harGyldigAdresse(): Boolean =
+    fun erGyldig() = when (type) {
+        MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE, MottakerType.DØDSBO -> validerManuellAddresse()
+        MottakerType.FULLMEKTIG -> when {
+            !ident.isNullOrEmpty() -> true
+            !orgNr.isNullOrEmpty() && navn.isNotEmpty() -> true
+            else -> validerManuellAddresse()
+        }
+        MottakerType.VERGE -> when {
+            !ident.isNullOrEmpty() -> true
+            else -> validerManuellAddresse()
+        }
+    }
+
+    private fun validerManuellAddresse(): Boolean =
         if (landkode == "NO") {
             navn.isNotEmpty() &&
                 !adresselinje1.isNullOrEmpty() &&

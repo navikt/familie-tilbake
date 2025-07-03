@@ -4,7 +4,5 @@ import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.Man
 
 object BrevmottakerAdresseValidering {
     fun erBrevmottakereGyldige(brevmottakere: List<ManuellBrevmottaker>): Boolean =
-        brevmottakere.all {
-            it.harGyldigAdresse()
-        }
+        brevmottakere.all(ManuellBrevmottaker::erGyldig)
 }
