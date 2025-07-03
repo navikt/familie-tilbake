@@ -6,4 +6,5 @@ import java.time.LocalDate
 data class BehandlingPåVentDto(
     val venteårsak: Venteårsak,
     val tidsfrist: LocalDate,
+    val begrunnelse: String?,
 )
