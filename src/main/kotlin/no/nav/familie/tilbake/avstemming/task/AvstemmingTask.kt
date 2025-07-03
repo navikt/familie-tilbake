@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.avstemming.task
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.tilbake.avstemming.AvstemmingService
 import no.nav.familie.tilbake.avstemming.domain.Avstemmingsfil
 import no.nav.familie.tilbake.avstemming.domain.AvstemmingsfilRepository
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
@@ -12,6 +11,7 @@ import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.kontrakter.Fil
 import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
+import no.nav.tilbakekreving.avstemming.AvstemmingMediator
 import org.slf4j.LoggerFactory
 import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
@@ -28,7 +28,7 @@ import java.util.UUID
 )
 class AvstemmingTask(
     private val taskService: TracableTaskService,
-    private val avstemmingService: AvstemmingService,
+    private val avstemmingMediator: AvstemmingMediator,
     private val avstemmingsfilRepository: AvstemmingsfilRepository,
     private val integrasjonerClient: IntegrasjonerClient,
     private val environment: Environment,
@@ -42,7 +42,7 @@ class AvstemmingTask(
         val dato = LocalDate.parse(task.payload)
         val batchRun = TYPE + "-" + UUID.randomUUID()
         logger.info("Kjører avstemming for {} i batch {}", dato, batchRun)
-        val resultat = avstemmingService.oppsummer(dato)
+        val resultat = avstemmingMediator.avstem(dato)
         if (resultat != null) {
             val forDato = dato.format(DATO_FORMATTER)
             val kjøreTidspunkt = LocalDateTime.now().format(DATO_TIDSPUNKT_FORMATTER)

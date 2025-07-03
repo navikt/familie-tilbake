@@ -17,7 +17,7 @@ class VedtakOppsummering(
             var bruttoUtenRenter = BigDecimal.ZERO
             var renter = BigDecimal.ZERO
             var skatt = BigDecimal.ZERO
-            for (periode in iverksattVedtak.tilbakekrevingsperioder) {
+            for (periode in iverksattVedtak.tilbakekrevingsvedtak.tilbakekrevingsperiode) {
                 renter = renter.add(periode.belopRenter)
                 for (beløp in periode.tilbakekrevingsbelop) {
                     bruttoUtenRenter = bruttoUtenRenter.add(beløp.belopTilbakekreves)

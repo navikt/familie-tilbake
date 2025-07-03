@@ -55,23 +55,21 @@ class IverksettService(
             logContext = logContext,
         )
 
-        lagreIverksattVedtak(iverksettelseBehov, kravgrunnlag, request, kvittering)
+        lagreIverksattVedtak(iverksettelseBehov, request, kvittering)
     }
 
     fun lagreIverksattVedtak(
         iverksettelseBehov: IverksettelseBehov,
-        kravgrunnlag: DetaljertKravgrunnlagDto,
         request: TilbakekrevingsvedtakRequest,
         kvittering: TilbakekrevingsvedtakResponse,
     ) {
         val iverksattVedtak = IverksattVedtak(
             behandlingId = iverksettelseBehov.behandlingId,
-            vedtakId = kravgrunnlag.vedtakId,
+            vedtakId = request.tilbakekrevingsvedtak.vedtakId,
             aktør = iverksettelseBehov.aktør.tilEntity(),
-            opprettetTid = kravgrunnlag.datoVedtakFagsystem,
-            ytelsestype = iverksettelseBehov.ytelsestype,
+            ytelsestypeKode = iverksettelseBehov.ytelsestype.kode,
             kvittering = kvittering.mmel.alvorlighetsgrad,
-            tilbakekrevingsperioder = request.tilbakekrevingsvedtak.tilbakekrevingsperiode,
+            tilbakekrevingsvedtak = request.tilbakekrevingsvedtak,
             behandlingstype = iverksettelseBehov.behandlingstype,
         )
         iverksettRepository.lagreIverksattVedtak(iverksattVedtak)

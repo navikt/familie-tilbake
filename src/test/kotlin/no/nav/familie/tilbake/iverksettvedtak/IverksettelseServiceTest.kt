@@ -36,7 +36,6 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.log.LogService
-import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakResponse
 import no.nav.tilbakekreving.api.v1.dto.AktsomhetDto
@@ -51,6 +50,7 @@ import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresu
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsbelopDto
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsvedtakDto
 import no.nav.tilbakekreving.typer.v1.MmelDto
+import no.nav.tilbakekreving.vedtak.IverksettRepository
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -68,6 +68,9 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
+
+    @Autowired
+    private lateinit var iverksettRepository: IverksettRepository
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
@@ -129,9 +132,9 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
             IverksettelseService(
                 behandlingRepository,
                 kravgrunnlagRepository,
-                økonomiXmlSendtRepository,
+                fagsakRepository,
+                iverksettRepository,
                 tilbakekrevingsvedtakBeregningService,
-                beregningService,
                 behandlingVedtakService,
                 oppdragClient,
                 logService,
@@ -149,11 +152,10 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
         mockIverksettelseResponse("00", "OK")
 
         iverksettelseService.sendIverksettVedtak(behandlingId)
-
-        val økonomiXmlSendt = økonomiXmlSendtRepository.findByBehandlingId(behandlingId)
-        økonomiXmlSendt.shouldNotBeNull()
-        assertRequestXml(økonomiXmlSendt.melding, behandlingId, økonomiXmlSendt.id)
-        assertRespons(økonomiXmlSendt.kvittering, "00", "OK")
+        val iverksattVedtak = iverksettRepository.findByBehandlingId(behandlingId)
+        iverksattVedtak.shouldNotBeNull()
+        assertRequestXml(iverksattVedtak.tilbakekrevingsvedtak)
+        assertRespons(iverksattVedtak.kvittering, "00")
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val aktivBehandlingsresultat = behandling.sisteResultat
@@ -172,8 +174,10 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
         exception.cause!!.message shouldBe "Fikk feil respons fra økonomi ved iverksetting av behandling=$behandlingId." +
             "Mottatt respons:${objectMapper.writeValueAsString(lagMmmelDto("10", "feil"))}"
 
-        val økonomiXmlSendt = økonomiXmlSendtRepository.findByBehandlingId(behandlingId)
-        økonomiXmlSendt.shouldBeNull()
+        // val økonomiXmlSendt = økonomiXmlSendtRepository.findByBehandlingId(behandlingId)
+        // økonomiXmlSendt.shouldBeNull()
+        val iverksattVedtak = iverksettRepository.findByBehandlingId(behandlingId)
+        iverksattVedtak.shouldBeNull()
     }
 
     @Test
@@ -329,23 +333,14 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
     private fun assertRespons(
         kvittering: String?,
         alvorlighetsgrad: String,
-        kodeMelding: String,
     ) {
         kvittering.shouldNotBeEmpty()
-        val mmelDto = objectMapper.readValue(kvittering, MmelDto::class.java)
-        mmelDto.alvorlighetsgrad shouldBe alvorlighetsgrad
-        mmelDto.kodeMelding shouldBe kodeMelding
+        kvittering shouldBe alvorlighetsgrad
     }
 
     private fun assertRequestXml(
-        melding: String,
-        behandlingId: UUID,
-        xmlId: UUID,
+        tilbakekrevingsvedtak: TilbakekrevingsvedtakDto,
     ) {
-        val request = TilbakekrevingsvedtakMarshaller.unmarshall(melding, behandlingId, xmlId, SecureLog.Context.tom())
-        request.shouldNotBeNull()
-
-        val tilbakekrevingsvedtak = request.tilbakekrevingsvedtak
         tilbakekrevingsvedtak.kodeAksjon shouldBe KodeAksjon.FATTE_VEDTAK.kode
         tilbakekrevingsvedtak.datoVedtakFagsystem.shouldNotBeNull()
         tilbakekrevingsvedtak.vedtakId shouldBe BigInteger.ZERO

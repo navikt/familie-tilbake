@@ -1,17 +1,16 @@
 package no.nav.tilbakekreving.avstemming
 
-import no.nav.tilbakekreving.fagsystem.Ytelsestype
 import java.math.BigDecimal
 import java.math.RoundingMode
-import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class Avstemmingsrad(
     val avsender: String,
     val vedtakId: String,
     val fnr: String,
-    val vedtaksdato: LocalDate,
-    val fagsakYtelseType: Ytelsestype,
+    val vedtaksdato: LocalDateTime,
+    val fagsakYtelseType: String,
     val tilbakekrevesBruttoUtenRenter: BigDecimal,
     val skatt: BigDecimal,
     val tilbakekrevesNettoUtenRenter: BigDecimal,
@@ -24,7 +23,7 @@ class Avstemmingsrad(
             vedtakId,
             fnr,
             vedtaksdato.format(DATOFORMAT),
-            fagsakYtelseType.kode,
+            fagsakYtelseType,
             format(tilbakekrevesBruttoUtenRenter),
             format(skatt),
             format(tilbakekrevesNettoUtenRenter),
