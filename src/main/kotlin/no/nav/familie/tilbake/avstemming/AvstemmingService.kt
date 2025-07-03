@@ -18,6 +18,7 @@ import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.typer.v1.MmelDto
+import no.nav.tilbakekreving.vedtak.IverksettRepository
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -26,6 +27,7 @@ class AvstemmingService(
     private val behandlingRepository: BehandlingRepository,
     private val sendtXmlRepository: ØkonomiXmlSendtRepository,
     private val fagsakRepository: FagsakRepository,
+    private val iverksettRepository: IverksettRepository,
     private val integrasjonerConfig: IntegrasjonerConfig,
     private val logService: LogService,
 ) {
@@ -33,6 +35,8 @@ class AvstemmingService(
 
     fun oppsummer(dato: LocalDate): ByteArray? {
         val sendteVedtak = sendtXmlRepository.findByOpprettetPåDato(dato)
+        val iverksattVedtakListe = iverksettRepository.hentIverksattVedtakMedOpprettetTid(dato)
+
         var antallFeilet = 0
         var antallFørstegangsvedtakUtenTilbakekreving = 0
         val rader =

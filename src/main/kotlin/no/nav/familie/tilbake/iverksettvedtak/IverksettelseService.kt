@@ -2,15 +2,13 @@ package no.nav.familie.tilbake.iverksettvedtak
 
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
+import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Iverksettingsstatus
-import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.integration.økonomi.OppdragClient
 import no.nav.familie.tilbake.iverksettvedtak.domain.KodeResultat
 import no.nav.familie.tilbake.iverksettvedtak.domain.Tilbakekrevingsbeløp
 import no.nav.familie.tilbake.iverksettvedtak.domain.Tilbakekrevingsperiode
-import no.nav.familie.tilbake.iverksettvedtak.domain.ØkonomiXmlSendt
-import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.KodeAksjon
@@ -19,10 +17,15 @@ import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
+import no.nav.tilbakekreving.entities.AktørEntity
+import no.nav.tilbakekreving.entities.AktørType
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsbelopDto
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsperiodeDto
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsvedtakDto
+import no.nav.tilbakekreving.typer.v1.MmelDto
 import no.nav.tilbakekreving.typer.v1.PeriodeDto
+import no.nav.tilbakekreving.vedtak.IverksattVedtak
+import no.nav.tilbakekreving.vedtak.IverksettRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -33,9 +36,9 @@ import java.util.UUID
 class IverksettelseService(
     private val behandlingRepository: BehandlingRepository,
     private val kravgrunnlagRepository: KravgrunnlagRepository,
-    private val økonomiXmlSendtRepository: ØkonomiXmlSendtRepository,
+    private val fagsakRepository: FagsakRepository,
+    private val iverksettRepository: IverksettRepository,
     private val tilbakekrevingsvedtakBeregningService: TilbakekrevingsvedtakBeregningService,
-    private val beregningService: TilbakekrevingsberegningService,
     private val behandlingVedtakService: BehandlingsvedtakService,
     private val oppdragClient: OppdragClient,
     private val logService: LogService,
@@ -46,6 +49,7 @@ class IverksettelseService(
     fun sendIverksettVedtak(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val logContext = logService.contextFraBehandling(behandling.id)
+        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
 
         if (behandling.erAvsluttet) {
             log.medContext(logContext) {
@@ -65,18 +69,30 @@ class IverksettelseService(
                 info("Sender tilbakekrevingsvedtak til økonomi for behandlingId={} request={}", behandlingId.toString(), requestXml)
             }
 
-            // Send request til økonomi
-            val kvittering = objectMapper.writeValueAsString(oppdragClient.iverksettVedtak(behandlingId, request, logContext).mmel)
-            lagreIverksettelsesvedtakRequest(behandlingId, requestXml, kvittering)
+            val mmel: MmelDto = oppdragClient.iverksettVedtak(behandlingId, request, logContext).mmel
+
+            val behandlingId = behandlingId
+            val vedtakId = request.tilbakekrevingsvedtak.vedtakId
+            val aktør = if (fagsak.institusjon != null) AktørEntity(AktørType.Organisasjon, fagsak.institusjon.organisasjonsnummer) else AktørEntity(AktørType.Person, fagsak.bruker.ident)
+            val ytelsestype = fagsak.ytelsestype
+            val kvittering2 = mmel.alvorlighetsgrad
+            val tilbakekrevingsvedtak = request.tilbakekrevingsvedtak
+            val behandlingstype = behandling.type
+
+            val iverksattVedtak = IverksattVedtak(
+                behandlingId = behandlingId,
+                vedtakId = vedtakId,
+                aktør = aktør,
+                ytelsestypeKode = ytelsestype.kode,
+                kvittering = kvittering2,
+                tilbakekrevingsvedtak = tilbakekrevingsvedtak,
+                behandlingstype = behandlingstype,
+            )
+
+            iverksettRepository.lagreIverksattVedtak(iverksattVedtak)
             behandlingVedtakService.oppdaterBehandlingsvedtak(behandlingId, Iverksettingsstatus.IVERKSATT)
         }
     }
-
-    fun lagreIverksettelsesvedtakRequest(
-        behandlingId: UUID,
-        requestXml: String,
-        kvittering: String?,
-    ): ØkonomiXmlSendt = økonomiXmlSendtRepository.insert(ØkonomiXmlSendt(behandlingId = behandlingId, melding = requestXml, kvittering = kvittering))
 
     private fun lagIveksettelseRequest(
         ansvarligSaksbehandler: String,

@@ -64,6 +64,7 @@ class AvstemmingMediator(
                 )
             }
         }
+
         return if (avstemmingsrader.isEmpty()) {
             null
         } else {
@@ -82,8 +83,8 @@ class AvstemmingMediator(
                 AktørType.Organisasjon -> padOrganisasjonsnummer(iverksattVedtak.aktør.ident)
                 else -> iverksattVedtak.aktør.ident
             },
-            vedtaksdato = iverksattVedtak.opprettetTid,
-            fagsakYtelseType = iverksattVedtak.ytelsestype,
+            vedtaksdato = iverksattVedtak.sporbar.opprettetTid,
+            fagsakYtelseType = iverksattVedtak.ytelsestypeKode,
             tilbakekrevesBruttoUtenRenter = oppsummering.tilbakekrevesBruttoUtenRenter,
             tilbakekrevesNettoUtenRenter = oppsummering.tilbakekrevesNettoUtenRenter,
             skatt = oppsummering.skatt,
