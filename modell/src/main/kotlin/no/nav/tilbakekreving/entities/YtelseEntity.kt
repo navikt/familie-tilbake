@@ -1,19 +1,15 @@
 package no.nav.tilbakekreving.entities
 
 import no.nav.tilbakekreving.fagsystem.Ytelse
+import no.nav.tilbakekreving.fagsystem.Ytelsestype
 
 data class YtelseEntity(
-    val type: YtelseType,
+    val type: Ytelsestype,
 ) {
     fun fraEntity(): Ytelse {
         return when (type) {
-            YtelseType.BARNETRYGD -> Ytelse.Barnetrygd
-            YtelseType.TILLEGGSSTØNAD -> Ytelse.Tilleggsstønad
+            Ytelsestype.BARNETRYGD -> Ytelse.Barnetrygd
+            Ytelsestype.TILLEGGSSTØNAD -> Ytelse.Tilleggsstønad
         }
     }
-}
-
-enum class YtelseType {
-    BARNETRYGD,
-    TILLEGGSSTØNAD,
 }

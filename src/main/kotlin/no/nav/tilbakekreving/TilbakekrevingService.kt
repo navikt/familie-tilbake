@@ -6,6 +6,7 @@ import no.nav.familie.tilbake.integration.pdl.internal.PdlKjønnType
 import no.nav.familie.tilbake.kontrakter.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFaktaDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFatteVedtaksstegDto
@@ -44,7 +45,7 @@ class TilbakekrevingService(
     private val iverksettService: IverksettService,
     private val tilbakekrevingRepository: TilbakekrevingRepository,
 ) {
-    private val fnr = "20046912345"
+    private val aktør = Aktør.Person(ident = "20046912345")
     private val logger = TracedLogger.getLogger<TilbakekrevingService>()
 
     fun opprettTilbakekreving(
@@ -164,7 +165,7 @@ class TilbakekrevingService(
                 tilbakekreving.håndter(
                     FagsysteminfoHendelse(
                         behandlingId = UUID.randomUUID().toString(),
-                        ident = fnr,
+                        aktør = aktør,
                         revurderingsresultat = "revurderingsresultat",
                         revurderingsårsak = "revurderingsårsak",
                         begrunnelseForTilbakekreving = "begrunnelseForTilbakekreving",
@@ -371,7 +372,7 @@ class TilbakekrevingService(
     private fun validerBrevmottaker(tilbakekreving: Tilbakekreving) {
         val behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.internId
 
-        val personIdenter = listOfNotNull(tilbakekreving.bruker!!.ident)
+        val personIdenter = listOfNotNull(tilbakekreving.bruker!!.aktør.ident)
         if (personIdenter.isEmpty()) return
         val strengtFortroligePersonIdenter =
             pdlClient.hentAdressebeskyttelseBolk(personIdenter, tilbakekreving.hentFagsysteminfo().tilFagsystemDTO(), SecureLog.Context.fra(tilbakekreving))

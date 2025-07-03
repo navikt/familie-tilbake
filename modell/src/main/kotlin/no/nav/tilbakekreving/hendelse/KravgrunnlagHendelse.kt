@@ -1,10 +1,9 @@
 package no.nav.tilbakekreving.hendelse
 
 import no.nav.tilbakekreving.UtenforScope
+import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagAdapter
 import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagPeriodeAdapter
-import no.nav.tilbakekreving.entities.AktørEntity
-import no.nav.tilbakekreving.entities.AktørType
 import no.nav.tilbakekreving.entities.BeløpEntity
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.KravgrunnlagHendelseEntity
@@ -63,8 +62,8 @@ class KravgrunnlagHendelse(
             vedtakId = vedtakId,
             kravstatuskode = kravstatuskode,
             fagsystemVedtaksdato = fagsystemVedtaksdato,
-            vedtakGjelder = tilAktørEntity(vedtakGjelder),
-            utbetalesTil = tilAktørEntity(utbetalesTil),
+            vedtakGjelder = vedtakGjelder.tilEntity(),
+            utbetalesTil = utbetalesTil.tilEntity(),
             skalBeregneRenter = skalBeregneRenter,
             ansvarligEnhet = ansvarligEnhet,
             kontrollfelt = kontrollfelt,
@@ -72,13 +71,6 @@ class KravgrunnlagHendelse(
             referanse = referanse,
             perioder = perioder.map { it.tilEntity() },
         )
-    }
-
-    private fun tilAktørEntity(aktør: Aktør): AktørEntity = when (aktør) {
-        is Aktør.Person -> AktørEntity(AktørType.Person, aktør.ident)
-        is Aktør.Organisasjon -> AktørEntity(AktørType.Organisasjon, aktør.ident)
-        is Aktør.Samhandler -> AktørEntity(AktørType.Samhandler, aktør.ident)
-        is Aktør.Applikasjonsbruker -> AktørEntity(AktørType.Applikasjonsbruker, aktør.ident)
     }
 
     class Periode(
@@ -153,17 +145,5 @@ class KravgrunnlagHendelse(
         MANUELL("Manuell behandling"),
         NY("Nytt kravgrunnlag"),
         SPERRET("Kravgrunnlag sperret"),
-    }
-
-    sealed interface Aktør {
-        val ident: String
-
-        data class Person(override val ident: String) : Aktør
-
-        data class Organisasjon(override val ident: String) : Aktør
-
-        data class Samhandler(override val ident: String) : Aktør
-
-        data class Applikasjonsbruker(override val ident: String) : Aktør
     }
 }

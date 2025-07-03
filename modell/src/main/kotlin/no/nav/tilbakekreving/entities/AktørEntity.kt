@@ -1,17 +1,17 @@
 package no.nav.tilbakekreving.entities
 
-import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
+import no.nav.tilbakekreving.aktør.Aktør
 
 data class AktørEntity(
     val aktørType: AktørType,
     val ident: String,
 ) {
-    fun fraEntity(): KravgrunnlagHendelse.Aktør {
+    fun fraEntity(): Aktør {
         return when (aktørType) {
-            AktørType.Person -> KravgrunnlagHendelse.Aktør.Person(ident)
-            AktørType.Organisasjon -> KravgrunnlagHendelse.Aktør.Organisasjon(ident)
-            AktørType.Samhandler -> KravgrunnlagHendelse.Aktør.Samhandler(ident)
-            AktørType.Applikasjonsbruker -> KravgrunnlagHendelse.Aktør.Applikasjonsbruker(ident)
+            AktørType.Person -> Aktør.Person(ident)
+            AktørType.Organisasjon -> Aktør.Organisasjon(ident)
+            AktørType.Samhandler -> Aktør.Samhandler(ident)
+            AktørType.Applikasjonsbruker -> Aktør.Applikasjonsbruker(ident)
         }
     }
 }
