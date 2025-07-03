@@ -15,7 +15,7 @@ class Avstemmingsrad(
     val skatt: BigDecimal,
     val tilbakekrevesNettoUtenRenter: BigDecimal,
     val renter: BigDecimal,
-    val erOmgjøringTilIngenTilbakekreving: Boolean = false,
+    val erOmgjøringTilIngenTilbakekreving: Boolean,
 ) {
     fun toCsvString(): String =
         listOf(

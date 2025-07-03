@@ -70,23 +70,16 @@ class IverksettelseService(
             }
 
             val mmel: MmelDto = oppdragClient.iverksettVedtak(behandlingId, request, logContext).mmel
-
-            val behandlingId = behandlingId
-            val vedtakId = request.tilbakekrevingsvedtak.vedtakId
             val aktør = if (fagsak.institusjon != null) AktørEntity(AktørType.Organisasjon, fagsak.institusjon.organisasjonsnummer) else AktørEntity(AktørType.Person, fagsak.bruker.ident)
-            val ytelsestype = fagsak.ytelsestype
-            val kvittering2 = mmel.alvorlighetsgrad
-            val tilbakekrevingsvedtak = request.tilbakekrevingsvedtak
-            val behandlingstype = behandling.type
 
             val iverksattVedtak = IverksattVedtak(
                 behandlingId = behandlingId,
-                vedtakId = vedtakId,
+                vedtakId = request.tilbakekrevingsvedtak.vedtakId,
                 aktør = aktør,
-                ytelsestypeKode = ytelsestype.kode,
-                kvittering = kvittering2,
-                tilbakekrevingsvedtak = tilbakekrevingsvedtak,
-                behandlingstype = behandlingstype,
+                ytelsestypeKode = fagsak.ytelsestype.kode,
+                kvittering = mmel.alvorlighetsgrad,
+                tilbakekrevingsvedtak = request.tilbakekrevingsvedtak,
+                behandlingstype = behandling.type,
             )
 
             iverksettRepository.lagreIverksattVedtak(iverksattVedtak)
