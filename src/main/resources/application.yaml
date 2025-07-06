@@ -18,6 +18,12 @@ tilbakekreving:
         beslutter: ${rolle.kontantstøtte.beslutter}
         saksbehandler: ${rolle.kontantstøtte.saksbehandler}
     forvalterGruppe: ${rolle.teamfamilie.forvalter}
+  token-exchange:
+    token-endpoint: ${NAIS_TOKEN_ENDPOINT}
+    token-exchange-endpoint: ${NAIS_TOKEN_EXCHANGE_ENDPOINT}
+    token-introspection-endpoint: ${NAIS_TOKEN_INTROSPECTION_ENDPOINT}
+  tilgangsmaskinen:
+    base-url: http://populasjonstilgangskontroll.tilgangsmaskin
 
 server:
   port: 8030

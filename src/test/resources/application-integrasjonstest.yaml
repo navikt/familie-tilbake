@@ -51,3 +51,5 @@ tilbakekreving:
         forvalter: ${rolle.teamfamilie.forvalter}
         saksbehandler: ${rolle.teamfamilie.forvalter}
         beslutter: ${rolle.teamfamilie.forvalter}
+  tilgangsmaskinen:
+    scope: api://dev-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default

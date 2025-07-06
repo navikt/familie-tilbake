@@ -6,6 +6,7 @@ val testcontainersVersion = "1.21.1"
 val tokenValidationVersion = "5.0.29"
 val flywayVersion = "11.3.4"
 val ktorVersion = "3.1.3"
+ext["ktorVersion"] = ktorVersion
 
 group = "no.nav"
 description = "familie-tilbake"
@@ -109,10 +110,11 @@ dependencies {
     api("org.apache.kafka:kafka-clients")
     api("org.springframework.kafka:spring-kafka")
 
-    api(project(":kontrakter-intern"))
-    api(project(":kontrakter-ekstern"))
-    api(project(":modell"))
     api(project(":felles"))
+    api(project(":integrasjoner"))
+    api(project(":kontrakter-ekstern"))
+    api(project(":kontrakter-intern"))
+    api(project(":modell"))
     api(project(":pdf"))
     api("no.nav.familie:prosessering-core:2.20250526085951_e212049") {
         // La spring boot håndtere flyway versjon selv om den er eldre enn den som er inkludert i prosessering-core

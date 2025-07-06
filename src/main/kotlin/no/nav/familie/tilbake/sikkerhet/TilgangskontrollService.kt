@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.sikkerhet
 
 import io.ktor.util.toLowerCasePreservingASCIIRules
+import kotlinx.coroutines.runBlocking
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.Fagsystem
@@ -15,11 +16,16 @@ import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.tilbakekreving.FagsystemUtil
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.Tema
+import no.tilbakekreving.integrasjoner.CallContext
+import no.tilbakekreving.integrasjoner.persontilgang.Persontilgang
+import no.tilbakekreving.integrasjoner.persontilgang.PersontilgangService
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
 import java.math.BigInteger
@@ -34,7 +40,11 @@ class TilgangskontrollService(
     private val auditLogger: AuditLogger,
     private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
     private val integrasjonerClient: IntegrasjonerClient,
+    private val persontilgangService: PersontilgangService,
+    private val tokenValidationContextHolder: TokenValidationContextHolder,
 ) {
+    private val log = TracedLogger.getLogger<TilgangskontrollService>()
+
     fun validerTilgangTilbakekreving(
         tilbakekreving: Tilbakekreving,
         behandlingId: UUID?,
@@ -222,6 +232,7 @@ class TilgangskontrollService(
             fagsystem = fagsystem,
             handling = handling,
             saksbehandler = saksbehandler,
+            logContext = logContext,
         )
 
         if (ident != null) {
@@ -252,16 +263,72 @@ class TilgangskontrollService(
         fagsystem: FagsystemDTO,
         handling: String,
         saksbehandler: String,
+        logContext: SecureLog.Context,
     ) {
         if (personIBehandlingen == null) return
-        val tilganger = integrasjonerClient.sjekkTilgangTilPersoner(listOf(personIBehandlingen), fagsystem.tilTema())
-        if (tilganger.any { !it.harTilgang }) {
+        var validationResult: Boolean? = null
+        try {
+            validationResult = validerMedTilgangsmaskinen(personIBehandlingen, logContext.behandlingId, logContext.fagsystemId)
+            if (applicationProperties.toggles.tilgangsmaskinenEnabled) {
+                if (validationResult) {
+                    return
+                } else {
+                    throw ForbiddenError(
+                        message = "$saksbehandler har ikke tilgang til person i $handling",
+                        frontendFeilmelding = "$saksbehandler  har ikke tilgang til person i $handling",
+                        logContext = SecureLog.Context.tom(),
+                    )
+                }
+            }
+        } catch (ex: Exception) {
+            log.medContext(logContext) { warn("Feilet validering med tilgangsmaskinen.", ex) }
+        }
+
+        log.medContext(logContext) { info("Faller tilbake til validering med familie-integrasjoner") }
+
+        val resultatMedFamilieIntegrasjoner = validerMedFamilieIntegrasjoner(personIBehandlingen, fagsystem)
+        if (resultatMedFamilieIntegrasjoner != validationResult) {
+            log.medContext(SecureLog.Context.tom()) { warn("Validering av tilgang var ulik med familie-integrasjoner og tilgangsmaskinen") }
+        }
+        if (!resultatMedFamilieIntegrasjoner) {
             throw ForbiddenError(
                 message = "$saksbehandler har ikke tilgang til person i $handling",
                 frontendFeilmelding = "$saksbehandler  har ikke tilgang til person i $handling",
                 logContext = SecureLog.Context.tom(),
             )
         }
+    }
+
+    private fun validerMedFamilieIntegrasjoner(
+        personIBehandlingen: String,
+        fagsystem: FagsystemDTO,
+    ): Boolean {
+        val tilganger = integrasjonerClient.sjekkTilgangTilPersoner(listOf(personIBehandlingen), fagsystem.tilTema())
+        return tilganger.all { it.harTilgang }
+    }
+
+    private fun validerMedTilgangsmaskinen(
+        personIdent: String,
+        behandlingId: String?,
+        fagsystemId: String?,
+    ): Boolean {
+        val token = tokenValidationContextHolder.getTokenValidationContext().firstValidToken
+        if (token != null) {
+            val tilgang = runBlocking {
+                persontilgangService.sjekkPersontilgang(
+                    CallContext.Saksbehandler(
+                        behandlingId,
+                        fagsystemId,
+                        userToken = token.encodedToken,
+                    ),
+                    personIdent = personIdent,
+                )
+            }
+            if (tilgang is Persontilgang.Ok) {
+                return true
+            }
+        }
+        return false
     }
 
     private fun FagsystemDTO.tilTema() =

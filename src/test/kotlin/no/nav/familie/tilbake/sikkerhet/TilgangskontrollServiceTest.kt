@@ -32,6 +32,7 @@ import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.tilbakekreving.integrasjoner.persontilgang.PersontilgangService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -99,6 +100,9 @@ internal class TilgangskontrollServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
 
+    @Autowired
+    private lateinit var persontilgangService: PersontilgangService
+
     private val auditLogger: AuditLogger = mockk(relaxed = true)
     private val personIdent: String = "1232"
     private val mockIntegrasjonerClient: IntegrasjonerClient = mockk()
@@ -116,6 +120,8 @@ internal class TilgangskontrollServiceTest : OppslagSpringRunnerTest() {
             auditLogger,
             mottattXmlRepository,
             mockIntegrasjonerClient,
+            persontilgangService,
+            mockk(relaxed = true),
         )
 
         fagsak = fagsakRepository.insert(

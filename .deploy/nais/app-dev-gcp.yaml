@@ -104,6 +104,10 @@ spec:
           namespace: tilbake
           cluster: dev-gcp
     outbound:
+      rules:
+        - application: populasjonstilgangskontroll
+          namespace: tilgangsmaskin
+          cluster: dev-gcp
       external:
         - host: tilbake-unleash-api.nav.cloud.nais.io
         - host: familie-integrasjoner.dev-fss-pub.nais.io

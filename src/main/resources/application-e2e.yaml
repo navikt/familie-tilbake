@@ -59,6 +59,10 @@ no.nav.security.jwt:
           client-secret: ${AZURE_APP_CLIENT_SECRET}
           client-auth-method: client_secret_basic
 
+tilbakekreving:
+  tilgangsmaskinen:
+    scope: api://dev-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
+
 logging:
   config: "classpath:logback-e2e.xml"
 

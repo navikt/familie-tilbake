@@ -7,6 +7,7 @@ spring:
     placeholders:
       ignoreIfProd: --
 
+
 oppdrag.mq:
   queuemanager: MPLS02
   kravgrunnlag: QA.P_FAMILIE_TILBAKE.KRAVGRUNNLAG
@@ -53,3 +54,6 @@ kafka:
   hentFagsystem:
     requestTopic: ${KAFKA_HENTFAGSYSTEM_REQUEST_TOPIC:tilbake.privat-tbk-hentfagsystemsbehandling}
     responseTopic: ${KAFKA_HENTFAGSYSTEM_RESPONSE_TOPIC:tilbake.privat-tbk-hentfagsystemsbehandling-svar}
+tilbakekreving:
+  tilgangsmaskinen:
+    scope: api://dev-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
