@@ -266,28 +266,29 @@ class TilgangskontrollService(
         logContext: SecureLog.Context,
     ) {
         if (personIBehandlingen == null) return
-        var validationResult: Boolean? = null
-        try {
-            validationResult = validerMedTilgangsmaskinen(personIBehandlingen, logContext.behandlingId, logContext.fagsystemId)
-            if (applicationProperties.toggles.tilgangsmaskinenEnabled) {
-                if (validationResult) {
-                    return
-                } else {
-                    throw ForbiddenError(
-                        message = "$saksbehandler har ikke tilgang til person i $handling",
-                        frontendFeilmelding = "$saksbehandler  har ikke tilgang til person i $handling",
-                        logContext = SecureLog.Context.tom(),
-                    )
-                }
-            }
+        val tilgangTilPerson = try {
+            validerMedTilgangsmaskinen(personIBehandlingen, logContext.behandlingId, logContext.fagsystemId)
         } catch (ex: Exception) {
             log.medContext(logContext) { warn("Feilet validering med tilgangsmaskinen.", ex) }
+            null
         }
 
-        log.medContext(logContext) { info("Faller tilbake til validering med familie-integrasjoner") }
+        if (applicationProperties.toggles.tilgangsmaskinenEnabled) {
+            if (tilgangTilPerson == null) {
+                log.medContext(logContext) { info("Faller tilbake til validering med familie-integrasjoner") }
+            } else if (tilgangTilPerson) {
+                return
+            } else {
+                throw ForbiddenError(
+                    message = "$saksbehandler har ikke tilgang til person i $handling",
+                    frontendFeilmelding = "$saksbehandler  har ikke tilgang til person i $handling",
+                    logContext = SecureLog.Context.tom(),
+                )
+            }
+        }
 
         val resultatMedFamilieIntegrasjoner = validerMedFamilieIntegrasjoner(personIBehandlingen, fagsystem)
-        if (resultatMedFamilieIntegrasjoner != validationResult) {
+        if (resultatMedFamilieIntegrasjoner != tilgangTilPerson) {
             log.medContext(SecureLog.Context.tom()) { warn("Validering av tilgang var ulik med familie-integrasjoner og tilgangsmaskinen") }
         }
         if (!resultatMedFamilieIntegrasjoner) {
