@@ -56,4 +56,4 @@ kafka:
     responseTopic: ${KAFKA_HENTFAGSYSTEM_RESPONSE_TOPIC:tilbake.privat-tbk-hentfagsystemsbehandling-svar}
 tilbakekreving:
   tilgangsmaskinen:
-    scope: api://dev-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
+    scope: api://prod-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
