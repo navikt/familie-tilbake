@@ -62,6 +62,7 @@ no.nav.security.jwt:
 tilbakekreving:
   tilgangsmaskinen:
     scope: api://dev-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
+  kravgrunnlag: []
 
 logging:
   config: "classpath:logback-e2e.xml"
