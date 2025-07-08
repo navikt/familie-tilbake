@@ -288,7 +288,9 @@ class TilgangskontrollService(
         }
 
         val resultatMedFamilieIntegrasjoner = validerMedFamilieIntegrasjoner(personIBehandlingen, fagsystem)
-        if (resultatMedFamilieIntegrasjoner != tilgangTilPerson) {
+        if (resultatMedFamilieIntegrasjoner == tilgangTilPerson) {
+            log.medContext(SecureLog.Context.tom()) { info("Validering av tilgang kom frem til samme utfall med familie-integrasjoner og tilgangsmaskinen") }
+        } else {
             log.medContext(SecureLog.Context.tom()) { warn("Validering av tilgang var ulik med familie-integrasjoner og tilgangsmaskinen") }
         }
         if (!resultatMedFamilieIntegrasjoner) {
