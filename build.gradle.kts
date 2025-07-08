@@ -1,11 +1,11 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
-val springDocVersion = "2.8.8"
-val testcontainersVersion = "1.21.1"
-val tokenValidationVersion = "5.0.29"
+val springDocVersion = "2.8.9"
+val testcontainersVersion = "1.21.3"
+val tokenValidationVersion = "5.0.30"
 val flywayVersion = "11.3.4"
-val ktorVersion = "3.1.3"
+val ktorVersion = "3.2.1"
 ext["ktorVersion"] = ktorVersion
 
 group = "no.nav"
@@ -13,10 +13,10 @@ description = "familie-tilbake"
 java.sourceCompatibility = JavaVersion.VERSION_21
 
 plugins {
-    kotlin("jvm") version "2.1.21"
-    id("org.springframework.boot") version "3.5.0"
-    id("org.jetbrains.kotlin.plugin.spring") version "2.1.21"
-    id("org.jlleitschuh.gradle.ktlint") version "12.3.0"
+    kotlin("jvm") version "2.2.0"
+    id("org.springframework.boot") version "3.5.3"
+    id("org.jetbrains.kotlin.plugin.spring") version "2.2.0"
+    id("org.jlleitschuh.gradle.ktlint") version "13.0.0"
 }
 
 springBoot {
@@ -54,7 +54,7 @@ subprojects {
     }
 
     dependencies {
-        testImplementation("org.junit.jupiter:junit-jupiter:5.13.0")
+        testImplementation("org.junit.jupiter:junit-jupiter:5.13.3")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
         testImplementation("io.kotest:kotest-assertions-core:5.9.1")
     }
@@ -99,7 +99,7 @@ dependencies {
     api("com.fasterxml.jackson.core:jackson-databind")
     api("com.fasterxml.jackson.module:jackson-module-kotlin")
 
-    api("com.ibm.mq:com.ibm.mq.jakarta.client:9.4.2.1")
+    api("com.ibm.mq:com.ibm.mq.jakarta.client:9.4.3.0")
     api("jakarta.jms:jakarta.jms-api")
     api("org.apache.activemq:activemq-jms-pool")
     api("org.springframework:spring-jms")
@@ -116,7 +116,7 @@ dependencies {
     api(project(":kontrakter-intern"))
     api(project(":modell"))
     api(project(":pdf"))
-    api("no.nav.familie:prosessering-core:2.20250526085951_e212049") {
+    api("no.nav.familie:prosessering-core:2.20250630085333_3794bb5") {
         // La spring boot håndtere flyway versjon selv om den er eldre enn den som er inkludert i prosessering-core
         exclude("org.flywaydb")
     }
@@ -133,15 +133,15 @@ dependencies {
     api("io.micrometer:micrometer-registry-prometheus")
     api("net.logstash.logback:logstash-logback-encoder:8.1")
 
-    api("io.getunleash:unleash-client-java:10.2.2")
+    api("io.getunleash:unleash-client-java:11.0.2")
     api("org.messaginghub:pooled-jms:3.1.7")
     api("org.flywaydb:flyway-core")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
 
-    testImplementation("org.junit.jupiter:junit-jupiter:5.13.0")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.13.3")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    testImplementation("io.mockk:mockk-jvm:1.14.2")
+    testImplementation("io.mockk:mockk-jvm:1.14.4")
     testImplementation("io.kotest:kotest-runner-junit5-jvm:5.9.1")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -157,6 +157,6 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers:$testcontainersVersion")
 
     testImplementation("org.apache.kafka:kafka_2.13")
-    testImplementation("org.wiremock:wiremock-standalone:3.13.0")
+    testImplementation("org.wiremock:wiremock-standalone:3.13.1")
     testImplementation("org.apache.activemq:activemq-client")
 }
