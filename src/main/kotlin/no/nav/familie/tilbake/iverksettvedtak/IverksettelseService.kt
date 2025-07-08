@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.iverksettvedtak
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
 import no.nav.familie.tilbake.behandling.FagsakRepository
@@ -9,6 +10,8 @@ import no.nav.familie.tilbake.integration.økonomi.OppdragClient
 import no.nav.familie.tilbake.iverksettvedtak.domain.KodeResultat
 import no.nav.familie.tilbake.iverksettvedtak.domain.Tilbakekrevingsbeløp
 import no.nav.familie.tilbake.iverksettvedtak.domain.Tilbakekrevingsperiode
+import no.nav.familie.tilbake.iverksettvedtak.domain.ØkonomiXmlSendt
+import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.KodeAksjon
@@ -25,7 +28,6 @@ import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.Tilbakekrevingsvedt
 import no.nav.tilbakekreving.typer.v1.MmelDto
 import no.nav.tilbakekreving.typer.v1.PeriodeDto
 import no.nav.tilbakekreving.vedtak.IverksattVedtak
-import no.nav.tilbakekreving.vedtak.IverksettRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -36,12 +38,12 @@ import java.util.UUID
 class IverksettelseService(
     private val behandlingRepository: BehandlingRepository,
     private val kravgrunnlagRepository: KravgrunnlagRepository,
-    private val fagsakRepository: FagsakRepository,
-    private val iverksettRepository: IverksettRepository,
+    private val økonomiXmlSendtRepository: ØkonomiXmlSendtRepository,
     private val tilbakekrevingsvedtakBeregningService: TilbakekrevingsvedtakBeregningService,
     private val behandlingVedtakService: BehandlingsvedtakService,
     private val oppdragClient: OppdragClient,
     private val logService: LogService,
+    private val fagsakRepository: FagsakRepository,
 ) {
     private val log = TracedLogger.getLogger<IverksettelseService>()
 
@@ -49,7 +51,6 @@ class IverksettelseService(
     fun sendIverksettVedtak(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val logContext = logService.contextFraBehandling(behandling.id)
-        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
 
         if (behandling.erAvsluttet) {
             log.medContext(logContext) {
@@ -69,23 +70,18 @@ class IverksettelseService(
                 info("Sender tilbakekrevingsvedtak til økonomi for behandlingId={} request={}", behandlingId.toString(), requestXml)
             }
 
-            val mmel: MmelDto = oppdragClient.iverksettVedtak(behandlingId, request, logContext).mmel
-            val aktør = if (fagsak.institusjon != null) AktørEntity(AktørType.Organisasjon, fagsak.institusjon.organisasjonsnummer) else AktørEntity(AktørType.Person, fagsak.bruker.ident)
-
-            val iverksattVedtak = IverksattVedtak(
-                behandlingId = behandlingId,
-                vedtakId = request.tilbakekrevingsvedtak.vedtakId,
-                aktør = aktør,
-                ytelsestypeKode = fagsak.ytelsestype.kode,
-                kvittering = mmel.alvorlighetsgrad,
-                tilbakekrevingsvedtak = request.tilbakekrevingsvedtak,
-                behandlingstype = behandling.type,
-            )
-
-            iverksettRepository.lagreIverksattVedtak(iverksattVedtak)
+            // Send request til økonomi
+            val kvittering = objectMapper.writeValueAsString(oppdragClient.iverksettVedtak(behandlingId, request, logContext).mmel)
+            lagreIverksettelsesvedtakRequest(behandlingId, requestXml, kvittering)
             behandlingVedtakService.oppdaterBehandlingsvedtak(behandlingId, Iverksettingsstatus.IVERKSATT)
         }
     }
+
+    fun lagreIverksettelsesvedtakRequest(
+        behandlingId: UUID,
+        requestXml: String,
+        kvittering: String?,
+    ): ØkonomiXmlSendt = økonomiXmlSendtRepository.insert(ØkonomiXmlSendt(behandlingId = behandlingId, melding = requestXml, kvittering = kvittering))
 
     private fun lagIveksettelseRequest(
         ansvarligSaksbehandler: String,
@@ -165,4 +161,35 @@ class IverksettelseService(
         }
 
     private fun harSattDelvisTilbakekrevingMenKreverTilbakeFulltBeløp(tilbakekrevingsbeløp: Tilbakekrevingsbeløp) = tilbakekrevingsbeløp.kodeResultat == KodeResultat.DELVIS_TILBAKEKREVING && tilbakekrevingsbeløp.uinnkrevdBeløp == BigDecimal.ZERO
+
+    fun hentGamleVedtak(dato: LocalDate): List<IverksattVedtak> {
+        return økonomiXmlSendtRepository.findByOpprettetPåDato(dato).map { gamleVedtaker ->
+            val behandling = behandlingRepository.findByIdOrThrow(gamleVedtaker.behandlingId)
+            val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+
+            val request = TilbakekrevingsvedtakMarshaller.unmarshall(
+                gamleVedtaker.melding,
+                gamleVedtaker.behandlingId,
+                gamleVedtaker.id,
+                logService.contextFraBehandling(behandling.id),
+            )
+
+            val mmel: MmelDto? = gamleVedtaker.kvittering?.let { objectMapper.readValue(it) }
+
+            val aktør = when (val institusjon = fagsak.institusjon) {
+                null -> AktørEntity(AktørType.Person, fagsak.bruker.ident)
+                else -> AktørEntity(AktørType.Organisasjon, institusjon.organisasjonsnummer)
+            }
+
+            IverksattVedtak(
+                behandlingId = gamleVedtaker.behandlingId,
+                vedtakId = request.tilbakekrevingsvedtak.vedtakId,
+                aktør = aktør,
+                ytelsestypeKode = fagsak.ytelsestype.kode,
+                kvittering = mmel?.alvorlighetsgrad,
+                tilbakekrevingsvedtak = request.tilbakekrevingsvedtak,
+                behandlingstype = behandling.type,
+            )
+        }
+    }
 }

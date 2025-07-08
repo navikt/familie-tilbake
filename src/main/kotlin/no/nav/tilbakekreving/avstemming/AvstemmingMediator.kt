@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.avstemming
 
 import no.nav.familie.tilbake.config.IntegrasjonerConfig
+import no.nav.familie.tilbake.iverksettvedtak.IverksettelseService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.tilbakekreving.entities.AktørType
@@ -12,6 +13,7 @@ import java.time.LocalDate
 
 @Service
 class AvstemmingMediator(
+    private val iverksettelseService: IverksettelseService,
     private val iverksettRepository: IverksettRepository,
     private val integrasjonerConfig: IntegrasjonerConfig,
 ) {
@@ -19,7 +21,8 @@ class AvstemmingMediator(
     private final val kvitteringerOkKoder = setOf("00", "04")
 
     fun avstem(dato: LocalDate): ByteArray? {
-        val iverksattVedtakListe = iverksettRepository.hentIverksattVedtakMedOpprettetTid(dato)
+        val iverksattVedtakListe = iverksettRepository.hentIverksattVedtakMedOpprettetTid(dato) +
+            iverksettelseService.hentGamleVedtak(dato)
 
         var antallFeilet = 0
         var antallFørstegangsvedtakUtenTilbakekreving = 0
@@ -105,5 +108,5 @@ class AvstemmingMediator(
         iverksattVedtak: IverksattVedtak,
     ): Boolean = iverksattVedtak.behandlingstype == Behandlingstype.REVURDERING_TILBAKEKREVING && oppsummering.harIngenTilbakekreving()
 
-    private fun erKvitteringOK(kvittering: String): Boolean = kvitteringerOkKoder.contains(kvittering)
+    private fun erKvitteringOK(kvittering: String?): Boolean = kvitteringerOkKoder.contains(kvittering)
 }

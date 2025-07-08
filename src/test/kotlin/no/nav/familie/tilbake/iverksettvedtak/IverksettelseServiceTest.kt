@@ -36,6 +36,7 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.log.LogService
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakResponse
 import no.nav.tilbakekreving.api.v1.dto.AktsomhetDto
@@ -132,12 +133,12 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
             IverksettelseService(
                 behandlingRepository,
                 kravgrunnlagRepository,
-                fagsakRepository,
-                iverksettRepository,
+                økonomiXmlSendtRepository,
                 tilbakekrevingsvedtakBeregningService,
                 behandlingVedtakService,
                 oppdragClient,
                 logService,
+                fagsakRepository,
             )
     }
 
@@ -152,10 +153,11 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
         mockIverksettelseResponse("00", "OK")
 
         iverksettelseService.sendIverksettVedtak(behandlingId)
-        val iverksattVedtak = iverksettRepository.findByBehandlingId(behandlingId)
-        iverksattVedtak.shouldNotBeNull()
-        assertRequestXml(iverksattVedtak.tilbakekrevingsvedtak)
-        assertRespons(iverksattVedtak.kvittering, "00")
+
+        val økonomiXmlSendt = økonomiXmlSendtRepository.findByBehandlingId(behandlingId)
+        økonomiXmlSendt.shouldNotBeNull()
+        assertRequestXml(økonomiXmlSendt.melding, behandlingId, økonomiXmlSendt.id)
+        assertRespons(økonomiXmlSendt.kvittering, "00", "OK")
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val aktivBehandlingsresultat = behandling.sisteResultat
@@ -333,14 +335,23 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
     private fun assertRespons(
         kvittering: String?,
         alvorlighetsgrad: String,
+        kodeMelding: String,
     ) {
         kvittering.shouldNotBeEmpty()
-        kvittering shouldBe alvorlighetsgrad
+        val mmelDto = objectMapper.readValue(kvittering, MmelDto::class.java)
+        mmelDto.alvorlighetsgrad shouldBe alvorlighetsgrad
+        mmelDto.kodeMelding shouldBe kodeMelding
     }
 
     private fun assertRequestXml(
-        tilbakekrevingsvedtak: TilbakekrevingsvedtakDto,
+        melding: String,
+        behandlingId: UUID,
+        xmlId: UUID,
     ) {
+        val request = TilbakekrevingsvedtakMarshaller.unmarshall(melding, behandlingId, xmlId, SecureLog.Context.tom())
+        request.shouldNotBeNull()
+
+        val tilbakekrevingsvedtak = request.tilbakekrevingsvedtak
         tilbakekrevingsvedtak.kodeAksjon shouldBe KodeAksjon.FATTE_VEDTAK.kode
         tilbakekrevingsvedtak.datoVedtakFagsystem.shouldNotBeNull()
         tilbakekrevingsvedtak.vedtakId shouldBe BigInteger.ZERO

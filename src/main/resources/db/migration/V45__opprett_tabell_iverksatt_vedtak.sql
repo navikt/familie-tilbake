@@ -4,7 +4,7 @@ CREATE TABLE iverksatt_vedtak (
     vedtak_id BIGINT,
     aktør JSONB NOT NULL,
     ytelsestype VARCHAR NOT NULL,
-    kvittering VARCHAR NOT NULL,
+    kvittering VARCHAR,
     tilbakekrevingsvedtak JSONB NOT NULL,
     opprettet_av  VARCHAR      DEFAULT 'VL',
     opprettet_tid TIMESTAMP(3) DEFAULT localtimestamp,

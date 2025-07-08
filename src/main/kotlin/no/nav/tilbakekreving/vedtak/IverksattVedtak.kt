@@ -13,7 +13,7 @@ data class IverksattVedtak(
     val vedtakId: BigInteger,
     val aktør: AktørEntity,
     val ytelsestypeKode: String,
-    val kvittering: String,
+    val kvittering: String?,
     val tilbakekrevingsvedtak: TilbakekrevingsvedtakDto,
     val sporbar: Sporbar = Sporbar(),
     val behandlingstype: Behandlingstype,
