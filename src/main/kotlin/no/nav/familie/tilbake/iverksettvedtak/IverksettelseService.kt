@@ -1,9 +1,10 @@
 package no.nav.familie.tilbake.iverksettvedtak
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
+import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Iverksettingsstatus
-import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.integration.økonomi.OppdragClient
 import no.nav.familie.tilbake.iverksettvedtak.domain.KodeResultat
@@ -19,10 +20,14 @@ import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
+import no.nav.tilbakekreving.entities.AktørEntity
+import no.nav.tilbakekreving.entities.AktørType
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsbelopDto
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsperiodeDto
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsvedtakDto
+import no.nav.tilbakekreving.typer.v1.MmelDto
 import no.nav.tilbakekreving.typer.v1.PeriodeDto
+import no.nav.tilbakekreving.vedtak.IverksattVedtak
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -35,10 +40,10 @@ class IverksettelseService(
     private val kravgrunnlagRepository: KravgrunnlagRepository,
     private val økonomiXmlSendtRepository: ØkonomiXmlSendtRepository,
     private val tilbakekrevingsvedtakBeregningService: TilbakekrevingsvedtakBeregningService,
-    private val beregningService: TilbakekrevingsberegningService,
     private val behandlingVedtakService: BehandlingsvedtakService,
     private val oppdragClient: OppdragClient,
     private val logService: LogService,
+    private val fagsakRepository: FagsakRepository,
 ) {
     private val log = TracedLogger.getLogger<IverksettelseService>()
 
@@ -156,4 +161,36 @@ class IverksettelseService(
         }
 
     private fun harSattDelvisTilbakekrevingMenKreverTilbakeFulltBeløp(tilbakekrevingsbeløp: Tilbakekrevingsbeløp) = tilbakekrevingsbeløp.kodeResultat == KodeResultat.DELVIS_TILBAKEKREVING && tilbakekrevingsbeløp.uinnkrevdBeløp == BigDecimal.ZERO
+
+    fun hentGamleVedtak(dato: LocalDate): List<IverksattVedtak> {
+        return økonomiXmlSendtRepository.findByOpprettetPåDato(dato).map { gammeltVedtak ->
+            val behandling = behandlingRepository.findByIdOrThrow(gammeltVedtak.behandlingId)
+            val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+
+            val request = TilbakekrevingsvedtakMarshaller.unmarshall(
+                gammeltVedtak.melding,
+                gammeltVedtak.behandlingId,
+                gammeltVedtak.id,
+                logService.contextFraBehandling(behandling.id),
+            )
+
+            val mmel: MmelDto? = gammeltVedtak.kvittering?.let { objectMapper.readValue(it) }
+
+            val aktør = when (val institusjon = fagsak.institusjon) {
+                null -> AktørEntity(AktørType.Person, fagsak.bruker.ident)
+                else -> AktørEntity(AktørType.Organisasjon, institusjon.organisasjonsnummer)
+            }
+
+            IverksattVedtak(
+                behandlingId = gammeltVedtak.behandlingId,
+                vedtakId = request.tilbakekrevingsvedtak.vedtakId,
+                aktør = aktør,
+                ytelsestypeKode = fagsak.ytelsestype.kode,
+                kvittering = mmel?.alvorlighetsgrad,
+                tilbakekrevingsvedtak = request.tilbakekrevingsvedtak,
+                behandlingstype = behandling.type,
+                sporbar = gammeltVedtak.sporbar,
+            )
+        }
+    }
 }

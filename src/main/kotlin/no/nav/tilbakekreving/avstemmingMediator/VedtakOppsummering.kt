@@ -1,9 +1,9 @@
-package no.nav.familie.tilbake.avstemming
+package no.nav.tilbakekreving.avstemmingMediator
 
-import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsvedtakDto
+import no.nav.tilbakekreving.vedtak.IverksattVedtak
 import java.math.BigDecimal
 
-class TilbakekrevingsvedtakOppsummering(
+class VedtakOppsummering(
     val økonomivedtakId: String,
     val tilbakekrevesBruttoUtenRenter: BigDecimal,
     val tilbakekrevesNettoUtenRenter: BigDecimal,
@@ -13,23 +13,23 @@ class TilbakekrevingsvedtakOppsummering(
     fun harIngenTilbakekreving(): Boolean = tilbakekrevesBruttoUtenRenter.signum() == 0
 
     companion object {
-        fun oppsummer(tilbakekrevingsvedtak: TilbakekrevingsvedtakDto): TilbakekrevingsvedtakOppsummering {
+        fun oppsummer(iverksattVedtak: IverksattVedtak): VedtakOppsummering {
             var bruttoUtenRenter = BigDecimal.ZERO
             var renter = BigDecimal.ZERO
             var skatt = BigDecimal.ZERO
-            for (periode in tilbakekrevingsvedtak.tilbakekrevingsperiode) {
+            for (periode in iverksattVedtak.tilbakekrevingsvedtak.tilbakekrevingsperiode) {
                 renter = renter.add(periode.belopRenter)
                 for (beløp in periode.tilbakekrevingsbelop) {
                     bruttoUtenRenter = bruttoUtenRenter.add(beløp.belopTilbakekreves)
                     skatt = skatt.add(beløp.belopSkatt)
                 }
             }
-            return TilbakekrevingsvedtakOppsummering(
-                renter = renter,
-                skatt = skatt,
+            return VedtakOppsummering(
+                økonomivedtakId = iverksattVedtak.vedtakId.toString(),
                 tilbakekrevesBruttoUtenRenter = bruttoUtenRenter,
                 tilbakekrevesNettoUtenRenter = bruttoUtenRenter.subtract(skatt),
-                økonomivedtakId = tilbakekrevingsvedtak.vedtakId.toString(),
+                renter = renter,
+                skatt = skatt,
             )
         }
     }

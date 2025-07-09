@@ -51,6 +51,7 @@ import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresu
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsbelopDto
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsvedtakDto
 import no.nav.tilbakekreving.typer.v1.MmelDto
+import no.nav.tilbakekreving.vedtak.IverksettRepository
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -68,6 +69,9 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
+
+    @Autowired
+    private lateinit var iverksettRepository: IverksettRepository
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
@@ -131,10 +135,10 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
                 kravgrunnlagRepository,
                 økonomiXmlSendtRepository,
                 tilbakekrevingsvedtakBeregningService,
-                beregningService,
                 behandlingVedtakService,
                 oppdragClient,
                 logService,
+                fagsakRepository,
             )
     }
 
@@ -174,6 +178,8 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
 
         val økonomiXmlSendt = økonomiXmlSendtRepository.findByBehandlingId(behandlingId)
         økonomiXmlSendt.shouldBeNull()
+        val iverksattVedtak = iverksettRepository.findByBehandlingId(behandlingId)
+        iverksattVedtak.shouldBeNull()
     }
 
     @Test

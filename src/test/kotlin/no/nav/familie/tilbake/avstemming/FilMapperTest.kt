@@ -2,6 +2,8 @@ package no.nav.familie.tilbake.avstemming
 
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.behandling.Ytelsestype
+import no.nav.tilbakekreving.avstemmingMediator.AvstemmingFilMapper
+import no.nav.tilbakekreving.avstemmingMediator.Avstemmingsrad
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -9,7 +11,7 @@ import java.time.LocalDate
 class FilMapperTest {
     @Test
     fun `tilFlatfil skal liste ut med forventet format for datoer og tall skal multipliseres med 100`() {
-        val avstemmingsfil = FilMapper(listOf(testRad()))
+        val avstemmingsfil = AvstemmingFilMapper(listOf(testRad()))
 
         avstemmingsfil
             .tilFlatfil()
@@ -18,7 +20,7 @@ class FilMapperTest {
 
     @Test
     fun `tilFlatfil skal ha newline for å skille rader`() {
-        val avstemmingsfil = FilMapper(listOf(testRad(), testRad()))
+        val avstemmingsfil = AvstemmingFilMapper(listOf(testRad(), testRad()))
         val enRad = "familie-tilbake;1234;12345678901;20191231;BA;1000;200;800;100;"
         avstemmingsfil.tilFlatfil().decodeToString() shouldBe "$FORVENTET_HEADER$enRad\n$enRad"
     }
@@ -26,14 +28,14 @@ class FilMapperTest {
     @Test
     fun `tilFlatfil skal bruke kode i siste kolonne når det er omgjøring til ingen tilbakekreving`() {
         val avstemmingsfil =
-            FilMapper(
+            AvstemmingFilMapper(
                 listOf(
-                    Rad(
+                    Avstemmingsrad(
                         avsender = "familie-tilbake",
                         vedtakId = "1234",
                         fnr = "12345678901",
                         vedtaksdato = LocalDate.of(2019, 12, 31),
-                        fagsakYtelseType = Ytelsestype.BARNETRYGD,
+                        fagsakYtelseType = Ytelsestype.BARNETRYGD.kode,
                         tilbakekrevesBruttoUtenRenter = BigDecimal.ZERO,
                         tilbakekrevesNettoUtenRenter = BigDecimal.ZERO,
                         renter = BigDecimal.ZERO,
@@ -47,13 +49,13 @@ class FilMapperTest {
             .decodeToString() shouldBe FORVENTET_HEADER + "familie-tilbake;1234;12345678901;20191231;BA;0;0;0;0;Omgjoring0"
     }
 
-    private fun testRad(): Rad =
-        Rad(
+    private fun testRad(): Avstemmingsrad =
+        Avstemmingsrad(
             avsender = "familie-tilbake",
             vedtakId = "1234",
             fnr = "12345678901",
             vedtaksdato = LocalDate.of(2019, 12, 31),
-            fagsakYtelseType = Ytelsestype.BARNETRYGD,
+            fagsakYtelseType = Ytelsestype.BARNETRYGD.kode,
             tilbakekrevesBruttoUtenRenter = BigDecimal.valueOf(1000),
             tilbakekrevesNettoUtenRenter = BigDecimal.valueOf(800),
             skatt = BigDecimal.valueOf(200),
