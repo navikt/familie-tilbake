@@ -213,8 +213,9 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
         behandlingService.settBehandlingPåVent(
             behandling.id,
             BehandlingPåVentDto(
-                Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-                LocalDate.now().plusDays(1),
+                venteårsak = Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
+                tidsfrist = LocalDate.now().plusDays(1),
+                begrunnelse = null,
             ),
         )
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)

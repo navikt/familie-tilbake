@@ -216,6 +216,24 @@ class BehandlingController(
         @Valid @RequestBody
         behandlingPåVentDto: BehandlingPåVentDto,
     ): Ressurs<String> {
+        val håndtert = tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving ->
+            tilgangskontrollService.validerTilgangTilbakekreving(
+                tilbakekreving = tilbakekreving,
+                behandlingId = behandlingId,
+                minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                auditLoggerEvent = AuditLoggerEvent.UPDATE,
+                handling = "Setter saksbehandler behandling på vent eller utvider fristen",
+            )
+            tilbakekreving.behandlingHistorikk.nåværende().entry.settPåVent(
+                årsak = behandlingPåVentDto.venteårsak,
+                utløpsdato = behandlingPåVentDto.tidsfrist,
+                begrunnelse = behandlingPåVentDto.begrunnelse,
+            )
+            true
+        }
+        if (håndtert ?: false) {
+            return Ressurs.success("OK")
+        }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
@@ -234,6 +252,20 @@ class BehandlingController(
     fun taBehandlingAvVent(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<String> {
+        val håndtert = tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving ->
+            tilgangskontrollService.validerTilgangTilbakekreving(
+                tilbakekreving = tilbakekreving,
+                behandlingId = behandlingId,
+                minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                auditLoggerEvent = AuditLoggerEvent.UPDATE,
+                handling = "Saksbehandler tar behandling av vent etter å motta brukerrespons eller dokumentasjon",
+            )
+            tilbakekreving.behandlingHistorikk.nåværende().entry.taAvVent()
+            true
+        }
+        if (håndtert ?: false) {
+            return Ressurs.success("OK")
+        }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,

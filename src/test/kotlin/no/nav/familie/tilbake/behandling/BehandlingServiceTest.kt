@@ -974,6 +974,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                     BehandlingPåVentDto(
                         venteårsak = Venteårsak.ENDRE_TILKJENT_YTELSE,
                         tidsfrist = LocalDate.now().minusDays(4),
+                        begrunnelse = null,
                     ),
                 )
             }
@@ -993,16 +994,16 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
             )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
-        val exception =
-            shouldThrow<RuntimeException> {
-                behandlingService.settBehandlingPåVent(
-                    behandling.id,
-                    BehandlingPåVentDto(
-                        venteårsak = Venteårsak.ENDRE_TILKJENT_YTELSE,
-                        tidsfrist = LocalDate.now(),
-                    ),
-                )
-            }
+        val exception = shouldThrow<RuntimeException> {
+            behandlingService.settBehandlingPåVent(
+                behandling.id,
+                BehandlingPåVentDto(
+                    venteårsak = Venteårsak.ENDRE_TILKJENT_YTELSE,
+                    tidsfrist = LocalDate.now(),
+                    begrunnelse = null,
+                ),
+            )
+        }
         exception.message shouldBe "Fristen må være større enn dagens dato for behandling ${behandling.id}"
     }
 
@@ -1019,11 +1020,11 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
             )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
-        val behandlingPåVentDto =
-            BehandlingPåVentDto(
-                venteårsak = Venteårsak.ENDRE_TILKJENT_YTELSE,
-                tidsfrist = LocalDate.now().plusDays(1),
-            )
+        val behandlingPåVentDto = BehandlingPåVentDto(
+            venteårsak = Venteårsak.ENDRE_TILKJENT_YTELSE,
+            tidsfrist = LocalDate.now().plusDays(1),
+            begrunnelse = null,
+        )
 
         behandlingService.settBehandlingPåVent(behandling.id, behandlingPåVentDto)
 
@@ -1079,11 +1080,11 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
         behandlingService.settBehandlingPåVent(
             behandlingId = behandling.id,
-            behandlingPåVentDto =
-                BehandlingPåVentDto(
-                    Venteårsak.AVVENTER_DOKUMENTASJON,
-                    LocalDate.now().plusDays(2),
-                ),
+            behandlingPåVentDto = BehandlingPåVentDto(
+                venteårsak = Venteårsak.AVVENTER_DOKUMENTASJON,
+                tidsfrist = LocalDate.now().plusDays(2),
+                begrunnelse = null,
+            ),
         )
 
         behandlingskontrollService.erBehandlingPåVent(behandling.id).shouldBeTrue()

@@ -25,6 +25,7 @@ data class BehandlingEntity(
     val vilkårsvurderingstegEntity: VilkårsvurderingstegEntity,
     val foreslåVedtakStegEntity: ForeslåVedtakStegEntity,
     val fatteVedtakStegEntity: FatteVedtakStegEntity,
+    val påVentEntity: PåVentEntity?,
 ) {
     fun fraEntity(
         eksternFagsakBehandlingHistorikk: EksternFagsakBehandlingHistorikk,
@@ -51,6 +52,7 @@ data class BehandlingEntity(
             vilkårsvurderingsteg = vilkårsvurderingstegEntity.fraEntity(kravgrunnlag, foreldelsessteg),
             foreslåVedtakSteg = foreslåVedtakStegEntity.fraEntity(),
             fatteVedtakSteg = fatteVedtakStegEntity.fraEntity(),
+            påVent = påVentEntity?.fraEntity(),
         )
     }
 }

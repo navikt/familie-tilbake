@@ -35,6 +35,7 @@ import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.tilstand.IverksettVedtak
 import no.nav.tilbakekreving.tilstand.Start
 import no.nav.tilbakekreving.tilstand.Tilstand
 import java.time.LocalDateTime
@@ -160,7 +161,11 @@ class Tilbakekreving internal constructor(
         behandlingssteg: Behandlingssteg,
         vurdering: FatteVedtakSteg.Vurdering,
     ) {
-        behandlingHistorikk.nåværende().entry.håndter(this, beslutter, behandlingssteg, vurdering)
+        val behandling = behandlingHistorikk.nåværende().entry
+        behandling.håndter(beslutter, behandlingssteg, vurdering)
+        if (behandling.kanUtbetales()) {
+            byttTilstand(IverksettVedtak)
+        }
     }
 
     fun håndter(

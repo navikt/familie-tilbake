@@ -10,6 +10,7 @@ enum class Venteårsak(
     UTVIDET_TILSVAR_FRIST(0, "Utvidet tilsvarsfrist"),
     ENDRE_TILKJENT_YTELSE(0, "Mulig endring i tilkjent ytelse"),
     VENT_PÅ_MULIG_MOTREGNING(0, "Mulig motregning med annen ytelse"),
+    MANGLER_STØTTE(0, "Mangler systemstøtte"),
     ;
 
     companion object {
