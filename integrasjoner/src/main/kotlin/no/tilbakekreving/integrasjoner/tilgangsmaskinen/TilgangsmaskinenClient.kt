@@ -38,6 +38,7 @@ internal class TilgangsmaskinenClient internal constructor(
             else -> throw UnexpectedResponseException(
                 message = "Uventet svar fra tilgangsmaskinen",
                 statusCode = response.status,
+                response = response.body(),
             )
         }
     }

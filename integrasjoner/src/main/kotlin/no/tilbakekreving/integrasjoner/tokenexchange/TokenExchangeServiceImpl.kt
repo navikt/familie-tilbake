@@ -12,7 +12,7 @@ internal class TokenExchangeServiceImpl(
     ): String {
         return when (val response = texasClient.exchangeToken(userToken, targetScope)) {
             is TokenResponse.Success -> response.accessToken
-            is TokenResponse.Error -> throw UnexpectedResponseException("Kunne ikke autentisere mot $targetScope feilmelding: ${response.error.errorDescription}", response.status)
+            is TokenResponse.Error -> throw UnexpectedResponseException("Kunne ikke autentisere mot $targetScope feilmelding: ${response.error.errorDescription}", response.status, response.error.error)
         }
     }
 }

@@ -24,6 +24,7 @@ import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.Tema
 import no.tilbakekreving.integrasjoner.CallContext
+import no.tilbakekreving.integrasjoner.feil.UnexpectedResponseException
 import no.tilbakekreving.integrasjoner.persontilgang.Persontilgang
 import no.tilbakekreving.integrasjoner.persontilgang.PersontilgangService
 import org.springframework.context.annotation.Configuration
@@ -268,8 +269,14 @@ class TilgangskontrollService(
         if (personIBehandlingen == null) return
         val tilgangTilPerson = try {
             validerMedTilgangsmaskinen(personIBehandlingen, logContext.behandlingId, logContext.fagsystemId)
-        } catch (ex: Exception) {
-            log.medContext(logContext) { warn("Feilet validering med tilgangsmaskinen.", ex) }
+        } catch (e: UnexpectedResponseException) {
+            SecureLog.medContext(logContext) {
+                warn("Feilet validering med tilgangsmaskinen. Status={}, Svar={}", e.statusCode.value, e.response, e)
+            }
+            log.medContext(logContext) { warn("Feilet validering med tilgangsmaskinen.", e) }
+            null
+        } catch (e: Exception) {
+            log.medContext(logContext) { warn("Feilet validering med tilgangsmaskinen.", e) }
             null
         }
 
