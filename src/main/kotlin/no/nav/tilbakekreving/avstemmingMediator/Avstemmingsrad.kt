@@ -1,15 +1,15 @@
-package no.nav.tilbakekreving.avstemming
+package no.nav.tilbakekreving.avstemmingMediator
 
 import java.math.BigDecimal
 import java.math.RoundingMode
-import java.time.LocalDateTime
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 class Avstemmingsrad(
     val avsender: String,
     val vedtakId: String,
     val fnr: String,
-    val vedtaksdato: LocalDateTime,
+    val vedtaksdato: LocalDate,
     val fagsakYtelseType: String,
     val tilbakekrevesBruttoUtenRenter: BigDecimal,
     val skatt: BigDecimal,

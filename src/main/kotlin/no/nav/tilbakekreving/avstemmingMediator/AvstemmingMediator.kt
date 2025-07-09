@@ -1,4 +1,4 @@
-package no.nav.tilbakekreving.avstemming
+package no.nav.tilbakekreving.avstemmingMediator
 
 import no.nav.familie.tilbake.config.IntegrasjonerConfig
 import no.nav.familie.tilbake.iverksettvedtak.IverksettelseService
@@ -86,7 +86,7 @@ class AvstemmingMediator(
                 AktørType.Organisasjon -> padOrganisasjonsnummer(iverksattVedtak.aktør.ident)
                 else -> iverksattVedtak.aktør.ident
             },
-            vedtaksdato = iverksattVedtak.sporbar.opprettetTid,
+            vedtaksdato = iverksattVedtak.sporbar.opprettetTid.toLocalDate(),
             fagsakYtelseType = iverksattVedtak.ytelsestypeKode,
             tilbakekrevesBruttoUtenRenter = oppsummering.tilbakekrevesBruttoUtenRenter,
             tilbakekrevesNettoUtenRenter = oppsummering.tilbakekrevesNettoUtenRenter,

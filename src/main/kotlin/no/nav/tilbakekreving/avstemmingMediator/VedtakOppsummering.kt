@@ -1,4 +1,4 @@
-package no.nav.tilbakekreving.avstemming
+package no.nav.tilbakekreving.avstemmingMediator
 
 import no.nav.tilbakekreving.vedtak.IverksattVedtak
 import java.math.BigDecimal

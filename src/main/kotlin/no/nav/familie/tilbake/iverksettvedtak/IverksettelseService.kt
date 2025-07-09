@@ -163,18 +163,18 @@ class IverksettelseService(
     private fun harSattDelvisTilbakekrevingMenKreverTilbakeFulltBeløp(tilbakekrevingsbeløp: Tilbakekrevingsbeløp) = tilbakekrevingsbeløp.kodeResultat == KodeResultat.DELVIS_TILBAKEKREVING && tilbakekrevingsbeløp.uinnkrevdBeløp == BigDecimal.ZERO
 
     fun hentGamleVedtak(dato: LocalDate): List<IverksattVedtak> {
-        return økonomiXmlSendtRepository.findByOpprettetPåDato(dato).map { gamleVedtaker ->
-            val behandling = behandlingRepository.findByIdOrThrow(gamleVedtaker.behandlingId)
+        return økonomiXmlSendtRepository.findByOpprettetPåDato(dato).map { gammeltVedtak ->
+            val behandling = behandlingRepository.findByIdOrThrow(gammeltVedtak.behandlingId)
             val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
 
             val request = TilbakekrevingsvedtakMarshaller.unmarshall(
-                gamleVedtaker.melding,
-                gamleVedtaker.behandlingId,
-                gamleVedtaker.id,
+                gammeltVedtak.melding,
+                gammeltVedtak.behandlingId,
+                gammeltVedtak.id,
                 logService.contextFraBehandling(behandling.id),
             )
 
-            val mmel: MmelDto? = gamleVedtaker.kvittering?.let { objectMapper.readValue(it) }
+            val mmel: MmelDto? = gammeltVedtak.kvittering?.let { objectMapper.readValue(it) }
 
             val aktør = when (val institusjon = fagsak.institusjon) {
                 null -> AktørEntity(AktørType.Person, fagsak.bruker.ident)
@@ -182,13 +182,14 @@ class IverksettelseService(
             }
 
             IverksattVedtak(
-                behandlingId = gamleVedtaker.behandlingId,
+                behandlingId = gammeltVedtak.behandlingId,
                 vedtakId = request.tilbakekrevingsvedtak.vedtakId,
                 aktør = aktør,
                 ytelsestypeKode = fagsak.ytelsestype.kode,
                 kvittering = mmel?.alvorlighetsgrad,
                 tilbakekrevingsvedtak = request.tilbakekrevingsvedtak,
                 behandlingstype = behandling.type,
+                sporbar = gammeltVedtak.sporbar,
             )
         }
     }

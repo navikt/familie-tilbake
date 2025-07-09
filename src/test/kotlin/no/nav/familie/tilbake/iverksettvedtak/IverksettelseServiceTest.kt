@@ -176,8 +176,8 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
         exception.cause!!.message shouldBe "Fikk feil respons fra økonomi ved iverksetting av behandling=$behandlingId." +
             "Mottatt respons:${objectMapper.writeValueAsString(lagMmmelDto("10", "feil"))}"
 
-        // val økonomiXmlSendt = økonomiXmlSendtRepository.findByBehandlingId(behandlingId)
-        // økonomiXmlSendt.shouldBeNull()
+        val økonomiXmlSendt = økonomiXmlSendtRepository.findByBehandlingId(behandlingId)
+        økonomiXmlSendt.shouldBeNull()
         val iverksattVedtak = iverksettRepository.findByBehandlingId(behandlingId)
         iverksattVedtak.shouldBeNull()
     }
