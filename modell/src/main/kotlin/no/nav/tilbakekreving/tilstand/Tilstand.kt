@@ -3,13 +3,12 @@ package no.nav.tilbakekreving.tilstand
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
+import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
-import java.math.BigInteger
-import java.util.UUID
 
 internal sealed interface Tilstand {
     val tilbakekrevingTilstand: TilbakekrevingTilstand
@@ -58,9 +57,10 @@ internal sealed interface Tilstand {
 
     fun håndter(
         tilbakekreving: Tilbakekreving,
-        iverksattVedtakId: UUID,
-        vedtakId: BigInteger,
-    ) {}
+        iverksettelseHendelse: IverksettelseHendelse,
+    ) {
+        error("Forventet ikke IverksettelseHendelse i $tilbakekrevingTilstand")
+    }
 
     fun håndterNullstilling(tilbakekreving: Tilbakekreving) {
         error("Forventet ikke Nullstilling i $tilbakekrevingTilstand")

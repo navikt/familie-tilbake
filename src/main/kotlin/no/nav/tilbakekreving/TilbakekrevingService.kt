@@ -27,6 +27,7 @@ import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
+import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.kontrakter.brev.MottakerType
@@ -176,7 +177,12 @@ class TilbakekrevingService(
 
             is IverksettelseBehov -> {
                 val iverksattVedtak = iverksettService.iverksett(behov, logContext)
-                tilbakekreving.håndter(iverksattVedtak.id, iverksattVedtak.vedtakId)
+                tilbakekreving.håndter(
+                    IverksettelseHendelse(
+                        iverksattVedtakId = iverksattVedtak.id,
+                        vedtakId = iverksattVedtak.vedtakId,
+                    ),
+                )
             }
         }
     }
