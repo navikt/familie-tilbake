@@ -174,7 +174,10 @@ class TilbakekrevingService(
                 )
             }
 
-            is IverksettelseBehov -> iverksettService.iverksett(behov, logContext)
+            is IverksettelseBehov -> {
+                val iverksattVedtak = iverksettService.iverksett(behov, logContext)
+                tilbakekreving.håndter(iverksattVedtak.id, iverksattVedtak.vedtakId)
+            }
         }
     }
 

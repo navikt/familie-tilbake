@@ -38,6 +38,7 @@ import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.tilstand.IverksettVedtak
 import no.nav.tilbakekreving.tilstand.Start
 import no.nav.tilbakekreving.tilstand.Tilstand
+import java.math.BigInteger
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -77,6 +78,13 @@ class Tilbakekreving internal constructor(
 
     fun håndter(varselbrevSendt: VarselbrevSendtHendelse) {
         tilstand.håndter(this, varselbrevSendt)
+    }
+
+    fun håndter(
+        iverksattVedtakId: UUID,
+        vedtakId: BigInteger,
+    ) {
+        tilstand.håndter(this, iverksattVedtakId, vedtakId)
     }
 
     fun håndterNullstilling() = tilstand.håndterNullstilling(this)

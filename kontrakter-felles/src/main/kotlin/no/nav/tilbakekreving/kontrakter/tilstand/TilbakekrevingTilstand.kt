@@ -10,4 +10,5 @@ enum class TilbakekrevingTilstand {
     SEND_VARSELBREV,
     IVERKSETT_VEDTAK,
     TIL_BEHANDLING,
+    AVSLUTTET,
 }

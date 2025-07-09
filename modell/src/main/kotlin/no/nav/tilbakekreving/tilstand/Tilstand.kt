@@ -8,6 +8,8 @@ import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
+import java.math.BigInteger
+import java.util.UUID
 
 internal sealed interface Tilstand {
     val tilbakekrevingTilstand: TilbakekrevingTilstand
@@ -52,6 +54,12 @@ internal sealed interface Tilstand {
     fun håndter(
         tilbakekreving: Tilbakekreving,
         påminnelse: Påminnelse,
+    ) {}
+
+    fun håndter(
+        tilbakekreving: Tilbakekreving,
+        iverksattVedtakId: UUID,
+        vedtakId: BigInteger,
     ) {}
 
     fun håndterNullstilling(tilbakekreving: Tilbakekreving) {
