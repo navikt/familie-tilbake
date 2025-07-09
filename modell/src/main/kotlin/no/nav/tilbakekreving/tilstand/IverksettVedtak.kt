@@ -1,9 +1,8 @@
 package no.nav.tilbakekreving.tilstand
 
 import no.nav.tilbakekreving.Tilbakekreving
+import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
-import java.math.BigInteger
-import java.util.UUID
 
 object IverksettVedtak : Tilstand {
     override val tilbakekrevingTilstand: TilbakekrevingTilstand = TilbakekrevingTilstand.IVERKSETT_VEDTAK
@@ -14,8 +13,7 @@ object IverksettVedtak : Tilstand {
 
     override fun håndter(
         tilbakekreving: Tilbakekreving,
-        iverksattVedtakId: UUID,
-        vedtakId: BigInteger,
+        iverksettelseHendelse: IverksettelseHendelse,
     ) {
         tilbakekreving.byttTilstand(Avsluttet)
     }
