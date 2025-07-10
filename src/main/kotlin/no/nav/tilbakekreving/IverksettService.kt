@@ -37,7 +37,7 @@ class IverksettService(
     fun iverksett(
         iverksettelseBehov: IverksettelseBehov,
         logContext: SecureLog.Context,
-    ) {
+    ): IverksattVedtak {
         val behandlingId = iverksettelseBehov.behandlingId
         val entity = kravgrunnlagBufferRepository.hentKravgrunnlag(iverksettelseBehov.kravgrunnlagId)
             ?: error("Fant ikke kravgrunnlag for $${iverksettelseBehov.kravgrunnlagId}")
@@ -55,14 +55,14 @@ class IverksettService(
             logContext = logContext,
         )
 
-        lagreIverksattVedtak(iverksettelseBehov, request, kvittering)
+        return lagreIverksattVedtak(iverksettelseBehov, request, kvittering)
     }
 
     fun lagreIverksattVedtak(
         iverksettelseBehov: IverksettelseBehov,
         request: TilbakekrevingsvedtakRequest,
         kvittering: TilbakekrevingsvedtakResponse,
-    ) {
+    ): IverksattVedtak {
         val iverksattVedtak = IverksattVedtak(
             behandlingId = iverksettelseBehov.behandlingId,
             vedtakId = request.tilbakekrevingsvedtak.vedtakId,
@@ -73,6 +73,7 @@ class IverksettService(
             behandlingstype = iverksettelseBehov.behandlingstype,
         )
         iverksettRepository.lagreIverksattVedtak(iverksattVedtak)
+        return iverksattVedtak
     }
 
     private fun lagIverksettelseRequest(
