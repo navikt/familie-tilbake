@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving
 
+import no.nav.familie.tilbake.api.forvaltning.Behandlingsinfo
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.integration.pdl.PdlClient
 import no.nav.familie.tilbake.integration.pdl.internal.PdlKjønnType
@@ -376,6 +377,23 @@ class TilbakekrevingService(
     ) {
         tilbakekreving.fjernManuelBrevmottaker(behandler, manuellBrevmottakerId)
         tilbakekrevingRepository.lagreTilstand(tilbakekreving.tilEntity())
+    }
+
+    fun hentBehandlingsinfo(
+        tilbakekreving: Tilbakekreving,
+    ): List<Behandlingsinfo> {
+        val behandlingsinformasjon = tilbakekreving.behandlingHistorikk.nåværende().entry.hentBehandlingsinformasjon()
+        return listOf(
+            Behandlingsinfo(
+                eksternKravgrunnlagId = null,
+                kravgrunnlagId = null,
+                kravgrunnlagKravstatuskode = null,
+                eksternId = behandlingsinformasjon.kravgrunnlagReferanse,
+                opprettetTid = behandlingsinformasjon.opprettetTid,
+                behandlingId = behandlingsinformasjon.behandlingId,
+                behandlingstatus = null,
+            ),
+        )
     }
 
     private fun validerBrevmottaker(tilbakekreving: Tilbakekreving) {
