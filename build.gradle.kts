@@ -5,7 +5,7 @@ val springDocVersion = "2.8.9"
 val testcontainersVersion = "1.21.3"
 val tokenValidationVersion = "5.0.30"
 val flywayVersion = "11.3.4"
-val ktorVersion = "3.2.1"
+val ktorVersion = "3.2.2"
 ext["ktorVersion"] = ktorVersion
 
 group = "no.nav"
@@ -116,7 +116,7 @@ dependencies {
     api(project(":kontrakter-intern"))
     api(project(":modell"))
     api(project(":pdf"))
-    api("no.nav.familie:prosessering-core:2.20250630085333_3794bb5") {
+    api("no.nav.familie:prosessering-core:2.20250715121557_9e42544") {
         // La spring boot håndtere flyway versjon selv om den er eldre enn den som er inkludert i prosessering-core
         exclude("org.flywaydb")
     }
@@ -141,7 +141,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.13.3")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    testImplementation("io.mockk:mockk-jvm:1.14.4")
+    testImplementation("io.mockk:mockk-jvm:1.14.5")
     testImplementation("io.kotest:kotest-runner-junit5-jvm:5.9.1")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
