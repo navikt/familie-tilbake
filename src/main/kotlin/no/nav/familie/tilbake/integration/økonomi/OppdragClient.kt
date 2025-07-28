@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.integration.økonomi
 
 import AbstractPingableRestClient
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
 import no.nav.familie.tilbake.common.exceptionhandler.KravgrunnlagIkkeFunnetFeil
 import no.nav.familie.tilbake.common.exceptionhandler.SperretKravgrunnlagFeil
@@ -172,7 +173,7 @@ class DefaultOppdragClient(
                     uri = hentKravgrunnlagUri(kravgrunnlagId),
                     payload = hentKravgrunnlagRequest,
                 ).getDataOrThrow()
-            validerHentKravgrunnlagRespons(respons.mmel, kravgrunnlagId, logContext)
+            validerHentKravgrunnlagRespons(respons, kravgrunnlagId, logContext)
             logger.medContext(logContext) {
                 info("Mottatt respons: ${lagRespons(respons.mmel)} fra økonomi til kravgrunnlagId=$kravgrunnlagId.")
             }
@@ -275,11 +276,15 @@ class DefaultOppdragClient(
     }
 
     private fun validerHentKravgrunnlagRespons(
-        mmelDto: MmelDto,
+        response: KravgrunnlagHentDetaljResponse,
         kravgrunnlagId: BigInteger,
         logContext: SecureLog.Context,
     ) {
-        if (!erResponsOk(mmelDto) || erKravgrunnlagIkkeFinnes(mmelDto)) {
+        val mmelDto = response.mmel
+        if (!erResponsOk(mmelDto) || erKravgrunnlagIkkeFinnes(mmelDto) || response.detaljertkravgrunnlag == null) {
+            SecureLog.medContext(logContext) {
+                warn("Mottok ugyldig kravgrunnlag. Mangler feltet `detaljertKravgrunnlag`. {}. {}", keyValue("kravgrunnlagId", kravgrunnlagId), objectMapper.writeValueAsString(response))
+            }
             logger.medContext(logContext) {
                 error(
                     "Fikk feil respons:${lagRespons(mmelDto)} fra økonomi ved henting av kravgrunnlag " +
