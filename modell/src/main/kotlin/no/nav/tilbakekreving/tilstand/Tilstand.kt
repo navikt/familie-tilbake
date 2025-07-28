@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.tilstand
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
+import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
@@ -53,6 +54,13 @@ internal sealed interface Tilstand {
         tilbakekreving: Tilbakekreving,
         påminnelse: Påminnelse,
     ) {}
+
+    fun håndter(
+        tilbakekreving: Tilbakekreving,
+        iverksettelseHendelse: IverksettelseHendelse,
+    ) {
+        error("Forventet ikke IverksettelseHendelse i $tilbakekrevingTilstand")
+    }
 
     fun håndterNullstilling(tilbakekreving: Tilbakekreving) {
         error("Forventet ikke Nullstilling i $tilbakekrevingTilstand")

@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.tilstand
 
 import no.nav.tilbakekreving.Tilbakekreving
+import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 
 object IverksettVedtak : Tilstand {
@@ -8,5 +9,12 @@ object IverksettVedtak : Tilstand {
 
     override fun entering(tilbakekreving: Tilbakekreving) {
         tilbakekreving.trengerIverksettelse()
+    }
+
+    override fun håndter(
+        tilbakekreving: Tilbakekreving,
+        iverksettelseHendelse: IverksettelseHendelse,
+    ) {
+        tilbakekreving.byttTilstand(Avsluttet)
     }
 }

@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.tilstand
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingsperiodeDto
@@ -10,6 +11,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.brukerinfoHendelse
 import no.nav.tilbakekreving.fagsysteminfoHendelse
+import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.januar
@@ -22,6 +24,8 @@ import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.varselbrev
 import org.junit.jupiter.api.Test
+import java.math.BigInteger
+import java.util.UUID
 
 class IverksettVedtakTest {
     @Test
@@ -97,5 +101,47 @@ class IverksettVedtakTest {
                 perioderMedTekst = emptyList(),
             ),
         )
+    }
+
+    @Test
+    fun `tilbakekrevingen er avsluttet når vedtak er iverksatt`() {
+        val oppsamler = BehovObservatørOppsamler()
+        val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
+        val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingEvent)
+
+        tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.FAKTA, FatteVedtakSteg.Vurdering.Godkjent)
+        tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.FORELDELSE, FatteVedtakSteg.Vurdering.Godkjent)
+        tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.VILKÅRSVURDERING, FatteVedtakSteg.Vurdering.Godkjent)
+        tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.FORESLÅ_VEDTAK, FatteVedtakSteg.Vurdering.Godkjent)
+
+        tilbakekreving.håndter(
+            IverksettelseHendelse(
+                iverksattVedtakId = UUID.randomUUID(),
+                vedtakId = BigInteger("1234"),
+            ),
+        )
+        tilbakekreving.tilstand shouldBe Avsluttet
+    }
+
+    @Test
+    fun `tilbakekrevingen kan ikke avsluttes når behandlingen er ikke fullført`() {
+        val oppsamler = BehovObservatørOppsamler()
+        val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
+        val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingEvent)
+
+        tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.FAKTA, FatteVedtakSteg.Vurdering.Godkjent)
+        tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.FORESLÅ_VEDTAK, FatteVedtakSteg.Vurdering.Godkjent)
+
+        val exception = shouldThrow<IllegalStateException> {
+            tilbakekreving.håndter(
+                IverksettelseHendelse(
+                    iverksattVedtakId = UUID.randomUUID(),
+                    vedtakId = BigInteger("1234"),
+                ),
+            )
+        }
+
+        exception.message shouldBe "Forventet ikke IverksettelseHendelse i TIL_BEHANDLING"
+        tilbakekreving.tilstand shouldBe TilBehandling
     }
 }

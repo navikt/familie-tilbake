@@ -24,6 +24,7 @@ import no.nav.tilbakekreving.entities.TilbakekrevingEntity
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
+import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
@@ -77,6 +78,10 @@ class Tilbakekreving internal constructor(
 
     fun håndter(varselbrevSendt: VarselbrevSendtHendelse) {
         tilstand.håndter(this, varselbrevSendt)
+    }
+
+    fun håndter(iverksettelseHendelse: IverksettelseHendelse) {
+        tilstand.håndter(this, iverksettelseHendelse)
     }
 
     fun håndterNullstilling() = tilstand.håndterNullstilling(this)
