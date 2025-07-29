@@ -3,9 +3,9 @@ import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 val springDocVersion = "2.8.9"
 val testcontainersVersion = "1.21.3"
-val tokenValidationVersion = "5.0.30"
+val tokenValidationVersion = "5.0.33"
 val flywayVersion = "11.3.4"
-val ktorVersion = "3.2.1"
+val ktorVersion = "3.2.2"
 ext["ktorVersion"] = ktorVersion
 
 group = "no.nav"
@@ -14,7 +14,7 @@ java.sourceCompatibility = JavaVersion.VERSION_21
 
 plugins {
     kotlin("jvm") version "2.2.0"
-    id("org.springframework.boot") version "3.5.3"
+    id("org.springframework.boot") version "3.5.4"
     id("org.jetbrains.kotlin.plugin.spring") version "2.2.0"
     id("org.jlleitschuh.gradle.ktlint") version "13.0.0"
 }
@@ -54,7 +54,7 @@ subprojects {
     }
 
     dependencies {
-        testImplementation("org.junit.jupiter:junit-jupiter:5.13.3")
+        testImplementation("org.junit.jupiter:junit-jupiter:5.13.4")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
         testImplementation("io.kotest:kotest-assertions-core:5.9.1")
     }
@@ -116,7 +116,7 @@ dependencies {
     api(project(":kontrakter-intern"))
     api(project(":modell"))
     api(project(":pdf"))
-    api("no.nav.familie:prosessering-core:2.20250630085333_3794bb5") {
+    api("no.nav.familie:prosessering-core:2.20250728105838_1f618e2") {
         // La spring boot håndtere flyway versjon selv om den er eldre enn den som er inkludert i prosessering-core
         exclude("org.flywaydb")
     }
@@ -138,10 +138,10 @@ dependencies {
     api("org.flywaydb:flyway-core")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
 
-    testImplementation("org.junit.jupiter:junit-jupiter:5.13.3")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.13.4")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    testImplementation("io.mockk:mockk-jvm:1.14.4")
+    testImplementation("io.mockk:mockk-jvm:1.14.5")
     testImplementation("io.kotest:kotest-runner-junit5-jvm:5.9.1")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")

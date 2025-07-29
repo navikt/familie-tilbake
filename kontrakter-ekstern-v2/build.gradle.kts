@@ -9,6 +9,6 @@ repositories {
 }
 
 dependencies {
-    api("com.fasterxml.jackson.core:jackson-annotations:2.19.1")
+    api("com.fasterxml.jackson.core:jackson-annotations:2.19.2")
     api(project("::kontrakter-felles"))
 }
