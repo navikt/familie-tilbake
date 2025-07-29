@@ -14,9 +14,10 @@ import no.nav.tilbakekreving.pdf.handlebars.dto.Språkstøtte
 import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.util.Locale
+import java.util.concurrent.ConcurrentHashMap
 
 object FellesTekstformaterer {
-    private val TEMPLATE_CACHE: MutableMap<String, Template> = HashMap()
+    private val TEMPLATE_CACHE = ConcurrentHashMap<String, Template>()
 
     private val OM = ObjectMapperForUtvekslingAvDataMedHandlebars.INSTANCE
 
@@ -40,29 +41,16 @@ object FellesTekstformaterer {
         språkkode: Språkkode,
         filsti: String,
     ): Template {
-        val språkstøttetFilsti: String = lagSpråkstøttetFilsti(filsti, språkkode)
-        if (TEMPLATE_CACHE.containsKey(språkstøttetFilsti)) {
-            return TEMPLATE_CACHE[språkstøttetFilsti]!!
-        }
-        TEMPLATE_CACHE[språkstøttetFilsti] =
-            opprettTemplate(språkstøttetFilsti)
-        return TEMPLATE_CACHE[språkstøttetFilsti]!!
+        return TEMPLATE_CACHE.computeIfAbsent(lagSpråkstøttetFilsti(filsti, språkkode), ::opprettTemplate)
     }
 
     private fun getTemplateFraPartial(
         språkkode: Språkkode,
         partial: String,
     ): Template {
-        val språkstøttetFilsti: String = lagSpråkstøttetFilsti(partial, språkkode)
-        if (TEMPLATE_CACHE.containsKey(språkstøttetFilsti)) {
-            return TEMPLATE_CACHE[språkstøttetFilsti]!!
+        return TEMPLATE_CACHE.computeIfAbsent(lagSpråkstøttetFilsti(partial, språkkode)) { filsti ->
+            opprettTemplateFraPartials(lagSpråkstøttetFilsti("vedtak/vedtak_felles", språkkode), filsti)
         }
-        TEMPLATE_CACHE[språkstøttetFilsti] =
-            opprettTemplateFraPartials(
-                lagSpråkstøttetFilsti("vedtak/vedtak_felles", språkkode),
-                språkstøttetFilsti,
-            )
-        return TEMPLATE_CACHE[språkstøttetFilsti]!!
     }
 
     private fun opprettTemplate(språkstøttetFilsti: String): Template = opprettHandlebarsKonfigurasjon().compile(språkstøttetFilsti)
@@ -72,7 +60,7 @@ object FellesTekstformaterer {
         return try {
             opprettHandlebarsKonfigurasjon().compileInline(partialString)
         } catch (e: IOException) {
-            error("Klarte ikke å kompilere partial template $partials")
+            throw Exception("Klarte ikke å kompilere partial template $partials", e)
         }
     }
 
@@ -93,7 +81,7 @@ object FellesTekstformaterer {
                     .build()
             template.apply(context).trim()
         } catch (e: IOException) {
-            throw IllegalStateException("Feil ved tekstgenerering.")
+            throw IllegalStateException("Feil ved tekstgenerering.", e)
         }
 
     private fun opprettHandlebarsKonfigurasjon(): Handlebars {
