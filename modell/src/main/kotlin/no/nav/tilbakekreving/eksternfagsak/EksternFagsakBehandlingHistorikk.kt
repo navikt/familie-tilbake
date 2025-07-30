@@ -13,7 +13,12 @@ class EksternFagsakBehandlingHistorikk(
         return HistorikkReferanse(this, innslag.internId)
     }
 
-    override fun finn(id: UUID): EksternFagsakBehandling {
+    override fun finn(id: UUID): HistorikkReferanse<UUID, EksternFagsakBehandling> {
+        require(historikk.any { it.internId == id })
+        return HistorikkReferanse(this, id)
+    }
+
+    override fun entry(id: UUID): EksternFagsakBehandling {
         return historikk.first { it.internId == id }
     }
 
@@ -22,6 +27,6 @@ class EksternFagsakBehandlingHistorikk(
     }
 
     fun tilEntity(): List<EksternFagsakBehandlingEntity> {
-        return historikk.mapNotNull { it.tilEntity() }
+        return historikk.map { it.tilEntity() }
     }
 }

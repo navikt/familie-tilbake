@@ -43,7 +43,7 @@ class ForeldelseController(
                 auditLoggerEvent = AuditLoggerEvent.ACCESS,
                 handling = "Henter vilkårsvurdering for en gitt behandling",
             )
-            return Ressurs.success(tilbakekreving.behandlingHistorikk.finn(behandlingId).foreldelsestegDto.tilFrontendDto())
+            return Ressurs.success(tilbakekreving.behandlingHistorikk.finn(behandlingId).entry.foreldelsestegDto.tilFrontendDto())
         }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,

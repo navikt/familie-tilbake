@@ -43,7 +43,7 @@ class VilkårsvurderingController(
                 auditLoggerEvent = AuditLoggerEvent.ACCESS,
                 handling = "Henter vilkårsvurdering for en gitt behandling",
             )
-            return Ressurs.success(tilbakekreving.behandlingHistorikk.finn(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto())
+            return Ressurs.success(tilbakekreving.behandlingHistorikk.finn(behandlingId).entry.vilkårsvurderingsstegDto.tilFrontendDto())
         }
 
         tilgangskontrollService.validerTilgangBehandlingID(

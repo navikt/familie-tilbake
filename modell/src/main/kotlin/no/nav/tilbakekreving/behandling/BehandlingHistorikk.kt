@@ -10,7 +10,12 @@ import java.util.UUID
 class BehandlingHistorikk(
     private val historikk: MutableList<Behandling>,
 ) : Historikk<UUID, Behandling>, FrontendDto<List<BehandlingDto>> {
-    override fun finn(id: UUID): Behandling {
+    override fun finn(id: UUID): HistorikkReferanse<UUID, Behandling> {
+        require(historikk.any { it.internId == id })
+        return HistorikkReferanse(this, id)
+    }
+
+    override fun entry(id: UUID): Behandling {
         return historikk.single { it.internId == id }
     }
 

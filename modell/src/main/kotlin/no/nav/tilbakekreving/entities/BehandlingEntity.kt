@@ -17,9 +17,9 @@ data class BehandlingEntity(
     val sistEndret: LocalDateTime,
     val enhet: EnhetEntity?,
     val årsak: Behandlingsårsakstype,
-    var ansvarligSaksbehandlerEntity: BehandlerEntity,
-    val eksternFagsakBehandlingRefEntity: EksternFagsakBehandlingEntity?,
-    val kravgrunnlagHendelseRefEntity: KravgrunnlagHendelseEntity,
+    var ansvarligSaksbehandler: BehandlerEntity,
+    val eksternFagsakBehandlingRef: HistorikkReferanseEntity<UUID>,
+    val kravgrunnlagRef: HistorikkReferanseEntity<UUID>,
     val foreldelsestegEntity: ForeldelsesstegEntity,
     val faktastegEntity: FaktastegEntity,
     val vilkårsvurderingstegEntity: VilkårsvurderingstegEntity,
@@ -32,9 +32,8 @@ data class BehandlingEntity(
         kravgrunnlagHistorikk: KravgrunnlagHistorikk,
         brevHistorikk: BrevHistorikk,
     ): Behandling {
-        // TODO: Ikke nåværende, men etter id fra entity
-        val eksternFagsak = eksternFagsakBehandlingHistorikk.nåværende()
-        val kravgrunnlag = kravgrunnlagHistorikk.nåværende()
+        val eksternFagsak = eksternFagsakBehandlingHistorikk.finn(eksternFagsakBehandlingRef.id)
+        val kravgrunnlag = kravgrunnlagHistorikk.finn(kravgrunnlagRef.id)
         val foreldelsessteg = foreldelsestegEntity.fraEntity(kravgrunnlag)
         return Behandling(
             internId = internId,
@@ -44,7 +43,7 @@ data class BehandlingEntity(
             sistEndret = sistEndret,
             enhet = enhet?.fraEntity(),
             årsak = årsak,
-            ansvarligSaksbehandler = ansvarligSaksbehandlerEntity.fraEntity(),
+            ansvarligSaksbehandler = ansvarligSaksbehandler.fraEntity(),
             eksternFagsakBehandling = eksternFagsak,
             kravgrunnlag = kravgrunnlag,
             foreldelsesteg = foreldelsessteg,

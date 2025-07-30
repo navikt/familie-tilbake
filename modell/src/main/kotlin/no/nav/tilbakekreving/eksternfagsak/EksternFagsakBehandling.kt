@@ -48,7 +48,7 @@ sealed class EksternFagsakBehandling(
             )
             is Ukjent -> EksternFagsakBehandlingEntity(
                 type = EksternFagsakBehandlingType.UKJENT,
-                null,
+                internId = internId,
                 null,
                 null,
                 null,

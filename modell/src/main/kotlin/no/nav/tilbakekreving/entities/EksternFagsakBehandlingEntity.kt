@@ -6,7 +6,7 @@ import java.util.UUID
 
 data class EksternFagsakBehandlingEntity(
     val type: EksternFagsakBehandlingType,
-    val internId: UUID?,
+    val internId: UUID,
     val eksternId: String?,
     val revurderingsresultat: String?,
     val revurderingsårsak: String?,
@@ -16,14 +16,14 @@ data class EksternFagsakBehandlingEntity(
     fun fraEntity(): EksternFagsakBehandling {
         return when (type) {
             EksternFagsakBehandlingType.BEHANDLING -> EksternFagsakBehandling.Behandling(
-                internId = requireNotNull(internId) { "internId kreves for EksternFagsakBehandling" },
+                internId = internId,
                 eksternId = requireNotNull(eksternId) { "eksternId kreves for EksternFagsakBehandling" },
                 revurderingsresultat = requireNotNull(revurderingsresultat) { "revurderingsresultat kreves for EksternFagsakBehandling" },
                 revurderingsårsak = requireNotNull(revurderingsårsak) { "revurderingsårsak kreves for EksternFagsakBehandling" },
                 begrunnelseForTilbakekreving = requireNotNull(begrunnelseForTilbakekreving) { "begrunnelseForTilbakekreving kreves for EksternFagsakBehandling" },
                 revurderingsvedtaksdato = requireNotNull(revurderingsvedtaksdato) { "revurderingsvedtaksdato kreves for EksternFagsakBehandling" },
             )
-            EksternFagsakBehandlingType.UKJENT -> EksternFagsakBehandling.Ukjent(internId = UUID.randomUUID(), null)
+            EksternFagsakBehandlingType.UKJENT -> EksternFagsakBehandling.Ukjent(internId = internId, null)
         }
     }
 }

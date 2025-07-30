@@ -15,7 +15,11 @@ class HistorikkStub<T : Historikk.HistorikkInnslag<UUID>>(val entry: T) : Histor
         return HistorikkReferanse(this, id)
     }
 
-    override fun finn(id: UUID): T {
+    override fun finn(id: UUID): HistorikkReferanse<UUID, T> {
+        return HistorikkReferanse(this, id)
+    }
+
+    override fun entry(id: UUID): T {
         return entry
     }
 

@@ -9,7 +9,12 @@ import java.util.UUID
 class KravgrunnlagHistorikk(
     private val historikk: MutableList<KravgrunnlagHendelse>,
 ) : Historikk<UUID, KravgrunnlagHendelse> {
-    override fun finn(id: UUID): KravgrunnlagHendelse {
+    override fun finn(id: UUID): HistorikkReferanse<UUID, KravgrunnlagHendelse> {
+        require(historikk.any { it.internId == id })
+        return HistorikkReferanse(this, id)
+    }
+
+    override fun entry(id: UUID): KravgrunnlagHendelse {
         return historikk.single { it.internId == id }
     }
 
