@@ -28,6 +28,9 @@ object ContextService {
             .runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
             .fold(
                 onSuccess = {
+                    SecureLog.medContext(logContext) {
+                        info("Dekodet systemtoken med roller {}", it.getAzureadClaimsOrNull()?.getAsList("roles"))
+                    }
                     return it.getAzureadClaimsOrNull()?.get("NAVident")?.toString()
                         ?: defaultverdi
                         ?: throw Feil(

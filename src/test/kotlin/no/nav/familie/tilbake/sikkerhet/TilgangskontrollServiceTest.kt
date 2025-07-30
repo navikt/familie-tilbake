@@ -392,7 +392,7 @@ internal class TilgangskontrollServiceTest : OppslagSpringRunnerTest() {
         behandlerNavn: String,
         gruppeNavn: List<String>,
     ): String {
-        val additionalParameters = mapOf("NAVident" to behandlerNavn, "groups" to gruppeNavn)
+        val additionalParameters = mapOf("NAVident" to behandlerNavn, "groups" to gruppeNavn, "roles" to emptySet<String>())
         val calendar = Calendar.getInstance()
         calendar.add(Calendar.SECOND, 60)
         return Jwts

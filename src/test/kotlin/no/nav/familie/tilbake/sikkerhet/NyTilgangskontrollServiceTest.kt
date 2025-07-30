@@ -277,9 +277,9 @@ internal class NyTilgangskontrollServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `sjekkTilgang skal forvalter ha tilgang til forvaltningstjeneste arkiver mottattXml med input som mottattXmlId`() {
         val token = opprettToken("abc", listOf(TEAMFAMILIE_FORVALTER_ROLLE))
+        opprettRequestContext(token)
         val økonomiXmlMottatt = Testdata.getøkonomiXmlMottatt()
         every { mottattXmlRepository.findById(any()) } returns Optional.of(økonomiXmlMottatt)
-        opprettRequestContext(token)
 
         shouldNotThrowAny { tilgangskontrollService.validerTilgangMottattXMLId(økonomiXmlMottatt.id, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
     }
@@ -287,9 +287,9 @@ internal class NyTilgangskontrollServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `sjekkTilgang skal forvalter ha tilgang til forvaltningstjeneste annuler kravgrunnlag med input som eksternKravgrunnlagId`() {
         val token = opprettToken("abc", listOf(TEAMFAMILIE_FORVALTER_ROLLE))
+        opprettRequestContext(token)
         val økonomiXmlMottatt = Testdata.getøkonomiXmlMottatt()
         every { mottattXmlRepository.findByEksternKravgrunnlagId(any()) } returns økonomiXmlMottatt
-        opprettRequestContext(token)
 
         shouldNotThrowAny { tilgangskontrollService.validerTilgangKravgrunnlagId(økonomiXmlMottatt.eksternKravgrunnlagId!!, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
     }
@@ -374,7 +374,7 @@ internal class NyTilgangskontrollServiceTest : OppslagSpringRunnerTest() {
         behandlerNavn: String,
         gruppeNavn: List<String>,
     ): String {
-        val additionalParameters = mapOf("NAVident" to behandlerNavn, "groups" to gruppeNavn)
+        val additionalParameters = mapOf("NAVident" to behandlerNavn, "groups" to gruppeNavn, "roles" to emptySet<String>())
         val calendar = Calendar.getInstance()
         calendar.add(Calendar.SECOND, 60)
         return Jwts
