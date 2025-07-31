@@ -10,11 +10,24 @@ import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
+import no.nav.tilbakekreving.auth.Approlle
+import no.nav.tilbakekreving.auth.Authentication
 import no.nav.tilbakekreving.config.Tilgangsstyring
 import no.nav.tilbakekreving.saksbehandler.Behandler
 
 object ContextService {
     private const val SYSTEM_NAVN = "System"
+
+    fun hentInnloggetBruker(): Authentication {
+        val claims = SpringTokenValidationContextHolder().getTokenValidationContext().getClaims("azuread")
+        val roles = claims.getAsList("roles")
+        return when {
+            erMaskinTilMaskinToken(claims) -> {
+                Authentication.Systembruker(Approlle.roller(roles))
+            }
+            else -> throw NotImplementedError("Ny tokenvalidering støtter bare maskin-til-maskin")
+        }
+    }
 
     fun hentSaksbehandler(logContext: SecureLog.Context): String = hentPåloggetSaksbehandler(Constants.BRUKER_ID_VEDTAKSLØSNINGEN, logContext)
 
@@ -28,9 +41,6 @@ object ContextService {
             .runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
             .fold(
                 onSuccess = {
-                    SecureLog.medContext(logContext) {
-                        info("Dekodet systemtoken med roller {}", it.getAzureadClaimsOrNull()?.getAsList("roles"))
-                    }
                     return it.getAzureadClaimsOrNull()?.get("NAVident")?.toString()
                         ?: defaultverdi
                         ?: throw Feil(
@@ -123,6 +133,10 @@ object ContextService {
 
     fun erMaskinTilMaskinToken(): Boolean {
         val claims = SpringTokenValidationContextHolder().getTokenValidationContext().getClaims("azuread")
+        return erMaskinTilMaskinToken(claims)
+    }
+
+    fun erMaskinTilMaskinToken(claims: JwtTokenClaims): Boolean {
         return claims.get("oid") != null &&
             claims.get("oid") == claims.get("sub") &&
             claims.getAsList("roles").contains("access_as_application")

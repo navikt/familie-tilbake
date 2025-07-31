@@ -20,6 +20,8 @@ import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.tilbakekreving.FagsystemUtil
 import no.nav.tilbakekreving.Tilbakekreving
+import no.nav.tilbakekreving.auth.Approlle
+import no.nav.tilbakekreving.auth.Authentication
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.Tema
@@ -106,6 +108,24 @@ class TilgangskontrollService(
             auditLoggerEvent = auditLoggerEvent,
             handling = handling,
         )
+    }
+
+    fun validerTilgangForFagsystem(
+        fagsystem: FagsystemDTO,
+        eksternFagsakId: String,
+        auditLoggerEvent: AuditLoggerEvent,
+        handling: String,
+    ) {
+        val maskinToken = ContextService.hentInnloggetBruker()
+
+        SecureLog.medContext(SecureLog.Context.utenBehandling(eksternFagsakId)) {
+            info(
+                "Tilgangsjekk med maskin token erMaskinbruker={} harRolle={}",
+                maskinToken is Authentication.Systembruker,
+                (maskinToken as? Authentication.Systembruker)?.harRolle(Approlle.Fagsystem),
+            )
+        }
+        return validerTilgangFagsystemOgFagsakId(fagsystem, eksternFagsakId, Behandlerrolle.VEILEDER, auditLoggerEvent, handling)
     }
 
     fun validerTilgangFagsystemOgFagsakId(
