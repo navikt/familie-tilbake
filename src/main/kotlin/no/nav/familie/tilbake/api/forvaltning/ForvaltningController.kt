@@ -13,9 +13,12 @@ import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.tilbakekreving.FagsystemUtil
 import no.nav.tilbakekreving.TilbakekrevingService
+import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -44,6 +47,7 @@ class ForvaltningController(
     private val logService: LogService,
     private val tilgangskontrollService: TilgangskontrollService,
     private val tilbakekrevingService: TilbakekrevingService,
+    private val applicationProperties: ApplicationProperties,
 ) {
     @Operation(summary = "Hent korrigert kravgrunnlag")
     @PutMapping(
@@ -172,17 +176,31 @@ class ForvaltningController(
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun hentForvaltningsinfo(
-        @PathVariable ytelsestype: Ytelsestype,
+        @PathVariable ytelsestype: YtelsestypeDTO,
         @PathVariable eksternFagsakId: String,
     ): Ressurs<List<Behandlingsinfo>> {
+        if (applicationProperties.toggles.nyModellEnabled) {
+            val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype), eksternFagsakId)
+            if (tilbakekreving != null) {
+                val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
+                tilgangskontrollService.validerTilgangTilbakekreving(
+                    tilbakekreving = tilbakekreving,
+                    behandlingId = behandling.internId,
+                    minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+                    auditLoggerEvent = AuditLoggerEvent.NONE,
+                    handling = "Henter forvaltningsinformasjon",
+                )
+                return Ressurs.success(tilbakekrevingService.hentBehandlingsinfo(tilbakekreving))
+            }
+        }
         tilgangskontrollService.validerTilgangYtelsetypeOgFagsakId(
-            ytelsestype = ytelsestype,
+            ytelsestype = Ytelsestype.forDTO(ytelsestype),
             eksternFagsakId = eksternFagsakId,
             minimumBehandlerrolle = Behandlerrolle.FORVALTER,
             auditLoggerEvent = AuditLoggerEvent.NONE,
             handling = "Henter forvaltningsinformasjon",
         )
-        return Ressurs.success(forvaltningService.hentForvaltningsinfo(ytelsestype, eksternFagsakId))
+        return Ressurs.success(forvaltningService.hentForvaltningsinfo(Ytelsestype.forDTO(ytelsestype), eksternFagsakId))
     }
 
     @Operation(summary = "Hent ikke arkiverte kravgrunnlag")

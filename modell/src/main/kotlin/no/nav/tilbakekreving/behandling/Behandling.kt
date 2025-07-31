@@ -344,6 +344,14 @@ class Behandling internal constructor(
 
     fun kanUtbetales(): Boolean = fatteVedtakSteg.erFullstending()
 
+    fun hentBehandlingsinformasjon(): Behandlingsinformasjon {
+        return Behandlingsinformasjon(
+            kravgrunnlagReferanse = kravgrunnlag.entry.referanse,
+            opprettetTid = opprettet,
+            behandlingId = internId,
+        )
+    }
+
     companion object {
         fun nyBehandling(
             internId: UUID,
