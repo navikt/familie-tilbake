@@ -73,28 +73,33 @@ spec:
         - application: familie-ba-sak
           namespace: teamfamilie
           cluster: prod-gcp
-          roles:
-            - fagsystem
+          permissions:
+            roles:
+              - fagsystem
         - application: familie-ks-sak
           namespace: teamfamilie
           cluster: prod-gcp
-          roles:
-            - fagsystem
+          permissions:
+            roles:
+              - fagsystem
         - application: familie-ef-sak
           namespace: teamfamilie
           cluster: prod-gcp
-          roles:
-            - fagsystem
+          permissions:
+            roles:
+              - fagsystem
         - application: familie-ef-iverksett
           namespace: teamfamilie
           cluster: prod-gcp
-          roles:
-            - fagsystem
+          permissions:
+            roles:
+              - fagsystem
         - application: familie-ks-sak
           namespace: teamfamilie
           cluster: prod-gcp
-          roles:
-            - fagsystem
+          permissions:
+            roles:
+              - fagsystem
         - application: tilbakekreving-frontend
           namespace: tilbake
           cluster: prod-gcp
