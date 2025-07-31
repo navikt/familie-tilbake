@@ -70,15 +70,27 @@ spec:
         - application: familie-ba-sak
           namespace: teamfamilie
           cluster: dev-gcp
+          permissions:
+            roles:
+              - fagsystem
         - application: familie-ef-sak
           namespace: teamfamilie
           cluster: dev-gcp
+          permissions:
+            roles:
+              - fagsystem
         - application: familie-ef-iverksett
           namespace: teamfamilie
           cluster: dev-gcp
+          permissions:
+            roles:
+              - fagsystem
         - application: familie-ks-sak
           namespace: teamfamilie
           cluster: dev-gcp
+          permissions:
+            roles:
+              - fagsystem
         - application: familie-tilbake-frontend
           namespace: teamfamilie
           cluster: dev-gcp
