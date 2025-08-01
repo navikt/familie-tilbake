@@ -8,4 +8,6 @@ sealed class Authentication {
             roles.contains(rolle)
         }
     }
+
+    data object Ukjent : Authentication()
 }
