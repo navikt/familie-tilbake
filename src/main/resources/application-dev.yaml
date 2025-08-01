@@ -27,6 +27,10 @@ tilbakekreving:
         beslutter: ${rolle.enslig.beslutter}
   tilgangsmaskinen:
     scope: api://dev-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
+  bigQuery:
+    prosjektId: tilbake-dev-d683
+    dataset: tilbakekreving_dataset
+    behandlingTable: bq_behandling
 
 rolle:
   barnetrygd:

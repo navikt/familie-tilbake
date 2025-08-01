@@ -15,6 +15,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
 import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.VarselbrevBehov
+import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
@@ -54,10 +55,21 @@ class Tilbakekreving internal constructor(
     private val behovObservatør: BehovObservatør,
     var bruker: Bruker? = null,
     internal var tilstand: Tilstand,
+    var bigQueryService: BigQueryService,
 ) : FrontendDto<FagsakDto> {
     internal fun byttTilstand(nyTilstand: Tilstand) {
         tilstand = nyTilstand
         tilstand.entering(this)
+        if (behandlingHistorikk.erIkkeTom()) {
+            val behandlingInfo = behandlingHistorikk.nåværende().entry.hentBehandlingsinformasjon()
+            bigQueryService.leggeTilBehanlingInfo(
+                behandlingId = behandlingInfo.behandlingId.toString(),
+                opprettetTid = opprettet,
+                ytelsestypeKode = hentFagsysteminfo().tilYtelsestype().kode,
+                behandlingstype = behandlingInfo.behandlingstype.name,
+                behandlendeEnhet = behandlingInfo.enhet?.kode,
+            )
+        }
     }
 
     fun håndter(opprettTilbakekrevingEvent: OpprettTilbakekrevingHendelse) {
@@ -232,6 +244,7 @@ class Tilbakekreving internal constructor(
         fun opprett(
             behovObservatør: BehovObservatør,
             opprettTilbakekrevingEvent: OpprettTilbakekrevingHendelse,
+            bigQueryService: BigQueryService,
         ): Tilbakekreving {
             val tilbakekreving = Tilbakekreving(
                 id = UUID.randomUUID(),
@@ -250,6 +263,7 @@ class Tilbakekreving internal constructor(
                 kravgrunnlagHistorikk = KravgrunnlagHistorikk(mutableListOf()),
                 brevHistorikk = BrevHistorikk(mutableListOf()),
                 tilstand = Start,
+                bigQueryService = bigQueryService,
             )
             tilbakekreving.håndter(opprettTilbakekrevingEvent)
             return tilbakekreving

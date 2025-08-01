@@ -41,4 +41,6 @@ class BehandlingHistorikk(
     fun tilEntity(): List<BehandlingEntity> {
         return historikk.map { it.tilEntity() }
     }
+
+    fun erIkkeTom(): Boolean = historikk.isNotEmpty()
 }
