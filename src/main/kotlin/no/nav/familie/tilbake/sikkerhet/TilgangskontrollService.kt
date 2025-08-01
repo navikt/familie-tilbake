@@ -120,8 +120,8 @@ class TilgangskontrollService(
 
         SecureLog.medContext(SecureLog.Context.utenBehandling(eksternFagsakId)) {
             info(
-                "Tilgangsjekk med maskin token erMaskinbruker={} harRolle={}",
-                maskinToken is Authentication.Systembruker,
+                "Tilgangsjekk med maskin token type={} harRolle={}",
+                maskinToken::class.simpleName,
                 (maskinToken as? Authentication.Systembruker)?.harRolle(Approlle.Fagsystem),
             )
         }

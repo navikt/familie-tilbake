@@ -190,7 +190,9 @@ class ForvaltningController(
                     auditLoggerEvent = AuditLoggerEvent.NONE,
                     handling = "Henter forvaltningsinformasjon",
                 )
-                return Ressurs.success(tilbakekrevingService.hentBehandlingsinfo(tilbakekreving))
+                val res = tilbakekrevingService.hentBehandlingsinfo(tilbakekreving)
+                tilbakekrevingService.bigqueryTest(res.first())
+                return Ressurs.success(res)
             }
         }
         tilgangskontrollService.validerTilgangYtelsetypeOgFagsakId(

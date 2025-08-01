@@ -1,5 +1,8 @@
 package no.nav.tilbakekreving
 
+import com.google.cloud.bigquery.BigQueryOptions
+import com.google.cloud.bigquery.InsertAllRequest
+import com.google.cloud.bigquery.TableId
 import no.nav.familie.tilbake.api.forvaltning.Behandlingsinfo
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.integration.pdl.PdlClient
@@ -383,6 +386,7 @@ class TilbakekrevingService(
         tilbakekreving: Tilbakekreving,
     ): List<Behandlingsinfo> {
         val behandlingsinformasjon = tilbakekreving.behandlingHistorikk.nåværende().entry.hentBehandlingsinformasjon()
+
         return listOf(
             Behandlingsinfo(
                 eksternKravgrunnlagId = null,
@@ -420,6 +424,34 @@ class TilbakekrevingService(
                 frontendFeilmelding = frontendFeilmelding,
                 logContext = SecureLog.Context.fra(tilbakekreving),
             )
+        }
+    }
+
+    fun bigqueryTest(behandling: Behandlingsinfo) {
+        logger.medContext(SecureLog.Context.tom()) {
+            info("=====>>> BIGQUERY INSERT <<<=====")
+        }
+        val table = "bq_behandling"
+
+        val bigquery = BigQueryOptions.getDefaultInstance().service
+        val tableId = TableId.of("tilbake-dev-d683", "tilbakekreving_dataset", table)
+
+        val rowContent = mapOf(
+            "behandlingId" to behandling.behandlingId.toString(),
+            "behandlende_enhets_navn" to "Test Enheten",
+            "kravgrunnlag_referanse" to behandling.eksternId,
+        )
+
+        val insertRequest = InsertAllRequest.newBuilder(tableId)
+            .addRow(rowContent)
+            .build()
+
+        val response = bigquery.insertAll(insertRequest)
+
+        if (response.hasErrors()) {
+            println("Feilet ved insert: ${response.insertErrors}")
+        } else {
+            println("Rad lagret i BigQuery")
         }
     }
 }

@@ -25,7 +25,7 @@ object ContextService {
             erMaskinTilMaskinToken(claims) -> {
                 Authentication.Systembruker(Approlle.roller(roles))
             }
-            else -> throw NotImplementedError("Ny tokenvalidering støtter bare maskin-til-maskin")
+            else -> Authentication.Ukjent
         }
     }
 
