@@ -3,9 +3,9 @@ import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 val springDocVersion = "2.8.9"
 val testcontainersVersion = "1.21.3"
-val tokenValidationVersion = "5.0.33"
+val tokenValidationVersion = "5.0.34"
 val flywayVersion = "11.3.4"
-val ktorVersion = "3.2.2"
+val ktorVersion = "3.2.3"
 ext["ktorVersion"] = ktorVersion
 
 group = "no.nav"
