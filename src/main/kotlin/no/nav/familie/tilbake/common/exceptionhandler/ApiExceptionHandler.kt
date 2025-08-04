@@ -1,8 +1,10 @@
 package no.nav.familie.tilbake.common.exceptionhandler
 
+import no.nav.familie.tilbake.kontrakter.FeilDto
 import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.tilbakekreving.feil.ModellFeil
 import org.springframework.core.NestedExceptionUtils
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -45,6 +47,18 @@ class ApiExceptionHandler {
                 frontendFeilmelding = feil.frontendFeilmelding,
             ),
         )
+    }
+
+    @ExceptionHandler(ModellFeil::class)
+    fun handleThrowable(feil: ModellFeil): ResponseEntity<FeilDto> {
+        val logContext = SecureLog.Context.medBehandling(feil.feilLogg.fagsakId, feil.feilLogg.behandlingId)
+        logger.medContext(logContext) {
+            error("En håndtert feil har oppstått: {}", feil.melding, feil)
+        }
+        val status = when (feil) {
+            is ModellFeil.UgyldigOperasjonException, is ModellFeil.UtenforScopeException -> HttpStatus.INTERNAL_SERVER_ERROR
+        }
+        return ResponseEntity.status(status).body(FeilDto(feil.melding))
     }
 
     @ExceptionHandler(ForbiddenError::class)
