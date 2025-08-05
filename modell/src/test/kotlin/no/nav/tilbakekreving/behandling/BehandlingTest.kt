@@ -9,7 +9,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.februar
-import no.nav.tilbakekreving.feil.UgyldigOperasjonException
+import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
@@ -108,7 +108,7 @@ class BehandlingTest {
         behandling.settPåVent(Venteårsak.MANGLER_STØTTE, LocalDate.MAX, "Begrunnelse")
 
         val faktasteg = FaktaFeilutbetalingsperiodeDto(periode, Hendelsestype.ANNET, Hendelsesundertype.ANNET_FRITEKST)
-        shouldThrowWithMessage<UgyldigOperasjonException>("Behandling er satt på vent. Kan ikke håndtere fakta.") {
+        shouldThrowWithMessage<ModellFeil.UgyldigOperasjonException>("Behandling er satt på vent. Kan ikke håndtere fakta.") {
             behandling.håndter(ansvarligSaksbehandler, faktasteg)
         }
 
@@ -117,7 +117,7 @@ class BehandlingTest {
 
         val foreldelse = Foreldelsesteg.Vurdering.IkkeForeldet("Begrunnelse")
         behandling.settPåVent(Venteårsak.MANGLER_STØTTE, LocalDate.MAX, "Begrunnelse")
-        shouldThrowWithMessage<UgyldigOperasjonException>("Behandling er satt på vent. Kan ikke håndtere foreldelse.") {
+        shouldThrowWithMessage<ModellFeil.UgyldigOperasjonException>("Behandling er satt på vent. Kan ikke håndtere foreldelse.") {
             behandling.håndter(ansvarligSaksbehandler, periode, foreldelse)
         }
 
@@ -126,7 +126,7 @@ class BehandlingTest {
 
         val vilkårsvurdering = Vilkårsvurderingsteg.Vurdering.ForstodEllerBurdeForstått("Begrunnelse", Vilkårsvurderingsteg.VurdertAktsomhet.Forsett("Begrunnelse", false))
         behandling.settPåVent(Venteårsak.MANGLER_STØTTE, LocalDate.MAX, "Begrunnelse")
-        shouldThrowWithMessage<UgyldigOperasjonException>("Behandling er satt på vent. Kan ikke håndtere vilkårsvurdering.") {
+        shouldThrowWithMessage<ModellFeil.UgyldigOperasjonException>("Behandling er satt på vent. Kan ikke håndtere vilkårsvurdering.") {
             behandling.håndter(ansvarligSaksbehandler, periode, vilkårsvurdering)
         }
 
@@ -136,7 +136,7 @@ class BehandlingTest {
         val foreslåVedtak = ForeslåVedtakSteg.Vurdering.ForeslåVedtak(null, listOf(ForeslåVedtakSteg.Vurdering.ForeslåVedtak.PeriodeMedTekst(periode, null, null, null, null, null)))
 
         behandling.settPåVent(Venteårsak.MANGLER_STØTTE, LocalDate.MAX, "Begrunnelse")
-        shouldThrowWithMessage<UgyldigOperasjonException>("Behandling er satt på vent. Kan ikke håndtere vedtaksforslag.") {
+        shouldThrowWithMessage<ModellFeil.UgyldigOperasjonException>("Behandling er satt på vent. Kan ikke håndtere vedtaksforslag.") {
             behandling.håndter(ansvarligSaksbehandler, foreslåVedtak)
         }
 
@@ -144,7 +144,7 @@ class BehandlingTest {
         behandling.håndter(ansvarligSaksbehandler, foreslåVedtak)
 
         behandling.settPåVent(Venteårsak.MANGLER_STØTTE, LocalDate.MAX, "Begrunnelse")
-        shouldThrowWithMessage<UgyldigOperasjonException>("Behandling er satt på vent. Kan ikke håndtere behandlingsutfall.") {
+        shouldThrowWithMessage<ModellFeil.UgyldigOperasjonException>("Behandling er satt på vent. Kan ikke håndtere behandlingsutfall.") {
             behandling.håndter(Behandler.Saksbehandler("Ansvarlig beslutter"), Behandlingssteg.FAKTA, FatteVedtakSteg.Vurdering.Godkjent)
         }
 

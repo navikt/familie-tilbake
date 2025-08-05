@@ -35,7 +35,6 @@ class Foreldelsesteg(
         periodeId: UUID,
         vurdering: Vurdering,
     ) {
-        // TODO: Ordentlig feilhåndtering i stedet for NoSuchElementException ved ugyldig periode
         vurdertePerioder.single { it.id == periodeId }.vurderForeldelse(vurdering)
     }
 
@@ -50,7 +49,6 @@ class Foreldelsesteg(
     }
 
     private fun finnIdFor(periode: Datoperiode): UUID {
-        // TODO: Ordentlig feilhåndtering i stedet for NoSuchElementException ved ugyldig periode
         return vurdertePerioder.single { it.periode == periode }.id
     }
 

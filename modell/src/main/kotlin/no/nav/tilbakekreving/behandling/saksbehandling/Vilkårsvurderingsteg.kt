@@ -62,12 +62,10 @@ class Vilkårsvurderingsteg(
         id: UUID,
         vurdering: Vurdering,
     ) {
-        // TODO: Ordentlig feilhåndtering i stedet for NoSuchElementException ved ugyldig periode
         vurderinger.single { it.id == id }.vurder(vurdering)
     }
 
     private fun finnIdForPeriode(periode: Datoperiode): UUID {
-        // TODO: Ordentlig feilhåndtering i stedet for NoSuchElementException ved ugyldig periode
         return vurderinger.single { it.periode == periode }.id
     }
 

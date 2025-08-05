@@ -16,7 +16,7 @@ import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp.Com
 import no.nav.tilbakekreving.e2e.TilbakekrevingE2EBase
 import no.nav.tilbakekreving.e2e.avventerBehandling
 import no.nav.tilbakekreving.e2e.kanBehandle
-import no.nav.tilbakekreving.feil.UtenforScopeException
+import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
@@ -169,11 +169,31 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
 
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
 
-        utførSteg(ident = "Z999999", behandlingId = behandlingId, stegData = BehandlingsstegGenerator.lagFaktastegVurderingFritekst())
-        utførSteg(ident = "Z999999", behandlingId = behandlingId, stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering())
-        utførSteg(ident = "Z999999", behandlingId = behandlingId, stegData = BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving())
-        utførSteg(ident = "Z999999", behandlingId = behandlingId, stegData = BehandlingsstegGenerator.lagForeslåVedtakVurdering())
-        utførSteg(ident = "Z111111", behandlingId = behandlingId, stegData = BehandlingsstegGenerator.lagGodkjennVedtakVurdering())
+        utførSteg(
+            ident = "Z999999",
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(),
+        )
+        utførSteg(
+            ident = "Z999999",
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(),
+        )
+        utførSteg(
+            ident = "Z999999",
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving(),
+        )
+        utførSteg(
+            ident = "Z999999",
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagForeslåVedtakVurdering(),
+        )
+        utførSteg(
+            ident = "Z111111",
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagGodkjennVedtakVurdering(),
+        )
 
         oppdragClient.shouldHaveIverksettelse(behandlingId) { vedtak ->
             vedtak.tilbakekrevingsperiode shouldHaveSize 1
@@ -184,7 +204,7 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
             }
         }
 
-        val exception = shouldThrow<UtenforScopeException> {
+        val exception = shouldThrow<ModellFeil.UtenforScopeException> {
             behandlingController.opprettRevurdering(
                 OpprettRevurderingDto(
                     YtelsestypeDTO.TILLEGGSSTØNAD,
@@ -194,7 +214,7 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
             )
         }
 
-        exception.utenforScope shouldBe UtenforScope.Revurdering
+        exception.melding shouldBe UtenforScope.Revurdering
     }
 
     companion object {

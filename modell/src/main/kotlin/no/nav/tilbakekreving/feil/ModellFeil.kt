@@ -4,17 +4,17 @@ import no.nav.tilbakekreving.UtenforScope
 
 sealed class ModellFeil(
     val melding: String,
-    val feilLogg: Sporing,
+    val sporing: Sporing,
 ) : Exception(melding) {
     class UgyldigOperasjonException(
         melding: String,
-        feilLogg: Sporing,
-    ) : ModellFeil(melding, feilLogg)
+        sporing: Sporing,
+    ) : ModellFeil(melding, sporing)
 
     class UtenforScopeException(
         utenforScope: UtenforScope,
-        feilLogg: Sporing,
-    ) : ModellFeil(utenforScope.feilmelding, feilLogg)
+        sporing: Sporing,
+    ) : ModellFeil(utenforScope.feilmelding, sporing)
 }
 
 data class Sporing(

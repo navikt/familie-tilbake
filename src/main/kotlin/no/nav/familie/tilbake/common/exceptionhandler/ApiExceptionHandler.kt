@@ -51,7 +51,7 @@ class ApiExceptionHandler {
 
     @ExceptionHandler(ModellFeil::class)
     fun handleThrowable(feil: ModellFeil): ResponseEntity<FeilDto> {
-        val logContext = SecureLog.Context.medBehandling(feil.feilLogg.fagsakId, feil.feilLogg.behandlingId)
+        val logContext = SecureLog.Context.medBehandling(feil.sporing.fagsakId, feil.sporing.behandlingId)
         logger.medContext(logContext) {
             error("En håndtert feil har oppstått: {}", feil.melding, feil)
         }
