@@ -1,6 +1,8 @@
 package no.nav.tilbakekreving.eksternfagsak
 
 import no.nav.tilbakekreving.entities.EksternFagsakBehandlingEntity
+import no.nav.tilbakekreving.feil.ModellFeil
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import java.util.UUID
@@ -13,8 +15,13 @@ class EksternFagsakBehandlingHistorikk(
         return HistorikkReferanse(this, innslag.internId)
     }
 
-    override fun finn(id: UUID): HistorikkReferanse<UUID, EksternFagsakBehandling> {
-        require(historikk.any { it.internId == id })
+    override fun finn(id: UUID, sporing: Sporing): HistorikkReferanse<UUID, EksternFagsakBehandling> {
+        require(historikk.any { it.internId == id }) {
+            throw ModellFeil.UgyldigOperasjonException(
+                "Fant ikke ekstern fagsak behandling med historikk-id $id",
+                sporing,
+            )
+        }
         return HistorikkReferanse(this, id)
     }
 

@@ -5,6 +5,7 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.fagsystem.Ytelse
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -28,6 +29,7 @@ object KravgrunnlagMapper {
     }
 
     fun tilKravgrunnlagHendelse(kravgrunnlag: DetaljertKravgrunnlagDto): KravgrunnlagHendelse {
+        val sporing = Sporing(kravgrunnlag.fagsystemId, "Ukjent")
         return KravgrunnlagHendelse(
             UUID.randomUUID(),
             kravgrunnlag.vedtakId,
@@ -48,6 +50,7 @@ object KravgrunnlagMapper {
                     ytelsesbeløp = periode.tilbakekrevingsBelop.filter { it.typeKlasse == TypeKlasseDto.YTEL }.tilBeløp(),
                 )
             },
+            sporing = sporing,
         )
     }
 

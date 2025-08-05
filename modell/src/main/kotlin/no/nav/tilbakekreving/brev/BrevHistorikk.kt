@@ -1,6 +1,8 @@
 package no.nav.tilbakekreving.brev
 
 import no.nav.tilbakekreving.entities.BrevEntity
+import no.nav.tilbakekreving.feil.ModellFeil
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import java.util.UUID
@@ -17,8 +19,13 @@ class BrevHistorikk(
         return HistorikkReferanse(this, innslag.internId)
     }
 
-    override fun finn(id: UUID): HistorikkReferanse<UUID, Brev> {
-        require(historikk.any { it.internId == id })
+    override fun finn(id: UUID, sporing: Sporing): HistorikkReferanse<UUID, Brev> {
+        require(historikk.any { it.internId == id }) {
+            throw ModellFeil.UgyldigOperasjonException(
+                "Fant ikke brev med id: $id i historikken",
+                sporing,
+            )
+        }
         return HistorikkReferanse(this, id)
     }
 
