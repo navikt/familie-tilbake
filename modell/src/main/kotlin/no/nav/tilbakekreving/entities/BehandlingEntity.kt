@@ -8,7 +8,7 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 data class BehandlingEntity(
     val internId: UUID,
