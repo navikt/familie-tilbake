@@ -16,7 +16,7 @@ class EksternFagsakBehandlingHistorikk(
     }
 
     override fun finn(id: UUID, sporing: Sporing): HistorikkReferanse<UUID, EksternFagsakBehandling> {
-        require(historikk.any { it.internId == id }) {
+        if (historikk.none { it.internId == id }) {
             throw ModellFeil.UgyldigOperasjonException(
                 "Fant ikke ekstern fagsak behandling med historikk-id $id",
                 sporing,

@@ -18,7 +18,7 @@ class KravgrunnlagHendelseTest {
             )
         }
 
-        exception.melding shouldBe UtenforScope.KravgrunnlagBrukerIkkeLikMottaker
+        exception.utenforScope shouldBe UtenforScope.KravgrunnlagBrukerIkkeLikMottaker
     }
 
     @Test
@@ -29,6 +29,6 @@ class KravgrunnlagHendelseTest {
             )
         }
 
-        exception.melding shouldBe UtenforScope.KravgrunnlagIkkePerson
+        exception.utenforScope shouldBe UtenforScope.KravgrunnlagIkkePerson
     }
 }

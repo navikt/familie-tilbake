@@ -13,7 +13,7 @@ class BehandlingHistorikk(
     private val historikk: MutableList<Behandling>,
 ) : Historikk<UUID, Behandling>, FrontendDto<List<BehandlingDto>> {
     override fun finn(id: UUID, sporing: Sporing): HistorikkReferanse<UUID, Behandling> {
-        require(historikk.any { it.internId == id }) {
+        if (historikk.none { it.internId == id }) {
             throw ModellFeil.UgyldigOperasjonException(
                 "Fant ikke behandling med historikk-id $id",
                 sporing,

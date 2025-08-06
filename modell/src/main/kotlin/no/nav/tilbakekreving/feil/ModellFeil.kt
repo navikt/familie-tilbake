@@ -12,7 +12,7 @@ sealed class ModellFeil(
     ) : ModellFeil(melding, sporing)
 
     class UtenforScopeException(
-        utenforScope: UtenforScope,
+        val utenforScope: UtenforScope,
         sporing: Sporing,
     ) : ModellFeil(utenforScope.feilmelding, sporing)
 }

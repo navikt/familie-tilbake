@@ -8,7 +8,7 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 data class BehandlingEntity(
     val internId: UUID,
@@ -35,10 +35,7 @@ data class BehandlingEntity(
     ): Behandling {
         val sporing = Sporing("Ukjent", internId.toString())
         val eksternFagsak = eksternFagsakBehandlingHistorikk.finn(eksternFagsakBehandlingRef.id, sporing)
-        val kravgrunnlag = kravgrunnlagHistorikk.finn(
-            kravgrunnlagRef.id,
-            sporing,
-        )
+        val kravgrunnlag = kravgrunnlagHistorikk.finn(kravgrunnlagRef.id, sporing)
         val foreldelsessteg = foreldelsestegEntity.fraEntity(kravgrunnlag)
         return Behandling(
             internId = internId,

@@ -29,7 +29,7 @@ class Beregning(
         kravgrunnlag.perioder().forEach { kravgrunnlagsperiode ->
             val vurdertePerioder =
                 foreldetPerioder + vilkårsvurdering.perioder().map(VilkårsvurdertPeriodeAdapter::periode)
-            require(vurdertePerioder.any { kravgrunnlagsperiode.periode() in it }) {
+            if (vurdertePerioder.none { kravgrunnlagsperiode.periode() in it }) {
                 throw ModellFeil.UgyldigOperasjonException(
                     "Perioden ${kravgrunnlagsperiode.periode()} mangler vilkårsvurdering eller foreldelse",
                     sporing,
@@ -77,8 +77,9 @@ class Beregning(
     fun vedtaksresultat(): Vedtaksresultat = bestemVedtaksresultat(beregn())
 
     private fun bestemVedtaksresultat(delperioder: List<Delperiode<out Delperiode.Beløp>>): Vedtaksresultat {
-        val tilbakekrevingsbeløp =
-            delperioder.sumOf { it.tilbakekrevesBruttoMedRenter() }.setScale(0, RoundingMode.HALF_UP)
+        val tilbakekrevingsbeløp = delperioder
+            .sumOf { it.tilbakekrevesBruttoMedRenter() }
+            .setScale(0, RoundingMode.HALF_UP)
         val feilutbetaltBeløp = delperioder.sumOf { it.feilutbetaltBeløp() }.setScale(0, RoundingMode.HALF_UP)
         return when {
             !tilbakekrevLavtBeløp -> Vedtaksresultat.INGEN_TILBAKEBETALING

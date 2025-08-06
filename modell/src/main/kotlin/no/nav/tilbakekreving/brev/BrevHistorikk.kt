@@ -20,7 +20,7 @@ class BrevHistorikk(
     }
 
     override fun finn(id: UUID, sporing: Sporing): HistorikkReferanse<UUID, Brev> {
-        require(historikk.any { it.internId == id }) {
+        if (historikk.none { it.internId == id }) {
             throw ModellFeil.UgyldigOperasjonException(
                 "Fant ikke brev med id: $id i historikken",
                 sporing,
