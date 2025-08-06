@@ -9,7 +9,6 @@ import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
 import no.nav.tilbakekreving.fagsystem.Ytelse
-import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
@@ -63,7 +62,6 @@ fun kravgrunnlag(
     referanse = UUID.randomUUID().toString(),
     kravgrunnlagId = UUID.randomUUID().toString(),
     perioder = perioder,
-    sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
 )
 
 fun kravgrunnlagPeriode(
