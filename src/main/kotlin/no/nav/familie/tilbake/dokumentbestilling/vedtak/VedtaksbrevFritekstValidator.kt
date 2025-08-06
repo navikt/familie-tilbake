@@ -208,6 +208,13 @@ object VedtaksbrevFritekstValidator {
                     )
 
                 if (perioder.isEmpty() && validerPåkrevetFritekster) {
+                    SecureLog.medContext(logContext) {
+                        warn(
+                            "Fant ikke fritekst for ANNET særlige grunner for vedtaksbrev. periode: {}, tilgjengelige fritekstfelter: {}",
+                            it.periode.toString(),
+                            vedtaksbrevFritekstPerioder.joinToString(",") { fritekst -> "periode=${fritekst.periode}, type=${fritekst.fritekststype}" },
+                        )
+                    }
                     throw Feil(
                         message = "Mangler ANNET Særliggrunner fritekst for ${it.periode}",
                         frontendFeilmelding = "Mangler ANNET Særliggrunner fritekst for ${it.periode} ",
