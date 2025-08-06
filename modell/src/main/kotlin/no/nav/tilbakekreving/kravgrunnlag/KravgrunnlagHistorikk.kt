@@ -37,7 +37,7 @@ class KravgrunnlagHistorikk(
         return HistorikkReferanse(this, historikk.last().internId)
     }
 
-    fun tilEntity(sporing: Sporing): List<KravgrunnlagHendelseEntity> {
-        return historikk.map { it.tilEntity(sporing) }
+    fun tilEntity(): List<KravgrunnlagHendelseEntity> {
+        return historikk.map { it.tilEntity() }
     }
 }

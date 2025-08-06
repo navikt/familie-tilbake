@@ -22,7 +22,6 @@ import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
 import no.nav.tilbakekreving.entities.TilbakekrevingEntity
 import no.nav.tilbakekreving.fagsystem.Ytelse
-import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
@@ -212,14 +211,14 @@ class Tilbakekreving internal constructor(
         behandlingHistorikk.nåværende().entry.fjernManuelBrevmottaker(behandler, manuellBrevmottakerId)
     }
 
-    fun tilEntity(sporing: Sporing): TilbakekrevingEntity {
+    fun tilEntity(): TilbakekrevingEntity {
         return TilbakekrevingEntity(
             nåværendeTilstand = tilstand.tilbakekrevingTilstand,
             id = this.id,
             fagsystemId = fagsystemId,
             eksternFagsak = this.eksternFagsak.tilEntity(),
             behandlingHistorikkEntities = this.behandlingHistorikk.tilEntity(),
-            kravgrunnlagHistorikkEntities = this.kravgrunnlagHistorikk.tilEntity(sporing),
+            kravgrunnlagHistorikkEntities = this.kravgrunnlagHistorikk.tilEntity(),
             brevHistorikkEntities = this.brevHistorikk.tilEntity(),
             opprettet = this.opprettet,
             opprettelsesvalg = this.opprettelsesvalg,

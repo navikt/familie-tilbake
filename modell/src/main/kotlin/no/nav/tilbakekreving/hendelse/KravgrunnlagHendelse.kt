@@ -57,7 +57,7 @@ class KravgrunnlagHendelse(
         return perioder
     }
 
-    fun tilEntity(sporing: Sporing): KravgrunnlagHendelseEntity {
+    fun tilEntity(): KravgrunnlagHendelseEntity {
         return KravgrunnlagHendelseEntity(
             internId = internId,
             vedtakId = vedtakId,

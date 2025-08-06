@@ -9,6 +9,7 @@ import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
 import no.nav.tilbakekreving.fagsystem.Ytelse
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
@@ -49,20 +50,24 @@ fun kravgrunnlag(
     vedtakGjelder: Aktør = Aktør.Person(bruker().ident),
     utbetalesTil: Aktør = Aktør.Person(bruker().ident),
     perioder: List<KravgrunnlagHendelse.Periode> = listOf(kravgrunnlagPeriode()),
-) = KravgrunnlagHendelse(
-    internId = UUID.randomUUID(),
-    vedtakId = BigInteger(128, Random()),
-    kravstatuskode = KravgrunnlagHendelse.Kravstatuskode.NY,
-    fagsystemVedtaksdato = LocalDate.now(),
-    vedtakGjelder = vedtakGjelder,
-    utbetalesTil = utbetalesTil,
-    skalBeregneRenter = false,
-    ansvarligEnhet = "0425",
-    kontrollfelt = UUID.randomUUID().toString(),
-    referanse = UUID.randomUUID().toString(),
-    kravgrunnlagId = UUID.randomUUID().toString(),
-    perioder = perioder,
-)
+): KravgrunnlagHendelse {
+    val kravgrunnlagHendelse = KravgrunnlagHendelse(
+        internId = UUID.randomUUID(),
+        vedtakId = BigInteger(128, Random()),
+        kravstatuskode = KravgrunnlagHendelse.Kravstatuskode.NY,
+        fagsystemVedtaksdato = LocalDate.now(),
+        vedtakGjelder = vedtakGjelder,
+        utbetalesTil = utbetalesTil,
+        skalBeregneRenter = false,
+        ansvarligEnhet = "0425",
+        kontrollfelt = UUID.randomUUID().toString(),
+        referanse = UUID.randomUUID().toString(),
+        kravgrunnlagId = UUID.randomUUID().toString(),
+        perioder = perioder,
+    )
+    kravgrunnlagHendelse.valider(Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()))
+    return kravgrunnlagHendelse
+}
 
 fun kravgrunnlagPeriode(
     periode: Datoperiode = 1.januar til 31.januar,
