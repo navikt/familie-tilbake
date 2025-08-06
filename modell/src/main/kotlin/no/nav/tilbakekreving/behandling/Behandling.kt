@@ -253,14 +253,7 @@ class Behandling internal constructor(
     ) {
         validerBehandlingstatus("vilkårsvurdering")
         this.ansvarligSaksbehandler = behandler
-        try {
-            vilkårsvurderingsteg.vurder(periode, vurdering)
-        } catch (feil: ModellFeil.UgyldigOperasjonException) {
-            throw ModellFeil.UgyldigOperasjonException(
-                feil.message.toString(),
-                sporingsinformasjon(),
-            )
-        }
+        vilkårsvurderingsteg.vurder(periode, vurdering)
     }
 
     internal fun håndter(

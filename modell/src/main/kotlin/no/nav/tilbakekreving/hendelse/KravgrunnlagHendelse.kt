@@ -32,7 +32,7 @@ class KravgrunnlagHendelse(
     // Brukes som eksternId i henting av fagsysteminfo, hva betyr det egentlig?
     val referanse: String,
     val perioder: List<Periode>,
-    val sporing: Sporing,
+    sporing: Sporing,
 ) : Historikk.HistorikkInnslag<UUID>, KravgrunnlagAdapter {
     init {
         if (vedtakGjelder !is Aktør.Person || utbetalesTil !is Aktør.Person) {
@@ -58,7 +58,7 @@ class KravgrunnlagHendelse(
         return perioder
     }
 
-    fun tilEntity(): KravgrunnlagHendelseEntity {
+    fun tilEntity(sporing: Sporing): KravgrunnlagHendelseEntity {
         return KravgrunnlagHendelseEntity(
             internId = internId,
             vedtakId = vedtakId,

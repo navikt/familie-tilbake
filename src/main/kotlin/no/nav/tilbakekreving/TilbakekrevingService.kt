@@ -26,6 +26,7 @@ import no.nav.tilbakekreving.behov.IverksettelseBehov
 import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.config.ApplicationProperties
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
@@ -105,7 +106,7 @@ class TilbakekrevingService(
         tilbakekrevingRepository.lagre(
             tilbakekreving.id,
             tilbakekreving.behandlingHistorikk.nåværende().entry.internId,
-            tilbakekreving.tilEntity(),
+            tilbakekreving.tilEntity(Sporing(tilbakekreving.fagsystemId, tilbakekreving.behandlingHistorikk.nåværende().entry.internId.toString())),
         )
     }
 
@@ -202,7 +203,7 @@ class TilbakekrevingService(
             is BehandlingsstegFatteVedtaksstegDto -> behandleFatteVedtak(tilbakekreving, behandlingsstegDto, behandler)
             else -> throw Feil("Vurdering for ${behandlingsstegDto.getSteg()} er ikke implementert i ny modell enda.", logContext = logContext)
         }
-        tilbakekrevingRepository.lagreTilstand(tilbakekreving.tilEntity())
+        tilbakekrevingRepository.lagreTilstand(tilbakekreving.tilEntity(Sporing(tilbakekreving.fagsystemId, tilbakekreving.behandlingHistorikk.nåværende().entry.internId.toString())))
         return result
     }
 
@@ -351,23 +352,23 @@ class TilbakekrevingService(
 
             else -> throw IllegalArgumentException("Default eller ugydlig mottaker type ${brevmottakerDto.type}")
         }
-        tilbakekrevingRepository.lagreTilstand(tilbakekreving.tilEntity())
+        tilbakekrevingRepository.lagreTilstand(tilbakekreving.tilEntity(Sporing(tilbakekreving.fagsystemId, tilbakekreving.behandlingHistorikk.nåværende().entry.internId.toString())))
     }
 
     fun flyttBehandlingsstegTilbakeTilFakta(tilbakekreving: Tilbakekreving) {
         tilbakekreving.håndterNullstilling()
-        tilbakekrevingRepository.lagreTilstand(tilbakekreving.tilEntity())
+        tilbakekrevingRepository.lagreTilstand(tilbakekreving.tilEntity(Sporing(tilbakekreving.fagsystemId, tilbakekreving.behandlingHistorikk.nåværende().entry.internId.toString())))
     }
 
     fun aktiverBrevmottakerSteg(tilbakekreving: Tilbakekreving) {
         validerBrevmottaker(tilbakekreving)
         tilbakekreving.aktiverBrevmottakerSteg()
-        tilbakekrevingRepository.lagreTilstand(tilbakekreving.tilEntity())
+        tilbakekrevingRepository.lagreTilstand(tilbakekreving.tilEntity(Sporing(tilbakekreving.fagsystemId, tilbakekreving.behandlingHistorikk.nåværende().entry.internId.toString())))
     }
 
     fun deaktiverBrevmottakerSteg(tilbakekreving: Tilbakekreving) {
         tilbakekreving.deaktiverBrevmottakerSteg()
-        tilbakekrevingRepository.lagreTilstand(tilbakekreving.tilEntity())
+        tilbakekrevingRepository.lagreTilstand(tilbakekreving.tilEntity(Sporing(tilbakekreving.fagsystemId, tilbakekreving.behandlingHistorikk.nåværende().entry.internId.toString())))
     }
 
     fun fjernManuelBrevmottaker(
@@ -376,7 +377,7 @@ class TilbakekrevingService(
         manuellBrevmottakerId: UUID,
     ) {
         tilbakekreving.fjernManuelBrevmottaker(behandler, manuellBrevmottakerId)
-        tilbakekrevingRepository.lagreTilstand(tilbakekreving.tilEntity())
+        tilbakekrevingRepository.lagreTilstand(tilbakekreving.tilEntity(Sporing(tilbakekreving.fagsystemId, tilbakekreving.behandlingHistorikk.nåværende().entry.internId.toString())))
     }
 
     fun hentBehandlingsinfo(
