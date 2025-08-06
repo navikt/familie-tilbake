@@ -29,8 +29,7 @@ object KravgrunnlagMapper {
     }
 
     fun tilKravgrunnlagHendelse(kravgrunnlag: DetaljertKravgrunnlagDto): KravgrunnlagHendelse {
-        val sporing = Sporing(kravgrunnlag.fagsystemId, "Ukjent")
-        return KravgrunnlagHendelse(
+        val kravgrunnlagHendelse = KravgrunnlagHendelse(
             UUID.randomUUID(),
             kravgrunnlag.vedtakId,
             KravgrunnlagHendelse.Kravstatuskode.valueOf(kravgrunnlag.kodeStatusKrav),
@@ -50,8 +49,9 @@ object KravgrunnlagMapper {
                     ytelsesbeløp = periode.tilbakekrevingsBelop.filter { it.typeKlasse == TypeKlasseDto.YTEL }.tilBeløp(),
                 )
             },
-            sporing = sporing,
         )
+        kravgrunnlagHendelse.valider(Sporing(kravgrunnlag.fagsystemId, "Ukjent"))
+        return kravgrunnlagHendelse
     }
 
     private fun mapAktør(

@@ -1,6 +1,5 @@
 package no.nav.tilbakekreving.entities
 
-import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse.Kravstatuskode
 import java.math.BigInteger
@@ -20,7 +19,6 @@ data class KravgrunnlagHendelseEntity(
     val kravgrunnlagId: String,
     val referanse: String,
     val perioder: List<KravgrunnlagPeriodeEntity>,
-    val sporing: Sporing,
 ) {
     fun fraEntity(): KravgrunnlagHendelse {
         return KravgrunnlagHendelse(
@@ -36,7 +34,6 @@ data class KravgrunnlagHendelseEntity(
             kravgrunnlagId = kravgrunnlagId,
             referanse = referanse,
             perioder = perioder.map { it.fraEntity() },
-            sporing = sporing,
         )
     }
 }

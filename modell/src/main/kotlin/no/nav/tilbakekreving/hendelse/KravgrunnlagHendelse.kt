@@ -32,9 +32,8 @@ class KravgrunnlagHendelse(
     // Brukes som eksternId i henting av fagsysteminfo, hva betyr det egentlig?
     val referanse: String,
     val perioder: List<Periode>,
-    sporing: Sporing,
 ) : Historikk.HistorikkInnslag<UUID>, KravgrunnlagAdapter {
-    init {
+    fun valider(sporing: Sporing) {
         if (vedtakGjelder !is Aktør.Person || utbetalesTil !is Aktør.Person) {
             throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagIkkePerson, sporing)
         }
@@ -72,7 +71,6 @@ class KravgrunnlagHendelse(
             kravgrunnlagId = kravgrunnlagId,
             referanse = referanse,
             perioder = perioder.map { it.tilEntity() },
-            sporing = sporing,
         )
     }
 
