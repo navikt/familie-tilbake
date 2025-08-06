@@ -214,7 +214,7 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
             )
         }
 
-        exception.melding shouldBe UtenforScope.Revurdering
+        exception.utenforScope shouldBe UtenforScope.Revurdering
     }
 
     companion object {
