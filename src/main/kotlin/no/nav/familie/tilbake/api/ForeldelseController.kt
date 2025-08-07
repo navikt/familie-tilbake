@@ -9,6 +9,7 @@ import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelseDto
+import no.nav.tilbakekreving.feil.Sporing
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -43,7 +44,12 @@ class ForeldelseController(
                 auditLoggerEvent = AuditLoggerEvent.ACCESS,
                 handling = "Henter vilkårsvurdering for en gitt behandling",
             )
-            return Ressurs.success(tilbakekreving.behandlingHistorikk.finn(behandlingId).entry.foreldelsestegDto.tilFrontendDto())
+            return Ressurs.success(
+                tilbakekreving.behandlingHistorikk.finn(
+                    behandlingId,
+                    Sporing(tilbakekreving.fagsystemId, behandlingId.toString()),
+                ).entry.foreldelsestegDto.tilFrontendDto(),
+            )
         }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,

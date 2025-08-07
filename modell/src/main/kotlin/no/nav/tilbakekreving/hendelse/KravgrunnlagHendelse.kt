@@ -8,7 +8,8 @@ import no.nav.tilbakekreving.entities.BeløpEntity
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.KravgrunnlagHendelseEntity
 import no.nav.tilbakekreving.entities.KravgrunnlagPeriodeEntity
-import no.nav.tilbakekreving.feil.UtenforScopeException
+import no.nav.tilbakekreving.feil.ModellFeil
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -32,13 +33,13 @@ class KravgrunnlagHendelse(
     val referanse: String,
     val perioder: List<Periode>,
 ) : Historikk.HistorikkInnslag<UUID>, KravgrunnlagAdapter {
-    init {
+    fun valider(sporing: Sporing) {
         if (vedtakGjelder !is Aktør.Person || utbetalesTil !is Aktør.Person) {
-            throw UtenforScopeException(UtenforScope.KravgrunnlagIkkePerson)
+            throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagIkkePerson, sporing)
         }
 
         if (vedtakGjelder.ident != utbetalesTil.ident) {
-            throw UtenforScopeException(UtenforScope.KravgrunnlagBrukerIkkeLikMottaker)
+            throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagBrukerIkkeLikMottaker, sporing)
         }
     }
 

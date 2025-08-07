@@ -1,6 +1,8 @@
 package no.nav.tilbakekreving.kravgrunnlag
 
 import no.nav.tilbakekreving.entities.KravgrunnlagHendelseEntity
+import no.nav.tilbakekreving.feil.ModellFeil
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
@@ -9,8 +11,16 @@ import java.util.UUID
 class KravgrunnlagHistorikk(
     private val historikk: MutableList<KravgrunnlagHendelse>,
 ) : Historikk<UUID, KravgrunnlagHendelse> {
-    override fun finn(id: UUID): HistorikkReferanse<UUID, KravgrunnlagHendelse> {
-        require(historikk.any { it.internId == id })
+    override fun finn(
+        id: UUID,
+        sporing: Sporing,
+    ): HistorikkReferanse<UUID, KravgrunnlagHendelse> {
+        if (historikk.none { it.internId == id }) {
+            throw ModellFeil.UgyldigOperasjonException(
+                "Fant ikke kravgrunnlag-hendelse med historikk-id $id",
+                sporing,
+            )
+        }
         return HistorikkReferanse(this, id)
     }
 

@@ -26,7 +26,8 @@ import no.nav.tilbakekreving.api.v1.dto.ByttEnhetDto
 import no.nav.tilbakekreving.api.v1.dto.HenleggelsesbrevFritekstDto
 import no.nav.tilbakekreving.api.v1.dto.OpprettRevurderingDto
 import no.nav.tilbakekreving.config.ApplicationProperties
-import no.nav.tilbakekreving.feil.UtenforScopeException
+import no.nav.tilbakekreving.feil.ModellFeil
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kontrakter.OpprettManueltTilbakekrevingRequest
 import no.nav.tilbakekreving.kontrakter.OpprettTilbakekrevingRequest
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
@@ -109,7 +110,10 @@ class BehandlingController(
         opprettRevurderingDto: OpprettRevurderingDto,
     ): Ressurs<String> {
         tilbakekrevingService.hentTilbakekreving(opprettRevurderingDto.originalBehandlingId) {
-            throw UtenforScopeException(UtenforScope.Revurdering)
+            throw ModellFeil.UtenforScopeException(
+                UtenforScope.Revurdering,
+                Sporing("Ukjent", opprettRevurderingDto.originalBehandlingId.toString()),
+            )
         }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = opprettRevurderingDto.originalBehandlingId,
@@ -201,7 +205,11 @@ class BehandlingController(
             behandlingService.oppdaterAnsvarligSaksbehandler(behandlingId)
         }
         val behandling = behandlingService.hentBehandling(behandlingId)
-        stegService.håndterSteg(behandlingId, behandlingsstegDto, SecureLog.Context.medBehandling(behandling.eksternFagsakId, behandlingId.toString()))
+        stegService.håndterSteg(
+            behandlingId,
+            behandlingsstegDto,
+            SecureLog.Context.medBehandling(behandling.eksternFagsakId, behandlingId.toString()),
+        )
 
         return Ressurs.success("OK")
     }
@@ -361,10 +369,22 @@ class BehandlingController(
         behandling: BehandlingDto,
         logContext: SecureLog.Context,
     ) {
-        feilHvis(!erAnsvarligSaksbehandler(behandling, logContext) && !tilgangService.harInnloggetBrukerForvalterRolle(), HttpStatus.FORBIDDEN, logContext) {
+        feilHvis(
+            !erAnsvarligSaksbehandler(
+                behandling,
+                logContext,
+            ) &&
+                !tilgangService.harInnloggetBrukerForvalterRolle(),
+            HttpStatus.FORBIDDEN,
+            logContext,
+        ) {
             "Kun ansvarlig saksbehandler kan flytte behandling tilbake til fakta"
         }
-        feilHvis(behandlingskontrollService.erBehandlingPåVent(behandling.behandlingId), HttpStatus.FORBIDDEN, logContext) {
+        feilHvis(
+            behandlingskontrollService.erBehandlingPåVent(behandling.behandlingId),
+            HttpStatus.FORBIDDEN,
+            logContext,
+        ) {
             "Behandling er på vent og kan derfor ikke flyttes tilbake til fakta"
         }
         val behandlingstatus = behandlingService.hentBehandling(behandling.behandlingId).status

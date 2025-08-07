@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.entities
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
@@ -32,8 +33,9 @@ data class BehandlingEntity(
         kravgrunnlagHistorikk: KravgrunnlagHistorikk,
         brevHistorikk: BrevHistorikk,
     ): Behandling {
-        val eksternFagsak = eksternFagsakBehandlingHistorikk.finn(eksternFagsakBehandlingRef.id)
-        val kravgrunnlag = kravgrunnlagHistorikk.finn(kravgrunnlagRef.id)
+        val sporing = Sporing("Ukjent", internId.toString())
+        val eksternFagsak = eksternFagsakBehandlingHistorikk.finn(eksternFagsakBehandlingRef.id, sporing)
+        val kravgrunnlag = kravgrunnlagHistorikk.finn(kravgrunnlagRef.id, sporing)
         val foreldelsessteg = foreldelsestegEntity.fraEntity(kravgrunnlag)
         return Behandling(
             internId = internId,

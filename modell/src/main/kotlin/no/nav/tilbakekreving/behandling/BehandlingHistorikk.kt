@@ -3,6 +3,8 @@ package no.nav.tilbakekreving.behandling
 import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
 import no.nav.tilbakekreving.entities.BehandlingEntity
+import no.nav.tilbakekreving.feil.ModellFeil
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import java.util.UUID
@@ -10,8 +12,13 @@ import java.util.UUID
 class BehandlingHistorikk(
     private val historikk: MutableList<Behandling>,
 ) : Historikk<UUID, Behandling>, FrontendDto<List<BehandlingDto>> {
-    override fun finn(id: UUID): HistorikkReferanse<UUID, Behandling> {
-        require(historikk.any { it.internId == id })
+    override fun finn(id: UUID, sporing: Sporing): HistorikkReferanse<UUID, Behandling> {
+        if (historikk.none { it.internId == id }) {
+            throw ModellFeil.UgyldigOperasjonException(
+                "Fant ikke behandling med historikk-id $id",
+                sporing,
+            )
+        }
         return HistorikkReferanse(this, id)
     }
 

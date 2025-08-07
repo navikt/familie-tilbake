@@ -17,6 +17,7 @@ import no.nav.tilbakekreving.api.v1.dto.BeregnetPerioderDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatsperiodeDto
 import no.nav.tilbakekreving.beregning.Beregning
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import org.springframework.stereotype.Service
@@ -75,6 +76,7 @@ class TilbakekrevingsberegningService(
             kravgrunnlag = kravgrunnlagAdapter,
             vilkårsvurdering = vilkårsvurderingAdapter,
             foreldetPerioder = foreldetPerioder,
+            sporing = Sporing(kravgrunnlag.fagsystemId, behandling.id.toString()),
         )
     }
 

@@ -16,6 +16,7 @@ import no.nav.tilbakekreving.beregning.delperiode.Delperiode
 import no.nav.tilbakekreving.beregning.modell.Beregningsresultat
 import no.nav.tilbakekreving.beregning.modell.Beregningsresultatsperiode
 import no.nav.tilbakekreving.februar
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
@@ -40,6 +41,7 @@ class BeregningTest {
             kravgrunnlag = perioder(
                 1.januar til 31.januar medTilbakekrevesBeløp 1500.kroner,
             ),
+            sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
 
         val delperioder = beregning.beregn()
@@ -90,6 +92,7 @@ class BeregningTest {
             kravgrunnlag = perioder(
                 1.januar til 31.januar medBeløp beløp(tilbakekrevesBeløp = 1500.kroner, skatteprosent = 50.prosent),
             ),
+            sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
 
         val delperioder = beregning.beregn()
@@ -141,6 +144,7 @@ class BeregningTest {
                 1.januar til 31.januar medTilbakekrevesBeløp 1500.kroner,
                 1.februar til 28.februar medTilbakekrevesBeløp 1500.kroner,
             ),
+            sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
 
         val delperiode = beregning.beregn()
@@ -204,6 +208,7 @@ class BeregningTest {
                 1.januar til 31.januar medTilbakekrevesBeløp 1500.kroner,
                 1.februar til 28.februar medTilbakekrevesBeløp 1500.kroner,
             ),
+            sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
 
         val delperioder = beregning.beregn()
@@ -267,6 +272,7 @@ class BeregningTest {
                 1.januar til 31.januar medTilbakekrevesBeløp 1499.kroner,
                 1.februar til 28.februar medTilbakekrevesBeløp 1499.kroner,
             ),
+            sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
 
         val delperioder = beregning.beregn()
@@ -331,6 +337,7 @@ class BeregningTest {
                 1.februar til 28.februar medBeløp beløp(tilbakekrevesBeløp = 18609.kroner, skatteprosent = 50.prosent, originaltUtbetaltBeløp = 44093.kroner, riktigYtelsesbeløp = 25484.kroner),
                 1.mars til 31.mars medBeløp beløp(tilbakekrevesBeløp = 18609.kroner, skatteprosent = 50.prosent, originaltUtbetaltBeløp = 44093.kroner, riktigYtelsesbeløp = 25484.kroner),
             ),
+            sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
 
         val delperioder = beregning.beregn()
@@ -407,6 +414,7 @@ class BeregningTest {
                 1.januar til 31.januar medBeløp beløp(1755.kroner, skatteprosent = 44.prosent, originaltUtbetaltBeløp = 19950.kroner, riktigYtelsesbeløp = 18195.kroner),
                 1.februar til 28.februar medBeløp beløp(1755.kroner, skatteprosent = 50.prosent, originaltUtbetaltBeløp = 19950.kroner, riktigYtelsesbeløp = 18195.kroner),
             ),
+            sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
 
         val delperioder = beregning.beregn()
@@ -471,6 +479,7 @@ class BeregningTest {
                 1.januar til 31.januar medBeløp beløp(tilbakekrevesBeløp = 1755.kroner, originaltUtbetaltBeløp = 19950.kroner, riktigYtelsesbeløp = 18195.kroner),
                 1.februar til 28.februar medBeløp beløp(tilbakekrevesBeløp = 1755.kroner, originaltUtbetaltBeløp = 19950.kroner, riktigYtelsesbeløp = 18195.kroner),
             ),
+            sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
 
         val delperioder = beregning.beregn()
@@ -550,6 +559,7 @@ class BeregningTest {
                 1.januar til 31.januar medTilbakekrevesBeløp 2000.kroner,
                 1.februar til 28.februar medTilbakekrevesBeløp 2000.kroner,
             ),
+            sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
 
         val delperioder = beregning.beregn()
@@ -614,6 +624,7 @@ class BeregningTest {
                 1.januar til 31.januar medBeløp beløp(tilbakekrevesBeløp = 1000.kroner, originaltUtbetaltBeløp = 10000.kroner, klassekode = "BATR")
                     medBeløp beløp(500.kroner, originaltUtbetaltBeløp = 10000.kroner, klassekode = "BAUTV-OP"),
             ),
+            sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
 
         val delperioder = beregning.beregn()
@@ -673,6 +684,7 @@ class BeregningTest {
                 1.februar til 28.februar medBeløp beløp(tilbakekrevesBeløp = 4000.kroner, originaltUtbetaltBeløp = 10000.kroner, klassekode = "BATR")
                     medBeløp beløp(tilbakekrevesBeløp = 2000.kroner, originaltUtbetaltBeløp = 10000.kroner, klassekode = "BAUTV-OP"),
             ),
+            sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
 
         val delperioder = beregning.beregn()

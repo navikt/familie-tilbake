@@ -30,7 +30,8 @@ import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
 import no.nav.tilbakekreving.entities.BehandlingEntity
 import no.nav.tilbakekreving.fagsystem.Ytelsestype
-import no.nav.tilbakekreving.feil.UgyldigOperasjonException
+import no.nav.tilbakekreving.feil.ModellFeil
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
@@ -94,6 +95,10 @@ class Behandling internal constructor(
         )
     }
 
+    fun sporingsinformasjon(): Sporing {
+        return Sporing(eksternFagsakBehandling.entry.eksternId, internId.toString())
+    }
+
     private fun steg() = listOf(
         faktasteg,
         foreldelsesteg,
@@ -127,6 +132,7 @@ class Behandling internal constructor(
             vilkårsvurderingsteg,
             foreldelsesteg.perioder(),
             kravgrunnlag.entry,
+            sporingsinformasjon(),
         )
     }
 
@@ -236,6 +242,7 @@ class Behandling internal constructor(
     ) {
         validerBehandlingstatus(håndtertSteg = "fakta")
         this.ansvarligSaksbehandler = behandler
+        // TODO håndter feil når fakta er implementer
         faktasteg.behandleFakta(vurdering)
     }
 
@@ -318,7 +325,10 @@ class Behandling internal constructor(
 
     private fun validerBehandlingstatus(håndtertSteg: String) {
         if (påVent != null) {
-            throw UgyldigOperasjonException("Behandling er satt på vent. Kan ikke håndtere $håndtertSteg.")
+            throw ModellFeil.UgyldigOperasjonException(
+                "Behandling er satt på vent. Kan ikke håndtere $håndtertSteg.",
+                sporingsinformasjon(),
+            )
         }
     }
 

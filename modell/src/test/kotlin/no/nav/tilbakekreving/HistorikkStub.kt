@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving
 
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import java.util.UUID
@@ -15,7 +16,7 @@ class HistorikkStub<T : Historikk.HistorikkInnslag<UUID>>(val entry: T) : Histor
         return HistorikkReferanse(this, id)
     }
 
-    override fun finn(id: UUID): HistorikkReferanse<UUID, T> {
+    override fun finn(id: UUID, sporing: Sporing): HistorikkReferanse<UUID, T> {
         return HistorikkReferanse(this, id)
     }
 

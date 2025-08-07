@@ -9,6 +9,7 @@ import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingDto
+import no.nav.tilbakekreving.feil.Sporing
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -43,7 +44,12 @@ class VilkårsvurderingController(
                 auditLoggerEvent = AuditLoggerEvent.ACCESS,
                 handling = "Henter vilkårsvurdering for en gitt behandling",
             )
-            return Ressurs.success(tilbakekreving.behandlingHistorikk.finn(behandlingId).entry.vilkårsvurderingsstegDto.tilFrontendDto())
+            return Ressurs.success(
+                tilbakekreving.behandlingHistorikk.finn(
+                    behandlingId,
+                    Sporing(tilbakekreving.fagsystemId, behandlingId.toString()),
+                ).entry.vilkårsvurderingsstegDto.tilFrontendDto(),
+            )
         }
 
         tilgangskontrollService.validerTilgangBehandlingID(
