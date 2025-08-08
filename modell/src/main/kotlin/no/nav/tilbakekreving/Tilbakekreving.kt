@@ -66,26 +66,26 @@ class Tilbakekreving internal constructor(
     }
 
     fun håndter(kravgrunnlag: KravgrunnlagHendelse) {
-        tilstand.håndter(this, kravgrunnlag)
+        tilstand.håndter(this, kravgrunnlag, Sporing(fagsystemId, "Ukjent"))
     }
 
     fun håndter(fagsysteminfo: FagsysteminfoHendelse) {
-        tilstand.håndter(this, fagsysteminfo)
+        tilstand.håndter(this, fagsysteminfo, Sporing(fagsystemId, "Ukjent"))
     }
 
     fun håndter(brukerinfo: BrukerinfoHendelse) {
-        tilstand.håndter(this, brukerinfo)
+        tilstand.håndter(this, brukerinfo, Sporing(fagsystemId, "Ukjent"))
     }
 
     fun håndter(varselbrevSendt: VarselbrevSendtHendelse) {
-        tilstand.håndter(this, varselbrevSendt)
+        tilstand.håndter(this, varselbrevSendt, Sporing(fagsystemId, "Ukjent"))
     }
 
     fun håndter(iverksettelseHendelse: IverksettelseHendelse) {
-        tilstand.håndter(this, iverksettelseHendelse)
+        tilstand.håndter(this, iverksettelseHendelse, Sporing(fagsystemId, "Ukjent"))
     }
 
-    fun håndterNullstilling() = tilstand.håndterNullstilling(this)
+    fun håndterNullstilling() = tilstand.håndterNullstilling(this, Sporing(fagsystemId, "Ukjent"))
 
     fun nullstillBehandling() {
         val nåværendeBehandling = behandlingHistorikk.nåværende().entry

@@ -28,29 +28,33 @@ internal sealed interface Tilstand {
     fun håndter(
         tilbakekreving: Tilbakekreving,
         kravgrunnlag: KravgrunnlagHendelse,
+        sporing: Sporing,
     ) {
-        error("Forventet ikke Kravgrunnlag i $tilbakekrevingTilstand")
+        throw ModellFeil.UgyldigOperasjonException("Forventet ikke Kravgrunnlag i $tilbakekrevingTilstand", sporing)
     }
 
     fun håndter(
         tilbakekreving: Tilbakekreving,
         fagsysteminfo: FagsysteminfoHendelse,
+        sporing: Sporing,
     ) {
-        error("Forventet ikke Fagsysteminfo i $tilbakekrevingTilstand")
+        throw ModellFeil.UgyldigOperasjonException("Forventet ikke Fagsysteminfo i $tilbakekrevingTilstand", sporing)
     }
 
     fun håndter(
         tilbakekreving: Tilbakekreving,
         brukerinfo: BrukerinfoHendelse,
+        sporing: Sporing,
     ) {
-        error("Forventet ikke Brukerinfo i $tilbakekrevingTilstand")
+        throw ModellFeil.UgyldigOperasjonException("Forventet ikke Brukerinfo i $tilbakekrevingTilstand", sporing)
     }
 
     fun håndter(
         tilbakekreving: Tilbakekreving,
         varselbrevSendtHendelse: VarselbrevSendtHendelse,
+        sporing: Sporing,
     ) {
-        error("Forventet ikke VarselbrevSendtHendelse i $tilbakekrevingTilstand")
+        throw ModellFeil.UgyldigOperasjonException("Forventet ikke VarselbrevSendtHendelse i $tilbakekrevingTilstand", sporing)
     }
 
     fun håndter(
@@ -61,11 +65,12 @@ internal sealed interface Tilstand {
     fun håndter(
         tilbakekreving: Tilbakekreving,
         iverksettelseHendelse: IverksettelseHendelse,
+        sporing: Sporing,
     ) {
-        error("Forventet ikke IverksettelseHendelse i $tilbakekrevingTilstand")
+        throw ModellFeil.UgyldigOperasjonException("Forventet ikke IverksettelseHendelse i $tilbakekrevingTilstand", sporing)
     }
 
-    fun håndterNullstilling(tilbakekreving: Tilbakekreving) {
-        error("Forventet ikke Nullstilling i $tilbakekrevingTilstand")
+    fun håndterNullstilling(tilbakekreving: Tilbakekreving, sporing: Sporing) {
+        throw ModellFeil.UgyldigOperasjonException("Forventet ikke Nullstilling i $tilbakekrevingTilstand", sporing)
     }
 }
