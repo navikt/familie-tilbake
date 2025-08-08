@@ -2,6 +2,8 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import java.util.UUID
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.junit.jupiter.api.Test
@@ -13,7 +15,13 @@ class FatteVedtakStegTest {
     @Test
     fun `delvis vurdering av fatte vedtak steg`() {
         val fatteVedtakSteg = FatteVedtakSteg.opprett()
-        fatteVedtakSteg.håndter(ansvarligBeslutter, ansvarligSaksbehandler, Behandlingssteg.FORELDELSE, FatteVedtakSteg.Vurdering.Godkjent)
+        fatteVedtakSteg.håndter(
+            ansvarligBeslutter,
+            ansvarligSaksbehandler,
+            Behandlingssteg.FORELDELSE,
+            FatteVedtakSteg.Vurdering.Godkjent,
+            Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+        )
 
         fatteVedtakSteg.erFullstending() shouldBe false
     }
@@ -21,10 +29,34 @@ class FatteVedtakStegTest {
     @Test
     fun `fullstendig vurdering av fatte vedtak steg`() {
         val fatteVedtakSteg = FatteVedtakSteg.opprett()
-        fatteVedtakSteg.håndter(ansvarligBeslutter, ansvarligSaksbehandler, Behandlingssteg.FAKTA, FatteVedtakSteg.Vurdering.Godkjent)
-        fatteVedtakSteg.håndter(ansvarligBeslutter, ansvarligSaksbehandler, Behandlingssteg.FORELDELSE, FatteVedtakSteg.Vurdering.Godkjent)
-        fatteVedtakSteg.håndter(ansvarligBeslutter, ansvarligSaksbehandler, Behandlingssteg.VILKÅRSVURDERING, FatteVedtakSteg.Vurdering.Godkjent)
-        fatteVedtakSteg.håndter(ansvarligBeslutter, ansvarligSaksbehandler, Behandlingssteg.FORESLÅ_VEDTAK, FatteVedtakSteg.Vurdering.Godkjent)
+        fatteVedtakSteg.håndter(
+            ansvarligBeslutter,
+            ansvarligSaksbehandler,
+            Behandlingssteg.FAKTA,
+            FatteVedtakSteg.Vurdering.Godkjent,
+            Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+        )
+        fatteVedtakSteg.håndter(
+            ansvarligBeslutter,
+            ansvarligSaksbehandler,
+            Behandlingssteg.FORELDELSE,
+            FatteVedtakSteg.Vurdering.Godkjent,
+            Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+        )
+        fatteVedtakSteg.håndter(
+            ansvarligBeslutter,
+            ansvarligSaksbehandler,
+            Behandlingssteg.VILKÅRSVURDERING,
+            FatteVedtakSteg.Vurdering.Godkjent,
+            Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+        )
+        fatteVedtakSteg.håndter(
+            ansvarligBeslutter,
+            ansvarligSaksbehandler,
+            Behandlingssteg.FORESLÅ_VEDTAK,
+            FatteVedtakSteg.Vurdering.Godkjent,
+            Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+        )
 
         fatteVedtakSteg.erFullstending() shouldBe true
     }
@@ -34,7 +66,13 @@ class FatteVedtakStegTest {
         val fatteVedtakSteg = FatteVedtakSteg.opprett()
 
         shouldThrow<NoSuchElementException> {
-            fatteVedtakSteg.håndter(ansvarligBeslutter, ansvarligSaksbehandler, Behandlingssteg.BREVMOTTAKER, FatteVedtakSteg.Vurdering.Godkjent)
+            fatteVedtakSteg.håndter(
+                ansvarligBeslutter,
+                ansvarligSaksbehandler,
+                Behandlingssteg.BREVMOTTAKER,
+                FatteVedtakSteg.Vurdering.Godkjent,
+                Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+            ))
         }
     }
 
@@ -43,7 +81,13 @@ class FatteVedtakStegTest {
         val fatteVedtakSteg = FatteVedtakSteg.opprett()
 
         shouldThrow<IllegalStateException> {
-            fatteVedtakSteg.håndter(ansvarligSaksbehandler, ansvarligSaksbehandler, Behandlingssteg.FAKTA, FatteVedtakSteg.Vurdering.Godkjent)
+            fatteVedtakSteg.håndter(
+                ansvarligSaksbehandler,
+                ansvarligSaksbehandler,
+                Behandlingssteg.FAKTA,
+                FatteVedtakSteg.Vurdering.Godkjent,
+                Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+            )
         }
     }
 }
