@@ -6,6 +6,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.behov.VarselbrevBehov
+import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.brukerinfoHendelse
 import no.nav.tilbakekreving.fagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
@@ -15,11 +16,13 @@ import no.nav.tilbakekreving.varselbrev
 import org.junit.jupiter.api.Test
 
 class SendVarselbrevTest {
+    private val bigQueryService = BigQueryServiceStub()
+
     @Test
     fun `tilbakekreving i SendVarselbrev går videre med Kravgrunnlag`() {
         val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
-        val tilbakekreving = Tilbakekreving.opprett(oppsamler, opprettTilbakekrevingEvent)
+        val tilbakekreving = Tilbakekreving.opprett(oppsamler, opprettTilbakekrevingEvent, bigQueryService)
 
         tilbakekreving.håndter(kravgrunnlag())
         tilbakekreving.håndter(fagsysteminfoHendelse())

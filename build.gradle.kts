@@ -87,6 +87,7 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
+    implementation("com.google.cloud:google-cloud-bigquery:2.54.0")
 
     api("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocVersion")
     api("org.springdoc:springdoc-openapi-starter-common:$springDocVersion")

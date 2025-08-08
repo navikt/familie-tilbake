@@ -6,17 +6,20 @@ import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
+import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.fagsysteminfoHendelse
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import org.junit.jupiter.api.Test
 
 class AvventerFagsysteminfoTest {
+    private val bigQueryService = BigQueryServiceStub()
+
     @Test
     fun `tilbakekreving i AvventerFagsysteminfo går videre med fagsysteminfo`() {
         val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
-        val tilbakekreving = Tilbakekreving.opprett(oppsamler, opprettTilbakekrevingEvent)
+        val tilbakekreving = Tilbakekreving.opprett(oppsamler, opprettTilbakekrevingEvent, bigQueryService)
 
         tilbakekreving.håndter(kravgrunnlag())
         tilbakekreving.håndter(fagsysteminfoHendelse())
