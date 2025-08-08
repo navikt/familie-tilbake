@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.tilstand
 
 import no.nav.tilbakekreving.Tilbakekreving
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.saksbehandler.Behandler
@@ -13,6 +14,7 @@ object AvventerKravgrunnlag : Tilstand {
     override fun håndter(
         tilbakekreving: Tilbakekreving,
         kravgrunnlag: KravgrunnlagHendelse,
+        sporing: Sporing,
     ) {
         tilbakekreving.kravgrunnlagHistorikk.lagre(kravgrunnlag)
         when (tilbakekreving.eksternFagsak.ytelse.integrererMotFagsystem()) {

@@ -6,6 +6,8 @@ import no.nav.tilbakekreving.api.v1.dto.TotrinnsvurderingDto
 import no.nav.tilbakekreving.entities.FatteVedtakStegEntity
 import no.nav.tilbakekreving.entities.VurdertStegEntity
 import no.nav.tilbakekreving.entities.VurdertStegType
+import no.nav.tilbakekreving.feil.ModellFeil
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.saksbehandler.Behandler
 
@@ -23,8 +25,9 @@ class FatteVedtakSteg internal constructor(
         ansvarligSaksbehandler: Behandler,
         behandlingssteg: Behandlingssteg,
         vurdering: Vurdering,
+        sporing: Sporing,
     ) {
-        if (ansvarligSaksbehandler == beslutter) error("Beslutter kan ikke være ansvarlig saksbehandler")
+        if (ansvarligSaksbehandler == beslutter) throw ModellFeil.IngenTilgangException("Beslutter kan ikke være ansvarlig saksbehandler", sporing)
         _ansvarligBeslutter = beslutter
         vurderteSteg.single { it.erFor(behandlingssteg) }
             .oppdaterVurdering(vurdering)

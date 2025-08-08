@@ -22,6 +22,7 @@ import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
 import no.nav.tilbakekreving.entities.TilbakekrevingEntity
 import no.nav.tilbakekreving.fagsystem.Ytelse
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
@@ -61,30 +62,30 @@ class Tilbakekreving internal constructor(
     }
 
     fun håndter(opprettTilbakekrevingEvent: OpprettTilbakekrevingHendelse) {
-        tilstand.håndter(this, opprettTilbakekrevingEvent)
+        tilstand.håndter(this, opprettTilbakekrevingEvent, Sporing(fagsystemId, "Ukjent"))
     }
 
     fun håndter(kravgrunnlag: KravgrunnlagHendelse) {
-        tilstand.håndter(this, kravgrunnlag)
+        tilstand.håndter(this, kravgrunnlag, Sporing(fagsystemId, "Ukjent"))
     }
 
     fun håndter(fagsysteminfo: FagsysteminfoHendelse) {
-        tilstand.håndter(this, fagsysteminfo)
+        tilstand.håndter(this, fagsysteminfo, Sporing(fagsystemId, "Ukjent"))
     }
 
     fun håndter(brukerinfo: BrukerinfoHendelse) {
-        tilstand.håndter(this, brukerinfo)
+        tilstand.håndter(this, brukerinfo, Sporing(fagsystemId, "Ukjent"))
     }
 
     fun håndter(varselbrevSendt: VarselbrevSendtHendelse) {
-        tilstand.håndter(this, varselbrevSendt)
+        tilstand.håndter(this, varselbrevSendt, Sporing(fagsystemId, "Ukjent"))
     }
 
     fun håndter(iverksettelseHendelse: IverksettelseHendelse) {
-        tilstand.håndter(this, iverksettelseHendelse)
+        tilstand.håndter(this, iverksettelseHendelse, Sporing(fagsystemId, "Ukjent"))
     }
 
-    fun håndterNullstilling() = tilstand.håndterNullstilling(this)
+    fun håndterNullstilling() = tilstand.håndterNullstilling(this, Sporing(fagsystemId, "Ukjent"))
 
     fun nullstillBehandling() {
         val nåværendeBehandling = behandlingHistorikk.nåværende().entry
