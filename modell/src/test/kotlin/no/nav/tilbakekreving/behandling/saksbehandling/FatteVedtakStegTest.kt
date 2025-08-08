@@ -2,11 +2,12 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import java.util.UUID
+import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 class FatteVedtakStegTest {
     private val ansvarligSaksbehandler = Behandler.Saksbehandler("AnsvarligSaksbehandler")
@@ -72,7 +73,7 @@ class FatteVedtakStegTest {
                 Behandlingssteg.BREVMOTTAKER,
                 FatteVedtakSteg.Vurdering.Godkjent,
                 Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
-            ))
+            )
         }
     }
 
@@ -80,7 +81,7 @@ class FatteVedtakStegTest {
     fun `ansvarlig saksbehandler skal ikke kunne fatte vedtak`() {
         val fatteVedtakSteg = FatteVedtakSteg.opprett()
 
-        shouldThrow<IllegalStateException> {
+        shouldThrow<ModellFeil.IngenTilgangException> {
             fatteVedtakSteg.håndter(
                 ansvarligSaksbehandler,
                 ansvarligSaksbehandler,

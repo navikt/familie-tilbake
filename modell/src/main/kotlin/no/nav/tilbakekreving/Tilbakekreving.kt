@@ -22,6 +22,7 @@ import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
 import no.nav.tilbakekreving.entities.TilbakekrevingEntity
 import no.nav.tilbakekreving.fagsystem.Ytelse
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
@@ -61,7 +62,7 @@ class Tilbakekreving internal constructor(
     }
 
     fun håndter(opprettTilbakekrevingEvent: OpprettTilbakekrevingHendelse) {
-        tilstand.håndter(this, opprettTilbakekrevingEvent)
+        tilstand.håndter(this, opprettTilbakekrevingEvent, Sporing(fagsystemId, "Ukjent"))
     }
 
     fun håndter(kravgrunnlag: KravgrunnlagHendelse) {

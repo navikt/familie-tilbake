@@ -1,6 +1,8 @@
 package no.nav.tilbakekreving.tilstand
 
 import no.nav.tilbakekreving.Tilbakekreving
+import no.nav.tilbakekreving.feil.ModellFeil
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
@@ -18,8 +20,9 @@ internal sealed interface Tilstand {
     fun håndter(
         tilbakekreving: Tilbakekreving,
         hendelse: OpprettTilbakekrevingHendelse,
+        sporing: Sporing,
     ) {
-        error("Forventet ikke OpprettTilbakekrevingEvent i $tilbakekrevingTilstand")
+        throw ModellFeil.UgyldigOperasjonException("Forventet ikke OpprettTilbakekrevingEvent i $tilbakekrevingTilstand", sporing)
     }
 
     fun håndter(

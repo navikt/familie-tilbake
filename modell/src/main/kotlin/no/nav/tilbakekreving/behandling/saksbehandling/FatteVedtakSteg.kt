@@ -27,7 +27,7 @@ class FatteVedtakSteg internal constructor(
         vurdering: Vurdering,
         sporing: Sporing,
     ) {
-        if (ansvarligSaksbehandler == beslutter) ModellFeil.IngenTilgangException("Beslutter kan ikke være ansvarlig saksbehandler", sporing)
+        if (ansvarligSaksbehandler == beslutter) throw ModellFeil.IngenTilgangException("Beslutter kan ikke være ansvarlig saksbehandler", sporing)
         _ansvarligBeslutter = beslutter
         vurderteSteg.single { it.erFor(behandlingssteg) }
             .oppdaterVurdering(vurdering)
