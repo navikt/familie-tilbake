@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.common.expectSingleOrNull
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -12,6 +13,7 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsoppsu
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.person.PersonService
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.tilbakekreving.api.v1.dto.FritekstavsnittDto
 import no.nav.tilbakekreving.api.v1.dto.HentForhåndvisningVedtaksbrevPdfDto
@@ -34,7 +36,9 @@ class VedtaksbrevService(
     private val pdfBrevService: PdfBrevService,
     private val distribusjonshåndteringService: DistribusjonshåndteringService,
     private val periodeService: PeriodeService,
+    private val personService: PersonService,
     private val logService: LogService,
+    private val fagsakRepository: FagsakRepository,
 ) {
     fun sendVedtaksbrev(
         behandling: Behandling,
@@ -99,20 +103,33 @@ class VedtaksbrevService(
 
         // Valider om obligatoriske fritekster er satt
         val faktaFeilutbetaling = faktaRepository.findFaktaFeilutbetalingByBehandlingIdAndAktivIsTrue(behandlingId)
-        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
-            .expectSingleOrNull(logContext) { "id=${it.id}, ${it.sporbar.opprettetTid}" }
 
-        VedtaksbrevFritekstValidator.validerObligatoriskeFritekster(
-            behandling = behandling,
-            faktaFeilutbetaling = faktaFeilutbetaling,
-            vilkårsvurdering = vilkårsvurdering,
-            vedtaksbrevFritekstPerioder = vedtaksbrevsperioder,
-            avsnittMedPerioder = fritekstavsnittDto.perioderMedTekst,
-            vedtaksbrevsoppsummering = vedtaksbrevsoppsummering,
-            vedtaksbrevstype = vedtaksbrevstype,
-            validerPåkrevetFritekster = validerPåkrevetFritekster,
-            logContext = logContext,
-        )
+        if (validerPåkrevetFritekster) {
+            val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
+                .expectSingleOrNull(logContext) { "id=${it.id}, ${it.sporbar.opprettetTid}" }
+            val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+            val gjelderDødsfall = personService.hentPersoninfo(fagsak.bruker.ident, fagsak.fagsystem, logContext).dødsdato != null
+            VedtaksbrevFritekstValidator.validerObligatoriskeFritekster(
+                behandling = behandling,
+                faktaFeilutbetaling = faktaFeilutbetaling,
+                vilkårsvurdering = vilkårsvurdering,
+                vedtaksbrevFritekstPerioder = vedtaksbrevsperioder,
+                avsnittMedPerioder = fritekstavsnittDto.perioderMedTekst,
+                vedtaksbrevsoppsummering = vedtaksbrevsoppsummering,
+                vedtaksbrevstype = vedtaksbrevstype,
+                gjelderDødsfall = gjelderDødsfall,
+                logContext = logContext,
+            )
+        } else {
+            VedtaksbrevFritekstValidator.validerFritekster(
+                behandling = behandling,
+                faktaFeilutbetaling = faktaFeilutbetaling,
+                avsnittMedPerioder = fritekstavsnittDto.perioderMedTekst,
+                vedtaksbrevsoppsummering = vedtaksbrevsoppsummering,
+                vedtaksbrevstype = vedtaksbrevstype,
+                logContext = logContext,
+            )
+        }
         // slett og legge til Vedtaksbrevsoppsummering
         val eksisterendeVedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)
         if (eksisterendeVedtaksbrevsoppsummering != null) {

@@ -66,19 +66,21 @@ import java.time.LocalDate
 import java.util.UUID
 
 object Testdata {
+    const val STANDARD_BRUKERIDENT = "32132132111"
     val avstemmingsfil = Avstemmingsfil(fil = Fil("File.txt", ByteArray(100) { 1 }))
 
-    private val bruker = Bruker(ident = "32132132111")
-
     @Deprecated("Bruk dynamisk fagsak opprettelse i stedet", replaceWith = ReplaceWith("fagsak()"))
-    val fagsak = fagsak("testverdi")
+    val fagsak = fagsak("testverdi", STANDARD_BRUKERIDENT)
 
-    fun fagsak(eksternFagsakId: String = UUID.randomUUID().toString()) =
+    fun fagsak(
+        eksternFagsakId: String = UUID.randomUUID().toString(),
+        brukerident: String = STANDARD_BRUKERIDENT,
+    ) =
         Fagsak(
             ytelsestype = Ytelsestype.BARNETRYGD,
             fagsystem = Fagsystem.BA,
             eksternFagsakId = eksternFagsakId,
-            bruker = bruker,
+            bruker = Bruker(ident = brukerident),
         )
 
     private val date = LocalDate.now()
@@ -433,7 +435,7 @@ object Testdata {
     fun lagVedtaksbrevgrunnlag(behandling: Behandling) =
         Vedtaksbrevgrunnlag(
             id = behandling.id,
-            bruker = bruker,
+            bruker = Bruker(STANDARD_BRUKERIDENT),
             eksternFagsakId = "testverdi",
             fagsystem = Fagsystem.BA,
             ytelsestype = Ytelsestype.BARNETRYGD,

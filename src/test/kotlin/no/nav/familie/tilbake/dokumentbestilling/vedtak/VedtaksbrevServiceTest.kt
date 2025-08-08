@@ -40,6 +40,7 @@ import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.person.PersonService
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
@@ -140,6 +141,9 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var periodeService: PeriodeService
 
+    @Autowired
+    private lateinit var personService: PersonService
+
     @BeforeEach
     fun init() {
         spyPdfBrevService = spyk(pdfBrevService)
@@ -162,7 +166,9 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
             spyPdfBrevService,
             sendBrevService,
             periodeService,
+            personService,
             logService,
+            fagsakRepository,
         )
     }
 
@@ -373,6 +379,31 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
             )
         }
         exception.message shouldBe "Mangler ANNET Særliggrunner fritekst for ${januar(2021) til mars(2021)}"
+    }
+
+    @Test
+    fun `lagreFriteksterFraSaksbehandler skal lagre når fritekst mangler for ANNET særliggrunner begrunnelse, men brukeren er død`() {
+        val (_, behandling) = nyBehandling(
+            lagFaktaVurdering = false,
+            lagVilkårsvurdering = false,
+            fødselsnummer = "doed1234",
+            kravgrunnlagPerioder = listOf(
+                januar(2021) til januar(2021),
+                februar(2021) til februar(2021),
+                mars(2021) til mars(2021),
+            ),
+        )
+        lagFakta(behandling.id, januar(2021) til mars(2021))
+        lagVilkårsvurdering(behandling.id, januar(2021) til mars(2021))
+        vedtaksbrevService.lagreFriteksterFraSaksbehandler(
+            behandling.id,
+            lagFritekstAvsnittDto(
+                faktaFritekst = "fakta",
+                oppsummeringstekst = "fakta data",
+                periode = 1.januar(2021) til 31.mars(2021),
+            ),
+            SecureLog.Context.tom(),
+        )
     }
 
     @Test
@@ -760,9 +791,10 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     fun nyBehandling(
         lagFaktaVurdering: Boolean = true,
         lagVilkårsvurdering: Boolean = true,
+        fødselsnummer: String = Testdata.STANDARD_BRUKERIDENT,
         kravgrunnlagPerioder: List<Månedsperiode> = listOf(januar(2021) til januar(2021)),
     ): Pair<Fagsak, Behandling> {
-        val fagsak = fagsakRepository.insert(Testdata.fagsak())
+        val fagsak = fagsakRepository.insert(Testdata.fagsak(brukerident = fødselsnummer))
         val behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId = fagsak.id).copy(avsluttetDato = 20.april(2024)))
         val fullPeriode = kravgrunnlagPerioder.minOf { it.fom } til kravgrunnlagPerioder.maxOf { it.tom }
         kravgrunnlagRepository.insert(

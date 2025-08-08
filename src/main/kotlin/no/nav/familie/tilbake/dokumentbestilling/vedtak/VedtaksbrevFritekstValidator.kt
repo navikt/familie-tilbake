@@ -29,16 +29,14 @@ object VedtaksbrevFritekstValidator {
         avsnittMedPerioder: List<PeriodeMedTekstDto>,
         vedtaksbrevsoppsummering: Vedtaksbrevsoppsummering,
         vedtaksbrevstype: Vedtaksbrevstype,
-        validerPåkrevetFritekster: Boolean,
+        gjelderDødsfall: Boolean,
         logContext: SecureLog.Context,
     ) {
-        validerPerioder(behandling, avsnittMedPerioder, faktaFeilutbetaling, logContext)
-
-        vilkårsvurdering?.let {
+        validerFritekster(behandling, faktaFeilutbetaling, avsnittMedPerioder, vedtaksbrevsoppsummering, vedtaksbrevstype, logContext)
+        if (vilkårsvurdering != null && !gjelderDødsfall) {
             validerFritekstISærligGrunnerAnnetAvsnitt(
-                it,
+                vilkårsvurdering,
                 vedtaksbrevFritekstPerioder,
-                validerPåkrevetFritekster,
                 vedtaksbrevsoppsummering.skalSammenslåPerioder == SkalSammenslåPerioder.JA,
                 logContext,
             )
@@ -49,15 +47,23 @@ object VedtaksbrevFritekstValidator {
                 faktaFeilutbetaling,
                 vedtaksbrevFritekstPerioder,
                 avsnittMedPerioder,
-                validerPåkrevetFritekster,
                 vedtaksbrevsoppsummering.skalSammenslåPerioder == SkalSammenslåPerioder.JA,
                 logContext,
             )
         }
+        validerNårOppsummeringsfritekstErPåkrevd(behandling, vedtaksbrevsoppsummering, logContext)
+    }
+
+    fun validerFritekster(
+        behandling: Behandling,
+        faktaFeilutbetaling: FaktaFeilutbetaling,
+        avsnittMedPerioder: List<PeriodeMedTekstDto>,
+        vedtaksbrevsoppsummering: Vedtaksbrevsoppsummering,
+        vedtaksbrevstype: Vedtaksbrevstype,
+        logContext: SecureLog.Context,
+    ) {
+        validerPerioder(behandling, avsnittMedPerioder, faktaFeilutbetaling, logContext)
         validerOppsummeringsfritekstLengde(behandling, vedtaksbrevsoppsummering, vedtaksbrevstype, logContext)
-        if (validerPåkrevetFritekster) {
-            validerNårOppsummeringsfritekstErPåkrevd(behandling, vedtaksbrevsoppsummering, logContext)
-        }
     }
 
     private fun validerPerioder(
@@ -136,7 +142,6 @@ object VedtaksbrevFritekstValidator {
         faktaFeilutbetaling: FaktaFeilutbetaling,
         vedtaksbrevFritekstPerioder: List<Vedtaksbrevsperiode>,
         avsnittMedPerioder: List<PeriodeMedTekstDto>,
-        validerPåkrevetFritekster: Boolean,
         skalSammenslåPerioder: Boolean,
         logContext: SecureLog.Context,
     ) {
@@ -151,7 +156,7 @@ object VedtaksbrevFritekstValidator {
                         faktaFeilutbetalingsperiode.periode,
                         Friteksttype.FAKTA,
                     )
-                if (perioder.isEmpty() && validerPåkrevetFritekster) {
+                if (perioder.isEmpty()) {
                     throw Feil(
                         message = "Mangler fakta fritekst for alle fakta perioder",
                         frontendFeilmelding = "Mangler Fakta fritekst for alle fakta perioder",
@@ -165,7 +170,7 @@ object VedtaksbrevFritekstValidator {
                         faktaFeilutbetalingsperiode.periode.inneholder(it.periode.toMånedsperiode())
                     }
                 omsluttetPerioder.forEach {
-                    if (it.faktaAvsnitt.isNullOrBlank() && validerPåkrevetFritekster) {
+                    if (it.faktaAvsnitt.isNullOrBlank()) {
                         throw Feil(
                             message = "Mangler fakta fritekst for ${it.periode.fom}-${it.periode.tom}",
                             frontendFeilmelding = "Mangler Fakta fritekst for ${it.periode.fom}-${it.periode.tom}",
@@ -180,7 +185,6 @@ object VedtaksbrevFritekstValidator {
     private fun validerFritekstISærligGrunnerAnnetAvsnitt(
         vilkårsvurdering: Vilkårsvurdering,
         vedtaksbrevFritekstPerioder: List<Vedtaksbrevsperiode>,
-        validerPåkrevetFritekster: Boolean,
         skalSammenslåPerioder: Boolean,
         logContext: SecureLog.Context,
     ) {
@@ -207,7 +211,7 @@ object VedtaksbrevFritekstValidator {
                         Friteksttype.SÆRLIGE_GRUNNER_ANNET,
                     )
 
-                if (perioder.isEmpty() && validerPåkrevetFritekster) {
+                if (perioder.isEmpty()) {
                     SecureLog.medContext(logContext) {
                         warn(
                             "Fant ikke fritekst for ANNET særlige grunner for vedtaksbrev. periode: {}, tilgjengelige fritekstfelter: {}",
