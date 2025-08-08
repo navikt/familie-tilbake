@@ -15,6 +15,11 @@ sealed class ModellFeil(
         val utenforScope: UtenforScope,
         sporing: Sporing,
     ) : ModellFeil(utenforScope.feilmelding, sporing)
+
+    class IngenTilgangException(
+        melding: String,
+        sporing: Sporing,
+    ) : ModellFeil(melding, sporing)
 }
 
 data class Sporing(
