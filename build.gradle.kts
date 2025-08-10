@@ -3,9 +3,9 @@ import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 val springDocVersion = "2.8.9"
 val testcontainersVersion = "1.21.3"
-val tokenValidationVersion = "5.0.33"
+val tokenValidationVersion = "5.0.34"
 val flywayVersion = "11.3.4"
-val ktorVersion = "3.2.2"
+val ktorVersion = "3.2.3"
 ext["ktorVersion"] = ktorVersion
 
 group = "no.nav"
@@ -116,7 +116,7 @@ dependencies {
     api(project(":kontrakter-intern"))
     api(project(":modell"))
     api(project(":pdf"))
-    api("no.nav.familie:prosessering-core:2.20250728105838_1f618e2") {
+    api("no.nav.familie:prosessering-core:2.20250804113739_6d49ef6") {
         // La spring boot håndtere flyway versjon selv om den er eldre enn den som er inkludert i prosessering-core
         exclude("org.flywaydb")
     }
