@@ -13,4 +13,5 @@ data class ApplicationProperties(
     val tilgangsstyring: Tilgangsstyring,
     val tokenExchange: TokenExchangeService.Companion.Config,
     val tilgangsmaskinen: PersontilgangService.Companion.Config,
+    val bigQuery: BigQueryProperties,
 )

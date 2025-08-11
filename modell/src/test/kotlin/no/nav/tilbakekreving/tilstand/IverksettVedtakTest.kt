@@ -9,6 +9,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
+import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.brukerinfoHendelse
 import no.nav.tilbakekreving.fagsysteminfoHendelse
 import no.nav.tilbakekreving.feil.ModellFeil
@@ -29,6 +30,8 @@ import java.math.BigInteger
 import java.util.UUID
 
 class IverksettVedtakTest {
+    private val bigQueryService = BigQueryServiceStub()
+
     @Test
     fun `iverksett vedtak`() {
         val oppsamler = BehovObservatørOppsamler()
@@ -59,7 +62,7 @@ class IverksettVedtakTest {
     private fun tilbakekrevingTilGodkjenning(
         oppsamler: BehovObservatørOppsamler,
         opprettTilbakekrevingHendelse: OpprettTilbakekrevingHendelse,
-    ) = Tilbakekreving.opprett(oppsamler, opprettTilbakekrevingHendelse).apply {
+    ) = Tilbakekreving.opprett(oppsamler, opprettTilbakekrevingHendelse, bigQueryService).apply {
         håndter(kravgrunnlag())
         håndter(fagsysteminfoHendelse())
         håndter(brukerinfoHendelse())

@@ -16,6 +16,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
 import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.VarselbrevBehov
+import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
@@ -55,10 +56,12 @@ class Tilbakekreving internal constructor(
     private val behovObservatør: BehovObservatør,
     var bruker: Bruker? = null,
     internal var tilstand: Tilstand,
+    private val biqQueryService: BigQueryService,
 ) : FrontendDto<FagsakDto> {
     internal fun byttTilstand(nyTilstand: Tilstand) {
         tilstand = nyTilstand
         tilstand.entering(this)
+        biqQueryService.leggeTilBehanlingInfo(behandlingHistorikk.nåværende().entry)
     }
 
     fun håndter(opprettTilbakekrevingEvent: OpprettTilbakekrevingHendelse) {
@@ -235,6 +238,7 @@ class Tilbakekreving internal constructor(
         fun opprett(
             behovObservatør: BehovObservatør,
             opprettTilbakekrevingEvent: OpprettTilbakekrevingHendelse,
+            bigQueryService: BigQueryService,
         ): Tilbakekreving {
             val tilbakekreving = Tilbakekreving(
                 id = UUID.randomUUID(),
@@ -253,6 +257,7 @@ class Tilbakekreving internal constructor(
                 kravgrunnlagHistorikk = KravgrunnlagHistorikk(mutableListOf()),
                 brevHistorikk = BrevHistorikk(mutableListOf()),
                 tilstand = Start,
+                biqQueryService = bigQueryService,
             )
             tilbakekreving.håndter(opprettTilbakekrevingEvent)
             return tilbakekreving

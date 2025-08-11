@@ -10,6 +10,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
+import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.brukerinfoHendelse
 import no.nav.tilbakekreving.fagsysteminfoHendelse
 import no.nav.tilbakekreving.feil.ModellFeil
@@ -27,6 +28,8 @@ import no.nav.tilbakekreving.varselbrev
 import org.junit.jupiter.api.Test
 
 class TilBehandlingTest {
+    private val bigQueryService = BigQueryServiceStub()
+
     @Test
     fun `behanlding kan nullstilles når den er i TilBehandling tilstand`() {
         val oppsamler = BehovObservatørOppsamler()
@@ -66,7 +69,7 @@ class TilBehandlingTest {
     private fun tilbakekrevingTilGodkjenning(
         oppsamler: BehovObservatørOppsamler,
         opprettTilbakekrevingHendelse: OpprettTilbakekrevingHendelse,
-    ) = Tilbakekreving.opprett(oppsamler, opprettTilbakekrevingHendelse).apply {
+    ) = Tilbakekreving.opprett(oppsamler, opprettTilbakekrevingHendelse, bigQueryService).apply {
         håndter(kravgrunnlag())
         håndter(fagsysteminfoHendelse())
         håndter(brukerinfoHendelse())
