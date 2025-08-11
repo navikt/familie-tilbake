@@ -2,7 +2,6 @@ package no.nav.tilbakekreving.tilstand
 
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
-import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 
@@ -14,7 +13,6 @@ object Start : Tilstand {
     override fun håndter(
         tilbakekreving: Tilbakekreving,
         hendelse: OpprettTilbakekrevingHendelse,
-        sporing: Sporing,
     ) {
         when (hendelse.opprettelsesvalg) {
             Opprettelsesvalg.UTSETT_BEHANDLING_MED_VARSEL -> tilbakekreving.byttTilstand(AvventerUtsattBehandlingMedVarsel)

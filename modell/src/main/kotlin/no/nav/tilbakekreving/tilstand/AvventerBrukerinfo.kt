@@ -1,7 +1,6 @@
 package no.nav.tilbakekreving.tilstand
 
 import no.nav.tilbakekreving.Tilbakekreving
-import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 
@@ -15,7 +14,6 @@ object AvventerBrukerinfo : Tilstand {
     override fun håndter(
         tilbakekreving: Tilbakekreving,
         brukerinfo: BrukerinfoHendelse,
-        sporing: Sporing,
     ) {
         tilbakekreving.bruker!!.oppdater(brukerinfo)
         tilbakekreving.opprettBrevmottakerSteg(brukerinfo.navn, brukerinfo.ident)

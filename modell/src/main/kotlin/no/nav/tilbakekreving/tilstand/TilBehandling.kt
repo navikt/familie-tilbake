@@ -1,7 +1,6 @@
 package no.nav.tilbakekreving.tilstand
 
 import no.nav.tilbakekreving.Tilbakekreving
-import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 
 object TilBehandling : Tilstand {
@@ -11,7 +10,7 @@ object TilBehandling : Tilstand {
         // TODO: Sende ut behov om saksbehandling
     }
 
-    override fun håndterNullstilling(tilbakekreving: Tilbakekreving, sporing: Sporing) {
+    override fun håndterNullstilling(tilbakekreving: Tilbakekreving) {
         tilbakekreving.nullstillBehandling()
     }
 }

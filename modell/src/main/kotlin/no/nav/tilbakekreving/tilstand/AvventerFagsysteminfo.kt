@@ -1,7 +1,6 @@
 package no.nav.tilbakekreving.tilstand
 
 import no.nav.tilbakekreving.Tilbakekreving
-import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.saksbehandler.Behandler
@@ -16,7 +15,6 @@ object AvventerFagsysteminfo : Tilstand {
     override fun håndter(
         tilbakekreving: Tilbakekreving,
         fagsysteminfo: FagsysteminfoHendelse,
-        sporing: Sporing,
     ) {
         val eksternBehandling = tilbakekreving.eksternFagsak.lagre(fagsysteminfo)
         tilbakekreving.opprettBehandling(eksternBehandling, Behandler.Vedtaksløsning)
