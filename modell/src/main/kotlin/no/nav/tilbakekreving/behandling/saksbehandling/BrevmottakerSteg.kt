@@ -1,6 +1,8 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
 import no.nav.tilbakekreving.api.v1.dto.ManuellBrevmottakerResponsDto
+import no.nav.tilbakekreving.feil.ModellFeil
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import java.util.UUID
 
@@ -15,16 +17,19 @@ class BrevmottakerSteg(
         return true
     }
 
-    internal fun håndter(nyBrevmottaker: RegistrertBrevmottaker) {
+    internal fun håndter(nyBrevmottaker: RegistrertBrevmottaker, sporing: Sporing) {
         if (!aktivert) {
-            throw Exception("BrevmottakerSteg er ikke aktivert.")
+            throw ModellFeil.UgyldigOperasjonException("BrevmottakerSteg er ikke aktivert.", sporing)
         }
         registrertBrevmottaker = when (nyBrevmottaker) {
-            is RegistrertBrevmottaker.DødsboMottaker -> registrertBrevmottaker.kombiner(nyBrevmottaker)
-            is RegistrertBrevmottaker.FullmektigMottaker -> registrertBrevmottaker.kombiner(nyBrevmottaker)
-            is RegistrertBrevmottaker.UtenlandskAdresseMottaker -> registrertBrevmottaker.kombiner(nyBrevmottaker)
-            is RegistrertBrevmottaker.VergeMottaker -> registrertBrevmottaker.kombiner(nyBrevmottaker)
-            else -> throw Exception("Kan ikke motta brevmottaker av type ${nyBrevmottaker.javaClass.simpleName}.")
+            is RegistrertBrevmottaker.DødsboMottaker -> registrertBrevmottaker.kombiner(nyBrevmottaker, sporing)
+            is RegistrertBrevmottaker.FullmektigMottaker -> registrertBrevmottaker.kombiner(nyBrevmottaker, sporing)
+            is RegistrertBrevmottaker.UtenlandskAdresseMottaker -> registrertBrevmottaker.kombiner(nyBrevmottaker, sporing)
+            is RegistrertBrevmottaker.VergeMottaker -> registrertBrevmottaker.kombiner(nyBrevmottaker, sporing)
+            else -> throw ModellFeil.UgyldigOperasjonException(
+                "Kan ikke motta brevmottaker av type ${nyBrevmottaker.javaClass.simpleName}.",
+                sporing,
+            )
         }
     }
 
@@ -45,16 +50,16 @@ class BrevmottakerSteg(
 
     fun hentRegistrertBrevmottaker() = registrertBrevmottaker
 
-    fun fjernManuellBrevmottaker(brevmottakerId: UUID) {
+    fun fjernManuellBrevmottaker(brevmottakerId: UUID, sporing: Sporing) {
         if (!aktivert) {
-            throw Exception("BrevmottakerSteg er ikke aktivert.")
+            throw ModellFeil.UgyldigOperasjonException("BrevmottakerSteg er ikke aktivert.", sporing)
         }
 
         if (registrertBrevmottaker == defaultMottaker) {
-            throw Exception("Kan ikke fjerne defaultMotatker.")
+            throw ModellFeil.UgyldigOperasjonException("Kan ikke fjerne defaultMotatker.", sporing)
         }
 
-        registrertBrevmottaker = registrertBrevmottaker.fjernBrevmottaker(brevmottakerId, defaultMottaker)
+        registrertBrevmottaker = registrertBrevmottaker.fjernBrevmottaker(brevmottakerId, defaultMottaker, sporing)
     }
 
     companion object {
