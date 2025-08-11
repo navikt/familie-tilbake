@@ -289,7 +289,7 @@ class Behandling internal constructor(
         brevmottaker: RegistrertBrevmottaker,
     ) {
         this.ansvarligSaksbehandler = behandler
-        brevmottakerSteg.håndter(brevmottaker)
+        brevmottakerSteg.håndter(brevmottaker, sporingsinformasjon())
     }
 
     internal fun fjernManuelBrevmottaker(
@@ -297,7 +297,7 @@ class Behandling internal constructor(
         manuellBrevmottakerId: UUID,
     ) {
         this.ansvarligSaksbehandler = behandler
-        brevmottakerSteg.fjernManuellBrevmottaker(manuellBrevmottakerId)
+        brevmottakerSteg.fjernManuellBrevmottaker(manuellBrevmottakerId, sporingsinformasjon())
     }
 
     internal fun opprettBrevmottaker(
