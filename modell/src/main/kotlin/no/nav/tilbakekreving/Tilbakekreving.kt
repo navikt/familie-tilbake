@@ -86,7 +86,7 @@ class Tilbakekreving internal constructor(
     }
 
     fun sporingsinformasjon(): Sporing {
-        return Sporing(eksternFagsak.eksternId, kravgrunnlagHistorikk.nåværende().entry.internId.toString())
+        return Sporing(eksternFagsak.eksternId, behandlingHistorikk.nåværende().entry.internId.toString())
     }
 
     fun håndterNullstilling() = tilstand.håndterNullstilling(this)
