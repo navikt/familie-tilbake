@@ -22,6 +22,7 @@ import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
 import no.nav.tilbakekreving.entities.TilbakekrevingEntity
 import no.nav.tilbakekreving.fagsystem.Ytelse
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
@@ -82,6 +83,10 @@ class Tilbakekreving internal constructor(
 
     fun håndter(iverksettelseHendelse: IverksettelseHendelse) {
         tilstand.håndter(this, iverksettelseHendelse)
+    }
+
+    fun sporingsinformasjon(): Sporing {
+        return Sporing(eksternFagsak.eksternId, behandlingHistorikk.nåværende().entry.internId.toString())
     }
 
     fun håndterNullstilling() = tilstand.håndterNullstilling(this)

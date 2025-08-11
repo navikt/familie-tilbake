@@ -281,7 +281,7 @@ class Behandling internal constructor(
         vurdering: FatteVedtakSteg.Vurdering,
     ) {
         validerBehandlingstatus("behandlingsutfall")
-        fatteVedtakSteg.håndter(beslutter, ansvarligSaksbehandler, behandlingssteg, vurdering)
+        fatteVedtakSteg.håndter(beslutter, ansvarligSaksbehandler, behandlingssteg, vurdering, sporingsinformasjon())
     }
 
     internal fun håndter(

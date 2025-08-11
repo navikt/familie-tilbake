@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.tilstand
 
 import no.nav.tilbakekreving.Tilbakekreving
+import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
@@ -19,35 +20,35 @@ internal sealed interface Tilstand {
         tilbakekreving: Tilbakekreving,
         hendelse: OpprettTilbakekrevingHendelse,
     ) {
-        error("Forventet ikke OpprettTilbakekrevingEvent i $tilbakekrevingTilstand")
+        throw ModellFeil.UgyldigOperasjonException("Forventet ikke OpprettTilbakekrevingEvent i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
     }
 
     fun håndter(
         tilbakekreving: Tilbakekreving,
         kravgrunnlag: KravgrunnlagHendelse,
     ) {
-        error("Forventet ikke Kravgrunnlag i $tilbakekrevingTilstand")
+        throw ModellFeil.UgyldigOperasjonException("Forventet ikke Kravgrunnlag i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
     }
 
     fun håndter(
         tilbakekreving: Tilbakekreving,
         fagsysteminfo: FagsysteminfoHendelse,
     ) {
-        error("Forventet ikke Fagsysteminfo i $tilbakekrevingTilstand")
+        throw ModellFeil.UgyldigOperasjonException("Forventet ikke Fagsysteminfo i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
     }
 
     fun håndter(
         tilbakekreving: Tilbakekreving,
         brukerinfo: BrukerinfoHendelse,
     ) {
-        error("Forventet ikke Brukerinfo i $tilbakekrevingTilstand")
+        throw ModellFeil.UgyldigOperasjonException("Forventet ikke Brukerinfo i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
     }
 
     fun håndter(
         tilbakekreving: Tilbakekreving,
         varselbrevSendtHendelse: VarselbrevSendtHendelse,
     ) {
-        error("Forventet ikke VarselbrevSendtHendelse i $tilbakekrevingTilstand")
+        throw ModellFeil.UgyldigOperasjonException("Forventet ikke VarselbrevSendtHendelse i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
     }
 
     fun håndter(
@@ -59,10 +60,10 @@ internal sealed interface Tilstand {
         tilbakekreving: Tilbakekreving,
         iverksettelseHendelse: IverksettelseHendelse,
     ) {
-        error("Forventet ikke IverksettelseHendelse i $tilbakekrevingTilstand")
+        throw ModellFeil.UgyldigOperasjonException("Forventet ikke IverksettelseHendelse i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
     }
 
     fun håndterNullstilling(tilbakekreving: Tilbakekreving) {
-        error("Forventet ikke Nullstilling i $tilbakekrevingTilstand")
+        throw ModellFeil.UgyldigOperasjonException("Forventet ikke Nullstilling i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
     }
 }

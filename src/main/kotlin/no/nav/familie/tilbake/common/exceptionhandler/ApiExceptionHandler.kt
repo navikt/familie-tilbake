@@ -57,6 +57,7 @@ class ApiExceptionHandler {
         }
         val status = when (feil) {
             is ModellFeil.UgyldigOperasjonException, is ModellFeil.UtenforScopeException -> HttpStatus.INTERNAL_SERVER_ERROR
+            is ModellFeil.IngenTilgangException -> HttpStatus.FORBIDDEN
         }
         return ResponseEntity.status(status).body(FeilDto(feil.melding))
     }

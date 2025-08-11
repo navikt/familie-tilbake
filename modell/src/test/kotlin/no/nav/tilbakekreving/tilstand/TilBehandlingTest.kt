@@ -12,6 +12,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.brukerinfoHendelse
 import no.nav.tilbakekreving.fagsysteminfoHendelse
+import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.januar
@@ -56,7 +57,7 @@ class TilBehandlingTest {
 
         tilbakekreving.tilstand shouldNotBe TilBehandling
 
-        val exception = shouldThrow<IllegalStateException> {
+        val exception = shouldThrow<ModellFeil.UgyldigOperasjonException> {
             tilbakekreving.håndterNullstilling()
         }
         exception.message shouldBe "Forventet ikke Nullstilling i ${tilbakekreving.tilstand.tilbakekrevingTilstand}"
