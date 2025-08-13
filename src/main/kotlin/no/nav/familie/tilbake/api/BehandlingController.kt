@@ -136,14 +136,15 @@ class BehandlingController(
         if (applicationProperties.toggles.nyModellEnabled) {
             val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
             if (tilbakekreving != null) {
-                tilgangskontrollService.validerTilgangTilbakekreving(
+                val rolle = tilgangskontrollService.validerTilgangTilbakekreving(
                     tilbakekreving = tilbakekreving,
                     behandlingId = behandlingId,
                     minimumBehandlerrolle = Behandlerrolle.VEILEDER,
                     auditLoggerEvent = AuditLoggerEvent.ACCESS,
                     handling = "Henter tilbakekrevingsbehandling",
                 )
-                return Ressurs.success(tilbakekreving.behandlingHistorikk.tilFrontendDto().first { it.behandlingId == behandlingId })
+                val behandler = ContextService.hentBehandler(SecureLog.Context.fra(tilbakekreving))
+                return Ressurs.success(tilbakekreving.behandlingHistorikk.entry(behandlingId).tilFrontendDto(behandler, rolle == Behandlerrolle.BESLUTTER))
             }
         }
         tilgangskontrollService.validerTilgangBehandlingID(

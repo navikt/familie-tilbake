@@ -44,7 +44,7 @@ class BehandlingEntityTest {
 
         val kravgrunnlag = kravgrunnlagHistorikk.lagre(kravgrunnlag())
         kravgrunnlagHistorikk.lagre(kravgrunnlag())
-
+        val behandler = Behandler.Saksbehandler("A123456")
         val behandlingFørLagring = Behandling.nyBehandling(
             internId = behandlingId,
             eksternId = behandlingId,
@@ -53,14 +53,14 @@ class BehandlingEntityTest {
             sistEndret = LocalDateTime.now(),
             enhet = Enhet("0425", "NAV Solør"),
             årsak = Behandlingsårsakstype.REVURDERING_KLAGE_KA,
-            ansvarligSaksbehandler = Behandler.Saksbehandler("A123456"),
+            ansvarligSaksbehandler = behandler,
             eksternFagsakBehandling = behandlingInnslag,
             kravgrunnlag = kravgrunnlag,
             brevHistorikk = brevHistorikk,
         )
 
         val behandlingEtterLagring = behandlingFørLagring.tilEntity().fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
-        behandlingEtterLagring.tilFrontendDto() shouldBe behandlingFørLagring.tilFrontendDto()
+        behandlingEtterLagring.tilFrontendDto(behandler, true) shouldBe behandlingFørLagring.tilFrontendDto(behandler, true)
 
         val observatør = BehovObservatørOppsamler()
         behandlingEtterLagring.trengerIverksettelse(observatør, Ytelsestype.TILLEGGSSTØNAD, Aktør.Person("20046912345"))

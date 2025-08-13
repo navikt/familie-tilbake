@@ -3,7 +3,6 @@ package no.nav.tilbakekreving
 import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.aktør.Bruker
 import no.nav.tilbakekreving.aktør.Bruker.Companion.tilNullableFrontendDto
-import no.nav.tilbakekreving.api.v1.dto.BehandlingsoppsummeringDto
 import no.nav.tilbakekreving.api.v1.dto.FagsakDto
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingsperiodeDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
@@ -160,9 +159,7 @@ class Tilbakekreving internal constructor(
             fagsystem = eksternFagsakDto.fagsystem,
             språkkode = bruker?.språkkode ?: Språkkode.NB,
             bruker = bruker.tilNullableFrontendDto(),
-            behandlinger = behandlingHistorikk.tilFrontendDto().map {
-                BehandlingsoppsummeringDto(it.behandlingId, it.eksternBrukId, it.type, it.status)
-            },
+            behandlinger = behandlingHistorikk.tilOppsummeringDto(),
         )
     }
 

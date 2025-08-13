@@ -1,7 +1,6 @@
 package no.nav.tilbakekreving.behandling
 
-import no.nav.tilbakekreving.FrontendDto
-import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsoppsummeringDto
 import no.nav.tilbakekreving.entities.BehandlingEntity
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
@@ -11,7 +10,7 @@ import java.util.UUID
 
 class BehandlingHistorikk(
     private val historikk: MutableList<Behandling>,
-) : Historikk<UUID, Behandling>, FrontendDto<List<BehandlingDto>> {
+) : Historikk<UUID, Behandling> {
     override fun finn(id: UUID, sporing: Sporing): HistorikkReferanse<UUID, Behandling> {
         if (historikk.none { it.internId == id }) {
             throw ModellFeil.UgyldigOperasjonException(
@@ -31,8 +30,8 @@ class BehandlingHistorikk(
         return HistorikkReferanse(this, innslag.internId)
     }
 
-    override fun tilFrontendDto(): List<BehandlingDto> {
-        return historikk.map(Behandling::tilFrontendDto)
+    fun tilOppsummeringDto(): List<BehandlingsoppsummeringDto> {
+        return historikk.map(Behandling::tilOppsummeringDto)
     }
 
     override fun nåværende(): HistorikkReferanse<UUID, Behandling> {
