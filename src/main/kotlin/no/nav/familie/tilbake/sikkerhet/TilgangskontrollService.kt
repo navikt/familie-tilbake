@@ -54,12 +54,12 @@ class TilgangskontrollService(
         minimumBehandlerrolle: Behandlerrolle,
         auditLoggerEvent: AuditLoggerEvent,
         handling: String,
-    ) {
+    ): Behandlerrolle {
         val saksbehandler = ContextService.hentSaksbehandler(SecureLog.Context.tom())
         val fagsystem = tilbakekreving.tilFrontendDto().fagsystem
         val logContext = SecureLog.Context.medBehandling(tilbakekreving.eksternFagsak.eksternId, behandlingId?.toString())
         val dto = tilbakekreving.tilFrontendDto()
-        validate(
+        return validate(
             fagsystem = fagsystem,
             minimumBehandlerrolle = minimumBehandlerrolle,
             ident = dto.bruker.personIdent,
@@ -217,10 +217,10 @@ class TilgangskontrollService(
         saksbehandler: String,
         auditLoggerEvent: AuditLoggerEvent,
         logContext: SecureLog.Context,
-    ) {
+    ): Behandlerrolle {
         if (saksbehandler == Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
             // når behandler har system tilgang, trenges ikke det validering på fagsystem eller rolle
-            return
+            return Behandlerrolle.SYSTEM
         }
 
         val brukerRolleOgFagsystemstilgang = ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(
@@ -239,9 +239,10 @@ class TilgangskontrollService(
         val tilgangskontrollsfagsystem = Tilgangskontrollsfagsystem.fraFagsystem(fagsystem)
         validateFagsystem(tilgangskontrollsfagsystem, brukerRolleOgFagsystemstilgang, handling, saksbehandler)
 
+        val rolleForFagsystem = brukerRolleOgFagsystemstilgang.tilganger.getValue(tilgangskontrollsfagsystem)
         // sjekk om saksbehandler har riktig rolle å aksessere denne ytelsestypen
         validateRolle(
-            brukersrolleTilFagsystemet = brukerRolleOgFagsystemstilgang.tilganger.getValue(tilgangskontrollsfagsystem),
+            brukersrolleTilFagsystemet = rolleForFagsystem,
             minimumBehandlerrolle = minimumBehandlerrolle,
             handling = handling,
             logContext = logContext,
@@ -259,6 +260,7 @@ class TilgangskontrollService(
         if (ident != null) {
             logAccess(auditLoggerEvent, ident, eksternFagsakId!!)
         }
+        return rolleForFagsystem
     }
 
     fun logAccess(

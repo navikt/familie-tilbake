@@ -23,6 +23,7 @@ import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagMediator
+import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
@@ -96,7 +97,7 @@ open class TilbakekrevingE2EBase : E2EBase() {
         fagsystem: FagsystemDTO,
     ): UUID? {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(fagsystem, fagsystemId) ?: return null
-        return tilbakekreving.behandlingHistorikk.nåværende().entry.tilFrontendDto().behandlingId
+        return tilbakekreving.behandlingHistorikk.nåværende().entry.tilFrontendDto(Behandler.Saksbehandler("A123456"), true).behandlingId
     }
 
     fun behandling(behandlingId: UUID): Behandling {

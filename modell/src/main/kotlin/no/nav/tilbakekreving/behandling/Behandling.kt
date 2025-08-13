@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.behandling
 import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsoppsummeringDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegsinfoDto
 import no.nav.tilbakekreving.api.v1.dto.BeregnetPeriodeDto
 import no.nav.tilbakekreving.api.v1.dto.BeregnetPerioderDto
@@ -65,7 +66,7 @@ class Behandling internal constructor(
     private val foreslåVedtakSteg: ForeslåVedtakSteg,
     private val fatteVedtakSteg: FatteVedtakSteg,
     private var påVent: PåVent?,
-) : Historikk.HistorikkInnslag<UUID>, FrontendDto<BehandlingDto> {
+) : Historikk.HistorikkInnslag<UUID> {
     val faktastegDto: FrontendDto<FaktaFeilutbetalingDto> get() = faktasteg
     val foreldelsestegDto: FrontendDto<VurdertForeldelseDto> get() = foreldelsesteg
     val vilkårsvurderingsstegDto: FrontendDto<VurdertVilkårsvurderingDto> get() = vilkårsvurderingsteg
@@ -167,7 +168,7 @@ class Behandling internal constructor(
                 behandlingId = internId,
                 kravgrunnlagId = kravgrunnlag.entry.kravgrunnlagId,
                 delperioder = delperioder,
-                ansvarligSaksbehandler = ansvarligSaksbehandler().ident,
+                ansvarligSaksbehandler = ansvarligSaksbehandler.ident,
                 ytelsestype = ytelsestype,
                 aktør = aktør,
                 behandlingstype = behandlingstype,
@@ -175,15 +176,11 @@ class Behandling internal constructor(
         )
     }
 
-    fun ansvarligSaksbehandler(): Behandler {
-        return ansvarligSaksbehandler
+    private fun kanEndres(behandler: Behandler, kanBeslutte: Boolean): Boolean {
+        return !foreslåVedtakSteg.erFullstending() || behandler != ansvarligSaksbehandler && kanBeslutte
     }
 
-    fun oppdaterAnsvarligSaksbehandler(behandler: Behandler) {
-        ansvarligSaksbehandler = behandler
-    }
-
-    override fun tilFrontendDto(): BehandlingDto {
+    fun tilFrontendDto(behandler: Behandler, kanBeslutte: Boolean): BehandlingDto {
         return BehandlingDto(
             eksternBrukId = eksternId,
             behandlingId = internId,
@@ -203,7 +200,7 @@ class Behandling internal constructor(
             kanHenleggeBehandling = false,
             kanRevurderingOpprettes = true,
             harVerge = false,
-            kanEndres = behandlingsstatus() != Behandlingsstatus.AVSLUTTET,
+            kanEndres = kanEndres(behandler, kanBeslutte),
             kanSetteTilbakeTilFakta = true,
             varselSendt = false,
             behandlingsstegsinfo = listOf(
@@ -233,6 +230,15 @@ class Behandling internal constructor(
             manuelleBrevmottakere = emptyList(),
             begrunnelseForTilbakekreving = eksternFagsakBehandling.entry.begrunnelseForTilbakekreving,
             saksbehandlingstype = Saksbehandlingstype.ORDINÆR,
+        )
+    }
+
+    fun tilOppsummeringDto(): BehandlingsoppsummeringDto {
+        return BehandlingsoppsummeringDto(
+            behandlingId = internId,
+            eksternBrukId = eksternId,
+            type = behandlingstype,
+            status = behandlingsstatus(),
         )
     }
 

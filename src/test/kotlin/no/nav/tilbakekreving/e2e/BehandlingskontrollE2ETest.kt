@@ -7,6 +7,7 @@ import no.nav.tilbakekreving.api.v1.dto.BehandlingPåVentDto
 import no.nav.tilbakekreving.e2e.ytelser.TilleggsstønaderE2ETest.Companion.TILLEGGSSTØNADER_KØ_NAVN
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -31,13 +32,13 @@ class BehandlingskontrollE2ETest : TilbakekrevingE2EBase() {
                 begrunnelse = "Ikke implementert!",
             ),
         ) shouldBe Ressurs.success("OK")
-
+        val behandler = Behandler.Saksbehandler("A123456")
         val frontendDtoPåVent = tilbakekrevingService.hentTilbakekreving(behandlingId)
             .shouldNotBeNull()
             .behandlingHistorikk
             .nåværende()
             .entry
-            .tilFrontendDto()
+            .tilFrontendDto(behandler, true)
 
         frontendDtoPåVent.erBehandlingPåVent shouldBe true
 
@@ -47,7 +48,7 @@ class BehandlingskontrollE2ETest : TilbakekrevingE2EBase() {
             .behandlingHistorikk
             .nåværende()
             .entry
-            .tilFrontendDto()
+            .tilFrontendDto(behandler, true)
 
         frontendDtoAvVent.erBehandlingPåVent shouldBe false
     }

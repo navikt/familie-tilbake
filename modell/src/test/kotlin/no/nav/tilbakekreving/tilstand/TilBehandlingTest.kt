@@ -31,7 +31,7 @@ class TilBehandlingTest {
     fun `behanlding kan nullstilles når den er i TilBehandling tilstand`() {
         val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
-        val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingHendelse)
+        val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingHendelse, Behandler.Saksbehandler("Ansvarlig saksbehandler"))
 
         tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.FAKTA, FatteVedtakSteg.Vurdering.Godkjent)
         tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.FORELDELSE, FatteVedtakSteg.Vurdering.Godkjent)
@@ -48,7 +48,7 @@ class TilBehandlingTest {
     fun `behanlding kan ikke nullstilles når den ikke er i TilBehandling tilstand`() {
         val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
-        val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingHendelse)
+        val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingHendelse, Behandler.Saksbehandler("Ansvarlig saksbehandler"))
 
         tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.FAKTA, FatteVedtakSteg.Vurdering.Godkjent)
         tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.FORELDELSE, FatteVedtakSteg.Vurdering.Godkjent)
@@ -63,9 +63,38 @@ class TilBehandlingTest {
         exception.message shouldBe "Forventet ikke Nullstilling i ${tilbakekreving.tilstand.tilbakekrevingTilstand}"
     }
 
+    @Test
+    fun `behandling kan endres for beslutter etter vedtak er foreslått`() {
+        val oppsamler = BehovObservatørOppsamler()
+        val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
+        val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingHendelse, Behandler.Saksbehandler("Ansvarlig saksbehandler"))
+
+        tilbakekreving.behandlingHistorikk.nåværende().entry.tilFrontendDto(Behandler.Saksbehandler("Ansvarlig beslutter"), true).kanEndres shouldBe true
+    }
+
+    @Test
+    fun `behandling kan ikke endres for annen saksbehandler etter vedtak er foreslått`() {
+        val oppsamler = BehovObservatørOppsamler()
+        val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
+        val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingHendelse, Behandler.Saksbehandler("Ansvarlig saksbehandler"))
+
+        tilbakekreving.behandlingHistorikk.nåværende().entry.tilFrontendDto(Behandler.Saksbehandler("Annen saksbehandler"), false).kanEndres shouldBe false
+    }
+
+    @Test
+    fun `behandling kan ikke endres etter foreslått vedtak for samme saksbehandler`() {
+        val oppsamler = BehovObservatørOppsamler()
+        val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
+        val behandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
+        val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingHendelse, behandler)
+
+        tilbakekreving.behandlingHistorikk.nåværende().entry.tilFrontendDto(behandler, true).kanEndres shouldBe false
+    }
+
     private fun tilbakekrevingTilGodkjenning(
         oppsamler: BehovObservatørOppsamler,
         opprettTilbakekrevingHendelse: OpprettTilbakekrevingHendelse,
+        behandler: Behandler,
     ) = Tilbakekreving.opprett(oppsamler, opprettTilbakekrevingHendelse).apply {
         håndter(kravgrunnlag())
         håndter(fagsysteminfoHendelse())
@@ -73,7 +102,7 @@ class TilBehandlingTest {
         håndter(VarselbrevSendtHendelse(varselbrev()))
 
         håndter(
-            Behandler.Saksbehandler("Ansvarlig saksbehandler"),
+            behandler,
             FaktaFeilutbetalingsperiodeDto(
                 periode = 1.januar til 31.januar,
                 hendelsestype = Hendelsestype.INNTEKT,
