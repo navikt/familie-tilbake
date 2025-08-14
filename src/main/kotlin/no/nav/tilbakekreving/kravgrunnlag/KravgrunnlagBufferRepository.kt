@@ -11,7 +11,7 @@ class KravgrunnlagBufferRepository(
     private val jdbcTemplate: JdbcTemplate,
 ) {
     fun lagre(entity: Entity) {
-        jdbcTemplate.update("INSERT INTO kravgrunnlag_buffer(kravgrunnlag_id, kravgrunnlag) VALUES (?, ?);", entity.kravgrunnlagId, entity.kravgrunnlag)
+        jdbcTemplate.update("INSERT INTO kravgrunnlag_buffer(kravgrunnlag_id, kravgrunnlag, fagsystem_id) VALUES (?, ?, ?);", entity.kravgrunnlagId, entity.kravgrunnlag, entity.fagsystemId)
     }
 
     fun hent(): List<Entity> {
@@ -39,6 +39,7 @@ class KravgrunnlagBufferRepository(
             return Entity(
                 rs.getString("kravgrunnlag"),
                 rs.getString("kravgrunnlag_id"),
+                rs.getString("fagsystem_id"),
             )
         }
     }
@@ -46,5 +47,6 @@ class KravgrunnlagBufferRepository(
     data class Entity(
         val kravgrunnlag: String,
         val kravgrunnlagId: String,
+        val fagsystemId: String,
     )
 }

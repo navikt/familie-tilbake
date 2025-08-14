@@ -12,6 +12,12 @@ class KravgrunnlagListener(private val kravgrunnlagBufferRepository: Kravgrunnla
         require(message is TextMessage) { "Mottok melding som ikke er TextMessage" }
         val kravgrunnlagXML = message.text
         val kravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagXML)
-        kravgrunnlagBufferRepository.lagre(KravgrunnlagBufferRepository.Entity(kravgrunnlagXML, kravgrunnlag.kravgrunnlagId.toString()))
+        kravgrunnlagBufferRepository.lagre(
+            KravgrunnlagBufferRepository.Entity(
+                kravgrunnlag = kravgrunnlagXML,
+                kravgrunnlagId = kravgrunnlag.kravgrunnlagId.toString(),
+                fagsystemId = kravgrunnlag.fagsystemId,
+            ),
+        )
     }
 }
