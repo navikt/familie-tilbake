@@ -6,12 +6,18 @@ import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import java.time.LocalDateTime
 import java.util.UUID
 
 data class FaktastegEntity(
     val tilbakekrevingOpprettet: LocalDateTime,
     val opprettelsesvalg: Opprettelsesvalg,
+    val perioder: List<FaktaPeriodeEntity>,
+    val årsakTilFeilutbetaling: String,
+    val uttalelse: Uttalelse,
+    val vurderingAvBrukersUttalelse: String?,
 ) {
     fun fraEntity(
         eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
@@ -24,9 +30,33 @@ data class FaktastegEntity(
         tilbakekrevingOpprettet = tilbakekrevingOpprettet,
         opprettelsesvalg = opprettelsesvalg,
         vurdering = Faktasteg.Vurdering(
-            perioder = emptyList(),
-            årsak = "",
-            uttalelse = Faktasteg.Uttalelse.IkkeVurdert,
+            perioder = perioder.map {
+                Faktasteg.FaktaPeriode(
+                    periode = it.periode.fraEntity(),
+                    hendelsestype = it.hendelsestype,
+                    hendelsesundertype = it.hendelsesundertype,
+                )
+            },
+            årsakTilFeilutbetaling = årsakTilFeilutbetaling,
+            uttalelse = when (uttalelse) {
+                Uttalelse.Ja -> Faktasteg.Uttalelse.Ja(vurderingAvBrukersUttalelse!!)
+                Uttalelse.Nei -> Faktasteg.Uttalelse.Nei
+                Uttalelse.IkkeAktuelt -> Faktasteg.Uttalelse.IkkeAktuelt
+                Uttalelse.IkkeVurdert -> Faktasteg.Uttalelse.IkkeVurdert
+            },
         ),
+    )
+
+    enum class Uttalelse {
+        Ja,
+        Nei,
+        IkkeAktuelt,
+        IkkeVurdert,
+    }
+
+    class FaktaPeriodeEntity(
+        val periode: DatoperiodeEntity,
+        val hendelsestype: Hendelsestype,
+        val hendelsesundertype: Hendelsesundertype,
     )
 }

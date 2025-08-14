@@ -223,7 +223,7 @@ class TilbakekrevingService(
                         hendelsesundertype = it.hendelsesundertype,
                     )
                 },
-                årsak = fakta.begrunnelse,
+                årsakTilFeilutbetaling = fakta.begrunnelse,
                 uttalelse = when (fakta.vurderingAvBrukersUttalelse?.harBrukerUttaltSeg) {
                     HarBrukerUttaltSeg.JA -> Faktasteg.Uttalelse.Ja(fakta.vurderingAvBrukersUttalelse!!.beskrivelse!!)
                     HarBrukerUttaltSeg.NEI -> Faktasteg.Uttalelse.Nei

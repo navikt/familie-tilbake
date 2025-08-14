@@ -182,7 +182,7 @@ fun faktastegVurdering(
                 hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
             ),
         ),
-        årsak = årsak,
+        årsakTilFeilutbetaling = årsak,
         uttalelse = uttalelse,
     )
 }

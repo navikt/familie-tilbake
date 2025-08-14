@@ -6,6 +6,7 @@ import no.nav.tilbakekreving.api.v1.dto.VurderingAvBrukersUttalelseDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
+import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.FaktastegEntity
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
@@ -30,7 +31,7 @@ class Faktasteg(
     override val type: Behandlingssteg = Behandlingssteg.FAKTA
 
     override fun erFullstending(): Boolean {
-        return true // vurdering.erFullstendig()
+        return true
     }
 
     internal fun vurder(vurdering: Vurdering) {
@@ -51,7 +52,7 @@ class Faktasteg(
                 )
             },
             revurderingsvedtaksdato = eksternFagsakBehandling.entry.revurderingsvedtaksdato,
-            begrunnelse = vurdering.årsak,
+            begrunnelse = vurdering.årsakTilFeilutbetaling,
             faktainfo =
                 Faktainfo(
                     revurderingsårsak = eksternFagsakBehandling.entry.revurderingsårsak,
@@ -82,6 +83,15 @@ class Faktasteg(
         return FaktastegEntity(
             tilbakekrevingOpprettet = tilbakekrevingOpprettet,
             opprettelsesvalg = opprettelsesvalg,
+            perioder = vurdering.perioder.map { it.tilEntity() },
+            årsakTilFeilutbetaling = vurdering.årsakTilFeilutbetaling,
+            uttalelse = when (vurdering.uttalelse) {
+                is Uttalelse.Ja -> FaktastegEntity.Uttalelse.Ja
+                is Uttalelse.Nei -> FaktastegEntity.Uttalelse.Nei
+                is Uttalelse.IkkeAktuelt -> FaktastegEntity.Uttalelse.IkkeAktuelt
+                is Uttalelse.IkkeVurdert -> FaktastegEntity.Uttalelse.IkkeVurdert
+            },
+            vurderingAvBrukersUttalelse = (vurdering.uttalelse as? Uttalelse.Ja)?.begrunnelse,
         )
     }
 
@@ -107,7 +117,7 @@ class Faktasteg(
                             hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
                         )
                     },
-                    årsak = eksternFagsakBehandling.entry.begrunnelseForTilbakekreving,
+                    årsakTilFeilutbetaling = eksternFagsakBehandling.entry.begrunnelseForTilbakekreving,
                     uttalelse = Uttalelse.IkkeVurdert,
                 ),
             )
@@ -116,7 +126,7 @@ class Faktasteg(
 
     class Vurdering(
         val perioder: List<FaktaPeriode>,
-        val årsak: String,
+        val årsakTilFeilutbetaling: String,
         val uttalelse: Uttalelse,
     )
 
@@ -124,7 +134,15 @@ class Faktasteg(
         val periode: Datoperiode,
         val hendelsestype: Hendelsestype,
         val hendelsesundertype: Hendelsesundertype,
-    )
+    ) {
+        fun tilEntity(): FaktastegEntity.FaktaPeriodeEntity {
+            return FaktastegEntity.FaktaPeriodeEntity(
+                periode = DatoperiodeEntity(fom = periode.fom, tom = periode.tom),
+                hendelsestype = hendelsestype,
+                hendelsesundertype = hendelsesundertype,
+            )
+        }
+    }
 
     sealed interface Uttalelse {
         class Ja(val begrunnelse: String) : Uttalelse
