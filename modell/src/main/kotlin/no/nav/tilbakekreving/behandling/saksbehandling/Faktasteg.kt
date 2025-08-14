@@ -14,6 +14,8 @@ import no.nav.tilbakekreving.kontrakter.Faktainfo
 import no.nav.tilbakekreving.kontrakter.Tilbakekrevingsvalg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -44,8 +46,8 @@ class Faktasteg(
                     FeilutbetalingsperiodeDto(
                         periode = it,
                         feilutbetaltBeløp = kravgrunnlag.entry.totaltBeløpFor(it),
-                        hendelsestype = null,
-                        hendelsesundertype = null,
+                        hendelsestype = Hendelsestype.ANNET,
+                        hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
                     )
                 },
             revurderingsvedtaksdato = eksternFagsakBehandling.entry.revurderingsvedtaksdato,
