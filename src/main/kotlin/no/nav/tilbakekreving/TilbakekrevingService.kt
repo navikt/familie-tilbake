@@ -15,6 +15,7 @@ import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeslåVedtaksstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.ManuellBrevmottakerRequestDto
+import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
@@ -33,6 +34,7 @@ import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.kontrakter.brev.MottakerType
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.saksbehandler.Behandler
@@ -211,10 +213,25 @@ class TilbakekrevingService(
         fakta: BehandlingsstegFaktaDto,
         behandler: Behandler,
     ) {
-        fakta.feilutbetaltePerioder.forEach {
-            tilbakekreving.håndter(behandler, it)
-            // TODO: Fakta steg
-        }
+        tilbakekreving.håndter(
+            behandler,
+            vurdering = Faktasteg.Vurdering(
+                perioder = fakta.feilutbetaltePerioder.map {
+                    Faktasteg.FaktaPeriode(
+                        periode = it.periode,
+                        hendelsestype = it.hendelsestype,
+                        hendelsesundertype = it.hendelsesundertype,
+                    )
+                },
+                årsak = fakta.begrunnelse,
+                uttalelse = when (fakta.vurderingAvBrukersUttalelse?.harBrukerUttaltSeg) {
+                    HarBrukerUttaltSeg.JA -> Faktasteg.Uttalelse.Ja(fakta.vurderingAvBrukersUttalelse!!.beskrivelse!!)
+                    HarBrukerUttaltSeg.NEI -> Faktasteg.Uttalelse.Nei
+                    HarBrukerUttaltSeg.IKKE_AKTUELT -> Faktasteg.Uttalelse.IkkeAktuelt
+                    HarBrukerUttaltSeg.IKKE_VURDERT, null -> Faktasteg.Uttalelse.IkkeVurdert
+                },
+            ),
+        )
     }
 
     private fun behandleVilkårsvurdering(

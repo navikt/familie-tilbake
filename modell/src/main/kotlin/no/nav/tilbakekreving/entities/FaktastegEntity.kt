@@ -23,5 +23,10 @@ data class FaktastegEntity(
         brevHistorikk = brevHistorikk,
         tilbakekrevingOpprettet = tilbakekrevingOpprettet,
         opprettelsesvalg = opprettelsesvalg,
+        vurdering = Faktasteg.Vurdering(
+            perioder = emptyList(),
+            årsak = "",
+            uttalelse = Faktasteg.Uttalelse.IkkeVurdert,
+        ),
     )
 }

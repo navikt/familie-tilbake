@@ -5,6 +5,8 @@ import no.nav.tilbakekreving.api.v2.BrukerDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.Enhet
+import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
+import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
@@ -18,6 +20,8 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.saksbehandler.Behandler
@@ -80,14 +84,17 @@ fun kravgrunnlagPeriode(
         feilutbetaltBeløp = feilutbetalteBeløp(),
     )
 
-fun ytelsesbeløp() =
+fun ytelsesbeløp(
+    tilbakekrevesBeløp: BigDecimal = 2000.kroner,
+    opprinneligBeløp: BigDecimal = 12000.kroner,
+) =
     listOf(
         KravgrunnlagHendelse.Periode.Beløp(
             klassekode = "",
             klassetype = "YTEL",
-            opprinneligUtbetalingsbeløp = BigDecimal("12000.0"),
-            nyttBeløp = BigDecimal("10000.0"),
-            tilbakekrevesBeløp = BigDecimal("2000.0"),
+            opprinneligUtbetalingsbeløp = opprinneligBeløp,
+            nyttBeløp = opprinneligBeløp - tilbakekrevesBeløp,
+            tilbakekrevesBeløp = tilbakekrevesBeløp,
             skatteprosent = BigDecimal("0.0"),
         ),
     )
@@ -159,5 +166,23 @@ fun behandling(
         eksternFagsakBehandling = eksternFagsakBehandling,
         kravgrunnlag = kravgrunnlagReferanse,
         brevHistorikk = BrevHistorikk(mutableListOf()),
+    )
+}
+
+fun faktastegVurdering(
+    periode: Datoperiode = 1.januar til 31.januar,
+    årsak: String = "Årsak",
+    uttalelse: Faktasteg.Uttalelse = Faktasteg.Uttalelse.Nei,
+): Faktasteg.Vurdering {
+    return Faktasteg.Vurdering(
+        perioder = listOf(
+            Faktasteg.FaktaPeriode(
+                periode = periode,
+                hendelsestype = Hendelsestype.ANNET,
+                hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
+            ),
+        ),
+        årsak = årsak,
+        uttalelse = uttalelse,
     )
 }
