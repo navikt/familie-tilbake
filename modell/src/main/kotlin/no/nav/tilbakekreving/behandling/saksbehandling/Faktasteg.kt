@@ -131,11 +131,7 @@ class Faktasteg(
     ) {
         fun erFullstendig(): Boolean {
             return årsakTilFeilutbetaling.isNotBlank() &&
-                when (uttalelse) {
-                    is Uttalelse.Ja -> uttalelse.begrunnelse.isNotBlank()
-                    is Uttalelse.IkkeVurdert, is Uttalelse.IkkeAktuelt -> false
-                    else -> true
-                }
+                uttalelse.erFullstendig()
         }
     }
 
@@ -154,6 +150,11 @@ class Faktasteg(
     }
 
     sealed interface Uttalelse {
+        fun erFullstendig(): Boolean = when (this) {
+            is Ja -> begrunnelse.isNotBlank()
+            Nei, IkkeAktuelt, IkkeVurdert -> true
+        }
+
         class Ja(val begrunnelse: String) : Uttalelse
 
         data object Nei : Uttalelse
