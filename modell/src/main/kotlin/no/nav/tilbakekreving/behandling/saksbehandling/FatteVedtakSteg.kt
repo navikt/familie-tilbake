@@ -18,7 +18,7 @@ class FatteVedtakSteg internal constructor(
     override val type: Behandlingssteg = Behandlingssteg.FATTE_VEDTAK
     val ansvarligBeslutter: Behandler? = _ansvarligBeslutter
 
-    override fun erFullstending(): Boolean = vurderteSteg.all { it.erFerdigvurdert() }
+    override fun erFullstendig(): Boolean = vurderteSteg.all { it.erFerdigvurdert() }
 
     internal fun håndter(
         beslutter: Behandler,

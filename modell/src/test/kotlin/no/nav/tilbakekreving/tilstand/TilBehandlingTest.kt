@@ -38,8 +38,8 @@ class TilBehandlingTest {
         tilbakekreving.nullstillBehandling()
         val behandlingEtterNullstilling = tilbakekreving.behandlingHistorikk.nåværende().entry
 
-        behandlingFørNullstilling.foreldelsesteg.erFullstending() shouldBe true
-        behandlingEtterNullstilling.foreldelsesteg.erFullstending() shouldBe false
+        behandlingFørNullstilling.foreldelsesteg.erFullstendig() shouldBe true
+        behandlingEtterNullstilling.foreldelsesteg.erFullstendig() shouldBe false
     }
 
     @Test

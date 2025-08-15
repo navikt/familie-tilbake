@@ -36,7 +36,7 @@ class VilkårsvurderingstegTest {
             ),
         )
 
-        vilkårsvurderingsteg.erFullstending() shouldBe false
+        vilkårsvurderingsteg.erFullstendig() shouldBe false
     }
 
     @Test
@@ -63,7 +63,7 @@ class VilkårsvurderingstegTest {
                 beløpIBehold = Vilkårsvurderingsteg.Vurdering.GodTro.BeløpIBehold.Nei,
             ),
         )
-        vilkårsvurderingsteg.erFullstending() shouldBe false
+        vilkårsvurderingsteg.erFullstendig() shouldBe false
 
         vilkårsvurderingsteg.vurder(
             1.februar til 28.februar,
@@ -73,7 +73,7 @@ class VilkårsvurderingstegTest {
             ),
         )
 
-        vilkårsvurderingsteg.erFullstending() shouldBe true
+        vilkårsvurderingsteg.erFullstendig() shouldBe true
     }
 
     @Test

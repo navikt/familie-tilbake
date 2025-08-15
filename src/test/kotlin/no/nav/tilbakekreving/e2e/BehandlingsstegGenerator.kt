@@ -10,9 +10,11 @@ import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.ForeldelsesperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.FritekstavsnittDto
 import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
+import no.nav.tilbakekreving.api.v1.dto.VurderingAvBrukersUttalelseDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertTotrinnDto
 import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
@@ -32,6 +34,10 @@ object BehandlingsstegGenerator {
                 )
             },
             begrunnelse = "Begrunnelse",
+            vurderingAvBrukersUttalelse = VurderingAvBrukersUttalelseDto(
+                harBrukerUttaltSeg = HarBrukerUttaltSeg.JA,
+                beskrivelse = "Ja, hvorfor ikke?",
+            ),
         )
     }
 

@@ -13,7 +13,7 @@ class BrevmottakerSteg(
     override val type = Behandlingssteg.BREVMOTTAKER
     var registrertBrevmottaker: RegistrertBrevmottaker = defaultMottaker
 
-    override fun erFullstending(): Boolean {
+    override fun erFullstendig(): Boolean {
         return true
     }
 

@@ -67,4 +67,40 @@ class FaktaStegTest {
             beskrivelse = uttalelse,
         )
     }
+
+    @Test
+    fun `fakta-steget er fullstendig når det er vurdert`() {
+        val periode = 1.januar til 1.januar
+        val tilbakekrevesBeløp = 2000.kroner
+        val faktasteg = Faktasteg.opprett(
+            eksternFagsakBehandling = fakeReferanse(eksternFagsakBehandling()),
+            kravgrunnlag = fakeReferanse(
+                kravgrunnlag(
+                    perioder = listOf(
+                        kravgrunnlagPeriode(periode, ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = tilbakekrevesBeløp)),
+                    ),
+                ),
+            ),
+            BrevHistorikk(historikk = mutableListOf()),
+            tilbakekrevingOpprettet = LocalDateTime.now(),
+            Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
+        )
+        faktasteg.erFullstendig() shouldBe false
+
+        faktasteg.vurder(
+            vurdering = Faktasteg.Vurdering(
+                perioder = listOf(
+                    Faktasteg.FaktaPeriode(
+                        periode = periode,
+                        hendelsestype = Hendelsestype.ANNET,
+                        hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
+                    ),
+                ),
+                årsakTilFeilutbetaling = "Årsak",
+                uttalelse = Faktasteg.Uttalelse.Ja("Uttalelse"),
+            ),
+        )
+
+        faktasteg.erFullstendig() shouldBe true
+    }
 }

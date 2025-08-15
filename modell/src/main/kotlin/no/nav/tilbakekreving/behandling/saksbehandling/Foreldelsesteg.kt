@@ -21,7 +21,7 @@ class Foreldelsesteg(
 ) : Saksbehandlingsteg<VurdertForeldelseDto> {
     override val type: Behandlingssteg = Behandlingssteg.FORELDELSE
 
-    override fun erFullstending(): Boolean = vurdertePerioder.all { it.vurdering != Vurdering.IkkeVurdert }
+    override fun erFullstendig(): Boolean = vurdertePerioder.all { it.vurdering != Vurdering.IkkeVurdert }
 
     internal fun vurderForeldelse(
         periode: Datoperiode,

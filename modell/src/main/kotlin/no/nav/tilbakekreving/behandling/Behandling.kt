@@ -108,7 +108,7 @@ class Behandling internal constructor(
     )
 
     private fun behandlingsstatus() =
-        steg().firstOrNull { !it.erFullstending() }
+        steg().firstOrNull { !it.erFullstendig() }
             ?.behandlingsstatus
             ?: Behandlingsstatus.AVSLUTTET
 
@@ -176,7 +176,7 @@ class Behandling internal constructor(
     }
 
     private fun kanEndres(behandler: Behandler, kanBeslutte: Boolean): Boolean {
-        return !foreslåVedtakSteg.erFullstending() || behandler != ansvarligSaksbehandler && kanBeslutte
+        return !foreslåVedtakSteg.erFullstendig() || behandler != ansvarligSaksbehandler && kanBeslutte
     }
 
     fun tilFrontendDto(behandler: Behandler, kanBeslutte: Boolean): BehandlingDto {
@@ -357,7 +357,7 @@ class Behandling internal constructor(
         )
     }
 
-    fun kanUtbetales(): Boolean = fatteVedtakSteg.erFullstending()
+    fun kanUtbetales(): Boolean = fatteVedtakSteg.erFullstendig()
 
     fun hentBehandlingsinformasjon(): Behandlingsinformasjon {
         return Behandlingsinformasjon(

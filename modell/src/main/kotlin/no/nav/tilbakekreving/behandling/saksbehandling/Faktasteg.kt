@@ -30,8 +30,8 @@ class Faktasteg(
 ) : Saksbehandlingsteg<FaktaFeilutbetalingDto> {
     override val type: Behandlingssteg = Behandlingssteg.FAKTA
 
-    override fun erFullstending(): Boolean {
-        return true
+    override fun erFullstendig(): Boolean {
+        return vurdering.erFullstendig()
     }
 
     internal fun vurder(vurdering: Vurdering) {
@@ -128,7 +128,16 @@ class Faktasteg(
         val perioder: List<FaktaPeriode>,
         val årsakTilFeilutbetaling: String,
         val uttalelse: Uttalelse,
-    )
+    ) {
+        fun erFullstendig(): Boolean {
+            return årsakTilFeilutbetaling.isNotBlank() &&
+                when (uttalelse) {
+                    is Uttalelse.Ja -> uttalelse.begrunnelse.isNotBlank()
+                    is Uttalelse.IkkeVurdert, is Uttalelse.IkkeAktuelt -> false
+                    else -> true
+                }
+        }
+    }
 
     class FaktaPeriode(
         val periode: Datoperiode,
