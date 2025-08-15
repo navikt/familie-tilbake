@@ -33,7 +33,11 @@ object VedtaksbrevFritekstValidator {
         logContext: SecureLog.Context,
     ) {
         validerFritekster(behandling, faktaFeilutbetaling, avsnittMedPerioder, vedtaksbrevsoppsummering, vedtaksbrevstype, logContext)
-        if (vilkårsvurdering != null && !gjelderDødsfall) {
+
+        val revurderingHeltEllerDelvisBortfalt = behandling.årsaker.any {
+            it.type == Behandlingsårsakstype.REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT
+        }
+        if (vilkårsvurdering != null && !gjelderDødsfall && !revurderingHeltEllerDelvisBortfalt) {
             validerFritekstISærligGrunnerAnnetAvsnitt(
                 vilkårsvurdering,
                 vedtaksbrevFritekstPerioder,
