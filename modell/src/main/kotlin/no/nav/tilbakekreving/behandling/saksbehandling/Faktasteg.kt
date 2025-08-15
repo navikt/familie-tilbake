@@ -152,7 +152,8 @@ class Faktasteg(
     sealed interface Uttalelse {
         fun erFullstendig(): Boolean = when (this) {
             is Ja -> begrunnelse.isNotBlank()
-            Nei, IkkeAktuelt, IkkeVurdert -> true
+            Nei -> true
+            IkkeAktuelt, IkkeVurdert -> false
         }
 
         class Ja(val begrunnelse: String) : Uttalelse

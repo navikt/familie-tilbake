@@ -81,9 +81,9 @@ class FaktaStegTest {
                     ),
                 ),
             ),
-            BrevHistorikk(historikk = mutableListOf()),
+            brevHistorikk = BrevHistorikk(historikk = mutableListOf()),
             tilbakekrevingOpprettet = LocalDateTime.now(),
-            Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
+            opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
         )
         faktasteg.erFullstendig() shouldBe false
 
