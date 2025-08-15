@@ -382,7 +382,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `lagreFriteksterFraSaksbehandler skal lagre når fritekst mangler for ANNET særliggrunner begrunnelse, men brukeren er død`() {
+    fun `skal godta at fritekst mangler for andre særlige grunner dersom brukeren er død`() {
         val (_, behandling) = nyBehandling(
             lagFaktaVurdering = false,
             lagVilkårsvurdering = false,
@@ -401,6 +401,43 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
                 faktaFritekst = "fakta",
                 oppsummeringstekst = "fakta data",
                 periode = 1.januar(2021) til 31.mars(2021),
+            ),
+            SecureLog.Context.tom(),
+        )
+    }
+
+    @Test
+    fun `skal godta at fritekst mangler for andre særlige grunner dersom revurdering er helt eller delvis bortfalt`() {
+        val (fagsak, behandling) = nyBehandling(
+            lagFaktaVurdering = false,
+            lagVilkårsvurdering = false,
+            kravgrunnlagPerioder = listOf(
+                januar(2021) til januar(2021),
+                februar(2021) til februar(2021),
+                mars(2021) til mars(2021),
+            ),
+        )
+        val revurdering = behandlingRepository.insert(
+            Testdata.lagRevurdering(behandling.id, fagsak.id).copy(
+                id = UUID.randomUUID(),
+                eksternBrukId = UUID.randomUUID(),
+                avsluttetDato = null,
+                årsaker = setOf(
+                    Behandlingsårsak(
+                        originalBehandlingId = behandling.id,
+                        type = Behandlingsårsakstype.REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT,
+                    ),
+                ),
+            ),
+        )
+
+        lagFakta(revurdering.id, januar(2021) til mars(2021))
+        lagVilkårsvurdering(revurdering.id, januar(2021) til mars(2021))
+        vedtaksbrevService.lagreFriteksterFraSaksbehandler(
+            revurdering.id,
+            FritekstavsnittDto(
+                oppsummeringstekst = "Begrunnelse for nytt vedtak",
+                perioderMedTekst = emptyList(),
             ),
             SecureLog.Context.tom(),
         )
