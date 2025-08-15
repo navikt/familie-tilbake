@@ -12,7 +12,7 @@ class ForeslåVedtakSteg(
 ) : Saksbehandlingsteg<Unit> {
     override val type = Behandlingssteg.FORESLÅ_VEDTAK
 
-    override fun erFullstending(): Boolean = vurdering != Vurdering.IkkeVurdert
+    override fun erFullstendig(): Boolean = vurdering != Vurdering.IkkeVurdert
 
     internal fun håndter(vurdering: Vurdering) {
         this.vurdering = vurdering

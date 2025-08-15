@@ -24,7 +24,7 @@ class FatteVedtakStegTest {
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
 
-        fatteVedtakSteg.erFullstending() shouldBe false
+        fatteVedtakSteg.erFullstendig() shouldBe false
     }
 
     @Test
@@ -59,7 +59,7 @@ class FatteVedtakStegTest {
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
 
-        fatteVedtakSteg.erFullstending() shouldBe true
+        fatteVedtakSteg.erFullstendig() shouldBe true
     }
 
     @Test

@@ -73,9 +73,9 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
         frontendDto.behandlinger.single().status shouldBe Behandlingsstatus.UTREDES
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
 
-        // TODO: må implementeres
-//        tilbakekreving kanBehandle Behandlingssteg.FAKTA
-//        tilbakekreving avventerBehandling Behandlingssteg.FORELDELSE
+        behandling(behandlingId) kanBehandle Behandlingssteg.FAKTA
+        behandling(behandlingId) avventerBehandling Behandlingssteg.FORELDELSE
+
         utførSteg(
             ident = "Z999999",
             behandlingId = behandlingId,

@@ -10,7 +10,6 @@ import no.nav.tilbakekreving.api.v1.dto.BeregnetPerioderDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
-import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.TotrinnsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingDto
@@ -109,7 +108,7 @@ class Behandling internal constructor(
     )
 
     private fun behandlingsstatus() =
-        steg().firstOrNull { !it.erFullstending() }
+        steg().firstOrNull { !it.erFullstendig() }
             ?.behandlingsstatus
             ?: Behandlingsstatus.AVSLUTTET
 
@@ -177,7 +176,7 @@ class Behandling internal constructor(
     }
 
     private fun kanEndres(behandler: Behandler, kanBeslutte: Boolean): Boolean {
-        return !foreslåVedtakSteg.erFullstending() || behandler != ansvarligSaksbehandler && kanBeslutte
+        return !foreslåVedtakSteg.erFullstendig() || behandler != ansvarligSaksbehandler && kanBeslutte
     }
 
     fun tilFrontendDto(behandler: Behandler, kanBeslutte: Boolean): BehandlingDto {
@@ -244,12 +243,11 @@ class Behandling internal constructor(
 
     internal fun håndter(
         behandler: Behandler,
-        vurdering: FaktaFeilutbetalingsperiodeDto,
+        vurdering: Faktasteg.Vurdering,
     ) {
         validerBehandlingstatus(håndtertSteg = "fakta")
         this.ansvarligSaksbehandler = behandler
-        // TODO håndter feil når fakta er implementer
-        faktasteg.behandleFakta(vurdering)
+        faktasteg.vurder(vurdering)
     }
 
     internal fun håndter(
@@ -358,7 +356,7 @@ class Behandling internal constructor(
         )
     }
 
-    fun kanUtbetales(): Boolean = fatteVedtakSteg.erFullstending()
+    fun kanUtbetales(): Boolean = fatteVedtakSteg.erFullstendig()
 
     fun hentBehandlingsinformasjon(): Behandlingsinformasjon {
         return Behandlingsinformasjon(

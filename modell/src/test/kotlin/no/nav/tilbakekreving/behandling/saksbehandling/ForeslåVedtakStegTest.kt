@@ -7,7 +7,7 @@ class ForeslåVedtakStegTest {
     @Test
     fun `kan sende vedtak til godkjenning`() {
         val foreslåVedtakSteg = ForeslåVedtakSteg.opprett()
-        foreslåVedtakSteg.erFullstending() shouldBe false
+        foreslåVedtakSteg.erFullstendig() shouldBe false
 
         foreslåVedtakSteg.håndter(
             ForeslåVedtakSteg.Vurdering.ForeslåVedtak(
@@ -15,6 +15,6 @@ class ForeslåVedtakStegTest {
                 perioderMedTekst = emptyList(),
             ),
         )
-        foreslåVedtakSteg.erFullstending() shouldBe true
+        foreslåVedtakSteg.erFullstendig() shouldBe true
     }
 }

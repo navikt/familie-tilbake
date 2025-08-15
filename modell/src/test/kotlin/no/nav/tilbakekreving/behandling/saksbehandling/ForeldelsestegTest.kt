@@ -31,7 +31,7 @@ class ForeldelsestegTest {
             Foreldelsesteg.Vurdering.IkkeForeldet("Starten av utbetalingsperioden er innenfor foreldelsesfristen"),
         )
 
-        foreldelsesteg.erFullstending() shouldBe false
+        foreldelsesteg.erFullstendig() shouldBe false
     }
 
     @Test
@@ -58,7 +58,7 @@ class ForeldelsestegTest {
             Foreldelsesteg.Vurdering.IkkeForeldet("Starten av utbetalingsperioden er innenfor foreldelsesfristen"),
         )
 
-        foreldelsesteg.erFullstending() shouldBe true
+        foreldelsesteg.erFullstendig() shouldBe true
     }
 
     @Test
@@ -85,14 +85,14 @@ class ForeldelsestegTest {
             1.januar til 31.januar,
             Foreldelsesteg.Vurdering.Foreldet("Deler av perioden er foreldet fordi grunner"),
         )
-        foreldelsesteg.erFullstending() shouldBe false
+        foreldelsesteg.erFullstendig() shouldBe false
 
         foreldelsesteg.vurderForeldelse(
             1.februar til 28.februar,
             Foreldelsesteg.Vurdering.IkkeForeldet("Hele greia er ikke foreldet"),
         )
 
-        foreldelsesteg.erFullstending() shouldBe true
+        foreldelsesteg.erFullstendig() shouldBe true
         foreldelsesteg.erPeriodeForeldet(1.januar til 31.januar) shouldBe true
         foreldelsesteg.erPeriodeForeldet(1.februar til 28.februar) shouldBe false
     }

@@ -9,13 +9,13 @@ internal interface Saksbehandlingsteg<FrontendDtoType> : FrontendDto<FrontendDto
     val type: Behandlingssteg
     val behandlingsstatus: Behandlingsstatus get() = Behandlingsstatus.UTREDES
 
-    fun erFullstending(): Boolean
+    fun erFullstendig(): Boolean
 
     companion object {
         fun <T> Saksbehandlingsteg<T>?.behandlingsstegstatus(): Behandlingsstegstatus {
             return when {
                 this == null -> Behandlingsstegstatus.VENTER
-                this.erFullstending() -> Behandlingsstegstatus.UTFØRT
+                this.erFullstendig() -> Behandlingsstegstatus.UTFØRT
                 else -> Behandlingsstegstatus.KLAR
             }
         }
@@ -24,7 +24,7 @@ internal interface Saksbehandlingsteg<FrontendDtoType> : FrontendDto<FrontendDto
             val klarTilBehandling = mutableListOf<Saksbehandlingsteg<*>>()
             for (steg in this) {
                 klarTilBehandling.add(steg)
-                if (!steg.erFullstending()) return klarTilBehandling
+                if (!steg.erFullstendig()) return klarTilBehandling
             }
             return klarTilBehandling
         }

@@ -4,10 +4,10 @@ import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.aktør.Bruker
 import no.nav.tilbakekreving.aktør.Bruker.Companion.tilNullableFrontendDto
 import no.nav.tilbakekreving.api.v1.dto.FagsakDto
-import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingsperiodeDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.BehandlingHistorikk
+import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
@@ -177,7 +177,7 @@ class Tilbakekreving internal constructor(
 
     fun håndter(
         behandler: Behandler,
-        vurdering: FaktaFeilutbetalingsperiodeDto,
+        vurdering: Faktasteg.Vurdering,
     ) = behandlingHistorikk.nåværende().entry.håndter(behandler, vurdering)
 
     fun håndter(

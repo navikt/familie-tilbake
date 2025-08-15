@@ -42,7 +42,7 @@ class Vilkårsvurderingsteg(
 ) : Saksbehandlingsteg<VurdertVilkårsvurderingDto>, VilkårsvurderingAdapter {
     override val type: Behandlingssteg = Behandlingssteg.VILKÅRSVURDERING
 
-    override fun erFullstending(): Boolean = vurderinger.none { it.vurdering is Vurdering.IkkeVurdert }
+    override fun erFullstendig(): Boolean = vurderinger.none { it.vurdering is Vurdering.IkkeVurdert }
 
     fun tilEntity(): VilkårsvurderingstegEntity {
         return VilkårsvurderingstegEntity(
