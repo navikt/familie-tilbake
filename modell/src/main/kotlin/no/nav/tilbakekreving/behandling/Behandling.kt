@@ -247,7 +247,6 @@ class Behandling internal constructor(
     ) {
         validerBehandlingstatus(håndtertSteg = "fakta")
         this.ansvarligSaksbehandler = behandler
-        // TODO håndter feil når fakta er implementer
         faktasteg.vurder(vurdering)
     }
 
