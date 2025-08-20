@@ -18,7 +18,6 @@ tilbakekreving:
   bigQuery:
     prosjektId: dummy
     dataset: dummy
-    behandlingTable: dummy
 rolle:
   barnetrygd:
     veileder: "93a26831-9866-4410-927b-74ff51a9107c"

@@ -55,21 +55,11 @@ class Tilbakekreving internal constructor(
     private val behovObservatør: BehovObservatør,
     var bruker: Bruker? = null,
     internal var tilstand: Tilstand,
-    var bigQueryService: BigQueryService,
+    val bigQueryService: BigQueryService,
 ) : FrontendDto<FagsakDto> {
     internal fun byttTilstand(nyTilstand: Tilstand) {
         tilstand = nyTilstand
         tilstand.entering(this)
-        if (behandlingHistorikk.erIkkeTom()) {
-            val behandlingInfo = behandlingHistorikk.nåværende().entry.hentBehandlingsinformasjon()
-            bigQueryService.leggeTilBehanlingInfo(
-                behandlingId = behandlingInfo.behandlingId.toString(),
-                opprettetTid = opprettet,
-                ytelsestypeKode = hentFagsysteminfo().tilYtelsestype().kode,
-                behandlingstype = behandlingInfo.behandlingstype.name,
-                behandlendeEnhet = behandlingInfo.enhet?.kode,
-            )
-        }
     }
 
     fun håndter(opprettTilbakekrevingEvent: OpprettTilbakekrevingHendelse) {
@@ -120,20 +110,28 @@ class Tilbakekreving internal constructor(
         behandler: Behandler,
     ) {
         val behandlingId = UUID.randomUUID()
-        behandlingHistorikk.lagre(
-            Behandling.nyBehandling(
-                internId = behandlingId,
-                eksternId = behandlingId,
-                behandlingstype = Behandlingstype.TILBAKEKREVING,
-                opprettet = LocalDateTime.now(),
-                enhet = null,
-                årsak = Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR,
-                ansvarligSaksbehandler = behandler,
-                sistEndret = LocalDateTime.now(),
-                eksternFagsakBehandling = eksternFagsakBehandling,
-                kravgrunnlag = kravgrunnlagHistorikk.nåværende(),
-                brevHistorikk = brevHistorikk,
-            ),
+        val behandling = Behandling.nyBehandling(
+            internId = behandlingId,
+            eksternId = behandlingId,
+            behandlingstype = Behandlingstype.TILBAKEKREVING,
+            opprettet = LocalDateTime.now(),
+            enhet = null,
+            årsak = Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR,
+            ansvarligSaksbehandler = behandler,
+            sistEndret = LocalDateTime.now(),
+            eksternFagsakBehandling = eksternFagsakBehandling,
+            kravgrunnlag = kravgrunnlagHistorikk.nåværende(),
+            brevHistorikk = brevHistorikk,
+        )
+        behandlingHistorikk.lagre(behandling)
+
+        val behandlingInfo = behandling.hentBehandlingsinformasjon()
+        bigQueryService.leggeTilBehanlingInfo(
+            behandlingId = behandlingInfo.behandlingId.toString(),
+            opprettetTid = opprettet,
+            ytelsestypeKode = hentFagsysteminfo().tilYtelsestype().kode,
+            behandlingstype = behandlingInfo.behandlingstype.name,
+            behandlendeEnhet = behandlingInfo.enhet?.kode,
         )
     }
 

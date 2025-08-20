@@ -30,7 +30,6 @@ tilbakekreving:
   bigQuery:
     prosjektId: tilbake-dev-d683
     dataset: tilbakekreving_dataset
-    behandlingTable: bq_behandling
 
 rolle:
   barnetrygd:

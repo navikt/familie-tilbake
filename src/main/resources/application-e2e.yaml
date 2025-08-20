@@ -64,9 +64,8 @@ tilbakekreving:
     scope: api://dev-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
   kravgrunnlag: []
   bigQuery:
-    prosjektId: tilbake-dev-d683
-    dataset: tilbakekreving_dataset
-    behandlingTable: bq_behandling
+    prosjektId: dummy
+    dataset: dummy
 logging:
   config: "classpath:logback-e2e.xml"
 

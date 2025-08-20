@@ -54,6 +54,5 @@ tilbakekreving:
   tilgangsmaskinen:
     scope: api://dev-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
   bigQuery:
-    prosjektId: Dummy
-    dataset: Dummy
-    behandlingTable: Dummy
+    prosjektId: dummy
+    dataset: dummy
