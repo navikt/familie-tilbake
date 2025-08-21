@@ -11,6 +11,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
@@ -48,6 +49,7 @@ import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode.Companion.til
+import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
@@ -61,6 +63,8 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
+    @Autowired
+    private lateinit var behandlingService: BehandlingService
     override val tømDBEtterHverTest = false
 
     @Autowired
@@ -728,6 +732,32 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
 
         val erLike = vilkårsvurderingService.sjekkOmVilkårsvurderingPerioderErLike(behandling.id, SecureLog.Context.tom())
         Assertions.assertFalse(erLike)
+    }
+
+    @Test
+    fun `ved splitt og vurdering av 1 av 2 perioder skal den uvurderte perioden fortsatt eksistere etter henting av vilkårsvurderingen`() {
+        // Splitter på første periode og lagrer vurderingen kun den første perioden
+        val splittetPeriode = 1.januar(2020) til 31.januar(2020)
+
+        val splittetVilkårsvurdering = BehandlingsstegVilkårsvurderingDto(
+            listOf(
+                VilkårsvurderingsperiodeDto(
+                    periode = splittetPeriode,
+                    vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
+                    begrunnelse = "kekw",
+                    godTroDto = GodTroDto(
+                        beløpErIBehold = false,
+                        begrunnelse = "lol xD",
+                    ),
+                    aktsomhetDto = null,
+                ),
+            ),
+        )
+        vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, splittetVilkårsvurdering)
+
+        val oppdatertVilkårsvurdering = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
+        oppdatertVilkårsvurdering.perioder[0].periode shouldBe splittetPeriode
+        oppdatertVilkårsvurdering.perioder[1].periode shouldBe (1.februar(2020) til 29.februar(2020))
     }
 
     private fun lagBehandlingsstegstilstand(
