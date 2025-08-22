@@ -157,7 +157,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentVilkårsvurdering skal hente vilkårsvurdering fra foreldelse perioder som ikke er foreldet`() {
-        lagForeldese(førstePeriode to Foreldelsesvurderingstype.FORELDET, andrePeriode to Foreldelsesvurderingstype.IKKE_FORELDET)
+        lagForeldelse(førstePeriode to Foreldelsesvurderingstype.FORELDET, andrePeriode to Foreldelsesvurderingstype.IKKE_FORELDET)
         lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)
 
@@ -174,7 +174,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         foreldetPeriode.reduserteBeløper.shouldBeEmpty()
         assertAktiviteter(foreldetPeriode.aktiviteter)
         foreldetPeriode.aktiviteter[0].beløp shouldBe BigDecimal(10000)
-        foreldetPeriode.begrunnelse shouldBe "foreldelse begrunnelse 1"
+        foreldetPeriode.begrunnelse shouldBe "begrunnelse"
         foreldetPeriode.vilkårsvurderingsresultatInfo.shouldBeNull()
 
         val ikkeForeldetPeriode = vurdertVilkårsvurderingDto.perioder[1]
@@ -447,7 +447,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentVilkårsvurdering skal hente foreldelse perioder som endret til IKKE_FORELDET`() {
         // en periode med FORELDET og andre er IKKE_FORELDET
-        lagForeldese(førstePeriode to Foreldelsesvurderingstype.FORELDET, andrePeriode to Foreldelsesvurderingstype.IKKE_FORELDET)
+        lagForeldelse(førstePeriode to Foreldelsesvurderingstype.FORELDET, andrePeriode to Foreldelsesvurderingstype.IKKE_FORELDET)
         lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)
 
@@ -514,7 +514,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentVilkårsvurdering skal hente perioder som endret til FORELDET`() {
         // en periode med FORELDET og andre er IKKE_FORELDET
-        lagForeldese(førstePeriode to Foreldelsesvurderingstype.FORELDET, andrePeriode to Foreldelsesvurderingstype.IKKE_FORELDET)
+        lagForeldelse(førstePeriode to Foreldelsesvurderingstype.FORELDET, andrePeriode to Foreldelsesvurderingstype.IKKE_FORELDET)
         lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)
 
@@ -765,7 +765,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `ved splitt og vurdering av 1 av 2 perioder skal den uvurderte perioden fortsatt eksistere etter henting av vilkårsvurderingen om foreldelse er vurdert`() {
-        lagForeldese(januar(2020) til februar(2020) to Foreldelsesvurderingstype.IKKE_FORELDET)
+        lagForeldelse(januar(2020) til februar(2020) to Foreldelsesvurderingstype.IKKE_FORELDET)
         // Splitter på første periode og lagrer vurderingen kun den første perioden
         val splittetPeriode = 1.januar(2020) til 31.januar(2020)
 
@@ -873,7 +873,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
             },
         )
 
-    private fun lagForeldese(vararg perioder: Pair<Månedsperiode, Foreldelsesvurderingstype>) {
+    private fun lagForeldelse(vararg perioder: Pair<Månedsperiode, Foreldelsesvurderingstype>) {
         foreldelseRepository.insert(
             VurdertForeldelse(
                 behandlingId = behandling.id,
