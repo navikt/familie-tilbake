@@ -32,21 +32,19 @@ class PdlClientMock : PdlClient {
         logContext: SecureLog.Context,
     ): Personinfo {
         hentPersoninfoHitsInternal.add(PersoninfoHit(ident, fagsystem))
-        val dødsdato = if (ident == "doed1234") {
-            LocalDate.of(2022, 4, 1)
-        } else {
-            null
-        }
-        if (ident.startsWith("feil")) {
-            throw Exception("Tvungen feil for testing")
-        }
-        return Personinfo(
+        var personInfo = Personinfo(
             ident = ident,
             fødselsdato = LocalDate.now().minusYears(20),
             navn = "testverdi",
             kjønn = PdlKjønnType.MANN,
-            dødsdato = dødsdato,
+            dødsdato = null,
         )
+        when {
+            ident.startsWith("feil") -> throw Exception("Tvungen feil for testing")
+            ident.startsWith("doed") -> personInfo = personInfo.copy(dødsdato = LocalDate.of(2022, 4, 1))
+            ident.startsWith("sleepy") -> Thread.sleep(100)
+        }
+        return personInfo
     }
 
     override fun hentIdenter(

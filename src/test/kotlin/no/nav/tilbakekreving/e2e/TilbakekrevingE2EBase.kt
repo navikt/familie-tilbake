@@ -26,6 +26,7 @@ import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagMediator
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.jdbc.core.JdbcTemplate
 import java.util.UUID
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -51,6 +52,9 @@ open class TilbakekrevingE2EBase : E2EBase() {
     @Autowired
     protected lateinit var behandlingController: BehandlingController
 
+    @Autowired
+    protected lateinit var jdbcTemplate: JdbcTemplate
+
     @AfterEach
     fun reset() {
         pdlClient.reset()
@@ -70,7 +74,7 @@ open class TilbakekrevingE2EBase : E2EBase() {
         }
     }
 
-    fun sendKravgrunnlagOgAvventLesing(
+    fun sendKravgrunnlag(
         queueName: String,
         kravgrunnlag: String,
     ) {
@@ -83,13 +87,19 @@ open class TilbakekrevingE2EBase : E2EBase() {
                     interval = 10.milliseconds
                 },
             ) {
-                kravgrunnlagBufferRepository.hentUlesteKravgrunnlag().size shouldBe 1
+                tellUlesteKravgrunnlag() shouldBe 1
             }
         }
+    }
 
+    fun sendKravgrunnlagOgAvventLesing(
+        queueName: String,
+        kravgrunnlag: String,
+    ) {
+        sendKravgrunnlag(queueName, kravgrunnlag)
         kravgrunnlagMediator.lesKravgrunnlag()
 
-        kravgrunnlagBufferRepository.hentUlesteKravgrunnlag().size shouldBe 0
+        tellUlesteKravgrunnlag() shouldBe 0
     }
 
     fun behandlingIdFor(
@@ -125,5 +135,11 @@ open class TilbakekrevingE2EBase : E2EBase() {
         somSaksbehandler(ident) {
             behandlingController.utførBehandlingssteg(behandlingId, stegData).status shouldBe Ressurs.Status.SUKSESS
         }
+    }
+
+    private fun tellUlesteKravgrunnlag(): Int {
+        return jdbcTemplate.query("SELECT count(1) AS antall FROM kravgrunnlag_buffer WHERE lest=false;") { rs, _ ->
+            rs.getInt("antall")
+        }.single()
     }
 }

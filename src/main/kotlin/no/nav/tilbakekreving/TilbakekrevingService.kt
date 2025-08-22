@@ -25,6 +25,7 @@ import no.nav.tilbakekreving.behov.BrukerinfoBehov
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
 import no.nav.tilbakekreving.behov.IverksettelseBehov
 import no.nav.tilbakekreving.behov.VarselbrevBehov
+import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
@@ -48,6 +49,7 @@ class TilbakekrevingService(
     private val pdlClient: PdlClient,
     private val iverksettService: IverksettService,
     private val tilbakekrevingRepository: TilbakekrevingRepository,
+    private val bigQueryService: BigQueryService,
 ) {
     private val aktør = Aktør.Person(ident = "20046912345")
     private val logger = TracedLogger.getLogger<TilbakekrevingService>()
@@ -57,7 +59,7 @@ class TilbakekrevingService(
         håndter: (Tilbakekreving) -> Unit,
     ) {
         val observatør = Observatør()
-        val tilbakekreving = Tilbakekreving.opprett(observatør, opprettTilbakekrevingHendelse)
+        val tilbakekreving = Tilbakekreving.opprett(observatør, opprettTilbakekrevingHendelse, bigQueryService)
         håndter(tilbakekreving)
 
         val logContext = SecureLog.Context.fra(tilbakekreving)
@@ -76,14 +78,14 @@ class TilbakekrevingService(
     ): Tilbakekreving? {
         if (!applicationProperties.toggles.nyModellEnabled) return null
 
-        val tilbakekrevinger = tilbakekrevingRepository.hentAlleTilbakekrevinger()?.map { it.fraEntity(Observatør()) }
+        val tilbakekrevinger = tilbakekrevingRepository.hentAlleTilbakekrevinger()?.map { it.fraEntity(Observatør(), bigQueryService) }
         return tilbakekrevinger?.firstOrNull { it.tilFrontendDto().fagsystem == fagsystem && it.tilFrontendDto().eksternFagsakId == eksternFagsakId }
     }
 
     fun hentTilbakekreving(behandlingId: UUID): Tilbakekreving? {
         if (!applicationProperties.toggles.nyModellEnabled) return null
 
-        return tilbakekrevingRepository.hentTilbakekreving(behandlingId)?.fraEntity(Observatør())
+        return tilbakekrevingRepository.hentTilbakekreving(behandlingId)?.fraEntity(Observatør(), bigQueryService)
     }
 
     fun <T> hentTilbakekreving(
@@ -92,7 +94,7 @@ class TilbakekrevingService(
     ): T? {
         val observatør = Observatør()
         return tilbakekrevingRepository.hentTilbakekreving(behandlingId)
-            ?.fraEntity(observatør)
+            ?.fraEntity(observatør, bigQueryService)
             ?.let { tilbakekreving ->
                 val resultat = håndter(tilbakekreving)
                 lagre(tilbakekreving)

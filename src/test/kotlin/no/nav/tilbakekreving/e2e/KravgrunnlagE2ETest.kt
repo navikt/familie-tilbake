@@ -1,7 +1,12 @@
 package no.nav.tilbakekreving.e2e
 
+import io.kotest.common.runBlocking
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import no.nav.tilbakekreving.TilbakekrevingRepository
 import no.nav.tilbakekreving.april
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.NyKlassekode
@@ -77,6 +82,20 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
         sendKravgrunnlagOgAvventLesing(QUEUE_NAME, KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId, fødselsnummer = "feil1234567"))
 
         kravgrunnlagMediator.lesKravgrunnlag()
+
+        tilbakekrevingRepository.hentAlleTilbakekrevinger()?.count { it.eksternFagsak.eksternId == fagsystemId } shouldBe 1
+    }
+
+    @Test
+    fun `flere konsumenter leser fra tabellen samtidig`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        sendKravgrunnlag(QUEUE_NAME, KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId, fødselsnummer = "sleepy12345"))
+
+        runBlocking(Dispatchers.IO) {
+            (0..4).map {
+                launch { kravgrunnlagMediator.lesKravgrunnlag() }
+            }.joinAll()
+        }
 
         tilbakekrevingRepository.hentAlleTilbakekrevinger()?.count { it.eksternFagsak.eksternId == fagsystemId } shouldBe 1
     }
