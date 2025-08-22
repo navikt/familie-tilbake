@@ -20,14 +20,11 @@ class KravgrunnlagMediator(
     }
 
     fun lesKravgrunnlag() {
-        val ikkeHåndterteKravgrunnlag = kravgrunnlagBufferRepository.hentUlesteKravgrunnlag()
-        ikkeHåndterteKravgrunnlag.forEach { entity ->
+        kravgrunnlagBufferRepository.konsumerKravgrunnlag { entity ->
             val kravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(entity.kravgrunnlag)
             tilbakekrevingService.opprettTilbakekreving(KravgrunnlagMapper.tilOpprettTilbakekrevingHendelse(kravgrunnlag)) { tilbakekreving ->
                 tilbakekreving.håndter(KravgrunnlagMapper.tilKravgrunnlagHendelse(kravgrunnlag))
             }
-
-            kravgrunnlagBufferRepository.markerLest(entity.kravgrunnlagId)
         }
     }
 }

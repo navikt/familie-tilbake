@@ -4,6 +4,7 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 import java.sql.ResultSet
 
 @Repository
@@ -18,12 +19,14 @@ class KravgrunnlagBufferRepository(
         return jdbcTemplate.query("SELECT * FROM kravgrunnlag_buffer;", Mapper)
     }
 
-    fun hentUlesteKravgrunnlag(): List<Entity> {
-        return jdbcTemplate.query("SELECT * FROM kravgrunnlag_buffer WHERE lest=false;", Mapper)
-    }
+    @Transactional
+    fun konsumerKravgrunnlag(callback: (Entity) -> Unit) {
+        val kravgrunnlag = jdbcTemplate.query("SELECT * FROM kravgrunnlag_buffer WHERE lest=false FOR UPDATE LIMIT 5;", Mapper)
+        kravgrunnlag.forEach {
+            callback(it)
 
-    fun markerLest(kravgrunnlagId: String) {
-        jdbcTemplate.update("UPDATE kravgrunnlag_buffer SET lest=true WHERE kravgrunnlag_id=?;", kravgrunnlagId)
+            jdbcTemplate.update("UPDATE kravgrunnlag_buffer SET lest=true WHERE kravgrunnlag_id=?;", it.kravgrunnlagId)
+        }
     }
 
     fun hentKravgrunnlag(kravgrunnlagId: String): Entity? {

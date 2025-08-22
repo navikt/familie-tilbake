@@ -53,3 +53,6 @@ tilbakekreving:
         beslutter: ${rolle.teamfamilie.forvalter}
   tilgangsmaskinen:
     scope: api://dev-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
+  bigQuery:
+    prosjektId: dummy
+    dataset: dummy

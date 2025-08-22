@@ -15,6 +15,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
 import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.VarselbrevBehov
+import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
@@ -54,6 +55,7 @@ class Tilbakekreving internal constructor(
     private val behovObservatør: BehovObservatør,
     var bruker: Bruker? = null,
     internal var tilstand: Tilstand,
+    val bigQueryService: BigQueryService,
 ) : FrontendDto<FagsakDto> {
     internal fun byttTilstand(nyTilstand: Tilstand) {
         tilstand = nyTilstand
@@ -108,20 +110,28 @@ class Tilbakekreving internal constructor(
         behandler: Behandler,
     ) {
         val behandlingId = UUID.randomUUID()
-        behandlingHistorikk.lagre(
-            Behandling.nyBehandling(
-                internId = behandlingId,
-                eksternId = behandlingId,
-                behandlingstype = Behandlingstype.TILBAKEKREVING,
-                opprettet = LocalDateTime.now(),
-                enhet = null,
-                årsak = Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR,
-                ansvarligSaksbehandler = behandler,
-                sistEndret = LocalDateTime.now(),
-                eksternFagsakBehandling = eksternFagsakBehandling,
-                kravgrunnlag = kravgrunnlagHistorikk.nåværende(),
-                brevHistorikk = brevHistorikk,
-            ),
+        val behandling = Behandling.nyBehandling(
+            internId = behandlingId,
+            eksternId = behandlingId,
+            behandlingstype = Behandlingstype.TILBAKEKREVING,
+            opprettet = LocalDateTime.now(),
+            enhet = null,
+            årsak = Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR,
+            ansvarligSaksbehandler = behandler,
+            sistEndret = LocalDateTime.now(),
+            eksternFagsakBehandling = eksternFagsakBehandling,
+            kravgrunnlag = kravgrunnlagHistorikk.nåværende(),
+            brevHistorikk = brevHistorikk,
+        )
+        behandlingHistorikk.lagre(behandling)
+
+        val behandlingInfo = behandling.hentBehandlingsinformasjon()
+        bigQueryService.leggeTilBehanlingInfo(
+            behandlingId = behandlingInfo.behandlingId.toString(),
+            opprettetTid = opprettet,
+            ytelsestypeKode = hentFagsysteminfo().tilYtelsestype().kode,
+            behandlingstype = behandlingInfo.behandlingstype.name,
+            behandlendeEnhet = behandlingInfo.enhet?.kode,
         )
     }
 
@@ -232,6 +242,7 @@ class Tilbakekreving internal constructor(
         fun opprett(
             behovObservatør: BehovObservatør,
             opprettTilbakekrevingEvent: OpprettTilbakekrevingHendelse,
+            bigQueryService: BigQueryService,
         ): Tilbakekreving {
             val tilbakekreving = Tilbakekreving(
                 id = UUID.randomUUID(),
@@ -250,6 +261,7 @@ class Tilbakekreving internal constructor(
                 kravgrunnlagHistorikk = KravgrunnlagHistorikk(mutableListOf()),
                 brevHistorikk = BrevHistorikk(mutableListOf()),
                 tilstand = Start,
+                bigQueryService = bigQueryService,
             )
             tilbakekreving.håndter(opprettTilbakekrevingEvent)
             return tilbakekreving
