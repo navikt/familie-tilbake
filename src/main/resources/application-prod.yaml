@@ -57,3 +57,6 @@ kafka:
 tilbakekreving:
   tilgangsmaskinen:
     scope: api://prod-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
+  bigQuery:
+    prosjektId: tilbake-prod-d235
+    dataset: tilbakekreving_dataset
