@@ -14,4 +14,5 @@ data class ApplicationProperties(
     val tokenExchange: TokenExchangeService.Companion.Config,
     val tilgangsmaskinen: PersontilgangService.Companion.Config,
     val bigQuery: BigQueryProperties,
+    val frontendUrl: String,
 )
