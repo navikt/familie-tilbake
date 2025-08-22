@@ -81,10 +81,24 @@ class VilkårsvurderingService(
         val perioder = mutableListOf<Månedsperiode>()
         val foreldetPerioderMedBegrunnelse = mutableMapOf<Månedsperiode, String>()
         if (vurdertForeldelse == null) {
-            // fakta perioder
-            faktaOmFeilutbetaling.perioder
-                .filter { !erPeriodeAlleredeVurdert(vilkårsvurdering, it.periode) }
-                .forEach { perioder.add(it.periode) }
+            val sortertVilkårsvurdering = vilkårsvurdering?.perioder?.sortedBy { it.periode.fom } ?: emptyList()
+            faktaOmFeilutbetaling.perioder.sortedBy { it.periode.fom }.forEach { faktaPeriode ->
+                var gjenværendeFaktaPeriode = faktaPeriode.periode
+
+                sortertVilkårsvurdering.forEach { vurderPeriode ->
+                    if (gjenværendeFaktaPeriode.inneholder(vurderPeriode.periode)) {
+                        val periodeFørVurdert = gjenværendeFaktaPeriode.før(vurderPeriode.periode.fom)
+                        val periodeEtterVurdert = gjenværendeFaktaPeriode.etter(vurderPeriode.periode.tom)
+
+                        periodeFørVurdert?.let { perioder.add(it) }
+                        perioder.add(vurderPeriode.periode)
+
+                        gjenværendeFaktaPeriode = periodeEtterVurdert ?: return@forEach
+                    }
+                }
+
+                gjenværendeFaktaPeriode.let { perioder.add(it) }
+            }
         } else {
             // Ikke foreldet perioder uten perioder som allerede vurdert i vilkårsvurdering
             vurdertForeldelse.foreldelsesperioder

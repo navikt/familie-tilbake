@@ -62,16 +62,18 @@ object VilkårsvurderingMapper {
                 }
 
         val ikkeBehandletPerioder =
-            perioder.map {
-                VurdertVilkårsvurderingsperiodeDto(
-                    periode = it.toDatoperiode(),
-                    feilutbetaltBeløp = kravgrunnlagAdapter.feilutbetaltBeløp(it.toDatoperiode()),
-                    hendelsestype = hentHendelsestype(faktaFeilutbetaling.perioder, it),
-                    reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, it),
-                    aktiviteter = hentAktiviteter(kravgrunnlag431, it),
-                    foreldet = false,
-                )
-            }
+            perioder
+                .filter { periode -> vilkårsvurdertePerioder?.none { Månedsperiode(it.periode.fom, it.periode.tom) == periode } ?: true }
+                .map {
+                    VurdertVilkårsvurderingsperiodeDto(
+                        periode = it.toDatoperiode(),
+                        feilutbetaltBeløp = kravgrunnlagAdapter.feilutbetaltBeløp(it.toDatoperiode()),
+                        hendelsestype = hentHendelsestype(faktaFeilutbetaling.perioder, it),
+                        reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, it),
+                        aktiviteter = hentAktiviteter(kravgrunnlag431, it),
+                        foreldet = false,
+                    )
+                }
 
         val foreldetPerioder =
             foreldetPerioderMedBegrunnelse.map { (periode, begrunnelse) ->
