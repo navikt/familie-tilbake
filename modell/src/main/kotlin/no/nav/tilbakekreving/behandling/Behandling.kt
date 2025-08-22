@@ -363,6 +363,8 @@ class Behandling internal constructor(
             kravgrunnlagReferanse = kravgrunnlag.entry.referanse,
             opprettetTid = opprettet,
             behandlingId = internId,
+            enhet = enhet,
+            behandlingstype = behandlingstype,
         )
     }
 

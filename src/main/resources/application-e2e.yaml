@@ -63,7 +63,9 @@ tilbakekreving:
   tilgangsmaskinen:
     scope: api://dev-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
   kravgrunnlag: []
-
+  bigQuery:
+    prosjektId: dummy
+    dataset: dummy
 logging:
   config: "classpath:logback-e2e.xml"
 

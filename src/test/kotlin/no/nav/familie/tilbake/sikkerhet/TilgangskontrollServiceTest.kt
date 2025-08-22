@@ -27,6 +27,7 @@ import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
+import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
@@ -102,6 +103,8 @@ internal class TilgangskontrollServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var persontilgangService: PersontilgangService
+
+    private val bigQueryService = BigQueryServiceStub()
 
     private val auditLogger: AuditLogger = mockk(relaxed = true)
     private val personIdent: String = "1232"
@@ -423,6 +426,7 @@ internal class TilgangskontrollServiceTest : OppslagSpringRunnerTest() {
                 ),
             ),
             behovObservatør = mockk(relaxed = true),
+            bigQueryService = bigQueryService,
         )
     }
 }
