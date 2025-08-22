@@ -41,6 +41,9 @@ spec:
         databases:
           - name: familie-tilbake
             envVarPrefix: DB
+    bigQueryDatasets:
+      - name: tilbakekreving_dataset
+        permission: READWRITE
   azure:
     application:
       claims:
