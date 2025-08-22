@@ -1,5 +1,8 @@
 package no.nav.familie.tilbake.vilkårsvurdering
 
+import java.math.BigDecimal
+import java.math.RoundingMode
+import java.util.UUID
 import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.familie.tilbake.beregning.Kravgrunnlag431Adapter
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
@@ -26,11 +29,47 @@ import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsresultatDto
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
-import java.math.BigDecimal
-import java.math.RoundingMode
-import java.util.UUID
+import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode.Companion.til
 
 object VilkårsvurderingMapper {
+    private fun uvurdertPeriode(
+        periode: Månedsperiode,
+        kravgrunnlag431: Kravgrunnlag431,
+        kravgrunnlagAdapter: Kravgrunnlag431Adapter,
+        faktaFeilutbetaling: FaktaFeilutbetaling,
+    ): VurdertVilkårsvurderingsperiodeDto {
+        return VurdertVilkårsvurderingsperiodeDto(
+            periode = periode.toDatoperiode(),
+            feilutbetaltBeløp = kravgrunnlagAdapter.feilutbetaltBeløp(periode.toDatoperiode()),
+            hendelsestype = hentHendelsestype(faktaFeilutbetaling.perioder, periode),
+            reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, periode),
+            aktiviteter = hentAktiviteter(kravgrunnlag431, periode),
+            foreldet = false,
+        )
+    }
+
+    private fun vurdertPeriode(
+        vilkårsvurdering: Vilkårsvurderingsperiode,
+        kravgrunnlag431: Kravgrunnlag431,
+        kravgrunnlagAdapter: Kravgrunnlag431Adapter,
+        faktaFeilutbetaling: FaktaFeilutbetaling,
+    ): VurdertVilkårsvurderingsperiodeDto {
+        return VurdertVilkårsvurderingsperiodeDto(
+            periode = vilkårsvurdering.periode.toDatoperiode(),
+            feilutbetaltBeløp = kravgrunnlagAdapter.feilutbetaltBeløp(vilkårsvurdering.periode.toDatoperiode()),
+            hendelsestype =
+                hentHendelsestype(
+                    faktaFeilutbetaling.perioder,
+                    vilkårsvurdering.periode,
+                ),
+            reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, vilkårsvurdering.periode),
+            aktiviteter = hentAktiviteter(kravgrunnlag431, vilkårsvurdering.periode),
+            begrunnelse = vilkårsvurdering.begrunnelse,
+            foreldet = false,
+            vilkårsvurderingsresultatInfo = tilVilkårsvurderingsresultatDto(vilkårsvurdering),
+        )
+    }
+
     fun tilRespons(
         vilkårsvurdering: Vilkårsvurdering?,
         perioder: List<Månedsperiode>,
@@ -40,37 +79,28 @@ object VilkårsvurderingMapper {
     ): VurdertVilkårsvurderingDto {
         // allerede behandlet perioder uten perioder som er foreldet
         val kravgrunnlagAdapter = Kravgrunnlag431Adapter(kravgrunnlag431)
-        val vilkårsvurdertePerioder =
-            vilkårsvurdering
-                ?.perioder
-                ?.filter { it.periode !in foreldetPerioderMedBegrunnelse }
-                ?.map {
-                    VurdertVilkårsvurderingsperiodeDto(
-                        periode = it.periode.toDatoperiode(),
-                        feilutbetaltBeløp = kravgrunnlagAdapter.feilutbetaltBeløp(it.periode.toDatoperiode()),
-                        hendelsestype =
-                            hentHendelsestype(
-                                faktaFeilutbetaling.perioder,
-                                it.periode,
-                            ),
-                        reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, it.periode),
-                        aktiviteter = hentAktiviteter(kravgrunnlag431, it.periode),
-                        begrunnelse = it.begrunnelse,
-                        foreldet = false,
-                        vilkårsvurderingsresultatInfo = tilVilkårsvurderingsresultatDto(it),
-                    )
+        val vilkårsvurdertePerioder = vilkårsvurdering?.perioder?.sortedBy { it.periode.fom } ?: emptyList()
+        val vilkårsvurderingPerioder = perioder
+            .flatMap { sammenhengendePeriode ->
+                val relevanteVilkårsvurderinger = vilkårsvurdertePerioder
+                    .dropWhile { !sammenhengendePeriode.inneholder(it.periode) }
+                    .takeWhile { sammenhengendePeriode.inneholder(it.periode) }
+
+                val uvurderteGapPerioder = mutableListOf<Månedsperiode>()
+                var nesteFom = sammenhengendePeriode.fom
+                for (vilkårsvurdering in relevanteVilkårsvurderinger) {
+                    if (vilkårsvurdering.periode.fom != nesteFom) {
+                        uvurderteGapPerioder.add(nesteFom til vilkårsvurdering.periode.fom.minusMonths(1))
+                    }
+                    nesteFom = vilkårsvurdering.periode.tom.plusMonths(1)
                 }
 
-        val ikkeBehandletPerioder =
-            perioder.map {
-                VurdertVilkårsvurderingsperiodeDto(
-                    periode = it.toDatoperiode(),
-                    feilutbetaltBeløp = kravgrunnlagAdapter.feilutbetaltBeløp(it.toDatoperiode()),
-                    hendelsestype = hentHendelsestype(faktaFeilutbetaling.perioder, it),
-                    reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, it),
-                    aktiviteter = hentAktiviteter(kravgrunnlag431, it),
-                    foreldet = false,
-                )
+                if (nesteFom <= sammenhengendePeriode.tom) {
+                    uvurderteGapPerioder.add(nesteFom til sammenhengendePeriode.tom)
+                }
+
+                (relevanteVilkårsvurderinger.map { vurdertPeriode(it, kravgrunnlag431, kravgrunnlagAdapter, faktaFeilutbetaling) }
+                        + uvurderteGapPerioder.map { uvurdertPeriode(it, kravgrunnlag431, kravgrunnlagAdapter, faktaFeilutbetaling) })
             }
 
         val foreldetPerioder =
@@ -86,12 +116,8 @@ object VilkårsvurderingMapper {
                 )
             }
 
-        val samletPerioder = ikkeBehandletPerioder.toMutableList()
-        samletPerioder.addAll(foreldetPerioder)
-        vilkårsvurdertePerioder?.let { samletPerioder.addAll(it) }
-
         return VurdertVilkårsvurderingDto(
-            perioder = samletPerioder.sortedBy { it.periode.fom },
+            perioder = foreldetPerioder + vilkårsvurderingPerioder.sortedBy { it.periode.fom },
             rettsgebyr = Rettsgebyr.rettsgebyr,
             opprettetTid = vilkårsvurdering?.sporbar?.opprettetTid,
         )

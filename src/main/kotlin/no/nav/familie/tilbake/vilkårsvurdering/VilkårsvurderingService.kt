@@ -83,13 +83,13 @@ class VilkårsvurderingService(
         if (vurdertForeldelse == null) {
             // fakta perioder
             faktaOmFeilutbetaling.perioder
-                .filter { !erPeriodeAlleredeVurdert(vilkårsvurdering, it.periode) }
+                //.filter { !erPeriodeAlleredeVurdert(vilkårsvurdering, it.periode) }
                 .forEach { perioder.add(it.periode) }
         } else {
             // Ikke foreldet perioder uten perioder som allerede vurdert i vilkårsvurdering
             vurdertForeldelse.foreldelsesperioder
                 .filter { !it.erForeldet() }
-                .filter { !erPeriodeAlleredeVurdert(vilkårsvurdering, it.periode) }
+                //.filter { !erPeriodeAlleredeVurdert(vilkårsvurdering, it.periode) }
                 .forEach { perioder.add(it.periode) }
             // foreldet perioder
             vurdertForeldelse.foreldelsesperioder
@@ -204,9 +204,4 @@ class VilkårsvurderingService(
         gjeldendeVilkårsvurderingGodTro: VilkårsvurderingGodTro?,
         førsteVilkårsvurderingGodTro: VilkårsvurderingGodTro?,
     ) = (gjeldendeVilkårsvurderingGodTro == null && førsteVilkårsvurderingGodTro == null) || gjeldendeVilkårsvurderingGodTro?.erLik(førsteVilkårsvurderingGodTro) == true
-
-    private fun erPeriodeAlleredeVurdert(
-        vilkårsvurdering: Vilkårsvurdering?,
-        periode: Månedsperiode,
-    ): Boolean = vilkårsvurdering?.perioder?.any { periode.inneholder(it.periode) } == true
 }
