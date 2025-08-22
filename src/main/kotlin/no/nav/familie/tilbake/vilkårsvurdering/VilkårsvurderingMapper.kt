@@ -88,7 +88,9 @@ object VilkårsvurderingMapper {
                 )
             }
 
-        val samletPerioder = ikkeBehandletPerioder.toMutableList()
+        val samletPerioder = ikkeBehandletPerioder
+            .filter { ikkeBehandletPeriode -> foreldetPerioder.none { it.periode == ikkeBehandletPeriode.periode } }
+            .toMutableList()
         samletPerioder.addAll(foreldetPerioder)
         vilkårsvurdertePerioder?.let { samletPerioder.addAll(it) }
 

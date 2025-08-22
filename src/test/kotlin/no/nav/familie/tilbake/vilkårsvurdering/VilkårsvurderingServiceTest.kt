@@ -11,7 +11,6 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
-import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
@@ -63,8 +62,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
-    @Autowired
-    private lateinit var behandlingService: BehandlingService
     override val tømDBEtterHverTest = false
 
     @Autowired
