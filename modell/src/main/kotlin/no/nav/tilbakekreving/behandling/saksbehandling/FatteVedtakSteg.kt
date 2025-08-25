@@ -8,6 +8,7 @@ import no.nav.tilbakekreving.entities.VurdertStegEntity
 import no.nav.tilbakekreving.entities.VurdertStegType
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.saksbehandler.Behandler
 
@@ -19,6 +20,13 @@ class FatteVedtakSteg internal constructor(
     val ansvarligBeslutter: Behandler? = _ansvarligBeslutter
 
     override fun erFullstendig(): Boolean = vurderteSteg.all { it.erFerdigvurdert() }
+
+    override val behandlingsstatus: Behandlingsstatus
+        get() = if (erFullstendig()) {
+            Behandlingsstatus.IVERKSETTER_VEDTAK
+        } else {
+            Behandlingsstatus.FATTER_VEDTAK
+        }
 
     internal fun håndter(
         beslutter: Behandler,

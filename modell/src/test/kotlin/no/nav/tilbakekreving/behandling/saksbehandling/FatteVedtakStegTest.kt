@@ -4,6 +4,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.junit.jupiter.api.Test
@@ -24,6 +25,7 @@ class FatteVedtakStegTest {
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
 
+        fatteVedtakSteg.behandlingsstatus shouldBe Behandlingsstatus.FATTER_VEDTAK
         fatteVedtakSteg.erFullstendig() shouldBe false
     }
 
@@ -59,6 +61,7 @@ class FatteVedtakStegTest {
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
 
+        fatteVedtakSteg.behandlingsstatus shouldBe Behandlingsstatus.IVERKSETTER_VEDTAK
         fatteVedtakSteg.erFullstendig() shouldBe true
     }
 
