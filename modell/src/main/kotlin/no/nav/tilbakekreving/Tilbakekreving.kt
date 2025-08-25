@@ -1,5 +1,7 @@
 package no.nav.tilbakekreving
 
+import io.ktor.http.URLBuilder
+import io.ktor.http.path
 import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.aktør.Bruker
 import no.nav.tilbakekreving.aktør.Bruker.Companion.tilNullableFrontendDto
@@ -236,6 +238,22 @@ class Tilbakekreving internal constructor(
             opprettelsesvalg = this.opprettelsesvalg,
             bruker = this.bruker?.tilEntity(),
         )
+    }
+
+    fun hentTilbakekrevingUrl(baseUrl: String): String {
+        val behandling = requireNotNull(behandlingHistorikk.nåværende())
+        val fagsystem = eksternFagsak.ytelse.tilFagsystemDTO()
+
+        return URLBuilder(baseUrl).apply {
+            path(
+                "fagsystem",
+                fagsystem.toString(),
+                "fagsak",
+                eksternFagsak.eksternId,
+                "behandling",
+                behandling.entry.internId.toString(),
+            )
+        }.buildString()
     }
 
     companion object {
