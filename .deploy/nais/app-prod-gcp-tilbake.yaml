@@ -44,6 +44,9 @@ spec:
         databases:
           - name: tilbakekreving
             envVarPrefix: DB
+    bigQueryDatasets:
+      - name: tilbakekreving_dataset
+        permission: READWRITE
   azure:
     application:
       claims:
