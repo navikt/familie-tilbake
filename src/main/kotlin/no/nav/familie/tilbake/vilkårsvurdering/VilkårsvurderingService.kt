@@ -18,6 +18,7 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingGodTro
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import no.nav.tilbakekreving.api.v1.dto.AktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
@@ -81,6 +82,7 @@ class VilkårsvurderingService(
         val vilkårsvurderingsperioder = mutableListOf<Månedsperiode>()
         val foreldetPerioderMedBegrunnelse = mutableMapOf<Månedsperiode, String>()
         val sortertVilkårsvurdering = vilkårsvurdering?.perioder?.sortedBy { it.periode.fom } ?: emptyList()
+        val vilkårsvurderinger = mutableListOf<Vilkårsvurderingsperiode>()
         val erUnder4xRettsgebyr = vurdertForeldelse == null
         val opprinneligePerioder = if (erUnder4xRettsgebyr) {
             faktaOmFeilutbetaling.perioder.map { it.periode }
@@ -89,28 +91,29 @@ class VilkårsvurderingService(
             vurdertForeldelse.foreldelsesperioder
                 .filter { it.erForeldet() }
                 .forEach { foreldetPerioderMedBegrunnelse[it.periode] = it.begrunnelse }
-            vurdertForeldelse.foreldelsesperioder.map { it.periode }
+            vurdertForeldelse.foreldelsesperioder.filter { !it.erForeldet() }.map { it.periode }
         }.sortedBy { it.fom }
         opprinneligePerioder.forEach { periode ->
             var gjenværendePeriode = periode
             sortertVilkårsvurdering
+                .filter { gjenværendePeriode.inneholder(it.periode) }
                 .forEach { vurdertPeriode ->
-                    if (gjenværendePeriode.inneholder(vurdertPeriode.periode)) {
-                        val periodeFørVurdert = gjenværendePeriode.før(vurdertPeriode.periode.fom)
-                        if (periodeFørVurdert != null) {
-                            vilkårsvurderingsperioder.add(periodeFørVurdert)
-                        }
-                        vilkårsvurderingsperioder.add(vurdertPeriode.periode)
-
-                        gjenværendePeriode = gjenværendePeriode.etter(vurdertPeriode.periode.tom) ?: return@forEach
+                    val periodeFørVurdert = gjenværendePeriode.før(vurdertPeriode.periode.fom)
+                    if (periodeFørVurdert != null) {
+                        vilkårsvurderingsperioder.add(periodeFørVurdert)
                     }
+                    vilkårsvurderinger.add(vurdertPeriode)
+
+                    gjenværendePeriode = gjenværendePeriode.etter(vurdertPeriode.periode.tom) ?: return@forEach
                 }
-            vilkårsvurderingsperioder.add(gjenværendePeriode)
+            if (vilkårsvurderinger.none { it.periode == gjenværendePeriode }) {
+                vilkårsvurderingsperioder.add(gjenværendePeriode)
+            }
         }
 
         return VilkårsvurderingMapper.tilRespons(
-            vilkårsvurdering = vilkårsvurdering,
-            perioder = vilkårsvurderingsperioder.toList(),
+            vilkårsvurderinger = vilkårsvurderinger,
+            ikkeForeldedePerioder = vilkårsvurderingsperioder.toList(),
             foreldetPerioderMedBegrunnelse = foreldetPerioderMedBegrunnelse.toMap(),
             faktaFeilutbetaling = faktaOmFeilutbetaling,
             kravgrunnlag431 = kravgrunnlag431,

@@ -28,76 +28,65 @@ import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.time.LocalDateTime
 import java.util.UUID
 
 object VilkårsvurderingMapper {
     fun tilRespons(
-        vilkårsvurdering: Vilkårsvurdering?,
-        perioder: List<Månedsperiode>,
+        vilkårsvurderinger: List<Vilkårsvurderingsperiode>,
+        ikkeForeldedePerioder: List<Månedsperiode>,
         foreldetPerioderMedBegrunnelse: Map<Månedsperiode, String>,
         faktaFeilutbetaling: FaktaFeilutbetaling,
         kravgrunnlag431: Kravgrunnlag431,
     ): VurdertVilkårsvurderingDto {
         // allerede behandlet perioder uten perioder som er foreldet
         val kravgrunnlagAdapter = Kravgrunnlag431Adapter(kravgrunnlag431)
-        val vilkårsvurdertePerioder =
-            vilkårsvurdering
-                ?.perioder
-                ?.filter { it.periode !in foreldetPerioderMedBegrunnelse }
-                ?.map {
-                    VurdertVilkårsvurderingsperiodeDto(
-                        periode = it.periode.toDatoperiode(),
-                        feilutbetaltBeløp = kravgrunnlagAdapter.feilutbetaltBeløp(it.periode.toDatoperiode()),
-                        hendelsestype =
-                            hentHendelsestype(
-                                faktaFeilutbetaling.perioder,
-                                it.periode,
-                            ),
-                        reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, it.periode),
-                        aktiviteter = hentAktiviteter(kravgrunnlag431, it.periode),
-                        begrunnelse = it.begrunnelse,
-                        foreldet = false,
-                        vilkårsvurderingsresultatInfo = tilVilkårsvurderingsresultatDto(it),
-                    )
-                }
-
-        val ikkeBehandletPerioder =
-            perioder
-                .filter { periode -> vilkårsvurdertePerioder?.none { Månedsperiode(it.periode.fom, it.periode.tom) == periode } ?: true }
-                .map {
-                    VurdertVilkårsvurderingsperiodeDto(
-                        periode = it.toDatoperiode(),
-                        feilutbetaltBeløp = kravgrunnlagAdapter.feilutbetaltBeløp(it.toDatoperiode()),
-                        hendelsestype = hentHendelsestype(faktaFeilutbetaling.perioder, it),
-                        reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, it),
-                        aktiviteter = hentAktiviteter(kravgrunnlag431, it),
-                        foreldet = false,
-                    )
-                }
-
-        val foreldetPerioder =
-            foreldetPerioderMedBegrunnelse.map { (periode, begrunnelse) ->
+        val vurdertePerioder = vilkårsvurderinger
+            .map {
                 VurdertVilkårsvurderingsperiodeDto(
-                    periode = periode.toDatoperiode(),
-                    feilutbetaltBeløp = kravgrunnlagAdapter.feilutbetaltBeløp(periode.toDatoperiode()),
-                    hendelsestype = hentHendelsestype(faktaFeilutbetaling.perioder, periode),
-                    reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, periode),
-                    aktiviteter = hentAktiviteter(kravgrunnlag431, periode),
-                    foreldet = true,
-                    begrunnelse = begrunnelse,
+                    periode = it.periode.toDatoperiode(),
+                    feilutbetaltBeløp = kravgrunnlagAdapter.feilutbetaltBeløp(it.periode.toDatoperiode()),
+                    hendelsestype =
+                        hentHendelsestype(
+                            faktaFeilutbetaling.perioder,
+                            it.periode,
+                        ),
+                    reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, it.periode),
+                    aktiviteter = hentAktiviteter(kravgrunnlag431, it.periode),
+                    begrunnelse = it.begrunnelse,
+                    foreldet = false,
+                    vilkårsvurderingsresultatInfo = tilVilkårsvurderingsresultatDto(it),
                 )
             }
 
-        val samletPerioder = ikkeBehandletPerioder
-            .filter { ikkeBehandletPeriode -> foreldetPerioder.none { it.periode == ikkeBehandletPeriode.periode } }
-            .toMutableList()
-        samletPerioder.addAll(foreldetPerioder)
-        vilkårsvurdertePerioder?.let { samletPerioder.addAll(it) }
+        val uvurdertePerioder = ikkeForeldedePerioder
+            .map {
+                VurdertVilkårsvurderingsperiodeDto(
+                    periode = it.toDatoperiode(),
+                    feilutbetaltBeløp = kravgrunnlagAdapter.feilutbetaltBeløp(it.toDatoperiode()),
+                    hendelsestype = hentHendelsestype(faktaFeilutbetaling.perioder, it),
+                    reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, it),
+                    aktiviteter = hentAktiviteter(kravgrunnlag431, it),
+                    foreldet = false,
+                )
+            }
+
+        val foreldetPerioder = foreldetPerioderMedBegrunnelse.map { (periode, begrunnelse) ->
+            VurdertVilkårsvurderingsperiodeDto(
+                periode = periode.toDatoperiode(),
+                feilutbetaltBeløp = kravgrunnlagAdapter.feilutbetaltBeløp(periode.toDatoperiode()),
+                hendelsestype = hentHendelsestype(faktaFeilutbetaling.perioder, periode),
+                reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, periode),
+                aktiviteter = hentAktiviteter(kravgrunnlag431, periode),
+                foreldet = true,
+                begrunnelse = begrunnelse,
+            )
+        }
 
         return VurdertVilkårsvurderingDto(
-            perioder = samletPerioder.sortedBy { it.periode.fom },
+            perioder = (foreldetPerioder + uvurdertePerioder + vurdertePerioder).sortedBy { it.periode.fom },
             rettsgebyr = Rettsgebyr.rettsgebyr,
-            opprettetTid = vilkårsvurdering?.sporbar?.opprettetTid,
+            opprettetTid = LocalDateTime.now(),
         )
     }
 
