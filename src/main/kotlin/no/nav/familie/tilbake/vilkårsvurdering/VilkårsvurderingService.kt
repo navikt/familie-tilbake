@@ -82,26 +82,29 @@ class VilkårsvurderingService(
         val foreldetPerioderMedBegrunnelse = mutableMapOf<Månedsperiode, String>()
         val sortertVilkårsvurdering = vilkårsvurdering?.perioder?.sortedBy { it.periode.fom } ?: emptyList()
         val erUnder4xRettsgebyr = vurdertForeldelse == null
-        val utgangspunktPerioder = if (erUnder4xRettsgebyr) {
+        val opprinneligePerioder = if (erUnder4xRettsgebyr) {
             faktaOmFeilutbetaling.perioder.map { it.periode }
         } else {
             // Foreldede perioder med begrunnelse i foreldetPerioderMedBegrunnelse
-            vurdertForeldelse.foreldelsesperioder.forEach { if (it.erForeldet()) foreldetPerioderMedBegrunnelse[it.periode] = it.begrunnelse }
+            vurdertForeldelse.foreldelsesperioder
+                .filter { it.erForeldet() }
+                .forEach { foreldetPerioderMedBegrunnelse[it.periode] = it.begrunnelse }
             vurdertForeldelse.foreldelsesperioder.map { it.periode }
         }.sortedBy { it.fom }
-        utgangspunktPerioder.forEach { periode ->
+        opprinneligePerioder.forEach { periode ->
             var gjenværendePeriode = periode
-            sortertVilkårsvurdering.forEach { vurdertPeriode ->
-                if (gjenværendePeriode.inneholder(vurdertPeriode.periode)) {
-                    val periodeFørVurdert = gjenværendePeriode.før(vurdertPeriode.periode.fom)
-                    val periodeEtterVurdert = gjenværendePeriode.etter(vurdertPeriode.periode.tom)
-                    if (periodeFørVurdert != null) {
-                        vilkårsvurderingsperioder.add(periodeFørVurdert)
+            sortertVilkårsvurdering
+                .forEach { vurdertPeriode ->
+                    if (gjenværendePeriode.inneholder(vurdertPeriode.periode)) {
+                        val periodeFørVurdert = gjenværendePeriode.før(vurdertPeriode.periode.fom)
+                        if (periodeFørVurdert != null) {
+                            vilkårsvurderingsperioder.add(periodeFørVurdert)
+                        }
+                        vilkårsvurderingsperioder.add(vurdertPeriode.periode)
+
+                        gjenværendePeriode = gjenværendePeriode.etter(vurdertPeriode.periode.tom) ?: return@forEach
                     }
-                    vilkårsvurderingsperioder.add(vurdertPeriode.periode)
-                    gjenværendePeriode = periodeEtterVurdert ?: return@forEach
                 }
-            }
             vilkårsvurderingsperioder.add(gjenværendePeriode)
         }
 
