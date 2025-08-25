@@ -78,56 +78,36 @@ class VilkårsvurderingService(
         vilkårsvurdering: Vilkårsvurdering?,
         kravgrunnlag431: Kravgrunnlag431,
     ): VurdertVilkårsvurderingDto {
-        val perioder = mutableListOf<Månedsperiode>()
+        val vilkårsvurderingsperioder = mutableListOf<Månedsperiode>()
         val foreldetPerioderMedBegrunnelse = mutableMapOf<Månedsperiode, String>()
         val sortertVilkårsvurdering = vilkårsvurdering?.perioder?.sortedBy { it.periode.fom } ?: emptyList()
-
-        if (vurdertForeldelse == null) {
-            // Gjelder ved automatisk behandling under 4x rettsgebyr
-            faktaOmFeilutbetaling.perioder.sortedBy { it.periode.fom }.forEach { faktaPeriode ->
-                var gjenværendeFaktaPeriode = faktaPeriode.periode
-                sortertVilkårsvurdering.forEach { vurdertPeriode ->
-                    if (gjenværendeFaktaPeriode.inneholder(vurdertPeriode.periode)) {
-                        val periodeFørVurdert = gjenværendeFaktaPeriode.før(vurdertPeriode.periode.fom)
-                        val periodeEtterVurdert = gjenværendeFaktaPeriode.etter(vurdertPeriode.periode.tom)
-
-                        periodeFørVurdert?.let { perioder.add(it) }
-                        perioder.add(vurdertPeriode.periode)
-
-                        gjenværendeFaktaPeriode = periodeEtterVurdert ?: return@forEach
-                    }
-                }
-
-                gjenværendeFaktaPeriode.let { perioder.add(it) }
-            }
+        val erUnder4xRettsgebyr = vurdertForeldelse == null
+        val utgangspunktPerioder = if (erUnder4xRettsgebyr) {
+            faktaOmFeilutbetaling.perioder.map { it.periode }
         } else {
-            vurdertForeldelse.foreldelsesperioder.sortedBy { it.periode.fom }.forEach { foreldelsesperiode ->
-                // Foreldede perioder med begrunnelse i foreldetPerioderMedBegrunnelse
-                if (foreldelsesperiode.erForeldet()) {
-                    foreldetPerioderMedBegrunnelse[foreldelsesperiode.periode] = foreldelsesperiode.begrunnelse
-                }
-
-                var gjenværendeForeldetPeriode = foreldelsesperiode.periode
-
-                sortertVilkårsvurdering.forEach { vurdertPeriode ->
-                    if (gjenværendeForeldetPeriode.inneholder(vurdertPeriode.periode)) {
-                        val periodeFørVurdert = gjenværendeForeldetPeriode.før(vurdertPeriode.periode.fom)
-                        val periodeEtterVurdert = gjenværendeForeldetPeriode.etter(vurdertPeriode.periode.tom)
-
-                        periodeFørVurdert?.let { perioder.add(it) }
-                        perioder.add(vurdertPeriode.periode)
-
-                        gjenværendeForeldetPeriode = periodeEtterVurdert ?: return@forEach
+            // Foreldede perioder med begrunnelse i foreldetPerioderMedBegrunnelse
+            vurdertForeldelse.foreldelsesperioder.forEach { if (it.erForeldet()) foreldetPerioderMedBegrunnelse[it.periode] = it.begrunnelse }
+            vurdertForeldelse.foreldelsesperioder.map { it.periode }
+        }.sortedBy { it.fom }
+        utgangspunktPerioder.forEach { periode ->
+            var gjenværendePeriode = periode
+            sortertVilkårsvurdering.forEach { vurdertPeriode ->
+                if (gjenværendePeriode.inneholder(vurdertPeriode.periode)) {
+                    val periodeFørVurdert = gjenværendePeriode.før(vurdertPeriode.periode.fom)
+                    val periodeEtterVurdert = gjenværendePeriode.etter(vurdertPeriode.periode.tom)
+                    if (periodeFørVurdert != null) {
+                        vilkårsvurderingsperioder.add(periodeFørVurdert)
                     }
+                    vilkårsvurderingsperioder.add(vurdertPeriode.periode)
+                    gjenværendePeriode = periodeEtterVurdert ?: return@forEach
                 }
-
-                gjenværendeForeldetPeriode.let { perioder.add(it) }
             }
+            vilkårsvurderingsperioder.add(gjenværendePeriode)
         }
 
         return VilkårsvurderingMapper.tilRespons(
             vilkårsvurdering = vilkårsvurdering,
-            perioder = perioder.toList(),
+            perioder = vilkårsvurderingsperioder.toList(),
             foreldetPerioderMedBegrunnelse = foreldetPerioderMedBegrunnelse.toMap(),
             faktaFeilutbetaling = faktaOmFeilutbetaling,
             kravgrunnlag431 = kravgrunnlag431,
