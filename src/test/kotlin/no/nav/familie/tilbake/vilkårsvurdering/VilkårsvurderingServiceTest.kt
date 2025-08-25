@@ -48,6 +48,7 @@ import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode.Companion.til
+import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
@@ -89,28 +90,31 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
 
     private lateinit var behandling: Behandling
 
+    private val førstePeriode = januar(2020) til januar(2020)
+    private val andrePeriode = februar(2020) til februar(2020)
+
     @BeforeEach
     fun init() {
         val fagsak = fagsakRepository.insert(Testdata.fagsak())
         behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id))
-        val førstePeriode = Testdata.lagKravgrunnlagsperiode(januar(2020) til januar(2020)).copy(
+        val førsteKravgrunnlagperiode = Testdata.lagKravgrunnlagsperiode(førstePeriode).copy(
             beløp = setOf(
                 Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
                 Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
             ),
         )
-        val andrePeriode = Testdata.lagKravgrunnlagsperiode(februar(2020) til februar(2020)).copy(
+        val andreKravgrunnlagperiode = Testdata.lagKravgrunnlagsperiode(andrePeriode).copy(
             beløp = setOf(
                 Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
                 Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
             ),
         )
 
-        val kravgrunnlag431 = Testdata.lagKravgrunnlag(behandling.id).copy(perioder = setOf(førstePeriode, andrePeriode))
+        val kravgrunnlag431 = Testdata.lagKravgrunnlag(behandling.id).copy(perioder = setOf(førsteKravgrunnlagperiode, andreKravgrunnlagperiode))
         kravgrunnlagRepository.insert(kravgrunnlag431)
 
         val periode = FaktaFeilutbetalingsperiode(
-            periode = Månedsperiode(førstePeriode.periode.fom, andrePeriode.periode.tom),
+            periode = Månedsperiode(førsteKravgrunnlagperiode.periode.fom, andreKravgrunnlagperiode.periode.tom),
             hendelsestype = Hendelsestype.ANNET,
             hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
         )
@@ -150,7 +154,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentVilkårsvurdering skal hente vilkårsvurdering fra foreldelse perioder som ikke er foreldet`() {
-        lagForeldese(Foreldelsesvurderingstype.FORELDET, Foreldelsesvurderingstype.IKKE_FORELDET)
+        lagForeldelse(førstePeriode to Foreldelsesvurderingstype.FORELDET, andrePeriode to Foreldelsesvurderingstype.IKKE_FORELDET)
         lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)
 
@@ -167,7 +171,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         foreldetPeriode.reduserteBeløper.shouldBeEmpty()
         assertAktiviteter(foreldetPeriode.aktiviteter)
         foreldetPeriode.aktiviteter[0].beløp shouldBe BigDecimal(10000)
-        foreldetPeriode.begrunnelse shouldBe "foreldelse begrunnelse 1"
+        foreldetPeriode.begrunnelse shouldBe "begrunnelse"
         foreldetPeriode.vilkårsvurderingsresultatInfo.shouldBeNull()
 
         val ikkeForeldetPeriode = vurdertVilkårsvurderingDto.perioder[1]
@@ -440,7 +444,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentVilkårsvurdering skal hente foreldelse perioder som endret til IKKE_FORELDET`() {
         // en periode med FORELDET og andre er IKKE_FORELDET
-        lagForeldese(Foreldelsesvurderingstype.FORELDET, Foreldelsesvurderingstype.IKKE_FORELDET)
+        lagForeldelse(førstePeriode to Foreldelsesvurderingstype.FORELDET, andrePeriode to Foreldelsesvurderingstype.IKKE_FORELDET)
         lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)
 
@@ -507,7 +511,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentVilkårsvurdering skal hente perioder som endret til FORELDET`() {
         // en periode med FORELDET og andre er IKKE_FORELDET
-        lagForeldese(Foreldelsesvurderingstype.FORELDET, Foreldelsesvurderingstype.IKKE_FORELDET)
+        lagForeldelse(førstePeriode to Foreldelsesvurderingstype.FORELDET, andrePeriode to Foreldelsesvurderingstype.IKKE_FORELDET)
         lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)
 
@@ -730,6 +734,59 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         Assertions.assertFalse(erLike)
     }
 
+    @Test
+    fun `ved splitt og vurdering av 1 av 2 perioder skal den uvurderte perioden fortsatt eksistere etter henting av vilkårsvurderingen`() {
+        // Splitter på første periode og lagrer vurderingen kun den første perioden
+        val splittetPeriode = 1.januar(2020) til 31.januar(2020)
+
+        val splittetVilkårsvurdering = BehandlingsstegVilkårsvurderingDto(
+            listOf(
+                VilkårsvurderingsperiodeDto(
+                    periode = splittetPeriode,
+                    vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
+                    begrunnelse = "kekw",
+                    godTroDto = GodTroDto(
+                        beløpErIBehold = false,
+                        begrunnelse = "lol xD",
+                    ),
+                    aktsomhetDto = null,
+                ),
+            ),
+        )
+        vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, splittetVilkårsvurdering)
+
+        val oppdatertVilkårsvurdering = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
+        oppdatertVilkårsvurdering.perioder[0].periode shouldBe splittetPeriode
+        oppdatertVilkårsvurdering.perioder[1].periode shouldBe (1.februar(2020) til 29.februar(2020))
+    }
+
+    @Test
+    fun `ved splitt og vurdering av 1 av 2 perioder skal den uvurderte perioden fortsatt eksistere etter henting av vilkårsvurderingen om foreldelse er vurdert`() {
+        lagForeldelse(januar(2020) til februar(2020) to Foreldelsesvurderingstype.IKKE_FORELDET)
+        // Splitter på første periode og lagrer vurderingen kun den første perioden
+        val splittetPeriode = 1.januar(2020) til 31.januar(2020)
+
+        val splittetVilkårsvurdering = BehandlingsstegVilkårsvurderingDto(
+            listOf(
+                VilkårsvurderingsperiodeDto(
+                    periode = splittetPeriode,
+                    vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
+                    begrunnelse = "kekw",
+                    godTroDto = GodTroDto(
+                        beløpErIBehold = false,
+                        begrunnelse = "lol xD",
+                    ),
+                    aktsomhetDto = null,
+                ),
+            ),
+        )
+        vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, splittetVilkårsvurdering)
+
+        val oppdatertVilkårsvurdering = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
+        oppdatertVilkårsvurdering.perioder[0].periode shouldBe splittetPeriode
+        oppdatertVilkårsvurdering.perioder[1].periode shouldBe (1.februar(2020) til 29.februar(2020))
+    }
+
     private fun lagBehandlingsstegstilstand(
         behandlingssteg: Behandlingssteg,
         behandlingsstegstatus: Behandlingsstegstatus,
@@ -813,20 +870,19 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
             },
         )
 
-    private fun lagForeldese(vararg foreldelsesvurderingstyper: Foreldelsesvurderingstype) {
-        val foreldelsesperioder = setOf(
-            Foreldelsesperiode(
-                periode = Månedsperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 1)),
-                foreldelsesvurderingstype = foreldelsesvurderingstyper[0],
-                begrunnelse = "foreldelse begrunnelse 1",
-            ),
-            Foreldelsesperiode(
-                periode = Månedsperiode(YearMonth.of(2020, 2), YearMonth.of(2020, 2)),
-                foreldelsesvurderingstype = foreldelsesvurderingstyper[1],
-                begrunnelse = "foreldelse begrunnelse 2",
+    private fun lagForeldelse(vararg perioder: Pair<Månedsperiode, Foreldelsesvurderingstype>) {
+        foreldelseRepository.insert(
+            VurdertForeldelse(
+                behandlingId = behandling.id,
+                foreldelsesperioder = perioder.map { (periode, vurdering) ->
+                    Foreldelsesperiode(
+                        periode = periode,
+                        foreldelsesvurderingstype = vurdering,
+                        begrunnelse = "begrunnelse",
+                    )
+                }.toSet(),
             ),
         )
-        foreldelseRepository.insert(VurdertForeldelse(behandlingId = behandling.id, foreldelsesperioder = foreldelsesperioder))
     }
 
     private fun oppdaterForeldelsesvurdering(

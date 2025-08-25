@@ -18,6 +18,7 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingGodTro
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import no.nav.tilbakekreving.api.v1.dto.AktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
@@ -78,27 +79,41 @@ class VilkårsvurderingService(
         vilkårsvurdering: Vilkårsvurdering?,
         kravgrunnlag431: Kravgrunnlag431,
     ): VurdertVilkårsvurderingDto {
-        val perioder = mutableListOf<Månedsperiode>()
+        val vilkårsvurderingsperioder = mutableListOf<Månedsperiode>()
         val foreldetPerioderMedBegrunnelse = mutableMapOf<Månedsperiode, String>()
-        if (vurdertForeldelse == null) {
-            // fakta perioder
-            faktaOmFeilutbetaling.perioder
-                .filter { !erPeriodeAlleredeVurdert(vilkårsvurdering, it.periode) }
-                .forEach { perioder.add(it.periode) }
+        val sortertVilkårsvurdering = vilkårsvurdering?.perioder?.sortedBy { it.periode.fom } ?: emptyList()
+        val vilkårsvurderinger = mutableListOf<Vilkårsvurderingsperiode>()
+        val erUnder4xRettsgebyr = vurdertForeldelse == null
+        val opprinneligePerioder = if (erUnder4xRettsgebyr) {
+            faktaOmFeilutbetaling.perioder.map { it.periode }
         } else {
-            // Ikke foreldet perioder uten perioder som allerede vurdert i vilkårsvurdering
-            vurdertForeldelse.foreldelsesperioder
-                .filter { !it.erForeldet() }
-                .filter { !erPeriodeAlleredeVurdert(vilkårsvurdering, it.periode) }
-                .forEach { perioder.add(it.periode) }
-            // foreldet perioder
+            // Foreldede perioder med begrunnelse i foreldetPerioderMedBegrunnelse
             vurdertForeldelse.foreldelsesperioder
                 .filter { it.erForeldet() }
                 .forEach { foreldetPerioderMedBegrunnelse[it.periode] = it.begrunnelse }
+            vurdertForeldelse.foreldelsesperioder.filter { !it.erForeldet() }.map { it.periode }
+        }.sortedBy { it.fom }
+        opprinneligePerioder.forEach { periode ->
+            var gjenværendePeriode = periode
+            sortertVilkårsvurdering
+                .filter { gjenværendePeriode.inneholder(it.periode) }
+                .forEach { vurdertPeriode ->
+                    val periodeFørVurdert = gjenværendePeriode.før(vurdertPeriode.periode.fom)
+                    if (periodeFørVurdert != null) {
+                        vilkårsvurderingsperioder.add(periodeFørVurdert)
+                    }
+                    vilkårsvurderinger.add(vurdertPeriode)
+
+                    gjenværendePeriode = gjenværendePeriode.etter(vurdertPeriode.periode.tom) ?: return@forEach
+                }
+            if (vilkårsvurderinger.none { it.periode == gjenværendePeriode }) {
+                vilkårsvurderingsperioder.add(gjenværendePeriode)
+            }
         }
+
         return VilkårsvurderingMapper.tilRespons(
-            vilkårsvurdering = vilkårsvurdering,
-            perioder = perioder.toList(),
+            vilkårsvurderinger = vilkårsvurderinger,
+            ikkeForeldedePerioder = vilkårsvurderingsperioder.toList(),
             foreldetPerioderMedBegrunnelse = foreldetPerioderMedBegrunnelse.toMap(),
             faktaFeilutbetaling = faktaOmFeilutbetaling,
             kravgrunnlag431 = kravgrunnlag431,
