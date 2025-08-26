@@ -93,7 +93,7 @@ class VilkårsvurderingService(
         }.sortedBy { it.fom }
 
         return VilkårsvurderingMapper.tilRespons(
-            vurdertePerioder = finnVurdertePerioder(opprinneligePerioder, sorterteVurderinger, foreldedePerioder),
+            vurdertePerioder = finnVurdertePerioder(sorterteVurderinger, foreldedePerioder),
             uvurdertePerioder = finnUvurdertePerioder(opprinneligePerioder, sorterteVurderinger),
             foreldetPerioder = foreldedePerioder.toMap(),
             faktaFeilutbetaling = faktaOmFeilutbetaling,
@@ -125,20 +125,9 @@ class VilkårsvurderingService(
     }
 
     private fun finnVurdertePerioder(
-        opprinneligePerioder: List<Månedsperiode>,
         sortertVilkårsvurdering: List<Vilkårsvurderingsperiode>,
         foreldedePerioder: MutableMap<Månedsperiode, String>,
-    ): List<Vilkårsvurderingsperiode> {
-        val vilkårsvurderingsperioder = mutableListOf<Vilkårsvurderingsperiode>()
-        opprinneligePerioder.forEach { periode ->
-            sortertVilkårsvurdering
-                .filter { periode.inneholder(it.periode) && !foreldedePerioder.containsKey(it.periode) }
-                .forEach { vurdertPeriode ->
-                    vilkårsvurderingsperioder.add(vurdertPeriode)
-                }
-        }
-        return vilkårsvurderingsperioder
-    }
+    ): List<Vilkårsvurderingsperiode> = sortertVilkårsvurdering.filter { vurdering -> foreldedePerioder.keys.none { it.inneholder(vurdering.periode) } }
 
     @Transactional
     fun lagreVilkårsvurdering(
