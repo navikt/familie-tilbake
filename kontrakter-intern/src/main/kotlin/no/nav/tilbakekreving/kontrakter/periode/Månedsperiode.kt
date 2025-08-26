@@ -27,19 +27,13 @@ data class Månedsperiode(
     ): Månedsperiode = Månedsperiode(fom, tom)
 
     fun før(annenMåned: YearMonth): Månedsperiode? {
-        return if (this.fom < annenMåned) {
-            Månedsperiode(this.fom, annenMåned.minusMonths(1))
-        } else {
-            null
-        }
+        if (this.fom >= annenMåned) return null
+        return Månedsperiode(this.fom, annenMåned.minusMonths(1))
     }
 
     fun etter(annenMåned: YearMonth): Månedsperiode? {
-        return if (this.tom > annenMåned) {
-            Månedsperiode(annenMåned.plusMonths(1), this.tom)
-        } else {
-            null
-        }
+        if (this.tom <= annenMåned) return null
+        return Månedsperiode(annenMåned.plusMonths(1), this.tom)
     }
 
     override infix fun snitt(annen: Periode<YearMonth>): Månedsperiode? = super.snitt(annen) as Månedsperiode?
