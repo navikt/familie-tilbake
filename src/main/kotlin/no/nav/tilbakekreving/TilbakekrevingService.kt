@@ -69,6 +69,7 @@ class TilbakekrevingService(
         logger.medContext(logContext) { info("Håndterer behov") }
         sjekkBehovOgHåndter(tilbakekreving, observatør, SecureLog.Context.fra(tilbakekreving))
 
+        logger.medContext(logContext) { info("URL til behandlingn er: {}", tilbakekreving.hentTilbakekrevingUrl(applicationProperties.frontendUrl)) }
         logger.medContext(logContext) { info("Tilbakekreving ferdig opprettet") }
     }
 
