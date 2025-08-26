@@ -26,6 +26,16 @@ data class Månedsperiode(
         tom: YearMonth,
     ): Månedsperiode = Månedsperiode(fom, tom)
 
+    fun før(annenMåned: YearMonth): Månedsperiode? {
+        if (this.fom >= annenMåned) return null
+        return Månedsperiode(this.fom, annenMåned.minusMonths(1))
+    }
+
+    fun etter(annenMåned: YearMonth): Månedsperiode? {
+        if (this.tom <= annenMåned) return null
+        return Månedsperiode(annenMåned.plusMonths(1), this.tom)
+    }
+
     override infix fun snitt(annen: Periode<YearMonth>): Månedsperiode? = super.snitt(annen) as Månedsperiode?
 
     override fun lengdeIHeleMåneder(): Long = (tom.year * 12 + tom.monthValue) - (fom.year * 12 + fom.monthValue) + 1L

@@ -18,6 +18,7 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingGodTro
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import no.nav.tilbakekreving.api.v1.dto.AktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
@@ -55,7 +56,7 @@ class VilkårsvurderingService(
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
             .expectSingleOrNull(logContext) { "id=${it.id}, ${it.sporbar.opprettetTid}" }
         val vurdertForeldelse = foreldelseService.hentAktivVurdertForeldelse(behandlingId, logContext)
-        return mapTilVilkårsvurderingDto(vurdertForeldelse, faktaOmFeilutbetaling, vilkårsvurdering, kravgrunnlag431)
+        return splittTilForeldedeUvurderteOgVurdertePerioder(vurdertForeldelse, faktaOmFeilutbetaling, vilkårsvurdering, kravgrunnlag431)
     }
 
     fun hentInaktivVilkårsvurdering(behandlingId: UUID): List<VurdertVilkårsvurderingDto> {
@@ -68,42 +69,65 @@ class VilkårsvurderingService(
             val vurdertForeldelse = alleForeldelser.lastOrNull { it.sporbar.opprettetTid < vilkårsvurdering.sporbar.opprettetTid }
             val kravgrunnlag431 = alleKravgrunnlag.last { it.sporbar.opprettetTid < vilkårsvurdering.sporbar.opprettetTid }
 
-            mapTilVilkårsvurderingDto(vurdertForeldelse, faktaOmFeilutbetaling, vilkårsvurdering, kravgrunnlag431)
+            splittTilForeldedeUvurderteOgVurdertePerioder(vurdertForeldelse, faktaOmFeilutbetaling, vilkårsvurdering, kravgrunnlag431)
         }
     }
 
-    private fun mapTilVilkårsvurderingDto(
+    private fun splittTilForeldedeUvurderteOgVurdertePerioder(
         vurdertForeldelse: VurdertForeldelse?,
         faktaOmFeilutbetaling: FaktaFeilutbetaling,
         vilkårsvurdering: Vilkårsvurdering?,
         kravgrunnlag431: Kravgrunnlag431,
     ): VurdertVilkårsvurderingDto {
-        val perioder = mutableListOf<Månedsperiode>()
-        val foreldetPerioderMedBegrunnelse = mutableMapOf<Månedsperiode, String>()
-        if (vurdertForeldelse == null) {
-            // fakta perioder
-            faktaOmFeilutbetaling.perioder
-                .filter { !erPeriodeAlleredeVurdert(vilkårsvurdering, it.periode) }
-                .forEach { perioder.add(it.periode) }
+        val foreldedePerioder = mutableMapOf<Månedsperiode, String>()
+        val sorterteVurderinger = vilkårsvurdering?.perioder?.sortedBy { it.periode.fom } ?: emptyList()
+        val erUnder4xRettsgebyr = vurdertForeldelse == null
+
+        val opprinneligePerioder = if (erUnder4xRettsgebyr) {
+            faktaOmFeilutbetaling.perioder.map { it.periode }
         } else {
-            // Ikke foreldet perioder uten perioder som allerede vurdert i vilkårsvurdering
-            vurdertForeldelse.foreldelsesperioder
-                .filter { !it.erForeldet() }
-                .filter { !erPeriodeAlleredeVurdert(vilkårsvurdering, it.periode) }
-                .forEach { perioder.add(it.periode) }
-            // foreldet perioder
             vurdertForeldelse.foreldelsesperioder
                 .filter { it.erForeldet() }
-                .forEach { foreldetPerioderMedBegrunnelse[it.periode] = it.begrunnelse }
-        }
+                .forEach { foreldedePerioder[it.periode] = it.begrunnelse }
+            vurdertForeldelse.foreldelsesperioder.filter { !it.erForeldet() }.map { it.periode }
+        }.sortedBy { it.fom }
+
         return VilkårsvurderingMapper.tilRespons(
-            vilkårsvurdering = vilkårsvurdering,
-            perioder = perioder.toList(),
-            foreldetPerioderMedBegrunnelse = foreldetPerioderMedBegrunnelse.toMap(),
+            vurdertePerioder = finnVurdertePerioder(sorterteVurderinger, foreldedePerioder),
+            uvurdertePerioder = finnUvurdertePerioder(opprinneligePerioder, sorterteVurderinger),
+            foreldetPerioder = foreldedePerioder.toMap(),
             faktaFeilutbetaling = faktaOmFeilutbetaling,
             kravgrunnlag431 = kravgrunnlag431,
+            opprettetTid = vilkårsvurdering?.sporbar?.opprettetTid,
         )
     }
+
+    private fun finnUvurdertePerioder(
+        opprinneligePerioder: List<Månedsperiode>,
+        sortertVilkårsvurdering: List<Vilkårsvurderingsperiode>,
+    ): List<Månedsperiode> {
+        val vilkårsvurderingsperioder = mutableListOf<Månedsperiode>()
+        opprinneligePerioder.forEach { periode ->
+            var gjenværendePeriode = periode
+            sortertVilkårsvurdering
+                .filter { gjenværendePeriode.inneholder(it.periode) }
+                .forEach { vurdertPeriode ->
+                    val periodeFørVurdert = gjenværendePeriode.før(vurdertPeriode.periode.fom)
+                    if (periodeFørVurdert != null) {
+                        vilkårsvurderingsperioder.add(periodeFørVurdert)
+                    }
+
+                    gjenværendePeriode = gjenværendePeriode.etter(vurdertPeriode.periode.tom) ?: return vilkårsvurderingsperioder
+                }
+            vilkårsvurderingsperioder.add(gjenværendePeriode)
+        }
+        return vilkårsvurderingsperioder
+    }
+
+    private fun finnVurdertePerioder(
+        sortertVilkårsvurdering: List<Vilkårsvurderingsperiode>,
+        foreldedePerioder: MutableMap<Månedsperiode, String>,
+    ): List<Vilkårsvurderingsperiode> = sortertVilkårsvurdering.filter { vurdering -> foreldedePerioder.keys.none { it.inneholder(vurdering.periode) } }
 
     @Transactional
     fun lagreVilkårsvurdering(
