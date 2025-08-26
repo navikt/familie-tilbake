@@ -56,7 +56,7 @@ class VilkårsvurderingService(
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
             .expectSingleOrNull(logContext) { "id=${it.id}, ${it.sporbar.opprettetTid}" }
         val vurdertForeldelse = foreldelseService.hentAktivVurdertForeldelse(behandlingId, logContext)
-        return mapTilVilkårsvurderingDto(vurdertForeldelse, faktaOmFeilutbetaling, vilkårsvurdering, kravgrunnlag431)
+        return splittTilForeldedeUvurderteOgVurdertePerioder(vurdertForeldelse, faktaOmFeilutbetaling, vilkårsvurdering, kravgrunnlag431)
     }
 
     fun hentInaktivVilkårsvurdering(behandlingId: UUID): List<VurdertVilkårsvurderingDto> {
@@ -69,30 +69,44 @@ class VilkårsvurderingService(
             val vurdertForeldelse = alleForeldelser.lastOrNull { it.sporbar.opprettetTid < vilkårsvurdering.sporbar.opprettetTid }
             val kravgrunnlag431 = alleKravgrunnlag.last { it.sporbar.opprettetTid < vilkårsvurdering.sporbar.opprettetTid }
 
-            mapTilVilkårsvurderingDto(vurdertForeldelse, faktaOmFeilutbetaling, vilkårsvurdering, kravgrunnlag431)
+            splittTilForeldedeUvurderteOgVurdertePerioder(vurdertForeldelse, faktaOmFeilutbetaling, vilkårsvurdering, kravgrunnlag431)
         }
     }
 
-    private fun mapTilVilkårsvurderingDto(
+    private fun splittTilForeldedeUvurderteOgVurdertePerioder(
         vurdertForeldelse: VurdertForeldelse?,
         faktaOmFeilutbetaling: FaktaFeilutbetaling,
         vilkårsvurdering: Vilkårsvurdering?,
         kravgrunnlag431: Kravgrunnlag431,
     ): VurdertVilkårsvurderingDto {
-        val vilkårsvurderingsperioder = mutableListOf<Månedsperiode>()
-        val foreldetPerioderMedBegrunnelse = mutableMapOf<Månedsperiode, String>()
-        val sortertVilkårsvurdering = vilkårsvurdering?.perioder?.sortedBy { it.periode.fom } ?: emptyList()
-        val vilkårsvurderinger = mutableListOf<Vilkårsvurderingsperiode>()
+        val foreldedePerioder = mutableMapOf<Månedsperiode, String>()
+        val sorterteVurderinger = vilkårsvurdering?.perioder?.sortedBy { it.periode.fom } ?: emptyList()
         val erUnder4xRettsgebyr = vurdertForeldelse == null
+
         val opprinneligePerioder = if (erUnder4xRettsgebyr) {
             faktaOmFeilutbetaling.perioder.map { it.periode }
         } else {
-            // Foreldede perioder med begrunnelse i foreldetPerioderMedBegrunnelse
             vurdertForeldelse.foreldelsesperioder
                 .filter { it.erForeldet() }
-                .forEach { foreldetPerioderMedBegrunnelse[it.periode] = it.begrunnelse }
+                .forEach { foreldedePerioder[it.periode] = it.begrunnelse }
             vurdertForeldelse.foreldelsesperioder.filter { !it.erForeldet() }.map { it.periode }
         }.sortedBy { it.fom }
+
+        return VilkårsvurderingMapper.tilRespons(
+            vurdertePerioder = sorterteVurderinger.filter { !foreldedePerioder.containsKey(it.periode) },
+            uvurdertePerioder = finnUvurdertePerioder(opprinneligePerioder, sorterteVurderinger),
+            foreldetPerioder = foreldedePerioder.toMap(),
+            faktaFeilutbetaling = faktaOmFeilutbetaling,
+            kravgrunnlag431 = kravgrunnlag431,
+            opprettetTid = vilkårsvurdering?.sporbar?.opprettetTid,
+        )
+    }
+
+    private fun finnUvurdertePerioder(
+        opprinneligePerioder: List<Månedsperiode>,
+        sortertVilkårsvurdering: List<Vilkårsvurderingsperiode>,
+    ): List<Månedsperiode> {
+        val vilkårsvurderingsperioder = mutableListOf<Månedsperiode>()
         opprinneligePerioder.forEach { periode ->
             var gjenværendePeriode = periode
             sortertVilkårsvurdering
@@ -102,22 +116,12 @@ class VilkårsvurderingService(
                     if (periodeFørVurdert != null) {
                         vilkårsvurderingsperioder.add(periodeFørVurdert)
                     }
-                    vilkårsvurderinger.add(vurdertPeriode)
 
-                    gjenværendePeriode = gjenværendePeriode.etter(vurdertPeriode.periode.tom) ?: return@forEach
+                    gjenværendePeriode = gjenværendePeriode.etter(vurdertPeriode.periode.tom) ?: return vilkårsvurderingsperioder
                 }
-            if (vilkårsvurderinger.none { it.periode == gjenværendePeriode }) {
-                vilkårsvurderingsperioder.add(gjenværendePeriode)
-            }
+            vilkårsvurderingsperioder.add(gjenværendePeriode)
         }
-
-        return VilkårsvurderingMapper.tilRespons(
-            vilkårsvurderinger = vilkårsvurderinger,
-            ikkeForeldedePerioder = vilkårsvurderingsperioder.toList(),
-            foreldetPerioderMedBegrunnelse = foreldetPerioderMedBegrunnelse.toMap(),
-            faktaFeilutbetaling = faktaOmFeilutbetaling,
-            kravgrunnlag431 = kravgrunnlag431,
-        )
+        return vilkårsvurderingsperioder
     }
 
     @Transactional

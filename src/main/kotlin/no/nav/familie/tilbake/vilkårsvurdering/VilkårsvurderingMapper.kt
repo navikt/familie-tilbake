@@ -33,15 +33,15 @@ import java.util.UUID
 
 object VilkårsvurderingMapper {
     fun tilRespons(
-        vilkårsvurderinger: List<Vilkårsvurderingsperiode>,
-        ikkeForeldedePerioder: List<Månedsperiode>,
-        foreldetPerioderMedBegrunnelse: Map<Månedsperiode, String>,
+        vurdertePerioder: List<Vilkårsvurderingsperiode>,
+        uvurdertePerioder: List<Månedsperiode>,
+        foreldetPerioder: Map<Månedsperiode, String>,
         faktaFeilutbetaling: FaktaFeilutbetaling,
         kravgrunnlag431: Kravgrunnlag431,
+        opprettetTid: LocalDateTime?,
     ): VurdertVilkårsvurderingDto {
-        // allerede behandlet perioder uten perioder som er foreldet
         val kravgrunnlagAdapter = Kravgrunnlag431Adapter(kravgrunnlag431)
-        val vurdertePerioder = vilkårsvurderinger
+        val vurdertePeriodeDtoer = vurdertePerioder
             .map {
                 VurdertVilkårsvurderingsperiodeDto(
                     periode = it.periode.toDatoperiode(),
@@ -59,7 +59,7 @@ object VilkårsvurderingMapper {
                 )
             }
 
-        val uvurdertePerioder = ikkeForeldedePerioder
+        val uvurdertePeriodeDtoer = uvurdertePerioder
             .map {
                 VurdertVilkårsvurderingsperiodeDto(
                     periode = it.toDatoperiode(),
@@ -71,7 +71,7 @@ object VilkårsvurderingMapper {
                 )
             }
 
-        val foreldetPerioder = foreldetPerioderMedBegrunnelse.map { (periode, begrunnelse) ->
+        val foreldetPeriodeDtoer = foreldetPerioder.map { (periode, begrunnelse) ->
             VurdertVilkårsvurderingsperiodeDto(
                 periode = periode.toDatoperiode(),
                 feilutbetaltBeløp = kravgrunnlagAdapter.feilutbetaltBeløp(periode.toDatoperiode()),
@@ -84,9 +84,9 @@ object VilkårsvurderingMapper {
         }
 
         return VurdertVilkårsvurderingDto(
-            perioder = (foreldetPerioder + uvurdertePerioder + vurdertePerioder).sortedBy { it.periode.fom },
+            perioder = (foreldetPeriodeDtoer + uvurdertePeriodeDtoer + vurdertePeriodeDtoer).sortedBy { it.periode.fom },
             rettsgebyr = Rettsgebyr.rettsgebyr,
-            opprettetTid = LocalDateTime.now(),
+            opprettetTid = opprettetTid,
         )
     }
 
