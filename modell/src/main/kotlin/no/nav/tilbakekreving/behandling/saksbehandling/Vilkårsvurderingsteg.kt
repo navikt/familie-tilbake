@@ -116,7 +116,7 @@ class Vilkårsvurderingsteg(
                     hendelsestype = Hendelsestype.ANNET,
                     reduserteBeløper = listOf(),
                     aktiviteter = listOf(),
-                    begrunnelse = it.begrunnelseForTilbakekreving,
+                    begrunnelse = it.vurdering.begrunnelse,
                     foreldet = foreldelsesteg.erPeriodeForeldet(it.periode),
                     vilkårsvurderingsresultatInfo =
                         it.vurdering.let { vurdering ->
