@@ -105,22 +105,25 @@ class VilkårsvurderingService(
     private fun finnUvurdertePerioder(
         opprinneligePerioder: List<Månedsperiode>,
         sortertVilkårsvurdering: List<Vilkårsvurderingsperiode>,
+    ): List<Månedsperiode> = opprinneligePerioder.flatMap { periode -> splittPeriode(sortertVilkårsvurdering, periode) }
+
+    fun splittPeriode(
+        sortertVilkårsvurdering: List<Vilkårsvurderingsperiode>,
+        periode: Månedsperiode,
     ): List<Månedsperiode> {
         val vilkårsvurderingsperioder = mutableListOf<Månedsperiode>()
-        opprinneligePerioder.forEach { periode ->
-            var gjenværendePeriode = periode
-            sortertVilkårsvurdering
-                .filter { gjenværendePeriode.inneholder(it.periode) }
-                .forEach { vurdertPeriode ->
-                    val periodeFørVurdert = gjenværendePeriode.før(vurdertPeriode.periode.fom)
-                    if (periodeFørVurdert != null) {
-                        vilkårsvurderingsperioder.add(periodeFørVurdert)
-                    }
-
-                    gjenværendePeriode = gjenværendePeriode.etter(vurdertPeriode.periode.tom) ?: return vilkårsvurderingsperioder
+        var gjenværendePeriode = periode
+        sortertVilkårsvurdering
+            .filter { gjenværendePeriode.inneholder(it.periode) }
+            .forEach { vurdertPeriode ->
+                val periodeFørVurdert = gjenværendePeriode.før(vurdertPeriode.periode.fom)
+                if (periodeFørVurdert != null) {
+                    vilkårsvurderingsperioder.add(periodeFørVurdert)
                 }
-            vilkårsvurderingsperioder.add(gjenværendePeriode)
-        }
+
+                gjenværendePeriode = gjenværendePeriode.etter(vurdertPeriode.periode.tom) ?: return vilkårsvurderingsperioder
+            }
+        vilkårsvurderingsperioder.add(gjenværendePeriode)
         return vilkårsvurderingsperioder
     }
 
