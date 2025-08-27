@@ -65,11 +65,3 @@ jobs:
           RESOURCE: .deploy/nais/app-prod-gcp-tilbake.yaml
           VAR: image= ${{ needs.build.outputs.image }}
           ENVIRONMENT: prod-gcp:tilbake
-      - name: Post deploy failures to Slack
-        if: failure()
-        run: |
-          curl -X POST --data "{\"text\": \"Deploy av $GITHUB_REPOSITORY feilet - $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID\"}" $WEBHOOK_URL
-        env:
-          MESSAGE: "Deploy av feilet"
-          WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
