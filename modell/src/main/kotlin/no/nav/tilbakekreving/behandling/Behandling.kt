@@ -35,7 +35,6 @@ import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
-import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
@@ -110,7 +109,7 @@ class Behandling internal constructor(
     private fun behandlingsstatus() =
         steg().firstOrNull { !it.erFullstendig() }
             ?.behandlingsstatus
-            ?: Behandlingsstatus.AVSLUTTET
+            ?: steg().last().behandlingsstatus
 
     fun beregnSplittetPeriode(
         perioder: List<Datoperiode>,
