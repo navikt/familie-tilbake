@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS`tilbake-dev-d683.tilbakekreving_dataset.bq_behandling`;
