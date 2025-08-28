@@ -4,6 +4,7 @@ import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.api.v2.BrukerDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.Behandling
+import no.nav.tilbakekreving.behandling.BehandlingObservatørOppsamler
 import no.nav.tilbakekreving.behandling.Enhet
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
@@ -31,6 +32,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Random
 import java.util.UUID
+
+val ANSVARLIG_SAKSBEHANDLER = Behandler.Saksbehandler("Z999999")
 
 fun eksternFagsak(ytelse: Ytelse = Ytelse.Barnetrygd) = OpprettTilbakekrevingHendelse.EksternFagsak(
     eksternId = "101010",
@@ -162,10 +165,11 @@ fun behandling(
         sistEndret = LocalDateTime.now(),
         enhet = Enhet("", ""),
         årsak = Behandlingsårsakstype.REVURDERING_KLAGE_KA,
-        ansvarligSaksbehandler = Behandler.Saksbehandler("Z999999"),
+        ansvarligSaksbehandler = ANSVARLIG_SAKSBEHANDLER,
         eksternFagsakBehandling = eksternFagsakBehandling,
         kravgrunnlag = kravgrunnlagReferanse,
         brevHistorikk = BrevHistorikk(mutableListOf()),
+        behandlingObservatør = BehandlingObservatørOppsamler(),
     )
 }
 

@@ -4,6 +4,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.behandling.Behandling
+import no.nav.tilbakekreving.behandling.BehandlingObservatørOppsamler
 import no.nav.tilbakekreving.behandling.Enhet
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.behov.IverksettelseBehov
@@ -57,6 +58,7 @@ class BehandlingEntityTest {
             eksternFagsakBehandling = behandlingInnslag,
             kravgrunnlag = kravgrunnlag,
             brevHistorikk = brevHistorikk,
+            behandlingObservatør = BehandlingObservatørOppsamler(),
         )
 
         val behandlingEtterLagring = behandlingFørLagring.tilEntity().fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)

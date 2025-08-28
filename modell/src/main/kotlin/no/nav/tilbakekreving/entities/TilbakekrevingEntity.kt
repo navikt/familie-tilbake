@@ -7,6 +7,7 @@ import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
+import no.nav.tilbakekreving.endring.EndringObservatør
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.tilstand.Avsluttet
@@ -37,6 +38,7 @@ data class TilbakekrevingEntity(
     fun fraEntity(
         behovObservatør: BehovObservatør,
         bigQueryService: BigQueryService,
+        endringObservatør: EndringObservatør,
     ): Tilbakekreving {
         val kravgrunnlagHistorikk = KravgrunnlagHistorikk(
             historikk = kravgrunnlagHistorikkEntities.map { it.fraEntity() }.toMutableList(),
@@ -82,6 +84,7 @@ data class TilbakekrevingEntity(
                 TilbakekrevingTilstand.AVSLUTTET -> Avsluttet
             },
             bigQueryService = bigQueryService,
+            endringObservatør = endringObservatør,
         )
 
         return tilbakekreving

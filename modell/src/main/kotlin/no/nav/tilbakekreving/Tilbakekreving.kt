@@ -9,6 +9,7 @@ import no.nav.tilbakekreving.api.v1.dto.FagsakDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.BehandlingHistorikk
+import no.nav.tilbakekreving.behandling.BehandlingObservatør
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
@@ -22,6 +23,7 @@ import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
+import no.nav.tilbakekreving.endring.EndringObservatør
 import no.nav.tilbakekreving.entities.TilbakekrevingEntity
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.feil.Sporing
@@ -35,6 +37,7 @@ import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
@@ -42,6 +45,7 @@ import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.tilstand.IverksettVedtak
 import no.nav.tilbakekreving.tilstand.Start
 import no.nav.tilbakekreving.tilstand.Tilstand
+import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -55,10 +59,11 @@ class Tilbakekreving internal constructor(
     val opprettet: LocalDateTime,
     val opprettelsesvalg: Opprettelsesvalg,
     private val behovObservatør: BehovObservatør,
+    private val endringObservatør: EndringObservatør,
     var bruker: Bruker? = null,
     internal var tilstand: Tilstand,
     val bigQueryService: BigQueryService,
-) : FrontendDto<FagsakDto> {
+) : FrontendDto<FagsakDto>, BehandlingObservatør {
     internal fun byttTilstand(nyTilstand: Tilstand) {
         tilstand = nyTilstand
         tilstand.entering(this)
@@ -96,7 +101,7 @@ class Tilbakekreving internal constructor(
 
     fun nullstillBehandling() {
         val nåværendeBehandling = behandlingHistorikk.nåværende().entry
-        val nullstiltBehandling = nåværendeBehandling.lagNullstiltBehandling(brevHistorikk)
+        val nullstiltBehandling = nåværendeBehandling.lagNullstiltBehandling(brevHistorikk, this)
         behandlingHistorikk.lagre(nullstiltBehandling)
     }
 
@@ -124,6 +129,7 @@ class Tilbakekreving internal constructor(
             eksternFagsakBehandling = eksternFagsakBehandling,
             kravgrunnlag = kravgrunnlagHistorikk.nåværende(),
             brevHistorikk = brevHistorikk,
+            behandlingObservatør = this,
         )
         behandlingHistorikk.lagre(behandling)
 
@@ -181,7 +187,7 @@ class Tilbakekreving internal constructor(
         vurdering: FatteVedtakSteg.Vurdering,
     ) {
         val behandling = behandlingHistorikk.nåværende().entry
-        behandling.håndter(beslutter, behandlingssteg, vurdering)
+        behandling.håndter(beslutter, behandlingssteg, vurdering, this)
         if (behandling.kanUtbetales()) {
             byttTilstand(IverksettVedtak)
         }
@@ -190,29 +196,29 @@ class Tilbakekreving internal constructor(
     fun håndter(
         behandler: Behandler,
         vurdering: Faktasteg.Vurdering,
-    ) = behandlingHistorikk.nåværende().entry.håndter(behandler, vurdering)
+    ) = behandlingHistorikk.nåværende().entry.håndter(behandler, vurdering, this)
 
     fun håndter(
         behandler: Behandler,
         periode: Datoperiode,
         vurdering: Foreldelsesteg.Vurdering,
-    ) = behandlingHistorikk.nåværende().entry.håndter(behandler, periode, vurdering)
+    ) = behandlingHistorikk.nåværende().entry.håndter(behandler, periode, vurdering, this)
 
     fun håndter(
         behandler: Behandler,
         periode: Datoperiode,
         vurdering: Vilkårsvurderingsteg.Vurdering,
-    ) = behandlingHistorikk.nåværende().entry.håndter(behandler, periode, vurdering)
+    ) = behandlingHistorikk.nåværende().entry.håndter(behandler, periode, vurdering, this)
 
     fun håndter(
         behandler: Behandler,
         vurdering: ForeslåVedtakSteg.Vurdering,
-    ) = behandlingHistorikk.nåværende().entry.håndter(behandler, vurdering)
+    ) = behandlingHistorikk.nåværende().entry.håndter(behandler, vurdering, this)
 
     fun håndter(
         behandler: Behandler,
         brevmottaker: RegistrertBrevmottaker,
-    ) = behandlingHistorikk.nåværende().entry.håndter(behandler, brevmottaker)
+    ) = behandlingHistorikk.nåværende().entry.håndter(behandler, brevmottaker, this)
 
     fun aktiverBrevmottakerSteg() = behandlingHistorikk.nåværende().entry.aktiverBrevmottakerSteg()
 
@@ -222,7 +228,7 @@ class Tilbakekreving internal constructor(
         behandler: Behandler,
         manuellBrevmottakerId: UUID,
     ) {
-        behandlingHistorikk.nåværende().entry.fjernManuelBrevmottaker(behandler, manuellBrevmottakerId)
+        behandlingHistorikk.nåværende().entry.fjernManuelBrevmottaker(behandler, manuellBrevmottakerId, this)
     }
 
     fun tilEntity(): TilbakekrevingEntity {
@@ -256,11 +262,39 @@ class Tilbakekreving internal constructor(
         }.buildString()
     }
 
+    override fun behandlingOppdatert(
+        behandlingId: UUID,
+        eksternBehandlingId: String,
+        vedtaksresultat: Vedtaksresultat?,
+        venterPåBruker: Boolean,
+        ansvarligSaksbehandler: String?,
+        ansvarligBeslutter: String?,
+        totaltFeilutbetaltBeløp: BigDecimal?,
+        totalFeilutbetaltPeriode: Datoperiode?,
+    ) {
+        endringObservatør.behandlingsstatusOppdatert(
+            behandlingId = behandlingId,
+            forrigeBehandlingId = behandlingHistorikk.forrige()?.entry?.internId,
+            eksternFagsystemId = eksternFagsak.eksternId,
+            eksternBehandlingId = eksternBehandlingId,
+            ytelse = eksternFagsak.ytelse,
+            tilstand = tilstand.tilbakekrevingTilstand,
+            vedtaksresultat = vedtaksresultat,
+            venterPåBruker = venterPåBruker,
+            ansvarligEnhet = null,
+            ansvarligSaksbehandler = ansvarligSaksbehandler,
+            ansvarligBeslutter = ansvarligBeslutter,
+            totaltFeilutbetaltBeløp = totaltFeilutbetaltBeløp,
+            totalFeilutbetaltPeriode = totalFeilutbetaltPeriode,
+        )
+    }
+
     companion object {
         fun opprett(
             behovObservatør: BehovObservatør,
             opprettTilbakekrevingEvent: OpprettTilbakekrevingHendelse,
             bigQueryService: BigQueryService,
+            endringObservatør: EndringObservatør,
         ): Tilbakekreving {
             val tilbakekreving = Tilbakekreving(
                 id = UUID.randomUUID(),
@@ -280,6 +314,7 @@ class Tilbakekreving internal constructor(
                 brevHistorikk = BrevHistorikk(mutableListOf()),
                 tilstand = Start,
                 bigQueryService = bigQueryService,
+                endringObservatør = endringObservatør,
             )
             tilbakekreving.håndter(opprettTilbakekrevingEvent)
             return tilbakekreving

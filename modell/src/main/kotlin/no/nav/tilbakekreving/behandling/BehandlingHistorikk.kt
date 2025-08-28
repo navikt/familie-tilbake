@@ -38,6 +38,10 @@ class BehandlingHistorikk(
         return HistorikkReferanse(this, historikk.last().internId)
     }
 
+    fun forrige(): HistorikkReferanse<UUID, Behandling>? {
+        return historikk.dropLast(1).lastOrNull()?.let { HistorikkReferanse(this, it.internId) }
+    }
+
     fun tilEntity(): List<BehandlingEntity> {
         return historikk.map { it.tilEntity() }
     }

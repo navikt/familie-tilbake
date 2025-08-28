@@ -26,46 +26,46 @@ class BehandlingTest {
 
         val faktasteg = faktastegVurdering(periode)
         shouldThrowWithMessage<ModellFeil.UgyldigOperasjonException>("Behandling er satt på vent. Kan ikke håndtere fakta.") {
-            behandling.håndter(ansvarligSaksbehandler, faktasteg)
+            behandling.håndter(ansvarligSaksbehandler, faktasteg, BehandlingObservatørOppsamler())
         }
 
         behandling.taAvVent()
-        behandling.håndter(ansvarligSaksbehandler, faktasteg)
+        behandling.håndter(ansvarligSaksbehandler, faktasteg, BehandlingObservatørOppsamler())
 
         val foreldelse = Foreldelsesteg.Vurdering.IkkeForeldet("Begrunnelse")
         behandling.settPåVent(Venteårsak.MANGLER_STØTTE, LocalDate.MAX, "Begrunnelse")
         shouldThrowWithMessage<ModellFeil.UgyldigOperasjonException>("Behandling er satt på vent. Kan ikke håndtere foreldelse.") {
-            behandling.håndter(ansvarligSaksbehandler, periode, foreldelse)
+            behandling.håndter(ansvarligSaksbehandler, periode, foreldelse, BehandlingObservatørOppsamler())
         }
 
         behandling.taAvVent()
-        behandling.håndter(ansvarligSaksbehandler, periode, foreldelse)
+        behandling.håndter(ansvarligSaksbehandler, periode, foreldelse, BehandlingObservatørOppsamler())
 
         val vilkårsvurdering = Vilkårsvurderingsteg.Vurdering.ForstodEllerBurdeForstått("Begrunnelse", Vilkårsvurderingsteg.VurdertAktsomhet.Forsett("Begrunnelse", false))
         behandling.settPåVent(Venteårsak.MANGLER_STØTTE, LocalDate.MAX, "Begrunnelse")
         shouldThrowWithMessage<ModellFeil.UgyldigOperasjonException>("Behandling er satt på vent. Kan ikke håndtere vilkårsvurdering.") {
-            behandling.håndter(ansvarligSaksbehandler, periode, vilkårsvurdering)
+            behandling.håndter(ansvarligSaksbehandler, periode, vilkårsvurdering, BehandlingObservatørOppsamler())
         }
 
         behandling.taAvVent()
-        behandling.håndter(ansvarligSaksbehandler, periode, vilkårsvurdering)
+        behandling.håndter(ansvarligSaksbehandler, periode, vilkårsvurdering, BehandlingObservatørOppsamler())
 
         val foreslåVedtak = ForeslåVedtakSteg.Vurdering.ForeslåVedtak(null, listOf(ForeslåVedtakSteg.Vurdering.ForeslåVedtak.PeriodeMedTekst(periode, null, null, null, null, null)))
 
         behandling.settPåVent(Venteårsak.MANGLER_STØTTE, LocalDate.MAX, "Begrunnelse")
         shouldThrowWithMessage<ModellFeil.UgyldigOperasjonException>("Behandling er satt på vent. Kan ikke håndtere vedtaksforslag.") {
-            behandling.håndter(ansvarligSaksbehandler, foreslåVedtak)
+            behandling.håndter(ansvarligSaksbehandler, foreslåVedtak, BehandlingObservatørOppsamler())
         }
 
         behandling.taAvVent()
-        behandling.håndter(ansvarligSaksbehandler, foreslåVedtak)
+        behandling.håndter(ansvarligSaksbehandler, foreslåVedtak, BehandlingObservatørOppsamler())
 
         behandling.settPåVent(Venteårsak.MANGLER_STØTTE, LocalDate.MAX, "Begrunnelse")
         shouldThrowWithMessage<ModellFeil.UgyldigOperasjonException>("Behandling er satt på vent. Kan ikke håndtere behandlingsutfall.") {
-            behandling.håndter(Behandler.Saksbehandler("Ansvarlig beslutter"), Behandlingssteg.FAKTA, FatteVedtakSteg.Vurdering.Godkjent)
+            behandling.håndter(Behandler.Saksbehandler("Ansvarlig beslutter"), Behandlingssteg.FAKTA, FatteVedtakSteg.Vurdering.Godkjent, BehandlingObservatørOppsamler())
         }
 
         behandling.taAvVent()
-        behandling.håndter(Behandler.Saksbehandler("Ansvarlig beslutter"), Behandlingssteg.FAKTA, FatteVedtakSteg.Vurdering.Godkjent)
+        behandling.håndter(Behandler.Saksbehandler("Ansvarlig beslutter"), Behandlingssteg.FAKTA, FatteVedtakSteg.Vurdering.Godkjent, BehandlingObservatørOppsamler())
     }
 }

@@ -40,6 +40,7 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
+import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -228,9 +229,10 @@ class Behandling internal constructor(
     internal fun håndter(
         behandler: Behandler,
         vurdering: Faktasteg.Vurdering,
+        observatør: BehandlingObservatør,
     ) {
         validerBehandlingstatus(håndtertSteg = "fakta")
-        this.ansvarligSaksbehandler = behandler
+        utførSideeffekt(behandler, observatør)
         faktasteg.vurder(vurdering)
     }
 
@@ -238,9 +240,10 @@ class Behandling internal constructor(
         behandler: Behandler,
         periode: Datoperiode,
         vurdering: Vilkårsvurderingsteg.Vurdering,
+        observatør: BehandlingObservatør,
     ) {
         validerBehandlingstatus("vilkårsvurdering")
-        this.ansvarligSaksbehandler = behandler
+        utførSideeffekt(behandler, observatør)
         vilkårsvurderingsteg.vurder(periode, vurdering)
     }
 
@@ -248,18 +251,20 @@ class Behandling internal constructor(
         behandler: Behandler,
         periode: Datoperiode,
         vurdering: Foreldelsesteg.Vurdering,
+        observatør: BehandlingObservatør,
     ) {
         validerBehandlingstatus("foreldelse")
-        this.ansvarligSaksbehandler = behandler
+        utførSideeffekt(behandler, observatør)
         foreldelsesteg.vurderForeldelse(periode, vurdering)
     }
 
     internal fun håndter(
         behandler: Behandler,
         vurdering: ForeslåVedtakSteg.Vurdering,
+        observatør: BehandlingObservatør,
     ) {
         validerBehandlingstatus("vedtaksforslag")
-        this.ansvarligSaksbehandler = behandler
+        utførSideeffekt(behandler, observatør)
         foreslåVedtakSteg.håndter(vurdering)
     }
 
@@ -267,24 +272,28 @@ class Behandling internal constructor(
         beslutter: Behandler,
         behandlingssteg: Behandlingssteg,
         vurdering: FatteVedtakSteg.Vurdering,
+        observatør: BehandlingObservatør,
     ) {
         validerBehandlingstatus("behandlingsutfall")
+        utførSideeffekt(ansvarligSaksbehandler, observatør)
         fatteVedtakSteg.håndter(beslutter, ansvarligSaksbehandler, behandlingssteg, vurdering, sporingsinformasjon())
     }
 
     internal fun håndter(
         behandler: Behandler,
         brevmottaker: RegistrertBrevmottaker,
+        observatør: BehandlingObservatør,
     ) {
-        this.ansvarligSaksbehandler = behandler
+        utførSideeffekt(behandler, observatør)
         brevmottakerSteg.håndter(brevmottaker, sporingsinformasjon())
     }
 
     internal fun fjernManuelBrevmottaker(
         behandler: Behandler,
         manuellBrevmottakerId: UUID,
+        observatør: BehandlingObservatør,
     ) {
-        this.ansvarligSaksbehandler = behandler
+        utførSideeffekt(behandler, observatør)
         brevmottakerSteg.fjernManuellBrevmottaker(manuellBrevmottakerId, sporingsinformasjon())
     }
 
@@ -324,7 +333,10 @@ class Behandling internal constructor(
 
     fun deaktiverBrevmottakerSteg() = brevmottakerSteg.deaktiverSteg()
 
-    fun lagNullstiltBehandling(brevHistorikk: BrevHistorikk): Behandling {
+    fun lagNullstiltBehandling(
+        brevHistorikk: BrevHistorikk,
+        behandlingObservatør: BehandlingObservatør,
+    ): Behandling {
         return nyBehandling(
             internId = UUID.randomUUID(),
             eksternId = eksternId,
@@ -337,6 +349,7 @@ class Behandling internal constructor(
             eksternFagsakBehandling = eksternFagsakBehandling,
             kravgrunnlag = kravgrunnlag,
             brevHistorikk = brevHistorikk,
+            behandlingObservatør = behandlingObservatør,
         )
     }
 
@@ -349,6 +362,24 @@ class Behandling internal constructor(
             behandlingId = internId,
             enhet = enhet,
             behandlingstype = behandlingstype,
+        )
+    }
+
+    fun utførSideeffekt(ansvarligSaksbehandler: Behandler, observatør: BehandlingObservatør) {
+        this.ansvarligSaksbehandler = ansvarligSaksbehandler
+        observatør.behandlingOppdatert(
+            behandlingId = internId,
+            eksternBehandlingId = eksternFagsakBehandling.entry.eksternId,
+            vedtaksresultat = if (fatteVedtakSteg.erFullstendig()) {
+                lagBeregning().oppsummer().vedtaksresultat
+            } else {
+                null
+            },
+            venterPåBruker = påVent?.avventerBruker() ?: false,
+            ansvarligSaksbehandler = ansvarligSaksbehandler.ident,
+            ansvarligBeslutter = fatteVedtakSteg.ansvarligBeslutter?.ident,
+            totaltFeilutbetaltBeløp = kravgrunnlag.entry.feilutbetaltBeløpForAllePerioder(),
+            totalFeilutbetaltPeriode = kravgrunnlag.entry.perioder.minOf { it.periode.fom } til kravgrunnlag.entry.perioder.maxOf { it.periode.tom },
         )
     }
 
@@ -365,6 +396,7 @@ class Behandling internal constructor(
             eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
             kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
             brevHistorikk: BrevHistorikk,
+            behandlingObservatør: BehandlingObservatør,
         ): Behandling {
             val foreldelsesteg = Foreldelsesteg.opprett(kravgrunnlag)
             val faktasteg = Faktasteg.opprett(eksternFagsakBehandling, kravgrunnlag, brevHistorikk, LocalDateTime.now(), Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL)
@@ -388,7 +420,9 @@ class Behandling internal constructor(
                 foreslåVedtakSteg = foreslåVedtakSteg,
                 fatteVedtakSteg = fatteVedtakSteg,
                 påVent = null,
-            )
+            ).also {
+                it.utførSideeffekt(ansvarligSaksbehandler, behandlingObservatør)
+            }
         }
     }
 }

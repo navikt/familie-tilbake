@@ -24,6 +24,7 @@ import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.config.ApplicationProperties
+import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
@@ -409,6 +410,7 @@ internal class NyTilgangskontrollServiceTest : OppslagSpringRunnerTest() {
             ),
             behovObservatør = mockk(relaxed = true),
             bigQueryService = bigQueryService,
+            endringObservatør = EndringObservatørOppsamler(),
         )
     }
 }

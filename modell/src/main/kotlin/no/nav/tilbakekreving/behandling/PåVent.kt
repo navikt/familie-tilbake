@@ -9,6 +9,8 @@ class PåVent(
     private val utløpsdato: LocalDate,
     private val begrunnelse: String?,
 ) {
+    fun avventerBruker(): Boolean = årsak == Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING
+
     fun tilEntity(): PåVentEntity = PåVentEntity(
         årsak = årsak,
         utløpsdato = utløpsdato,

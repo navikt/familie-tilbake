@@ -87,7 +87,7 @@ class BehandlingTilstandService(
                     setProperty("beskrivelse", hendelsesbeskrivelse)
                     setProperty(
                         PropertyName.FAGSYSTEM,
-                        FagsystemUtil.hentFagsystemFraYtelsestype(behandlingstilstand.ytelsestype.tilDTO()).name,
+                        FagsystemUtil.hentFagsystemFraYtelsestype(behandlingstilstand.ytelsestype).name,
                     )
                 },
             )
@@ -131,8 +131,8 @@ class BehandlingTilstandService(
         }
 
         return Behandlingstilstand(
-            ytelsestype = fagsak.ytelsestype,
-            fagsystem = fagsak.fagsystem,
+            ytelsestype = fagsak.ytelsestype.tilDTO(),
+            fagsystem = fagsak.fagsystem.tilDTO(),
             saksnummer = fagsak.eksternFagsakId,
             behandlingUuid = behandling.eksternBrukId,
             referertFagsaksbehandling = eksternBehandling,

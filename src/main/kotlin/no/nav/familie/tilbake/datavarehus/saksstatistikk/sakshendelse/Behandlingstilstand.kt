@@ -1,12 +1,12 @@
 package no.nav.familie.tilbake.datavarehus.saksstatistikk.sakshendelse
 
-import no.nav.familie.tilbake.behandling.Fagsystem
-import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.tilbakekreving.kontrakter.Periode
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import java.math.BigDecimal
 import java.time.OffsetDateTime
 import java.util.UUID
@@ -15,8 +15,8 @@ data class Behandlingstilstand(
     val funksjoneltTidspunkt: OffsetDateTime,
     val tekniskTidspunkt: OffsetDateTime? = null,
     val saksnummer: String,
-    val fagsystem: Fagsystem,
-    val ytelsestype: Ytelsestype,
+    val fagsystem: FagsystemDTO,
+    val ytelsestype: YtelsestypeDTO,
     val behandlingUuid: UUID,
     val referertFagsaksbehandling: String,
     val behandlingstype: Behandlingstype,
