@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.foreldelse
 
-import io.kotest.matchers.equality.shouldBeEqualToComparingFieldsExcept
+import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -41,7 +41,7 @@ internal class VurdertForeldelseRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretVurdertForeldelse = vurdertForeldelseRepository.findByIdOrThrow(vurdertForeldelse.id)
 
-        lagretVurdertForeldelse.shouldBeEqualToComparingFieldsExcept(
+        lagretVurdertForeldelse.shouldBeEqualToIgnoringFields(
             vurdertForeldelse,
             VurdertForeldelse::sporbar,
             VurdertForeldelse::versjon,
@@ -58,7 +58,7 @@ internal class VurdertForeldelseRepositoryTest : OppslagSpringRunnerTest() {
         vurdertForeldelseRepository.update(oppdatertVurdertForeldelse)
 
         lagretVurdertForeldelse = vurdertForeldelseRepository.findByIdOrThrow(vurdertForeldelse.id)
-        lagretVurdertForeldelse.shouldBeEqualToComparingFieldsExcept(
+        lagretVurdertForeldelse.shouldBeEqualToIgnoringFields(
             oppdatertVurdertForeldelse,
             VurdertForeldelse::sporbar,
             VurdertForeldelse::versjon,

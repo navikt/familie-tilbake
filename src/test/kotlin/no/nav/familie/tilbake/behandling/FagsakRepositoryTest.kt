@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.behandling
 
-import io.kotest.matchers.equality.shouldBeEqualToComparingFieldsExcept
+import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.domain.Fagsak
@@ -20,7 +20,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         fagsakRepository.insert(fagsak)
 
         val lagretFagsak = fagsakRepository.findByIdOrThrow(fagsak.id)
-        lagretFagsak.shouldBeEqualToComparingFieldsExcept(fagsak, Fagsak::sporbar, Fagsak::versjon)
+        lagretFagsak.shouldBeEqualToIgnoringFields(fagsak, Fagsak::sporbar, Fagsak::versjon)
         lagretFagsak.versjon shouldBe 1
     }
 
@@ -33,7 +33,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         fagsakRepository.update(oppdatertFagsak)
 
         lagretFagsak = fagsakRepository.findByIdOrThrow(fagsak.id)
-        lagretFagsak.shouldBeEqualToComparingFieldsExcept(oppdatertFagsak, Fagsak::sporbar, Fagsak::versjon)
+        lagretFagsak.shouldBeEqualToIgnoringFields(oppdatertFagsak, Fagsak::sporbar, Fagsak::versjon)
         lagretFagsak.versjon shouldBe 2
     }
 }

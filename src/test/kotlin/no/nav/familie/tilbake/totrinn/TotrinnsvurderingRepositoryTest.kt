@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.totrinn
 
-import io.kotest.matchers.equality.shouldBeEqualToComparingFieldsExcept
+import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -41,7 +41,7 @@ internal class TotrinnsvurderingRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretTotrinnsvurdering = totrinnsvurderingRepository.findByIdOrThrow(totrinnsvurdering.id)
 
-        lagretTotrinnsvurdering.shouldBeEqualToComparingFieldsExcept(
+        lagretTotrinnsvurdering.shouldBeEqualToIgnoringFields(
             totrinnsvurdering,
             Totrinnsvurdering::sporbar,
             Totrinnsvurdering::versjon,
@@ -58,7 +58,7 @@ internal class TotrinnsvurderingRepositoryTest : OppslagSpringRunnerTest() {
         totrinnsvurderingRepository.update(oppdatertTotrinnsvurdering)
 
         lagretTotrinnsvurdering = totrinnsvurderingRepository.findByIdOrThrow(totrinnsvurdering.id)
-        lagretTotrinnsvurdering.shouldBeEqualToComparingFieldsExcept(
+        lagretTotrinnsvurdering.shouldBeEqualToIgnoringFields(
             oppdatertTotrinnsvurdering,
             Totrinnsvurdering::sporbar,
             Totrinnsvurdering::versjon,

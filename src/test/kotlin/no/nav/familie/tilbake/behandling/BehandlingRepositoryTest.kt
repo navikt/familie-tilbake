@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.behandling
 
-import io.kotest.matchers.equality.shouldBeEqualToComparingFieldsExcept
+import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.domain.Behandling
@@ -35,7 +35,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling)
 
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        lagretBehandling.shouldBeEqualToComparingFieldsExcept(
+        lagretBehandling.shouldBeEqualToIgnoringFields(
             behandling,
             Behandling::endretTidspunkt,
             Behandling::sporbar,
@@ -53,7 +53,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         behandlingRepository.update(oppdatertBehandling)
 
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        lagretBehandling.shouldBeEqualToComparingFieldsExcept(
+        lagretBehandling.shouldBeEqualToIgnoringFields(
             oppdatertBehandling,
             Behandling::endretTidspunkt,
             Behandling::sporbar,

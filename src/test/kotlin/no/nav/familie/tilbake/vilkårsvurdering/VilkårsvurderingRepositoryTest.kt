@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.vilkårsvurdering
 
-import io.kotest.matchers.equality.shouldBeEqualToComparingFieldsExcept
+import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -19,7 +19,7 @@ internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
         vilkårsvurderingRepository.insert(vilkår)
 
         val lagretVilkår = vilkårsvurderingRepository.findByIdOrThrow(vilkår.id)
-        lagretVilkår.shouldBeEqualToComparingFieldsExcept(vilkår, Vilkårsvurdering::sporbar, Vilkårsvurdering::versjon)
+        lagretVilkår.shouldBeEqualToIgnoringFields(vilkår, Vilkårsvurdering::sporbar, Vilkårsvurdering::versjon)
         lagretVilkår.versjon shouldBe 1
     }
 
@@ -33,7 +33,7 @@ internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
         vilkårsvurderingRepository.update(oppdatertVilkår)
 
         lagretVilkår = vilkårsvurderingRepository.findByIdOrThrow(vilkår.id)
-        lagretVilkår.shouldBeEqualToComparingFieldsExcept(oppdatertVilkår, Vilkårsvurdering::sporbar, Vilkårsvurdering::versjon)
+        lagretVilkår.shouldBeEqualToIgnoringFields(oppdatertVilkår, Vilkårsvurdering::sporbar, Vilkårsvurdering::versjon)
         lagretVilkår.versjon shouldBe 2
     }
 }

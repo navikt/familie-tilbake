@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
-import io.kotest.matchers.equality.shouldBeEqualToComparingFieldsExcept
+import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -21,7 +21,7 @@ internal class ØkonomiXmlMottattArkivRepositoryTest : OppslagSpringRunnerTest()
 
         val lagretØkonomiXmlMottattArkiv = økonomiXmlMottattArkivRepository.findByIdOrThrow(økonomiXmlMottattArkiv.id)
 
-        lagretØkonomiXmlMottattArkiv.shouldBeEqualToComparingFieldsExcept(
+        lagretØkonomiXmlMottattArkiv.shouldBeEqualToIgnoringFields(
             økonomiXmlMottattArkiv,
             ØkonomiXmlMottattArkiv::sporbar,
             ØkonomiXmlMottattArkiv::versjon,
@@ -38,7 +38,7 @@ internal class ØkonomiXmlMottattArkivRepositoryTest : OppslagSpringRunnerTest()
         økonomiXmlMottattArkivRepository.update(oppdatertØkonomiXmlMottattArkiv)
 
         lagretØkonomiXmlMottattArkiv = økonomiXmlMottattArkivRepository.findByIdOrThrow(økonomiXmlMottattArkiv.id)
-        lagretØkonomiXmlMottattArkiv.shouldBeEqualToComparingFieldsExcept(
+        lagretØkonomiXmlMottattArkiv.shouldBeEqualToIgnoringFields(
             oppdatertØkonomiXmlMottattArkiv,
             ØkonomiXmlMottattArkiv::sporbar,
             ØkonomiXmlMottattArkiv::versjon,

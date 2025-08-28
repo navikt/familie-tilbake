@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.dokumentbestilling.felles
 
-import io.kotest.matchers.equality.shouldBeEqualToComparingFieldsExcept
+import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -49,7 +49,7 @@ internal class BrevsporingRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretBrevsporing = brevsporingRepository.findByIdOrThrow(brevsporing.id)
 
-        lagretBrevsporing.shouldBeEqualToComparingFieldsExcept(brevsporing, Brevsporing::sporbar, Brevsporing::versjon)
+        lagretBrevsporing.shouldBeEqualToIgnoringFields(brevsporing, Brevsporing::sporbar, Brevsporing::versjon)
         lagretBrevsporing.versjon shouldBe 1
     }
 
@@ -62,7 +62,7 @@ internal class BrevsporingRepositoryTest : OppslagSpringRunnerTest() {
         brevsporingRepository.update(oppdatertBrevsporing)
 
         lagretBrevsporing = brevsporingRepository.findByIdOrThrow(brevsporing.id)
-        lagretBrevsporing.shouldBeEqualToComparingFieldsExcept(oppdatertBrevsporing, Brevsporing::sporbar, Brevsporing::versjon)
+        lagretBrevsporing.shouldBeEqualToIgnoringFields(oppdatertBrevsporing, Brevsporing::sporbar, Brevsporing::versjon)
         lagretBrevsporing.versjon shouldBe 2
     }
 
@@ -84,6 +84,6 @@ internal class BrevsporingRepositoryTest : OppslagSpringRunnerTest() {
                 Brevtype.VARSEL,
             )
 
-        funnetBrevsporing?.shouldBeEqualToComparingFieldsExcept(nyesteBrevsporing, Brevsporing::sporbar, Brevsporing::versjon)
+        funnetBrevsporing?.shouldBeEqualToIgnoringFields(nyesteBrevsporing, Brevsporing::sporbar, Brevsporing::versjon)
     }
 }

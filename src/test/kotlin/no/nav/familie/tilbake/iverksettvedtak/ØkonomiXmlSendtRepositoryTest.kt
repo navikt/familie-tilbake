@@ -2,7 +2,7 @@ package no.nav.familie.tilbake.iverksettvedtak
 
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
-import io.kotest.matchers.equality.shouldBeEqualToComparingFieldsExcept
+import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -44,7 +44,7 @@ internal class ØkonomiXmlSendtRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretØkonomiXmlSendt = økonomiXmlSendtRepository.findByIdOrThrow(økonomiXmlSendt.id)
 
-        lagretØkonomiXmlSendt.shouldBeEqualToComparingFieldsExcept(
+        lagretØkonomiXmlSendt.shouldBeEqualToIgnoringFields(
             økonomiXmlSendt,
             ØkonomiXmlSendt::sporbar,
             ØkonomiXmlSendt::versjon,
@@ -81,7 +81,7 @@ internal class ØkonomiXmlSendtRepositoryTest : OppslagSpringRunnerTest() {
         økonomiXmlSendtRepository.update(oppdatertØkonomiXmlSendt)
 
         lagretØkonomiXmlSendt = økonomiXmlSendtRepository.findByIdOrThrow(økonomiXmlSendt.id)
-        lagretØkonomiXmlSendt.shouldBeEqualToComparingFieldsExcept(
+        lagretØkonomiXmlSendt.shouldBeEqualToIgnoringFields(
             oppdatertØkonomiXmlSendt,
             ØkonomiXmlSendt::sporbar,
             ØkonomiXmlSendt::versjon,

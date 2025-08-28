@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
-import io.kotest.matchers.equality.shouldBeEqualToComparingFieldsExcept
+import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -37,7 +37,7 @@ internal class VedtaksbrevsperiodeRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretVedtaksbrevsperiode = vedtaksbrevsperiodeRepository.findByIdOrThrow(vedtaksbrevsperiode.id)
 
-        lagretVedtaksbrevsperiode.shouldBeEqualToComparingFieldsExcept(
+        lagretVedtaksbrevsperiode.shouldBeEqualToIgnoringFields(
             vedtaksbrevsperiode,
             Vedtaksbrevsperiode::sporbar,
             Vedtaksbrevsperiode::versjon,
@@ -54,7 +54,7 @@ internal class VedtaksbrevsperiodeRepositoryTest : OppslagSpringRunnerTest() {
         vedtaksbrevsperiodeRepository.update(oppdatertVedtaksbrevsperiode)
 
         lagretVedtaksbrevsperiode = vedtaksbrevsperiodeRepository.findByIdOrThrow(vedtaksbrevsperiode.id)
-        lagretVedtaksbrevsperiode.shouldBeEqualToComparingFieldsExcept(
+        lagretVedtaksbrevsperiode.shouldBeEqualToIgnoringFields(
             oppdatertVedtaksbrevsperiode,
             Vedtaksbrevsperiode::sporbar,
             Vedtaksbrevsperiode::versjon,

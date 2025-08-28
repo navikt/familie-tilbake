@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
-import io.kotest.matchers.equality.shouldBeEqualToComparingFieldsExcept
+import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -46,7 +46,7 @@ internal class KravgrunnlagRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretKravgrunnlag431 = kravgrunnlagRepository.findByIdOrThrow(kravgrunnlag431.id)
 
-        lagretKravgrunnlag431.shouldBeEqualToComparingFieldsExcept(
+        lagretKravgrunnlag431.shouldBeEqualToIgnoringFields(
             kravgrunnlag431,
             Kravgrunnlag431::sporbar,
             Kravgrunnlag431::perioder,
@@ -64,7 +64,7 @@ internal class KravgrunnlagRepositoryTest : OppslagSpringRunnerTest() {
         kravgrunnlagRepository.update(oppdatertKravgrunnlag431)
 
         lagretKravgrunnlag431 = kravgrunnlagRepository.findByIdOrThrow(kravgrunnlag431.id)
-        lagretKravgrunnlag431.shouldBeEqualToComparingFieldsExcept(
+        lagretKravgrunnlag431.shouldBeEqualToIgnoringFields(
             oppdatertKravgrunnlag431,
             Kravgrunnlag431::sporbar,
             Kravgrunnlag431::perioder,
@@ -79,7 +79,7 @@ internal class KravgrunnlagRepositoryTest : OppslagSpringRunnerTest() {
 
         val findByBehandlingId = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
 
-        kravgrunnlag431.shouldBeEqualToComparingFieldsExcept(
+        kravgrunnlag431.shouldBeEqualToIgnoringFields(
             findByBehandlingId,
             Kravgrunnlag431::sporbar,
             Kravgrunnlag431::perioder,

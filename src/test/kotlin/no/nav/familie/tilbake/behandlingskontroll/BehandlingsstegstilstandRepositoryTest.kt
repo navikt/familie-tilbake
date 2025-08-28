@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.behandlingskontroll
 
-import io.kotest.matchers.equality.shouldBeEqualToComparingFieldsExcept
+import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -40,7 +40,7 @@ internal class BehandlingsstegstilstandRepositoryTest : OppslagSpringRunnerTest(
 
         val lagretBehandlingsstegstilstand = behandlingsstegstilstandRepository.findByIdOrThrow(behandlingsstegstilstand.id)
 
-        lagretBehandlingsstegstilstand.shouldBeEqualToComparingFieldsExcept(
+        lagretBehandlingsstegstilstand.shouldBeEqualToIgnoringFields(
             behandlingsstegstilstand,
             Behandlingsstegstilstand::sporbar,
             Behandlingsstegstilstand::versjon,
@@ -58,7 +58,7 @@ internal class BehandlingsstegstilstandRepositoryTest : OppslagSpringRunnerTest(
         behandlingsstegstilstandRepository.update(oppdatertBehandlingsstegstilstand)
 
         lagretBehandlingsstegstilstand = behandlingsstegstilstandRepository.findByIdOrThrow(behandlingsstegstilstand.id)
-        lagretBehandlingsstegstilstand.shouldBeEqualToComparingFieldsExcept(
+        lagretBehandlingsstegstilstand.shouldBeEqualToIgnoringFields(
             oppdatertBehandlingsstegstilstand,
             Behandlingsstegstilstand::sporbar,
             Behandlingsstegstilstand::versjon,

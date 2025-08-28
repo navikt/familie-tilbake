@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.avstemming.domain
 
-import io.kotest.matchers.equality.shouldBeEqualToComparingFieldsExcept
+import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -20,7 +20,7 @@ internal class AvstemmingsfilRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretAvstemmingsfil = avstemmingsfilRepository.findByIdOrThrow(avstemmingsfil.id)
 
-        lagretAvstemmingsfil.shouldBeEqualToComparingFieldsExcept(
+        lagretAvstemmingsfil.shouldBeEqualToIgnoringFields(
             avstemmingsfil,
             Avstemmingsfil::fil,
             Avstemmingsfil::sporbar,

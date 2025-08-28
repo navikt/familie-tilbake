@@ -143,11 +143,9 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     testImplementation("io.mockk:mockk-jvm:1.14.5")
-    testImplementation("io.kotest:kotest-runner-junit5-jvm:5.9.1")
+    testImplementation("io.kotest:kotest-assertions-core-jvm:6.0.1")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.springframework.cloud:spring-cloud-contract-wiremock:4.3.0")
-    testImplementation("org.springframework.kafka:spring-kafka-test")
 
     testImplementation("io.jsonwebtoken:jjwt:0.12.6")
     testImplementation("no.nav.security:token-validation-spring-test:$tokenValidationVersion")
