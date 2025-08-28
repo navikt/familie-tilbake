@@ -71,12 +71,6 @@ class Vilkårsvurderingsteg(
         return vurderinger.single { it.periode == periode }.id
     }
 
-    internal fun splittPerioder(perioder: List<Datoperiode>) {
-        if (perioder.sortedBy { it.fom } == vurderinger.map { it.periode }.sortedBy { it.fom }) return
-
-        vurderinger = perioder.map { Vilkårsvurderingsperiode.opprett(it) }
-    }
-
     // TODO: Trenger først muligheten til å referere til tidligere vilkårsvurdert periode for å finne ut
     fun harLikePerioder() = false
 

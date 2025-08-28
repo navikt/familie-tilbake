@@ -5,8 +5,6 @@ import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsoppsummeringDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegsinfoDto
-import no.nav.tilbakekreving.api.v1.dto.BeregnetPeriodeDto
-import no.nav.tilbakekreving.api.v1.dto.BeregnetPerioderDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
@@ -110,19 +108,6 @@ class Behandling internal constructor(
         steg().firstOrNull { !it.erFullstendig() }
             ?.behandlingsstatus
             ?: steg().last().behandlingsstatus
-
-    fun beregnSplittetPeriode(
-        perioder: List<Datoperiode>,
-    ): BeregnetPerioderDto = BeregnetPerioderDto(perioder.map { BeregnetPeriodeDto(it, kravgrunnlag.entry.totaltBeløpFor(it)) })
-
-    fun splittForeldetPerioder(perioder: List<Datoperiode>) {
-        foreldelsesteg.splittPerioder(perioder)
-        vilkårsvurderingsteg.splittPerioder(perioder)
-    }
-
-    fun splittVilkårsvurdertePerioder(perioder: List<Datoperiode>) {
-        vilkårsvurderingsteg.splittPerioder(perioder)
-    }
 
     private fun lagBeregning(): Beregning {
         return Beregning(
