@@ -39,12 +39,6 @@ class Foreldelsesteg(
         vurdertePerioder.single { it.id == periodeId }.vurderForeldelse(vurdering)
     }
 
-    internal fun splittPerioder(perioder: List<Datoperiode>) {
-        if (perioder.sortedBy { it.fom } == vurdertePerioder.map { it.periode }.sortedBy { it.fom }) return
-
-        vurdertePerioder = perioder.map { Foreldelseperiode.opprett(it) }
-    }
-
     fun erPeriodeForeldet(periode: Datoperiode): Boolean {
         return vurdertePerioder.single { it.periode.inneholder(periode) }.vurdering !is Vurdering.IkkeForeldet
     }

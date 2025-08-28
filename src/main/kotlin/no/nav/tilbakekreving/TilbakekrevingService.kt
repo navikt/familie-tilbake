@@ -242,9 +242,6 @@ class TilbakekrevingService(
         vurdering: BehandlingsstegVilkårsvurderingDto,
         behandler: Behandler,
     ) {
-        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
-
-        behandling.splittVilkårsvurdertePerioder(vurdering.vilkårsvurderingsperioder.map { it.periode })
         vurdering.vilkårsvurderingsperioder.forEach { periode ->
             tilbakekreving.håndter(
                 behandler,
@@ -259,8 +256,6 @@ class TilbakekrevingService(
         vurdering: BehandlingsstegForeldelseDto,
         behandler: Behandler,
     ) {
-        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
-        behandling.splittForeldetPerioder(vurdering.foreldetPerioder.map { it.periode })
         vurdering.foreldetPerioder.forEach { periode ->
             tilbakekreving.håndter(
                 behandler,
