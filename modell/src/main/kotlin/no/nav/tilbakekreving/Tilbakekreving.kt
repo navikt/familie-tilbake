@@ -34,6 +34,7 @@ import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
@@ -91,6 +92,7 @@ class Tilbakekreving internal constructor(
 
     fun håndter(iverksettelseHendelse: IverksettelseHendelse) {
         tilstand.håndter(this, iverksettelseHendelse)
+        behandlingHistorikk.nåværende().entry.utførSideeffekt(this)
     }
 
     fun sporingsinformasjon(): Sporing {
@@ -183,52 +185,82 @@ class Tilbakekreving internal constructor(
 
     fun håndter(
         beslutter: Behandler,
-        behandlingssteg: Behandlingssteg,
-        vurdering: FatteVedtakSteg.Vurdering,
+        vurderinger: List<Pair<Behandlingssteg, FatteVedtakSteg.Vurdering>>,
     ) {
         val behandling = behandlingHistorikk.nåværende().entry
-        behandling.håndter(beslutter, behandlingssteg, vurdering, this)
+        behandling.håndter(beslutter, vurderinger, this)
         if (behandling.kanUtbetales()) {
             byttTilstand(IverksettVedtak)
         }
+        behandling.utførSideeffekt(this)
     }
 
     fun håndter(
         behandler: Behandler,
         vurdering: Faktasteg.Vurdering,
-    ) = behandlingHistorikk.nåværende().entry.håndter(behandler, vurdering, this)
+    ) {
+        val behandling = behandlingHistorikk.nåværende().entry
+        behandling.håndter(behandler, vurdering, this)
+        behandling.utførSideeffekt(this)
+    }
 
     fun håndter(
         behandler: Behandler,
         periode: Datoperiode,
         vurdering: Foreldelsesteg.Vurdering,
-    ) = behandlingHistorikk.nåværende().entry.håndter(behandler, periode, vurdering, this)
+    ) {
+        val behandling = behandlingHistorikk.nåværende().entry
+        behandling.håndter(behandler, periode, vurdering, this)
+        behandling.utførSideeffekt(this)
+    }
 
     fun håndter(
         behandler: Behandler,
         periode: Datoperiode,
         vurdering: Vilkårsvurderingsteg.Vurdering,
-    ) = behandlingHistorikk.nåværende().entry.håndter(behandler, periode, vurdering, this)
+    ) {
+        val behandling = behandlingHistorikk.nåværende().entry
+        behandling.håndter(behandler, periode, vurdering, this)
+        behandling.utførSideeffekt(this)
+    }
 
     fun håndter(
         behandler: Behandler,
         vurdering: ForeslåVedtakSteg.Vurdering,
-    ) = behandlingHistorikk.nåværende().entry.håndter(behandler, vurdering, this)
+    ) {
+        val behandling = behandlingHistorikk.nåværende().entry
+        behandling.håndter(behandler, vurdering, this)
+        behandling.utførSideeffekt(this)
+    }
 
     fun håndter(
         behandler: Behandler,
         brevmottaker: RegistrertBrevmottaker,
-    ) = behandlingHistorikk.nåværende().entry.håndter(behandler, brevmottaker, this)
+    ) {
+        val behandling = behandlingHistorikk.nåværende().entry
+        behandling.håndter(behandler, brevmottaker, this)
+        behandling.utførSideeffekt(this)
+    }
 
-    fun aktiverBrevmottakerSteg() = behandlingHistorikk.nåværende().entry.aktiverBrevmottakerSteg()
+    fun aktiverBrevmottakerSteg() {
+        val behandling = behandlingHistorikk.nåværende().entry
+        behandling.aktiverBrevmottakerSteg()
+        behandling.utførSideeffekt(this)
+    }
 
-    fun deaktiverBrevmottakerSteg() = behandlingHistorikk.nåværende().entry.deaktiverBrevmottakerSteg()
+    fun deaktiverBrevmottakerSteg() = {
+        val behandling = behandlingHistorikk.nåværende().entry
+        behandling.deaktiverBrevmottakerSteg()
+        behandling.utførSideeffekt(this)
+    }
 
     fun fjernManuelBrevmottaker(
         behandler: Behandler,
         manuellBrevmottakerId: UUID,
     ) {
-        behandlingHistorikk.nåværende().entry.fjernManuelBrevmottaker(behandler, manuellBrevmottakerId, this)
+        val behandling = behandlingHistorikk.nåværende().entry
+        behandling.fjernManuelBrevmottaker(behandler, manuellBrevmottakerId, this)
+        behandling.utførSideeffekt(this)
     }
 
     fun tilEntity(): TilbakekrevingEntity {
@@ -266,6 +298,7 @@ class Tilbakekreving internal constructor(
         behandlingId: UUID,
         eksternBehandlingId: String,
         vedtaksresultat: Vedtaksresultat?,
+        behandlingstatus: Behandlingsstatus,
         venterPåBruker: Boolean,
         ansvarligSaksbehandler: String?,
         ansvarligBeslutter: String?,
@@ -279,6 +312,7 @@ class Tilbakekreving internal constructor(
             eksternBehandlingId = eksternBehandlingId,
             ytelse = eksternFagsak.ytelse,
             tilstand = tilstand.tilbakekrevingTilstand,
+            behandlingstatus = behandlingstatus,
             vedtaksresultat = vedtaksresultat,
             venterPåBruker = venterPåBruker,
             ansvarligEnhet = null,

@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.endring
 
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.sakshendelse.Behandlingstilstand
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.log.SecureLog
@@ -30,6 +31,7 @@ class EndringObservatørService(
         eksternBehandlingId: String,
         ytelse: Ytelse,
         tilstand: TilbakekrevingTilstand,
+        behandlingstatus: Behandlingsstatus,
         vedtaksresultat: Vedtaksresultat?,
         venterPåBruker: Boolean,
         ansvarligEnhet: String?,
@@ -38,6 +40,7 @@ class EndringObservatørService(
         totaltFeilutbetaltBeløp: BigDecimal?,
         totalFeilutbetaltPeriode: Datoperiode?,
     ) {
+        val logContext = SecureLog.Context.medBehandling(eksternFagsystemId, behandlingId.toString())
         kafkaProducer.sendSaksdata(
             behandlingId,
             Behandlingstilstand(
@@ -59,7 +62,14 @@ class EndringObservatørService(
                     TilbakekrevingTilstand.SEND_VARSELBREV,
                     -> Behandlingsstatus.OPPRETTET
                     TilbakekrevingTilstand.IVERKSETT_VEDTAK -> Behandlingsstatus.IVERKSETTER_VEDTAK
-                    TilbakekrevingTilstand.TIL_BEHANDLING -> Behandlingsstatus.UTREDES
+                    TilbakekrevingTilstand.TIL_BEHANDLING -> when (behandlingstatus) {
+                        Behandlingsstatus.FATTER_VEDTAK -> Behandlingsstatus.FATTER_VEDTAK
+                        Behandlingsstatus.UTREDES -> Behandlingsstatus.UTREDES
+                        else -> throw Feil(
+                            message = "Forventet ikke behandlingstatus $behandlingstatus for behandling i $tilstand",
+                            logContext = logContext,
+                        )
+                    }
                     TilbakekrevingTilstand.AVSLUTTET -> Behandlingsstatus.AVSLUTTET
                 },
                 behandlingsresultat = when (vedtaksresultat) {

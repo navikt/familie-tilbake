@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.endring
 
 import no.nav.tilbakekreving.fagsystem.Ytelse
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
@@ -15,6 +16,7 @@ interface EndringObservatør {
         eksternBehandlingId: String,
         ytelse: Ytelse,
         tilstand: TilbakekrevingTilstand,
+        behandlingstatus: Behandlingsstatus,
         vedtaksresultat: Vedtaksresultat?,
         venterPåBruker: Boolean,
         ansvarligEnhet: String?,

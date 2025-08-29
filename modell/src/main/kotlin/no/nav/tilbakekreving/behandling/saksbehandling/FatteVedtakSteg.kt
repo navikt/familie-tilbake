@@ -17,7 +17,7 @@ class FatteVedtakSteg internal constructor(
     private var _ansvarligBeslutter: Behandler?,
 ) : Saksbehandlingsteg<TotrinnsvurderingDto> {
     override val type: Behandlingssteg = Behandlingssteg.FATTE_VEDTAK
-    val ansvarligBeslutter: Behandler? = _ansvarligBeslutter
+    val ansvarligBeslutter: Behandler? get() = _ansvarligBeslutter
 
     override fun erFullstendig(): Boolean = vurderteSteg.all { it.erFerdigvurdert() }
 

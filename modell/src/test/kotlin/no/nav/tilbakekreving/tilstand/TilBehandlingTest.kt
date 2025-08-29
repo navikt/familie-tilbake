@@ -35,8 +35,13 @@ class TilBehandlingTest {
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
         val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingHendelse, Behandler.Saksbehandler("Ansvarlig saksbehandler"))
 
-        tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.FAKTA, FatteVedtakSteg.Vurdering.Godkjent)
-        tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.FORELDELSE, FatteVedtakSteg.Vurdering.Godkjent)
+        tilbakekreving.håndter(
+            Behandler.Saksbehandler("Z999999"),
+            listOf(
+                Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
+                Behandlingssteg.FORELDELSE to FatteVedtakSteg.Vurdering.Godkjent,
+            ),
+        )
 
         val behandlingFørNullstilling = tilbakekreving.behandlingHistorikk.nåværende().entry
         tilbakekreving.nullstillBehandling()
@@ -52,10 +57,15 @@ class TilBehandlingTest {
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
         val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingHendelse, Behandler.Saksbehandler("Ansvarlig saksbehandler"))
 
-        tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.FAKTA, FatteVedtakSteg.Vurdering.Godkjent)
-        tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.FORELDELSE, FatteVedtakSteg.Vurdering.Godkjent)
-        tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.VILKÅRSVURDERING, FatteVedtakSteg.Vurdering.Godkjent)
-        tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.FORESLÅ_VEDTAK, FatteVedtakSteg.Vurdering.Godkjent)
+        tilbakekreving.håndter(
+            Behandler.Saksbehandler("Z999999"),
+            listOf(
+                Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
+                Behandlingssteg.FORELDELSE to FatteVedtakSteg.Vurdering.Godkjent,
+                Behandlingssteg.VILKÅRSVURDERING to FatteVedtakSteg.Vurdering.Godkjent,
+                Behandlingssteg.FORESLÅ_VEDTAK to FatteVedtakSteg.Vurdering.Godkjent,
+            ),
+        )
 
         tilbakekreving.tilstand shouldNotBe TilBehandling
 

@@ -232,8 +232,8 @@ class Behandling internal constructor(
         observatør: BehandlingObservatør,
     ) {
         validerBehandlingstatus(håndtertSteg = "fakta")
-        utførSideeffekt(behandler, observatør)
         faktasteg.vurder(vurdering)
+        oppdaterBehandler(behandler)
     }
 
     internal fun håndter(
@@ -243,8 +243,8 @@ class Behandling internal constructor(
         observatør: BehandlingObservatør,
     ) {
         validerBehandlingstatus("vilkårsvurdering")
-        utførSideeffekt(behandler, observatør)
         vilkårsvurderingsteg.vurder(periode, vurdering)
+        oppdaterBehandler(behandler)
     }
 
     internal fun håndter(
@@ -254,8 +254,8 @@ class Behandling internal constructor(
         observatør: BehandlingObservatør,
     ) {
         validerBehandlingstatus("foreldelse")
-        utførSideeffekt(behandler, observatør)
         foreldelsesteg.vurderForeldelse(periode, vurdering)
+        oppdaterBehandler(behandler)
     }
 
     internal fun håndter(
@@ -264,19 +264,20 @@ class Behandling internal constructor(
         observatør: BehandlingObservatør,
     ) {
         validerBehandlingstatus("vedtaksforslag")
-        utførSideeffekt(behandler, observatør)
         foreslåVedtakSteg.håndter(vurdering)
+        oppdaterBehandler(behandler)
     }
 
     internal fun håndter(
         beslutter: Behandler,
-        behandlingssteg: Behandlingssteg,
-        vurdering: FatteVedtakSteg.Vurdering,
+        vurderinger: List<Pair<Behandlingssteg, FatteVedtakSteg.Vurdering>>,
         observatør: BehandlingObservatør,
     ) {
         validerBehandlingstatus("behandlingsutfall")
-        utførSideeffekt(ansvarligSaksbehandler, observatør)
-        fatteVedtakSteg.håndter(beslutter, ansvarligSaksbehandler, behandlingssteg, vurdering, sporingsinformasjon())
+        for ((behandlingssteg, vurdering) in vurderinger) {
+            fatteVedtakSteg.håndter(beslutter, ansvarligSaksbehandler, behandlingssteg, vurdering, sporingsinformasjon())
+        }
+        oppdaterBehandler(ansvarligSaksbehandler)
     }
 
     internal fun håndter(
@@ -284,8 +285,8 @@ class Behandling internal constructor(
         brevmottaker: RegistrertBrevmottaker,
         observatør: BehandlingObservatør,
     ) {
-        utførSideeffekt(behandler, observatør)
         brevmottakerSteg.håndter(brevmottaker, sporingsinformasjon())
+        oppdaterBehandler(behandler)
     }
 
     internal fun fjernManuelBrevmottaker(
@@ -293,8 +294,8 @@ class Behandling internal constructor(
         manuellBrevmottakerId: UUID,
         observatør: BehandlingObservatør,
     ) {
-        utførSideeffekt(behandler, observatør)
         brevmottakerSteg.fjernManuellBrevmottaker(manuellBrevmottakerId, sporingsinformasjon())
+        oppdaterBehandler(behandler)
     }
 
     internal fun opprettBrevmottaker(
@@ -365,8 +366,11 @@ class Behandling internal constructor(
         )
     }
 
-    fun utførSideeffekt(ansvarligSaksbehandler: Behandler, observatør: BehandlingObservatør) {
+    fun oppdaterBehandler(ansvarligSaksbehandler: Behandler) {
         this.ansvarligSaksbehandler = ansvarligSaksbehandler
+    }
+
+    fun utførSideeffekt(observatør: BehandlingObservatør) {
         observatør.behandlingOppdatert(
             behandlingId = internId,
             eksternBehandlingId = eksternFagsakBehandling.entry.eksternId,
@@ -375,6 +379,7 @@ class Behandling internal constructor(
             } else {
                 null
             },
+            behandlingstatus = this.behandlingsstatus(),
             venterPåBruker = påVent?.avventerBruker() ?: false,
             ansvarligSaksbehandler = ansvarligSaksbehandler.ident,
             ansvarligBeslutter = fatteVedtakSteg.ansvarligBeslutter?.ident,
@@ -421,7 +426,7 @@ class Behandling internal constructor(
                 fatteVedtakSteg = fatteVedtakSteg,
                 påVent = null,
             ).also {
-                it.utførSideeffekt(ansvarligSaksbehandler, behandlingObservatør)
+                it.utførSideeffekt(behandlingObservatør)
             }
         }
     }

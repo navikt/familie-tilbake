@@ -37,11 +37,15 @@ class IverksettVedtakTest {
         val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
         val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingEvent)
 
-        tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.FAKTA, FatteVedtakSteg.Vurdering.Godkjent)
-        tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.FORELDELSE, FatteVedtakSteg.Vurdering.Godkjent)
-        tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.VILKÅRSVURDERING, FatteVedtakSteg.Vurdering.Godkjent)
-        tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.FORESLÅ_VEDTAK, FatteVedtakSteg.Vurdering.Godkjent)
-
+        tilbakekreving.håndter(
+            beslutter = Behandler.Saksbehandler("Z999999"),
+            vurderinger = listOf(
+                Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
+                Behandlingssteg.FORELDELSE to FatteVedtakSteg.Vurdering.Godkjent,
+                Behandlingssteg.VILKÅRSVURDERING to FatteVedtakSteg.Vurdering.Godkjent,
+                Behandlingssteg.FORESLÅ_VEDTAK to FatteVedtakSteg.Vurdering.Godkjent,
+            ),
+        )
         tilbakekreving.tilstand shouldBe IverksettVedtak
     }
 
@@ -50,11 +54,14 @@ class IverksettVedtakTest {
         val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
         val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingEvent)
-
-        tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.FAKTA, FatteVedtakSteg.Vurdering.Godkjent)
-        tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.FORELDELSE, FatteVedtakSteg.Vurdering.Godkjent)
-        tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.FORESLÅ_VEDTAK, FatteVedtakSteg.Vurdering.Godkjent)
-
+        tilbakekreving.håndter(
+            beslutter = Behandler.Saksbehandler("Z999999"),
+            vurderinger = listOf(
+                Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
+                Behandlingssteg.FORELDELSE to FatteVedtakSteg.Vurdering.Godkjent,
+                Behandlingssteg.FORESLÅ_VEDTAK to FatteVedtakSteg.Vurdering.Godkjent,
+            ),
+        )
         tilbakekreving.tilstand shouldBe TilBehandling
     }
 
@@ -108,10 +115,15 @@ class IverksettVedtakTest {
         val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
         val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingEvent)
 
-        tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.FAKTA, FatteVedtakSteg.Vurdering.Godkjent)
-        tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.FORELDELSE, FatteVedtakSteg.Vurdering.Godkjent)
-        tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.VILKÅRSVURDERING, FatteVedtakSteg.Vurdering.Godkjent)
-        tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.FORESLÅ_VEDTAK, FatteVedtakSteg.Vurdering.Godkjent)
+        tilbakekreving.håndter(
+            Behandler.Saksbehandler("Z999999"),
+            listOf(
+                Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
+                Behandlingssteg.FORELDELSE to FatteVedtakSteg.Vurdering.Godkjent,
+                Behandlingssteg.VILKÅRSVURDERING to FatteVedtakSteg.Vurdering.Godkjent,
+                Behandlingssteg.FORESLÅ_VEDTAK to FatteVedtakSteg.Vurdering.Godkjent,
+            ),
+        )
 
         tilbakekreving.håndter(
             IverksettelseHendelse(
@@ -127,9 +139,13 @@ class IverksettVedtakTest {
         val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
         val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingEvent)
-
-        tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.FAKTA, FatteVedtakSteg.Vurdering.Godkjent)
-        tilbakekreving.håndter(Behandler.Saksbehandler("Z999999"), Behandlingssteg.FORESLÅ_VEDTAK, FatteVedtakSteg.Vurdering.Godkjent)
+        tilbakekreving.håndter(
+            Behandler.Saksbehandler("Z999999"),
+            listOf(
+                Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
+                Behandlingssteg.FORESLÅ_VEDTAK to FatteVedtakSteg.Vurdering.Godkjent,
+            ),
+        )
 
         val exception = shouldThrow<ModellFeil.UgyldigOperasjonException> {
             tilbakekreving.håndter(

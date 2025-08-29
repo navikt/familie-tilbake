@@ -62,10 +62,10 @@ class BehandlingTest {
 
         behandling.settPåVent(Venteårsak.MANGLER_STØTTE, LocalDate.MAX, "Begrunnelse")
         shouldThrowWithMessage<ModellFeil.UgyldigOperasjonException>("Behandling er satt på vent. Kan ikke håndtere behandlingsutfall.") {
-            behandling.håndter(Behandler.Saksbehandler("Ansvarlig beslutter"), Behandlingssteg.FAKTA, FatteVedtakSteg.Vurdering.Godkjent, BehandlingObservatørOppsamler())
+            behandling.håndter(Behandler.Saksbehandler("Ansvarlig beslutter"), listOf(Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent), BehandlingObservatørOppsamler())
         }
 
         behandling.taAvVent()
-        behandling.håndter(Behandler.Saksbehandler("Ansvarlig beslutter"), Behandlingssteg.FAKTA, FatteVedtakSteg.Vurdering.Godkjent, BehandlingObservatørOppsamler())
+        behandling.håndter(Behandler.Saksbehandler("Ansvarlig beslutter"), listOf(Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent), BehandlingObservatørOppsamler())
     }
 }

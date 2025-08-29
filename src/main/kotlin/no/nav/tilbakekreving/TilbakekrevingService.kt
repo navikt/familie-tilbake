@@ -300,16 +300,15 @@ class TilbakekrevingService(
         vurdering: BehandlingsstegFatteVedtaksstegDto,
         beslutter: Behandler,
     ) {
-        for (stegVurdering in vurdering.totrinnsvurderinger) {
-            tilbakekreving.håndter(
-                beslutter = beslutter,
-                behandlingssteg = stegVurdering.behandlingssteg,
-                vurdering = when (stegVurdering.godkjent) {
+        tilbakekreving.håndter(
+            beslutter = beslutter,
+            vurderinger = vurdering.totrinnsvurderinger.map { stegVurdering ->
+                stegVurdering.behandlingssteg to when (stegVurdering.godkjent) {
                     true -> FatteVedtakSteg.Vurdering.Godkjent
                     else -> FatteVedtakSteg.Vurdering.Underkjent(stegVurdering.begrunnelse!!)
-                },
-            )
-        }
+                }
+            },
+        )
     }
 
     fun behandleBrevmottaker(

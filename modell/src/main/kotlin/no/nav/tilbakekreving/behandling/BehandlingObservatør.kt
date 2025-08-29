@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.behandling
 
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import java.math.BigDecimal
@@ -10,6 +11,7 @@ interface BehandlingObservatør {
         behandlingId: UUID,
         eksternBehandlingId: String,
         vedtaksresultat: Vedtaksresultat?,
+        behandlingstatus: Behandlingsstatus,
         venterPåBruker: Boolean,
         ansvarligSaksbehandler: String?,
         ansvarligBeslutter: String?,
