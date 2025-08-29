@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.vilkårsvurdering
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
-import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
@@ -115,7 +114,6 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         vurdertPeriode.periode shouldBe Datoperiode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 2, 29))
         vurdertPeriode.hendelsestype shouldBe Hendelsestype.ANNET
         vurdertPeriode.feilutbetaltBeløp shouldBe BigDecimal("20000")
-        vurdertPeriode.reduserteBeløper.shouldBeEmpty()
         assertAktiviteter(vurdertPeriode.aktiviteter)
         vurdertPeriode.aktiviteter[0].beløp shouldBe BigDecimal(20000)
         vurdertPeriode.foreldet.shouldBeFalse()
@@ -140,7 +138,6 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         foreldetPeriode.hendelsestype shouldBe Hendelsestype.ANNET
         foreldetPeriode.feilutbetaltBeløp shouldBe BigDecimal("10000")
         foreldetPeriode.foreldet.shouldBeTrue()
-        foreldetPeriode.reduserteBeløper.shouldBeEmpty()
         assertAktiviteter(foreldetPeriode.aktiviteter)
         foreldetPeriode.aktiviteter[0].beløp shouldBe BigDecimal(10000)
         foreldetPeriode.begrunnelse shouldBe "begrunnelse"
@@ -152,7 +149,6 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         ikkeForeldetPeriode.foreldet.shouldBeFalse()
         ikkeForeldetPeriode.feilutbetaltBeløp shouldBe BigDecimal("10000")
         ikkeForeldetPeriode.aktiviteter[0].beløp shouldBe BigDecimal(10000)
-        ikkeForeldetPeriode.reduserteBeløper.shouldBeEmpty()
         assertAktiviteter(ikkeForeldetPeriode.aktiviteter)
         ikkeForeldetPeriode.begrunnelse.shouldBeNull()
         ikkeForeldetPeriode.vilkårsvurderingsresultatInfo.shouldBeNull()
@@ -192,78 +188,6 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         vilkårsvurderingsresultatDto = andrePeriode.vilkårsvurderingsresultatInfo
         vilkårsvurderingsresultatDto.shouldNotBeNull()
         vilkårsvurderingsresultatDto.vilkårsvurderingsresultat shouldBe Vilkårsvurderingsresultat.GOD_TRO
-    }
-
-    @Test
-    fun `hentVilkårsvurdering skal hente vilkårsvurdering med reduserte beløper`() {
-        lagBehandlingsstegstilstand(behandling.id, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
-        lagBehandlingsstegstilstand(behandling.id, Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)
-
-        val kravgrunnlag431 = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
-        val justBeløp = lagKravgrunnlagsbeløp(
-            klassetype = Klassetype.JUST,
-            nyttBeløp = BigDecimal(5000),
-            opprinneligUtbetalingsbeløp = BigDecimal.ZERO,
-        )
-        val trekBeløp = lagKravgrunnlagsbeløp(
-            klassetype = Klassetype.TREK,
-            nyttBeløp = BigDecimal.ZERO,
-            opprinneligUtbetalingsbeløp = BigDecimal(-2000),
-        )
-        val skatBeløp = lagKravgrunnlagsbeløp(
-            klassetype = Klassetype.SKAT,
-            nyttBeløp = BigDecimal.ZERO,
-            opprinneligUtbetalingsbeløp = BigDecimal(-2000),
-        )
-        val førstePeriode = kravgrunnlag431.perioder
-            .toList()[0]
-            .copy(
-                beløp =
-                    setOf(
-                        Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
-                        Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
-                        justBeløp,
-                    ),
-            )
-        val andrePeriode = kravgrunnlag431.perioder
-            .toList()[1]
-            .copy(
-                beløp =
-                    setOf(
-                        Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
-                        Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
-                        trekBeløp,
-                        skatBeløp,
-                    ),
-            )
-        kravgrunnlagRepository.update(kravgrunnlag431.copy(perioder = setOf(førstePeriode, andrePeriode)))
-
-        val vurdertVilkårsvurderingDto = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
-        vurdertVilkårsvurderingDto.rettsgebyr shouldBe Rettsgebyr.rettsgebyr
-        vurdertVilkårsvurderingDto.perioder.shouldNotBeEmpty()
-        vurdertVilkårsvurderingDto.perioder.size shouldBe 1
-        val vurdertPeriode = vurdertVilkårsvurderingDto.perioder[0]
-        vurdertPeriode.periode shouldBe Datoperiode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 2, 29))
-        vurdertPeriode.hendelsestype shouldBe Hendelsestype.ANNET
-        vurdertPeriode.feilutbetaltBeløp shouldBe BigDecimal("20000")
-        assertAktiviteter(vurdertPeriode.aktiviteter)
-        vurdertPeriode.aktiviteter[0].beløp shouldBe BigDecimal(20000)
-        vurdertPeriode.foreldet.shouldBeFalse()
-
-        vurdertPeriode.reduserteBeløper.shouldNotBeEmpty()
-        vurdertPeriode.reduserteBeløper.size shouldBe 3
-        var redusertBeløp = vurdertPeriode.reduserteBeløper[0]
-        redusertBeløp.trekk.shouldBeTrue()
-        redusertBeløp.beløp shouldBe BigDecimal("2000.00")
-        redusertBeløp = vurdertPeriode.reduserteBeløper[1]
-        redusertBeløp.trekk.shouldBeTrue()
-        redusertBeløp.beløp shouldBe BigDecimal("2000.00")
-        redusertBeløp = vurdertPeriode.reduserteBeløper[2]
-        redusertBeløp.trekk.shouldBeFalse()
-        redusertBeløp.beløp shouldBe BigDecimal("5000.00")
-
-        vurdertPeriode.vilkårsvurderingsresultatInfo.shouldBeNull()
-        vurdertPeriode.begrunnelse.shouldBeNull()
     }
 
     @Test
@@ -450,7 +374,6 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         ikkeVurdertPeriode.periode shouldBe Datoperiode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31))
         ikkeVurdertPeriode.hendelsestype shouldBe Hendelsestype.ANNET
         ikkeVurdertPeriode.feilutbetaltBeløp shouldBe BigDecimal("10000")
-        ikkeVurdertPeriode.reduserteBeløper.shouldBeEmpty()
         assertAktiviteter(ikkeVurdertPeriode.aktiviteter)
         ikkeVurdertPeriode.aktiviteter[0].beløp shouldBe BigDecimal(10000)
         ikkeVurdertPeriode.vilkårsvurderingsresultatInfo.shouldBeNull()
@@ -512,7 +435,6 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         førsteForeldetPeriode.periode shouldBe (1.januar(2020) til 31.januar(2020))
         førsteForeldetPeriode.hendelsestype shouldBe Hendelsestype.ANNET
         førsteForeldetPeriode.feilutbetaltBeløp shouldBe BigDecimal("10000")
-        førsteForeldetPeriode.reduserteBeløper.shouldBeEmpty()
         assertAktiviteter(førsteForeldetPeriode.aktiviteter)
         førsteForeldetPeriode.aktiviteter[0].beløp shouldBe BigDecimal(10000)
         førsteForeldetPeriode.vilkårsvurderingsresultatInfo.shouldBeNull()
@@ -522,7 +444,6 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         andreForeldetPeriode.periode shouldBe (1.februar(2020) til 29.februar(2020))
         andreForeldetPeriode.hendelsestype shouldBe Hendelsestype.ANNET
         andreForeldetPeriode.feilutbetaltBeløp shouldBe BigDecimal("10000")
-        andreForeldetPeriode.reduserteBeløper.shouldBeEmpty()
         assertAktiviteter(andreForeldetPeriode.aktiviteter)
         andreForeldetPeriode.aktiviteter[0].beløp shouldBe BigDecimal(10000)
         andreForeldetPeriode.vilkårsvurderingsresultatInfo.shouldBeNull()

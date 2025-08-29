@@ -24,7 +24,6 @@ import no.nav.tilbakekreving.entities.VurdertAktsomhetEntity
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
-import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
@@ -39,7 +38,7 @@ class Vilkårsvurderingsteg(
     private var vurderinger: List<Vilkårsvurderingsperiode>,
     private val kravgrunnlagHendelse: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
     private val foreldelsesteg: Foreldelsesteg,
-) : Saksbehandlingsteg<VurdertVilkårsvurderingDto>, VilkårsvurderingAdapter {
+) : Saksbehandlingsteg, VilkårsvurderingAdapter {
     override val type: Behandlingssteg = Behandlingssteg.VILKÅRSVURDERING
 
     override fun erFullstendig(): Boolean = vurderinger.none { it.vurdering is Vurdering.IkkeVurdert }
@@ -78,7 +77,7 @@ class Vilkårsvurderingsteg(
         return vurderinger.toSet()
     }
 
-    override fun tilFrontendDto(): VurdertVilkårsvurderingDto {
+    fun tilFrontendDto(faktasteg: Faktasteg): VurdertVilkårsvurderingDto {
         fun mapAktsomhet(aktsomhet: VurdertAktsomhet): VurdertAktsomhetDto {
             return VurdertAktsomhetDto(
                 aktsomhet = when (aktsomhet) {
@@ -88,7 +87,7 @@ class Vilkårsvurderingsteg(
                 },
                 ileggRenter = aktsomhet.skalIleggesRenter,
                 andelTilbakekreves = (aktsomhet.skalReduseres as? VurdertAktsomhet.SkalReduseres.Ja)?.prosentdel?.toBigDecimal(),
-                beløpTilbakekreves = null,
+                beløpTilbakekreves = kravgrunnlagHendelse.entry.feilutbetaltBeløpForAllePerioder(),
                 begrunnelse = aktsomhet.begrunnelse,
                 særligeGrunner = aktsomhet.særligeGrunner?.grunner?.map {
                     VurdertSærligGrunnDto(
@@ -98,6 +97,7 @@ class Vilkårsvurderingsteg(
                     )
                 },
                 særligeGrunnerTilReduksjon = aktsomhet.skalReduseres is VurdertAktsomhet.SkalReduseres.Ja,
+                // TODO: se på denne under arbeidet med under 4xrettsgebyr
                 tilbakekrevSmåbeløp = false,
                 særligeGrunnerBegrunnelse = aktsomhet.særligeGrunner?.begrunnelse,
             )
@@ -107,11 +107,7 @@ class Vilkårsvurderingsteg(
                 VurdertVilkårsvurderingsperiodeDto(
                     periode = it.periode,
                     feilutbetaltBeløp = kravgrunnlagHendelse.entry.totaltBeløpFor(it.periode),
-                    hendelsestype = Hendelsestype.ANNET,
-                    reduserteBeløper = listOf(),
-                    aktiviteter = listOf(),
-                    begrunnelse = it.vurdering.begrunnelse,
-                    foreldet = foreldelsesteg.erPeriodeForeldet(it.periode),
+                    hendelsestype = faktasteg.hentHendelsestype(it.periode),
                     vilkårsvurderingsresultatInfo =
                         it.vurdering.let { vurdering ->
                             when (vurdering) {
@@ -147,6 +143,8 @@ class Vilkårsvurderingsteg(
                                 Vurdering.IkkeVurdert -> null
                             }
                         },
+                    begrunnelse = it.vurdering.begrunnelse,
+                    foreldet = foreldelsesteg.erPeriodeForeldet(it.periode),
                 )
             },
             rettsgebyr = 0,
