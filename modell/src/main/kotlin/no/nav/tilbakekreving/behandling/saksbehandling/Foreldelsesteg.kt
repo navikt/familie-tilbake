@@ -18,7 +18,7 @@ import java.util.UUID
 class Foreldelsesteg(
     private var vurdertePerioder: List<Foreldelseperiode>,
     private val kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
-) : Saksbehandlingsteg<VurdertForeldelseDto> {
+) : Saksbehandlingsteg {
     override val type: Behandlingssteg = Behandlingssteg.FORELDELSE
 
     override fun erFullstendig(): Boolean = vurdertePerioder.all { it.vurdering != Vurdering.IkkeVurdert }
@@ -52,7 +52,7 @@ class Foreldelsesteg(
         .filter { it.vurdering is Vurdering.Foreldet }
         .map(Foreldelseperiode::periode)
 
-    override fun tilFrontendDto(): VurdertForeldelseDto {
+    fun tilFrontendDto(): VurdertForeldelseDto {
         return VurdertForeldelseDto(
             foreldetPerioder =
                 vurdertePerioder.map {

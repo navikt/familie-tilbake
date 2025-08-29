@@ -27,7 +27,7 @@ class Faktasteg(
     private val tilbakekrevingOpprettet: LocalDateTime,
     private val opprettelsesvalg: Opprettelsesvalg,
     private var vurdering: Vurdering,
-) : Saksbehandlingsteg<FaktaFeilutbetalingDto> {
+) : Saksbehandlingsteg {
     override val type: Behandlingssteg = Behandlingssteg.FAKTA
 
     override fun erFullstendig(): Boolean {
@@ -38,19 +38,14 @@ class Faktasteg(
         this.vurdering = vurdering
     }
 
-    override fun tilFrontendDto(): FaktaFeilutbetalingDto {
+    internal fun hentHendelsestype(periode: Datoperiode): Hendelsestype = vurdering.perioder.single { it.gjelder(periode) }.hendelsestype
+
+    fun tilFrontendDto(): FaktaFeilutbetalingDto {
         return FaktaFeilutbetalingDto(
             varsletBeløp = brevHistorikk.sisteVarselbrev()?.varsletBeløp,
             totalFeilutbetaltPeriode = kravgrunnlag.entry.totaltFeilutbetaltPeriode(),
             totaltFeilutbetaltBeløp = kravgrunnlag.entry.feilutbetaltBeløpForAllePerioder(),
-            feilutbetaltePerioder = vurdering.perioder.map {
-                FeilutbetalingsperiodeDto(
-                    periode = it.periode,
-                    feilutbetaltBeløp = kravgrunnlag.entry.totaltBeløpFor(it.periode),
-                    hendelsestype = it.hendelsestype,
-                    hendelsesundertype = it.hendelsesundertype,
-                )
-            },
+            feilutbetaltePerioder = vurdering.perioder.map { it.tilFrontendDto(kravgrunnlag.entry) },
             revurderingsvedtaksdato = eksternFagsakBehandling.entry.revurderingsvedtaksdato,
             begrunnelse = vurdering.årsakTilFeilutbetaling,
             faktainfo =
@@ -136,13 +131,24 @@ class Faktasteg(
     }
 
     class FaktaPeriode(
-        val periode: Datoperiode,
+        private val periode: Datoperiode,
         val hendelsestype: Hendelsestype,
         val hendelsesundertype: Hendelsesundertype,
     ) {
         fun tilEntity(): FaktastegEntity.FaktaPeriodeEntity {
             return FaktastegEntity.FaktaPeriodeEntity(
                 periode = DatoperiodeEntity(fom = periode.fom, tom = periode.tom),
+                hendelsestype = hendelsestype,
+                hendelsesundertype = hendelsesundertype,
+            )
+        }
+
+        internal fun gjelder(periode: Datoperiode): Boolean = this.periode.inneholder(periode)
+
+        internal fun tilFrontendDto(kravgrunnlag: KravgrunnlagHendelse): FeilutbetalingsperiodeDto {
+            return FeilutbetalingsperiodeDto(
+                periode = periode,
+                feilutbetaltBeløp = kravgrunnlag.totaltBeløpFor(periode),
                 hendelsestype = hendelsestype,
                 hendelsesundertype = hendelsesundertype,
             )

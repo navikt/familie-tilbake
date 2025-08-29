@@ -39,7 +39,7 @@ class Vilkårsvurderingsteg(
     private var vurderinger: List<Vilkårsvurderingsperiode>,
     private val kravgrunnlagHendelse: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
     private val foreldelsesteg: Foreldelsesteg,
-) : Saksbehandlingsteg<VurdertVilkårsvurderingDto>, VilkårsvurderingAdapter {
+) : Saksbehandlingsteg, VilkårsvurderingAdapter {
     override val type: Behandlingssteg = Behandlingssteg.VILKÅRSVURDERING
 
     override fun erFullstendig(): Boolean = vurderinger.none { it.vurdering is Vurdering.IkkeVurdert }
@@ -78,7 +78,7 @@ class Vilkårsvurderingsteg(
         return vurderinger.toSet()
     }
 
-    override fun tilFrontendDto(): VurdertVilkårsvurderingDto {
+    fun tilFrontendDto(faktasteg: Faktasteg): VurdertVilkårsvurderingDto {
         fun mapAktsomhet(aktsomhet: VurdertAktsomhet): VurdertAktsomhetDto {
             return VurdertAktsomhetDto(
                 aktsomhet = when (aktsomhet) {
@@ -88,7 +88,7 @@ class Vilkårsvurderingsteg(
                 },
                 ileggRenter = aktsomhet.skalIleggesRenter,
                 andelTilbakekreves = (aktsomhet.skalReduseres as? VurdertAktsomhet.SkalReduseres.Ja)?.prosentdel?.toBigDecimal(),
-                beløpTilbakekreves = null,
+                beløpTilbakekreves = kravgrunnlagHendelse.entry.feilutbetaltBeløpForAllePerioder(),
                 begrunnelse = aktsomhet.begrunnelse,
                 særligeGrunner = aktsomhet.særligeGrunner?.grunner?.map {
                     VurdertSærligGrunnDto(
@@ -98,6 +98,7 @@ class Vilkårsvurderingsteg(
                     )
                 },
                 særligeGrunnerTilReduksjon = aktsomhet.skalReduseres is VurdertAktsomhet.SkalReduseres.Ja,
+                // TODO: se på denne under arbeidet med under 4xrettsgebyr
                 tilbakekrevSmåbeløp = false,
                 særligeGrunnerBegrunnelse = aktsomhet.særligeGrunner?.begrunnelse,
             )
@@ -107,7 +108,7 @@ class Vilkårsvurderingsteg(
                 VurdertVilkårsvurderingsperiodeDto(
                     periode = it.periode,
                     feilutbetaltBeløp = kravgrunnlagHendelse.entry.totaltBeløpFor(it.periode),
-                    hendelsestype = Hendelsestype.ANNET,
+                    hendelsestype = faktasteg.hentHendelsestype(it.periode),
                     reduserteBeløper = listOf(),
                     aktiviteter = listOf(),
                     begrunnelse = it.vurdering.begrunnelse,

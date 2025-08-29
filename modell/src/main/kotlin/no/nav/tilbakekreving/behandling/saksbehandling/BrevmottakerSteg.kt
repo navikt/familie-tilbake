@@ -9,7 +9,7 @@ import java.util.UUID
 class BrevmottakerSteg(
     private var aktivert: Boolean,
     private val defaultMottaker: RegistrertBrevmottaker,
-) : Saksbehandlingsteg<List<ManuellBrevmottakerResponsDto>> {
+) : Saksbehandlingsteg {
     override val type = Behandlingssteg.BREVMOTTAKER
     var registrertBrevmottaker: RegistrertBrevmottaker = defaultMottaker
 
@@ -33,7 +33,7 @@ class BrevmottakerSteg(
         }
     }
 
-    override fun tilFrontendDto(): List<ManuellBrevmottakerResponsDto> {
+    fun tilFrontendDto(): List<ManuellBrevmottakerResponsDto> {
         return registrertBrevmottaker.tilFrontendDto()
     }
 

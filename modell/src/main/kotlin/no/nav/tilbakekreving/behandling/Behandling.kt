@@ -18,6 +18,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
+import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg.Companion.behandlingsstegstatus
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg.Companion.klarTilVisning
 import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
@@ -64,10 +65,10 @@ class Behandling internal constructor(
     private val fatteVedtakSteg: FatteVedtakSteg,
     private var påVent: PåVent?,
 ) : Historikk.HistorikkInnslag<UUID> {
-    val faktastegDto: FrontendDto<FaktaFeilutbetalingDto> get() = faktasteg
-    val foreldelsestegDto: FrontendDto<VurdertForeldelseDto> get() = foreldelsesteg
-    val vilkårsvurderingsstegDto: FrontendDto<VurdertVilkårsvurderingDto> get() = vilkårsvurderingsteg
-    val fatteVedtakStegDto: FrontendDto<TotrinnsvurderingDto> get() = fatteVedtakSteg
+    val faktastegDto = FrontendDto<FaktaFeilutbetalingDto> { faktasteg.tilFrontendDto() }
+    val foreldelsestegDto = FrontendDto<VurdertForeldelseDto> { foreldelsesteg.tilFrontendDto() }
+    val vilkårsvurderingsstegDto = FrontendDto<VurdertVilkårsvurderingDto> { vilkårsvurderingsteg.tilFrontendDto(faktasteg) }
+    val fatteVedtakStegDto = FrontendDto<TotrinnsvurderingDto> { fatteVedtakSteg.tilFrontendDto() }
     lateinit var brevmottakerSteg: BrevmottakerSteg
 
     fun harLikePerioder(): Boolean = vilkårsvurderingsteg.harLikePerioder()
@@ -97,7 +98,7 @@ class Behandling internal constructor(
         return Sporing(eksternFagsakBehandling.entry.eksternId, internId.toString())
     }
 
-    private fun steg() = listOf(
+    private fun steg() = listOf<Saksbehandlingsteg>(
         faktasteg,
         foreldelsesteg,
         vilkårsvurderingsteg,
