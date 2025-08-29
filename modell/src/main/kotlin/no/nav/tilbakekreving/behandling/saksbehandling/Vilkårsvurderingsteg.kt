@@ -24,7 +24,6 @@ import no.nav.tilbakekreving.entities.VurdertAktsomhetEntity
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
-import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
@@ -109,10 +108,6 @@ class Vilkårsvurderingsteg(
                     periode = it.periode,
                     feilutbetaltBeløp = kravgrunnlagHendelse.entry.totaltBeløpFor(it.periode),
                     hendelsestype = faktasteg.hentHendelsestype(it.periode),
-                    reduserteBeløper = listOf(),
-                    aktiviteter = listOf(),
-                    begrunnelse = it.vurdering.begrunnelse,
-                    foreldet = foreldelsesteg.erPeriodeForeldet(it.periode),
                     vilkårsvurderingsresultatInfo =
                         it.vurdering.let { vurdering ->
                             when (vurdering) {
@@ -148,6 +143,8 @@ class Vilkårsvurderingsteg(
                                 Vurdering.IkkeVurdert -> null
                             }
                         },
+                    begrunnelse = it.vurdering.begrunnelse,
+                    foreldet = foreldelsesteg.erPeriodeForeldet(it.periode),
                 )
             },
             rettsgebyr = 0,
