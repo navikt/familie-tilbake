@@ -1,11 +1,11 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
-val springDocVersion = "2.8.9"
+val springDocVersion = "2.8.11"
 val testcontainersVersion = "1.21.3"
-val tokenValidationVersion = "5.0.33"
+val tokenValidationVersion = "5.0.34"
 val flywayVersion = "11.3.4"
-val ktorVersion = "3.2.2"
+val ktorVersion = "3.2.3"
 ext["ktorVersion"] = ktorVersion
 
 group = "no.nav"
@@ -13,10 +13,10 @@ description = "familie-tilbake"
 java.sourceCompatibility = JavaVersion.VERSION_21
 
 plugins {
-    kotlin("jvm") version "2.2.0"
-    id("org.springframework.boot") version "3.5.4"
-    id("org.jetbrains.kotlin.plugin.spring") version "2.2.0"
-    id("org.jlleitschuh.gradle.ktlint") version "13.0.0"
+    kotlin("jvm") version "2.2.10"
+    id("org.springframework.boot") version "3.5.5"
+    id("org.jetbrains.kotlin.plugin.spring") version "2.2.10"
+    id("org.jlleitschuh.gradle.ktlint") version "13.1.0"
 }
 
 springBoot {
@@ -56,7 +56,7 @@ subprojects {
     dependencies {
         testImplementation("org.junit.jupiter:junit-jupiter:5.13.4")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-        testImplementation("io.kotest:kotest-assertions-core:5.9.1")
+        testImplementation("io.kotest:kotest-assertions-core:6.0.1")
     }
 
     tasks.test {
@@ -87,7 +87,7 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
-    implementation("com.google.cloud:google-cloud-bigquery:2.54.0")
+    implementation("com.google.cloud:google-cloud-bigquery:2.54.2")
 
     api("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocVersion")
     api("org.springdoc:springdoc-openapi-starter-common:$springDocVersion")
@@ -117,7 +117,7 @@ dependencies {
     api(project(":kontrakter-intern"))
     api(project(":modell"))
     api(project(":pdf"))
-    api("no.nav.familie:prosessering-core:2.20250728105838_1f618e2") {
+    api("no.nav.familie:prosessering-core:2.20250825143618_c0302c9") {
         // La spring boot håndtere flyway versjon selv om den er eldre enn den som er inkludert i prosessering-core
         exclude("org.flywaydb")
     }
@@ -134,7 +134,7 @@ dependencies {
     api("io.micrometer:micrometer-registry-prometheus")
     api("net.logstash.logback:logstash-logback-encoder:8.1")
 
-    api("io.getunleash:unleash-client-java:11.0.2")
+    api("io.getunleash:unleash-client-java:11.1.0")
     api("org.messaginghub:pooled-jms:3.1.7")
     api("org.flywaydb:flyway-core")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
@@ -147,7 +147,7 @@ dependencies {
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
-    testImplementation("io.jsonwebtoken:jjwt:0.12.6")
+    testImplementation("io.jsonwebtoken:jjwt:0.13.0")
     testImplementation("no.nav.security:token-validation-spring-test:$tokenValidationVersion")
 
     testImplementation("org.testcontainers:junit-jupiter:$testcontainersVersion")
