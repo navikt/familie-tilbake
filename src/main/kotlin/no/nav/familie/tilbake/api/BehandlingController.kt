@@ -144,6 +144,7 @@ class BehandlingController(
                     handling = "Henter tilbakekrevingsbehandling",
                 )
                 val behandler = ContextService.hentBehandler(SecureLog.Context.fra(tilbakekreving))
+                println("==========>>> ROLLE: $rolle")
                 return Ressurs.success(tilbakekreving.behandlingHistorikk.entry(behandlingId).tilFrontendDto(behandler, rolle == Behandlerrolle.BESLUTTER))
             }
         }
