@@ -83,6 +83,10 @@ class ForvaltningService(
                 logContext,
             )
 
+        log.medContext(logContext) {
+            info("Nytt kravgrunnlag: ${hentetKravgrunnlag.tilbakekrevingsPeriode}")
+        }
+
         val kravgrunnlag = kravgrunnlagRepository.findByEksternKravgrunnlagIdAndAktivIsTrue(kravgrunnlagId)
         if (kravgrunnlag != null) {
             kravgrunnlagRepository.update(kravgrunnlag.copy(aktiv = false))
@@ -112,6 +116,10 @@ class ForvaltningService(
                 KodeAksjon.HENT_KORRIGERT_KRAVGRUNNLAG,
                 logContext,
             )
+
+        log.medContext(logContext) {
+            info("Nytt kravgrunnlag: ${hentetKravgrunnlag.tilbakekrevingsPeriode}")
+        }
 
         val kravgrunnlag = kravgrunnlagRepository.findByEksternKravgrunnlagIdAndAktivIsTrue(kravgrunnlagId)
         if (kravgrunnlag != null) {
