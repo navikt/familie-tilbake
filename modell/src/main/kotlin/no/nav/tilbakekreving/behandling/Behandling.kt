@@ -33,12 +33,14 @@ import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
+import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.saksbehandler.Behandler
@@ -177,7 +179,12 @@ class Behandling internal constructor(
             vedtaksdato = null,
             enhetskode = enhet?.kode ?: "Ukjent",
             enhetsnavn = enhet?.navn ?: "Ukjent",
-            resultatstype = null,
+            resultatstype = when (hentVedtaksresultat()) {
+                Vedtaksresultat.FULL_TILBAKEBETALING -> Behandlingsresultatstype.FULL_TILBAKEBETALING
+                Vedtaksresultat.DELVIS_TILBAKEBETALING -> Behandlingsresultatstype.DELVIS_TILBAKEBETALING
+                Vedtaksresultat.INGEN_TILBAKEBETALING -> Behandlingsresultatstype.INGEN_TILBAKEBETALING
+                null -> null
+            },
             ansvarligSaksbehandler = ansvarligSaksbehandler.ident,
             ansvarligBeslutter = fatteVedtakSteg.ansvarligBeslutter?.ident,
             erBehandlingPåVent = påVent != null,
@@ -374,11 +381,7 @@ class Behandling internal constructor(
         observatør.behandlingOppdatert(
             behandlingId = internId,
             eksternBehandlingId = eksternFagsakBehandling.entry.eksternId,
-            vedtaksresultat = if (fatteVedtakSteg.erFullstendig()) {
-                lagBeregning().oppsummer().vedtaksresultat
-            } else {
-                null
-            },
+            vedtaksresultat = hentVedtaksresultat(),
             behandlingstatus = this.behandlingsstatus(),
             venterPåBruker = påVent?.avventerBruker() ?: false,
             ansvarligSaksbehandler = ansvarligSaksbehandler.ident,
@@ -386,6 +389,13 @@ class Behandling internal constructor(
             totaltFeilutbetaltBeløp = kravgrunnlag.entry.feilutbetaltBeløpForAllePerioder(),
             totalFeilutbetaltPeriode = kravgrunnlag.entry.perioder.minOf { it.periode.fom } til kravgrunnlag.entry.perioder.maxOf { it.periode.tom },
         )
+    }
+
+    fun hentVedtaksresultat(): Vedtaksresultat? {
+        if (fatteVedtakSteg.erFullstendig()) {
+            return lagBeregning().oppsummer().vedtaksresultat
+        }
+        return null
     }
 
     companion object {
