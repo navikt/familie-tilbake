@@ -18,7 +18,6 @@ data class VurdertVilkårsvurderingsperiodeDto(
     val periode: Datoperiode,
     val feilutbetaltBeløp: BigDecimal,
     val hendelsestype: Hendelsestype,
-    val reduserteBeløper: List<RedusertBeløpDto> = listOf(),
     val aktiviteter: List<AktivitetDto> = listOf(),
     val vilkårsvurderingsresultatInfo: VurdertVilkårsvurderingsresultatDto? = null,
     val begrunnelse: String? = null,
@@ -52,11 +51,6 @@ data class VurdertAktsomhetDto(
 data class VurdertSærligGrunnDto(
     val særligGrunn: SærligGrunn,
     val begrunnelse: String? = null,
-)
-
-data class RedusertBeløpDto(
-    val trekk: Boolean,
-    val beløp: BigDecimal,
 )
 
 data class AktivitetDto(

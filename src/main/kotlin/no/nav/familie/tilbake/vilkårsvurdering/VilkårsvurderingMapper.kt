@@ -15,7 +15,6 @@ import no.nav.tilbakekreving.Rettsgebyr
 import no.nav.tilbakekreving.api.v1.dto.AktivitetDto
 import no.nav.tilbakekreving.api.v1.dto.AktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.GodTroDto
-import no.nav.tilbakekreving.api.v1.dto.RedusertBeløpDto
 import no.nav.tilbakekreving.api.v1.dto.SærligGrunnDto
 import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertAktsomhetDto
@@ -51,11 +50,10 @@ object VilkårsvurderingMapper {
                             faktaFeilutbetaling.perioder,
                             it.periode,
                         ),
-                    reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, it.periode),
                     aktiviteter = hentAktiviteter(kravgrunnlag431, it.periode),
+                    vilkårsvurderingsresultatInfo = tilVilkårsvurderingsresultatDto(it),
                     begrunnelse = it.begrunnelse,
                     foreldet = false,
-                    vilkårsvurderingsresultatInfo = tilVilkårsvurderingsresultatDto(it),
                 )
             }
 
@@ -65,7 +63,6 @@ object VilkårsvurderingMapper {
                     periode = it.toDatoperiode(),
                     feilutbetaltBeløp = kravgrunnlagAdapter.feilutbetaltBeløp(it.toDatoperiode()),
                     hendelsestype = hentHendelsestype(faktaFeilutbetaling.perioder, it),
-                    reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, it),
                     aktiviteter = hentAktiviteter(kravgrunnlag431, it),
                     foreldet = false,
                 )
@@ -76,10 +73,9 @@ object VilkårsvurderingMapper {
                 periode = periode.toDatoperiode(),
                 feilutbetaltBeløp = kravgrunnlagAdapter.feilutbetaltBeløp(periode.toDatoperiode()),
                 hendelsestype = hentHendelsestype(faktaFeilutbetaling.perioder, periode),
-                reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, periode),
                 aktiviteter = hentAktiviteter(kravgrunnlag431, periode),
-                foreldet = true,
                 begrunnelse = begrunnelse,
+                foreldet = true,
             )
         }
 
@@ -203,43 +199,6 @@ object VilkårsvurderingMapper {
         faktaPerioder: Set<FaktaFeilutbetalingsperiode>,
         vurdertVilkårsperiode: Månedsperiode,
     ): Hendelsestype = faktaPerioder.first { it.periode.overlapper(vurdertVilkårsperiode) }.hendelsestype
-
-    private fun utledReduserteBeløp(
-        kravgrunnlag431: Kravgrunnlag431,
-        vurdertVilkårsperiode: Månedsperiode,
-    ): List<RedusertBeløpDto> {
-        val perioder = kravgrunnlag431.perioder.filter { vurdertVilkårsperiode.overlapper(it.periode) }
-        val redusertBeløper = mutableListOf<RedusertBeløpDto>()
-        // reduserte beløper for SKAT/TREK
-        perioder.forEach { periode ->
-            periode.beløp
-                .filter { Klassetype.SKAT == it.klassetype || Klassetype.TREK == it.klassetype }
-                .filter { it.opprinneligUtbetalingsbeløp.signum() == -1 }
-                .forEach {
-                    redusertBeløper.add(
-                        RedusertBeløpDto(
-                            true,
-                            it.opprinneligUtbetalingsbeløp.abs(),
-                        ),
-                    )
-                }
-        }
-        // reduserte beløper for JUST(etterbetaling)
-        perioder.forEach { periode ->
-            periode.beløp
-                .filter { Klassetype.JUST == it.klassetype }
-                .filter { it.opprinneligUtbetalingsbeløp.signum() == 0 && it.nyttBeløp.signum() == 1 }
-                .forEach {
-                    redusertBeløper.add(
-                        RedusertBeløpDto(
-                            false,
-                            it.nyttBeløp,
-                        ),
-                    )
-                }
-        }
-        return redusertBeløper
-    }
 
     private fun hentAktiviteter(
         kravgrunnlag431: Kravgrunnlag431,
