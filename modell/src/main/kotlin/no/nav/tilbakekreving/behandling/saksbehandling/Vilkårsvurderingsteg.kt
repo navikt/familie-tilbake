@@ -28,7 +28,6 @@ import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -92,9 +91,11 @@ class Vilkårsvurderingsteg(
                 begrunnelse = aktsomhet.begrunnelse,
                 særligeGrunner = aktsomhet.særligeGrunner?.grunner?.map {
                     VurdertSærligGrunnDto(
-                        særligGrunn = it,
-                        // TODO: Trenger kanskje egen sealed interface også siden bare annet skal ha grunn
-                        begrunnelse = null,
+                        særligGrunn = it.type,
+                        begrunnelse = when (it) {
+                            is SærligGrunn.Annet -> it.begrunnelse
+                            else -> null
+                        },
                     )
                 },
                 særligeGrunnerTilReduksjon = aktsomhet.skalReduseres is VurdertAktsomhet.SkalReduseres.Ja,
@@ -408,7 +409,9 @@ class Vilkårsvurderingsteg(
             fun tilEntity(): SærligeGrunnerEntity {
                 return SærligeGrunnerEntity(
                     begrunnelse = begrunnelse,
-                    grunner = grunner.map { it },
+                    grunner = grunner.map {
+                        it.tilEntity()
+                    },
                 )
             }
         }

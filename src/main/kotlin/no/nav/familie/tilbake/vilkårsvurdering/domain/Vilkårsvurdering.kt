@@ -3,7 +3,7 @@ package no.nav.familie.tilbake.vilkårsvurdering.domain
 import no.nav.familie.tilbake.common.repository.Sporbar
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnTyper
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
@@ -130,7 +130,7 @@ data class VilkårsvurderingSærligGrunn(
     @Id
     val id: UUID = UUID.randomUUID(),
     @Column("serlig_grunn")
-    val særligGrunn: SærligGrunn,
+    val særligGrunn: SærligGrunnTyper,
     val begrunnelse: String?,
     @Version
     val versjon: Long = 0,

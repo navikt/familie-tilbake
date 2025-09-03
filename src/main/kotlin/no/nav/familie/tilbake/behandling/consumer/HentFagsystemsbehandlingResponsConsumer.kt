@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-@Profile("!integrasjonstest & !e2e")
+@Profile("!integrasjonstest & !e2e & !local")
 class HentFagsystemsbehandlingResponsConsumer(
     private val fagsystemsbehandlingService: HentFagsystemsbehandlingService,
 ) {
