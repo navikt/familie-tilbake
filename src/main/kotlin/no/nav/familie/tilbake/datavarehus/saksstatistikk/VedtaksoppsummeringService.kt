@@ -50,8 +50,8 @@ class VedtaksoppsummeringService(
         return Vedtaksoppsummering(
             behandlingUuid = behandling.eksternBrukId,
             saksnummer = fagsak.eksternFagsakId,
-            ytelsestype = fagsak.ytelsestype,
-            fagsystem = fagsak.fagsystem,
+            ytelsestype = fagsak.ytelsestype.tilDTO(),
+            fagsystem = fagsak.fagsystem.tilDTO(),
             ansvarligSaksbehandler = behandling.ansvarligSaksbehandler,
             ansvarligBeslutter = ansvarligBeslutter,
             behandlingstype = behandling.type,

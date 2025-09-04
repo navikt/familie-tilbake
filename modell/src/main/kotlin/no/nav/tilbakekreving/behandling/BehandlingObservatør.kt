@@ -13,7 +13,7 @@ interface BehandlingObservatør {
         vedtaksresultat: Vedtaksresultat?,
         behandlingstatus: Behandlingsstatus,
         venterPåBruker: Boolean,
-        ansvarligSaksbehandler: String?,
+        ansvarligSaksbehandler: String,
         ansvarligBeslutter: String?,
         totaltFeilutbetaltBeløp: BigDecimal?,
         totalFeilutbetaltPeriode: Datoperiode?,

@@ -9,6 +9,7 @@ object IverksettVedtak : Tilstand {
 
     override fun entering(tilbakekreving: Tilbakekreving) {
         tilbakekreving.trengerIverksettelse()
+        tilbakekreving.sendVedtakIverksatt()
     }
 
     override fun håndter(

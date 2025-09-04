@@ -44,7 +44,12 @@ import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import java.util.UUID
+import no.nav.tilbakekreving.endring.EndringObservatør
+import no.nav.tilbakekreving.endring.VurdertUtbetaling
+import no.nav.tilbakekreving.fagsystem.Ytelse
 
 class Behandling internal constructor(
     override val internId: UUID,
@@ -385,6 +390,39 @@ class Behandling internal constructor(
             ansvarligBeslutter = fatteVedtakSteg.ansvarligBeslutter?.ident,
             totaltFeilutbetaltBeløp = kravgrunnlag.entry.feilutbetaltBeløpForAllePerioder(),
             totalFeilutbetaltPeriode = kravgrunnlag.entry.perioder.minOf { it.periode.fom } til kravgrunnlag.entry.perioder.maxOf { it.periode.tom },
+        )
+    }
+
+    fun sendVedtakIverksatt(
+        forrigeBehandlingId: UUID?,
+        eksternFagsystemId: String,
+        ytelse: Ytelse,
+        endringObservatør: EndringObservatør,
+    ) {
+        val beregning = lagBeregning()
+        endringObservatør.vedtakFattet(
+            behandlingId = internId,
+            forrigeBehandlingId = forrigeBehandlingId,
+            behandlingOpprettet = OffsetDateTime.of(opprettet, ZoneOffset.UTC),
+            eksternFagsystemId = eksternFagsystemId,
+            eksternBehandlingId = eksternFagsakBehandling.entry.eksternId,
+            ytelse = ytelse,
+            vedtakFattetTidspunkt = OffsetDateTime.now(ZoneOffset.UTC),
+            ansvarligEnhet = null,
+            ansvarligSaksbehandler = ansvarligSaksbehandler.ident,
+            ansvarligBeslutter = ansvarligSaksbehandler.ident,
+            vurderteUtbetalinger = beregning.beregn().map {
+                VurdertUtbetaling(
+                    periode = it.periode,
+                    rettsligGrunnlag = "Annet",
+                    vilkårsvurdering = TODO(),//vilkårsvurderingsteg.oppsummerVurdering(it.periode),
+                    beregning = VurdertUtbetaling.Beregning(
+                        feilutbetaltBeløp = it.feilutbetaltBeløp(),
+                        tilbakekrevesBeløp = it.tilbakekrevesBruttoMedRenter(),
+                        rentebeløp = it.renter()
+                    )
+                )
+            }
         )
     }
 

@@ -6,6 +6,7 @@ import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.math.BigDecimal
+import java.time.OffsetDateTime
 import java.util.UUID
 
 class EndringObservatørOppsamler : EndringObservatør {
@@ -22,7 +23,7 @@ class EndringObservatørOppsamler : EndringObservatør {
         vedtaksresultat: Vedtaksresultat?,
         venterPåBruker: Boolean,
         ansvarligEnhet: String?,
-        ansvarligSaksbehandler: String?,
+        ansvarligSaksbehandler: String,
         ansvarligBeslutter: String?,
         totaltFeilutbetaltBeløp: BigDecimal?,
         totalFeilutbetaltPeriode: Datoperiode?,
@@ -36,6 +37,20 @@ class EndringObservatørOppsamler : EndringObservatør {
                 ),
             )
     }
+
+    override fun vedtakFattet(
+        behandlingId: UUID,
+        forrigeBehandlingId: UUID?,
+        behandlingOpprettet: OffsetDateTime,
+        eksternFagsystemId: String,
+        eksternBehandlingId: String,
+        ytelse: Ytelse,
+        vedtakFattetTidspunkt: OffsetDateTime,
+        ansvarligEnhet: String?,
+        ansvarligSaksbehandler: String,
+        ansvarligBeslutter: String,
+        vurderteUtbetalinger: List<VurdertUtbetaling>
+    ) {}
 
     fun statusoppdateringerFor(behandlingId: UUID): List<Statusoppdatering> {
         return statusoppdateringer[behandlingId] ?: emptyList()

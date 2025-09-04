@@ -155,6 +155,8 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
                 }
             }
         }
+
+        val tbk = tilbakekrevingService.hentTilbakekreving(behandlingId)
     }
 
     @Test

@@ -16,8 +16,19 @@ import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.util.UUID
+import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.SærligeGrunner
+import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.UtvidetVilkårsresultat
+import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.VedtakPeriode
+import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.Vedtaksoppsummering
+import no.nav.tilbakekreving.beregning.delperiode.Vilkårsvurdert
+import no.nav.tilbakekreving.beregning.modell.Beregningsresultat
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
 
 @Service
 class EndringObservatørService(
@@ -35,7 +46,7 @@ class EndringObservatørService(
         vedtaksresultat: Vedtaksresultat?,
         venterPåBruker: Boolean,
         ansvarligEnhet: String?,
-        ansvarligSaksbehandler: String?,
+        ansvarligSaksbehandler: String,
         ansvarligBeslutter: String?,
         totaltFeilutbetaltBeløp: BigDecimal?,
         totalFeilutbetaltPeriode: Datoperiode?,
@@ -82,7 +93,7 @@ class EndringObservatørService(
                 venterPåBruker = venterPåBruker,
                 venterPåØkonomi = tilstand == TilbakekrevingTilstand.AVVENTER_KRAVGRUNNLAG,
                 ansvarligEnhet = ansvarligEnhet ?: "Ukjent",
-                ansvarligSaksbehandler = ansvarligSaksbehandler ?: "Ukjent",
+                ansvarligSaksbehandler = ansvarligSaksbehandler,
                 ansvarligBeslutter = ansvarligBeslutter,
                 forrigeBehandling = forrigeBehandlingId,
                 revurderingOpprettetÅrsak = applicationProperties.toggles.defaultWhenDisabled(Toggles::revurdering) { null },
@@ -90,6 +101,65 @@ class EndringObservatørService(
                 totalFeilutbetaltPeriode = totalFeilutbetaltPeriode?.let { Periode(it.fom, it.tom) },
             ),
             logContext = SecureLog.Context.medBehandling(eksternFagsystemId, behandlingId.toString()),
+        )
+    }
+
+    override fun vedtakFattet(
+        behandlingId: UUID,
+        forrigeBehandlingId: UUID?,
+        behandlingOpprettet: OffsetDateTime,
+        eksternFagsystemId: String,
+        eksternBehandlingId: String,
+        ytelse: Ytelse,
+        vedtakFattetTidspunkt: OffsetDateTime,
+        ansvarligEnhet: String?,
+        ansvarligSaksbehandler: String,
+        ansvarligBeslutter: String,
+        vurderteUtbetalinger: List<VurdertUtbetaling>,
+    ) {
+        val logContext = SecureLog.Context.medBehandling(eksternFagsystemId, behandlingId.toString())
+        kafkaProducer.sendVedtaksdata(
+            behandlingId = behandlingId,
+            request = Vedtaksoppsummering(
+                saksnummer = eksternFagsystemId,
+                ytelsestype = ytelse.tilYtelseDTO(),
+                fagsystem = ytelse.tilFagsystemDTO(),
+                behandlingUuid = behandlingId,
+                behandlingstype = applicationProperties.toggles.defaultWhenDisabled(Toggles::revurdering) { Behandlingstype.TILBAKEKREVING },
+                erBehandlingManueltOpprettet = applicationProperties.toggles.defaultWhenDisabled(Toggles::manuellOpprettelse) { false },
+                behandlingOpprettetTidspunkt = behandlingOpprettet,
+                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+                referertFagsaksbehandling = eksternBehandlingId,
+                forrigeBehandling = forrigeBehandlingId,
+                ansvarligSaksbehandler = ansvarligSaksbehandler,
+                ansvarligBeslutter = ansvarligBeslutter,
+                behandlendeEnhet = ansvarligEnhet ?: "Ukjent",
+                perioder = vurderteUtbetalinger.map {
+                    VedtakPeriode(
+                        fom = it.periode.fom,
+                        tom = it.periode.tom,
+                        hendelsestype = Hendelsestype.ANNET.name,
+                        hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST.name,
+                        vilkårsresultat = when (it.vilkårsvurdering.aktsomhetFørUtbetaling) {
+                            Aktsomhet.FORSETT -> UtvidetVilkårsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER
+                            Aktsomhet.GROV_UAKTSOMHET -> UtvidetVilkårsresultat.MANGELFULLE_OPPLYSNINGER_FRA_BRUKER
+                            Aktsomhet.SIMPEL_UAKTSOMHET -> UtvidetVilkårsresultat.FORSTO_BURDE_FORSTÅTT
+                        },
+                        feilutbetaltBeløp = it.beregning.feilutbetaltBeløp,
+                        bruttoTilbakekrevingsbeløp = it.beregning.tilbakekrevesBeløp,
+                        rentebeløp = it.beregning.rentebeløp,
+                        harBruktSjetteLedd = it.vilkårsvurdering.beløpUnnlatesUnder4Rettsgebyr, // 4x rettsgebyr
+                        aktsomhet = it.vilkårsvurdering.aktsomhetEtterUtbetaling,
+                        særligeGrunner = it.vilkårsvurdering.særligeGrunner?.let { særligeGrunner ->
+                            SærligeGrunner(
+                                erSærligeGrunnerTilReduksjon = særligeGrunner.beløpReduseres == VurdertUtbetaling.SærligeGrunner.Reduseres.Ja,
+                                særligeGrunner = særligeGrunner.grunner.toList()
+                            )
+                        }
+                    )
+                }
+            ),
+            logContext = logContext,
         )
     }
 }
