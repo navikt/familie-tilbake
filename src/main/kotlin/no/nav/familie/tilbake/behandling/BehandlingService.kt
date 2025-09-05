@@ -44,6 +44,7 @@ import no.nav.tilbakekreving.api.v1.dto.BehandlingPåVentDto
 import no.nav.tilbakekreving.api.v1.dto.ByttEnhetDto
 import no.nav.tilbakekreving.api.v1.dto.HenleggelsesbrevFritekstDto
 import no.nav.tilbakekreving.api.v1.dto.OpprettRevurderingDto
+import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandling
 import no.nav.tilbakekreving.kontrakter.OpprettManueltTilbakekrevingRequest
 import no.nav.tilbakekreving.kontrakter.OpprettTilbakekrevingRequest
@@ -87,6 +88,7 @@ class BehandlingService(
     private val validerBehandlingService: ValiderBehandlingService,
     private val oppgaveService: OppgaveService,
     private val logService: LogService,
+    private val applicationProperties: ApplicationProperties,
 ) {
     private val log = TracedLogger.getLogger<BehandlingService>()
 
@@ -249,6 +251,7 @@ class BehandlingService(
             fagsak.eksternFagsakId,
             manuelleBrevmottakere,
             støtterManuelleBrevmottakere,
+            applicationProperties.toggles.nyModellEnabled,
         )
     }
 

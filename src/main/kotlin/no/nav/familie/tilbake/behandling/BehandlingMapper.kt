@@ -89,6 +89,7 @@ object BehandlingMapper {
         eksternFagsakId: String,
         manuelleBrevmottakere: List<ManuellBrevmottaker>,
         støtterManuelleBrevmottakere: Boolean,
+        erNyModell: Boolean,
     ): BehandlingDto {
         val resultat: Behandlingsresultat? =
             behandling.resultater.maxByOrNull {
@@ -126,6 +127,7 @@ object BehandlingMapper {
             manuelleBrevmottakere = manuelleBrevmottakere.map { ManuellBrevmottakerMapper.tilRespons(it) },
             begrunnelseForTilbakekreving = behandling.begrunnelseForTilbakekreving,
             saksbehandlingstype = behandling.saksbehandlingstype,
+            erNyModell = erNyModell,
         )
     }
 

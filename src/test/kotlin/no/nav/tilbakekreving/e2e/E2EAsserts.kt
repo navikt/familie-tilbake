@@ -9,7 +9,7 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatu
 import no.nav.tilbakekreving.saksbehandler.Behandler
 
 infix fun Behandling.kanBehandle(behandlingssteg: Behandlingssteg) {
-    val steg = tilFrontendDto(Behandler.Saksbehandler("A123456"), true).behandlingsstegsinfo.singleOrNull {
+    val steg = tilFrontendDto(Behandler.Saksbehandler("A123456"), kanBeslutte = true, erNyModell = true).behandlingsstegsinfo.singleOrNull {
         it.behandlingssteg == behandlingssteg
     }.shouldNotBeNull()
 
@@ -17,7 +17,7 @@ infix fun Behandling.kanBehandle(behandlingssteg: Behandlingssteg) {
 }
 
 infix fun Behandling.avventerBehandling(behandlingssteg: Behandlingssteg) {
-    tilFrontendDto(Behandler.Saksbehandler("A123456"), true).behandlingsstegsinfo.forNone {
+    tilFrontendDto(Behandler.Saksbehandler("A123456"), kanBeslutte = true, erNyModell = true).behandlingsstegsinfo.forNone {
         it.behandlingssteg shouldBe behandlingssteg
     }
 }
