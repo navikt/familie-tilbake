@@ -1,13 +1,13 @@
 package no.nav.tilbakekreving.entities
 
-import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg.Vilkårsvurderingsperiode
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg.Vilkårsvurderingsperiode
 import java.util.UUID
 
 data class VilkårsvurderingsperiodeEntity(
     val id: UUID,
     val periode: DatoperiodeEntity,
     val begrunnelseForTilbakekreving: String?,
-    val vurdering: VurderingEntity,
+    val vurdering: AktsomhetsvurderingEntity,
 ) {
     fun fraEntity(): Vilkårsvurderingsperiode {
         return Vilkårsvurderingsperiode(
