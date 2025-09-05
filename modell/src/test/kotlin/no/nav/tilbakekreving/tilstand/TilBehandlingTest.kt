@@ -7,7 +7,9 @@ import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
-import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonSærligeGrunner
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.brukerinfoHendelse
@@ -127,15 +129,17 @@ class TilBehandlingTest {
         håndter(
             Behandler.Saksbehandler("Ansvarlig saksbehandler"),
             periode = 1.januar til 31.januar,
-            vurdering = Vilkårsvurderingsteg.Vurdering.ForstodEllerBurdeForstått(
+            vurdering = NivåAvForståelse.BurdeForstått(
                 begrunnelse = "Brukeren gikk opp i lønn",
-                aktsomhet = Vilkårsvurderingsteg.VurdertAktsomhet.SimpelUaktsomhet(
+                aktsomhet = NivåAvForståelse.Aktsomhet.Uaktsomhet(
                     begrunnelse = "Brukeren gikk opp i lønn og var klar over at det burde føre til en lavere utbetaling.",
-                    særligeGrunner = Vilkårsvurderingsteg.VurdertAktsomhet.SærligeGrunner(
-                        begrunnelse = "Jaha",
-                        grunner = emptySet(),
+                    kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.Tilbakekreves(
+                        reduksjonSærligeGrunner = ReduksjonSærligeGrunner(
+                            begrunnelse = "",
+                            grunner = emptySet(),
+                            skalReduseres = ReduksjonSærligeGrunner.SkalReduseres.Nei,
+                        ),
                     ),
-                    skalReduseres = Vilkårsvurderingsteg.VurdertAktsomhet.SkalReduseres.Nei,
                 ),
             ),
         )
