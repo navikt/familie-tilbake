@@ -1,49 +1,44 @@
 package no.nav.tilbakekreving
 
 import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
-import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonSærligeGrunner
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Skyldgrad
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 
 object VilkårsvurderingMapperV2 {
+    private fun VilkårsvurderingsperiodeDto.særligeGrunner(): ReduksjonSærligeGrunner {
+        return ReduksjonSærligeGrunner(
+            aktsomhetDto!!.særligeGrunnerBegrunnelse!!,
+            aktsomhetDto!!.særligeGrunner!!.map { it.særligGrunn }.toSet(),
+            when (aktsomhetDto!!.særligeGrunnerTilReduksjon) {
+                true -> ReduksjonSærligeGrunner.SkalReduseres.Ja(
+                    aktsomhetDto!!.andelTilbakekreves!!.toInt(),
+                )
+                false -> ReduksjonSærligeGrunner.SkalReduseres.Nei
+            },
+        )
+    }
+
     private fun VilkårsvurderingsperiodeDto.aktsomhetsvurdering() =
         aktsomhetDto!!.let { aktsomhet ->
             when (aktsomhet.aktsomhet) {
                 Aktsomhet.FORSETT ->
-                    Vilkårsvurderingsteg.VurdertAktsomhet.Forsett(
-                        begrunnelse = aktsomhet.begrunnelse,
-                        skalIleggesRenter = aktsomhet.ileggRenter ?: false,
-                    )
+                    NivåAvForståelse.Aktsomhet.Forsett(begrunnelse = aktsomhet.begrunnelse)
 
                 Aktsomhet.GROV_UAKTSOMHET ->
-                    Vilkårsvurderingsteg.VurdertAktsomhet.GrovUaktsomhet(
+                    NivåAvForståelse.Aktsomhet.GrovUaktsomhet(
                         begrunnelse = aktsomhet.begrunnelse,
-                        særligeGrunner =
-                            Vilkårsvurderingsteg.VurdertAktsomhet.SærligeGrunner(
-                                begrunnelse = aktsomhet.særligeGrunnerBegrunnelse!!,
-                                grunner = aktsomhet.særligeGrunner!!.map { it.særligGrunn }.toSet(),
-                            ),
-                        skalReduseres =
-                            when (aktsomhet.særligeGrunnerTilReduksjon) {
-                                true -> Vilkårsvurderingsteg.VurdertAktsomhet.SkalReduseres.Ja(aktsomhet.andelTilbakekreves!!.toInt())
-                                false -> Vilkårsvurderingsteg.VurdertAktsomhet.SkalReduseres.Nei
-                            },
-                        skalIleggesRenter = aktsomhet.ileggRenter!!,
+                        reduksjonSærligeGrunner = særligeGrunner(),
                     )
 
                 Aktsomhet.SIMPEL_UAKTSOMHET ->
-                    Vilkårsvurderingsteg.VurdertAktsomhet.SimpelUaktsomhet(
+                    NivåAvForståelse.Aktsomhet.Uaktsomhet(
                         begrunnelse = aktsomhet.begrunnelse,
-                        særligeGrunner =
-                            Vilkårsvurderingsteg.VurdertAktsomhet.SærligeGrunner(
-                                begrunnelse = aktsomhet.særligeGrunnerBegrunnelse!!,
-                                grunner = aktsomhet.særligeGrunner!!.map { it.særligGrunn }.toSet(),
-                            ),
-                        skalReduseres =
-                            when (aktsomhet.særligeGrunnerTilReduksjon) {
-                                true -> Vilkårsvurderingsteg.VurdertAktsomhet.SkalReduseres.Ja(aktsomhet.andelTilbakekreves!!.toInt())
-                                false -> Vilkårsvurderingsteg.VurdertAktsomhet.SkalReduseres.Nei
-                            },
+                        kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.Tilbakekreves(særligeGrunner()),
                     )
             }
         }
@@ -51,33 +46,32 @@ object VilkårsvurderingMapperV2 {
     fun tilVurdering(periode: VilkårsvurderingsperiodeDto) =
         when (periode.vilkårsvurderingsresultat) {
             Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT ->
-                Vilkårsvurderingsteg.Vurdering.ForstodEllerBurdeForstått(
+                NivåAvForståelse.BurdeForstått(
                     begrunnelse = periode.begrunnelse,
                     aktsomhet = periode.aktsomhetsvurdering(),
                 )
 
             Vilkårsvurderingsresultat.MANGELFULLE_OPPLYSNINGER_FRA_BRUKER ->
-                Vilkårsvurderingsteg.Vurdering.MangelfulleOpplysningerFraBruker(
+                Skyldgrad.GrovUaktsomhet(
                     begrunnelse = periode.begrunnelse,
-                    aktsomhet = periode.aktsomhetsvurdering(),
+                    reduksjonSærligeGrunner = periode.særligeGrunner(),
                 )
 
             Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER ->
-                Vilkårsvurderingsteg.Vurdering.FeilaktigeOpplysningerFraBruker(
+                Skyldgrad.Forsett(
                     begrunnelse = periode.begrunnelse,
-                    aktsomhet = periode.aktsomhetsvurdering(),
                 )
 
             Vilkårsvurderingsresultat.GOD_TRO ->
-                Vilkårsvurderingsteg.Vurdering.GodTro(
+                NivåAvForståelse.GodTro(
                     beløpIBehold =
                         when (periode.godTroDto!!.beløpErIBehold) {
-                            true -> Vilkårsvurderingsteg.Vurdering.GodTro.BeløpIBehold.Ja(periode.godTroDto!!.beløpTilbakekreves!!)
-                            false -> Vilkårsvurderingsteg.Vurdering.GodTro.BeløpIBehold.Nei
+                            true -> NivåAvForståelse.GodTro.BeløpIBehold.Ja(periode.godTroDto!!.beløpTilbakekreves!!)
+                            false -> NivåAvForståelse.GodTro.BeløpIBehold.Nei
                         },
                     begrunnelse = periode.godTroDto!!.begrunnelse,
                 )
 
-            Vilkårsvurderingsresultat.UDEFINERT -> Vilkårsvurderingsteg.Vurdering.IkkeVurdert
+            Vilkårsvurderingsresultat.UDEFINERT -> ForårsaketAvBruker.IkkeVurdert
         }
 }

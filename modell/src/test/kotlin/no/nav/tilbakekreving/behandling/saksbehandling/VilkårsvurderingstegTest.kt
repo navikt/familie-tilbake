@@ -2,6 +2,8 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.HistorikkStub
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.februar
 import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -29,9 +31,9 @@ class VilkårsvurderingstegTest {
             )
         vilkårsvurderingsteg.vurder(
             1.januar til 31.januar,
-            Vilkårsvurderingsteg.Vurdering.GodTro(
+            NivåAvForståelse.GodTro(
                 begrunnelse = "Brukeren brukte alt på en tur til Vegas",
-                beløpIBehold = Vilkårsvurderingsteg.Vurdering.GodTro.BeløpIBehold.Nei,
+                beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.Nei,
             ),
         )
 
@@ -57,18 +59,18 @@ class VilkårsvurderingstegTest {
             )
         vilkårsvurderingsteg.vurder(
             1.januar til 31.januar,
-            Vilkårsvurderingsteg.Vurdering.GodTro(
+            NivåAvForståelse.GodTro(
                 begrunnelse = "Brukeren brukte alt på en tur til Vegas",
-                beløpIBehold = Vilkårsvurderingsteg.Vurdering.GodTro.BeløpIBehold.Nei,
+                beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.Nei,
             ),
         )
         vilkårsvurderingsteg.erFullstendig() shouldBe false
 
         vilkårsvurderingsteg.vurder(
             1.februar til 28.februar,
-            Vilkårsvurderingsteg.Vurdering.GodTro(
+            NivåAvForståelse.GodTro(
                 begrunnelse = "Brukeren brukte alt på en tur til Vegas",
-                beløpIBehold = Vilkårsvurderingsteg.Vurdering.GodTro.BeløpIBehold.Nei,
+                beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.Nei,
             ),
         )
 

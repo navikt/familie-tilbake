@@ -5,7 +5,7 @@ import no.nav.tilbakekreving.behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
-import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
 import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.januar
@@ -41,7 +41,7 @@ class BehandlingTest {
         behandling.taAvVent()
         behandling.håndter(ansvarligSaksbehandler, periode, foreldelse, BehandlingObservatørOppsamler())
 
-        val vilkårsvurdering = Vilkårsvurderingsteg.Vurdering.ForstodEllerBurdeForstått("Begrunnelse", Vilkårsvurderingsteg.VurdertAktsomhet.Forsett("Begrunnelse", false))
+        val vilkårsvurdering = NivåAvForståelse.BurdeForstått(NivåAvForståelse.Aktsomhet.Forsett("Begrunnelse"), "Begrunnelse")
         behandling.settPåVent(Venteårsak.MANGLER_STØTTE, LocalDate.MAX, "Begrunnelse")
         shouldThrowWithMessage<ModellFeil.UgyldigOperasjonException>("Behandling er satt på vent. Kan ikke håndtere vilkårsvurdering.") {
             behandling.håndter(ansvarligSaksbehandler, periode, vilkårsvurdering, BehandlingObservatørOppsamler())

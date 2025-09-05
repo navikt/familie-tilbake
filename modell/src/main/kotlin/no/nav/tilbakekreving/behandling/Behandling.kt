@@ -20,7 +20,8 @@ import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg.Companion.behandlingsstegstatus
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg.Companion.klarTilVisning
-import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.IverksettelseBehov
 import no.nav.tilbakekreving.beregning.Beregning
@@ -252,7 +253,7 @@ class Behandling internal constructor(
     internal fun håndter(
         behandler: Behandler,
         periode: Datoperiode,
-        vurdering: Vilkårsvurderingsteg.Vurdering,
+        vurdering: ForårsaketAvBruker,
         observatør: BehandlingObservatør,
     ) {
         validerBehandlingstatus("vilkårsvurdering")

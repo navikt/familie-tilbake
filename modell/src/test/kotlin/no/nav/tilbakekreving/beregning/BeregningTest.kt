@@ -2,7 +2,11 @@ package no.nav.tilbakekreving.beregning
 
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
-import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonSærligeGrunner
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Skyldgrad
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.medBeløp
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.medTilbakekrevesBeløp
@@ -35,7 +39,7 @@ class BeregningTest {
             beregnRenter = true,
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
-                1.januar til 31.januar burdeForstått medForsett(ileggesRenter = false),
+                1.januar til 31.januar burdeForstått medForsett(),
             ),
             foreldetPerioder = emptyList(),
             kravgrunnlag = perioder(
@@ -86,7 +90,7 @@ class BeregningTest {
             beregnRenter = true,
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
-                1.januar til 31.januar burdeForstått medForsett(ileggesRenter = true),
+                (1.januar til 31.januar).forårsaketFeilutbetalingMedForsett(),
             ),
             foreldetPerioder = emptyList(),
             kravgrunnlag = perioder(
@@ -329,7 +333,7 @@ class BeregningTest {
             beregnRenter = true,
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
-                1.januar til 31.mars burdeForstått medGrovUaktsomhet(ileggesRenter = true),
+                (1.januar til 31.mars).forårsaketFeilutbetalingMedGrovUaktsomhet(),
             ),
             foreldetPerioder = emptyList(),
             kravgrunnlag = perioder(
@@ -471,8 +475,8 @@ class BeregningTest {
             beregnRenter = true,
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
-                1.februar til 28.februar burdeForstått medForsett(ileggesRenter = false),
-                1.januar til 31.januar burdeForstått medForsett(ileggesRenter = false),
+                1.februar til 28.februar burdeForstått medForsett(),
+                1.januar til 31.januar burdeForstått medForsett(),
             ),
             foreldetPerioder = emptyList(),
             kravgrunnlag = perioder(
@@ -759,46 +763,69 @@ class BeregningTest {
         }
     }
 
-    infix fun Datoperiode.godTro(beløpIBehold: Vilkårsvurderingsteg.Vurdering.GodTro.BeløpIBehold) = Vilkårsvurderingsteg.Vilkårsvurderingsperiode(
+    infix fun Datoperiode.godTro(beløpIBehold: NivåAvForståelse.GodTro.BeløpIBehold) = Vilkårsvurderingsteg.Vilkårsvurderingsperiode(
         id = UUID.randomUUID(),
         periode = this,
         begrunnelseForTilbakekreving = "",
-        _vurdering = Vilkårsvurderingsteg.Vurdering.GodTro(
+        _vurdering = NivåAvForståelse.GodTro(
             beløpIBehold = beløpIBehold,
             begrunnelse = "",
         ),
     )
 
-    infix fun Datoperiode.burdeForstått(aktsomhet: Vilkårsvurderingsteg.VurdertAktsomhet) = Vilkårsvurderingsteg.Vilkårsvurderingsperiode(
+    infix fun Datoperiode.burdeForstått(aktsomhet: NivåAvForståelse.Aktsomhet) = Vilkårsvurderingsteg.Vilkårsvurderingsperiode(
         id = UUID.randomUUID(),
         periode = this,
         begrunnelseForTilbakekreving = "",
-        _vurdering = Vilkårsvurderingsteg.Vurdering.ForstodEllerBurdeForstått(
-            "",
+        _vurdering = NivåAvForståelse.BurdeForstått(
             aktsomhet,
+            "",
         ),
     )
 
-    fun medForsett(ileggesRenter: Boolean): Vilkårsvurderingsteg.VurdertAktsomhet.Forsett {
-        return Vilkårsvurderingsteg.VurdertAktsomhet.Forsett("", ileggesRenter)
+    fun medForsett(): NivåAvForståelse.Aktsomhet {
+        return NivåAvForståelse.Aktsomhet.Forsett("")
     }
 
-    fun medSimpelUaktsomhet(prosentdel: BigDecimal) = Vilkårsvurderingsteg.VurdertAktsomhet.SimpelUaktsomhet(
-        "",
-        Vilkårsvurderingsteg.VurdertAktsomhet.SærligeGrunner("", emptySet()),
-        Vilkårsvurderingsteg.VurdertAktsomhet.SkalReduseres.Ja(prosentdel.toInt()),
+    fun medSimpelUaktsomhet(prosentdel: BigDecimal) = NivåAvForståelse.Aktsomhet.Uaktsomhet(
+        begrunnelse = "",
+        kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.Tilbakekreves(
+            ReduksjonSærligeGrunner(
+                begrunnelse = "",
+                grunner = emptySet(),
+                skalReduseres = ReduksjonSærligeGrunner.SkalReduseres.Ja(prosentdel.toInt()),
+            ),
+        ),
     )
 
-    fun medGrovUaktsomhet(ileggesRenter: Boolean) = Vilkårsvurderingsteg.VurdertAktsomhet.GrovUaktsomhet(
-        "",
-        Vilkårsvurderingsteg.VurdertAktsomhet.SærligeGrunner("", emptySet()),
-        Vilkårsvurderingsteg.VurdertAktsomhet.SkalReduseres.Nei,
-        skalIleggesRenter = ileggesRenter,
-    )
+    fun Datoperiode.forårsaketFeilutbetalingMedForsett(): Vilkårsvurderingsteg.Vilkårsvurderingsperiode {
+        return Vilkårsvurderingsteg.Vilkårsvurderingsperiode(
+            id = UUID.randomUUID(),
+            periode = this,
+            begrunnelseForTilbakekreving = "",
+            _vurdering = Skyldgrad.Forsett(""),
+        )
+    }
 
-    fun medBeløpIBehold(beløp: BigDecimal) = Vilkårsvurderingsteg.Vurdering.GodTro.BeløpIBehold.Ja(beløp)
+    fun Datoperiode.forårsaketFeilutbetalingMedGrovUaktsomhet(): Vilkårsvurderingsteg.Vilkårsvurderingsperiode {
+        return Vilkårsvurderingsteg.Vilkårsvurderingsperiode(
+            id = UUID.randomUUID(),
+            periode = this,
+            begrunnelseForTilbakekreving = "",
+            _vurdering = Skyldgrad.GrovUaktsomhet(
+                begrunnelse = "",
+                reduksjonSærligeGrunner = ReduksjonSærligeGrunner(
+                    begrunnelse = "",
+                    grunner = emptySet(),
+                    skalReduseres = ReduksjonSærligeGrunner.SkalReduseres.Nei,
+                ),
+            ),
+        )
+    }
 
-    fun utenBeløpIBehold() = Vilkårsvurderingsteg.Vurdering.GodTro.BeløpIBehold.Nei
+    fun medBeløpIBehold(beløp: BigDecimal) = NivåAvForståelse.GodTro.BeløpIBehold.Ja(beløp)
+
+    fun utenBeløpIBehold() = NivåAvForståelse.GodTro.BeløpIBehold.Nei
 
     fun Delperiode<out Delperiode.Beløp>.shouldMatch(
         periode: Datoperiode,
