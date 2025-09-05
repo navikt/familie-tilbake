@@ -348,7 +348,7 @@ class Behandling internal constructor(
     ): Behandling {
         return nyBehandling(
             internId = UUID.randomUUID(),
-            eksternId = eksternId,
+            eksternId = UUID.randomUUID(),
             behandlingstype = Behandlingstype.REVURDERING_TILBAKEKREVING,
             opprettet = opprettet,
             enhet = enhet,

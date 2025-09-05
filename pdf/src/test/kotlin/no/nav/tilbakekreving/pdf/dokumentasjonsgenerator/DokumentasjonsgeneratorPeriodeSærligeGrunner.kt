@@ -8,7 +8,7 @@ import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnTyper
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
@@ -182,18 +182,18 @@ class DokumentasjonsgeneratorPeriodeSærligeGrunner {
         sgAnnet: Boolean,
         reduksjon: Boolean,
     ): HbVedtaksbrevsperiode {
-        val sg: MutableList<SærligGrunn> = ArrayList()
+        val sg: MutableList<SærligGrunnTyper> = ArrayList()
         if (sgNav) {
-            sg.add(SærligGrunn.HELT_ELLER_DELVIS_NAVS_FEIL)
+            sg.add(SærligGrunnTyper.HELT_ELLER_DELVIS_NAVS_FEIL)
         }
         if (sgBeløp) {
-            sg.add(SærligGrunn.STØRRELSE_BELØP)
+            sg.add(SærligGrunnTyper.STØRRELSE_BELØP)
         }
         if (sgTid) {
-            sg.add(SærligGrunn.TID_FRA_UTBETALING)
+            sg.add(SærligGrunnTyper.TID_FRA_UTBETALING)
         }
         if (sgAnnet) {
-            sg.add(SærligGrunn.ANNET)
+            sg.add(SærligGrunnTyper.ANNET)
         }
         val fritekstSærligeGrunnerAnnet = "[ fritekst her ]"
         return HbVedtaksbrevsperiode(
