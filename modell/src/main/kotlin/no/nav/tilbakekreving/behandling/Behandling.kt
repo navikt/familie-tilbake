@@ -166,7 +166,7 @@ class Behandling internal constructor(
         return !foreslåVedtakSteg.erFullstendig() || behandler != ansvarligSaksbehandler && kanBeslutte
     }
 
-    fun tilFrontendDto(behandler: Behandler, kanBeslutte: Boolean, erNyModell: Boolean): BehandlingDto {
+    fun tilFrontendDto(behandler: Behandler, kanBeslutte: Boolean): BehandlingDto {
         return BehandlingDto(
             eksternBrukId = eksternId,
             behandlingId = internId,
@@ -221,7 +221,7 @@ class Behandling internal constructor(
             manuelleBrevmottakere = emptyList(),
             begrunnelseForTilbakekreving = eksternFagsakBehandling.entry.begrunnelseForTilbakekreving,
             saksbehandlingstype = Saksbehandlingstype.ORDINÆR,
-            erNyModell = erNyModell,
+            erNyModell = true,
         )
     }
 

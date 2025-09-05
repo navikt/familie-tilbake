@@ -144,7 +144,7 @@ class BehandlingController(
                     handling = "Henter tilbakekrevingsbehandling",
                 )
                 val behandler = ContextService.hentBehandler(SecureLog.Context.fra(tilbakekreving))
-                return Ressurs.success(tilbakekreving.behandlingHistorikk.entry(behandlingId).tilFrontendDto(behandler, rolle == Behandlerrolle.BESLUTTER, applicationProperties.toggles.nyModellEnabled))
+                return Ressurs.success(tilbakekreving.behandlingHistorikk.entry(behandlingId).tilFrontendDto(behandler, rolle == Behandlerrolle.BESLUTTER))
             }
         }
         tilgangskontrollService.validerTilgangBehandlingID(

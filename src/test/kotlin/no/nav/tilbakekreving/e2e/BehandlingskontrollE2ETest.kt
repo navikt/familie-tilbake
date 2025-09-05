@@ -38,7 +38,7 @@ class BehandlingskontrollE2ETest : TilbakekrevingE2EBase() {
             .behandlingHistorikk
             .nåværende()
             .entry
-            .tilFrontendDto(behandler, kanBeslutte = true, erNyModell = true)
+            .tilFrontendDto(behandler, true)
 
         frontendDtoPåVent.erBehandlingPåVent shouldBe true
 
@@ -48,7 +48,7 @@ class BehandlingskontrollE2ETest : TilbakekrevingE2EBase() {
             .behandlingHistorikk
             .nåværende()
             .entry
-            .tilFrontendDto(behandler, kanBeslutte = true, erNyModell = true)
+            .tilFrontendDto(behandler, true)
 
         frontendDtoAvVent.erBehandlingPåVent shouldBe false
     }

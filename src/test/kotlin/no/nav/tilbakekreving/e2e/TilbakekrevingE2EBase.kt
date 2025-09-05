@@ -107,7 +107,7 @@ open class TilbakekrevingE2EBase : E2EBase() {
         fagsystem: FagsystemDTO,
     ): UUID? {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(fagsystem, fagsystemId) ?: return null
-        return tilbakekreving.behandlingHistorikk.nåværende().entry.tilFrontendDto(Behandler.Saksbehandler("A123456"), kanBeslutte = true, erNyModell = true).behandlingId
+        return tilbakekreving.behandlingHistorikk.nåværende().entry.tilFrontendDto(Behandler.Saksbehandler("A123456"), true).behandlingId
     }
 
     fun behandling(behandlingId: UUID): Behandling {

@@ -62,7 +62,7 @@ class BehandlingEntityTest {
         )
 
         val behandlingEtterLagring = behandlingFørLagring.tilEntity().fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
-        behandlingEtterLagring.tilFrontendDto(behandler, kanBeslutte = true, erNyModell = false) shouldBe behandlingFørLagring.tilFrontendDto(behandler, kanBeslutte = true, erNyModell = false)
+        behandlingEtterLagring.tilFrontendDto(behandler, true) shouldBe behandlingFørLagring.tilFrontendDto(behandler, true)
 
         val observatør = BehovObservatørOppsamler()
         behandlingEtterLagring.trengerIverksettelse(observatør, Ytelsestype.TILLEGGSSTØNAD, Aktør.Person("20046912345"))
