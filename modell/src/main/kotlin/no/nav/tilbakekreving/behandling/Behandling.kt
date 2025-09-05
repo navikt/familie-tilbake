@@ -162,7 +162,12 @@ class Behandling internal constructor(
         )
     }
 
+    private fun kanBesluttes(behandler: Behandler, kanBeslutte: Boolean): Boolean {
+        return fatteVedtakSteg.erFullstendig() && behandler != ansvarligSaksbehandler && kanBeslutte
+    }
+
     private fun kanEndres(behandler: Behandler, kanBeslutte: Boolean): Boolean {
+        if (kanBesluttes(behandler, kanBeslutte)) return false
         return !foreslåVedtakSteg.erFullstendig() || behandler != ansvarligSaksbehandler && kanBeslutte
     }
 
