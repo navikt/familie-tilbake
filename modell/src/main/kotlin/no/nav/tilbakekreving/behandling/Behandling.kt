@@ -221,6 +221,7 @@ class Behandling internal constructor(
             manuelleBrevmottakere = emptyList(),
             begrunnelseForTilbakekreving = eksternFagsakBehandling.entry.begrunnelseForTilbakekreving,
             saksbehandlingstype = Saksbehandlingstype.ORDINÆR,
+            erNyModell = true,
         )
     }
 

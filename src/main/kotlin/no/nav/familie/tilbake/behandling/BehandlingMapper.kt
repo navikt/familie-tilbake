@@ -126,6 +126,7 @@ object BehandlingMapper {
             manuelleBrevmottakere = manuelleBrevmottakere.map { ManuellBrevmottakerMapper.tilRespons(it) },
             begrunnelseForTilbakekreving = behandling.begrunnelseForTilbakekreving,
             saksbehandlingstype = behandling.saksbehandlingstype,
+            erNyModell = false,
         )
     }
 

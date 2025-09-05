@@ -43,6 +43,7 @@ data class BehandlingDto(
     val manuelleBrevmottakere: List<ManuellBrevmottakerResponsDto>,
     val begrunnelseForTilbakekreving: String?,
     val saksbehandlingstype: Saksbehandlingstype,
+    val erNyModell: Boolean,
 )
 
 data class BehandlingsstegsinfoDto(
