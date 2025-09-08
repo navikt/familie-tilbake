@@ -15,7 +15,7 @@ import no.nav.tilbakekreving.saksbehandler.Behandler
 class FatteVedtakSteg internal constructor(
     private val vurderteSteg: List<VurdertSteg>,
     private var _ansvarligBeslutter: Behandler?,
-) : Saksbehandlingsteg<TotrinnsvurderingDto> {
+) : Saksbehandlingsteg<TotrinnsvurderingDto>, Nullstillbar {
     override val type: Behandlingssteg = Behandlingssteg.FATTE_VEDTAK
     val ansvarligBeslutter: Behandler? get() = _ansvarligBeslutter
 
@@ -27,6 +27,10 @@ class FatteVedtakSteg internal constructor(
         } else {
             Behandlingsstatus.FATTER_VEDTAK
         }
+
+    override fun nullstill() {
+        opprett()
+    }
 
     internal fun håndter(
         beslutter: Behandler,

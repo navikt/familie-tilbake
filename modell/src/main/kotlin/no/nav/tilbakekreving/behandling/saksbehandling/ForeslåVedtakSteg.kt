@@ -9,7 +9,7 @@ import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 
 class ForeslåVedtakSteg(
     private var vurdering: Vurdering,
-) : Saksbehandlingsteg<Unit> {
+) : Saksbehandlingsteg<Unit>, Nullstillbar {
     override val type = Behandlingssteg.FORESLÅ_VEDTAK
 
     override fun erFullstendig(): Boolean = vurdering != Vurdering.IkkeVurdert
@@ -20,6 +20,10 @@ class ForeslåVedtakSteg(
 
     fun tilEntity(): ForeslåVedtakStegEntity {
         return vurdering.tilEntity()
+    }
+
+    override fun nullstill() {
+        this.vurdering = Vurdering.IkkeVurdert
     }
 
     override fun tilFrontendDto() {}

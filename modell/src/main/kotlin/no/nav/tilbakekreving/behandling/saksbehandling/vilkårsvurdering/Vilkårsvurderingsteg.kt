@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
+import no.nav.tilbakekreving.behandling.saksbehandling.Nullstillbar
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg
 import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurderingAdapter
@@ -23,7 +24,7 @@ class Vilkårsvurderingsteg(
     private var vurderinger: List<Vilkårsvurderingsperiode>,
     private val kravgrunnlagHendelse: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
     private val foreldelsesteg: Foreldelsesteg,
-) : Saksbehandlingsteg<VurdertVilkårsvurderingDto>, VilkårsvurderingAdapter {
+) : Saksbehandlingsteg<VurdertVilkårsvurderingDto>, VilkårsvurderingAdapter, Nullstillbar {
     override val type: Behandlingssteg = Behandlingssteg.VILKÅRSVURDERING
 
     override fun erFullstendig(): Boolean = vurderinger.none { it.vurdering is ForårsaketAvBruker.IkkeVurdert }
@@ -32,6 +33,14 @@ class Vilkårsvurderingsteg(
         return VilkårsvurderingstegEntity(
             vurderinger = vurderinger.map { it.tilEntity() },
         )
+    }
+
+    override fun nullstill() {
+        val nullstill = opprett(
+            kravgrunnlagHendelse = kravgrunnlagHendelse,
+            foreldelsesteg = foreldelsesteg,
+        )
+        this.vurderinger = nullstill.vurderinger
     }
 
     internal fun vurder(

@@ -18,6 +18,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
+import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg.Companion.behandlingsstegstatus
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg.Companion.klarTilVisning
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
@@ -105,7 +106,7 @@ class Behandling internal constructor(
         return Sporing(eksternFagsakBehandling.entry.eksternId, internId.toString())
     }
 
-    private fun steg() = listOf(
+    private fun steg(): List<Saksbehandlingsteg<*>> = listOf(
         faktasteg,
         foreldelsesteg,
         vilkårsvurderingsteg,
@@ -408,6 +409,14 @@ class Behandling internal constructor(
             return lagBeregning().oppsummer().vedtaksresultat
         }
         return null
+    }
+
+    fun flyttTilbakeTilFakta() {
+        faktasteg.nullstill()
+        foreldelsesteg.nullstill()
+        vilkårsvurderingsteg.nullstill()
+        foreslåVedtakSteg.nullstill()
+        fatteVedtakSteg.nullstill()
     }
 
     fun sendVedtakIverksatt(

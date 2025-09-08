@@ -27,11 +27,22 @@ class Faktasteg(
     private val tilbakekrevingOpprettet: LocalDateTime,
     private val opprettelsesvalg: Opprettelsesvalg,
     private var vurdering: Vurdering,
-) : Saksbehandlingsteg<FaktaFeilutbetalingDto> {
+) : Saksbehandlingsteg<FaktaFeilutbetalingDto>, Nullstillbar {
     override val type: Behandlingssteg = Behandlingssteg.FAKTA
 
     override fun erFullstendig(): Boolean {
         return vurdering.erFullstendig()
+    }
+
+    override fun nullstill() {
+        val nullstill = opprett(
+            eksternFagsakBehandling = eksternFagsakBehandling,
+            kravgrunnlag = kravgrunnlag,
+            brevHistorikk = brevHistorikk,
+            tilbakekrevingOpprettet = tilbakekrevingOpprettet,
+            opprettelsesvalg = opprettelsesvalg,
+        )
+        this.vurdering = nullstill.vurdering
     }
 
     internal fun vurder(vurdering: Vurdering) {
