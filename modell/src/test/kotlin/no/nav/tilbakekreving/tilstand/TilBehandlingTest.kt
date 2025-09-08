@@ -133,7 +133,7 @@ class TilBehandlingTest {
                 begrunnelse = "Brukeren gikk opp i lønn",
                 aktsomhet = NivåAvForståelse.Aktsomhet.Uaktsomhet(
                     begrunnelse = "Brukeren gikk opp i lønn og var klar over at det burde føre til en lavere utbetaling.",
-                    kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.Tilbakekreves(
+                    kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(
                         reduksjonSærligeGrunner = ReduksjonSærligeGrunner(
                             begrunnelse = "",
                             grunner = emptySet(),

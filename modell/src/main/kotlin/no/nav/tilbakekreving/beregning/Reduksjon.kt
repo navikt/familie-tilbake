@@ -28,7 +28,7 @@ sealed interface Reduksjon {
         ): BigDecimal = beløp.multiply(andelAvBeløp)
     }
 
-    class FullstendigRefusjon : Reduksjon {
+    class FullstendigTilbakekreving : Reduksjon {
         override val andel = HUNDRE_PROSENT
 
         override fun beregn(

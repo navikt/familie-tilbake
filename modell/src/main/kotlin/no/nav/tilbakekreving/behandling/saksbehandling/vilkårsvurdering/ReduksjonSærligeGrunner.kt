@@ -7,6 +7,7 @@ import no.nav.tilbakekreving.entities.SkalReduseresType
 import no.nav.tilbakekreving.entities.SærligeGrunnerEntity
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
 
+// §22-15 4. ledd
 class ReduksjonSærligeGrunner(
     val begrunnelse: String,
     val grunner: Set<SærligGrunn>,
@@ -41,7 +42,7 @@ class ReduksjonSærligeGrunner(
 
         data object Nei : SkalReduseres {
             override fun reduksjon(): Reduksjon {
-                return Reduksjon.FullstendigRefusjon()
+                return Reduksjon.FullstendigTilbakekreving()
             }
 
             override fun tilEntity(): SkalReduseresEntity {

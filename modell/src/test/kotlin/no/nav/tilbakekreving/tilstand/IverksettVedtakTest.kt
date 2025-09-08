@@ -92,7 +92,7 @@ class IverksettVedtakTest {
             periode = 1.januar til 31.januar,
             vurdering = NivåAvForståelse.BurdeForstått(
                 aktsomhet = NivåAvForståelse.Aktsomhet.Uaktsomhet(
-                    kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.Tilbakekreves(
+                    kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(
                         ReduksjonSærligeGrunner(
                             begrunnelse = "Jaha",
                             grunner = emptySet(),

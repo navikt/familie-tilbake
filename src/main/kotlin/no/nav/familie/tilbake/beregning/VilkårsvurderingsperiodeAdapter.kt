@@ -45,7 +45,7 @@ class VilkårsvurderingsperiodeAdapter(
         if (Aktsomhet.SIMPEL_UAKTSOMHET == aktsomhet.aktsomhet && !aktsomhet.tilbakekrevSmåbeløp) {
             Reduksjon.IngenTilbakekreving()
         } else if (Aktsomhet.FORSETT == aktsomhet.aktsomhet || !aktsomhet.særligeGrunnerTilReduksjon) {
-            Reduksjon.FullstendigRefusjon()
+            Reduksjon.FullstendigTilbakekreving()
         } else {
             Reduksjon.Prosentdel(aktsomhet.andelTilbakekreves ?: error("Særlige grunner til reduksjon er satt, men andel mangler."))
         }

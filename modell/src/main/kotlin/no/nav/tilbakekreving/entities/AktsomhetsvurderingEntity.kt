@@ -10,6 +10,7 @@ data class AktsomhetsvurderingEntity(
     val begrunnelse: String?,
     val beløpIBehold: BeløpIBeholdEntity?,
     val aktsomhet: VurdertAktsomhetEntity?,
+    val feilaktigEllerMangelfull: FeilaktigEllerMangelfullType?,
 ) {
     fun fraEntity(): ForårsaketAvBruker {
         return when (vurderingType) {
@@ -34,11 +35,12 @@ data class AktsomhetsvurderingEntity(
                 )
             }
 
-            VurderingType.FORÅRSAKET_AV_BRUKER_SIMPEL_UAKTSOMHET -> {
-                val aktsomhet = requireNotNull(aktsomhet) { "Aktsomhet kreves for simpel uaktsomhet" }
-                Skyldgrad.SimpelUaktsomhet(
-                    begrunnelse = requireNotNull(begrunnelse) { "Begrunnelse kreves for simpel uaktsomhet" },
-                    reduksjonSærligeGrunner = requireNotNull(aktsomhet.særligGrunner) { "Særlige grunner kreves for simpel uaktsomhet" }.fraEntity(),
+            VurderingType.FORÅRSAKET_AV_BRUKER_UAKTSOMT -> {
+                val aktsomhet = requireNotNull(aktsomhet) { "Aktsomhet kreves for uaktsomt" }
+                Skyldgrad.Uaktsomt(
+                    begrunnelse = requireNotNull(begrunnelse) { "Begrunnelse kreves for uaktsomt" },
+                    reduksjonSærligeGrunner = requireNotNull(aktsomhet.særligGrunner) { "Særlige grunner kreves for uaktsomt" }.fraEntity(),
+                    feilaktigeEllerMangelfulleOpplysninger = requireNotNull(feilaktigEllerMangelfull) { "Feilaktige eller mangelfulle opplysninger kreves for uaktsomt" }.fraEntity,
                 )
             }
 
@@ -47,12 +49,14 @@ data class AktsomhetsvurderingEntity(
                 Skyldgrad.GrovUaktsomhet(
                     begrunnelse = requireNotNull(begrunnelse) { "Særlige grunner kreves for grov uaktsomhet" },
                     reduksjonSærligeGrunner = requireNotNull(aktsomhet.særligGrunner).fraEntity(),
+                    feilaktigeEllerMangelfulleOpplysninger = requireNotNull(feilaktigEllerMangelfull) { "Feilaktige eller mangelfulle opplysninger kreves for grov uaktsomhet" }.fraEntity,
                 )
             }
 
             VurderingType.FORÅRSAKET_AV_BRUKER_FORSETT -> {
                 Skyldgrad.Forsett(
                     begrunnelse = requireNotNull(begrunnelse) { "Begrunnelse kreves for forsett" },
+                    feilaktigeEllerMangelfulleOpplysninger = requireNotNull(feilaktigEllerMangelfull) { "Feilaktige eller mangelfulle opplysninger kreves for forsett" }.fraEntity,
                 )
             }
 
@@ -83,9 +87,14 @@ enum class VurderingType {
     IKKE_FORÅRSAKET_AV_BRUKER_FORSTOD,
     IKKE_FORÅRSAKET_AV_BRUKER_BURDE_FORSTÅTT,
     IKKE_FORÅRSAKET_AV_BRUKER_GOD_TRO,
-    FORÅRSAKET_AV_BRUKER_SIMPEL_UAKTSOMHET,
+    FORÅRSAKET_AV_BRUKER_UAKTSOMT,
     FORÅRSAKET_AV_BRUKER_GROV_UAKTSOMHET,
     FORÅRSAKET_AV_BRUKER_FORSETT,
+}
+
+enum class FeilaktigEllerMangelfullType(val fraEntity: Skyldgrad.FeilaktigEllerMangelfull) {
+    FEILAKTIG(Skyldgrad.FeilaktigEllerMangelfull.FEILAKTIG),
+    MANGELFULL(Skyldgrad.FeilaktigEllerMangelfull.MANGELFULL),
 }
 
 enum class BeholdType {

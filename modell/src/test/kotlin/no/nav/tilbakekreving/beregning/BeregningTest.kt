@@ -789,7 +789,7 @@ class BeregningTest {
 
     fun medSimpelUaktsomhet(prosentdel: BigDecimal) = NivåAvForståelse.Aktsomhet.Uaktsomhet(
         begrunnelse = "",
-        kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.Tilbakekreves(
+        kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(
             ReduksjonSærligeGrunner(
                 begrunnelse = "",
                 grunner = emptySet(),
@@ -803,7 +803,7 @@ class BeregningTest {
             id = UUID.randomUUID(),
             periode = this,
             begrunnelseForTilbakekreving = "",
-            _vurdering = Skyldgrad.Forsett(""),
+            _vurdering = Skyldgrad.Forsett("", Skyldgrad.FeilaktigEllerMangelfull.FEILAKTIG),
         )
     }
 
@@ -819,6 +819,7 @@ class BeregningTest {
                     grunner = emptySet(),
                     skalReduseres = ReduksjonSærligeGrunner.SkalReduseres.Nei,
                 ),
+                feilaktigeEllerMangelfulleOpplysninger = Skyldgrad.FeilaktigEllerMangelfull.FEILAKTIG,
             ),
         )
     }

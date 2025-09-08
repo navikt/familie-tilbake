@@ -21,9 +21,7 @@ interface ForårsaketAvBruker {
 
     sealed interface Ja : ForårsaketAvBruker
 
-    sealed interface Nei : ForårsaketAvBruker {
-        override fun renter(): Boolean = false
-    }
+    sealed interface Nei : ForårsaketAvBruker
 
     data object IkkeVurdert : ForårsaketAvBruker, Vurdering {
         override val begrunnelse: String = ""
@@ -32,7 +30,7 @@ interface ForårsaketAvBruker {
 
         override fun renter(): Boolean = false
 
-        override fun reduksjon(): Reduksjon = Reduksjon.FullstendigRefusjon()
+        override fun reduksjon(): Reduksjon = Reduksjon.FullstendigTilbakekreving()
 
         override fun tilFrontendDto(): VurdertVilkårsvurderingsresultatDto? = null
 
@@ -45,6 +43,7 @@ interface ForårsaketAvBruker {
                 begrunnelse = null,
                 beløpIBehold = null,
                 aktsomhet = null,
+                feilaktigEllerMangelfull = null,
             )
         }
     }

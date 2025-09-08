@@ -38,10 +38,31 @@ object VilkårsvurderingMapperV2 {
                 Aktsomhet.SIMPEL_UAKTSOMHET ->
                     NivåAvForståelse.Aktsomhet.Uaktsomhet(
                         begrunnelse = aktsomhet.begrunnelse,
-                        kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.Tilbakekreves(særligeGrunner()),
+                        kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(særligeGrunner()),
                     )
             }
         }
+
+    private fun VilkårsvurderingsperiodeDto.skyldgrad(feilaktigEllerMangelfull: Skyldgrad.FeilaktigEllerMangelfull): Skyldgrad {
+        val aktsomhet = aktsomhetDto!!
+
+        return when (aktsomhet.aktsomhet) {
+            Aktsomhet.FORSETT -> Skyldgrad.Forsett(
+                begrunnelse = begrunnelse,
+                feilaktigeEllerMangelfulleOpplysninger = feilaktigEllerMangelfull,
+            )
+            Aktsomhet.GROV_UAKTSOMHET -> Skyldgrad.GrovUaktsomhet(
+                begrunnelse = begrunnelse,
+                reduksjonSærligeGrunner = særligeGrunner(),
+                feilaktigeEllerMangelfulleOpplysninger = feilaktigEllerMangelfull,
+            )
+            Aktsomhet.SIMPEL_UAKTSOMHET -> Skyldgrad.Uaktsomt(
+                begrunnelse = begrunnelse,
+                reduksjonSærligeGrunner = særligeGrunner(),
+                feilaktigeEllerMangelfulleOpplysninger = feilaktigEllerMangelfull,
+            )
+        }
+    }
 
     fun tilVurdering(periode: VilkårsvurderingsperiodeDto) =
         when (periode.vilkårsvurderingsresultat) {
@@ -51,16 +72,9 @@ object VilkårsvurderingMapperV2 {
                     aktsomhet = periode.aktsomhetsvurdering(),
                 )
 
-            Vilkårsvurderingsresultat.MANGELFULLE_OPPLYSNINGER_FRA_BRUKER ->
-                Skyldgrad.GrovUaktsomhet(
-                    begrunnelse = periode.begrunnelse,
-                    reduksjonSærligeGrunner = periode.særligeGrunner(),
-                )
+            Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER -> periode.skyldgrad(Skyldgrad.FeilaktigEllerMangelfull.FEILAKTIG)
 
-            Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER ->
-                Skyldgrad.Forsett(
-                    begrunnelse = periode.begrunnelse,
-                )
+            Vilkårsvurderingsresultat.MANGELFULLE_OPPLYSNINGER_FRA_BRUKER -> periode.skyldgrad(Skyldgrad.FeilaktigEllerMangelfull.MANGELFULL)
 
             Vilkårsvurderingsresultat.GOD_TRO ->
                 NivåAvForståelse.GodTro(

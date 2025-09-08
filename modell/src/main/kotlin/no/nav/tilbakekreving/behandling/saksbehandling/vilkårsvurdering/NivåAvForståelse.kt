@@ -3,7 +3,6 @@ package no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering
 import no.nav.tilbakekreving.api.v1.dto.VurdertAktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertGodTroDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsresultatDto
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
 import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.entities.AktsomhetType
 import no.nav.tilbakekreving.entities.AktsomhetsvurderingEntity
@@ -26,6 +25,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
 
         override fun reduksjon(): Reduksjon = aktsomhet.reduksjon()
 
+        override fun renter(): Boolean = aktsomhet.renter()
+
         override fun tilFrontendDto(): VurdertVilkårsvurderingsresultatDto? {
             return VurdertVilkårsvurderingsresultatDto(
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
@@ -40,6 +41,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 beløpIBehold = null,
                 begrunnelse = begrunnelse,
                 aktsomhet = aktsomhet.tilEntity(),
+                feilaktigEllerMangelfull = null,
             )
         }
     }
@@ -51,6 +53,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
         override fun vurderingstype(): Vurdering = aktsomhet.vurderingstype()
 
         override fun reduksjon(): Reduksjon = aktsomhet.reduksjon()
+
+        override fun renter(): Boolean = false
 
         override fun tilFrontendDto(): VurdertVilkårsvurderingsresultatDto? {
             return VurdertVilkårsvurderingsresultatDto(
@@ -66,6 +70,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 beløpIBehold = null,
                 begrunnelse = begrunnelse,
                 aktsomhet = aktsomhet.tilEntity(),
+                feilaktigEllerMangelfull = null,
             )
         }
     }
@@ -77,6 +82,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
         override fun vurderingstype(): Vurdering = AnnenVurdering.GOD_TRO
 
         override fun reduksjon(): Reduksjon = beløpIBehold.reduksjon()
+
+        override fun renter(): Boolean = false
 
         override fun tilFrontendDto(): VurdertVilkårsvurderingsresultatDto? {
             return VurdertVilkårsvurderingsresultatDto(
@@ -96,6 +103,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 begrunnelse = begrunnelse,
                 beløpIBehold = beløpIBehold.tilEntity(),
                 aktsomhet = null,
+                feilaktigEllerMangelfull = null,
             )
         }
 
@@ -140,12 +148,16 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
 
         fun tilEntity(): VurdertAktsomhetEntity
 
+        fun renter(): Boolean
+
         class Forsett(
             override val begrunnelse: String,
         ) : Aktsomhet {
             override fun vurderingstype(): AktsomhetDTO = AktsomhetDTO.FORSETT
 
-            override fun reduksjon(): Reduksjon = Reduksjon.FullstendigRefusjon()
+            override fun reduksjon(): Reduksjon = Reduksjon.FullstendigTilbakekreving()
+
+            override fun renter(): Boolean = true
 
             override fun tilFrontendDto(): VurdertAktsomhetDto {
                 return VurdertAktsomhetDto(
@@ -175,11 +187,13 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             private val reduksjonSærligeGrunner: ReduksjonSærligeGrunner,
             override val begrunnelse: String,
         ) : Aktsomhet {
-            override fun vurderingstype(): AktsomhetDTO = AktsomhetDTO.GROV_UAKTSOMHET
-
             override fun reduksjon(): Reduksjon {
                 return reduksjonSærligeGrunner.skalReduseres.reduksjon()
             }
+
+            override fun renter(): Boolean = true
+
+            override fun vurderingstype(): AktsomhetDTO = AktsomhetDTO.GROV_UAKTSOMHET
 
             override fun tilFrontendDto(): VurdertAktsomhetDto {
                 return VurdertAktsomhetDto(
@@ -209,9 +223,11 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             private val kanUnnlates4XRettsgebyr: KanUnnlates4xRettsgebyr,
             override val begrunnelse: String,
         ) : Aktsomhet {
-            override fun vurderingstype(): AktsomhetDTO = AktsomhetDTO.SIMPEL_UAKTSOMHET
-
             override fun reduksjon(): Reduksjon = kanUnnlates4XRettsgebyr.reduksjon()
+
+            override fun renter(): Boolean = false
+
+            override fun vurderingstype(): AktsomhetDTO = AktsomhetDTO.SIMPEL_UAKTSOMHET
 
             override fun tilFrontendDto(): VurdertAktsomhetDto {
                 return VurdertAktsomhetDto(
@@ -220,10 +236,10 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     andelTilbakekreves = reduksjon().andel,
                     beløpTilbakekreves = null,
                     begrunnelse = begrunnelse,
-                    særligeGrunner = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.Tilbakekreves)?.reduksjonSærligeGrunner?.vurderteGrunner(),
-                    særligeGrunnerTilReduksjon = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.Tilbakekreves)?.reduksjonSærligeGrunner?.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja,
-                    tilbakekrevSmåbeløp = kanUnnlates4XRettsgebyr is KanUnnlates4xRettsgebyr.Tilbakekreves,
-                    særligeGrunnerBegrunnelse = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.Tilbakekreves)?.reduksjonSærligeGrunner?.begrunnelse,
+                    særligeGrunner = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr)?.reduksjonSærligeGrunner?.vurderteGrunner(),
+                    særligeGrunnerTilReduksjon = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr)?.reduksjonSærligeGrunner?.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja,
+                    tilbakekrevSmåbeløp = kanUnnlates4XRettsgebyr is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr,
+                    særligeGrunnerBegrunnelse = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr)?.reduksjonSærligeGrunner?.begrunnelse,
                 )
             }
 
@@ -232,7 +248,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     aktsomhetType = AktsomhetType.IKKE_UTVIST_SKYLD,
                     begrunnelse = begrunnelse,
                     skalIleggesRenter = null,
-                    særligGrunner = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.Tilbakekreves)?.reduksjonSærligeGrunner?.tilEntity(),
+                    særligGrunner = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr)?.reduksjonSærligeGrunner?.tilEntity(),
                 )
             }
         }
@@ -241,9 +257,11 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             private val kanUnnlates4XRettsgebyr: KanUnnlates4xRettsgebyr,
             override val begrunnelse: String,
         ) : Aktsomhet {
-            override fun vurderingstype(): AktsomhetDTO = AktsomhetDTO.SIMPEL_UAKTSOMHET
-
             override fun reduksjon(): Reduksjon = kanUnnlates4XRettsgebyr.reduksjon()
+
+            override fun renter(): Boolean = false
+
+            override fun vurderingstype(): AktsomhetDTO = AktsomhetDTO.SIMPEL_UAKTSOMHET
 
             override fun tilFrontendDto(): VurdertAktsomhetDto {
                 return VurdertAktsomhetDto(
@@ -252,10 +270,10 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     andelTilbakekreves = reduksjon().andel,
                     beløpTilbakekreves = null,
                     begrunnelse = begrunnelse,
-                    særligeGrunner = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.Tilbakekreves)?.reduksjonSærligeGrunner?.vurderteGrunner(),
-                    særligeGrunnerTilReduksjon = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.Tilbakekreves)?.reduksjonSærligeGrunner?.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja,
-                    tilbakekrevSmåbeløp = kanUnnlates4XRettsgebyr is KanUnnlates4xRettsgebyr.Tilbakekreves,
-                    særligeGrunnerBegrunnelse = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.Tilbakekreves)?.reduksjonSærligeGrunner?.begrunnelse,
+                    særligeGrunner = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr)?.reduksjonSærligeGrunner?.vurderteGrunner(),
+                    særligeGrunnerTilReduksjon = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr)?.reduksjonSærligeGrunner?.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja,
+                    tilbakekrevSmåbeløp = kanUnnlates4XRettsgebyr is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr,
+                    særligeGrunnerBegrunnelse = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr)?.reduksjonSærligeGrunner?.begrunnelse,
                 )
             }
 
@@ -264,7 +282,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     aktsomhetType = AktsomhetType.SIMPEL_UAKTSOMHET,
                     begrunnelse = begrunnelse,
                     skalIleggesRenter = null,
-                    særligGrunner = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.Tilbakekreves)?.reduksjonSærligeGrunner?.tilEntity(),
+                    særligGrunner = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr)?.reduksjonSærligeGrunner?.tilEntity(),
                 )
             }
         }

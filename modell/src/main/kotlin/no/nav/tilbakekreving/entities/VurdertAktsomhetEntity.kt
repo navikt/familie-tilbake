@@ -3,7 +3,6 @@ package no.nav.tilbakekreving.entities
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonSærligeGrunner
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Skyldgrad
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
 
 data class VurdertAktsomhetEntity(
@@ -15,7 +14,7 @@ data class VurdertAktsomhetEntity(
     fun tilAktsomhet(): NivåAvForståelse.Aktsomhet {
         return when (aktsomhetType) {
             AktsomhetType.SIMPEL_UAKTSOMHET -> NivåAvForståelse.Aktsomhet.Uaktsomhet(
-                kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.Tilbakekreves(
+                kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(
                     requireNotNull(særligGrunner) { "SærligGrunner kreves for Uaktsomhet" }.fraEntity(),
                 ),
                 begrunnelse = begrunnelse,
@@ -29,35 +28,11 @@ data class VurdertAktsomhetEntity(
             )
 
             AktsomhetType.IKKE_UTVIST_SKYLD -> NivåAvForståelse.Aktsomhet.IkkeUtvistSkyld(
-                kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.Tilbakekreves(
+                kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(
                     requireNotNull(særligGrunner) { "IkkeUtvistSkyld kreves for Uaktsomhet" }.fraEntity(),
                 ),
                 begrunnelse = begrunnelse,
             )
-        }
-    }
-
-    fun tilSkyldgrad(): Skyldgrad {
-        return when (aktsomhetType) {
-            AktsomhetType.SIMPEL_UAKTSOMHET -> {
-                Skyldgrad.SimpelUaktsomhet(
-                    begrunnelse = begrunnelse,
-                    reduksjonSærligeGrunner = requireNotNull(særligGrunner) { "SærligGrunner kreves for SimpelUaktsomhet" }.fraEntity(),
-                )
-            }
-            AktsomhetType.GROV_UAKTSOMHET -> {
-                Skyldgrad.GrovUaktsomhet(
-                    begrunnelse = begrunnelse,
-                    reduksjonSærligeGrunner = requireNotNull(særligGrunner) { "SærligGrunner kreves for GrovUaktsomhet" }.fraEntity(),
-                )
-            }
-            AktsomhetType.FORSETT -> {
-                Skyldgrad.Forsett(
-                    begrunnelse = begrunnelse,
-                )
-            }
-
-            AktsomhetType.IKKE_UTVIST_SKYLD -> error("Kan ikke velge IkkeUtvistSkyld dersom det er forårsaket av bruker")
         }
     }
 }
