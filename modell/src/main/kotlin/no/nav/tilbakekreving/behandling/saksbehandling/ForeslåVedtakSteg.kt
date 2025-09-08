@@ -9,7 +9,7 @@ import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 
 class ForeslåVedtakSteg(
     private var vurdering: Vurdering,
-) : Saksbehandlingsteg<Unit>, Nullstillbar {
+) : Saksbehandlingsteg<Unit> {
     override val type = Behandlingssteg.FORESLÅ_VEDTAK
 
     override fun erFullstendig(): Boolean = vurdering != Vurdering.IkkeVurdert

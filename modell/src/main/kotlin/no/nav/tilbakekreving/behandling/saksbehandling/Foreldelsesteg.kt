@@ -18,7 +18,7 @@ import java.util.UUID
 class Foreldelsesteg(
     private var vurdertePerioder: List<Foreldelseperiode>,
     private val kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
-) : Saksbehandlingsteg<VurdertForeldelseDto>, Nullstillbar {
+) : Saksbehandlingsteg<VurdertForeldelseDto> {
     override val type: Behandlingssteg = Behandlingssteg.FORELDELSE
 
     override fun erFullstendig(): Boolean = vurdertePerioder.all { it.vurdering != Vurdering.IkkeVurdert }

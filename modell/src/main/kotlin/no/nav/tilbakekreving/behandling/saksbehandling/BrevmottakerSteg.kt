@@ -17,6 +17,11 @@ class BrevmottakerSteg(
         return true
     }
 
+    override fun nullstill() {
+        this.aktivert = false
+        this.registrertBrevmottaker = defaultMottaker
+    }
+
     internal fun håndter(nyBrevmottaker: RegistrertBrevmottaker, sporing: Sporing) {
         if (!aktivert) {
             throw ModellFeil.UgyldigOperasjonException("BrevmottakerSteg er ikke aktivert.", sporing)

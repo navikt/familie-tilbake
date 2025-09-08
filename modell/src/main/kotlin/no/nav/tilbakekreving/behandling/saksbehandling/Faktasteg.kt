@@ -27,7 +27,7 @@ class Faktasteg(
     private val tilbakekrevingOpprettet: LocalDateTime,
     private val opprettelsesvalg: Opprettelsesvalg,
     private var vurdering: Vurdering,
-) : Saksbehandlingsteg<FaktaFeilutbetalingDto>, Nullstillbar {
+) : Saksbehandlingsteg<FaktaFeilutbetalingDto> {
     override val type: Behandlingssteg = Behandlingssteg.FAKTA
 
     override fun erFullstendig(): Boolean {
