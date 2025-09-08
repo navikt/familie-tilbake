@@ -87,9 +87,21 @@ class ForvaltningService(
             info("Kravgrunnlag hentet fra økonomi ${hentetKravgrunnlag.kravgrunnlagId}. vedtakId: ${hentetKravgrunnlag.vedtakId}")
         }
 
+        val gammelKravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
+        log.medContext(logContext) {
+            info("finnes gammelKravgrunnlag? $gammelKravgrunnlag")
+        }
+
         val kravgrunnlag = kravgrunnlagRepository.findByEksternKravgrunnlagIdAndAktivIsTrue(kravgrunnlagId)
+        log.medContext(logContext) {
+            info("finnes kravgrunnlag allerede? $kravgrunnlag")
+        }
+
         if (kravgrunnlag != null) {
             kravgrunnlagRepository.update(kravgrunnlag.copy(aktiv = false))
+            log.medContext(logContext) {
+                info("oppdatert kravgrunnlaget")
+            }
         }
         hentKravgrunnlagService.lagreHentetKravgrunnlag(behandlingId, hentetKravgrunnlag, logContext)
 
