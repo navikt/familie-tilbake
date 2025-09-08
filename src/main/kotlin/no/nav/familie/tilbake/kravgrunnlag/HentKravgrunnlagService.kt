@@ -48,7 +48,16 @@ class HentKravgrunnlagService(
             info("Lagrer hentet kravgrunnlag for behandling $behandlingId")
         }
         val kravgrunnlag431 = KravgrunnlagMapper.tilKravgrunnlag431(kravgrunnlag, behandlingId)
-        kravgrunnlagRepository.insert(kravgrunnlag431)
+        log.medContext(logContext) {
+            info("vedtakId: ${kravgrunnlag431.vedtakId}. eksternKravgrunnlagId: ${kravgrunnlag431.eksternKravgrunnlagId}")
+        }
+        try {
+            kravgrunnlagRepository.insert(kravgrunnlag431)
+        } catch (e: Exception) {
+            log.medContext(logContext) {
+                warn("Feil ved insert av kravgrunnlag", e)
+            }
+        }
     }
 
     @Transactional

@@ -83,6 +83,10 @@ class ForvaltningService(
                 logContext,
             )
 
+        log.medContext(logContext) {
+            info("Kravgrunnlag hentet fra økonomi ${hentetKravgrunnlag.kravgrunnlagId}. vedtakId: ${hentetKravgrunnlag.vedtakId}")
+        }
+
         val kravgrunnlag = kravgrunnlagRepository.findByEksternKravgrunnlagIdAndAktivIsTrue(kravgrunnlagId)
         if (kravgrunnlag != null) {
             kravgrunnlagRepository.update(kravgrunnlag.copy(aktiv = false))
