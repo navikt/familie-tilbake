@@ -83,14 +83,11 @@ class ForvaltningService(
                 logContext,
             )
 
-        log.medContext(logContext) {
-            info("Kravgrunnlag hentet fra økonomi ${hentetKravgrunnlag.kravgrunnlagId}. vedtakId: ${hentetKravgrunnlag.vedtakId}")
-        }
-
-        val kravgrunnlag = kravgrunnlagRepository.findByEksternKravgrunnlagIdAndAktivIsTrue(kravgrunnlagId)
-        if (kravgrunnlag != null) {
+        if (kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandlingId)) {
+            val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
             kravgrunnlagRepository.update(kravgrunnlag.copy(aktiv = false))
         }
+
         hentKravgrunnlagService.lagreHentetKravgrunnlag(behandlingId, hentetKravgrunnlag, logContext)
 
         stegService.håndterSteg(behandlingId, logContext)
