@@ -1,11 +1,11 @@
 package no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering
 
 import no.nav.tilbakekreving.api.v1.dto.VurdertSærligGrunnDto
+import no.nav.tilbakekreving.behandling.saksbehandling.SærligGrunn
 import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.entities.SkalReduseresEntity
 import no.nav.tilbakekreving.entities.SkalReduseresType
 import no.nav.tilbakekreving.entities.SærligeGrunnerEntity
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
 
 // §22-15 4. ledd
 class ReduksjonSærligeGrunner(
@@ -16,13 +16,18 @@ class ReduksjonSærligeGrunner(
     fun tilEntity(): SærligeGrunnerEntity {
         return SærligeGrunnerEntity(
             begrunnelse = begrunnelse,
-            grunner = grunner.map { it },
+            grunner = grunner.map { it.tilEntity() },
             skalReduseres = skalReduseres.tilEntity(),
         )
     }
 
     fun vurderteGrunner(): List<VurdertSærligGrunnDto> {
-        return grunner.map { VurdertSærligGrunnDto(it, null) }
+        return grunner.map {
+            when (it) {
+                is SærligGrunn.Annet -> VurdertSærligGrunnDto(it.type, it.begrunnelse)
+                else -> VurdertSærligGrunnDto(it.type, null)
+            }
+        }
     }
 
     sealed interface SkalReduseres {
