@@ -1,9 +1,10 @@
 package no.nav.tilbakekreving.entities
 
+import no.nav.tilbakekreving.behandling.saksbehandling.SærligGrunn
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonSærligeGrunner
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 
 data class VurdertAktsomhetEntity(
     val aktsomhetType: AktsomhetType,
@@ -39,14 +40,29 @@ data class VurdertAktsomhetEntity(
 
 data class SærligeGrunnerEntity(
     val begrunnelse: String,
-    val grunner: List<SærligGrunn>,
+    val grunner: List<SærligGrunnEntity>,
     val skalReduseres: SkalReduseresEntity,
 ) {
     fun fraEntity(): ReduksjonSærligeGrunner = ReduksjonSærligeGrunner(
         begrunnelse = begrunnelse,
-        grunner = grunner.toSet(),
+        grunner = grunner.map { it.fraEntity() }.toSet(),
         skalReduseres = skalReduseres.fraEntity(),
     )
+}
+
+data class SærligGrunnEntity(
+    val type: SærligGrunnType,
+    val annetBegrunnelse: String?,
+) {
+    fun fraEntity(): SærligGrunn {
+        return when (type) {
+            SærligGrunnType.GRAD_AV_UAKTSOMHET -> SærligGrunn.GradAvUaktsomhet
+            SærligGrunnType.HELT_ELLER_DELVIS_NAVS_FEIL -> SærligGrunn.HeltEllerDelvisNavsFeil
+            SærligGrunnType.TID_FRA_UTBETALING -> SærligGrunn.TidFraUtbetaling
+            SærligGrunnType.STØRRELSE_BELØP -> SærligGrunn.StørrelseBeløp
+            SærligGrunnType.ANNET -> SærligGrunn.Annet(requireNotNull(annetBegrunnelse))
+        }
+    }
 }
 
 enum class AktsomhetType {

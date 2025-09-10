@@ -10,7 +10,7 @@ import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
@@ -139,8 +139,8 @@ class TekstformatererVedtaksbrevInntektOver6GTest {
                     særligeGrunner =
                         HbSærligeGrunner(
                             listOf(
-                                SærligGrunn.TID_FRA_UTBETALING,
-                                SærligGrunn.STØRRELSE_BELØP,
+                                SærligGrunnType.TID_FRA_UTBETALING,
+                                SærligGrunnType.STØRRELSE_BELØP,
                             ),
                         ),
                 ),

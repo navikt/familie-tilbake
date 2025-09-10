@@ -1,6 +1,6 @@
 package no.nav.tilbakekreving.pdf.dokumentbestilling.vedtak.handlebars.dto.periode
 
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 
 data class HbSærligeGrunner(
     val størrelse: Boolean = false,
@@ -11,14 +11,14 @@ data class HbSærligeGrunner(
     val fritekstAnnet: String? = null,
 ) {
     constructor(
-        grunner: Collection<SærligGrunn>,
+        grunner: Collection<SærligGrunnType>,
         fritekst: String? = null,
         fritekstAnnet: String? = null,
     ) : this(
-        grunner.contains(SærligGrunn.STØRRELSE_BELØP),
-        grunner.contains(SærligGrunn.ANNET),
-        grunner.contains(SærligGrunn.HELT_ELLER_DELVIS_NAVS_FEIL),
-        grunner.contains(SærligGrunn.TID_FRA_UTBETALING),
+        grunner.contains(SærligGrunnType.STØRRELSE_BELØP),
+        grunner.contains(SærligGrunnType.ANNET),
+        grunner.contains(SærligGrunnType.HELT_ELLER_DELVIS_NAVS_FEIL),
+        grunner.contains(SærligGrunnType.TID_FRA_UTBETALING),
         fritekst,
         fritekstAnnet,
     )

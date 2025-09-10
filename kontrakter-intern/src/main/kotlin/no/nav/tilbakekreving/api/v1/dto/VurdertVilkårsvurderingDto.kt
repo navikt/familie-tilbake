@@ -3,7 +3,7 @@ package no.nav.tilbakekreving.api.v1.dto
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -50,7 +50,7 @@ data class VurdertAktsomhetDto(
 )
 
 data class VurdertSærligGrunnDto(
-    val særligGrunn: SærligGrunn,
+    val særligGrunn: SærligGrunnType,
     val begrunnelse: String? = null,
 )
 

@@ -58,7 +58,7 @@ import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode.Companion.til
 import no.nav.tilbakekreving.kontrakter.verge.Vergetype
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -309,7 +309,7 @@ object Testdata {
 
     private val vilkårsvurderingSærligGrunn =
         VilkårsvurderingSærligGrunn(
-            særligGrunn = SærligGrunn.GRAD_AV_UAKTSOMHET,
+            særligGrunn = SærligGrunnType.GRAD_AV_UAKTSOMHET,
             begrunnelse = "testverdi",
         )
 

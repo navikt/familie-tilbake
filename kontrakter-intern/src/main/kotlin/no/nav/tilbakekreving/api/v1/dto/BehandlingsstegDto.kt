@@ -13,7 +13,7 @@ import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.verge.Vergetype
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -150,7 +150,7 @@ data class AktsomhetDto(
 )
 
 data class SærligGrunnDto(
-    val særligGrunn: SærligGrunn,
+    val særligGrunn: SærligGrunnType,
     @Size(max = 1500, message = "begrunnelse er for lang")
     val begrunnelse: String? = null,
 )
