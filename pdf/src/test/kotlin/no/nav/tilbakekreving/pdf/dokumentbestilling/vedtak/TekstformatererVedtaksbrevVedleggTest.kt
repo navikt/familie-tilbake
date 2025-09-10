@@ -10,7 +10,7 @@ import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnTyper
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
@@ -145,8 +145,8 @@ class TekstformatererVedtaksbrevVedleggTest {
                             særligeGrunner =
                                 HbSærligeGrunner(
                                     listOf(
-                                        SærligGrunnTyper.TID_FRA_UTBETALING,
-                                        SærligGrunnTyper.STØRRELSE_BELØP,
+                                        SærligGrunnType.TID_FRA_UTBETALING,
+                                        SærligGrunnType.STØRRELSE_BELØP,
                                     ),
                                 ),
                         ),
@@ -238,9 +238,9 @@ class TekstformatererVedtaksbrevVedleggTest {
                             særligeGrunner =
                                 HbSærligeGrunner(
                                     listOf(
-                                        SærligGrunnTyper
+                                        SærligGrunnType
                                             .TID_FRA_UTBETALING,
-                                        SærligGrunnTyper.STØRRELSE_BELØP,
+                                        SærligGrunnType.STØRRELSE_BELØP,
                                     ),
                                     null,
                                     null,

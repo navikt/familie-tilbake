@@ -51,7 +51,7 @@ import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode.Companion.til
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnTyper
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import no.nav.tilbakekreving.mars
 import org.junit.jupiter.api.Assertions
@@ -269,7 +269,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentVilkårsvurdering skal hente allerede lagret simpel aktsomhet vilkårsvurdering`() {
         val behandlingsstegVilkårsvurderingDto =
-            lagVilkårsvurderingMedSimpelAktsomhet(særligGrunn = SærligGrunnDto(SærligGrunnTyper.GRAD_AV_UAKTSOMHET))
+            lagVilkårsvurderingMedSimpelAktsomhet(særligGrunn = SærligGrunnDto(SærligGrunnType.GRAD_AV_UAKTSOMHET))
         vilkårsvurderingService.lagreVilkårsvurdering(
             behandlingId = behandling.id,
             behandlingsstegVilkårsvurderingDto = behandlingsstegVilkårsvurderingDto,
@@ -304,7 +304,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         aktsomhetDto.særligeGrunnerBegrunnelse shouldBe "Særlig grunner begrunnelse"
         val særligGrunner = aktsomhetDto.særligeGrunner
         særligGrunner.shouldNotBeNull()
-        særligGrunner.any { SærligGrunnTyper.GRAD_AV_UAKTSOMHET == it.særligGrunn }.shouldBeTrue()
+        særligGrunner.any { SærligGrunnType.GRAD_AV_UAKTSOMHET == it.særligGrunn }.shouldBeTrue()
         særligGrunner.all { it.begrunnelse == null }.shouldBeTrue()
     }
 
@@ -354,8 +354,8 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
             behandlingsstegVilkårsvurderingDto = behandlingsstegVilkårsvurderingDto,
         )
 
-        val oppdatertVilkårsvurderingDto = lagVilkårsvurderingMedSimpelAktsomhet(særligGrunn = SærligGrunnDto(SærligGrunnTyper.GRAD_AV_UAKTSOMHET))
-        val oppdatertVilkårsvurderingDtoNavsFeil = lagVilkårsvurderingMedSimpelAktsomhet(særligGrunn = SærligGrunnDto(SærligGrunnTyper.HELT_ELLER_DELVIS_NAVS_FEIL))
+        val oppdatertVilkårsvurderingDto = lagVilkårsvurderingMedSimpelAktsomhet(særligGrunn = SærligGrunnDto(SærligGrunnType.GRAD_AV_UAKTSOMHET))
+        val oppdatertVilkårsvurderingDtoNavsFeil = lagVilkårsvurderingMedSimpelAktsomhet(særligGrunn = SærligGrunnDto(SærligGrunnType.HELT_ELLER_DELVIS_NAVS_FEIL))
         vilkårsvurderingService.lagreVilkårsvurdering(
             behandlingId = behandling.id,
             behandlingsstegVilkårsvurderingDto = oppdatertVilkårsvurderingDto,
@@ -410,7 +410,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
             ?.aktsomhet
             ?.særligeGrunner
             ?.first()
-            ?.særligGrunn shouldBe SærligGrunnTyper.GRAD_AV_UAKTSOMHET
+            ?.særligGrunn shouldBe SærligGrunnType.GRAD_AV_UAKTSOMHET
     }
 
     @Test
@@ -537,7 +537,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                 lagVilkårsvurderingMedSimpelAktsomhet(
                     andelTilbakekreves = BigDecimal(120),
                     særligGrunn =
-                        SærligGrunnDto(SærligGrunnTyper.GRAD_AV_UAKTSOMHET),
+                        SærligGrunnDto(SærligGrunnType.GRAD_AV_UAKTSOMHET),
                 ),
             )
         }
@@ -549,7 +549,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         val exception = shouldThrow<RuntimeException> {
             vilkårsvurderingService.lagreVilkårsvurdering(
                 behandling.id,
-                lagVilkårsvurderingMedSimpelAktsomhet(særligGrunn = SærligGrunnDto(SærligGrunnTyper.ANNET)),
+                lagVilkårsvurderingMedSimpelAktsomhet(særligGrunn = SærligGrunnDto(SærligGrunnType.ANNET)),
             )
         }
         exception.message shouldBe "ANNET særlig grunner må ha ANNET begrunnelse"
@@ -560,7 +560,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         // forutsetter at kravgrunnlag har 20000 som feilutbetalt beløp fra Testdata
         val behandlingsstegVilkårsvurderingDto = lagVilkårsvurderingMedSimpelAktsomhet(
             manueltSattBeløp = BigDecimal(30000),
-            særligGrunn = SærligGrunnDto(SærligGrunnTyper.GRAD_AV_UAKTSOMHET),
+            særligGrunn = SærligGrunnDto(SærligGrunnType.GRAD_AV_UAKTSOMHET),
         )
         val exception = shouldThrow<RuntimeException> {
             vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, behandlingsstegVilkårsvurderingDto)
@@ -591,7 +591,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
             lagVilkårsvurderingMedSimpelAktsomhet(
                 ileggRenter = true,
                 særligGrunn =
-                    SærligGrunnDto(SærligGrunnTyper.GRAD_AV_UAKTSOMHET),
+                    SærligGrunnDto(SærligGrunnType.GRAD_AV_UAKTSOMHET),
             ),
         )
 
@@ -623,7 +623,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
 
         val særligGrunner = aktsomhet.vilkårsvurderingSærligeGrunner
         særligGrunner.shouldNotBeNull()
-        særligGrunner.any { SærligGrunnTyper.GRAD_AV_UAKTSOMHET == it.særligGrunn }.shouldBeTrue()
+        særligGrunner.any { SærligGrunnType.GRAD_AV_UAKTSOMHET == it.særligGrunn }.shouldBeTrue()
         særligGrunner.all { it.begrunnelse == null }.shouldBeTrue()
     }
 

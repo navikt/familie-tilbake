@@ -12,7 +12,7 @@ import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnTyper
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
@@ -461,10 +461,10 @@ class TekstformatererVedtaksbrevTest {
                                 særligeGrunner =
                                     HbSærligeGrunner(
                                         listOf(
-                                            SærligGrunnTyper.HELT_ELLER_DELVIS_NAVS_FEIL,
-                                            SærligGrunnTyper.STØRRELSE_BELØP,
-                                            SærligGrunnTyper.TID_FRA_UTBETALING,
-                                            SærligGrunnTyper.ANNET,
+                                            SærligGrunnType.HELT_ELLER_DELVIS_NAVS_FEIL,
+                                            SærligGrunnType.STØRRELSE_BELØP,
+                                            SærligGrunnType.TID_FRA_UTBETALING,
+                                            SærligGrunnType.ANNET,
                                         ),
                                         "Gratulerer, du fikk norgesrekord i feilutbetalt" +
                                             " beløp! Du skal slippe å betale renter!",
@@ -1410,7 +1410,7 @@ class TekstformatererVedtaksbrevTest {
                             aktsomhetsresultat = Aktsomhet.SIMPEL_UAKTSOMHET,
                             særligeGrunner =
                                 HbSærligeGrunner(
-                                    listOf(SærligGrunnTyper.GRAD_AV_UAKTSOMHET),
+                                    listOf(SærligGrunnType.GRAD_AV_UAKTSOMHET),
                                     null,
                                     null,
                                 ),
@@ -1480,8 +1480,8 @@ class TekstformatererVedtaksbrevTest {
                             særligeGrunner =
                                 HbSærligeGrunner(
                                     listOf(
-                                        SærligGrunnTyper.TID_FRA_UTBETALING,
-                                        SærligGrunnTyper.STØRRELSE_BELØP,
+                                        SærligGrunnType.TID_FRA_UTBETALING,
+                                        SærligGrunnType.STØRRELSE_BELØP,
                                     ),
                                 ),
                         ),
@@ -1573,7 +1573,7 @@ class TekstformatererVedtaksbrevTest {
                                     .FEIL_OPPLYSNINGER_FRA_BRUKER,
                             aktsomhetsresultat = Aktsomhet.GROV_UAKTSOMHET,
                             særligeGrunner =
-                                HbSærligeGrunner(listOf(SærligGrunnTyper.GRAD_AV_UAKTSOMHET)),
+                                HbSærligeGrunner(listOf(SærligGrunnType.GRAD_AV_UAKTSOMHET)),
                         ),
                     resultat =
                         HbResultat(

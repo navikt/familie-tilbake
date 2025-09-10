@@ -4,7 +4,7 @@ import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.behandling.saksbehandling.SærligGrunn
 import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnTyper
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 
 object VilkårsvurderingMapperV2 {
@@ -25,11 +25,11 @@ object VilkårsvurderingMapperV2 {
                                 begrunnelse = aktsomhet.særligeGrunnerBegrunnelse!!,
                                 grunner = aktsomhet.særligeGrunner!!.map {
                                     when (it.særligGrunn) {
-                                        SærligGrunnTyper.ANNET -> SærligGrunn.Annet(it.begrunnelse!!)
-                                        SærligGrunnTyper.STØRRELSE_BELØP -> SærligGrunn.StørrelseBeløp
-                                        SærligGrunnTyper.HELT_ELLER_DELVIS_NAVS_FEIL -> SærligGrunn.HeltEllerDelvisNavsFeil
-                                        SærligGrunnTyper.GRAD_AV_UAKTSOMHET -> SærligGrunn.GradAvUaktsomhet
-                                        SærligGrunnTyper.TID_FRA_UTBETALING -> SærligGrunn.TidFraUtbetaling
+                                        SærligGrunnType.ANNET -> SærligGrunn.Annet(it.begrunnelse!!)
+                                        SærligGrunnType.STØRRELSE_BELØP -> SærligGrunn.StørrelseBeløp
+                                        SærligGrunnType.HELT_ELLER_DELVIS_NAVS_FEIL -> SærligGrunn.HeltEllerDelvisNavsFeil
+                                        SærligGrunnType.GRAD_AV_UAKTSOMHET -> SærligGrunn.GradAvUaktsomhet
+                                        SærligGrunnType.TID_FRA_UTBETALING -> SærligGrunn.TidFraUtbetaling
                                     }
                                 }.toSet(),
                             ),
@@ -49,11 +49,11 @@ object VilkårsvurderingMapperV2 {
                                 begrunnelse = aktsomhet.særligeGrunnerBegrunnelse!!,
                                 grunner = aktsomhet.særligeGrunner!!.map {
                                     when (it.særligGrunn) {
-                                        SærligGrunnTyper.ANNET -> SærligGrunn.Annet(it.begrunnelse!!)
-                                        SærligGrunnTyper.STØRRELSE_BELØP -> SærligGrunn.StørrelseBeløp
-                                        SærligGrunnTyper.HELT_ELLER_DELVIS_NAVS_FEIL -> SærligGrunn.HeltEllerDelvisNavsFeil
-                                        SærligGrunnTyper.GRAD_AV_UAKTSOMHET -> SærligGrunn.GradAvUaktsomhet
-                                        SærligGrunnTyper.TID_FRA_UTBETALING -> SærligGrunn.TidFraUtbetaling
+                                        SærligGrunnType.ANNET -> SærligGrunn.Annet(it.begrunnelse!!)
+                                        SærligGrunnType.STØRRELSE_BELØP -> SærligGrunn.StørrelseBeløp
+                                        SærligGrunnType.HELT_ELLER_DELVIS_NAVS_FEIL -> SærligGrunn.HeltEllerDelvisNavsFeil
+                                        SærligGrunnType.GRAD_AV_UAKTSOMHET -> SærligGrunn.GradAvUaktsomhet
+                                        SærligGrunnType.TID_FRA_UTBETALING -> SærligGrunn.TidFraUtbetaling
                                     }
                                 }.toSet(),
                             ),

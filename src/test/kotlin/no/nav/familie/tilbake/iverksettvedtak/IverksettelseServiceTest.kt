@@ -46,7 +46,7 @@ import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnTyper
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsbelopDto
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsvedtakDto
@@ -298,7 +298,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
                             særligeGrunner =
                                 listOf(
                                     SærligGrunnDto(
-                                        særligGrunn = SærligGrunnTyper.ANNET,
+                                        særligGrunn = SærligGrunnType.ANNET,
                                         begrunnelse = "testverdi",
                                     ),
                                 ),

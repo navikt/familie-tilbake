@@ -12,7 +12,7 @@ import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnTyper
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
@@ -119,9 +119,9 @@ class AvsnittUtilTest {
                             særligeGrunner =
                                 HbSærligeGrunner(
                                     listOf(
-                                        SærligGrunnTyper.TID_FRA_UTBETALING,
-                                        SærligGrunnTyper.STØRRELSE_BELØP,
-                                        SærligGrunnTyper.ANNET,
+                                        SærligGrunnType.TID_FRA_UTBETALING,
+                                        SærligGrunnType.STØRRELSE_BELØP,
+                                        SærligGrunnType.ANNET,
                                     ),
                                     "Fritekst særlige grunner",
                                     "Fritekst særlige grunner annet",
@@ -149,8 +149,8 @@ class AvsnittUtilTest {
                             særligeGrunner =
                                 HbSærligeGrunner(
                                     listOf(
-                                        SærligGrunnTyper.HELT_ELLER_DELVIS_NAVS_FEIL,
-                                        SærligGrunnTyper.STØRRELSE_BELØP,
+                                        SærligGrunnType.HELT_ELLER_DELVIS_NAVS_FEIL,
+                                        SærligGrunnType.STØRRELSE_BELØP,
                                     ),
                                 ),
                         ),

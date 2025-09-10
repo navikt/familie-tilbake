@@ -2,7 +2,7 @@ package no.nav.tilbakekreving.entities
 
 import no.nav.tilbakekreving.behandling.saksbehandling.SærligGrunn
 import no.nav.tilbakekreving.behandling.saksbehandling.Vilkårsvurderingsteg
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnTyper
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 
 data class VurdertAktsomhetEntity(
     val aktsomhetType: AktsomhetType,
@@ -50,16 +50,16 @@ data class SærligeGrunnerEntity(
 }
 
 data class SærligGrunnEntity(
-    val type: SærligGrunnTyper,
+    val type: SærligGrunnType,
     val annetBegrunnelse: String?,
 ) {
     fun fraEntity(): SærligGrunn {
         return when (type) {
-            SærligGrunnTyper.GRAD_AV_UAKTSOMHET -> SærligGrunn.GradAvUaktsomhet
-            SærligGrunnTyper.HELT_ELLER_DELVIS_NAVS_FEIL -> SærligGrunn.HeltEllerDelvisNavsFeil
-            SærligGrunnTyper.TID_FRA_UTBETALING -> SærligGrunn.TidFraUtbetaling
-            SærligGrunnTyper.STØRRELSE_BELØP -> SærligGrunn.StørrelseBeløp
-            SærligGrunnTyper.ANNET -> SærligGrunn.Annet(requireNotNull(annetBegrunnelse))
+            SærligGrunnType.GRAD_AV_UAKTSOMHET -> SærligGrunn.GradAvUaktsomhet
+            SærligGrunnType.HELT_ELLER_DELVIS_NAVS_FEIL -> SærligGrunn.HeltEllerDelvisNavsFeil
+            SærligGrunnType.TID_FRA_UTBETALING -> SærligGrunn.TidFraUtbetaling
+            SærligGrunnType.STØRRELSE_BELØP -> SærligGrunn.StørrelseBeløp
+            SærligGrunnType.ANNET -> SærligGrunn.Annet(requireNotNull(annetBegrunnelse))
         }
     }
 }

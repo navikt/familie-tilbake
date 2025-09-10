@@ -46,7 +46,7 @@ import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnTyper
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -232,7 +232,7 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
     private fun lagVilkårMedAktsomhet() {
         val særligGrunn =
             VilkårsvurderingSærligGrunn(
-                særligGrunn = SærligGrunnTyper.STØRRELSE_BELØP,
+                særligGrunn = SærligGrunnType.STØRRELSE_BELØP,
                 begrunnelse = "særlig grunner begrunnelse",
             )
         val vilkårVurderingAktsomhet =

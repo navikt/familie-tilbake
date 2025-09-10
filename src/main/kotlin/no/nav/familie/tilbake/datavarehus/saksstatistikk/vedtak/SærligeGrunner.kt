@@ -1,8 +1,8 @@
 package no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak
 
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnTyper
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 
 class SærligeGrunner(
     var erSærligeGrunnerTilReduksjon: Boolean = false,
-    var særligeGrunner: List<SærligGrunnTyper> = emptyList(),
+    var særligeGrunner: List<SærligGrunnType> = emptyList(),
 )

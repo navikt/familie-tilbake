@@ -1,15 +1,15 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
 import no.nav.tilbakekreving.entities.SærligGrunnEntity
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnTyper
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 
 sealed interface SærligGrunn {
-    val type: SærligGrunnTyper
+    val type: SærligGrunnType
 
     fun tilEntity(): SærligGrunnEntity
 
     object GradAvUaktsomhet : SærligGrunn {
-        override val type = SærligGrunnTyper.GRAD_AV_UAKTSOMHET
+        override val type = SærligGrunnType.GRAD_AV_UAKTSOMHET
 
         override fun tilEntity(): SærligGrunnEntity {
             return SærligGrunnEntity(type, null)
@@ -17,7 +17,7 @@ sealed interface SærligGrunn {
     }
 
     object HeltEllerDelvisNavsFeil : SærligGrunn {
-        override val type = SærligGrunnTyper.HELT_ELLER_DELVIS_NAVS_FEIL
+        override val type = SærligGrunnType.HELT_ELLER_DELVIS_NAVS_FEIL
 
         override fun tilEntity(): SærligGrunnEntity {
             return SærligGrunnEntity(type, null)
@@ -25,7 +25,7 @@ sealed interface SærligGrunn {
     }
 
     object StørrelseBeløp : SærligGrunn {
-        override val type = SærligGrunnTyper.STØRRELSE_BELØP
+        override val type = SærligGrunnType.STØRRELSE_BELØP
 
         override fun tilEntity(): SærligGrunnEntity {
             return SærligGrunnEntity(type, null)
@@ -33,7 +33,7 @@ sealed interface SærligGrunn {
     }
 
     object TidFraUtbetaling : SærligGrunn {
-        override val type = SærligGrunnTyper.TID_FRA_UTBETALING
+        override val type = SærligGrunnType.TID_FRA_UTBETALING
 
         override fun tilEntity(): SærligGrunnEntity {
             return SærligGrunnEntity(type, null)
@@ -41,7 +41,7 @@ sealed interface SærligGrunn {
     }
 
     data class Annet(val begrunnelse: String) : SærligGrunn {
-        override val type = SærligGrunnTyper.ANNET
+        override val type = SærligGrunnType.ANNET
 
         override fun tilEntity(): SærligGrunnEntity {
             return SærligGrunnEntity(type, begrunnelse)

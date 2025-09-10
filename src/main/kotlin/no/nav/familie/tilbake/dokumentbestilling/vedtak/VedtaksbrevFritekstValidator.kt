@@ -14,7 +14,7 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnTyper
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 import no.nav.tilbakekreving.pdf.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
 import no.nav.tilbakekreving.pdf.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype.ORDINÆR
 import org.springframework.http.HttpStatus
@@ -196,7 +196,7 @@ object VedtaksbrevFritekstValidator {
             vilkårsvurdering.perioder
                 .filter {
                     it.aktsomhet?.vilkårsvurderingSærligeGrunner != null &&
-                        it.aktsomhet.vilkårsvurderingSærligeGrunner.any { særligGrunn -> SærligGrunnTyper.ANNET == særligGrunn.særligGrunn }
+                        it.aktsomhet.vilkårsvurderingSærligeGrunner.any { særligGrunn -> SærligGrunnType.ANNET == særligGrunn.særligGrunn }
                 }.sortedBy { it.periode }
 
         val validerPerioder =
