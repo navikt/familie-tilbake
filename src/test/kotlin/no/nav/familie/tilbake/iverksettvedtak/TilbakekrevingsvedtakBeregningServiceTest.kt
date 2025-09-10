@@ -40,9 +40,9 @@ import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn.ANNET
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn.GRAD_AV_UAKTSOMHET
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn.HELT_ELLER_DELVIS_NAVS_FEIL
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType.ANNET
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType.GRAD_AV_UAKTSOMHET
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType.HELT_ELLER_DELVIS_NAVS_FEIL
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

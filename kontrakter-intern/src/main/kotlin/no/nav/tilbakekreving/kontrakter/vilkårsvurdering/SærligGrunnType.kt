@@ -1,6 +1,6 @@
 package no.nav.tilbakekreving.kontrakter.vilkårsvurdering
 
-enum class SærligGrunn(
+enum class SærligGrunnType(
     val navn: String,
 ) {
     GRAD_AV_UAKTSOMHET("Graden av uaktsomhet hos den kravet retter seg mot"),

@@ -65,7 +65,7 @@ import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode.Companion.til
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import no.nav.tilbakekreving.mars
 import no.nav.tilbakekreving.oktober
@@ -813,7 +813,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
                             særligeGrunnerTilReduksjon = false,
                             vilkårsvurderingSærligeGrunner = setOf(
                                 VilkårsvurderingSærligGrunn(
-                                    særligGrunn = SærligGrunn.ANNET,
+                                    særligGrunn = SærligGrunnType.ANNET,
                                     begrunnelse = "Annet begrunnelse",
                                 ),
                             ),

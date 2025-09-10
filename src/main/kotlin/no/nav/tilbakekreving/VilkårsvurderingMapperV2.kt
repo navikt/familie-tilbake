@@ -1,19 +1,29 @@
 package no.nav.tilbakekreving
 
 import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
+import no.nav.tilbakekreving.behandling.saksbehandling.SærligGrunn
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonSærligeGrunner
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Skyldgrad
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 
 object VilkårsvurderingMapperV2 {
     private fun VilkårsvurderingsperiodeDto.særligeGrunner(): ReduksjonSærligeGrunner {
         return ReduksjonSærligeGrunner(
             aktsomhetDto!!.særligeGrunnerBegrunnelse!!,
-            aktsomhetDto!!.særligeGrunner!!.map { it.særligGrunn }.toSet(),
+            aktsomhetDto!!.særligeGrunner!!.map {
+                when (it.særligGrunn) {
+                    SærligGrunnType.ANNET -> SærligGrunn.Annet(it.begrunnelse!!)
+                    SærligGrunnType.STØRRELSE_BELØP -> SærligGrunn.StørrelseBeløp
+                    SærligGrunnType.HELT_ELLER_DELVIS_NAVS_FEIL -> SærligGrunn.HeltEllerDelvisNavsFeil
+                    SærligGrunnType.GRAD_AV_UAKTSOMHET -> SærligGrunn.GradAvUaktsomhet
+                    SærligGrunnType.TID_FRA_UTBETALING -> SærligGrunn.TidFraUtbetaling
+                }
+            }.toSet(),
             when (aktsomhetDto!!.særligeGrunnerTilReduksjon) {
                 true -> ReduksjonSærligeGrunner.SkalReduseres.Ja(
                     aktsomhetDto!!.andelTilbakekreves!!.toInt(),

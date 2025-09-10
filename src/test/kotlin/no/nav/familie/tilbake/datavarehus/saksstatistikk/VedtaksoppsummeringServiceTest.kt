@@ -46,7 +46,7 @@ import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
@@ -234,7 +234,7 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
     private fun lagVilkårMedAktsomhet() {
         val særligGrunn =
             VilkårsvurderingSærligGrunn(
-                særligGrunn = SærligGrunn.STØRRELSE_BELØP,
+                særligGrunn = SærligGrunnType.STØRRELSE_BELØP,
                 begrunnelse = "særlig grunner begrunnelse",
             )
         val vilkårVurderingAktsomhet =

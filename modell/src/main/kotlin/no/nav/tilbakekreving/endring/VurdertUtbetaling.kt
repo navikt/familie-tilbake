@@ -1,8 +1,8 @@
 package no.nav.tilbakekreving.endring
 
+import no.nav.tilbakekreving.behandling.saksbehandling.SærligGrunn
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
 import java.math.BigDecimal
 
 data class VurdertUtbetaling(

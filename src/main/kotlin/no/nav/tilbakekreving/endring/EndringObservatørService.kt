@@ -149,7 +149,7 @@ class EndringObservatørService(
                         særligeGrunner = it.vilkårsvurdering.særligeGrunner?.let { særligeGrunner ->
                             SærligeGrunner(
                                 erSærligeGrunnerTilReduksjon = særligeGrunner.beløpReduseres == VurdertUtbetaling.JaNeiVurdering.Ja,
-                                særligeGrunner = særligeGrunner.grunner.toList(),
+                                særligeGrunner = særligeGrunner.grunner.map { it.type }.toList(),
                             )
                         },
                     )
