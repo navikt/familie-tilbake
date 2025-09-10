@@ -24,8 +24,7 @@ class Foreldelsesteg(
     override fun erFullstendig(): Boolean = vurdertePerioder.all { it.vurdering != Vurdering.IkkeVurdert }
 
     override fun nullstill() {
-        val nullstill = opprett(kravgrunnlag)
-        this.vurdertePerioder = nullstill.vurdertePerioder
+        vurdertePerioder = tomVurdering(kravgrunnlag)
     }
 
     internal fun vurderForeldelse(
@@ -168,14 +167,17 @@ class Foreldelsesteg(
     companion object {
         fun opprett(kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>): Foreldelsesteg {
             return Foreldelsesteg(
-                vurdertePerioder =
-                    kravgrunnlag.entry.datoperioder().map {
-                        Foreldelseperiode.opprett(
-                            periode = it,
-                        )
-                    },
+                vurdertePerioder = tomVurdering(kravgrunnlag),
                 kravgrunnlag = kravgrunnlag,
             )
+        }
+
+        private fun tomVurdering(kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>): List<Foreldelseperiode> {
+            return kravgrunnlag.entry.datoperioder().map {
+                Foreldelseperiode.opprett(
+                    periode = it,
+                )
+            }
         }
     }
 }

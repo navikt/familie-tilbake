@@ -35,11 +35,7 @@ class Vilkårsvurderingsteg(
     }
 
     override fun nullstill() {
-        val nullstill = opprett(
-            kravgrunnlagHendelse = kravgrunnlagHendelse,
-            foreldelsesteg = foreldelsesteg,
-        )
-        this.vurderinger = nullstill.vurderinger
+        this.vurderinger = tomVurdering(kravgrunnlagHendelse)
     }
 
     internal fun vurder(
@@ -143,12 +139,16 @@ class Vilkårsvurderingsteg(
             foreldelsesteg: Foreldelsesteg,
         ): Vilkårsvurderingsteg {
             return Vilkårsvurderingsteg(
-                kravgrunnlagHendelse.entry.datoperioder().map {
-                    Vilkårsvurderingsperiode.opprett(it)
-                },
+                tomVurdering(kravgrunnlagHendelse),
                 kravgrunnlagHendelse,
                 foreldelsesteg,
             )
+        }
+
+        private fun tomVurdering(kravgrunnlagHendelse: HistorikkReferanse<UUID, KravgrunnlagHendelse>): List<Vilkårsvurderingsperiode> {
+            return kravgrunnlagHendelse.entry.datoperioder().map {
+                Vilkårsvurderingsperiode.opprett(it)
+            }
         }
     }
 }

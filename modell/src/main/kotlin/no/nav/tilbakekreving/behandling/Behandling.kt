@@ -352,7 +352,7 @@ class Behandling internal constructor(
 
     fun aktiverBrevmottakerSteg() = brevmottakerSteg.aktiverSteg()
 
-    fun nullstillBrevmottakerSteg() = brevmottakerSteg.nullstill()
+    fun deaktiverBrevmottakerSteg() = brevmottakerSteg.deaktiverSteg()
 
     fun kanUtbetales(): Boolean = fatteVedtakSteg.erFullstendig()
 
@@ -391,11 +391,7 @@ class Behandling internal constructor(
         return null
     }
 
-    fun flyttTilbakeTilFakta() {
-        faktasteg.nullstill()
-        foreldelsesteg.nullstill()
-        vilkårsvurderingsteg.nullstill()
-    }
+    fun flyttTilbakeTilFakta() = steg().forEach { it.nullstill() }
 
     fun sendVedtakIverksatt(
         forrigeBehandlingId: UUID?,

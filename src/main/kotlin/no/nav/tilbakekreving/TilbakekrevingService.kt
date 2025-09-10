@@ -382,7 +382,7 @@ class TilbakekrevingService(
     }
 
     fun fjernBrevmottakerSteg(tilbakekreving: Tilbakekreving) {
-        tilbakekreving.nullstillBrevmottakerSteg()
+        tilbakekreving.deaktiverBrevmottakerSteg()
         tilbakekrevingRepository.lagreTilstand(tilbakekreving.tilEntity())
     }
 

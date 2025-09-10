@@ -35,14 +35,7 @@ class Faktasteg(
     }
 
     override fun nullstill() {
-        val nullstill = opprett(
-            eksternFagsakBehandling = eksternFagsakBehandling,
-            kravgrunnlag = kravgrunnlag,
-            brevHistorikk = brevHistorikk,
-            tilbakekrevingOpprettet = tilbakekrevingOpprettet,
-            opprettelsesvalg = opprettelsesvalg,
-        )
-        vurdering = nullstill.vurdering
+        vurdering = tomVurdering(kravgrunnlag, eksternFagsakBehandling)
     }
 
     internal fun vurder(vurdering: Vurdering) {
@@ -120,17 +113,21 @@ class Faktasteg(
                 brevHistorikk = brevHistorikk,
                 tilbakekrevingOpprettet = tilbakekrevingOpprettet,
                 opprettelsesvalg = opprettelsesvalg,
-                vurdering = Vurdering(
-                    perioder = kravgrunnlag.entry.perioder.map {
-                        FaktaPeriode(
-                            periode = it.periode,
-                            hendelsestype = Hendelsestype.ANNET,
-                            hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
-                        )
-                    },
-                    årsakTilFeilutbetaling = eksternFagsakBehandling.entry.begrunnelseForTilbakekreving,
-                    uttalelse = Uttalelse.IkkeVurdert,
-                ),
+                vurdering = tomVurdering(kravgrunnlag, eksternFagsakBehandling),
+            )
+        }
+
+        private fun tomVurdering(kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>, eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>): Vurdering {
+            return Vurdering(
+                perioder = kravgrunnlag.entry.perioder.map {
+                    FaktaPeriode(
+                        periode = it.periode,
+                        hendelsestype = Hendelsestype.ANNET,
+                        hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
+                    )
+                },
+                årsakTilFeilutbetaling = eksternFagsakBehandling.entry.begrunnelseForTilbakekreving,
+                uttalelse = Uttalelse.IkkeVurdert,
             )
         }
     }

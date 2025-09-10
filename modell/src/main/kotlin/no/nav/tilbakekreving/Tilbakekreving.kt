@@ -255,9 +255,9 @@ class Tilbakekreving internal constructor(
         behandling.utførSideeffekt(this)
     }
 
-    fun nullstillBrevmottakerSteg() = {
+    fun deaktiverBrevmottakerSteg() = {
         val behandling = behandlingHistorikk.nåværende().entry
-        behandling.nullstillBrevmottakerSteg()
+        behandling.deaktiverBrevmottakerSteg()
         behandling.utførSideeffekt(this)
     }
 
