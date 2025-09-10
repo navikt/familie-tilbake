@@ -4,6 +4,7 @@ import no.nav.tilbakekreving.api.v1.dto.VurdertAktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertGodTroDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsresultatDto
 import no.nav.tilbakekreving.beregning.Reduksjon
+import no.nav.tilbakekreving.endring.VurdertUtbetaling
 import no.nav.tilbakekreving.entities.AktsomhetType
 import no.nav.tilbakekreving.entities.AktsomhetsvurderingEntity
 import no.nav.tilbakekreving.entities.BeholdType
@@ -35,6 +36,16 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             )
         }
 
+        override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
+            return VurdertUtbetaling.Vilkårsvurdering(
+                aktsomhetFørUtbetaling = null,
+                aktsomhetEtterUtbetaling = aktsomhet.vurderingstype(),
+                forårsaketAvBruker = VurdertUtbetaling.ForårsaketAvBruker.IKKE_FORÅRSAKET_AV_BRUKER,
+                særligeGrunner = aktsomhet.oppsummerSærligeGrunnerVurdering(),
+                beløpUnnlatesUnder4Rettsgebyr = VurdertUtbetaling.JaNeiVurdering.Nei,
+            )
+        }
+
         override fun tilEntity(): AktsomhetsvurderingEntity {
             return AktsomhetsvurderingEntity(
                 vurderingType = VurderingType.IKKE_FORÅRSAKET_AV_BRUKER_FORSTOD,
@@ -61,6 +72,16 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
                 godTro = null,
                 aktsomhet = aktsomhet.tilFrontendDto(),
+            )
+        }
+
+        override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
+            return VurdertUtbetaling.Vilkårsvurdering(
+                aktsomhetFørUtbetaling = null,
+                aktsomhetEtterUtbetaling = aktsomhet.vurderingstype(),
+                forårsaketAvBruker = VurdertUtbetaling.ForårsaketAvBruker.IKKE_FORÅRSAKET_AV_BRUKER,
+                særligeGrunner = aktsomhet.oppsummerSærligeGrunnerVurdering(),
+                beløpUnnlatesUnder4Rettsgebyr = aktsomhet.oppsummer4RettsgebyrVurdering(),
             )
         }
 
@@ -94,6 +115,16 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     begrunnelse = begrunnelse,
                 ),
                 aktsomhet = null,
+            )
+        }
+
+        override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
+            return VurdertUtbetaling.Vilkårsvurdering(
+                aktsomhetFørUtbetaling = null,
+                aktsomhetEtterUtbetaling = null,
+                forårsaketAvBruker = VurdertUtbetaling.ForårsaketAvBruker.GOD_TRO,
+                særligeGrunner = null,
+                beløpUnnlatesUnder4Rettsgebyr = VurdertUtbetaling.JaNeiVurdering.Nei,
             )
         }
 
@@ -137,6 +168,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
         }
     }
 
+    // §22-15 1. ledd 1. punktum (Etter utbetaling)
     sealed interface Aktsomhet {
         fun vurderingstype(): AktsomhetDTO
 
@@ -149,6 +181,10 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
         fun tilEntity(): VurdertAktsomhetEntity
 
         fun renter(): Boolean
+
+        fun oppsummerSærligeGrunnerVurdering(): VurdertUtbetaling.SærligeGrunner?
+
+        fun oppsummer4RettsgebyrVurdering(): VurdertUtbetaling.JaNeiVurdering
 
         class Forsett(
             override val begrunnelse: String,
@@ -171,6 +207,14 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     tilbakekrevSmåbeløp = false,
                     særligeGrunnerBegrunnelse = null,
                 )
+            }
+
+            override fun oppsummerSærligeGrunnerVurdering(): VurdertUtbetaling.SærligeGrunner? {
+                return null
+            }
+
+            override fun oppsummer4RettsgebyrVurdering(): VurdertUtbetaling.JaNeiVurdering {
+                return VurdertUtbetaling.JaNeiVurdering.Nei
             }
 
             override fun tilEntity(): VurdertAktsomhetEntity {
@@ -209,6 +253,14 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 )
             }
 
+            override fun oppsummerSærligeGrunnerVurdering(): VurdertUtbetaling.SærligeGrunner? {
+                return reduksjonSærligeGrunner.oppsummerVurdering()
+            }
+
+            override fun oppsummer4RettsgebyrVurdering(): VurdertUtbetaling.JaNeiVurdering {
+                return VurdertUtbetaling.JaNeiVurdering.Nei
+            }
+
             override fun tilEntity(): VurdertAktsomhetEntity {
                 return VurdertAktsomhetEntity(
                     aktsomhetType = AktsomhetType.GROV_UAKTSOMHET,
@@ -228,6 +280,15 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             override fun renter(): Boolean = false
 
             override fun vurderingstype(): AktsomhetDTO = AktsomhetDTO.SIMPEL_UAKTSOMHET
+
+            override fun oppsummerSærligeGrunnerVurdering(): VurdertUtbetaling.SærligeGrunner? {
+                return (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr)?.reduksjonSærligeGrunner?.oppsummerVurdering()
+            }
+
+            override fun oppsummer4RettsgebyrVurdering(): VurdertUtbetaling.JaNeiVurdering = when (kanUnnlates4XRettsgebyr) {
+                is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr, is KanUnnlates4xRettsgebyr.SkalIkkeUnnlates -> VurdertUtbetaling.JaNeiVurdering.Nei
+                is KanUnnlates4xRettsgebyr.Unnlates -> VurdertUtbetaling.JaNeiVurdering.Ja
+            }
 
             override fun tilFrontendDto(): VurdertAktsomhetDto {
                 return VurdertAktsomhetDto(
@@ -262,6 +323,15 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             override fun renter(): Boolean = false
 
             override fun vurderingstype(): AktsomhetDTO = AktsomhetDTO.SIMPEL_UAKTSOMHET
+
+            override fun oppsummerSærligeGrunnerVurdering(): VurdertUtbetaling.SærligeGrunner? {
+                return (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr)?.reduksjonSærligeGrunner?.oppsummerVurdering()
+            }
+
+            override fun oppsummer4RettsgebyrVurdering(): VurdertUtbetaling.JaNeiVurdering = when (kanUnnlates4XRettsgebyr) {
+                is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr, is KanUnnlates4xRettsgebyr.SkalIkkeUnnlates -> VurdertUtbetaling.JaNeiVurdering.Nei
+                is KanUnnlates4xRettsgebyr.Unnlates -> VurdertUtbetaling.JaNeiVurdering.Ja
+            }
 
             override fun tilFrontendDto(): VurdertAktsomhetDto {
                 return VurdertAktsomhetDto(

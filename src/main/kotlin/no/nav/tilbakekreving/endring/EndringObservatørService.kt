@@ -2,6 +2,10 @@ package no.nav.tilbakekreving.endring
 
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.sakshendelse.Behandlingstilstand
+import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.SærligeGrunner
+import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.UtvidetVilkårsresultat
+import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.VedtakPeriode
+import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.Vedtaksoppsummering
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.config.ApplicationProperties
@@ -12,6 +16,8 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import org.springframework.stereotype.Service
@@ -35,7 +41,7 @@ class EndringObservatørService(
         vedtaksresultat: Vedtaksresultat?,
         venterPåBruker: Boolean,
         ansvarligEnhet: String?,
-        ansvarligSaksbehandler: String?,
+        ansvarligSaksbehandler: String,
         ansvarligBeslutter: String?,
         totaltFeilutbetaltBeløp: BigDecimal?,
         totalFeilutbetaltPeriode: Datoperiode?,
@@ -82,7 +88,7 @@ class EndringObservatørService(
                 venterPåBruker = venterPåBruker,
                 venterPåØkonomi = tilstand == TilbakekrevingTilstand.AVVENTER_KRAVGRUNNLAG,
                 ansvarligEnhet = ansvarligEnhet ?: "Ukjent",
-                ansvarligSaksbehandler = ansvarligSaksbehandler ?: "Ukjent",
+                ansvarligSaksbehandler = ansvarligSaksbehandler,
                 ansvarligBeslutter = ansvarligBeslutter,
                 forrigeBehandling = forrigeBehandlingId,
                 revurderingOpprettetÅrsak = applicationProperties.toggles.defaultWhenDisabled(Toggles::revurdering) { null },
@@ -90,6 +96,66 @@ class EndringObservatørService(
                 totalFeilutbetaltPeriode = totalFeilutbetaltPeriode?.let { Periode(it.fom, it.tom) },
             ),
             logContext = SecureLog.Context.medBehandling(eksternFagsystemId, behandlingId.toString()),
+        )
+    }
+
+    override fun vedtakFattet(
+        behandlingId: UUID,
+        forrigeBehandlingId: UUID?,
+        behandlingOpprettet: OffsetDateTime,
+        eksternFagsystemId: String,
+        eksternBehandlingId: String,
+        ytelse: Ytelse,
+        vedtakFattetTidspunkt: OffsetDateTime,
+        ansvarligEnhet: String?,
+        ansvarligSaksbehandler: String,
+        ansvarligBeslutter: String,
+        vurderteUtbetalinger: List<VurdertUtbetaling>,
+    ) {
+        val logContext = SecureLog.Context.medBehandling(eksternFagsystemId, behandlingId.toString())
+        kafkaProducer.sendVedtaksdata(
+            behandlingId = behandlingId,
+            request = Vedtaksoppsummering(
+                saksnummer = eksternFagsystemId,
+                ytelsestype = ytelse.tilYtelseDTO(),
+                fagsystem = ytelse.tilFagsystemDTO(),
+                behandlingUuid = behandlingId,
+                behandlingstype = applicationProperties.toggles.defaultWhenDisabled(Toggles::revurdering) { Behandlingstype.TILBAKEKREVING },
+                erBehandlingManueltOpprettet = applicationProperties.toggles.defaultWhenDisabled(Toggles::manuellOpprettelse) { false },
+                behandlingOpprettetTidspunkt = behandlingOpprettet,
+                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+                referertFagsaksbehandling = eksternBehandlingId,
+                forrigeBehandling = forrigeBehandlingId,
+                ansvarligSaksbehandler = ansvarligSaksbehandler,
+                ansvarligBeslutter = ansvarligBeslutter,
+                behandlendeEnhet = ansvarligEnhet ?: "Ukjent",
+                perioder = vurderteUtbetalinger.map {
+                    VedtakPeriode(
+                        fom = it.periode.fom,
+                        tom = it.periode.tom,
+                        hendelsestype = Hendelsestype.ANNET.name,
+                        hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST.name,
+                        vilkårsresultat = when (it.vilkårsvurdering.forårsaketAvBruker) {
+                            VurdertUtbetaling.ForårsaketAvBruker.FEILAKTIGE_OPPLYSNINGER -> UtvidetVilkårsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER
+                            VurdertUtbetaling.ForårsaketAvBruker.MANGELFULLE_OPPLYSNINGER -> UtvidetVilkårsresultat.MANGELFULLE_OPPLYSNINGER_FRA_BRUKER
+                            VurdertUtbetaling.ForårsaketAvBruker.IKKE_FORÅRSAKET_AV_BRUKER -> UtvidetVilkårsresultat.FORSTO_BURDE_FORSTÅTT
+                            VurdertUtbetaling.ForårsaketAvBruker.GOD_TRO -> UtvidetVilkårsresultat.GOD_TRO
+                        },
+                        feilutbetaltBeløp = it.beregning.feilutbetaltBeløp,
+                        bruttoTilbakekrevingsbeløp = it.beregning.tilbakekrevesBeløp,
+                        rentebeløp = it.beregning.rentebeløp,
+                        harBruktSjetteLedd = it.vilkårsvurdering.beløpUnnlatesUnder4Rettsgebyr == VurdertUtbetaling.JaNeiVurdering.Ja,
+                        aktsomhet = it.vilkårsvurdering.aktsomhetEtterUtbetaling ?: it.vilkårsvurdering.aktsomhetFørUtbetaling,
+                        særligeGrunner = it.vilkårsvurdering.særligeGrunner?.let { særligeGrunner ->
+                            SærligeGrunner(
+                                erSærligeGrunnerTilReduksjon = særligeGrunner.beløpReduseres == VurdertUtbetaling.JaNeiVurdering.Ja,
+                                særligeGrunner = særligeGrunner.grunner.toList(),
+                            )
+                        },
+                    )
+                },
+            ),
+            logContext = logContext,
         )
     }
 }

@@ -1,17 +1,17 @@
 package no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak
 
 import jakarta.validation.constraints.Size
-import no.nav.familie.tilbake.behandling.Fagsystem
-import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import java.time.OffsetDateTime
 import java.util.UUID
 
 class Vedtaksoppsummering(
     @Size(min = 1, max = 20)
     val saksnummer: String,
-    val ytelsestype: Ytelsestype,
-    val fagsystem: Fagsystem,
+    val ytelsestype: YtelsestypeDTO,
+    val fagsystem: FagsystemDTO,
     val behandlingUuid: UUID,
     val behandlingstype: Behandlingstype,
     val erBehandlingManueltOpprettet: Boolean = false,

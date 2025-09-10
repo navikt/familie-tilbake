@@ -4,16 +4,16 @@ import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import java.math.BigDecimal
 import java.time.LocalDate
 
-class VedtakPeriode(
-    var fom: LocalDate,
-    var tom: LocalDate,
-    var hendelsestype: String,
-    var hendelsesundertype: String? = null,
-    var vilkårsresultat: UtvidetVilkårsresultat,
-    var feilutbetaltBeløp: BigDecimal,
-    var bruttoTilbakekrevingsbeløp: BigDecimal,
-    var rentebeløp: BigDecimal,
-    var harBruktSjetteLedd: Boolean = false,
-    var aktsomhet: Aktsomhet? = null,
-    var særligeGrunner: SærligeGrunner? = null,
+data class VedtakPeriode(
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val hendelsestype: String,
+    val hendelsesundertype: String? = null,
+    val vilkårsresultat: UtvidetVilkårsresultat,
+    val feilutbetaltBeløp: BigDecimal,
+    val bruttoTilbakekrevingsbeløp: BigDecimal,
+    val rentebeløp: BigDecimal,
+    val harBruktSjetteLedd: Boolean = false,
+    val aktsomhet: Aktsomhet? = null,
+    val særligeGrunner: SærligeGrunner? = null,
 )

@@ -2,10 +2,16 @@ package no.nav.tilbakekreving.e2e
 
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.SærligeGrunner
+import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.UtvidetVilkårsresultat
+import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.VedtakPeriode
 import no.nav.tilbakekreving.e2e.ytelser.TilleggsstønaderE2ETest.Companion.TILLEGGSSTØNADER_KØ_NAVN
 import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub
+import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.util.kroner
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -79,6 +85,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         dvhHendelser.last().ansvarligBeslutter shouldBe null
         dvhHendelser.last().ansvarligEnhet shouldBe "Ukjent"
         dvhHendelser.last().behandlingsstatus shouldBe Behandlingsstatus.FATTER_VEDTAK
+        kafkaProducer.finnVedtaksoppsummering(behandlingId).size shouldBe 0
 
         utførSteg(
             ident = ansvarligBeslutter,
@@ -95,5 +102,29 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         dvhHendelser[6].ansvarligBeslutter shouldBe ansvarligBeslutter
         dvhHendelser[6].ansvarligEnhet shouldBe "Ukjent"
         dvhHendelser[6].behandlingsstatus shouldBe Behandlingsstatus.AVSLUTTET
+
+        val vedtaksoppsummeringer = kafkaProducer.finnVedtaksoppsummering(behandlingId)
+        vedtaksoppsummeringer.size shouldBe 1
+        val vedtaksoppsummering = vedtaksoppsummeringer.single()
+        vedtaksoppsummering.ansvarligSaksbehandler shouldBe ansvarligSaksbehandler
+        vedtaksoppsummering.ansvarligBeslutter shouldBe ansvarligBeslutter
+        vedtaksoppsummering.perioder shouldBe listOf(
+            VedtakPeriode(
+                fom = 1.januar(2021),
+                tom = 1.januar(2021),
+                hendelsestype = "ANNET",
+                hendelsesundertype = "ANNET_FRITEKST",
+                vilkårsresultat = UtvidetVilkårsresultat.FORSTO_BURDE_FORSTÅTT,
+                feilutbetaltBeløp = 2000.kroner,
+                bruttoTilbakekrevingsbeløp = 2000.kroner,
+                rentebeløp = 0.kroner,
+                harBruktSjetteLedd = false,
+                aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
+                særligeGrunner = SærligeGrunner(
+                    erSærligeGrunnerTilReduksjon = false,
+                    særligeGrunner = emptyList(),
+                ),
+            ),
+        )
     }
 }

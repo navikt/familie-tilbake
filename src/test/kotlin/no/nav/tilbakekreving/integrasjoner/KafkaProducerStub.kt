@@ -13,16 +13,21 @@ import java.util.UUID
 @Primary
 class KafkaProducerStub : KafkaProducer {
     private val saksdata = mutableMapOf<UUID, MutableList<Behandlingstilstand>>()
+    private val vedtak = mutableMapOf<UUID, MutableList<Vedtaksoppsummering>>()
 
     override fun sendSaksdata(behandlingId: UUID, request: Behandlingstilstand, logContext: SecureLog.Context) {
         saksdata.computeIfAbsent(behandlingId) { mutableListOf() }.add(request)
     }
 
-    override fun sendVedtaksdata(behandlingId: UUID, request: Vedtaksoppsummering, logContext: SecureLog.Context) {}
+    override fun sendVedtaksdata(behandlingId: UUID, request: Vedtaksoppsummering, logContext: SecureLog.Context) {
+        vedtak.computeIfAbsent(behandlingId) { mutableListOf() }.add(request)
+    }
 
     override fun sendRåFagsystemsbehandlingResponse(behandlingId: UUID?, response: String) {}
 
     override fun sendHentFagsystemsbehandlingRequest(requestId: UUID, request: HentFagsystemsbehandlingRequest, logContext: SecureLog.Context) {}
 
     fun finnSaksdata(behandlingId: UUID): List<Behandlingstilstand> = saksdata[behandlingId] ?: emptyList()
+
+    fun finnVedtaksoppsummering(behandlingId: UUID): List<Vedtaksoppsummering> = vedtak[behandlingId] ?: emptyList()
 }

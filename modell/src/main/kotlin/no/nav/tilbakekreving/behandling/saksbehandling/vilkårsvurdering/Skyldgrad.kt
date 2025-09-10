@@ -3,13 +3,14 @@ package no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering
 import no.nav.tilbakekreving.api.v1.dto.VurdertAktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsresultatDto
 import no.nav.tilbakekreving.beregning.Reduksjon
+import no.nav.tilbakekreving.endring.VurdertUtbetaling
 import no.nav.tilbakekreving.entities.AktsomhetsvurderingEntity
 import no.nav.tilbakekreving.entities.FeilaktigEllerMangelfullType
 import no.nav.tilbakekreving.entities.VurderingType
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering
 
+// §22-15 1. ledd 2. punktum (Før utbetaling)
 sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
     val feilaktigeEllerMangelfulleOpplysninger: FeilaktigEllerMangelfull
 
@@ -22,7 +23,20 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
 
         override fun reduksjon(): Reduksjon = reduksjonSærligeGrunner.skalReduseres.reduksjon()
 
-        override fun vurderingstype(): Vurdering = Aktsomhet.SIMPEL_UAKTSOMHET
+        override fun vurderingstype(): Aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET
+
+        override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
+            return VurdertUtbetaling.Vilkårsvurdering(
+                aktsomhetFørUtbetaling = vurderingstype(),
+                aktsomhetEtterUtbetaling = null,
+                forårsaketAvBruker = when (feilaktigeEllerMangelfulleOpplysninger) {
+                    FeilaktigEllerMangelfull.FEILAKTIG -> VurdertUtbetaling.ForårsaketAvBruker.FEILAKTIGE_OPPLYSNINGER
+                    FeilaktigEllerMangelfull.MANGELFULL -> VurdertUtbetaling.ForårsaketAvBruker.MANGELFULLE_OPPLYSNINGER
+                },
+                særligeGrunner = reduksjonSærligeGrunner.oppsummerVurdering(),
+                beløpUnnlatesUnder4Rettsgebyr = VurdertUtbetaling.JaNeiVurdering.Nei,
+            )
+        }
 
         override fun tilFrontendDto(): VurdertVilkårsvurderingsresultatDto? {
             return VurdertVilkårsvurderingsresultatDto(
@@ -57,11 +71,24 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
         private val reduksjonSærligeGrunner: ReduksjonSærligeGrunner,
         override val feilaktigeEllerMangelfulleOpplysninger: FeilaktigEllerMangelfull,
     ) : Skyldgrad {
-        override fun vurderingstype(): Vurdering = Aktsomhet.GROV_UAKTSOMHET
+        override fun vurderingstype(): Aktsomhet = Aktsomhet.GROV_UAKTSOMHET
 
         override fun renter() = true
 
         override fun reduksjon(): Reduksjon = reduksjonSærligeGrunner.skalReduseres.reduksjon()
+
+        override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
+            return VurdertUtbetaling.Vilkårsvurdering(
+                aktsomhetFørUtbetaling = vurderingstype(),
+                aktsomhetEtterUtbetaling = null,
+                forårsaketAvBruker = when (feilaktigeEllerMangelfulleOpplysninger) {
+                    FeilaktigEllerMangelfull.FEILAKTIG -> VurdertUtbetaling.ForårsaketAvBruker.FEILAKTIGE_OPPLYSNINGER
+                    FeilaktigEllerMangelfull.MANGELFULL -> VurdertUtbetaling.ForårsaketAvBruker.MANGELFULLE_OPPLYSNINGER
+                },
+                særligeGrunner = reduksjonSærligeGrunner.oppsummerVurdering(),
+                beløpUnnlatesUnder4Rettsgebyr = VurdertUtbetaling.JaNeiVurdering.Nei,
+            )
+        }
 
         override fun tilFrontendDto(): VurdertVilkårsvurderingsresultatDto? {
             return VurdertVilkårsvurderingsresultatDto(
@@ -97,9 +124,22 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
     ) : Skyldgrad {
         override fun renter() = true
 
-        override fun vurderingstype(): Vurdering = Aktsomhet.FORSETT
+        override fun vurderingstype(): Aktsomhet = Aktsomhet.FORSETT
 
         override fun reduksjon(): Reduksjon = Reduksjon.FullstendigTilbakekreving()
+
+        override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
+            return VurdertUtbetaling.Vilkårsvurdering(
+                aktsomhetFørUtbetaling = vurderingstype(),
+                aktsomhetEtterUtbetaling = null,
+                forårsaketAvBruker = when (feilaktigeEllerMangelfulleOpplysninger) {
+                    FeilaktigEllerMangelfull.FEILAKTIG -> VurdertUtbetaling.ForårsaketAvBruker.FEILAKTIGE_OPPLYSNINGER
+                    FeilaktigEllerMangelfull.MANGELFULL -> VurdertUtbetaling.ForårsaketAvBruker.MANGELFULLE_OPPLYSNINGER
+                },
+                særligeGrunner = null,
+                beløpUnnlatesUnder4Rettsgebyr = VurdertUtbetaling.JaNeiVurdering.Nei,
+            )
+        }
 
         override fun tilFrontendDto(): VurdertVilkårsvurderingsresultatDto? {
             return VurdertVilkårsvurderingsresultatDto(

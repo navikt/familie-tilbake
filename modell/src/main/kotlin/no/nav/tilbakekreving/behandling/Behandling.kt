@@ -27,7 +27,10 @@ import no.nav.tilbakekreving.behov.IverksettelseBehov
 import no.nav.tilbakekreving.beregning.Beregning
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
+import no.nav.tilbakekreving.endring.EndringObservatør
+import no.nav.tilbakekreving.endring.VurdertUtbetaling
 import no.nav.tilbakekreving.entities.BehandlingEntity
+import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.fagsystem.Ytelsestype
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
@@ -47,6 +50,8 @@ import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import java.util.UUID
 
 class Behandling internal constructor(
@@ -403,6 +408,39 @@ class Behandling internal constructor(
             return lagBeregning().oppsummer().vedtaksresultat
         }
         return null
+    }
+
+    fun sendVedtakIverksatt(
+        forrigeBehandlingId: UUID?,
+        eksternFagsystemId: String,
+        ytelse: Ytelse,
+        endringObservatør: EndringObservatør,
+    ) {
+        val beregning = lagBeregning()
+        endringObservatør.vedtakFattet(
+            behandlingId = internId,
+            forrigeBehandlingId = forrigeBehandlingId,
+            behandlingOpprettet = OffsetDateTime.of(opprettet, ZoneOffset.UTC),
+            eksternFagsystemId = eksternFagsystemId,
+            eksternBehandlingId = eksternFagsakBehandling.entry.eksternId,
+            ytelse = ytelse,
+            vedtakFattetTidspunkt = OffsetDateTime.now(ZoneOffset.UTC),
+            ansvarligEnhet = null,
+            ansvarligSaksbehandler = ansvarligSaksbehandler.ident,
+            ansvarligBeslutter = fatteVedtakSteg.ansvarligBeslutter!!.ident,
+            vurderteUtbetalinger = beregning.beregn().map {
+                VurdertUtbetaling(
+                    periode = it.periode,
+                    rettsligGrunnlag = "Annet",
+                    vilkårsvurdering = vilkårsvurderingsteg.oppsummer(it.periode),
+                    beregning = VurdertUtbetaling.Beregning(
+                        feilutbetaltBeløp = it.feilutbetaltBeløp(),
+                        tilbakekrevesBeløp = it.tilbakekrevesBruttoMedRenter(),
+                        rentebeløp = it.renter(),
+                    ),
+                )
+            },
+        )
     }
 
     companion object {

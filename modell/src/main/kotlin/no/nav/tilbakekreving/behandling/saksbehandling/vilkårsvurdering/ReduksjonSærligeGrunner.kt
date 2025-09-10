@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering
 
 import no.nav.tilbakekreving.api.v1.dto.VurdertSærligGrunnDto
 import no.nav.tilbakekreving.beregning.Reduksjon
+import no.nav.tilbakekreving.endring.VurdertUtbetaling
 import no.nav.tilbakekreving.entities.SkalReduseresEntity
 import no.nav.tilbakekreving.entities.SkalReduseresType
 import no.nav.tilbakekreving.entities.SærligeGrunnerEntity
@@ -21,6 +22,13 @@ class ReduksjonSærligeGrunner(
         )
     }
 
+    fun oppsummerVurdering(): VurdertUtbetaling.SærligeGrunner {
+        return VurdertUtbetaling.SærligeGrunner(
+            beløpReduseres = skalReduseres.lagStatistikk(),
+            grunner = grunner,
+        )
+    }
+
     fun vurderteGrunner(): List<VurdertSærligGrunnDto> {
         return grunner.map { VurdertSærligGrunnDto(it, null) }
     }
@@ -30,10 +38,14 @@ class ReduksjonSærligeGrunner(
 
         fun tilEntity(): SkalReduseresEntity
 
+        fun lagStatistikk(): VurdertUtbetaling.JaNeiVurdering
+
         class Ja(val prosentdel: Int) : SkalReduseres {
             override fun reduksjon(): Reduksjon {
                 return Reduksjon.Prosentdel(prosentdel.toBigDecimal())
             }
+
+            override fun lagStatistikk(): VurdertUtbetaling.JaNeiVurdering = VurdertUtbetaling.JaNeiVurdering.Ja
 
             override fun tilEntity(): SkalReduseresEntity {
                 return SkalReduseresEntity(SkalReduseresType.Ja, prosentdel)
@@ -44,6 +56,8 @@ class ReduksjonSærligeGrunner(
             override fun reduksjon(): Reduksjon {
                 return Reduksjon.FullstendigTilbakekreving()
             }
+
+            override fun lagStatistikk(): VurdertUtbetaling.JaNeiVurdering = VurdertUtbetaling.JaNeiVurdering.Nei
 
             override fun tilEntity(): SkalReduseresEntity {
                 return SkalReduseresEntity(SkalReduseresType.Nei, null)

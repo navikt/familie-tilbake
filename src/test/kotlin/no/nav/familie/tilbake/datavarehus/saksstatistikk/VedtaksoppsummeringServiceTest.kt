@@ -48,6 +48,8 @@ import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunn
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -180,8 +182,8 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
         vedtaksoppsummering.referertFagsaksbehandling.shouldNotBeNull()
         vedtaksoppsummering.saksnummer shouldBe saksnummer
         vedtaksoppsummering.vedtakFattetTidspunkt.shouldNotBeNull()
-        vedtaksoppsummering.ytelsestype shouldBe Ytelsestype.OVERGANGSSTØNAD
-        vedtaksoppsummering.fagsystem shouldBe Fagsystem.EF
+        vedtaksoppsummering.ytelsestype shouldBe YtelsestypeDTO.OVERGANGSSTØNAD
+        vedtaksoppsummering.fagsystem shouldBe FagsystemDTO.EF
         vedtaksoppsummering.forrigeBehandling shouldBe null
     }
 

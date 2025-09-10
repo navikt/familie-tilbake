@@ -167,6 +167,16 @@ class Tilbakekreving internal constructor(
         )
     }
 
+    fun sendVedtakIverksatt() {
+        val nåværendeBehandling = behandlingHistorikk.nåværende().entry
+        nåværendeBehandling.sendVedtakIverksatt(
+            forrigeBehandlingId = behandlingHistorikk.forrige()?.entry?.internId,
+            eksternFagsystemId = eksternFagsak.eksternId,
+            ytelse = eksternFagsak.ytelse,
+            endringObservatør = endringObservatør,
+        )
+    }
+
     fun hentFagsysteminfo(): Ytelse {
         return eksternFagsak.ytelse
     }
@@ -300,7 +310,7 @@ class Tilbakekreving internal constructor(
         vedtaksresultat: Vedtaksresultat?,
         behandlingstatus: Behandlingsstatus,
         venterPåBruker: Boolean,
-        ansvarligSaksbehandler: String?,
+        ansvarligSaksbehandler: String,
         ansvarligBeslutter: String?,
         totaltFeilutbetaltBeløp: BigDecimal?,
         totalFeilutbetaltPeriode: Datoperiode?,
