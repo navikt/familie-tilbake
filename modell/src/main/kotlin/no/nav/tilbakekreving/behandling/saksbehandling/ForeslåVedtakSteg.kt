@@ -22,9 +22,7 @@ class ForeslåVedtakSteg(
         return vurdering.tilEntity()
     }
 
-    override fun nullstill() {
-        this.vurdering = Vurdering.IkkeVurdert
-    }
+    override fun nullstill() {}
 
     override fun tilFrontendDto() {}
 

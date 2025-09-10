@@ -353,7 +353,7 @@ class BehandlingController(
         @PathVariable behandlingId: UUID,
     ): Ressurs<String> {
         val håndtert = tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving ->
-            tilbakekreving.behandlingHistorikk.nåværende().entry.flyttTilbakeTilFakta()
+            tilbakekrevingService.flyttBehandlingTilFakta(tilbakekreving)
             true
         }
         if (håndtert ?: false) {

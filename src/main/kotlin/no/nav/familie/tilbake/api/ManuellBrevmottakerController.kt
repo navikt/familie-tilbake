@@ -199,7 +199,7 @@ class ManuellBrevmottakerController(
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
                 handling = "Fjern ev. manuelt registrerte brevmottakere og deaktiver steg.",
             )
-            tilbakekrevingService.deaktiverBrevmottakerSteg(tilbakekreving)
+            tilbakekrevingService.fjernBrevmottakerSteg(tilbakekreving)
             return Ressurs.success("OK")
         }
 

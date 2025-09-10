@@ -42,7 +42,7 @@ class Faktasteg(
             tilbakekrevingOpprettet = tilbakekrevingOpprettet,
             opprettelsesvalg = opprettelsesvalg,
         )
-        this.vurdering = nullstill.vurdering
+        vurdering = nullstill.vurdering
     }
 
     internal fun vurder(vurdering: Vurdering) {

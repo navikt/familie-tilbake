@@ -352,27 +352,7 @@ class Behandling internal constructor(
 
     fun aktiverBrevmottakerSteg() = brevmottakerSteg.aktiverSteg()
 
-    fun deaktiverBrevmottakerSteg() = brevmottakerSteg.deaktiverSteg()
-
-    fun lagNullstiltBehandling(
-        brevHistorikk: BrevHistorikk,
-        behandlingObservatør: BehandlingObservatør,
-    ): Behandling {
-        return nyBehandling(
-            internId = UUID.randomUUID(),
-            eksternId = eksternId,
-            behandlingstype = Behandlingstype.REVURDERING_TILBAKEKREVING,
-            opprettet = opprettet,
-            enhet = enhet,
-            årsak = årsak,
-            ansvarligSaksbehandler = ansvarligSaksbehandler,
-            sistEndret = LocalDateTime.now(),
-            eksternFagsakBehandling = eksternFagsakBehandling,
-            kravgrunnlag = kravgrunnlag,
-            brevHistorikk = brevHistorikk,
-            behandlingObservatør = behandlingObservatør,
-        )
-    }
+    fun nullstillBrevmottakerSteg() = brevmottakerSteg.nullstill()
 
     fun kanUtbetales(): Boolean = fatteVedtakSteg.erFullstendig()
 
@@ -415,8 +395,6 @@ class Behandling internal constructor(
         faktasteg.nullstill()
         foreldelsesteg.nullstill()
         vilkårsvurderingsteg.nullstill()
-        foreslåVedtakSteg.nullstill()
-        fatteVedtakSteg.nullstill()
     }
 
     fun sendVedtakIverksatt(

@@ -28,9 +28,7 @@ class FatteVedtakSteg internal constructor(
             Behandlingsstatus.FATTER_VEDTAK
         }
 
-    override fun nullstill() {
-        opprett()
-    }
+    override fun nullstill() {}
 
     internal fun håndter(
         beslutter: Behandler,

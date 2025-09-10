@@ -18,8 +18,8 @@ class BrevmottakerSteg(
     }
 
     override fun nullstill() {
-        this.aktivert = false
         this.registrertBrevmottaker = defaultMottaker
+        this.aktivert = false
     }
 
     internal fun håndter(nyBrevmottaker: RegistrertBrevmottaker, sporing: Sporing) {
@@ -44,11 +44,6 @@ class BrevmottakerSteg(
 
     fun aktiverSteg() {
         aktivert = true
-    }
-
-    fun deaktiverSteg() {
-        registrertBrevmottaker = defaultMottaker
-        aktivert = false
     }
 
     fun erStegetAktivert() = aktivert
