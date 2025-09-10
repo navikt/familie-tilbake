@@ -803,7 +803,7 @@ class BeregningTest {
             id = UUID.randomUUID(),
             periode = this,
             begrunnelseForTilbakekreving = "",
-            _vurdering = Skyldgrad.Forsett("", Skyldgrad.FeilaktigEllerMangelfull.FEILAKTIG),
+            _vurdering = Skyldgrad.Forsett("", "", Skyldgrad.FeilaktigEllerMangelfull.FEILAKTIG),
         )
     }
 
@@ -814,6 +814,7 @@ class BeregningTest {
             begrunnelseForTilbakekreving = "",
             _vurdering = Skyldgrad.GrovUaktsomhet(
                 begrunnelse = "",
+                begrunnelseAktsomhet = "",
                 reduksjonSærligeGrunner = ReduksjonSærligeGrunner(
                     begrunnelse = "",
                     grunner = emptySet(),

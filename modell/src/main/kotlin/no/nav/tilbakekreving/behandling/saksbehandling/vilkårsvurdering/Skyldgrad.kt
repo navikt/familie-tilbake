@@ -4,18 +4,22 @@ import no.nav.tilbakekreving.api.v1.dto.VurdertAktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsresultatDto
 import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.endring.VurdertUtbetaling
+import no.nav.tilbakekreving.entities.AktsomhetType
 import no.nav.tilbakekreving.entities.AktsomhetsvurderingEntity
 import no.nav.tilbakekreving.entities.FeilaktigEllerMangelfullType
 import no.nav.tilbakekreving.entities.VurderingType
+import no.nav.tilbakekreving.entities.VurdertAktsomhetEntity
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 
 // §22-15 1. ledd 2. punktum (Før utbetaling)
 sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
     val feilaktigeEllerMangelfulleOpplysninger: FeilaktigEllerMangelfull
+    val begrunnelseAktsomhet: String
 
     class Uaktsomt(
         override val begrunnelse: String,
+        override val begrunnelseAktsomhet: String,
         private val reduksjonSærligeGrunner: ReduksjonSærligeGrunner,
         override val feilaktigeEllerMangelfulleOpplysninger: FeilaktigEllerMangelfull,
     ) : Skyldgrad {
@@ -57,10 +61,15 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
 
         override fun tilEntity(): AktsomhetsvurderingEntity {
             return AktsomhetsvurderingEntity(
-                vurderingType = VurderingType.FORÅRSAKET_AV_BRUKER_UAKTSOMT,
+                vurderingType = VurderingType.FORÅRSAKET_AV_BRUKER,
                 begrunnelse = begrunnelse,
                 beløpIBehold = null,
-                aktsomhet = null,
+                aktsomhet = VurdertAktsomhetEntity(
+                    aktsomhetType = AktsomhetType.SIMPEL_UAKTSOMHET,
+                    begrunnelse = begrunnelseAktsomhet,
+                    skalIleggesRenter = null,
+                    særligGrunner = reduksjonSærligeGrunner.tilEntity(),
+                ),
                 feilaktigeEllerMangelfulleOpplysninger.tilEntity(),
             )
         }
@@ -68,6 +77,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
 
     class GrovUaktsomhet(
         override val begrunnelse: String,
+        override val begrunnelseAktsomhet: String,
         private val reduksjonSærligeGrunner: ReduksjonSærligeGrunner,
         override val feilaktigeEllerMangelfulleOpplysninger: FeilaktigEllerMangelfull,
     ) : Skyldgrad {
@@ -109,10 +119,15 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
 
         override fun tilEntity(): AktsomhetsvurderingEntity {
             return AktsomhetsvurderingEntity(
-                vurderingType = VurderingType.FORÅRSAKET_AV_BRUKER_GROV_UAKTSOMHET,
+                vurderingType = VurderingType.FORÅRSAKET_AV_BRUKER,
                 begrunnelse = begrunnelse,
                 beløpIBehold = null,
-                aktsomhet = null,
+                aktsomhet = VurdertAktsomhetEntity(
+                    aktsomhetType = AktsomhetType.GROV_UAKTSOMHET,
+                    særligGrunner = reduksjonSærligeGrunner.tilEntity(),
+                    begrunnelse = begrunnelseAktsomhet,
+                    skalIleggesRenter = null,
+                ),
                 feilaktigEllerMangelfull = feilaktigeEllerMangelfulleOpplysninger.tilEntity(),
             )
         }
@@ -120,6 +135,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
 
     class Forsett(
         override val begrunnelse: String,
+        override val begrunnelseAktsomhet: String,
         override val feilaktigeEllerMangelfulleOpplysninger: FeilaktigEllerMangelfull,
     ) : Skyldgrad {
         override fun renter() = true
@@ -160,10 +176,15 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
 
         override fun tilEntity(): AktsomhetsvurderingEntity {
             return AktsomhetsvurderingEntity(
-                vurderingType = VurderingType.FORÅRSAKET_AV_BRUKER_FORSETT,
+                vurderingType = VurderingType.FORÅRSAKET_AV_BRUKER,
                 begrunnelse = begrunnelse,
                 beløpIBehold = null,
-                aktsomhet = null,
+                aktsomhet = VurdertAktsomhetEntity(
+                    aktsomhetType = AktsomhetType.FORSETT,
+                    begrunnelse = begrunnelseAktsomhet,
+                    skalIleggesRenter = null,
+                    særligGrunner = null,
+                ),
                 feilaktigEllerMangelfull = feilaktigeEllerMangelfulleOpplysninger.tilEntity(),
             )
         }

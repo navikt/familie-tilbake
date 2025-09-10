@@ -49,15 +49,18 @@ object VilkårsvurderingMapperV2 {
         return when (aktsomhet.aktsomhet) {
             Aktsomhet.FORSETT -> Skyldgrad.Forsett(
                 begrunnelse = begrunnelse,
+                begrunnelseAktsomhet = "",
                 feilaktigeEllerMangelfulleOpplysninger = feilaktigEllerMangelfull,
             )
             Aktsomhet.GROV_UAKTSOMHET -> Skyldgrad.GrovUaktsomhet(
                 begrunnelse = begrunnelse,
+                begrunnelseAktsomhet = "",
                 reduksjonSærligeGrunner = særligeGrunner(),
                 feilaktigeEllerMangelfulleOpplysninger = feilaktigEllerMangelfull,
             )
             Aktsomhet.SIMPEL_UAKTSOMHET -> Skyldgrad.Uaktsomt(
                 begrunnelse = begrunnelse,
+                begrunnelseAktsomhet = "",
                 reduksjonSærligeGrunner = særligeGrunner(),
                 feilaktigeEllerMangelfulleOpplysninger = feilaktigEllerMangelfull,
             )
