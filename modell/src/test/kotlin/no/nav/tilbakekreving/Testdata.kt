@@ -7,6 +7,11 @@ import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.BehandlingObservatørOppsamler
 import no.nav.tilbakekreving.behandling.Enhet
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
+import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
+import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
+import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonSærligeGrunner
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Skyldgrad
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.brev.Varselbrev
@@ -19,6 +24,7 @@ import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
@@ -26,6 +32,7 @@ import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.tilstand.TilBehandling
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
@@ -170,6 +177,7 @@ fun behandling(
         kravgrunnlag = kravgrunnlagReferanse,
         brevHistorikk = BrevHistorikk(mutableListOf()),
         behandlingObservatør = BehandlingObservatørOppsamler(),
+        tilstand = TilBehandling,
     )
 }
 
@@ -190,3 +198,25 @@ fun faktastegVurdering(
         uttalelse = uttalelse,
     )
 }
+
+fun foreldelseVurdering() = Foreldelsesteg.Vurdering.IkkeForeldet("")
+
+fun forårsaketAvBrukerGrovtUaktsomt() = Skyldgrad.GrovUaktsomhet(
+    begrunnelse = "",
+    begrunnelseAktsomhet = "",
+    reduksjonSærligeGrunner = ReduksjonSærligeGrunner(
+        begrunnelse = "",
+        grunner = emptySet(),
+        skalReduseres = ReduksjonSærligeGrunner.SkalReduseres.Nei,
+    ),
+    feilaktigeEllerMangelfulleOpplysninger = Skyldgrad.FeilaktigEllerMangelfull.FEILAKTIG,
+)
+
+fun foreslåVedtakVurdering() = ForeslåVedtakSteg.Vurdering.ForeslåVedtak("", emptyList())
+
+fun godkjenning() = listOf(
+    Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
+    Behandlingssteg.FORELDELSE to FatteVedtakSteg.Vurdering.Godkjent,
+    Behandlingssteg.VILKÅRSVURDERING to FatteVedtakSteg.Vurdering.Godkjent,
+    Behandlingssteg.FORESLÅ_VEDTAK to FatteVedtakSteg.Vurdering.Godkjent,
+)

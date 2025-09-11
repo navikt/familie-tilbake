@@ -97,7 +97,7 @@ class BehandlingTest {
         behandling.faktastegDto.tilFrontendDto().vurderingAvBrukersUttalelse.beskrivelse shouldBe null
         behandling.faktastegDto.tilFrontendDto().vurderingAvBrukersUttalelse.harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.NEI
 
-        behandling.tilFrontendDto(ansvarligSaksbehandler, true)
+        behandling.tilFrontendDto(TilBehandling, ansvarligSaksbehandler, true)
             .behandlingsstegsinfo.find { it.behandlingssteg == Behandlingssteg.FAKTA }
             .shouldNotBeNull()
             .behandlingsstegstatus shouldBe Behandlingsstegstatus.UTFØRT

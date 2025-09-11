@@ -1,6 +1,5 @@
 package no.nav.tilbakekreving.endring
 
-import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.sakshendelse.Behandlingstilstand
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.SærligeGrunner
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.UtvidetVilkårsresultat
@@ -46,7 +45,6 @@ class EndringObservatørService(
         totaltFeilutbetaltBeløp: BigDecimal?,
         totalFeilutbetaltPeriode: Datoperiode?,
     ) {
-        val logContext = SecureLog.Context.medBehandling(eksternFagsystemId, behandlingId.toString())
         kafkaProducer.sendSaksdata(
             behandlingId,
             Behandlingstilstand(
@@ -58,26 +56,7 @@ class EndringObservatørService(
                 behandlingUuid = behandlingId,
                 referertFagsaksbehandling = eksternBehandlingId,
                 behandlingstype = applicationProperties.toggles.defaultWhenDisabled(Toggles::revurdering) { Behandlingstype.TILBAKEKREVING },
-                behandlingsstatus = when (tilstand) {
-                    TilbakekrevingTilstand.START,
-                    TilbakekrevingTilstand.AVVENTER_UTSATT_BEHANDLING_MED_VARSEL,
-                    TilbakekrevingTilstand.AVVENTER_UTSATT_BEHANDLING_UTEN_VARSEL,
-                    TilbakekrevingTilstand.AVVENTER_KRAVGRUNNLAG,
-                    TilbakekrevingTilstand.AVVENTER_FAGSYSTEMINFO,
-                    TilbakekrevingTilstand.AVVENTER_BRUKERINFO,
-                    TilbakekrevingTilstand.SEND_VARSELBREV,
-                    -> Behandlingsstatus.OPPRETTET
-                    TilbakekrevingTilstand.IVERKSETT_VEDTAK -> Behandlingsstatus.IVERKSETTER_VEDTAK
-                    TilbakekrevingTilstand.TIL_BEHANDLING -> when (behandlingstatus) {
-                        Behandlingsstatus.FATTER_VEDTAK -> Behandlingsstatus.FATTER_VEDTAK
-                        Behandlingsstatus.UTREDES -> Behandlingsstatus.UTREDES
-                        else -> throw Feil(
-                            message = "Forventet ikke behandlingstatus $behandlingstatus for behandling i $tilstand",
-                            logContext = logContext,
-                        )
-                    }
-                    TilbakekrevingTilstand.AVSLUTTET -> Behandlingsstatus.AVSLUTTET
-                },
+                behandlingsstatus = behandlingstatus,
                 behandlingsresultat = when (vedtaksresultat) {
                     Vedtaksresultat.FULL_TILBAKEBETALING -> Behandlingsresultatstype.FULL_TILBAKEBETALING
                     Vedtaksresultat.DELVIS_TILBAKEBETALING -> Behandlingsresultatstype.DELVIS_TILBAKEBETALING

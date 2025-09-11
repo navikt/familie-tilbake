@@ -61,7 +61,6 @@ class FatteVedtakStegTest {
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
 
-        fatteVedtakSteg.behandlingsstatus shouldBe Behandlingsstatus.IVERKSETTER_VEDTAK
         fatteVedtakSteg.erFullstendig() shouldBe true
     }
 

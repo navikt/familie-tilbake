@@ -92,7 +92,7 @@ class Tilbakekreving internal constructor(
 
     fun håndter(iverksettelseHendelse: IverksettelseHendelse) {
         tilstand.håndter(this, iverksettelseHendelse)
-        behandlingHistorikk.nåværende().entry.utførSideeffekt(this)
+        behandlingHistorikk.nåværende().entry.utførSideeffekt(tilstand, this)
     }
 
     fun sporingsinformasjon(): Sporing {
@@ -129,6 +129,7 @@ class Tilbakekreving internal constructor(
             kravgrunnlag = kravgrunnlagHistorikk.nåværende(),
             brevHistorikk = brevHistorikk,
             behandlingObservatør = this,
+            tilstand = tilstand,
         )
         behandlingHistorikk.lagre(behandling)
 
@@ -186,7 +187,7 @@ class Tilbakekreving internal constructor(
             fagsystem = eksternFagsakDto.fagsystem,
             språkkode = bruker?.språkkode ?: Språkkode.NB,
             bruker = bruker.tilNullableFrontendDto(),
-            behandlinger = behandlingHistorikk.tilOppsummeringDto(),
+            behandlinger = behandlingHistorikk.tilOppsummeringDto(tilstand),
         )
     }
 
@@ -199,7 +200,7 @@ class Tilbakekreving internal constructor(
         if (behandling.kanUtbetales()) {
             byttTilstand(IverksettVedtak)
         }
-        behandling.utførSideeffekt(this)
+        behandling.utførSideeffekt(tilstand, this)
     }
 
     fun håndter(
@@ -208,7 +209,7 @@ class Tilbakekreving internal constructor(
     ) {
         val behandling = behandlingHistorikk.nåværende().entry
         behandling.håndter(behandler, vurdering, this)
-        behandling.utførSideeffekt(this)
+        behandling.utførSideeffekt(tilstand, this)
     }
 
     fun håndter(
@@ -218,7 +219,7 @@ class Tilbakekreving internal constructor(
     ) {
         val behandling = behandlingHistorikk.nåværende().entry
         behandling.håndter(behandler, periode, vurdering, this)
-        behandling.utførSideeffekt(this)
+        behandling.utførSideeffekt(tilstand, this)
     }
 
     fun håndter(
@@ -228,7 +229,7 @@ class Tilbakekreving internal constructor(
     ) {
         val behandling = behandlingHistorikk.nåværende().entry
         behandling.håndter(behandler, periode, vurdering, this)
-        behandling.utførSideeffekt(this)
+        behandling.utførSideeffekt(tilstand, this)
     }
 
     fun håndter(
@@ -237,7 +238,7 @@ class Tilbakekreving internal constructor(
     ) {
         val behandling = behandlingHistorikk.nåværende().entry
         behandling.håndter(behandler, vurdering, this)
-        behandling.utførSideeffekt(this)
+        behandling.utførSideeffekt(tilstand, this)
     }
 
     fun håndter(
@@ -246,19 +247,19 @@ class Tilbakekreving internal constructor(
     ) {
         val behandling = behandlingHistorikk.nåværende().entry
         behandling.håndter(behandler, brevmottaker, this)
-        behandling.utførSideeffekt(this)
+        behandling.utførSideeffekt(tilstand, this)
     }
 
     fun aktiverBrevmottakerSteg() {
         val behandling = behandlingHistorikk.nåværende().entry
         behandling.aktiverBrevmottakerSteg()
-        behandling.utførSideeffekt(this)
+        behandling.utførSideeffekt(tilstand, this)
     }
 
     fun deaktiverBrevmottakerSteg() = {
         val behandling = behandlingHistorikk.nåværende().entry
         behandling.deaktiverBrevmottakerSteg()
-        behandling.utførSideeffekt(this)
+        behandling.utførSideeffekt(tilstand, this)
     }
 
     fun fjernManuelBrevmottaker(
@@ -267,8 +268,15 @@ class Tilbakekreving internal constructor(
     ) {
         val behandling = behandlingHistorikk.nåværende().entry
         behandling.fjernManuelBrevmottaker(behandler, manuellBrevmottakerId, this)
-        behandling.utførSideeffekt(this)
+        behandling.utførSideeffekt(tilstand, this)
     }
+
+    fun frontendDtoForBehandling(
+        behandler: Behandler,
+        kanBeslutte: Boolean,
+    ) = behandlingHistorikk.nåværende().entry.tilFrontendDto(tilstand, behandler, kanBeslutte)
+
+    fun frontendDtoForBehandlingsoppsummering() = behandlingHistorikk.tilOppsummeringDto(tilstand)
 
     fun tilEntity(): TilbakekrevingEntity {
         return TilbakekrevingEntity(

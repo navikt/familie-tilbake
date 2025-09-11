@@ -17,6 +17,7 @@ import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.InnloggetBrukertilgang
 import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
+import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
 import no.nav.tilbakekreving.behandling.Behandling
@@ -107,11 +108,13 @@ open class TilbakekrevingE2EBase : E2EBase() {
         fagsystem: FagsystemDTO,
     ): UUID? {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(fagsystem, fagsystemId) ?: return null
-        return tilbakekreving.behandlingHistorikk.nåværende().entry.tilFrontendDto(Behandler.Saksbehandler("A123456"), true).behandlingId
+        return tilbakekreving.frontendDtoForBehandling(Behandler.Saksbehandler("A123456"), true).behandlingId
     }
 
+    fun tilbakekreving(behandlingId: UUID): Tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId).shouldNotBeNull()
+
     fun behandling(behandlingId: UUID): Behandling {
-        return tilbakekrevingService.hentTilbakekreving(behandlingId).shouldNotBeNull().behandlingHistorikk.nåværende().entry
+        return tilbakekreving(behandlingId).behandlingHistorikk.nåværende().entry
     }
 
     fun somSaksbehandler(

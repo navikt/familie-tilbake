@@ -6,6 +6,7 @@ import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
+import no.nav.tilbakekreving.tilstand.Tilstand
 import java.util.UUID
 
 class BehandlingHistorikk(
@@ -30,8 +31,8 @@ class BehandlingHistorikk(
         return HistorikkReferanse(this, innslag.internId)
     }
 
-    fun tilOppsummeringDto(): List<BehandlingsoppsummeringDto> {
-        return historikk.map(Behandling::tilOppsummeringDto)
+    internal fun tilOppsummeringDto(tilstand: Tilstand): List<BehandlingsoppsummeringDto> {
+        return historikk.map { it.tilOppsummeringDto(tilstand) }
     }
 
     override fun nåværende(): HistorikkReferanse<UUID, Behandling> {

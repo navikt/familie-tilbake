@@ -21,12 +21,7 @@ class FatteVedtakSteg internal constructor(
 
     override fun erFullstendig(): Boolean = vurderteSteg.all { it.erFerdigvurdert() }
 
-    override val behandlingsstatus: Behandlingsstatus
-        get() = if (erFullstendig()) {
-            Behandlingsstatus.IVERKSETTER_VEDTAK
-        } else {
-            Behandlingsstatus.FATTER_VEDTAK
-        }
+    override val behandlingsstatus: Behandlingsstatus = Behandlingsstatus.FATTER_VEDTAK
 
     override fun nullstill() {}
 

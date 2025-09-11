@@ -73,8 +73,8 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
         frontendDto.behandlinger.single().status shouldBe Behandlingsstatus.UTREDES
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
 
-        behandling(behandlingId) kanBehandle Behandlingssteg.FAKTA
-        behandling(behandlingId) avventerBehandling Behandlingssteg.FORELDELSE
+        tilbakekreving(behandlingId) kanBehandle Behandlingssteg.FAKTA
+        tilbakekreving(behandlingId) avventerBehandling Behandlingssteg.FORELDELSE
 
         utførSteg(
             ident = "Z999999",
@@ -82,8 +82,8 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
             stegData = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(1.januar(2021) til 1.januar(2021)),
         )
 
-        behandling(behandlingId) kanBehandle Behandlingssteg.FORELDELSE
-        behandling(behandlingId) avventerBehandling Behandlingssteg.VILKÅRSVURDERING
+        tilbakekreving(behandlingId) kanBehandle Behandlingssteg.FORELDELSE
+        tilbakekreving(behandlingId) avventerBehandling Behandlingssteg.VILKÅRSVURDERING
 
         utførSteg(
             ident = "Z999999",
@@ -93,8 +93,8 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
 
         behandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto().perioder[0].foreldet shouldBe false
 
-        behandling(behandlingId) kanBehandle Behandlingssteg.VILKÅRSVURDERING
-        behandling(behandlingId) avventerBehandling Behandlingssteg.FORESLÅ_VEDTAK
+        tilbakekreving(behandlingId) kanBehandle Behandlingssteg.VILKÅRSVURDERING
+        tilbakekreving(behandlingId) avventerBehandling Behandlingssteg.FORESLÅ_VEDTAK
 
         utførSteg(
             ident = "Z999999",
@@ -102,16 +102,16 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
             stegData = BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving(1.januar(2021) til 1.januar(2021)),
         )
 
-        behandling(behandlingId) kanBehandle Behandlingssteg.FORESLÅ_VEDTAK
-        behandling(behandlingId) avventerBehandling Behandlingssteg.FATTE_VEDTAK
+        tilbakekreving(behandlingId) kanBehandle Behandlingssteg.FORESLÅ_VEDTAK
+        tilbakekreving(behandlingId) avventerBehandling Behandlingssteg.FATTE_VEDTAK
 
         utførSteg(
             ident = "Z999999",
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagForeslåVedtakVurdering(),
         )
-        behandling(behandlingId) kanBehandle Behandlingssteg.FATTE_VEDTAK
-        behandling(behandlingId) avventerBehandling Behandlingssteg.IVERKSETT_VEDTAK
+        tilbakekreving(behandlingId) kanBehandle Behandlingssteg.FATTE_VEDTAK
+        tilbakekreving(behandlingId) avventerBehandling Behandlingssteg.IVERKSETT_VEDTAK
 
         utførSteg(
             ident = "Z111111",

@@ -17,6 +17,7 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.tilstand.TilBehandling
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -59,10 +60,11 @@ class BehandlingEntityTest {
             kravgrunnlag = kravgrunnlag,
             brevHistorikk = brevHistorikk,
             behandlingObservatør = BehandlingObservatørOppsamler(),
+            tilstand = TilBehandling,
         )
 
         val behandlingEtterLagring = behandlingFørLagring.tilEntity().fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
-        behandlingEtterLagring.tilFrontendDto(behandler, true) shouldBe behandlingFørLagring.tilFrontendDto(behandler, true)
+        behandlingEtterLagring.tilFrontendDto(TilBehandling, behandler, true) shouldBe behandlingFørLagring.tilFrontendDto(TilBehandling, behandler, true)
 
         val observatør = BehovObservatørOppsamler()
         behandlingEtterLagring.trengerIverksettelse(observatør, Ytelsestype.TILLEGGSSTØNAD, Aktør.Person("20046912345"))

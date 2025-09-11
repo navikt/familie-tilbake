@@ -49,6 +49,7 @@ import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.tilstand.Tilstand
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
@@ -106,18 +107,13 @@ class Behandling internal constructor(
         return Sporing(eksternFagsakBehandling.entry.eksternId, internId.toString())
     }
 
-    private fun steg(): List<Saksbehandlingsteg<*>> = listOf(
+    internal fun steg(): List<Saksbehandlingsteg<*>> = listOf(
         faktasteg,
         foreldelsesteg,
         vilkårsvurderingsteg,
         foreslåVedtakSteg,
         fatteVedtakSteg,
     )
-
-    private fun behandlingsstatus() =
-        steg().firstOrNull { !it.erFullstendig() }
-            ?.behandlingsstatus
-            ?: steg().last().behandlingsstatus
 
     private fun lagBeregning(): Beregning {
         return Beregning(
@@ -178,13 +174,13 @@ class Behandling internal constructor(
         return !foreslåVedtakSteg.erFullstendig() || behandler != ansvarligSaksbehandler && kanBeslutte
     }
 
-    fun tilFrontendDto(behandler: Behandler, kanBeslutte: Boolean): BehandlingDto {
+    internal fun tilFrontendDto(tilstand: Tilstand, behandler: Behandler, kanBeslutte: Boolean): BehandlingDto {
         return BehandlingDto(
             eksternBrukId = eksternId,
             behandlingId = internId,
             erBehandlingHenlagt = false,
             type = behandlingstype,
-            status = behandlingsstatus(),
+            status = tilstand.behandlingsstatus(this),
             opprettetDato = opprettet.toLocalDate(),
             avsluttetDato = null,
             endretTidspunkt = sistEndret,
@@ -237,12 +233,12 @@ class Behandling internal constructor(
         )
     }
 
-    fun tilOppsummeringDto(): BehandlingsoppsummeringDto {
+    internal fun tilOppsummeringDto(tilstand: Tilstand): BehandlingsoppsummeringDto {
         return BehandlingsoppsummeringDto(
             behandlingId = internId,
             eksternBrukId = eksternId,
             type = behandlingstype,
-            status = behandlingsstatus(),
+            status = tilstand.behandlingsstatus(this),
         )
     }
 
@@ -370,12 +366,12 @@ class Behandling internal constructor(
         this.ansvarligSaksbehandler = ansvarligSaksbehandler
     }
 
-    fun utførSideeffekt(observatør: BehandlingObservatør) {
+    internal fun utførSideeffekt(tilstand: Tilstand, observatør: BehandlingObservatør) {
         observatør.behandlingOppdatert(
             behandlingId = internId,
             eksternBehandlingId = eksternFagsakBehandling.entry.eksternId,
             vedtaksresultat = hentVedtaksresultat(),
-            behandlingstatus = this.behandlingsstatus(),
+            behandlingstatus = tilstand.behandlingsstatus(this),
             venterPåBruker = påVent?.avventerBruker() ?: false,
             ansvarligSaksbehandler = ansvarligSaksbehandler.ident,
             ansvarligBeslutter = fatteVedtakSteg.ansvarligBeslutter?.ident,
@@ -427,7 +423,7 @@ class Behandling internal constructor(
     }
 
     companion object {
-        fun nyBehandling(
+        internal fun nyBehandling(
             internId: UUID,
             eksternId: UUID,
             behandlingstype: Behandlingstype,
@@ -440,6 +436,7 @@ class Behandling internal constructor(
             kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
             brevHistorikk: BrevHistorikk,
             behandlingObservatør: BehandlingObservatør,
+            tilstand: Tilstand,
         ): Behandling {
             val foreldelsesteg = Foreldelsesteg.opprett(kravgrunnlag)
             val faktasteg = Faktasteg.opprett(eksternFagsakBehandling, kravgrunnlag, brevHistorikk, LocalDateTime.now(), Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL)
@@ -464,7 +461,7 @@ class Behandling internal constructor(
                 fatteVedtakSteg = fatteVedtakSteg,
                 påVent = null,
             ).also {
-                it.utførSideeffekt(behandlingObservatør)
+                it.utførSideeffekt(tilstand, behandlingObservatør)
             }
         }
     }

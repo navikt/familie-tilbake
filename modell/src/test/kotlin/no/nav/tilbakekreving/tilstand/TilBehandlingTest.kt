@@ -80,7 +80,7 @@ class TilBehandlingTest {
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
         val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingHendelse, Behandler.Saksbehandler("Ansvarlig saksbehandler"))
 
-        tilbakekreving.behandlingHistorikk.nåværende().entry.tilFrontendDto(Behandler.Saksbehandler("Ansvarlig beslutter"), true).kanEndres shouldBe true
+        tilbakekreving.frontendDtoForBehandling(Behandler.Saksbehandler("Ansvarlig beslutter"), true).kanEndres shouldBe true
     }
 
     @Test
@@ -89,7 +89,7 @@ class TilBehandlingTest {
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
         val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingHendelse, Behandler.Saksbehandler("Ansvarlig saksbehandler"))
 
-        tilbakekreving.behandlingHistorikk.nåværende().entry.tilFrontendDto(Behandler.Saksbehandler("Annen saksbehandler"), false).kanEndres shouldBe false
+        tilbakekreving.frontendDtoForBehandling(Behandler.Saksbehandler("Annen saksbehandler"), false).kanEndres shouldBe false
     }
 
     @Test
@@ -99,7 +99,7 @@ class TilBehandlingTest {
         val behandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
         val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingHendelse, behandler)
 
-        tilbakekreving.behandlingHistorikk.nåværende().entry.tilFrontendDto(behandler, true).kanEndres shouldBe false
+        tilbakekreving.frontendDtoForBehandling(behandler, true).kanEndres shouldBe false
     }
 
     private fun tilbakekrevingTilGodkjenning(
