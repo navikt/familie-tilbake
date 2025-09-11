@@ -34,6 +34,10 @@ class Vilkårsvurderingsteg(
         )
     }
 
+    override fun nullstill() {
+        this.vurderinger = tomVurdering(kravgrunnlagHendelse)
+    }
+
     internal fun vurder(
         periode: Datoperiode,
         vurdering: ForårsaketAvBruker,
@@ -135,12 +139,16 @@ class Vilkårsvurderingsteg(
             foreldelsesteg: Foreldelsesteg,
         ): Vilkårsvurderingsteg {
             return Vilkårsvurderingsteg(
-                kravgrunnlagHendelse.entry.datoperioder().map {
-                    Vilkårsvurderingsperiode.opprett(it)
-                },
+                tomVurdering(kravgrunnlagHendelse),
                 kravgrunnlagHendelse,
                 foreldelsesteg,
             )
+        }
+
+        private fun tomVurdering(kravgrunnlagHendelse: HistorikkReferanse<UUID, KravgrunnlagHendelse>): List<Vilkårsvurderingsperiode> {
+            return kravgrunnlagHendelse.entry.datoperioder().map {
+                Vilkårsvurderingsperiode.opprett(it)
+            }
         }
     }
 }

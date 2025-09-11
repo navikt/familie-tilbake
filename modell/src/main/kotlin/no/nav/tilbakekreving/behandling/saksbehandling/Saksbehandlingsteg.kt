@@ -11,6 +11,8 @@ internal interface Saksbehandlingsteg<FrontendDtoType> : FrontendDto<FrontendDto
 
     fun erFullstendig(): Boolean
 
+    fun nullstill()
+
     companion object {
         fun <T> Saksbehandlingsteg<T>?.behandlingsstegstatus(): Behandlingsstegstatus {
             return when {

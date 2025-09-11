@@ -28,6 +28,8 @@ class FatteVedtakSteg internal constructor(
             Behandlingsstatus.FATTER_VEDTAK
         }
 
+    override fun nullstill() {}
+
     internal fun håndter(
         beslutter: Behandler,
         ansvarligSaksbehandler: Behandler,

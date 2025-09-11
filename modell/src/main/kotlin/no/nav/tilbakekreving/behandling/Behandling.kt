@@ -18,6 +18,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
+import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg.Companion.behandlingsstegstatus
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg.Companion.klarTilVisning
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
@@ -105,7 +106,7 @@ class Behandling internal constructor(
         return Sporing(eksternFagsakBehandling.entry.eksternId, internId.toString())
     }
 
-    private fun steg() = listOf(
+    private fun steg(): List<Saksbehandlingsteg<*>> = listOf(
         faktasteg,
         foreldelsesteg,
         vilkårsvurderingsteg,
@@ -353,26 +354,6 @@ class Behandling internal constructor(
 
     fun deaktiverBrevmottakerSteg() = brevmottakerSteg.deaktiverSteg()
 
-    fun lagNullstiltBehandling(
-        brevHistorikk: BrevHistorikk,
-        behandlingObservatør: BehandlingObservatør,
-    ): Behandling {
-        return nyBehandling(
-            internId = UUID.randomUUID(),
-            eksternId = eksternId,
-            behandlingstype = Behandlingstype.REVURDERING_TILBAKEKREVING,
-            opprettet = opprettet,
-            enhet = enhet,
-            årsak = årsak,
-            ansvarligSaksbehandler = ansvarligSaksbehandler,
-            sistEndret = LocalDateTime.now(),
-            eksternFagsakBehandling = eksternFagsakBehandling,
-            kravgrunnlag = kravgrunnlag,
-            brevHistorikk = brevHistorikk,
-            behandlingObservatør = behandlingObservatør,
-        )
-    }
-
     fun kanUtbetales(): Boolean = fatteVedtakSteg.erFullstendig()
 
     fun hentBehandlingsinformasjon(): Behandlingsinformasjon {
@@ -409,6 +390,8 @@ class Behandling internal constructor(
         }
         return null
     }
+
+    fun flyttTilbakeTilFakta() = steg().forEach { it.nullstill() }
 
     fun sendVedtakIverksatt(
         forrigeBehandlingId: UUID?,

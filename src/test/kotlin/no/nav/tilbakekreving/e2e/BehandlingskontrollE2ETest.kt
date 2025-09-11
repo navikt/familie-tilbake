@@ -5,6 +5,8 @@ import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.tilbakekreving.api.v1.dto.BehandlingPåVentDto
 import no.nav.tilbakekreving.e2e.ytelser.TilleggsstønaderE2ETest.Companion.TILLEGGSSTØNADER_KØ_NAVN
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.saksbehandler.Behandler
@@ -51,5 +53,42 @@ class BehandlingskontrollE2ETest : TilbakekrevingE2EBase() {
             .tilFrontendDto(behandler, true)
 
         frontendDtoAvVent.erBehandlingPåVent shouldBe false
+    }
+
+    @Test
+    fun `flytt behandling tilbake til fakta`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        sendKravgrunnlagOgAvventLesing(
+            queueName = TILLEGGSSTØNADER_KØ_NAVN,
+            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+            ),
+        )
+
+        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        val ansvarligSaksbehandler = Behandler.Saksbehandler("Z999999")
+
+        val dtoFørUtførtFakta = behandling(behandlingId).tilFrontendDto(ansvarligSaksbehandler, true)
+        dtoFørUtførtFakta.behandlingsstegsinfo.find { it.behandlingssteg == Behandlingssteg.FAKTA }
+            .shouldNotBeNull()
+            .behandlingsstegstatus shouldBe Behandlingsstegstatus.KLAR
+
+        utførSteg(
+            ident = ansvarligSaksbehandler.ident,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(),
+        )
+
+        val dtoEtterUtførtFakta = behandling(behandlingId).tilFrontendDto(ansvarligSaksbehandler, true)
+        dtoEtterUtførtFakta.behandlingsstegsinfo.find { it.behandlingssteg == Behandlingssteg.FAKTA }
+            .shouldNotBeNull()
+            .behandlingsstegstatus shouldBe Behandlingsstegstatus.UTFØRT
+
+        behandlingController.flyttBehandlingTilFakta(behandlingId) shouldBe Ressurs.success("OK")
+
+        val dtoEtterTilbakeTilFakta = behandling(behandlingId).tilFrontendDto(ansvarligSaksbehandler, true)
+        dtoEtterTilbakeTilFakta.behandlingsstegsinfo.find { it.behandlingssteg == Behandlingssteg.FAKTA }
+            .shouldNotBeNull()
+            .behandlingsstegstatus shouldBe Behandlingsstegstatus.KLAR
     }
 }

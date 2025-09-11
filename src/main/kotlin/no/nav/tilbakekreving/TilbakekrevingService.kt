@@ -370,7 +370,7 @@ class TilbakekrevingService(
         tilbakekrevingRepository.lagreTilstand(tilbakekreving.tilEntity())
     }
 
-    fun flyttBehandlingsstegTilbakeTilFakta(tilbakekreving: Tilbakekreving) {
+    fun flyttBehandlingTilFakta(tilbakekreving: Tilbakekreving) {
         tilbakekreving.håndterNullstilling()
         tilbakekrevingRepository.lagreTilstand(tilbakekreving.tilEntity())
     }
@@ -381,7 +381,7 @@ class TilbakekrevingService(
         tilbakekrevingRepository.lagreTilstand(tilbakekreving.tilEntity())
     }
 
-    fun deaktiverBrevmottakerSteg(tilbakekreving: Tilbakekreving) {
+    fun fjernBrevmottakerSteg(tilbakekreving: Tilbakekreving) {
         tilbakekreving.deaktiverBrevmottakerSteg()
         tilbakekrevingRepository.lagreTilstand(tilbakekreving.tilEntity())
     }

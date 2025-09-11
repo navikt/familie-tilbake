@@ -99,12 +99,9 @@ class Tilbakekreving internal constructor(
         return Sporing(eksternFagsak.eksternId, behandlingHistorikk.nåværende().entry.internId.toString())
     }
 
-    fun håndterNullstilling() = tilstand.håndterNullstilling(this)
-
-    fun nullstillBehandling() {
+    fun håndterNullstilling() {
         val nåværendeBehandling = behandlingHistorikk.nåværende().entry
-        val nullstiltBehandling = nåværendeBehandling.lagNullstiltBehandling(brevHistorikk, this)
-        behandlingHistorikk.lagre(nullstiltBehandling)
+        tilstand.håndterNullstilling(nåværendeBehandling, sporingsinformasjon())
     }
 
     fun opprettBrevmottakerSteg(

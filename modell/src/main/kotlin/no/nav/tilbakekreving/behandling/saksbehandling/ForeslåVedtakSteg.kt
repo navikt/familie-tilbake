@@ -22,6 +22,10 @@ class ForeslåVedtakSteg(
         return vurdering.tilEntity()
     }
 
+    override fun nullstill() {
+        vurdering = Vurdering.IkkeVurdert
+    }
+
     override fun tilFrontendDto() {}
 
     sealed interface Vurdering {

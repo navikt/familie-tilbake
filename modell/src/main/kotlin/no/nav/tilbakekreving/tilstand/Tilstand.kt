@@ -1,7 +1,9 @@
 package no.nav.tilbakekreving.tilstand
 
 import no.nav.tilbakekreving.Tilbakekreving
+import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.feil.ModellFeil
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
@@ -63,7 +65,7 @@ internal sealed interface Tilstand {
         throw ModellFeil.UgyldigOperasjonException("Forventet ikke IverksettelseHendelse i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
     }
 
-    fun håndterNullstilling(tilbakekreving: Tilbakekreving) {
-        throw ModellFeil.UgyldigOperasjonException("Forventet ikke Nullstilling i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
+    fun håndterNullstilling(nåværendeBehandling: Behandling, sporing: Sporing) {
+        throw ModellFeil.UgyldigOperasjonException("Kan ikke flytte tilbake til fakta i $tilbakekrevingTilstand", sporing)
     }
 }

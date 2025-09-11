@@ -32,7 +32,7 @@ class TilBehandlingTest {
     private val bigQueryService = BigQueryServiceStub()
 
     @Test
-    fun `behanlding kan nullstilles når den er i TilBehandling tilstand`() {
+    fun `behandling kan nullstilles når den er i TilBehandling tilstand`() {
         val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
         val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingHendelse, Behandler.Saksbehandler("Ansvarlig saksbehandler"))
@@ -45,16 +45,13 @@ class TilBehandlingTest {
             ),
         )
 
-        val behandlingFørNullstilling = tilbakekreving.behandlingHistorikk.nåværende().entry
-        tilbakekreving.nullstillBehandling()
-        val behandlingEtterNullstilling = tilbakekreving.behandlingHistorikk.nåværende().entry
-
-        behandlingFørNullstilling.foreldelsesteg.erFullstendig() shouldBe true
-        behandlingEtterNullstilling.foreldelsesteg.erFullstendig() shouldBe false
+        tilbakekreving.behandlingHistorikk.nåværende().entry.foreldelsesteg.erFullstendig() shouldBe true
+        tilbakekreving.håndterNullstilling()
+        tilbakekreving.behandlingHistorikk.nåværende().entry.foreldelsesteg.erFullstendig() shouldBe false
     }
 
     @Test
-    fun `behanlding kan ikke nullstilles når den ikke er i TilBehandling tilstand`() {
+    fun `behandling kan ikke nullstilles når den ikke er i TilBehandling tilstand`() {
         val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
         val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingHendelse, Behandler.Saksbehandler("Ansvarlig saksbehandler"))
@@ -74,7 +71,7 @@ class TilBehandlingTest {
         val exception = shouldThrow<ModellFeil.UgyldigOperasjonException> {
             tilbakekreving.håndterNullstilling()
         }
-        exception.message shouldBe "Forventet ikke Nullstilling i ${tilbakekreving.tilstand.tilbakekrevingTilstand}"
+        exception.message shouldBe "Kan ikke flytte tilbake til fakta i ${tilbakekreving.tilstand.tilbakekrevingTilstand}"
     }
 
     @Test
