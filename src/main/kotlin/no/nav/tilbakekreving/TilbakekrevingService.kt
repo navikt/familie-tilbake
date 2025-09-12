@@ -179,6 +179,7 @@ class TilbakekrevingService(
                         revurderingsårsak = "revurderingsårsak",
                         begrunnelseForTilbakekreving = "begrunnelseForTilbakekreving",
                         revurderingsvedtaksdato = LocalDate.now(),
+                        utvidPerioder = null,
                     ),
                 )
             }

@@ -39,6 +39,7 @@ class BehandlingEntityTest {
                 revurderingsårsak = "abc",
                 begrunnelseForTilbakekreving = "abc",
                 revurderingsvedtaksdato = LocalDate.now(),
+                utvidetPerioder = emptyList(),
             ),
         )
         // Lagre et nytt innslag så vi er sikker på at det riktige plukkes opp, ikke det nyeste

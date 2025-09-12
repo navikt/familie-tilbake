@@ -152,6 +152,6 @@ class BehandlingTest {
 
         behandling.flyttTilbakeTilFakta()
 
-        behandling.vilkårsvurderingsstegDto.tilFrontendDto().perioder.first().begrunnelse shouldBe ""
+        behandling.vilkårsvurderingsstegDto.tilFrontendDto().perioder.first().begrunnelse shouldBe null
     }
 }

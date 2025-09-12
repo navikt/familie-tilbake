@@ -17,6 +17,7 @@ import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
+import no.nav.tilbakekreving.kontrakter.periode.til
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -45,7 +46,7 @@ class Faktasteg(
     override fun tilFrontendDto(): FaktaFeilutbetalingDto {
         return FaktaFeilutbetalingDto(
             varsletBeløp = brevHistorikk.sisteVarselbrev()?.varsletBeløp,
-            totalFeilutbetaltPeriode = kravgrunnlag.entry.totaltFeilutbetaltPeriode(),
+            totalFeilutbetaltPeriode = vurdering.perioder.minOf { it.periode.fom } til vurdering.perioder.maxOf { it.periode.tom },
             totaltFeilutbetaltBeløp = kravgrunnlag.entry.feilutbetaltBeløpForAllePerioder(),
             feilutbetaltePerioder = vurdering.perioder.map {
                 FeilutbetalingsperiodeDto(
@@ -119,9 +120,9 @@ class Faktasteg(
 
         private fun tomVurdering(kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>, eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>): Vurdering {
             return Vurdering(
-                perioder = kravgrunnlag.entry.perioder.map {
+                perioder = kravgrunnlag.entry.datoperioder().map {
                     FaktaPeriode(
-                        periode = it.periode,
+                        periode = eksternFagsakBehandling.entry.utvidPeriode(it),
                         hendelsestype = Hendelsestype.ANNET,
                         hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
                     )

@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelsesperiodeDto
+import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.ForeldelseperiodeEntity
 import no.nav.tilbakekreving.entities.ForeldelsesstegEntity
@@ -17,6 +18,7 @@ import java.util.UUID
 
 class Foreldelsesteg(
     private var vurdertePerioder: List<Foreldelseperiode>,
+    private val eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
     private val kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
 ) : Saksbehandlingsteg<VurdertForeldelseDto> {
     override val type: Behandlingssteg = Behandlingssteg.FORELDELSE
@@ -24,7 +26,7 @@ class Foreldelsesteg(
     override fun erFullstendig(): Boolean = vurdertePerioder.all { it.vurdering != Vurdering.IkkeVurdert }
 
     override fun nullstill() {
-        vurdertePerioder = tomVurdering(kravgrunnlag)
+        vurdertePerioder = tomVurdering(eksternFagsakBehandling, kravgrunnlag)
     }
 
     internal fun vurderForeldelse(
@@ -165,17 +167,24 @@ class Foreldelsesteg(
     }
 
     companion object {
-        fun opprett(kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>): Foreldelsesteg {
+        fun opprett(
+            eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
+            kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
+        ): Foreldelsesteg {
             return Foreldelsesteg(
-                vurdertePerioder = tomVurdering(kravgrunnlag),
+                vurdertePerioder = tomVurdering(eksternFagsakBehandling, kravgrunnlag),
+                eksternFagsakBehandling = eksternFagsakBehandling,
                 kravgrunnlag = kravgrunnlag,
             )
         }
 
-        private fun tomVurdering(kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>): List<Foreldelseperiode> {
-            return kravgrunnlag.entry.datoperioder().map {
+        private fun tomVurdering(
+            eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
+            kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
+        ): List<Foreldelseperiode> {
+            return kravgrunnlag.entry.datoperioder().map { kravgrunnlagPeriode ->
                 Foreldelseperiode.opprett(
-                    periode = it,
+                    periode = eksternFagsakBehandling.entry.utvidPeriode(kravgrunnlagPeriode),
                 )
             }
         }

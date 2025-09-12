@@ -34,6 +34,11 @@ data class Datoperiode(
 
     operator fun contains(other: Datoperiode) = snitt(other) != null
 
+    override fun equals(other: Any?): Boolean {
+        val annenPeriode = other as? Datoperiode ?: return false
+        return fom == annenPeriode.fom && tom == annenPeriode.tom
+    }
+
     fun toMånedsperiode() = Månedsperiode(fomMåned, tomMåned)
 }
 

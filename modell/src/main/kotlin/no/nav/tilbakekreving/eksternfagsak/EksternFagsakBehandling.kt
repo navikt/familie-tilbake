@@ -1,8 +1,11 @@
 package no.nav.tilbakekreving.eksternfagsak
 
+import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.EksternFagsakBehandlingEntity
 import no.nav.tilbakekreving.entities.EksternFagsakBehandlingType
+import no.nav.tilbakekreving.entities.UtvidetPeriodeEntity
 import no.nav.tilbakekreving.historikk.Historikk
+import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import java.time.LocalDate
 import java.util.UUID
 
@@ -15,6 +18,8 @@ sealed class EksternFagsakBehandling(
     abstract val begrunnelseForTilbakekreving: String
     abstract val revurderingsvedtaksdato: LocalDate
 
+    abstract fun utvidPeriode(periode: Datoperiode): Datoperiode
+
     class Behandling(
         internId: UUID,
         override val eksternId: String,
@@ -22,7 +27,41 @@ sealed class EksternFagsakBehandling(
         override val revurderingsårsak: String,
         override val begrunnelseForTilbakekreving: String,
         override val revurderingsvedtaksdato: LocalDate,
-    ) : EksternFagsakBehandling(internId)
+        private val utvidetPerioder: List<UtvidetPeriode>,
+    ) : EksternFagsakBehandling(internId) {
+        override fun utvidPeriode(periode: Datoperiode): Datoperiode {
+            return utvidetPerioder.singleOrNull { it.gjelderFor(periode) }?.utvid() ?: periode
+        }
+
+        override fun tilEntity(): EksternFagsakBehandlingEntity {
+            return EksternFagsakBehandlingEntity(
+                type = EksternFagsakBehandlingType.BEHANDLING,
+                internId = internId,
+                eksternId = eksternId,
+                revurderingsresultat = revurderingsresultat,
+                revurderingsårsak = revurderingsårsak,
+                begrunnelseForTilbakekreving = begrunnelseForTilbakekreving,
+                revurderingsvedtaksdato = revurderingsvedtaksdato,
+                utvidetPerioder = utvidetPerioder.map { it.tilEntity() },
+            )
+        }
+    }
+
+    class UtvidetPeriode(
+        private val kravgrunnlagPeriode: Datoperiode,
+        private val vedtaksperiode: Datoperiode,
+    ) {
+        fun gjelderFor(periode: Datoperiode): Boolean = kravgrunnlagPeriode == periode
+
+        fun utvid(): Datoperiode = vedtaksperiode
+
+        fun tilEntity(): UtvidetPeriodeEntity {
+            return UtvidetPeriodeEntity(
+                kravgrunnlagPeriode = DatoperiodeEntity(kravgrunnlagPeriode.fom, kravgrunnlagPeriode.tom),
+                vedtaksperiode = DatoperiodeEntity(vedtaksperiode.fom, vedtaksperiode.tom),
+            )
+        }
+    }
 
     class Ukjent(
         internId: UUID,
@@ -33,22 +72,14 @@ sealed class EksternFagsakBehandling(
         override val revurderingsårsak: String = "Ukjent - finn i fagsystem"
         override val begrunnelseForTilbakekreving: String = "Ukjent - finn i fagsystem"
         override val revurderingsvedtaksdato: LocalDate = revurderingsdatoFraKravgrunnlag ?: LocalDate.MIN
-    }
 
-    fun tilEntity(): EksternFagsakBehandlingEntity {
-        return when (this) {
-            is Behandling -> EksternFagsakBehandlingEntity(
-                type = EksternFagsakBehandlingType.BEHANDLING,
-                internId = internId,
-                eksternId = eksternId,
-                revurderingsresultat = revurderingsresultat,
-                revurderingsårsak = revurderingsårsak,
-                begrunnelseForTilbakekreving = begrunnelseForTilbakekreving,
-                revurderingsvedtaksdato = revurderingsvedtaksdato,
-            )
-            is Ukjent -> EksternFagsakBehandlingEntity(
+        override fun utvidPeriode(periode: Datoperiode): Datoperiode = periode
+
+        override fun tilEntity(): EksternFagsakBehandlingEntity {
+            return EksternFagsakBehandlingEntity(
                 type = EksternFagsakBehandlingType.UKJENT,
                 internId = internId,
+                null,
                 null,
                 null,
                 null,
@@ -57,4 +88,6 @@ sealed class EksternFagsakBehandling(
             )
         }
     }
+
+    abstract fun tilEntity(): EksternFagsakBehandlingEntity
 }

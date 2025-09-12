@@ -34,6 +34,12 @@ class EksternFagsak(
                 revurderingsresultat = fagsysteminfo.revurderingsresultat,
                 begrunnelseForTilbakekreving = fagsysteminfo.begrunnelseForTilbakekreving,
                 revurderingsvedtaksdato = fagsysteminfo.revurderingsvedtaksdato,
+                utvidetPerioder = fagsysteminfo.utvidPerioder?.map {
+                    EksternFagsakBehandling.UtvidetPeriode(
+                        kravgrunnlagPeriode = it.kravgrunnlagPeriode,
+                        vedtaksperiode = it.vedtakPeriode,
+                    )
+                } ?: emptyList(),
             ),
         )
     }

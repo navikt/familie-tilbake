@@ -438,9 +438,9 @@ class Behandling internal constructor(
             behandlingObservatør: BehandlingObservatør,
             tilstand: Tilstand,
         ): Behandling {
-            val foreldelsesteg = Foreldelsesteg.opprett(kravgrunnlag)
+            val foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakBehandling, kravgrunnlag)
             val faktasteg = Faktasteg.opprett(eksternFagsakBehandling, kravgrunnlag, brevHistorikk, LocalDateTime.now(), Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL)
-            val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(kravgrunnlag, foreldelsesteg)
+            val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(eksternFagsakBehandling, kravgrunnlag, foreldelsesteg)
             val foreslåVedtakSteg = ForeslåVedtakSteg.opprett()
             val fatteVedtakSteg = FatteVedtakSteg.opprett()
             return Behandling(

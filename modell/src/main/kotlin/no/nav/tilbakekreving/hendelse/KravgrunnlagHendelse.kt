@@ -12,7 +12,6 @@ import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
-import no.nav.tilbakekreving.kontrakter.periode.til
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
@@ -44,14 +43,12 @@ class KravgrunnlagHendelse(
     }
 
     fun totaltBeløpFor(periode: Datoperiode): BigDecimal =
-        perioder.single { kgPeriode -> kgPeriode.inneholder(periode) }
+        perioder.single { kgPeriode -> kgPeriode.gjelderFor(periode) }
             .feilutbetaltYtelsesbeløp()
 
     fun datoperioder() = perioder.map { it.periode }
 
     fun feilutbetaltBeløpForAllePerioder() = perioder.sumOf { it.feilutbetaltYtelsesbeløp() }
-
-    fun totaltFeilutbetaltPeriode() = datoperioder().minOf { it.fom } til datoperioder().maxOf { it.tom }
 
     override fun perioder(): List<KravgrunnlagPeriodeAdapter> {
         return perioder
@@ -80,7 +77,7 @@ class KravgrunnlagHendelse(
         private val ytelsesbeløp: List<Beløp>,
         private val feilutbetaltBeløp: List<Beløp>,
     ) : KravgrunnlagPeriodeAdapter {
-        fun inneholder(other: Datoperiode): Boolean = periode.inneholder(other)
+        fun gjelderFor(other: Datoperiode): Boolean = other.inneholder(periode)
 
         override fun periode(): Datoperiode {
             return periode

@@ -8,7 +8,7 @@ import no.nav.tilbakekreving.entities.VurderingType
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering
 
 interface ForårsaketAvBruker {
-    val begrunnelse: String
+    val begrunnelse: String?
 
     fun renter(): Boolean
 
@@ -27,7 +27,7 @@ interface ForårsaketAvBruker {
     sealed interface Nei : ForårsaketAvBruker
 
     data object IkkeVurdert : ForårsaketAvBruker, Vurdering {
-        override val begrunnelse: String = ""
+        override val begrunnelse: String? = null
 
         override fun vurderingstype(): Vurdering = this
 
