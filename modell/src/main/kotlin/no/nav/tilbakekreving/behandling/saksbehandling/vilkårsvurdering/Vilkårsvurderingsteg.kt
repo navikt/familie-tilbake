@@ -7,6 +7,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg
 import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurderingAdapter
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurdertPeriodeAdapter
+import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.VilkårsvurderingsperiodeEntity
 import no.nav.tilbakekreving.entities.VilkårsvurderingstegEntity
@@ -21,6 +22,7 @@ import java.util.UUID
 
 class Vilkårsvurderingsteg(
     private var vurderinger: List<Vilkårsvurderingsperiode>,
+    private val eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
     private val kravgrunnlagHendelse: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
     private val foreldelsesteg: Foreldelsesteg,
 ) : Saksbehandlingsteg<VurdertVilkårsvurderingDto>, VilkårsvurderingAdapter {
@@ -35,7 +37,7 @@ class Vilkårsvurderingsteg(
     }
 
     override fun nullstill() {
-        this.vurderinger = tomVurdering(kravgrunnlagHendelse)
+        this.vurderinger = tomVurdering(eksternFagsakBehandling, kravgrunnlagHendelse)
     }
 
     internal fun vurder(
@@ -122,7 +124,9 @@ class Vilkårsvurderingsteg(
         }
 
         companion object {
-            fun opprett(periode: Datoperiode): Vilkårsvurderingsperiode {
+            fun opprett(
+                periode: Datoperiode,
+            ): Vilkårsvurderingsperiode {
                 return Vilkårsvurderingsperiode(
                     id = UUID.randomUUID(),
                     periode = periode,
@@ -135,19 +139,26 @@ class Vilkårsvurderingsteg(
 
     companion object {
         fun opprett(
+            eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
             kravgrunnlagHendelse: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
             foreldelsesteg: Foreldelsesteg,
         ): Vilkårsvurderingsteg {
             return Vilkårsvurderingsteg(
-                tomVurdering(kravgrunnlagHendelse),
+                tomVurdering(eksternFagsakBehandling, kravgrunnlagHendelse),
+                eksternFagsakBehandling,
                 kravgrunnlagHendelse,
                 foreldelsesteg,
             )
         }
 
-        private fun tomVurdering(kravgrunnlagHendelse: HistorikkReferanse<UUID, KravgrunnlagHendelse>): List<Vilkårsvurderingsperiode> {
+        private fun tomVurdering(
+            eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
+            kravgrunnlagHendelse: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
+        ): List<Vilkårsvurderingsperiode> {
             return kravgrunnlagHendelse.entry.datoperioder().map {
-                Vilkårsvurderingsperiode.opprett(it)
+                Vilkårsvurderingsperiode.opprett(
+                    periode = eksternFagsakBehandling.entry.utvidPeriode(it),
+                )
             }
         }
     }

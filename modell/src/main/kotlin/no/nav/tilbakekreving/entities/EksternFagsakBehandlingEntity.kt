@@ -12,6 +12,7 @@ data class EksternFagsakBehandlingEntity(
     val revurderingsårsak: String?,
     val begrunnelseForTilbakekreving: String?,
     val revurderingsvedtaksdato: LocalDate?,
+    val utvidetPerioder: List<UtvidetPeriodeEntity>?,
 ) {
     fun fraEntity(): EksternFagsakBehandling {
         return when (type) {
@@ -22,9 +23,22 @@ data class EksternFagsakBehandlingEntity(
                 revurderingsårsak = requireNotNull(revurderingsårsak) { "revurderingsårsak kreves for EksternFagsakBehandling" },
                 begrunnelseForTilbakekreving = requireNotNull(begrunnelseForTilbakekreving) { "begrunnelseForTilbakekreving kreves for EksternFagsakBehandling" },
                 revurderingsvedtaksdato = requireNotNull(revurderingsvedtaksdato) { "revurderingsvedtaksdato kreves for EksternFagsakBehandling" },
+                utvidetPerioder = requireNotNull(utvidetPerioder) { "utvidetPerioder kreves for EksternFagsakBehandling" }.map { it.fraEntity() },
             )
             EksternFagsakBehandlingType.UKJENT -> EksternFagsakBehandling.Ukjent(internId = internId, null)
         }
+    }
+}
+
+data class UtvidetPeriodeEntity(
+    val kravgrunnlagPeriode: DatoperiodeEntity,
+    val vedtaksperiode: DatoperiodeEntity,
+) {
+    fun fraEntity(): EksternFagsakBehandling.UtvidetPeriode {
+        return EksternFagsakBehandling.UtvidetPeriode(
+            kravgrunnlagPeriode = kravgrunnlagPeriode.fraEntity(),
+            vedtaksperiode = vedtaksperiode.fraEntity(),
+        )
     }
 }
 

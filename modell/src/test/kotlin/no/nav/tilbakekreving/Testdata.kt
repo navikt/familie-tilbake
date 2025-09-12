@@ -121,15 +121,17 @@ fun feilutbetalteBeløp() =
         ),
     )
 
-fun fagsysteminfoHendelse() =
-    FagsysteminfoHendelse(
-        behandlingId = UUID.randomUUID().toString(),
-        aktør = Aktør.Person(bruker().ident),
-        revurderingsårsak = "Revurderingsårsak",
-        revurderingsresultat = "Revurderingsresultat",
-        revurderingsvedtaksdato = LocalDate.now(),
-        begrunnelseForTilbakekreving = "Begrunnelse for tilbakekreving",
-    )
+fun fagsysteminfoHendelse(
+    utvidPerioder: List<FagsysteminfoHendelse.UtvidetPeriode>? = null,
+) = FagsysteminfoHendelse(
+    behandlingId = UUID.randomUUID().toString(),
+    aktør = Aktør.Person(bruker().ident),
+    revurderingsårsak = "Revurderingsårsak",
+    revurderingsresultat = "Revurderingsresultat",
+    revurderingsvedtaksdato = LocalDate.now(),
+    begrunnelseForTilbakekreving = "Begrunnelse for tilbakekreving",
+    utvidPerioder = utvidPerioder,
+)
 
 fun brukerinfoHendelse() =
     BrukerinfoHendelse(
@@ -156,6 +158,7 @@ fun eksternFagsakBehandling(): EksternFagsakBehandling {
         revurderingsresultat = "Revurderingsresultat",
         revurderingsvedtaksdato = LocalDate.now(),
         begrunnelseForTilbakekreving = "Begrunnelse for tilbakekreving",
+        utvidetPerioder = emptyList(),
     )
 }
 

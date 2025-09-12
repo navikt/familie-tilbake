@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.HistorikkStub.Companion.fakeReferanse
+import no.nav.tilbakekreving.eksternFagsakBehandling
 import no.nav.tilbakekreving.februar
 import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -14,6 +15,7 @@ class ForeldelsestegTest {
     fun `vurdering av deler av periode`() {
         val foreldelsesteg =
             Foreldelsesteg.opprett(
+                fakeReferanse(eksternFagsakBehandling()),
                 fakeReferanse(
                     kravgrunnlag(
                         perioder =
@@ -37,6 +39,7 @@ class ForeldelsestegTest {
     fun `vurdering av deler hele perioden`() {
         val foreldelsesteg =
             Foreldelsesteg.opprett(
+                fakeReferanse(eksternFagsakBehandling()),
                 fakeReferanse(
                     kravgrunnlag(
                         perioder =
@@ -64,6 +67,7 @@ class ForeldelsestegTest {
     fun `sjekk foreldelse på deler av splittet periode`() {
         val foreldelsesteg =
             Foreldelsesteg.opprett(
+                fakeReferanse(eksternFagsakBehandling()),
                 fakeReferanse(
                     kravgrunnlag(
                         perioder =

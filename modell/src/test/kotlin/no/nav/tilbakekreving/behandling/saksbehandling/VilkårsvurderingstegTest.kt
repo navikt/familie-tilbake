@@ -2,8 +2,10 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.HistorikkStub
+import no.nav.tilbakekreving.HistorikkStub.Companion.fakeReferanse
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
+import no.nav.tilbakekreving.eksternFagsakBehandling
 import no.nav.tilbakekreving.februar
 import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -26,8 +28,9 @@ class VilkårsvurderingstegTest {
             )
         val vilkårsvurderingsteg =
             Vilkårsvurderingsteg.opprett(
+                fakeReferanse(eksternFagsakBehandling()),
                 kravgrunnlag,
-                Foreldelsesteg.opprett(kravgrunnlag),
+                Foreldelsesteg.opprett(fakeReferanse(eksternFagsakBehandling()), kravgrunnlag),
             )
         vilkårsvurderingsteg.vurder(
             1.januar til 31.januar,
@@ -54,8 +57,9 @@ class VilkårsvurderingstegTest {
             )
         val vilkårsvurderingsteg =
             Vilkårsvurderingsteg.opprett(
+                eksternFagsakBehandling = fakeReferanse(eksternFagsakBehandling()),
                 kravgrunnlagHendelse = kravgrunnlag,
-                foreldelsesteg = Foreldelsesteg.opprett(kravgrunnlag),
+                foreldelsesteg = Foreldelsesteg.opprett(fakeReferanse(eksternFagsakBehandling()), kravgrunnlag),
             )
         vilkårsvurderingsteg.vurder(
             1.januar til 31.januar,
