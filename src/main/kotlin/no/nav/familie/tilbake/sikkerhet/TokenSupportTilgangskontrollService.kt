@@ -35,7 +35,7 @@ import java.math.BigInteger
 import java.util.UUID
 
 @Configuration
-class TilgangskontrollService(
+class TokenSupportTilgangskontrollService(
     private val applicationProperties: ApplicationProperties,
     private val fagsakRepository: FagsakRepository,
     private val behandlingRepository: BehandlingRepository,
@@ -267,7 +267,7 @@ class TilgangskontrollService(
         auditLoggerEvent: AuditLoggerEvent,
         ident: String,
         eksternFagsakId: String,
-        behandling: Behandling? = null,
+        behandling: Behandling?,
     ) {
         auditLogger.log(
             Sporingsdata(
