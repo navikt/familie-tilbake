@@ -111,7 +111,7 @@ internal class NyTilgangskontrollServiceTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun setup() {
-        tilgangskontrollService = TilgangskontrollService(
+        tilgangskontrollService = TokenSupportTilgangskontrollService(
             applicationProperties = applicationProperties,
             fagsakRepository = mockk {
                 every { findByFagsystemAndEksternFagsakId(any(), fagsak.eksternFagsakId) } returns fagsak

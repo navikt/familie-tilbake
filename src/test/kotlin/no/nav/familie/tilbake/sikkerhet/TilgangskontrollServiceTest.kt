@@ -116,7 +116,7 @@ internal class TilgangskontrollServiceTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        tilgangskontrollService = TilgangskontrollService(
+        tilgangskontrollService = TokenSupportTilgangskontrollService(
             applicationProperties,
             fagsakRepository,
             behandlingRepository,

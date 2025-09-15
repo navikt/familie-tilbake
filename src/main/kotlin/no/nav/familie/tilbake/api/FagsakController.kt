@@ -71,9 +71,10 @@ class FagsakController(
         @PathVariable fagsystem: FagsystemDTO,
         @PathVariable eksternFagsakId: String,
     ): Ressurs<FinnesBehandlingResponse> {
-        tilgangskontrollService.validerTilgangForFagsystem(
+        tilgangskontrollService.validerTilgangFagsystemOgFagsakId(
             fagsystem = fagsystem,
             eksternFagsakId = eksternFagsakId,
+            minimumBehandlerrolle = Behandlerrolle.VEILEDER,
             auditLoggerEvent = AuditLoggerEvent.ACCESS,
             handling = "Sjekk om det finnes en åpen tilbakekrevingsbehandling",
         )
@@ -113,9 +114,10 @@ class FagsakController(
         @PathVariable fagsystem: FagsystemDTO,
         @PathVariable eksternFagsakId: String,
     ): Ressurs<List<Behandling>> {
-        tilgangskontrollService.validerTilgangForFagsystem(
+        tilgangskontrollService.validerTilgangFagsystemOgFagsakId(
             fagsystem = fagsystem,
             eksternFagsakId = eksternFagsakId,
+            minimumBehandlerrolle = Behandlerrolle.VEILEDER,
             auditLoggerEvent = AuditLoggerEvent.ACCESS,
             handling = "Henter behandlinger for bruk i fagsystem",
         )
@@ -131,9 +133,10 @@ class FagsakController(
         @PathVariable fagsystem: FagsystemDTO,
         @PathVariable eksternFagsakId: String,
     ): Ressurs<List<FagsystemVedtak>> {
-        tilgangskontrollService.validerTilgangForFagsystem(
+        tilgangskontrollService.validerTilgangFagsystemOgFagsakId(
             fagsystem = fagsystem,
             eksternFagsakId = eksternFagsakId,
+            minimumBehandlerrolle = Behandlerrolle.VEILEDER,
             auditLoggerEvent = AuditLoggerEvent.ACCESS,
             handling = "Henter behandlinger for bruk i fagsystem",
         )

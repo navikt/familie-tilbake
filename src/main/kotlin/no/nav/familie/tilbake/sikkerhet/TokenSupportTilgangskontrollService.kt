@@ -45,10 +45,10 @@ class TokenSupportTilgangskontrollService(
     private val integrasjonerClient: IntegrasjonerClient,
     private val persontilgangService: PersontilgangService,
     private val tokenValidationContextHolder: TokenValidationContextHolder,
-) {
+) : TilgangskontrollService {
     private val log = TracedLogger.getLogger<TilgangskontrollService>()
 
-    fun validerTilgangTilbakekreving(
+    override fun validerTilgangTilbakekreving(
         tilbakekreving: Tilbakekreving,
         behandlingId: UUID?,
         minimumBehandlerrolle: Behandlerrolle,
@@ -71,7 +71,7 @@ class TokenSupportTilgangskontrollService(
         )
     }
 
-    fun validerTilgangBehandlingID(
+    override fun validerTilgangBehandlingID(
         behandlingId: UUID,
         minimumBehandlerrolle: Behandlerrolle,
         auditLoggerEvent: AuditLoggerEvent,
@@ -94,7 +94,7 @@ class TokenSupportTilgangskontrollService(
         )
     }
 
-    fun validerTilgangYtelsetypeOgFagsakId(
+    override fun validerTilgangYtelsetypeOgFagsakId(
         ytelsestype: Ytelsestype,
         eksternFagsakId: String,
         minimumBehandlerrolle: Behandlerrolle,
@@ -128,7 +128,7 @@ class TokenSupportTilgangskontrollService(
         return validerTilgangFagsystemOgFagsakId(fagsystem, eksternFagsakId, Behandlerrolle.VEILEDER, auditLoggerEvent, handling)
     }
 
-    fun validerTilgangFagsystemOgFagsakId(
+    override fun validerTilgangFagsystemOgFagsakId(
         fagsystem: FagsystemDTO,
         eksternFagsakId: String,
         minimumBehandlerrolle: Behandlerrolle,
@@ -150,7 +150,7 @@ class TokenSupportTilgangskontrollService(
         )
     }
 
-    fun validerTilgangMottattXMLId(
+    override fun validerTilgangMottattXMLId(
         mottattXmlId: UUID,
         minimumBehandlerrolle: Behandlerrolle,
         auditLoggerEvent: AuditLoggerEvent,
@@ -171,7 +171,7 @@ class TokenSupportTilgangskontrollService(
         )
     }
 
-    fun validerTilgangKravgrunnlagId(
+    override fun validerTilgangKravgrunnlagId(
         eksternKravgrunnlagId: BigInteger,
         minimumBehandlerrolle: Behandlerrolle,
         auditLoggerEvent: AuditLoggerEvent,
@@ -263,7 +263,7 @@ class TokenSupportTilgangskontrollService(
         return rolleForFagsystem
     }
 
-    fun logAccess(
+    override fun logAccess(
         auditLoggerEvent: AuditLoggerEvent,
         ident: String,
         eksternFagsakId: String,
