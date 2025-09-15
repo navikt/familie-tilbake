@@ -28,9 +28,11 @@ import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.test.context.ActiveProfiles
 import java.util.UUID
 import kotlin.time.Duration.Companion.milliseconds
 
+@ActiveProfiles("ny-modell")
 open class TilbakekrevingE2EBase : E2EBase() {
     @Autowired
     protected lateinit var kravgrunnlagBufferRepository: KravgrunnlagBufferRepository

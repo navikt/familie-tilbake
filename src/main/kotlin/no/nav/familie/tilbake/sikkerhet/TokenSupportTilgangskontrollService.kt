@@ -20,7 +20,6 @@ import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.tilbakekreving.FagsystemUtil
 import no.nav.tilbakekreving.Tilbakekreving
-import no.nav.tilbakekreving.auth.Approlle
 import no.nav.tilbakekreving.auth.Authentication
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
@@ -29,12 +28,12 @@ import no.tilbakekreving.integrasjoner.CallContext
 import no.tilbakekreving.integrasjoner.feil.UnexpectedResponseException
 import no.tilbakekreving.integrasjoner.persontilgang.Persontilgang
 import no.tilbakekreving.integrasjoner.persontilgang.PersontilgangService
-import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
+import org.springframework.stereotype.Service
 import java.math.BigInteger
 import java.util.UUID
 
-@Configuration
+@Service
 class TokenSupportTilgangskontrollService(
     private val applicationProperties: ApplicationProperties,
     private val fagsakRepository: FagsakRepository,
@@ -67,16 +66,12 @@ class TokenSupportTilgangskontrollService(
             handling = handling,
             saksbehandler = saksbehandler,
             auditLoggerEvent = auditLoggerEvent,
+            authentication = ContextService.hentInnloggetBruker(),
             logContext = logContext,
         )
     }
 
-    override fun validerTilgangBehandlingID(
-        behandlingId: UUID,
-        minimumBehandlerrolle: Behandlerrolle,
-        auditLoggerEvent: AuditLoggerEvent,
-        handling: String,
-    ) {
+    override fun validerTilgangBehandlingID(behandlingId: UUID, minimumBehandlerrolle: Behandlerrolle, auditLoggerEvent: AuditLoggerEvent, handling: String) {
         val saksbehandler = ContextService.hentSaksbehandler(SecureLog.Context.tom())
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
@@ -90,6 +85,7 @@ class TokenSupportTilgangskontrollService(
             handling = handling,
             saksbehandler = saksbehandler,
             auditLoggerEvent = auditLoggerEvent,
+            authentication = ContextService.hentInnloggetBruker(),
             logContext = logContext,
         )
     }
@@ -110,24 +106,6 @@ class TokenSupportTilgangskontrollService(
         )
     }
 
-    fun validerTilgangForFagsystem(
-        fagsystem: FagsystemDTO,
-        eksternFagsakId: String,
-        auditLoggerEvent: AuditLoggerEvent,
-        handling: String,
-    ) {
-        val maskinToken = ContextService.hentInnloggetBruker()
-
-        SecureLog.medContext(SecureLog.Context.utenBehandling(eksternFagsakId)) {
-            info(
-                "Tilgangsjekk med maskin token type={} harRolle={}",
-                maskinToken::class.simpleName,
-                (maskinToken as? Authentication.Systembruker)?.harRolle(Approlle.Fagsystem),
-            )
-        }
-        return validerTilgangFagsystemOgFagsakId(fagsystem, eksternFagsakId, Behandlerrolle.VEILEDER, auditLoggerEvent, handling)
-    }
-
     override fun validerTilgangFagsystemOgFagsakId(
         fagsystem: FagsystemDTO,
         eksternFagsakId: String,
@@ -145,6 +123,7 @@ class TokenSupportTilgangskontrollService(
             eksternFagsakId = fagsak?.eksternFagsakId,
             handling = handling,
             saksbehandler = saksbehandler,
+            authentication = ContextService.hentInnloggetBruker(),
             auditLoggerEvent = auditLoggerEvent,
             logContext = logContext,
         )
@@ -167,6 +146,7 @@ class TokenSupportTilgangskontrollService(
             handling = handling,
             saksbehandler = saksbehandler,
             auditLoggerEvent = auditLoggerEvent,
+            authentication = ContextService.hentInnloggetBruker(),
             logContext = SecureLog.Context.tom(),
         )
     }
@@ -204,6 +184,7 @@ class TokenSupportTilgangskontrollService(
             handling = handling,
             saksbehandler = saksbehandler,
             auditLoggerEvent = auditLoggerEvent,
+            authentication = ContextService.hentInnloggetBruker(),
             logContext = SecureLog.Context.tom(),
         )
     }
@@ -216,6 +197,7 @@ class TokenSupportTilgangskontrollService(
         handling: String,
         saksbehandler: String,
         auditLoggerEvent: AuditLoggerEvent,
+        authentication: Authentication,
         logContext: SecureLog.Context,
     ): Behandlerrolle {
         if (saksbehandler == Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
@@ -254,6 +236,7 @@ class TokenSupportTilgangskontrollService(
             fagsystem = fagsystem,
             handling = handling,
             saksbehandler = saksbehandler,
+            authentication = authentication,
             logContext = logContext,
         )
 
@@ -286,11 +269,17 @@ class TokenSupportTilgangskontrollService(
         fagsystem: FagsystemDTO,
         handling: String,
         saksbehandler: String,
+        authentication: Authentication,
         logContext: SecureLog.Context,
     ) {
         if (personIBehandlingen == null) return
         val tilgangTilPerson = try {
-            validerMedTilgangsmaskinen(personIBehandlingen, logContext.behandlingId, logContext.fagsystemId)
+            validerMedTilgangsmaskinen(
+                personIdent = personIBehandlingen,
+                authentication = authentication,
+                behandlingId = logContext.behandlingId,
+                fagsystemId = logContext.fagsystemId,
+            )
         } catch (e: UnexpectedResponseException) {
             SecureLog.medContext(logContext) {
                 warn("Feilet validering med tilgangsmaskinen. Status={}, Svar={}", e.statusCode.value, e.response, e)
@@ -318,7 +307,13 @@ class TokenSupportTilgangskontrollService(
 
         val resultatMedFamilieIntegrasjoner = validerMedFamilieIntegrasjoner(personIBehandlingen, fagsystem)
         if (resultatMedFamilieIntegrasjoner == tilgangTilPerson) {
-            log.medContext(SecureLog.Context.tom()) { info("Validering av tilgang kom frem til samme utfall med familie-integrasjoner og tilgangsmaskinen") }
+            log.medContext(SecureLog.Context.tom()) {
+                info(
+                    "Validering av tilgang kom frem til samme utfall med familie-integrasjoner og tilgangsmaskinen. Resultat={}, maskinbruker={}",
+                    tilgangTilPerson,
+                    authentication is Authentication.Systembruker,
+                )
+            }
         } else {
             log.medContext(SecureLog.Context.tom()) { warn("Validering av tilgang var ulik med familie-integrasjoner og tilgangsmaskinen") }
         }
@@ -341,9 +336,11 @@ class TokenSupportTilgangskontrollService(
 
     private fun validerMedTilgangsmaskinen(
         personIdent: String,
+        authentication: Authentication,
         behandlingId: String?,
         fagsystemId: String?,
     ): Boolean {
+        if (authentication is Authentication.Systembruker) return true
         val token = tokenValidationContextHolder.getTokenValidationContext().firstValidToken
         if (token != null) {
             val tilgang = runBlocking {
