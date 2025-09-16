@@ -22,13 +22,16 @@ class AvventerKravgrunnlagHendelseTest {
         val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
         val tilbakekreving = Tilbakekreving.opprett(oppsamler, opprettTilbakekrevingEvent, bigQueryService, EndringObservatørOppsamler())
 
-        tilbakekreving.håndter(kravgrunnlag())
+        val kravgrunnlag = kravgrunnlag()
+        tilbakekreving.håndter(kravgrunnlag)
 
         tilbakekreving.tilstand shouldBe AvventerFagsysteminfo
         oppsamler.behovListe.forOne {
             it shouldBeEqual FagsysteminfoBehov(
                 eksternFagsakId = opprettTilbakekrevingEvent.eksternFagsak.eksternId,
+                eksternBehandlingId = kravgrunnlag.referanse,
                 ytelse = Ytelse.Barnetrygd,
+                vedtakGjelderId = kravgrunnlag.vedtakGjelder.ident,
             )
         }
     }

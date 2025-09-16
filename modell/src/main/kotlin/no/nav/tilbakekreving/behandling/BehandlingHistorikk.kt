@@ -39,6 +39,8 @@ class BehandlingHistorikk(
         return HistorikkReferanse(this, historikk.last().internId)
     }
 
+    fun harBehandling(): Boolean = historikk.isNotEmpty()
+
     fun forrige(): HistorikkReferanse<UUID, Behandling>? {
         return historikk.dropLast(1).lastOrNull()?.let { HistorikkReferanse(this, it.internId) }
     }

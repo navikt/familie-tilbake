@@ -43,6 +43,7 @@ import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.tilstand.AvventerBrukerinfo
 import no.nav.tilbakekreving.tilstand.IverksettVedtak
 import no.nav.tilbakekreving.tilstand.Start
 import no.nav.tilbakekreving.tilstand.Tilstand
@@ -149,6 +150,14 @@ class Tilbakekreving internal constructor(
         )
     }
 
+    fun opprettBehandlingUtenIntegrasjon() {
+        val kravgrunnlag = kravgrunnlagHistorikk.nåværende().entry
+        val eksternBehandling = eksternFagsak.lagreTomBehandling(kravgrunnlag.fagsystemVedtaksdato)
+        opprettBehandling(eksternBehandling, Behandler.Vedtaksløsning)
+        opprettBruker(kravgrunnlag.vedtakGjelder)
+        byttTilstand(AvventerBrukerinfo)
+    }
+
     fun trengerVarselbrev() {
         behovObservatør.håndter(VarselbrevBehov("wip"))
     }
@@ -162,6 +171,14 @@ class Tilbakekreving internal constructor(
             behovObservatør,
             ytelsestype = eksternFagsak.ytelse.tilYtelsestype(),
             aktør = requireNotNull(bruker) { "Aktør kreves for Iverksettelse." }.aktør,
+        )
+    }
+
+    fun trengerFagsysteminfo() {
+        val kravgrunnlag = kravgrunnlagHistorikk.nåværende().entry
+        eksternFagsak.trengerFagsysteminfo(
+            eksternBehandlingId = kravgrunnlag.referanse,
+            vedtakGjelderId = kravgrunnlag.vedtakGjelder.ident,
         )
     }
 

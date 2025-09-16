@@ -9,7 +9,10 @@ object AvventerFagsysteminfo : Tilstand {
     override val tilbakekrevingTilstand: TilbakekrevingTilstand = TilbakekrevingTilstand.AVVENTER_FAGSYSTEMINFO
 
     override fun entering(tilbakekreving: Tilbakekreving) {
-        tilbakekreving.eksternFagsak.trengerFagsysteminfo()
+        tilbakekreving.trengerFagsysteminfo()
+        if (!tilbakekreving.eksternFagsak.ytelse.integrererMotFagsystem()) {
+            tilbakekreving.opprettBehandlingUtenIntegrasjon()
+        }
     }
 
     override fun håndter(

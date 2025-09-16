@@ -7,6 +7,8 @@ import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.Vedtaksoppsummer
 import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.tilbakekreving.api.v2.Kafkamelding
+import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandlingRequest
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.context.annotation.Profile
@@ -35,6 +37,13 @@ interface KafkaProducer {
     fun sendHentFagsystemsbehandlingRequest(
         requestId: UUID,
         request: HentFagsystemsbehandlingRequest,
+        logContext: SecureLog.Context,
+    )
+
+    fun sendKafkaEvent(
+        kafkamelding: Kafkamelding,
+        vedtakGjelderId: String,
+        ytelse: Ytelse,
         logContext: SecureLog.Context,
     )
 }
@@ -133,6 +142,18 @@ class DefaultKafkaProducer(
                 )
             }
     }
+
+    override fun sendKafkaEvent(
+        kafkamelding: Kafkamelding,
+        vedtakGjelderId: String,
+        ytelse: Ytelse,
+        logContext: SecureLog.Context,
+    ) {
+        val json = objectMapper.writeValueAsString(kafkamelding)
+        val producerRecord = ProducerRecord(ytelse.kafkaTopic, vedtakGjelderId, json)
+
+        kafkaTemplate.send(producerRecord).get()
+    }
 }
 
 @Service
@@ -174,6 +195,17 @@ class E2EKafkaProducer : KafkaProducer {
     ) {
         log.medContext(logContext) {
             info("Skipper sending av info-request for fagsystembehandling ${request.eksternId} fordi kafka ikke er enablet")
+        }
+    }
+
+    override fun sendKafkaEvent(
+        kafkamelding: Kafkamelding,
+        vedtakGjelderId: String,
+        ytelse: Ytelse,
+        logContext: SecureLog.Context,
+    ) {
+        log.medContext(logContext) {
+            info("Ville sendt event med innhold '{}'", objectMapper.writeValueAsString(kafkamelding))
         }
     }
 

@@ -74,11 +74,14 @@ object SecureLog {
                 ?.getAttribute("logContext", RequestAttributes.SCOPE_REQUEST) as Context?
                 ?: tom()
 
-            fun fra(tilbakekreving: Tilbakekreving) =
+            fun fra(tilbakekreving: Tilbakekreving) = if (tilbakekreving.behandlingHistorikk.harBehandling()) {
                 medBehandling(
                     fagsystemId = tilbakekreving.eksternFagsak.eksternId,
                     behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.internId.toString(),
                 )
+            } else {
+                utenBehandling(tilbakekreving.eksternFagsak.eksternId)
+            }
 
             fun Task.logContext(): Context =
                 medBehandling(

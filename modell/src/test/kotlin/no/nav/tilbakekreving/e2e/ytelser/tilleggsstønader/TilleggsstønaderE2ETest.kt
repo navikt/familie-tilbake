@@ -1,7 +1,6 @@
 package no.nav.tilbakekreving.e2e.ytelser.tilleggsstønader
 
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.FeilutbetalingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelsesperiodeDto
@@ -9,6 +8,7 @@ import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.behov.BrukerinfoBehov
+import no.nav.tilbakekreving.behov.FagsysteminfoBehov
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.brukerinfoHendelse
@@ -44,8 +44,9 @@ class TilleggsstønaderE2ETest {
         val tilbakekreving = Tilbakekreving.opprett(observatør, opprettTilbakekrevingHendelse, bigQueryService, EndringObservatørOppsamler())
         tilbakekreving.håndter(kravgrunnlag())
 
-        observatør.behovListe.size shouldBe 1
-        observatør.behovListe.single().shouldBeInstanceOf<BrukerinfoBehov>()
+        observatør.behovListe.size shouldBe 2
+        observatør.behovListe.filterIsInstance<BrukerinfoBehov>().size shouldBe 1
+        observatør.behovListe.filterIsInstance<FagsysteminfoBehov>().size shouldBe 1
     }
 
     @Test

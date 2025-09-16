@@ -1,0 +1,26 @@
+name: Update kafka topics
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+      - name: Apply tilleggsstønader kafka topic to dev-gcp
+        uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: ./.deploy/nais/dev/kafka/ytelser/tilleggsstønader.yaml
+          ENVIRONMENT: dev-gcp:tilbake
+      - name: Apply tilleggsstønader kafka topic to dev-gcp
+        uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: prod-gcp
+          RESOURCE: ./.deploy/nais/prod/kafka/ytelser/tilleggsstønader.yaml
+          ENVIRONMENT: prod-gcp:tilbake

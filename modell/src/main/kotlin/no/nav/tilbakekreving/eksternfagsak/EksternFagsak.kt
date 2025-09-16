@@ -53,10 +53,15 @@ class EksternFagsak(
         )
     }
 
-    fun trengerFagsysteminfo() {
+    fun trengerFagsysteminfo(
+        eksternBehandlingId: String,
+        vedtakGjelderId: String,
+    ) {
         behovObservatør.håndter(
             FagsysteminfoBehov(
                 eksternFagsakId = eksternId,
+                eksternBehandlingId = eksternBehandlingId,
+                vedtakGjelderId = vedtakGjelderId,
                 ytelse = ytelse,
             ),
         )

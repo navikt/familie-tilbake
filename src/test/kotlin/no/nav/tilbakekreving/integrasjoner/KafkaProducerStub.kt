@@ -4,6 +4,8 @@ import no.nav.familie.tilbake.datavarehus.saksstatistikk.sakshendelse.Behandling
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.Vedtaksoppsummering
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.api.v2.Kafkamelding
+import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandlingRequest
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Service
@@ -14,6 +16,16 @@ import java.util.UUID
 class KafkaProducerStub : KafkaProducer {
     private val saksdata = mutableMapOf<UUID, MutableList<Behandlingstilstand>>()
     private val vedtak = mutableMapOf<UUID, MutableList<Vedtaksoppsummering>>()
+    private val kafkameldinger = mutableMapOf<String, MutableList<Kafkamelding>>()
+
+    override fun sendKafkaEvent(
+        kafkamelding: Kafkamelding,
+        vedtakGjelderId: String,
+        ytelse: Ytelse,
+        logContext: SecureLog.Context,
+    ) {
+        kafkameldinger.computeIfAbsent(kafkamelding.eksternFagsakId) { mutableListOf() }.add(kafkamelding)
+    }
 
     override fun sendSaksdata(behandlingId: UUID, request: Behandlingstilstand, logContext: SecureLog.Context) {
         saksdata.computeIfAbsent(behandlingId) { mutableListOf() }.add(request)
@@ -30,4 +42,6 @@ class KafkaProducerStub : KafkaProducer {
     fun finnSaksdata(behandlingId: UUID): List<Behandlingstilstand> = saksdata[behandlingId] ?: emptyList()
 
     fun finnVedtaksoppsummering(behandlingId: UUID): List<Vedtaksoppsummering> = vedtak[behandlingId] ?: emptyList()
+
+    fun finnKafkamelding(eksternFagsakId: String): List<Kafkamelding> = kafkameldinger[eksternFagsakId] ?: emptyList()
 }

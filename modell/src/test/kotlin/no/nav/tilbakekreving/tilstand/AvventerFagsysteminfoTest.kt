@@ -7,6 +7,7 @@ import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
+import no.nav.tilbakekreving.bruker
 import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.fagsysteminfoHendelse
 import no.nav.tilbakekreving.kravgrunnlag
@@ -22,15 +23,20 @@ class AvventerFagsysteminfoTest {
         val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
         val tilbakekreving = Tilbakekreving.opprett(oppsamler, opprettTilbakekrevingEvent, bigQueryService, EndringObservatørOppsamler())
 
-        tilbakekreving.håndter(kravgrunnlag())
+        val kravgrunnlag = kravgrunnlag()
+        tilbakekreving.håndter(kravgrunnlag)
+        tilbakekreving.tilstand shouldBe AvventerFagsysteminfo
+
         tilbakekreving.håndter(fagsysteminfoHendelse())
 
         tilbakekreving.tilstand shouldBe AvventerBrukerinfo
         oppsamler.behovListe.forOne {
             it shouldBeEqual
                 FagsysteminfoBehov(
-                    opprettTilbakekrevingEvent.eksternFagsak.eksternId,
-                    opprettTilbakekrevingEvent.eksternFagsak.ytelse,
+                    eksternFagsakId = opprettTilbakekrevingEvent.eksternFagsak.eksternId,
+                    eksternBehandlingId = kravgrunnlag.referanse,
+                    vedtakGjelderId = bruker().ident,
+                    ytelse = opprettTilbakekrevingEvent.eksternFagsak.ytelse,
                 )
         }
     }

@@ -2,6 +2,7 @@ package no.nav.tilbakekreving
 
 import no.nav.familie.tilbake.api.forvaltning.Behandlingsinfo
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.integration.pdl.PdlClient
 import no.nav.familie.tilbake.integration.pdl.internal.PdlKjønnType
 import no.nav.familie.tilbake.kontrakter.personopplysning.ADRESSEBESKYTTELSEGRADERING
@@ -15,6 +16,7 @@ import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeslåVedtaksstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.ManuellBrevmottakerRequestDto
+import no.nav.tilbakekreving.api.v2.behov.FagsysteminfoBehovHendelse
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
@@ -30,7 +32,6 @@ import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.endring.EndringObservatørService
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
-import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
@@ -41,7 +42,7 @@ import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.springframework.stereotype.Service
-import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -52,6 +53,7 @@ class TilbakekrevingService(
     private val tilbakekrevingRepository: TilbakekrevingRepository,
     private val bigQueryService: BigQueryService,
     private val endringObservatørService: EndringObservatørService,
+    private val kafkaProducer: KafkaProducer,
 ) {
     private val aktør = Aktør.Person(ident = "20046912345")
     private val logger = TracedLogger.getLogger<TilbakekrevingService>()
@@ -109,11 +111,13 @@ class TilbakekrevingService(
     fun lagre(
         tilbakekreving: Tilbakekreving,
     ) {
-        tilbakekrevingRepository.lagre(
-            tilbakekreving.id,
-            tilbakekreving.behandlingHistorikk.nåværende().entry.internId,
-            tilbakekreving.tilEntity(),
-        )
+        if (tilbakekreving.behandlingHistorikk.harBehandling()) {
+            tilbakekrevingRepository.lagre(
+                tilbakekreving.id,
+                tilbakekreving.behandlingHistorikk.nåværende().entry.internId,
+                tilbakekreving.tilEntity(),
+            )
+        }
     }
 
     private fun sjekkBehovOgHåndter(
@@ -171,16 +175,16 @@ class TilbakekrevingService(
             }
 
             is FagsysteminfoBehov -> {
-                tilbakekreving.håndter(
-                    FagsysteminfoHendelse(
-                        behandlingId = UUID.randomUUID().toString(),
-                        aktør = aktør,
-                        revurderingsresultat = "revurderingsresultat",
-                        revurderingsårsak = "revurderingsårsak",
-                        begrunnelseForTilbakekreving = "begrunnelseForTilbakekreving",
-                        revurderingsvedtaksdato = LocalDate.now(),
-                        utvidPerioder = null,
+                val logContext = SecureLog.Context.utenBehandling(behov.eksternFagsakId)
+                kafkaProducer.sendKafkaEvent(
+                    kafkamelding = FagsysteminfoBehovHendelse(
+                        eksternFagsakId = behov.eksternFagsakId,
+                        eksternBehandlingId = behov.eksternBehandlingId,
+                        hendelseOpprettet = LocalDateTime.now(),
                     ),
+                    vedtakGjelderId = behov.vedtakGjelderId,
+                    ytelse = behov.ytelse,
+                    logContext = logContext,
                 )
             }
 

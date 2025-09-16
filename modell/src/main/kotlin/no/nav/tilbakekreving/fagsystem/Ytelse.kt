@@ -13,6 +13,8 @@ sealed interface Ytelse {
 
     fun tilYtelsestype(): Ytelsestype
 
+    val kafkaTopic: String
+
     fun tilEntity(): YtelseEntity
 
     object Barnetrygd : Ytelse {
@@ -23,6 +25,8 @@ sealed interface Ytelse {
         override fun integrererMotFagsystem(): Boolean = true
 
         override fun tilYtelsestype(): Ytelsestype = Ytelsestype.BARNETRYGD
+
+        override val kafkaTopic: String = "privat-tilbakekreving-barnetrygd"
 
         override fun tilEntity(): YtelseEntity = YtelseEntity(Ytelsestype.BARNETRYGD)
     }
@@ -35,6 +39,8 @@ sealed interface Ytelse {
         override fun integrererMotFagsystem(): Boolean = false
 
         override fun tilYtelsestype(): Ytelsestype = Ytelsestype.TILLEGGSSTØNAD
+
+        override val kafkaTopic: String = "privat-tilbakekreving-tilleggsstønad"
 
         override fun tilEntity(): YtelseEntity = YtelseEntity(Ytelsestype.TILLEGGSSTØNAD)
     }
