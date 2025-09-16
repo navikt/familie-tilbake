@@ -22,6 +22,7 @@ import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
+import java.math.BigDecimal
 
 object BehandlingsstegGenerator {
     fun lagFaktastegVurderingFritekst(vararg perioder: Datoperiode = arrayOf(1.januar(2021) til 1.januar(2021))): BehandlingsstegFaktaDto {
@@ -70,6 +71,75 @@ object BehandlingsstegGenerator {
                     begrunnelse = "Jaha",
                     særligeGrunner = emptyList(),
                     særligeGrunnerTilReduksjon = false,
+                    tilbakekrevSmåbeløp = true,
+                    særligeGrunnerBegrunnelse = "Særlige grunner",
+                ),
+            )
+        },
+    )
+
+    fun lagVilkårsvurderingUnder4xRettsgebyrIngenTilbakekreving(
+        vararg perioder: Datoperiode = arrayOf(1.januar(2021) til 1.januar(2021)),
+        vilkårsvurderingsresultat: Vilkårsvurderingsresultat,
+    ): BehandlingsstegVilkårsvurderingDto = BehandlingsstegVilkårsvurderingDto(
+        vilkårsvurderingsperioder = perioder.map { periode ->
+            VilkårsvurderingsperiodeDto(
+                periode = periode,
+                vilkårsvurderingsresultat = vilkårsvurderingsresultat,
+                begrunnelse = "Jepp",
+                godTroDto = null,
+                aktsomhetDto = AktsomhetDto(
+                    aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
+                    begrunnelse = "Jaha",
+                    tilbakekrevSmåbeløp = false,
+                ),
+            )
+        },
+    )
+
+    fun lagVilkårsvurderingUnder4xRettsgebyrFullTilbakekreving(
+        vararg perioder: Datoperiode = arrayOf(1.januar(2021) til 1.januar(2021)),
+        vilkårsvurderingsresultat: Vilkårsvurderingsresultat,
+    ): BehandlingsstegVilkårsvurderingDto = BehandlingsstegVilkårsvurderingDto(
+        vilkårsvurderingsperioder = perioder.map { periode ->
+            VilkårsvurderingsperiodeDto(
+                periode = periode,
+                vilkårsvurderingsresultat = vilkårsvurderingsresultat,
+                begrunnelse = "Jepp",
+                godTroDto = null,
+                aktsomhetDto = AktsomhetDto(
+                    aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
+                    ileggRenter = false,
+                    andelTilbakekreves = null,
+                    beløpTilbakekreves = null,
+                    begrunnelse = "Jaha",
+                    særligeGrunner = emptyList(),
+                    særligeGrunnerTilReduksjon = false,
+                    tilbakekrevSmåbeløp = true,
+                    særligeGrunnerBegrunnelse = "Særlige grunner",
+                ),
+            )
+        },
+    )
+
+    fun lagVilkårsvurderingUnder4xRettsgebyrDelvisTilbakekreving(
+        vararg perioder: Datoperiode = arrayOf(1.januar(2021) til 1.januar(2021)),
+        vilkårsvurderingsresultat: Vilkårsvurderingsresultat,
+    ): BehandlingsstegVilkårsvurderingDto = BehandlingsstegVilkårsvurderingDto(
+        vilkårsvurderingsperioder = perioder.map { periode ->
+            VilkårsvurderingsperiodeDto(
+                periode = periode,
+                vilkårsvurderingsresultat = vilkårsvurderingsresultat,
+                begrunnelse = "Jepp",
+                godTroDto = null,
+                aktsomhetDto = AktsomhetDto(
+                    aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
+                    ileggRenter = false,
+                    andelTilbakekreves = BigDecimal(50),
+                    beløpTilbakekreves = null,
+                    begrunnelse = "Jaha",
+                    særligeGrunner = emptyList(),
+                    særligeGrunnerTilReduksjon = true,
                     tilbakekrevSmåbeløp = true,
                     særligeGrunnerBegrunnelse = "Særlige grunner",
                 ),

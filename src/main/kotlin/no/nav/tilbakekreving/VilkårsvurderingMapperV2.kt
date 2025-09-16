@@ -48,7 +48,11 @@ object VilkårsvurderingMapperV2 {
                 Aktsomhet.SIMPEL_UAKTSOMHET ->
                     NivåAvForståelse.Aktsomhet.Uaktsomhet(
                         begrunnelse = aktsomhet.begrunnelse,
-                        kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(særligeGrunner()),
+                        kanUnnlates4XRettsgebyr = if (aktsomhet.tilbakekrevSmåbeløp) {
+                            KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(særligeGrunner())
+                        } else {
+                            KanUnnlates4xRettsgebyr.Unnlates
+                        },
                     )
             }
         }
@@ -68,12 +72,19 @@ object VilkårsvurderingMapperV2 {
                 reduksjonSærligeGrunner = særligeGrunner(),
                 feilaktigeEllerMangelfulleOpplysninger = feilaktigEllerMangelfull,
             )
-            Aktsomhet.SIMPEL_UAKTSOMHET -> Skyldgrad.Uaktsomt(
-                begrunnelse = begrunnelse,
-                begrunnelseAktsomhet = "",
-                reduksjonSærligeGrunner = særligeGrunner(),
-                feilaktigeEllerMangelfulleOpplysninger = feilaktigEllerMangelfull,
-            )
+            Aktsomhet.SIMPEL_UAKTSOMHET -> when (aktsomhet.tilbakekrevSmåbeløp) {
+                true -> Skyldgrad.Uaktsomt(
+                    begrunnelse = begrunnelse,
+                    begrunnelseAktsomhet = "",
+                    reduksjonSærligeGrunner = særligeGrunner(),
+                    feilaktigeEllerMangelfulleOpplysninger = feilaktigEllerMangelfull,
+                )
+                false -> Skyldgrad.UaktsomtUnder4xRettsgebyrUnnlates(
+                    begrunnelse = begrunnelse,
+                    feilaktigeEllerMangelfulleOpplysninger = feilaktigEllerMangelfull,
+                    begrunnelseAktsomhet = "",
+                )
+            }
         }
     }
 

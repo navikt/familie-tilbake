@@ -44,6 +44,12 @@ data class AktsomhetsvurderingEntity(
                         reduksjonSærligeGrunner = requireNotNull(aktsomhet.særligGrunner) { "Særlige grunner kreves for uaktsomt" }.fraEntity(),
                         feilaktigeEllerMangelfulleOpplysninger = requireNotNull(feilaktigEllerMangelfull) { "Feilaktige eller mangelfulle opplysninger kreves for uaktsomt" }.fraEntity,
                     )
+                    AktsomhetType.SIMPEL_UAKTSOMHET_UNNLATES -> Skyldgrad.UaktsomtUnder4xRettsgebyrUnnlates(
+                        begrunnelse = requireNotNull(begrunnelse) { "Begrunnelse kreves for uaktsomt" },
+                        begrunnelseAktsomhet = aktsomhet.begrunnelse,
+                        feilaktigeEllerMangelfulleOpplysninger = requireNotNull(feilaktigEllerMangelfull) { "Feilaktige eller mangelfulle opplysninger kreves for uaktsomt" }.fraEntity,
+                    )
+
                     AktsomhetType.GROV_UAKTSOMHET -> Skyldgrad.GrovUaktsomhet(
                         begrunnelse = requireNotNull(begrunnelse) { "Særlige grunner kreves for grov uaktsomhet" },
                         begrunnelseAktsomhet = aktsomhet.begrunnelse,

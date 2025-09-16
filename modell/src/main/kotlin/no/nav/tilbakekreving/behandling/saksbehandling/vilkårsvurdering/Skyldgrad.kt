@@ -75,6 +75,61 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
         }
     }
 
+    class UaktsomtUnder4xRettsgebyrUnnlates(
+        override val begrunnelse: String,
+        override val feilaktigeEllerMangelfulleOpplysninger: FeilaktigEllerMangelfull,
+        override val begrunnelseAktsomhet: String,
+    ) : Skyldgrad {
+        override fun renter() = false
+
+        override fun reduksjon(): Reduksjon = Reduksjon.IngenTilbakekreving()
+
+        override fun vurderingstype(): Aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET
+
+        override fun tilFrontendDto(): VurdertVilkårsvurderingsresultatDto? {
+            return VurdertVilkårsvurderingsresultatDto(
+                vilkårsvurderingsresultat = feilaktigeEllerMangelfulleOpplysninger.vilkårsvurderingsresultat,
+                aktsomhet = VurdertAktsomhetDto(
+                    aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
+                    ileggRenter = renter(),
+                    andelTilbakekreves = reduksjon().andel,
+                    beløpTilbakekreves = null,
+                    begrunnelse = begrunnelse,
+                    særligeGrunner = null,
+                    tilbakekrevSmåbeløp = false,
+                ),
+            )
+        }
+
+        override fun tilEntity(): AktsomhetsvurderingEntity {
+            return AktsomhetsvurderingEntity(
+                vurderingType = VurderingType.FORÅRSAKET_AV_BRUKER,
+                begrunnelse = begrunnelse,
+                beløpIBehold = null,
+                aktsomhet = VurdertAktsomhetEntity(
+                    aktsomhetType = AktsomhetType.SIMPEL_UAKTSOMHET_UNNLATES,
+                    begrunnelse = begrunnelseAktsomhet,
+                    skalIleggesRenter = null,
+                    særligGrunner = null,
+                ),
+                feilaktigEllerMangelfull = feilaktigeEllerMangelfulleOpplysninger.tilEntity(),
+            )
+        }
+
+        override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
+            return VurdertUtbetaling.Vilkårsvurdering(
+                aktsomhetFørUtbetaling = vurderingstype(),
+                aktsomhetEtterUtbetaling = null,
+                forårsaketAvBruker = when (feilaktigeEllerMangelfulleOpplysninger) {
+                    FeilaktigEllerMangelfull.FEILAKTIG -> VurdertUtbetaling.ForårsaketAvBruker.FEILAKTIGE_OPPLYSNINGER
+                    FeilaktigEllerMangelfull.MANGELFULL -> VurdertUtbetaling.ForårsaketAvBruker.MANGELFULLE_OPPLYSNINGER
+                },
+                særligeGrunner = null,
+                beløpUnnlatesUnder4Rettsgebyr = VurdertUtbetaling.JaNeiVurdering.Ja,
+            )
+        }
+    }
+
     class GrovUaktsomhet(
         override val begrunnelse: String,
         override val begrunnelseAktsomhet: String,

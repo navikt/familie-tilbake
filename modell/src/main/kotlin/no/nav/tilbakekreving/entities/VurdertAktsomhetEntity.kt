@@ -20,6 +20,10 @@ data class VurdertAktsomhetEntity(
                 ),
                 begrunnelse = begrunnelse,
             )
+            AktsomhetType.SIMPEL_UAKTSOMHET_UNNLATES -> NivåAvForståelse.Aktsomhet.Uaktsomhet(
+                kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.Unnlates,
+                begrunnelse = begrunnelse,
+            )
             AktsomhetType.GROV_UAKTSOMHET -> NivåAvForståelse.Aktsomhet.GrovUaktsomhet(
                 reduksjonSærligeGrunner = requireNotNull(særligGrunner) { "SærligGrunner kreves for GrovUaktsomhet" }.fraEntity(),
                 begrunnelse = begrunnelse,
@@ -67,6 +71,7 @@ data class SærligGrunnEntity(
 
 enum class AktsomhetType {
     SIMPEL_UAKTSOMHET,
+    SIMPEL_UAKTSOMHET_UNNLATES,
     GROV_UAKTSOMHET,
     FORSETT,
     IKKE_UTVIST_SKYLD,

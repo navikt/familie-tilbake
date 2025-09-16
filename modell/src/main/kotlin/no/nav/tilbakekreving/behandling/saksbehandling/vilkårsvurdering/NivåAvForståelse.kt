@@ -348,12 +348,20 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             }
 
             override fun tilEntity(): VurdertAktsomhetEntity {
-                return VurdertAktsomhetEntity(
-                    aktsomhetType = AktsomhetType.SIMPEL_UAKTSOMHET,
-                    begrunnelse = begrunnelse,
-                    skalIleggesRenter = null,
-                    særligGrunner = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr)?.reduksjonSærligeGrunner?.tilEntity(),
-                )
+                return when (kanUnnlates4XRettsgebyr) {
+                    is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr, is KanUnnlates4xRettsgebyr.SkalIkkeUnnlates -> VurdertAktsomhetEntity(
+                        aktsomhetType = AktsomhetType.SIMPEL_UAKTSOMHET,
+                        begrunnelse = begrunnelse,
+                        skalIleggesRenter = null,
+                        særligGrunner = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr)?.reduksjonSærligeGrunner?.tilEntity(),
+                    )
+                    is KanUnnlates4xRettsgebyr.Unnlates -> VurdertAktsomhetEntity(
+                        aktsomhetType = AktsomhetType.SIMPEL_UAKTSOMHET_UNNLATES,
+                        begrunnelse = begrunnelse,
+                        skalIleggesRenter = null,
+                        særligGrunner = null,
+                    )
+                }
             }
         }
     }
