@@ -223,6 +223,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     begrunnelse = begrunnelse,
                     skalIleggesRenter = null,
                     særligGrunner = null,
+                    kanUnnlates = KanUnnlates4xRettsgebyr.KanUnnlates.Nei,
                 )
             }
         }
@@ -267,6 +268,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     begrunnelse = begrunnelse,
                     skalIleggesRenter = null,
                     særligGrunner = reduksjonSærligeGrunner.tilEntity(),
+                    kanUnnlates = KanUnnlates4xRettsgebyr.KanUnnlates.Nei,
                 )
             }
         }
@@ -310,6 +312,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     begrunnelse = begrunnelse,
                     skalIleggesRenter = null,
                     særligGrunner = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr)?.reduksjonSærligeGrunner?.tilEntity(),
+                    kanUnnlates = kanUnnlates4XRettsgebyr.kanUnnlates,
                 )
             }
         }
@@ -348,20 +351,13 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             }
 
             override fun tilEntity(): VurdertAktsomhetEntity {
-                return when (kanUnnlates4XRettsgebyr) {
-                    is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr, is KanUnnlates4xRettsgebyr.SkalIkkeUnnlates -> VurdertAktsomhetEntity(
-                        aktsomhetType = AktsomhetType.SIMPEL_UAKTSOMHET,
-                        begrunnelse = begrunnelse,
-                        skalIleggesRenter = null,
-                        særligGrunner = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr)?.reduksjonSærligeGrunner?.tilEntity(),
-                    )
-                    is KanUnnlates4xRettsgebyr.Unnlates -> VurdertAktsomhetEntity(
-                        aktsomhetType = AktsomhetType.SIMPEL_UAKTSOMHET_UNNLATES,
-                        begrunnelse = begrunnelse,
-                        skalIleggesRenter = null,
-                        særligGrunner = null,
-                    )
-                }
+                return VurdertAktsomhetEntity(
+                    aktsomhetType = AktsomhetType.SIMPEL_UAKTSOMHET,
+                    begrunnelse = begrunnelse,
+                    skalIleggesRenter = null,
+                    særligGrunner = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr)?.reduksjonSærligeGrunner?.tilEntity(),
+                    kanUnnlates = kanUnnlates4XRettsgebyr.kanUnnlates,
+                )
             }
         }
     }

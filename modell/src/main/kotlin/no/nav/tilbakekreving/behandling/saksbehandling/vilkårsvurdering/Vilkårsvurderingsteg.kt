@@ -90,7 +90,7 @@ class Vilkårsvurderingsteg(
                     vilkårsvurderingsresultatInfo = it.vurdering.tilFrontendDto(),
                 )
             },
-            rettsgebyr = Rettsgebyr.rettsgebyr,
+            rettsgebyr = Rettsgebyr.rettsgebyr, // Todo burde bruke rettsgebyret som var gjeldene ved utbetalingen. Oppdateres etter avklaring med jurist.
             opprettetTid = LocalDateTime.now(),
         )
     }

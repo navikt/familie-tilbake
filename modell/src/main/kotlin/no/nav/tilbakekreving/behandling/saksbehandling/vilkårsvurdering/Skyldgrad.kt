@@ -20,12 +20,12 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
     class Uaktsomt(
         override val begrunnelse: String,
         override val begrunnelseAktsomhet: String,
-        private val reduksjonSærligeGrunner: ReduksjonSærligeGrunner,
+        private val kanUnnlates4XRettsgebyr: KanUnnlates4xRettsgebyr,
         override val feilaktigeEllerMangelfulleOpplysninger: FeilaktigEllerMangelfull,
     ) : Skyldgrad {
         override fun renter() = false
 
-        override fun reduksjon(): Reduksjon = reduksjonSærligeGrunner.skalReduseres.reduksjon()
+        override fun reduksjon(): Reduksjon = kanUnnlates4XRettsgebyr.reduksjon()
 
         override fun vurderingstype(): Aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET
 
@@ -37,8 +37,11 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                     FeilaktigEllerMangelfull.FEILAKTIG -> VurdertUtbetaling.ForårsaketAvBruker.FEILAKTIGE_OPPLYSNINGER
                     FeilaktigEllerMangelfull.MANGELFULL -> VurdertUtbetaling.ForårsaketAvBruker.MANGELFULLE_OPPLYSNINGER
                 },
-                særligeGrunner = reduksjonSærligeGrunner.oppsummerVurdering(),
-                beløpUnnlatesUnder4Rettsgebyr = VurdertUtbetaling.JaNeiVurdering.Nei,
+                særligeGrunner = when (kanUnnlates4XRettsgebyr) {
+                    is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.oppsummerVurdering()
+                    else -> null
+                },
+                beløpUnnlatesUnder4Rettsgebyr = kanUnnlates4XRettsgebyr.oppsummering(),
             )
         }
 
@@ -51,10 +54,19 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                     andelTilbakekreves = reduksjon().andel,
                     beløpTilbakekreves = null,
                     begrunnelse = begrunnelse,
-                    særligeGrunner = reduksjonSærligeGrunner.vurderteGrunner(),
-                    særligeGrunnerTilReduksjon = reduksjonSærligeGrunner.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja,
+                    særligeGrunner = when (kanUnnlates4XRettsgebyr) {
+                        is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.vurderteGrunner()
+                        else -> null
+                    },
+                    særligeGrunnerTilReduksjon = when (kanUnnlates4XRettsgebyr) {
+                        is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja
+                        else -> false
+                    },
                     tilbakekrevSmåbeløp = true,
-                    særligeGrunnerBegrunnelse = reduksjonSærligeGrunner.begrunnelse,
+                    særligeGrunnerBegrunnelse = when (kanUnnlates4XRettsgebyr) {
+                        is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.begrunnelse
+                        else -> null
+                    },
                 ),
             )
         }
@@ -68,64 +80,13 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                     aktsomhetType = AktsomhetType.SIMPEL_UAKTSOMHET,
                     begrunnelse = begrunnelseAktsomhet,
                     skalIleggesRenter = null,
-                    særligGrunner = reduksjonSærligeGrunner.tilEntity(),
+                    særligGrunner = when (kanUnnlates4XRettsgebyr) {
+                        is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.tilEntity()
+                        else -> null
+                    },
+                    kanUnnlates = kanUnnlates4XRettsgebyr.kanUnnlates,
                 ),
                 feilaktigeEllerMangelfulleOpplysninger.tilEntity(),
-            )
-        }
-    }
-
-    class UaktsomtUnder4xRettsgebyrUnnlates(
-        override val begrunnelse: String,
-        override val feilaktigeEllerMangelfulleOpplysninger: FeilaktigEllerMangelfull,
-        override val begrunnelseAktsomhet: String,
-    ) : Skyldgrad {
-        override fun renter() = false
-
-        override fun reduksjon(): Reduksjon = Reduksjon.IngenTilbakekreving()
-
-        override fun vurderingstype(): Aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET
-
-        override fun tilFrontendDto(): VurdertVilkårsvurderingsresultatDto? {
-            return VurdertVilkårsvurderingsresultatDto(
-                vilkårsvurderingsresultat = feilaktigeEllerMangelfulleOpplysninger.vilkårsvurderingsresultat,
-                aktsomhet = VurdertAktsomhetDto(
-                    aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
-                    ileggRenter = renter(),
-                    andelTilbakekreves = reduksjon().andel,
-                    beløpTilbakekreves = null,
-                    begrunnelse = begrunnelse,
-                    særligeGrunner = null,
-                    tilbakekrevSmåbeløp = false,
-                ),
-            )
-        }
-
-        override fun tilEntity(): AktsomhetsvurderingEntity {
-            return AktsomhetsvurderingEntity(
-                vurderingType = VurderingType.FORÅRSAKET_AV_BRUKER,
-                begrunnelse = begrunnelse,
-                beløpIBehold = null,
-                aktsomhet = VurdertAktsomhetEntity(
-                    aktsomhetType = AktsomhetType.SIMPEL_UAKTSOMHET_UNNLATES,
-                    begrunnelse = begrunnelseAktsomhet,
-                    skalIleggesRenter = null,
-                    særligGrunner = null,
-                ),
-                feilaktigEllerMangelfull = feilaktigeEllerMangelfulleOpplysninger.tilEntity(),
-            )
-        }
-
-        override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
-            return VurdertUtbetaling.Vilkårsvurdering(
-                aktsomhetFørUtbetaling = vurderingstype(),
-                aktsomhetEtterUtbetaling = null,
-                forårsaketAvBruker = when (feilaktigeEllerMangelfulleOpplysninger) {
-                    FeilaktigEllerMangelfull.FEILAKTIG -> VurdertUtbetaling.ForårsaketAvBruker.FEILAKTIGE_OPPLYSNINGER
-                    FeilaktigEllerMangelfull.MANGELFULL -> VurdertUtbetaling.ForårsaketAvBruker.MANGELFULLE_OPPLYSNINGER
-                },
-                særligeGrunner = null,
-                beløpUnnlatesUnder4Rettsgebyr = VurdertUtbetaling.JaNeiVurdering.Ja,
             )
         }
     }
@@ -182,6 +143,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                     særligGrunner = reduksjonSærligeGrunner.tilEntity(),
                     begrunnelse = begrunnelseAktsomhet,
                     skalIleggesRenter = null,
+                    kanUnnlates = KanUnnlates4xRettsgebyr.KanUnnlates.Nei,
                 ),
                 feilaktigEllerMangelfull = feilaktigeEllerMangelfulleOpplysninger.tilEntity(),
             )
@@ -239,6 +201,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                     begrunnelse = begrunnelseAktsomhet,
                     skalIleggesRenter = null,
                     særligGrunner = null,
+                    kanUnnlates = KanUnnlates4xRettsgebyr.KanUnnlates.Nei,
                 ),
                 feilaktigEllerMangelfull = feilaktigeEllerMangelfulleOpplysninger.tilEntity(),
             )

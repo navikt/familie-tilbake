@@ -11,19 +11,21 @@ data class VurdertAktsomhetEntity(
     val begrunnelse: String,
     val skalIleggesRenter: Boolean?,
     val særligGrunner: SærligeGrunnerEntity?,
+    val kanUnnlates: KanUnnlates4xRettsgebyr.KanUnnlates,
 ) {
     fun tilAktsomhet(): NivåAvForståelse.Aktsomhet {
         return when (aktsomhetType) {
-            AktsomhetType.SIMPEL_UAKTSOMHET -> NivåAvForståelse.Aktsomhet.Uaktsomhet(
-                kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(
-                    requireNotNull(særligGrunner) { "SærligGrunner kreves for Uaktsomhet" }.fraEntity(),
-                ),
-                begrunnelse = begrunnelse,
-            )
-            AktsomhetType.SIMPEL_UAKTSOMHET_UNNLATES -> NivåAvForståelse.Aktsomhet.Uaktsomhet(
-                kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.Unnlates,
-                begrunnelse = begrunnelse,
-            )
+            AktsomhetType.SIMPEL_UAKTSOMHET -> {
+                NivåAvForståelse.Aktsomhet.Uaktsomhet(
+                    begrunnelse = begrunnelse,
+                    kanUnnlates4XRettsgebyr = when (kanUnnlates) {
+                        KanUnnlates4xRettsgebyr.KanUnnlates.Ja -> KanUnnlates4xRettsgebyr.Unnlates
+                        KanUnnlates4xRettsgebyr.KanUnnlates.Nei -> KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(
+                            requireNotNull(særligGrunner) { "SærligGrunner kreves for Uaktsomhet" }.fraEntity(),
+                        )
+                    },
+                )
+            }
             AktsomhetType.GROV_UAKTSOMHET -> NivåAvForståelse.Aktsomhet.GrovUaktsomhet(
                 reduksjonSærligeGrunner = requireNotNull(særligGrunner) { "SærligGrunner kreves for GrovUaktsomhet" }.fraEntity(),
                 begrunnelse = begrunnelse,
@@ -71,7 +73,6 @@ data class SærligGrunnEntity(
 
 enum class AktsomhetType {
     SIMPEL_UAKTSOMHET,
-    SIMPEL_UAKTSOMHET_UNNLATES,
     GROV_UAKTSOMHET,
     FORSETT,
     IKKE_UTVIST_SKYLD,
