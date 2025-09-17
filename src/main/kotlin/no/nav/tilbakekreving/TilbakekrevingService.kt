@@ -179,7 +179,7 @@ class TilbakekrevingService(
                 kafkaProducer.sendKafkaEvent(
                     kafkamelding = FagsysteminfoBehovHendelse(
                         eksternFagsakId = behov.eksternFagsakId,
-                        eksternBehandlingId = behov.eksternBehandlingId,
+                        kravgrunnlagReferanse = behov.eksternBehandlingId,
                         hendelseOpprettet = LocalDateTime.now(),
                     ),
                     vedtakGjelderId = behov.vedtakGjelderId,

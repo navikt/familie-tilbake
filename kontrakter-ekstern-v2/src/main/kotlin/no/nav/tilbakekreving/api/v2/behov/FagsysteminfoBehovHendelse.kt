@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 
 data class FagsysteminfoBehovHendelse(
     override val eksternFagsakId: String,
-    val eksternBehandlingId: String,
+    val kravgrunnlagReferanse: String,
     override val hendelseOpprettet: LocalDateTime,
 ) : Kafkamelding {
     override val hendelsestype: String = "fagsysteminfo_behov"

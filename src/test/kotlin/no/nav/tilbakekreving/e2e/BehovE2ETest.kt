@@ -30,6 +30,6 @@ class BehovE2ETest : TilbakekrevingE2EBase() {
             .shouldBeInstanceOf<FagsysteminfoBehovHendelse>()
 
         fagsysteminfoBehov.eksternFagsakId shouldBe fagsystemId
-        fagsysteminfoBehov.eksternBehandlingId shouldBe fagsystemBehandling
+        fagsysteminfoBehov.kravgrunnlagReferanse shouldBe fagsystemBehandling
     }
 }
