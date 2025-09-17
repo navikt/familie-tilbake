@@ -1,7 +1,7 @@
 apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
-  name: privat-tilbakekreving-tilleggsstønad
+  name: privat-tilbakekreving-tilleggsstonad
   namespace: tilbake
   labels:
     team: tilbake
