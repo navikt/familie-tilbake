@@ -48,7 +48,10 @@ object VilkårsvurderingMapperV2 {
                 Aktsomhet.SIMPEL_UAKTSOMHET ->
                     NivåAvForståelse.Aktsomhet.Uaktsomhet(
                         begrunnelse = aktsomhet.begrunnelse,
-                        kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(særligeGrunner()),
+                        kanUnnlates4XRettsgebyr = when (aktsomhet.tilbakekrevSmåbeløp) {
+                            true -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(særligeGrunner())
+                            false -> KanUnnlates4xRettsgebyr.Unnlates
+                        },
                     )
             }
         }
@@ -59,20 +62,23 @@ object VilkårsvurderingMapperV2 {
         return when (aktsomhet.aktsomhet) {
             Aktsomhet.FORSETT -> Skyldgrad.Forsett(
                 begrunnelse = begrunnelse,
-                begrunnelseAktsomhet = "",
+                begrunnelseAktsomhet = aktsomhet.begrunnelse,
                 feilaktigeEllerMangelfulleOpplysninger = feilaktigEllerMangelfull,
             )
             Aktsomhet.GROV_UAKTSOMHET -> Skyldgrad.GrovUaktsomhet(
                 begrunnelse = begrunnelse,
-                begrunnelseAktsomhet = "",
+                begrunnelseAktsomhet = aktsomhet.begrunnelse,
                 reduksjonSærligeGrunner = særligeGrunner(),
                 feilaktigeEllerMangelfulleOpplysninger = feilaktigEllerMangelfull,
             )
             Aktsomhet.SIMPEL_UAKTSOMHET -> Skyldgrad.Uaktsomt(
                 begrunnelse = begrunnelse,
-                begrunnelseAktsomhet = "",
-                reduksjonSærligeGrunner = særligeGrunner(),
+                begrunnelseAktsomhet = aktsomhet.begrunnelse,
                 feilaktigeEllerMangelfulleOpplysninger = feilaktigEllerMangelfull,
+                kanUnnlates4XRettsgebyr = when (aktsomhet.tilbakekrevSmåbeløp) {
+                    true -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(særligeGrunner())
+                    false -> KanUnnlates4xRettsgebyr.Unnlates
+                },
             )
         }
     }

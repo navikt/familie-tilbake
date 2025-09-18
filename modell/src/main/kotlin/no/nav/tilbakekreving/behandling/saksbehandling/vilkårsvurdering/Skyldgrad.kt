@@ -20,12 +20,12 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
     class Uaktsomt(
         override val begrunnelse: String,
         override val begrunnelseAktsomhet: String,
-        private val reduksjonSærligeGrunner: ReduksjonSærligeGrunner,
+        private val kanUnnlates4XRettsgebyr: KanUnnlates4xRettsgebyr,
         override val feilaktigeEllerMangelfulleOpplysninger: FeilaktigEllerMangelfull,
     ) : Skyldgrad {
         override fun renter() = false
 
-        override fun reduksjon(): Reduksjon = reduksjonSærligeGrunner.skalReduseres.reduksjon()
+        override fun reduksjon(): Reduksjon = kanUnnlates4XRettsgebyr.reduksjon()
 
         override fun vurderingstype(): Aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET
 
@@ -37,8 +37,12 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                     FeilaktigEllerMangelfull.FEILAKTIG -> VurdertUtbetaling.ForårsaketAvBruker.FEILAKTIGE_OPPLYSNINGER
                     FeilaktigEllerMangelfull.MANGELFULL -> VurdertUtbetaling.ForårsaketAvBruker.MANGELFULLE_OPPLYSNINGER
                 },
-                særligeGrunner = reduksjonSærligeGrunner.oppsummerVurdering(),
-                beløpUnnlatesUnder4Rettsgebyr = VurdertUtbetaling.JaNeiVurdering.Nei,
+                særligeGrunner = when (kanUnnlates4XRettsgebyr) {
+                    is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.oppsummerVurdering()
+                    is KanUnnlates4xRettsgebyr.SkalIkkeUnnlates -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.oppsummerVurdering()
+                    is KanUnnlates4xRettsgebyr.Unnlates -> null
+                },
+                beløpUnnlatesUnder4Rettsgebyr = kanUnnlates4XRettsgebyr.oppsummering(),
             )
         }
 
@@ -51,10 +55,22 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                     andelTilbakekreves = reduksjon().andel,
                     beløpTilbakekreves = null,
                     begrunnelse = begrunnelse,
-                    særligeGrunner = reduksjonSærligeGrunner.vurderteGrunner(),
-                    særligeGrunnerTilReduksjon = reduksjonSærligeGrunner.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja,
+                    særligeGrunner = when (kanUnnlates4XRettsgebyr) {
+                        is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.vurderteGrunner()
+                        is KanUnnlates4xRettsgebyr.SkalIkkeUnnlates -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.vurderteGrunner()
+                        is KanUnnlates4xRettsgebyr.Unnlates -> null
+                    },
+                    særligeGrunnerTilReduksjon = when (kanUnnlates4XRettsgebyr) {
+                        is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja
+                        is KanUnnlates4xRettsgebyr.SkalIkkeUnnlates -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja
+                        is KanUnnlates4xRettsgebyr.Unnlates -> false
+                    },
                     tilbakekrevSmåbeløp = true,
-                    særligeGrunnerBegrunnelse = reduksjonSærligeGrunner.begrunnelse,
+                    særligeGrunnerBegrunnelse = when (kanUnnlates4XRettsgebyr) {
+                        is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.begrunnelse
+                        is KanUnnlates4xRettsgebyr.SkalIkkeUnnlates -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.begrunnelse
+                        is KanUnnlates4xRettsgebyr.Unnlates -> null
+                    },
                 ),
             )
         }
@@ -68,7 +84,12 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                     aktsomhetType = AktsomhetType.SIMPEL_UAKTSOMHET,
                     begrunnelse = begrunnelseAktsomhet,
                     skalIleggesRenter = null,
-                    særligGrunner = reduksjonSærligeGrunner.tilEntity(),
+                    særligGrunner = when (kanUnnlates4XRettsgebyr) {
+                        is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.tilEntity()
+                        is KanUnnlates4xRettsgebyr.SkalIkkeUnnlates -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.tilEntity()
+                        is KanUnnlates4xRettsgebyr.Unnlates -> null
+                    },
+                    kanUnnlates = kanUnnlates4XRettsgebyr.tilEntity(),
                 ),
                 feilaktigeEllerMangelfulleOpplysninger.tilEntity(),
             )
@@ -127,6 +148,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                     særligGrunner = reduksjonSærligeGrunner.tilEntity(),
                     begrunnelse = begrunnelseAktsomhet,
                     skalIleggesRenter = null,
+                    kanUnnlates = null,
                 ),
                 feilaktigEllerMangelfull = feilaktigeEllerMangelfulleOpplysninger.tilEntity(),
             )
@@ -184,6 +206,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                     begrunnelse = begrunnelseAktsomhet,
                     skalIleggesRenter = null,
                     særligGrunner = null,
+                    kanUnnlates = null,
                 ),
                 feilaktigEllerMangelfull = feilaktigeEllerMangelfulleOpplysninger.tilEntity(),
             )

@@ -1,10 +1,14 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.tilbakekreving.HistorikkStub
 import no.nav.tilbakekreving.HistorikkStub.Companion.fakeReferanse
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonSærligeGrunner
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
+import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.eksternFagsakBehandling
 import no.nav.tilbakekreving.februar
 import no.nav.tilbakekreving.januar
@@ -79,5 +83,75 @@ class VilkårsvurderingstegTest {
         )
 
         vilkårsvurderingsteg.erFullstendig() shouldBe true
+    }
+
+    @Test
+    fun `vilkårsvurdering for under 4x rettgebyr med delvis tilbakekreving`() {
+        val kravgrunnlag =
+            HistorikkStub.fakeReferanse(
+                kravgrunnlag(
+                    perioder =
+                        listOf(
+                            kravgrunnlagPeriode(1.januar til 31.januar),
+                            kravgrunnlagPeriode(1.februar til 28.februar),
+                        ),
+                ),
+            )
+        val vilkårsvurderingsteg =
+            Vilkårsvurderingsteg.opprett(
+                eksternFagsakBehandling = fakeReferanse(eksternFagsakBehandling()),
+                kravgrunnlagHendelse = kravgrunnlag,
+                foreldelsesteg = Foreldelsesteg.opprett(fakeReferanse(eksternFagsakBehandling()), kravgrunnlag),
+            )
+        vilkårsvurderingsteg.vurder(
+            1.januar til 31.januar,
+            NivåAvForståelse.BurdeForstått(
+                begrunnelse = "Brukeren brukte alt på en tur til Vegas",
+                aktsomhet = NivåAvForståelse.Aktsomhet.Uaktsomhet(
+                    begrunnelse = "Begrunnelse",
+                    kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
+                        ReduksjonSærligeGrunner(
+                            begrunnelse = "begrunnelse til ReduksjonSærligeGrunner",
+                            skalReduseres = ReduksjonSærligeGrunner.SkalReduseres.Ja(50),
+                            grunner = setOf(),
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        vilkårsvurderingsteg.perioder().first().reduksjon().shouldBeInstanceOf<Reduksjon.Prosentdel>()
+    }
+
+    @Test
+    fun `vilkårsvurdering for under 4x rettgebyr med ingen tilbakekreving`() {
+        val kravgrunnlag =
+            HistorikkStub.fakeReferanse(
+                kravgrunnlag(
+                    perioder =
+                        listOf(
+                            kravgrunnlagPeriode(1.januar til 31.januar),
+                            kravgrunnlagPeriode(1.februar til 28.februar),
+                        ),
+                ),
+            )
+        val vilkårsvurderingsteg =
+            Vilkårsvurderingsteg.opprett(
+                eksternFagsakBehandling = fakeReferanse(eksternFagsakBehandling()),
+                kravgrunnlagHendelse = kravgrunnlag,
+                foreldelsesteg = Foreldelsesteg.opprett(fakeReferanse(eksternFagsakBehandling()), kravgrunnlag),
+            )
+        vilkårsvurderingsteg.vurder(
+            1.januar til 31.januar,
+            NivåAvForståelse.BurdeForstått(
+                begrunnelse = "Brukeren brukte alt på en tur til Vegas",
+                aktsomhet = NivåAvForståelse.Aktsomhet.Uaktsomhet(
+                    begrunnelse = "Begrunnelse",
+                    kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.Unnlates,
+                ),
+            ),
+        )
+
+        vilkårsvurderingsteg.perioder().first().reduksjon().shouldBeInstanceOf<Reduksjon.IngenTilbakekreving>()
     }
 }
