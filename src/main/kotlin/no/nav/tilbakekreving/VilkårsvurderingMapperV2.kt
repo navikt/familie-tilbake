@@ -49,7 +49,7 @@ object VilkårsvurderingMapperV2 {
                     NivåAvForståelse.Aktsomhet.Uaktsomhet(
                         begrunnelse = aktsomhet.begrunnelse,
                         kanUnnlates4XRettsgebyr = when (aktsomhet.tilbakekrevSmåbeløp) {
-                            true -> KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(særligeGrunner())
+                            true -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(særligeGrunner())
                             false -> KanUnnlates4xRettsgebyr.Unnlates
                         },
                     )
@@ -76,7 +76,7 @@ object VilkårsvurderingMapperV2 {
                 begrunnelseAktsomhet = aktsomhet.begrunnelse,
                 feilaktigeEllerMangelfulleOpplysninger = feilaktigEllerMangelfull,
                 kanUnnlates4XRettsgebyr = when (aktsomhet.tilbakekrevSmåbeløp) {
-                    true -> KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(særligeGrunner())
+                    true -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(særligeGrunner())
                     false -> KanUnnlates4xRettsgebyr.Unnlates
                 },
             )

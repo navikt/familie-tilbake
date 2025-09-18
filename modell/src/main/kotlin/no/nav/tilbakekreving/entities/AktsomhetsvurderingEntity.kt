@@ -45,8 +45,9 @@ data class AktsomhetsvurderingEntity(
                             begrunnelseAktsomhet = aktsomhet.begrunnelse,
                             feilaktigeEllerMangelfulleOpplysninger = requireNotNull(feilaktigEllerMangelfull) { "Feilaktige eller mangelfulle opplysninger kreves for uaktsomt" }.fraEntity,
                             kanUnnlates4XRettsgebyr = when (aktsomhet.kanUnnlates) {
-                                KanUnnlates4xRettsgebyr.KanUnnlates.Ja -> KanUnnlates4xRettsgebyr.Unnlates
-                                KanUnnlates4xRettsgebyr.KanUnnlates.Nei -> KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(aktsomhet.særligGrunner!!.fraEntity())
+                                KanUnnlates.UNNLATES -> KanUnnlates4xRettsgebyr.Unnlates
+                                KanUnnlates.SKAL_IKKE_UNNLATES -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(aktsomhet.særligGrunner!!.fraEntity())
+                                null -> error("Uaktsomhet må avklare om det kan unnlates eller ikke.")
                             },
                         )
                     }

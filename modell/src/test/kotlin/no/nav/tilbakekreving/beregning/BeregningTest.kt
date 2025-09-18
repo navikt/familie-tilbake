@@ -789,7 +789,7 @@ class BeregningTest {
 
     fun medSimpelUaktsomhet(prosentdel: BigDecimal) = NivåAvForståelse.Aktsomhet.Uaktsomhet(
         begrunnelse = "",
-        kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(
+        kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
             ReduksjonSærligeGrunner(
                 begrunnelse = "",
                 grunner = emptySet(),

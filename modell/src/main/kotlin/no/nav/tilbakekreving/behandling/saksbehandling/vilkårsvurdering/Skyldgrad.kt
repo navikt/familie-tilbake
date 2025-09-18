@@ -39,7 +39,8 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                 },
                 særligeGrunner = when (kanUnnlates4XRettsgebyr) {
                     is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.oppsummerVurdering()
-                    else -> null
+                    is KanUnnlates4xRettsgebyr.SkalIkkeUnnlates -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.oppsummerVurdering()
+                    is KanUnnlates4xRettsgebyr.Unnlates -> null
                 },
                 beløpUnnlatesUnder4Rettsgebyr = kanUnnlates4XRettsgebyr.oppsummering(),
             )
@@ -56,16 +57,19 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                     begrunnelse = begrunnelse,
                     særligeGrunner = when (kanUnnlates4XRettsgebyr) {
                         is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.vurderteGrunner()
-                        else -> null
+                        is KanUnnlates4xRettsgebyr.SkalIkkeUnnlates -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.vurderteGrunner()
+                        is KanUnnlates4xRettsgebyr.Unnlates -> null
                     },
                     særligeGrunnerTilReduksjon = when (kanUnnlates4XRettsgebyr) {
                         is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja
-                        else -> false
+                        is KanUnnlates4xRettsgebyr.SkalIkkeUnnlates -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja
+                        is KanUnnlates4xRettsgebyr.Unnlates -> false
                     },
                     tilbakekrevSmåbeløp = true,
                     særligeGrunnerBegrunnelse = when (kanUnnlates4XRettsgebyr) {
                         is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.begrunnelse
-                        else -> null
+                        is KanUnnlates4xRettsgebyr.SkalIkkeUnnlates -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.begrunnelse
+                        is KanUnnlates4xRettsgebyr.Unnlates -> null
                     },
                 ),
             )
@@ -82,9 +86,10 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                     skalIleggesRenter = null,
                     særligGrunner = when (kanUnnlates4XRettsgebyr) {
                         is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.tilEntity()
-                        else -> null
+                        is KanUnnlates4xRettsgebyr.SkalIkkeUnnlates -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.tilEntity()
+                        is KanUnnlates4xRettsgebyr.Unnlates -> null
                     },
-                    kanUnnlates = kanUnnlates4XRettsgebyr.kanUnnlates,
+                    kanUnnlates = kanUnnlates4XRettsgebyr.tilEntity(),
                 ),
                 feilaktigeEllerMangelfulleOpplysninger.tilEntity(),
             )
@@ -143,7 +148,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                     særligGrunner = reduksjonSærligeGrunner.tilEntity(),
                     begrunnelse = begrunnelseAktsomhet,
                     skalIleggesRenter = null,
-                    kanUnnlates = KanUnnlates4xRettsgebyr.KanUnnlates.Nei,
+                    kanUnnlates = null,
                 ),
                 feilaktigEllerMangelfull = feilaktigeEllerMangelfulleOpplysninger.tilEntity(),
             )
@@ -201,7 +206,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                     begrunnelse = begrunnelseAktsomhet,
                     skalIleggesRenter = null,
                     særligGrunner = null,
-                    kanUnnlates = KanUnnlates4xRettsgebyr.KanUnnlates.Nei,
+                    kanUnnlates = null,
                 ),
                 feilaktigEllerMangelfull = feilaktigeEllerMangelfulleOpplysninger.tilEntity(),
             )

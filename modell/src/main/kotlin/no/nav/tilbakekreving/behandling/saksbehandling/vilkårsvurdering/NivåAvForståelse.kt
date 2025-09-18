@@ -223,7 +223,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     begrunnelse = begrunnelse,
                     skalIleggesRenter = null,
                     særligGrunner = null,
-                    kanUnnlates = KanUnnlates4xRettsgebyr.KanUnnlates.Nei,
+                    kanUnnlates = null,
                 )
             }
         }
@@ -268,7 +268,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     begrunnelse = begrunnelse,
                     skalIleggesRenter = null,
                     særligGrunner = reduksjonSærligeGrunner.tilEntity(),
-                    kanUnnlates = KanUnnlates4xRettsgebyr.KanUnnlates.Nei,
+                    kanUnnlates = null,
                 )
             }
         }
@@ -284,7 +284,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             override fun vurderingstype(): AktsomhetDTO = AktsomhetDTO.SIMPEL_UAKTSOMHET
 
             override fun oppsummerSærligeGrunnerVurdering(): VurdertUtbetaling.SærligeGrunner? {
-                return (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr)?.reduksjonSærligeGrunner?.oppsummerVurdering()
+                return (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.SkalIkkeUnnlates)?.reduksjonSærligeGrunner?.oppsummerVurdering()
             }
 
             override fun oppsummer4RettsgebyrVurdering(): VurdertUtbetaling.JaNeiVurdering = when (kanUnnlates4XRettsgebyr) {
@@ -299,10 +299,10 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     andelTilbakekreves = reduksjon().andel,
                     beløpTilbakekreves = null,
                     begrunnelse = begrunnelse,
-                    særligeGrunner = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr)?.reduksjonSærligeGrunner?.vurderteGrunner(),
-                    særligeGrunnerTilReduksjon = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr)?.reduksjonSærligeGrunner?.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja,
-                    tilbakekrevSmåbeløp = kanUnnlates4XRettsgebyr is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr,
-                    særligeGrunnerBegrunnelse = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr)?.reduksjonSærligeGrunner?.begrunnelse,
+                    særligeGrunner = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.SkalIkkeUnnlates)?.reduksjonSærligeGrunner?.vurderteGrunner(),
+                    særligeGrunnerTilReduksjon = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.SkalIkkeUnnlates)?.reduksjonSærligeGrunner?.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja,
+                    tilbakekrevSmåbeløp = kanUnnlates4XRettsgebyr is KanUnnlates4xRettsgebyr.SkalIkkeUnnlates,
+                    særligeGrunnerBegrunnelse = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.SkalIkkeUnnlates)?.reduksjonSærligeGrunner?.begrunnelse,
                 )
             }
 
@@ -311,8 +311,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     aktsomhetType = AktsomhetType.IKKE_UTVIST_SKYLD,
                     begrunnelse = begrunnelse,
                     skalIleggesRenter = null,
-                    særligGrunner = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr)?.reduksjonSærligeGrunner?.tilEntity(),
-                    kanUnnlates = kanUnnlates4XRettsgebyr.kanUnnlates,
+                    særligGrunner = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.SkalIkkeUnnlates)?.reduksjonSærligeGrunner?.tilEntity(),
+                    kanUnnlates = kanUnnlates4XRettsgebyr.tilEntity(),
                 )
             }
         }
@@ -328,7 +328,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             override fun vurderingstype(): AktsomhetDTO = AktsomhetDTO.SIMPEL_UAKTSOMHET
 
             override fun oppsummerSærligeGrunnerVurdering(): VurdertUtbetaling.SærligeGrunner? {
-                return (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr)?.reduksjonSærligeGrunner?.oppsummerVurdering()
+                return (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.SkalIkkeUnnlates)?.reduksjonSærligeGrunner?.oppsummerVurdering()
             }
 
             override fun oppsummer4RettsgebyrVurdering(): VurdertUtbetaling.JaNeiVurdering = when (kanUnnlates4XRettsgebyr) {
@@ -343,10 +343,10 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     andelTilbakekreves = reduksjon().andel,
                     beløpTilbakekreves = null,
                     begrunnelse = begrunnelse,
-                    særligeGrunner = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr)?.reduksjonSærligeGrunner?.vurderteGrunner(),
-                    særligeGrunnerTilReduksjon = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr)?.reduksjonSærligeGrunner?.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja,
-                    tilbakekrevSmåbeløp = kanUnnlates4XRettsgebyr is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr,
-                    særligeGrunnerBegrunnelse = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr)?.reduksjonSærligeGrunner?.begrunnelse,
+                    særligeGrunner = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.SkalIkkeUnnlates)?.reduksjonSærligeGrunner?.vurderteGrunner(),
+                    særligeGrunnerTilReduksjon = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.SkalIkkeUnnlates)?.reduksjonSærligeGrunner?.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja,
+                    tilbakekrevSmåbeløp = kanUnnlates4XRettsgebyr is KanUnnlates4xRettsgebyr.SkalIkkeUnnlates,
+                    særligeGrunnerBegrunnelse = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.SkalIkkeUnnlates)?.reduksjonSærligeGrunner?.begrunnelse,
                 )
             }
 
@@ -355,8 +355,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     aktsomhetType = AktsomhetType.SIMPEL_UAKTSOMHET,
                     begrunnelse = begrunnelse,
                     skalIleggesRenter = null,
-                    særligGrunner = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr)?.reduksjonSærligeGrunner?.tilEntity(),
-                    kanUnnlates = kanUnnlates4XRettsgebyr.kanUnnlates,
+                    særligGrunner = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.SkalIkkeUnnlates)?.reduksjonSærligeGrunner?.tilEntity(),
+                    kanUnnlates = kanUnnlates4XRettsgebyr.tilEntity(),
                 )
             }
         }
