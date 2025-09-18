@@ -27,7 +27,7 @@ import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.IverksettelseBehov
 import no.nav.tilbakekreving.beregning.Beregning
 import no.nav.tilbakekreving.brev.BrevHistorikk
-import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
+import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.endring.EndringObservatør
 import no.nav.tilbakekreving.endring.VurdertUtbetaling
 import no.nav.tilbakekreving.entities.BehandlingEntity
@@ -65,7 +65,7 @@ class Behandling internal constructor(
     private val enhet: Enhet?,
     private val årsak: Behandlingsårsakstype,
     private var ansvarligSaksbehandler: Behandler,
-    private val eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
+    private val eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
     private val kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
     val foreldelsesteg: Foreldelsesteg,
     private val faktasteg: Faktasteg,
@@ -92,7 +92,7 @@ class Behandling internal constructor(
             enhet = enhet?.tilEntity(),
             årsak = årsak,
             ansvarligSaksbehandler = ansvarligSaksbehandler.tilEntity(),
-            eksternFagsakBehandlingRef = eksternFagsakBehandling.tilEntity(),
+            eksternFagsakBehandlingRef = eksternFagsakRevurdering.tilEntity(),
             kravgrunnlagRef = kravgrunnlag.tilEntity(),
             foreldelsestegEntity = foreldelsesteg.tilEntity(),
             faktastegEntity = faktasteg.tilEntity(),
@@ -104,7 +104,7 @@ class Behandling internal constructor(
     }
 
     fun sporingsinformasjon(): Sporing {
-        return Sporing(eksternFagsakBehandling.entry.eksternId, internId.toString())
+        return Sporing(eksternFagsakRevurdering.entry.eksternId, internId.toString())
     }
 
     internal fun steg(): List<Saksbehandlingsteg<*>> = listOf(
@@ -220,14 +220,14 @@ class Behandling internal constructor(
                     )
                 },
             ).flatten(),
-            fagsystemsbehandlingId = eksternFagsakBehandling.entry.eksternId,
+            fagsystemsbehandlingId = eksternFagsakRevurdering.entry.eksternId,
             // TODO
             eksternFagsakId = "TODO",
             behandlingsårsakstype = årsak,
             støtterManuelleBrevmottakere = true,
             harManuelleBrevmottakere = false,
             manuelleBrevmottakere = emptyList(),
-            begrunnelseForTilbakekreving = eksternFagsakBehandling.entry.begrunnelseForTilbakekreving,
+            begrunnelseForTilbakekreving = eksternFagsakRevurdering.entry.årsakTilFeilutbetaling,
             saksbehandlingstype = Saksbehandlingstype.ORDINÆR,
             erNyModell = true,
         )
@@ -369,7 +369,7 @@ class Behandling internal constructor(
     internal fun utførSideeffekt(tilstand: Tilstand, observatør: BehandlingObservatør) {
         observatør.behandlingOppdatert(
             behandlingId = internId,
-            eksternBehandlingId = eksternFagsakBehandling.entry.eksternId,
+            eksternBehandlingId = eksternFagsakRevurdering.entry.eksternId,
             vedtaksresultat = hentVedtaksresultat(),
             behandlingstatus = tilstand.behandlingsstatus(this),
             venterPåBruker = påVent?.avventerBruker() ?: false,
@@ -401,7 +401,7 @@ class Behandling internal constructor(
             forrigeBehandlingId = forrigeBehandlingId,
             behandlingOpprettet = OffsetDateTime.of(opprettet, ZoneOffset.UTC),
             eksternFagsystemId = eksternFagsystemId,
-            eksternBehandlingId = eksternFagsakBehandling.entry.eksternId,
+            eksternBehandlingId = eksternFagsakRevurdering.entry.eksternId,
             ytelse = ytelse,
             vedtakFattetTidspunkt = OffsetDateTime.now(ZoneOffset.UTC),
             ansvarligEnhet = null,
@@ -432,15 +432,15 @@ class Behandling internal constructor(
             enhet: Enhet?,
             årsak: Behandlingsårsakstype,
             ansvarligSaksbehandler: Behandler,
-            eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
+            eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
             kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
             brevHistorikk: BrevHistorikk,
             behandlingObservatør: BehandlingObservatør,
             tilstand: Tilstand,
         ): Behandling {
-            val foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakBehandling, kravgrunnlag)
-            val faktasteg = Faktasteg.opprett(eksternFagsakBehandling, kravgrunnlag, brevHistorikk, LocalDateTime.now(), Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL)
-            val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(eksternFagsakBehandling, kravgrunnlag, foreldelsesteg)
+            val foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakRevurdering, kravgrunnlag)
+            val faktasteg = Faktasteg.opprett(eksternFagsakRevurdering, kravgrunnlag, brevHistorikk, LocalDateTime.now(), Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL)
+            val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(eksternFagsakRevurdering, kravgrunnlag, foreldelsesteg)
             val foreslåVedtakSteg = ForeslåVedtakSteg.opprett()
             val fatteVedtakSteg = FatteVedtakSteg.opprett()
             return Behandling(
@@ -452,7 +452,7 @@ class Behandling internal constructor(
                 enhet = enhet,
                 årsak = årsak,
                 ansvarligSaksbehandler = ansvarligSaksbehandler,
-                eksternFagsakBehandling = eksternFagsakBehandling,
+                eksternFagsakRevurdering = eksternFagsakRevurdering,
                 kravgrunnlag = kravgrunnlag,
                 foreldelsesteg = foreldelsesteg,
                 faktasteg = faktasteg,

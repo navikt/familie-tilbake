@@ -25,7 +25,7 @@ class FaktaStegTest {
         val periode = 1.januar til 1.januar
         val tilbakekrevesBeløp = 2000.kroner
         val faktasteg = Faktasteg.opprett(
-            eksternFagsakBehandling = fakeReferanse(eksternFagsakBehandling()),
+            eksternFagsakRevurdering = fakeReferanse(eksternFagsakBehandling()),
             kravgrunnlag = fakeReferanse(
                 kravgrunnlag(
                     perioder = listOf(
@@ -44,8 +44,8 @@ class FaktaStegTest {
                 perioder = listOf(
                     Faktasteg.FaktaPeriode(
                         periode = periode,
-                        hendelsestype = Hendelsestype.ANNET,
-                        hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
+                        rettsligGrunnlag = Hendelsestype.ANNET,
+                        rettsligGrunnlagUnderkategori = Hendelsesundertype.ANNET_FRITEKST,
                     ),
                 ),
                 årsakTilFeilutbetaling = årsak,
@@ -73,7 +73,7 @@ class FaktaStegTest {
         val periode = 1.januar til 1.januar
         val tilbakekrevesBeløp = 2000.kroner
         val faktasteg = Faktasteg.opprett(
-            eksternFagsakBehandling = fakeReferanse(eksternFagsakBehandling()),
+            eksternFagsakRevurdering = fakeReferanse(eksternFagsakBehandling()),
             kravgrunnlag = fakeReferanse(
                 kravgrunnlag(
                     perioder = listOf(
@@ -92,8 +92,8 @@ class FaktaStegTest {
                 perioder = listOf(
                     Faktasteg.FaktaPeriode(
                         periode = periode,
-                        hendelsestype = Hendelsestype.ANNET,
-                        hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
+                        rettsligGrunnlag = Hendelsestype.ANNET,
+                        rettsligGrunnlagUnderkategori = Hendelsesundertype.ANNET_FRITEKST,
                     ),
                 ),
                 årsakTilFeilutbetaling = "Årsak",

@@ -31,7 +31,7 @@ class FaktastegEntityTest {
         )
         val brevHistorikk = BrevHistorikk(historikk = mutableListOf())
         val faktasteg = Faktasteg.opprett(
-            eksternFagsakBehandling = fakeReferanse(eksternFagsakBehandling()),
+            eksternFagsakRevurdering = fakeReferanse(eksternFagsakBehandling()),
             kravgrunnlag = kravgrunnlag,
             brevHistorikk = brevHistorikk,
             tilbakekrevingOpprettet = LocalDateTime.now(),
@@ -44,8 +44,8 @@ class FaktastegEntityTest {
                 perioder = listOf(
                     Faktasteg.FaktaPeriode(
                         periode = periode,
-                        hendelsestype = Hendelsestype.ANNET,
-                        hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
+                        rettsligGrunnlag = Hendelsestype.ANNET,
+                        rettsligGrunnlagUnderkategori = Hendelsesundertype.ANNET_FRITEKST,
                     ),
                 ),
                 årsakTilFeilutbetaling = årsak,

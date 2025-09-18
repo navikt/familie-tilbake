@@ -3,7 +3,7 @@ package no.nav.tilbakekreving.entities
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.brev.BrevHistorikk
-import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
+import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
@@ -20,11 +20,11 @@ data class FaktastegEntity(
     val vurderingAvBrukersUttalelse: String?,
 ) {
     fun fraEntity(
-        eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
+        eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
         kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
         brevHistorikk: BrevHistorikk,
     ): Faktasteg = Faktasteg(
-        eksternFagsakBehandling = eksternFagsakBehandling,
+        eksternFagsakRevurdering = eksternFagsakRevurdering,
         kravgrunnlag = kravgrunnlag,
         brevHistorikk = brevHistorikk,
         tilbakekrevingOpprettet = tilbakekrevingOpprettet,
@@ -33,8 +33,8 @@ data class FaktastegEntity(
             perioder = perioder.map {
                 Faktasteg.FaktaPeriode(
                     periode = it.periode.fraEntity(),
-                    hendelsestype = it.hendelsestype,
-                    hendelsesundertype = it.hendelsesundertype,
+                    rettsligGrunnlag = it.rettsligGrunnlag,
+                    rettsligGrunnlagUnderkategori = it.rettsligGrunnlagUnderkategori,
                 )
             },
             årsakTilFeilutbetaling = årsakTilFeilutbetaling,
@@ -56,7 +56,7 @@ data class FaktastegEntity(
 
     class FaktaPeriodeEntity(
         val periode: DatoperiodeEntity,
-        val hendelsestype: Hendelsestype,
-        val hendelsesundertype: Hendelsesundertype,
+        val rettsligGrunnlag: Hendelsestype,
+        val rettsligGrunnlagUnderkategori: Hendelsesundertype,
     )
 }

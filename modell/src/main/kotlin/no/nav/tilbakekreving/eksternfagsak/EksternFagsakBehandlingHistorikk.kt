@@ -8,14 +8,14 @@ import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import java.util.UUID
 
 class EksternFagsakBehandlingHistorikk(
-    private val historikk: MutableList<EksternFagsakBehandling>,
-) : Historikk<UUID, EksternFagsakBehandling> {
-    override fun lagre(innslag: EksternFagsakBehandling): HistorikkReferanse<UUID, EksternFagsakBehandling> {
+    private val historikk: MutableList<EksternFagsakRevurdering>,
+) : Historikk<UUID, EksternFagsakRevurdering> {
+    override fun lagre(innslag: EksternFagsakRevurdering): HistorikkReferanse<UUID, EksternFagsakRevurdering> {
         historikk.add(innslag)
         return HistorikkReferanse(this, innslag.internId)
     }
 
-    override fun finn(id: UUID, sporing: Sporing): HistorikkReferanse<UUID, EksternFagsakBehandling> {
+    override fun finn(id: UUID, sporing: Sporing): HistorikkReferanse<UUID, EksternFagsakRevurdering> {
         if (historikk.none { it.internId == id }) {
             throw ModellFeil.UgyldigOperasjonException(
                 "Fant ikke ekstern fagsak behandling med historikk-id $id",
@@ -25,11 +25,11 @@ class EksternFagsakBehandlingHistorikk(
         return HistorikkReferanse(this, id)
     }
 
-    override fun entry(id: UUID): EksternFagsakBehandling {
+    override fun entry(id: UUID): EksternFagsakRevurdering {
         return historikk.first { it.internId == id }
     }
 
-    override fun nåværende(): HistorikkReferanse<UUID, EksternFagsakBehandling> {
+    override fun nåværende(): HistorikkReferanse<UUID, EksternFagsakRevurdering> {
         return HistorikkReferanse(this, historikk.last().internId)
     }
 

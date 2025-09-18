@@ -21,8 +21,8 @@ import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
-import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
+import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.endring.EndringObservatør
 import no.nav.tilbakekreving.entities.TilbakekrevingEntity
 import no.nav.tilbakekreving.fagsystem.Ytelse
@@ -113,7 +113,7 @@ class Tilbakekreving internal constructor(
     }
 
     fun opprettBehandling(
-        eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
+        eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
         behandler: Behandler,
     ) {
         val behandlingId = UUID.randomUUID()
@@ -126,7 +126,7 @@ class Tilbakekreving internal constructor(
             årsak = Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR,
             ansvarligSaksbehandler = behandler,
             sistEndret = LocalDateTime.now(),
-            eksternFagsakBehandling = eksternFagsakBehandling,
+            eksternFagsakRevurdering = eksternFagsakRevurdering,
             kravgrunnlag = kravgrunnlagHistorikk.nåværende(),
             brevHistorikk = brevHistorikk,
             behandlingObservatør = this,

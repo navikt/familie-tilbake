@@ -3,34 +3,33 @@ package no.nav.tilbakekreving.eksternfagsak
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.EksternFagsakBehandlingEntity
 import no.nav.tilbakekreving.entities.EksternFagsakBehandlingType
+import no.nav.tilbakekreving.entities.RevurderingsårsakType
 import no.nav.tilbakekreving.entities.UtvidetPeriodeEntity
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import java.time.LocalDate
 import java.util.UUID
 
-sealed class EksternFagsakBehandling(
+sealed class EksternFagsakRevurdering(
     override val internId: UUID,
 ) : Historikk.HistorikkInnslag<UUID> {
     internal abstract val eksternId: String
-    abstract val revurderingsresultat: String
-    abstract val revurderingsårsak: String
-    abstract val begrunnelseForTilbakekreving: String
-    abstract val revurderingsvedtaksdato: LocalDate
+    abstract val revurderingsårsak: Revurderingsårsak
+    abstract val årsakTilFeilutbetaling: String
+    abstract val vedtaksdato: LocalDate
 
     abstract fun utvidPeriode(periode: Datoperiode): Datoperiode
 
-    class Behandling(
+    class Revurdering(
         internId: UUID,
         override val eksternId: String,
-        override val revurderingsresultat: String,
-        override val revurderingsårsak: String,
-        override val begrunnelseForTilbakekreving: String,
-        override val revurderingsvedtaksdato: LocalDate,
-        private val utvidetPerioder: List<UtvidetPeriode>,
-    ) : EksternFagsakBehandling(internId) {
+        override val revurderingsårsak: Revurderingsårsak,
+        override val årsakTilFeilutbetaling: String,
+        override val vedtaksdato: LocalDate,
+        private val utvidedePerioder: List<UtvidetPeriode>,
+    ) : EksternFagsakRevurdering(internId) {
         override fun utvidPeriode(periode: Datoperiode): Datoperiode {
-            return utvidetPerioder.singleOrNull { it.gjelderFor(periode) }?.utvid() ?: periode
+            return utvidedePerioder.singleOrNull { it.gjelderFor(periode) }?.utvid() ?: periode
         }
 
         override fun tilEntity(): EksternFagsakBehandlingEntity {
@@ -38,11 +37,10 @@ sealed class EksternFagsakBehandling(
                 type = EksternFagsakBehandlingType.BEHANDLING,
                 internId = internId,
                 eksternId = eksternId,
-                revurderingsresultat = revurderingsresultat,
-                revurderingsårsak = revurderingsårsak,
-                begrunnelseForTilbakekreving = begrunnelseForTilbakekreving,
-                revurderingsvedtaksdato = revurderingsvedtaksdato,
-                utvidetPerioder = utvidetPerioder.map { it.tilEntity() },
+                revurderingsårsak = revurderingsårsak.tilEntity(),
+                årsakTilFeilutbetaling = årsakTilFeilutbetaling,
+                utvidedePerioder = utvidedePerioder.map { it.tilEntity() },
+                vedtaksdato = vedtaksdato,
             )
         }
     }
@@ -66,12 +64,11 @@ sealed class EksternFagsakBehandling(
     class Ukjent(
         internId: UUID,
         val revurderingsdatoFraKravgrunnlag: LocalDate?,
-    ) : EksternFagsakBehandling(internId) {
+    ) : EksternFagsakRevurdering(internId) {
         override val eksternId: String = "Ukjent"
-        override val revurderingsresultat: String = "Ukjent"
-        override val revurderingsårsak: String = "Ukjent - finn i fagsystem"
-        override val begrunnelseForTilbakekreving: String = "Ukjent - finn i fagsystem"
-        override val revurderingsvedtaksdato: LocalDate = revurderingsdatoFraKravgrunnlag ?: LocalDate.MIN
+        override val revurderingsårsak: Revurderingsårsak = Revurderingsårsak.UKJENT
+        override val årsakTilFeilutbetaling: String = "Ukjent - finn i fagsystem"
+        override val vedtaksdato: LocalDate = revurderingsdatoFraKravgrunnlag ?: LocalDate.MIN
 
         override fun utvidPeriode(periode: Datoperiode): Datoperiode = periode
 
@@ -79,15 +76,24 @@ sealed class EksternFagsakBehandling(
             return EksternFagsakBehandlingEntity(
                 type = EksternFagsakBehandlingType.UKJENT,
                 internId = internId,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
+                eksternId = null,
+                revurderingsårsak = null,
+                årsakTilFeilutbetaling = null,
+                vedtaksdato = null,
+                utvidedePerioder = null,
             )
         }
     }
 
     abstract fun tilEntity(): EksternFagsakBehandlingEntity
+
+    enum class Revurderingsårsak(private val entity: RevurderingsårsakType, val beskrivelse: String) {
+        NYE_OPPLYSNINGER(RevurderingsårsakType.NYE_OPPLYSNINGER, "Nye opplysninger"),
+        KORRIGERING(RevurderingsårsakType.KORRIGERING, "Korrigering"),
+        KLAGE(RevurderingsårsakType.KLAGE, "Klage"),
+        UKJENT(RevurderingsårsakType.UKJENT, "Ukjent"),
+        ;
+
+        fun tilEntity(): RevurderingsårsakType = entity
+    }
 }

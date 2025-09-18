@@ -15,7 +15,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Skyldgr
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.brev.Varselbrev
-import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
+import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
@@ -124,41 +124,39 @@ fun feilutbetalteBeløp() =
 fun fagsysteminfoHendelse(
     utvidPerioder: List<FagsysteminfoHendelse.UtvidetPeriode>? = null,
 ) = FagsysteminfoHendelse(
-    behandlingId = UUID.randomUUID().toString(),
     aktør = Aktør.Person(bruker().ident),
-    revurderingsårsak = "Revurderingsårsak",
-    revurderingsresultat = "Revurderingsresultat",
-    revurderingsvedtaksdato = LocalDate.now(),
-    begrunnelseForTilbakekreving = "Begrunnelse for tilbakekreving",
-    utvidPerioder = utvidPerioder,
+    revurdering = FagsysteminfoHendelse.Revurdering(
+        behandlingId = UUID.randomUUID().toString(),
+        årsak = EksternFagsakRevurdering.Revurderingsårsak.NYE_OPPLYSNINGER,
+        årsakTilFeilutbetaling = "",
+        vedtaksdato = LocalDate.now(),
+        utvidPerioder = utvidPerioder,
+    ),
 )
 
-fun brukerinfoHendelse() =
-    BrukerinfoHendelse(
-        ident = bruker().ident,
-        navn = "test bruker",
-        fødselsdato = LocalDate.now(),
-        kjønn = Kjønn.MANN,
-        dødsdato = null,
-        språkkode = bruker().språkkode,
-    )
+fun brukerinfoHendelse() = BrukerinfoHendelse(
+    ident = bruker().ident,
+    navn = "test bruker",
+    fødselsdato = LocalDate.now(),
+    kjønn = Kjønn.MANN,
+    dødsdato = null,
+    språkkode = bruker().språkkode,
+)
 
-fun varselbrev() =
-    Varselbrev(
-        internId = UUID.randomUUID(),
-        opprettetDato = LocalDate.now(),
-        varsletBeløp = 10000L,
-    )
+fun varselbrev() = Varselbrev(
+    internId = UUID.randomUUID(),
+    opprettetDato = LocalDate.now(),
+    varsletBeløp = 10000L,
+)
 
-fun eksternFagsakBehandling(): EksternFagsakBehandling {
-    return EksternFagsakBehandling.Behandling(
+fun eksternFagsakBehandling(): EksternFagsakRevurdering {
+    return EksternFagsakRevurdering.Revurdering(
         internId = UUID.randomUUID(),
         eksternId = UUID.randomUUID().toString(),
-        revurderingsårsak = "Revurderingsårsak",
-        revurderingsresultat = "Revurderingsresultat",
-        revurderingsvedtaksdato = LocalDate.now(),
-        begrunnelseForTilbakekreving = "Begrunnelse for tilbakekreving",
-        utvidetPerioder = emptyList(),
+        årsakTilFeilutbetaling = "",
+        revurderingsårsak = EksternFagsakRevurdering.Revurderingsårsak.NYE_OPPLYSNINGER,
+        vedtaksdato = LocalDate.now(),
+        utvidedePerioder = emptyList(),
     )
 }
 
@@ -176,7 +174,7 @@ fun behandling(
         enhet = Enhet("", ""),
         årsak = Behandlingsårsakstype.REVURDERING_KLAGE_KA,
         ansvarligSaksbehandler = ANSVARLIG_SAKSBEHANDLER,
-        eksternFagsakBehandling = eksternFagsakBehandling,
+        eksternFagsakRevurdering = eksternFagsakBehandling,
         kravgrunnlag = kravgrunnlagReferanse,
         brevHistorikk = BrevHistorikk(mutableListOf()),
         behandlingObservatør = BehandlingObservatørOppsamler(),
@@ -193,8 +191,8 @@ fun faktastegVurdering(
         perioder = listOf(
             Faktasteg.FaktaPeriode(
                 periode = periode,
-                hendelsestype = Hendelsestype.ANNET,
-                hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
+                rettsligGrunnlag = Hendelsestype.ANNET,
+                rettsligGrunnlagUnderkategori = Hendelsesundertype.ANNET_FRITEKST,
             ),
         ),
         årsakTilFeilutbetaling = årsak,

@@ -25,17 +25,16 @@ class EksternFagsak(
         )
     }
 
-    fun lagre(fagsysteminfo: FagsysteminfoHendelse): HistorikkReferanse<UUID, EksternFagsakBehandling> {
+    fun lagre(fagsysteminfo: FagsysteminfoHendelse): HistorikkReferanse<UUID, EksternFagsakRevurdering> {
         return behandlinger.lagre(
-            EksternFagsakBehandling.Behandling(
+            EksternFagsakRevurdering.Revurdering(
                 internId = UUID.randomUUID(),
-                eksternId = fagsysteminfo.behandlingId,
-                revurderingsårsak = fagsysteminfo.revurderingsårsak,
-                revurderingsresultat = fagsysteminfo.revurderingsresultat,
-                begrunnelseForTilbakekreving = fagsysteminfo.begrunnelseForTilbakekreving,
-                revurderingsvedtaksdato = fagsysteminfo.revurderingsvedtaksdato,
-                utvidetPerioder = fagsysteminfo.utvidPerioder?.map {
-                    EksternFagsakBehandling.UtvidetPeriode(
+                eksternId = fagsysteminfo.revurdering.behandlingId,
+                revurderingsårsak = fagsysteminfo.revurdering.årsak,
+                årsakTilFeilutbetaling = fagsysteminfo.revurdering.årsakTilFeilutbetaling ?: "Ukjent",
+                vedtaksdato = fagsysteminfo.revurdering.vedtaksdato,
+                utvidedePerioder = fagsysteminfo.revurdering.utvidPerioder?.map {
+                    EksternFagsakRevurdering.UtvidetPeriode(
                         kravgrunnlagPeriode = it.kravgrunnlagPeriode,
                         vedtaksperiode = it.vedtakPeriode,
                     )
@@ -44,9 +43,9 @@ class EksternFagsak(
         )
     }
 
-    fun lagreTomBehandling(revurderingsdatoFraKravgrunnlag: LocalDate?): HistorikkReferanse<UUID, EksternFagsakBehandling> {
+    fun lagreTomBehandling(revurderingsdatoFraKravgrunnlag: LocalDate?): HistorikkReferanse<UUID, EksternFagsakRevurdering> {
         return behandlinger.lagre(
-            EksternFagsakBehandling.Ukjent(
+            EksternFagsakRevurdering.Ukjent(
                 internId = UUID.randomUUID(),
                 revurderingsdatoFraKravgrunnlag = revurderingsdatoFraKravgrunnlag,
             ),

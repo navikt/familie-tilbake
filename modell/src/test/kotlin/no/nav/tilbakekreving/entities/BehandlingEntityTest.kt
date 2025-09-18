@@ -9,8 +9,8 @@ import no.nav.tilbakekreving.behandling.Enhet
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.behov.IverksettelseBehov
 import no.nav.tilbakekreving.brev.BrevHistorikk
-import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
+import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.fagsystem.Ytelsestype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
@@ -31,19 +31,18 @@ class BehandlingEntityTest {
         val kravgrunnlagHistorikk = KravgrunnlagHistorikk(mutableListOf())
         val brevHistorikk = BrevHistorikk(mutableListOf())
 
-        val behandlingInnslag = fagsakBehandlingHistorikk.lagre(
-            EksternFagsakBehandling.Behandling(
+        val revurderingInnslag = fagsakBehandlingHistorikk.lagre(
+            EksternFagsakRevurdering.Revurdering(
                 internId = UUID.randomUUID(),
                 eksternId = UUID.randomUUID().toString(),
-                revurderingsresultat = "abc",
-                revurderingsårsak = "abc",
-                begrunnelseForTilbakekreving = "abc",
-                revurderingsvedtaksdato = LocalDate.now(),
-                utvidetPerioder = emptyList(),
+                revurderingsårsak = EksternFagsakRevurdering.Revurderingsårsak.NYE_OPPLYSNINGER,
+                årsakTilFeilutbetaling = "abc",
+                vedtaksdato = LocalDate.now(),
+                utvidedePerioder = emptyList(),
             ),
         )
         // Lagre et nytt innslag så vi er sikker på at det riktige plukkes opp, ikke det nyeste
-        fagsakBehandlingHistorikk.lagre(EksternFagsakBehandling.Ukjent(UUID.randomUUID(), null))
+        fagsakBehandlingHistorikk.lagre(EksternFagsakRevurdering.Ukjent(UUID.randomUUID(), null))
 
         val kravgrunnlag = kravgrunnlagHistorikk.lagre(kravgrunnlag())
         kravgrunnlagHistorikk.lagre(kravgrunnlag())
@@ -57,7 +56,7 @@ class BehandlingEntityTest {
             enhet = Enhet("0425", "NAV Solør"),
             årsak = Behandlingsårsakstype.REVURDERING_KLAGE_KA,
             ansvarligSaksbehandler = behandler,
-            eksternFagsakBehandling = behandlingInnslag,
+            eksternFagsakRevurdering = revurderingInnslag,
             kravgrunnlag = kravgrunnlag,
             brevHistorikk = brevHistorikk,
             behandlingObservatør = BehandlingObservatørOppsamler(),

@@ -61,7 +61,7 @@ class VilkårsvurderingstegTest {
             )
         val vilkårsvurderingsteg =
             Vilkårsvurderingsteg.opprett(
-                eksternFagsakBehandling = fakeReferanse(eksternFagsakBehandling()),
+                eksternFagsakRevurdering = fakeReferanse(eksternFagsakBehandling()),
                 kravgrunnlagHendelse = kravgrunnlag,
                 foreldelsesteg = Foreldelsesteg.opprett(fakeReferanse(eksternFagsakBehandling()), kravgrunnlag),
             )
@@ -99,7 +99,7 @@ class VilkårsvurderingstegTest {
             )
         val vilkårsvurderingsteg =
             Vilkårsvurderingsteg.opprett(
-                eksternFagsakBehandling = fakeReferanse(eksternFagsakBehandling()),
+                eksternFagsakRevurdering = fakeReferanse(eksternFagsakBehandling()),
                 kravgrunnlagHendelse = kravgrunnlag,
                 foreldelsesteg = Foreldelsesteg.opprett(fakeReferanse(eksternFagsakBehandling()), kravgrunnlag),
             )
@@ -137,7 +137,7 @@ class VilkårsvurderingstegTest {
             )
         val vilkårsvurderingsteg =
             Vilkårsvurderingsteg.opprett(
-                eksternFagsakBehandling = fakeReferanse(eksternFagsakBehandling()),
+                eksternFagsakRevurdering = fakeReferanse(eksternFagsakBehandling()),
                 kravgrunnlagHendelse = kravgrunnlag,
                 foreldelsesteg = Foreldelsesteg.opprett(fakeReferanse(eksternFagsakBehandling()), kravgrunnlag),
             )

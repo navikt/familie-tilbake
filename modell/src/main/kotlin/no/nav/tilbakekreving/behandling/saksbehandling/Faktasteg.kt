@@ -5,7 +5,7 @@ import no.nav.tilbakekreving.api.v1.dto.FeilutbetalingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurderingAvBrukersUttalelseDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.brev.BrevHistorikk
-import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandling
+import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.FaktastegEntity
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
@@ -22,7 +22,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class Faktasteg(
-    private val eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
+    private val eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
     private val kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
     private val brevHistorikk: BrevHistorikk,
     private val tilbakekrevingOpprettet: LocalDateTime,
@@ -36,7 +36,7 @@ class Faktasteg(
     }
 
     override fun nullstill() {
-        vurdering = tomVurdering(kravgrunnlag, eksternFagsakBehandling)
+        vurdering = tomVurdering(kravgrunnlag, eksternFagsakRevurdering)
     }
 
     internal fun vurder(vurdering: Vurdering) {
@@ -52,24 +52,23 @@ class Faktasteg(
                 FeilutbetalingsperiodeDto(
                     periode = it.periode,
                     feilutbetaltBeløp = kravgrunnlag.entry.totaltBeløpFor(it.periode),
-                    hendelsestype = it.hendelsestype,
-                    hendelsesundertype = it.hendelsesundertype,
+                    hendelsestype = it.rettsligGrunnlag,
+                    hendelsesundertype = it.rettsligGrunnlagUnderkategori,
                 )
             },
-            revurderingsvedtaksdato = eksternFagsakBehandling.entry.revurderingsvedtaksdato,
+            revurderingsvedtaksdato = eksternFagsakRevurdering.entry.vedtaksdato,
             begrunnelse = vurdering.årsakTilFeilutbetaling,
-            faktainfo =
-                Faktainfo(
-                    revurderingsårsak = eksternFagsakBehandling.entry.revurderingsårsak,
-                    revurderingsresultat = eksternFagsakBehandling.entry.revurderingsresultat,
-                    tilbakekrevingsvalg =
-                        when (opprettelsesvalg) {
-                            Opprettelsesvalg.UTSETT_BEHANDLING_MED_VARSEL -> Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL
-                            Opprettelsesvalg.UTSETT_BEHANDLING_UTEN_VARSEL -> Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL
-                            Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL -> Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK
-                        },
-                    konsekvensForYtelser = emptySet(),
-                ),
+            faktainfo = Faktainfo(
+                revurderingsårsak = eksternFagsakRevurdering.entry.revurderingsårsak.beskrivelse,
+                revurderingsresultat = eksternFagsakRevurdering.entry.årsakTilFeilutbetaling,
+                tilbakekrevingsvalg =
+                    when (opprettelsesvalg) {
+                        Opprettelsesvalg.UTSETT_BEHANDLING_MED_VARSEL -> Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL
+                        Opprettelsesvalg.UTSETT_BEHANDLING_UTEN_VARSEL -> Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL
+                        Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL -> Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK
+                    },
+                konsekvensForYtelser = emptySet(),
+            ),
             kravgrunnlagReferanse = kravgrunnlag.entry.referanse,
             vurderingAvBrukersUttalelse = VurderingAvBrukersUttalelseDto(
                 harBrukerUttaltSeg = when (vurdering.uttalelse) {
@@ -89,45 +88,45 @@ class Faktasteg(
             tilbakekrevingOpprettet = tilbakekrevingOpprettet,
             opprettelsesvalg = opprettelsesvalg,
             perioder = vurdering.perioder.map { it.tilEntity() },
-            årsakTilFeilutbetaling = vurdering.årsakTilFeilutbetaling,
             uttalelse = when (vurdering.uttalelse) {
                 is Uttalelse.Ja -> FaktastegEntity.Uttalelse.Ja
                 is Uttalelse.Nei -> FaktastegEntity.Uttalelse.Nei
                 is Uttalelse.IkkeAktuelt -> FaktastegEntity.Uttalelse.IkkeAktuelt
                 is Uttalelse.IkkeVurdert -> FaktastegEntity.Uttalelse.IkkeVurdert
             },
+            årsakTilFeilutbetaling = vurdering.årsakTilFeilutbetaling,
             vurderingAvBrukersUttalelse = (vurdering.uttalelse as? Uttalelse.Ja)?.begrunnelse,
         )
     }
 
     companion object {
         fun opprett(
-            eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>,
+            eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
             kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
             brevHistorikk: BrevHistorikk,
             tilbakekrevingOpprettet: LocalDateTime,
             opprettelsesvalg: Opprettelsesvalg,
         ): Faktasteg {
             return Faktasteg(
-                eksternFagsakBehandling = eksternFagsakBehandling,
+                eksternFagsakRevurdering = eksternFagsakRevurdering,
                 kravgrunnlag = kravgrunnlag,
                 brevHistorikk = brevHistorikk,
                 tilbakekrevingOpprettet = tilbakekrevingOpprettet,
                 opprettelsesvalg = opprettelsesvalg,
-                vurdering = tomVurdering(kravgrunnlag, eksternFagsakBehandling),
+                vurdering = tomVurdering(kravgrunnlag, eksternFagsakRevurdering),
             )
         }
 
-        private fun tomVurdering(kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>, eksternFagsakBehandling: HistorikkReferanse<UUID, EksternFagsakBehandling>): Vurdering {
+        private fun tomVurdering(kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>, eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>): Vurdering {
             return Vurdering(
                 perioder = kravgrunnlag.entry.datoperioder().map {
                     FaktaPeriode(
-                        periode = eksternFagsakBehandling.entry.utvidPeriode(it),
-                        hendelsestype = Hendelsestype.ANNET,
-                        hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
+                        periode = eksternFagsakRevurdering.entry.utvidPeriode(it),
+                        rettsligGrunnlag = Hendelsestype.ANNET,
+                        rettsligGrunnlagUnderkategori = Hendelsesundertype.ANNET_FRITEKST,
                     )
                 },
-                årsakTilFeilutbetaling = eksternFagsakBehandling.entry.begrunnelseForTilbakekreving,
+                årsakTilFeilutbetaling = eksternFagsakRevurdering.entry.årsakTilFeilutbetaling,
                 uttalelse = Uttalelse.IkkeVurdert,
             )
         }
@@ -139,21 +138,20 @@ class Faktasteg(
         val uttalelse: Uttalelse,
     ) {
         fun erFullstendig(): Boolean {
-            return årsakTilFeilutbetaling.isNotBlank() &&
-                uttalelse.erFullstendig()
+            return uttalelse.erFullstendig()
         }
     }
 
     class FaktaPeriode(
         val periode: Datoperiode,
-        val hendelsestype: Hendelsestype,
-        val hendelsesundertype: Hendelsesundertype,
+        val rettsligGrunnlag: Hendelsestype,
+        val rettsligGrunnlagUnderkategori: Hendelsesundertype,
     ) {
         fun tilEntity(): FaktastegEntity.FaktaPeriodeEntity {
             return FaktastegEntity.FaktaPeriodeEntity(
                 periode = DatoperiodeEntity(fom = periode.fom, tom = periode.tom),
-                hendelsestype = hendelsestype,
-                hendelsesundertype = hendelsesundertype,
+                rettsligGrunnlag = rettsligGrunnlag,
+                rettsligGrunnlagUnderkategori = rettsligGrunnlagUnderkategori,
             )
         }
     }

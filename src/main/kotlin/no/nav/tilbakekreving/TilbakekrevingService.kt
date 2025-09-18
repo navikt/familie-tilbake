@@ -229,8 +229,8 @@ class TilbakekrevingService(
                 perioder = fakta.feilutbetaltePerioder.map {
                     Faktasteg.FaktaPeriode(
                         periode = it.periode,
-                        hendelsestype = it.hendelsestype,
-                        hendelsesundertype = it.hendelsesundertype,
+                        rettsligGrunnlag = it.hendelsestype,
+                        rettsligGrunnlagUnderkategori = it.hendelsesundertype,
                     )
                 },
                 årsakTilFeilutbetaling = fakta.begrunnelse,

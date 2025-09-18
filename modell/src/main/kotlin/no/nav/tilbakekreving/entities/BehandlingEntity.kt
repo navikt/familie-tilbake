@@ -46,7 +46,7 @@ data class BehandlingEntity(
             enhet = enhet?.fraEntity(),
             årsak = årsak,
             ansvarligSaksbehandler = ansvarligSaksbehandler.fraEntity(),
-            eksternFagsakBehandling = eksternFagsak,
+            eksternFagsakRevurdering = eksternFagsak,
             kravgrunnlag = kravgrunnlag,
             foreldelsesteg = foreldelsessteg,
             faktasteg = faktastegEntity.fraEntity(eksternFagsak, kravgrunnlag, brevHistorikk),
