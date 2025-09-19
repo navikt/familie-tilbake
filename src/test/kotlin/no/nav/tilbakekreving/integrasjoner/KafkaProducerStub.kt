@@ -4,7 +4,7 @@ import no.nav.familie.tilbake.datavarehus.saksstatistikk.sakshendelse.Behandling
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.Vedtaksoppsummering
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.log.SecureLog
-import no.nav.tilbakekreving.api.v2.Kafkamelding
+import no.nav.tilbakekreving.api.v2.fagsystem.Kafkamelding
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandlingRequest
 import org.springframework.context.annotation.Primary

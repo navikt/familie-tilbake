@@ -74,11 +74,11 @@ class TilleggsstønaderE2ETest {
                 utvidPerioder = listOf(
                     FagsysteminfoHendelse.UtvidetPeriode(
                         kravgrunnlagPeriode = 3.januar til 3.januar,
-                        vedtakPeriode = 1.januar til 31.januar,
+                        vedtaksperiode = 1.januar til 31.januar,
                     ),
                     FagsysteminfoHendelse.UtvidetPeriode(
                         kravgrunnlagPeriode = 1.februar til 1.februar,
-                        vedtakPeriode = 1.februar til 28.februar,
+                        vedtaksperiode = 1.februar til 28.februar,
                     ),
                 ),
             ),
@@ -177,11 +177,11 @@ class TilleggsstønaderE2ETest {
                 utvidPerioder = listOf(
                     FagsysteminfoHendelse.UtvidetPeriode(
                         kravgrunnlagPeriode = 3.januar til 3.januar,
-                        vedtakPeriode = 1.januar til 31.januar,
+                        vedtaksperiode = 1.januar til 31.januar,
                     ),
                     FagsysteminfoHendelse.UtvidetPeriode(
                         kravgrunnlagPeriode = 1.februar til 1.februar,
-                        vedtakPeriode = 1.februar til 14.februar,
+                        vedtaksperiode = 1.februar til 14.februar,
                     ),
                 ),
             ),

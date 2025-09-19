@@ -7,7 +7,7 @@ import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.Vedtaksoppsummer
 import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
-import no.nav.tilbakekreving.api.v2.Kafkamelding
+import no.nav.tilbakekreving.api.v2.fagsystem.Kafkamelding
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandlingRequest
 import org.apache.kafka.clients.producer.ProducerRecord

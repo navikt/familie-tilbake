@@ -36,7 +36,7 @@ class EksternFagsak(
                 utvidedePerioder = fagsysteminfo.revurdering.utvidPerioder?.map {
                     EksternFagsakRevurdering.UtvidetPeriode(
                         kravgrunnlagPeriode = it.kravgrunnlagPeriode,
-                        vedtaksperiode = it.vedtakPeriode,
+                        vedtaksperiode = it.vedtaksperiode,
                     )
                 } ?: emptyList(),
             ),
