@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.tilstand
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.feil.Sporing
+import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 
@@ -22,4 +23,6 @@ object TilBehandling : Tilstand {
     override fun håndterNullstilling(nåværendeBehandling: Behandling, sporing: Sporing) {
         nåværendeBehandling.flyttTilbakeTilFakta()
     }
+
+    override fun håndter(tilbakekreving: Tilbakekreving, fagsysteminfo: FagsysteminfoHendelse) {}
 }

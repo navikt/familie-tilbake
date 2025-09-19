@@ -11,7 +11,7 @@ data class FagsysteminfoHendelse(
 ) {
     data class UtvidetPeriode(
         val kravgrunnlagPeriode: Datoperiode,
-        val vedtakPeriode: Datoperiode,
+        val vedtaksperiode: Datoperiode,
     )
 
     data class Revurdering(
