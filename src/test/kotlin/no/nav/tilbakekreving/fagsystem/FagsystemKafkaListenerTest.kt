@@ -32,20 +32,20 @@ class FagsystemKafkaListenerTest {
                             "behandlingId": "654321",
                             "årsak": "NYE_OPPLYSNINGER",
                             "årsakTilFeilutbetaling": "Bruker sluttet på tiltaket",
-                            "vedtaksdato": "2025-01-12",
-                            "utvidPerioder": [
-                              {
-                                "kravgrunnlagPeriode": {
-                                  "fom": "2023-01-01",
-                                  "tom": "2023-01-01"
-                                },
-                                "vedtaksperiode": {
-                                  "fom": "2023-01-01",
-                                  "tom": "2023-01-31"
-                                }
+                            "vedtaksdato": "2025-01-12"
+                          },
+                          "utvidPerioder": [
+                            {
+                              "kravgrunnlagPeriode": {
+                                "fom": "2023-01-01",
+                                "tom": "2023-01-01"
+                              },
+                              "vedtaksperiode": {
+                                "fom": "2023-01-01",
+                                "tom": "2023-01-31"
                               }
-                            ]
-                          }
+                            }
+                          ]
                         }
             """.trimIndent(),
         )
@@ -63,11 +63,11 @@ class FagsystemKafkaListenerTest {
                     årsak = FagsysteminfoSvarHendelse.RevurderingDto.Årsak.NYE_OPPLYSNINGER,
                     årsakTilFeilutbetaling = "Bruker sluttet på tiltaket",
                     vedtaksdato = LocalDate.of(2025, 1, 12),
-                    utvidPerioder = listOf(
-                        FagsysteminfoSvarHendelse.UtvidetPeriodeDto(
-                            kravgrunnlagPeriode = PeriodeDto(1.januar(2023), 1.januar(2023)),
-                            vedtaksperiode = PeriodeDto(1.januar(2023), 31.januar(2023)),
-                        ),
+                ),
+                utvidPerioder = listOf(
+                    FagsysteminfoSvarHendelse.UtvidetPeriodeDto(
+                        kravgrunnlagPeriode = PeriodeDto(1.januar(2023), 1.januar(2023)),
+                        vedtaksperiode = PeriodeDto(1.januar(2023), 31.januar(2023)),
                     ),
                 ),
             ),

@@ -89,11 +89,11 @@ class BehovE2ETest : TilbakekrevingE2EBase() {
                     årsak = FagsysteminfoSvarHendelse.RevurderingDto.Årsak.NYE_OPPLYSNINGER,
                     årsakTilFeilutbetaling = "Heisann",
                     vedtaksdato = LocalDate.now(),
-                    utvidPerioder = listOf(
-                        FagsysteminfoSvarHendelse.UtvidetPeriodeDto(
-                            kravgrunnlagPeriode = PeriodeDto(1.januar(2021), 1.januar(2021)),
-                            vedtaksperiode = PeriodeDto(1.januar(2021), 31.januar(2021)),
-                        ),
+                ),
+                utvidPerioder = listOf(
+                    FagsysteminfoSvarHendelse.UtvidetPeriodeDto(
+                        kravgrunnlagPeriode = PeriodeDto(1.januar(2021), 1.januar(2021)),
+                        vedtaksperiode = PeriodeDto(1.januar(2021), 31.januar(2021)),
                     ),
                 ),
             ),

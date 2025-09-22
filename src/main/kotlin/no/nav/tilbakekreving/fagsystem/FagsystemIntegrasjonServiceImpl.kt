@@ -27,13 +27,13 @@ class FagsystemIntegrasjonServiceImpl(
                     },
                     årsakTilFeilutbetaling = fagsysteminfo.revurdering.årsakTilFeilutbetaling,
                     vedtaksdato = fagsysteminfo.revurdering.vedtaksdato,
-                    utvidPerioder = fagsysteminfo.revurdering.utvidPerioder?.map {
-                        FagsysteminfoHendelse.UtvidetPeriode(
-                            kravgrunnlagPeriode = it.kravgrunnlagPeriode.fom til it.kravgrunnlagPeriode.tom,
-                            vedtaksperiode = it.vedtaksperiode.fom til it.vedtaksperiode.tom,
-                        )
-                    },
                 ),
+                utvidPerioder = fagsysteminfo.utvidPerioder?.map {
+                    FagsysteminfoHendelse.UtvidetPeriode(
+                        kravgrunnlagPeriode = it.kravgrunnlagPeriode.fom til it.kravgrunnlagPeriode.tom,
+                        vedtaksperiode = it.vedtaksperiode.fom til it.vedtaksperiode.tom,
+                    )
+                },
             ),
         )
     }

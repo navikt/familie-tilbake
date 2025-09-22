@@ -11,6 +11,7 @@ data class FagsysteminfoSvarHendelse(
     override val hendelseOpprettet: LocalDateTime,
     val mottaker: MottakerDto,
     val revurdering: RevurderingDto,
+    val utvidPerioder: List<UtvidetPeriodeDto>?,
 ) : KafkameldingFraFagsystem {
     data class UtvidetPeriodeDto(
         val kravgrunnlagPeriode: PeriodeDto,
@@ -22,7 +23,6 @@ data class FagsysteminfoSvarHendelse(
         val årsak: Årsak,
         val årsakTilFeilutbetaling: String?,
         val vedtaksdato: LocalDate,
-        val utvidPerioder: List<UtvidetPeriodeDto>?,
     ) {
         enum class Årsak {
             NYE_OPPLYSNINGER,

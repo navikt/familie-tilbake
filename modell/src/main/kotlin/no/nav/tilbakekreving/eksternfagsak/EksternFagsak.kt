@@ -33,7 +33,7 @@ class EksternFagsak(
                 revurderingsårsak = fagsysteminfo.revurdering.årsak,
                 årsakTilFeilutbetaling = fagsysteminfo.revurdering.årsakTilFeilutbetaling ?: "Ukjent",
                 vedtaksdato = fagsysteminfo.revurdering.vedtaksdato,
-                utvidedePerioder = fagsysteminfo.revurdering.utvidPerioder?.map {
+                utvidedePerioder = fagsysteminfo.utvidPerioder?.map {
                     EksternFagsakRevurdering.UtvidetPeriode(
                         kravgrunnlagPeriode = it.kravgrunnlagPeriode,
                         vedtaksperiode = it.vedtaksperiode,

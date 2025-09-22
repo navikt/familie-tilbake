@@ -130,8 +130,8 @@ fun fagsysteminfoHendelse(
         årsak = EksternFagsakRevurdering.Revurderingsårsak.NYE_OPPLYSNINGER,
         årsakTilFeilutbetaling = "",
         vedtaksdato = LocalDate.now(),
-        utvidPerioder = utvidPerioder,
     ),
+    utvidPerioder = utvidPerioder,
 )
 
 fun brukerinfoHendelse() = BrukerinfoHendelse(

@@ -8,6 +8,7 @@ import java.time.LocalDate
 data class FagsysteminfoHendelse(
     val aktør: Aktør,
     val revurdering: Revurdering,
+    val utvidPerioder: List<UtvidetPeriode>?,
 ) {
     data class UtvidetPeriode(
         val kravgrunnlagPeriode: Datoperiode,
@@ -19,6 +20,5 @@ data class FagsysteminfoHendelse(
         val årsak: EksternFagsakRevurdering.Revurderingsårsak,
         val årsakTilFeilutbetaling: String?,
         val vedtaksdato: LocalDate,
-        val utvidPerioder: List<UtvidetPeriode>?,
     )
 }
