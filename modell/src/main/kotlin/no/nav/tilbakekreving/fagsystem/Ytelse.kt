@@ -26,7 +26,7 @@ sealed interface Ytelse {
 
         override fun tilYtelsestype(): Ytelsestype = Ytelsestype.BARNETRYGD
 
-        override val kafkaTopic: String = "privat-tilbakekreving-barnetrygd"
+        override val kafkaTopic: String = "tilbake.privat-tilbakekreving-barnetrygd"
 
         override fun tilEntity(): YtelseEntity = YtelseEntity(Ytelsestype.BARNETRYGD)
     }
@@ -40,7 +40,7 @@ sealed interface Ytelse {
 
         override fun tilYtelsestype(): Ytelsestype = Ytelsestype.TILLEGGSSTØNAD
 
-        override val kafkaTopic: String = "privat-tilbakekreving-tilleggsstonad"
+        override val kafkaTopic: String = "tilbake.privat-tilbakekreving-tilleggsstonad"
 
         override fun tilEntity(): YtelseEntity = YtelseEntity(Ytelsestype.TILLEGGSSTØNAD)
     }
