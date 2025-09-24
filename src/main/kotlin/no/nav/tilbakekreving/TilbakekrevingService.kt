@@ -1,10 +1,13 @@
 package no.nav.tilbakekreving
 
+import kotlinx.coroutines.runBlocking
 import no.nav.familie.tilbake.api.forvaltning.Behandlingsinfo
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.integration.pdl.PdlClient
 import no.nav.familie.tilbake.integration.pdl.internal.PdlKjønnType
+import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstidspunkt
+import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstype
 import no.nav.familie.tilbake.kontrakter.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
@@ -35,6 +38,8 @@ import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
+import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokumentdistribusjonService
+import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.domain.DistribuerJournalpostRequestTo
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.brev.MottakerType
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
@@ -56,6 +61,7 @@ class TilbakekrevingService(
     private val bigQueryService: BigQueryService,
     private val endringObservatørService: EndringObservatørService,
     private val kafkaProducer: KafkaProducer,
+    private val dokumentdistribusjonService: DokumentdistribusjonService,
 ) {
     private val aktør = Aktør.Person(ident = "20046912345")
     private val logger = TracedLogger.getLogger<TilbakekrevingService>()
@@ -240,6 +246,9 @@ class TilbakekrevingService(
         fakta: BehandlingsstegFaktaDto,
         behandler: Behandler,
     ) {
+        if (fakta.begrunnelse.equals("Brev Test!")) {
+            sendBrevTest(tilbakekreving)
+        }
         tilbakekreving.håndter(
             behandler,
             vurdering = Faktasteg.Vurdering(
@@ -479,6 +488,27 @@ class TilbakekrevingService(
                 frontendFeilmelding = frontendFeilmelding,
                 logContext = SecureLog.Context.fra(tilbakekreving),
             )
+        }
+    }
+
+    fun sendBrevTest(tilbakekreving: Tilbakekreving) {
+        println("=====>>>> Sender Brev: ")
+
+        runBlocking {
+            val result = dokumentdistribusjonService.sendBrev(
+                tilbakekreving,
+                DistribuerJournalpostRequestTo(
+                    journalpostId = "123",
+                    batchId = null,
+                    bestillendeFagsystem = FagsystemDTO.TS.name,
+                    adresse = null,
+                    dokumentProdApp = "tilbakekreving",
+                    distribusjonstype = Distribusjonstype.VIKTIG,
+                    distribusjonstidspunkt = Distribusjonstidspunkt.KJERNETID,
+                ),
+            )
+
+            println("======>>>>> bestillingsId: ${result?.bestillingsId}")
         }
     }
 }

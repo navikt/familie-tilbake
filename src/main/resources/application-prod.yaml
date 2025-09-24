@@ -42,6 +42,9 @@ ainntekt:
 PDL_URL: https://pdl-api.prod-fss-pub.nais.io
 PDL_SCOPE: api://prod-fss.pdl.pdl-api/.default
 
+DOKDIST_URL: https://dokdistfordeling.prod-fss-pub.nais.io
+DOKDIST_SCOPE: api://prod-fss.teamdokumenthandtering.dokdistfordeling/.default
+
 FAMILIE_INTEGRASJONER_URL: https://familie-integrasjoner.prod-fss-pub.nais.io
 FAMILIE_INTEGRASJONER_SCOPE: api://prod-fss.teamfamilie.familie-integrasjoner/.default
 FAMILIE_OPPDRAG_URL: https://familie-oppdrag.prod-fss-pub.nais.io
@@ -60,3 +63,6 @@ tilbakekreving:
   bigQuery:
     prosjektId: tilbake-prod-d235
     dataset: tilbakekreving_dataset
+  dokdist:
+    base-url: https://dokdistfordeling.prod-fss-pub.nais.io
+    scope: api://prod-fss.teamdokumenthandtering.dokdistfordeling/.default

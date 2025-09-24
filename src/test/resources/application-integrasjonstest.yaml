@@ -56,3 +56,7 @@ tilbakekreving:
   bigQuery:
     prosjektId: dummy
     dataset: dummy
+  dokdist:
+    base-url: https://dokdistfordeling.dev-fss-pub.nais.io
+    scope: api://dev-fss.teamdokumenthandtering.dokdistfordeling/.default
+
