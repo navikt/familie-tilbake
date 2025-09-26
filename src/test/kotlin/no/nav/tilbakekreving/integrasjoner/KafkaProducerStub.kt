@@ -4,6 +4,7 @@ import no.nav.familie.tilbake.datavarehus.saksstatistikk.sakshendelse.Behandling
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.Vedtaksoppsummering
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.api.v2.fagsystem.EventMetadata
 import no.nav.tilbakekreving.api.v2.fagsystem.Kafkamelding
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandlingRequest
@@ -18,8 +19,9 @@ class KafkaProducerStub : KafkaProducer {
     private val vedtak = mutableMapOf<UUID, MutableList<Vedtaksoppsummering>>()
     private val kafkameldinger = mutableMapOf<String, MutableList<Kafkamelding>>()
 
-    override fun sendKafkaEvent(
-        kafkamelding: Kafkamelding,
+    override fun <K : Kafkamelding> sendKafkaEvent(
+        kafkamelding: K,
+        metadata: EventMetadata<K>,
         vedtakGjelderId: String,
         ytelse: Ytelse,
         logContext: SecureLog.Context,

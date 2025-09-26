@@ -7,6 +7,7 @@ import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.Vedtaksoppsummer
 import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.tilbakekreving.api.v2.fagsystem.EventMetadata
 import no.nav.tilbakekreving.api.v2.fagsystem.Kafkamelding
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandlingRequest
@@ -40,8 +41,9 @@ interface KafkaProducer {
         logContext: SecureLog.Context,
     )
 
-    fun sendKafkaEvent(
-        kafkamelding: Kafkamelding,
+    fun <K : Kafkamelding> sendKafkaEvent(
+        kafkamelding: K,
+        metadata: EventMetadata<K>,
         vedtakGjelderId: String,
         ytelse: Ytelse,
         logContext: SecureLog.Context,
@@ -143,16 +145,18 @@ class DefaultKafkaProducer(
             }
     }
 
-    override fun sendKafkaEvent(
-        kafkamelding: Kafkamelding,
+    override fun <K : Kafkamelding> sendKafkaEvent(
+        kafkamelding: K,
+        metadata: EventMetadata<K>,
         vedtakGjelderId: String,
         ytelse: Ytelse,
         logContext: SecureLog.Context,
     ) {
-        val json = objectMapper.writeValueAsString(kafkamelding)
-        val producerRecord = ProducerRecord(ytelse.kafkaTopic, vedtakGjelderId, json)
+        val json = objectMapper.createObjectNode()
+        objectMapper.updateValue(json, metadata)
+        objectMapper.updateValue(json, kafkamelding)
 
-        kafkaTemplate.send(producerRecord).get()
+        kafkaTemplate.send(ytelse.kafkaTopic, vedtakGjelderId, objectMapper.writeValueAsString(json)).get()
     }
 }
 
@@ -198,8 +202,9 @@ class E2EKafkaProducer : KafkaProducer {
         }
     }
 
-    override fun sendKafkaEvent(
-        kafkamelding: Kafkamelding,
+    override fun <K : Kafkamelding> sendKafkaEvent(
+        kafkamelding: K,
+        metadata: EventMetadata<K>,
         vedtakGjelderId: String,
         ytelse: Ytelse,
         logContext: SecureLog.Context,

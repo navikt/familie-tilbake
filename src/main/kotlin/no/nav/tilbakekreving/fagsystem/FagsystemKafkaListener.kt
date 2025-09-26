@@ -37,7 +37,7 @@ class FagsystemKafkaListener(
         @Language("JSON") melding: String,
     ) {
         val obj = objectMapper.readTree(melding)
-        val header = objectMapper.convertValue<EventMetadata>(obj)
+        val header = objectMapper.convertValue<EventMetadata<*>>(obj)
         when (header) {
             FagsysteminfoSvarHendelse.METADATA -> {
                 val fagsysteminfo = objectMapper.treeToValue<FagsysteminfoSvarHendelse>(obj)

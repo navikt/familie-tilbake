@@ -33,7 +33,7 @@ data class FagsysteminfoSvarHendelse(
     }
 
     companion object {
-        val METADATA = EventMetadata(
+        val METADATA = EventMetadata<FagsysteminfoSvarHendelse>(
             hendelsestype = "fagsysteminfo_svar",
             versjon = 1,
         )

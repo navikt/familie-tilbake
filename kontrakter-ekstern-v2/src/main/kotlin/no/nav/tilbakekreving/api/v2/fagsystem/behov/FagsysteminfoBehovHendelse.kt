@@ -10,7 +10,7 @@ data class FagsysteminfoBehovHendelse(
     override val hendelseOpprettet: LocalDateTime,
 ) : Kafkamelding {
     companion object {
-        val METADATA = EventMetadata(
+        val METADATA = EventMetadata<FagsysteminfoBehovHendelse>(
             hendelsestype = "fagsysteminfo_behov",
             versjon = 1,
         )

@@ -182,6 +182,7 @@ class TilbakekrevingService(
                         kravgrunnlagReferanse = behov.eksternBehandlingId,
                         hendelseOpprettet = LocalDateTime.now(),
                     ),
+                    metadata = FagsysteminfoBehovHendelse.METADATA,
                     vedtakGjelderId = behov.vedtakGjelderId,
                     ytelse = behov.ytelse,
                     logContext = logContext,
