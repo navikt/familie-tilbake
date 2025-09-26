@@ -94,18 +94,40 @@ class TilbakekrevingService(
     }
 
     fun <T> hentTilbakekreving(
+        fagsystem: FagsystemDTO,
+        eksternFagsakId: String,
+        håndter: (Tilbakekreving) -> T,
+    ): T? {
+        return tilbakekrevingRepository.hentAlleTilbakekrevinger()
+            ?.asSequence()
+            ?.map {
+                val observatør = Observatør()
+                it.fraEntity(observatør, bigQueryService, endringObservatørService) to observatør
+            }
+            ?.firstOrNull { (tilbakekreving, _) -> tilbakekreving.tilFrontendDto().fagsystem == fagsystem && tilbakekreving.tilFrontendDto().eksternFagsakId == eksternFagsakId }
+            ?.let { (tilbakekreving, observatør) ->
+                tilbakekreving.utførSideeffekt(observatør, håndter)
+            }
+    }
+
+    fun <T> hentTilbakekreving(
         behandlingId: UUID,
         håndter: (Tilbakekreving) -> T,
     ): T? {
         val observatør = Observatør()
         return tilbakekrevingRepository.hentTilbakekreving(behandlingId)
             ?.fraEntity(observatør, bigQueryService, endringObservatørService)
-            ?.let { tilbakekreving ->
-                val resultat = håndter(tilbakekreving)
-                lagre(tilbakekreving)
-                sjekkBehovOgHåndter(tilbakekreving, observatør, SecureLog.Context.fra(tilbakekreving))
-                resultat
-            }
+            ?.utførSideeffekt(observatør, håndter)
+    }
+
+    private fun <T> Tilbakekreving.utførSideeffekt(
+        observatør: Observatør,
+        håndter: (Tilbakekreving) -> T,
+    ): T? {
+        val resultat = håndter(this)
+        lagre(this)
+        sjekkBehovOgHåndter(this, observatør, SecureLog.Context.fra(this))
+        return resultat
     }
 
     fun lagre(

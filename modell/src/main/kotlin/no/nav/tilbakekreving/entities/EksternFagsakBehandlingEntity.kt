@@ -40,14 +40,18 @@ data class UtvidetPeriodeEntity(
     }
 }
 
-enum class RevurderingsårsakType(private val modellType: EksternFagsakRevurdering.Revurderingsårsak) {
-    NYE_OPPLYSNINGER(EksternFagsakRevurdering.Revurderingsårsak.NYE_OPPLYSNINGER),
-    KORRIGERING(EksternFagsakRevurdering.Revurderingsårsak.KORRIGERING),
-    KLAGE(EksternFagsakRevurdering.Revurderingsårsak.KLAGE),
-    UKJENT(EksternFagsakRevurdering.Revurderingsårsak.UKJENT),
-    ;
+enum class RevurderingsårsakType {
+    NYE_OPPLYSNINGER,
+    KORRIGERING,
+    KLAGE,
+    UKJENT, ;
 
-    fun fraEntity() = modellType
+    fun fraEntity() = when (this) {
+        NYE_OPPLYSNINGER -> EksternFagsakRevurdering.Revurderingsårsak.NYE_OPPLYSNINGER
+        KORRIGERING -> EksternFagsakRevurdering.Revurderingsårsak.KORRIGERING
+        KLAGE -> EksternFagsakRevurdering.Revurderingsårsak.KLAGE
+        UKJENT -> EksternFagsakRevurdering.Revurderingsårsak.UKJENT
+    }
 }
 
 enum class EksternFagsakBehandlingType {

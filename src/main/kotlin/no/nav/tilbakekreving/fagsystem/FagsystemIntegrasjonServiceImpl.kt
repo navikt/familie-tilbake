@@ -13,28 +13,32 @@ class FagsystemIntegrasjonServiceImpl(
     private val tilbakekrevingService: TilbakekrevingService,
 ) : FagsystemIntegrasjonService {
     override fun håndter(ytelse: Ytelse, fagsysteminfo: FagsysteminfoSvarHendelse) {
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(ytelse.tilFagsystemDTO(), fagsysteminfo.eksternFagsakId)
-        tilbakekreving!!.håndter(
-            FagsysteminfoHendelse(
-                aktør = Aktør.Person(""),
-                revurdering = FagsysteminfoHendelse.Revurdering(
-                    behandlingId = fagsysteminfo.revurdering.behandlingId,
-                    årsak = when (fagsysteminfo.revurdering.årsak) {
-                        FagsysteminfoSvarHendelse.RevurderingDto.Årsak.NYE_OPPLYSNINGER -> EksternFagsakRevurdering.Revurderingsårsak.NYE_OPPLYSNINGER
-                        FagsysteminfoSvarHendelse.RevurderingDto.Årsak.KORRIGERING -> EksternFagsakRevurdering.Revurderingsårsak.KORRIGERING
-                        FagsysteminfoSvarHendelse.RevurderingDto.Årsak.KLAGE -> EksternFagsakRevurdering.Revurderingsårsak.KLAGE
-                        FagsysteminfoSvarHendelse.RevurderingDto.Årsak.UKJENT -> EksternFagsakRevurdering.Revurderingsårsak.UKJENT
+        tilbakekrevingService.hentTilbakekreving(
+            fagsystem = ytelse.tilFagsystemDTO(),
+            eksternFagsakId = fagsysteminfo.eksternFagsakId,
+        ) { tilbakekreving ->
+            tilbakekreving.håndter(
+                FagsysteminfoHendelse(
+                    aktør = Aktør.Person(""),
+                    revurdering = FagsysteminfoHendelse.Revurdering(
+                        behandlingId = fagsysteminfo.revurdering.behandlingId,
+                        årsak = when (fagsysteminfo.revurdering.årsak) {
+                            FagsysteminfoSvarHendelse.RevurderingDto.Årsak.NYE_OPPLYSNINGER -> EksternFagsakRevurdering.Revurderingsårsak.NYE_OPPLYSNINGER
+                            FagsysteminfoSvarHendelse.RevurderingDto.Årsak.KORRIGERING -> EksternFagsakRevurdering.Revurderingsårsak.KORRIGERING
+                            FagsysteminfoSvarHendelse.RevurderingDto.Årsak.KLAGE -> EksternFagsakRevurdering.Revurderingsårsak.KLAGE
+                            FagsysteminfoSvarHendelse.RevurderingDto.Årsak.UKJENT -> EksternFagsakRevurdering.Revurderingsårsak.UKJENT
+                        },
+                        årsakTilFeilutbetaling = fagsysteminfo.revurdering.årsakTilFeilutbetaling,
+                        vedtaksdato = fagsysteminfo.revurdering.vedtaksdato,
+                    ),
+                    utvidPerioder = fagsysteminfo.utvidPerioder?.map {
+                        FagsysteminfoHendelse.UtvidetPeriode(
+                            kravgrunnlagPeriode = it.kravgrunnlagPeriode.fom til it.kravgrunnlagPeriode.tom,
+                            vedtaksperiode = it.vedtaksperiode.fom til it.vedtaksperiode.tom,
+                        )
                     },
-                    årsakTilFeilutbetaling = fagsysteminfo.revurdering.årsakTilFeilutbetaling,
-                    vedtaksdato = fagsysteminfo.revurdering.vedtaksdato,
                 ),
-                utvidPerioder = fagsysteminfo.utvidPerioder?.map {
-                    FagsysteminfoHendelse.UtvidetPeriode(
-                        kravgrunnlagPeriode = it.kravgrunnlagPeriode.fom til it.kravgrunnlagPeriode.tom,
-                        vedtaksperiode = it.vedtaksperiode.fom til it.vedtaksperiode.tom,
-                    )
-                },
-            ),
-        )
+            )
+        }
     }
 }
