@@ -36,7 +36,6 @@ import no.nav.tilbakekreving.tilstand.TilBehandling
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.Random
 import java.util.UUID
 
@@ -169,8 +168,6 @@ fun behandling(
         internId = UUID.randomUUID(),
         eksternId = UUID.randomUUID(),
         behandlingstype = Behandlingstype.TILBAKEKREVING,
-        opprettet = LocalDateTime.now(),
-        sistEndret = LocalDateTime.now(),
         enhet = Enhet("", ""),
         årsak = Behandlingsårsakstype.REVURDERING_KLAGE_KA,
         ansvarligSaksbehandler = ANSVARLIG_SAKSBEHANDLER,

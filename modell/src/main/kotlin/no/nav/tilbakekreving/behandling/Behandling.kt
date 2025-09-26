@@ -61,7 +61,7 @@ class Behandling internal constructor(
     private val eksternId: UUID,
     private val behandlingstype: Behandlingstype,
     private val opprettet: LocalDateTime,
-    private val sistEndret: LocalDateTime,
+    private var sistEndret: LocalDateTime,
     private val enhet: Enhet?,
     private val årsak: Behandlingsårsakstype,
     private var ansvarligSaksbehandler: Behandler,
@@ -314,7 +314,7 @@ class Behandling internal constructor(
     internal fun oppdaterEksternFagsak(
         eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
     ) {
-        if (steg().any { it.erFullstendig() }) {
+        if (sistEndret == opprettet) {
             this.eksternFagsakRevurdering = eksternFagsakRevurdering
             flyttTilbakeTilFakta()
         }
@@ -378,6 +378,7 @@ class Behandling internal constructor(
     }
 
     fun oppdaterBehandler(ansvarligSaksbehandler: Behandler) {
+        this.sistEndret = LocalDateTime.now()
         this.ansvarligSaksbehandler = ansvarligSaksbehandler
     }
 
@@ -442,8 +443,6 @@ class Behandling internal constructor(
             internId: UUID,
             eksternId: UUID,
             behandlingstype: Behandlingstype,
-            opprettet: LocalDateTime,
-            sistEndret: LocalDateTime = opprettet,
             enhet: Enhet?,
             årsak: Behandlingsårsakstype,
             ansvarligSaksbehandler: Behandler,
@@ -458,12 +457,13 @@ class Behandling internal constructor(
             val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(eksternFagsakRevurdering.entry, kravgrunnlag.entry, foreldelsesteg)
             val foreslåVedtakSteg = ForeslåVedtakSteg.opprett()
             val fatteVedtakSteg = FatteVedtakSteg.opprett()
+            val opprettet = LocalDateTime.now()
             return Behandling(
                 internId = internId,
                 eksternId = eksternId,
                 behandlingstype = behandlingstype,
                 opprettet = opprettet,
-                sistEndret = sistEndret,
+                sistEndret = opprettet,
                 enhet = enhet,
                 årsak = årsak,
                 ansvarligSaksbehandler = ansvarligSaksbehandler,

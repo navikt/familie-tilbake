@@ -3,7 +3,6 @@ package no.nav.tilbakekreving.tilstand
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
@@ -11,26 +10,28 @@ import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnl
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonSærligeGrunner
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
-import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.brukerinfoHendelse
-import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
+import no.nav.tilbakekreving.eksternFagsak
+import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.fagsysteminfoHendelse
 import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.feil.ModellFeil
+import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
+import no.nav.tilbakekreving.kravgrunnlagPeriode
+import no.nav.tilbakekreving.opprettTilbakekreving
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.tilbakekrevingTilBehandling
 import no.nav.tilbakekreving.varselbrev
 import org.junit.jupiter.api.Test
 
 class TilBehandlingTest {
-    private val bigQueryService = BigQueryServiceStub()
-
     @Test
     fun `behandling kan nullstilles når den er i TilBehandling tilstand`() {
         val oppsamler = BehovObservatørOppsamler()
@@ -102,16 +103,68 @@ class TilBehandlingTest {
         tilbakekreving.frontendDtoForBehandling(behandler, true).kanEndres shouldBe false
     }
 
+    @Test
+    fun `sistEndret oppdateres ved saksbehandling`() {
+        val behandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
+        val oppsamler = BehovObservatørOppsamler()
+        val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
+        val tilbakekreving = tilbakekrevingTilBehandling(oppsamler, opprettTilbakekrevingHendelse)
+
+        val gammeltEndringstidspunkt = tilbakekreving.frontendDtoForBehandling(behandler, true).endretTidspunkt
+
+        tilbakekreving.håndter(behandler, faktastegVurdering())
+        val nyttEndringstidspunkt = tilbakekreving.frontendDtoForBehandling(behandler, true).endretTidspunkt
+        nyttEndringstidspunkt shouldNotBe gammeltEndringstidspunkt
+    }
+
+    @Test
+    fun `svar på behov for fagsysteminfo etter sak har gått til behandling`() {
+        val behandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
+        val oppsamler = BehovObservatørOppsamler()
+        val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse(
+            eksternFagsak = eksternFagsak(Ytelse.Tilleggsstønad),
+        )
+
+        val tilbakekreving = opprettTilbakekreving(oppsamler, opprettTilbakekrevingHendelse)
+        tilbakekreving.håndter(
+            kravgrunnlag(
+                perioder = listOf(
+                    kravgrunnlagPeriode(1.januar til 1.januar),
+                ),
+            ),
+        )
+        tilbakekreving.håndter(brukerinfoHendelse())
+        tilbakekreving.håndter(VarselbrevSendtHendelse(varselbrev()))
+
+        tilbakekreving.tilstand shouldBe TilBehandling
+
+        tilbakekreving.håndter(
+            fagsysteminfoHendelse(
+                utvidPerioder = listOf(
+                    FagsysteminfoHendelse.UtvidetPeriode(
+                        kravgrunnlagPeriode = 1.januar til 1.januar,
+                        vedtaksperiode = 1.januar til 31.januar,
+                    ),
+                ),
+            ),
+        )
+
+        val perioder = tilbakekreving.behandlingHistorikk
+            .nåværende()
+            .entry
+            .vilkårsvurderingsstegDto
+            .tilFrontendDto()
+            .perioder
+            .map { it.periode }
+
+        perioder shouldBe listOf(1.januar til 31.januar)
+    }
+
     private fun tilbakekrevingTilGodkjenning(
         oppsamler: BehovObservatørOppsamler,
         opprettTilbakekrevingHendelse: OpprettTilbakekrevingHendelse,
         behandler: Behandler,
-    ) = Tilbakekreving.opprett(oppsamler, opprettTilbakekrevingHendelse, bigQueryService, EndringObservatørOppsamler()).apply {
-        håndter(kravgrunnlag())
-        håndter(fagsysteminfoHendelse())
-        håndter(brukerinfoHendelse())
-        håndter(VarselbrevSendtHendelse(varselbrev()))
-
+    ) = tilbakekrevingTilBehandling(oppsamler, opprettTilbakekrevingHendelse).apply {
         håndter(
             behandler,
             faktastegVurdering(),

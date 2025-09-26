@@ -20,7 +20,6 @@ import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.tilstand.TilBehandling
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 
 class BehandlingEntityTest {
@@ -51,8 +50,6 @@ class BehandlingEntityTest {
             internId = behandlingId,
             eksternId = behandlingId,
             behandlingstype = Behandlingstype.TILBAKEKREVING,
-            opprettet = LocalDateTime.now(),
-            sistEndret = LocalDateTime.now(),
             enhet = Enhet("0425", "NAV Solør"),
             årsak = Behandlingsårsakstype.REVURDERING_KLAGE_KA,
             ansvarligSaksbehandler = behandler,
