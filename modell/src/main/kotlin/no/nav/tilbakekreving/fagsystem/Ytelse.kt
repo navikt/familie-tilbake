@@ -44,6 +44,12 @@ sealed interface Ytelse {
 
         override fun tilEntity(): YtelseEntity = YtelseEntity(Ytelsestype.TILLEGGSSTØNAD)
     }
+
+    companion object {
+        fun ytelser() = setOf(
+            Tilleggsstønad,
+        )
+    }
 }
 
 enum class Ytelsestype(val kode: String) {

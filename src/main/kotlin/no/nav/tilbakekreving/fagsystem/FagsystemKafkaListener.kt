@@ -29,6 +29,9 @@ class FagsystemKafkaListener(
             }
             return
         }
+        SecureLog.medContext(SecureLog.Context.tom()) {
+            info("Mottok melding fra fagsystem via kafka topic {}, melding: {}", data.topic(), data.value())
+        }
         håndterMelding(ytelse, data.value())
     }
 
