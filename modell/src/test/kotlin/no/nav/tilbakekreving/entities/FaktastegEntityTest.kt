@@ -1,7 +1,6 @@
 package no.nav.tilbakekreving.entities
 
 import io.kotest.matchers.shouldBe
-import no.nav.tilbakekreving.HistorikkStub.Companion.fakeReferanse
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
@@ -22,16 +21,15 @@ class FaktastegEntityTest {
     fun `vurdering av fakta steg blir lagret`() {
         val periode = 1.januar til 1.januar
         val tilbakekrevesBeløp = 2000.kroner
-        val kravgrunnlag = fakeReferanse(
-            kravgrunnlag(
-                perioder = listOf(
-                    kravgrunnlagPeriode(periode, ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = tilbakekrevesBeløp)),
-                ),
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(periode, ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = tilbakekrevesBeløp)),
             ),
         )
+        val eksternFagsakRevurdering = eksternFagsakBehandling()
         val brevHistorikk = BrevHistorikk(historikk = mutableListOf())
         val faktasteg = Faktasteg.opprett(
-            eksternFagsakRevurdering = fakeReferanse(eksternFagsakBehandling()),
+            eksternFagsakRevurdering = eksternFagsakRevurdering,
             kravgrunnlag = kravgrunnlag,
             brevHistorikk = brevHistorikk,
             tilbakekrevingOpprettet = LocalDateTime.now(),
@@ -53,9 +51,9 @@ class FaktastegEntityTest {
             ),
         )
 
-        val dtoFør = faktasteg.tilFrontendDto()
+        val dtoFør = faktasteg.tilFrontendDto(kravgrunnlag, eksternFagsakRevurdering)
 
-        val dtoEtter = faktasteg.tilEntity().fraEntity(fakeReferanse(eksternFagsakBehandling()), kravgrunnlag, brevHistorikk).tilFrontendDto()
+        val dtoEtter = faktasteg.tilEntity().fraEntity(brevHistorikk).tilFrontendDto(kravgrunnlag, eksternFagsakRevurdering)
 
         dtoEtter shouldBe dtoFør
     }

@@ -13,7 +13,6 @@ import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.VilkårsvurderingsperiodeEntity
 import no.nav.tilbakekreving.entities.VilkårsvurderingstegEntity
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
-import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
@@ -23,10 +22,8 @@ import java.util.UUID
 
 class Vilkårsvurderingsteg(
     private var vurderinger: List<Vilkårsvurderingsperiode>,
-    private val eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
-    private val kravgrunnlagHendelse: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
     private val foreldelsesteg: Foreldelsesteg,
-) : Saksbehandlingsteg<VurdertVilkårsvurderingDto>, VilkårsvurderingAdapter {
+) : Saksbehandlingsteg, VilkårsvurderingAdapter {
     override val type: Behandlingssteg = Behandlingssteg.VILKÅRSVURDERING
 
     override fun erFullstendig(): Boolean = vurderinger.none { it.vurdering is ForårsaketAvBruker.IkkeVurdert }
@@ -37,8 +34,11 @@ class Vilkårsvurderingsteg(
         )
     }
 
-    override fun nullstill() {
-        this.vurderinger = tomVurdering(eksternFagsakRevurdering, kravgrunnlagHendelse)
+    override fun nullstill(
+        kravgrunnlag: KravgrunnlagHendelse,
+        eksternFagsakRevurdering: EksternFagsakRevurdering,
+    ) {
+        this.vurderinger = tomVurdering(eksternFagsakRevurdering, kravgrunnlag)
     }
 
     internal fun vurder(
@@ -76,12 +76,14 @@ class Vilkårsvurderingsteg(
         return vurderinger.toSet()
     }
 
-    override fun tilFrontendDto(): VurdertVilkårsvurderingDto {
+    fun tilFrontendDto(
+        kravgrunnlag: KravgrunnlagHendelse,
+    ): VurdertVilkårsvurderingDto {
         return VurdertVilkårsvurderingDto(
             perioder = vurderinger.map {
                 VurdertVilkårsvurderingsperiodeDto(
                     periode = it.periode,
-                    feilutbetaltBeløp = kravgrunnlagHendelse.entry.totaltBeløpFor(it.periode),
+                    feilutbetaltBeløp = kravgrunnlag.totaltBeløpFor(it.periode),
                     hendelsestype = Hendelsestype.ANNET,
                     reduserteBeløper = listOf(),
                     aktiviteter = listOf(),
@@ -140,25 +142,23 @@ class Vilkårsvurderingsteg(
 
     companion object {
         fun opprett(
-            eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
-            kravgrunnlagHendelse: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
+            eksternFagsakRevurdering: EksternFagsakRevurdering,
+            kravgrunnlagHendelse: KravgrunnlagHendelse,
             foreldelsesteg: Foreldelsesteg,
         ): Vilkårsvurderingsteg {
             return Vilkårsvurderingsteg(
                 tomVurdering(eksternFagsakRevurdering, kravgrunnlagHendelse),
-                eksternFagsakRevurdering,
-                kravgrunnlagHendelse,
                 foreldelsesteg,
             )
         }
 
         private fun tomVurdering(
-            eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
-            kravgrunnlagHendelse: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
+            eksternFagsakRevurdering: EksternFagsakRevurdering,
+            kravgrunnlagHendelse: KravgrunnlagHendelse,
         ): List<Vilkårsvurderingsperiode> {
-            return kravgrunnlagHendelse.entry.datoperioder().map {
+            return kravgrunnlagHendelse.datoperioder().map {
                 Vilkårsvurderingsperiode.opprett(
-                    periode = eksternFagsakRevurdering.entry.utvidPeriode(it),
+                    periode = eksternFagsakRevurdering.utvidPeriode(it),
                 )
             }
         }

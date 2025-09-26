@@ -1,15 +1,18 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
+import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.api.v1.dto.ManuellBrevmottakerResponsDto
+import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
+import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import java.util.UUID
 
 class BrevmottakerSteg(
     private var aktivert: Boolean,
     private val defaultMottaker: RegistrertBrevmottaker,
-) : Saksbehandlingsteg<List<ManuellBrevmottakerResponsDto>> {
+) : Saksbehandlingsteg, FrontendDto<List<ManuellBrevmottakerResponsDto>> {
     override val type = Behandlingssteg.BREVMOTTAKER
     var registrertBrevmottaker: RegistrertBrevmottaker = defaultMottaker
 
@@ -17,7 +20,10 @@ class BrevmottakerSteg(
         return true
     }
 
-    override fun nullstill() {}
+    override fun nullstill(
+        kravgrunnlag: KravgrunnlagHendelse,
+        eksternFagsakRevurdering: EksternFagsakRevurdering,
+    ) {}
 
     internal fun håndter(nyBrevmottaker: RegistrertBrevmottaker, sporing: Sporing) {
         if (!aktivert) {

@@ -1,7 +1,6 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
 import io.kotest.matchers.shouldBe
-import no.nav.tilbakekreving.HistorikkStub.Companion.fakeReferanse
 import no.nav.tilbakekreving.eksternFagsakBehandling
 import no.nav.tilbakekreving.februar
 import no.nav.tilbakekreving.januar
@@ -15,15 +14,13 @@ class ForeldelsestegTest {
     fun `vurdering av deler av periode`() {
         val foreldelsesteg =
             Foreldelsesteg.opprett(
-                fakeReferanse(eksternFagsakBehandling()),
-                fakeReferanse(
-                    kravgrunnlag(
-                        perioder =
-                            listOf(
-                                kravgrunnlagPeriode(1.januar til 31.januar),
-                                kravgrunnlagPeriode(1.februar til 28.februar),
-                            ),
-                    ),
+                eksternFagsakBehandling(),
+                kravgrunnlag(
+                    perioder =
+                        listOf(
+                            kravgrunnlagPeriode(1.januar til 31.januar),
+                            kravgrunnlagPeriode(1.februar til 28.februar),
+                        ),
                 ),
             )
 
@@ -39,15 +36,13 @@ class ForeldelsestegTest {
     fun `vurdering av deler hele perioden`() {
         val foreldelsesteg =
             Foreldelsesteg.opprett(
-                fakeReferanse(eksternFagsakBehandling()),
-                fakeReferanse(
-                    kravgrunnlag(
-                        perioder =
-                            listOf(
-                                kravgrunnlagPeriode(1.januar til 31.januar),
-                                kravgrunnlagPeriode(1.februar til 28.februar),
-                            ),
-                    ),
+                eksternFagsakBehandling(),
+                kravgrunnlag(
+                    perioder =
+                        listOf(
+                            kravgrunnlagPeriode(1.januar til 31.januar),
+                            kravgrunnlagPeriode(1.februar til 28.februar),
+                        ),
                 ),
             )
 
@@ -67,14 +62,12 @@ class ForeldelsestegTest {
     fun `sjekk foreldelse på deler av splittet periode`() {
         val foreldelsesteg =
             Foreldelsesteg.opprett(
-                fakeReferanse(eksternFagsakBehandling()),
-                fakeReferanse(
-                    kravgrunnlag(
-                        perioder =
-                            listOf(
-                                kravgrunnlagPeriode(1.januar til 28.februar),
-                            ),
-                    ),
+                eksternFagsakBehandling(),
+                kravgrunnlag(
+                    perioder =
+                        listOf(
+                            kravgrunnlagPeriode(1.januar til 28.februar),
+                        ),
                 ),
             )
 

@@ -1,15 +1,17 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
+import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.ForeslåVedtakStegEntity
 import no.nav.tilbakekreving.entities.ForeslåVedtakVurderingType
 import no.nav.tilbakekreving.entities.PeriodeMedTekstEntity
+import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 
 class ForeslåVedtakSteg(
     private var vurdering: Vurdering,
-) : Saksbehandlingsteg<Unit> {
+) : Saksbehandlingsteg {
     override val type = Behandlingssteg.FORESLÅ_VEDTAK
 
     override fun erFullstendig(): Boolean = vurdering != Vurdering.IkkeVurdert
@@ -22,11 +24,12 @@ class ForeslåVedtakSteg(
         return vurdering.tilEntity()
     }
 
-    override fun nullstill() {
+    override fun nullstill(
+        kravgrunnlag: KravgrunnlagHendelse,
+        eksternFagsakRevurdering: EksternFagsakRevurdering,
+    ) {
         vurdering = Vurdering.IkkeVurdert
     }
-
-    override fun tilFrontendDto() {}
 
     sealed interface Vurdering {
         fun tilEntity(): ForeslåVedtakStegEntity

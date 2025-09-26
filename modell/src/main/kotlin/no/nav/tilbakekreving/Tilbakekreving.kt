@@ -96,6 +96,12 @@ class Tilbakekreving internal constructor(
         behandlingHistorikk.nåværende().entry.utførSideeffekt(tilstand, this)
     }
 
+    fun oppdaterFagsysteminfo(fagsysteminfo: FagsysteminfoHendelse) {
+        val eksternFagsak = eksternFagsak.lagre(fagsysteminfo)
+        behandlingHistorikk.nåværende().entry
+            .oppdaterEksternFagsak(eksternFagsak)
+    }
+
     fun sporingsinformasjon(): Sporing {
         return Sporing(eksternFagsak.eksternId, behandlingHistorikk.nåværende().entry.internId.toString())
     }

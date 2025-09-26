@@ -19,6 +19,7 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatu
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.kontrakter.periode.til
+import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.tilstand.TilBehandling
 import org.junit.jupiter.api.Test
@@ -110,7 +111,8 @@ class BehandlingTest {
 
     @Test
     fun `flytt behandling tilbake til fakta - nullstiller foreldelse`() {
-        val behandling = behandling().apply {
+        val kravgrunnlag = kravgrunnlag()
+        val behandling = behandling(kravgrunnlag).apply {
             brevmottakerSteg = BrevmottakerSteg(false, RegistrertBrevmottaker.DefaultMottaker(navn = "navn", personIdent = "ident"))
         }
 
@@ -123,11 +125,11 @@ class BehandlingTest {
         val foreldelse = Foreldelsesteg.Vurdering.Foreldet("Begrunnelse")
         behandling.håndter(ansvarligSaksbehandler, periode, foreldelse, BehandlingObservatørOppsamler())
 
-        behandling.foreldelsesteg.tilFrontendDto().foreldetPerioder.first().begrunnelse shouldBe "Begrunnelse"
+        behandling.foreldelsesteg.tilFrontendDto(kravgrunnlag).foreldetPerioder.first().begrunnelse shouldBe "Begrunnelse"
 
         behandling.flyttTilbakeTilFakta()
 
-        behandling.foreldelsesteg.tilFrontendDto().foreldetPerioder.first().begrunnelse shouldBe null
+        behandling.foreldelsesteg.tilFrontendDto(kravgrunnlag).foreldetPerioder.first().begrunnelse shouldBe null
     }
 
     @Test

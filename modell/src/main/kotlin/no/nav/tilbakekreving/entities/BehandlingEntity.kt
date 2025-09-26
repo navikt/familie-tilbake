@@ -36,7 +36,7 @@ data class BehandlingEntity(
         val sporing = Sporing("Ukjent", internId.toString())
         val eksternFagsak = eksternFagsakBehandlingHistorikk.finn(eksternFagsakBehandlingRef.id, sporing)
         val kravgrunnlag = kravgrunnlagHistorikk.finn(kravgrunnlagRef.id, sporing)
-        val foreldelsessteg = foreldelsestegEntity.fraEntity(eksternFagsak, kravgrunnlag)
+        val foreldelsessteg = foreldelsestegEntity.fraEntity()
         return Behandling(
             internId = internId,
             eksternId = eksternId,
@@ -49,8 +49,8 @@ data class BehandlingEntity(
             eksternFagsakRevurdering = eksternFagsak,
             kravgrunnlag = kravgrunnlag,
             foreldelsesteg = foreldelsessteg,
-            faktasteg = faktastegEntity.fraEntity(eksternFagsak, kravgrunnlag, brevHistorikk),
-            vilkårsvurderingsteg = vilkårsvurderingstegEntity.fraEntity(eksternFagsak, kravgrunnlag, foreldelsessteg),
+            faktasteg = faktastegEntity.fraEntity(brevHistorikk),
+            vilkårsvurderingsteg = vilkårsvurderingstegEntity.fraEntity(foreldelsessteg),
             foreslåVedtakSteg = foreslåVedtakStegEntity.fraEntity(),
             fatteVedtakSteg = fatteVedtakStegEntity.fraEntity(),
             påVent = påVentEntity?.fraEntity(),

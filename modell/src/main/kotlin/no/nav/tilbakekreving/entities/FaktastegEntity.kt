@@ -3,13 +3,9 @@ package no.nav.tilbakekreving.entities
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.brev.BrevHistorikk
-import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
-import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
-import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import java.time.LocalDateTime
-import java.util.UUID
 
 data class FaktastegEntity(
     val tilbakekrevingOpprettet: LocalDateTime,
@@ -20,12 +16,8 @@ data class FaktastegEntity(
     val vurderingAvBrukersUttalelse: String?,
 ) {
     fun fraEntity(
-        eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
-        kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
         brevHistorikk: BrevHistorikk,
     ): Faktasteg = Faktasteg(
-        eksternFagsakRevurdering = eksternFagsakRevurdering,
-        kravgrunnlag = kravgrunnlag,
         brevHistorikk = brevHistorikk,
         tilbakekrevingOpprettet = tilbakekrevingOpprettet,
         opprettelsesvalg = opprettelsesvalg,

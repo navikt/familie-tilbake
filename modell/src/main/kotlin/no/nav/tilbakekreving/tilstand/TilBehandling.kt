@@ -24,5 +24,7 @@ object TilBehandling : Tilstand {
         nåværendeBehandling.flyttTilbakeTilFakta()
     }
 
-    override fun håndter(tilbakekreving: Tilbakekreving, fagsysteminfo: FagsysteminfoHendelse) {}
+    override fun håndter(tilbakekreving: Tilbakekreving, fagsysteminfo: FagsysteminfoHendelse) {
+        tilbakekreving.oppdaterFagsysteminfo(fagsysteminfo)
+    }
 }

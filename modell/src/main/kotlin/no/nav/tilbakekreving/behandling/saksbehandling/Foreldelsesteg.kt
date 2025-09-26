@@ -9,7 +9,6 @@ import no.nav.tilbakekreving.entities.ForeldelsesstegEntity
 import no.nav.tilbakekreving.entities.ForeldelsesvurderingEntity
 import no.nav.tilbakekreving.entities.ForeldelsesvurderingType
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
-import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
@@ -18,14 +17,12 @@ import java.util.UUID
 
 class Foreldelsesteg(
     private var vurdertePerioder: List<Foreldelseperiode>,
-    private val eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
-    private val kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
-) : Saksbehandlingsteg<VurdertForeldelseDto> {
+) : Saksbehandlingsteg {
     override val type: Behandlingssteg = Behandlingssteg.FORELDELSE
 
     override fun erFullstendig(): Boolean = vurdertePerioder.all { it.vurdering != Vurdering.IkkeVurdert }
 
-    override fun nullstill() {
+    override fun nullstill(kravgrunnlag: KravgrunnlagHendelse, eksternFagsakRevurdering: EksternFagsakRevurdering) {
         vurdertePerioder = tomVurdering(eksternFagsakRevurdering, kravgrunnlag)
     }
 
@@ -58,13 +55,15 @@ class Foreldelsesteg(
         .filter { it.vurdering is Vurdering.Foreldet }
         .map(Foreldelseperiode::periode)
 
-    override fun tilFrontendDto(): VurdertForeldelseDto {
+    fun tilFrontendDto(
+        kravgrunnlag: KravgrunnlagHendelse,
+    ): VurdertForeldelseDto {
         return VurdertForeldelseDto(
             foreldetPerioder =
                 vurdertePerioder.map {
                     VurdertForeldelsesperiodeDto(
                         periode = it.periode,
-                        feilutbetaltBeløp = kravgrunnlag.entry.totaltBeløpFor(it.periode),
+                        feilutbetaltBeløp = kravgrunnlag.totaltBeløpFor(it.periode),
                         begrunnelse = it.vurdering.begrunnelse,
                         foreldelsesvurderingstype =
                             when (it.vurdering) {
@@ -168,23 +167,21 @@ class Foreldelsesteg(
 
     companion object {
         fun opprett(
-            eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
-            kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
+            eksternFagsakRevurdering: EksternFagsakRevurdering,
+            kravgrunnlag: KravgrunnlagHendelse,
         ): Foreldelsesteg {
             return Foreldelsesteg(
                 vurdertePerioder = tomVurdering(eksternFagsakRevurdering, kravgrunnlag),
-                eksternFagsakRevurdering = eksternFagsakRevurdering,
-                kravgrunnlag = kravgrunnlag,
             )
         }
 
         private fun tomVurdering(
-            eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
-            kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
+            eksternFagsakRevurdering: EksternFagsakRevurdering,
+            kravgrunnlag: KravgrunnlagHendelse,
         ): List<Foreldelseperiode> {
-            return kravgrunnlag.entry.datoperioder().map { kravgrunnlagPeriode ->
+            return kravgrunnlag.datoperioder().map { kravgrunnlagPeriode ->
                 Foreldelseperiode.opprett(
-                    periode = eksternFagsakRevurdering.entry.utvidPeriode(kravgrunnlagPeriode),
+                    periode = eksternFagsakRevurdering.utvidPeriode(kravgrunnlagPeriode),
                 )
             }
         }

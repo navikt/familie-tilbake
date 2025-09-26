@@ -2,8 +2,6 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
-import no.nav.tilbakekreving.HistorikkStub
-import no.nav.tilbakekreving.HistorikkStub.Companion.fakeReferanse
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonSærligeGrunner
@@ -20,22 +18,17 @@ import org.junit.jupiter.api.Test
 class VilkårsvurderingstegTest {
     @Test
     fun `vilkårsvurdering på en av to perioder`() {
-        val kravgrunnlag =
-            HistorikkStub.fakeReferanse(
-                kravgrunnlag(
-                    perioder =
-                        listOf(
-                            kravgrunnlagPeriode(1.januar til 31.januar),
-                            kravgrunnlagPeriode(1.februar til 28.februar),
-                        ),
-                ),
-            )
-        val vilkårsvurderingsteg =
-            Vilkårsvurderingsteg.opprett(
-                fakeReferanse(eksternFagsakBehandling()),
-                kravgrunnlag,
-                Foreldelsesteg.opprett(fakeReferanse(eksternFagsakBehandling()), kravgrunnlag),
-            )
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(1.januar til 31.januar),
+                kravgrunnlagPeriode(1.februar til 28.februar),
+            ),
+        )
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakBehandling(),
+            kravgrunnlag,
+            Foreldelsesteg.opprett(eksternFagsakBehandling(), kravgrunnlag),
+        )
         vilkårsvurderingsteg.vurder(
             1.januar til 31.januar,
             NivåAvForståelse.GodTro(
@@ -49,21 +42,18 @@ class VilkårsvurderingstegTest {
 
     @Test
     fun `vilkårsvurdering på begge perioder`() {
-        val kravgrunnlag =
-            HistorikkStub.fakeReferanse(
-                kravgrunnlag(
-                    perioder =
-                        listOf(
-                            kravgrunnlagPeriode(1.januar til 31.januar),
-                            kravgrunnlagPeriode(1.februar til 28.februar),
-                        ),
+        val kravgrunnlag = kravgrunnlag(
+            perioder =
+                listOf(
+                    kravgrunnlagPeriode(1.januar til 31.januar),
+                    kravgrunnlagPeriode(1.februar til 28.februar),
                 ),
-            )
+        )
         val vilkårsvurderingsteg =
             Vilkårsvurderingsteg.opprett(
-                eksternFagsakRevurdering = fakeReferanse(eksternFagsakBehandling()),
+                eksternFagsakRevurdering = eksternFagsakBehandling(),
                 kravgrunnlagHendelse = kravgrunnlag,
-                foreldelsesteg = Foreldelsesteg.opprett(fakeReferanse(eksternFagsakBehandling()), kravgrunnlag),
+                foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakBehandling(), kravgrunnlag),
             )
         vilkårsvurderingsteg.vurder(
             1.januar til 31.januar,
@@ -87,21 +77,17 @@ class VilkårsvurderingstegTest {
 
     @Test
     fun `vilkårsvurdering for under 4x rettgebyr med delvis tilbakekreving`() {
-        val kravgrunnlag =
-            HistorikkStub.fakeReferanse(
-                kravgrunnlag(
-                    perioder =
-                        listOf(
-                            kravgrunnlagPeriode(1.januar til 31.januar),
-                            kravgrunnlagPeriode(1.februar til 28.februar),
-                        ),
-                ),
-            )
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(1.januar til 31.januar),
+                kravgrunnlagPeriode(1.februar til 28.februar),
+            ),
+        )
         val vilkårsvurderingsteg =
             Vilkårsvurderingsteg.opprett(
-                eksternFagsakRevurdering = fakeReferanse(eksternFagsakBehandling()),
+                eksternFagsakRevurdering = eksternFagsakBehandling(),
                 kravgrunnlagHendelse = kravgrunnlag,
-                foreldelsesteg = Foreldelsesteg.opprett(fakeReferanse(eksternFagsakBehandling()), kravgrunnlag),
+                foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakBehandling(), kravgrunnlag),
             )
         vilkårsvurderingsteg.vurder(
             1.januar til 31.januar,
@@ -125,21 +111,17 @@ class VilkårsvurderingstegTest {
 
     @Test
     fun `vilkårsvurdering for under 4x rettgebyr med ingen tilbakekreving`() {
-        val kravgrunnlag =
-            HistorikkStub.fakeReferanse(
-                kravgrunnlag(
-                    perioder =
-                        listOf(
-                            kravgrunnlagPeriode(1.januar til 31.januar),
-                            kravgrunnlagPeriode(1.februar til 28.februar),
-                        ),
-                ),
-            )
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(1.januar til 31.januar),
+                kravgrunnlagPeriode(1.februar til 28.februar),
+            ),
+        )
         val vilkårsvurderingsteg =
             Vilkårsvurderingsteg.opprett(
-                eksternFagsakRevurdering = fakeReferanse(eksternFagsakBehandling()),
+                eksternFagsakRevurdering = eksternFagsakBehandling(),
                 kravgrunnlagHendelse = kravgrunnlag,
-                foreldelsesteg = Foreldelsesteg.opprett(fakeReferanse(eksternFagsakBehandling()), kravgrunnlag),
+                foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakBehandling(), kravgrunnlag),
             )
         vilkårsvurderingsteg.vurder(
             1.januar til 31.januar,

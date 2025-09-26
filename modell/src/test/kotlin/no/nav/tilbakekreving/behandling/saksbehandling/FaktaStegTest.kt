@@ -1,7 +1,6 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
 import io.kotest.matchers.shouldBe
-import no.nav.tilbakekreving.HistorikkStub.Companion.fakeReferanse
 import no.nav.tilbakekreving.api.v1.dto.FeilutbetalingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurderingAvBrukersUttalelseDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
@@ -24,15 +23,15 @@ class FaktaStegTest {
     fun `send inn fakta blir vist i dto-en`() {
         val periode = 1.januar til 1.januar
         val tilbakekrevesBeløp = 2000.kroner
-        val faktasteg = Faktasteg.opprett(
-            eksternFagsakRevurdering = fakeReferanse(eksternFagsakBehandling()),
-            kravgrunnlag = fakeReferanse(
-                kravgrunnlag(
-                    perioder = listOf(
-                        kravgrunnlagPeriode(periode, ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = tilbakekrevesBeløp)),
-                    ),
-                ),
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(periode, ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = tilbakekrevesBeløp)),
             ),
+        )
+        val eksternFagsakRevurdering = eksternFagsakBehandling()
+        val faktasteg = Faktasteg.opprett(
+            eksternFagsakRevurdering = eksternFagsakRevurdering,
+            kravgrunnlag = kravgrunnlag,
             BrevHistorikk(historikk = mutableListOf()),
             tilbakekrevingOpprettet = LocalDateTime.now(),
             Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
@@ -53,7 +52,7 @@ class FaktaStegTest {
             ),
         )
 
-        faktasteg.tilFrontendDto().feilutbetaltePerioder shouldBe listOf(
+        faktasteg.tilFrontendDto(kravgrunnlag, eksternFagsakRevurdering).feilutbetaltePerioder shouldBe listOf(
             FeilutbetalingsperiodeDto(
                 periode = periode,
                 feilutbetaltBeløp = tilbakekrevesBeløp,
@@ -61,8 +60,8 @@ class FaktaStegTest {
                 hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
             ),
         )
-        faktasteg.tilFrontendDto().begrunnelse shouldBe årsak
-        faktasteg.tilFrontendDto().vurderingAvBrukersUttalelse shouldBe VurderingAvBrukersUttalelseDto(
+        faktasteg.tilFrontendDto(kravgrunnlag, eksternFagsakRevurdering).begrunnelse shouldBe årsak
+        faktasteg.tilFrontendDto(kravgrunnlag, eksternFagsakRevurdering).vurderingAvBrukersUttalelse shouldBe VurderingAvBrukersUttalelseDto(
             harBrukerUttaltSeg = HarBrukerUttaltSeg.JA,
             beskrivelse = uttalelse,
         )
@@ -73,12 +72,10 @@ class FaktaStegTest {
         val periode = 1.januar til 1.januar
         val tilbakekrevesBeløp = 2000.kroner
         val faktasteg = Faktasteg.opprett(
-            eksternFagsakRevurdering = fakeReferanse(eksternFagsakBehandling()),
-            kravgrunnlag = fakeReferanse(
-                kravgrunnlag(
-                    perioder = listOf(
-                        kravgrunnlagPeriode(periode, ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = tilbakekrevesBeløp)),
-                    ),
+            eksternFagsakRevurdering = eksternFagsakBehandling(),
+            kravgrunnlag = kravgrunnlag(
+                perioder = listOf(
+                    kravgrunnlagPeriode(periode, ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = tilbakekrevesBeløp)),
                 ),
             ),
             brevHistorikk = BrevHistorikk(historikk = mutableListOf()),

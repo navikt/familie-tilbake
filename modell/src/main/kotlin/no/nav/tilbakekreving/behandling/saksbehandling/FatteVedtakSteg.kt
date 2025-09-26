@@ -3,11 +3,13 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.api.v1.dto.Totrinnsstegsinfo
 import no.nav.tilbakekreving.api.v1.dto.TotrinnsvurderingDto
+import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.entities.FatteVedtakStegEntity
 import no.nav.tilbakekreving.entities.VurdertStegEntity
 import no.nav.tilbakekreving.entities.VurdertStegType
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
+import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.saksbehandler.Behandler
@@ -15,7 +17,7 @@ import no.nav.tilbakekreving.saksbehandler.Behandler
 class FatteVedtakSteg internal constructor(
     private val vurderteSteg: List<VurdertSteg>,
     private var _ansvarligBeslutter: Behandler?,
-) : Saksbehandlingsteg<TotrinnsvurderingDto> {
+) : Saksbehandlingsteg, FrontendDto<TotrinnsvurderingDto> {
     override val type: Behandlingssteg = Behandlingssteg.FATTE_VEDTAK
     val ansvarligBeslutter: Behandler? get() = _ansvarligBeslutter
 
@@ -23,7 +25,10 @@ class FatteVedtakSteg internal constructor(
 
     override val behandlingsstatus: Behandlingsstatus = Behandlingsstatus.FATTER_VEDTAK
 
-    override fun nullstill() {}
+    override fun nullstill(
+        kravgrunnlag: KravgrunnlagHendelse,
+        eksternFagsakRevurdering: EksternFagsakRevurdering,
+    ) {}
 
     internal fun håndter(
         beslutter: Behandler,

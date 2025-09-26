@@ -65,7 +65,7 @@ class Behandling internal constructor(
     private val enhet: Enhet?,
     private val årsak: Behandlingsårsakstype,
     private var ansvarligSaksbehandler: Behandler,
-    private val eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
+    private var eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
     private val kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
     val foreldelsesteg: Foreldelsesteg,
     private val faktasteg: Faktasteg,
@@ -74,9 +74,15 @@ class Behandling internal constructor(
     private val fatteVedtakSteg: FatteVedtakSteg,
     private var påVent: PåVent?,
 ) : Historikk.HistorikkInnslag<UUID> {
-    val faktastegDto: FrontendDto<FaktaFeilutbetalingDto> get() = faktasteg
-    val foreldelsestegDto: FrontendDto<VurdertForeldelseDto> get() = foreldelsesteg
-    val vilkårsvurderingsstegDto: FrontendDto<VurdertVilkårsvurderingDto> get() = vilkårsvurderingsteg
+    val faktastegDto: FrontendDto<FaktaFeilutbetalingDto> get() = FrontendDto {
+        faktasteg.tilFrontendDto(kravgrunnlag.entry, eksternFagsakRevurdering.entry)
+    }
+    val foreldelsestegDto: FrontendDto<VurdertForeldelseDto> get() = FrontendDto {
+        foreldelsesteg.tilFrontendDto(kravgrunnlag.entry)
+    }
+    val vilkårsvurderingsstegDto: FrontendDto<VurdertVilkårsvurderingDto> get() = FrontendDto {
+        vilkårsvurderingsteg.tilFrontendDto(kravgrunnlag.entry)
+    }
     val fatteVedtakStegDto: FrontendDto<TotrinnsvurderingDto> get() = fatteVedtakSteg
     lateinit var brevmottakerSteg: BrevmottakerSteg
 
@@ -107,7 +113,7 @@ class Behandling internal constructor(
         return Sporing(eksternFagsakRevurdering.entry.eksternId, internId.toString())
     }
 
-    internal fun steg(): List<Saksbehandlingsteg<*>> = listOf(
+    internal fun steg(): List<Saksbehandlingsteg> = listOf(
         faktasteg,
         foreldelsesteg,
         vilkårsvurderingsteg,
@@ -141,7 +147,7 @@ class Behandling internal constructor(
                 )
             },
             beregning.vedtaksresultat,
-            faktasteg.tilFrontendDto().vurderingAvBrukersUttalelse,
+            faktasteg.tilFrontendDto(kravgrunnlag.entry, eksternFagsakRevurdering.entry).vurderingAvBrukersUttalelse,
         )
     }
 
@@ -305,6 +311,15 @@ class Behandling internal constructor(
         oppdaterBehandler(behandler)
     }
 
+    internal fun oppdaterEksternFagsak(
+        eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
+    ) {
+        if (steg().any { it.erFullstendig() }) {
+            this.eksternFagsakRevurdering = eksternFagsakRevurdering
+            flyttTilbakeTilFakta()
+        }
+    }
+
     internal fun fjernManuelBrevmottaker(
         behandler: Behandler,
         manuellBrevmottakerId: UUID,
@@ -387,7 +402,7 @@ class Behandling internal constructor(
         return null
     }
 
-    fun flyttTilbakeTilFakta() = steg().forEach { it.nullstill() }
+    fun flyttTilbakeTilFakta() = steg().forEach { it.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry) }
 
     fun sendVedtakIverksatt(
         forrigeBehandlingId: UUID?,
@@ -438,9 +453,9 @@ class Behandling internal constructor(
             behandlingObservatør: BehandlingObservatør,
             tilstand: Tilstand,
         ): Behandling {
-            val foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakRevurdering, kravgrunnlag)
-            val faktasteg = Faktasteg.opprett(eksternFagsakRevurdering, kravgrunnlag, brevHistorikk, LocalDateTime.now(), Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL)
-            val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(eksternFagsakRevurdering, kravgrunnlag, foreldelsesteg)
+            val foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakRevurdering.entry, kravgrunnlag.entry)
+            val faktasteg = Faktasteg.opprett(eksternFagsakRevurdering.entry, kravgrunnlag.entry, brevHistorikk, LocalDateTime.now(), Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL)
+            val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(eksternFagsakRevurdering.entry, kravgrunnlag.entry, foreldelsesteg)
             val foreslåVedtakSteg = ForeslåVedtakSteg.opprett()
             val fatteVedtakSteg = FatteVedtakSteg.opprett()
             return Behandling(
