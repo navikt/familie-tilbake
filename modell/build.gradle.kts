@@ -3,5 +3,5 @@ dependencies {
     api(project(":kontrakter-ekstern-v2"))
     api(project(":felles"))
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("io.ktor:ktor-http:3.2.3")
+    implementation("io.ktor:ktor-http:3.3.0")
 }
