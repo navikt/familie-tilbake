@@ -83,6 +83,12 @@ class ForvaltningService(
                 logContext,
             )
 
+        for (periode in hentetKravgrunnlag.tilbakekrevingsPeriode) {
+            for (beløp in periode.tilbakekrevingsBelop) {
+                println("======>>>> Periode: ${periode.periode.fom}-${periode.periode.tom}: ${beløp.belopTilbakekreves} kr.")
+            }
+        }
+
         if (kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandlingId)) {
             val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
             kravgrunnlagRepository.update(kravgrunnlag.copy(aktiv = false))
