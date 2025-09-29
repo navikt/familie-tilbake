@@ -23,19 +23,23 @@ class FagsystemKafkaListener(
 
     override fun onMessage(data: ConsumerRecord<String, String>) {
         val ytelse = ytelseForTopics[data.topic()]
+        val logContext = SecureLog.Context.tom()
         if (ytelse == null) {
-            log.medContext(SecureLog.Context.tom()) {
+            log.medContext(logContext) {
                 error("Fant ikke ytelse for topic {}. Innhold: {}", data.topic(), data.value())
             }
             return
         }
-        SecureLog.medContext(SecureLog.Context.tom()) {
+        SecureLog.medContext(logContext) {
             info("Mottok melding fra fagsystem via kafka topic {}, melding: {}", data.topic(), data.value())
         }
         try {
+            log.medContext(logContext) {
+                info("Mottok melding fra kafka via kafka topic {}", data.topic())
+            }
             håndterMelding(ytelse, data.value())
         } catch (e: Exception) {
-            log.medContext(SecureLog.Context.tom()) {
+            log.medContext(logContext) {
                 error("Kunne ikke håndtere svar fra fagsystem", e)
             }
             throw e
@@ -53,6 +57,13 @@ class FagsystemKafkaListener(
                 val fagsysteminfo = objectMapper.treeToValue<FagsysteminfoSvarHendelse>(obj)
                 fagsystemIntegrasjonService.håndter(ytelse, fagsysteminfo)
             }
+        }
+        SecureLog.medContext(SecureLog.Context.tom()) {
+            info(
+                "Ferdig med håndtering av melding med type {}. Mottatt for ytelse {}",
+                header.hendelsestype,
+                ytelse.tilFagsystemDTO(),
+            )
         }
     }
 }
