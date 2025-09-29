@@ -32,7 +32,14 @@ class FagsystemKafkaListener(
         SecureLog.medContext(SecureLog.Context.tom()) {
             info("Mottok melding fra fagsystem via kafka topic {}, melding: {}", data.topic(), data.value())
         }
-        håndterMelding(ytelse, data.value())
+        try {
+            håndterMelding(ytelse, data.value())
+        } catch (e: Exception) {
+            log.medContext(SecureLog.Context.tom()) {
+                error("Kunne ikke håndtere svar fra fagsystem", e)
+            }
+            throw e
+        }
     }
 
     fun håndterMelding(
