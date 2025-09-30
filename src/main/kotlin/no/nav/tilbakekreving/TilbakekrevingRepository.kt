@@ -7,7 +7,9 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.tilbakekreving.entities.TilbakekrevingEntity
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
@@ -20,25 +22,6 @@ class TilbakekrevingRepository(
         .registerModule(JavaTimeModule())
         .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-
-    @Transactional
-    fun lagre(
-        tilbakekrevingId: UUID,
-        behandlingId: UUID,
-        tilbakekrevingEntity: TilbakekrevingEntity,
-    ) {
-        jdbcTemplate.update(
-            """
-        INSERT INTO tilbakekreving_behandling(tilbakekreving_id, behandling_id)
-        VALUES (?, ?)
-        ON CONFLICT (tilbakekreving_id, behandling_id) DO NOTHING
-            """.trimIndent(),
-            tilbakekrevingId,
-            behandlingId,
-        )
-
-        lagreTilstand(tilbakekrevingEntity)
-    }
 
     fun hentTilbakekreving(behandlingId: UUID): TilbakekrevingEntity? {
         val tilbakekrevingId: UUID? = jdbcTemplate.query(
@@ -59,18 +42,58 @@ class TilbakekrevingRepository(
         }.toList()
     }
 
-    @Transactional
-    fun lagreTilstand(snapshot: TilbakekrevingEntity) {
-        val jsonText = objectMapper.writeValueAsString(snapshot)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun opprett(
+        tilbakekrevingEntity: TilbakekrevingEntity,
+    ): UUID {
         jdbcTemplate.update(
-            """
-            INSERT INTO tilbakekreving_snapshot (id, snapshot) 
-            VALUES (?, to_jsonb(?::json)) 
-            ON CONFLICT (id) DO UPDATE SET snapshot = excluded.snapshot
-            """.trimIndent(),
-            snapshot.id,
-            jsonText,
+            "INSERT INTO tilbakekreving_snapshot(id, snapshot) VALUES (?, ?);",
+            tilbakekrevingEntity.id,
+            objectMapper.writeValueAsString(tilbakekrevingEntity),
         )
+
+        return tilbakekrevingEntity.id
+    }
+
+    // Denne er inline så den blir inlinet i transactions
+    private inline fun hentForOppdatering(tilbakekrevingId: UUID): TilbakekrevingEntity {
+        return jdbcTemplate.query(
+            "SELECT * FROM tilbakekreving_snapshot WHERE id=? FOR UPDATE;",
+            tilbakekrevingId,
+        ) { rs, _ ->
+            val jsonText = rs.getString("snapshot")
+            objectMapper.readValue(jsonText, TilbakekrevingEntity::class.java)
+        }.toList().single()
+    }
+
+    // Denne er inline så den blir inlinet i transactions
+    private inline fun oppdaterBehandlingsIder(tilbakekrevingEntity: TilbakekrevingEntity) {
+        for (behandlingId in tilbakekrevingEntity.behandlingHistorikkEntities.map { it.eksternId }) {
+            jdbcTemplate.update(
+                """
+        INSERT INTO tilbakekreving_behandling(tilbakekreving_id, behandling_id)
+        VALUES (?, ?)
+        ON CONFLICT (tilbakekreving_id, behandling_id) DO NOTHING
+                """.trimIndent(),
+                tilbakekrevingEntity.id,
+                behandlingId,
+            )
+        }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun hentOgLagreResultat(
+        tilbakekrevingId: UUID,
+        callback: (TilbakekrevingEntity) -> TilbakekrevingEntity,
+    ) {
+        val oppdatertEntity = callback(hentForOppdatering(tilbakekrevingId))
+        val jsonText = objectMapper.writeValueAsString(oppdatertEntity)
+        jdbcTemplate.update(
+            "UPDATE tilbakekreving_snapshot SET snapshot = to_jsonb(?::json) WHERE id=?;",
+            jsonText,
+            tilbakekrevingId,
+        )
+        oppdaterBehandlingsIder(oppdatertEntity)
     }
 
     fun hentTilbakekrevingMedTilbakekrevingId(id: UUID): TilbakekrevingEntity? {

@@ -1,17 +1,22 @@
 package no.nav.tilbakekreving.e2e
 
+import io.kotest.inspectors.forAll
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.TilbakekrevingRepository
 import no.nav.tilbakekreving.april
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.NyKlassekode
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp.Companion.medFeilutbetaling
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsperiode
+import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
+import no.nav.tilbakekreving.fagsystem.Ytelse
+import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagMediator
@@ -24,10 +29,16 @@ import java.util.UUID
 
 class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
     @Autowired
+    private lateinit var fagsystemIntegrasjonService: FagsystemIntegrasjonService
+
+    @Autowired
     private lateinit var tilbakekrevingRepository: TilbakekrevingRepository
 
     @Autowired
     private lateinit var kravgrunnlagMediator: KravgrunnlagMediator
+
+    @Autowired
+    private lateinit var kafkaProducerStub: KafkaProducerStub
 
     @Test
     fun `kan lese kravgrunnlag for tilleggsstønader`() {
@@ -97,6 +108,38 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
         }
 
         tilbakekrevingRepository.hentAlleTilbakekrevinger()?.count { it.eksternFagsak.eksternId == fagsystemId } shouldBe 1
+    }
+
+    @Test
+    fun `mottar svar fra fagsystem mens vi venter på svar fra PDL`() {
+        runBlocking(Dispatchers.IO) {
+            val fagsystemIder = (0..4).map {
+                val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+                val future = Thread {
+                    fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
+                }
+
+                kafkaProducerStub.settFagsysteminfoSvar(fagsystemId) {
+                    // Simuler at en ny melding kommer raskt fra en annen tråd
+                    future.start()
+                }
+
+                sendKravgrunnlag(QUEUE_NAME, KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId, fødselsnummer = "sleepy12345"))
+                kravgrunnlagMediator.lesKravgrunnlag()
+                future.join()
+                fagsystemId
+            }
+
+            val tilbakekrevinger = tilbakekrevingRepository.hentAlleTilbakekrevinger()
+                .shouldNotBeNull()
+                .filter { it.eksternFagsak.eksternId in fagsystemIder }
+
+            tilbakekrevinger.size shouldBe 5
+
+            tilbakekrevinger.forAll {
+                it.eksternFagsak.behandlinger.size shouldBe 2
+            }
+        }
     }
 
     companion object {

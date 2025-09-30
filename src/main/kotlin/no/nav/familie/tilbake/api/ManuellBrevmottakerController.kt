@@ -57,7 +57,7 @@ class ManuellBrevmottakerController(
                 handling = "Legger til brevmottaker manuelt",
             )
             val id = UUID.randomUUID()
-            tilbakekrevingService.behandleBrevmottaker(saksbehandler, tilbakekreving, manuellBrevmottakerRequestDto, id)
+            tilbakekrevingService.behandleBrevmottaker(saksbehandler, tilbakekreving.id, manuellBrevmottakerRequestDto, id)
             return Ressurs.success(id, melding = "Manuell brevmottaker er lagt til.")
         }
 
@@ -115,7 +115,7 @@ class ManuellBrevmottakerController(
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
                 handling = "Oppdaterer manuell brevmottaker",
             )
-            tilbakekrevingService.behandleBrevmottaker(saksbehandler, tilbakekreving, manuellBrevmottakerRequestDto, manuellBrevmottakerId)
+            tilbakekrevingService.behandleBrevmottaker(saksbehandler, tilbakekreving.id, manuellBrevmottakerRequestDto, manuellBrevmottakerId)
             return Ressurs.success("", melding = "Manuell brevmottaker er oppdatert")
         }
 
@@ -145,7 +145,7 @@ class ManuellBrevmottakerController(
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
                 handling = "Fjerner manuell brevmottaker",
             )
-            tilbakekrevingService.fjernManuelBrevmottaker(saksbehandler, tilbakekreving, manuellBrevmottakerId)
+            tilbakekrevingService.fjernManuelBrevmottaker(saksbehandler, tilbakekreving.id, manuellBrevmottakerId)
             return Ressurs.success("", melding = "Manuell brevmottaker er oppdatert")
         }
 
@@ -172,7 +172,7 @@ class ManuellBrevmottakerController(
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
                 handling = "Oppretter brevmottaker-steg på behandling",
             )
-            tilbakekrevingService.aktiverBrevmottakerSteg(tilbakekreving)
+            tilbakekrevingService.aktiverBrevmottakerSteg(tilbakekreving.id)
             return Ressurs.success("OK")
         }
 
@@ -199,7 +199,7 @@ class ManuellBrevmottakerController(
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
                 handling = "Fjern ev. manuelt registrerte brevmottakere og deaktiver steg.",
             )
-            tilbakekrevingService.fjernBrevmottakerSteg(tilbakekreving)
+            tilbakekrevingService.fjernBrevmottakerSteg(tilbakekreving.id)
             return Ressurs.success("OK")
         }
 

@@ -35,6 +35,7 @@ import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.brev.MottakerType
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
@@ -42,6 +43,7 @@ import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -63,17 +65,22 @@ class TilbakekrevingService(
         håndter: (Tilbakekreving) -> Unit,
     ) {
         val observatør = Observatør()
-        val tilbakekreving = Tilbakekreving.opprett(observatør, opprettTilbakekrevingHendelse, bigQueryService, endringObservatørService)
-        håndter(tilbakekreving)
+        lateinit var logContext: SecureLog.Context
 
-        val logContext = SecureLog.Context.fra(tilbakekreving)
-        logger.medContext(logContext) { info("Lagrer tilbakekreving") }
-        lagre(tilbakekreving)
+        val tilbakekrevingId = tilbakekrevingRepository.opprett(Tilbakekreving.opprett(observatør, opprettTilbakekrevingHendelse, bigQueryService, endringObservatørService).tilEntity())
 
-        logger.medContext(logContext) { info("Håndterer behov") }
-        sjekkBehovOgHåndter(tilbakekreving, observatør, SecureLog.Context.fra(tilbakekreving))
+        hentOgLagreTilbakekreving(tilbakekrevingId) { tilbakekreving ->
+            håndter(tilbakekreving)
 
-        logger.medContext(logContext) { info("URL til behandlingn er: {}", tilbakekreving.hentTilbakekrevingUrl(applicationProperties.frontendUrl)) }
+            logContext = SecureLog.Context.fra(tilbakekreving)
+            logger.medContext(logContext) { info("Lagrer tilbakekreving") }
+            logger.medContext(logContext) {
+                info("URL til behandling er: {}", tilbakekreving.hentTilbakekrevingUrl(applicationProperties.frontendUrl))
+            }
+
+            tilbakekreving.tilEntity()
+        }
+
         logger.medContext(logContext) { info("Tilbakekreving ferdig opprettet") }
     }
 
@@ -93,7 +100,35 @@ class TilbakekrevingService(
         return tilbakekrevingRepository.hentTilbakekreving(behandlingId)?.fraEntity(Observatør(), bigQueryService, endringObservatørService)
     }
 
-    fun <T> hentTilbakekreving(
+    fun <T : Any> hentOgLagreTilbakekreving(
+        tilbakekrevingId: UUID,
+        callback: (Tilbakekreving) -> T,
+    ): T {
+        lateinit var result: T
+        val observatør = Observatør()
+        tilbakekrevingRepository.hentOgLagreResultat(tilbakekrevingId) {
+            val tilbakekreving = it.fraEntity(observatør, bigQueryService, endringObservatørService)
+            val logContext = SecureLog.Context.fra(tilbakekreving)
+            result = callback(tilbakekreving)
+
+            while (observatør.harUbesvarteBehov()) {
+                try {
+                    håndterBehov(tilbakekreving, observatør.nesteBehov(), SecureLog.Context.fra(tilbakekreving))
+                } catch (e: Exception) {
+                    logger.medContext(logContext) {
+                        warn("Feilet under håndtering av behov", e)
+                    }
+                    break
+                }
+            }
+
+            tilbakekreving.tilEntity()
+        }
+
+        return result
+    }
+
+    fun <T : Any> hentTilbakekreving(
         fagsystem: FagsystemDTO,
         eksternFagsakId: String,
         håndter: (Tilbakekreving) -> T,
@@ -101,64 +136,23 @@ class TilbakekrevingService(
         return tilbakekrevingRepository.hentAlleTilbakekrevinger()
             ?.asSequence()
             ?.map {
-                val observatør = Observatør()
-                it.fraEntity(observatør, bigQueryService, endringObservatørService) to observatør
+                it.fraEntity(Observatør(), bigQueryService, endringObservatørService)
             }
-            ?.firstOrNull { (tilbakekreving, _) -> tilbakekreving.tilFrontendDto().fagsystem == fagsystem && tilbakekreving.tilFrontendDto().eksternFagsakId == eksternFagsakId }
-            ?.let { (tilbakekreving, observatør) ->
-                tilbakekreving.utførSideeffekt(observatør, håndter)
+            ?.firstOrNull { tilbakekreving -> tilbakekreving.tilFrontendDto().fagsystem == fagsystem && tilbakekreving.tilFrontendDto().eksternFagsakId == eksternFagsakId }
+            ?.let { tilbakekreving ->
+                hentOgLagreTilbakekreving(tilbakekreving.id, håndter)
             }
     }
 
-    fun <T> hentTilbakekreving(
+    fun <T : Any> hentTilbakekreving(
         behandlingId: UUID,
         håndter: (Tilbakekreving) -> T,
     ): T? {
-        val observatør = Observatør()
         return tilbakekrevingRepository.hentTilbakekreving(behandlingId)
-            ?.fraEntity(observatør, bigQueryService, endringObservatørService)
-            ?.utførSideeffekt(observatør, håndter)
-    }
-
-    private fun <T> Tilbakekreving.utførSideeffekt(
-        observatør: Observatør,
-        håndter: (Tilbakekreving) -> T,
-    ): T? {
-        val resultat = håndter(this)
-        lagre(this)
-        sjekkBehovOgHåndter(this, observatør, SecureLog.Context.fra(this))
-        return resultat
-    }
-
-    fun lagre(
-        tilbakekreving: Tilbakekreving,
-    ) {
-        if (tilbakekreving.behandlingHistorikk.harBehandling()) {
-            tilbakekrevingRepository.lagre(
-                tilbakekreving.id,
-                tilbakekreving.behandlingHistorikk.nåværende().entry.internId,
-                tilbakekreving.tilEntity(),
-            )
-        }
-    }
-
-    private fun sjekkBehovOgHåndter(
-        tilbakekreving: Tilbakekreving,
-        observatør: Observatør,
-        logContext: SecureLog.Context,
-    ) {
-        while (observatør.harUbesvarteBehov()) {
-            try {
-                val behov = observatør.nesteBehov()
-                håndterBehov(tilbakekreving, behov, logContext)
-                lagre(tilbakekreving)
-            } catch (e: Exception) {
-                logger.medContext(logContext) {
-                    warn("Feilet under håndtering av behov", e)
-                }
-                break
+            ?.fraEntity(Observatør(), bigQueryService, endringObservatørService)
+            ?.let {
+                hentOgLagreTilbakekreving(it.id, håndter)
             }
-        }
     }
 
     private fun håndterBehov(
@@ -225,20 +219,20 @@ class TilbakekrevingService(
 
     fun utførSteg(
         behandler: Behandler,
-        tilbakekreving: Tilbakekreving,
+        tilbakekrevingId: UUID,
         behandlingsstegDto: BehandlingsstegDto,
         logContext: SecureLog.Context,
     ) {
-        val result = when (behandlingsstegDto) {
-            is BehandlingsstegForeldelseDto -> behandleForeldelse(tilbakekreving, behandlingsstegDto, behandler)
-            is BehandlingsstegVilkårsvurderingDto -> behandleVilkårsvurdering(tilbakekreving, behandlingsstegDto, behandler)
-            is BehandlingsstegFaktaDto -> behandleFakta(tilbakekreving, behandlingsstegDto, behandler)
-            is BehandlingsstegForeslåVedtaksstegDto -> behandleForeslåVedtak(tilbakekreving, behandlingsstegDto, behandler)
-            is BehandlingsstegFatteVedtaksstegDto -> behandleFatteVedtak(tilbakekreving, behandlingsstegDto, behandler)
-            else -> throw Feil("Vurdering for ${behandlingsstegDto.getSteg()} er ikke implementert i ny modell enda.", logContext = logContext)
+        return hentOgLagreTilbakekreving(tilbakekrevingId) { tilbakekreving ->
+            when (behandlingsstegDto) {
+                is BehandlingsstegForeldelseDto -> behandleForeldelse(tilbakekreving, behandlingsstegDto, behandler)
+                is BehandlingsstegVilkårsvurderingDto -> behandleVilkårsvurdering(tilbakekreving, behandlingsstegDto, behandler)
+                is BehandlingsstegFaktaDto -> behandleFakta(tilbakekreving, behandlingsstegDto, behandler)
+                is BehandlingsstegForeslåVedtaksstegDto -> behandleForeslåVedtak(tilbakekreving, behandlingsstegDto, behandler)
+                is BehandlingsstegFatteVedtaksstegDto -> behandleFatteVedtak(tilbakekreving, behandlingsstegDto, behandler)
+                else -> throw Feil("Vurdering for ${behandlingsstegDto.getSteg()} er ikke implementert i ny modell enda.", logContext = logContext)
+            }
         }
-        tilbakekrevingRepository.lagreTilstand(tilbakekreving.tilEntity())
-        return result
     }
 
     private fun behandleFakta(
@@ -341,86 +335,107 @@ class TilbakekrevingService(
 
     fun behandleBrevmottaker(
         behandler: Behandler,
-        tilbakekreving: Tilbakekreving,
+        tilbakekrevingId: UUID,
         brevmottakerDto: ManuellBrevmottakerRequestDto,
         id: UUID,
     ) {
-        when (brevmottakerDto.type) {
-            MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE -> {
-                tilbakekreving.håndter(
-                    behandler,
-                    RegistrertBrevmottaker.UtenlandskAdresseMottaker(
-                        id = id,
-                        navn = brevmottakerDto.navn,
-                        manuellAdresseInfo = brevmottakerDto.manuellAdresseInfo,
-                    ),
-                )
-            }
+        hentOgLagreTilbakekreving(tilbakekrevingId) { tilbakekreving ->
+            when (brevmottakerDto.type) {
+                MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE -> {
+                    tilbakekreving.håndter(
+                        behandler,
+                        RegistrertBrevmottaker.UtenlandskAdresseMottaker(
+                            id = id,
+                            navn = brevmottakerDto.navn,
+                            manuellAdresseInfo = brevmottakerDto.manuellAdresseInfo,
+                        ),
+                    )
+                }
 
-            MottakerType.FULLMEKTIG -> {
-                tilbakekreving.håndter(
-                    behandler,
-                    RegistrertBrevmottaker.FullmektigMottaker(
-                        id = id,
-                        navn = brevmottakerDto.navn,
-                        organisasjonsnummer = brevmottakerDto.organisasjonsnummer,
-                        personIdent = brevmottakerDto.personIdent,
-                        manuellAdresseInfo = brevmottakerDto.manuellAdresseInfo,
-                    ),
-                )
-            }
+                MottakerType.FULLMEKTIG -> {
+                    tilbakekreving.håndter(
+                        behandler,
+                        RegistrertBrevmottaker.FullmektigMottaker(
+                            id = id,
+                            navn = brevmottakerDto.navn,
+                            organisasjonsnummer = brevmottakerDto.organisasjonsnummer,
+                            personIdent = brevmottakerDto.personIdent,
+                            manuellAdresseInfo = brevmottakerDto.manuellAdresseInfo,
+                        ),
+                    )
+                }
 
-            MottakerType.VERGE -> {
-                tilbakekreving.håndter(
-                    behandler,
-                    RegistrertBrevmottaker.VergeMottaker(
-                        id = id,
-                        navn = brevmottakerDto.navn,
-                        personIdent = brevmottakerDto.personIdent,
-                        manuellAdresseInfo = brevmottakerDto.manuellAdresseInfo,
-                    ),
-                )
-            }
+                MottakerType.VERGE -> {
+                    tilbakekreving.håndter(
+                        behandler,
+                        RegistrertBrevmottaker.VergeMottaker(
+                            id = id,
+                            navn = brevmottakerDto.navn,
+                            personIdent = brevmottakerDto.personIdent,
+                            manuellAdresseInfo = brevmottakerDto.manuellAdresseInfo,
+                        ),
+                    )
+                }
 
-            MottakerType.DØDSBO -> {
-                tilbakekreving.håndter(
-                    behandler,
-                    RegistrertBrevmottaker.DødsboMottaker(
-                        id = id,
-                        navn = brevmottakerDto.navn,
-                        manuellAdresseInfo = brevmottakerDto.manuellAdresseInfo,
-                    ),
-                )
-            }
+                MottakerType.DØDSBO -> {
+                    tilbakekreving.håndter(
+                        behandler,
+                        RegistrertBrevmottaker.DødsboMottaker(
+                            id = id,
+                            navn = brevmottakerDto.navn,
+                            manuellAdresseInfo = brevmottakerDto.manuellAdresseInfo,
+                        ),
+                    )
+                }
 
-            else -> throw IllegalArgumentException("Default eller ugydlig mottaker type ${brevmottakerDto.type}")
+                else -> throw IllegalArgumentException("Default eller ugydlig mottaker type ${brevmottakerDto.type}")
+            }
         }
-        tilbakekrevingRepository.lagreTilstand(tilbakekreving.tilEntity())
     }
 
-    fun flyttBehandlingTilFakta(tilbakekreving: Tilbakekreving) {
-        tilbakekreving.håndterNullstilling()
-        tilbakekrevingRepository.lagreTilstand(tilbakekreving.tilEntity())
+    fun settPåVent(tilbakekrevingId: UUID, venteårsak: Venteårsak, tidsfrist: LocalDate, begrunnelse: String?) {
+        hentOgLagreTilbakekreving(tilbakekrevingId) { tilbakekreving ->
+            tilbakekreving.behandlingHistorikk.nåværende().entry.settPåVent(
+                årsak = venteårsak,
+                utløpsdato = tidsfrist,
+                begrunnelse = begrunnelse,
+            )
+        }
     }
 
-    fun aktiverBrevmottakerSteg(tilbakekreving: Tilbakekreving) {
-        validerBrevmottaker(tilbakekreving)
-        tilbakekreving.aktiverBrevmottakerSteg()
-        tilbakekrevingRepository.lagreTilstand(tilbakekreving.tilEntity())
+    fun taAvVent(tilbakekrevingId: UUID) {
+        hentOgLagreTilbakekreving(tilbakekrevingId) { tilbakekreving ->
+            tilbakekreving.behandlingHistorikk.nåværende().entry.taAvVent()
+        }
     }
 
-    fun fjernBrevmottakerSteg(tilbakekreving: Tilbakekreving) {
-        tilbakekreving.deaktiverBrevmottakerSteg()
-        tilbakekrevingRepository.lagreTilstand(tilbakekreving.tilEntity())
+    fun flyttBehandlingTilFakta(tilbakekrevingId: UUID) {
+        hentOgLagreTilbakekreving(tilbakekrevingId) { tilbakekreving ->
+            tilbakekreving.håndterNullstilling()
+        }
+    }
+
+    fun aktiverBrevmottakerSteg(tilbakekrevingId: UUID) {
+        hentOgLagreTilbakekreving(tilbakekrevingId) { tilbakekreving ->
+            validerBrevmottaker(tilbakekreving)
+            tilbakekreving.aktiverBrevmottakerSteg()
+        }
+    }
+
+    fun fjernBrevmottakerSteg(tilbakekrevingId: UUID) {
+        hentOgLagreTilbakekreving(tilbakekrevingId) { tilbakekreving ->
+            tilbakekreving.deaktiverBrevmottakerSteg()
+        }
     }
 
     fun fjernManuelBrevmottaker(
         behandler: Behandler,
-        tilbakekreving: Tilbakekreving,
+        tilbakekrevingId: UUID,
         manuellBrevmottakerId: UUID,
     ) {
-        tilbakekreving.fjernManuelBrevmottaker(behandler, manuellBrevmottakerId)
-        tilbakekrevingRepository.lagreTilstand(tilbakekreving.tilEntity())
+        hentOgLagreTilbakekreving(tilbakekrevingId) { tilbakekreving ->
+            tilbakekreving.fjernManuelBrevmottaker(behandler, manuellBrevmottakerId)
+        }
     }
 
     fun hentBehandlingsinfo(

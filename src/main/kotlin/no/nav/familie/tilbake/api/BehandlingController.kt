@@ -166,7 +166,8 @@ class BehandlingController(
         @Valid @RequestBody
         behandlingsstegDto: BehandlingsstegDto,
     ): Ressurs<String> {
-        val håndtert = tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving ->
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        if (tilbakekreving != null) {
             val logContext = SecureLog.Context.fra(tilbakekreving)
             val saksbehandler = ContextService.hentBehandler(logContext)
 
@@ -183,10 +184,7 @@ class BehandlingController(
                 handling = "Utfører behandlingens aktiv steg og fortsetter den til neste steg",
             )
 
-            tilbakekrevingService.utførSteg(saksbehandler, tilbakekreving, behandlingsstegDto, logContext)
-            true
-        }
-        if (håndtert ?: false) {
+            tilbakekrevingService.utførSteg(saksbehandler, tilbakekreving.id, behandlingsstegDto, logContext)
             return Ressurs.success("OK")
         }
         tilgangskontrollService.validerTilgangBehandlingID(
@@ -225,7 +223,8 @@ class BehandlingController(
         @Valid @RequestBody
         behandlingPåVentDto: BehandlingPåVentDto,
     ): Ressurs<String> {
-        val håndtert = tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving ->
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        if (tilbakekreving != null) {
             tilgangskontrollService.validerTilgangTilbakekreving(
                 tilbakekreving = tilbakekreving,
                 behandlingId = behandlingId,
@@ -233,14 +232,7 @@ class BehandlingController(
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
                 handling = "Setter saksbehandler behandling på vent eller utvider fristen",
             )
-            tilbakekreving.behandlingHistorikk.nåværende().entry.settPåVent(
-                årsak = behandlingPåVentDto.venteårsak,
-                utløpsdato = behandlingPåVentDto.tidsfrist,
-                begrunnelse = behandlingPåVentDto.begrunnelse,
-            )
-            true
-        }
-        if (håndtert ?: false) {
+            tilbakekrevingService.settPåVent(tilbakekreving.id, behandlingPåVentDto.venteårsak, behandlingPåVentDto.tidsfrist, behandlingPåVentDto.begrunnelse)
             return Ressurs.success("OK")
         }
         tilgangskontrollService.validerTilgangBehandlingID(
@@ -261,7 +253,8 @@ class BehandlingController(
     fun taBehandlingAvVent(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<String> {
-        val håndtert = tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving ->
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        if (tilbakekreving != null) {
             tilgangskontrollService.validerTilgangTilbakekreving(
                 tilbakekreving = tilbakekreving,
                 behandlingId = behandlingId,
@@ -269,10 +262,7 @@ class BehandlingController(
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
                 handling = "Saksbehandler tar behandling av vent etter å motta brukerrespons eller dokumentasjon",
             )
-            tilbakekreving.behandlingHistorikk.nåværende().entry.taAvVent()
-            true
-        }
-        if (håndtert ?: false) {
+            tilbakekrevingService.taAvVent(tilbakekreving.id)
             return Ressurs.success("OK")
         }
         tilgangskontrollService.validerTilgangBehandlingID(
@@ -352,11 +342,16 @@ class BehandlingController(
     fun flyttBehandlingTilFakta(
         @PathVariable behandlingId: UUID,
     ): Ressurs<String> {
-        val håndtert = tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving ->
-            tilbakekrevingService.flyttBehandlingTilFakta(tilbakekreving)
-            true
-        }
-        if (håndtert ?: false) {
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        if (tilbakekreving != null) {
+            tilgangskontrollService.validerTilgangTilbakekreving(
+                tilbakekreving = tilbakekreving,
+                behandlingId = behandlingId,
+                minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                auditLoggerEvent = AuditLoggerEvent.UPDATE,
+                handling = "Flytter behandling tilbake til Fakta",
+            )
+            tilbakekrevingService.flyttBehandlingTilFakta(tilbakekreving.id)
             return Ressurs.success("OK")
         }
         tilgangskontrollService.validerTilgangBehandlingID(

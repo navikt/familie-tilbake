@@ -6,6 +6,7 @@ import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.api.v2.fagsystem.EventMetadata
 import no.nav.tilbakekreving.api.v2.fagsystem.Kafkamelding
+import no.nav.tilbakekreving.api.v2.fagsystem.behov.FagsysteminfoBehovHendelse
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandlingRequest
 import org.springframework.context.annotation.Primary
@@ -14,10 +15,12 @@ import java.util.UUID
 
 @Service
 @Primary
-class KafkaProducerStub : KafkaProducer {
+class KafkaProducerStub() : KafkaProducer {
     private val saksdata = mutableMapOf<UUID, MutableList<Behandlingstilstand>>()
     private val vedtak = mutableMapOf<UUID, MutableList<Vedtaksoppsummering>>()
     private val kafkameldinger = mutableMapOf<String, MutableList<Kafkamelding>>()
+
+    private val fagsystemInfoSvarHandlers = mutableMapOf<String, () -> Unit>()
 
     override fun <K : Kafkamelding> sendKafkaEvent(
         kafkamelding: K,
@@ -27,6 +30,14 @@ class KafkaProducerStub : KafkaProducer {
         logContext: SecureLog.Context,
     ) {
         kafkameldinger.computeIfAbsent(kafkamelding.eksternFagsakId) { mutableListOf() }.add(kafkamelding)
+        when (metadata) {
+            FagsysteminfoBehovHendelse.METADATA -> {
+                val eventHandler = fagsystemInfoSvarHandlers.remove(kafkamelding.eksternFagsakId)
+                if (eventHandler != null) {
+                    eventHandler()
+                }
+            }
+        }
     }
 
     override fun sendSaksdata(behandlingId: UUID, request: Behandlingstilstand, logContext: SecureLog.Context) {
@@ -46,4 +57,8 @@ class KafkaProducerStub : KafkaProducer {
     fun finnVedtaksoppsummering(behandlingId: UUID): List<Vedtaksoppsummering> = vedtak[behandlingId] ?: emptyList()
 
     fun finnKafkamelding(eksternFagsakId: String): List<Kafkamelding> = kafkameldinger[eksternFagsakId] ?: emptyList()
+
+    fun settFagsysteminfoSvar(eksternFagsakId: String, handler: () -> Unit) {
+        fagsystemInfoSvarHandlers[eksternFagsakId] = handler
+    }
 }
