@@ -44,6 +44,8 @@ PDL_SCOPE: api://prod-fss.pdl.pdl-api/.default
 
 DOKDIST_URL: https://dokdistfordeling.prod-fss-pub.nais.io
 DOKDIST_SCOPE: api://prod-fss.teamdokumenthandtering.dokdistfordeling/.default
+DOKARKIV_URL: https://dokarkiv.intern.nav.no
+DOKARKIV_SCOPE: api://prod-fss.teamdokumenthandtering.dokarkiv/.default
 
 FAMILIE_INTEGRASJONER_URL: https://familie-integrasjoner.prod-fss-pub.nais.io
 FAMILIE_INTEGRASJONER_SCOPE: api://prod-fss.teamfamilie.familie-integrasjoner/.default
@@ -66,3 +68,6 @@ tilbakekreving:
   dokdist:
     base-url: https://dokdistfordeling.prod-fss-pub.nais.io
     scope: api://prod-fss.teamdokumenthandtering.dokdistfordeling/.default
+  dokarkiv:
+    base-url: https://dokarkiv.intern.nav.no
+    scope: api://prod-fss.teamdokumenthandtering.dokarkiv/.default

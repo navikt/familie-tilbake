@@ -23,6 +23,9 @@ tilbakekreving:
   dokdist:
     base-url: dummy
     scope: dummy
+  dokarkiv:
+    base-url: dummy
+    scope: dummy
 rolle:
   barnetrygd:
     veileder: "93a26831-9866-4410-927b-74ff51a9107c"

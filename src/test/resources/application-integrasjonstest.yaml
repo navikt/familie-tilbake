@@ -59,4 +59,7 @@ tilbakekreving:
   dokdist:
     base-url: https://dokdistfordeling.dev-fss-pub.nais.io
     scope: api://dev-fss.teamdokumenthandtering.dokdistfordeling/.default
+  dokarkiv:
+    base-url: https://dokarkiv-q2.dev.intern.nav.no
+    scope: api://dev-fss.teamdokumenthandtering.dokarkiv/.default
 

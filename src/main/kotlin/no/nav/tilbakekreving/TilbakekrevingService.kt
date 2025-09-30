@@ -38,6 +38,7 @@ import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
+import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivService
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokumentdistribusjonService
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.domain.DistribuerJournalpostRequestTo
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
@@ -62,6 +63,7 @@ class TilbakekrevingService(
     private val endringObservatørService: EndringObservatørService,
     private val kafkaProducer: KafkaProducer,
     private val dokumentdistribusjonService: DokumentdistribusjonService,
+    private val dokarkivService: DokarkivService,
 ) {
     private val aktør = Aktør.Person(ident = "20046912345")
     private val logger = TracedLogger.getLogger<TilbakekrevingService>()
@@ -246,9 +248,6 @@ class TilbakekrevingService(
         fakta: BehandlingsstegFaktaDto,
         behandler: Behandler,
     ) {
-        if (fakta.begrunnelse.equals("Brev Test!")) {
-            sendBrevTest(tilbakekreving)
-        }
         tilbakekreving.håndter(
             behandler,
             vurdering = Faktasteg.Vurdering(
@@ -491,14 +490,14 @@ class TilbakekrevingService(
         }
     }
 
+    // Todo denne må fjernes. har den her kun for å teste lettere i dev!
     fun sendBrevTest(tilbakekreving: Tilbakekreving) {
-        println("=====>>>> Sender Brev: ")
-
+        val arkivert = dokarkivService.journalføringTest(tilbakekreving)
         runBlocking {
             val result = dokumentdistribusjonService.sendBrev(
                 tilbakekreving,
                 DistribuerJournalpostRequestTo(
-                    journalpostId = "123",
+                    journalpostId = arkivert.journalpostId!!,
                     batchId = null,
                     bestillendeFagsystem = FagsystemDTO.TS.name,
                     adresse = null,
@@ -507,8 +506,6 @@ class TilbakekrevingService(
                     distribusjonstidspunkt = Distribusjonstidspunkt.KJERNETID,
                 ),
             )
-
-            println("======>>>>> bestillingsId: ${result?.bestillingsId}")
         }
     }
 }

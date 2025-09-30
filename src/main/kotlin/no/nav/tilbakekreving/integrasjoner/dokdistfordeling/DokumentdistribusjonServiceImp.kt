@@ -13,8 +13,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
-import io.ktor.serialization.kotlinx.json.json
-import kotlinx.serialization.json.Json
+import io.ktor.serialization.jackson.jackson
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
@@ -39,14 +38,7 @@ class DokumentdistribusjonServiceImp(
 
     val client = HttpClient(CIO) {
         install(ContentNegotiation) {
-            json(
-                Json {
-                    ignoreUnknownKeys = true
-                    prettyPrint = true
-                    encodeDefaults = true
-                    explicitNulls = false
-                },
-            )
+            jackson()
         }
     }
 
@@ -80,7 +72,6 @@ class DokumentdistribusjonServiceImp(
             }
 
             if (response.status.isSuccess()) {
-                println("====>>> Body: ${response.bodyAsText()}")
                 return response.body<DistribuerJournalpostResponseTo>()
             } else {
                 val body = response.bodyAsText()

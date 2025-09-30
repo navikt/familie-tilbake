@@ -17,7 +17,6 @@ plugins {
     id("org.springframework.boot") version "3.5.4"
     id("org.jetbrains.kotlin.plugin.spring") version "2.2.0"
     id("org.jlleitschuh.gradle.ktlint") version "13.0.0"
-    kotlin("plugin.serialization") version "2.2.0"
 }
 
 springBoot {
@@ -87,7 +86,9 @@ dependencies {
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
+    implementation("io.ktor:ktor-serialization-jackson-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-server-content-negotiation-jvm:$ktorVersion")
+
     implementation("com.google.cloud:google-cloud-bigquery:2.54.0")
 
     api("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocVersion")

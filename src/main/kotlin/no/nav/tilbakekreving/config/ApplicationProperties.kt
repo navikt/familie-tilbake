@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.config
 
+import no.nav.tilbakekreving.integrasjoner.dokarkiv.config.DokarkivConfig
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.config.DokdistConfig
 import no.tilbakekreving.integrasjoner.persontilgang.PersontilgangService
 import no.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
@@ -17,4 +18,5 @@ data class ApplicationProperties(
     val bigQuery: BigQueryProperties,
     val frontendUrl: String,
     val dokdist: DokdistConfig,
+    val dokarkiv: no.nav.tilbakekreving.integrasjoner.dokarkiv.config.DokarkivConfig,
 )

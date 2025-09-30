@@ -46,8 +46,7 @@ class IntegrasjonerClientConfig {
                         "jpUkjentDødsbo",
                         false,
                         listOf(
-                            no.nav.familie.tilbake.kontrakter.dokarkiv
-                                .DokumentInfo("id"),
+                            no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.DokumentInfo("id"),
                         ),
                     )
                 "04098203010" ->
@@ -55,8 +54,7 @@ class IntegrasjonerClientConfig {
                         "jpUkjentDødsbo",
                         false,
                         listOf(
-                            no.nav.familie.tilbake.kontrakter.dokarkiv
-                                .DokumentInfo("id"),
+                            no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.DokumentInfo("id"),
                         ),
                     )
                 else ->
@@ -64,8 +62,7 @@ class IntegrasjonerClientConfig {
                         "jpId",
                         false,
                         listOf(
-                            no.nav.familie.tilbake.kontrakter.dokarkiv
-                                .DokumentInfo("id"),
+                            no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.DokumentInfo("id"),
                         ),
                     )
             }
