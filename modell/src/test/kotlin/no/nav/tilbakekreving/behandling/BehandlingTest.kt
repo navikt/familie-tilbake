@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.behandling
 import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.BrevmottakerSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
@@ -89,14 +90,14 @@ class BehandlingTest {
         val ansvarligSaksbehandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
         val periode = 1.januar til 31.januar
 
-        behandling.faktastegDto.tilFrontendDto().vurderingAvBrukersUttalelse.beskrivelse shouldBe null
-        behandling.faktastegDto.tilFrontendDto().vurderingAvBrukersUttalelse.harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.IKKE_VURDERT
+        behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL).vurderingAvBrukersUttalelse.beskrivelse shouldBe null
+        behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL).vurderingAvBrukersUttalelse.harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.IKKE_VURDERT
 
         val faktasteg = faktastegVurdering(periode)
         behandling.håndter(ansvarligSaksbehandler, faktasteg, BehandlingObservatørOppsamler())
 
-        behandling.faktastegDto.tilFrontendDto().vurderingAvBrukersUttalelse.beskrivelse shouldBe null
-        behandling.faktastegDto.tilFrontendDto().vurderingAvBrukersUttalelse.harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.NEI
+        behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL).vurderingAvBrukersUttalelse.beskrivelse shouldBe null
+        behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL).vurderingAvBrukersUttalelse.harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.NEI
 
         behandling.tilFrontendDto(TilBehandling, ansvarligSaksbehandler, true)
             .behandlingsstegsinfo.find { it.behandlingssteg == Behandlingssteg.FAKTA }
@@ -105,8 +106,8 @@ class BehandlingTest {
 
         TilBehandling.håndterNullstilling(behandling, Sporing("fefe", "fe"))
 
-        behandling.faktastegDto.tilFrontendDto().vurderingAvBrukersUttalelse.beskrivelse shouldBe null
-        behandling.faktastegDto.tilFrontendDto().vurderingAvBrukersUttalelse.harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.IKKE_VURDERT
+        behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL).vurderingAvBrukersUttalelse.beskrivelse shouldBe null
+        behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL).vurderingAvBrukersUttalelse.harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.IKKE_VURDERT
     }
 
     @Test

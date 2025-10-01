@@ -2,8 +2,6 @@ package no.nav.tilbakekreving.kontrakter.tilstand
 
 enum class TilbakekrevingTilstand {
     START,
-    AVVENTER_UTSATT_BEHANDLING_MED_VARSEL,
-    AVVENTER_UTSATT_BEHANDLING_UTEN_VARSEL,
     AVVENTER_KRAVGRUNNLAG,
     AVVENTER_FAGSYSTEMINFO,
     AVVENTER_BRUKERINFO,

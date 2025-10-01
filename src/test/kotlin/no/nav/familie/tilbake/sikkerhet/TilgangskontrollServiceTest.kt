@@ -420,7 +420,7 @@ internal class TilgangskontrollServiceTest : OppslagSpringRunnerTest() {
     private fun tilbakekreving(ytelse: Ytelse): Tilbakekreving {
         return Tilbakekreving.opprett(
             opprettTilbakekrevingEvent = OpprettTilbakekrevingHendelse(
-                opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
+                opprettelsesvalg = Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
                 eksternFagsak = OpprettTilbakekrevingHendelse.EksternFagsak(
                     "1abc",
                     ytelse,

@@ -22,7 +22,6 @@ import java.time.LocalDateTime
 class Faktasteg(
     private val brevHistorikk: BrevHistorikk,
     private val tilbakekrevingOpprettet: LocalDateTime,
-    private val opprettelsesvalg: Opprettelsesvalg,
     private var vurdering: Vurdering,
 ) : Saksbehandlingsteg {
     override val type: Behandlingssteg = Behandlingssteg.FAKTA
@@ -45,6 +44,7 @@ class Faktasteg(
     fun tilFrontendDto(
         kravgrunnlag: KravgrunnlagHendelse,
         eksternFagsakRevurdering: EksternFagsakRevurdering,
+        opprettelsesvalg: Opprettelsesvalg,
     ): FaktaFeilutbetalingDto {
         return FaktaFeilutbetalingDto(
             varsletBeløp = brevHistorikk.sisteVarselbrev()?.varsletBeløp,
@@ -63,32 +63,32 @@ class Faktasteg(
             faktainfo = Faktainfo(
                 revurderingsårsak = eksternFagsakRevurdering.revurderingsårsak.beskrivelse,
                 revurderingsresultat = eksternFagsakRevurdering.årsakTilFeilutbetaling,
-                tilbakekrevingsvalg =
-                    when (opprettelsesvalg) {
-                        Opprettelsesvalg.UTSETT_BEHANDLING_MED_VARSEL -> Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL
-                        Opprettelsesvalg.UTSETT_BEHANDLING_UTEN_VARSEL -> Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL
-                        Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL -> Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK
-                    },
+                tilbakekrevingsvalg = when (opprettelsesvalg) {
+                    Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL -> Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL
+                },
                 konsekvensForYtelser = emptySet(),
             ),
             kravgrunnlagReferanse = kravgrunnlag.referanse,
-            vurderingAvBrukersUttalelse = VurderingAvBrukersUttalelseDto(
-                harBrukerUttaltSeg = when (vurdering.uttalelse) {
-                    is Uttalelse.Ja -> HarBrukerUttaltSeg.JA
-                    is Uttalelse.Nei -> HarBrukerUttaltSeg.NEI
-                    is Uttalelse.IkkeAktuelt -> HarBrukerUttaltSeg.IKKE_AKTUELT
-                    is Uttalelse.IkkeVurdert -> HarBrukerUttaltSeg.IKKE_VURDERT
-                },
-                beskrivelse = (vurdering.uttalelse as? Uttalelse.Ja)?.begrunnelse,
-            ),
+            vurderingAvBrukersUttalelse = vurderingAvBrukersUttalelse(),
             opprettetTid = tilbakekrevingOpprettet,
+        )
+    }
+
+    fun vurderingAvBrukersUttalelse(): VurderingAvBrukersUttalelseDto {
+        return VurderingAvBrukersUttalelseDto(
+            harBrukerUttaltSeg = when (vurdering.uttalelse) {
+                is Uttalelse.Ja -> HarBrukerUttaltSeg.JA
+                is Uttalelse.Nei -> HarBrukerUttaltSeg.NEI
+                is Uttalelse.IkkeAktuelt -> HarBrukerUttaltSeg.IKKE_AKTUELT
+                is Uttalelse.IkkeVurdert -> HarBrukerUttaltSeg.IKKE_VURDERT
+            },
+            beskrivelse = (vurdering.uttalelse as? Uttalelse.Ja)?.begrunnelse,
         )
     }
 
     fun tilEntity(): FaktastegEntity {
         return FaktastegEntity(
             tilbakekrevingOpprettet = tilbakekrevingOpprettet,
-            opprettelsesvalg = opprettelsesvalg,
             perioder = vurdering.perioder.map { it.tilEntity() },
             uttalelse = when (vurdering.uttalelse) {
                 is Uttalelse.Ja -> FaktastegEntity.Uttalelse.Ja
@@ -107,12 +107,10 @@ class Faktasteg(
             kravgrunnlag: KravgrunnlagHendelse,
             brevHistorikk: BrevHistorikk,
             tilbakekrevingOpprettet: LocalDateTime,
-            opprettelsesvalg: Opprettelsesvalg,
         ): Faktasteg {
             return Faktasteg(
                 brevHistorikk = brevHistorikk,
                 tilbakekrevingOpprettet = tilbakekrevingOpprettet,
-                opprettelsesvalg = opprettelsesvalg,
                 vurdering = tomVurdering(kravgrunnlag, eksternFagsakRevurdering),
             )
         }

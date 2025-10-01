@@ -8,8 +8,6 @@ import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.tilstand.AvventerKravgrunnlag
-import no.nav.tilbakekreving.tilstand.AvventerUtsattBehandlingMedVarsel
-import no.nav.tilbakekreving.tilstand.AvventerUtsattBehandlingUtenVarsel
 import org.junit.jupiter.api.Test
 import kotlin.collections.listOf
 
@@ -19,26 +17,10 @@ class TilbakekrevingTest {
 
     @Test
     fun `oppretter tilbakekreving`() {
-        val opprettEvent = opprettTilbakekrevingHendelse(opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL)
+        val opprettEvent = opprettTilbakekrevingHendelse(opprettelsesvalg = Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
         val tilbakekreving = Tilbakekreving.opprett(BehovObservatørOppsamler(), opprettEvent, bigQueryService, endringObservatør)
 
         tilbakekreving.tilstand shouldBe AvventerKravgrunnlag
-    }
-
-    @Test
-    fun `oppretter tilbakekreving som avventer oppdatert kravgrunnlag uten varsel`() {
-        val opprettEvent = opprettTilbakekrevingHendelse(opprettelsesvalg = Opprettelsesvalg.UTSETT_BEHANDLING_UTEN_VARSEL)
-        val tilbakekreving = Tilbakekreving.opprett(BehovObservatørOppsamler(), opprettEvent, bigQueryService, endringObservatør)
-
-        tilbakekreving.tilstand shouldBe AvventerUtsattBehandlingUtenVarsel
-    }
-
-    @Test
-    fun `oppretter tilbakekreving som avventer oppdatert kravgrunnlag med varsel`() {
-        val opprettEvent = opprettTilbakekrevingHendelse(opprettelsesvalg = Opprettelsesvalg.UTSETT_BEHANDLING_MED_VARSEL)
-        val tilbakekreving = Tilbakekreving.opprett(BehovObservatørOppsamler(), opprettEvent, bigQueryService, endringObservatør)
-
-        tilbakekreving.tilstand shouldBe AvventerUtsattBehandlingMedVarsel
     }
 
     @Test

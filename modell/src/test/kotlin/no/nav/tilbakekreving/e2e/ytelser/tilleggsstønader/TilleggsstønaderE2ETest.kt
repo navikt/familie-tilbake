@@ -85,7 +85,7 @@ class TilleggsstønaderE2ETest {
         )
         tilbakekreving.håndter(brukerinfoHendelse())
 
-        val faktastegDto = tilbakekreving.behandlingHistorikk.nåværende().entry.faktastegDto.tilFrontendDto()
+        val faktastegDto = tilbakekreving.faktastegFrontendDto()
         faktastegDto.feilutbetaltePerioder shouldBe listOf(
             FeilutbetalingsperiodeDto(
                 periode = 1.januar til 31.januar,
@@ -188,7 +188,7 @@ class TilleggsstønaderE2ETest {
         )
         tilbakekreving.håndter(brukerinfoHendelse())
 
-        val faktastegDto = tilbakekreving.behandlingHistorikk.nåværende().entry.faktastegDto.tilFrontendDto()
+        val faktastegDto = tilbakekreving.faktastegFrontendDto()
         faktastegDto.feilutbetaltePerioder shouldBe listOf(
             FeilutbetalingsperiodeDto(
                 periode = 1.januar til 31.januar,

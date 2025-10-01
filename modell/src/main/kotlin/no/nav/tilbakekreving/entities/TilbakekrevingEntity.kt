@@ -14,8 +14,6 @@ import no.nav.tilbakekreving.tilstand.Avsluttet
 import no.nav.tilbakekreving.tilstand.AvventerBrukerinfo
 import no.nav.tilbakekreving.tilstand.AvventerFagsysteminfo
 import no.nav.tilbakekreving.tilstand.AvventerKravgrunnlag
-import no.nav.tilbakekreving.tilstand.AvventerUtsattBehandlingMedVarsel
-import no.nav.tilbakekreving.tilstand.AvventerUtsattBehandlingUtenVarsel
 import no.nav.tilbakekreving.tilstand.IverksettVedtak
 import no.nav.tilbakekreving.tilstand.SendVarselbrev
 import no.nav.tilbakekreving.tilstand.Start
@@ -73,8 +71,6 @@ data class TilbakekrevingEntity(
             behovObservatør = behovObservatør,
             tilstand = when (nåværendeTilstand) {
                 TilbakekrevingTilstand.START -> Start
-                TilbakekrevingTilstand.AVVENTER_UTSATT_BEHANDLING_MED_VARSEL -> AvventerUtsattBehandlingMedVarsel
-                TilbakekrevingTilstand.AVVENTER_UTSATT_BEHANDLING_UTEN_VARSEL -> AvventerUtsattBehandlingUtenVarsel
                 TilbakekrevingTilstand.AVVENTER_KRAVGRUNNLAG -> AvventerKravgrunnlag
                 TilbakekrevingTilstand.AVVENTER_FAGSYSTEMINFO -> AvventerFagsysteminfo
                 TilbakekrevingTilstand.AVVENTER_BRUKERINFO -> AvventerBrukerinfo
