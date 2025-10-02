@@ -1,6 +1,5 @@
-package no.nav.familie.tilbake.kontrakter.dokarkiv
+package no.nav.tilbakekreving.integrasjoner.dokarkiv.domain
 
-@Suppress("unused")
 enum class Dokumenttype {
     BARNETRYGD_TILBAKEKREVING_VEDTAK,
     OVERGANGSSTØNAD_TILBAKEKREVING_VEDTAK,

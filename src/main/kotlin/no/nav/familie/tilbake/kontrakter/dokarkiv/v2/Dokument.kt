@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.kontrakter.dokarkiv.v2
 
 import jakarta.validation.constraints.NotEmpty
-import no.nav.familie.tilbake.kontrakter.dokarkiv.Dokumenttype
+import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.Dokumenttype
 
 class Dokument(
     @field:NotEmpty val dokument: ByteArray,

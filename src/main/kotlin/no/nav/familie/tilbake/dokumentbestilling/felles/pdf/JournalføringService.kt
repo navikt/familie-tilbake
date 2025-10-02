@@ -10,7 +10,6 @@ import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.kontrakter.BrukerIdType
 import no.nav.familie.tilbake.kontrakter.dokarkiv.AvsenderMottaker
-import no.nav.familie.tilbake.kontrakter.dokarkiv.Dokumenttype
 import no.nav.familie.tilbake.kontrakter.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.tilbake.kontrakter.dokarkiv.v2.Dokument
 import no.nav.familie.tilbake.kontrakter.dokarkiv.v2.Filtype
@@ -20,6 +19,7 @@ import no.nav.familie.tilbake.kontrakter.journalpost.Journalpost
 import no.nav.familie.tilbake.kontrakter.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.Dokumenttype
 import no.nav.tilbakekreving.kontrakter.ytelse.Tema
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmetadata

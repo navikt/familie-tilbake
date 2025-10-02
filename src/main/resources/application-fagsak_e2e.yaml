@@ -42,6 +42,8 @@ unleash:
 
 STS_URL: http://nav-auth-mock:8200/nais-sts/token
 PDL_URL: http://familie-mock-server:1337/rest/api/pdl/
+DOKDIST_URL: http://familie-mock-server:1337
+DOKDIST_SCOPE: api://dummy/.default
 SECURITYTOKENSERVICE_URL: https://localhost:8063/soap/SecurityTokenServiceProvider/
 
 FAMILIE_INTEGRASJONER_URL: http://familie-integrasjoner:8085/api
