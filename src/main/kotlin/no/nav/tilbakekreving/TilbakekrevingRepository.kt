@@ -6,11 +6,15 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.tilbakekreving.entities.TilbakekrevingEntity
+import no.nav.tilbakekreving.entity.Entity.Companion.get
+import no.nav.tilbakekreving.entity.FieldConverter
+import no.nav.tilbakekreving.entity.TilbakekrevingEntityMapper
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import java.sql.ResultSet
 import java.util.UUID
 
 @Repository
@@ -23,29 +27,56 @@ class TilbakekrevingRepository(
         .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
 
-    fun hentTilbakekreving(behandlingId: UUID): TilbakekrevingEntity? {
-        val tilbakekrevingId: UUID? = jdbcTemplate.query(
-            "SELECT tilbakekreving_id FROM tilbakekreving_behandling WHERE behandling_id = ?",
-            arrayOf(behandlingId),
-        ) { rs, _ -> rs.getObject("tilbakekreving_id", UUID::class.java) }
-            .firstOrNull()
-
-        return tilbakekrevingId?.let { hentTilbakekrevingMedTilbakekrevingId(it) }
+    fun nesteId(): String {
+        return jdbcTemplate.query("SELECT nextval('tilbakekreving_id')") { rs, _ ->
+            FieldConverter.NumericId.convert(rs, "nextval")
+        }.single()
     }
 
-    fun hentAlleTilbakekrevinger(): List<TilbakekrevingEntity>? {
-        return jdbcTemplate.query(
-            "SELECT * FROM tilbakekreving_snapshot",
+    private fun mergeMedJson(
+        resultSet: ResultSet,
+    ): TilbakekrevingEntity {
+        val id = resultSet[TilbakekrevingEntityMapper.id]
+        val json = jdbcTemplate.query(
+            "SELECT * FROM tilbakekreving_snapshot WHERE id=?;",
+            id,
         ) { rs, _ ->
             val jsonText = rs.getString("snapshot")
             objectMapper.readValue(jsonText, TilbakekrevingEntity::class.java)
-        }.toList()
+        }.single()
+
+        return TilbakekrevingEntityMapper.map(
+            resultSet,
+            eksternFagsak = json.eksternFagsak,
+            behandlingHistorikk = json.behandlingHistorikkEntities,
+            kravgrunnlagHistorikk = json.kravgrunnlagHistorikkEntities,
+            brevHistorikk = json.brevHistorikkEntities,
+            bruker = json.bruker,
+        )
+    }
+
+    fun hentTilbakekreving(behandlingId: UUID): TilbakekrevingEntity? {
+        return hentAlleTilbakekrevinger()
+            ?.firstOrNull { tilbakekreving ->
+                tilbakekreving.behandlingHistorikkEntities
+                    .any { it.eksternId == behandlingId }
+            }
+    }
+
+    fun hentAlleTilbakekrevinger(): List<TilbakekrevingEntity>? {
+        return jdbcTemplate.query("SELECT * FROM tilbakekreving") { rs, _ ->
+            mergeMedJson(rs)
+        }
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun opprett(
         tilbakekrevingEntity: TilbakekrevingEntity,
-    ): UUID {
+    ): String {
+        TilbakekrevingEntityMapper.insertQuery(
+            jdbcTemplate,
+            tilbakekrevingEntity,
+        )
         jdbcTemplate.update(
             "INSERT INTO tilbakekreving_snapshot(id, snapshot) VALUES (?, ?);",
             tilbakekrevingEntity.id,
@@ -56,53 +87,30 @@ class TilbakekrevingRepository(
     }
 
     // Denne er inline så den blir inlinet i transactions
-    private inline fun hentForOppdatering(tilbakekrevingId: UUID): TilbakekrevingEntity {
+    private inline fun hentForOppdatering(tilbakekrevingId: String): TilbakekrevingEntity {
         return jdbcTemplate.query(
-            "SELECT * FROM tilbakekreving_snapshot WHERE id=? FOR UPDATE;",
-            tilbakekrevingId,
+            "SELECT * FROM tilbakekreving WHERE id=? FOR UPDATE;",
+            FieldConverter.NumericId.convert(tilbakekrevingId),
         ) { rs, _ ->
-            val jsonText = rs.getString("snapshot")
-            objectMapper.readValue(jsonText, TilbakekrevingEntity::class.java)
+            mergeMedJson(rs)
         }.toList().single()
-    }
-
-    // Denne er inline så den blir inlinet i transactions
-    private inline fun oppdaterBehandlingsIder(tilbakekrevingEntity: TilbakekrevingEntity) {
-        for (behandlingId in tilbakekrevingEntity.behandlingHistorikkEntities.map { it.eksternId }) {
-            jdbcTemplate.update(
-                """
-        INSERT INTO tilbakekreving_behandling(tilbakekreving_id, behandling_id)
-        VALUES (?, ?)
-        ON CONFLICT (tilbakekreving_id, behandling_id) DO NOTHING
-                """.trimIndent(),
-                tilbakekrevingEntity.id,
-                behandlingId,
-            )
-        }
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun hentOgLagreResultat(
-        tilbakekrevingId: UUID,
+        tilbakekrevingId: String,
         callback: (TilbakekrevingEntity) -> TilbakekrevingEntity,
     ) {
         val oppdatertEntity = callback(hentForOppdatering(tilbakekrevingId))
         val jsonText = objectMapper.writeValueAsString(oppdatertEntity)
+        TilbakekrevingEntityMapper.updateQuery(
+            jdbcTemplate,
+            oppdatertEntity,
+        )
         jdbcTemplate.update(
             "UPDATE tilbakekreving_snapshot SET snapshot = to_jsonb(?::json) WHERE id=?;",
             jsonText,
             tilbakekrevingId,
         )
-        oppdaterBehandlingsIder(oppdatertEntity)
-    }
-
-    fun hentTilbakekrevingMedTilbakekrevingId(id: UUID): TilbakekrevingEntity? {
-        return jdbcTemplate.query(
-            "SELECT snapshot FROM tilbakekreving_snapshot WHERE id = ?",
-            arrayOf(id),
-        ) { rs, _ ->
-            val jsonText = rs.getString("snapshot")
-            objectMapper.readValue(jsonText, TilbakekrevingEntity::class.java)
-        }.firstOrNull()
     }
 }

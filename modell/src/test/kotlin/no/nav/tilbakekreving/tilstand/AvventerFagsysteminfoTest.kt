@@ -13,6 +13,7 @@ import no.nav.tilbakekreving.fagsysteminfoHendelse
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 class AvventerFagsysteminfoTest {
     private val bigQueryService = BigQueryServiceStub()
@@ -21,7 +22,7 @@ class AvventerFagsysteminfoTest {
     fun `tilbakekreving i AvventerFagsysteminfo går videre med fagsysteminfo`() {
         val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
-        val tilbakekreving = Tilbakekreving.opprett(oppsamler, opprettTilbakekrevingEvent, bigQueryService, EndringObservatørOppsamler())
+        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), oppsamler, opprettTilbakekrevingEvent, bigQueryService, EndringObservatørOppsamler())
 
         val kravgrunnlag = kravgrunnlag()
         tilbakekreving.håndter(kravgrunnlag)

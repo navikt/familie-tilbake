@@ -5,6 +5,7 @@ import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
+import java.util.UUID
 
 private val bigQueryService = BigQueryServiceStub()
 
@@ -13,6 +14,7 @@ fun opprettTilbakekreving(
     opprettTilbakekrevingHendelse: OpprettTilbakekrevingHendelse,
 ) = Tilbakekreving
     .opprett(
+        id = UUID.randomUUID().toString(),
         behovObservatør = oppsamler,
         opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse,
         bigQueryService = bigQueryService,

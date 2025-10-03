@@ -33,6 +33,7 @@ class FrontendE2ETest {
         val beslutter = Behandler.Saksbehandler("Ansvarlig beslutter")
 
         val tilbakekreving = Tilbakekreving.opprett(
+            UUID.randomUUID().toString(),
             BehovObservatørOppsamler(),
             opprettTilbakekrevingHendelse,
             BigQueryServiceStub(),
