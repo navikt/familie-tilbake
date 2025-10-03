@@ -67,7 +67,7 @@ class TilbakekrevingService(
         val observatør = Observatør()
         lateinit var logContext: SecureLog.Context
 
-        val tilbakekrevingId = tilbakekrevingRepository.opprett(Tilbakekreving.opprett(observatør, opprettTilbakekrevingHendelse, bigQueryService, endringObservatørService).tilEntity())
+        val tilbakekrevingId = tilbakekrevingRepository.opprett(Tilbakekreving.opprett(tilbakekrevingRepository.nesteId(), observatør, opprettTilbakekrevingHendelse, bigQueryService, endringObservatørService).tilEntity())
 
         hentOgLagreTilbakekreving(tilbakekrevingId) { tilbakekreving ->
             håndter(tilbakekreving)
@@ -101,7 +101,7 @@ class TilbakekrevingService(
     }
 
     fun <T : Any> hentOgLagreTilbakekreving(
-        tilbakekrevingId: UUID,
+        tilbakekrevingId: String,
         callback: (Tilbakekreving) -> T,
     ): T {
         lateinit var result: T
@@ -219,7 +219,7 @@ class TilbakekrevingService(
 
     fun utførSteg(
         behandler: Behandler,
-        tilbakekrevingId: UUID,
+        tilbakekrevingId: String,
         behandlingsstegDto: BehandlingsstegDto,
         logContext: SecureLog.Context,
     ) {
@@ -335,7 +335,7 @@ class TilbakekrevingService(
 
     fun behandleBrevmottaker(
         behandler: Behandler,
-        tilbakekrevingId: UUID,
+        tilbakekrevingId: String,
         brevmottakerDto: ManuellBrevmottakerRequestDto,
         id: UUID,
     ) {
@@ -393,7 +393,7 @@ class TilbakekrevingService(
         }
     }
 
-    fun settPåVent(tilbakekrevingId: UUID, venteårsak: Venteårsak, tidsfrist: LocalDate, begrunnelse: String?) {
+    fun settPåVent(tilbakekrevingId: String, venteårsak: Venteårsak, tidsfrist: LocalDate, begrunnelse: String?) {
         hentOgLagreTilbakekreving(tilbakekrevingId) { tilbakekreving ->
             tilbakekreving.behandlingHistorikk.nåværende().entry.settPåVent(
                 årsak = venteårsak,
@@ -403,26 +403,26 @@ class TilbakekrevingService(
         }
     }
 
-    fun taAvVent(tilbakekrevingId: UUID) {
+    fun taAvVent(tilbakekrevingId: String) {
         hentOgLagreTilbakekreving(tilbakekrevingId) { tilbakekreving ->
             tilbakekreving.behandlingHistorikk.nåværende().entry.taAvVent()
         }
     }
 
-    fun flyttBehandlingTilFakta(tilbakekrevingId: UUID) {
+    fun flyttBehandlingTilFakta(tilbakekrevingId: String) {
         hentOgLagreTilbakekreving(tilbakekrevingId) { tilbakekreving ->
             tilbakekreving.håndterNullstilling()
         }
     }
 
-    fun aktiverBrevmottakerSteg(tilbakekrevingId: UUID) {
+    fun aktiverBrevmottakerSteg(tilbakekrevingId: String) {
         hentOgLagreTilbakekreving(tilbakekrevingId) { tilbakekreving ->
             validerBrevmottaker(tilbakekreving)
             tilbakekreving.aktiverBrevmottakerSteg()
         }
     }
 
-    fun fjernBrevmottakerSteg(tilbakekrevingId: UUID) {
+    fun fjernBrevmottakerSteg(tilbakekrevingId: String) {
         hentOgLagreTilbakekreving(tilbakekrevingId) { tilbakekreving ->
             tilbakekreving.deaktiverBrevmottakerSteg()
         }
@@ -430,7 +430,7 @@ class TilbakekrevingService(
 
     fun fjernManuelBrevmottaker(
         behandler: Behandler,
-        tilbakekrevingId: UUID,
+        tilbakekrevingId: String,
         manuellBrevmottakerId: UUID,
     ) {
         hentOgLagreTilbakekreving(tilbakekrevingId) { tilbakekreving ->

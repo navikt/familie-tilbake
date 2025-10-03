@@ -15,9 +15,7 @@ object Start : Tilstand {
         hendelse: OpprettTilbakekrevingHendelse,
     ) {
         when (hendelse.opprettelsesvalg) {
-            Opprettelsesvalg.UTSETT_BEHANDLING_MED_VARSEL -> tilbakekreving.byttTilstand(AvventerUtsattBehandlingMedVarsel)
-            Opprettelsesvalg.UTSETT_BEHANDLING_UTEN_VARSEL -> tilbakekreving.byttTilstand(AvventerUtsattBehandlingUtenVarsel)
-            Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL -> tilbakekreving.byttTilstand(AvventerKravgrunnlag)
+            Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL -> tilbakekreving.byttTilstand(AvventerKravgrunnlag)
         }
     }
 }

@@ -34,7 +34,6 @@ class FaktaStegTest {
             kravgrunnlag = kravgrunnlag,
             BrevHistorikk(historikk = mutableListOf()),
             tilbakekrevingOpprettet = LocalDateTime.now(),
-            Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
         )
         val årsak = "Dette er årsaken til tilbakekrevingen"
         val uttalelse = "Ja hvorfor ikke"
@@ -52,7 +51,7 @@ class FaktaStegTest {
             ),
         )
 
-        faktasteg.tilFrontendDto(kravgrunnlag, eksternFagsakRevurdering).feilutbetaltePerioder shouldBe listOf(
+        faktasteg.tilFrontendDto(kravgrunnlag, eksternFagsakRevurdering, Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL).feilutbetaltePerioder shouldBe listOf(
             FeilutbetalingsperiodeDto(
                 periode = periode,
                 feilutbetaltBeløp = tilbakekrevesBeløp,
@@ -60,8 +59,8 @@ class FaktaStegTest {
                 hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
             ),
         )
-        faktasteg.tilFrontendDto(kravgrunnlag, eksternFagsakRevurdering).begrunnelse shouldBe årsak
-        faktasteg.tilFrontendDto(kravgrunnlag, eksternFagsakRevurdering).vurderingAvBrukersUttalelse shouldBe VurderingAvBrukersUttalelseDto(
+        faktasteg.tilFrontendDto(kravgrunnlag, eksternFagsakRevurdering, Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL).begrunnelse shouldBe årsak
+        faktasteg.tilFrontendDto(kravgrunnlag, eksternFagsakRevurdering, Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL).vurderingAvBrukersUttalelse shouldBe VurderingAvBrukersUttalelseDto(
             harBrukerUttaltSeg = HarBrukerUttaltSeg.JA,
             beskrivelse = uttalelse,
         )
@@ -80,7 +79,6 @@ class FaktaStegTest {
             ),
             brevHistorikk = BrevHistorikk(historikk = mutableListOf()),
             tilbakekrevingOpprettet = LocalDateTime.now(),
-            opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
         )
         faktasteg.erFullstendig() shouldBe false
 

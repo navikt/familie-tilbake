@@ -16,6 +16,7 @@ import no.nav.tilbakekreving.fagsysteminfoHendelse
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 class AvventerBrukerinfoTest {
     private val bigQueryService = BigQueryServiceStub()
@@ -24,7 +25,7 @@ class AvventerBrukerinfoTest {
     fun `håndtering av AvventerBrukerinfo skal også oppdatere brevmottakerSteg i behandling`() {
         val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
-        val tilbakekreving = Tilbakekreving.opprett(oppsamler, opprettTilbakekrevingEvent, bigQueryService, EndringObservatørOppsamler())
+        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), oppsamler, opprettTilbakekrevingEvent, bigQueryService, EndringObservatørOppsamler())
 
         tilbakekreving.håndter(kravgrunnlag())
         tilbakekreving.håndter(fagsysteminfoHendelse())
@@ -37,7 +38,7 @@ class AvventerBrukerinfoTest {
     fun `tilbakekreving med AvventerBrukerinfo går videre med brukerinfo`() {
         val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
-        val tilbakekreving = Tilbakekreving.opprett(oppsamler, opprettTilbakekrevingEvent, bigQueryService, EndringObservatørOppsamler())
+        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), oppsamler, opprettTilbakekrevingEvent, bigQueryService, EndringObservatørOppsamler())
 
         tilbakekreving.håndter(kravgrunnlag())
         tilbakekreving.håndter(fagsysteminfoHendelse())

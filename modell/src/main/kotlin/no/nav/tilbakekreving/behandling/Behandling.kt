@@ -74,9 +74,10 @@ class Behandling internal constructor(
     private val fatteVedtakSteg: FatteVedtakSteg,
     private var påVent: PåVent?,
 ) : Historikk.HistorikkInnslag<UUID> {
-    val faktastegDto: FrontendDto<FaktaFeilutbetalingDto> get() = FrontendDto {
-        faktasteg.tilFrontendDto(kravgrunnlag.entry, eksternFagsakRevurdering.entry)
+    fun faktastegFrontendDto(opprettelsesvalg: Opprettelsesvalg): FaktaFeilutbetalingDto {
+        return faktasteg.tilFrontendDto(kravgrunnlag.entry, eksternFagsakRevurdering.entry, opprettelsesvalg)
     }
+
     val foreldelsestegDto: FrontendDto<VurdertForeldelseDto> get() = FrontendDto {
         foreldelsesteg.tilFrontendDto(kravgrunnlag.entry)
     }
@@ -147,7 +148,7 @@ class Behandling internal constructor(
                 )
             },
             beregning.vedtaksresultat,
-            faktasteg.tilFrontendDto(kravgrunnlag.entry, eksternFagsakRevurdering.entry).vurderingAvBrukersUttalelse,
+            faktasteg.vurderingAvBrukersUttalelse(),
         )
     }
 
@@ -453,7 +454,7 @@ class Behandling internal constructor(
             tilstand: Tilstand,
         ): Behandling {
             val foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakRevurdering.entry, kravgrunnlag.entry)
-            val faktasteg = Faktasteg.opprett(eksternFagsakRevurdering.entry, kravgrunnlag.entry, brevHistorikk, LocalDateTime.now(), Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL)
+            val faktasteg = Faktasteg.opprett(eksternFagsakRevurdering.entry, kravgrunnlag.entry, brevHistorikk, LocalDateTime.now())
             val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(eksternFagsakRevurdering.entry, kravgrunnlag.entry, foreldelsesteg)
             val foreslåVedtakSteg = ForeslåVedtakSteg.opprett()
             val fatteVedtakSteg = FatteVedtakSteg.opprett()

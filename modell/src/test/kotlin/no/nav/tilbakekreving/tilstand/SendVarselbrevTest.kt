@@ -15,6 +15,7 @@ import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.varselbrev
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 class SendVarselbrevTest {
     private val bigQueryService = BigQueryServiceStub()
@@ -23,7 +24,7 @@ class SendVarselbrevTest {
     fun `tilbakekreving i SendVarselbrev går videre med Kravgrunnlag`() {
         val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
-        val tilbakekreving = Tilbakekreving.opprett(oppsamler, opprettTilbakekrevingEvent, bigQueryService, EndringObservatørOppsamler())
+        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), oppsamler, opprettTilbakekrevingEvent, bigQueryService, EndringObservatørOppsamler())
 
         tilbakekreving.håndter(kravgrunnlag())
         tilbakekreving.håndter(fagsysteminfoHendelse())

@@ -53,7 +53,7 @@ fun bruker() = BrukerDto(
 
 fun opprettTilbakekrevingHendelse(
     eksternFagsak: OpprettTilbakekrevingHendelse.EksternFagsak = eksternFagsak(),
-    opprettelsesvalg: Opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
+    opprettelsesvalg: Opprettelsesvalg = Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
 ) = OpprettTilbakekrevingHendelse(
     eksternFagsak = eksternFagsak,
     opprettelsesvalg = opprettelsesvalg,

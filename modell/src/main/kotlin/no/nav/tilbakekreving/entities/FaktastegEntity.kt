@@ -1,6 +1,5 @@
 package no.nav.tilbakekreving.entities
 
-import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
@@ -9,7 +8,6 @@ import java.time.LocalDateTime
 
 data class FaktastegEntity(
     val tilbakekrevingOpprettet: LocalDateTime,
-    val opprettelsesvalg: Opprettelsesvalg,
     val perioder: List<FaktaPeriodeEntity>,
     val årsakTilFeilutbetaling: String,
     val uttalelse: Uttalelse,
@@ -20,7 +18,6 @@ data class FaktastegEntity(
     ): Faktasteg = Faktasteg(
         brevHistorikk = brevHistorikk,
         tilbakekrevingOpprettet = tilbakekrevingOpprettet,
-        opprettelsesvalg = opprettelsesvalg,
         vurdering = Faktasteg.Vurdering(
             perioder = perioder.map {
                 Faktasteg.FaktaPeriode(

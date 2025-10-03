@@ -8,9 +8,8 @@ import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.tilstand.AvventerKravgrunnlag
-import no.nav.tilbakekreving.tilstand.AvventerUtsattBehandlingMedVarsel
-import no.nav.tilbakekreving.tilstand.AvventerUtsattBehandlingUtenVarsel
 import org.junit.jupiter.api.Test
+import java.util.UUID
 import kotlin.collections.listOf
 
 class TilbakekrevingTest {
@@ -19,26 +18,10 @@ class TilbakekrevingTest {
 
     @Test
     fun `oppretter tilbakekreving`() {
-        val opprettEvent = opprettTilbakekrevingHendelse(opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL)
-        val tilbakekreving = Tilbakekreving.opprett(BehovObservatørOppsamler(), opprettEvent, bigQueryService, endringObservatør)
+        val opprettEvent = opprettTilbakekrevingHendelse(opprettelsesvalg = Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
+        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), BehovObservatørOppsamler(), opprettEvent, bigQueryService, endringObservatør)
 
         tilbakekreving.tilstand shouldBe AvventerKravgrunnlag
-    }
-
-    @Test
-    fun `oppretter tilbakekreving som avventer oppdatert kravgrunnlag uten varsel`() {
-        val opprettEvent = opprettTilbakekrevingHendelse(opprettelsesvalg = Opprettelsesvalg.UTSETT_BEHANDLING_UTEN_VARSEL)
-        val tilbakekreving = Tilbakekreving.opprett(BehovObservatørOppsamler(), opprettEvent, bigQueryService, endringObservatør)
-
-        tilbakekreving.tilstand shouldBe AvventerUtsattBehandlingUtenVarsel
-    }
-
-    @Test
-    fun `oppretter tilbakekreving som avventer oppdatert kravgrunnlag med varsel`() {
-        val opprettEvent = opprettTilbakekrevingHendelse(opprettelsesvalg = Opprettelsesvalg.UTSETT_BEHANDLING_MED_VARSEL)
-        val tilbakekreving = Tilbakekreving.opprett(BehovObservatørOppsamler(), opprettEvent, bigQueryService, endringObservatør)
-
-        tilbakekreving.tilstand shouldBe AvventerUtsattBehandlingMedVarsel
     }
 
     @Test
@@ -48,7 +31,7 @@ class TilbakekrevingTest {
                 ytelse = Ytelse.Tilleggsstønad,
             ),
         )
-        val tilbakekreving = Tilbakekreving.opprett(BehovObservatørOppsamler(), opprettTilbakekrevingHendelse, bigQueryService, endringObservatør)
+        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), BehovObservatørOppsamler(), opprettTilbakekrevingHendelse, bigQueryService, endringObservatør)
         tilbakekreving.håndter(kravgrunnlag())
         tilbakekreving.håndter(brukerinfoHendelse())
         tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, faktastegVurdering())

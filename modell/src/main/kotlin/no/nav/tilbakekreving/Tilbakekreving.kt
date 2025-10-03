@@ -6,6 +6,7 @@ import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.aktør.Bruker
 import no.nav.tilbakekreving.aktør.Bruker.Companion.tilNullableFrontendDto
 import no.nav.tilbakekreving.api.v1.dto.FagsakDto
+import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.BehandlingHistorikk
@@ -52,8 +53,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class Tilbakekreving internal constructor(
-    val id: UUID,
-    val fagsystemId: String,
+    val id: String,
     val eksternFagsak: EksternFagsak,
     val behandlingHistorikk: BehandlingHistorikk,
     val kravgrunnlagHistorikk: KravgrunnlagHistorikk,
@@ -212,6 +212,8 @@ class Tilbakekreving internal constructor(
         )
     }
 
+    fun faktastegFrontendDto(): FaktaFeilutbetalingDto = behandlingHistorikk.nåværende().entry.faktastegFrontendDto(opprettelsesvalg)
+
     fun håndter(
         beslutter: Behandler,
         vurderinger: List<Pair<Behandlingssteg, FatteVedtakSteg.Vurdering>>,
@@ -303,7 +305,6 @@ class Tilbakekreving internal constructor(
         return TilbakekrevingEntity(
             nåværendeTilstand = tilstand.tilbakekrevingTilstand,
             id = this.id,
-            fagsystemId = fagsystemId,
             eksternFagsak = this.eksternFagsak.tilEntity(),
             behandlingHistorikkEntities = this.behandlingHistorikk.tilEntity(),
             kravgrunnlagHistorikkEntities = this.kravgrunnlagHistorikk.tilEntity(),
@@ -361,16 +362,16 @@ class Tilbakekreving internal constructor(
 
     companion object {
         fun opprett(
+            id: String,
             behovObservatør: BehovObservatør,
             opprettTilbakekrevingEvent: OpprettTilbakekrevingHendelse,
             bigQueryService: BigQueryService,
             endringObservatør: EndringObservatør,
         ): Tilbakekreving {
             val tilbakekreving = Tilbakekreving(
-                id = UUID.randomUUID(),
+                id = id,
                 opprettet = LocalDateTime.now(),
                 // TODO: Lesbar ID
-                fagsystemId = UUID.randomUUID().toString(),
                 opprettelsesvalg = opprettTilbakekrevingEvent.opprettelsesvalg,
                 eksternFagsak = EksternFagsak(
                     eksternId = opprettTilbakekrevingEvent.eksternFagsak.eksternId,

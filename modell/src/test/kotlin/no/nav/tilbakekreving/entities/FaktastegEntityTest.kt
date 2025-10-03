@@ -33,7 +33,6 @@ class FaktastegEntityTest {
             kravgrunnlag = kravgrunnlag,
             brevHistorikk = brevHistorikk,
             tilbakekrevingOpprettet = LocalDateTime.now(),
-            opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
         )
         val årsak = "Dette er årsaken til tilbakekrevingen"
         val uttalelse = "Ja hvorfor ikke"
@@ -51,9 +50,9 @@ class FaktastegEntityTest {
             ),
         )
 
-        val dtoFør = faktasteg.tilFrontendDto(kravgrunnlag, eksternFagsakRevurdering)
+        val dtoFør = faktasteg.tilFrontendDto(kravgrunnlag, eksternFagsakRevurdering, Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
 
-        val dtoEtter = faktasteg.tilEntity().fraEntity(brevHistorikk).tilFrontendDto(kravgrunnlag, eksternFagsakRevurdering)
+        val dtoEtter = faktasteg.tilEntity().fraEntity(brevHistorikk).tilFrontendDto(kravgrunnlag, eksternFagsakRevurdering, Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
 
         dtoEtter shouldBe dtoFør
     }

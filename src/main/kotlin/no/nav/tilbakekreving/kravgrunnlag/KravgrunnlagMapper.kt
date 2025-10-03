@@ -24,7 +24,7 @@ object KravgrunnlagMapper {
                 eksternId = kravgrunnlag.fagsystemId,
                 ytelse = ytelseFor(kravgrunnlag),
             ),
-            opprettelsesvalg = Opprettelsesvalg.OPPRETT_BEHANDLING_MED_VARSEL,
+            opprettelsesvalg = Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
         )
     }
 
