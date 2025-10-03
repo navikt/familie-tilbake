@@ -45,6 +45,7 @@ import org.springframework.test.context.TestPropertySource
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import java.util.Calendar
+import java.util.UUID
 
 @TestPropertySource(
     properties = [
@@ -419,6 +420,7 @@ internal class TilgangskontrollServiceTest : OppslagSpringRunnerTest() {
 
     private fun tilbakekreving(ytelse: Ytelse): Tilbakekreving {
         return Tilbakekreving.opprett(
+            id = UUID.randomUUID().toString(),
             opprettTilbakekrevingEvent = OpprettTilbakekrevingHendelse(
                 opprettelsesvalg = Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
                 eksternFagsak = OpprettTilbakekrevingHendelse.EksternFagsak(

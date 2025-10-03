@@ -47,7 +47,7 @@ class VilkårsvurderingController(
             return Ressurs.success(
                 tilbakekreving.behandlingHistorikk.finn(
                     behandlingId,
-                    Sporing(tilbakekreving.fagsystemId, behandlingId.toString()),
+                    Sporing(tilbakekreving.id, behandlingId.toString()),
                 ).entry.vilkårsvurderingsstegDto.tilFrontendDto(),
             )
         }

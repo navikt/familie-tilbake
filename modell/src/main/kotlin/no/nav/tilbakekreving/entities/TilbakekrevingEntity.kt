@@ -19,11 +19,9 @@ import no.nav.tilbakekreving.tilstand.SendVarselbrev
 import no.nav.tilbakekreving.tilstand.Start
 import no.nav.tilbakekreving.tilstand.TilBehandling
 import java.time.LocalDateTime
-import java.util.UUID
 
 data class TilbakekrevingEntity(
-    val id: UUID,
-    val fagsystemId: String,
+    val id: String,
     val nåværendeTilstand: TilbakekrevingTilstand,
     val eksternFagsak: EksternFagsakEntity,
     val behandlingHistorikkEntities: List<BehandlingEntity>,
@@ -60,7 +58,6 @@ data class TilbakekrevingEntity(
 
         val tilbakekreving = Tilbakekreving(
             id = id,
-            fagsystemId = fagsystemId,
             eksternFagsak = eksternFagsak.fraEntity(behovObservatør),
             behandlingHistorikk = behandlingHistorikk,
             kravgrunnlagHistorikk = kravgrunnlagHistorikk,

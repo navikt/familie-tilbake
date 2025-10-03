@@ -53,8 +53,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class Tilbakekreving internal constructor(
-    val id: UUID,
-    val fagsystemId: String,
+    val id: String,
     val eksternFagsak: EksternFagsak,
     val behandlingHistorikk: BehandlingHistorikk,
     val kravgrunnlagHistorikk: KravgrunnlagHistorikk,
@@ -306,7 +305,6 @@ class Tilbakekreving internal constructor(
         return TilbakekrevingEntity(
             nåværendeTilstand = tilstand.tilbakekrevingTilstand,
             id = this.id,
-            fagsystemId = fagsystemId,
             eksternFagsak = this.eksternFagsak.tilEntity(),
             behandlingHistorikkEntities = this.behandlingHistorikk.tilEntity(),
             kravgrunnlagHistorikkEntities = this.kravgrunnlagHistorikk.tilEntity(),
@@ -364,16 +362,16 @@ class Tilbakekreving internal constructor(
 
     companion object {
         fun opprett(
+            id: String,
             behovObservatør: BehovObservatør,
             opprettTilbakekrevingEvent: OpprettTilbakekrevingHendelse,
             bigQueryService: BigQueryService,
             endringObservatør: EndringObservatør,
         ): Tilbakekreving {
             val tilbakekreving = Tilbakekreving(
-                id = UUID.randomUUID(),
+                id = id,
                 opprettet = LocalDateTime.now(),
                 // TODO: Lesbar ID
-                fagsystemId = UUID.randomUUID().toString(),
                 opprettelsesvalg = opprettTilbakekrevingEvent.opprettelsesvalg,
                 eksternFagsak = EksternFagsak(
                     eksternId = opprettTilbakekrevingEvent.eksternFagsak.eksternId,

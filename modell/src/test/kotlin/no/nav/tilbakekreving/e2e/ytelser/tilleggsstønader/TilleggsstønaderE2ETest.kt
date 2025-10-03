@@ -29,6 +29,7 @@ import no.nav.tilbakekreving.kravgrunnlagPeriode
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 class TilleggsstønaderE2ETest {
     private val bigQueryService = BigQueryServiceStub()
@@ -41,7 +42,7 @@ class TilleggsstønaderE2ETest {
                 ytelse = Ytelse.Tilleggsstønad,
             ),
         )
-        val tilbakekreving = Tilbakekreving.opprett(observatør, opprettTilbakekrevingHendelse, bigQueryService, EndringObservatørOppsamler())
+        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), observatør, opprettTilbakekrevingHendelse, bigQueryService, EndringObservatørOppsamler())
         tilbakekreving.håndter(kravgrunnlag())
 
         observatør.behovListe.size shouldBe 2
@@ -55,6 +56,7 @@ class TilleggsstønaderE2ETest {
         val behandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
 
         val tilbakekreving = Tilbakekreving.opprett(
+            UUID.randomUUID().toString(),
             BehovObservatørOppsamler(),
             opprettTilbakekrevingHendelse,
             BigQueryServiceStub(),
@@ -158,6 +160,7 @@ class TilleggsstønaderE2ETest {
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
 
         val tilbakekreving = Tilbakekreving.opprett(
+            UUID.randomUUID().toString(),
             BehovObservatørOppsamler(),
             opprettTilbakekrevingHendelse,
             BigQueryServiceStub(),
