@@ -18,17 +18,17 @@ object TilbakekrevingEntityMapper : Entity<TilbakekrevingEntity, String, Int>(
     val nåværendeTilstand = field(
         column = "nåværende_tilstand",
         getter = TilbakekrevingEntity::nåværendeTilstand,
-        converter = FieldConverter.EnumConverter.of<TilbakekrevingTilstand>(),
+        converter = FieldConverter.EnumConverter.of<TilbakekrevingTilstand>().required(),
     )
     val opprettet = field(
         column = "opprettet",
         getter = TilbakekrevingEntity::opprettet,
-        converter = FieldConverter.LocalDateTimeConverter,
+        converter = FieldConverter.LocalDateTimeConverter.required(),
     )
     val opprettelsesvalg = field(
         column = "opprettelsesvalg",
         getter = TilbakekrevingEntity::opprettelsesvalg,
-        converter = FieldConverter.EnumConverter.of<Opprettelsesvalg>(),
+        converter = FieldConverter.EnumConverter.of<Opprettelsesvalg>().required(),
     )
 
     fun map(

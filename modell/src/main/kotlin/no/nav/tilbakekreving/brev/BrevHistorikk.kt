@@ -11,16 +11,16 @@ class BrevHistorikk(
     private val historikk: MutableList<Brev>,
 ) : Historikk<UUID, Brev> {
     override fun entry(id: UUID): Brev {
-        return historikk.single { it.internId == id }
+        return historikk.single { it.id == id }
     }
 
     override fun lagre(innslag: Brev): HistorikkReferanse<UUID, Brev> {
         historikk.add(innslag)
-        return HistorikkReferanse(this, innslag.internId)
+        return HistorikkReferanse(this, innslag.id)
     }
 
     override fun finn(id: UUID, sporing: Sporing): HistorikkReferanse<UUID, Brev> {
-        if (historikk.none { it.internId == id }) {
+        if (historikk.none { it.id == id }) {
             throw ModellFeil.UgyldigOperasjonException(
                 "Fant ikke brev med id: $id i historikken",
                 sporing,
@@ -30,7 +30,7 @@ class BrevHistorikk(
     }
 
     override fun nåværende(): HistorikkReferanse<UUID, Brev> {
-        return HistorikkReferanse(this, historikk.last().internId)
+        return HistorikkReferanse(this, historikk.last().id)
     }
 
     fun sisteVarselbrev(): Varselbrev? {

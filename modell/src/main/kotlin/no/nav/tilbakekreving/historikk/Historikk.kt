@@ -12,6 +12,6 @@ interface Historikk<IdType, Innslag : Historikk.HistorikkInnslag<IdType>> {
     fun nåværende(): HistorikkReferanse<IdType, Innslag>
 
     interface HistorikkInnslag<IdType> {
-        val internId: IdType
+        val id: IdType
     }
 }

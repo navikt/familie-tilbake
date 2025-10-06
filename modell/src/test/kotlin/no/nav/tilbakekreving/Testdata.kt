@@ -65,7 +65,7 @@ fun kravgrunnlag(
     perioder: List<KravgrunnlagHendelse.Periode> = listOf(kravgrunnlagPeriode()),
 ): KravgrunnlagHendelse {
     val kravgrunnlagHendelse = KravgrunnlagHendelse(
-        internId = UUID.randomUUID(),
+        id = UUID.randomUUID(),
         vedtakId = BigInteger(128, Random()),
         kravstatuskode = KravgrunnlagHendelse.Kravstatuskode.NY,
         fagsystemVedtaksdato = LocalDate.now(),
@@ -143,7 +143,7 @@ fun brukerinfoHendelse() = BrukerinfoHendelse(
 )
 
 fun varselbrev() = Varselbrev(
-    internId = UUID.randomUUID(),
+    id = UUID.randomUUID(),
     opprettetDato = LocalDate.now(),
     varsletBeløp = 10000L,
 )
@@ -165,8 +165,7 @@ fun behandling(
     val kravgrunnlagReferanse = HistorikkStub.fakeReferanse(kravgrunnlag)
     val eksternFagsakBehandling = HistorikkStub.fakeReferanse(eksternFagsakBehandling())
     return Behandling.nyBehandling(
-        internId = UUID.randomUUID(),
-        eksternId = UUID.randomUUID(),
+        id = UUID.randomUUID(),
         behandlingstype = Behandlingstype.TILBAKEKREVING,
         enhet = Enhet("", ""),
         årsak = Behandlingsårsakstype.REVURDERING_KLAGE_KA,

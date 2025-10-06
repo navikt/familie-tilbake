@@ -57,8 +57,7 @@ import java.time.ZoneOffset
 import java.util.UUID
 
 class Behandling internal constructor(
-    override val internId: UUID,
-    private val eksternId: UUID,
+    override val id: UUID,
     private val behandlingstype: Behandlingstype,
     private val opprettet: LocalDateTime,
     private var sistEndret: LocalDateTime,
@@ -89,10 +88,10 @@ class Behandling internal constructor(
 
     fun harLikePerioder(): Boolean = vilkårsvurderingsteg.harLikePerioder()
 
-    fun tilEntity(): BehandlingEntity {
+    fun tilEntity(tilbakekrevingId: String): BehandlingEntity {
         return BehandlingEntity(
-            internId = internId,
-            eksternId = eksternId,
+            id = id,
+            tilbakekrevingId = tilbakekrevingId,
             behandlingstype = behandlingstype,
             opprettet = opprettet,
             sistEndret = sistEndret,
@@ -111,7 +110,7 @@ class Behandling internal constructor(
     }
 
     fun sporingsinformasjon(): Sporing {
-        return Sporing(eksternFagsakRevurdering.entry.eksternId, internId.toString())
+        return Sporing(eksternFagsakRevurdering.entry.eksternId, id.toString())
     }
 
     internal fun steg(): List<Saksbehandlingsteg> = listOf(
@@ -161,7 +160,7 @@ class Behandling internal constructor(
         val delperioder = beregning.beregn()
         behovObservatør.håndter(
             IverksettelseBehov(
-                behandlingId = internId,
+                behandlingId = id,
                 kravgrunnlagId = kravgrunnlag.entry.kravgrunnlagId,
                 delperioder = delperioder,
                 ansvarligSaksbehandler = ansvarligSaksbehandler.ident,
@@ -183,8 +182,8 @@ class Behandling internal constructor(
 
     internal fun tilFrontendDto(tilstand: Tilstand, behandler: Behandler, kanBeslutte: Boolean): BehandlingDto {
         return BehandlingDto(
-            eksternBrukId = eksternId,
-            behandlingId = internId,
+            eksternBrukId = id,
+            behandlingId = id,
             erBehandlingHenlagt = false,
             type = behandlingstype,
             status = tilstand.behandlingsstatus(this),
@@ -242,8 +241,8 @@ class Behandling internal constructor(
 
     internal fun tilOppsummeringDto(tilstand: Tilstand): BehandlingsoppsummeringDto {
         return BehandlingsoppsummeringDto(
-            behandlingId = internId,
-            eksternBrukId = eksternId,
+            behandlingId = id,
+            eksternBrukId = id,
             type = behandlingstype,
             status = tilstand.behandlingsstatus(this),
         )
@@ -372,7 +371,7 @@ class Behandling internal constructor(
         return Behandlingsinformasjon(
             kravgrunnlagReferanse = kravgrunnlag.entry.referanse,
             opprettetTid = opprettet,
-            behandlingId = internId,
+            behandlingId = id,
             enhet = enhet,
             behandlingstype = behandlingstype,
         )
@@ -385,7 +384,7 @@ class Behandling internal constructor(
 
     internal fun utførSideeffekt(tilstand: Tilstand, observatør: BehandlingObservatør) {
         observatør.behandlingOppdatert(
-            behandlingId = internId,
+            behandlingId = id,
             eksternBehandlingId = eksternFagsakRevurdering.entry.eksternId,
             vedtaksresultat = hentVedtaksresultat(),
             behandlingstatus = tilstand.behandlingsstatus(this),
@@ -414,7 +413,7 @@ class Behandling internal constructor(
     ) {
         val beregning = lagBeregning()
         endringObservatør.vedtakFattet(
-            behandlingId = internId,
+            behandlingId = id,
             forrigeBehandlingId = forrigeBehandlingId,
             behandlingOpprettet = OffsetDateTime.of(opprettet, ZoneOffset.UTC),
             eksternFagsystemId = eksternFagsystemId,
@@ -441,8 +440,7 @@ class Behandling internal constructor(
 
     companion object {
         internal fun nyBehandling(
-            internId: UUID,
-            eksternId: UUID,
+            id: UUID,
             behandlingstype: Behandlingstype,
             enhet: Enhet?,
             årsak: Behandlingsårsakstype,
@@ -460,8 +458,7 @@ class Behandling internal constructor(
             val fatteVedtakSteg = FatteVedtakSteg.opprett()
             val opprettet = LocalDateTime.now()
             return Behandling(
-                internId = internId,
-                eksternId = eksternId,
+                id = id,
                 behandlingstype = behandlingstype,
                 opprettet = opprettet,
                 sistEndret = opprettet,

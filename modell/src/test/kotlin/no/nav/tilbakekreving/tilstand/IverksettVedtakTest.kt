@@ -177,7 +177,7 @@ class IverksettVedtakTest {
             endringOppsamler = endringObservatørOppsamler,
         )
 
-        endringObservatørOppsamler.vedtakFattetFor(tilbakekreving.behandlingHistorikk.nåværende().entry.internId).size shouldBe 0
+        endringObservatørOppsamler.vedtakFattetFor(tilbakekreving.behandlingHistorikk.nåværende().entry.id).size shouldBe 0
 
         tilbakekreving.håndter(
             Behandler.Saksbehandler("Z999999"),
@@ -189,7 +189,7 @@ class IverksettVedtakTest {
             ),
         )
 
-        val vedtakFattet = endringObservatørOppsamler.vedtakFattetFor(tilbakekreving.behandlingHistorikk.nåværende().entry.internId)
+        val vedtakFattet = endringObservatørOppsamler.vedtakFattetFor(tilbakekreving.behandlingHistorikk.nåværende().entry.id)
         vedtakFattet.size shouldBe 1
         val vedtak = vedtakFattet.single()
         vedtak.vurderteUtbetalinger.size shouldBe 1

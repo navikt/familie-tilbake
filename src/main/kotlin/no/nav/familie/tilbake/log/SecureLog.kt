@@ -77,7 +77,7 @@ object SecureLog {
             fun fra(tilbakekreving: Tilbakekreving) = if (tilbakekreving.behandlingHistorikk.harBehandling()) {
                 medBehandling(
                     fagsystemId = tilbakekreving.eksternFagsak.eksternId,
-                    behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.internId.toString(),
+                    behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id.toString(),
                 )
             } else {
                 utenBehandling(tilbakekreving.eksternFagsak.eksternId)

@@ -11,8 +11,8 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 data class BehandlingEntity(
-    val internId: UUID,
-    val eksternId: UUID,
+    val id: UUID,
+    val tilbakekrevingId: String,
     val behandlingstype: Behandlingstype,
     val opprettet: LocalDateTime,
     val sistEndret: LocalDateTime,
@@ -33,13 +33,12 @@ data class BehandlingEntity(
         kravgrunnlagHistorikk: KravgrunnlagHistorikk,
         brevHistorikk: BrevHistorikk,
     ): Behandling {
-        val sporing = Sporing("Ukjent", internId.toString())
+        val sporing = Sporing("Ukjent", id.toString())
         val eksternFagsak = eksternFagsakBehandlingHistorikk.finn(eksternFagsakBehandlingRef.id, sporing)
         val kravgrunnlag = kravgrunnlagHistorikk.finn(kravgrunnlagRef.id, sporing)
         val foreldelsessteg = foreldelsestegEntity.fraEntity()
         return Behandling(
-            internId = internId,
-            eksternId = eksternId,
+            id = id,
             behandlingstype = behandlingstype,
             opprettet = opprettet,
             sistEndret = sistEndret,

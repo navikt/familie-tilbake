@@ -103,7 +103,7 @@ class Tilbakekreving internal constructor(
     }
 
     fun sporingsinformasjon(): Sporing {
-        return Sporing(eksternFagsak.eksternId, behandlingHistorikk.nåværende().entry.internId.toString())
+        return Sporing(eksternFagsak.eksternId, behandlingHistorikk.nåværende().entry.id.toString())
     }
 
     fun håndterNullstilling() {
@@ -124,8 +124,7 @@ class Tilbakekreving internal constructor(
     ) {
         val behandlingId = UUID.randomUUID()
         val behandling = Behandling.nyBehandling(
-            internId = behandlingId,
-            eksternId = behandlingId,
+            id = behandlingId,
             behandlingstype = Behandlingstype.TILBAKEKREVING,
             enhet = null,
             årsak = Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR,
@@ -189,7 +188,7 @@ class Tilbakekreving internal constructor(
     fun sendVedtakIverksatt() {
         val nåværendeBehandling = behandlingHistorikk.nåværende().entry
         nåværendeBehandling.sendVedtakIverksatt(
-            forrigeBehandlingId = behandlingHistorikk.forrige()?.entry?.internId,
+            forrigeBehandlingId = behandlingHistorikk.forrige()?.entry?.id,
             eksternFagsystemId = eksternFagsak.eksternId,
             ytelse = eksternFagsak.ytelse,
             endringObservatør = endringObservatør,
@@ -306,7 +305,7 @@ class Tilbakekreving internal constructor(
             nåværendeTilstand = tilstand.tilbakekrevingTilstand,
             id = this.id,
             eksternFagsak = this.eksternFagsak.tilEntity(),
-            behandlingHistorikkEntities = this.behandlingHistorikk.tilEntity(),
+            behandlingHistorikkEntities = this.behandlingHistorikk.tilEntity(id),
             kravgrunnlagHistorikkEntities = this.kravgrunnlagHistorikk.tilEntity(),
             brevHistorikkEntities = this.brevHistorikk.tilEntity(),
             opprettet = this.opprettet,
@@ -326,7 +325,7 @@ class Tilbakekreving internal constructor(
                 "fagsak",
                 eksternFagsak.eksternId,
                 "behandling",
-                behandling.entry.internId.toString(),
+                behandling.entry.id.toString(),
             )
         }.buildString()
     }
@@ -344,7 +343,7 @@ class Tilbakekreving internal constructor(
     ) {
         endringObservatør.behandlingsstatusOppdatert(
             behandlingId = behandlingId,
-            forrigeBehandlingId = behandlingHistorikk.forrige()?.entry?.internId,
+            forrigeBehandlingId = behandlingHistorikk.forrige()?.entry?.id,
             eksternFagsystemId = eksternFagsak.eksternId,
             eksternBehandlingId = eksternBehandlingId,
             ytelse = eksternFagsak.ytelse,

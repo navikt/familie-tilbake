@@ -5,6 +5,7 @@ import java.sql.ResultSet
 import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+import java.util.UUID
 
 interface FieldConverter<T, DbPrimitive> {
     fun convert(value: T): DbPrimitive
@@ -29,53 +30,93 @@ interface FieldConverter<T, DbPrimitive> {
         }
     }
 
-    object StringConverter : FieldConverter<String, String> {
-        override fun convert(value: String): String {
+    object StringConverter : FieldConverter<String?, String?> {
+        override fun convert(value: String?): String? {
             return value
         }
 
-        override fun convert(resultSet: ResultSet, column: String): String {
+        override fun convert(resultSet: ResultSet, column: String): String? {
             return resultSet.getString(column)
         }
 
-        override fun setColumn(index: Int, preparedStatement: PreparedStatement, value: String) {
+        override fun setColumn(index: Int, preparedStatement: PreparedStatement, value: String?) {
             preparedStatement.setString(index, value)
         }
+
+        fun required() = Required(this)
     }
 
-    object LocalDateTimeConverter : FieldConverter<LocalDateTime, Timestamp> {
-        override fun convert(value: LocalDateTime): Timestamp {
-            return Timestamp.from(value.toInstant(ZoneOffset.UTC))
+    object LocalDateTimeConverter : FieldConverter<LocalDateTime?, Timestamp?> {
+        override fun convert(value: LocalDateTime?): Timestamp? {
+            return value?.toInstant(ZoneOffset.UTC)?.let(Timestamp::from)
         }
 
-        override fun convert(resultSet: ResultSet, column: String): LocalDateTime {
+        override fun convert(resultSet: ResultSet, column: String): LocalDateTime? {
             return resultSet.getTimestamp(column).toLocalDateTime()
         }
 
-        override fun setColumn(index: Int, preparedStatement: PreparedStatement, value: LocalDateTime) {
+        override fun setColumn(index: Int, preparedStatement: PreparedStatement, value: LocalDateTime?) {
             preparedStatement.setTimestamp(index, convert(value))
         }
+
+        fun required() = Required(this)
     }
 
     class EnumConverter<T>(
         private val stringValue: (String) -> T,
         private val enumValue: (T) -> String,
-    ) : FieldConverter<T, String> {
-        override fun convert(value: T): String {
-            return enumValue(value)
+    ) : FieldConverter<T?, String?> {
+        override fun convert(value: T?): String? {
+            return value?.let(enumValue)
         }
 
-        override fun convert(resultSet: ResultSet, column: String): T {
+        override fun convert(resultSet: ResultSet, column: String): T? {
             val name = resultSet.getString(column)
             return stringValue(name)
         }
 
-        override fun setColumn(index: Int, preparedStatement: PreparedStatement, value: T) {
+        override fun setColumn(index: Int, preparedStatement: PreparedStatement, value: T?) {
             preparedStatement.setString(index, convert(value))
         }
 
+        fun required() = Required(this)
+
         companion object {
             inline fun <reified T : Enum<T>> of() = EnumConverter<T>(::enumValueOf, Enum<T>::name)
+        }
+    }
+
+    object UUIDConverter : FieldConverter<UUID?, UUID?> {
+        override fun convert(value: UUID?): UUID? {
+            return value
+        }
+
+        override fun convert(resultSet: ResultSet, column: String): UUID? {
+            return resultSet.getObject(column, UUID::class.java)
+        }
+
+        override fun setColumn(index: Int, preparedStatement: PreparedStatement, value: UUID?) {
+            preparedStatement.setObject(index, value)
+        }
+
+        fun required() = Required(this)
+    }
+
+    class Required<JavaType, DbPrimitive>(
+        private val original: FieldConverter<JavaType?, DbPrimitive?>,
+    ) : FieldConverter<JavaType, DbPrimitive> {
+        override fun convert(value: JavaType): DbPrimitive {
+            return original.convert(value)!!
+        }
+
+        override fun convert(resultSet: ResultSet, column: String): JavaType {
+            return requireNotNull(original.convert(resultSet, column)) {
+                "Converter expects column `$column` not to be null"
+            }
+        }
+
+        override fun setColumn(index: Int, preparedStatement: PreparedStatement, value: JavaType) {
+            return original.setColumn(index, preparedStatement, value)
         }
     }
 }

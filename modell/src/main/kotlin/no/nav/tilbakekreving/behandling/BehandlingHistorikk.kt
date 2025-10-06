@@ -13,7 +13,7 @@ class BehandlingHistorikk(
     private val historikk: MutableList<Behandling>,
 ) : Historikk<UUID, Behandling> {
     override fun finn(id: UUID, sporing: Sporing): HistorikkReferanse<UUID, Behandling> {
-        if (historikk.none { it.internId == id }) {
+        if (historikk.none { it.id == id }) {
             throw ModellFeil.UgyldigOperasjonException(
                 "Fant ikke behandling med historikk-id $id",
                 sporing,
@@ -23,12 +23,12 @@ class BehandlingHistorikk(
     }
 
     override fun entry(id: UUID): Behandling {
-        return historikk.single { it.internId == id }
+        return historikk.single { it.id == id }
     }
 
     override fun lagre(innslag: Behandling): HistorikkReferanse<UUID, Behandling> {
         historikk.add(innslag)
-        return HistorikkReferanse(this, innslag.internId)
+        return HistorikkReferanse(this, innslag.id)
     }
 
     internal fun tilOppsummeringDto(tilstand: Tilstand): List<BehandlingsoppsummeringDto> {
@@ -36,16 +36,16 @@ class BehandlingHistorikk(
     }
 
     override fun nåværende(): HistorikkReferanse<UUID, Behandling> {
-        return HistorikkReferanse(this, historikk.last().internId)
+        return HistorikkReferanse(this, historikk.last().id)
     }
 
     fun harBehandling(): Boolean = historikk.isNotEmpty()
 
     fun forrige(): HistorikkReferanse<UUID, Behandling>? {
-        return historikk.dropLast(1).lastOrNull()?.let { HistorikkReferanse(this, it.internId) }
+        return historikk.dropLast(1).lastOrNull()?.let { HistorikkReferanse(this, it.id) }
     }
 
-    fun tilEntity(): List<BehandlingEntity> {
-        return historikk.map { it.tilEntity() }
+    fun tilEntity(tilbakekrevingId: String): List<BehandlingEntity> {
+        return historikk.map { it.tilEntity(tilbakekrevingId) }
     }
 }

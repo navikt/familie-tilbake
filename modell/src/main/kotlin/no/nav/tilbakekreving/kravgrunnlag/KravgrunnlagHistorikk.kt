@@ -15,7 +15,7 @@ class KravgrunnlagHistorikk(
         id: UUID,
         sporing: Sporing,
     ): HistorikkReferanse<UUID, KravgrunnlagHendelse> {
-        if (historikk.none { it.internId == id }) {
+        if (historikk.none { it.id == id }) {
             throw ModellFeil.UgyldigOperasjonException(
                 "Fant ikke kravgrunnlag-hendelse med historikk-id $id",
                 sporing,
@@ -25,16 +25,16 @@ class KravgrunnlagHistorikk(
     }
 
     override fun entry(id: UUID): KravgrunnlagHendelse {
-        return historikk.single { it.internId == id }
+        return historikk.single { it.id == id }
     }
 
     override fun lagre(innslag: KravgrunnlagHendelse): HistorikkReferanse<UUID, KravgrunnlagHendelse> {
         historikk.add(innslag)
-        return HistorikkReferanse(this, innslag.internId)
+        return HistorikkReferanse(this, innslag.id)
     }
 
     override fun nåværende(): HistorikkReferanse<UUID, KravgrunnlagHendelse> {
-        return HistorikkReferanse(this, historikk.last().internId)
+        return HistorikkReferanse(this, historikk.last().id)
     }
 
     fun tilEntity(): List<KravgrunnlagHendelseEntity> {

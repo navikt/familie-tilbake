@@ -37,10 +37,28 @@ abstract class Entity<E, IdType, IdDbPrimitive>(
         })
     }
 
-    private fun createInsertStatement(value: E) = PreparedStatementCreator { connection ->
-        fun placeholders(): String = allFields.joinToString(separator = ",") { "?" }
+    private fun placeholders(): String = allFields.joinToString(separator = ",") { "?" }
 
-        fun columnNames(): String = allFields.joinToString(",") { it.column }
+    private fun columnNames(): String = allFields.joinToString(",") { it.column }
+
+    fun upsertQuery(
+        jdbcTemplate: JdbcTemplate,
+        value: E,
+    ) {
+        val setters = fields.joinToString(", ") {
+            "${it.column}=EXCLUDED.${it.column}"
+        }
+        jdbcTemplate.update { connection ->
+            val preparedStatement = connection.prepareStatement("INSERT INTO $tableName(${columnNames()}) VALUES(${placeholders()}) ON CONFLICT(id) DO UPDATE SET $setters")
+
+            allFields.forEachIndexed { index, field ->
+                field.set(preparedStatement, index + 1, value)
+            }
+            preparedStatement
+        }
+    }
+
+    private fun createInsertStatement(value: E) = PreparedStatementCreator { connection ->
         val preparedStatement = connection.prepareStatement("INSERT INTO $tableName(${columnNames()}) VALUES(${placeholders()});")
 
         allFields.forEachIndexed { index, field ->

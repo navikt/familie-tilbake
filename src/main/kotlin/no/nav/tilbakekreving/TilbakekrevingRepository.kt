@@ -20,6 +20,7 @@ import java.util.UUID
 @Repository
 class TilbakekrevingRepository(
     private val jdbcTemplate: JdbcTemplate,
+    private val behandlingRepository: NyBehandlingRepository,
 ) {
     private val objectMapper = jacksonObjectMapper()
         .registerModule(KotlinModule.Builder().build())
@@ -48,7 +49,7 @@ class TilbakekrevingRepository(
         return TilbakekrevingEntityMapper.map(
             resultSet,
             eksternFagsak = json.eksternFagsak,
-            behandlingHistorikk = json.behandlingHistorikkEntities,
+            behandlingHistorikk = behandlingRepository.hentBehandlinger(id, json.behandlingHistorikkEntities),
             kravgrunnlagHistorikk = json.kravgrunnlagHistorikkEntities,
             brevHistorikk = json.brevHistorikkEntities,
             bruker = json.bruker,
@@ -59,7 +60,7 @@ class TilbakekrevingRepository(
         return hentAlleTilbakekrevinger()
             ?.firstOrNull { tilbakekreving ->
                 tilbakekreving.behandlingHistorikkEntities
-                    .any { it.eksternId == behandlingId }
+                    .any { it.id == behandlingId }
             }
     }
 
@@ -107,6 +108,7 @@ class TilbakekrevingRepository(
             jdbcTemplate,
             oppdatertEntity,
         )
+        behandlingRepository.lagreBehandlinger(oppdatertEntity.behandlingHistorikkEntities)
         jdbcTemplate.update(
             "UPDATE tilbakekreving_snapshot SET snapshot = to_jsonb(?::json) WHERE id=?;",
             jsonText,

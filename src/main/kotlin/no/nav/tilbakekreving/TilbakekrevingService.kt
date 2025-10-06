@@ -67,7 +67,10 @@ class TilbakekrevingService(
         val observatør = Observatør()
         lateinit var logContext: SecureLog.Context
 
-        val tilbakekrevingId = tilbakekrevingRepository.opprett(Tilbakekreving.opprett(tilbakekrevingRepository.nesteId(), observatør, opprettTilbakekrevingHendelse, bigQueryService, endringObservatørService).tilEntity())
+        val tilbakekrevingId = tilbakekrevingRepository.opprett(
+            Tilbakekreving
+                .opprett(tilbakekrevingRepository.nesteId(), observatør, opprettTilbakekrevingHendelse, bigQueryService, endringObservatørService).tilEntity(),
+        )
 
         hentOgLagreTilbakekreving(tilbakekrevingId) { tilbakekreving ->
             håndter(tilbakekreving)
@@ -456,7 +459,7 @@ class TilbakekrevingService(
     }
 
     private fun validerBrevmottaker(tilbakekreving: Tilbakekreving) {
-        val behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.internId
+        val behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id
 
         val personIdenter = listOfNotNull(tilbakekreving.bruker!!.aktør.ident)
         if (personIdenter.isEmpty()) return

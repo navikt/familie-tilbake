@@ -6,7 +6,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 class Varselbrev(
-    override val internId: UUID,
+    override val id: UUID,
     override val opprettetDato: LocalDate,
     val varsletBeløp: Long,
 ) : Brev {
@@ -15,7 +15,7 @@ class Varselbrev(
             varsletBeløp: Long,
         ): Brev {
             return Varselbrev(
-                internId = UUID.randomUUID(),
+                id = UUID.randomUUID(),
                 varsletBeløp = varsletBeløp,
                 opprettetDato = LocalDate.now(),
             )
@@ -25,7 +25,7 @@ class Varselbrev(
     override fun tilEntity(): BrevEntity {
         return BrevEntity(
             brevType = Brevtype.VARSEL_BREV,
-            internId = internId,
+            internId = id,
             opprettetDato = opprettetDato,
             varsletBeløp = varsletBeløp,
         )

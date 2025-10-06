@@ -22,7 +22,7 @@ data class KravgrunnlagHendelseEntity(
 ) {
     fun fraEntity(): KravgrunnlagHendelse {
         return KravgrunnlagHendelse(
-            internId = internId,
+            id = internId,
             vedtakId = vedtakId,
             kravstatuskode = kravstatuskode,
             fagsystemVedtaksdato = fagsystemVedtaksdato,

@@ -47,8 +47,7 @@ class BehandlingEntityTest {
         kravgrunnlagHistorikk.lagre(kravgrunnlag())
         val behandler = Behandler.Saksbehandler("A123456")
         val behandlingFørLagring = Behandling.nyBehandling(
-            internId = behandlingId,
-            eksternId = behandlingId,
+            id = behandlingId,
             behandlingstype = Behandlingstype.TILBAKEKREVING,
             enhet = Enhet("0425", "NAV Solør"),
             årsak = Behandlingsårsakstype.REVURDERING_KLAGE_KA,
@@ -60,7 +59,9 @@ class BehandlingEntityTest {
             tilstand = TilBehandling,
         )
 
-        val behandlingEtterLagring = behandlingFørLagring.tilEntity().fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
+        val behandlingEtterLagring = behandlingFørLagring
+            .tilEntity("not_needed")
+            .fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
         behandlingEtterLagring.tilFrontendDto(TilBehandling, behandler, true) shouldBe behandlingFørLagring.tilFrontendDto(TilBehandling, behandler, true)
 
         val observatør = BehovObservatørOppsamler()

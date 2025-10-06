@@ -65,7 +65,7 @@ class ForvaltningTest : TilbakekrevingE2EBase() {
 
         val behandlingInfo = tilbakekrevingService.hentBehandlingsinfo(tilbakekreving!!)
 
-        behandlingInfo.first().behandlingId.shouldBe(behandling?.internId)
+        behandlingInfo.first().behandlingId.shouldBe(behandling?.id)
         behandlingInfo.first().eksternId.shouldBe(kravgrunnlag?.referanse)
     }
 }

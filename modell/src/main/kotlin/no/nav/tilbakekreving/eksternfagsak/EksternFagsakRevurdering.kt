@@ -11,7 +11,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 sealed class EksternFagsakRevurdering(
-    override val internId: UUID,
+    override val id: UUID,
 ) : Historikk.HistorikkInnslag<UUID> {
     internal abstract val eksternId: String
     abstract val revurderingsårsak: Revurderingsårsak
@@ -35,7 +35,7 @@ sealed class EksternFagsakRevurdering(
         override fun tilEntity(): EksternFagsakBehandlingEntity {
             return EksternFagsakBehandlingEntity(
                 type = EksternFagsakBehandlingType.BEHANDLING,
-                internId = internId,
+                internId = id,
                 eksternId = eksternId,
                 revurderingsårsak = revurderingsårsak.tilEntity(),
                 årsakTilFeilutbetaling = årsakTilFeilutbetaling,
@@ -75,7 +75,7 @@ sealed class EksternFagsakRevurdering(
         override fun tilEntity(): EksternFagsakBehandlingEntity {
             return EksternFagsakBehandlingEntity(
                 type = EksternFagsakBehandlingType.UKJENT,
-                internId = internId,
+                internId = id,
                 eksternId = null,
                 revurderingsårsak = null,
                 årsakTilFeilutbetaling = null,

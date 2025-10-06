@@ -18,7 +18,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 class KravgrunnlagHendelse(
-    override val internId: UUID,
+    override val id: UUID,
     private val vedtakId: BigInteger,
     private val kravstatuskode: Kravstatuskode,
     internal val fagsystemVedtaksdato: LocalDate?,
@@ -56,7 +56,7 @@ class KravgrunnlagHendelse(
 
     fun tilEntity(): KravgrunnlagHendelseEntity {
         return KravgrunnlagHendelseEntity(
-            internId = internId,
+            internId = id,
             vedtakId = vedtakId,
             kravstatuskode = kravstatuskode,
             fagsystemVedtaksdato = fagsystemVedtaksdato,

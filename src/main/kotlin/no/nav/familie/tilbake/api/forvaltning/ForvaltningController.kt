@@ -185,7 +185,7 @@ class ForvaltningController(
                 val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
                 tilgangskontrollService.validerTilgangTilbakekreving(
                     tilbakekreving = tilbakekreving,
-                    behandlingId = behandling.internId,
+                    behandlingId = behandling.id,
                     minimumBehandlerrolle = Behandlerrolle.FORVALTER,
                     auditLoggerEvent = AuditLoggerEvent.NONE,
                     handling = "Henter forvaltningsinformasjon",
