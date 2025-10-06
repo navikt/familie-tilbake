@@ -2,6 +2,9 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 
 import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.api.v1.dto.ManuellBrevmottakerResponsDto
+import no.nav.tilbakekreving.entities.ManuellAdresseInfoEntity
+import no.nav.tilbakekreving.entities.MottakerType
+import no.nav.tilbakekreving.entities.RegistrertBrevmottakerEntity
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kontrakter.brev.Brevmottaker
@@ -40,6 +43,8 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
         throw ModellFeil.UgyldigOperasjonException("Ugyldig mottakerId $brevmottakerId", sporing)
     }
 
+    fun tilEntity(): RegistrertBrevmottakerEntity
+
     class DefaultMottaker(
         override val id: UUID = UUID.randomUUID(),
         val navn: String,
@@ -71,6 +76,22 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
 
         override fun tilFrontendDto(): List<ManuellBrevmottakerResponsDto> {
             return listOf()
+        }
+
+        override fun tilEntity(): RegistrertBrevmottakerEntity {
+            return RegistrertBrevmottakerEntity(
+                mottakerType = MottakerType.DEFAULT_MOTTAKER,
+                id = id,
+                navn = navn,
+                personIdent = personIdent,
+                organisasjonsnummer = null,
+                vergetype = null,
+                manuellAdresseInfoEntity = null,
+                defaultMottaker = null,
+                utenlandskAdresse = null,
+                verge = null,
+                fullmektig = null,
+            )
         }
     }
 
@@ -122,6 +143,28 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
                 ),
             )
         }
+
+        override fun tilEntity(): RegistrertBrevmottakerEntity = RegistrertBrevmottakerEntity(
+            mottakerType = MottakerType.UTENLANDSK_ADRESSE_MOTTAKER,
+            id = this.id,
+            navn = navn,
+            manuellAdresseInfoEntity = manuellAdresseInfo?.run {
+                ManuellAdresseInfoEntity(
+                    adresselinje1,
+                    adresselinje2,
+                    postnummer,
+                    poststed,
+                    landkode,
+                )
+            },
+            personIdent = null,
+            organisasjonsnummer = null,
+            vergetype = null,
+            defaultMottaker = null,
+            utenlandskAdresse = null,
+            verge = null,
+            fullmektig = null,
+        )
     }
 
     class FullmektigMottaker(
@@ -129,6 +172,7 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
         val navn: String,
         val organisasjonsnummer: String? = null,
         val personIdent: String? = null,
+        val vergeType: Vergetype,
         val manuellAdresseInfo: ManuellAdresseInfo? = null,
     ) : RegistrertBrevmottaker {
         override fun tilFrontendDto(): List<ManuellBrevmottakerResponsDto> {
@@ -137,7 +181,7 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
                     id = id,
                     brevmottaker = Brevmottaker(
                         type = FULLMEKTIG,
-                        vergetype = null,
+                        vergetype = vergeType,
                         navn = navn,
                         organisasjonsnummer = organisasjonsnummer,
                         personIdent = personIdent,
@@ -146,12 +190,34 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
                 ),
             )
         }
+
+        override fun tilEntity(): RegistrertBrevmottakerEntity = RegistrertBrevmottakerEntity(
+            mottakerType = MottakerType.FULLMEKTIG_MOTTAKER,
+            id = this.id,
+            navn = navn,
+            personIdent = personIdent,
+            organisasjonsnummer = organisasjonsnummer,
+            vergetype = vergeType,
+            manuellAdresseInfoEntity = manuellAdresseInfo?.run {
+                ManuellAdresseInfoEntity(
+                    adresselinje1,
+                    adresselinje2,
+                    postnummer,
+                    poststed,
+                    landkode,
+                )
+            },
+            defaultMottaker = null,
+            utenlandskAdresse = null,
+            verge = null,
+            fullmektig = null,
+        )
     }
 
     class VergeMottaker(
         override val id: UUID,
         val navn: String,
-        val vergetype: Vergetype? = null,
+        val vergetype: Vergetype,
         val personIdent: String? = null,
         val manuellAdresseInfo: ManuellAdresseInfo? = null,
     ) : RegistrertBrevmottaker {
@@ -170,6 +236,28 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
                 ),
             )
         }
+
+        override fun tilEntity(): RegistrertBrevmottakerEntity = RegistrertBrevmottakerEntity(
+            mottakerType = MottakerType.VERGE_MOTTAKER,
+            id = this.id,
+            navn = navn,
+            personIdent = personIdent,
+            vergetype = vergetype,
+            manuellAdresseInfoEntity = manuellAdresseInfo?.run {
+                ManuellAdresseInfoEntity(
+                    adresselinje1,
+                    adresselinje2,
+                    postnummer,
+                    poststed,
+                    landkode,
+                )
+            },
+            organisasjonsnummer = null,
+            defaultMottaker = null,
+            utenlandskAdresse = null,
+            verge = null,
+            fullmektig = null,
+        )
     }
 
     class DødsboMottaker(
@@ -203,6 +291,28 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
                 ),
             )
         }
+
+        override fun tilEntity(): RegistrertBrevmottakerEntity = RegistrertBrevmottakerEntity(
+            mottakerType = MottakerType.DODSBO_MOTTAKER,
+            id = this.id,
+            navn = navn,
+            manuellAdresseInfoEntity = manuellAdresseInfo?.run {
+                ManuellAdresseInfoEntity(
+                    adresselinje1,
+                    adresselinje2,
+                    postnummer,
+                    poststed,
+                    landkode,
+                )
+            },
+            personIdent = null,
+            organisasjonsnummer = null,
+            vergetype = null,
+            defaultMottaker = null,
+            utenlandskAdresse = null,
+            verge = null,
+            fullmektig = null,
+        )
     }
 
     class UtenlandskAdresseOgVergeMottaker(
@@ -241,6 +351,20 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
         override fun tilFrontendDto(): List<ManuellBrevmottakerResponsDto> {
             return utenlandskAdresse.tilFrontendDto() + verge.tilFrontendDto()
         }
+
+        override fun tilEntity(): RegistrertBrevmottakerEntity = RegistrertBrevmottakerEntity(
+            mottakerType = MottakerType.UTENLANDSK_ADRESSE_OG_VERGE_MOTTAKER,
+            id = this.id,
+            utenlandskAdresse = utenlandskAdresse.tilEntity(),
+            verge = verge.tilEntity(),
+            navn = null,
+            personIdent = null,
+            organisasjonsnummer = null,
+            vergetype = null,
+            manuellAdresseInfoEntity = null,
+            defaultMottaker = null,
+            fullmektig = null,
+        )
     }
 
     class UtenlandskAdresseOgFullmektigMottaker(
@@ -279,6 +403,21 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
         override fun tilFrontendDto(): List<ManuellBrevmottakerResponsDto> {
             return utenlandskAdresse.tilFrontendDto() + fullmektig.tilFrontendDto()
         }
+
+        override fun tilEntity(): RegistrertBrevmottakerEntity =
+            RegistrertBrevmottakerEntity(
+                mottakerType = MottakerType.UTENLANDSK_ADRESSE_OG_FULLMEKTIG_MOTTAKER,
+                id = id,
+                utenlandskAdresse = utenlandskAdresse.tilEntity(),
+                fullmektig = fullmektig.tilEntity(),
+                navn = null,
+                personIdent = null,
+                organisasjonsnummer = null,
+                vergetype = null,
+                manuellAdresseInfoEntity = null,
+                defaultMottaker = null,
+                verge = null,
+            )
     }
 
     class DefaultBrukerAdresseOgVergeMottaker(
@@ -319,6 +458,21 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
         override fun tilFrontendDto(): List<ManuellBrevmottakerResponsDto> {
             return defaultMottaker.tilFrontendDto() + verge.tilFrontendDto()
         }
+
+        override fun tilEntity(): RegistrertBrevmottakerEntity =
+            RegistrertBrevmottakerEntity(
+                mottakerType = MottakerType.DEFAULT_BRUKER_ADRESSE_OG_VERGE_MOTTAKER,
+                id = id,
+                defaultMottaker = defaultMottaker.tilEntity(),
+                verge = verge.tilEntity(),
+                navn = null,
+                personIdent = null,
+                organisasjonsnummer = null,
+                vergetype = null,
+                manuellAdresseInfoEntity = null,
+                utenlandskAdresse = null,
+                fullmektig = null,
+            )
     }
 
     class DefaultBrukerAdresseOgFullmektigMottaker(
@@ -359,5 +513,20 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
         override fun tilFrontendDto(): List<ManuellBrevmottakerResponsDto> {
             return defaultMottaker.tilFrontendDto() + fullmektig.tilFrontendDto()
         }
+
+        override fun tilEntity(): RegistrertBrevmottakerEntity =
+            RegistrertBrevmottakerEntity(
+                mottakerType = MottakerType.DEFAULT_BRUKER_ADRESSE_OG_FULLMEKTIG_MOTTAKER,
+                id = id,
+                defaultMottaker = defaultMottaker.tilEntity(),
+                fullmektig = fullmektig.tilEntity(),
+                navn = null,
+                personIdent = null,
+                organisasjonsnummer = null,
+                vergetype = null,
+                manuellAdresseInfoEntity = null,
+                utenlandskAdresse = null,
+                verge = null,
+            )
     }
 }

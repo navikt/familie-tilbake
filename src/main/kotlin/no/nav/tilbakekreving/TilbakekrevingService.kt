@@ -363,6 +363,7 @@ class TilbakekrevingService(
                             navn = brevmottakerDto.navn,
                             organisasjonsnummer = brevmottakerDto.organisasjonsnummer,
                             personIdent = brevmottakerDto.personIdent,
+                            vergeType = requireNotNull(brevmottakerDto.vergetype) { "FullmektigMottaker krever vergetype" },
                             manuellAdresseInfo = brevmottakerDto.manuellAdresseInfo,
                         ),
                     )
@@ -375,6 +376,7 @@ class TilbakekrevingService(
                             id = id,
                             navn = brevmottakerDto.navn,
                             personIdent = brevmottakerDto.personIdent,
+                            vergetype = requireNotNull(brevmottakerDto.vergetype) { "VergeMottaker krever vergetype" },
                             manuellAdresseInfo = brevmottakerDto.manuellAdresseInfo,
                         ),
                     )

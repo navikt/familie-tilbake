@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.api.v1.dto.ManuellBrevmottakerResponsDto
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
+import no.nav.tilbakekreving.entities.BrevmottakerStegEntity
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
@@ -69,6 +70,13 @@ class BrevmottakerSteg(
 
         registrertBrevmottaker = registrertBrevmottaker.fjernBrevmottaker(brevmottakerId, defaultMottaker, sporing)
     }
+
+    fun tilEntity(): BrevmottakerStegEntity =
+        BrevmottakerStegEntity(
+            aktivert,
+            defaultMottakerEntity = defaultMottaker.tilEntity(),
+            registrertBrevmottakerEntity = registrertBrevmottaker.tilEntity(),
+        )
 
     companion object {
         fun opprett(
