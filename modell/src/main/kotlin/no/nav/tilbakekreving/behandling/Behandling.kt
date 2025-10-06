@@ -72,6 +72,7 @@ class Behandling internal constructor(
     private val foreslåVedtakSteg: ForeslåVedtakSteg,
     private val fatteVedtakSteg: FatteVedtakSteg,
     private var påVent: PåVent?,
+    var brevmottakerSteg: BrevmottakerSteg?,
 ) : Historikk.HistorikkInnslag<UUID> {
     fun faktastegFrontendDto(opprettelsesvalg: Opprettelsesvalg): FaktaFeilutbetalingDto {
         return faktasteg.tilFrontendDto(kravgrunnlag.entry, eksternFagsakRevurdering.entry, opprettelsesvalg)
@@ -84,7 +85,6 @@ class Behandling internal constructor(
         vilkårsvurderingsteg.tilFrontendDto(kravgrunnlag.entry)
     }
     val fatteVedtakStegDto: FrontendDto<TotrinnsvurderingDto> get() = fatteVedtakSteg
-    var brevmottakerSteg: BrevmottakerSteg? = null
 
     fun harLikePerioder(): Boolean = vilkårsvurderingsteg.harLikePerioder()
 
@@ -474,6 +474,7 @@ class Behandling internal constructor(
                 foreslåVedtakSteg = foreslåVedtakSteg,
                 fatteVedtakSteg = fatteVedtakSteg,
                 påVent = null,
+                brevmottakerSteg = null,
             ).also {
                 it.utførSideeffekt(tilstand, behandlingObservatør)
             }

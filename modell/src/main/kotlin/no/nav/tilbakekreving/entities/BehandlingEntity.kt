@@ -54,6 +54,7 @@ data class BehandlingEntity(
             foreslåVedtakSteg = foreslåVedtakStegEntity.fraEntity(),
             fatteVedtakSteg = fatteVedtakStegEntity.fraEntity(),
             påVent = påVentEntity?.fraEntity(),
+            brevmottakerSteg = brevmottakerStegEntity?.fraEntity(),
         )
     }
 }

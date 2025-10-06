@@ -2,9 +2,9 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 
 import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.api.v1.dto.ManuellBrevmottakerResponsDto
-import no.nav.tilbakekreving.entities.ManuellAdresseInfoEntity
 import no.nav.tilbakekreving.entities.MottakerType
 import no.nav.tilbakekreving.entities.RegistrertBrevmottakerEntity
+import no.nav.tilbakekreving.entities.mapper.tilManuellAdresseInfoEntity
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kontrakter.brev.Brevmottaker
@@ -148,15 +148,7 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
             mottakerType = MottakerType.UTENLANDSK_ADRESSE_MOTTAKER,
             id = this.id,
             navn = navn,
-            manuellAdresseInfoEntity = manuellAdresseInfo?.run {
-                ManuellAdresseInfoEntity(
-                    adresselinje1,
-                    adresselinje2,
-                    postnummer,
-                    poststed,
-                    landkode,
-                )
-            },
+            manuellAdresseInfoEntity = manuellAdresseInfo?.let(::tilManuellAdresseInfoEntity),
             personIdent = null,
             organisasjonsnummer = null,
             vergetype = null,
@@ -198,15 +190,7 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
             personIdent = personIdent,
             organisasjonsnummer = organisasjonsnummer,
             vergetype = vergeType,
-            manuellAdresseInfoEntity = manuellAdresseInfo?.run {
-                ManuellAdresseInfoEntity(
-                    adresselinje1,
-                    adresselinje2,
-                    postnummer,
-                    poststed,
-                    landkode,
-                )
-            },
+            manuellAdresseInfoEntity = manuellAdresseInfo?.let(::tilManuellAdresseInfoEntity),
             defaultMottaker = null,
             utenlandskAdresse = null,
             verge = null,
@@ -217,7 +201,7 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
     class VergeMottaker(
         override val id: UUID,
         val navn: String,
-        val vergetype: Vergetype,
+        val vergeType: Vergetype,
         val personIdent: String? = null,
         val manuellAdresseInfo: ManuellAdresseInfo? = null,
     ) : RegistrertBrevmottaker {
@@ -227,7 +211,7 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
                     id = id,
                     brevmottaker = Brevmottaker(
                         type = VERGE,
-                        vergetype = vergetype,
+                        vergetype = vergeType,
                         navn = navn,
                         organisasjonsnummer = null,
                         personIdent = personIdent,
@@ -242,16 +226,8 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
             id = this.id,
             navn = navn,
             personIdent = personIdent,
-            vergetype = vergetype,
-            manuellAdresseInfoEntity = manuellAdresseInfo?.run {
-                ManuellAdresseInfoEntity(
-                    adresselinje1,
-                    adresselinje2,
-                    postnummer,
-                    poststed,
-                    landkode,
-                )
-            },
+            vergetype = vergeType,
+            manuellAdresseInfoEntity = manuellAdresseInfo?.let(::tilManuellAdresseInfoEntity),
             organisasjonsnummer = null,
             defaultMottaker = null,
             utenlandskAdresse = null,
@@ -296,15 +272,7 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
             mottakerType = MottakerType.DODSBO_MOTTAKER,
             id = this.id,
             navn = navn,
-            manuellAdresseInfoEntity = manuellAdresseInfo?.run {
-                ManuellAdresseInfoEntity(
-                    adresselinje1,
-                    adresselinje2,
-                    postnummer,
-                    poststed,
-                    landkode,
-                )
-            },
+            manuellAdresseInfoEntity = manuellAdresseInfo?.let(::tilManuellAdresseInfoEntity),
             personIdent = null,
             organisasjonsnummer = null,
             vergetype = null,

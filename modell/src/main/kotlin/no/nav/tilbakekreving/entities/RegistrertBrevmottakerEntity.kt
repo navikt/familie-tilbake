@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.entities
 
 import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
+import no.nav.tilbakekreving.entities.mapper.fraManuellAdresseInfoEntity
 import no.nav.tilbakekreving.kontrakter.brev.ManuellAdresseInfo
 import no.nav.tilbakekreving.kontrakter.verge.Vergetype
 import java.util.UUID
@@ -47,7 +48,7 @@ data class RegistrertBrevmottakerEntity(
             RegistrertBrevmottaker.VergeMottaker(
                 id = id,
                 navn = requireNotNull(navn) { "navn kreves for VERGE_MOTTAKER" },
-                vergetype = requireNotNull(vergetype) { "vergetype kreves for VERGE_MOTTAKER" },
+                vergeType = requireNotNull(vergetype) { "vergetype kreves for VERGE_MOTTAKER" },
                 personIdent = personIdent,
                 manuellAdresseInfo = manuellAdresseInfoEntity?.fraEntity(),
             )
@@ -96,13 +97,7 @@ data class ManuellAdresseInfoEntity(
     val poststed: String,
     val landkode: String,
 ) {
-    fun fraEntity(): ManuellAdresseInfo = ManuellAdresseInfo(
-        adresselinje1 = adresselinje1,
-        adresselinje2 = adresselinje2,
-        postnummer = postnummer,
-        poststed = poststed,
-        landkode = landkode,
-    )
+    fun fraEntity(): ManuellAdresseInfo = fraManuellAdresseInfoEntity(this)
 }
 
 enum class MottakerType {
