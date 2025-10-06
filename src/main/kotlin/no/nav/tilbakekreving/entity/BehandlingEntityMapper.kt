@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.entity
 
 import no.nav.tilbakekreving.entities.BehandlerEntity
 import no.nav.tilbakekreving.entities.BehandlingEntity
+import no.nav.tilbakekreving.entities.BrevmottakerStegEntity
 import no.nav.tilbakekreving.entities.EnhetEntity
 import no.nav.tilbakekreving.entities.FaktastegEntity
 import no.nav.tilbakekreving.entities.FatteVedtakStegEntity
@@ -68,6 +69,7 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
         foreslåVedtak: ForeslåVedtakStegEntity,
         fatteVedtak: FatteVedtakStegEntity,
         påVent: PåVentEntity?,
+        brevmottakerSteg: BrevmottakerStegEntity?,
     ): BehandlingEntity {
         return BehandlingEntity(
             id = resultSet[id],
@@ -86,6 +88,7 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
             foreslåVedtakStegEntity = foreslåVedtak,
             fatteVedtakStegEntity = fatteVedtak,
             påVentEntity = påVent,
+            brevmottakerStegEntity = brevmottakerSteg,
         )
     }
 }

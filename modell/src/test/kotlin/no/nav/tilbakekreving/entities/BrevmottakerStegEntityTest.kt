@@ -37,7 +37,7 @@ class BrevmottakerStegEntityTest {
             ),
         )
 
-        val behandlingEtterLagring = behandlingFørLagring.tilEntity().fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
+        val behandlingEtterLagring = behandlingFørLagring.tilEntity("not_needed").fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
         behandlingEtterLagring.brevmottakerSteg?.tilFrontendDto()?.size shouldBe 0
     }
 
@@ -62,7 +62,7 @@ class BrevmottakerStegEntityTest {
             ),
         )
 
-        val behandlingEtterLagring = behandlingFørLagring.tilEntity().fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
+        val behandlingEtterLagring = behandlingFørLagring.tilEntity("not_needed").fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
 
         behandlingEtterLagring.brevmottakerSteg?.tilFrontendDto()?.size shouldBe 1
         behandlingEtterLagring.brevmottakerSteg?.tilFrontendDto()?.first()?.brevmottaker?.navn shouldBe "Utenlandsk Mottaker"
@@ -90,7 +90,7 @@ class BrevmottakerStegEntityTest {
             ),
         )
 
-        val behandlingEtterLagring = behandlingFørLagring.tilEntity().fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
+        val behandlingEtterLagring = behandlingFørLagring.tilEntity("not_needed").fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
 
         behandlingEtterLagring.brevmottakerSteg?.tilFrontendDto()?.size shouldBe 1
         behandlingEtterLagring.brevmottakerSteg?.tilFrontendDto()?.first()?.brevmottaker?.navn shouldBe "Verge Mottaker"
@@ -118,7 +118,7 @@ class BrevmottakerStegEntityTest {
             ),
         )
 
-        val behandlingEtterLagring = behandlingFørLagring.tilEntity().fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
+        val behandlingEtterLagring = behandlingFørLagring.tilEntity("not_needed").fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
 
         behandlingEtterLagring.brevmottakerSteg?.tilFrontendDto()?.size shouldBe 1
         behandlingEtterLagring.brevmottakerSteg?.tilFrontendDto()?.first()?.brevmottaker?.navn shouldBe "Verge Mottaker"
@@ -145,7 +145,7 @@ class BrevmottakerStegEntityTest {
             ),
         )
 
-        val behandlingEtterLagring = behandlingFørLagring.tilEntity().fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
+        val behandlingEtterLagring = behandlingFørLagring.tilEntity("not_needed").fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
 
         behandlingEtterLagring.brevmottakerSteg?.tilFrontendDto()?.size shouldBe 1
         behandlingEtterLagring.brevmottakerSteg?.tilFrontendDto()?.first()?.brevmottaker?.navn shouldBe "Døds Mottaker"
@@ -181,7 +181,7 @@ class BrevmottakerStegEntityTest {
             ),
         )
 
-        val behandlingEtterLagring = behandlingFørLagring.tilEntity().fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
+        val behandlingEtterLagring = behandlingFørLagring.tilEntity("not_needed").fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
         behandlingEtterLagring.brevmottakerSteg?.tilFrontendDto()?.size shouldBe 2
         behandlingEtterLagring.brevmottakerSteg?.tilFrontendDto()?.first()?.brevmottaker?.navn shouldBe "Person i utlandet"
         behandlingEtterLagring.brevmottakerSteg?.tilFrontendDto()?.get(1)?.brevmottaker?.navn shouldBe "Verge"
@@ -217,7 +217,7 @@ class BrevmottakerStegEntityTest {
             ),
         )
 
-        val behandlingEtterLagring = behandlingFørLagring.tilEntity().fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
+        val behandlingEtterLagring = behandlingFørLagring.tilEntity("not_needed").fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
         behandlingEtterLagring.brevmottakerSteg?.tilFrontendDto()?.size shouldBe 2
         behandlingEtterLagring.brevmottakerSteg?.tilFrontendDto()?.first()?.brevmottaker?.navn shouldBe "Person i utlandet"
         behandlingEtterLagring.brevmottakerSteg?.tilFrontendDto()?.get(1)?.brevmottaker?.navn shouldBe "Fullmekting"
@@ -247,7 +247,7 @@ class BrevmottakerStegEntityTest {
             ),
         )
 
-        val behandlingEtterLagring = behandlingFørLagring.tilEntity().fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
+        val behandlingEtterLagring = behandlingFørLagring.tilEntity("not_needed").fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
         behandlingEtterLagring.brevmottakerSteg?.tilFrontendDto()?.size shouldBe 1
         behandlingEtterLagring.brevmottakerSteg?.tilFrontendDto()?.first()?.brevmottaker?.navn shouldBe "Verge"
     }
@@ -276,7 +276,7 @@ class BrevmottakerStegEntityTest {
             ),
         )
 
-        val behandlingEtterLagring = behandlingFørLagring.tilEntity().fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
+        val behandlingEtterLagring = behandlingFørLagring.tilEntity("not_needed").fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
         behandlingEtterLagring.brevmottakerSteg?.tilFrontendDto()?.size shouldBe 1
         behandlingEtterLagring.brevmottakerSteg?.tilFrontendDto()?.first()?.brevmottaker?.navn shouldBe "Fullmektig"
     }
@@ -305,8 +305,7 @@ class BrevmottakerStegEntityTest {
         kravgrunnlagHistorikk.lagre(kravgrunnlag())
         val behandler = Behandler.Saksbehandler("A123456")
         return Behandling.nyBehandling(
-            internId = behandlingId,
-            eksternId = behandlingId,
+            id = behandlingId,
             behandlingstype = Behandlingstype.TILBAKEKREVING,
             enhet = Enhet("0425", "NAV Solør"),
             årsak = Behandlingsårsakstype.REVURDERING_KLAGE_KA,

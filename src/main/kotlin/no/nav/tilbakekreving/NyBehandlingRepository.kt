@@ -31,6 +31,7 @@ class NyBehandlingRepository(
                 foreslåVedtak = jsonBehandling.foreslåVedtakStegEntity,
                 fatteVedtak = jsonBehandling.fatteVedtakStegEntity,
                 påVent = jsonBehandling.påVentEntity,
+                brevmottakerSteg = jsonBehandling.brevmottakerStegEntity,
             )
         }
     }
