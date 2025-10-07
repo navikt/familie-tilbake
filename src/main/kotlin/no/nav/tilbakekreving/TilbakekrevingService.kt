@@ -28,7 +28,6 @@ import no.nav.tilbakekreving.behov.FagsysteminfoBehov
 import no.nav.tilbakekreving.behov.IverksettelseBehov
 import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.bigquery.BigQueryService
-import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.endring.EndringObservatørService
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
@@ -189,7 +188,8 @@ class TilbakekrevingService(
             is VarselbrevBehov -> {
                 tilbakekreving.håndter(
                     VarselbrevSendtHendelse(
-                        Varselbrev.opprett(varsletBeløp = 2000L),
+                        varselbrevId = behov.brevId,
+                        journalpostId = "12345", // ToDo her kommer journalpost id som vi får i response når vi journalfører og sender brev.
                     ),
                 )
             }

@@ -1,5 +1,9 @@
 package no.nav.tilbakekreving.behov
 
+import no.nav.tilbakekreving.brev.Varselbrev
+import java.util.UUID
+
 data class VarselbrevBehov(
-    val dummyData: String,
+    val brevId: UUID,
+    val varselbrev: Varselbrev,
 ) : Behov

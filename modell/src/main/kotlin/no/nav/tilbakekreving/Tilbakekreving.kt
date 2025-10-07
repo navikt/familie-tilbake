@@ -21,6 +21,7 @@ import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.brev.BrevHistorikk
+import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
@@ -161,8 +162,8 @@ class Tilbakekreving internal constructor(
         byttTilstand(AvventerBrukerinfo)
     }
 
-    fun trengerVarselbrev() {
-        behovObservatør.håndter(VarselbrevBehov("wip"))
+    fun trengerVarselbrev(varselbrev: Varselbrev) {
+        behovObservatør.håndter(VarselbrevBehov(varselbrev.id, varselbrev))
     }
 
     fun trengerBrukerinfo() {

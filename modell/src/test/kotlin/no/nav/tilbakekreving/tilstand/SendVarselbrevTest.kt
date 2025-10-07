@@ -7,6 +7,7 @@ import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
+import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.brukerinfoHendelse
 import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.fagsysteminfoHendelse
@@ -29,13 +30,29 @@ class SendVarselbrevTest {
         tilbakekreving.håndter(kravgrunnlag())
         tilbakekreving.håndter(fagsysteminfoHendelse())
         tilbakekreving.håndter(brukerinfoHendelse())
-        tilbakekreving.håndter(VarselbrevSendtHendelse(varselbrev()))
+        println(oppsamler)
+        tilbakekreving.håndter(VarselbrevSendtHendelse(varselbrevId = tilbakekreving.brevHistorikk.nåværende().entry.id, journalpostId = "1234"))
 
         tilbakekreving.tilstand shouldBe TilBehandling
+
+        val varselbrevITilbakekreving = tilbakekreving.brevHistorikk.nåværende().entry as Varselbrev
+
+        println(oppsamler)
         oppsamler.behovListe.forOne {
             it shouldBeEqual
                 VarselbrevBehov(
-                    dummyData = "wip",
+                    brevId = varselbrevITilbakekreving.id,
+                    varselbrev = Varselbrev(
+                        id = varselbrevITilbakekreving.id,
+                        opprettetDato = varselbrevITilbakekreving.opprettetDato,
+                        brevInformasjon = varselbrevITilbakekreving.brevInformasjon,
+                        journalpostId = "1234",
+                        varsletBeløp = varselbrevITilbakekreving.varsletBeløp,
+                        revurderingsvedtaksdato = varselbrevITilbakekreving.revurderingsvedtaksdato,
+                        fristdatoForTilbakemelding = varselbrevITilbakekreving.fristdatoForTilbakemelding,
+                        varseltekstFraSaksbehandler = varselbrevITilbakekreving.varseltekstFraSaksbehandler,
+                        feilutbetaltePerioder = varselbrevITilbakekreving.feilutbetaltePerioder,
+                    ),
                 )
         }
     }
