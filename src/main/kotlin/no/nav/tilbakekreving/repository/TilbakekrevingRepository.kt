@@ -1,4 +1,4 @@
-package no.nav.tilbakekreving
+package no.nav.tilbakekreving.repository
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -21,6 +21,7 @@ import java.util.UUID
 class TilbakekrevingRepository(
     private val jdbcTemplate: JdbcTemplate,
     private val behandlingRepository: NyBehandlingRepository,
+    private val kravgrunnlagRepository: NyKravgrunnlagRepository,
 ) {
     private val objectMapper = jacksonObjectMapper()
         .registerModule(KotlinModule.Builder().build())
@@ -50,7 +51,7 @@ class TilbakekrevingRepository(
             resultSet,
             eksternFagsak = json.eksternFagsak,
             behandlingHistorikk = behandlingRepository.hentBehandlinger(id, json.behandlingHistorikkEntities),
-            kravgrunnlagHistorikk = json.kravgrunnlagHistorikkEntities,
+            kravgrunnlagHistorikk = kravgrunnlagRepository.hentKravgrunnlag(id),
             brevHistorikk = json.brevHistorikkEntities,
             bruker = json.bruker,
         )
@@ -108,6 +109,7 @@ class TilbakekrevingRepository(
             jdbcTemplate,
             oppdatertEntity,
         )
+        kravgrunnlagRepository.lagre(oppdatertEntity.kravgrunnlagHistorikkEntities)
         behandlingRepository.lagreBehandlinger(oppdatertEntity.behandlingHistorikkEntities)
         jdbcTemplate.update(
             "UPDATE tilbakekreving_snapshot SET snapshot = to_jsonb(?::json) WHERE id=?;",

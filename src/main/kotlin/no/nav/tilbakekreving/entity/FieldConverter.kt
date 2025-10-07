@@ -1,8 +1,13 @@
 package no.nav.tilbakekreving.entity
 
+import java.math.BigDecimal
+import java.math.BigInteger
+import java.sql.Date
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Timestamp
+import java.sql.Types
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.UUID
@@ -62,6 +67,22 @@ interface FieldConverter<T, DbPrimitive> {
         fun required() = Required(this)
     }
 
+    object LocalDateConverter : FieldConverter<LocalDate?, Date?> {
+        override fun convert(value: LocalDate?): Date? {
+            return value?.let(Date::valueOf)
+        }
+
+        override fun convert(resultSet: ResultSet, column: String): LocalDate? {
+            return resultSet.getDate(column)?.toLocalDate()
+        }
+
+        override fun setColumn(index: Int, preparedStatement: PreparedStatement, value: LocalDate?) {
+            preparedStatement.setDate(index, convert(value))
+        }
+
+        fun required() = Required(this)
+    }
+
     class EnumConverter<T>(
         private val stringValue: (String) -> T,
         private val enumValue: (T) -> String,
@@ -97,6 +118,58 @@ interface FieldConverter<T, DbPrimitive> {
 
         override fun setColumn(index: Int, preparedStatement: PreparedStatement, value: UUID?) {
             preparedStatement.setObject(index, value)
+        }
+
+        fun required() = Required(this)
+    }
+
+    object BigIntConverter : FieldConverter<BigInteger?, BigInteger?> {
+        override fun convert(value: BigInteger?): BigInteger? {
+            return value
+        }
+
+        override fun convert(resultSet: ResultSet, column: String): BigInteger? {
+            return resultSet.getObject(column, BigInteger::class.java)
+        }
+
+        override fun setColumn(index: Int, preparedStatement: PreparedStatement, value: BigInteger?) {
+            preparedStatement.setObject(index, convert(value))
+        }
+
+        fun required() = Required(this)
+    }
+
+    object BooleanConverter : FieldConverter<Boolean?, Boolean?> {
+        override fun convert(value: Boolean?): Boolean? {
+            return value
+        }
+
+        override fun convert(resultSet: ResultSet, column: String): Boolean {
+            return resultSet.getBoolean(column)
+        }
+
+        override fun setColumn(index: Int, preparedStatement: PreparedStatement, value: Boolean?) {
+            if (value != null) {
+                preparedStatement.setBoolean(index, value)
+            } else {
+                preparedStatement.setNull(index, Types.BOOLEAN)
+            }
+        }
+
+        fun required() = Required(this)
+    }
+
+    object BigDecimalConverter : FieldConverter<BigDecimal?, String?> {
+        override fun convert(value: BigDecimal?): String? {
+            return value?.toString()
+        }
+
+        override fun convert(resultSet: ResultSet, column: String): BigDecimal? {
+            return resultSet.getString(column)?.toBigDecimal()
+        }
+
+        override fun setColumn(index: Int, preparedStatement: PreparedStatement, value: BigDecimal?) {
+            preparedStatement.setString(index, convert(value))
         }
 
         fun required() = Required(this)

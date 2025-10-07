@@ -8,7 +8,6 @@ import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import no.nav.tilbakekreving.Testdata
-import no.nav.tilbakekreving.TilbakekrevingRepository
 import no.nav.tilbakekreving.april
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.NyKlassekode
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp
@@ -22,6 +21,7 @@ import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagMediator
 import no.nav.tilbakekreving.mai
 import no.nav.tilbakekreving.mars
+import no.nav.tilbakekreving.repository.TilbakekrevingRepository
 import no.nav.tilbakekreving.util.kroner
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

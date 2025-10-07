@@ -13,7 +13,6 @@ import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagBelopDt
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import no.nav.tilbakekreving.typer.v1.JaNeiDto
 import no.nav.tilbakekreving.typer.v1.TypeGjelderDto
-import no.nav.tilbakekreving.typer.v1.TypeKlasseDto
 import org.springframework.http.HttpStatus
 import java.util.UUID
 
@@ -43,10 +42,10 @@ object KravgrunnlagMapper {
             referanse = kravgrunnlag.referanse,
             perioder = kravgrunnlag.tilbakekrevingsPeriode.map { periode ->
                 KravgrunnlagHendelse.Periode(
+                    id = UUID.randomUUID(),
                     periode = periode.periode.fom til periode.periode.tom,
                     månedligSkattebeløp = periode.belopSkattMnd,
-                    feilutbetaltBeløp = periode.tilbakekrevingsBelop.filter { it.typeKlasse == TypeKlasseDto.FEIL }.tilBeløp(),
-                    ytelsesbeløp = periode.tilbakekrevingsBelop.filter { it.typeKlasse == TypeKlasseDto.YTEL }.tilBeløp(),
+                    beløp = periode.tilbakekrevingsBelop.tilBeløp(),
                 )
             },
         )
@@ -66,6 +65,7 @@ object KravgrunnlagMapper {
 
     private fun Iterable<DetaljertKravgrunnlagBelopDto>.tilBeløp() = map {
         KravgrunnlagHendelse.Periode.Beløp(
+            id = UUID.randomUUID(),
             it.kodeKlasse,
             it.typeKlasse.name,
             it.belopOpprUtbet,

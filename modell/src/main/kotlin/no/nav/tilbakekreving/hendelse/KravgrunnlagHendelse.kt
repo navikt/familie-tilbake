@@ -54,9 +54,10 @@ class KravgrunnlagHendelse(
         return perioder
     }
 
-    fun tilEntity(): KravgrunnlagHendelseEntity {
+    fun tilEntity(tilbakekrevingId: String): KravgrunnlagHendelseEntity {
         return KravgrunnlagHendelseEntity(
-            internId = id,
+            id = id,
+            tilbakekrevingId = tilbakekrevingId,
             vedtakId = vedtakId,
             kravstatuskode = kravstatuskode,
             fagsystemVedtaksdato = fagsystemVedtaksdato,
@@ -67,15 +68,15 @@ class KravgrunnlagHendelse(
             kontrollfelt = kontrollfelt,
             kravgrunnlagId = kravgrunnlagId,
             referanse = referanse,
-            perioder = perioder.map { it.tilEntity() },
+            perioder = perioder.map { it.tilEntity(id) },
         )
     }
 
     class Periode(
+        private val id: UUID,
         val periode: Datoperiode,
         private val månedligSkattebeløp: BigDecimal,
-        private val ytelsesbeløp: List<Beløp>,
-        private val feilutbetaltBeløp: List<Beløp>,
+        private val beløp: List<Beløp>,
     ) : KravgrunnlagPeriodeAdapter {
         fun gjelderFor(other: Datoperiode): Boolean = other.inneholder(periode)
 
@@ -84,23 +85,25 @@ class KravgrunnlagHendelse(
         }
 
         override fun beløpTilbakekreves(): List<KravgrunnlagPeriodeAdapter.BeløpTilbakekreves> {
-            return ytelsesbeløp + feilutbetaltBeløp
+            return beløp
         }
 
         override fun feilutbetaltYtelsesbeløp(): BigDecimal {
-            return ytelsesbeløp.sumOf { it.tilbakekrevesBeløp }
+            return beløp.filter { it.erYtelsesbeløp() }.sumOf { it.tilbakekrevesBeløp }
         }
 
-        fun tilEntity(): KravgrunnlagPeriodeEntity {
+        fun tilEntity(kravgrunnlagId: UUID): KravgrunnlagPeriodeEntity {
             return KravgrunnlagPeriodeEntity(
+                id = id,
+                kravgrunnlagId = kravgrunnlagId,
                 periode = DatoperiodeEntity(periode.fom, periode.tom),
                 månedligSkattebeløp = månedligSkattebeløp,
-                ytelsesbeløp = ytelsesbeløp.map { it.tilEntity() },
-                feilutbetaltBeløp = feilutbetaltBeløp.map { it.tilEntity() },
+                beløp = beløp.map { it.tilEntity(id) },
             )
         }
 
         data class Beløp(
+            private val id: UUID,
             private val klassekode: String,
             private val klassetype: String,
             val opprinneligUtbetalingsbeløp: BigDecimal,
@@ -118,8 +121,12 @@ class KravgrunnlagHendelse(
 
             override fun riktigYteslesbeløp(): BigDecimal = nyttBeløp
 
-            fun tilEntity(): BeløpEntity {
+            fun erYtelsesbeløp(): Boolean = klassetype == "YTEL"
+
+            fun tilEntity(kravgrunnlagPeriodeId: UUID): BeløpEntity {
                 return BeløpEntity(
+                    id = id,
+                    kravgrunnlagPeriodeId = kravgrunnlagPeriodeId,
                     klassekode = klassekode,
                     klassetype = klassetype,
                     opprinneligUtbetalingsbeløp = opprinneligUtbetalingsbeløp,

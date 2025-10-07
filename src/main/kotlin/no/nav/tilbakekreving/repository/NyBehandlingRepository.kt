@@ -1,4 +1,4 @@
-package no.nav.tilbakekreving
+package no.nav.tilbakekreving.repository
 
 import no.nav.tilbakekreving.entities.BehandlingEntity
 import no.nav.tilbakekreving.entity.BehandlingEntityMapper

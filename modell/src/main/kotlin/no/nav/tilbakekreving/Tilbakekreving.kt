@@ -306,7 +306,7 @@ class Tilbakekreving internal constructor(
             id = this.id,
             eksternFagsak = this.eksternFagsak.tilEntity(),
             behandlingHistorikkEntities = this.behandlingHistorikk.tilEntity(id),
-            kravgrunnlagHistorikkEntities = this.kravgrunnlagHistorikk.tilEntity(),
+            kravgrunnlagHistorikkEntities = this.kravgrunnlagHistorikk.tilEntity(id),
             brevHistorikkEntities = this.brevHistorikk.tilEntity(),
             opprettet = this.opprettet,
             opprettelsesvalg = this.opprettelsesvalg,

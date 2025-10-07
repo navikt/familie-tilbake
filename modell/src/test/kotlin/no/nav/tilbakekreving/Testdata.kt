@@ -87,10 +87,10 @@ fun kravgrunnlagPeriode(
     ytelsesbeløp: List<KravgrunnlagHendelse.Periode.Beløp> = ytelsesbeløp(),
 ) =
     KravgrunnlagHendelse.Periode(
+        id = UUID.randomUUID(),
         periode = periode,
         månedligSkattebeløp = BigDecimal("0.0"),
-        ytelsesbeløp = ytelsesbeløp,
-        feilutbetaltBeløp = feilutbetalteBeløp(),
+        beløp = ytelsesbeløp + feilutbetalteBeløp(),
     )
 
 fun ytelsesbeløp(
@@ -99,6 +99,7 @@ fun ytelsesbeløp(
 ) =
     listOf(
         KravgrunnlagHendelse.Periode.Beløp(
+            id = UUID.randomUUID(),
             klassekode = "",
             klassetype = "YTEL",
             opprinneligUtbetalingsbeløp = opprinneligBeløp,
@@ -111,6 +112,7 @@ fun ytelsesbeløp(
 fun feilutbetalteBeløp() =
     listOf(
         KravgrunnlagHendelse.Periode.Beløp(
+            id = UUID.randomUUID(),
             klassekode = "",
             klassetype = "FEIL",
             opprinneligUtbetalingsbeløp = BigDecimal("12000.0"),

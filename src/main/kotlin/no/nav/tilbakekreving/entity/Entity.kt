@@ -59,7 +59,7 @@ abstract class Entity<E, IdType, IdDbPrimitive>(
     }
 
     private fun createInsertStatement(value: E) = PreparedStatementCreator { connection ->
-        val preparedStatement = connection.prepareStatement("INSERT INTO $tableName(${columnNames()}) VALUES(${placeholders()});")
+        val preparedStatement = connection.prepareStatement("INSERT INTO $tableName(${columnNames()}) VALUES(${placeholders()}) ON CONFLICT DO NOTHING;")
 
         allFields.forEachIndexed { index, field ->
             field.set(preparedStatement, index + 1, value)

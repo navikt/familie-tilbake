@@ -7,7 +7,8 @@ import java.time.LocalDate
 import java.util.UUID
 
 data class KravgrunnlagHendelseEntity(
-    val internId: UUID,
+    val id: UUID,
+    val tilbakekrevingId: String,
     val vedtakId: BigInteger,
     val kravstatuskode: Kravstatuskode,
     val fagsystemVedtaksdato: LocalDate?,
@@ -22,7 +23,7 @@ data class KravgrunnlagHendelseEntity(
 ) {
     fun fraEntity(): KravgrunnlagHendelse {
         return KravgrunnlagHendelse(
-            id = internId,
+            id = id,
             vedtakId = vedtakId,
             kravstatuskode = kravstatuskode,
             fagsystemVedtaksdato = fagsystemVedtaksdato,

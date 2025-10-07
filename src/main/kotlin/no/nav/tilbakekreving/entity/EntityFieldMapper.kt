@@ -3,10 +3,10 @@ package no.nav.tilbakekreving.entity
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 
-class EntityFieldMapper<E, T, IdPrimitive>(
+class EntityFieldMapper<E, T, DbPrimitive>(
     val column: String,
     private val getter: (E) -> T,
-    private val converter: FieldConverter<T, IdPrimitive>,
+    private val converter: FieldConverter<T, DbPrimitive>,
 ) {
     fun set(preparedStatement: PreparedStatement, index: Int, value: E) {
         converter.setColumn(index, preparedStatement, getter(value))
