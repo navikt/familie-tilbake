@@ -31,7 +31,7 @@ class AvventerBrukerinfoTest {
         tilbakekreving.håndter(fagsysteminfoHendelse())
         tilbakekreving.håndter(brukerinfoHendelse())
 
-        tilbakekreving.behandlingHistorikk.nåværende().entry.brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.DefaultMottaker>()
+        tilbakekreving.behandlingHistorikk.nåværende().entry.brevmottakerSteg?.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.DefaultMottaker>()
     }
 
     @Test

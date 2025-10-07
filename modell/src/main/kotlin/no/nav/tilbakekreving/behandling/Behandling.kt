@@ -72,6 +72,7 @@ class Behandling internal constructor(
     private val foreslåVedtakSteg: ForeslåVedtakSteg,
     private val fatteVedtakSteg: FatteVedtakSteg,
     private var påVent: PåVent?,
+    var brevmottakerSteg: BrevmottakerSteg?,
 ) : Historikk.HistorikkInnslag<UUID> {
     fun faktastegFrontendDto(opprettelsesvalg: Opprettelsesvalg): FaktaFeilutbetalingDto {
         return faktasteg.tilFrontendDto(kravgrunnlag.entry, eksternFagsakRevurdering.entry, opprettelsesvalg)
@@ -84,7 +85,6 @@ class Behandling internal constructor(
         vilkårsvurderingsteg.tilFrontendDto(kravgrunnlag.entry)
     }
     val fatteVedtakStegDto: FrontendDto<TotrinnsvurderingDto> get() = fatteVedtakSteg
-    lateinit var brevmottakerSteg: BrevmottakerSteg
 
     fun harLikePerioder(): Boolean = vilkårsvurderingsteg.harLikePerioder()
 
@@ -106,6 +106,7 @@ class Behandling internal constructor(
             foreslåVedtakStegEntity = foreslåVedtakSteg.tilEntity(),
             fatteVedtakStegEntity = fatteVedtakSteg.tilEntity(),
             påVentEntity = påVent?.tilEntity(),
+            brevmottakerStegEntity = brevmottakerSteg?.tilEntity(),
         )
     }
 
@@ -307,7 +308,7 @@ class Behandling internal constructor(
         brevmottaker: RegistrertBrevmottaker,
         observatør: BehandlingObservatør,
     ) {
-        brevmottakerSteg.håndter(brevmottaker, sporingsinformasjon())
+        brevmottakerSteg!!.håndter(brevmottaker, sporingsinformasjon())
         oppdaterBehandler(behandler)
     }
 
@@ -325,7 +326,7 @@ class Behandling internal constructor(
         manuellBrevmottakerId: UUID,
         observatør: BehandlingObservatør,
     ) {
-        brevmottakerSteg.fjernManuellBrevmottaker(manuellBrevmottakerId, sporingsinformasjon())
+        brevmottakerSteg!!.fjernManuellBrevmottaker(manuellBrevmottakerId, sporingsinformasjon())
         oppdaterBehandler(behandler)
     }
 
@@ -361,9 +362,9 @@ class Behandling internal constructor(
         }
     }
 
-    fun aktiverBrevmottakerSteg() = brevmottakerSteg.aktiverSteg()
+    fun aktiverBrevmottakerSteg() = brevmottakerSteg!!.aktiverSteg()
 
-    fun deaktiverBrevmottakerSteg() = brevmottakerSteg.deaktiverSteg()
+    fun deaktiverBrevmottakerSteg() = brevmottakerSteg!!.deaktiverSteg()
 
     fun kanUtbetales(): Boolean = fatteVedtakSteg.erFullstendig()
 
@@ -473,6 +474,7 @@ class Behandling internal constructor(
                 foreslåVedtakSteg = foreslåVedtakSteg,
                 fatteVedtakSteg = fatteVedtakSteg,
                 påVent = null,
+                brevmottakerSteg = null,
             ).also {
                 it.utførSideeffekt(tilstand, behandlingObservatør)
             }

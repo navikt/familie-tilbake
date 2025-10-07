@@ -7,6 +7,7 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kontrakter.brev.ManuellAdresseInfo
+import no.nav.tilbakekreving.kontrakter.verge.Vergetype
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
@@ -128,6 +129,7 @@ class BrevmottakerStegTest {
                 personIdent = "43214321321",
                 navn = "Verge",
                 manuellAdresseInfo = adresseInfo,
+                vergeType = Vergetype.VERGE_FOR_BARN,
             ),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -151,6 +153,7 @@ class BrevmottakerStegTest {
                 personIdent = "43214321321",
                 navn = "Verge",
                 manuellAdresseInfo = adresseInfo,
+                vergeType = Vergetype.VERGE_FOR_BARN,
             ),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -161,6 +164,7 @@ class BrevmottakerStegTest {
                 personIdent = "23232323231",
                 navn = "Ny Verge",
                 manuellAdresseInfo = adresseInfo,
+                vergeType = Vergetype.VERGE_FOR_BARN,
             ),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -185,6 +189,7 @@ class BrevmottakerStegTest {
                 personIdent = "43214321321",
                 navn = "fullmektig",
                 manuellAdresseInfo = adresseInfo,
+                vergeType = Vergetype.ADVOKAT,
             ),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -208,6 +213,7 @@ class BrevmottakerStegTest {
                 personIdent = "43214321321",
                 navn = "fullmektig",
                 manuellAdresseInfo = adresseInfo,
+                vergeType = Vergetype.ADVOKAT,
             ),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -218,6 +224,7 @@ class BrevmottakerStegTest {
                 personIdent = "11111111111",
                 navn = "ny fullmektig",
                 manuellAdresseInfo = adresseInfo,
+                vergeType = Vergetype.ADVOKAT,
             ),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -242,6 +249,7 @@ class BrevmottakerStegTest {
                 personIdent = "43214321321",
                 navn = "Verge",
                 manuellAdresseInfo = adresseInfo,
+                vergeType = Vergetype.VERGE_FOR_BARN,
             ),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -274,6 +282,7 @@ class BrevmottakerStegTest {
                 personIdent = "43214321321",
                 navn = "Verge",
                 manuellAdresseInfo = adresseInfo,
+                vergeType = Vergetype.VERGE_FOR_BARN,
             ),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -322,6 +331,7 @@ class BrevmottakerStegTest {
                 personIdent = "43214321321",
                 navn = "Verge",
                 manuellAdresseInfo = adresseInfo,
+                vergeType = Vergetype.VERGE_FOR_BARN,
             ),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -341,6 +351,7 @@ class BrevmottakerStegTest {
                 personIdent = "11122233345",
                 navn = "Verge",
                 manuellAdresseInfo = adresseInfo,
+                vergeType = Vergetype.VERGE_FOR_BARN,
             ),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -364,6 +375,7 @@ class BrevmottakerStegTest {
                 personIdent = "43214321321",
                 navn = "Fullmektig",
                 manuellAdresseInfo = adresseInfo,
+                vergeType = Vergetype.ADVOKAT,
             ),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -396,6 +408,7 @@ class BrevmottakerStegTest {
                 personIdent = "43214321321",
                 navn = "Fullmektig",
                 manuellAdresseInfo = adresseInfo,
+                vergeType = Vergetype.ADVOKAT,
             ),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -444,6 +457,7 @@ class BrevmottakerStegTest {
                 personIdent = "43214321321",
                 navn = "Fullmektig",
                 manuellAdresseInfo = adresseInfo,
+                vergeType = Vergetype.ADVOKAT,
             ),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -463,6 +477,7 @@ class BrevmottakerStegTest {
                 personIdent = "33333333311",
                 navn = "Fullmektig",
                 manuellAdresseInfo = adresseInfo,
+                vergeType = Vergetype.ADVOKAT,
             ),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -486,6 +501,7 @@ class BrevmottakerStegTest {
                 personIdent = "43214321321",
                 navn = "Fullmektig",
                 manuellAdresseInfo = adresseInfo,
+                vergeType = Vergetype.ADVOKAT,
             ),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -504,6 +520,7 @@ class BrevmottakerStegTest {
                 id = UUID.randomUUID(),
                 navn = "Verge",
                 manuellAdresseInfo = adresseInfo,
+                vergeType = Vergetype.VERGE_FOR_BARN,
             ),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -527,6 +544,7 @@ class BrevmottakerStegTest {
                 personIdent = "43214321321",
                 navn = "Verge",
                 manuellAdresseInfo = adresseInfo,
+                vergeType = Vergetype.VERGE_FOR_BARN,
             ),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -545,6 +563,7 @@ class BrevmottakerStegTest {
                 id = UUID.randomUUID(),
                 navn = "Fullmektig",
                 manuellAdresseInfo = adresseInfo,
+                vergeType = Vergetype.ADVOKAT,
             ),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -568,6 +587,7 @@ class BrevmottakerStegTest {
                 personIdent = "43214321321",
                 navn = "Verge",
                 manuellAdresseInfo = adresseInfo,
+                vergeType = Vergetype.VERGE_FOR_BARN,
             ),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -677,6 +697,7 @@ class BrevmottakerStegTest {
                 personIdent = "43214321321",
                 navn = "Verge",
                 manuellAdresseInfo = adresseInfo,
+                vergeType = Vergetype.VERGE_FOR_BARN,
             ),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -711,6 +732,7 @@ class BrevmottakerStegTest {
                 id = vergeId,
                 navn = "Fullmektig Navn",
                 manuellAdresseInfo = adresseInfo,
+                vergeType = Vergetype.VERGE_FOR_BARN,
             ),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -745,6 +767,7 @@ class BrevmottakerStegTest {
                 id = vergeId,
                 navn = "Verge Navn",
                 manuellAdresseInfo = adresseInfo,
+                vergeType = Vergetype.VERGE_FOR_BARN,
             ),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -771,6 +794,7 @@ class BrevmottakerStegTest {
                 personIdent = "43214321321",
                 navn = "Verge",
                 manuellAdresseInfo = adresseInfo,
+                vergeType = Vergetype.ADVOKAT,
             ),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -805,6 +829,7 @@ class BrevmottakerStegTest {
                 id = fullmektigId,
                 navn = "Fullmektig Navn",
                 manuellAdresseInfo = adresseInfo,
+                vergeType = Vergetype.ADVOKAT,
             ),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -839,6 +864,7 @@ class BrevmottakerStegTest {
                 id = fullmektigId,
                 navn = "Fullmektig Navn",
                 manuellAdresseInfo = adresseInfo,
+                vergeType = Vergetype.ADVOKAT,
             ),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )

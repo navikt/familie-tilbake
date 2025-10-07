@@ -27,6 +27,7 @@ data class BehandlingEntity(
     val foreslåVedtakStegEntity: ForeslåVedtakStegEntity,
     val fatteVedtakStegEntity: FatteVedtakStegEntity,
     val påVentEntity: PåVentEntity?,
+    val brevmottakerStegEntity: BrevmottakerStegEntity?,
 ) {
     fun fraEntity(
         eksternFagsakBehandlingHistorikk: EksternFagsakBehandlingHistorikk,
@@ -53,6 +54,7 @@ data class BehandlingEntity(
             foreslåVedtakSteg = foreslåVedtakStegEntity.fraEntity(),
             fatteVedtakSteg = fatteVedtakStegEntity.fraEntity(),
             påVent = påVentEntity?.fraEntity(),
+            brevmottakerSteg = brevmottakerStegEntity?.fraEntity(),
         )
     }
 }
