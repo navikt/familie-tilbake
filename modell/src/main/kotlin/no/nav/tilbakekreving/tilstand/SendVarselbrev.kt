@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.tilstand
 
 import no.nav.tilbakekreving.Tilbakekreving
+import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
@@ -12,20 +13,36 @@ object SendVarselbrev : Tilstand {
         val brukerBrevmetadata = tilbakekreving.bruker!!.hentBrevmetadata()
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
         val fagsak = tilbakekreving.eksternFagsak
-        val kravgrunnlag = tilbakekreving.kravgrunnlagHistorikk.nåværende().entry
+        val kravgrunnlag = tilbakekreving.kravgrunnlagHistorikk.nåværende()
+
+        val revurderingsvedtaksdato = fagsak.behandlinger.nåværende().entry.vedtaksdato
+        val varseltekstFraSaksbehandler = "Todo" // todo Kanskje vi skal ha en varselTekst i behandling?
 
         val varselbrev = Varselbrev.opprett(
-            bruker = brukerBrevmetadata,
-            mottaker = tilbakekreving.behandlingHistorikk.nåværende().entry.brevmottakerSteg!!.registrertBrevmottaker,
-            behandling = behandling.hentBehandlingsinformasjon(),
-            fagsak = fagsak,
-            beløp = kravgrunnlag.feilutbetaltBeløpForAllePerioder(),
-            feilutbetaltePerioder = kravgrunnlag.datoperioder(),
+            mottaker = behandling.brevmottakerSteg!!.registrertBrevmottaker,
+            ansvarligSaksbehandlerIdent = behandling.hentBehandlingsinformasjon().ansvarligSaksbehandler.ident,
+            kravgrunnlag = kravgrunnlag,
         )
 
         tilbakekreving.brevHistorikk.lagre(varselbrev)
 
-        tilbakekreving.trengerVarselbrev(varselbrev as Varselbrev)
+        tilbakekreving.trengerVarselbrev(
+            VarselbrevBehov(
+                brevId = varselbrev.id,
+                brukerIdent = brukerBrevmetadata.personIdent,
+                brukerNavn = brukerBrevmetadata.navn,
+                språkkode = brukerBrevmetadata.språkkode,
+                varselbrev = varselbrev as Varselbrev,
+                revurderingsvedtaksdato = revurderingsvedtaksdato,
+                varseltekstFraSaksbehandler = varseltekstFraSaksbehandler,
+                saksnummer = fagsak.eksternId,
+                ytelse = fagsak.ytelse,
+                behandlendeEnhet = behandling.hentBehandlingsinformasjon().enhet,
+                feilutbetaltBeløp = varselbrev.hentVarsletBeløp(),
+                feilutbetaltePerioder = kravgrunnlag.entry.datoperioder(),
+                gjelderDødsfall = brukerBrevmetadata.dødsdato != null,
+            ),
+        )
     }
 
     override fun håndter(

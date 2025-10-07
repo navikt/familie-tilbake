@@ -15,8 +15,6 @@ import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Reduksj
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Skyldgrad
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.brev.BrevHistorikk
-import no.nav.tilbakekreving.brev.BrevInformasjon
-import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.feil.Sporing
@@ -150,28 +148,6 @@ fun defaultBrevmottaker() = RegistrertBrevmottaker.DefaultMottaker(
     id = UUID.randomUUID(),
     navn = "test bruker",
     personIdent = bruker().ident,
-)
-
-fun varselbrev() = Varselbrev(
-    id = UUID.randomUUID(),
-    opprettetDato = LocalDate.now(),
-    brevInformasjon = BrevInformasjon(
-        brukerIdent = bruker().ident,
-        brukerNavn = "brukerNavn",
-        mottaker = defaultBrevmottaker(),
-        behandlendeEnhet = Enhet("1234", "Helsfyr"),
-        ansvarligSaksbehandler = ANSVARLIG_SAKSBEHANDLER.ident,
-        saksnummer = eksternFagsak().eksternId,
-        språkkode = bruker().språkkode,
-        ytelse = eksternFagsak().ytelse,
-        gjelderDødsfall = false,
-    ),
-    varsletBeløp = 10000L,
-    feilutbetaltePerioder = emptyList(),
-    varseltekstFraSaksbehandler = "tekst fra saksbehandler",
-    fristdatoForTilbakemelding = LocalDate.of(2025, 8, 10),
-    revurderingsvedtaksdato = LocalDate.of(2025, 3, 1),
-    journalpostId = null,
 )
 
 fun eksternFagsakBehandling(): EksternFagsakRevurdering {

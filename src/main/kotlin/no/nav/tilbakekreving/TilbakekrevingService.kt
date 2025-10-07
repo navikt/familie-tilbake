@@ -186,6 +186,7 @@ class TilbakekrevingService(
             }
 
             is VarselbrevBehov -> {
+                // Todo her skjer Journalføring og utsending av brev!
                 tilbakekreving.håndter(
                     VarselbrevSendtHendelse(
                         varselbrevId = behov.brevId,
