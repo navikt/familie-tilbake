@@ -129,6 +129,7 @@ spec:
         - host: familie-oppdrag.dev-fss-pub.nais.io
         - host: pdl-api.dev-fss-pub.nais.io
         - host: arbeid-og-inntekt.dev-fss-pub.nais.io
+        - host: dokarkiv-q2.dev-fss-pub.nais.io
         - host: b27apvl220.preprod.local
           ports:
             - port: 1413

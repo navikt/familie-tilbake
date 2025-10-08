@@ -86,7 +86,7 @@ dependencies {
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
+    implementation("io.ktor:ktor-serialization-jackson-jvm:$ktorVersion")
     implementation("com.google.cloud:google-cloud-bigquery:2.54.0")
 
     api("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocVersion")
@@ -144,6 +144,7 @@ dependencies {
 
     testImplementation("io.mockk:mockk-jvm:1.14.5")
     testImplementation("io.kotest:kotest-assertions-core-jvm:6.0.1")
+    testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 

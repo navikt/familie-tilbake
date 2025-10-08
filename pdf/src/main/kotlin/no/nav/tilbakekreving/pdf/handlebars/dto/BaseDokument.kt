@@ -114,6 +114,24 @@ open class BaseDokument(
                             ),
                     ),
                 ),
+            YtelsestypeDTO.TILLEGGSSTØNAD to
+                Ytelsesinfo(
+                    "nav.no/tilleggsstonad",
+                    mapOf(
+                        Språkkode.NB to
+                            Ytelsesnavn(
+                                "tilleggsstønad",
+                                "tilleggsstønad",
+                                "tilleggsstønad din",
+                            ),
+                        Språkkode.NN to
+                            Ytelsesnavn(
+                                "tilleggsstønad",
+                                "tilleggsstønad",
+                                "tilleggsstønaden din",
+                            ),
+                    ),
+                ),
         )
 
     private val ytelsesinfo
