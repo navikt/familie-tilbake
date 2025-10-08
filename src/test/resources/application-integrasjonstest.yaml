@@ -56,3 +56,6 @@ tilbakekreving:
   bigQuery:
     prosjektId: dummy
     dataset: dummy
+  dokarkiv:
+    base-url: https://dokarkiv-q2.dev.intern.nav.no
+    scope: api://dev-fss.teamdokumenthandtering.dokarkiv/.default

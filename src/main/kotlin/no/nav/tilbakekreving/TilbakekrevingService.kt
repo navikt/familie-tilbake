@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving
 
+import kotlinx.coroutines.runBlocking
 import no.nav.familie.tilbake.api.forvaltning.Behandlingsinfo
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
@@ -8,7 +9,7 @@ import no.nav.familie.tilbake.integration.pdl.internal.PdlKjønnType
 import no.nav.familie.tilbake.kontrakter.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
-import no.nav.tilbakekreving.aktør.Aktør
+import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFaktaDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFatteVedtaksstegDto
@@ -34,6 +35,7 @@ import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
+import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivService
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.brev.MottakerType
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
@@ -56,8 +58,9 @@ class TilbakekrevingService(
     private val bigQueryService: BigQueryService,
     private val endringObservatørService: EndringObservatørService,
     private val kafkaProducer: KafkaProducer,
+    private val dokarkivService: DokarkivService,
+    private val tokenValidationContextHolder: TokenValidationContextHolder,
 ) {
-    private val aktør = Aktør.Person(ident = "20046912345")
     private val logger = TracedLogger.getLogger<TilbakekrevingService>()
 
     fun opprettTilbakekreving(
@@ -192,10 +195,13 @@ class TilbakekrevingService(
 
             is VarselbrevBehov -> {
                 // Todo her skjer Journalføring og utsending av brev!
+                val token = tokenValidationContextHolder.getTokenValidationContext().firstValidToken ?: error("Trenger token!")
+                val arkivert = runBlocking { dokarkivService.journalførVarselbrev(token, behov, logContext) }
+                println("======>>>>> Journalført OK: journalpostId: ${arkivert?.journalpostId}")
                 tilbakekreving.håndter(
                     VarselbrevSendtHendelse(
                         varselbrevId = behov.brevId,
-                        journalpostId = "12345", // ToDo her kommer journalpost id som vi får i response når vi journalfører og sender brev.
+                        journalpostId = arkivert?.journalpostId!!, // ToDo her kommer journalpost id som vi får i response når vi journalfører og sender brev.
                     ),
                 )
             }
