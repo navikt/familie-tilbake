@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.behandling
 
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
+import no.nav.tilbakekreving.saksbehandler.Behandler
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -10,4 +11,5 @@ data class Behandlingsinformasjon(
     val behandlingId: UUID,
     val enhet: Enhet?,
     val behandlingstype: Behandlingstype,
+    val ansvarligSaksbehandler: Behandler,
 )

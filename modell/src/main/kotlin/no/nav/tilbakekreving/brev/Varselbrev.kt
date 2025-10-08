@@ -1,23 +1,41 @@
 package no.nav.tilbakekreving.brev
 
+import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
 import no.nav.tilbakekreving.entities.BrevEntity
 import no.nav.tilbakekreving.entities.Brevtype
+import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
+import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import java.time.LocalDate
+import java.time.Period
 import java.util.UUID
 
-class Varselbrev(
+data class Varselbrev(
     override val id: UUID,
     override val opprettetDato: LocalDate,
-    val varsletBeløp: Long,
+    override var journalpostId: String?,
+    val mottaker: RegistrertBrevmottaker,
+    val ansvarligSaksbehandlerIdent: String?,
+    val kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
+    val fristForTilbakemelding: LocalDate,
 ) : Brev {
+    fun hentVarsletBeløp(): Long {
+        return kravgrunnlag.entry.feilutbetaltBeløpForAllePerioder().toLong()
+    }
+
     companion object {
         fun opprett(
-            varsletBeløp: Long,
+            mottaker: RegistrertBrevmottaker,
+            ansvarligSaksbehandlerIdent: String,
+            kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
         ): Brev {
             return Varselbrev(
                 id = UUID.randomUUID(),
-                varsletBeløp = varsletBeløp,
                 opprettetDato = LocalDate.now(),
+                journalpostId = null,
+                mottaker = mottaker,
+                ansvarligSaksbehandlerIdent = ansvarligSaksbehandlerIdent,
+                kravgrunnlag = kravgrunnlag,
+                fristForTilbakemelding = LocalDate.now().plus(Period.ofWeeks(3)),
             )
         }
     }
@@ -25,9 +43,13 @@ class Varselbrev(
     override fun tilEntity(): BrevEntity {
         return BrevEntity(
             brevType = Brevtype.VARSEL_BREV,
-            internId = id,
+            id = id,
             opprettetDato = opprettetDato,
-            varsletBeløp = varsletBeløp,
+            journalpostId = journalpostId,
+            mottaker = mottaker.tilEntity(),
+            ansvarligSaksbehandlerIdent = ansvarligSaksbehandlerIdent,
+            kravgrunnlagRef = kravgrunnlag.tilEntity(),
+            fristForTilbakemelding = fristForTilbakemelding,
         )
     }
 }

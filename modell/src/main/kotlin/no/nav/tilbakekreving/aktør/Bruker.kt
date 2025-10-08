@@ -60,6 +60,15 @@ class Bruker(
         språkkode = hendelse.språkkode ?: språkkode
     }
 
+    internal fun hentBrevmetadata(): BrukerBrevmetadata {
+        return BrukerBrevmetadata(
+            personIdent = aktør.ident,
+            navn = navn!!,
+            språkkode = språkkode ?: Språkkode.NB,
+            dødsdato = dødsdato,
+        )
+    }
+
     companion object {
         fun Bruker?.tilNullableFrontendDto(): FrontendBrukerDto {
             return this?.tilFrontendDto() ?: FrontendBrukerDto(
@@ -72,3 +81,10 @@ class Bruker(
         }
     }
 }
+
+data class BrukerBrevmetadata(
+    val personIdent: String,
+    val navn: String,
+    val språkkode: Språkkode,
+    val dødsdato: LocalDate?,
+)

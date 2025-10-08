@@ -1,7 +1,8 @@
 package no.nav.tilbakekreving.hendelse
 
-import no.nav.tilbakekreving.brev.Brev
+import java.util.UUID
 
 data class VarselbrevSendtHendelse(
-    val brev: Brev,
+    val varselbrevId: UUID,
+    val journalpostId: String,
 )

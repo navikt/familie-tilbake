@@ -2,21 +2,32 @@ package no.nav.tilbakekreving.entities
 
 import no.nav.tilbakekreving.brev.Brev
 import no.nav.tilbakekreving.brev.Varselbrev
+import no.nav.tilbakekreving.feil.Sporing
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import java.time.LocalDate
 import java.util.UUID
 
 data class BrevEntity(
     val brevType: Brevtype,
-    val internId: UUID,
+    val id: UUID,
     val opprettetDato: LocalDate,
-    val varsletBeløp: Long?,
+    val journalpostId: String?,
+    val mottaker: RegistrertBrevmottakerEntity,
+    val ansvarligSaksbehandlerIdent: String?,
+    val kravgrunnlagRef: HistorikkReferanseEntity<UUID>,
+    val fristForTilbakemelding: LocalDate,
 ) {
-    fun fraEntity(): Brev {
+    fun fraEntity(kravgrunnlagHistorikk: KravgrunnlagHistorikk): Brev {
+        val sporing = Sporing("Ukjent", id.toString())
         return when (brevType) {
             Brevtype.VARSEL_BREV -> Varselbrev(
-                requireNotNull(internId) { "internId kreves for Brev" },
-                requireNotNull(opprettetDato) { "opprettetDato kreves for Brev" },
-                requireNotNull(varsletBeløp) { "varsletBeløp kreves for Brev" },
+                id = requireNotNull(id) { "Id kreves for Brev" },
+                opprettetDato = requireNotNull(opprettetDato) { "opprettetDato kreves for Brev" },
+                journalpostId = journalpostId,
+                mottaker = mottaker.fraEntity(),
+                ansvarligSaksbehandlerIdent = ansvarligSaksbehandlerIdent,
+                kravgrunnlag = kravgrunnlagHistorikk.finn(kravgrunnlagRef.id, sporing),
+                fristForTilbakemelding = fristForTilbakemelding,
             )
         }
     }

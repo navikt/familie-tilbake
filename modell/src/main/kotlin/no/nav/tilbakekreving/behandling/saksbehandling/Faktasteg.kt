@@ -47,7 +47,7 @@ class Faktasteg(
         opprettelsesvalg: Opprettelsesvalg,
     ): FaktaFeilutbetalingDto {
         return FaktaFeilutbetalingDto(
-            varsletBeløp = brevHistorikk.sisteVarselbrev()?.varsletBeløp,
+            varsletBeløp = brevHistorikk.sisteVarselbrev()?.hentVarsletBeløp(),
             totalFeilutbetaltPeriode = vurdering.perioder.minOf { it.periode.fom } til vurdering.perioder.maxOf { it.periode.tom },
             totaltFeilutbetaltBeløp = kravgrunnlag.feilutbetaltBeløpForAllePerioder(),
             feilutbetaltePerioder = vurdering.perioder.map {

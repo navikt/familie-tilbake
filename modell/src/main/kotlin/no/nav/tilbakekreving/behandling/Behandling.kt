@@ -375,6 +375,7 @@ class Behandling internal constructor(
             behandlingId = id,
             enhet = enhet,
             behandlingstype = behandlingstype,
+            ansvarligSaksbehandler = ansvarligSaksbehandler,
         )
     }
 

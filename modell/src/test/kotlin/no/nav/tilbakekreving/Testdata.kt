@@ -10,11 +10,11 @@ import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
+import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonSærligeGrunner
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Skyldgrad
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.brev.BrevHistorikk
-import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.feil.Sporing
@@ -144,10 +144,10 @@ fun brukerinfoHendelse() = BrukerinfoHendelse(
     språkkode = bruker().språkkode,
 )
 
-fun varselbrev() = Varselbrev(
+fun defaultBrevmottaker() = RegistrertBrevmottaker.DefaultMottaker(
     id = UUID.randomUUID(),
-    opprettetDato = LocalDate.now(),
-    varsletBeløp = 10000L,
+    navn = "test bruker",
+    personIdent = bruker().ident,
 )
 
 fun eksternFagsakBehandling(): EksternFagsakRevurdering {

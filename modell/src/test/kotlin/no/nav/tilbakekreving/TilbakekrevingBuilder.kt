@@ -24,10 +24,13 @@ fun opprettTilbakekreving(
 fun tilbakekrevingTilBehandling(
     oppsamler: BehovObservatørOppsamler,
     opprettTilbakekrevingHendelse: OpprettTilbakekrevingHendelse,
-) = opprettTilbakekreving(oppsamler, opprettTilbakekrevingHendelse)
-    .apply {
+): Tilbakekreving {
+    val tilbakekreving = opprettTilbakekreving(oppsamler, opprettTilbakekrevingHendelse)
+    tilbakekreving.apply {
         håndter(kravgrunnlag())
         håndter(fagsysteminfoHendelse())
         håndter(brukerinfoHendelse())
-        håndter(VarselbrevSendtHendelse(varselbrev()))
+        håndter(VarselbrevSendtHendelse(varselbrevId = tilbakekreving.brevHistorikk.nåværende().entry.id, journalpostId = "1234"))
     }
+    return tilbakekreving
+}

@@ -27,7 +27,6 @@ import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
-import no.nav.tilbakekreving.varselbrev
 import org.junit.jupiter.api.Test
 import java.math.BigInteger
 import java.util.UUID
@@ -73,47 +72,51 @@ class IverksettVedtakTest {
         opprettTilbakekrevingHendelse: OpprettTilbakekrevingHendelse,
         oppsamler: BehovObservatørOppsamler,
         endringOppsamler: EndringObservatørOppsamler = EndringObservatørOppsamler(),
-    ) = Tilbakekreving.opprett(UUID.randomUUID().toString(), oppsamler, opprettTilbakekrevingHendelse, bigQueryService, endringOppsamler).apply {
-        håndter(kravgrunnlag())
-        håndter(fagsysteminfoHendelse())
-        håndter(brukerinfoHendelse())
-        håndter(VarselbrevSendtHendelse(varselbrev()))
+    ): Tilbakekreving {
+        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), oppsamler, opprettTilbakekrevingHendelse, bigQueryService, endringOppsamler)
 
-        håndter(
-            Behandler.Saksbehandler("Ansvarlig saksbehandler"),
-            faktastegVurdering(),
-        )
-        håndter(
-            Behandler.Saksbehandler("Ansvarlig saksbehandler"),
-            periode = 1.januar til 31.januar,
-            vurdering = Foreldelsesteg.Vurdering.IkkeForeldet(
-                "Siste utbetaling er innenfor 3 år",
-            ),
-        )
-        håndter(
-            Behandler.Saksbehandler("Ansvarlig saksbehandler"),
-            periode = 1.januar til 31.januar,
-            vurdering = NivåAvForståelse.BurdeForstått(
-                aktsomhet = NivåAvForståelse.Aktsomhet.Uaktsomhet(
-                    kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
-                        ReduksjonSærligeGrunner(
-                            begrunnelse = "Jaha",
-                            grunner = emptySet(),
-                            skalReduseres = ReduksjonSærligeGrunner.SkalReduseres.Nei,
+        tilbakekreving.apply {
+            håndter(kravgrunnlag())
+            håndter(fagsysteminfoHendelse())
+            håndter(brukerinfoHendelse())
+            tilbakekreving.håndter(VarselbrevSendtHendelse(varselbrevId = tilbakekreving.brevHistorikk.nåværende().entry.id, journalpostId = "1234"))
+            håndter(
+                Behandler.Saksbehandler("Ansvarlig saksbehandler"),
+                faktastegVurdering(),
+            )
+            håndter(
+                Behandler.Saksbehandler("Ansvarlig saksbehandler"),
+                periode = 1.januar til 31.januar,
+                vurdering = Foreldelsesteg.Vurdering.IkkeForeldet(
+                    "Siste utbetaling er innenfor 3 år",
+                ),
+            )
+            håndter(
+                Behandler.Saksbehandler("Ansvarlig saksbehandler"),
+                periode = 1.januar til 31.januar,
+                vurdering = NivåAvForståelse.BurdeForstått(
+                    aktsomhet = NivåAvForståelse.Aktsomhet.Uaktsomhet(
+                        kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
+                            ReduksjonSærligeGrunner(
+                                begrunnelse = "Jaha",
+                                grunner = emptySet(),
+                                skalReduseres = ReduksjonSærligeGrunner.SkalReduseres.Nei,
+                            ),
                         ),
+                        begrunnelse = "",
                     ),
                     begrunnelse = "",
                 ),
-                begrunnelse = "",
-            ),
-        )
-        håndter(
-            Behandler.Saksbehandler("Ansvarlig saksbehandler"),
-            ForeslåVedtakSteg.Vurdering.ForeslåVedtak(
-                oppsummeringstekst = null,
-                perioderMedTekst = emptyList(),
-            ),
-        )
+            )
+            håndter(
+                Behandler.Saksbehandler("Ansvarlig saksbehandler"),
+                ForeslåVedtakSteg.Vurdering.ForeslåVedtak(
+                    oppsummeringstekst = null,
+                    perioderMedTekst = emptyList(),
+                ),
+            )
+        }
+        return tilbakekreving
     }
 
     @Test

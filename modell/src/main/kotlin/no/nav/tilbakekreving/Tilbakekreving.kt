@@ -161,8 +161,8 @@ class Tilbakekreving internal constructor(
         byttTilstand(AvventerBrukerinfo)
     }
 
-    fun trengerVarselbrev() {
-        behovObservatør.håndter(VarselbrevBehov("wip"))
+    fun trengerVarselbrev(varselbrevBehov: VarselbrevBehov) {
+        behovObservatør.håndter(varselbrevBehov)
     }
 
     fun trengerBrukerinfo() {
