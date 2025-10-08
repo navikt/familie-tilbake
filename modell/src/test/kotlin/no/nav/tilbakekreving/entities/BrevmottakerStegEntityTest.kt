@@ -290,7 +290,7 @@ class BrevmottakerStegEntityTest {
 
         val revurderingInnslag = fagsakBehandlingHistorikk.lagre(
             EksternFagsakRevurdering.Revurdering(
-                internId = UUID.randomUUID(),
+                id = UUID.randomUUID(),
                 eksternId = UUID.randomUUID().toString(),
                 revurderingsårsak = EksternFagsakRevurdering.Revurderingsårsak.NYE_OPPLYSNINGER,
                 årsakTilFeilutbetaling = "abc",
@@ -299,7 +299,7 @@ class BrevmottakerStegEntityTest {
             ),
         )
         // Lagre et nytt innslag så vi er sikker på at det riktige plukkes opp, ikke det nyeste
-        fagsakBehandlingHistorikk.lagre(EksternFagsakRevurdering.Ukjent(UUID.randomUUID(), null))
+        fagsakBehandlingHistorikk.lagre(EksternFagsakRevurdering.Ukjent(UUID.randomUUID(), UUID.randomUUID().toString(), null))
 
         val kravgrunnlag = kravgrunnlagHistorikk.lagre(kravgrunnlag())
         kravgrunnlagHistorikk.lagre(kravgrunnlag())

@@ -155,7 +155,8 @@ class Tilbakekreving internal constructor(
 
     fun opprettBehandlingUtenIntegrasjon() {
         val kravgrunnlag = kravgrunnlagHistorikk.nåværende().entry
-        val eksternBehandling = eksternFagsak.lagreTomBehandling(kravgrunnlag.fagsystemVedtaksdato)
+        // Å bruke kravgrunnlagreferanse er nok ikke alltid riktig her, men de fleste fagsystem bruker behandlingsid som referanse i kravgrunnlaget.
+        val eksternBehandling = eksternFagsak.lagreTomBehandling(kravgrunnlag.fagsystemVedtaksdato, kravgrunnlag.referanse)
         opprettBehandling(eksternBehandling, Behandler.Vedtaksløsning)
         opprettBruker(kravgrunnlag.vedtakGjelder)
         byttTilstand(AvventerBrukerinfo)
@@ -304,7 +305,7 @@ class Tilbakekreving internal constructor(
         return TilbakekrevingEntity(
             nåværendeTilstand = tilstand.tilbakekrevingTilstand,
             id = this.id,
-            eksternFagsak = this.eksternFagsak.tilEntity(),
+            eksternFagsak = this.eksternFagsak.tilEntity(id),
             behandlingHistorikkEntities = this.behandlingHistorikk.tilEntity(id),
             kravgrunnlagHistorikkEntities = this.kravgrunnlagHistorikk.tilEntity(id),
             brevHistorikkEntities = this.brevHistorikk.tilEntity(),
@@ -373,6 +374,7 @@ class Tilbakekreving internal constructor(
                 // TODO: Lesbar ID
                 opprettelsesvalg = opprettTilbakekrevingEvent.opprettelsesvalg,
                 eksternFagsak = EksternFagsak(
+                    id = UUID.randomUUID(),
                     eksternId = opprettTilbakekrevingEvent.eksternFagsak.eksternId,
                     ytelse = opprettTilbakekrevingEvent.eksternFagsak.ytelse,
                     behovObservatør = behovObservatør,

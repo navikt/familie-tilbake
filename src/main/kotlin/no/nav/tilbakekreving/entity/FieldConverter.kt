@@ -19,9 +19,9 @@ interface FieldConverter<T, DbPrimitive> {
 
     fun setColumn(index: Int, preparedStatement: PreparedStatement, value: T)
 
-    object NumericId : FieldConverter<String, Int> {
-        override fun convert(value: String): Int {
-            return value.toInt()
+    object NumericId : FieldConverter<String, Long> {
+        override fun convert(value: String): Long {
+            return value.toLong()
         }
 
         override fun convert(resultSet: ResultSet, column: String): String {
@@ -31,7 +31,7 @@ interface FieldConverter<T, DbPrimitive> {
         }
 
         override fun setColumn(index: Int, preparedStatement: PreparedStatement, value: String) {
-            preparedStatement.setInt(index, value.toInt())
+            preparedStatement.setLong(index, value.toLong())
         }
     }
 
@@ -85,15 +85,15 @@ interface FieldConverter<T, DbPrimitive> {
 
     class EnumConverter<T>(
         private val stringValue: (String) -> T,
-        private val enumValue: (T) -> String,
+        private val enumValue: (T) -> String?,
     ) : FieldConverter<T?, String?> {
         override fun convert(value: T?): String? {
             return value?.let(enumValue)
         }
 
         override fun convert(resultSet: ResultSet, column: String): T? {
-            val name = resultSet.getString(column)
-            return stringValue(name)
+            return resultSet.getString(column)
+                ?.let(stringValue)
         }
 
         override fun setColumn(index: Int, preparedStatement: PreparedStatement, value: T?) {

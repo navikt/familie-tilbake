@@ -22,6 +22,7 @@ class TilbakekrevingRepository(
     private val jdbcTemplate: JdbcTemplate,
     private val behandlingRepository: NyBehandlingRepository,
     private val kravgrunnlagRepository: NyKravgrunnlagRepository,
+    private val eksternFagsakRepository: NyEksternFagsakRepository,
 ) {
     private val objectMapper = jacksonObjectMapper()
         .registerModule(KotlinModule.Builder().build())
@@ -48,8 +49,8 @@ class TilbakekrevingRepository(
         }.single()
 
         return TilbakekrevingEntityMapper.map(
-            resultSet,
-            eksternFagsak = json.eksternFagsak,
+            resultSet = resultSet,
+            eksternFagsak = eksternFagsakRepository.hentEksternFagsak(id),
             behandlingHistorikk = behandlingRepository.hentBehandlinger(id, json.behandlingHistorikkEntities),
             kravgrunnlagHistorikk = kravgrunnlagRepository.hentKravgrunnlag(id),
             brevHistorikk = json.brevHistorikkEntities,
@@ -79,6 +80,7 @@ class TilbakekrevingRepository(
             jdbcTemplate,
             tilbakekrevingEntity,
         )
+        eksternFagsakRepository.lagre(tilbakekrevingEntity.eksternFagsak)
         jdbcTemplate.update(
             "INSERT INTO tilbakekreving_snapshot(id, snapshot) VALUES (?, ?);",
             tilbakekrevingEntity.id,
@@ -109,6 +111,7 @@ class TilbakekrevingRepository(
             jdbcTemplate,
             oppdatertEntity,
         )
+        eksternFagsakRepository.lagre(oppdatertEntity.eksternFagsak)
         kravgrunnlagRepository.lagre(oppdatertEntity.kravgrunnlagHistorikkEntities)
         behandlingRepository.lagreBehandlinger(oppdatertEntity.behandlingHistorikkEntities)
         jdbcTemplate.update(

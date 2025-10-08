@@ -152,7 +152,7 @@ fun defaultBrevmottaker() = RegistrertBrevmottaker.DefaultMottaker(
 
 fun eksternFagsakBehandling(): EksternFagsakRevurdering {
     return EksternFagsakRevurdering.Revurdering(
-        internId = UUID.randomUUID(),
+        id = UUID.randomUUID(),
         eksternId = UUID.randomUUID().toString(),
         årsakTilFeilutbetaling = "",
         revurderingsårsak = EksternFagsakRevurdering.Revurderingsårsak.NYE_OPPLYSNINGER,

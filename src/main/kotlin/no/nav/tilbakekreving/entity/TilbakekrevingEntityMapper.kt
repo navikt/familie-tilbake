@@ -10,7 +10,7 @@ import no.nav.tilbakekreving.entities.TilbakekrevingEntity
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.sql.ResultSet
 
-object TilbakekrevingEntityMapper : Entity<TilbakekrevingEntity, String, Int>(
+object TilbakekrevingEntityMapper : Entity<TilbakekrevingEntity, String, Long>(
     tableName = "tilbakekreving",
     idGetter = TilbakekrevingEntity::id,
     idConverter = FieldConverter.NumericId,

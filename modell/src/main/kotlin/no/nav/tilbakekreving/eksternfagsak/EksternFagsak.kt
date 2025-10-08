@@ -12,6 +12,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 class EksternFagsak(
+    private val id: UUID,
     val eksternId: String,
     internal val ytelse: Ytelse,
     val behandlinger: EksternFagsakBehandlingHistorikk,
@@ -28,13 +29,14 @@ class EksternFagsak(
     fun lagre(fagsysteminfo: FagsysteminfoHendelse): HistorikkReferanse<UUID, EksternFagsakRevurdering> {
         return behandlinger.lagre(
             EksternFagsakRevurdering.Revurdering(
-                internId = UUID.randomUUID(),
+                id = UUID.randomUUID(),
                 eksternId = fagsysteminfo.revurdering.behandlingId,
                 revurderingsårsak = fagsysteminfo.revurdering.årsak,
                 årsakTilFeilutbetaling = fagsysteminfo.revurdering.årsakTilFeilutbetaling ?: "Ukjent",
                 vedtaksdato = fagsysteminfo.revurdering.vedtaksdato,
                 utvidedePerioder = fagsysteminfo.utvidPerioder?.map {
                     EksternFagsakRevurdering.UtvidetPeriode(
+                        id = UUID.randomUUID(),
                         kravgrunnlagPeriode = it.kravgrunnlagPeriode,
                         vedtaksperiode = it.vedtaksperiode,
                     )
@@ -43,10 +45,14 @@ class EksternFagsak(
         )
     }
 
-    fun lagreTomBehandling(revurderingsdatoFraKravgrunnlag: LocalDate?): HistorikkReferanse<UUID, EksternFagsakRevurdering> {
+    fun lagreTomBehandling(
+        revurderingsdatoFraKravgrunnlag: LocalDate?,
+        kravgrunnlagReferanse: String,
+    ): HistorikkReferanse<UUID, EksternFagsakRevurdering> {
         return behandlinger.lagre(
             EksternFagsakRevurdering.Ukjent(
-                internId = UUID.randomUUID(),
+                id = UUID.randomUUID(),
+                eksternId = kravgrunnlagReferanse,
                 revurderingsdatoFraKravgrunnlag = revurderingsdatoFraKravgrunnlag,
             ),
         )
@@ -66,11 +72,13 @@ class EksternFagsak(
         )
     }
 
-    fun tilEntity(): EksternFagsakEntity {
+    fun tilEntity(tilbakekrevingId: String): EksternFagsakEntity {
         return EksternFagsakEntity(
+            id = id,
+            tilbakekrevingRef = tilbakekrevingId,
             eksternId = eksternId,
             ytelseEntity = ytelse.tilEntity(),
-            behandlinger = behandlinger.tilEntity(),
+            behandlinger = behandlinger.tilEntity(id),
         )
     }
 }

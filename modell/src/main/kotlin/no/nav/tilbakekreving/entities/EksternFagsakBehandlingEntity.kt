@@ -5,9 +5,10 @@ import java.time.LocalDate
 import java.util.UUID
 
 data class EksternFagsakBehandlingEntity(
+    val id: UUID,
+    val eksternFagsakRef: UUID,
     val type: EksternFagsakBehandlingType,
-    val internId: UUID,
-    val eksternId: String?,
+    val eksternId: String,
     val revurderingsårsak: RevurderingsårsakType?,
     val årsakTilFeilutbetaling: String?,
     val vedtaksdato: LocalDate?,
@@ -16,24 +17,27 @@ data class EksternFagsakBehandlingEntity(
     fun fraEntity(): EksternFagsakRevurdering {
         return when (type) {
             EksternFagsakBehandlingType.BEHANDLING -> EksternFagsakRevurdering.Revurdering(
-                internId = internId,
-                eksternId = requireNotNull(eksternId) { "eksternId kreves for EksternFagsakBehandling" },
+                id = id,
+                eksternId = eksternId,
                 revurderingsårsak = requireNotNull(revurderingsårsak) { "årsak kreves for EksternFagsakBehandling" }.fraEntity(),
                 årsakTilFeilutbetaling = requireNotNull(årsakTilFeilutbetaling) { "årsakTilFeilutbetaling kreves for EksternFagsakBehandling" },
                 vedtaksdato = requireNotNull(vedtaksdato) { "vedtaksdato kreves for EksternFagsakBehandling" },
                 utvidedePerioder = requireNotNull(utvidedePerioder) { "utvidetPerioder kreves for EksternFagsakBehandling" }.map { it.fraEntity() },
             )
-            EksternFagsakBehandlingType.UKJENT -> EksternFagsakRevurdering.Ukjent(internId = internId, null)
+            EksternFagsakBehandlingType.UKJENT -> EksternFagsakRevurdering.Ukjent(id = id, eksternId = eksternId, null)
         }
     }
 }
 
 data class UtvidetPeriodeEntity(
+    val id: UUID,
+    val eksternFagsakBehandlingRef: UUID,
     val kravgrunnlagPeriode: DatoperiodeEntity,
     val vedtaksperiode: DatoperiodeEntity,
 ) {
     fun fraEntity(): EksternFagsakRevurdering.UtvidetPeriode {
         return EksternFagsakRevurdering.UtvidetPeriode(
+            id = id,
             kravgrunnlagPeriode = kravgrunnlagPeriode.fraEntity(),
             vedtaksperiode = vedtaksperiode.fraEntity(),
         )

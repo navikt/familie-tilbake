@@ -33,7 +33,7 @@ class EksternFagsakBehandlingHistorikk(
         return HistorikkReferanse(this, historikk.last().id)
     }
 
-    fun tilEntity(): List<EksternFagsakBehandlingEntity> {
-        return historikk.map { it.tilEntity() }
+    fun tilEntity(eksternFagsakRef: UUID): List<EksternFagsakBehandlingEntity> {
+        return historikk.map { it.tilEntity(eksternFagsakRef) }
     }
 }
