@@ -375,6 +375,9 @@ class Behandling internal constructor(
             behandlingId = id,
             enhet = enhet,
             behandlingstype = behandlingstype,
+            ansvarligSaksbehandler = ansvarligSaksbehandler,
+            totaltFeilutbetaltBeløp = kravgrunnlag.entry.feilutbetaltBeløpForAllePerioder(),
+            feilutbetaltePerioder = kravgrunnlag.entry.datoperioder(),
         )
     }
 
