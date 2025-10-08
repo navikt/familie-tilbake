@@ -80,7 +80,7 @@ class TilbakekrevingRepository(
             jdbcTemplate,
             tilbakekrevingEntity,
         )
-        eksternFagsakRepository.lagre(tilbakekrevingEntity.eksternFagsak)
+        lagreUnderobjekter(tilbakekrevingEntity)
         jdbcTemplate.update(
             "INSERT INTO tilbakekreving_snapshot(id, snapshot) VALUES (?, ?);",
             tilbakekrevingEntity.id,
@@ -111,13 +111,17 @@ class TilbakekrevingRepository(
             jdbcTemplate,
             oppdatertEntity,
         )
-        eksternFagsakRepository.lagre(oppdatertEntity.eksternFagsak)
-        kravgrunnlagRepository.lagre(oppdatertEntity.kravgrunnlagHistorikkEntities)
-        behandlingRepository.lagreBehandlinger(oppdatertEntity.behandlingHistorikkEntities)
+        lagreUnderobjekter(oppdatertEntity)
         jdbcTemplate.update(
             "UPDATE tilbakekreving_snapshot SET snapshot = to_jsonb(?::json) WHERE id=?;",
             jsonText,
             tilbakekrevingId,
         )
+    }
+
+    private fun lagreUnderobjekter(entity: TilbakekrevingEntity) {
+        eksternFagsakRepository.lagre(entity.eksternFagsak)
+        kravgrunnlagRepository.lagre(entity.kravgrunnlagHistorikkEntities)
+        behandlingRepository.lagreBehandlinger(entity.behandlingHistorikkEntities)
     }
 }

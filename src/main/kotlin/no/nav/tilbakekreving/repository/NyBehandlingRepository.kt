@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository
 @Repository
 class NyBehandlingRepository(
     private val jdbcTemplate: JdbcTemplate,
+    private val foreldelseRepository: NyForeldelseRepository,
 ) {
     fun hentBehandlinger(
         tilbakekrevingId: String,
@@ -25,7 +26,7 @@ class NyBehandlingRepository(
                 resultSet = resultSet,
                 enhet = jsonBehandling.enhet,
                 ansvarligSaksbehandler = jsonBehandling.ansvarligSaksbehandler,
-                foreldelsessteg = jsonBehandling.foreldelsestegEntity,
+                foreldelsessteg = foreldelseRepository.hentForeldelsesvurdering(jsonBehandling.id),
                 faktasteg = jsonBehandling.faktastegEntity,
                 vilkårsvurdering = jsonBehandling.vilkårsvurderingstegEntity,
                 foreslåVedtak = jsonBehandling.foreslåVedtakStegEntity,
@@ -39,6 +40,7 @@ class NyBehandlingRepository(
     fun lagreBehandlinger(behandlinger: List<BehandlingEntity>) {
         for (behandling in behandlinger) {
             BehandlingEntityMapper.upsertQuery(jdbcTemplate, behandling)
+            foreldelseRepository.lagre(behandling.foreldelsestegEntity)
         }
     }
 }

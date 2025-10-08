@@ -100,7 +100,7 @@ class Behandling internal constructor(
             ansvarligSaksbehandler = ansvarligSaksbehandler.tilEntity(),
             eksternFagsakBehandlingRef = eksternFagsakRevurdering.tilEntity(),
             kravgrunnlagRef = kravgrunnlag.tilEntity(),
-            foreldelsestegEntity = foreldelsesteg.tilEntity(),
+            foreldelsestegEntity = foreldelsesteg.tilEntity(id),
             faktastegEntity = faktasteg.tilEntity(),
             vilkårsvurderingstegEntity = vilkårsvurderingsteg.tilEntity(),
             foreslåVedtakStegEntity = foreslåVedtakSteg.tilEntity(),

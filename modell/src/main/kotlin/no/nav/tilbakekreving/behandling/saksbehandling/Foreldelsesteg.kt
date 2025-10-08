@@ -16,6 +16,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 class Foreldelsesteg(
+    private val id: UUID,
     private var vurdertePerioder: List<Foreldelseperiode>,
 ) : Saksbehandlingsteg {
     override val type: Behandlingssteg = Behandlingssteg.FORELDELSE
@@ -79,9 +80,11 @@ class Foreldelsesteg(
         )
     }
 
-    fun tilEntity(): ForeldelsesstegEntity {
+    fun tilEntity(behandlingRef: UUID): ForeldelsesstegEntity {
         return ForeldelsesstegEntity(
-            vurdertePerioder = vurdertePerioder.map { it.tilEntity() },
+            id = id,
+            behandlingRef = behandlingRef,
+            vurdertePerioder = vurdertePerioder.map { it.tilEntity(id) },
         )
     }
 
@@ -96,9 +99,10 @@ class Foreldelsesteg(
             this._vurdering = vurdering
         }
 
-        fun tilEntity(): ForeldelseperiodeEntity {
+        fun tilEntity(foreldelsesvurderingRef: UUID): ForeldelseperiodeEntity {
             return ForeldelseperiodeEntity(
                 id = id,
+                foreldelsesvurderingRef = foreldelsesvurderingRef,
                 periode = DatoperiodeEntity(periode.fom, periode.tom),
                 foreldelsesvurdering = _vurdering.tilEntity(),
             )
@@ -171,6 +175,7 @@ class Foreldelsesteg(
             kravgrunnlag: KravgrunnlagHendelse,
         ): Foreldelsesteg {
             return Foreldelsesteg(
+                id = UUID.randomUUID(),
                 vurdertePerioder = tomVurdering(eksternFagsakRevurdering, kravgrunnlag),
             )
         }

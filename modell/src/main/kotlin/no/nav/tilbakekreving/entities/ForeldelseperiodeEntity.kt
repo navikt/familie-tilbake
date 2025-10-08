@@ -5,6 +5,7 @@ import java.util.UUID
 
 data class ForeldelseperiodeEntity(
     val id: UUID,
+    val foreldelsesvurderingRef: UUID,
     val periode: DatoperiodeEntity,
     val foreldelsesvurdering: ForeldelsesvurderingEntity,
 ) {
