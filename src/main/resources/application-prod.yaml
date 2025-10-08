@@ -60,3 +60,6 @@ tilbakekreving:
   bigQuery:
     prosjektId: tilbake-prod-d235
     dataset: tilbakekreving_dataset
+  dokarkiv:
+    base-url: https://dokarkiv.intern.nav.no
+    scope: api://prod-fss.teamdokumenthandtering.dokarkiv/.default

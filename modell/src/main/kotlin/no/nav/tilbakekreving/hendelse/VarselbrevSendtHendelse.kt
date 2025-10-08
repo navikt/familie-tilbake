@@ -4,5 +4,5 @@ import java.util.UUID
 
 data class VarselbrevSendtHendelse(
     val varselbrevId: UUID,
-    val journalpostId: String,
+    val journalpostId: String?,
 )
