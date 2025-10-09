@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.tilstand
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.brev.Varselbrev
+import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 
@@ -55,5 +56,9 @@ object SendVarselbrev : Tilstand {
         }
 
         tilbakekreving.byttTilstand(TilBehandling)
+    }
+
+    override fun håndter(tilbakekreving: Tilbakekreving, fagsysteminfo: FagsysteminfoHendelse) {
+        tilbakekreving.oppdaterFagsysteminfo(fagsysteminfo)
     }
 }
