@@ -212,7 +212,7 @@ class Tilbakekreving internal constructor(
         )
     }
 
-    fun faktastegFrontendDto(): FaktaFeilutbetalingDto = behandlingHistorikk.nåværende().entry.faktastegFrontendDto(opprettelsesvalg)
+    fun faktastegFrontendDto(): FaktaFeilutbetalingDto = behandlingHistorikk.nåværende().entry.faktastegFrontendDto(opprettelsesvalg, opprettet)
 
     fun håndter(
         beslutter: Behandler,

@@ -18,10 +18,11 @@ import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import java.time.LocalDateTime
+import java.util.UUID
 
 class Faktasteg(
+    private val id: UUID,
     private val brevHistorikk: BrevHistorikk,
-    private val tilbakekrevingOpprettet: LocalDateTime,
     private var vurdering: Vurdering,
 ) : Saksbehandlingsteg {
     override val type: Behandlingssteg = Behandlingssteg.FAKTA
@@ -45,6 +46,7 @@ class Faktasteg(
         kravgrunnlag: KravgrunnlagHendelse,
         eksternFagsakRevurdering: EksternFagsakRevurdering,
         opprettelsesvalg: Opprettelsesvalg,
+        tilbakekrevingOpprettet: LocalDateTime,
     ): FaktaFeilutbetalingDto {
         return FaktaFeilutbetalingDto(
             varsletBeløp = brevHistorikk.sisteVarselbrev()?.hentVarsletBeløp(),
@@ -86,10 +88,11 @@ class Faktasteg(
         )
     }
 
-    fun tilEntity(): FaktastegEntity {
+    fun tilEntity(behandlingRef: UUID): FaktastegEntity {
         return FaktastegEntity(
-            tilbakekrevingOpprettet = tilbakekrevingOpprettet,
-            perioder = vurdering.perioder.map { it.tilEntity() },
+            id = id,
+            behandlingRef = behandlingRef,
+            perioder = vurdering.perioder.map { it.tilEntity(id) },
             uttalelse = when (vurdering.uttalelse) {
                 is Uttalelse.Ja -> FaktastegEntity.Uttalelse.Ja
                 is Uttalelse.Nei -> FaktastegEntity.Uttalelse.Nei
@@ -106,11 +109,10 @@ class Faktasteg(
             eksternFagsakRevurdering: EksternFagsakRevurdering,
             kravgrunnlag: KravgrunnlagHendelse,
             brevHistorikk: BrevHistorikk,
-            tilbakekrevingOpprettet: LocalDateTime,
         ): Faktasteg {
             return Faktasteg(
+                id = UUID.randomUUID(),
                 brevHistorikk = brevHistorikk,
-                tilbakekrevingOpprettet = tilbakekrevingOpprettet,
                 vurdering = tomVurdering(kravgrunnlag, eksternFagsakRevurdering),
             )
         }
@@ -119,6 +121,7 @@ class Faktasteg(
             return Vurdering(
                 perioder = kravgrunnlag.datoperioder().map {
                     FaktaPeriode(
+                        id = UUID.randomUUID(),
                         periode = eksternFagsakRevurdering.utvidPeriode(it),
                         rettsligGrunnlag = Hendelsestype.ANNET,
                         rettsligGrunnlagUnderkategori = Hendelsesundertype.ANNET_FRITEKST,
@@ -141,12 +144,15 @@ class Faktasteg(
     }
 
     class FaktaPeriode(
+        val id: UUID,
         val periode: Datoperiode,
         val rettsligGrunnlag: Hendelsestype,
         val rettsligGrunnlagUnderkategori: Hendelsesundertype,
     ) {
-        fun tilEntity(): FaktastegEntity.FaktaPeriodeEntity {
+        fun tilEntity(faktavurderingRef: UUID): FaktastegEntity.FaktaPeriodeEntity {
             return FaktastegEntity.FaktaPeriodeEntity(
+                id = id,
+                faktavurderingRef = faktavurderingRef,
                 periode = DatoperiodeEntity(fom = periode.fom, tom = periode.tom),
                 rettsligGrunnlag = rettsligGrunnlag,
                 rettsligGrunnlagUnderkategori = rettsligGrunnlagUnderkategori,

@@ -127,4 +127,25 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
             ),
         )
     }
+
+    @Test
+    fun `lagrer vurderingsperioder for fakta`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        sendKravgrunnlagOgAvventLesing(
+            queueName = TILLEGGSSTØNADER_KØ_NAVN,
+            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+            ),
+        )
+
+        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+
+        utførSteg(
+            ident = ansvarligSaksbehandler,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(),
+        )
+
+        tilbakekreving(behandlingId).faktastegFrontendDto().feilutbetaltePerioder.size shouldBe 1
+    }
 }

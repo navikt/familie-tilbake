@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository
 @Repository
 class NyBehandlingRepository(
     private val jdbcTemplate: JdbcTemplate,
+    private val faktavurderingRepository: NyFaktavurderingRepository,
     private val foreldelseRepository: NyForeldelseRepository,
 ) {
     fun hentBehandlinger(
@@ -21,13 +22,14 @@ class NyBehandlingRepository(
             "SELECT * FROM tilbakekreving_behandling WHERE tilbakekreving_id = ?",
             FieldConverter.NumericId.convert(tilbakekrevingId),
         ) { resultSet, _ ->
-            val jsonBehandling = jsonBehandlinger.single { it.id == resultSet[BehandlingEntityMapper.id] }
+            val behandlingId = resultSet[BehandlingEntityMapper.id]
+            val jsonBehandling = jsonBehandlinger.single { it.id == behandlingId }
             BehandlingEntityMapper.map(
                 resultSet = resultSet,
                 enhet = jsonBehandling.enhet,
                 ansvarligSaksbehandler = jsonBehandling.ansvarligSaksbehandler,
-                foreldelsessteg = foreldelseRepository.hentForeldelsesvurdering(jsonBehandling.id),
-                faktasteg = jsonBehandling.faktastegEntity,
+                foreldelsessteg = foreldelseRepository.hentForeldelsesvurdering(behandlingId),
+                faktasteg = faktavurderingRepository.hentFaktavurdering(behandlingId),
                 vilkårsvurdering = jsonBehandling.vilkårsvurderingstegEntity,
                 foreslåVedtak = jsonBehandling.foreslåVedtakStegEntity,
                 fatteVedtak = jsonBehandling.fatteVedtakStegEntity,
@@ -41,6 +43,7 @@ class NyBehandlingRepository(
         for (behandling in behandlinger) {
             BehandlingEntityMapper.upsertQuery(jdbcTemplate, behandling)
             foreldelseRepository.lagre(behandling.foreldelsestegEntity)
+            faktavurderingRepository.lagre(behandling.faktastegEntity)
         }
     }
 }

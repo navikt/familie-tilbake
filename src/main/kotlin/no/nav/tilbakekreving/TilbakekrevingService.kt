@@ -265,6 +265,7 @@ class TilbakekrevingService(
             vurdering = Faktasteg.Vurdering(
                 perioder = fakta.feilutbetaltePerioder.map {
                     Faktasteg.FaktaPeriode(
+                        id = UUID.randomUUID(),
                         periode = it.periode,
                         rettsligGrunnlag = it.hendelsestype,
                         rettsligGrunnlagUnderkategori = it.hendelsesundertype,
