@@ -74,8 +74,16 @@ class Behandling internal constructor(
     private var påVent: PåVent?,
     var brevmottakerSteg: BrevmottakerSteg?,
 ) : Historikk.HistorikkInnslag<UUID> {
-    fun faktastegFrontendDto(opprettelsesvalg: Opprettelsesvalg): FaktaFeilutbetalingDto {
-        return faktasteg.tilFrontendDto(kravgrunnlag.entry, eksternFagsakRevurdering.entry, opprettelsesvalg)
+    fun faktastegFrontendDto(
+        opprettelsesvalg: Opprettelsesvalg,
+        tilbakekrevingOpprettet: LocalDateTime,
+    ): FaktaFeilutbetalingDto {
+        return faktasteg.tilFrontendDto(
+            kravgrunnlag = kravgrunnlag.entry,
+            eksternFagsakRevurdering = eksternFagsakRevurdering.entry,
+            opprettelsesvalg = opprettelsesvalg,
+            tilbakekrevingOpprettet = tilbakekrevingOpprettet,
+        )
     }
 
     val foreldelsestegDto: FrontendDto<VurdertForeldelseDto> get() = FrontendDto {
@@ -101,7 +109,7 @@ class Behandling internal constructor(
             eksternFagsakBehandlingRef = eksternFagsakRevurdering.tilEntity(),
             kravgrunnlagRef = kravgrunnlag.tilEntity(),
             foreldelsestegEntity = foreldelsesteg.tilEntity(id),
-            faktastegEntity = faktasteg.tilEntity(),
+            faktastegEntity = faktasteg.tilEntity(id),
             vilkårsvurderingstegEntity = vilkårsvurderingsteg.tilEntity(),
             foreslåVedtakStegEntity = foreslåVedtakSteg.tilEntity(),
             fatteVedtakStegEntity = fatteVedtakSteg.tilEntity(),
@@ -454,7 +462,7 @@ class Behandling internal constructor(
             tilstand: Tilstand,
         ): Behandling {
             val foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakRevurdering.entry, kravgrunnlag.entry)
-            val faktasteg = Faktasteg.opprett(eksternFagsakRevurdering.entry, kravgrunnlag.entry, brevHistorikk, LocalDateTime.now())
+            val faktasteg = Faktasteg.opprett(eksternFagsakRevurdering.entry, kravgrunnlag.entry, brevHistorikk)
             val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(eksternFagsakRevurdering.entry, kravgrunnlag.entry, foreldelsesteg)
             val foreslåVedtakSteg = ForeslåVedtakSteg.opprett()
             val fatteVedtakSteg = FatteVedtakSteg.opprett()

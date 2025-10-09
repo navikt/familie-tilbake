@@ -15,6 +15,7 @@ import no.nav.tilbakekreving.kravgrunnlagPeriode
 import no.nav.tilbakekreving.ytelsesbeløp
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
+import java.util.UUID
 
 class FaktastegEntityTest {
     @Test
@@ -32,7 +33,6 @@ class FaktastegEntityTest {
             eksternFagsakRevurdering = eksternFagsakRevurdering,
             kravgrunnlag = kravgrunnlag,
             brevHistorikk = brevHistorikk,
-            tilbakekrevingOpprettet = LocalDateTime.now(),
         )
         val årsak = "Dette er årsaken til tilbakekrevingen"
         val uttalelse = "Ja hvorfor ikke"
@@ -40,6 +40,7 @@ class FaktastegEntityTest {
             vurdering = Faktasteg.Vurdering(
                 perioder = listOf(
                     Faktasteg.FaktaPeriode(
+                        id = UUID.randomUUID(),
                         periode = periode,
                         rettsligGrunnlag = Hendelsestype.ANNET,
                         rettsligGrunnlagUnderkategori = Hendelsesundertype.ANNET_FRITEKST,
@@ -50,9 +51,11 @@ class FaktastegEntityTest {
             ),
         )
 
-        val dtoFør = faktasteg.tilFrontendDto(kravgrunnlag, eksternFagsakRevurdering, Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
+        val tilbakekrevingOpprettet = LocalDateTime.now()
 
-        val dtoEtter = faktasteg.tilEntity().fraEntity(brevHistorikk).tilFrontendDto(kravgrunnlag, eksternFagsakRevurdering, Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
+        val dtoFør = faktasteg.tilFrontendDto(kravgrunnlag, eksternFagsakRevurdering, Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, tilbakekrevingOpprettet)
+
+        val dtoEtter = faktasteg.tilEntity(UUID.randomUUID()).fraEntity(brevHistorikk).tilFrontendDto(kravgrunnlag, eksternFagsakRevurdering, Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, tilbakekrevingOpprettet)
 
         dtoEtter shouldBe dtoFør
     }
