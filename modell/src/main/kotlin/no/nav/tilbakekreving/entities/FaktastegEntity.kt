@@ -4,10 +4,11 @@ import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
-import java.time.LocalDateTime
+import java.util.UUID
 
 data class FaktastegEntity(
-    val tilbakekrevingOpprettet: LocalDateTime,
+    val id: UUID,
+    val behandlingRef: UUID,
     val perioder: List<FaktaPeriodeEntity>,
     val årsakTilFeilutbetaling: String,
     val uttalelse: Uttalelse,
@@ -16,11 +17,12 @@ data class FaktastegEntity(
     fun fraEntity(
         brevHistorikk: BrevHistorikk,
     ): Faktasteg = Faktasteg(
+        id = id,
         brevHistorikk = brevHistorikk,
-        tilbakekrevingOpprettet = tilbakekrevingOpprettet,
         vurdering = Faktasteg.Vurdering(
             perioder = perioder.map {
                 Faktasteg.FaktaPeriode(
+                    id = it.id,
                     periode = it.periode.fraEntity(),
                     rettsligGrunnlag = it.rettsligGrunnlag,
                     rettsligGrunnlagUnderkategori = it.rettsligGrunnlagUnderkategori,
@@ -44,6 +46,8 @@ data class FaktastegEntity(
     }
 
     class FaktaPeriodeEntity(
+        val id: UUID,
+        val faktavurderingRef: UUID,
         val periode: DatoperiodeEntity,
         val rettsligGrunnlag: Hendelsestype,
         val rettsligGrunnlagUnderkategori: Hendelsesundertype,

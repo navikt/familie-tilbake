@@ -188,6 +188,7 @@ fun faktastegVurdering(
     return Faktasteg.Vurdering(
         perioder = listOf(
             Faktasteg.FaktaPeriode(
+                id = UUID.randomUUID(),
                 periode = periode,
                 rettsligGrunnlag = Hendelsestype.ANNET,
                 rettsligGrunnlagUnderkategori = Hendelsesundertype.ANNET_FRITEKST,
