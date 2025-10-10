@@ -83,16 +83,7 @@ open class TilbakekrevingE2EBase : E2EBase() {
     ) {
         sendMessage(queueName, kravgrunnlag)
 
-        runBlocking {
-            eventually(
-                eventuallyConfig {
-                    duration = 1000.milliseconds
-                    interval = 10.milliseconds
-                },
-            ) {
-                tellUlesteKravgrunnlag() shouldBe 1
-            }
-        }
+        avventAntallUlesteKravgrunnlag(1)
     }
 
     fun sendKravgrunnlagOgAvventLesing(
@@ -102,7 +93,7 @@ open class TilbakekrevingE2EBase : E2EBase() {
         sendKravgrunnlag(queueName, kravgrunnlag)
         kravgrunnlagMediator.lesKravgrunnlag()
 
-        tellUlesteKravgrunnlag() shouldBe 0
+        avventAntallUlesteKravgrunnlag(0)
     }
 
     fun behandlingIdFor(
@@ -139,6 +130,19 @@ open class TilbakekrevingE2EBase : E2EBase() {
     ) {
         somSaksbehandler(ident) {
             behandlingController.utførBehandlingssteg(behandlingId, stegData).status shouldBe Ressurs.Status.SUKSESS
+        }
+    }
+
+    fun avventAntallUlesteKravgrunnlag(antall: Int) {
+        runBlocking {
+            eventually(
+                eventuallyConfig {
+                    duration = 1000.milliseconds
+                    interval = 10.milliseconds
+                },
+            ) {
+                tellUlesteKravgrunnlag() shouldBe antall
+            }
         }
     }
 

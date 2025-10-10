@@ -68,8 +68,13 @@ class TilbakekrevingService(
         lateinit var logContext: SecureLog.Context
 
         val tilbakekrevingId = tilbakekrevingRepository.opprett(
-            Tilbakekreving
-                .opprett(tilbakekrevingRepository.nesteId(), observatør, opprettTilbakekrevingHendelse, bigQueryService, endringObservatørService).tilEntity(),
+            Tilbakekreving.opprett(
+                id = tilbakekrevingRepository.nesteId(),
+                behovObservatør = observatør,
+                opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse,
+                bigQueryService = bigQueryService,
+                endringObservatør = endringObservatørService,
+            ).tilEntity(),
         )
 
         hentOgLagreTilbakekreving(tilbakekrevingId) { tilbakekreving ->
