@@ -14,6 +14,8 @@ interface TokenExchangeService {
         targetScope: String,
     ): String
 
+    suspend fun clientCredentialsToken(targetScope: String): String
+
     companion object {
         fun opprett(
             config: Config,

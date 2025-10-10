@@ -31,4 +31,22 @@ class TexasClient(
             TokenResponse.Error(response.body<TokenErrorResponse>(), response.status)
         }
     }
+
+    internal suspend fun clientCredentialsToken(
+        targetScope: String,
+    ): TokenResponse {
+        val response = httpClient
+            .submitForm(
+                config.tokenEndpoint,
+                parameters {
+                    set("target", targetScope)
+                    set("identity_provider", "azuread")
+                },
+            )
+        return if (response.status.isSuccess()) {
+            return response.body<TokenResponse.Success>()
+        } else {
+            TokenResponse.Error(response.body<TokenErrorResponse>(), response.status)
+        }
+    }
 }
