@@ -19,7 +19,7 @@ sealed class CallContext(
             tokenExchangeService: TokenExchangeService,
             scope: String,
         ): String {
-            TODO()
+            return tokenExchangeService.clientCredentialsToken(scope)
         }
     }
 
