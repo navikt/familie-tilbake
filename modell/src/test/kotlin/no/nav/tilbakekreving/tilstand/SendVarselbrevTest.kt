@@ -55,7 +55,7 @@ class SendVarselbrevTest {
             varselbrevBehov.varseltekstFraSaksbehandler shouldBe "Todo" // Hardkodet todo i koden også må fikses når vi vet mer
             varselbrevBehov.feilutbetaltePerioder shouldBe kravgrunnlag.datoperioder()
             varselbrevBehov.gjelderDødsfall shouldBe false
-            varselbrevBehov.saksnummer shouldBe tilbakekreving.eksternFagsak.eksternId
+            varselbrevBehov.eksternFagsakId shouldBe tilbakekreving.eksternFagsak.eksternId
             varselbrevBehov.ytelse shouldBe tilbakekreving.eksternFagsak.ytelse
             varselbrevBehov.behandlendeEnhet shouldBe tilbakekreving.behandlingHistorikk.nåværende().entry.hentBehandlingsinformasjon().enhet
         }

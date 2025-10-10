@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.tilstand
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.brev.Varselbrev
+import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 
@@ -32,10 +33,11 @@ object SendVarselbrev : Tilstand {
                 brukerIdent = brukerBrevmetadata.personIdent,
                 brukerNavn = brukerBrevmetadata.navn,
                 språkkode = brukerBrevmetadata.språkkode,
+                behandlingId = behandling.id,
                 varselbrev = varselbrev as Varselbrev,
                 revurderingsvedtaksdato = revurderingsvedtaksdato,
                 varseltekstFraSaksbehandler = varseltekstFraSaksbehandler,
-                saksnummer = fagsak.eksternId,
+                eksternFagsakId = fagsak.eksternId,
                 ytelse = fagsak.ytelse,
                 behandlendeEnhet = behandling.hentBehandlingsinformasjon().enhet,
                 feilutbetaltBeløp = varselbrev.hentVarsletBeløp(),
@@ -55,5 +57,9 @@ object SendVarselbrev : Tilstand {
         }
 
         tilbakekreving.byttTilstand(TilBehandling)
+    }
+
+    override fun håndter(tilbakekreving: Tilbakekreving, fagsysteminfo: FagsysteminfoHendelse) {
+        tilbakekreving.oppdaterFagsysteminfo(fagsysteminfo)
     }
 }
