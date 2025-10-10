@@ -33,6 +33,7 @@ import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
+import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.brev.MottakerType
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
@@ -58,6 +59,7 @@ class TilbakekrevingService(
     private val kafkaProducer: KafkaProducer,
     private val kravgrunnlagBufferRepository: KravgrunnlagBufferRepository,
     private val dokarkivClient: DokarkivClient,
+    private val dokdistService: DokdistClient,
 ) {
     private val logger = TracedLogger.getLogger<TilbakekrevingService>()
 
@@ -213,7 +215,11 @@ class TilbakekrevingService(
                         logContext = SecureLog.Context.fra(tilbakekreving),
                     )
                 }
-                // todo her skjer utsending av brev
+                dokdistService.brevTilUtsending(
+                    behov = behov,
+                    journalpostId = arkivert.journalpostId,
+                    logContext = logContext,
+                )
                 tilbakekreving.håndter(
                     VarselbrevSendtHendelse(
                         varselbrevId = behov.brevId,

@@ -77,3 +77,6 @@ tilbakekreving:
   dokarkiv:
     base-url: https://dokarkiv.intern.nav.no
     scope: api://prod-fss.teamdokumenthandtering.dokarkiv/.default
+  dokdist:
+    base-url: https://dokdistfordeling.prod-fss-pub.nais.io
+    scope: api://prod-fss.teamdokumenthandtering.dokdistfordeling/.default
