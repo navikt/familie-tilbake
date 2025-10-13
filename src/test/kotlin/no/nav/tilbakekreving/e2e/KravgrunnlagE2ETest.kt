@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.e2e
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.inspectors.forAll
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -8,14 +9,21 @@ import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import no.nav.tilbakekreving.Testdata
+import no.nav.tilbakekreving.aktør.Aktør
+import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.april
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.NyKlassekode
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp.Companion.medFeilutbetaling
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsperiode
+import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
+import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
+import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub
+import no.nav.tilbakekreving.januar
+import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagMediator
@@ -25,6 +33,8 @@ import no.nav.tilbakekreving.repository.TilbakekrevingRepository
 import no.nav.tilbakekreving.util.kroner
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.math.BigDecimal
+import java.time.LocalDate
 import java.util.UUID
 
 class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
@@ -141,6 +151,82 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
             }
         }
     }
+
+    @Test
+    fun `ruller tilbake tilbakekreving som feiler under opprettelse`() {
+        val brukerIdent = KravgrunnlagGenerator.nextPaddedId(48)
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        shouldThrow<Exception> {
+            tilbakekrevingService.opprettTilbakekreving(
+                OpprettTilbakekrevingHendelse(
+                    Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
+                    OpprettTilbakekrevingHendelse.EksternFagsak(
+                        fagsystemId,
+                        Ytelse.Tilleggsstønad,
+                    ),
+                ),
+            ) {
+                it.håndter(
+                    KravgrunnlagHendelse(
+                        id = UUID.randomUUID(),
+                        vedtakId = KravgrunnlagGenerator.nextPaddedId(6).toBigInteger(),
+                        kravstatuskode = KravgrunnlagHendelse.Kravstatuskode.NY,
+                        fagsystemVedtaksdato = LocalDate.now(),
+                        vedtakGjelder = Aktør.Person(brukerIdent),
+                        utbetalesTil = Aktør.Person(brukerIdent),
+                        skalBeregneRenter = true,
+                        ansvarligEnhet = "1337",
+                        kontrollfelt = "kontrollfelt",
+                        kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6),
+                        referanse = "referanse",
+                        perioder = listOf(kravgrunnlagPeriode()),
+                    ),
+                )
+            }
+        }
+
+        tilbakekrevingRepository.hentAlleTilbakekrevinger()?.count { it.eksternFagsak.eksternId == fagsystemId } shouldBe 0
+    }
+
+    fun kravgrunnlagPeriode(
+        periode: Datoperiode = 1.januar(2021) til 31.januar(2021),
+        ytelsesbeløp: List<KravgrunnlagHendelse.Periode.Beløp> = ytelsesbeløp(),
+    ) =
+        KravgrunnlagHendelse.Periode(
+            id = UUID.randomUUID(),
+            periode = periode,
+            månedligSkattebeløp = BigDecimal("0.0"),
+            beløp = ytelsesbeløp + feilutbetalteBeløp(),
+        )
+
+    fun ytelsesbeløp(
+        tilbakekrevesBeløp: BigDecimal = 2000.kroner,
+        opprinneligBeløp: BigDecimal = 12000.kroner,
+    ) =
+        listOf(
+            KravgrunnlagHendelse.Periode.Beløp(
+                id = UUID.randomUUID(),
+                klassekode = "",
+                klassetype = "YTEL",
+                opprinneligUtbetalingsbeløp = opprinneligBeløp,
+                nyttBeløp = opprinneligBeløp - tilbakekrevesBeløp,
+                tilbakekrevesBeløp = tilbakekrevesBeløp,
+                skatteprosent = BigDecimal("0.0"),
+            ),
+        )
+
+    fun feilutbetalteBeløp() =
+        listOf(
+            KravgrunnlagHendelse.Periode.Beløp(
+                id = UUID.randomUUID(),
+                klassekode = "",
+                klassetype = "FEIL",
+                opprinneligUtbetalingsbeløp = BigDecimal("12000.0"),
+                nyttBeløp = BigDecimal("10000.0"),
+                tilbakekrevesBeløp = BigDecimal("2000.0"),
+                skatteprosent = BigDecimal("0.0"),
+            ),
+        )
 
     companion object {
         const val QUEUE_NAME = "LOCAL_TILLEGGSSTONADER.KRAVGRUNNLAG"

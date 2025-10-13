@@ -11,7 +11,7 @@ import org.intellij.lang.annotations.Language
 import java.math.BigDecimal
 
 object KravgrunnlagGenerator {
-    private val idIndexes = Array(10) { 0 }
+    private val idIndexes = Array(48) { 0 }
 
     fun nextPaddedId(width: Int) = (idIndexes[width - 1]++)
         .toString()
