@@ -25,8 +25,8 @@ class NyEksternFagsakRepository(private val jdbcTemplate: JdbcTemplate) {
     }
 
     fun lagre(eksternFagsak: EksternFagsakEntity) {
-        lagreBehandlinger(eksternFagsak.behandlinger)
         EksternFagsakMapper.upsertQuery(jdbcTemplate, eksternFagsak)
+        lagreBehandlinger(eksternFagsak.behandlinger)
     }
 
     private fun hentBehandling(eksternFagsakId: UUID): List<EksternFagsakBehandlingEntity> {

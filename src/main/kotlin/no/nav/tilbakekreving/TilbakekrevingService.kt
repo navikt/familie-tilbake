@@ -65,29 +65,26 @@ class TilbakekrevingService(
         håndter: (Tilbakekreving) -> Unit,
     ) {
         val observatør = Observatør()
-        lateinit var logContext: SecureLog.Context
 
-        val tilbakekrevingId = tilbakekrevingRepository.opprett(
-            Tilbakekreving.opprett(
-                id = tilbakekrevingRepository.nesteId(),
-                behovObservatør = observatør,
-                opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse,
-                bigQueryService = bigQueryService,
-                endringObservatør = endringObservatørService,
-            ).tilEntity(),
+        val tilbakekreving = Tilbakekreving.opprett(
+            id = tilbakekrevingRepository.nesteId(),
+            behovObservatør = observatør,
+            opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse,
+            bigQueryService = bigQueryService,
+            endringObservatør = endringObservatørService,
         )
 
-        hentOgLagreTilbakekreving(tilbakekrevingId) { tilbakekreving ->
-            håndter(tilbakekreving)
+        håndter(tilbakekreving)
+        val tilbakekrevingId = tilbakekrevingRepository.opprett(tilbakekreving.tilEntity())
 
-            logContext = SecureLog.Context.fra(tilbakekreving)
-            logger.medContext(logContext) { info("Lagrer tilbakekreving") }
-            logger.medContext(logContext) {
-                info("URL til behandling er: {}", tilbakekreving.hentTilbakekrevingUrl(applicationProperties.frontendUrl))
-            }
+        val logContext = SecureLog.Context.fra(tilbakekreving)
 
-            tilbakekreving.tilEntity()
+        logger.medContext(logContext) { info("Lagrer tilbakekreving") }
+        logger.medContext(logContext) {
+            info("URL til behandling er: {}", tilbakekreving.hentTilbakekrevingUrl(applicationProperties.frontendUrl))
         }
+
+        utførSideeffekter(tilbakekrevingId, observatør, logContext)
 
         logger.medContext(logContext) { info("Tilbakekreving ferdig opprettet") }
     }
@@ -114,11 +111,27 @@ class TilbakekrevingService(
     ): T {
         lateinit var result: T
         val observatør = Observatør()
+        lateinit var logContext: SecureLog.Context
         tilbakekrevingRepository.hentOgLagreResultat(tilbakekrevingId) {
             val tilbakekreving = it.fraEntity(observatør, bigQueryService, endringObservatørService)
-            val logContext = SecureLog.Context.fra(tilbakekreving)
+            logContext = SecureLog.Context.fra(tilbakekreving)
             result = callback(tilbakekreving)
 
+            tilbakekreving.tilEntity()
+        }
+
+        utførSideeffekter(tilbakekrevingId, observatør, logContext)
+
+        return result
+    }
+
+    private fun utførSideeffekter(
+        tilbakekrevingId: String,
+        observatør: Observatør,
+        logContext: SecureLog.Context,
+    ) {
+        tilbakekrevingRepository.hentOgLagreResultat(tilbakekrevingId) {
+            val tilbakekreving = it.fraEntity(observatør, bigQueryService, endringObservatørService)
             while (observatør.harUbesvarteBehov()) {
                 try {
                     håndterBehov(tilbakekreving, observatør.nesteBehov(), SecureLog.Context.fra(tilbakekreving))
@@ -129,11 +142,8 @@ class TilbakekrevingService(
                     break
                 }
             }
-
             tilbakekreving.tilEntity()
         }
-
-        return result
     }
 
     fun <T : Any> hentTilbakekreving(
