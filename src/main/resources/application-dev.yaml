@@ -30,6 +30,9 @@ tilbakekreving:
   bigQuery:
     prosjektId: tilbake-dev-d683
     dataset: tilbakekreving_dataset
+  dokarkiv:
+    base-url: https://dokarkiv-q2.dev-fss-pub.nais.io
+    scope: api://dev-fss.teamdokumenthandtering.dokarkiv/.default
 
 rolle:
   barnetrygd:
