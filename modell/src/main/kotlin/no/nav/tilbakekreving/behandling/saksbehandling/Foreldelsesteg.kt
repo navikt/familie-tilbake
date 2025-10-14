@@ -60,23 +60,22 @@ class Foreldelsesteg(
         kravgrunnlag: KravgrunnlagHendelse,
     ): VurdertForeldelseDto {
         return VurdertForeldelseDto(
-            foreldetPerioder =
-                vurdertePerioder.map {
-                    VurdertForeldelsesperiodeDto(
-                        periode = it.periode,
-                        feilutbetaltBeløp = kravgrunnlag.totaltBeløpFor(it.periode),
-                        begrunnelse = it.vurdering.begrunnelse,
-                        foreldelsesvurderingstype =
-                            when (it.vurdering) {
-                                is Vurdering.IkkeForeldet -> Foreldelsesvurderingstype.IKKE_FORELDET
-                                is Vurdering.Foreldet -> Foreldelsesvurderingstype.FORELDET
-                                is Vurdering.IkkeVurdert -> Foreldelsesvurderingstype.IKKE_VURDERT
-                                is Vurdering.Tilleggsfrist -> Foreldelsesvurderingstype.TILLEGGSFRIST
-                            },
-                        foreldelsesfrist = it.vurdering.frist,
-                        oppdagelsesdato = (it.vurdering as? Vurdering.Tilleggsfrist)?.oppdaget,
-                    )
-                },
+            foreldetPerioder = vurdertePerioder.map {
+                VurdertForeldelsesperiodeDto(
+                    periode = it.periode,
+                    feilutbetaltBeløp = kravgrunnlag.totaltBeløpFor(it.periode),
+                    begrunnelse = it.vurdering.begrunnelse,
+                    foreldelsesvurderingstype =
+                        when (it.vurdering) {
+                            is Vurdering.IkkeForeldet -> Foreldelsesvurderingstype.IKKE_FORELDET
+                            is Vurdering.Foreldet -> Foreldelsesvurderingstype.FORELDET
+                            is Vurdering.IkkeVurdert -> Foreldelsesvurderingstype.IKKE_VURDERT
+                            is Vurdering.Tilleggsfrist -> Foreldelsesvurderingstype.TILLEGGSFRIST
+                        },
+                    foreldelsesfrist = it.vurdering.frist,
+                    oppdagelsesdato = (it.vurdering as? Vurdering.Tilleggsfrist)?.oppdaget,
+                )
+            },
         )
     }
 

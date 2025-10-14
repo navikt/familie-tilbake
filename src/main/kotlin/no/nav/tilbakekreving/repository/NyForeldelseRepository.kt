@@ -34,6 +34,7 @@ class NyForeldelseRepository(
 
     fun lagre(foreldelsestegEntity: ForeldelsesstegEntity) {
         ForeldelsesvurderingEntityMapper.insertQuery(jdbcTemplate, foreldelsestegEntity)
+        jdbcTemplate.update("DELETE FROM tilbakekreving_foreldelsesvurdering_periode WHERE foreldelsesvurdering_ref=?;", foreldelsestegEntity.id)
         for (vurdertPeriode in foreldelsestegEntity.vurdertePerioder) {
             ForeldelsesvurderingEntityMapper.VurdertPeriode.upsertQuery(jdbcTemplate, vurdertPeriode)
         }

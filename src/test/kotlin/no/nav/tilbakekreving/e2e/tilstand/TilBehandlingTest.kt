@@ -4,6 +4,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.tilbakekreving.api.v2.MottakerDto
+import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.api.v2.PeriodeDto
 import no.nav.tilbakekreving.api.v2.fagsystem.svar.FagsysteminfoSvarHendelse
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
@@ -63,6 +64,12 @@ class TilBehandlingTest : TilbakekrevingE2EBase() {
         )
 
         val tilbakekreving = tilbakekreving(behandlingId)
+        tilbakekreving.behandlingHistorikk.nåværende().entry.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL).feilutbetaltePerioder.map { it.periode } shouldBe listOf(
+            1.januar(2021) til 31.januar(2021),
+        )
+        tilbakekreving.behandlingHistorikk.nåværende().entry.foreldelsestegDto.tilFrontendDto().foreldetPerioder.map { it.periode } shouldBe listOf(
+            1.januar(2021) til 31.januar(2021),
+        )
         tilbakekreving.behandlingHistorikk.nåværende().entry.vilkårsvurderingsstegDto.tilFrontendDto().perioder.map { it.periode } shouldBe listOf(
             1.januar(2021) til 31.januar(2021),
         )
