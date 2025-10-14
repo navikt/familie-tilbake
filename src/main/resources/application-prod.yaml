@@ -60,3 +60,6 @@ tilbakekreving:
   bigQuery:
     prosjektId: tilbake-prod-d235
     dataset: tilbakekreving_dataset
+  dokdist:
+    base-url: https://dokdistfordeling.prod-fss-pub.nais.io
+    scope: api://prod-fss.teamdokumenthandtering.dokdistfordeling/.default

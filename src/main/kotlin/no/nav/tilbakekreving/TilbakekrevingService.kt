@@ -34,6 +34,7 @@ import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
+import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokumentdistribusjonService
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.brev.MottakerType
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
@@ -56,6 +57,7 @@ class TilbakekrevingService(
     private val bigQueryService: BigQueryService,
     private val endringObservatørService: EndringObservatørService,
     private val kafkaProducer: KafkaProducer,
+    private val dokdistService: DokumentdistribusjonService,
 ) {
     private val aktør = Aktør.Person(ident = "20046912345")
     private val logger = TracedLogger.getLogger<TilbakekrevingService>()
@@ -201,11 +203,16 @@ class TilbakekrevingService(
             }
 
             is VarselbrevBehov -> {
-                // Todo her skjer Journalføring og utsending av brev!
+                // todo Denne skal inn når journalføring er merged!
+                dokdistService.brevTilUtsending(
+                    behov = behov,
+                    journalpostId = "", // arkivert.journalpostId,
+                    logContext = logContext,
+                )
                 tilbakekreving.håndter(
                     VarselbrevSendtHendelse(
                         varselbrevId = behov.brevId,
-                        journalpostId = "12345", // ToDo her kommer journalpost id som vi får i response når vi journalfører og sender brev.
+                        journalpostId = "454031034", // ToDo her kommer journalpost id som vi får i response når vi journalfører og sender brev. arkivert.journalpostId
                     ),
                 )
             }

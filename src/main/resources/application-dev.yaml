@@ -30,6 +30,9 @@ tilbakekreving:
   bigQuery:
     prosjektId: tilbake-dev-d683
     dataset: tilbakekreving_dataset
+  dokdist:
+    base-url: https://dokdistfordeling.dev-fss-pub.nais.io
+    scope: api://dev-fss.teamdokumenthandtering.dokdistfordeling/.default
 
 rolle:
   barnetrygd:

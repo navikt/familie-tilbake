@@ -56,3 +56,6 @@ tilbakekreving:
   bigQuery:
     prosjektId: dummy
     dataset: dummy
+  dokdist:
+    base-url: dummy
+    scope: dummy
