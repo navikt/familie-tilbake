@@ -43,6 +43,10 @@ class NyEksternFagsakRepository(private val jdbcTemplate: JdbcTemplate) {
     private fun lagreBehandlinger(behandlinger: List<EksternFagsakBehandlingEntity>) {
         behandlinger.forEach { behandling ->
             EksternFagsakBehandlingMapper.upsertQuery(jdbcTemplate, behandling)
+            jdbcTemplate.update("DELETE FROM tilbakekreving_ekstern_fagsak_behandling_utvidet_periode WHERE ekstern_fagsak_behandling_ref=?;", behandling.id)
+            behandling.utvidedePerioder?.forEach {
+                EksternFagsakBehandlingMapper.UtvidetPeriodeMapper.insertQuery(jdbcTemplate, it)
+            }
         }
     }
 
