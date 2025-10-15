@@ -66,6 +66,9 @@ spec:
           - id: 54cd86b8-2e23-48b2-8852-b05b5827bb0f # 0000-GA-Kontantstøtte-Veileder
           - id: e40090eb-c2fb-400e-b412-e9084019a73b # 0000-GA-Kontantstøtte
           - id: 4e7f23d9-5db1-45c0-acec-89c86a9ec678 # 0000-GA-Kontantstøtte-Beslutter
+          - id: 0f841c83-0d64-407c-80d5-4eb51dfaee1e # TS veileder
+          - id: c1e9edec-0c10-4df2-8c74-324ab9922220 # TS saksbehandler
+          - id: 224b5097-d0af-462c-8d8e-49c0e8a42661 # TS beslutter
       enabled: true
       replyURLs:
         - "https://tilbakekreving-backend.intern.nav.no/swagger-ui/oauth2-redirect.html"
