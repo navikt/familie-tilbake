@@ -61,6 +61,12 @@ tilbakekreving:
     ny-modell-enabled: true
   tilgangsmaskinen:
     scope: api://prod-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
+  tilgangsstyring:
+    grupper:
+      ts:
+        veileder: "0f841c83-0d64-407c-80d5-4eb51dfaee1e"
+        saksbehandler: "c1e9edec-0c10-4df2-8c74-324ab9922220"
+        beslutter: "224b5097-d0af-462c-8d8e-49c0e8a42661"
   bigQuery:
     prosjektId: tilbake-prod-d235
     dataset: tilbakekreving_dataset
