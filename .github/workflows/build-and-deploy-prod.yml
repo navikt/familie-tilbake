@@ -45,13 +45,13 @@ jobs:
       id-token: "write"
     steps:
       - uses: actions/checkout@v5
-#      - name: Deploy til dev-gcp
-#        uses: nais/deploy/actions/deploy@v2
-#        env:
-#          CLUSTER: dev-gcp
-#          RESOURCE: .deploy/nais/app-dev-gcp.yaml
-#          VAR: image=${{ needs.build.outputs.image }}
-#          ENVIRONMENT: dev-gcp:tilbake
+      - name: Deploy til dev-gcp
+        uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: .deploy/nais/app-dev-gcp.yaml
+          VAR: image=${{ needs.build.outputs.image }}
+          ENVIRONMENT: dev-gcp:tilbake
       - name: Deploy til prod-gcp
         uses: nais/deploy/actions/deploy@v2
         env:

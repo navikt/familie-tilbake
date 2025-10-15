@@ -64,86 +64,86 @@ jobs:
           docker_context: .
     outputs:
       image: ${{ steps.docker-push.outputs.image }}
-#
-#  run-junit:
-#    if: github.event.pull_request.draft == false
-#    name: Kjøre junit tester
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v5
-#        with:
-#          fetch-depth: 0
-#      - uses: actions/setup-java@v4
-#        with:
-#          java-version: 21
-#          distribution: 'temurin'
-#          cache: 'gradle'
-#      - name: Bygg med gradle
-#        env:
-#          GITHUB_USERNAME: x-access-token
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        run: ./gradlew build -xtest
-#      - name: Kjør tester
-#        env:
-#          GITHUB_USERNAME: x-access-token
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        run: ./gradlew test
-#
-#  run-e2e:
-#    if: github.event.pull_request.draft == false && github.event.pull_request.user.login != 'dependabot[bot]'
-#    name: Kjør e2e tester
-#    runs-on: ubuntu-latest
-#    needs: build-jar-docker
-#    permissions:
-#      contents: "read"
-#      id-token: "write"
-#    steps:
-#      - name: Login GAR
-#        uses: nais/login@v0
-#        with:
-#          team: tilbake
-#      - name: Checkout e2e tests
-#        if: "!contains(github.event.head_commit.message, 'e2e skip')"
-#        uses: actions/checkout@v5
-#        with:
-#          ref: "main"
-#          repository: navikt/familie-tilbake-e2e
-#          token: ${{ secrets.READER_TOKEN }}
-#          path: tilbake-e2e
-#      - name: Setter riktig familie-tilbake versjon i e2e tester hvis e2e bruker ghcr.io(deprecated)
-#        if: "!contains(github.event.head_commit.message, 'e2e skip')"
-#        run: sed -i 's/ghcr.io\/navikt\/familie-tilbake:latest/europe-north1-docker.pkg.dev\/nais-management-233d\/tilbake\/familie-tilbake:${{ github.sha }}/g' tilbake-e2e/e2e/docker-compose.yml
-#      - name: Setter riktig familie-tilbake versjon i e2e tester
-#        if: "!contains(github.event.head_commit.message, 'e2e skip')"
-#        run: sed -i 's/europe-north1-docker.pkg.dev\/nais-management-233d\/tilbake\/familie-tilbake:latest/europe-north1-docker.pkg.dev\/nais-management-233d\/tilbake\/familie-tilbake:${{ github.sha }}/g' tilbake-e2e/e2e/docker-compose.yml
-#      - name: Set up Java 21
-#        uses: actions/setup-java@v4
-#        with:
-#          java-version: 21
-#          distribution: 'temurin'
-#          cache: 'maven'
-#      - name: Start alle apper (e2e)
-#        if: "!contains(github.event.head_commit.message, 'e2e skip')"
-#        timeout-minutes: 5
-#        run: cd tilbake-e2e/e2e; ./e2e.sh
-#      - name: Kjør tester (e2e)
-#        env:
-#          GITHUB_USERNAME: x-access-token
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        if: "!contains(github.event.head_commit.message, 'e2e skip')"
-#        run: cd tilbake-e2e/autotest; mvn -B --no-transfer-progress --settings .m2/maven-settings.xml -Dtest="**" test
-#      - name: Samle Docker-logs ved feil
-#        if: failure()
-#        uses: jwalton/gh-docker-logs@v2
-#        with:
-#          dest: './logs'
-#      - name: Tar logs
-#        if: failure()
-#        run: tar cvzf ./logs.tgz ./logs
-#      - name: Laste opp logs til GitHub
-#        uses: actions/upload-artifact@master
-#        if: failure()
-#        with:
-#          name: docker-logs-${{ github.run_number }}.tgz
-#          path: ./logs.tgz
-#          retention-days: 2
+
+  run-junit:
+    if: github.event.pull_request.draft == false
+    name: Kjøre junit tester
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: 'temurin'
+          cache: 'gradle'
+      - name: Bygg med gradle
+        env:
+          GITHUB_USERNAME: x-access-token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew build -xtest
+      - name: Kjør tester
+        env:
+          GITHUB_USERNAME: x-access-token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew test
+
+  run-e2e:
+    if: github.event.pull_request.draft == false && github.event.pull_request.user.login != 'dependabot[bot]'
+    name: Kjør e2e tester
+    runs-on: ubuntu-latest
+    needs: build-jar-docker
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      - name: Login GAR
+        uses: nais/login@v0
+        with:
+          team: tilbake
+      - name: Checkout e2e tests
+        if: "!contains(github.event.head_commit.message, 'e2e skip')"
+        uses: actions/checkout@v5
+        with:
+          ref: "main"
+          repository: navikt/familie-tilbake-e2e
+          token: ${{ secrets.READER_TOKEN }}
+          path: tilbake-e2e
+      - name: Setter riktig familie-tilbake versjon i e2e tester hvis e2e bruker ghcr.io(deprecated)
+        if: "!contains(github.event.head_commit.message, 'e2e skip')"
+        run: sed -i 's/ghcr.io\/navikt\/familie-tilbake:latest/europe-north1-docker.pkg.dev\/nais-management-233d\/tilbake\/familie-tilbake:${{ github.sha }}/g' tilbake-e2e/e2e/docker-compose.yml
+      - name: Setter riktig familie-tilbake versjon i e2e tester
+        if: "!contains(github.event.head_commit.message, 'e2e skip')"
+        run: sed -i 's/europe-north1-docker.pkg.dev\/nais-management-233d\/tilbake\/familie-tilbake:latest/europe-north1-docker.pkg.dev\/nais-management-233d\/tilbake\/familie-tilbake:${{ github.sha }}/g' tilbake-e2e/e2e/docker-compose.yml
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: 'temurin'
+          cache: 'maven'
+      - name: Start alle apper (e2e)
+        if: "!contains(github.event.head_commit.message, 'e2e skip')"
+        timeout-minutes: 5
+        run: cd tilbake-e2e/e2e; ./e2e.sh
+      - name: Kjør tester (e2e)
+        env:
+          GITHUB_USERNAME: x-access-token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: "!contains(github.event.head_commit.message, 'e2e skip')"
+        run: cd tilbake-e2e/autotest; mvn -B --no-transfer-progress --settings .m2/maven-settings.xml -Dtest="**" test
+      - name: Samle Docker-logs ved feil
+        if: failure()
+        uses: jwalton/gh-docker-logs@v2
+        with:
+          dest: './logs'
+      - name: Tar logs
+        if: failure()
+        run: tar cvzf ./logs.tgz ./logs
+      - name: Laste opp logs til GitHub
+        uses: actions/upload-artifact@master
+        if: failure()
+        with:
+          name: docker-logs-${{ github.run_number }}.tgz
+          path: ./logs.tgz
+          retention-days: 2
