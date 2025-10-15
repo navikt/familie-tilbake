@@ -55,6 +55,10 @@ kafka:
     requestTopic: ${KAFKA_HENTFAGSYSTEM_REQUEST_TOPIC:tilbake.privat-tbk-hentfagsystemsbehandling}
     responseTopic: ${KAFKA_HENTFAGSYSTEM_RESPONSE_TOPIC:tilbake.privat-tbk-hentfagsystemsbehandling-svar}
 tilbakekreving:
+  kravgrunnlag:
+    - QA.P_TILLEGGSSTONADER.KRAVGRUNNLAG
+  toggles:
+    ny-modell-enabled: true
   tilgangsmaskinen:
     scope: api://prod-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
   bigQuery:
