@@ -29,9 +29,9 @@ object KravgrunnlagMapper {
 
     fun tilKravgrunnlagHendelse(kravgrunnlag: DetaljertKravgrunnlagDto): KravgrunnlagHendelse {
         val kravgrunnlagHendelse = KravgrunnlagHendelse(
-            UUID.randomUUID(),
-            kravgrunnlag.vedtakId,
-            KravgrunnlagHendelse.Kravstatuskode.valueOf(kravgrunnlag.kodeStatusKrav),
+            id = UUID.randomUUID(),
+            vedtakId = kravgrunnlag.vedtakId,
+            kravstatuskode = KravgrunnlagHendelse.Kravstatuskode.forOppdragKode(kravgrunnlag.kodeStatusKrav),
             fagsystemVedtaksdato = kravgrunnlag.datoVedtakFagsystem,
             vedtakGjelder = mapAktør(kravgrunnlag.typeGjelderId, kravgrunnlag.vedtakGjelderId),
             utbetalesTil = mapAktør(kravgrunnlag.typeUtbetId, kravgrunnlag.utbetalesTilId),

@@ -40,6 +40,7 @@ import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.springframework.stereotype.Service
@@ -56,6 +57,7 @@ class TilbakekrevingService(
     private val bigQueryService: BigQueryService,
     private val endringObservatørService: EndringObservatørService,
     private val kafkaProducer: KafkaProducer,
+    private val kravgrunnlagBufferRepository: KravgrunnlagBufferRepository,
 ) {
     private val aktør = Aktør.Person(ident = "20046912345")
     private val logger = TracedLogger.getLogger<TilbakekrevingService>()
@@ -96,13 +98,19 @@ class TilbakekrevingService(
         if (!applicationProperties.toggles.nyModellEnabled) return null
 
         val tilbakekrevinger = tilbakekrevingRepository.hentAlleTilbakekrevinger()?.map { it.fraEntity(Observatør(), bigQueryService, endringObservatørService) }
-        return tilbakekrevinger?.firstOrNull { it.tilFrontendDto().fagsystem == fagsystem && it.tilFrontendDto().eksternFagsakId == eksternFagsakId }
+        val tilbakekreving = tilbakekrevinger?.firstOrNull { it.tilFrontendDto().fagsystem == fagsystem && it.tilFrontendDto().eksternFagsakId == eksternFagsakId }
+            ?: return null
+        val logContext = SecureLog.Context.fra(tilbakekreving)
+        kravgrunnlagBufferRepository.validerKravgrunnlagInnenforScope(eksternFagsakId, logContext.behandlingId)
+        return tilbakekreving
     }
 
     fun hentTilbakekreving(behandlingId: UUID): Tilbakekreving? {
         if (!applicationProperties.toggles.nyModellEnabled) return null
 
-        return tilbakekrevingRepository.hentTilbakekreving(behandlingId)?.fraEntity(Observatør(), bigQueryService, endringObservatørService)
+        val tilbakekreving = tilbakekrevingRepository.hentTilbakekreving(behandlingId) ?: return null
+        kravgrunnlagBufferRepository.validerKravgrunnlagInnenforScope(tilbakekreving.eksternFagsak.eksternId, tilbakekreving.behandlingHistorikkEntities.lastOrNull()?.id?.toString())
+        return tilbakekreving.fraEntity(Observatør(), bigQueryService, endringObservatørService)
     }
 
     fun <T : Any> hentOgLagreTilbakekreving(
@@ -113,6 +121,7 @@ class TilbakekrevingService(
         val observatør = Observatør()
         lateinit var logContext: SecureLog.Context
         tilbakekrevingRepository.hentOgLagreResultat(tilbakekrevingId) {
+            kravgrunnlagBufferRepository.validerKravgrunnlagInnenforScope(it.eksternFagsak.eksternId, it.behandlingHistorikkEntities.lastOrNull()?.id?.toString())
             val tilbakekreving = it.fraEntity(observatør, bigQueryService, endringObservatørService)
             logContext = SecureLog.Context.fra(tilbakekreving)
             result = callback(tilbakekreving)

@@ -40,6 +40,10 @@ class KravgrunnlagHendelse(
         if (vedtakGjelder.ident != utbetalesTil.ident) {
             throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagBrukerIkkeLikMottaker, sporing)
         }
+
+        if (kravstatuskode != Kravstatuskode.NY) {
+            throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagStatusIkkeStøttet, sporing)
+        }
     }
 
     fun totaltBeløpFor(periode: Datoperiode): BigDecimal =
@@ -139,16 +143,22 @@ class KravgrunnlagHendelse(
     }
 
     enum class Kravstatuskode(
+        val oppdragKode: String,
         val navn: String,
     ) {
-        ANNULERT("Kravgrunnlag annullert"),
-        ANNULLERT_OMG("Kravgrunnlag annullert ved omg"),
-        AVSLUTTET("Avsluttet kravgrunnlag"),
-        BEHANDLET("Kravgrunnlag ferdigbehandlet"),
-        ENDRET("Endret kravgrunnlag"),
-        FEIL("Feil på kravgrunnlag"),
-        MANUELL("Manuell behandling"),
-        NY("Nytt kravgrunnlag"),
-        SPERRET("Kravgrunnlag sperret"),
+        ANNULERT("ANNU", "Kravgrunnlag annullert"),
+        ANNULLERT_OMG("ANOM", "Kravgrunnlag annullert ved omg"),
+        AVSLUTTET("AVSL", "Avsluttet kravgrunnlag"),
+        BEHANDLET("BEHA", "Kravgrunnlag ferdigbehandlet"),
+        ENDRET("ENDR", "Endret kravgrunnlag"),
+        FEIL("FEIL", "Feil på kravgrunnlag"),
+        MANUELL("MANU", "Manuell behandling"),
+        NY("NY", "Nytt kravgrunnlag"),
+        SPERRET("SPER", "Kravgrunnlag sperret"),
+        ;
+
+        companion object {
+            fun forOppdragKode(kode: String) = entries.single { it.oppdragKode == kode }
+        }
     }
 }

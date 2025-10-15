@@ -24,6 +24,7 @@ object KravgrunnlagGenerator {
         referanse: String = nextPaddedId(4),
         ansvarligEnhet: String = nextPaddedId(4),
         fødselsnummer: String = "40026912345",
+        kravStatusKode: String = "NY",
         perioder: List<Tilbakekrevingsperiode> = listOf(
             Tilbakekrevingsperiode(
                 1.januar(2021) til 1.januar(2021),
@@ -45,7 +46,7 @@ object KravgrunnlagGenerator {
             <urn:detaljertKravgrunnlag>
                 <urn:kravgrunnlagId>$kravgrunnlagId</urn:kravgrunnlagId>
                 <urn:vedtakId>$vedtakId</urn:vedtakId>
-                <urn:kodeStatusKrav>NY</urn:kodeStatusKrav>
+                <urn:kodeStatusKrav>$kravStatusKode</urn:kodeStatusKrav>
                 <urn:kodeFagomraade>TILLST</urn:kodeFagomraade>
                 <urn:fagsystemId>$fagsystemId</urn:fagsystemId>
                 <urn:vedtakIdOmgjort>0</urn:vedtakIdOmgjort>

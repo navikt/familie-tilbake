@@ -18,6 +18,7 @@ import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp.Com
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsperiode
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
+import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub
@@ -185,6 +186,28 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
         }
 
         tilbakekrevingRepository.hentAlleTilbakekrevinger()?.count { it.eksternFagsak.eksternId == fagsystemId } shouldBe 0
+    }
+
+    @Test
+    fun `statuskode som ikke er støttet blokkerer behandling`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        sendKravgrunnlagOgAvventLesing(QUEUE_NAME, KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId))
+        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+
+        sendKravgrunnlagOgAvventLesing(QUEUE_NAME, KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId, kravStatusKode = "ENDR"))
+
+        shouldThrow<ModellFeil.UtenforScopeException> {
+            tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId)
+        }
+
+        shouldThrow<ModellFeil.UtenforScopeException> {
+            tilbakekrevingService.hentTilbakekreving(behandlingId)
+        }
+
+        shouldThrow<ModellFeil.UtenforScopeException> {
+            // Henting for skriving
+            tilbakekrevingService.hentTilbakekreving(behandlingId) {}
+        }
     }
 
     fun kravgrunnlagPeriode(
