@@ -33,7 +33,7 @@ class NyBehandlingRepository(
                 faktasteg = faktavurderingRepository.hentFaktavurdering(behandlingId),
                 vilkårsvurdering = jsonBehandling.vilkårsvurderingstegEntity,
                 foreslåVedtak = jsonBehandling.foreslåVedtakStegEntity,
-                fatteVedtak = fatteVedtakRepository.hentVedtaksvurdering(behandlingId),
+                fatteVedtak = fatteVedtakRepository.hentVedtaksvurdering(behandlingId) ?: jsonBehandling.fatteVedtakStegEntity,
                 påVent = jsonBehandling.påVentEntity,
                 brevmottakerSteg = jsonBehandling.brevmottakerStegEntity,
             )

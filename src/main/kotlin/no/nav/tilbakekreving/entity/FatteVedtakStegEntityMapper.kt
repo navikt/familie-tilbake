@@ -20,14 +20,14 @@ object FatteVedtakStegEntityMapper : Entity<FatteVedtakStegEntity, UUID, UUID>(
         FieldConverter.UUIDConverter.required(),
     )
 
-    val beslutter = field(
-        "beslutter",
+    val beslutterType = field(
+        "beslutter_type",
         { it.ansvarligBeslutter?.type },
         FieldConverter.EnumConverter.of<BehandlerType>(),
     )
 
-    val behandlerIdent = field(
-        "behandler_ident",
+    val beslutterIdent = field(
+        "beslutter_ident",
         { it.ansvarligBeslutter?.ident },
         FieldConverter.StringConverter,
     )
@@ -39,8 +39,8 @@ object FatteVedtakStegEntityMapper : Entity<FatteVedtakStegEntity, UUID, UUID>(
         return FatteVedtakStegEntity(
             id = resultSet[id],
             behandlingRef = resultSet[behandlingRef],
-            ansvarligBeslutter = resultSet[beslutter]?.let { type ->
-                resultSet[behandlerIdent]?.let { ident ->
+            ansvarligBeslutter = resultSet[beslutterType]?.let { type ->
+                resultSet[beslutterIdent]?.let { ident ->
                     BehandlerEntity(type, ident)
                 }
             },
@@ -49,7 +49,7 @@ object FatteVedtakStegEntityMapper : Entity<FatteVedtakStegEntity, UUID, UUID>(
     }
 
     object Vurderinger : Entity<VurdertStegEntity, UUID, UUID>(
-        "tilbakekreving_fattevedtak_vurdering",
+        "tilbakekreving_totrinnsvurdering_vurdertsteg",
         VurdertStegEntity::id,
         FieldConverter.UUIDConverter.required(),
     ) {

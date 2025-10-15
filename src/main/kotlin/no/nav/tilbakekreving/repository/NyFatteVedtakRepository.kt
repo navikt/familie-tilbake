@@ -15,7 +15,7 @@ class NyFatteVedtakRepository(
 ) {
     fun hentVedtaksvurdering(
         behandlingId: UUID,
-    ): FatteVedtakStegEntity {
+    ): FatteVedtakStegEntity? {
         return jdbcTemplate.query(
             "SELECT * FROM tilbakekreving_totrinnsvurdering WHERE behandling_ref=?",
             behandlingId,
@@ -25,12 +25,12 @@ class NyFatteVedtakRepository(
                 resultSet = resultSet,
                 vurderinger = hentVurderinger(fattVedtakRef),
             )
-        }.single()
+        }.singleOrNull()
     }
 
     private fun hentVurderinger(fattVedtakRef: UUID): List<VurdertStegEntity> {
         return jdbcTemplate.query(
-            "SELECT * FROM tilbakekreving_fattevedtak_vurdering WHERE fattevedtak_ref=?",
+            "SELECT * FROM tilbakekreving_totrinnsvurdering_vurdertsteg WHERE fattevedtak_ref=?",
             fattVedtakRef,
         ) { resultSet, _ ->
             FatteVedtakStegEntityMapper.Vurderinger.map(resultSet)
