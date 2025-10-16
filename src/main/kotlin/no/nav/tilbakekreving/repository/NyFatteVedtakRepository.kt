@@ -20,25 +20,25 @@ class NyFatteVedtakRepository(
             "SELECT * FROM tilbakekreving_totrinnsvurdering WHERE behandling_ref=?",
             behandlingId,
         ) { resultSet, _ ->
-            val fattVedtakRef = resultSet[FatteVedtakStegEntityMapper.id]
+            val totrinnsvurderingRef = resultSet[FatteVedtakStegEntityMapper.id]
             FatteVedtakStegEntityMapper.map(
                 resultSet = resultSet,
-                vurderinger = hentVurderinger(fattVedtakRef),
+                vurderinger = hentVurderinger(totrinnsvurderingRef),
             )
         }.singleOrNull()
     }
 
-    private fun hentVurderinger(fattVedtakRef: UUID): List<VurdertStegEntity> {
+    private fun hentVurderinger(totrinnsvurderingRef: UUID): List<VurdertStegEntity> {
         return jdbcTemplate.query(
-            "SELECT * FROM tilbakekreving_totrinnsvurdering_vurdertsteg WHERE fattevedtak_ref=?",
-            fattVedtakRef,
+            "SELECT * FROM tilbakekreving_totrinnsvurdering_vurdertsteg WHERE totrinnsvurdering_ref=?",
+            totrinnsvurderingRef,
         ) { resultSet, _ ->
             FatteVedtakStegEntityMapper.Vurderinger.map(resultSet)
         }
     }
 
     fun lagre(fatteVedtakStegEntity: FatteVedtakStegEntity) {
-        FatteVedtakStegEntityMapper.insertQuery(jdbcTemplate, fatteVedtakStegEntity)
+        FatteVedtakStegEntityMapper.upsertQuery(jdbcTemplate, fatteVedtakStegEntity)
         for (vurdering in fatteVedtakStegEntity.vurderteStegEntities) {
             FatteVedtakStegEntityMapper.Vurderinger.upsertQuery(jdbcTemplate, vurdering)
         }

@@ -87,10 +87,10 @@ class FatteVedtakSteg internal constructor(
             )
         }
 
-        fun tilEntity(fattevedtakRef: UUID): VurdertStegEntity {
+        fun tilEntity(totrinnsvurderingRef: UUID): VurdertStegEntity {
             return VurdertStegEntity(
                 id = id,
-                fattevedtakRef = fattevedtakRef,
+                totrinnsvurderingRef = totrinnsvurderingRef,
                 steg = steg,
                 vurdering = when (this.vurdering) {
                     is Vurdering.IkkeVurdert -> VurdertStegType.IKKE_VURDERT

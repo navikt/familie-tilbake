@@ -16,7 +16,7 @@ object FatteVedtakStegEntityMapper : Entity<FatteVedtakStegEntity, UUID, UUID>(
 ) {
     val behandlingRef = field(
         "behandling_ref",
-        FatteVedtakStegEntity::behandlingRef,
+        { it.behandlingRef!! },
         FieldConverter.UUIDConverter.required(),
     )
 
@@ -40,9 +40,7 @@ object FatteVedtakStegEntityMapper : Entity<FatteVedtakStegEntity, UUID, UUID>(
             id = resultSet[id],
             behandlingRef = resultSet[behandlingRef],
             ansvarligBeslutter = resultSet[beslutterType]?.let { type ->
-                resultSet[beslutterIdent]?.let { ident ->
-                    BehandlerEntity(type, ident)
-                }
+                BehandlerEntity(type, resultSet[beslutterIdent]!!)
             },
             vurderteStegEntities = vurderinger,
         )
@@ -53,9 +51,9 @@ object FatteVedtakStegEntityMapper : Entity<FatteVedtakStegEntity, UUID, UUID>(
         VurdertStegEntity::id,
         FieldConverter.UUIDConverter.required(),
     ) {
-        val fattevedtakRef = field(
-            "fattevedtak_ref",
-            VurdertStegEntity::fattevedtakRef,
+        val totrinnsvurderingRef = field(
+            "totrinnsvurdering_ref",
+            { it.totrinnsvurderingRef!! },
             FieldConverter.UUIDConverter.required(),
         )
 
@@ -80,7 +78,7 @@ object FatteVedtakStegEntityMapper : Entity<FatteVedtakStegEntity, UUID, UUID>(
         fun map(resultSet: ResultSet): VurdertStegEntity {
             return VurdertStegEntity(
                 id = resultSet[id],
-                fattevedtakRef = resultSet[fattevedtakRef],
+                totrinnsvurderingRef = resultSet[totrinnsvurderingRef],
                 steg = resultSet[behandlingssteg],
                 vurdering = resultSet[vurdering],
                 begrunnelse = resultSet[begrunnelse],

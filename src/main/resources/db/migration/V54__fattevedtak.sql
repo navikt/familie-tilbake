@@ -7,7 +7,7 @@ CREATE TABLE tilbakekreving_totrinnsvurdering(
 
 CREATE TABLE tilbakekreving_totrinnsvurdering_vurdertsteg(
     id UUID NOT NULL PRIMARY KEY,
-    fattevedtak_ref UUID NOT NULL REFERENCES tilbakekreving_totrinnsvurdering(id),
+    totrinnsvurdering_ref UUID NOT NULL REFERENCES tilbakekreving_totrinnsvurdering(id),
     behandlingssteg VARCHAR(128) NOT NULL,
     vurdering VARCHAR(128) NOT NULL,
     begrunnelse TEXT
