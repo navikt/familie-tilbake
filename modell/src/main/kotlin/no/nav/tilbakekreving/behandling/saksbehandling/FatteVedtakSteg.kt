@@ -13,8 +13,10 @@ import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.saksbehandler.Behandler
+import java.util.UUID
 
 class FatteVedtakSteg internal constructor(
+    private val id: UUID,
     private val vurderteSteg: List<VurdertSteg>,
     private var _ansvarligBeslutter: Behandler?,
 ) : Saksbehandlingsteg, FrontendDto<TotrinnsvurderingDto> {
@@ -47,14 +49,17 @@ class FatteVedtakSteg internal constructor(
         return TotrinnsvurderingDto(vurderteSteg.map(VurdertSteg::tilFrontendDto))
     }
 
-    fun tilEntity(): FatteVedtakStegEntity {
+    fun tilEntity(behandlingRef: UUID): FatteVedtakStegEntity {
         return FatteVedtakStegEntity(
-            vurderteStegEntities = vurderteSteg.map { it.tilEntity() },
+            id = id,
+            behandlingRef = behandlingRef,
+            vurderteStegEntities = vurderteSteg.map { it.tilEntity(id) },
             ansvarligBeslutter = _ansvarligBeslutter?.tilEntity(),
         )
     }
 
     class VurdertSteg(
+        private val id: UUID,
         private val steg: Behandlingssteg,
         private var vurdering: Vurdering,
     ) : FrontendDto<Totrinnsstegsinfo> {
@@ -82,8 +87,10 @@ class FatteVedtakSteg internal constructor(
             )
         }
 
-        fun tilEntity(): VurdertStegEntity {
+        fun tilEntity(totrinnsvurderingRef: UUID): VurdertStegEntity {
             return VurdertStegEntity(
+                id = id,
+                totrinnsvurderingRef = totrinnsvurderingRef,
                 steg = steg,
                 vurdering = when (this.vurdering) {
                     is Vurdering.IkkeVurdert -> VurdertStegType.IKKE_VURDERT
@@ -106,22 +113,27 @@ class FatteVedtakSteg internal constructor(
     companion object {
         fun opprett(): FatteVedtakSteg {
             return FatteVedtakSteg(
+                id = UUID.randomUUID(),
                 vurderteSteg = listOf(
                     VurdertSteg(
-                        Behandlingssteg.FAKTA,
-                        Vurdering.IkkeVurdert,
+                        id = UUID.randomUUID(),
+                        steg = Behandlingssteg.FAKTA,
+                        vurdering = Vurdering.IkkeVurdert,
                     ),
                     VurdertSteg(
-                        Behandlingssteg.FORELDELSE,
-                        Vurdering.IkkeVurdert,
+                        id = UUID.randomUUID(),
+                        steg = Behandlingssteg.FORELDELSE,
+                        vurdering = Vurdering.IkkeVurdert,
                     ),
                     VurdertSteg(
-                        Behandlingssteg.VILKÅRSVURDERING,
-                        Vurdering.IkkeVurdert,
+                        id = UUID.randomUUID(),
+                        steg = Behandlingssteg.VILKÅRSVURDERING,
+                        vurdering = Vurdering.IkkeVurdert,
                     ),
                     VurdertSteg(
-                        Behandlingssteg.FORESLÅ_VEDTAK,
-                        Vurdering.IkkeVurdert,
+                        id = UUID.randomUUID(),
+                        steg = Behandlingssteg.FORESLÅ_VEDTAK,
+                        vurdering = Vurdering.IkkeVurdert,
                     ),
                 ),
                 _ansvarligBeslutter = null,

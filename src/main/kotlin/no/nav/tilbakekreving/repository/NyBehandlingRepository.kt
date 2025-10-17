@@ -13,6 +13,7 @@ class NyBehandlingRepository(
     private val jdbcTemplate: JdbcTemplate,
     private val faktavurderingRepository: NyFaktavurderingRepository,
     private val foreldelseRepository: NyForeldelseRepository,
+    private val fatteVedtakRepository: NyFatteVedtakRepository,
 ) {
     fun hentBehandlinger(
         tilbakekrevingId: String,
@@ -32,7 +33,7 @@ class NyBehandlingRepository(
                 faktasteg = faktavurderingRepository.hentFaktavurdering(behandlingId),
                 vilkårsvurdering = jsonBehandling.vilkårsvurderingstegEntity,
                 foreslåVedtak = jsonBehandling.foreslåVedtakStegEntity,
-                fatteVedtak = jsonBehandling.fatteVedtakStegEntity,
+                fatteVedtak = fatteVedtakRepository.hentVedtaksvurdering(behandlingId) ?: jsonBehandling.fatteVedtakStegEntity,
                 påVent = jsonBehandling.påVentEntity,
                 brevmottakerSteg = jsonBehandling.brevmottakerStegEntity,
             )
@@ -44,6 +45,7 @@ class NyBehandlingRepository(
             BehandlingEntityMapper.upsertQuery(jdbcTemplate, behandling)
             foreldelseRepository.lagre(behandling.foreldelsestegEntity)
             faktavurderingRepository.lagre(behandling.faktastegEntity)
+            fatteVedtakRepository.lagre(behandling.fatteVedtakStegEntity)
         }
     }
 }
