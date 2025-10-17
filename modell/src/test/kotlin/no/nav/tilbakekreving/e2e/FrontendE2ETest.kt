@@ -9,7 +9,6 @@ import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.fagsysteminfoHendelse
 import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.foreldelseVurdering
-import no.nav.tilbakekreving.foreslåVedtakVurdering
 import no.nav.tilbakekreving.forårsaketAvBrukerGrovtUaktsomt
 import no.nav.tilbakekreving.godkjenning
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
@@ -53,7 +52,7 @@ class FrontendE2ETest {
         tilbakekreving.håndter(behandler, 1.januar til 31.januar, forårsaketAvBrukerGrovtUaktsomt())
         tilbakekreving.frontendDtoForBehandling(behandler, true).status shouldBe Behandlingsstatus.UTREDES
 
-        tilbakekreving.håndter(behandler, foreslåVedtakVurdering())
+        tilbakekreving.håndterForeslåVedtak(behandler)
         tilbakekreving.frontendDtoForBehandling(behandler, true).status shouldBe Behandlingsstatus.FATTER_VEDTAK
 
         tilbakekreving.håndter(beslutter, godkjenning())

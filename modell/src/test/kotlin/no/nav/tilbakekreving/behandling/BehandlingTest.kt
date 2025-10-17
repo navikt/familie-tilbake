@@ -8,7 +8,6 @@ import no.nav.tilbakekreving.behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.BrevmottakerSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
-import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
 import no.nav.tilbakekreving.faktastegVurdering
@@ -61,18 +60,19 @@ class BehandlingTest {
         behandling.taAvVent()
         behandling.håndter(ansvarligSaksbehandler, periode, vilkårsvurdering, BehandlingObservatørOppsamler())
 
-        val foreslåVedtak = ForeslåVedtakSteg.Vurdering.ForeslåVedtak(
-            null,
-            listOf(ForeslåVedtakSteg.Vurdering.ForeslåVedtak.PeriodeMedTekst(periode, null, null, null, null, null)),
-        )
-
         behandling.settPåVent(Venteårsak.MANGLER_STØTTE, LocalDate.MAX, "Begrunnelse")
         shouldThrowWithMessage<ModellFeil.UgyldigOperasjonException>("Behandling er satt på vent. Kan ikke håndtere vedtaksforslag.") {
-            behandling.håndter(ansvarligSaksbehandler, foreslåVedtak, BehandlingObservatørOppsamler())
+            behandling.håndterForeslåVedtak(
+                ansvarligSaksbehandler,
+                BehandlingObservatørOppsamler(),
+            )
         }
 
         behandling.taAvVent()
-        behandling.håndter(ansvarligSaksbehandler, foreslåVedtak, BehandlingObservatørOppsamler())
+        behandling.håndterForeslåVedtak(
+            ansvarligSaksbehandler,
+            BehandlingObservatørOppsamler(),
+        )
 
         behandling.settPåVent(Venteårsak.MANGLER_STØTTE, LocalDate.MAX, "Begrunnelse")
         shouldThrowWithMessage<ModellFeil.UgyldigOperasjonException>("Behandling er satt på vent. Kan ikke håndtere behandlingsutfall.") {

@@ -9,7 +9,6 @@ import no.nav.tilbakekreving.behandling.Enhet
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
-import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonSærligeGrunner
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Skyldgrad
@@ -211,8 +210,6 @@ fun forårsaketAvBrukerGrovtUaktsomt() = Skyldgrad.GrovUaktsomhet(
     ),
     feilaktigeEllerMangelfulleOpplysninger = Skyldgrad.FeilaktigEllerMangelfull.FEILAKTIG,
 )
-
-fun foreslåVedtakVurdering() = ForeslåVedtakSteg.Vurdering.ForeslåVedtak("", emptyList())
 
 fun godkjenning() = listOf(
     Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
