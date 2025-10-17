@@ -9,12 +9,7 @@ class ForeslåVedtakStegTest {
         val foreslåVedtakSteg = ForeslåVedtakSteg.opprett()
         foreslåVedtakSteg.erFullstendig() shouldBe false
 
-        foreslåVedtakSteg.håndter(
-            ForeslåVedtakSteg.Vurdering.ForeslåVedtak(
-                oppsummeringstekst = null,
-                perioderMedTekst = emptyList(),
-            ),
-        )
+        foreslåVedtakSteg.håndter()
         foreslåVedtakSteg.erFullstendig() shouldBe true
     }
 }

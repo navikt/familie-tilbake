@@ -14,6 +14,7 @@ class NyBehandlingRepository(
     private val faktavurderingRepository: NyFaktavurderingRepository,
     private val foreldelseRepository: NyForeldelseRepository,
     private val fatteVedtakRepository: NyFatteVedtakRepository,
+    private val foreslåVedtakRepository: NyForeslåVedtakRepository,
 ) {
     fun hentBehandlinger(
         tilbakekrevingId: String,
@@ -32,7 +33,7 @@ class NyBehandlingRepository(
                 foreldelsessteg = foreldelseRepository.hentForeldelsesvurdering(behandlingId),
                 faktasteg = faktavurderingRepository.hentFaktavurdering(behandlingId),
                 vilkårsvurdering = jsonBehandling.vilkårsvurderingstegEntity,
-                foreslåVedtak = jsonBehandling.foreslåVedtakStegEntity,
+                foreslåVedtak = foreslåVedtakRepository.hentForeslåttVedtak(behandlingId) ?: jsonBehandling.foreslåVedtakStegEntity,
                 fatteVedtak = fatteVedtakRepository.hentVedtaksvurdering(behandlingId) ?: jsonBehandling.fatteVedtakStegEntity,
                 påVent = jsonBehandling.påVentEntity,
                 brevmottakerSteg = jsonBehandling.brevmottakerStegEntity,
