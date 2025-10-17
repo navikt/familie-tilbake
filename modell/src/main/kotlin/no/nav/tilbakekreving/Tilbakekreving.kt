@@ -14,7 +14,6 @@ import no.nav.tilbakekreving.behandling.BehandlingObservatør
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
-import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
 import no.nav.tilbakekreving.behov.BehovObservatør
@@ -257,10 +256,12 @@ class Tilbakekreving internal constructor(
 
     fun håndter(
         behandler: Behandler,
-        vurdering: ForeslåVedtakSteg.Vurdering,
     ) {
         val behandling = behandlingHistorikk.nåværende().entry
-        behandling.håndter(behandler, vurdering, this)
+        behandling.håndter(
+            behandler,
+            this,
+        )
         behandling.utførSideeffekt(tilstand, this)
     }
 
