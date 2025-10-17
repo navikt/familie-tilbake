@@ -54,7 +54,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                     ileggRenter = renter(),
                     andelTilbakekreves = reduksjon().andel,
                     beløpTilbakekreves = null,
-                    begrunnelse = begrunnelse,
+                    begrunnelse = begrunnelseAktsomhet,
                     særligeGrunner = when (kanUnnlates4XRettsgebyr) {
                         is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.vurderteGrunner()
                         is KanUnnlates4xRettsgebyr.SkalIkkeUnnlates -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.vurderteGrunner()
@@ -129,7 +129,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                     ileggRenter = renter(),
                     andelTilbakekreves = reduksjon().andel,
                     beløpTilbakekreves = null,
-                    begrunnelse = begrunnelse,
+                    begrunnelse = begrunnelseAktsomhet,
                     særligeGrunner = reduksjonSærligeGrunner.vurderteGrunner(),
                     særligeGrunnerTilReduksjon = reduksjonSærligeGrunner.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja,
                     tilbakekrevSmåbeløp = true,
@@ -187,7 +187,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                     ileggRenter = renter(),
                     andelTilbakekreves = reduksjon().andel,
                     beløpTilbakekreves = null,
-                    begrunnelse = begrunnelse,
+                    begrunnelse = begrunnelseAktsomhet,
                     særligeGrunner = null,
                     særligeGrunnerTilReduksjon = false,
                     tilbakekrevSmåbeløp = true,

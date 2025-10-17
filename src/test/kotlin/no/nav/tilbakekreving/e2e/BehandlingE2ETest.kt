@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.SærligeGrunner
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.UtvidetVilkårsresultat
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.VedtakPeriode
+import no.nav.tilbakekreving.api.v1.dto.AktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.GodTroDto
 import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
@@ -19,6 +20,8 @@ import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresu
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.util.kroner
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
 
 class BehandlingE2ETest : TilbakekrevingE2EBase() {
@@ -284,5 +287,62 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         vilkårsvurderingFrontendDto.perioder[0].vilkårsvurderingsresultatInfo?.godTro?.begrunnelse shouldBe "Japp1"
         vilkårsvurderingFrontendDto.perioder[1].begrunnelse shouldBe "Jepp2"
         vilkårsvurderingFrontendDto.perioder[1].vilkårsvurderingsresultatInfo?.godTro?.begrunnelse shouldBe "Japp2"
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["SIMPEL_UAKTSOMHET", "GROV_UAKTSOMHET", "FORSETT"])
+    fun `begrunnelse for aktsomhet forårsaket av bruker`(aktsomhet: Aktsomhet) {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        sendKravgrunnlagOgAvventLesing(
+            queueName = TILLEGGSSTØNADER_KØ_NAVN,
+            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+            ),
+        )
+
+        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+
+        utførSteg(
+            ident = ansvarligSaksbehandler,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(),
+        )
+
+        utførSteg(
+            ident = ansvarligSaksbehandler,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(),
+        )
+
+        utførSteg(
+            ident = ansvarligSaksbehandler,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegVilkårsvurderingDto(
+                vilkårsvurderingsperioder = listOf(
+                    VilkårsvurderingsperiodeDto(
+                        periode = 1.januar(2021) til 1.januar(2021),
+                        vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
+                        begrunnelse = "Jepp",
+                        aktsomhetDto = AktsomhetDto(
+                            aktsomhet = aktsomhet,
+                            ileggRenter = false,
+                            andelTilbakekreves = null,
+                            beløpTilbakekreves = null,
+                            begrunnelse = "Japp",
+                            særligeGrunner = emptyList(),
+                            særligeGrunnerTilReduksjon = false,
+                            tilbakekrevSmåbeløp = false,
+                            særligeGrunnerBegrunnelse = "",
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        val tilbakekreving = tilbakekreving(behandlingId)
+        val vilkårsvurderingFrontendDto = tilbakekreving.behandlingHistorikk.nåværende().entry.vilkårsvurderingsstegDto.tilFrontendDto()
+        vilkårsvurderingFrontendDto.perioder.size shouldBe 1
+        vilkårsvurderingFrontendDto.perioder.single().begrunnelse shouldBe "Jepp"
+        vilkårsvurderingFrontendDto.perioder.single().vilkårsvurderingsresultatInfo?.aktsomhet?.begrunnelse shouldBe "Japp"
     }
 }
