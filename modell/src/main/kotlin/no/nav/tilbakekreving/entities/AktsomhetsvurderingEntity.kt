@@ -9,7 +9,7 @@ import java.math.BigDecimal
 data class AktsomhetsvurderingEntity(
     val vurderingType: VurderingType,
     val begrunnelse: String?,
-    val beløpIBehold: BeløpIBeholdEntity?,
+    val beløpIBehold: GodTroEntity?,
     val aktsomhet: VurdertAktsomhetEntity?,
     val feilaktigEllerMangelfull: FeilaktigEllerMangelfullType?,
 ) {
@@ -19,6 +19,7 @@ data class AktsomhetsvurderingEntity(
                 NivåAvForståelse.GodTro(
                     beløpIBehold = requireNotNull(beløpIBehold) { "beløpIBehold kreves i GOD_TRO " }.fraEntity(),
                     begrunnelse = requireNotNull(begrunnelse) { "begrunnelse kreves i GOD_TRO " },
+                    begrunnelseForGodTro = requireNotNull(beløpIBehold) { "begrunnelse kreves i GOD_TRO " }.begrunnelse,
                 )
             }
 
@@ -71,7 +72,9 @@ data class AktsomhetsvurderingEntity(
     }
 }
 
-data class BeløpIBeholdEntity(
+data class GodTroEntity(
+    // TODO: Fjerne default etter prod er ok
+    val begrunnelse: String = "",
     val beholdType: BeholdType,
     val beløp: BigDecimal?,
 ) {

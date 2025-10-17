@@ -32,8 +32,9 @@ class VilkårsvurderingstegTest {
         vilkårsvurderingsteg.vurder(
             1.januar til 31.januar,
             NivåAvForståelse.GodTro(
-                begrunnelse = "Brukeren brukte alt på en tur til Vegas",
+                begrunnelse = "Brukeren fikk penger som de ikke hadde krav på",
                 beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.Nei,
+                begrunnelseForGodTro = "Brukeren brukte alt på en tur til Vegas",
             ),
         )
 
@@ -58,8 +59,9 @@ class VilkårsvurderingstegTest {
         vilkårsvurderingsteg.vurder(
             1.januar til 31.januar,
             NivåAvForståelse.GodTro(
-                begrunnelse = "Brukeren brukte alt på en tur til Vegas",
+                begrunnelse = "Brukeren fikk penger som de ikke hadde krav på",
                 beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.Nei,
+                begrunnelseForGodTro = "Brukeren brukte alt på en tur til Vegas",
             ),
         )
         vilkårsvurderingsteg.erFullstendig() shouldBe false
@@ -67,8 +69,9 @@ class VilkårsvurderingstegTest {
         vilkårsvurderingsteg.vurder(
             1.februar til 28.februar,
             NivåAvForståelse.GodTro(
-                begrunnelse = "Brukeren brukte alt på en tur til Vegas",
+                begrunnelse = "Brukeren fikk penger som de ikke hadde krav på",
                 beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.Nei,
+                begrunnelseForGodTro = "Brukeren brukte alt på en tur til Vegas",
             ),
         )
 

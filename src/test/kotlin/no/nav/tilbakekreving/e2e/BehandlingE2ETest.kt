@@ -5,11 +5,17 @@ import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.SærligeGrunner
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.UtvidetVilkårsresultat
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.VedtakPeriode
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
+import no.nav.tilbakekreving.api.v1.dto.GodTroDto
+import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.e2e.ytelser.TilleggsstønaderE2ETest.Companion.TILLEGGSSTØNADER_KØ_NAVN
+import no.nav.tilbakekreving.februar
 import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub
 import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
+import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.util.kroner
 import org.junit.jupiter.api.Test
@@ -147,5 +153,136 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         )
 
         tilbakekreving(behandlingId).faktastegFrontendDto().feilutbetaltePerioder.size shouldBe 1
+    }
+
+    @Test
+    fun `lagrer begrunnelse riktig for god tro`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        sendKravgrunnlagOgAvventLesing(
+            queueName = TILLEGGSSTØNADER_KØ_NAVN,
+            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+            ),
+        )
+
+        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+
+        utførSteg(
+            ident = ansvarligSaksbehandler,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(),
+        )
+
+        utførSteg(
+            ident = ansvarligSaksbehandler,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(),
+        )
+
+        utførSteg(
+            ident = ansvarligSaksbehandler,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegVilkårsvurderingDto(
+                vilkårsvurderingsperioder = listOf(
+                    VilkårsvurderingsperiodeDto(
+                        periode = 1.januar(2021) til 1.januar(2021),
+                        vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
+                        begrunnelse = "Jepp",
+                        godTroDto = GodTroDto(
+                            beløpErIBehold = false,
+                            beløpTilbakekreves = null,
+                            begrunnelse = "Japp",
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        val tilbakekreving = tilbakekreving(behandlingId)
+        val vilkårsvurderingFrontendDto = tilbakekreving.behandlingHistorikk.nåværende().entry.vilkårsvurderingsstegDto.tilFrontendDto()
+        vilkårsvurderingFrontendDto.perioder.size shouldBe 1
+        vilkårsvurderingFrontendDto.perioder.single().begrunnelse shouldBe "Jepp"
+        vilkårsvurderingFrontendDto.perioder.single().vilkårsvurderingsresultatInfo?.godTro?.begrunnelse shouldBe "Japp"
+    }
+
+    @Test
+    fun `lagrer begrunnelse riktig for god tro med to perioder`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        sendKravgrunnlagOgAvventLesing(
+            queueName = TILLEGGSSTØNADER_KØ_NAVN,
+            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+                perioder = listOf(
+                    KravgrunnlagGenerator.standardPeriode(1.januar(2021) til 1.januar(2021)),
+                    KravgrunnlagGenerator.standardPeriode(1.februar(2021) til 1.februar(2021)),
+                ),
+            ),
+        )
+
+        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+
+        utførSteg(
+            ident = ansvarligSaksbehandler,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(
+                1.januar(2021) til 1.januar(2021),
+                1.februar(2021) til 1.februar(2021),
+            ),
+        )
+
+        utførSteg(
+            ident = ansvarligSaksbehandler,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(
+                1.januar(2021) til 1.januar(2021),
+                1.februar(2021) til 1.februar(2021),
+            ),
+        )
+
+        utførSteg(
+            ident = ansvarligSaksbehandler,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegVilkårsvurderingDto(
+                vilkårsvurderingsperioder = listOf(
+                    VilkårsvurderingsperiodeDto(
+                        periode = 1.januar(2021) til 1.januar(2021),
+                        vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
+                        begrunnelse = "Jepp1",
+                        godTroDto = GodTroDto(
+                            beløpErIBehold = false,
+                            beløpTilbakekreves = null,
+                            begrunnelse = "Japp1",
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        utførSteg(
+            ident = ansvarligSaksbehandler,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegVilkårsvurderingDto(
+                vilkårsvurderingsperioder = listOf(
+                    VilkårsvurderingsperiodeDto(
+                        periode = 1.februar(2021) til 1.februar(2021),
+                        vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
+                        begrunnelse = "Jepp2",
+                        godTroDto = GodTroDto(
+                            beløpErIBehold = false,
+                            beløpTilbakekreves = null,
+                            begrunnelse = "Japp2",
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        val tilbakekreving = tilbakekreving(behandlingId)
+        val vilkårsvurderingFrontendDto = tilbakekreving.behandlingHistorikk.nåværende().entry.vilkårsvurderingsstegDto.tilFrontendDto()
+        vilkårsvurderingFrontendDto.perioder.size shouldBe 2
+        vilkårsvurderingFrontendDto.perioder[0].begrunnelse shouldBe "Jepp1"
+        vilkårsvurderingFrontendDto.perioder[0].vilkårsvurderingsresultatInfo?.godTro?.begrunnelse shouldBe "Japp1"
+        vilkårsvurderingFrontendDto.perioder[1].begrunnelse shouldBe "Jepp2"
+        vilkårsvurderingFrontendDto.perioder[1].vilkårsvurderingsresultatInfo?.godTro?.begrunnelse shouldBe "Japp2"
     }
 }

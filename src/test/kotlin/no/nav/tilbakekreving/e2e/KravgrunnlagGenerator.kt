@@ -17,6 +17,17 @@ object KravgrunnlagGenerator {
         .toString()
         .padStart(width, '0')
 
+    fun standardPeriode(periode: Datoperiode) = Tilbakekrevingsperiode(
+        periode = periode,
+        tilbakekrevingsbeløp = listOf(
+            Tilbakekrevingsbeløp.forKlassekode(
+                klassekode = NyKlassekode.TSTBASISP4_OP,
+                beløpTilbakekreves = 2000.kroner,
+                beløpOpprinneligUtbetalt = 20000.kroner,
+            ),
+        ).medFeilutbetaling(NyKlassekode.KL_KODE_FEIL_ARBYT),
+    )
+
     fun forTilleggsstønader(
         vedtakId: String = nextPaddedId(6),
         fagsystemId: String = nextPaddedId(6),
@@ -25,18 +36,7 @@ object KravgrunnlagGenerator {
         ansvarligEnhet: String = nextPaddedId(4),
         fødselsnummer: String = "40026912345",
         kravStatusKode: String = "NY",
-        perioder: List<Tilbakekrevingsperiode> = listOf(
-            Tilbakekrevingsperiode(
-                1.januar(2021) til 1.januar(2021),
-                tilbakekrevingsbeløp = listOf(
-                    Tilbakekrevingsbeløp.forKlassekode(
-                        klassekode = NyKlassekode.TSTBASISP4_OP,
-                        beløpTilbakekreves = 2000.kroner,
-                        beløpOpprinneligUtbetalt = 20000.kroner,
-                    ),
-                ).medFeilutbetaling(NyKlassekode.KL_KODE_FEIL_ARBYT),
-            ),
-        ),
+        perioder: List<Tilbakekrevingsperiode> = listOf(standardPeriode(1.januar(2021) til 1.januar(2021))),
     ): String {
         val perioderXML = perioder.joinToString("\n") { it.toXML() }
 

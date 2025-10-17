@@ -8,7 +8,7 @@ import no.nav.tilbakekreving.endring.VurdertUtbetaling
 import no.nav.tilbakekreving.entities.AktsomhetType
 import no.nav.tilbakekreving.entities.AktsomhetsvurderingEntity
 import no.nav.tilbakekreving.entities.BeholdType
-import no.nav.tilbakekreving.entities.BeløpIBeholdEntity
+import no.nav.tilbakekreving.entities.GodTroEntity
 import no.nav.tilbakekreving.entities.VurderingType
 import no.nav.tilbakekreving.entities.VurdertAktsomhetEntity
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
@@ -99,6 +99,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
     class GodTro(
         private val beløpIBehold: BeløpIBehold,
         override val begrunnelse: String,
+        val begrunnelseForGodTro: String,
     ) : NivåAvForståelse {
         override fun vurderingstype(): Vurdering = AnnenVurdering.GOD_TRO
 
@@ -108,11 +109,11 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
 
         override fun tilFrontendDto(): VurdertVilkårsvurderingsresultatDto? {
             return VurdertVilkårsvurderingsresultatDto(
-                vilkårsvurderingsresultat = null,
+                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
                 godTro = VurdertGodTroDto(
                     beløpErIBehold = beløpIBehold is BeløpIBehold.Ja,
                     beløpTilbakekreves = (beløpIBehold as? BeløpIBehold.Ja)?.beløp ?: BigDecimal.ZERO,
-                    begrunnelse = begrunnelse,
+                    begrunnelse = begrunnelseForGodTro,
                 ),
                 aktsomhet = null,
             )
@@ -132,7 +133,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             return AktsomhetsvurderingEntity(
                 vurderingType = VurderingType.IKKE_FORÅRSAKET_AV_BRUKER_GOD_TRO,
                 begrunnelse = begrunnelse,
-                beløpIBehold = beløpIBehold.tilEntity(),
+                beløpIBehold = beløpIBehold.tilEntity(begrunnelseForGodTro),
                 aktsomhet = null,
                 feilaktigEllerMangelfull = null,
             )
@@ -141,15 +142,16 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
         sealed interface BeløpIBehold {
             fun reduksjon(): Reduksjon
 
-            fun tilEntity(): BeløpIBeholdEntity
+            fun tilEntity(begrunnelse: String): GodTroEntity
 
             class Ja(val beløp: BigDecimal) : BeløpIBehold {
                 override fun reduksjon(): Reduksjon {
                     return Reduksjon.ManueltBeløp(beløp)
                 }
 
-                override fun tilEntity(): BeløpIBeholdEntity {
-                    return BeløpIBeholdEntity(
+                override fun tilEntity(begrunnelse: String): GodTroEntity {
+                    return GodTroEntity(
+                        begrunnelse = begrunnelse,
                         beholdType = BeholdType.JA,
                         beløp = beløp,
                     )
@@ -161,8 +163,12 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     return Reduksjon.IngenTilbakekreving()
                 }
 
-                override fun tilEntity(): BeløpIBeholdEntity {
-                    return BeløpIBeholdEntity(beholdType = BeholdType.NEI, null)
+                override fun tilEntity(begrunnelse: String): GodTroEntity {
+                    return GodTroEntity(
+                        begrunnelse = begrunnelse,
+                        beholdType = BeholdType.NEI,
+                        beløp = null,
+                    )
                 }
             }
         }

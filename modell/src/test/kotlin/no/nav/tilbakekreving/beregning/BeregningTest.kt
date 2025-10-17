@@ -770,6 +770,7 @@ class BeregningTest {
         _vurdering = NivåAvForståelse.GodTro(
             beløpIBehold = beløpIBehold,
             begrunnelse = "",
+            begrunnelseForGodTro = "",
         ),
     )
 

@@ -102,7 +102,8 @@ object VilkårsvurderingMapperV2 {
                             true -> NivåAvForståelse.GodTro.BeløpIBehold.Ja(periode.godTroDto!!.beløpTilbakekreves!!)
                             false -> NivåAvForståelse.GodTro.BeløpIBehold.Nei
                         },
-                    begrunnelse = periode.godTroDto!!.begrunnelse,
+                    begrunnelse = periode.begrunnelse,
+                    begrunnelseForGodTro = periode.godTroDto!!.begrunnelse,
                 )
 
             Vilkårsvurderingsresultat.UDEFINERT -> ForårsaketAvBruker.IkkeVurdert
