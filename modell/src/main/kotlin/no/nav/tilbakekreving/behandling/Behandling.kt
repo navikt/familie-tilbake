@@ -434,10 +434,11 @@ class Behandling internal constructor(
             ansvarligSaksbehandler = ansvarligSaksbehandler.ident,
             ansvarligBeslutter = fatteVedtakSteg.ansvarligBeslutter!!.ident,
             vurderteUtbetalinger = beregning.beregn().map {
+                val utvidetPeriode = eksternFagsakRevurdering.entry.utvidPeriode(it.periode)
                 VurdertUtbetaling(
-                    periode = it.periode,
+                    periode = utvidetPeriode,
                     rettsligGrunnlag = "Annet",
-                    vilkårsvurdering = vilkårsvurderingsteg.oppsummer(it.periode),
+                    vilkårsvurdering = vilkårsvurderingsteg.oppsummer(utvidetPeriode),
                     beregning = VurdertUtbetaling.Beregning(
                         feilutbetaltBeløp = it.feilutbetaltBeløp(),
                         tilbakekrevesBeløp = it.tilbakekrevesBruttoMedRenter(),

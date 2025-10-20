@@ -9,7 +9,15 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 object Testdata {
-    fun fagsysteminfoSvar(fagsystemId: String) = FagsysteminfoSvarHendelse(
+    fun fagsysteminfoSvar(
+        fagsystemId: String,
+        utvidPerioder: List<FagsysteminfoSvarHendelse.UtvidetPeriodeDto> = listOf(
+            FagsysteminfoSvarHendelse.UtvidetPeriodeDto(
+                kravgrunnlagPeriode = PeriodeDto(fom = 1.januar(2021), tom = 1.januar(2021)),
+                vedtaksperiode = PeriodeDto(fom = 1.januar(2021), tom = 31.januar(2021)),
+            ),
+        ),
+    ) = FagsysteminfoSvarHendelse(
         eksternFagsakId = fagsystemId,
         hendelseOpprettet = LocalDateTime.now(),
         mottaker = MottakerDto(
@@ -22,11 +30,6 @@ object Testdata {
             årsakTilFeilutbetaling = "ingen",
             vedtaksdato = LocalDate.now(),
         ),
-        utvidPerioder = listOf(
-            FagsysteminfoSvarHendelse.UtvidetPeriodeDto(
-                kravgrunnlagPeriode = PeriodeDto(fom = 1.januar(2021), tom = 1.januar(2021)),
-                vedtaksperiode = PeriodeDto(fom = 1.januar(2021), tom = 31.januar(2021)),
-            ),
-        ),
+        utvidPerioder = utvidPerioder,
     )
 }

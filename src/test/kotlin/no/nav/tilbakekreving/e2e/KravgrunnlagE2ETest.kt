@@ -2,6 +2,8 @@ package no.nav.tilbakekreving.e2e
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.inspectors.forAll
+import io.kotest.inspectors.forOne
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.Dispatchers
@@ -11,6 +13,8 @@ import kotlinx.coroutines.runBlocking
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
+import no.nav.tilbakekreving.api.v2.PeriodeDto
+import no.nav.tilbakekreving.api.v2.fagsystem.svar.FagsysteminfoSvarHendelse
 import no.nav.tilbakekreving.april
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.NyKlassekode
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp
@@ -208,6 +212,53 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
             // Henting for skriving
             tilbakekrevingService.hentTilbakekreving(behandlingId) {}
         }
+    }
+
+    @Test
+    fun `iverksettelse av vedtak med utvidet periode`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        sendKravgrunnlagOgAvventLesing(
+            QUEUE_NAME,
+            KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+                perioder = listOf(
+                    KravgrunnlagGenerator.standardPeriode(1.januar(2021) til 1.januar(2021)),
+                ),
+            ),
+        )
+        fagsystemIntegrasjonService.håndter(
+            Ytelse.Tilleggsstønad,
+            Testdata.fagsysteminfoSvar(
+                fagsystemId = fagsystemId,
+                utvidPerioder = listOf(
+                    FagsysteminfoSvarHendelse.UtvidetPeriodeDto(
+                        kravgrunnlagPeriode = PeriodeDto(fom = 1.januar(2021), tom = 1.januar(2021)),
+                        vedtaksperiode = PeriodeDto(fom = 1.januar(2021), tom = 31.januar(2021)),
+                    ),
+                ),
+            ),
+        )
+
+        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+
+        utførSteg("Z999999", behandlingId, BehandlingsstegGenerator.lagFaktastegVurderingFritekst(1.januar(2021) til 31.januar(2021)))
+        utførSteg("Z999999", behandlingId, BehandlingsstegGenerator.lagIkkeForeldetVurdering(1.januar(2021) til 31.januar(2021)))
+        utførSteg("Z999999", behandlingId, BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving(1.januar(2021) til 31.januar(2021)))
+        utførSteg("Z999999", behandlingId, BehandlingsstegGenerator.lagForeslåVedtakVurdering())
+        utførSteg("Z111111", behandlingId, BehandlingsstegGenerator.lagGodkjennVedtakVurdering())
+
+        oppdragClient.shouldHaveIverksettelse(behandlingId) { vedtak ->
+            vedtak.tilbakekrevingsperiode shouldHaveSize 1
+            val tilbakekrevingsperiode = vedtak.tilbakekrevingsperiode.single()
+            tilbakekrevingsperiode.tilbakekrevingsbelop shouldHaveSize 2
+            tilbakekrevingsperiode.tilbakekrevingsbelop.forOne { beløp ->
+                beløp.kodeResultat shouldBe "FULL_TILBAKEKREV"
+            }
+        }
+
+        val periode = kafkaProducerStub.finnVedtaksoppsummering(behandlingId).single().perioder.single()
+        periode.fom shouldBe 1.januar(2021)
+        periode.tom shouldBe 31.januar(2021)
     }
 
     fun kravgrunnlagPeriode(
