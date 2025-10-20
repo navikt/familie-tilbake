@@ -20,7 +20,6 @@ import no.nav.tilbakekreving.api.v2.fagsystem.behov.FagsysteminfoBehovHendelse
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
-import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
 import no.nav.tilbakekreving.behov.Behov
 import no.nav.tilbakekreving.behov.BrukerinfoBehov
@@ -329,22 +328,7 @@ class TilbakekrevingService(
         vurdering: BehandlingsstegForeslåVedtaksstegDto,
         behandler: Behandler,
     ) {
-        tilbakekreving.håndter(
-            behandler,
-            ForeslåVedtakSteg.Vurdering.ForeslåVedtak(
-                vurdering.fritekstavsnitt.oppsummeringstekst,
-                vurdering.fritekstavsnitt.perioderMedTekst.map {
-                    ForeslåVedtakSteg.Vurdering.ForeslåVedtak.PeriodeMedTekst(
-                        periode = it.periode,
-                        faktaAvsnitt = it.faktaAvsnitt,
-                        foreldelseAvsnitt = it.foreldelseAvsnitt,
-                        vilkårAvsnitt = it.vilkårAvsnitt,
-                        særligeGrunnerAvsnitt = it.særligeGrunnerAvsnitt,
-                        særligeGrunnerAnnetAvsnitt = it.særligeGrunnerAnnetAvsnitt,
-                    )
-                },
-            ),
-        )
+        tilbakekreving.håndterForeslåVedtak(behandler)
     }
 
     private fun behandleFatteVedtak(

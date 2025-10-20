@@ -111,7 +111,7 @@ class Behandling internal constructor(
             foreldelsestegEntity = foreldelsesteg.tilEntity(id),
             faktastegEntity = faktasteg.tilEntity(id),
             vilkårsvurderingstegEntity = vilkårsvurderingsteg.tilEntity(),
-            foreslåVedtakStegEntity = foreslåVedtakSteg.tilEntity(),
+            foreslåVedtakStegEntity = foreslåVedtakSteg.tilEntity(id),
             fatteVedtakStegEntity = fatteVedtakSteg.tilEntity(id),
             påVentEntity = påVent?.tilEntity(),
             brevmottakerStegEntity = brevmottakerSteg?.tilEntity(),
@@ -289,13 +289,12 @@ class Behandling internal constructor(
         oppdaterBehandler(behandler)
     }
 
-    internal fun håndter(
+    internal fun håndterForeslåVedtak(
         behandler: Behandler,
-        vurdering: ForeslåVedtakSteg.Vurdering,
         observatør: BehandlingObservatør,
     ) {
         validerBehandlingstatus("vedtaksforslag")
-        foreslåVedtakSteg.håndter(vurdering)
+        foreslåVedtakSteg.håndter()
         oppdaterBehandler(behandler)
     }
 

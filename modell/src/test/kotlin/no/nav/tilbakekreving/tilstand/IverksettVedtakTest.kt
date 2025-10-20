@@ -5,7 +5,6 @@ import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
-import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonSærligeGrunner
@@ -108,13 +107,7 @@ class IverksettVedtakTest {
                     begrunnelse = "",
                 ),
             )
-            håndter(
-                Behandler.Saksbehandler("Ansvarlig saksbehandler"),
-                ForeslåVedtakSteg.Vurdering.ForeslåVedtak(
-                    oppsummeringstekst = null,
-                    perioderMedTekst = emptyList(),
-                ),
-            )
+            håndterForeslåVedtak(Behandler.Saksbehandler("Ansvarlig saksbehandler"))
         }
         return tilbakekreving
     }
