@@ -113,7 +113,7 @@ class Behandling internal constructor(
             vilkårsvurderingstegEntity = vilkårsvurderingsteg.tilEntity(),
             foreslåVedtakStegEntity = foreslåVedtakSteg.tilEntity(id),
             fatteVedtakStegEntity = fatteVedtakSteg.tilEntity(id),
-            påVentEntity = påVent?.tilEntity(),
+            påVentEntity = påVent?.tilEntity(id),
             brevmottakerStegEntity = brevmottakerSteg?.tilEntity(),
         )
     }
@@ -350,6 +350,7 @@ class Behandling internal constructor(
         begrunnelse: String?,
     ) {
         påVent = PåVent(
+            id = UUID.randomUUID(),
             årsak = årsak,
             utløpsdato = utløpsdato,
             begrunnelse = begrunnelse,
