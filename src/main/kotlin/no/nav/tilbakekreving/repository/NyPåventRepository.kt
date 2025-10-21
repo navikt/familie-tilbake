@@ -20,7 +20,10 @@ class NyPåventRepository(
         }.singleOrNull()
     }
 
-    fun lagre(påVentEntity: PåVentEntity) {
-        PåventEntityMapper.upsertQuery(jdbcTemplate, påVentEntity)
+    fun lagre(påVentEntity: PåVentEntity?, behandlingId: UUID) {
+        jdbcTemplate.update("DELETE FROM tilbakekreving_påvent WHERE behandling_ref=?", behandlingId)
+        if (påVentEntity != null) {
+            PåventEntityMapper.upsertQuery(jdbcTemplate, påVentEntity)
+        }
     }
 }
