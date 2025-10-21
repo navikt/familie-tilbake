@@ -20,6 +20,8 @@ class BrevmottakerStegTest {
         landkode = "Land",
     )
 
+    val behandlingId = UUID.randomUUID()
+
     @Test
     fun `brevmottakerSteg er deaktivert ved behandlingopprettelse`() {
         val brevmottakerSteg = BrevmottakerSteg.opprett("navn", "12312312312")
@@ -134,9 +136,9 @@ class BrevmottakerStegTest {
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
 
-        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.DefaultBrukerAdresseOgVergeMottaker> {
-            it.defaultMottaker.navn shouldBe "test bruker"
-            it.verge.navn shouldBe "Verge"
+        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.VergeMottaker> {
+            it.navn shouldBe "Verge"
+            it.manuellAdresseInfo?.adresselinje1 shouldBe "Adresse"
         }
     }
 
@@ -169,10 +171,9 @@ class BrevmottakerStegTest {
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
 
-        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.DefaultBrukerAdresseOgVergeMottaker> {
-            it.defaultMottaker.navn shouldBe "test bruker"
-            it.verge.navn shouldBe "Ny Verge"
-            it.verge.personIdent shouldBe "23232323231"
+        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.VergeMottaker> {
+            it.navn shouldBe "Ny Verge"
+            it.personIdent shouldBe "23232323231"
         }
     }
 
@@ -194,9 +195,9 @@ class BrevmottakerStegTest {
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
 
-        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.DefaultBrukerAdresseOgFullmektigMottaker> {
-            it.defaultMottaker.navn shouldBe "test bruker"
-            it.fullmektig.navn shouldBe "fullmektig"
+        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.FullmektigMottaker> {
+            it.navn shouldBe "fullmektig"
+            it.manuellAdresseInfo?.adresselinje1 shouldBe "Adresse"
         }
     }
 
@@ -229,10 +230,9 @@ class BrevmottakerStegTest {
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
 
-        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.DefaultBrukerAdresseOgFullmektigMottaker> {
-            it.defaultMottaker.navn shouldBe "test bruker"
-            it.fullmektig.navn shouldBe "ny fullmektig"
-            it.fullmektig.personIdent shouldBe "11111111111"
+        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.FullmektigMottaker> {
+            it.navn shouldBe "ny fullmektig"
+            it.personIdent shouldBe "11111111111"
         }
     }
 
@@ -295,6 +295,12 @@ class BrevmottakerStegTest {
             ),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
+
+        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.UtenlandskAdresseOgVergeMottaker> {
+            it.utenlandskAdresse.navn shouldBe "Navn"
+            it.utenlandskAdresse.manuellAdresseInfo?.poststed shouldBe "Poststed"
+            it.verge.navn shouldBe "Verge"
+        }
 
         brevmottakerSteg.håndter(
             RegistrertBrevmottaker.UtenlandskAdresseMottaker(
@@ -774,9 +780,8 @@ class BrevmottakerStegTest {
 
         brevmottakerSteg.fjernManuellBrevmottaker(utenlandskAdresseId, Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()))
 
-        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.DefaultBrukerAdresseOgVergeMottaker> {
-            it.defaultMottaker.navn shouldBe "test bruker"
-            it.verge.navn shouldBe "Verge Navn"
+        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.VergeMottaker> {
+            it.navn shouldBe "Verge Navn"
         }
     }
 
@@ -871,9 +876,8 @@ class BrevmottakerStegTest {
 
         brevmottakerSteg.fjernManuellBrevmottaker(utenlandskAdresseId, Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()))
 
-        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.DefaultBrukerAdresseOgFullmektigMottaker> {
-            it.defaultMottaker.navn shouldBe "test bruker"
-            it.fullmektig.navn shouldBe "Fullmektig Navn"
+        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.FullmektigMottaker> {
+            it.navn shouldBe "Fullmektig Navn"
         }
     }
 }

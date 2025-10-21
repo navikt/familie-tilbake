@@ -114,7 +114,7 @@ class Behandling internal constructor(
             foreslåVedtakStegEntity = foreslåVedtakSteg.tilEntity(id),
             fatteVedtakStegEntity = fatteVedtakSteg.tilEntity(id),
             påVentEntity = påVent?.tilEntity(id),
-            brevmottakerStegEntity = brevmottakerSteg?.tilEntity(),
+            brevmottakerStegEntity = brevmottakerSteg?.tilEntity(id),
         )
     }
 
