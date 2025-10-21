@@ -14,6 +14,7 @@ data class Varselbrev(
     override val opprettetDato: LocalDate,
     override var journalpostId: String?,
     val mottaker: RegistrertBrevmottaker,
+    val brevmottakerStegId: UUID?,
     val ansvarligSaksbehandlerIdent: String?,
     val kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
     val fristForTilbakemelding: LocalDate,
@@ -25,6 +26,7 @@ data class Varselbrev(
     companion object {
         fun opprett(
             mottaker: RegistrertBrevmottaker,
+            brevmottakerStegId: UUID,
             ansvarligSaksbehandlerIdent: String,
             kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
         ): Brev {
@@ -33,6 +35,7 @@ data class Varselbrev(
                 opprettetDato = LocalDate.now(),
                 journalpostId = null,
                 mottaker = mottaker,
+                brevmottakerStegId = brevmottakerStegId,
                 ansvarligSaksbehandlerIdent = ansvarligSaksbehandlerIdent,
                 kravgrunnlag = kravgrunnlag,
                 fristForTilbakemelding = LocalDate.now().plus(Period.ofWeeks(3)),
@@ -44,9 +47,10 @@ data class Varselbrev(
         return BrevEntity(
             brevType = Brevtype.VARSEL_BREV,
             id = id,
+            brevmottakerStegRef = brevmottakerStegId,
             opprettetDato = opprettetDato,
             journalpostId = journalpostId,
-            mottaker = mottaker.tilEntity(),
+            mottaker = mottaker.tilEntity(brevmottakerStegId, null),
             ansvarligSaksbehandlerIdent = ansvarligSaksbehandlerIdent,
             kravgrunnlagRef = kravgrunnlag.tilEntity(),
             fristForTilbakemelding = fristForTilbakemelding,

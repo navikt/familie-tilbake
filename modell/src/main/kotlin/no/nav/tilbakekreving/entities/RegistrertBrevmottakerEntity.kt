@@ -1,20 +1,23 @@
 package no.nav.tilbakekreving.entities
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
 import no.nav.tilbakekreving.entities.mapper.fraManuellAdresseInfoEntity
 import no.nav.tilbakekreving.kontrakter.brev.ManuellAdresseInfo
 import no.nav.tilbakekreving.kontrakter.verge.Vergetype
 import java.util.UUID
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class RegistrertBrevmottakerEntity(
-    val mottakerType: MottakerType,
     val id: UUID,
+    val brevmottakerRef: UUID? = null,
+    val parentRef: UUID?,
+    val mottakerType: MottakerType,
     val navn: String?,
     val personIdent: String?,
     val organisasjonsnummer: String?,
     val vergetype: Vergetype?,
     val manuellAdresseInfoEntity: ManuellAdresseInfoEntity?,
-    val defaultMottaker: RegistrertBrevmottakerEntity?,
     val utenlandskAdresse: RegistrertBrevmottakerEntity?,
     val verge: RegistrertBrevmottakerEntity?,
     val fullmektig: RegistrertBrevmottakerEntity?,
@@ -73,20 +76,6 @@ data class RegistrertBrevmottakerEntity(
                 utenlandskAdresse = requireNotNull(utenlandskAdresse) { "utenlandskAdresse kreves" }.fraEntity() as RegistrertBrevmottaker.UtenlandskAdresseMottaker,
                 fullmektig = requireNotNull(fullmektig) { "fullmektig kreves" }.fraEntity() as RegistrertBrevmottaker.FullmektigMottaker,
             )
-
-        MottakerType.DEFAULT_BRUKER_ADRESSE_OG_VERGE_MOTTAKER ->
-            RegistrertBrevmottaker.DefaultBrukerAdresseOgVergeMottaker(
-                id = id,
-                defaultMottaker = requireNotNull(defaultMottaker) { "defaultMottaker kreves" }.fraEntity() as RegistrertBrevmottaker.DefaultMottaker,
-                verge = requireNotNull(verge) { "verge kreves" }.fraEntity() as RegistrertBrevmottaker.VergeMottaker,
-            )
-
-        MottakerType.DEFAULT_BRUKER_ADRESSE_OG_FULLMEKTIG_MOTTAKER ->
-            RegistrertBrevmottaker.DefaultBrukerAdresseOgFullmektigMottaker(
-                id = id,
-                defaultMottaker = requireNotNull(defaultMottaker) { "defaultMottaker kreves" }.fraEntity() as RegistrertBrevmottaker.DefaultMottaker,
-                fullmektig = requireNotNull(fullmektig) { "fullmektig kreves" }.fraEntity() as RegistrertBrevmottaker.FullmektigMottaker,
-            )
     }
 }
 
@@ -108,6 +97,4 @@ enum class MottakerType {
     DODSBO_MOTTAKER,
     UTENLANDSK_ADRESSE_OG_VERGE_MOTTAKER,
     UTENLANDSK_ADRESSE_OG_FULLMEKTIG_MOTTAKER,
-    DEFAULT_BRUKER_ADRESSE_OG_VERGE_MOTTAKER,
-    DEFAULT_BRUKER_ADRESSE_OG_FULLMEKTIG_MOTTAKER,
 }
