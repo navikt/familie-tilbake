@@ -16,6 +16,7 @@ class NyBehandlingRepository(
     private val fatteVedtakRepository: NyFatteVedtakRepository,
     private val foreslåVedtakRepository: NyForeslåVedtakRepository,
     private val vilkårsvurderingRepository: NyVilkårsvurderingRepository,
+    private val påventRepository: NyPåventRepository,
 ) {
     fun hentBehandlinger(
         tilbakekrevingId: String,
@@ -36,7 +37,7 @@ class NyBehandlingRepository(
                 vilkårsvurdering = vilkårsvurderingRepository.hentVilkårsvurdering(behandlingId) ?: jsonBehandling.vilkårsvurderingstegEntity,
                 foreslåVedtak = foreslåVedtakRepository.hentForeslåttVedtak(behandlingId) ?: jsonBehandling.foreslåVedtakStegEntity,
                 fatteVedtak = fatteVedtakRepository.hentVedtaksvurdering(behandlingId) ?: jsonBehandling.fatteVedtakStegEntity,
-                påVent = jsonBehandling.påVentEntity,
+                påVent = påventRepository.hentPåventetBehandling(behandlingId) ?: jsonBehandling.påVentEntity,
                 brevmottakerSteg = jsonBehandling.brevmottakerStegEntity,
             )
         }
@@ -49,6 +50,8 @@ class NyBehandlingRepository(
             faktavurderingRepository.lagre(behandling.faktastegEntity)
             fatteVedtakRepository.lagre(behandling.fatteVedtakStegEntity)
             vilkårsvurderingRepository.lagre(behandling.vilkårsvurderingstegEntity)
+            foreslåVedtakRepository.lagre(behandling.foreslåVedtakStegEntity)
+            behandling.påVentEntity?.let { påventRepository.lagre(it) }
         }
     }
 }
