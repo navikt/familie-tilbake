@@ -5,6 +5,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnl
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Skyldgrad
 import java.math.BigDecimal
+import java.util.UUID
 
 data class AktsomhetsvurderingEntity(
     val vurderingType: VurderingType,
@@ -74,6 +75,7 @@ data class AktsomhetsvurderingEntity(
 
 data class GodTroEntity(
     // TODO: Fjerne default etter prod er ok
+    val periodeRef: UUID? = null,
     val begrunnelse: String = "",
     val beholdType: BeholdType,
     val beløp: BigDecimal?,

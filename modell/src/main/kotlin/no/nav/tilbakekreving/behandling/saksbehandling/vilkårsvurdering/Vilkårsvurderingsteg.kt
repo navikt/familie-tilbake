@@ -21,6 +21,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class Vilkårsvurderingsteg(
+    private val id: UUID,
     private var vurderinger: List<Vilkårsvurderingsperiode>,
     private val foreldelsesteg: Foreldelsesteg,
 ) : Saksbehandlingsteg, VilkårsvurderingAdapter {
@@ -28,9 +29,11 @@ class Vilkårsvurderingsteg(
 
     override fun erFullstendig(): Boolean = vurderinger.none { it.vurdering is ForårsaketAvBruker.IkkeVurdert }
 
-    fun tilEntity(): VilkårsvurderingstegEntity {
+    fun tilEntity(behandlingRef: UUID): VilkårsvurderingstegEntity {
         return VilkårsvurderingstegEntity(
-            vurderinger = vurderinger.map { it.tilEntity() },
+            id = id,
+            behandlingRef = behandlingRef,
+            vurderinger = vurderinger.map { it.tilEntity(id) },
         )
     }
 
@@ -117,12 +120,13 @@ class Vilkårsvurderingsteg(
 
         override fun vurdering(): Vurdering = vurdering.vurderingstype()
 
-        fun tilEntity(): VilkårsvurderingsperiodeEntity {
+        fun tilEntity(vurderingRef: UUID): VilkårsvurderingsperiodeEntity {
             return VilkårsvurderingsperiodeEntity(
                 id = id,
+                vurderingRef = vurderingRef,
                 periode = DatoperiodeEntity(periode.fom, periode.tom),
                 begrunnelseForTilbakekreving = begrunnelseForTilbakekreving,
-                vurdering = _vurdering.tilEntity(),
+                vurdering = _vurdering.tilEntity(id),
             )
         }
 
@@ -147,8 +151,9 @@ class Vilkårsvurderingsteg(
             foreldelsesteg: Foreldelsesteg,
         ): Vilkårsvurderingsteg {
             return Vilkårsvurderingsteg(
-                tomVurdering(eksternFagsakRevurdering, kravgrunnlagHendelse),
-                foreldelsesteg,
+                id = UUID.randomUUID(),
+                vurderinger = tomVurdering(eksternFagsakRevurdering, kravgrunnlagHendelse),
+                foreldelsesteg = foreldelsesteg,
             )
         }
 

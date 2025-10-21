@@ -110,7 +110,7 @@ class Behandling internal constructor(
             kravgrunnlagRef = kravgrunnlag.tilEntity(),
             foreldelsestegEntity = foreldelsesteg.tilEntity(id),
             faktastegEntity = faktasteg.tilEntity(id),
-            vilkårsvurderingstegEntity = vilkårsvurderingsteg.tilEntity(),
+            vilkårsvurderingstegEntity = vilkårsvurderingsteg.tilEntity(id),
             foreslåVedtakStegEntity = foreslåVedtakSteg.tilEntity(id),
             fatteVedtakStegEntity = fatteVedtakSteg.tilEntity(id),
             påVentEntity = påVent?.tilEntity(id),

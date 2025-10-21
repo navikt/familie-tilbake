@@ -5,6 +5,7 @@ import java.util.UUID
 
 data class VilkårsvurderingsperiodeEntity(
     val id: UUID,
+    val vurderingRef: UUID? = null,
     val periode: DatoperiodeEntity,
     val begrunnelseForTilbakekreving: String?,
     val vurdering: AktsomhetsvurderingEntity,

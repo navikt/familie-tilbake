@@ -11,6 +11,7 @@ import no.nav.tilbakekreving.entities.VurderingType
 import no.nav.tilbakekreving.entities.VurdertAktsomhetEntity
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
+import java.util.UUID
 
 // §22-15 1. ledd 2. punktum (Før utbetaling)
 sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
@@ -75,23 +76,24 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
             )
         }
 
-        override fun tilEntity(): AktsomhetsvurderingEntity {
+        override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
             return AktsomhetsvurderingEntity(
                 vurderingType = VurderingType.FORÅRSAKET_AV_BRUKER,
                 begrunnelse = begrunnelse,
                 beløpIBehold = null,
                 aktsomhet = VurdertAktsomhetEntity(
+                    periodeRef = periodeRef,
                     aktsomhetType = AktsomhetType.SIMPEL_UAKTSOMHET,
                     begrunnelse = begrunnelseAktsomhet,
                     skalIleggesRenter = null,
                     særligGrunner = when (kanUnnlates4XRettsgebyr) {
-                        is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.tilEntity()
-                        is KanUnnlates4xRettsgebyr.SkalIkkeUnnlates -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.tilEntity()
+                        is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.tilEntity(periodeRef)
+                        is KanUnnlates4xRettsgebyr.SkalIkkeUnnlates -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.tilEntity(periodeRef)
                         is KanUnnlates4xRettsgebyr.Unnlates -> null
                     },
                     kanUnnlates = kanUnnlates4XRettsgebyr.tilEntity(),
                 ),
-                feilaktigeEllerMangelfulleOpplysninger.tilEntity(),
+                feilaktigEllerMangelfull = feilaktigeEllerMangelfulleOpplysninger.tilEntity(),
             )
         }
     }
@@ -138,14 +140,15 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
             )
         }
 
-        override fun tilEntity(): AktsomhetsvurderingEntity {
+        override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
             return AktsomhetsvurderingEntity(
                 vurderingType = VurderingType.FORÅRSAKET_AV_BRUKER,
                 begrunnelse = begrunnelse,
                 beløpIBehold = null,
                 aktsomhet = VurdertAktsomhetEntity(
+                    periodeRef = periodeRef,
                     aktsomhetType = AktsomhetType.GROV_UAKTSOMHET,
-                    særligGrunner = reduksjonSærligeGrunner.tilEntity(),
+                    særligGrunner = reduksjonSærligeGrunner.tilEntity(periodeRef),
                     begrunnelse = begrunnelseAktsomhet,
                     skalIleggesRenter = null,
                     kanUnnlates = null,
@@ -196,12 +199,13 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
             )
         }
 
-        override fun tilEntity(): AktsomhetsvurderingEntity {
+        override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
             return AktsomhetsvurderingEntity(
                 vurderingType = VurderingType.FORÅRSAKET_AV_BRUKER,
                 begrunnelse = begrunnelse,
                 beløpIBehold = null,
                 aktsomhet = VurdertAktsomhetEntity(
+                    periodeRef = periodeRef,
                     aktsomhetType = AktsomhetType.FORSETT,
                     begrunnelse = begrunnelseAktsomhet,
                     skalIleggesRenter = null,

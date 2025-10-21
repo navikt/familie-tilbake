@@ -11,6 +11,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.UUID
+import java.sql.Array as SqlArray
 
 interface FieldConverter<T, DbPrimitive> {
     fun convert(value: T): DbPrimitive
@@ -107,6 +108,28 @@ interface FieldConverter<T, DbPrimitive> {
         }
     }
 
+    class EnumArrayConverter<T>(
+        private val stringValue: (String) -> T,
+        private val enumValue: (T) -> String,
+    ) : FieldConverter<List<T>, SqlArray> {
+        override fun convert(value: List<T>): SqlArray {
+            throw NotImplementedError("Har ikke støtte for konvertering fra array til SQL array uten prepared statement")
+        }
+
+        override fun convert(resultSet: ResultSet, column: String): List<T> {
+            return (resultSet.getArray(column).array as Array<*>).map { stringValue(it as String) }
+        }
+
+        override fun setColumn(index: Int, preparedStatement: PreparedStatement, value: List<T>) {
+            val array = preparedStatement.connection.createArrayOf("VARCHAR", value.map(enumValue).toTypedArray())
+            preparedStatement.setArray(index, array)
+        }
+
+        companion object {
+            inline fun <reified T : Enum<T>> of() = EnumArrayConverter<T>(::enumValueOf, Enum<T>::name)
+        }
+    }
+
     object UUIDConverter : FieldConverter<UUID?, UUID?> {
         override fun convert(value: UUID?): UUID? {
             return value
@@ -173,6 +196,22 @@ interface FieldConverter<T, DbPrimitive> {
         }
 
         fun required() = Required(this)
+    }
+
+    object IntConverter : FieldConverter<Int?, Int?> {
+        override fun convert(value: Int?): Int? = value
+
+        override fun convert(resultSet: ResultSet, column: String): Int? {
+            return resultSet.getInt(column)
+        }
+
+        override fun setColumn(index: Int, preparedStatement: PreparedStatement, value: Int?) {
+            if (value == null) {
+                preparedStatement.setNull(index, Types.INTEGER)
+            } else {
+                preparedStatement.setInt(index, value)
+            }
+        }
     }
 
     class Required<JavaType, DbPrimitive>(

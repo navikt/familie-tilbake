@@ -6,6 +6,7 @@ import no.nav.tilbakekreving.endring.VurdertUtbetaling
 import no.nav.tilbakekreving.entities.AktsomhetsvurderingEntity
 import no.nav.tilbakekreving.entities.VurderingType
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering
+import java.util.UUID
 
 interface ForårsaketAvBruker {
     val begrunnelse: String?
@@ -18,7 +19,7 @@ interface ForårsaketAvBruker {
 
     fun tilFrontendDto(): VurdertVilkårsvurderingsresultatDto?
 
-    fun tilEntity(): AktsomhetsvurderingEntity
+    fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity
 
     fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering
 
@@ -44,9 +45,9 @@ interface ForårsaketAvBruker {
         override val navn: String
             get() = "IkkeVurdert"
 
-        override fun tilEntity(): AktsomhetsvurderingEntity {
+        override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
             return AktsomhetsvurderingEntity(
-                VurderingType.IKKE_VURDERT,
+                vurderingType = VurderingType.IKKE_VURDERT,
                 begrunnelse = null,
                 beløpIBehold = null,
                 aktsomhet = null,

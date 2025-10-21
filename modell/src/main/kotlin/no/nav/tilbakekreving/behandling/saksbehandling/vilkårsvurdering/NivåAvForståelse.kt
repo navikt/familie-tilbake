@@ -15,6 +15,7 @@ import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering
 import java.math.BigDecimal
+import java.util.UUID
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet as AktsomhetDTO
 
 interface NivåAvForståelse : ForårsaketAvBruker.Nei {
@@ -46,12 +47,12 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             )
         }
 
-        override fun tilEntity(): AktsomhetsvurderingEntity {
+        override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
             return AktsomhetsvurderingEntity(
                 vurderingType = VurderingType.IKKE_FORÅRSAKET_AV_BRUKER_FORSTOD,
                 beløpIBehold = null,
                 begrunnelse = begrunnelse,
-                aktsomhet = aktsomhet.tilEntity(),
+                aktsomhet = aktsomhet.tilEntity(periodeRef),
                 feilaktigEllerMangelfull = null,
             )
         }
@@ -85,12 +86,12 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             )
         }
 
-        override fun tilEntity(): AktsomhetsvurderingEntity {
+        override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
             return AktsomhetsvurderingEntity(
                 vurderingType = VurderingType.IKKE_FORÅRSAKET_AV_BRUKER_BURDE_FORSTÅTT,
                 beløpIBehold = null,
                 begrunnelse = begrunnelse,
-                aktsomhet = aktsomhet.tilEntity(),
+                aktsomhet = aktsomhet.tilEntity(periodeRef),
                 feilaktigEllerMangelfull = null,
             )
         }
@@ -129,11 +130,11 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             )
         }
 
-        override fun tilEntity(): AktsomhetsvurderingEntity {
+        override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
             return AktsomhetsvurderingEntity(
                 vurderingType = VurderingType.IKKE_FORÅRSAKET_AV_BRUKER_GOD_TRO,
                 begrunnelse = begrunnelse,
-                beløpIBehold = beløpIBehold.tilEntity(begrunnelseForGodTro),
+                beløpIBehold = beløpIBehold.tilEntity(periodeRef, begrunnelseForGodTro),
                 aktsomhet = null,
                 feilaktigEllerMangelfull = null,
             )
@@ -142,15 +143,16 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
         sealed interface BeløpIBehold {
             fun reduksjon(): Reduksjon
 
-            fun tilEntity(begrunnelse: String): GodTroEntity
+            fun tilEntity(periodeRef: UUID, begrunnelse: String): GodTroEntity
 
             class Ja(val beløp: BigDecimal) : BeløpIBehold {
                 override fun reduksjon(): Reduksjon {
                     return Reduksjon.ManueltBeløp(beløp)
                 }
 
-                override fun tilEntity(begrunnelse: String): GodTroEntity {
+                override fun tilEntity(periodeRef: UUID, begrunnelse: String): GodTroEntity {
                     return GodTroEntity(
+                        periodeRef = periodeRef,
                         begrunnelse = begrunnelse,
                         beholdType = BeholdType.JA,
                         beløp = beløp,
@@ -163,8 +165,9 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     return Reduksjon.IngenTilbakekreving()
                 }
 
-                override fun tilEntity(begrunnelse: String): GodTroEntity {
+                override fun tilEntity(periodeRef: UUID, begrunnelse: String): GodTroEntity {
                     return GodTroEntity(
+                        periodeRef = periodeRef,
                         begrunnelse = begrunnelse,
                         beholdType = BeholdType.NEI,
                         beløp = null,
@@ -184,7 +187,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
 
         fun tilFrontendDto(): VurdertAktsomhetDto
 
-        fun tilEntity(): VurdertAktsomhetEntity
+        fun tilEntity(periodeRef: UUID): VurdertAktsomhetEntity
 
         fun renter(): Boolean
 
@@ -223,8 +226,9 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 return VurdertUtbetaling.JaNeiVurdering.Nei
             }
 
-            override fun tilEntity(): VurdertAktsomhetEntity {
+            override fun tilEntity(periodeRef: UUID): VurdertAktsomhetEntity {
                 return VurdertAktsomhetEntity(
+                    periodeRef = periodeRef,
                     aktsomhetType = AktsomhetType.FORSETT,
                     begrunnelse = begrunnelse,
                     skalIleggesRenter = null,
@@ -268,12 +272,13 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 return VurdertUtbetaling.JaNeiVurdering.Nei
             }
 
-            override fun tilEntity(): VurdertAktsomhetEntity {
+            override fun tilEntity(periodeRef: UUID): VurdertAktsomhetEntity {
                 return VurdertAktsomhetEntity(
+                    periodeRef = periodeRef,
                     aktsomhetType = AktsomhetType.GROV_UAKTSOMHET,
                     begrunnelse = begrunnelse,
                     skalIleggesRenter = null,
-                    særligGrunner = reduksjonSærligeGrunner.tilEntity(),
+                    særligGrunner = reduksjonSærligeGrunner.tilEntity(periodeRef),
                     kanUnnlates = null,
                 )
             }
@@ -312,12 +317,13 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 )
             }
 
-            override fun tilEntity(): VurdertAktsomhetEntity {
+            override fun tilEntity(periodeRef: UUID): VurdertAktsomhetEntity {
                 return VurdertAktsomhetEntity(
+                    periodeRef = periodeRef,
                     aktsomhetType = AktsomhetType.IKKE_UTVIST_SKYLD,
                     begrunnelse = begrunnelse,
                     skalIleggesRenter = null,
-                    særligGrunner = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.SkalIkkeUnnlates)?.reduksjonSærligeGrunner?.tilEntity(),
+                    særligGrunner = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.SkalIkkeUnnlates)?.reduksjonSærligeGrunner?.tilEntity(periodeRef),
                     kanUnnlates = kanUnnlates4XRettsgebyr.tilEntity(),
                 )
             }
@@ -356,12 +362,13 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 )
             }
 
-            override fun tilEntity(): VurdertAktsomhetEntity {
+            override fun tilEntity(periodeRef: UUID): VurdertAktsomhetEntity {
                 return VurdertAktsomhetEntity(
+                    periodeRef = periodeRef,
                     aktsomhetType = AktsomhetType.SIMPEL_UAKTSOMHET,
                     begrunnelse = begrunnelse,
                     skalIleggesRenter = null,
-                    særligGrunner = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.SkalIkkeUnnlates)?.reduksjonSærligeGrunner?.tilEntity(),
+                    særligGrunner = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.SkalIkkeUnnlates)?.reduksjonSærligeGrunner?.tilEntity(periodeRef),
                     kanUnnlates = kanUnnlates4XRettsgebyr.tilEntity(),
                 )
             }

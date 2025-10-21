@@ -7,6 +7,7 @@ import no.nav.tilbakekreving.endring.VurdertUtbetaling
 import no.nav.tilbakekreving.entities.SkalReduseresEntity
 import no.nav.tilbakekreving.entities.SkalReduseresType
 import no.nav.tilbakekreving.entities.SærligeGrunnerEntity
+import java.util.UUID
 
 // §22-15 4. ledd
 class ReduksjonSærligeGrunner(
@@ -14,8 +15,9 @@ class ReduksjonSærligeGrunner(
     val grunner: Set<SærligGrunn>,
     val skalReduseres: SkalReduseres,
 ) {
-    fun tilEntity(): SærligeGrunnerEntity {
+    fun tilEntity(periodeRef: UUID): SærligeGrunnerEntity {
         return SærligeGrunnerEntity(
+            periodeRef = periodeRef,
             begrunnelse = begrunnelse,
             grunner = grunner.map { it.tilEntity() },
             skalReduseres = skalReduseres.tilEntity(),
