@@ -85,7 +85,7 @@ class TilbakekrevingService(
             info("URL til behandling er: {}", tilbakekreving.hentTilbakekrevingUrl(applicationProperties.frontendUrl))
         }
 
-        utførSideeffekter(tilbakekrevingId, observatør, logContext)
+        utførSideeffekter(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId), observatør, logContext)
 
         logger.medContext(logContext) { info("Tilbakekreving ferdig opprettet") }
     }
@@ -96,9 +96,10 @@ class TilbakekrevingService(
     ): Tilbakekreving? {
         if (!applicationProperties.toggles.nyModellEnabled) return null
 
-        val tilbakekrevinger = tilbakekrevingRepository.hentAlleTilbakekrevinger()?.map { it.fraEntity(Observatør(), bigQueryService, endringObservatørService) }
-        val tilbakekreving = tilbakekrevinger?.firstOrNull { it.tilFrontendDto().fagsystem == fagsystem && it.tilFrontendDto().eksternFagsakId == eksternFagsakId }
+        val tilbakekreving = tilbakekrevingRepository.hentTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.EksternFagsakId(eksternFagsakId, fagsystem))
+            ?.fraEntity(Observatør(), bigQueryService, endringObservatørService)
             ?: return null
+
         val logContext = SecureLog.Context.fra(tilbakekreving)
         kravgrunnlagBufferRepository.validerKravgrunnlagInnenforScope(eksternFagsakId, logContext.behandlingId)
         return tilbakekreving
@@ -107,19 +108,19 @@ class TilbakekrevingService(
     fun hentTilbakekreving(behandlingId: UUID): Tilbakekreving? {
         if (!applicationProperties.toggles.nyModellEnabled) return null
 
-        val tilbakekreving = tilbakekrevingRepository.hentTilbakekreving(behandlingId) ?: return null
+        val tilbakekreving = tilbakekrevingRepository.hentTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.BehandlingId(behandlingId)) ?: return null
         kravgrunnlagBufferRepository.validerKravgrunnlagInnenforScope(tilbakekreving.eksternFagsak.eksternId, tilbakekreving.behandlingHistorikkEntities.lastOrNull()?.id?.toString())
         return tilbakekreving.fraEntity(Observatør(), bigQueryService, endringObservatørService)
     }
 
     fun <T : Any> hentOgLagreTilbakekreving(
-        tilbakekrevingId: String,
+        strategy: TilbakekrevingRepository.FindTilbakekrevingStrategy,
         callback: (Tilbakekreving) -> T,
     ): T {
         lateinit var result: T
         val observatør = Observatør()
         lateinit var logContext: SecureLog.Context
-        tilbakekrevingRepository.hentOgLagreResultat(tilbakekrevingId) {
+        tilbakekrevingRepository.hentOgLagreResultat(strategy) {
             kravgrunnlagBufferRepository.validerKravgrunnlagInnenforScope(it.eksternFagsak.eksternId, it.behandlingHistorikkEntities.lastOrNull()?.id?.toString())
             val tilbakekreving = it.fraEntity(observatør, bigQueryService, endringObservatørService)
             logContext = SecureLog.Context.fra(tilbakekreving)
@@ -128,17 +129,17 @@ class TilbakekrevingService(
             tilbakekreving.tilEntity()
         }
 
-        utførSideeffekter(tilbakekrevingId, observatør, logContext)
+        utførSideeffekter(strategy, observatør, logContext)
 
         return result
     }
 
     private fun utførSideeffekter(
-        tilbakekrevingId: String,
+        strategy: TilbakekrevingRepository.FindTilbakekrevingStrategy,
         observatør: Observatør,
         logContext: SecureLog.Context,
     ) {
-        tilbakekrevingRepository.hentOgLagreResultat(tilbakekrevingId) {
+        tilbakekrevingRepository.hentOgLagreResultat(strategy) {
             val tilbakekreving = it.fraEntity(observatør, bigQueryService, endringObservatørService)
             while (observatør.harUbesvarteBehov()) {
                 try {
@@ -159,26 +160,20 @@ class TilbakekrevingService(
         eksternFagsakId: String,
         håndter: (Tilbakekreving) -> T,
     ): T? {
-        return tilbakekrevingRepository.hentAlleTilbakekrevinger()
-            ?.asSequence()
-            ?.map {
-                it.fraEntity(Observatør(), bigQueryService, endringObservatørService)
-            }
-            ?.firstOrNull { tilbakekreving -> tilbakekreving.tilFrontendDto().fagsystem == fagsystem && tilbakekreving.tilFrontendDto().eksternFagsakId == eksternFagsakId }
-            ?.let { tilbakekreving ->
-                hentOgLagreTilbakekreving(tilbakekreving.id, håndter)
-            }
+        return hentOgLagreTilbakekreving(
+            strategy = TilbakekrevingRepository.FindTilbakekrevingStrategy.EksternFagsakId(eksternFagsakId, fagsystem),
+            callback = håndter,
+        )
     }
 
     fun <T : Any> hentTilbakekreving(
         behandlingId: UUID,
         håndter: (Tilbakekreving) -> T,
     ): T? {
-        return tilbakekrevingRepository.hentTilbakekreving(behandlingId)
-            ?.fraEntity(Observatør(), bigQueryService, endringObservatørService)
-            ?.let {
-                hentOgLagreTilbakekreving(it.id, håndter)
-            }
+        return hentOgLagreTilbakekreving(
+            strategy = TilbakekrevingRepository.FindTilbakekrevingStrategy.BehandlingId(behandlingId),
+            callback = håndter,
+        )
     }
 
     private fun håndterBehov(
@@ -251,7 +246,7 @@ class TilbakekrevingService(
         behandlingsstegDto: BehandlingsstegDto,
         logContext: SecureLog.Context,
     ) {
-        return hentOgLagreTilbakekreving(tilbakekrevingId) { tilbakekreving ->
+        return hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
             when (behandlingsstegDto) {
                 is BehandlingsstegForeldelseDto -> behandleForeldelse(tilbakekreving, behandlingsstegDto, behandler)
                 is BehandlingsstegVilkårsvurderingDto -> behandleVilkårsvurdering(tilbakekreving, behandlingsstegDto, behandler)
@@ -353,7 +348,7 @@ class TilbakekrevingService(
         brevmottakerDto: ManuellBrevmottakerRequestDto,
         id: UUID,
     ) {
-        hentOgLagreTilbakekreving(tilbakekrevingId) { tilbakekreving ->
+        hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
             when (brevmottakerDto.type) {
                 MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE -> {
                     tilbakekreving.håndter(
@@ -410,7 +405,7 @@ class TilbakekrevingService(
     }
 
     fun settPåVent(tilbakekrevingId: String, venteårsak: Venteårsak, tidsfrist: LocalDate, begrunnelse: String?) {
-        hentOgLagreTilbakekreving(tilbakekrevingId) { tilbakekreving ->
+        hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
             tilbakekreving.behandlingHistorikk.nåværende().entry.settPåVent(
                 årsak = venteårsak,
                 utløpsdato = tidsfrist,
@@ -420,26 +415,26 @@ class TilbakekrevingService(
     }
 
     fun taAvVent(tilbakekrevingId: String) {
-        hentOgLagreTilbakekreving(tilbakekrevingId) { tilbakekreving ->
+        hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
             tilbakekreving.behandlingHistorikk.nåværende().entry.taAvVent()
         }
     }
 
     fun flyttBehandlingTilFakta(tilbakekrevingId: String) {
-        hentOgLagreTilbakekreving(tilbakekrevingId) { tilbakekreving ->
+        hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
             tilbakekreving.håndterNullstilling()
         }
     }
 
     fun aktiverBrevmottakerSteg(tilbakekrevingId: String) {
-        hentOgLagreTilbakekreving(tilbakekrevingId) { tilbakekreving ->
+        hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
             validerBrevmottaker(tilbakekreving)
             tilbakekreving.aktiverBrevmottakerSteg()
         }
     }
 
     fun fjernBrevmottakerSteg(tilbakekrevingId: String) {
-        hentOgLagreTilbakekreving(tilbakekrevingId) { tilbakekreving ->
+        hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
             tilbakekreving.deaktiverBrevmottakerSteg()
         }
     }
@@ -449,7 +444,7 @@ class TilbakekrevingService(
         tilbakekrevingId: String,
         manuellBrevmottakerId: UUID,
     ) {
-        hentOgLagreTilbakekreving(tilbakekrevingId) { tilbakekreving ->
+        hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
             tilbakekreving.fjernManuelBrevmottaker(behandler, manuellBrevmottakerId)
         }
     }

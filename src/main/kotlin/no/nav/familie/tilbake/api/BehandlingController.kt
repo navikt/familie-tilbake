@@ -109,7 +109,7 @@ class BehandlingController(
         @Valid @RequestBody
         opprettRevurderingDto: OpprettRevurderingDto,
     ): Ressurs<String> {
-        tilbakekrevingService.hentTilbakekreving(opprettRevurderingDto.originalBehandlingId) {
+        if (tilbakekrevingService.hentTilbakekreving(opprettRevurderingDto.originalBehandlingId) != null) {
             throw ModellFeil.UtenforScopeException(
                 UtenforScope.Revurdering,
                 Sporing("Ukjent", opprettRevurderingDto.originalBehandlingId.toString()),
