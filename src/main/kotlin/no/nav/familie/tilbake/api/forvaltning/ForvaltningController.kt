@@ -325,10 +325,11 @@ class ForvaltningController(
     @PostMapping("/migrer-alle-saker")
     fun migrerAlleSaker() {
         tilbakekrevingRepository.hentAlleTilbakekrevinger()?.forEach { entity ->
-            tilbakekrevingService.hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(entity.id)) {
-                logger.medContext(SecureLog.Context.fra(it)) {
+            tilbakekrevingRepository.hentOgLagreResultat(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(entity.id)) {
+                logger.medContext(SecureLog.Context.medBehandling(it.eksternFagsak.eksternId, it.behandlingHistorikkEntities.lastOrNull()?.toString())) {
                     info("Migrerer sak {}", applicationProperties.frontendUrl)
                 }
+                it
             }
         }
     }
