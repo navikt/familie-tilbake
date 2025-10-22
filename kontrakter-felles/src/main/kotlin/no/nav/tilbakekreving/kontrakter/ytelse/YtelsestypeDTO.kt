@@ -7,4 +7,5 @@ enum class YtelsestypeDTO {
     SKOLEPENGER,
     KONTANTSTØTTE,
     TILLEGGSSTØNAD,
+    INFOTRYGD,
 }
