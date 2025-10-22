@@ -132,7 +132,8 @@ class ForvaltningController(
     ): Ressurs<String> {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
         if (tilbakekreving != null) {
-            tilgangskontrollService.validerTilgangBehandlingID(
+            tilgangskontrollService.validerTilgangTilbakekreving(
+                tilbakekreving = tilbakekreving,
                 behandlingId = behandlingId,
                 minimumBehandlerrolle = Behandlerrolle.FORVALTER,
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,

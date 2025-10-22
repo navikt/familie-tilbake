@@ -50,7 +50,8 @@ class ManuellBrevmottakerController(
         if (tilbakekreving != null) {
             val logContext = SecureLog.Context.fra(tilbakekreving)
             val saksbehandler = ContextService.hentBehandler(logContext)
-            tilgangskontrollService.validerTilgangBehandlingID(
+            tilgangskontrollService.validerTilgangTilbakekreving(
+                tilbakekreving = tilbakekreving,
                 behandlingId = behandlingId,
                 minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
@@ -109,7 +110,8 @@ class ManuellBrevmottakerController(
         if (tilbakekreving != null) {
             val logContext = SecureLog.Context.fra(tilbakekreving)
             val saksbehandler = ContextService.hentBehandler(logContext)
-            tilgangskontrollService.validerTilgangBehandlingID(
+            tilgangskontrollService.validerTilgangTilbakekreving(
+                tilbakekreving = tilbakekreving,
                 behandlingId = behandlingId,
                 minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
@@ -139,7 +141,8 @@ class ManuellBrevmottakerController(
         if (tilbakekreving != null) {
             val logContext = SecureLog.Context.fra(tilbakekreving)
             val saksbehandler = ContextService.hentBehandler(logContext)
-            tilgangskontrollService.validerTilgangBehandlingID(
+            tilgangskontrollService.validerTilgangTilbakekreving(
+                tilbakekreving = tilbakekreving,
                 behandlingId = behandlingId,
                 minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
@@ -166,7 +169,8 @@ class ManuellBrevmottakerController(
     ): Ressurs<String> {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
         if (tilbakekreving != null) {
-            tilgangskontrollService.validerTilgangBehandlingID(
+            tilgangskontrollService.validerTilgangTilbakekreving(
+                tilbakekreving = tilbakekreving,
                 behandlingId = behandlingId,
                 minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
@@ -193,7 +197,8 @@ class ManuellBrevmottakerController(
     ): Ressurs<String> {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
         if (tilbakekreving != null) {
-            tilgangskontrollService.validerTilgangBehandlingID(
+            tilgangskontrollService.validerTilgangTilbakekreving(
+                tilbakekreving = tilbakekreving,
                 behandlingId = behandlingId,
                 minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
