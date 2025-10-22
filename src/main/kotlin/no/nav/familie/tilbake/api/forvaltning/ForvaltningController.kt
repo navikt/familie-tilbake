@@ -5,9 +5,10 @@ import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
-import no.nav.familie.tilbake.integration.pdl.internal.logger
 import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.log.LogService
+import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
@@ -19,6 +20,7 @@ import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
+import no.nav.tilbakekreving.repository.TilbakekrevingRepository
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -48,7 +50,10 @@ class ForvaltningController(
     private val tilgangskontrollService: TilgangskontrollService,
     private val tilbakekrevingService: TilbakekrevingService,
     private val applicationProperties: ApplicationProperties,
+    private val tilbakekrevingRepository: TilbakekrevingRepository,
 ) {
+    private val logger = TracedLogger.getLogger<ForvaltningController>()
+
     @Operation(summary = "Hent korrigert kravgrunnlag")
     @PutMapping(
         path = ["/behandling/{behandlingId}/kravgrunnlag/{eksternKravgrunnlagId}/v1"],
@@ -310,8 +315,22 @@ class ForvaltningController(
         @PathVariable behandlingId: UUID,
         @PathVariable oppgaveType: String,
     ) {
-        logger.info("Ferdigstiller oppgave $oppgaveType for behandling $behandlingId")
+        logger.medContext(SecureLog.Context.medBehandling(null, behandlingId.toString())) {
+            info("Ferdigstiller oppgave $oppgaveType for behandling $behandlingId")
+        }
         oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId = behandlingId, oppgavetype = oppgaveType)
+    }
+
+    @Operation(summary = "Tvinger en migrering av alle saker i ny modell")
+    @PostMapping("/migrer-alle-saker")
+    fun migrerAlleSaker() {
+        tilbakekrevingRepository.hentAlleTilbakekrevinger()?.forEach { entity ->
+            tilbakekrevingService.hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(entity.id)) {
+                logger.medContext(SecureLog.Context.fra(it)) {
+                    info("Migrerer sak {}", applicationProperties.frontendUrl)
+                }
+            }
+        }
     }
 }
 
