@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.entity
 
 import no.nav.tilbakekreving.entities.BehandlerEntity
+import no.nav.tilbakekreving.entities.BehandlerType
 import no.nav.tilbakekreving.entities.BehandlingEntity
 import no.nav.tilbakekreving.entities.BrevmottakerStegEntity
 import no.nav.tilbakekreving.entities.EnhetEntity
@@ -59,6 +60,30 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
         converter = FieldConverter.UUIDConverter.required(),
     )
 
+    val ansvarligSaksbehandlerType = field(
+        column = "ansvarlig_saksbehandler_type",
+        getter = { it.ansvarligSaksbehandler.type },
+        converter = FieldConverter.EnumConverter.of<BehandlerType>(),
+    )
+
+    val ansvarligSaksbehandlerIdent = field(
+        column = "ansvarlig_saksbehandler_ident",
+        getter = { it.ansvarligSaksbehandler.ident },
+        converter = FieldConverter.StringConverter,
+    )
+
+    val enhetId = field(
+        column = "enhet_id",
+        getter = { it.enhet?.kode },
+        converter = FieldConverter.StringConverter,
+    )
+
+    val enhetNavn = field(
+        column = "enhet_navn",
+        getter = { it.enhet?.navn },
+        converter = FieldConverter.StringConverter,
+    )
+
     fun map(
         resultSet: ResultSet,
         enhet: EnhetEntity?,
@@ -77,9 +102,13 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
             behandlingstype = resultSet[behandlingstype],
             opprettet = resultSet[opprettet],
             sistEndret = resultSet[sistEndret],
-            enhet = enhet,
+            enhet = resultSet[enhetId]?.let {
+                EnhetEntity(kode = it, navn = resultSet[enhetNavn]!!)
+            } ?: enhet,
             årsak = resultSet[årsak],
-            ansvarligSaksbehandler = ansvarligSaksbehandler,
+            ansvarligSaksbehandler = resultSet[ansvarligSaksbehandlerType]?.let {
+                BehandlerEntity(type = it, ident = resultSet[ansvarligSaksbehandlerIdent]!!)
+            } ?: ansvarligSaksbehandler,
             eksternFagsakBehandlingRef = HistorikkReferanseEntity(resultSet[eksternFagsakBehandlingId]),
             kravgrunnlagRef = HistorikkReferanseEntity(resultSet[kravgrunnlagId]),
             foreldelsestegEntity = foreldelsessteg,
