@@ -141,7 +141,9 @@ class TilbakekrevingRepository(
 
         class EksternFagsakId(private val fagsakId: String, private val fagsystem: FagsystemDTO) : FindTilbakekrevingStrategy {
             private fun ytelse() = when (fagsystem) {
-                FagsystemDTO.EF, FagsystemDTO.KONT, FagsystemDTO.IT01 -> TODO()
+                FagsystemDTO.EF -> Ytelsestype.OVERGANGSSTØNAD
+                FagsystemDTO.KONT -> Ytelsestype.KONTANTSTØTTE
+                FagsystemDTO.IT01 -> Ytelsestype.INFOTRYGD
                 FagsystemDTO.BA -> Ytelsestype.BARNETRYGD
                 FagsystemDTO.TS -> Ytelsestype.TILLEGGSSTØNAD
             }.name

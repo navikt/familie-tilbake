@@ -55,4 +55,7 @@ sealed interface Ytelse {
 enum class Ytelsestype(val kode: String) {
     BARNETRYGD("BA"),
     TILLEGGSSTØNAD("TSO"),
+    KONTANTSTØTTE("KS"),
+    OVERGANGSSTØNAD("EF"),
+    INFOTRYGD("IT01"),
 }
