@@ -41,6 +41,13 @@ spec:
         diskAutoresize: true
         highAvailability: true
         autoBackupHour: 3
+        flags:
+          - name: "cloudsql.enable_pgaudit"
+            value: "on"
+          - name: "pgaudit.log"
+            value: "write,ddl,role"
+          - name: "pgaudit.log_parameter"
+            value: "on"
         databases:
           - name: tilbakekreving
             envVarPrefix: DB
