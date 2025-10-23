@@ -15,8 +15,11 @@ import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.FagsystemUtil
+import no.nav.tilbakekreving.Observatør
 import no.nav.tilbakekreving.TilbakekrevingService
+import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.config.ApplicationProperties
+import no.nav.tilbakekreving.endring.EndringObservatør
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
@@ -51,6 +54,8 @@ class ForvaltningController(
     private val tilbakekrevingService: TilbakekrevingService,
     private val applicationProperties: ApplicationProperties,
     private val tilbakekrevingRepository: TilbakekrevingRepository,
+    private val bigQueryService: BigQueryService,
+    private val endringObservatør: EndringObservatør,
 ) {
     private val logger = TracedLogger.getLogger<ForvaltningController>()
 
@@ -326,10 +331,11 @@ class ForvaltningController(
     fun migrerAlleSaker() {
         tilbakekrevingRepository.hentAlleTilbakekrevinger()?.forEach { entity ->
             tilbakekrevingRepository.hentOgLagreResultat(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(entity.id)) {
-                logger.medContext(SecureLog.Context.medBehandling(it.eksternFagsak.eksternId, it.behandlingHistorikkEntities.lastOrNull()?.toString())) {
-                    info("Migrerer sak {}", applicationProperties.frontendUrl)
+                val tilbakekreving = it.fraEntity(Observatør(), bigQueryService, endringObservatør)
+                logger.medContext(SecureLog.Context.fra(tilbakekreving)) {
+                    info("Migrerer sak {}", tilbakekreving.hentTilbakekrevingUrl(applicationProperties.frontendUrl))
                 }
-                it
+                tilbakekreving.tilEntity()
             }
         }
     }
