@@ -1,17 +1,20 @@
 package no.nav.tilbakekreving.endring
 
+import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.math.BigDecimal
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.util.UUID
 
 class EndringObservatørOppsamler : EndringObservatør {
     private val statusoppdateringer = mutableMapOf<UUID, MutableList<Statusoppdatering>>()
     private val vedtakFattet = mutableMapOf<UUID, MutableList<FattetVedtak>>()
+    private val behandlingEndretEvents = mutableMapOf<String, MutableList<BehandlingEndret>>()
 
     override fun behandlingsstatusOppdatert(
         behandlingId: UUID,
@@ -39,6 +42,23 @@ class EndringObservatørOppsamler : EndringObservatør {
             )
     }
 
+    override fun behandlingEndret(
+        vedtakGjelderId: String,
+        eksternFagsakId: String,
+        ytelse: Ytelse,
+        eksternBehandlingId: String?,
+        sakOpprettet: LocalDateTime,
+        varselSendt: LocalDateTime?,
+        behandlingsstatus: ForenkletBehandlingsstatus,
+        totaltFeilutbetaltBeløp: BigDecimal,
+        hentSaksbehandlingURL: (String) -> String,
+        fullstendigPeriode: Datoperiode,
+    ) {
+        behandlingEndretEvents
+            .computeIfAbsent(eksternFagsakId) { mutableListOf() }
+            .add(BehandlingEndret(status = behandlingsstatus))
+    }
+
     override fun vedtakFattet(
         behandlingId: UUID,
         forrigeBehandlingId: UUID?,
@@ -60,6 +80,8 @@ class EndringObservatørOppsamler : EndringObservatør {
             )
     }
 
+    fun behandlingEndretEventsFor(fagsakId: String): List<BehandlingEndret> = behandlingEndretEvents[fagsakId] ?: emptyList()
+
     fun statusoppdateringerFor(behandlingId: UUID): List<Statusoppdatering> = statusoppdateringer[behandlingId] ?: emptyList()
 
     fun vedtakFattetFor(internId: UUID): List<FattetVedtak> = vedtakFattet[internId] ?: emptyList()
@@ -72,4 +94,6 @@ class EndringObservatørOppsamler : EndringObservatør {
     data class FattetVedtak(
         val vurderteUtbetalinger: List<VurdertUtbetaling>,
     )
+
+    data class BehandlingEndret(val status: ForenkletBehandlingsstatus)
 }

@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.tilstand
 
 import no.nav.tilbakekreving.Tilbakekreving
+import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
@@ -17,7 +18,7 @@ object TilBehandling : Tilstand {
     }
 
     override fun entering(tilbakekreving: Tilbakekreving) {
-        // TODO: Sende ut behov om saksbehandling
+        tilbakekreving.sendStatusendring(ForenkletBehandlingsstatus.TIL_BEHANDLING)
     }
 
     override fun håndterNullstilling(nåværendeBehandling: Behandling, sporing: Sporing) {

@@ -18,7 +18,7 @@ import java.util.UUID
 class KafkaProducerStub() : KafkaProducer {
     private val saksdata = mutableMapOf<UUID, MutableList<Behandlingstilstand>>()
     private val vedtak = mutableMapOf<UUID, MutableList<Vedtaksoppsummering>>()
-    private val kafkameldinger = mutableMapOf<String, MutableList<Kafkamelding>>()
+    private val kafkameldinger = mutableMapOf<String, MutableList<Pair<EventMetadata<*>, Kafkamelding>>>()
 
     private val fagsystemInfoSvarHandlers = mutableMapOf<String, () -> Unit>()
 
@@ -29,7 +29,7 @@ class KafkaProducerStub() : KafkaProducer {
         ytelse: Ytelse,
         logContext: SecureLog.Context,
     ) {
-        kafkameldinger.computeIfAbsent(kafkamelding.eksternFagsakId) { mutableListOf() }.add(kafkamelding)
+        kafkameldinger.computeIfAbsent(kafkamelding.eksternFagsakId) { mutableListOf() }.add(metadata to kafkamelding)
         when (metadata) {
             FagsysteminfoBehovHendelse.METADATA -> {
                 val eventHandler = fagsystemInfoSvarHandlers.remove(kafkamelding.eksternFagsakId)
@@ -56,7 +56,7 @@ class KafkaProducerStub() : KafkaProducer {
 
     fun finnVedtaksoppsummering(behandlingId: UUID): List<Vedtaksoppsummering> = vedtak[behandlingId] ?: emptyList()
 
-    fun finnKafkamelding(eksternFagsakId: String): List<Kafkamelding> = kafkameldinger[eksternFagsakId] ?: emptyList()
+    fun finnKafkamelding(eksternFagsakId: String): List<Pair<EventMetadata<*>, Kafkamelding>> = kafkameldinger[eksternFagsakId] ?: emptyList()
 
     fun settFagsysteminfoSvar(eksternFagsakId: String, handler: () -> Unit) {
         fagsystemInfoSvarHandlers[eksternFagsakId] = handler

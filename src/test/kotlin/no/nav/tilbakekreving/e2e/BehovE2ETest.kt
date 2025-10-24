@@ -42,12 +42,13 @@ class BehovE2ETest : TilbakekrevingE2EBase() {
         )
 
         val hendelser = kafkaProducer.finnKafkamelding(fagsystemId)
+            .map { (_, hendelse) -> hendelse }
+            .filterIsInstance<FagsysteminfoBehovHendelse>()
         hendelser.size shouldBe 1
-        val fagsysteminfoBehov = hendelser.single { it.eksternFagsakId == fagsystemId }
-            .shouldBeInstanceOf<FagsysteminfoBehovHendelse>()
 
-        fagsysteminfoBehov.eksternFagsakId shouldBe fagsystemId
-        fagsysteminfoBehov.kravgrunnlagReferanse shouldBe fagsystemBehandling
+        hendelser[0].shouldBeInstanceOf<FagsysteminfoBehovHendelse>()
+        hendelser[0].eksternFagsakId shouldBe fagsystemId
+        hendelser[0].kravgrunnlagReferanse shouldBe fagsystemBehandling
     }
 
     @Test

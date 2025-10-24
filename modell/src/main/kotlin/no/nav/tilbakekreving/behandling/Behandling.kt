@@ -50,6 +50,7 @@ import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.tilstand.Tilstand
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
@@ -411,6 +412,16 @@ class Behandling internal constructor(
             return lagBeregning().oppsummer().vedtaksresultat
         }
         return null
+    }
+
+    fun totaltFeilutbetaltBeløp(): BigDecimal {
+        return kravgrunnlag.entry.feilutbetaltBeløpForAllePerioder()
+    }
+
+    fun fullstendigPeriode(): Datoperiode {
+        val perioder = kravgrunnlag.entry.perioder.map { it.periode }
+            .map { eksternFagsakRevurdering.entry.utvidPeriode(it) }
+        return perioder.minOf { it.fom } til perioder.maxOf { it.tom }
     }
 
     fun flyttTilbakeTilFakta() = steg().forEach { it.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry) }
