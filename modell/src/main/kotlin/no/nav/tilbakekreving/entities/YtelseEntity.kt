@@ -10,6 +10,7 @@ data class YtelseEntity(
         return when (type) {
             Ytelsestype.BARNETRYGD -> Ytelse.Barnetrygd
             Ytelsestype.TILLEGGSSTØNAD -> Ytelse.Tilleggsstønad
+            Ytelsestype.ARBEIDSAVKLARINGSPENGER -> Ytelse.Arbeidsavklaringspenger
             Ytelsestype.KONTANTSTØTTE, Ytelsestype.OVERGANGSSTØNAD, Ytelsestype.INFOTRYGD -> TODO()
         }
     }

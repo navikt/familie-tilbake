@@ -45,6 +45,20 @@ sealed interface Ytelse {
         override fun tilEntity(): YtelseEntity = YtelseEntity(Ytelsestype.TILLEGGSSTØNAD)
     }
 
+    object Arbeidsavklaringspenger : Ytelse {
+        override fun tilFagsystemDTO(): FagsystemDTO = FagsystemDTO.AAP
+
+        override fun tilYtelseDTO(): YtelsestypeDTO = YtelsestypeDTO.ARBEIDSAVKLARINGSPENGER
+
+        override fun integrererMotFagsystem(): Boolean = false
+
+        override fun tilYtelsestype(): Ytelsestype = Ytelsestype.ARBEIDSAVKLARINGSPENGER
+
+        override val kafkaTopic: String = "tilbake.privat-tilbakekreving-aap"
+
+        override fun tilEntity(): YtelseEntity = YtelseEntity(Ytelsestype.ARBEIDSAVKLARINGSPENGER)
+    }
+
     companion object {
         fun ytelser() = setOf(
             Tilleggsstønad,
@@ -58,4 +72,5 @@ enum class Ytelsestype(val kode: String) {
     KONTANTSTØTTE("KS"),
     OVERGANGSSTØNAD("EF"),
     INFOTRYGD("IT01"),
+    ARBEIDSAVKLARINGSPENGER("AAP"),
 }

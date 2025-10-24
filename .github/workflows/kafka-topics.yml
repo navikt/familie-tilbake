@@ -24,3 +24,15 @@ jobs:
           CLUSTER: prod-gcp
           RESOURCE: ./.deploy/nais/prod/kafka/ytelser/tilleggsstønader.yaml
           ENVIRONMENT: prod-gcp:tilbake
+      - name: Apply arbeidsavklaringspenger kafka topic to dev-gcp
+        uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: ./.deploy/nais/dev/kafka/ytelser/arbeidsavklaringspenger.yaml
+          ENVIRONMENT: dev-gcp:tilbake
+      - name: Apply arbeidsavklaringspenger kafka topic to dev-gcp
+        uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: prod-gcp
+          RESOURCE: ./.deploy/nais/prod/kafka/ytelser/arbeidsavklaringspenger.yaml
+          ENVIRONMENT: prod-gcp:tilbake

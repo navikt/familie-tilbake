@@ -366,6 +366,7 @@ class TokenSupportTilgangskontrollService(
             FagsystemDTO.KONT -> Tema.KON
             FagsystemDTO.EF -> Tema.ENF
             FagsystemDTO.TS -> Tema.TSO
+            FagsystemDTO.AAP -> Tema.AAP
             FagsystemDTO.IT01 -> throw Feil(
                 message = "Fagsystem $this støttes ikke",
                 logContext = SecureLog.Context.tom(),

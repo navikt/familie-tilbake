@@ -1,0 +1,23 @@
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: privat-tilbakekreving-arbeidsavklaringspenger
+  namespace: tilbake
+  labels:
+    team: tilbake
+spec:
+  pool: nav-prod
+  config:
+    cleanupPolicy: delete
+    minimumInSyncReplicas: 2
+    partitions: 1
+    replication: 3
+    retentionBytes: -1
+    retentionHours: -1
+  acl:
+    - team: tilbake
+      application: tilbakekreving-backend
+      access: readwrite
+    - team: aap
+      application: api
+      access: readwrite

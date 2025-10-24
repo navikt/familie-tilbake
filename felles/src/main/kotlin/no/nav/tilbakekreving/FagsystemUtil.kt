@@ -12,6 +12,7 @@ object FagsystemUtil {
             YtelsestypeDTO.BARNETILSYN -> FagsystemDTO.EF
             YtelsestypeDTO.SKOLEPENGER -> FagsystemDTO.EF
             YtelsestypeDTO.TILLEGGSSTØNAD -> FagsystemDTO.TS
+            YtelsestypeDTO.ARBEIDSAVKLARINGSPENGER -> FagsystemDTO.AAP
             YtelsestypeDTO.INFOTRYGD -> FagsystemDTO.IT01
         }
 }

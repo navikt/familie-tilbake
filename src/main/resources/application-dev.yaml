@@ -16,12 +16,17 @@ tilbakekreving:
   frontendUrl: https://tilbakekreving.ansatt.dev.nav.no
   kravgrunnlag:
     - Q1_TILLEGGSSTONADER.KRAVGRUNNLAG
+    - Q1_TILBAKEKREVING.KRAVGRUNNLAG
   toggles:
     ny-modell-enabled: true
     tilgangsmaskinen-enabled: true
   tilgangsstyring:
     grupper:
       ts:
+        veileder: ${rolle.enslig.veileder}
+        saksbehandler: ${rolle.enslig.saksbehandler}
+        beslutter: ${rolle.enslig.beslutter}
+      aap:
         veileder: ${rolle.enslig.veileder}
         saksbehandler: ${rolle.enslig.saksbehandler}
         beslutter: ${rolle.enslig.beslutter}
