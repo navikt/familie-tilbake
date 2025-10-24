@@ -1,11 +1,13 @@
 package no.nav.tilbakekreving.endring
 
+import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.math.BigDecimal
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.util.UUID
 
@@ -25,6 +27,19 @@ class EndringObservatørOppsamler : EndringObservatør {
         ansvarligBeslutter: String?,
         totaltFeilutbetaltBeløp: BigDecimal?,
         totalFeilutbetaltPeriode: Datoperiode?,
+    ) {}
+
+    override fun behandlingEndret(
+        vedtakGjelderId: String,
+        eksternFagsakId: String,
+        ytelse: Ytelse,
+        eksternBehandlingId: String?,
+        sakOpprettet: LocalDateTime,
+        varselSendt: LocalDateTime?,
+        behandlingsstatus: ForenkletBehandlingsstatus,
+        totaltFeilutbetaltBeløp: BigDecimal,
+        hentSaksbehandlingURL: (String) -> String,
+        fullstendigPeriode: Datoperiode,
     ) {}
 
     override fun vedtakFattet(

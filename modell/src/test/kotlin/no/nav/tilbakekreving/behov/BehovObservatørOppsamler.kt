@@ -1,5 +1,7 @@
 package no.nav.tilbakekreving.behov
 
+import io.kotest.matchers.nulls.shouldNotBeNull
+
 class BehovObservatørOppsamler() : BehovObservatør {
     val behovListe = mutableListOf<Behov>()
 
@@ -24,4 +26,6 @@ class BehovObservatørOppsamler() : BehovObservatør {
     override fun håndter(behov: IverksettelseBehov) {
         behovListe.add(behov)
     }
+
+    fun sisteVarselbrevId() = behovListe.filterIsInstance<VarselbrevBehov>().lastOrNull().shouldNotBeNull().brevId
 }
