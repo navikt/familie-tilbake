@@ -11,6 +11,7 @@ import java.util.UUID
 object Testdata {
     fun fagsysteminfoSvar(
         fagsystemId: String,
+        eksternBehandlingId: String = UUID.randomUUID().toString(),
         utvidPerioder: List<FagsysteminfoSvarHendelse.UtvidetPeriodeDto> = listOf(
             FagsysteminfoSvarHendelse.UtvidetPeriodeDto(
                 kravgrunnlagPeriode = PeriodeDto(fom = 1.januar(2021), tom = 1.januar(2021)),
@@ -25,7 +26,7 @@ object Testdata {
             type = MottakerDto.MottakerType.PERSON,
         ),
         revurdering = FagsysteminfoSvarHendelse.RevurderingDto(
-            behandlingId = UUID.randomUUID().toString(),
+            behandlingId = eksternBehandlingId,
             årsak = FagsysteminfoSvarHendelse.RevurderingDto.Årsak.NYE_OPPLYSNINGER,
             årsakTilFeilutbetaling = "ingen",
             vedtaksdato = LocalDate.now(),

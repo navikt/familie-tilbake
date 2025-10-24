@@ -20,6 +20,13 @@ sealed class EksternFagsakRevurdering(
 
     abstract fun utvidPeriode(periode: Datoperiode): Datoperiode
 
+    /**
+     * @return null I noen tilfeller hvor vi ikke har integrasjon med fagsystem vil ekstern id være basert på referansen i kravgrunnlaget, vi kan ikke 100% sikre på at referansen er samme id som behandlingen.
+     * Når vi ikke vet at det er samme id returnerer vi null.
+     * I tilfeller hvor vi har integrasjon med fagsystemet vil denne returnere fagsystemets id på behandlingen
+     */
+    abstract fun behandlingId(): String?
+
     class Revurdering(
         id: UUID,
         override val eksternId: String,
@@ -31,6 +38,8 @@ sealed class EksternFagsakRevurdering(
         override fun utvidPeriode(periode: Datoperiode): Datoperiode {
             return utvidedePerioder.singleOrNull { it.gjelderFor(periode) }?.utvid() ?: periode
         }
+
+        override fun behandlingId(): String? = eksternId
 
         override fun tilEntity(eksternFagsakRef: UUID): EksternFagsakBehandlingEntity {
             return EksternFagsakBehandlingEntity(
@@ -73,6 +82,8 @@ sealed class EksternFagsakRevurdering(
         override val revurderingsårsak: Revurderingsårsak = Revurderingsårsak.UKJENT
         override val årsakTilFeilutbetaling: String = "Ukjent - finn i fagsystem"
         override val vedtaksdato: LocalDate = revurderingsdatoFraKravgrunnlag ?: LocalDate.MIN
+
+        override fun behandlingId(): String? = null
 
         override fun utvidPeriode(periode: Datoperiode): Datoperiode = periode
 

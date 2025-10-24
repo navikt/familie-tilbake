@@ -7,6 +7,9 @@ import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.VedtakPeriode
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.Vedtaksoppsummering
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.api.v2.PeriodeDto
+import no.nav.tilbakekreving.api.v2.fagsystem.BehandlingEndretHendelse
+import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.config.Toggles
 import no.nav.tilbakekreving.fagsystem.Ytelse
@@ -21,6 +24,7 @@ import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.util.UUID
 
@@ -75,6 +79,38 @@ class EndringObservatørService(
                 totalFeilutbetaltPeriode = totalFeilutbetaltPeriode?.let { Periode(it.fom, it.tom) },
             ),
             logContext = SecureLog.Context.medBehandling(eksternFagsystemId, behandlingId.toString()),
+        )
+    }
+
+    override fun behandlingEndret(
+        vedtakGjelderId: String,
+        eksternFagsakId: String,
+        ytelse: Ytelse,
+        eksternBehandlingId: String?,
+        sakOpprettet: LocalDateTime,
+        varselSendt: LocalDateTime?,
+        behandlingsstatus: ForenkletBehandlingsstatus,
+        totaltFeilutbetaltBeløp: BigDecimal,
+        hentSaksbehandlingURL: (String) -> String,
+        fullstendigPeriode: Datoperiode,
+    ) {
+        val logContext = SecureLog.Context.utenBehandling(eksternFagsakId)
+        kafkaProducer.sendKafkaEvent(
+            BehandlingEndretHendelse(
+                eksternFagsakId = eksternFagsakId,
+                hendelseOpprettet = LocalDateTime.now(),
+                eksternBehandlingId = eksternBehandlingId,
+                sakOpprettet = sakOpprettet,
+                varselSendt = varselSendt,
+                behandlingsstatus = behandlingsstatus,
+                totaltFeilutbetaltBeløp = totaltFeilutbetaltBeløp,
+                saksbehandlingURL = hentSaksbehandlingURL(applicationProperties.frontendUrl),
+                fullstendigPeriode = PeriodeDto(fullstendigPeriode.fom, fullstendigPeriode.tom),
+            ),
+            BehandlingEndretHendelse.METADATA,
+            vedtakGjelderId,
+            ytelse,
+            logContext,
         )
     }
 

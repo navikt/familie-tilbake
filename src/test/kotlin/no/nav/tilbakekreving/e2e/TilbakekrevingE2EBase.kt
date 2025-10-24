@@ -21,6 +21,7 @@ import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
 import no.nav.tilbakekreving.behandling.Behandling
+import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagMediator
@@ -139,6 +140,44 @@ open class TilbakekrevingE2EBase : E2EBase() {
         somSaksbehandler(ident) {
             behandlingController.utførBehandlingssteg(behandlingId, stegData).status shouldBe Ressurs.Status.SUKSESS
         }
+    }
+
+    fun tilbakekrevVedtak(
+        behandlingId: UUID,
+        perioder: List<Datoperiode>,
+        behandlerIdent: String = "Z111111",
+        beslutterIdent: String = "Z999999",
+    ) {
+        utførSteg(
+            ident = behandlerIdent,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(),
+        )
+
+        utførSteg(
+            ident = behandlerIdent,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(
+                *perioder.toTypedArray(),
+            ),
+        )
+        utførSteg(
+            ident = behandlerIdent,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving(
+                *perioder.toTypedArray(),
+            ),
+        )
+        utførSteg(
+            ident = behandlerIdent,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagForeslåVedtakVurdering(),
+        )
+        utførSteg(
+            ident = beslutterIdent,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagGodkjennVedtakVurdering(),
+        )
     }
 
     fun avventAntallUlesteKravgrunnlag(antall: Int) {

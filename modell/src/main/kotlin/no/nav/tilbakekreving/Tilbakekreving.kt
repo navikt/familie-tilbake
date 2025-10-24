@@ -8,6 +8,7 @@ import no.nav.tilbakekreving.aktør.Bruker.Companion.tilNullableFrontendDto
 import no.nav.tilbakekreving.api.v1.dto.FagsakDto
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
+import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.BehandlingHistorikk
 import no.nav.tilbakekreving.behandling.BehandlingObservatør
@@ -142,6 +143,7 @@ class Tilbakekreving internal constructor(
             behandlingstype = behandlingInfo.behandlingstype.name,
             behandlendeEnhet = behandlingInfo.enhet?.kode,
         )
+        sendStatusendring(ForenkletBehandlingsstatus.OPPRETTET)
     }
 
     fun opprettBruker(aktør: Aktør) {
@@ -356,6 +358,22 @@ class Tilbakekreving internal constructor(
             ansvarligBeslutter = ansvarligBeslutter,
             totaltFeilutbetaltBeløp = totaltFeilutbetaltBeløp,
             totalFeilutbetaltPeriode = totalFeilutbetaltPeriode,
+        )
+    }
+
+    fun sendStatusendring(behandlingsstatus: ForenkletBehandlingsstatus) {
+        val behandling = behandlingHistorikk.nåværende().entry
+        endringObservatør.behandlingEndret(
+            vedtakGjelderId = bruker?.aktør?.ident ?: "Ukjent",
+            eksternFagsakId = eksternFagsak.eksternId,
+            ytelse = eksternFagsak.ytelse,
+            eksternBehandlingId = eksternFagsak.behandlinger.nåværende().entry.behandlingId(),
+            sakOpprettet = opprettet,
+            varselSendt = brevHistorikk.sisteVarselbrev()?.sendt,
+            behandlingsstatus = behandlingsstatus,
+            totaltFeilutbetaltBeløp = behandling.totaltFeilutbetaltBeløp(),
+            hentSaksbehandlingURL = ::hentTilbakekrevingUrl,
+            fullstendigPeriode = behandling.fullstendigPeriode(),
         )
     }
 

@@ -120,7 +120,7 @@ class TilBehandlingTest {
         val behandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
         val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse(
-            eksternFagsak = eksternFagsak(Ytelse.Tilleggsstønad),
+            eksternFagsak = eksternFagsak(ytelse = Ytelse.Tilleggsstønad),
         )
 
         val tilbakekreving = opprettTilbakekreving(oppsamler, opprettTilbakekrevingHendelse)

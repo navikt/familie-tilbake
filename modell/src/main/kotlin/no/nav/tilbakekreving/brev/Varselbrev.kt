@@ -6,6 +6,7 @@ import no.nav.tilbakekreving.entities.Brevtype
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.Period
 import java.util.UUID
 
@@ -13,6 +14,7 @@ data class Varselbrev(
     override val id: UUID,
     override val opprettetDato: LocalDate,
     override var journalpostId: String?,
+    override var sendt: LocalDateTime?,
     val mottaker: RegistrertBrevmottaker,
     val brevmottakerStegId: UUID?,
     val ansvarligSaksbehandlerIdent: String?,
@@ -34,6 +36,7 @@ data class Varselbrev(
                 id = UUID.randomUUID(),
                 opprettetDato = LocalDate.now(),
                 journalpostId = null,
+                sendt = null,
                 mottaker = mottaker,
                 brevmottakerStegId = brevmottakerStegId,
                 ansvarligSaksbehandlerIdent = ansvarligSaksbehandlerIdent,
@@ -50,6 +53,7 @@ data class Varselbrev(
             brevmottakerStegRef = brevmottakerStegId,
             opprettetDato = opprettetDato,
             journalpostId = journalpostId,
+            sendt = sendt,
             mottaker = mottaker.tilEntity(brevmottakerStegId, null),
             ansvarligSaksbehandlerIdent = ansvarligSaksbehandlerIdent,
             kravgrunnlagRef = kravgrunnlag.tilEntity(),

@@ -19,8 +19,10 @@ import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
+import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
+import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
@@ -38,9 +40,13 @@ import java.util.Random
 import java.util.UUID
 
 val ANSVARLIG_SAKSBEHANDLER = Behandler.Saksbehandler("Z999999")
+val ANSVARLIG_BESLUTTER = Behandler.Saksbehandler("Z111111")
 
-fun eksternFagsak(ytelse: Ytelse = Ytelse.Barnetrygd) = OpprettTilbakekrevingHendelse.EksternFagsak(
-    eksternId = "101010",
+fun eksternFagsak(
+    eksternId: String = "101010",
+    ytelse: Ytelse = Ytelse.Barnetrygd,
+) = OpprettTilbakekrevingHendelse.EksternFagsak(
+    eksternId = eksternId,
     ytelse = ytelse,
 )
 
@@ -133,6 +139,11 @@ fun fagsysteminfoHendelse(
     utvidPerioder = utvidPerioder,
 )
 
+fun varselbrevHendelse(varselbrevId: UUID) = VarselbrevSendtHendelse(
+    varselbrevId = varselbrevId,
+    journalpostId = UUID.randomUUID().toString(),
+)
+
 fun brukerinfoHendelse() = BrukerinfoHendelse(
     ident = bruker().ident,
     navn = "test bruker",
@@ -215,3 +226,10 @@ fun godkjenning() = listOf(
     Behandlingssteg.VILKÅRSVURDERING to FatteVedtakSteg.Vurdering.Godkjent,
     Behandlingssteg.FORESLÅ_VEDTAK to FatteVedtakSteg.Vurdering.Godkjent,
 )
+
+fun iverksettelse(): IverksettelseHendelse {
+    return IverksettelseHendelse(
+        iverksattVedtakId = UUID.randomUUID(),
+        vedtakId = BigInteger.ZERO,
+    )
+}

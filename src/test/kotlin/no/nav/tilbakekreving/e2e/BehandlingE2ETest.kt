@@ -2,15 +2,23 @@ package no.nav.tilbakekreving.e2e
 
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.SærligeGrunner
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.UtvidetVilkårsresultat
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.VedtakPeriode
+import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.api.v1.dto.AktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.GodTroDto
 import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
+import no.nav.tilbakekreving.api.v2.PeriodeDto
+import no.nav.tilbakekreving.api.v2.fagsystem.BehandlingEndretHendelse
+import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
+import no.nav.tilbakekreving.api.v2.fagsystem.svar.FagsysteminfoSvarHendelse
 import no.nav.tilbakekreving.behandling.saksbehandling.BrevmottakerSteg
 import no.nav.tilbakekreving.e2e.ytelser.TilleggsstønaderE2ETest.Companion.TILLEGGSSTØNADER_KØ_NAVN
+import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
+import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.februar
 import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub
 import no.nav.tilbakekreving.januar
@@ -24,8 +32,12 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
 
 class BehandlingE2ETest : TilbakekrevingE2EBase() {
+    @Autowired
+    private lateinit var fagsystemIntegrasjonService: FagsystemIntegrasjonService
+
     @Autowired
     private lateinit var kafkaProducer: KafkaProducerStub
 
@@ -345,5 +357,52 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         vilkårsvurderingFrontendDto.perioder.size shouldBe 1
         vilkårsvurderingFrontendDto.perioder.single().begrunnelse shouldBe "Jepp"
         vilkårsvurderingFrontendDto.perioder.single().vilkårsvurderingsresultatInfo?.aktsomhet?.begrunnelse shouldBe "Japp"
+    }
+
+    @Test
+    fun `endringer i behandling skal føre til kafka-meldinger til fagsystem`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        sendKravgrunnlagOgAvventLesing(
+            queueName = TILLEGGSSTØNADER_KØ_NAVN,
+            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+            ),
+        )
+
+        val eksternBehandlingId = "ekstern_behandling_id"
+
+        fagsystemIntegrasjonService.håndter(
+            Ytelse.Tilleggsstønad,
+            Testdata.fagsysteminfoSvar(
+                fagsystemId = fagsystemId,
+                eksternBehandlingId = eksternBehandlingId,
+                utvidPerioder = listOf(
+                    FagsysteminfoSvarHendelse.UtvidetPeriodeDto(
+                        kravgrunnlagPeriode = PeriodeDto(1.januar(2021), 1.januar(2021)),
+                        vedtaksperiode = PeriodeDto(1.januar(2021), 31.januar(2021)),
+                    ),
+                ),
+            ),
+        )
+
+        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+
+        tilbakekrevVedtak(behandlingId, listOf(1.januar(2021) til 31.januar(2021)))
+
+        val kafkameldinger = kafkaProducer.finnKafkamelding(fagsystemId)
+        val (_, event) = kafkameldinger.lastOrNull { (metadata, _) -> metadata == BehandlingEndretHendelse.METADATA }
+            .shouldNotBeNull()
+
+        event.shouldBeInstanceOf<BehandlingEndretHendelse>()
+
+        event.eksternFagsakId shouldBe fagsystemId
+        event.hendelseOpprettet.toLocalDate() shouldBe LocalDate.now()
+        event.eksternBehandlingId shouldBe eksternBehandlingId
+        event.sakOpprettet.toLocalDate() shouldBe LocalDate.now()
+        event.varselSendt shouldBe null
+        event.behandlingsstatus shouldBe ForenkletBehandlingsstatus.AVSLUTTET
+        event.totaltFeilutbetaltBeløp shouldBe 2000.0.kroner
+        event.fullstendigPeriode shouldBe PeriodeDto(1.januar(2021), 31.januar(2021))
+        event.saksbehandlingURL shouldBe "https://tilbakekreving.intern.nav.no/fagsystem/TS/fagsak/$fagsystemId/behandling/$behandlingId"
     }
 }
