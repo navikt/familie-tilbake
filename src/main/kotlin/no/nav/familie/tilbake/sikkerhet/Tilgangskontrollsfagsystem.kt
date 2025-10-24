@@ -10,6 +10,7 @@ enum class Tilgangskontrollsfagsystem(
     ENSLIG_FORELDER("EF"),
     KONTANTSTØTTE("KONT"),
     TILLEGGSSTØNAD("TS"),
+    ARBEIDSAVKLARINGSPENGER("AAP"),
     FORVALTER_TILGANG("FT"), // brukes internt bare for tilgangsskontroll
     SYSTEM_TILGANG(""), // brukes internt bare for tilgangsskontroll
     ;
