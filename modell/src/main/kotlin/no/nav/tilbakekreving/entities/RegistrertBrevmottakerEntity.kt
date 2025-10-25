@@ -7,8 +7,10 @@ import no.nav.tilbakekreving.kontrakter.verge.Vergetype
 import java.util.UUID
 
 data class RegistrertBrevmottakerEntity(
-    val mottakerType: MottakerType,
     val id: UUID,
+    val brevmottakerRef: UUID?,
+    val parentRef: UUID?,
+    val mottakerType: MottakerType,
     val navn: String?,
     val personIdent: String?,
     val organisasjonsnummer: String?,
@@ -73,20 +75,6 @@ data class RegistrertBrevmottakerEntity(
                 utenlandskAdresse = requireNotNull(utenlandskAdresse) { "utenlandskAdresse kreves" }.fraEntity() as RegistrertBrevmottaker.UtenlandskAdresseMottaker,
                 fullmektig = requireNotNull(fullmektig) { "fullmektig kreves" }.fraEntity() as RegistrertBrevmottaker.FullmektigMottaker,
             )
-
-        MottakerType.DEFAULT_BRUKER_ADRESSE_OG_VERGE_MOTTAKER ->
-            RegistrertBrevmottaker.DefaultBrukerAdresseOgVergeMottaker(
-                id = id,
-                defaultMottaker = requireNotNull(defaultMottaker) { "defaultMottaker kreves" }.fraEntity() as RegistrertBrevmottaker.DefaultMottaker,
-                verge = requireNotNull(verge) { "verge kreves" }.fraEntity() as RegistrertBrevmottaker.VergeMottaker,
-            )
-
-        MottakerType.DEFAULT_BRUKER_ADRESSE_OG_FULLMEKTIG_MOTTAKER ->
-            RegistrertBrevmottaker.DefaultBrukerAdresseOgFullmektigMottaker(
-                id = id,
-                defaultMottaker = requireNotNull(defaultMottaker) { "defaultMottaker kreves" }.fraEntity() as RegistrertBrevmottaker.DefaultMottaker,
-                fullmektig = requireNotNull(fullmektig) { "fullmektig kreves" }.fraEntity() as RegistrertBrevmottaker.FullmektigMottaker,
-            )
     }
 }
 
@@ -108,6 +96,6 @@ enum class MottakerType {
     DODSBO_MOTTAKER,
     UTENLANDSK_ADRESSE_OG_VERGE_MOTTAKER,
     UTENLANDSK_ADRESSE_OG_FULLMEKTIG_MOTTAKER,
-    DEFAULT_BRUKER_ADRESSE_OG_VERGE_MOTTAKER,
-    DEFAULT_BRUKER_ADRESSE_OG_FULLMEKTIG_MOTTAKER,
+    // DEFAULT_BRUKER_ADRESSE_OG_VERGE_MOTTAKER,
+    // DEFAULT_BRUKER_ADRESSE_OG_FULLMEKTIG_MOTTAKER,
 }

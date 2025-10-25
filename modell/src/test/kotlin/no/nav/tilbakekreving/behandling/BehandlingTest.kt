@@ -85,8 +85,9 @@ class BehandlingTest {
 
     @Test
     fun `flytt behandling tilbake til fakta - nullstiller fakta`() {
-        val behandling = behandling().apply {
-            brevmottakerSteg = BrevmottakerSteg(false, RegistrertBrevmottaker.DefaultMottaker(navn = "navn", personIdent = "ident"))
+        val behandling = behandling()
+        behandling.apply {
+            brevmottakerSteg = BrevmottakerSteg(behandling.id, false, RegistrertBrevmottaker.DefaultMottaker(navn = "navn", personIdent = "ident"))
         }
         val ansvarligSaksbehandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
         val periode = 1.januar til 31.januar
@@ -114,8 +115,9 @@ class BehandlingTest {
     @Test
     fun `flytt behandling tilbake til fakta - nullstiller foreldelse`() {
         val kravgrunnlag = kravgrunnlag()
-        val behandling = behandling(kravgrunnlag).apply {
-            brevmottakerSteg = BrevmottakerSteg(false, RegistrertBrevmottaker.DefaultMottaker(navn = "navn", personIdent = "ident"))
+        val behandling = behandling(kravgrunnlag)
+        behandling.apply {
+            brevmottakerSteg = BrevmottakerSteg(behandling.id, false, RegistrertBrevmottaker.DefaultMottaker(navn = "navn", personIdent = "ident"))
         }
 
         val periode = 1.januar til 31.januar
@@ -136,8 +138,9 @@ class BehandlingTest {
 
     @Test
     fun `flytt behandling tilbake til fakta - nullstiller vilkårsvurderingen`() {
-        val behandling = behandling().apply {
-            brevmottakerSteg = BrevmottakerSteg(false, RegistrertBrevmottaker.DefaultMottaker(navn = "navn", personIdent = "ident"))
+        val behandling = behandling()
+        behandling.apply {
+            brevmottakerSteg = BrevmottakerSteg(behandling.id, false, RegistrertBrevmottaker.DefaultMottaker(navn = "navn", personIdent = "ident"))
         }
 
         val periode = 1.januar til 31.januar

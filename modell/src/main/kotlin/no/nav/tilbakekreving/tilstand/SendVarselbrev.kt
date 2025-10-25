@@ -20,6 +20,7 @@ object SendVarselbrev : Tilstand {
 
         val varselbrev = Varselbrev.opprett(
             mottaker = behandling.brevmottakerSteg!!.registrertBrevmottaker,
+            brevmottakerStegId = behandling.brevmottakerSteg!!.id,
             ansvarligSaksbehandlerIdent = behandling.hentBehandlingsinformasjon().ansvarligSaksbehandler.ident,
             kravgrunnlag = kravgrunnlag,
         )

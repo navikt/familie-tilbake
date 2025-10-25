@@ -43,7 +43,7 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
         throw ModellFeil.UgyldigOperasjonException("Ugyldig mottakerId $brevmottakerId", sporing)
     }
 
-    fun tilEntity(): RegistrertBrevmottakerEntity
+    fun tilEntity(brevmottakerStegId: UUID, parentRef: UUID?): RegistrertBrevmottakerEntity
 
     class DefaultMottaker(
         override val id: UUID = UUID.randomUUID(),
@@ -55,19 +55,11 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
         }
 
         override fun kombiner(annen: VergeMottaker, sporing: Sporing): RegistrertBrevmottaker {
-            return DefaultBrukerAdresseOgVergeMottaker(
-                id = UUID.randomUUID(),
-                defaultMottaker = this,
-                verge = annen,
-            )
+            return annen
         }
 
         override fun kombiner(annen: FullmektigMottaker, sporing: Sporing): RegistrertBrevmottaker {
-            return DefaultBrukerAdresseOgFullmektigMottaker(
-                id = UUID.randomUUID(),
-                defaultMottaker = this,
-                fullmektig = annen,
-            )
+            return annen
         }
 
         override fun kombiner(annen: UtenlandskAdresseMottaker, sporing: Sporing): RegistrertBrevmottaker {
@@ -78,10 +70,12 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
             return listOf()
         }
 
-        override fun tilEntity(): RegistrertBrevmottakerEntity {
+        override fun tilEntity(brevmottakerStegId: UUID, parentRef: UUID?): RegistrertBrevmottakerEntity {
             return RegistrertBrevmottakerEntity(
-                mottakerType = MottakerType.DEFAULT_MOTTAKER,
                 id = id,
+                brevmottakerRef = brevmottakerStegId,
+                parentRef = parentRef,
+                mottakerType = MottakerType.DEFAULT_MOTTAKER,
                 navn = navn,
                 personIdent = personIdent,
                 organisasjonsnummer = null,
@@ -144,9 +138,11 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
             )
         }
 
-        override fun tilEntity(): RegistrertBrevmottakerEntity = RegistrertBrevmottakerEntity(
+        override fun tilEntity(brevmottakerStegId: UUID, parentRef: UUID?): RegistrertBrevmottakerEntity = RegistrertBrevmottakerEntity(
             mottakerType = MottakerType.UTENLANDSK_ADRESSE_MOTTAKER,
             id = this.id,
+            brevmottakerRef = brevmottakerStegId,
+            parentRef = parentRef,
             navn = navn,
             manuellAdresseInfoEntity = manuellAdresseInfo?.let(::tilManuellAdresseInfoEntity),
             personIdent = null,
@@ -167,6 +163,18 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
         val vergeType: Vergetype,
         val manuellAdresseInfo: ManuellAdresseInfo? = null,
     ) : RegistrertBrevmottaker {
+        override fun kombiner(annen: FullmektigMottaker, sporing: Sporing): RegistrertBrevmottaker {
+            return annen
+        }
+
+        override fun kombiner(annen: UtenlandskAdresseMottaker, sporing: Sporing): RegistrertBrevmottaker {
+            return UtenlandskAdresseOgFullmektigMottaker(
+                id = UUID.randomUUID(),
+                utenlandskAdresse = annen,
+                fullmektig = this,
+            )
+        }
+
         override fun tilFrontendDto(): List<ManuellBrevmottakerResponsDto> {
             return listOf(
                 ManuellBrevmottakerResponsDto(
@@ -183,9 +191,11 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
             )
         }
 
-        override fun tilEntity(): RegistrertBrevmottakerEntity = RegistrertBrevmottakerEntity(
+        override fun tilEntity(brevmottakerStegId: UUID, parentRef: UUID?): RegistrertBrevmottakerEntity = RegistrertBrevmottakerEntity(
             mottakerType = MottakerType.FULLMEKTIG_MOTTAKER,
             id = this.id,
+            brevmottakerRef = brevmottakerStegId,
+            parentRef = parentRef,
             navn = navn,
             personIdent = personIdent,
             organisasjonsnummer = organisasjonsnummer,
@@ -205,6 +215,18 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
         val personIdent: String? = null,
         val manuellAdresseInfo: ManuellAdresseInfo? = null,
     ) : RegistrertBrevmottaker {
+        override fun kombiner(annen: VergeMottaker, sporing: Sporing): RegistrertBrevmottaker {
+            return annen
+        }
+
+        override fun kombiner(annen: UtenlandskAdresseMottaker, sporing: Sporing): RegistrertBrevmottaker {
+            return UtenlandskAdresseOgVergeMottaker(
+                id = UUID.randomUUID(),
+                utenlandskAdresse = annen,
+                verge = this,
+            )
+        }
+
         override fun tilFrontendDto(): List<ManuellBrevmottakerResponsDto> {
             return listOf(
                 ManuellBrevmottakerResponsDto(
@@ -221,9 +243,11 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
             )
         }
 
-        override fun tilEntity(): RegistrertBrevmottakerEntity = RegistrertBrevmottakerEntity(
+        override fun tilEntity(brevmottakerStegId: UUID, parentRef: UUID?): RegistrertBrevmottakerEntity = RegistrertBrevmottakerEntity(
             mottakerType = MottakerType.VERGE_MOTTAKER,
             id = this.id,
+            brevmottakerRef = brevmottakerStegId,
+            parentRef = parentRef,
             navn = navn,
             personIdent = personIdent,
             vergetype = vergeType,
@@ -241,6 +265,10 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
         val navn: String,
         val manuellAdresseInfo: ManuellAdresseInfo? = null,
     ) : RegistrertBrevmottaker {
+        override fun kombiner(annen: DødsboMottaker, sporing: Sporing): RegistrertBrevmottaker {
+            return annen
+        }
+
         override fun fjernBrevmottaker(
             brevmottakerId: UUID,
             defaultMottaker: RegistrertBrevmottaker,
@@ -268,9 +296,11 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
             )
         }
 
-        override fun tilEntity(): RegistrertBrevmottakerEntity = RegistrertBrevmottakerEntity(
+        override fun tilEntity(brevmottakerStegId: UUID, parentRef: UUID?): RegistrertBrevmottakerEntity = RegistrertBrevmottakerEntity(
             mottakerType = MottakerType.DODSBO_MOTTAKER,
             id = this.id,
+            brevmottakerRef = brevmottakerStegId,
+            parentRef = parentRef,
             navn = navn,
             manuellAdresseInfoEntity = manuellAdresseInfo?.let(::tilManuellAdresseInfoEntity),
             personIdent = null,
@@ -311,7 +341,7 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
             defaultMottaker: RegistrertBrevmottaker,
             sporing: Sporing,
         ): RegistrertBrevmottaker {
-            if (utenlandskAdresse.id == brevmottakerId) return defaultMottaker.kombiner(verge, sporing)
+            if (utenlandskAdresse.id == brevmottakerId) return verge
             if (verge.id == brevmottakerId) return utenlandskAdresse
             throw ModellFeil.UgyldigOperasjonException("Ugyldig mottakerId $brevmottakerId", sporing)
         }
@@ -320,11 +350,13 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
             return utenlandskAdresse.tilFrontendDto() + verge.tilFrontendDto()
         }
 
-        override fun tilEntity(): RegistrertBrevmottakerEntity = RegistrertBrevmottakerEntity(
+        override fun tilEntity(brevmottakerStegId: UUID, parentRef: UUID?): RegistrertBrevmottakerEntity = RegistrertBrevmottakerEntity(
             mottakerType = MottakerType.UTENLANDSK_ADRESSE_OG_VERGE_MOTTAKER,
             id = this.id,
-            utenlandskAdresse = utenlandskAdresse.tilEntity(),
-            verge = verge.tilEntity(),
+            brevmottakerRef = brevmottakerStegId,
+            parentRef = parentRef,
+            utenlandskAdresse = utenlandskAdresse.tilEntity(brevmottakerStegId = brevmottakerStegId, parentRef = id),
+            verge = verge.tilEntity(brevmottakerStegId = brevmottakerStegId, parentRef = id),
             navn = null,
             personIdent = null,
             organisasjonsnummer = null,
@@ -372,12 +404,14 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
             return utenlandskAdresse.tilFrontendDto() + fullmektig.tilFrontendDto()
         }
 
-        override fun tilEntity(): RegistrertBrevmottakerEntity =
+        override fun tilEntity(brevmottakerStegId: UUID, parentRef: UUID?): RegistrertBrevmottakerEntity =
             RegistrertBrevmottakerEntity(
                 mottakerType = MottakerType.UTENLANDSK_ADRESSE_OG_FULLMEKTIG_MOTTAKER,
                 id = id,
-                utenlandskAdresse = utenlandskAdresse.tilEntity(),
-                fullmektig = fullmektig.tilEntity(),
+                brevmottakerRef = brevmottakerStegId,
+                parentRef = parentRef,
+                utenlandskAdresse = utenlandskAdresse.tilEntity(brevmottakerStegId = brevmottakerStegId, parentRef = id),
+                fullmektig = fullmektig.tilEntity(brevmottakerStegId = brevmottakerStegId, parentRef = id),
                 navn = null,
                 personIdent = null,
                 organisasjonsnummer = null,
@@ -387,7 +421,7 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
                 verge = null,
             )
     }
-
+/*
     class DefaultBrukerAdresseOgVergeMottaker(
         override val id: UUID,
         var defaultMottaker: DefaultMottaker,
@@ -497,4 +531,5 @@ sealed interface RegistrertBrevmottaker : FrontendDto<List<ManuellBrevmottakerRe
                 verge = null,
             )
     }
+ */
 }

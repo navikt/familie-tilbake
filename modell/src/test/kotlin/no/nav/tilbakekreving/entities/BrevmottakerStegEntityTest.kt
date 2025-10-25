@@ -30,8 +30,9 @@ class BrevmottakerStegEntityTest {
         val behandlingFørLagring = hentBehandling(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
 
         behandlingFørLagring.brevmottakerSteg = BrevmottakerSteg(
+            id = UUID.randomUUID(),
             aktivert = true,
-            RegistrertBrevmottaker.DefaultMottaker(
+            defaultMottaker = RegistrertBrevmottaker.DefaultMottaker(
                 navn = "default navn",
                 personIdent = "123456789",
             ),
@@ -49,6 +50,7 @@ class BrevmottakerStegEntityTest {
         val behandlingFørLagring = hentBehandling(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
 
         behandlingFørLagring.brevmottakerSteg = BrevmottakerSteg(
+            id = UUID.randomUUID(),
             aktivert = true,
             RegistrertBrevmottaker.UtenlandskAdresseMottaker(
                 id = UUID.randomUUID(),
@@ -76,6 +78,7 @@ class BrevmottakerStegEntityTest {
         val behandlingFørLagring = hentBehandling(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
 
         behandlingFørLagring.brevmottakerSteg = BrevmottakerSteg(
+            id = UUID.randomUUID(),
             aktivert = true,
             RegistrertBrevmottaker.VergeMottaker(
                 id = UUID.randomUUID(),
@@ -104,6 +107,7 @@ class BrevmottakerStegEntityTest {
         val behandlingFørLagring = hentBehandling(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
 
         behandlingFørLagring.brevmottakerSteg = BrevmottakerSteg(
+            id = UUID.randomUUID(),
             aktivert = true,
             RegistrertBrevmottaker.FullmektigMottaker(
                 id = UUID.randomUUID(),
@@ -132,6 +136,7 @@ class BrevmottakerStegEntityTest {
         val behandlingFørLagring = hentBehandling(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
 
         behandlingFørLagring.brevmottakerSteg = BrevmottakerSteg(
+            id = UUID.randomUUID(),
             aktivert = true,
             RegistrertBrevmottaker.DødsboMottaker(
                 id = UUID.randomUUID(),
@@ -159,6 +164,7 @@ class BrevmottakerStegEntityTest {
         val behandlingFørLagring = hentBehandling(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
 
         behandlingFørLagring.brevmottakerSteg = BrevmottakerSteg(
+            id = UUID.randomUUID(),
             aktivert = true,
             RegistrertBrevmottaker.UtenlandskAdresseOgVergeMottaker(
                 id = UUID.randomUUID(),
@@ -195,6 +201,7 @@ class BrevmottakerStegEntityTest {
         val behandlingFørLagring = hentBehandling(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
 
         behandlingFørLagring.brevmottakerSteg = BrevmottakerSteg(
+            id = UUID.randomUUID(),
             aktivert = true,
             RegistrertBrevmottaker.UtenlandskAdresseOgFullmektigMottaker(
                 id = UUID.randomUUID(),
@@ -231,22 +238,20 @@ class BrevmottakerStegEntityTest {
         val behandlingFørLagring = hentBehandling(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
 
         behandlingFørLagring.brevmottakerSteg = BrevmottakerSteg(
+            id = UUID.randomUUID(),
             aktivert = true,
-            RegistrertBrevmottaker.DefaultBrukerAdresseOgVergeMottaker(
+            defaultMottaker = RegistrertBrevmottaker.DefaultMottaker(
                 id = UUID.randomUUID(),
-                defaultMottaker = RegistrertBrevmottaker.DefaultMottaker(
-                    id = UUID.randomUUID(),
-                    navn = "Default navn",
-                ),
-                verge = RegistrertBrevmottaker.VergeMottaker(
-                    id = UUID.randomUUID(),
-                    navn = "Verge",
-                    personIdent = "43214321321",
-                    vergeType = Vergetype.ADVOKAT,
-                ),
+                navn = "Default navn",
             ),
-        )
-
+        ).apply {
+            registrertBrevmottaker = RegistrertBrevmottaker.VergeMottaker(
+                id = UUID.randomUUID(),
+                navn = "Verge",
+                personIdent = "43214321321",
+                vergeType = Vergetype.ADVOKAT,
+            )
+        }
         val behandlingEtterLagring = behandlingFørLagring.tilEntity("not_needed").fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
         behandlingEtterLagring.brevmottakerSteg?.tilFrontendDto()?.size shouldBe 1
         behandlingEtterLagring.brevmottakerSteg?.tilFrontendDto()?.first()?.brevmottaker?.navn shouldBe "Verge"
@@ -260,21 +265,20 @@ class BrevmottakerStegEntityTest {
         val behandlingFørLagring = hentBehandling(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
 
         behandlingFørLagring.brevmottakerSteg = BrevmottakerSteg(
+            id = UUID.randomUUID(),
             aktivert = true,
-            RegistrertBrevmottaker.DefaultBrukerAdresseOgFullmektigMottaker(
+            defaultMottaker = RegistrertBrevmottaker.DefaultMottaker(
                 id = UUID.randomUUID(),
-                defaultMottaker = RegistrertBrevmottaker.DefaultMottaker(
-                    id = UUID.randomUUID(),
-                    navn = "Default navn",
-                ),
-                fullmektig = RegistrertBrevmottaker.FullmektigMottaker(
-                    id = UUID.randomUUID(),
-                    navn = "Fullmektig",
-                    vergeType = Vergetype.ADVOKAT,
-                    organisasjonsnummer = "123456789",
-                ),
+                navn = "Default navn",
             ),
-        )
+        ).apply {
+            registrertBrevmottaker = RegistrertBrevmottaker.FullmektigMottaker(
+                id = UUID.randomUUID(),
+                navn = "Fullmektig",
+                vergeType = Vergetype.ADVOKAT,
+                organisasjonsnummer = "123456789",
+            )
+        }
 
         val behandlingEtterLagring = behandlingFørLagring.tilEntity("not_needed").fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
         behandlingEtterLagring.brevmottakerSteg?.tilFrontendDto()?.size shouldBe 1
