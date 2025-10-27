@@ -97,18 +97,25 @@ class NyBrevmottakerRepository(
         BrevmottakerEntityMapper.upsertQuery(jdbcTemplate, brevmottakerStegEntity)
         BrevmottakerEntityMapper.RegistrertBrevmottaker.upsertQuery(jdbcTemplate, brevmottakerStegEntity.defaultMottakerEntity)
 
-        when (brevmottakerStegEntity.registrertBrevmottakerEntity.mottakerType) {
-            MottakerType.UTENLANDSK_ADRESSE_OG_VERGE_MOTTAKER -> {
-                BrevmottakerEntityMapper.RegistrertBrevmottaker.upsertQuery(jdbcTemplate, brevmottakerStegEntity.registrertBrevmottakerEntity)
-                BrevmottakerEntityMapper.RegistrertBrevmottaker.upsertQuery(jdbcTemplate, brevmottakerStegEntity.registrertBrevmottakerEntity.utenlandskAdresse!!)
-                BrevmottakerEntityMapper.RegistrertBrevmottaker.upsertQuery(jdbcTemplate, brevmottakerStegEntity.registrertBrevmottakerEntity.verge!!)
-            }
-            MottakerType.UTENLANDSK_ADRESSE_OG_FULLMEKTIG_MOTTAKER -> {
-                BrevmottakerEntityMapper.RegistrertBrevmottaker.upsertQuery(jdbcTemplate, brevmottakerStegEntity.registrertBrevmottakerEntity)
-                BrevmottakerEntityMapper.RegistrertBrevmottaker.upsertQuery(jdbcTemplate, brevmottakerStegEntity.registrertBrevmottakerEntity.utenlandskAdresse!!)
-                BrevmottakerEntityMapper.RegistrertBrevmottaker.upsertQuery(jdbcTemplate, brevmottakerStegEntity.registrertBrevmottakerEntity.fullmektig!!)
-            }
-            else -> BrevmottakerEntityMapper.RegistrertBrevmottaker.upsertQuery(jdbcTemplate, brevmottakerStegEntity.registrertBrevmottakerEntity)
+        val registrertBrevmottakerEntity = brevmottakerStegEntity.registrertBrevmottakerEntity
+        BrevmottakerEntityMapper.RegistrertBrevmottaker.upsertQuery(jdbcTemplate, registrertBrevmottakerEntity)
+        if (registrertBrevmottakerEntity.utenlandskAdresse != null) {
+            BrevmottakerEntityMapper.RegistrertBrevmottaker.upsertQuery(
+                jdbcTemplate,
+                registrertBrevmottakerEntity.utenlandskAdresse!!,
+            )
+        }
+        if (registrertBrevmottakerEntity.verge != null) {
+            BrevmottakerEntityMapper.RegistrertBrevmottaker.upsertQuery(
+                jdbcTemplate,
+                registrertBrevmottakerEntity.verge!!,
+            )
+        }
+        if (registrertBrevmottakerEntity.fullmektig != null) {
+            BrevmottakerEntityMapper.RegistrertBrevmottaker.upsertQuery(
+                jdbcTemplate,
+                registrertBrevmottakerEntity.fullmektig!!,
+            )
         }
     }
 }
