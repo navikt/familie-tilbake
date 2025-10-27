@@ -11,6 +11,7 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import java.util.UUID
 
 class BrevmottakerSteg(
+    val id: UUID,
     private var aktivert: Boolean,
     private val defaultMottaker: RegistrertBrevmottaker,
 ) : Saksbehandlingsteg, FrontendDto<List<ManuellBrevmottakerResponsDto>> {
@@ -71,11 +72,13 @@ class BrevmottakerSteg(
         registrertBrevmottaker = registrertBrevmottaker.fjernBrevmottaker(brevmottakerId, defaultMottaker, sporing)
     }
 
-    fun tilEntity(): BrevmottakerStegEntity =
+    fun tilEntity(behandlingRef: UUID): BrevmottakerStegEntity =
         BrevmottakerStegEntity(
-            aktivert,
-            defaultMottakerEntity = defaultMottaker.tilEntity(),
-            registrertBrevmottakerEntity = registrertBrevmottaker.tilEntity(),
+            id = id,
+            behandlingRef = behandlingRef,
+            aktivert = aktivert,
+            defaultMottakerEntity = defaultMottaker.tilEntity(id, null),
+            registrertBrevmottakerEntity = registrertBrevmottaker.tilEntity(brevmottakerStegId = id, parentRef = null),
         )
 
     companion object {
@@ -83,8 +86,9 @@ class BrevmottakerSteg(
             navn: String,
             ident: String,
         ) = BrevmottakerSteg(
+            id = UUID.randomUUID(),
             aktivert = false,
-            RegistrertBrevmottaker.DefaultMottaker(navn = navn, personIdent = ident),
+            defaultMottaker = RegistrertBrevmottaker.DefaultMottaker(navn = navn, personIdent = ident),
         )
     }
 }

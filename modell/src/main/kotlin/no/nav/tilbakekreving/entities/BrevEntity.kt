@@ -10,6 +10,7 @@ import java.util.UUID
 data class BrevEntity(
     val brevType: Brevtype,
     val id: UUID,
+    val brevmottakerStegRef: UUID? = null, // Todo nullable må fjernes etter prod.
     val opprettetDato: LocalDate,
     val journalpostId: String?,
     val mottaker: RegistrertBrevmottakerEntity,
@@ -22,6 +23,7 @@ data class BrevEntity(
         return when (brevType) {
             Brevtype.VARSEL_BREV -> Varselbrev(
                 id = requireNotNull(id) { "Id kreves for Brev" },
+                brevmottakerStegId = brevmottakerStegRef,
                 opprettetDato = requireNotNull(opprettetDato) { "opprettetDato kreves for Brev" },
                 journalpostId = journalpostId,
                 mottaker = mottaker.fraEntity(),

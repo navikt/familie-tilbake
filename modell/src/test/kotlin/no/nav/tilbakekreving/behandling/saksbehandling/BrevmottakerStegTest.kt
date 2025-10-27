@@ -27,7 +27,7 @@ class BrevmottakerStegTest {
     }
 
     @Test
-    fun `brevmottaker skal være brukeren ved behandlingopprettelse`() {
+    fun `registrertBrevmottaker skal være DefaultMottaker ved behandlingopprettelse`() {
         val navn = "test bruker"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
@@ -38,7 +38,7 @@ class BrevmottakerStegTest {
     }
 
     @Test
-    fun `endre bruker mottaker til dødsbo som brevmottaker`() {
+    fun `registrertBrevmottaker skal være dødsbo etter at dødsbo er lagt til som brevmottaker`() {
         val navn = "dødsbo adresse"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
@@ -59,7 +59,7 @@ class BrevmottakerStegTest {
     }
 
     @Test
-    fun `erstatter bruker addresse med utenlandsk adresse`() {
+    fun `registrertBrevmottaker skal være utenlandskadresse etter at utenlandskadresse er lagt til som brevmottaker`() {
         val navn = "test bruker"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
@@ -80,7 +80,7 @@ class BrevmottakerStegTest {
     }
 
     @Test
-    fun `oppdatere utenlandskadresse i utenlandskadresse`() {
+    fun `skal kunne oppdatere utenlandskadresse når brevmottakeren er allerede utenlandskadresse`() {
         val navn = "test bruker"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
@@ -117,7 +117,7 @@ class BrevmottakerStegTest {
     }
 
     @Test
-    fun `legge til Verge til bruker som brevmottaker`() {
+    fun `registrertBrevmottaker skal være VergeMottaker etter at VergeMottaker er lagt til som brevmottaker`() {
         val navn = "test bruker"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
@@ -134,14 +134,14 @@ class BrevmottakerStegTest {
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
 
-        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.DefaultBrukerAdresseOgVergeMottaker> {
-            it.defaultMottaker.navn shouldBe "test bruker"
-            it.verge.navn shouldBe "Verge"
+        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.VergeMottaker> {
+            it.navn shouldBe "Verge"
+            it.manuellAdresseInfo?.adresselinje1 shouldBe "Adresse"
         }
     }
 
     @Test
-    fun `oppdater Verge i Defaultbruker_og_verge`() {
+    fun `skal kunne oppdatere VergeMottaker når brevmottakeren er allerede VergeMottaker`() {
         val navn = "test bruker"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
@@ -169,15 +169,14 @@ class BrevmottakerStegTest {
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
 
-        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.DefaultBrukerAdresseOgVergeMottaker> {
-            it.defaultMottaker.navn shouldBe "test bruker"
-            it.verge.navn shouldBe "Ny Verge"
-            it.verge.personIdent shouldBe "23232323231"
+        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.VergeMottaker> {
+            it.navn shouldBe "Ny Verge"
+            it.personIdent shouldBe "23232323231"
         }
     }
 
     @Test
-    fun `legge til fullmektig til bruker som brevmottaker`() {
+    fun `registrertBrevmottaker skal være FullmektigMottaker etter at FullmektigMottaker er lagt til som brevmottaker`() {
         val navn = "test bruker"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
@@ -194,14 +193,14 @@ class BrevmottakerStegTest {
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
 
-        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.DefaultBrukerAdresseOgFullmektigMottaker> {
-            it.defaultMottaker.navn shouldBe "test bruker"
-            it.fullmektig.navn shouldBe "fullmektig"
+        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.FullmektigMottaker> {
+            it.navn shouldBe "fullmektig"
+            it.manuellAdresseInfo?.adresselinje1 shouldBe "Adresse"
         }
     }
 
     @Test
-    fun `oppdater Fullmektig i Defaultbruker_og_fullmektig`() {
+    fun `skal kunne oppdatere FullmektigMottaker når brevmottakeren er allerede FullmektigMottaker`() {
         val navn = "test bruker"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
@@ -229,15 +228,14 @@ class BrevmottakerStegTest {
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
 
-        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.DefaultBrukerAdresseOgFullmektigMottaker> {
-            it.defaultMottaker.navn shouldBe "test bruker"
-            it.fullmektig.navn shouldBe "ny fullmektig"
-            it.fullmektig.personIdent shouldBe "11111111111"
+        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.FullmektigMottaker> {
+            it.navn shouldBe "ny fullmektig"
+            it.personIdent shouldBe "11111111111"
         }
     }
 
     @Test
-    fun `legge til Utenlandskaddresse til Defaultbruker_Og_Verge som brevmottakere`() {
+    fun `registrertBrevmottaker skal være UtenlandskAdresseOgVergeMottaker når Utenlandskaddresse legges til VergeMottaker som brevmottakere`() {
         val navn = "test bruker"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
@@ -270,7 +268,7 @@ class BrevmottakerStegTest {
     }
 
     @Test
-    fun `oppdatere Utenlandskaddresse i Utenlandskadresse_Og_Verge`() {
+    fun `skal kunne oppdatere Utenlandskaddresse når brevmottakeren er UtenlandskAdresseOgVergeMottaker`() {
         val navn = "test bruker"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
@@ -296,6 +294,12 @@ class BrevmottakerStegTest {
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
 
+        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.UtenlandskAdresseOgVergeMottaker> {
+            it.utenlandskAdresse.navn shouldBe "Navn"
+            it.utenlandskAdresse.manuellAdresseInfo?.poststed shouldBe "Poststed"
+            it.verge.navn shouldBe "Verge"
+        }
+
         brevmottakerSteg.håndter(
             RegistrertBrevmottaker.UtenlandskAdresseMottaker(
                 id = UUID.randomUUID(),
@@ -319,7 +323,7 @@ class BrevmottakerStegTest {
     }
 
     @Test
-    fun `oppdatere Verge i Utenlandskadresse_Og_Verge`() {
+    fun `skal kunne oppdatere VergeMottaker når brevmottakeren er UtenlandskAdresseOgVergeMottake`() {
         val navn = "test bruker"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
@@ -363,7 +367,7 @@ class BrevmottakerStegTest {
     }
 
     @Test
-    fun `legge til Utenlandskaddresse til Defaultbruker_Og_Fullmektig`() {
+    fun `registrertBrevmottaker skal være UtenlandskAdresseOgFullmektigMottaker når Utenlandskaddresse legges til FullmektigMottaker som brevmottakere`() {
         val navn = "test bruker"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
@@ -396,7 +400,7 @@ class BrevmottakerStegTest {
     }
 
     @Test
-    fun `oppdatere Utenlandskaddresse i Utenlandskadresse_Og_Fullmektig`() {
+    fun `skal kunne oppdatere Utenlandskaddresse når brevmottakeren er UtenlandskAdresseOgFullmektigMottaker`() {
         val navn = "test bruker"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
@@ -445,7 +449,7 @@ class BrevmottakerStegTest {
     }
 
     @Test
-    fun `oppdatere Fullmektig i Utenlandskadresse_Og_Fullmektig`() {
+    fun `skal kunne oppdatere FullmektigMottaker når brevmottakeren er UtenlandskAdresseOgFullmektigMottaker`() {
         val navn = "test bruker"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
@@ -489,7 +493,7 @@ class BrevmottakerStegTest {
     }
 
     @Test
-    fun `endre UTENLANDSK_ADRESSE_OG_FULLMEKTIG til UTENLANDSK_ADRESSE_OG_VERGE`() {
+    fun `endre UtenlandskAdresseOgFullmektigMottaker til UtenlandskAdresseOgVergeMottaker`() {
         val navn = "test bruker"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
@@ -532,7 +536,7 @@ class BrevmottakerStegTest {
     }
 
     @Test
-    fun `endre UTENLANDSK_ADRESSE_OG_VERGE til UTENLANDSK_ADRESSE_OG_FULLMEKTIG`() {
+    fun `endre UtenlandskAdresseOgVergeMottaker til UtenlandskAdresseOgFullmektigMottaker`() {
         val navn = "test bruker"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
@@ -575,7 +579,7 @@ class BrevmottakerStegTest {
     }
 
     @Test
-    fun `kan ikke endre UTENLANDSK_ADRESSE_OG_VERGE til Dødsbo`() {
+    fun `kan ikke endre UtenlandskAdresseOgVergeMottaker til Dødsbo`() {
         val navn = "test bruker"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
@@ -615,7 +619,7 @@ class BrevmottakerStegTest {
     }
 
     @Test
-    fun `kan ikke fjerne brevmottakerSteg er deaktivert`() {
+    fun `må kunne ikke fjerne når brevmottakerSteg er deaktivert`() {
         val navn = "test bruker"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
@@ -627,7 +631,7 @@ class BrevmottakerStegTest {
     }
 
     @Test
-    fun `kan ikke fjerne defaultBruker`() {
+    fun `må kunne ikke fjerne defaultBruker`() {
         val navn = "test bruker"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
@@ -640,7 +644,7 @@ class BrevmottakerStegTest {
     }
 
     @Test
-    fun `fjerner dødsboMottaker`() {
+    fun `registrertBrevmottaker skal være DefaultMottaker når dødsboMottaker fjernes`() {
         val navn = "test bruker"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
@@ -662,7 +666,7 @@ class BrevmottakerStegTest {
     }
 
     @Test
-    fun `fjerner utenlandskadresse`() {
+    fun `registrertBrevmottaker skal være DefaultMottaker når utenlandskadresse fjernes`() {
         val navn = "test bruker"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
@@ -684,7 +688,7 @@ class BrevmottakerStegTest {
     }
 
     @Test
-    fun `fjerner verge adresse fra defaultbruker_og_verge`() {
+    fun `registrertBrevmottaker skal være DefaultMottaker når VergeMottaker fjernes`() {
         val navn = "test bruker"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
@@ -710,7 +714,7 @@ class BrevmottakerStegTest {
     }
 
     @Test
-    fun `fjerner verge adresse fra utenlandskaddresse_og_verge`() {
+    fun `registrertBrevmottaker skal være UtenlandskAdresseMottaker når VergeMottaker fjernes fra UtenlandskAdresseOgVergeMottaker`() {
         val navn = "test bruker"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
@@ -730,7 +734,7 @@ class BrevmottakerStegTest {
         brevmottakerSteg.håndter(
             RegistrertBrevmottaker.VergeMottaker(
                 id = vergeId,
-                navn = "Fullmektig Navn",
+                navn = "Verge Navn",
                 manuellAdresseInfo = adresseInfo,
                 vergeType = Vergetype.VERGE_FOR_BARN,
             ),
@@ -745,7 +749,7 @@ class BrevmottakerStegTest {
     }
 
     @Test
-    fun `fjerner utenlandskadresse fra utenlandskaddresse_og_verge`() {
+    fun `registrertBrevmottaker skal være VergeMottaker når UtenlandskAdresseMottaker fjernes fra UtenlandskAdresseOgVergeMottaker`() {
         val navn = "test bruker"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
@@ -774,14 +778,13 @@ class BrevmottakerStegTest {
 
         brevmottakerSteg.fjernManuellBrevmottaker(utenlandskAdresseId, Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()))
 
-        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.DefaultBrukerAdresseOgVergeMottaker> {
-            it.defaultMottaker.navn shouldBe "test bruker"
-            it.verge.navn shouldBe "Verge Navn"
+        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.VergeMottaker> {
+            it.navn shouldBe "Verge Navn"
         }
     }
 
     @Test
-    fun `fjerner fullmektig adresse fra defaultbruker_og_fullmektig`() {
+    fun `registrertBrevmottaker skal være DefaultMottaker når Fullmektig fjernes`() {
         val navn = "test bruker"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
@@ -807,7 +810,7 @@ class BrevmottakerStegTest {
     }
 
     @Test
-    fun `fjerner fullmektig adresse fra utenlandskaddresse_og_fullmektig`() {
+    fun `registrertBrevmottaker skal være UtenlandskAdresseMottaker når FullmektigMottaker fjernes fra UtenlandskAdresseOgFullmektigMottaker`() {
         val navn = "test bruker"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
@@ -842,7 +845,7 @@ class BrevmottakerStegTest {
     }
 
     @Test
-    fun `fjerner utenlandskadresse fra utenlandskaddresse_og_fullmektig`() {
+    fun `registrertBrevmottaker skal være FullmektigMottaker når UtenlandskAdresseMottaker fjernes fra UtenlandskAdresseOgFullmektigMottaker`() {
         val navn = "test bruker"
         val ident = "12312312312"
         val brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
@@ -871,9 +874,8 @@ class BrevmottakerStegTest {
 
         brevmottakerSteg.fjernManuellBrevmottaker(utenlandskAdresseId, Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()))
 
-        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.DefaultBrukerAdresseOgFullmektigMottaker> {
-            it.defaultMottaker.navn shouldBe "test bruker"
-            it.fullmektig.navn shouldBe "Fullmektig Navn"
+        brevmottakerSteg.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.FullmektigMottaker> {
+            it.navn shouldBe "Fullmektig Navn"
         }
     }
 }
