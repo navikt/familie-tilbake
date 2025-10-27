@@ -3,15 +3,15 @@ package no.nav.tilbakekreving.integrasjoner.dokarkiv.domain
 import no.nav.familie.tilbake.kontrakter.dokarkiv.AvsenderMottaker
 
 data class OpprettJournalpostRequest(
-    val journalpostType: JournalpostType? = null,
-    val avsenderMottaker: AvsenderMottaker? = null,
-    val bruker: DokarkivBruker? = null,
-    val tema: String? = null,
-    val behandlingstema: String? = null,
-    val tittel: String? = null,
-    val kanal: String? = null,
-    val journalfoerendeEnhet: String? = null,
-    val eksternReferanseId: String? = null,
-    val sak: Sak? = null,
-    val dokumenter: List<ArkivDokument> = ArrayList(),
+    val journalpostType: JournalpostType?,
+    val avsenderMottaker: AvsenderMottaker?,
+    val bruker: DokarkivBruker?,
+    val tema: String?,
+    val behandlingstema: String?,
+    val tittel: String?,
+    val kanal: String?,
+    val journalfoerendeEnhet: String?,
+    val eksternReferanseId: String?,
+    val sak: Sak?,
+    val dokumenter: List<ArkivDokument>,
 )

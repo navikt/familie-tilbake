@@ -17,13 +17,13 @@ class DokarkivServiceStub() : DokarkivService {
         eksternFagsakId: String,
         logContext: SecureLog.Context,
     ): OpprettJournalpostResponse {
-        return OpprettJournalpostResponse(journalpostId = "-1")
+        return OpprettJournalpostResponse(journalpostId = "-1", null, null, null)
     }
 
     override fun journalførVarselbrev(
         varselbrevBehov: VarselbrevBehov,
         logContext: SecureLog.Context,
     ): OpprettJournalpostResponse {
-        return OpprettJournalpostResponse(journalpostId = "-1")
+        return OpprettJournalpostResponse(journalpostId = "-1", null, null, null)
     }
 }

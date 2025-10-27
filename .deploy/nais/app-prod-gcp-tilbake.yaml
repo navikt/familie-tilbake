@@ -119,6 +119,9 @@ spec:
         - application: tilbakekreving-prosessering
           namespace: tilbake
           cluster: prod-gcp
+        - application: dokarkiv
+          namespace: teamdokumenthandtering
+          cluster: prod-gcp
     outbound:
       rules:
         - application: populasjonstilgangskontroll
@@ -130,7 +133,6 @@ spec:
         - host: familie-oppdrag.prod-fss-pub.nais.io
         - host: pdl-api.prod-fss-pub.nais.io
         - host: arbeid-og-inntekt.prod-fss-pub.nais.io
-        - host: dokarkiv.prod-fss-pub.nais.io
         - host: mpls02.adeo.no
           ports:
             - port: 1414

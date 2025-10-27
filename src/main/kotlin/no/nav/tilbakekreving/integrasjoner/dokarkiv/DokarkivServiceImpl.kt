@@ -228,15 +228,18 @@ class DokarkivServiceImpl(
             ),
             journalfoerendeEnhet = "1234", // Todo for testing harkodet 1234 for nå. må fjernes!! requireNotNull(varselbrevBehov.behandlendeEnhet) { "Enhetskode kreves for journalføring" }.kode,,
             sak = Sak(
+                arkivsaksnummer = null,
+                arkivsaksystem = null,
                 fagsakId = varselbrevBehov.eksternFagsakId,
-                sakstype = "FAGSAK",
                 fagsaksystem = when (varselbrevBehov.ytelse.tilFagsystemDTO()) {
                     FagsystemDTO.BA -> Fagsaksystem.BA
                     FagsystemDTO.EF -> Fagsaksystem.EF
                     FagsystemDTO.TS -> Fagsaksystem.TILLEGGSSTONADER
                     FagsystemDTO.IT01 -> Fagsaksystem.IT01
                     FagsystemDTO.KONT -> Fagsaksystem.KONT
+                    FagsystemDTO.AAP -> Fagsaksystem.KELVIN
                 },
+                sakstype = "FAGSAK",
             ),
         )
         return runBlocking {

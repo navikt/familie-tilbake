@@ -45,6 +45,8 @@ class DokarkivServiceImplTest {
         val expectedResponse = OpprettJournalpostResponse(
             journalpostId = "123456789",
             journalpostferdigstilt = true,
+            melding = null,
+            dokumenter = emptyList(),
         )
         every { jwtToken.encodedToken } returns "USER_TOKEN"
 
@@ -73,6 +75,16 @@ class DokarkivServiceImplTest {
 
         val request = OpprettJournalpostRequest(
             journalpostType = JournalpostType.UTGAAENDE,
+            avsenderMottaker = null,
+            bruker = null,
+            tema = null,
+            behandlingstema = null,
+            tittel = null,
+            kanal = null,
+            journalfoerendeEnhet = null,
+            eksternReferanseId = null,
+            sak = null,
+            dokumenter = emptyList(),
         )
 
         val resp = runBlocking {
@@ -112,7 +124,19 @@ class DokarkivServiceImplTest {
         shouldThrow<Feil> {
             runBlocking {
                 dokarkivService.lagJournalpost(
-                    request = OpprettJournalpostRequest(journalpostType = JournalpostType.UTGAAENDE),
+                    request = OpprettJournalpostRequest(
+                        journalpostType = JournalpostType.UTGAAENDE,
+                        avsenderMottaker = null,
+                        bruker = null,
+                        tema = null,
+                        behandlingstema = null,
+                        tittel = null,
+                        kanal = null,
+                        journalfoerendeEnhet = null,
+                        eksternReferanseId = null,
+                        sak = null,
+                        dokumenter = emptyList(),
+                    ),
                     ferdigstill = true,
                     behandlingId = "b",
                     eksternFagsakId = "f",

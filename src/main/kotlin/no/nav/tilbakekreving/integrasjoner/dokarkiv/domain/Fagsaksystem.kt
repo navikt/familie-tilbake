@@ -6,4 +6,5 @@ enum class Fagsaksystem {
     KONT,
     IT01,
     TILLEGGSSTONADER,
+    KELVIN,
 }
