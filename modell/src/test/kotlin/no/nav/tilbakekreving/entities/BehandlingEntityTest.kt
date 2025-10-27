@@ -13,7 +13,6 @@ import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.fagsystem.Ytelsestype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
-import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.saksbehandler.Behandler
@@ -48,9 +47,8 @@ class BehandlingEntityTest {
         val behandler = Behandler.Saksbehandler("A123456")
         val behandlingFørLagring = Behandling.nyBehandling(
             id = behandlingId,
-            behandlingstype = Behandlingstype.TILBAKEKREVING,
+            type = Behandlingstype.TILBAKEKREVING,
             enhet = Enhet("0425", "NAV Solør"),
-            årsak = Behandlingsårsakstype.REVURDERING_KLAGE_KA,
             ansvarligSaksbehandler = behandler,
             eksternFagsakRevurdering = revurderingInnslag,
             kravgrunnlag = kravgrunnlag,

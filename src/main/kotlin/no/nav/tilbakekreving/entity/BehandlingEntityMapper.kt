@@ -28,8 +28,8 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
         FieldConverter.NumericId,
     )
     val behandlingstype = field(
-        column = "behandlingstype",
-        getter = BehandlingEntity::behandlingstype,
+        column = "type",
+        getter = BehandlingEntity::type,
         converter = FieldConverter.EnumConverter.of<Behandlingstype>().required(),
     )
     val opprettet = field(
@@ -43,9 +43,9 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
         converter = FieldConverter.LocalDateTimeConverter.required(),
     )
     val årsak = field(
-        column = "årsak",
-        getter = BehandlingEntity::årsak,
-        converter = FieldConverter.EnumConverter.of<Behandlingsårsakstype>().required(),
+        column = "revurderingsårsak",
+        getter = BehandlingEntity::revurderingsårsak,
+        converter = FieldConverter.EnumConverter.of<Behandlingsårsakstype>(),
     )
 
     val eksternFagsakBehandlingId = field(
@@ -99,13 +99,13 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
         return BehandlingEntity(
             id = resultSet[id],
             tilbakekrevingId = resultSet[tilbakekrevingId],
-            behandlingstype = resultSet[behandlingstype],
+            type = resultSet[behandlingstype],
             opprettet = resultSet[opprettet],
             sistEndret = resultSet[sistEndret],
             enhet = resultSet[enhetId]?.let {
                 EnhetEntity(kode = it, navn = resultSet[enhetNavn]!!)
             } ?: enhet,
-            årsak = resultSet[årsak],
+            revurderingsårsak = resultSet[årsak],
             ansvarligSaksbehandler = resultSet[ansvarligSaksbehandlerType]?.let {
                 BehandlerEntity(type = it, ident = resultSet[ansvarligSaksbehandlerIdent]!!)
             } ?: ansvarligSaksbehandler,

@@ -22,7 +22,6 @@ import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
-import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
@@ -167,9 +166,8 @@ fun behandling(
     val eksternFagsakBehandling = HistorikkStub.fakeReferanse(eksternFagsakBehandling())
     return Behandling.nyBehandling(
         id = UUID.randomUUID(),
-        behandlingstype = Behandlingstype.TILBAKEKREVING,
+        type = Behandlingstype.TILBAKEKREVING,
         enhet = Enhet("", ""),
-        årsak = Behandlingsårsakstype.REVURDERING_KLAGE_KA,
         ansvarligSaksbehandler = ANSVARLIG_SAKSBEHANDLER,
         eksternFagsakRevurdering = eksternFagsakBehandling,
         kravgrunnlag = kravgrunnlagReferanse,

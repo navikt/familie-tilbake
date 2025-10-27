@@ -36,7 +36,6 @@ import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
-import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
@@ -124,9 +123,8 @@ class Tilbakekreving internal constructor(
         val behandlingId = UUID.randomUUID()
         val behandling = Behandling.nyBehandling(
             id = behandlingId,
-            behandlingstype = Behandlingstype.TILBAKEKREVING,
+            type = Behandlingstype.TILBAKEKREVING,
             enhet = null,
-            årsak = Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR,
             ansvarligSaksbehandler = behandler,
             eksternFagsakRevurdering = eksternFagsakRevurdering,
             kravgrunnlag = kravgrunnlagHistorikk.nåværende(),

@@ -10,7 +10,6 @@ import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
-import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.brev.ManuellAdresseInfo
 import no.nav.tilbakekreving.kontrakter.verge.Vergetype
 import no.nav.tilbakekreving.kravgrunnlag
@@ -310,9 +309,8 @@ class BrevmottakerStegEntityTest {
         val behandler = Behandler.Saksbehandler("A123456")
         return Behandling.nyBehandling(
             id = behandlingId,
-            behandlingstype = Behandlingstype.TILBAKEKREVING,
+            type = Behandlingstype.TILBAKEKREVING,
             enhet = Enhet("0425", "NAV Solør"),
-            årsak = Behandlingsårsakstype.REVURDERING_KLAGE_KA,
             ansvarligSaksbehandler = behandler,
             eksternFagsakRevurdering = revurderingInnslag,
             kravgrunnlag = kravgrunnlag,

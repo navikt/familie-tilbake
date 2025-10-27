@@ -13,11 +13,11 @@ import java.util.UUID
 data class BehandlingEntity(
     val id: UUID,
     val tilbakekrevingId: String,
-    val behandlingstype: Behandlingstype,
+    val type: Behandlingstype,
     val opprettet: LocalDateTime,
     val sistEndret: LocalDateTime,
     val enhet: EnhetEntity?,
-    val årsak: Behandlingsårsakstype,
+    val revurderingsårsak: Behandlingsårsakstype?,
     var ansvarligSaksbehandler: BehandlerEntity,
     val eksternFagsakBehandlingRef: HistorikkReferanseEntity<UUID>,
     val kravgrunnlagRef: HistorikkReferanseEntity<UUID>,
@@ -40,11 +40,11 @@ data class BehandlingEntity(
         val foreldelsessteg = foreldelsestegEntity.fraEntity()
         return Behandling(
             id = id,
-            behandlingstype = behandlingstype,
+            type = type,
             opprettet = opprettet,
             sistEndret = sistEndret,
             enhet = enhet?.fraEntity(),
-            årsak = årsak,
+            revurderingsårsak = revurderingsårsak,
             ansvarligSaksbehandler = ansvarligSaksbehandler.fraEntity(),
             eksternFagsakRevurdering = eksternFagsak,
             kravgrunnlag = kravgrunnlag,

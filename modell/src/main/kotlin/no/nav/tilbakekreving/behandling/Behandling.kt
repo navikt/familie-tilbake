@@ -58,11 +58,11 @@ import java.util.UUID
 
 class Behandling internal constructor(
     override val id: UUID,
-    private val behandlingstype: Behandlingstype,
+    private val type: Behandlingstype,
     private val opprettet: LocalDateTime,
     private var sistEndret: LocalDateTime,
     private val enhet: Enhet?,
-    private val årsak: Behandlingsårsakstype,
+    private val revurderingsårsak: Behandlingsårsakstype?,
     private var ansvarligSaksbehandler: Behandler,
     private var eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
     private val kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
@@ -100,11 +100,11 @@ class Behandling internal constructor(
         return BehandlingEntity(
             id = id,
             tilbakekrevingId = tilbakekrevingId,
-            behandlingstype = behandlingstype,
+            type = type,
             opprettet = opprettet,
             sistEndret = sistEndret,
             enhet = enhet?.tilEntity(),
-            årsak = årsak,
+            revurderingsårsak = revurderingsårsak,
             ansvarligSaksbehandler = ansvarligSaksbehandler.tilEntity(),
             eksternFagsakBehandlingRef = eksternFagsakRevurdering.tilEntity(),
             kravgrunnlagRef = kravgrunnlag.tilEntity(),
@@ -175,7 +175,7 @@ class Behandling internal constructor(
                 ansvarligSaksbehandler = ansvarligSaksbehandler.ident,
                 ytelsestype = ytelsestype,
                 aktør = aktør,
-                behandlingstype = behandlingstype,
+                behandlingstype = type,
             ),
         )
     }
@@ -194,7 +194,7 @@ class Behandling internal constructor(
             eksternBrukId = id,
             behandlingId = id,
             erBehandlingHenlagt = false,
-            type = behandlingstype,
+            type = type,
             status = tilstand.behandlingsstatus(this),
             opprettetDato = opprettet.toLocalDate(),
             avsluttetDato = null,
@@ -238,7 +238,7 @@ class Behandling internal constructor(
             fagsystemsbehandlingId = eksternFagsakRevurdering.entry.eksternId,
             // TODO
             eksternFagsakId = "TODO",
-            behandlingsårsakstype = årsak,
+            behandlingsårsakstype = revurderingsårsak,
             støtterManuelleBrevmottakere = true,
             harManuelleBrevmottakere = false,
             manuelleBrevmottakere = emptyList(),
@@ -252,7 +252,7 @@ class Behandling internal constructor(
         return BehandlingsoppsummeringDto(
             behandlingId = id,
             eksternBrukId = id,
-            type = behandlingstype,
+            type = type,
             status = tilstand.behandlingsstatus(this),
         )
     }
@@ -382,7 +382,7 @@ class Behandling internal constructor(
             opprettetTid = opprettet,
             behandlingId = id,
             enhet = enhet,
-            behandlingstype = behandlingstype,
+            behandlingstype = type,
             ansvarligSaksbehandler = ansvarligSaksbehandler,
         )
     }
@@ -452,9 +452,8 @@ class Behandling internal constructor(
     companion object {
         internal fun nyBehandling(
             id: UUID,
-            behandlingstype: Behandlingstype,
+            type: Behandlingstype,
             enhet: Enhet?,
-            årsak: Behandlingsårsakstype,
             ansvarligSaksbehandler: Behandler,
             eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
             kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
@@ -470,11 +469,11 @@ class Behandling internal constructor(
             val opprettet = LocalDateTime.now()
             return Behandling(
                 id = id,
-                behandlingstype = behandlingstype,
+                type = type,
                 opprettet = opprettet,
                 sistEndret = opprettet,
                 enhet = enhet,
-                årsak = årsak,
+                revurderingsårsak = null,
                 ansvarligSaksbehandler = ansvarligSaksbehandler,
                 eksternFagsakRevurdering = eksternFagsakRevurdering,
                 kravgrunnlag = kravgrunnlag,
