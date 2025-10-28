@@ -72,7 +72,7 @@ sealed interface Ytelse {
 
         override fun tilDokarkivFagsaksystem(): DokarkivFagsaksystem = DokarkivFagsaksystem.KELVIN
 
-        override val kafkaTopic: String = "tilbake.privat-tilbakekreving-aap"
+        override val kafkaTopic: String = "tilbake.privat-tilbakekreving-arbeidsavklaringspenger"
 
         override fun tilEntity(): YtelseEntity = YtelseEntity(Ytelsestype.ARBEIDSAVKLARINGSPENGER)
     }
