@@ -15,4 +15,5 @@ data class ApplicationProperties(
     val tilgangsmaskinen: PersontilgangService.Companion.Config,
     val bigQuery: BigQueryProperties,
     val frontendUrl: String,
+    val kravgrunnlagMapping: Map<String, String> = emptyMap(),
 )

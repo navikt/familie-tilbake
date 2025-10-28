@@ -71,3 +71,6 @@ tilbakekreving:
   bigQuery:
     prosjektId: tilbake-prod-d235
     dataset: tilbakekreving_dataset
+  kravgrunnlag-mapping:
+    569173: xdYwRVATSvaDgXKCh5y9OA==
+    564495: FK12N0b8TOCwuZ2IeJeuMw==

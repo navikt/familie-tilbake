@@ -27,7 +27,7 @@ object KravgrunnlagMapper {
         )
     }
 
-    fun tilKravgrunnlagHendelse(kravgrunnlag: DetaljertKravgrunnlagDto): KravgrunnlagHendelse {
+    fun tilKravgrunnlagHendelse(kravgrunnlag: DetaljertKravgrunnlagDto, kravgrunnlagReferanseMapping: Map<String, String>): KravgrunnlagHendelse {
         val kravgrunnlagHendelse = KravgrunnlagHendelse(
             id = UUID.randomUUID(),
             vedtakId = kravgrunnlag.vedtakId,
@@ -39,7 +39,12 @@ object KravgrunnlagMapper {
             ansvarligEnhet = kravgrunnlag.enhetAnsvarlig,
             kontrollfelt = kravgrunnlag.kontrollfelt,
             kravgrunnlagId = kravgrunnlag.kravgrunnlagId.toString(),
-            referanse = kravgrunnlag.referanse,
+            referanse = kravgrunnlag.referanse
+                ?: kravgrunnlagReferanseMapping[kravgrunnlag.kravgrunnlagId.toString()]
+                ?: throw Feil(
+                    message = "Mottok kravgrunnlag uten referanse hvor vi ikke har mapping fra kravgrunnlagId",
+                    logContext = SecureLog.Context.utenBehandling(kravgrunnlag.fagsystemId),
+                ),
             perioder = kravgrunnlag.tilbakekrevingsPeriode.map { periode ->
                 KravgrunnlagHendelse.Periode(
                     id = UUID.randomUUID(),

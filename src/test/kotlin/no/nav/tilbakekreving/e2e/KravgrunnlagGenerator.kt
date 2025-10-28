@@ -38,6 +38,53 @@ object KravgrunnlagGenerator {
         kravStatusKode: String = "NY",
         perioder: List<Tilbakekrevingsperiode> = listOf(standardPeriode(1.januar(2021) til 1.januar(2021))),
     ): String {
+        return forFagområde(
+            vedtakId = vedtakId,
+            fagsystemId = fagsystemId,
+            kravgrunnlagId = kravgrunnlagId,
+            referanse = referanse,
+            ansvarligEnhet = ansvarligEnhet,
+            fødselsnummer = fødselsnummer,
+            kravStatusKode = kravStatusKode,
+            perioder = perioder,
+            fagområde = "TILLST",
+        )
+    }
+
+    fun forAAP(
+        vedtakId: String = nextPaddedId(6),
+        fagsystemId: String = nextPaddedId(6),
+        kravgrunnlagId: String = nextPaddedId(6),
+        referanse: String = nextPaddedId(4),
+        ansvarligEnhet: String = nextPaddedId(4),
+        fødselsnummer: String = "40026912345",
+        kravStatusKode: String = "NY",
+        perioder: List<Tilbakekrevingsperiode> = listOf(standardPeriode(1.januar(2021) til 14.januar(2021))),
+    ): String {
+        return forFagområde(
+            vedtakId = vedtakId,
+            fagsystemId = fagsystemId,
+            kravgrunnlagId = kravgrunnlagId,
+            referanse = referanse,
+            ansvarligEnhet = ansvarligEnhet,
+            fødselsnummer = fødselsnummer,
+            kravStatusKode = kravStatusKode,
+            perioder = perioder,
+            fagområde = "AAP",
+        )
+    }
+
+    fun forFagområde(
+        vedtakId: String,
+        fagsystemId: String,
+        kravgrunnlagId: String,
+        referanse: String,
+        ansvarligEnhet: String,
+        fødselsnummer: String,
+        kravStatusKode: String,
+        perioder: List<Tilbakekrevingsperiode>,
+        fagområde: String,
+    ): String {
         val perioderXML = perioder.joinToString("\n") { it.toXML() }
 
         @Language("XML")
@@ -47,7 +94,7 @@ object KravgrunnlagGenerator {
                 <urn:kravgrunnlagId>$kravgrunnlagId</urn:kravgrunnlagId>
                 <urn:vedtakId>$vedtakId</urn:vedtakId>
                 <urn:kodeStatusKrav>$kravStatusKode</urn:kodeStatusKrav>
-                <urn:kodeFagomraade>TILLST</urn:kodeFagomraade>
+            <urn:kodeFagomraade>$fagområde</urn:kodeFagomraade>
                 <urn:fagsystemId>$fagsystemId</urn:fagsystemId>
                 <urn:vedtakIdOmgjort>0</urn:vedtakIdOmgjort>
                 <urn:vedtakGjelderId>$fødselsnummer</urn:vedtakGjelderId>

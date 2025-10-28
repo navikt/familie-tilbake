@@ -6,6 +6,7 @@ import io.kotest.inspectors.forOne
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
@@ -14,6 +15,7 @@ import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.api.v2.PeriodeDto
+import no.nav.tilbakekreving.api.v2.fagsystem.behov.FagsysteminfoBehovHendelse
 import no.nav.tilbakekreving.api.v2.fagsystem.svar.FagsysteminfoSvarHendelse
 import no.nav.tilbakekreving.april
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.NyKlassekode
@@ -259,6 +261,26 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
         val periode = kafkaProducerStub.finnVedtaksoppsummering(behandlingId).single().perioder.single()
         periode.fom shouldBe 1.januar(2021)
         periode.tom shouldBe 31.januar(2021)
+    }
+
+    @Test
+    fun `kravgrunnlag uten referanse`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        val kravgrunnlagId = "560609"
+        val kravgrunnlag = KravgrunnlagGenerator.forAAP(
+            fagsystemId = fagsystemId,
+            kravgrunnlagId = kravgrunnlagId,
+        ).replace(Regex("<urn:referanse>[0-9]+</urn:referanse>"), "")
+
+        sendKravgrunnlagOgAvventLesing(QUEUE_NAME, kravgrunnlag)
+
+        val fagsystemInfoBehov = kafkaProducerStub.finnKafkamelding(fagsystemId)
+            .filter { (metadata, _) -> metadata == FagsysteminfoBehovHendelse.METADATA }
+            .map { (_, behov) -> behov }
+            .single()
+            .shouldBeInstanceOf<FagsysteminfoBehovHendelse>()
+
+        fagsystemInfoBehov.kravgrunnlagReferanse shouldBe "q+l/W4fQTy6ymStSpiIq9w=="
     }
 
     fun kravgrunnlagPeriode(

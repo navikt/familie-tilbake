@@ -35,6 +35,18 @@ tilbakekreving:
   bigQuery:
     prosjektId: tilbake-dev-d683
     dataset: tilbakekreving_dataset
+  kravgrunnlag-mapping:
+    560009: OhdDfXICR4e647w6yUz+1A==
+    560314: rjoOGjxOS9SoL3Xhbkqh4g==
+    560319: pUmDIEnzQuygaKyHtdWGHA==
+    560403: qC21u7phQUaBoW1ZqIJp6Q==
+    560405: 4hotv5B+TuKJ/4tjCQiPAw==
+    560603: SrTuAq8QQESttCz+a/aUCA==
+    560604: 185fm4DMT1aYLOu57vEcbQ==
+    560605: 9aAtys7HQeyxNnscWs2uaA==
+    560607: 5M6S8XENTSScQeYbAjC4kg==
+    560608: hsBJKfDPSe6z0fq9CubGlw==
+    560609: q+l/W4fQTy6ymStSpiIq9w==
 
 rolle:
   barnetrygd:

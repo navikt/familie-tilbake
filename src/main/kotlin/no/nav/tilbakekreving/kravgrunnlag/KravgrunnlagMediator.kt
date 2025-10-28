@@ -23,7 +23,7 @@ class KravgrunnlagMediator(
         kravgrunnlagBufferRepository.konsumerKravgrunnlag { entity ->
             val kravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(entity.kravgrunnlag)
             tilbakekrevingService.opprettTilbakekreving(KravgrunnlagMapper.tilOpprettTilbakekrevingHendelse(kravgrunnlag)) { tilbakekreving ->
-                tilbakekreving.håndter(KravgrunnlagMapper.tilKravgrunnlagHendelse(kravgrunnlag))
+                tilbakekreving.håndter(KravgrunnlagMapper.tilKravgrunnlagHendelse(kravgrunnlag, applicationProperties.kravgrunnlagMapping))
             }
         }
     }
