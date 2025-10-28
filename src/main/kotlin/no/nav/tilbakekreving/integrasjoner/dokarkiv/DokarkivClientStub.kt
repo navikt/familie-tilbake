@@ -4,18 +4,24 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostRequest
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostResponse
+import org.springframework.context.annotation.Profile
 
-interface DokarkivService {
-    suspend fun lagJournalpost(
+@Profile("e2e", "local", "integrasjonstest")
+class DokarkivClientStub() : DokarkivClient {
+    override suspend fun lagJournalpost(
         request: OpprettJournalpostRequest,
         ferdigstill: Boolean,
         behandlingId: String,
         eksternFagsakId: String,
         logContext: SecureLog.Context,
-    ): OpprettJournalpostResponse
+    ): OpprettJournalpostResponse {
+        return OpprettJournalpostResponse(journalpostId = "-1", null, null, null)
+    }
 
-    fun journalførVarselbrev(
+    override fun journalførVarselbrev(
         varselbrevBehov: VarselbrevBehov,
         logContext: SecureLog.Context,
-    ): OpprettJournalpostResponse
+    ): OpprettJournalpostResponse {
+        return OpprettJournalpostResponse(journalpostId = "-1", null, null, null)
+    }
 }

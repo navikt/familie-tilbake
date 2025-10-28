@@ -32,7 +32,7 @@ import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
-import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivService
+import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.brev.MottakerType
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
@@ -57,7 +57,7 @@ class TilbakekrevingService(
     private val endringObservatørService: EndringObservatørService,
     private val kafkaProducer: KafkaProducer,
     private val kravgrunnlagBufferRepository: KravgrunnlagBufferRepository,
-    private val dokarkivService: DokarkivService,
+    private val dokarkivClient: DokarkivClient,
 ) {
     private val logger = TracedLogger.getLogger<TilbakekrevingService>()
 
@@ -205,7 +205,7 @@ class TilbakekrevingService(
 
             is VarselbrevBehov -> {
                 val logContext = SecureLog.Context.utenBehandling(behov.eksternFagsakId)
-                val arkivert = dokarkivService.journalførVarselbrev(behov, logContext)
+                val arkivert = dokarkivClient.journalførVarselbrev(behov, logContext)
                 if (arkivert.journalpostId == null) {
                     throw Feil(
                         message = "journalførin av varselbrev til behandlingId ${behov.behandlingId} misslykket med denne meldingen: ${arkivert.melding}",

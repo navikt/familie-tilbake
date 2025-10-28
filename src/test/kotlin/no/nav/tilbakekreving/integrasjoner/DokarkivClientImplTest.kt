@@ -23,7 +23,7 @@ import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.tilbakekreving.applicationProps
-import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivServiceImpl
+import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClientImpl
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.JournalpostType
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostRequest
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostResponse
@@ -31,7 +31,7 @@ import no.nav.tilbakekreving.pdf.PdfGenerator
 import no.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
 import org.junit.jupiter.api.Test
 
-class DokarkivServiceImplTest {
+class DokarkivClientImplTest {
     private val logContext = SecureLog.Context.tom()
     private val jwtToken = mockk<JwtToken>()
     private val scope = "api://dokarkiv/.default"
@@ -65,7 +65,7 @@ class DokarkivServiceImplTest {
             install(ContentNegotiation) { jackson() }
         }
 
-        val dokarkivService = DokarkivServiceImpl(
+        val dokarkivService = DokarkivClientImpl(
             applicationProperties = applicationProps(),
             tokenExchangeService = tokenExchange,
             varselbrevUtil = mockk(),
@@ -113,7 +113,7 @@ class DokarkivServiceImplTest {
         }
         val httpClient = HttpClient(engine) { install(ContentNegotiation) { jackson() } }
 
-        val dokarkivService = DokarkivServiceImpl(
+        val dokarkivService = DokarkivClientImpl(
             applicationProperties = applicationProps(),
             tokenExchangeService = tokenExchange,
             varselbrevUtil = mockk(),
