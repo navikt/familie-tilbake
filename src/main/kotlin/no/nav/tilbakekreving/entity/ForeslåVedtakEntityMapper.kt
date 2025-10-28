@@ -16,7 +16,7 @@ object ForeslåVedtakEntityMapper : Entity<ForeslåVedtakStegEntity, UUID, UUID>
     )
 
     val vurdert = field(
-        "vurdering",
+        "vurdert",
         ForeslåVedtakStegEntity::vurdert,
         FieldConverter.BooleanConverter.required(),
     )

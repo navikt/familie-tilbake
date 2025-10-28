@@ -30,7 +30,7 @@ class BehandlingskontrollE2ETest : TilbakekrevingE2EBase() {
             behandlingId = behandlingId,
             behandlingPåVentDto = BehandlingPåVentDto(
                 venteårsak = Venteårsak.MANGLER_STØTTE,
-                tidsfrist = LocalDate.MAX,
+                tidsfrist = LocalDate.of(2099, 1, 1),
                 begrunnelse = "Ikke implementert!",
             ),
         ) shouldBe Ressurs.success("OK")
