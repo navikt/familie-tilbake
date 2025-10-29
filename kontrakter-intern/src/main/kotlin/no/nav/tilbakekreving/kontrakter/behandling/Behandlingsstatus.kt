@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.kontrakter.behandling
 
+@Schema(name = "Behandlingsstatus")
 enum class Behandlingsstatus(
     val kode: String,
 ) {
