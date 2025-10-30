@@ -6,8 +6,6 @@ import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.header.Institusjon
 
-private const val EF_URL = "nav.no/alene-med-barn"
-
 open class BaseDokument(
     val ytelsestype: YtelsestypeDTO,
     override val språkkode: Språkkode,
@@ -15,6 +13,7 @@ open class BaseDokument(
     val ansvarligSaksbehandler: String,
     val gjelderDødsfall: Boolean,
     val institusjon: Institusjon? = null,
+    private val katalog: YtelseKatalog = DefaultYtelseKatalog,
 ) : Språkstøtte {
     val avsenderenhet =
         if (FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype) == FagsystemDTO.EF) {
@@ -22,109 +21,12 @@ open class BaseDokument(
         } else {
             behandlendeEnhetsNavn
         }
-    private val infoMap =
-        mapOf(
-            YtelsestypeDTO.BARNETRYGD to
-                Ytelsesinfo(
-                    "nav.no/barnetrygd",
-                    mapOf(
-                        Språkkode.NB to
-                            Ytelsesnavn(
-                                "barnetrygd",
-                                "barnetrygden",
-                                "barnetrygden din",
-                            ),
-                        Språkkode.NN to
-                            Ytelsesnavn(
-                                "barnetrygd",
-                                "barnetrygda",
-                                "barnetrygda di",
-                            ),
-                    ),
-                ),
-            YtelsestypeDTO.OVERGANGSSTØNAD to
-                Ytelsesinfo(
-                    EF_URL,
-                    mapOf(
-                        Språkkode.NB to
-                            Ytelsesnavn(
-                                "overgangsstønad",
-                                "overgangsstønaden",
-                                "overgangsstønaden din",
-                            ),
-                        Språkkode.NN to
-                            Ytelsesnavn(
-                                "overgangsstønad",
-                                "overgangsstønaden",
-                                "overgangsstønaden din",
-                            ),
-                    ),
-                ),
-            YtelsestypeDTO.BARNETILSYN to
-                Ytelsesinfo(
-                    EF_URL,
-                    mapOf(
-                        Språkkode.NB to
-                            Ytelsesnavn(
-                                "stønad til barnetilsyn",
-                                "stønaden til barnetilsyn",
-                                "stønaden din til barnetilsyn",
-                            ),
-                        Språkkode.NN to
-                            Ytelsesnavn(
-                                "stønad til barnetilsyn",
-                                "stønaden til barnetilsyn",
-                                "stønaden din til barnetilsyn",
-                            ),
-                    ),
-                ),
-            YtelsestypeDTO.SKOLEPENGER to
-                Ytelsesinfo(
-                    EF_URL,
-                    mapOf(
-                        Språkkode.NB to
-                            Ytelsesnavn(
-                                "stønad til skolepenger",
-                                "stønaden til skolepenger",
-                                "stønaden din til skolepenger",
-                            ),
-                        Språkkode.NN to
-                            Ytelsesnavn(
-                                "stønad til skulepengar",
-                                "stønaden til skulepengar",
-                                "stønaden din til skulepengar",
-                            ),
-                    ),
-                ),
-            YtelsestypeDTO.KONTANTSTØTTE to
-                Ytelsesinfo(
-                    "nav.no/kontantstotte",
-                    mapOf(
-                        Språkkode.NB to
-                            Ytelsesnavn(
-                                "kontantstøtte",
-                                "kontantstøtten",
-                                "kontantstøtten din",
-                            ),
-                        Språkkode.NN to
-                            Ytelsesnavn(
-                                "kontantstøtte",
-                                "kontantstøtta",
-                                "kontantstøtta di",
-                            ),
-                    ),
-                ),
-        )
 
-    private val ytelsesinfo
-        get() =
-            infoMap[ytelsestype]
-                ?: error("Dokument forsøkt generert for ugyldig ytelsestype: $ytelsestype ")
+    private val ytelsesinfo: Ytelsesinfo
+        get() = katalog.infoFor(ytelsestype)
 
-    private val ytelsesnavn
-        get() =
-            ytelsesinfo.navn[språkkode]
-                ?: error("Dokument forsøkt generert for ugyldig språkkode: $språkkode ytelse: $ytelsestype")
+    private val ytelsesnavn: Ytelsesnavn
+        get() = ytelsesinfo.navnFor(språkkode)
 
     @Suppress("unused") // Handlebars
     val ytelsesnavnUbestemt = ytelsesnavn.ubestemt
@@ -138,15 +40,4 @@ open class BaseDokument(
 
     @Suppress("unused") // Handlebars
     val ytelseUrl = ytelsesinfo.url
-
-    private class Ytelsesinfo(
-        val url: String,
-        val navn: Map<Språkkode, Ytelsesnavn>,
-    )
-
-    private class Ytelsesnavn(
-        val ubestemt: String,
-        val bestemt: String,
-        val eiendomsform: String,
-    )
 }

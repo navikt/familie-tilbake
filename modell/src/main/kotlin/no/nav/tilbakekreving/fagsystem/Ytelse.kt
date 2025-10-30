@@ -1,7 +1,9 @@
 package no.nav.tilbakekreving.fagsystem
 
 import no.nav.tilbakekreving.entities.YtelseEntity
+import no.nav.tilbakekreving.kontrakter.ytelse.DokarkivFagsaksystem
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.kontrakter.ytelse.Tema
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 
 sealed interface Ytelse {
@@ -12,6 +14,10 @@ sealed interface Ytelse {
     fun integrererMotFagsystem(): Boolean
 
     fun tilYtelsestype(): Ytelsestype
+
+    fun tilDokarkivFagsaksystem(): DokarkivFagsaksystem
+
+    fun tilTema(): Tema
 
     val kafkaTopic: String
 
@@ -25,6 +31,10 @@ sealed interface Ytelse {
         override fun integrererMotFagsystem(): Boolean = true
 
         override fun tilYtelsestype(): Ytelsestype = Ytelsestype.BARNETRYGD
+
+        override fun tilTema(): Tema = Tema.BAR
+
+        override fun tilDokarkivFagsaksystem(): DokarkivFagsaksystem = DokarkivFagsaksystem.BA
 
         override val kafkaTopic: String = "tilbake.privat-tilbakekreving-barnetrygd"
 
@@ -40,6 +50,10 @@ sealed interface Ytelse {
 
         override fun tilYtelsestype(): Ytelsestype = Ytelsestype.TILLEGGSSTØNAD
 
+        override fun tilTema(): Tema = Tema.TSO
+
+        override fun tilDokarkivFagsaksystem(): DokarkivFagsaksystem = DokarkivFagsaksystem.TILLEGGSSTONADER
+
         override val kafkaTopic: String = "tilbake.privat-tilbakekreving-tilleggsstonad"
 
         override fun tilEntity(): YtelseEntity = YtelseEntity(Ytelsestype.TILLEGGSSTØNAD)
@@ -53,6 +67,10 @@ sealed interface Ytelse {
         override fun integrererMotFagsystem(): Boolean = false
 
         override fun tilYtelsestype(): Ytelsestype = Ytelsestype.ARBEIDSAVKLARINGSPENGER
+
+        override fun tilTema(): Tema = Tema.AAP
+
+        override fun tilDokarkivFagsaksystem(): DokarkivFagsaksystem = DokarkivFagsaksystem.KELVIN
 
         override val kafkaTopic: String = "tilbake.privat-tilbakekreving-aap"
 

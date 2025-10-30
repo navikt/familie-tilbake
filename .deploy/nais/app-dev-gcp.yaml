@@ -118,6 +118,9 @@ spec:
         - application: burde-forstatt
           namespace: tilbake
           cluster: dev-gcp
+        - application: dokarkiv
+          namespace: teamdokumenthandtering
+          cluster: dev-gcp
     outbound:
       rules:
         - application: populasjonstilgangskontroll

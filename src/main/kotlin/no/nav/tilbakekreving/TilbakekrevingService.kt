@@ -8,7 +8,6 @@ import no.nav.familie.tilbake.integration.pdl.internal.PdlKjønnType
 import no.nav.familie.tilbake.kontrakter.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
-import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFaktaDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFatteVedtaksstegDto
@@ -33,6 +32,7 @@ import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
+import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.brev.MottakerType
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
@@ -57,8 +57,8 @@ class TilbakekrevingService(
     private val endringObservatørService: EndringObservatørService,
     private val kafkaProducer: KafkaProducer,
     private val kravgrunnlagBufferRepository: KravgrunnlagBufferRepository,
+    private val dokarkivClient: DokarkivClient,
 ) {
-    private val aktør = Aktør.Person(ident = "20046912345")
     private val logger = TracedLogger.getLogger<TilbakekrevingService>()
 
     fun opprettTilbakekreving(
@@ -204,11 +204,20 @@ class TilbakekrevingService(
             }
 
             is VarselbrevBehov -> {
-                // Todo her skjer Journalføring og utsending av brev!
+                val logContext = SecureLog.Context.utenBehandling(behov.eksternFagsakId)
+                val arkivert = dokarkivClient.journalførVarselbrev(behov, logContext)
+                if (arkivert.journalpostId == null) {
+                    throw Feil(
+                        message = "journalførin av varselbrev til behandlingId ${behov.behandlingId} misslykket med denne meldingen: ${arkivert.melding}",
+                        frontendFeilmelding = "journalførin av varselbrev til behandlingId ${behov.behandlingId} misslykket med denne meldingen: ${arkivert.melding}",
+                        logContext = SecureLog.Context.fra(tilbakekreving),
+                    )
+                }
+                // todo her skjer utsending av brev
                 tilbakekreving.håndter(
                     VarselbrevSendtHendelse(
                         varselbrevId = behov.brevId,
-                        journalpostId = "12345", // ToDo her kommer journalpost id som vi får i response når vi journalfører og sender brev.
+                        journalpostId = arkivert.journalpostId,
                     ),
                 )
             }

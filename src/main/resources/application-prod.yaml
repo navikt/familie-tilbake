@@ -74,3 +74,6 @@ tilbakekreving:
   kravgrunnlag-mapping:
     569173: xdYwRVATSvaDgXKCh5y9OA==
     564495: FK12N0b8TOCwuZ2IeJeuMw==
+  dokarkiv:
+    base-url: https://dokarkiv.intern.nav.no
+    scope: api://prod-fss.teamdokumenthandtering.dokarkiv/.default
