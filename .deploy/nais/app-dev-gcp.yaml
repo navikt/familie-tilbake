@@ -121,6 +121,9 @@ spec:
         - application: dokarkiv
           namespace: teamdokumenthandtering
           cluster: dev-gcp
+        - application: dokdistfordeling
+          namespace: teamdokumenthandtering
+          cluster: dev-gcp
     outbound:
       rules:
         - application: populasjonstilgangskontroll

@@ -5,6 +5,7 @@ import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.config.BigQueryProperties
 import no.nav.tilbakekreving.config.Tilgangsstyring
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.config.DokarkivConfig
+import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.config.DokdistConfig
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.tilbakekreving.integrasjoner.persontilgang.PersontilgangService
 import no.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
@@ -36,6 +37,10 @@ fun applicationProps(): ApplicationProperties {
         dokarkiv = DokarkivConfig(
             baseUrl = "http://dokarkiv",
             scope = "api://dokarkiv/.default",
+        ),
+        dokdist = DokdistConfig(
+            baseUrl = "http://dokdist",
+            scope = "api://dokdist/.default",
         ),
     )
 }
