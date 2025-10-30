@@ -31,6 +31,7 @@ import no.nav.tilbakekreving.endring.EndringObservatørService
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
+import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
@@ -479,6 +480,20 @@ class TilbakekrevingService(
                 behandlingstatus = null,
             ),
         )
+    }
+
+    fun påminnSaker() {
+        var context = SecureLog.Context.tom()
+        try {
+            hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TrengerPåminnelse) { tilbakekreving ->
+                context = SecureLog.Context.fra(tilbakekreving)
+                tilbakekreving.håndter(Påminnelse(LocalDateTime.now()))
+            }
+        } catch (e: Exception) {
+            logger.medContext(context) {
+                warn("Feilet under påminnelse av saker", e)
+            }
+        }
     }
 
     private fun validerBrevmottaker(tilbakekreving: Tilbakekreving) {

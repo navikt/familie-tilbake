@@ -33,6 +33,7 @@ import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
+import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
@@ -58,6 +59,7 @@ class Tilbakekreving internal constructor(
     val kravgrunnlagHistorikk: KravgrunnlagHistorikk,
     val brevHistorikk: BrevHistorikk,
     val opprettet: LocalDateTime,
+    var nestePåminnelse: LocalDateTime?,
     val opprettelsesvalg: Opprettelsesvalg,
     private val behovObservatør: BehovObservatør,
     private val endringObservatør: EndringObservatør,
@@ -66,6 +68,11 @@ class Tilbakekreving internal constructor(
     val bigQueryService: BigQueryService,
 ) : FrontendDto<FagsakDto>, BehandlingObservatør {
     internal fun byttTilstand(nyTilstand: Tilstand) {
+        if (nyTilstand.tidTilPåminnelse == null) {
+            nestePåminnelse = null
+        } else {
+            nestePåminnelse = LocalDateTime.now().plus(nyTilstand.tidTilPåminnelse)
+        }
         tilstand = nyTilstand
         tilstand.entering(this)
     }
@@ -93,6 +100,10 @@ class Tilbakekreving internal constructor(
     fun håndter(iverksettelseHendelse: IverksettelseHendelse) {
         tilstand.håndter(this, iverksettelseHendelse)
         behandlingHistorikk.nåværende().entry.utførSideeffekt(tilstand, this)
+    }
+
+    fun håndter(påminnelse: Påminnelse) {
+        tilstand.håndter(this, påminnelse)
     }
 
     fun oppdaterFagsysteminfo(fagsysteminfo: FagsysteminfoHendelse) {
@@ -312,6 +323,7 @@ class Tilbakekreving internal constructor(
             brevHistorikkEntities = this.brevHistorikk.tilEntity(),
             opprettet = this.opprettet,
             opprettelsesvalg = this.opprettelsesvalg,
+            nestePåminnelse = nestePåminnelse,
             bruker = this.bruker?.tilEntity(),
         )
     }
@@ -388,7 +400,7 @@ class Tilbakekreving internal constructor(
             val tilbakekreving = Tilbakekreving(
                 id = id,
                 opprettet = LocalDateTime.now(),
-                // TODO: Lesbar ID
+                nestePåminnelse = LocalDateTime.now().plus(Start.tidTilPåminnelse),
                 opprettelsesvalg = opprettTilbakekrevingEvent.opprettelsesvalg,
                 eksternFagsak = EksternFagsak(
                     id = UUID.randomUUID(),

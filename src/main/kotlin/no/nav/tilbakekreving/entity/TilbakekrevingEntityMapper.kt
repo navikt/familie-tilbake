@@ -30,6 +30,11 @@ object TilbakekrevingEntityMapper : Entity<TilbakekrevingEntity, String, Long>(
         getter = TilbakekrevingEntity::opprettelsesvalg,
         converter = FieldConverter.EnumConverter.of<Opprettelsesvalg>().required(),
     )
+    val nestePåminnelse = field(
+        column = "neste_påminnelse",
+        getter = TilbakekrevingEntity::nestePåminnelse,
+        converter = FieldConverter.LocalDateTimeConverter,
+    )
 
     fun map(
         resultSet: ResultSet,
@@ -48,6 +53,7 @@ object TilbakekrevingEntityMapper : Entity<TilbakekrevingEntity, String, Long>(
             brevHistorikkEntities = brevHistorikk,
             opprettet = resultSet[opprettet],
             opprettelsesvalg = resultSet[opprettelsesvalg],
+            nestePåminnelse = resultSet[nestePåminnelse],
             bruker = bruker,
         )
     }

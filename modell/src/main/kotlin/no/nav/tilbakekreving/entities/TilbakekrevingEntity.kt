@@ -28,6 +28,7 @@ data class TilbakekrevingEntity(
     val kravgrunnlagHistorikkEntities: List<KravgrunnlagHendelseEntity>,
     val brevHistorikkEntities: List<BrevEntity>,
     val opprettet: LocalDateTime,
+    val nestePåminnelse: LocalDateTime?,
     val opprettelsesvalg: Opprettelsesvalg,
     val bruker: BrukerEntity?,
 ) {
@@ -64,6 +65,7 @@ data class TilbakekrevingEntity(
             brevHistorikk = brevHistorikk,
             opprettet = opprettet,
             opprettelsesvalg = opprettelsesvalg,
+            nestePåminnelse = nestePåminnelse,
             bruker = bruker?.fraEntity(),
             behovObservatør = behovObservatør,
             tilstand = when (nåværendeTilstand) {

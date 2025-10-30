@@ -4,10 +4,13 @@ import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
+import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
+import java.time.Duration
 
 object SendVarselbrev : Tilstand {
+    override val tidTilPåminnelse: Duration? = Duration.ofHours(1)
     override val tilbakekrevingTilstand: TilbakekrevingTilstand = TilbakekrevingTilstand.SEND_VARSELBREV
 
     override fun entering(tilbakekreving: Tilbakekreving) {
@@ -47,6 +50,8 @@ object SendVarselbrev : Tilstand {
             ),
         )
     }
+
+    override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse) {}
 
     override fun håndter(
         tilbakekreving: Tilbakekreving,

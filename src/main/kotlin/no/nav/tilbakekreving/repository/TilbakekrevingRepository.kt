@@ -18,6 +18,7 @@ import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.sql.ResultSet
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Repository
@@ -171,7 +172,7 @@ class TilbakekrevingRepository(
         class TilbakekrevingId(val id: String) : FindTilbakekrevingStrategy {
             override fun select(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
                 return jdbcTemplate.query(
-                    "SELECT * FROM tilbakekreving WHERE id=? FOR UPDATE;",
+                    "SELECT * FROM tilbakekreving WHERE id=?;",
                     mapper,
                     FieldConverter.NumericId.convert(id),
                 )
@@ -182,6 +183,24 @@ class TilbakekrevingRepository(
                     "SELECT * FROM tilbakekreving WHERE id=? FOR UPDATE;",
                     mapper,
                     FieldConverter.NumericId.convert(id),
+                )
+            }
+        }
+
+        object TrengerPåminnelse : FindTilbakekrevingStrategy {
+            override fun select(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
+                return jdbcTemplate.query(
+                    "SELECT * FROM tilbakekreving WHERE neste_påminnelse < ?;",
+                    mapper,
+                    FieldConverter.LocalDateTimeConverter.convert(LocalDateTime.now()),
+                )
+            }
+
+            override fun selectForUpdate(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
+                return jdbcTemplate.query(
+                    "SELECT * FROM tilbakekreving WHERE neste_påminnelse < ? FOR UPDATE;",
+                    mapper,
+                    FieldConverter.LocalDateTimeConverter.convert(LocalDateTime.now()),
                 )
             }
         }

@@ -13,8 +13,10 @@ import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
+import java.time.Duration
 
 internal sealed interface Tilstand {
+    val tidTilPåminnelse: Duration?
     val tilbakekrevingTilstand: TilbakekrevingTilstand
 
     fun behandlingsstatus(behandling: Behandling): Behandlingsstatus = Behandlingsstatus.OPPRETTET
@@ -59,7 +61,7 @@ internal sealed interface Tilstand {
     fun håndter(
         tilbakekreving: Tilbakekreving,
         påminnelse: Påminnelse,
-    ) {}
+    )
 
     fun håndter(
         tilbakekreving: Tilbakekreving,

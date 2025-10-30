@@ -2,7 +2,6 @@ package no.nav.tilbakekreving.e2e
 
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.SærligeGrunner
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.UtvidetVilkårsresultat
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.VedtakPeriode
@@ -21,6 +20,7 @@ import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.februar
 import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub
+import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub.Companion.finnKafkamelding
 import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -389,11 +389,9 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
 
         tilbakekrevVedtak(behandlingId, listOf(1.januar(2021) til 31.januar(2021)))
 
-        val kafkameldinger = kafkaProducer.finnKafkamelding(fagsystemId)
-        val (_, event) = kafkameldinger.lastOrNull { (metadata, _) -> metadata == BehandlingEndretHendelse.METADATA }
+        val event = kafkaProducer.finnKafkamelding(fagsystemId, BehandlingEndretHendelse.METADATA)
+            .lastOrNull()
             .shouldNotBeNull()
-
-        event.shouldBeInstanceOf<BehandlingEndretHendelse>()
 
         event.eksternFagsakId shouldBe fagsystemId
         event.hendelseOpprettet.toLocalDate() shouldBe LocalDate.now()

@@ -58,7 +58,10 @@ interface FieldConverter<T, DbPrimitive> {
         }
 
         override fun convert(resultSet: ResultSet, column: String): LocalDateTime? {
-            return resultSet.getTimestamp(column).toInstant().atOffset(ZoneOffset.UTC).toLocalDateTime()
+            return resultSet.getTimestamp(column)
+                ?.toInstant()
+                ?.atOffset(ZoneOffset.UTC)
+                ?.toLocalDateTime()
         }
 
         override fun setColumn(index: Int, preparedStatement: PreparedStatement, value: LocalDateTime?) {

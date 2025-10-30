@@ -1,7 +1,9 @@
 package no.nav.tilbakekreving.e2e
 
+import io.kotest.inspectors.forExactly
+import io.kotest.matchers.comparables.shouldBeGreaterThan
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.tilbakekreving.api.v2.MottakerDto
 import no.nav.tilbakekreving.api.v2.PeriodeDto
@@ -10,14 +12,18 @@ import no.nav.tilbakekreving.api.v2.fagsystem.svar.FagsysteminfoSvarHendelse
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.NyKlassekode
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp
 import no.nav.tilbakekreving.e2e.ytelser.TilleggsstønaderE2ETest.Companion.TILLEGGSSTØNADER_KØ_NAVN
+import no.nav.tilbakekreving.entity.FieldConverter
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub
+import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub.Companion.finnKafkamelding
 import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.periode.til
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.util.kroner
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.jdbc.core.query
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -41,12 +47,9 @@ class BehovE2ETest : TilbakekrevingE2EBase() {
             ),
         )
 
-        val hendelser = kafkaProducer.finnKafkamelding(fagsystemId)
-            .map { (_, hendelse) -> hendelse }
-            .filterIsInstance<FagsysteminfoBehovHendelse>()
+        val hendelser = kafkaProducer.finnKafkamelding(fagsystemId, FagsysteminfoBehovHendelse.METADATA)
         hendelser.size shouldBe 1
 
-        hendelser[0].shouldBeInstanceOf<FagsysteminfoBehovHendelse>()
         hendelser[0].eksternFagsakId shouldBe fagsystemId
         hendelser[0].kravgrunnlagReferanse shouldBe fagsystemBehandling
     }
@@ -99,5 +102,48 @@ class BehovE2ETest : TilbakekrevingE2EBase() {
                 ),
             ),
         )
+    }
+
+    @Test
+    fun `sender ut nytt behov ved påminnelse`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        val fødselsnummer = "feil${KravgrunnlagGenerator.nextPaddedId(7)}"
+        sendKravgrunnlagOgAvventLesing(
+            queueName = TILLEGGSSTØNADER_KØ_NAVN,
+            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId, fødselsnummer = fødselsnummer),
+        )
+
+        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        val tilbakekrevingId = tilbakekreving(behandlingId).id
+
+        pdlClient.hentPersoninfoHits.forExactly(1) {
+            it.fagsystem shouldBe FagsystemDTO.TS
+            it.ident shouldBe fødselsnummer
+        }
+
+        tilbakekrevingService.påminnSaker()
+
+        pdlClient.hentPersoninfoHits.forExactly(1) {
+            it.fagsystem shouldBe FagsystemDTO.TS
+            it.ident shouldBe fødselsnummer
+        }
+
+        val nestePåminnelse = jdbcTemplate.query("SELECT neste_påminnelse FROM tilbakekreving WHERE id=?;", tilbakekrevingId) { resultSet, _ ->
+            FieldConverter.LocalDateTimeConverter.convert(resultSet, "neste_påminnelse")
+        }.singleOrNull().shouldNotBeNull()
+        nestePåminnelse shouldBeGreaterThan LocalDateTime.now().plusMinutes(59)
+
+        jdbcTemplate.update(
+            "UPDATE tilbakekreving SET neste_påminnelse=? WHERE id=?;",
+            FieldConverter.LocalDateTimeConverter.convert(LocalDateTime.now().minusSeconds(1)),
+            tilbakekrevingId,
+        )
+
+        tilbakekrevingService.påminnSaker()
+
+        pdlClient.hentPersoninfoHits.forExactly(2) {
+            it.fagsystem shouldBe FagsystemDTO.TS
+            it.ident shouldBe fødselsnummer
+        }
     }
 }

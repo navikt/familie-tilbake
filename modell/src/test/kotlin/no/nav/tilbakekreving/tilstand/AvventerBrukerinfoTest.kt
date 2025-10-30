@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.tilstand
 
+import io.kotest.inspectors.forExactly
 import io.kotest.inspectors.forOne
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
@@ -13,9 +14,11 @@ import no.nav.tilbakekreving.bruker
 import no.nav.tilbakekreving.brukerinfoHendelse
 import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.fagsysteminfoHendelse
+import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 import java.util.UUID
 
 class AvventerBrukerinfoTest {
@@ -46,11 +49,29 @@ class AvventerBrukerinfoTest {
 
         tilbakekreving.tilstand shouldBe SendVarselbrev
         oppsamler.behovListe.forOne {
-            it shouldBeEqual
-                BrukerinfoBehov(
-                    bruker().ident,
-                    tilbakekreving.eksternFagsak.ytelse,
-                )
+            it shouldBeEqual BrukerinfoBehov(
+                bruker().ident,
+                tilbakekreving.eksternFagsak.ytelse,
+            )
+        }
+    }
+
+    @Test
+    fun `tilbakekreving med AvventerBrukerinfo sender nytt behov for brukerinfo ved påminnelse`() {
+        val oppsamler = BehovObservatørOppsamler()
+        val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
+        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), oppsamler, opprettTilbakekrevingEvent, bigQueryService, EndringObservatørOppsamler())
+
+        tilbakekreving.håndter(kravgrunnlag())
+        tilbakekreving.håndter(fagsysteminfoHendelse())
+        tilbakekreving.håndter(Påminnelse(LocalDateTime.now()))
+
+        tilbakekreving.tilstand shouldBe AvventerBrukerinfo
+        oppsamler.behovListe.forExactly(2) {
+            it shouldBeEqual BrukerinfoBehov(
+                bruker().ident,
+                tilbakekreving.eksternFagsak.ytelse,
+            )
         }
     }
 }

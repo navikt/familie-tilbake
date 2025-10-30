@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.integrasjoner
 
+import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.sakshendelse.Behandlingstilstand
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.Vedtaksoppsummering
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
@@ -60,5 +61,14 @@ class KafkaProducerStub() : KafkaProducer {
 
     fun settFagsysteminfoSvar(eksternFagsakId: String, handler: () -> Unit) {
         fagsystemInfoSvarHandlers[eksternFagsakId] = handler
+    }
+
+    companion object {
+        inline fun <reified T : Kafkamelding> KafkaProducerStub.finnKafkamelding(eksternFagsakId: String, type: EventMetadata<T>): List<T> {
+            return finnKafkamelding(eksternFagsakId)
+                .filter { (metadata, _) -> metadata == type }
+                .map { (_, value) -> value }
+                .map { it.shouldBeInstanceOf() }
+        }
     }
 }

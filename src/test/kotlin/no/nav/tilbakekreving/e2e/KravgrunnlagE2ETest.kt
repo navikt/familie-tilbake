@@ -6,7 +6,6 @@ import io.kotest.inspectors.forOne
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
@@ -28,6 +27,7 @@ import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub
+import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub.Companion.finnKafkamelding
 import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -274,11 +274,8 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
 
         sendKravgrunnlagOgAvventLesing(QUEUE_NAME, kravgrunnlag)
 
-        val fagsystemInfoBehov = kafkaProducerStub.finnKafkamelding(fagsystemId)
-            .filter { (metadata, _) -> metadata == FagsysteminfoBehovHendelse.METADATA }
-            .map { (_, behov) -> behov }
+        val fagsystemInfoBehov = kafkaProducerStub.finnKafkamelding(fagsystemId, FagsysteminfoBehovHendelse.METADATA)
             .single()
-            .shouldBeInstanceOf<FagsysteminfoBehovHendelse>()
 
         fagsystemInfoBehov.kravgrunnlagReferanse shouldBe "q+l/W4fQTy6ymStSpiIq9w=="
     }
