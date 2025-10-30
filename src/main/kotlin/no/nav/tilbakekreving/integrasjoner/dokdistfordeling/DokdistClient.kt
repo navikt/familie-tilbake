@@ -11,11 +11,11 @@ interface DokdistClient {
         request: DistribuerJournalpostRequest,
         behandlingId: UUID,
         logContext: SecureLog.Context,
-    ): DistribuerJournalpostResponse?
+    ): DistribuerJournalpostResponse
 
     fun brevTilUtsending(
         behov: VarselbrevBehov,
         journalpostId: String,
         logContext: SecureLog.Context,
-    ): DistribuerJournalpostResponse?
+    ): DistribuerJournalpostResponse
 }

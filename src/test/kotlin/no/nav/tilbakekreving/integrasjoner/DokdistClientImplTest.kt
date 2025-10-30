@@ -1,7 +1,9 @@
 package no.nav.tilbakekreving.integrasjoner
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -117,12 +119,14 @@ class DokdistClientImplTest {
             distribusjonstidspunkt = Distribusjonstidspunkt.KJERNETID,
         )
 
-        runBlocking {
-            dokdistService.sendBrev(
-                request = request,
-                behandlingId = UUID.randomUUID(),
-                logContext = logContext,
-            )
-        } shouldBe null
+        shouldThrow<Exception> {
+            runBlocking {
+                dokdistService.sendBrev(
+                    request = request,
+                    behandlingId = UUID.randomUUID(),
+                    logContext = logContext,
+                )
+            }
+        }.message shouldContain "Utsending av brev feilet: Utsendig av brev for behandling:"
     }
 }

@@ -19,7 +19,6 @@ import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstidspunkt
 import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstype
 import no.nav.familie.tilbake.log.SecureLog
-import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.domain.DistribuerJournalpostRequest
@@ -37,13 +36,11 @@ class DokdistClientImpl(
         }
     },
 ) : DokdistClient {
-    private val logger = TracedLogger.getLogger<DokdistClientImpl>()
-
     override suspend fun sendBrev(
         request: DistribuerJournalpostRequest,
         behandlingId: UUID,
         logContext: SecureLog.Context,
-    ): DistribuerJournalpostResponse? {
+    ): DistribuerJournalpostResponse {
         val baseUrl = applicationProperties.dokdist.baseUrl
         val scope = applicationProperties.dokdist.scope
         val token = tokenExchangeService.clientCredentialsToken(scope)
@@ -60,11 +57,11 @@ class DokdistClientImpl(
                 return response.body<DistribuerJournalpostResponse>()
             } else {
                 val body = response.bodyAsText()
-
-                logger.medContext(logContext) {
-                    error("Utsendig av brev for behandling: $behandlingId feilet med status: ${response.status}: og melding: $body")
-                }
-                return null
+                throw Feil(
+                    message = "Utsendig av brev for behandling: $behandlingId feilet med status: ${response.status}: og melding: $body",
+                    frontendFeilmelding = "Utsendig av brev for behandling: $behandlingId feilet med status: ${response.status}: og melding: $body",
+                    logContext = logContext,
+                )
             }
         } catch (e: Exception) {
             throw Feil(
@@ -75,17 +72,17 @@ class DokdistClientImpl(
         }
     }
 
-    override fun brevTilUtsending(behov: VarselbrevBehov, journalpostId: String, logContext: SecureLog.Context): DistribuerJournalpostResponse? {
+    override fun brevTilUtsending(behov: VarselbrevBehov, journalpostId: String, logContext: SecureLog.Context): DistribuerJournalpostResponse {
         return runBlocking {
             sendBrev(
-                request = hentDistribuerJournalpostRequestTo(journalpostId, behov.ytelse.tilFagsystemDTO()),
+                request = opprettDistribuerJournalpostRequest(journalpostId, behov.ytelse.tilFagsystemDTO()),
                 behandlingId = behov.behandlingId,
                 logContext = logContext,
             )
         }
     }
 
-    private fun hentDistribuerJournalpostRequestTo(journalpostId: String, fagsystem: FagsystemDTO): DistribuerJournalpostRequest {
+    private fun opprettDistribuerJournalpostRequest(journalpostId: String, fagsystem: FagsystemDTO): DistribuerJournalpostRequest {
         return DistribuerJournalpostRequest(
             journalpostId = journalpostId,
             batchId = null,

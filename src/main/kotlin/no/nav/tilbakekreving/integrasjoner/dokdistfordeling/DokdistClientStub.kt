@@ -11,15 +11,15 @@ class DokdistClientStub : DokdistClient {
         request: DistribuerJournalpostRequest,
         behandlingId: UUID,
         logContext: SecureLog.Context,
-    ): DistribuerJournalpostResponse? {
-        return null
+    ): DistribuerJournalpostResponse {
+        return DistribuerJournalpostResponse("")
     }
 
     override fun brevTilUtsending(
         behov: VarselbrevBehov,
         journalpostId: String,
         logContext: SecureLog.Context,
-    ): DistribuerJournalpostResponse? {
-        return null
+    ): DistribuerJournalpostResponse {
+        return DistribuerJournalpostResponse("")
     }
 }
