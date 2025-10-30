@@ -18,7 +18,7 @@ data class BehandlingDto(
     val behandlingId: UUID,
     val erBehandlingHenlagt: Boolean,
     val type: Behandlingstype,
-    @param:Schema(type = "Behandlingsstatus")
+    @param:Schema(name = "Behandlingsstatus")
     val status: Behandlingsstatus,
     val opprettetDato: LocalDate,
     val avsluttetDato: LocalDate? = null,
