@@ -194,7 +194,7 @@ class TilbakekrevingRepository(
         object TrengerPåminnelse : FindTilbakekrevingStrategy {
             override fun select(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
                 return jdbcTemplate.query(
-                    "SELECT * FROM tilbakekreving WHERE neste_påminnelse < ?;",
+                    "SELECT * FROM tilbakekreving WHERE neste_påminnelse IS NOT NULL AND neste_påminnelse < ?;",
                     mapper,
                     FieldConverter.LocalDateTimeConverter.convert(LocalDateTime.now()),
                 )
@@ -202,7 +202,7 @@ class TilbakekrevingRepository(
 
             override fun selectForUpdate(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
                 return jdbcTemplate.query(
-                    "SELECT * FROM tilbakekreving WHERE neste_påminnelse < ? FOR UPDATE;",
+                    "SELECT * FROM tilbakekreving WHERE neste_påminnelse IS NOT NULL AND neste_påminnelse < ? FOR UPDATE;",
                     mapper,
                     FieldConverter.LocalDateTimeConverter.convert(LocalDateTime.now()),
                 )

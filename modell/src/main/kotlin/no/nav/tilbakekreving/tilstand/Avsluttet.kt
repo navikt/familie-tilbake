@@ -18,5 +18,7 @@ object Avsluttet : Tilstand {
         tilbakekreving.sendStatusendring(ForenkletBehandlingsstatus.AVSLUTTET)
     }
 
-    override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse) {}
+    override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse) {
+        tilbakekreving.oppdaterPåminnelsestidspunkt()
+    }
 }

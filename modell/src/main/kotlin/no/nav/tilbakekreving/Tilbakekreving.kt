@@ -59,7 +59,7 @@ class Tilbakekreving internal constructor(
     val kravgrunnlagHistorikk: KravgrunnlagHistorikk,
     val brevHistorikk: BrevHistorikk,
     val opprettet: LocalDateTime,
-    var nestePåminnelse: LocalDateTime?,
+    private var nestePåminnelse: LocalDateTime?,
     val opprettelsesvalg: Opprettelsesvalg,
     private val behovObservatør: BehovObservatør,
     private val endringObservatør: EndringObservatør,
