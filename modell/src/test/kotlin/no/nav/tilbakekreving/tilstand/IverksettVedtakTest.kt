@@ -28,6 +28,7 @@ import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.junit.jupiter.api.Test
 import java.math.BigInteger
+import java.time.LocalDateTime
 import java.util.UUID
 
 class IverksettVedtakTest {
@@ -78,7 +79,7 @@ class IverksettVedtakTest {
             håndter(kravgrunnlag())
             håndter(fagsysteminfoHendelse())
             håndter(brukerinfoHendelse())
-            tilbakekreving.håndter(VarselbrevSendtHendelse(varselbrevId = tilbakekreving.brevHistorikk.nåværende().entry.id, journalpostId = "1234"))
+            tilbakekreving.håndter(VarselbrevSendtHendelse(varselbrevId = tilbakekreving.brevHistorikk.nåværende().entry.id, journalpostId = "1234", sendtTid = LocalDateTime.now()))
             håndter(
                 Behandler.Saksbehandler("Ansvarlig saksbehandler"),
                 faktastegVurdering(),

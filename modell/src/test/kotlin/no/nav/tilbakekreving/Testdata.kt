@@ -36,6 +36,7 @@ import no.nav.tilbakekreving.tilstand.TilBehandling
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.Random
 import java.util.UUID
 
@@ -142,6 +143,7 @@ fun fagsysteminfoHendelse(
 fun varselbrevHendelse(varselbrevId: UUID) = VarselbrevSendtHendelse(
     varselbrevId = varselbrevId,
     journalpostId = UUID.randomUUID().toString(),
+    sendtTid = LocalDateTime.now()
 )
 
 fun brukerinfoHendelse() = BrukerinfoHendelse(

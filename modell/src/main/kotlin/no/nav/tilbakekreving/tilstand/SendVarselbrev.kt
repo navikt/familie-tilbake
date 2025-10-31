@@ -51,16 +51,22 @@ object SendVarselbrev : Tilstand {
         )
     }
 
-    override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse) {}
+    override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse) {
+        tilbakekreving.byttTilstand(TilBehandling)
+    }
 
     override fun håndter(
         tilbakekreving: Tilbakekreving,
         varselbrevSendtHendelse: VarselbrevSendtHendelse,
     ) {
+        if (varselbrevSendtHendelse.journalpostId == null) {
+            tilbakekreving.byttTilstand(TilBehandling)
+        }
+
         when (val brev = tilbakekreving.brevHistorikk.entry(varselbrevSendtHendelse.varselbrevId)) {
             is Varselbrev -> {
                 brev.journalpostId = varselbrevSendtHendelse.journalpostId
-                // TODO: Oppdatere sendt når varselbrev faktisk blir sendt
+                brev.sendt = varselbrevSendtHendelse.sendtTid
             }
             else -> error("Forventet Varselbrev for id=${varselbrevSendtHendelse.varselbrevId}, men var ${brev::class.simpleName}")
         }

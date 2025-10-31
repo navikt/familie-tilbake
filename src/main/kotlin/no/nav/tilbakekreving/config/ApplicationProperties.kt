@@ -10,6 +10,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 data class ApplicationProperties(
     val toggles: Toggles = Toggles(
         nyModellEnabled = false,
+        sendVarselbrev = false
     ),
     val kravgrunnlag: List<String> = emptyList(),
     val tilgangsstyring: Tilgangsstyring,

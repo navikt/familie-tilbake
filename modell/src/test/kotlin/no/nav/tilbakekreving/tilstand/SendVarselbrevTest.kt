@@ -15,6 +15,7 @@ import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.Period
 import java.util.UUID
 
@@ -32,7 +33,7 @@ class SendVarselbrevTest {
         tilbakekreving.håndter(kravgrunnlag)
         tilbakekreving.håndter(fagsak)
         tilbakekreving.håndter(bruker)
-        val varselbrevSendtHendelse = VarselbrevSendtHendelse(varselbrevId = tilbakekreving.brevHistorikk.nåværende().entry.id, journalpostId = "1234")
+        val varselbrevSendtHendelse = VarselbrevSendtHendelse(varselbrevId = tilbakekreving.brevHistorikk.nåværende().entry.id, journalpostId = "1234", sendtTid = LocalDateTime.now())
         tilbakekreving.håndter(varselbrevSendtHendelse)
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
 

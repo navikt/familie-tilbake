@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.tilstand
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import java.time.LocalDateTime
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
@@ -132,7 +133,7 @@ class TilBehandlingTest {
             ),
         )
         tilbakekreving.håndter(brukerinfoHendelse())
-        tilbakekreving.håndter(VarselbrevSendtHendelse(tilbakekreving.brevHistorikk.nåværende().entry.id, journalpostId = "1234"))
+        tilbakekreving.håndter(VarselbrevSendtHendelse(tilbakekreving.brevHistorikk.nåværende().entry.id, journalpostId = "1234", sendtTid = LocalDateTime.now()))
 
         tilbakekreving.tilstand shouldBe TilBehandling
 

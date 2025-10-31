@@ -2,6 +2,8 @@ package no.nav.tilbakekreving
 
 import no.nav.familie.tilbake.api.forvaltning.Behandlingsinfo
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.config.FeatureToggleConfig
+import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.integration.pdl.PdlClient
 import no.nav.familie.tilbake.integration.pdl.internal.PdlKjønnType
@@ -60,6 +62,7 @@ class TilbakekrevingService(
     private val kravgrunnlagBufferRepository: KravgrunnlagBufferRepository,
     private val dokarkivClient: DokarkivClient,
     private val dokdistService: DokdistClient,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = TracedLogger.getLogger<TilbakekrevingService>()
 
@@ -207,24 +210,29 @@ class TilbakekrevingService(
             }
 
             is VarselbrevBehov -> {
-                val logContext = SecureLog.Context.utenBehandling(behov.eksternFagsakId)
-                val arkivert = dokarkivClient.journalførVarselbrev(behov, logContext)
-                if (arkivert.journalpostId == null) {
-                    throw Feil(
-                        message = "journalførin av varselbrev til behandlingId ${behov.behandlingId} misslykket med denne meldingen: ${arkivert.melding}",
-                        frontendFeilmelding = "journalførin av varselbrev til behandlingId ${behov.behandlingId} misslykket med denne meldingen: ${arkivert.melding}",
-                        logContext = SecureLog.Context.fra(tilbakekreving),
+                var journalpostId: String? = null
+                if (applicationProperties.toggles.sendVarselbrev) {
+                    val logContext = SecureLog.Context.utenBehandling(behov.eksternFagsakId)
+                    val arkivert = dokarkivClient.journalførVarselbrev(behov, logContext)
+                    if (arkivert.journalpostId == null) {
+                        throw Feil(
+                            message = "journalførin av varselbrev til behandlingId ${behov.behandlingId} misslykket med denne meldingen: ${arkivert.melding}",
+                            frontendFeilmelding = "journalførin av varselbrev til behandlingId ${behov.behandlingId} misslykket med denne meldingen: ${arkivert.melding}",
+                            logContext = SecureLog.Context.fra(tilbakekreving),
+                        )
+                    }
+                    dokdistService.brevTilUtsending(
+                        behov = behov,
+                        journalpostId = arkivert.journalpostId,
+                        logContext = logContext,
                     )
+                    journalpostId = arkivert.journalpostId
                 }
-                dokdistService.brevTilUtsending(
-                    behov = behov,
-                    journalpostId = arkivert.journalpostId,
-                    logContext = logContext,
-                )
                 tilbakekreving.håndter(
                     VarselbrevSendtHendelse(
                         varselbrevId = behov.brevId,
-                        journalpostId = arkivert.journalpostId,
+                        journalpostId = journalpostId,
+                        sendtTid = LocalDateTime.now(),
                     ),
                 )
             }

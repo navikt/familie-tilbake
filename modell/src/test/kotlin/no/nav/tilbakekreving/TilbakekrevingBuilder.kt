@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving
 
+import java.time.LocalDateTime
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
@@ -30,7 +31,7 @@ fun tilbakekrevingTilBehandling(
         håndter(kravgrunnlag())
         håndter(fagsysteminfoHendelse())
         håndter(brukerinfoHendelse())
-        håndter(VarselbrevSendtHendelse(varselbrevId = tilbakekreving.brevHistorikk.nåværende().entry.id, journalpostId = "1234"))
+        håndter(VarselbrevSendtHendelse(varselbrevId = tilbakekreving.brevHistorikk.nåværende().entry.id, journalpostId = "1234", sendtTid = LocalDateTime.now()))
     }
     return tilbakekreving
 }

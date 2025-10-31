@@ -21,6 +21,7 @@ import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.junit.jupiter.api.Test
 import java.math.BigInteger
+import java.time.LocalDateTime
 import java.util.UUID
 
 class FrontendE2ETest {
@@ -44,7 +45,7 @@ class FrontendE2ETest {
 
         tilbakekreving.frontendDtoForBehandling(behandler, true).status shouldBe Behandlingsstatus.OPPRETTET
 
-        tilbakekreving.håndter(VarselbrevSendtHendelse(varselbrevId = tilbakekreving.brevHistorikk.nåværende().entry.id, journalpostId = "1234"))
+        tilbakekreving.håndter(VarselbrevSendtHendelse(varselbrevId = tilbakekreving.brevHistorikk.nåværende().entry.id, journalpostId = "1234", sendtTid = LocalDateTime.now()))
         tilbakekreving.frontendDtoForBehandling(behandler, true).status shouldBe Behandlingsstatus.UTREDES
 
         tilbakekreving.håndter(behandler, faktastegVurdering())
