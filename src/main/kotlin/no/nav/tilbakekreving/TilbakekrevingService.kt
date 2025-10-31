@@ -151,6 +151,7 @@ class TilbakekrevingService(
                     logger.medContext(logContext) {
                         warn("Feilet under håndtering av behov", e)
                     }
+                    tilbakekreving.oppdaterPåminnelsestidspunkt()
                     break
                 }
             }
@@ -483,15 +484,14 @@ class TilbakekrevingService(
     }
 
     fun påminnSaker() {
-        var context = SecureLog.Context.tom()
-        try {
-            hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TrengerPåminnelse) { tilbakekreving ->
-                context = SecureLog.Context.fra(tilbakekreving)
+        val tilbakekrevinger = tilbakekrevingRepository.hentTilbakekrevinger(TilbakekrevingRepository.FindTilbakekrevingStrategy.TrengerPåminnelse)
+        for (tilbakekrevingEntity in tilbakekrevinger) {
+            hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingEntity.id)) { tilbakekreving ->
+                val context = SecureLog.Context.fra(tilbakekreving)
+                logger.medContext(context) {
+                    info("Sender påminnelse")
+                }
                 tilbakekreving.håndter(Påminnelse(LocalDateTime.now()))
-            }
-        } catch (e: Exception) {
-            logger.medContext(context) {
-                warn("Feilet under påminnelse av saker", e)
             }
         }
     }

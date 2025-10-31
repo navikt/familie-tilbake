@@ -145,5 +145,12 @@ class BehovE2ETest : TilbakekrevingE2EBase() {
             it.fagsystem shouldBe FagsystemDTO.TS
             it.ident shouldBe fødselsnummer
         }
+
+        tilbakekrevingService.påminnSaker()
+
+        pdlClient.hentPersoninfoHits.forExactly(2) {
+            it.fagsystem shouldBe FagsystemDTO.TS
+            it.ident shouldBe fødselsnummer
+        }
     }
 }

@@ -68,13 +68,13 @@ class Tilbakekreving internal constructor(
     val bigQueryService: BigQueryService,
 ) : FrontendDto<FagsakDto>, BehandlingObservatør {
     internal fun byttTilstand(nyTilstand: Tilstand) {
-        if (nyTilstand.tidTilPåminnelse == null) {
-            nestePåminnelse = null
-        } else {
-            nestePåminnelse = LocalDateTime.now().plus(nyTilstand.tidTilPåminnelse)
-        }
         tilstand = nyTilstand
+        oppdaterPåminnelsestidspunkt()
         tilstand.entering(this)
+    }
+
+    fun oppdaterPåminnelsestidspunkt() {
+        nestePåminnelse = tilstand.tidTilPåminnelse?.let(LocalDateTime.now()::plus)
     }
 
     fun håndter(opprettTilbakekrevingEvent: OpprettTilbakekrevingHendelse) {

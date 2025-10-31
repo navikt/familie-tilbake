@@ -63,9 +63,13 @@ class TilbakekrevingRepository(
     }
 
     fun hentTilbakekreving(strategy: FindTilbakekrevingStrategy): TilbakekrevingEntity? {
+        return hentTilbakekrevinger(strategy).firstOrNull()
+    }
+
+    fun hentTilbakekrevinger(strategy: FindTilbakekrevingStrategy): List<TilbakekrevingEntity> {
         return strategy.select(jdbcTemplate) { resultSet, index ->
             mergeMedJson(resultSet)
-        }.firstOrNull()
+        }
     }
 
     fun hentAlleTilbakekrevinger(): List<TilbakekrevingEntity>? {
