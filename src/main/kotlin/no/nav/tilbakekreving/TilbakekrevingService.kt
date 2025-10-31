@@ -31,7 +31,6 @@ import no.nav.tilbakekreving.endring.EndringObservatørService
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
-import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
@@ -481,19 +480,6 @@ class TilbakekrevingService(
                 behandlingstatus = null,
             ),
         )
-    }
-
-    fun påminnSaker() {
-        val tilbakekrevinger = tilbakekrevingRepository.hentTilbakekrevinger(TilbakekrevingRepository.FindTilbakekrevingStrategy.TrengerPåminnelse)
-        for (tilbakekrevingEntity in tilbakekrevinger) {
-            hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingEntity.id)) { tilbakekreving ->
-                val context = SecureLog.Context.fra(tilbakekreving)
-                logger.medContext(context) {
-                    info("Sender påminnelse")
-                }
-                tilbakekreving.håndter(Påminnelse(LocalDateTime.now()))
-            }
-        }
     }
 
     private fun validerBrevmottaker(tilbakekreving: Tilbakekreving) {

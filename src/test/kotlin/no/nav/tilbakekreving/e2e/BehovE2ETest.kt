@@ -15,6 +15,7 @@ import no.nav.tilbakekreving.e2e.ytelser.TilleggsstønaderE2ETest.Companion.TILL
 import no.nav.tilbakekreving.entity.FieldConverter
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
+import no.nav.tilbakekreving.hendelser.PåminnelseMediator
 import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub
 import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub.Companion.finnKafkamelding
 import no.nav.tilbakekreving.januar
@@ -29,6 +30,9 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class BehovE2ETest : TilbakekrevingE2EBase() {
+    @Autowired
+    private lateinit var påminnelseMediator: PåminnelseMediator
+
     @Autowired
     private lateinit var kafkaProducer: KafkaProducerStub
 
@@ -121,7 +125,7 @@ class BehovE2ETest : TilbakekrevingE2EBase() {
             it.ident shouldBe fødselsnummer
         }
 
-        tilbakekrevingService.påminnSaker()
+        påminnelseMediator.påminnSaker()
 
         pdlClient.hentPersoninfoHits.forExactly(1) {
             it.fagsystem shouldBe FagsystemDTO.TS
@@ -139,14 +143,14 @@ class BehovE2ETest : TilbakekrevingE2EBase() {
             tilbakekrevingId,
         )
 
-        tilbakekrevingService.påminnSaker()
+        påminnelseMediator.påminnSaker()
 
         pdlClient.hentPersoninfoHits.forExactly(2) {
             it.fagsystem shouldBe FagsystemDTO.TS
             it.ident shouldBe fødselsnummer
         }
 
-        tilbakekrevingService.påminnSaker()
+        påminnelseMediator.påminnSaker()
 
         pdlClient.hentPersoninfoHits.forExactly(2) {
             it.fagsystem shouldBe FagsystemDTO.TS
