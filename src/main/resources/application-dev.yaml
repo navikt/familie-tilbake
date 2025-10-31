@@ -20,6 +20,7 @@ tilbakekreving:
   toggles:
     ny-modell-enabled: true
     tilgangsmaskinen-enabled: true
+    varselbrev-enabled: true
   tilgangsstyring:
     grupper:
       ts:

@@ -331,7 +331,7 @@ class ForvaltningController(
     fun migrerAlleSaker() {
         tilbakekrevingRepository.hentAlleTilbakekrevinger()?.forEach { entity ->
             tilbakekrevingRepository.hentOgLagreResultat(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(entity.id)) {
-                val tilbakekreving = it.fraEntity(Observatør(), bigQueryService, endringObservatør)
+                val tilbakekreving = it.fraEntity(Observatør(), bigQueryService, endringObservatør, varselbrevEnabled = false)
                 logger.medContext(SecureLog.Context.fra(tilbakekreving)) {
                     info("Migrerer sak {}", tilbakekreving.hentTilbakekrevingUrl(applicationProperties.frontendUrl))
                 }

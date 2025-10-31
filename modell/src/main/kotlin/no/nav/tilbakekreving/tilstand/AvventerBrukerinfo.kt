@@ -24,6 +24,10 @@ object AvventerBrukerinfo : Tilstand {
     ) {
         tilbakekreving.bruker!!.oppdater(brukerinfo)
         tilbakekreving.opprettBrevmottakerSteg(brukerinfo.navn, brukerinfo.ident)
-        tilbakekreving.byttTilstand(SendVarselbrev)
+        if (tilbakekreving.varselbrevEnabled) {
+            tilbakekreving.byttTilstand(SendVarselbrev)
+        } else {
+            tilbakekreving.byttTilstand(TilBehandling)
+        }
     }
 }

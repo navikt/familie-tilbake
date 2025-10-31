@@ -35,7 +35,7 @@ class EndringObservatørTest {
                 ytelse = Ytelse.Tilleggsstønad,
             ),
         )
-        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), BehovObservatørOppsamler(), opprettTilbakekrevingHendelse, bigQueryService, endringObservatør)
+        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), BehovObservatørOppsamler(), opprettTilbakekrevingHendelse, bigQueryService, endringObservatør, varselbrevEnabled = true)
         tilbakekreving.håndter(kravgrunnlag())
         tilbakekreving.håndter(brukerinfoHendelse())
         tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, faktastegVurdering())
@@ -61,7 +61,7 @@ class EndringObservatørTest {
                 ytelse = Ytelse.Tilleggsstønad,
             ),
         )
-        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), behovOppsamler, opprettTilbakekrevingHendelse, bigQueryService, endringObservatør)
+        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), behovOppsamler, opprettTilbakekrevingHendelse, bigQueryService, endringObservatør, varselbrevEnabled = true)
         tilbakekreving.håndter(kravgrunnlag())
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.status } shouldBe listOf(
             ForenkletBehandlingsstatus.OPPRETTET,

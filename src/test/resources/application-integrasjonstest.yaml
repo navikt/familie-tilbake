@@ -44,6 +44,7 @@ tilbakekreving:
     - LOCAL_TILLEGGSSTONADER.KRAVGRUNNLAG
   toggles:
     ny-modell-enabled: true
+    varselbrev-enabled: true
   tilgangsstyring:
     ts:
       grupper:

@@ -19,6 +19,7 @@ fun opprettTilbakekreving(
         opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse,
         bigQueryService = bigQueryService,
         endringObservatør = EndringObservatørOppsamler(),
+        varselbrevEnabled = true,
     )
 
 fun tilbakekrevingTilBehandling(

@@ -42,7 +42,7 @@ class TilleggsstønaderE2ETest {
                 ytelse = Ytelse.Tilleggsstønad,
             ),
         )
-        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), observatør, opprettTilbakekrevingHendelse, bigQueryService, EndringObservatørOppsamler())
+        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), observatør, opprettTilbakekrevingHendelse, bigQueryService, EndringObservatørOppsamler(), varselbrevEnabled = true)
         tilbakekreving.håndter(kravgrunnlag())
 
         observatør.behovListe.size shouldBe 2
@@ -61,6 +61,7 @@ class TilleggsstønaderE2ETest {
             opprettTilbakekrevingHendelse,
             BigQueryServiceStub(),
             EndringObservatørOppsamler(),
+            varselbrevEnabled = true,
         )
 
         tilbakekreving.håndter(
@@ -165,6 +166,7 @@ class TilleggsstønaderE2ETest {
             opprettTilbakekrevingHendelse,
             BigQueryServiceStub(),
             EndringObservatørOppsamler(),
+            varselbrevEnabled = true,
         )
 
         tilbakekreving.håndter(

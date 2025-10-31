@@ -413,6 +413,7 @@ internal class NyTilgangskontrollServiceTest : OppslagSpringRunnerTest() {
             behovObservatør = mockk(relaxed = true),
             bigQueryService = bigQueryService,
             endringObservatør = EndringObservatørOppsamler(),
+            varselbrevEnabled = true,
         )
     }
 }

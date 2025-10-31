@@ -36,6 +36,7 @@ data class TilbakekrevingEntity(
         behovObservatør: BehovObservatør,
         bigQueryService: BigQueryService,
         endringObservatør: EndringObservatør,
+        varselbrevEnabled: Boolean,
     ): Tilbakekreving {
         val kravgrunnlagHistorikk = KravgrunnlagHistorikk(
             historikk = kravgrunnlagHistorikkEntities.map { it.fraEntity() }.toMutableList(),
@@ -80,6 +81,7 @@ data class TilbakekrevingEntity(
             },
             bigQueryService = bigQueryService,
             endringObservatør = endringObservatør,
+            varselbrevEnabled = varselbrevEnabled,
         )
 
         return tilbakekreving

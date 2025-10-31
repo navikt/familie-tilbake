@@ -72,7 +72,7 @@ class IverksettVedtakTest {
         oppsamler: BehovObservatørOppsamler,
         endringOppsamler: EndringObservatørOppsamler = EndringObservatørOppsamler(),
     ): Tilbakekreving {
-        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), oppsamler, opprettTilbakekrevingHendelse, bigQueryService, endringOppsamler)
+        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), oppsamler, opprettTilbakekrevingHendelse, bigQueryService, endringOppsamler, varselbrevEnabled = true)
 
         tilbakekreving.apply {
             håndter(kravgrunnlag())

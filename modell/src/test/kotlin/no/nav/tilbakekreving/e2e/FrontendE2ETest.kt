@@ -36,6 +36,7 @@ class FrontendE2ETest {
             opprettTilbakekrevingHendelse,
             BigQueryServiceStub(),
             EndringObservatørOppsamler(),
+            varselbrevEnabled = true,
         )
 
         tilbakekreving.håndter(kravgrunnlag())

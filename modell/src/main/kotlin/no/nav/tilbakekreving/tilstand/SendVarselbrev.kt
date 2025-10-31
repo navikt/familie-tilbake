@@ -51,7 +51,9 @@ object SendVarselbrev : Tilstand {
         )
     }
 
-    override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse) {}
+    override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse) {
+        tilbakekreving.byttTilstand(TilBehandling)
+    }
 
     override fun håndter(
         tilbakekreving: Tilbakekreving,

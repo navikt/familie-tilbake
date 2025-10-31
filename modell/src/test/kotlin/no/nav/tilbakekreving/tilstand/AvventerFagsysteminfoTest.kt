@@ -22,7 +22,7 @@ class AvventerFagsysteminfoTest {
     fun `tilbakekreving i AvventerFagsysteminfo går videre med fagsysteminfo`() {
         val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
-        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), oppsamler, opprettTilbakekrevingEvent, bigQueryService, EndringObservatørOppsamler())
+        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), oppsamler, opprettTilbakekrevingEvent, bigQueryService, EndringObservatørOppsamler(), varselbrevEnabled = true)
 
         val kravgrunnlag = kravgrunnlag()
         tilbakekreving.håndter(kravgrunnlag)

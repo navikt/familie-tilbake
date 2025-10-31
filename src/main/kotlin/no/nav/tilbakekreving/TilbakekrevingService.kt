@@ -75,6 +75,7 @@ class TilbakekrevingService(
             opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse,
             bigQueryService = bigQueryService,
             endringObservatør = endringObservatørService,
+            varselbrevEnabled = applicationProperties.toggles.varselbrevEnabled,
         )
 
         håndter(tilbakekreving)
@@ -99,7 +100,7 @@ class TilbakekrevingService(
         if (!applicationProperties.toggles.nyModellEnabled) return null
 
         val tilbakekreving = tilbakekrevingRepository.hentTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.EksternFagsakId(eksternFagsakId, fagsystem))
-            ?.fraEntity(Observatør(), bigQueryService, endringObservatørService)
+            ?.fraEntity(Observatør(), bigQueryService, endringObservatørService, varselbrevEnabled = applicationProperties.toggles.varselbrevEnabled)
             ?: return null
 
         val logContext = SecureLog.Context.fra(tilbakekreving)
@@ -112,7 +113,7 @@ class TilbakekrevingService(
 
         val tilbakekreving = tilbakekrevingRepository.hentTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.BehandlingId(behandlingId)) ?: return null
         kravgrunnlagBufferRepository.validerKravgrunnlagInnenforScope(tilbakekreving.eksternFagsak.eksternId, tilbakekreving.behandlingHistorikkEntities.lastOrNull()?.id?.toString())
-        return tilbakekreving.fraEntity(Observatør(), bigQueryService, endringObservatørService)
+        return tilbakekreving.fraEntity(Observatør(), bigQueryService, endringObservatørService, varselbrevEnabled = applicationProperties.toggles.varselbrevEnabled)
     }
 
     fun <T : Any> hentOgLagreTilbakekreving(
@@ -124,7 +125,7 @@ class TilbakekrevingService(
         lateinit var logContext: SecureLog.Context
         tilbakekrevingRepository.hentOgLagreResultat(strategy) {
             kravgrunnlagBufferRepository.validerKravgrunnlagInnenforScope(it.eksternFagsak.eksternId, it.behandlingHistorikkEntities.lastOrNull()?.id?.toString())
-            val tilbakekreving = it.fraEntity(observatør, bigQueryService, endringObservatørService)
+            val tilbakekreving = it.fraEntity(observatør, bigQueryService, endringObservatørService, varselbrevEnabled = applicationProperties.toggles.varselbrevEnabled)
             logContext = SecureLog.Context.fra(tilbakekreving)
             result = callback(tilbakekreving)
 
@@ -142,7 +143,7 @@ class TilbakekrevingService(
         logContext: SecureLog.Context,
     ) {
         tilbakekrevingRepository.hentOgLagreResultat(strategy) {
-            val tilbakekreving = it.fraEntity(observatør, bigQueryService, endringObservatørService)
+            val tilbakekreving = it.fraEntity(observatør, bigQueryService, endringObservatørService, varselbrevEnabled = applicationProperties.toggles.varselbrevEnabled)
             while (observatør.harUbesvarteBehov()) {
                 try {
                     håndterBehov(tilbakekreving, observatør.nesteBehov(), SecureLog.Context.fra(tilbakekreving))

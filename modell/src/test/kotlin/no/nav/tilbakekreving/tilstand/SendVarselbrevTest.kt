@@ -25,7 +25,7 @@ class SendVarselbrevTest {
     fun `tilbakekreving i SendVarselbrev går videre med Kravgrunnlag`() {
         val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
-        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), oppsamler, opprettTilbakekrevingEvent, bigQueryService, EndringObservatørOppsamler())
+        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), oppsamler, opprettTilbakekrevingEvent, bigQueryService, EndringObservatørOppsamler(), varselbrevEnabled = true)
         val bruker = brukerinfoHendelse()
         val kravgrunnlag = kravgrunnlag()
         val fagsak = fagsysteminfoHendelse()
