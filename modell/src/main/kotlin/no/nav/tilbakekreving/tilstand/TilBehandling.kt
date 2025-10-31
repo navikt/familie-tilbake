@@ -24,7 +24,9 @@ object TilBehandling : Tilstand {
         tilbakekreving.sendStatusendring(ForenkletBehandlingsstatus.TIL_BEHANDLING)
     }
 
-    override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse) {}
+    override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse) {
+        tilbakekreving.sendStatusendring(ForenkletBehandlingsstatus.TIL_BEHANDLING)
+    }
 
     override fun håndterNullstilling(nåværendeBehandling: Behandling, sporing: Sporing) {
         nåværendeBehandling.flyttTilbakeTilFakta()

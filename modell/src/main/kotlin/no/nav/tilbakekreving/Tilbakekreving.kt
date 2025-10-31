@@ -104,6 +104,7 @@ class Tilbakekreving internal constructor(
 
     fun håndter(påminnelse: Påminnelse) {
         tilstand.håndter(this, påminnelse)
+        oppdaterPåminnelsestidspunkt()
     }
 
     fun oppdaterFagsysteminfo(fagsysteminfo: FagsysteminfoHendelse) {
