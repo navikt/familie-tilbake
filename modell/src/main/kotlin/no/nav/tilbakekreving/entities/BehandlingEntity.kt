@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.entities
 
+import com.fasterxml.jackson.annotation.JsonAlias
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
@@ -13,10 +14,12 @@ import java.util.UUID
 data class BehandlingEntity(
     val id: UUID,
     val tilbakekrevingId: String,
+    @field:JsonAlias("behandlingstype", "type")
     val type: Behandlingstype,
     val opprettet: LocalDateTime,
     val sistEndret: LocalDateTime,
     val enhet: EnhetEntity?,
+    @field:JsonAlias("årsak", "revurderingsårsak")
     val revurderingsårsak: Behandlingsårsakstype?,
     var ansvarligSaksbehandler: BehandlerEntity,
     val eksternFagsakBehandlingRef: HistorikkReferanseEntity<UUID>,
