@@ -16,6 +16,7 @@ import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.FagsystemUtil
 import no.nav.tilbakekreving.Observatør
+import no.nav.tilbakekreving.Rettsgebyr
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.config.ApplicationProperties
@@ -338,6 +339,17 @@ class ForvaltningController(
                 tilbakekreving.tilEntity()
             }
         }
+    }
+
+    @Operation(summary = "Finner saker over 4 rettsgebyr")
+    @GetMapping("/alle-over-4-rettsgebyr")
+    fun alleSakerOver4Rettsgebyr(): Ressurs<List<String>> {
+        val urler = tilbakekrevingRepository
+            .hentAlleTilbakekrevinger()?.map { it.fraEntity(Observatør(), bigQueryService, endringObservatør, features = featureService.modellFeatures) }
+            ?.filter { it.behandlingHistorikk.nåværende().entry.totaltFeilutbetaltBeløp() >= (Rettsgebyr.rettsgebyr * 4).toBigDecimal() }
+            ?.map { it.hentTilbakekrevingUrl(applicationProperties.frontendUrl) }
+            ?: emptyList()
+        return Ressurs.success(urler)
     }
 }
 
