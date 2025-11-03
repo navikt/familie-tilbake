@@ -39,8 +39,8 @@ class KravgrunnlagBufferRepository(
                 }
                 jdbcTemplate.update("UPDATE kravgrunnlag_buffer SET utenfor_scope=true WHERE kravgrunnlag_id=?;", it.kravgrunnlagId)
             } catch (e: Exception) {
-                log.medContext(SecureLog.Context.utenBehandling(it.kravgrunnlagId)) {
-                    error("Feilet under konsumering av kravgrunnlag", e)
+                log.medContext(SecureLog.Context.utenBehandling(it.fagsystemId)) {
+                    error("Feilet under konsumering av kravgrunnlag, kravgrunnlagId={}", it.kravgrunnlagId, e)
                 }
             }
         }
