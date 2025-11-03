@@ -13,12 +13,6 @@ class KravgrunnlagMediator(
     private val applicationProperties: ApplicationProperties,
 ) {
     @Scheduled(fixedRate = 1000L)
-    fun håndterKravgrunnlag() {
-        if (applicationProperties.toggles.nyModellEnabled) {
-            lesKravgrunnlag()
-        }
-    }
-
     fun lesKravgrunnlag() {
         kravgrunnlagBufferRepository.konsumerKravgrunnlag { entity ->
             val kravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(entity.kravgrunnlag)

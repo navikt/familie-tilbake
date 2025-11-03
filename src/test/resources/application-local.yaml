@@ -7,8 +7,6 @@ spring:
 
 tilbakekreving:
   frontendUrl: https://tilbakekreving.ansatt.dev.nav.no
-  toggles:
-    ny-modell-enabled: true
   tilgangsstyring:
     ts:
       grupper:

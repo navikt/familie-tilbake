@@ -16,7 +16,7 @@ class TilbakekrevingTest {
     @Test
     fun `oppretter tilbakekreving`() {
         val opprettEvent = opprettTilbakekrevingHendelse(opprettelsesvalg = Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
-        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), BehovObservatørOppsamler(), opprettEvent, bigQueryService, endringObservatør, varselbrevEnabled = true)
+        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), BehovObservatørOppsamler(), opprettEvent, bigQueryService, endringObservatør, features = defaultFeatures())
 
         tilbakekreving.tilstand shouldBe AvventerKravgrunnlag
     }

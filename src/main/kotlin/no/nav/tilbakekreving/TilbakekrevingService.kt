@@ -27,6 +27,7 @@ import no.nav.tilbakekreving.behov.IverksettelseBehov
 import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.config.ApplicationProperties
+import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.endring.EndringObservatørService
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
@@ -60,6 +61,7 @@ class TilbakekrevingService(
     private val kravgrunnlagBufferRepository: KravgrunnlagBufferRepository,
     private val dokarkivClient: DokarkivClient,
     private val dokdistService: DokdistClient,
+    private val featureService: FeatureService,
 ) {
     private val logger = TracedLogger.getLogger<TilbakekrevingService>()
 
@@ -75,7 +77,7 @@ class TilbakekrevingService(
             opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse,
             bigQueryService = bigQueryService,
             endringObservatør = endringObservatørService,
-            varselbrevEnabled = applicationProperties.toggles.varselbrevEnabled,
+            features = featureService.modellFeatures,
         )
 
         håndter(tilbakekreving)
@@ -97,10 +99,8 @@ class TilbakekrevingService(
         fagsystem: FagsystemDTO,
         eksternFagsakId: String,
     ): Tilbakekreving? {
-        if (!applicationProperties.toggles.nyModellEnabled) return null
-
         val tilbakekreving = tilbakekrevingRepository.hentTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.EksternFagsakId(eksternFagsakId, fagsystem))
-            ?.fraEntity(Observatør(), bigQueryService, endringObservatørService, varselbrevEnabled = applicationProperties.toggles.varselbrevEnabled)
+            ?.fraEntity(Observatør(), bigQueryService, endringObservatørService, features = featureService.modellFeatures)
             ?: return null
 
         val logContext = SecureLog.Context.fra(tilbakekreving)
@@ -109,11 +109,9 @@ class TilbakekrevingService(
     }
 
     fun hentTilbakekreving(behandlingId: UUID): Tilbakekreving? {
-        if (!applicationProperties.toggles.nyModellEnabled) return null
-
         val tilbakekreving = tilbakekrevingRepository.hentTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.BehandlingId(behandlingId)) ?: return null
         kravgrunnlagBufferRepository.validerKravgrunnlagInnenforScope(tilbakekreving.eksternFagsak.eksternId, tilbakekreving.behandlingHistorikkEntities.lastOrNull()?.id?.toString())
-        return tilbakekreving.fraEntity(Observatør(), bigQueryService, endringObservatørService, varselbrevEnabled = applicationProperties.toggles.varselbrevEnabled)
+        return tilbakekreving.fraEntity(Observatør(), bigQueryService, endringObservatørService, features = featureService.modellFeatures)
     }
 
     fun <T : Any> hentOgLagreTilbakekreving(
@@ -125,7 +123,7 @@ class TilbakekrevingService(
         lateinit var logContext: SecureLog.Context
         tilbakekrevingRepository.hentOgLagreResultat(strategy) {
             kravgrunnlagBufferRepository.validerKravgrunnlagInnenforScope(it.eksternFagsak.eksternId, it.behandlingHistorikkEntities.lastOrNull()?.id?.toString())
-            val tilbakekreving = it.fraEntity(observatør, bigQueryService, endringObservatørService, varselbrevEnabled = applicationProperties.toggles.varselbrevEnabled)
+            val tilbakekreving = it.fraEntity(observatør, bigQueryService, endringObservatørService, features = featureService.modellFeatures)
             logContext = SecureLog.Context.fra(tilbakekreving)
             result = callback(tilbakekreving)
 
@@ -143,7 +141,7 @@ class TilbakekrevingService(
         logContext: SecureLog.Context,
     ) {
         tilbakekrevingRepository.hentOgLagreResultat(strategy) {
-            val tilbakekreving = it.fraEntity(observatør, bigQueryService, endringObservatørService, varselbrevEnabled = applicationProperties.toggles.varselbrevEnabled)
+            val tilbakekreving = it.fraEntity(observatør, bigQueryService, endringObservatørService, features = featureService.modellFeatures)
             while (observatør.harUbesvarteBehov()) {
                 try {
                     håndterBehov(tilbakekreving, observatør.nesteBehov(), SecureLog.Context.fra(tilbakekreving))

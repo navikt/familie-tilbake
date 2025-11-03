@@ -8,6 +8,7 @@ import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.brukerinfoHendelse
+import no.nav.tilbakekreving.defaultFeatures
 import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.fagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
@@ -25,7 +26,7 @@ class SendVarselbrevTest {
     fun `tilbakekreving i SendVarselbrev går videre med Kravgrunnlag`() {
         val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
-        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), oppsamler, opprettTilbakekrevingEvent, bigQueryService, EndringObservatørOppsamler(), varselbrevEnabled = true)
+        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), oppsamler, opprettTilbakekrevingEvent, bigQueryService, EndringObservatørOppsamler(), features = defaultFeatures())
         val bruker = brukerinfoHendelse()
         val kravgrunnlag = kravgrunnlag()
         val fagsak = fagsysteminfoHendelse()

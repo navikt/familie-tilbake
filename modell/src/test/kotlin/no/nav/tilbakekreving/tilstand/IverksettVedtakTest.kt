@@ -11,6 +11,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Reduksj
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.brukerinfoHendelse
+import no.nav.tilbakekreving.defaultFeatures
 import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.endring.VurdertUtbetaling
 import no.nav.tilbakekreving.fagsysteminfoHendelse
@@ -72,7 +73,7 @@ class IverksettVedtakTest {
         oppsamler: BehovObservatørOppsamler,
         endringOppsamler: EndringObservatørOppsamler = EndringObservatørOppsamler(),
     ): Tilbakekreving {
-        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), oppsamler, opprettTilbakekrevingHendelse, bigQueryService, endringOppsamler, varselbrevEnabled = true)
+        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), oppsamler, opprettTilbakekrevingHendelse, bigQueryService, endringOppsamler, features = defaultFeatures())
 
         tilbakekreving.apply {
             håndter(kravgrunnlag())

@@ -58,7 +58,6 @@ tilbakekreving:
   kravgrunnlag:
     - QA.P_TILLEGGSSTONADER.KRAVGRUNNLAG
   toggles:
-    ny-modell-enabled: true
     tilgangsmaskinen-enabled: true
   tilgangsmaskinen:
     scope: api://prod-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default

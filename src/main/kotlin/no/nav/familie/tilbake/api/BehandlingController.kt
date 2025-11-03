@@ -133,19 +133,17 @@ class BehandlingController(
     fun hentBehandling(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<BehandlingDto> {
-        if (applicationProperties.toggles.nyModellEnabled) {
-            val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
-            if (tilbakekreving != null) {
-                val rolle = tilgangskontrollService.validerTilgangTilbakekreving(
-                    tilbakekreving = tilbakekreving,
-                    behandlingId = behandlingId,
-                    minimumBehandlerrolle = Behandlerrolle.VEILEDER,
-                    auditLoggerEvent = AuditLoggerEvent.ACCESS,
-                    handling = "Henter tilbakekrevingsbehandling",
-                )
-                val behandler = ContextService.hentBehandler(SecureLog.Context.fra(tilbakekreving))
-                return Ressurs.success(tilbakekreving.frontendDtoForBehandling(behandler, rolle == Behandlerrolle.BESLUTTER))
-            }
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        if (tilbakekreving != null) {
+            val rolle = tilgangskontrollService.validerTilgangTilbakekreving(
+                tilbakekreving = tilbakekreving,
+                behandlingId = behandlingId,
+                minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+                auditLoggerEvent = AuditLoggerEvent.ACCESS,
+                handling = "Henter tilbakekrevingsbehandling",
+            )
+            val behandler = ContextService.hentBehandler(SecureLog.Context.fra(tilbakekreving))
+            return Ressurs.success(tilbakekreving.frontendDtoForBehandling(behandler, rolle == Behandlerrolle.BESLUTTER))
         }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,

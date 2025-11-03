@@ -25,7 +25,9 @@ import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
+import no.nav.tilbakekreving.FeatureToggles
 import no.nav.tilbakekreving.Tilbakekreving
+import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.config.ApplicationProperties
@@ -45,6 +47,7 @@ import org.springframework.test.context.TestPropertySource
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import java.util.Calendar
+import java.util.EnumMap
 import java.util.UUID
 
 @TestPropertySource(
@@ -431,7 +434,7 @@ internal class TilgangskontrollServiceTest : OppslagSpringRunnerTest() {
             behovObservatør = mockk(relaxed = true),
             bigQueryService = bigQueryService,
             endringObservatør = EndringObservatørOppsamler(),
-            varselbrevEnabled = true,
+            features = FeatureToggles(EnumMap(Toggle::class.java)),
         )
     }
 }

@@ -5,13 +5,25 @@ import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
+import java.util.EnumMap
 import java.util.UUID
 
 private val bigQueryService = BigQueryServiceStub()
 
+fun defaultFeatures(
+    vararg overrides: Pair<Toggle, Boolean>,
+): FeatureToggles = FeatureToggles(
+    EnumMap(
+        mutableMapOf(
+            Toggle.SendVarselbrev to true,
+        ).apply { putAll(overrides) },
+    ),
+)
+
 fun opprettTilbakekreving(
     oppsamler: BehovObservatørOppsamler,
     opprettTilbakekrevingHendelse: OpprettTilbakekrevingHendelse,
+    features: FeatureToggles = defaultFeatures(),
 ) = Tilbakekreving
     .opprett(
         id = UUID.randomUUID().toString(),
@@ -19,7 +31,7 @@ fun opprettTilbakekreving(
         opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse,
         bigQueryService = bigQueryService,
         endringObservatør = EndringObservatørOppsamler(),
-        varselbrevEnabled = true,
+        features = features,
     )
 
 fun tilbakekrevingTilBehandling(

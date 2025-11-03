@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.tilstand
 
 import no.nav.tilbakekreving.Tilbakekreving
+import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
@@ -24,7 +25,7 @@ object AvventerBrukerinfo : Tilstand {
     ) {
         tilbakekreving.bruker!!.oppdater(brukerinfo)
         tilbakekreving.opprettBrevmottakerSteg(brukerinfo.navn, brukerinfo.ident)
-        if (tilbakekreving.varselbrevEnabled) {
+        if (tilbakekreving.features[Toggle.SendVarselbrev]) {
             tilbakekreving.byttTilstand(SendVarselbrev)
         } else {
             tilbakekreving.byttTilstand(TilBehandling)

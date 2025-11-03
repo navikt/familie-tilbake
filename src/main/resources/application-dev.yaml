@@ -18,9 +18,9 @@ tilbakekreving:
     - Q1_TILLEGGSSTONADER.KRAVGRUNNLAG
     - Q1_TILBAKEKREVING.KRAVGRUNNLAG
   toggles:
-    ny-modell-enabled: true
     tilgangsmaskinen-enabled: true
-    varselbrev-enabled: true
+    ny-modell:
+      SendVarselbrev: true
   tilgangsstyring:
     grupper:
       ts:

@@ -66,7 +66,7 @@ class Tilbakekreving internal constructor(
     var bruker: Bruker? = null,
     internal var tilstand: Tilstand,
     val bigQueryService: BigQueryService,
-    val varselbrevEnabled: Boolean,
+    val features: FeatureToggles,
 ) : FrontendDto<FagsakDto>, BehandlingObservatør {
     internal fun byttTilstand(nyTilstand: Tilstand) {
         tilstand = nyTilstand
@@ -398,7 +398,7 @@ class Tilbakekreving internal constructor(
             opprettTilbakekrevingEvent: OpprettTilbakekrevingHendelse,
             bigQueryService: BigQueryService,
             endringObservatør: EndringObservatør,
-            varselbrevEnabled: Boolean,
+            features: FeatureToggles,
         ): Tilbakekreving {
             val tilbakekreving = Tilbakekreving(
                 id = id,
@@ -419,7 +419,7 @@ class Tilbakekreving internal constructor(
                 tilstand = Start,
                 bigQueryService = bigQueryService,
                 endringObservatør = endringObservatør,
-                varselbrevEnabled = varselbrevEnabled,
+                features = features,
             )
             tilbakekreving.håndter(opprettTilbakekrevingEvent)
             return tilbakekreving

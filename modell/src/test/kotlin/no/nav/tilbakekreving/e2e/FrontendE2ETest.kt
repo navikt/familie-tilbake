@@ -5,6 +5,7 @@ import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.brukerinfoHendelse
+import no.nav.tilbakekreving.defaultFeatures
 import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.fagsysteminfoHendelse
 import no.nav.tilbakekreving.faktastegVurdering
@@ -36,7 +37,7 @@ class FrontendE2ETest {
             opprettTilbakekrevingHendelse,
             BigQueryServiceStub(),
             EndringObservatørOppsamler(),
-            varselbrevEnabled = true,
+            features = defaultFeatures(),
         )
 
         tilbakekreving.håndter(kravgrunnlag())

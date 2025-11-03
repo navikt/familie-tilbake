@@ -12,6 +12,7 @@ import no.nav.tilbakekreving.behov.FagsysteminfoBehov
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.brukerinfoHendelse
+import no.nav.tilbakekreving.defaultFeatures
 import no.nav.tilbakekreving.eksternFagsak
 import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.fagsystem.Ytelse
@@ -42,7 +43,7 @@ class TilleggsstønaderE2ETest {
                 ytelse = Ytelse.Tilleggsstønad,
             ),
         )
-        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), observatør, opprettTilbakekrevingHendelse, bigQueryService, EndringObservatørOppsamler(), varselbrevEnabled = true)
+        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), observatør, opprettTilbakekrevingHendelse, bigQueryService, EndringObservatørOppsamler(), features = defaultFeatures())
         tilbakekreving.håndter(kravgrunnlag())
 
         observatør.behovListe.size shouldBe 2
@@ -61,7 +62,7 @@ class TilleggsstønaderE2ETest {
             opprettTilbakekrevingHendelse,
             BigQueryServiceStub(),
             EndringObservatørOppsamler(),
-            varselbrevEnabled = true,
+            features = defaultFeatures(),
         )
 
         tilbakekreving.håndter(
@@ -166,7 +167,7 @@ class TilleggsstønaderE2ETest {
             opprettTilbakekrevingHendelse,
             BigQueryServiceStub(),
             EndringObservatørOppsamler(),
-            varselbrevEnabled = true,
+            features = defaultFeatures(),
         )
 
         tilbakekreving.håndter(

@@ -35,18 +35,16 @@ class HistorikkController(
     fun hentHistorikkinnslag(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<List<HistorikkinnslagDto?>> {
-        if (applicationProperties.toggles.nyModellEnabled) {
-            val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
-            if (tilbakekreving != null) {
-                tilgangskontrollService.validerTilgangTilbakekreving(
-                    tilbakekreving = tilbakekreving,
-                    behandlingId = behandlingId,
-                    minimumBehandlerrolle = Behandlerrolle.VEILEDER,
-                    auditLoggerEvent = AuditLoggerEvent.ACCESS,
-                    handling = "Henter tilbakekrevingsbehandling",
-                )
-                return Ressurs.success(emptyList())
-            }
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        if (tilbakekreving != null) {
+            tilgangskontrollService.validerTilgangTilbakekreving(
+                tilbakekreving = tilbakekreving,
+                behandlingId = behandlingId,
+                minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+                auditLoggerEvent = AuditLoggerEvent.ACCESS,
+                handling = "Henter tilbakekrevingsbehandling",
+            )
+            return Ressurs.success(emptyList())
         }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,

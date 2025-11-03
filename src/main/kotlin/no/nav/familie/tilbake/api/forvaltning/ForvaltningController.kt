@@ -19,6 +19,7 @@ import no.nav.tilbakekreving.Observatør
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.config.ApplicationProperties
+import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.endring.EndringObservatør
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
@@ -56,6 +57,7 @@ class ForvaltningController(
     private val tilbakekrevingRepository: TilbakekrevingRepository,
     private val bigQueryService: BigQueryService,
     private val endringObservatør: EndringObservatør,
+    private val featureService: FeatureService,
 ) {
     private val logger = TracedLogger.getLogger<ForvaltningController>()
 
@@ -190,19 +192,17 @@ class ForvaltningController(
         @PathVariable ytelsestype: YtelsestypeDTO,
         @PathVariable eksternFagsakId: String,
     ): Ressurs<List<Behandlingsinfo>> {
-        if (applicationProperties.toggles.nyModellEnabled) {
-            val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype), eksternFagsakId)
-            if (tilbakekreving != null) {
-                val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
-                tilgangskontrollService.validerTilgangTilbakekreving(
-                    tilbakekreving = tilbakekreving,
-                    behandlingId = behandling.id,
-                    minimumBehandlerrolle = Behandlerrolle.FORVALTER,
-                    auditLoggerEvent = AuditLoggerEvent.NONE,
-                    handling = "Henter forvaltningsinformasjon",
-                )
-                return Ressurs.success(tilbakekrevingService.hentBehandlingsinfo(tilbakekreving))
-            }
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype), eksternFagsakId)
+        if (tilbakekreving != null) {
+            val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
+            tilgangskontrollService.validerTilgangTilbakekreving(
+                tilbakekreving = tilbakekreving,
+                behandlingId = behandling.id,
+                minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+                auditLoggerEvent = AuditLoggerEvent.NONE,
+                handling = "Henter forvaltningsinformasjon",
+            )
+            return Ressurs.success(tilbakekrevingService.hentBehandlingsinfo(tilbakekreving))
         }
         tilgangskontrollService.validerTilgangYtelsetypeOgFagsakId(
             ytelsestype = Ytelsestype.forDTO(ytelsestype),
@@ -331,7 +331,7 @@ class ForvaltningController(
     fun migrerAlleSaker() {
         tilbakekrevingRepository.hentAlleTilbakekrevinger()?.forEach { entity ->
             tilbakekrevingRepository.hentOgLagreResultat(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(entity.id)) {
-                val tilbakekreving = it.fraEntity(Observatør(), bigQueryService, endringObservatør, varselbrevEnabled = false)
+                val tilbakekreving = it.fraEntity(Observatør(), bigQueryService, endringObservatør, features = featureService.modellFeatures)
                 logger.medContext(SecureLog.Context.fra(tilbakekreving)) {
                     info("Migrerer sak {}", tilbakekreving.hentTilbakekrevingUrl(applicationProperties.frontendUrl))
                 }

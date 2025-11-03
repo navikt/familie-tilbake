@@ -8,9 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties("tilbakekreving")
 data class ApplicationProperties(
-    val toggles: Toggles = Toggles(
-        nyModellEnabled = false,
-    ),
+    val toggles: Toggles = Toggles(),
     val kravgrunnlag: List<String> = emptyList(),
     val tilgangsstyring: Tilgangsstyring,
     val tokenExchange: TokenExchangeService.Companion.Config,
