@@ -123,6 +123,11 @@ class Tilbakekreving internal constructor(
         tilstand.håndterNullstilling(nåværendeBehandling, sporingsinformasjon())
     }
 
+    fun håndterTrekkTilbakeFraGodkjenning() {
+        val nåværendeBehandling = behandlingHistorikk.nåværende().entry
+        tilstand.håndterTrekkTilbakeFraGodkjenning(nåværendeBehandling, sporingsinformasjon())
+    }
+
     fun opprettBrevmottakerSteg(
         navn: String,
         ident: String,

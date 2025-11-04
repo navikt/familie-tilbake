@@ -8,13 +8,16 @@ import no.nav.tilbakekreving.api.v2.MottakerDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.api.v2.PeriodeDto
 import no.nav.tilbakekreving.api.v2.fagsystem.svar.FagsysteminfoSvarHendelse
+import no.nav.tilbakekreving.e2e.BehandlingsstegGenerator
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.e2e.TilbakekrevingE2EBase
+import no.nav.tilbakekreving.e2e.kanBehandle
 import no.nav.tilbakekreving.e2e.ytelser.TilleggsstønaderE2ETest.Companion.TILLEGGSSTØNADER_KØ_NAVN
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import org.junit.jupiter.api.Test
@@ -127,5 +130,46 @@ class TilBehandlingTest : TilbakekrevingE2EBase() {
         tilbakekreving.behandlingHistorikk.nåværende().entry.vilkårsvurderingsstegDto.tilFrontendDto().perioder.map { it.periode } shouldBe listOf(
             1.januar(2021) til 31.januar(2021),
         )
+    }
+
+    @Test
+    fun `tilbakekreving trekkes tilbake fra godkjenning`() {
+        val behandlerIdent = "Z111111"
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        sendKravgrunnlagOgAvventLesing(
+            queueName = TILLEGGSSTØNADER_KØ_NAVN,
+            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+            ),
+        )
+
+        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+
+        utførSteg(
+            ident = behandlerIdent,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(),
+        )
+
+        utførSteg(
+            ident = behandlerIdent,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(),
+        )
+        utførSteg(
+            ident = behandlerIdent,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving(),
+        )
+        utførSteg(
+            ident = behandlerIdent,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagForeslåVedtakVurdering(),
+        )
+
+        somSaksbehandler(behandlerIdent) {
+            behandlingController.angreSendTilBeslutter(behandlingId)
+        }
+        tilbakekreving(behandlingId) kanBehandle Behandlingssteg.FORESLÅ_VEDTAK
     }
 }

@@ -73,4 +73,8 @@ internal sealed interface Tilstand {
     fun håndterNullstilling(nåværendeBehandling: Behandling, sporing: Sporing) {
         throw ModellFeil.UgyldigOperasjonException("Kan ikke flytte tilbake til fakta i $tilbakekrevingTilstand", sporing)
     }
+
+    fun håndterTrekkTilbakeFraGodkjenning(behandling: Behandling, sporing: Sporing) {
+        throw ModellFeil.UgyldigOperasjonException("Kan ikke trekke tilbake fra godkjenning $tilbakekrevingTilstand", sporing)
+    }
 }

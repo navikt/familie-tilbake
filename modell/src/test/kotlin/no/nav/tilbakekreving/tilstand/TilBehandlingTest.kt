@@ -3,6 +3,8 @@ package no.nav.tilbakekreving.tilstand
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import no.nav.tilbakekreving.ANSVARLIG_BESLUTTER
+import no.nav.tilbakekreving.ANSVARLIG_SAKSBEHANDLER
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
@@ -15,6 +17,7 @@ import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.fagsysteminfoHendelse
 import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.feil.ModellFeil
+import no.nav.tilbakekreving.godkjenning
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
@@ -156,6 +159,18 @@ class TilBehandlingTest {
             .map { it.periode }
 
         perioder shouldBe listOf(1.januar til 31.januar)
+    }
+
+    @Test
+    fun `tilbakekreving trekkes tilbake fra godkjenning`() {
+        val oppsamler = BehovObservatørOppsamler()
+        val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
+        val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingHendelse, ANSVARLIG_SAKSBEHANDLER)
+        tilbakekreving.håndterTrekkTilbakeFraGodkjenning()
+        val exception = shouldThrow<ModellFeil> {
+            tilbakekreving.håndter(ANSVARLIG_BESLUTTER, godkjenning())
+        }
+        exception.message shouldBe "Behandlingen er i FORESLÅ_VEDTAK og kan ikke behandle vurdering for FATTE_VEDTAK"
     }
 
     private fun tilbakekrevingTilGodkjenning(

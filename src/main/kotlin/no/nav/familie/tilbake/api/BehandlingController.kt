@@ -322,6 +322,18 @@ class BehandlingController(
     fun angreSendTilBeslutter(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<String> {
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        if (tilbakekreving != null) {
+            tilgangskontrollService.validerTilgangTilbakekreving(
+                tilbakekreving = tilbakekreving,
+                behandlingId = behandlingId,
+                minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                auditLoggerEvent = AuditLoggerEvent.UPDATE,
+                handling = "Saksbehandler angrer på send til beslutter og tar behandling tilbake til saksbehandler",
+            )
+            tilbakekrevingService.trekkTilbakeFraGodkjenning(tilbakekreving.id)
+            return Ressurs.success("OK")
+        }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,

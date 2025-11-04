@@ -13,6 +13,7 @@ import no.nav.tilbakekreving.eksternFagsak
 import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.faktastegVurdering
+import no.nav.tilbakekreving.foreldelseVurdering
 import no.nav.tilbakekreving.forårsaketAvBrukerGrovtUaktsomt
 import no.nav.tilbakekreving.godkjenning
 import no.nav.tilbakekreving.iverksettelse
@@ -74,6 +75,7 @@ class EndringObservatørTest {
             ForenkletBehandlingsstatus.TIL_BEHANDLING,
         )
         tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, faktastegVurdering())
+        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar til 31.januar, foreldelseVurdering())
         tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar til 31.januar, forårsaketAvBrukerGrovtUaktsomt())
         tilbakekreving.håndterForeslåVedtak(ANSVARLIG_SAKSBEHANDLER)
 

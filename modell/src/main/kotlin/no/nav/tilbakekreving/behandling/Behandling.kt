@@ -263,7 +263,7 @@ class Behandling internal constructor(
         vurdering: Faktasteg.Vurdering,
         observatør: BehandlingObservatør,
     ) {
-        validerBehandlingstatus(håndtertSteg = "fakta")
+        validerBehandlingstatus(håndtertSteg = "fakta", faktasteg)
         faktasteg.vurder(vurdering)
         oppdaterBehandler(behandler)
     }
@@ -274,7 +274,7 @@ class Behandling internal constructor(
         vurdering: ForårsaketAvBruker,
         observatør: BehandlingObservatør,
     ) {
-        validerBehandlingstatus("vilkårsvurdering")
+        validerBehandlingstatus("vilkårsvurdering", vilkårsvurderingsteg)
         vilkårsvurderingsteg.vurder(periode, vurdering)
         oppdaterBehandler(behandler)
     }
@@ -285,7 +285,7 @@ class Behandling internal constructor(
         vurdering: Foreldelsesteg.Vurdering,
         observatør: BehandlingObservatør,
     ) {
-        validerBehandlingstatus("foreldelse")
+        validerBehandlingstatus("foreldelse", foreldelsesteg)
         foreldelsesteg.vurderForeldelse(periode, vurdering)
         oppdaterBehandler(behandler)
     }
@@ -294,7 +294,7 @@ class Behandling internal constructor(
         behandler: Behandler,
         observatør: BehandlingObservatør,
     ) {
-        validerBehandlingstatus("vedtaksforslag")
+        validerBehandlingstatus("vedtaksforslag", foreslåVedtakSteg)
         foreslåVedtakSteg.håndter()
         oppdaterBehandler(behandler)
     }
@@ -304,7 +304,7 @@ class Behandling internal constructor(
         vurderinger: List<Pair<Behandlingssteg, FatteVedtakSteg.Vurdering>>,
         observatør: BehandlingObservatør,
     ) {
-        validerBehandlingstatus("behandlingsutfall")
+        validerBehandlingstatus("behandlingsutfall", fatteVedtakSteg)
         for ((behandlingssteg, vurdering) in vurderinger) {
             fatteVedtakSteg.håndter(beslutter, ansvarligSaksbehandler, behandlingssteg, vurdering, sporingsinformasjon())
         }
@@ -362,7 +362,13 @@ class Behandling internal constructor(
         påVent = null
     }
 
-    private fun validerBehandlingstatus(håndtertSteg: String) {
+    private fun validerBehandlingstatus(håndtertSteg: String, steg: Saksbehandlingsteg) {
+        if (!steg().klarTilVisning().contains(steg)) {
+            throw ModellFeil.UgyldigOperasjonException(
+                "Behandlingen er i ${steg().klarTilVisning().last().type} og kan ikke behandle vurdering for ${steg.type}",
+                sporingsinformasjon(),
+            )
+        }
         if (påVent != null) {
             throw ModellFeil.UgyldigOperasjonException(
                 "Behandling er satt på vent. Kan ikke håndtere $håndtertSteg.",
@@ -425,6 +431,8 @@ class Behandling internal constructor(
     }
 
     fun flyttTilbakeTilFakta() = steg().forEach { it.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry) }
+
+    fun trekkTilbakeFraGodkjenning() = foreslåVedtakSteg.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry)
 
     fun sendVedtakIverksatt(
         forrigeBehandlingId: UUID?,

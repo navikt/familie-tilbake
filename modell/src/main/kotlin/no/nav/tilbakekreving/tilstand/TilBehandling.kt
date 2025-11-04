@@ -35,4 +35,8 @@ object TilBehandling : Tilstand {
     override fun håndter(tilbakekreving: Tilbakekreving, fagsysteminfo: FagsysteminfoHendelse) {
         tilbakekreving.oppdaterFagsysteminfo(fagsysteminfo)
     }
+
+    override fun håndterTrekkTilbakeFraGodkjenning(behandling: Behandling, sporing: Sporing) {
+        behandling.trekkTilbakeFraGodkjenning()
+    }
 }

@@ -441,6 +441,12 @@ class TilbakekrevingService(
         }
     }
 
+    fun trekkTilbakeFraGodkjenning(tilbakekrevingId: String) {
+        hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
+            tilbakekreving.håndterTrekkTilbakeFraGodkjenning()
+        }
+    }
+
     fun aktiverBrevmottakerSteg(tilbakekrevingId: String) {
         hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
             validerBrevmottaker(tilbakekreving)
