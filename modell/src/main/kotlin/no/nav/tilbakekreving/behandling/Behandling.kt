@@ -434,6 +434,12 @@ class Behandling internal constructor(
         return kravgrunnlag.entry.feilutbetaltBeløpForAllePerioder()
     }
 
+    fun feilutbetaltePerioder(): List<Datoperiode> {
+        return kravgrunnlag.entry.perioder.map {
+            it.periode
+        }
+    }
+
     fun fullstendigPeriode(): Datoperiode {
         val perioder = kravgrunnlag.entry.perioder.map { it.periode }
             .map { eksternFagsakRevurdering.entry.utvidPeriode(it) }
