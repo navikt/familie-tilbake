@@ -21,6 +21,7 @@ import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
 import no.nav.tilbakekreving.behandling.Behandling
+import no.nav.tilbakekreving.brev.varselbrev.ForhåndsvarselService
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
@@ -66,6 +67,9 @@ open class TilbakekrevingE2EBase : E2EBase() {
 
     @Autowired
     protected lateinit var jdbcTemplate: JdbcTemplate
+
+    @Autowired
+    protected lateinit var forhåndsvarselService: ForhåndsvarselService
 
     @AfterEach
     fun reset() {

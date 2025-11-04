@@ -17,6 +17,8 @@ import no.nav.tilbakekreving.api.v1.dto.BestillBrevDto
 import no.nav.tilbakekreving.api.v1.dto.ForhåndsvisningHenleggelsesbrevDto
 import no.nav.tilbakekreving.api.v1.dto.FritekstavsnittDto
 import no.nav.tilbakekreving.api.v1.dto.HentForhåndvisningVedtaksbrevPdfDto
+import no.nav.tilbakekreving.brev.varselbrev.ForhåndsvarselService
+import no.nav.tilbakekreving.brev.varselbrev.Section
 import no.nav.tilbakekreving.kontrakter.ForhåndsvisVarselbrevRequest
 import no.nav.tilbakekreving.kontrakter.brev.Dokumentmalstype
 import no.nav.tilbakekreving.pdf.dokumentbestilling.vedtak.Avsnitt
@@ -40,6 +42,7 @@ class DokumentController(
     private val lagreUtkastVedtaksbrevService: LagreUtkastVedtaksbrevService,
     private val tilgangskontrollService: TilgangskontrollService,
     private val tilbakekrevingService: TilbakekrevingService,
+    private val forhåndsvarselService: ForhåndsvarselService,
 ) {
     @Operation(summary = "Bestill brevsending")
     @PostMapping("/bestill")
@@ -96,6 +99,28 @@ class DokumentController(
             handling = "Forhåndsviser brev",
         )
         return varselbrevService.hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest)
+    }
+
+    @Operation(summary = "Henter varselbrevtekst")
+    @GetMapping(
+        "/varselbrevtekst/{behandlingId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun hentForhåndsvarselTekst(
+        @PathVariable("behandlingId") behandlingId: UUID,
+    ): Ressurs<List<Section>> {
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        if (tilbakekreving != null) {
+            tilgangskontrollService.validerTilgangTilbakekreving(
+                tilbakekreving = tilbakekreving,
+                behandlingId = behandlingId,
+                minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+                auditLoggerEvent = AuditLoggerEvent.ACCESS,
+                handling = "Henter varselbrevtekst",
+            )
+            return Ressurs.success(forhåndsvarselService.hentVarselbrevTekster(tilbakekreving))
+        }
+        return Ressurs.failure("Fant ingen tilbakekreving til behandlingId $behandlingId")
     }
 
     @Operation(summary = "Forhåndsvis henleggelsesbrev")
