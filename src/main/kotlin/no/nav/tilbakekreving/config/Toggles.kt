@@ -4,7 +4,6 @@ import no.nav.tilbakekreving.Toggle
 import java.util.EnumMap
 
 data class Toggles(
-    val tilgangsmaskinenEnabled: Boolean = false,
     val revurdering: Boolean = false,
     val manuellOpprettelse: Boolean = false,
     val varselbrevEnabled: Boolean = false,

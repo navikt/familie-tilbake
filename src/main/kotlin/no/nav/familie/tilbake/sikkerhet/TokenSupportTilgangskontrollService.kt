@@ -23,7 +23,6 @@ import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.auth.Authentication
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
-import no.nav.tilbakekreving.kontrakter.ytelse.Tema
 import no.tilbakekreving.integrasjoner.CallContext
 import no.tilbakekreving.integrasjoner.feil.UnexpectedResponseException
 import no.tilbakekreving.integrasjoner.persontilgang.Persontilgang
@@ -208,37 +207,43 @@ class TokenSupportTilgangskontrollService(
         val brukerRolleOgFagsystemstilgang = ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(
             applicationProperties.tilgangsstyring,
             handling,
-            SecureLog.Context.tom(),
+            logContext,
         )
 
-        validateForvaltingsrolle(
-            brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
-            minimumBehandlerrolle = minimumBehandlerrolle,
-            handling = handling,
-            saksbehandler = saksbehandler,
-        )
+        if (!validateForvaltingsrolle(brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang, minimumBehandlerrolle = minimumBehandlerrolle)) {
+            throw ForbiddenError(
+                message = "$saksbehandler uten rolle ${Behandlerrolle.FORVALTER} har ikke tilgang til å kalle forvaltningstjeneste $handling.",
+                frontendFeilmelding = "Du har rollen FORVALTER og trenger rollen $minimumBehandlerrolle når du ${handling.toLowerCasePreservingASCIIRules()}.",
+                logContext = logContext,
+            )
+        }
         // sjekk om saksbehandler har riktig gruppe å aksessere denne ytelsestypen
         val tilgangskontrollsfagsystem = Tilgangskontrollsfagsystem.fraFagsystem(fagsystem)
-        validateFagsystem(tilgangskontrollsfagsystem, brukerRolleOgFagsystemstilgang, handling, saksbehandler)
+        if (!validateFagsystem(tilgangskontrollsfagsystem, brukerRolleOgFagsystemstilgang)) {
+            throw ForbiddenError(
+                message = "$saksbehandler har ikke tilgang til $handling",
+                frontendFeilmelding = "$saksbehandler  har ikke tilgang til $handling",
+                logContext = logContext,
+            )
+        }
 
         val rolleForFagsystem = brukerRolleOgFagsystemstilgang.tilganger.getValue(tilgangskontrollsfagsystem)
         // sjekk om saksbehandler har riktig rolle å aksessere denne ytelsestypen
-        validateRolle(
-            brukersrolleTilFagsystemet = rolleForFagsystem,
-            minimumBehandlerrolle = minimumBehandlerrolle,
-            handling = handling,
-            logContext = logContext,
-            saksbehandler = saksbehandler,
-        )
+        if (!validateRolle(brukersrolleTilFagsystemet = rolleForFagsystem, minimumBehandlerrolle = minimumBehandlerrolle)) {
+            throw ForbiddenError(
+                message = "$saksbehandler med rolle $rolleForFagsystem har ikke tilgang til å $handling. Krever $minimumBehandlerrolle.",
+                frontendFeilmelding = "Du har rollen $rolleForFagsystem og trenger rollen $minimumBehandlerrolle når du ${handling.toLowerCasePreservingASCIIRules()}.",
+                logContext = logContext,
+            )
+        }
 
-        validateEgenAnsattKode6Kode7(
-            personIBehandlingen = ident,
-            fagsystem = fagsystem,
-            handling = handling,
-            saksbehandler = saksbehandler,
-            authentication = authentication,
-            logContext = logContext,
-        )
+        if (!validateEgenAnsattKode6Kode7(personIBehandlingen = ident, authentication = authentication, logContext = logContext)) {
+            throw ForbiddenError(
+                message = "$saksbehandler har ikke tilgang til person i $handling",
+                frontendFeilmelding = "$saksbehandler  har ikke tilgang til person i $handling",
+                logContext = logContext,
+            )
+        }
 
         if (ident != null) {
             logAccess(auditLoggerEvent, ident, eksternFagsakId!!)
@@ -266,158 +271,59 @@ class TokenSupportTilgangskontrollService(
 
     private fun validateEgenAnsattKode6Kode7(
         personIBehandlingen: String?,
-        fagsystem: FagsystemDTO,
-        handling: String,
-        saksbehandler: String,
         authentication: Authentication,
         logContext: SecureLog.Context,
-    ) {
-        if (personIBehandlingen == null) return
-        val tilgangTilPerson = try {
-            validerMedTilgangsmaskinen(
-                personIdent = personIBehandlingen,
-                authentication = authentication,
-                behandlingId = logContext.behandlingId,
-                fagsystemId = logContext.fagsystemId,
-            )
-        } catch (e: UnexpectedResponseException) {
-            SecureLog.medContext(logContext) {
-                warn("Feilet validering med tilgangsmaskinen. Status={}, Svar={}", e.statusCode.value, e.response, e)
-            }
-            log.medContext(logContext) { warn("Feilet validering med tilgangsmaskinen.", e) }
-            null
-        } catch (e: Exception) {
-            log.medContext(logContext) { warn("Feilet validering med tilgangsmaskinen.", e) }
-            null
-        }
-
-        if (applicationProperties.toggles.tilgangsmaskinenEnabled) {
-            if (tilgangTilPerson == null) {
-                log.medContext(logContext) { info("Faller tilbake til validering med familie-integrasjoner") }
-            } else if (tilgangTilPerson) {
-                return
-            } else {
-                throw ForbiddenError(
-                    message = "$saksbehandler har ikke tilgang til person i $handling",
-                    frontendFeilmelding = "$saksbehandler  har ikke tilgang til person i $handling",
-                    logContext = SecureLog.Context.tom(),
-                )
-            }
-        }
-
-        val resultatMedFamilieIntegrasjoner = validerMedFamilieIntegrasjoner(personIBehandlingen, fagsystem)
-        if (resultatMedFamilieIntegrasjoner == tilgangTilPerson) {
-            log.medContext(SecureLog.Context.tom()) {
-                info(
-                    "Validering av tilgang kom frem til samme utfall med familie-integrasjoner og tilgangsmaskinen. Resultat={}, maskinbruker={}",
-                    tilgangTilPerson,
-                    authentication is Authentication.Systembruker,
-                )
-            }
-        } else {
-            log.medContext(SecureLog.Context.tom()) { warn("Validering av tilgang var ulik med familie-integrasjoner og tilgangsmaskinen") }
-        }
-        if (!resultatMedFamilieIntegrasjoner) {
-            throw ForbiddenError(
-                message = "$saksbehandler har ikke tilgang til person i $handling",
-                frontendFeilmelding = "$saksbehandler  har ikke tilgang til person i $handling",
-                logContext = SecureLog.Context.tom(),
-            )
-        }
-    }
-
-    private fun validerMedFamilieIntegrasjoner(
-        personIBehandlingen: String,
-        fagsystem: FagsystemDTO,
     ): Boolean {
-        val tilganger = integrasjonerClient.sjekkTilgangTilPersoner(listOf(personIBehandlingen), fagsystem.tilTema())
-        return tilganger.all { it.harTilgang }
-    }
-
-    private fun validerMedTilgangsmaskinen(
-        personIdent: String,
-        authentication: Authentication,
-        behandlingId: String?,
-        fagsystemId: String?,
-    ): Boolean {
+        if (personIBehandlingen == null) return true
         if (authentication is Authentication.Systembruker) return true
-        val token = tokenValidationContextHolder.getTokenValidationContext().firstValidToken
-        if (token != null) {
+
+        try {
+            val token = tokenValidationContextHolder.getTokenValidationContext().firstValidToken ?: return false
             val tilgang = runBlocking {
                 persontilgangService.sjekkPersontilgang(
                     CallContext.Saksbehandler(
-                        behandlingId,
-                        fagsystemId,
+                        logContext.behandlingId,
+                        logContext.fagsystemId,
                         userToken = token.encodedToken,
                     ),
-                    personIdent = personIdent,
+                    personIdent = personIBehandlingen,
                 )
             }
             if (tilgang is Persontilgang.Ok) {
                 return true
             }
+        } catch (e: UnexpectedResponseException) {
+            SecureLog.medContext(logContext) {
+                warn("Feilet validering med tilgangsmaskinen. Status={}, Svar={}", e.statusCode.value, e.response, e)
+            }
+            log.medContext(logContext) { warn("Feilet validering med tilgangsmaskinen.", e) }
+        } catch (e: Exception) {
+            log.medContext(logContext) { warn("Feilet validering med tilgangsmaskinen.", e) }
         }
+
         return false
     }
-
-    private fun FagsystemDTO.tilTema() =
-        when (this) {
-            FagsystemDTO.BA -> Tema.BAR
-            FagsystemDTO.KONT -> Tema.KON
-            FagsystemDTO.EF -> Tema.ENF
-            FagsystemDTO.TS -> Tema.TSO
-            FagsystemDTO.AAP -> Tema.AAP
-            FagsystemDTO.IT01 -> throw Feil(
-                message = "Fagsystem $this støttes ikke",
-                logContext = SecureLog.Context.tom(),
-            )
-        }
 
     private fun validateFagsystem(
         fagsystem: Tilgangskontrollsfagsystem,
         brukerRolleOgFagsystemstilgang: InnloggetBrukertilgang,
-        handling: String,
-        saksbehandler: String,
-    ) {
-        if (!brukerRolleOgFagsystemstilgang.tilganger.contains(fagsystem)) {
-            throw ForbiddenError(
-                message = "$saksbehandler har ikke tilgang til $handling",
-                frontendFeilmelding = "$saksbehandler  har ikke tilgang til $handling",
-                logContext = SecureLog.Context.tom(),
-            )
-        }
+    ): Boolean {
+        return brukerRolleOgFagsystemstilgang.tilganger.contains(fagsystem)
     }
 
     private fun validateRolle(
         brukersrolleTilFagsystemet: Behandlerrolle,
         minimumBehandlerrolle: Behandlerrolle,
-        handling: String,
-        logContext: SecureLog.Context,
-        saksbehandler: String,
-    ) {
-        if (minimumBehandlerrolle.nivå > brukersrolleTilFagsystemet.nivå) {
-            throw ForbiddenError(
-                message = "$saksbehandler med rolle $brukersrolleTilFagsystemet har ikke tilgang til å $handling. Krever $minimumBehandlerrolle.",
-                frontendFeilmelding = "Du har rollen $brukersrolleTilFagsystemet og trenger rollen $minimumBehandlerrolle når du ${handling.toLowerCasePreservingASCIIRules()}.",
-                logContext = logContext,
-            )
-        }
+    ): Boolean {
+        return brukersrolleTilFagsystemet.nivå >= minimumBehandlerrolle.nivå
     }
 
     private fun validateForvaltingsrolle(
         brukerRolleOgFagsystemstilgang: InnloggetBrukertilgang,
         minimumBehandlerrolle: Behandlerrolle,
-        handling: String,
-        saksbehandler: String,
-    ) {
+    ): Boolean {
         val tilganger = brukerRolleOgFagsystemstilgang.tilganger
         // Forvalter kan kun kalle forvaltningstjenestene og tjenestene som kan kalles av Veileder
-        if (minimumBehandlerrolle == Behandlerrolle.FORVALTER && tilganger[Tilgangskontrollsfagsystem.FORVALTER_TILGANG] != Behandlerrolle.FORVALTER) {
-            throw ForbiddenError(
-                message = "$saksbehandler uten rolle ${Behandlerrolle.FORVALTER} har ikke tilgang til å kalle forvaltningstjeneste $handling.",
-                frontendFeilmelding = "Du har rollen FORVALTER og trenger rollen $minimumBehandlerrolle når du ${handling.toLowerCasePreservingASCIIRules()}.",
-                logContext = SecureLog.Context.tom(),
-            )
-        }
+        return minimumBehandlerrolle != Behandlerrolle.FORVALTER || tilganger[Tilgangskontrollsfagsystem.FORVALTER_TILGANG] == Behandlerrolle.FORVALTER
     }
 }

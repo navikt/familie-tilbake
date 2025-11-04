@@ -22,15 +22,11 @@ import no.nav.familie.tilbake.kontrakter.oppgave.OppgaveResponse
 import no.nav.familie.tilbake.kontrakter.oppgave.OpprettOppgaveRequest
 import no.nav.familie.tilbake.kontrakter.organisasjon.Organisasjon
 import no.nav.familie.tilbake.kontrakter.saksbehandler.Saksbehandler
-import no.nav.familie.tilbake.kontrakter.tilgangskontroll.Tilgang
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
-import no.nav.tilbakekreving.kontrakter.ytelse.Tema
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpHeaders
-import org.springframework.retry.annotation.Backoff
-import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
@@ -59,13 +55,6 @@ class IntegrasjonerClient(
         UriComponentsBuilder
             .fromUri(integrasjonerConfig.integrasjonUri)
             .pathSegment(IntegrasjonerConfig.PATH_SFTP)
-            .build()
-            .toUri()
-
-    private val tilgangssjekkUri =
-        UriComponentsBuilder
-            .fromUri(integrasjonerConfig.integrasjonUri)
-            .pathSegment(IntegrasjonerConfig.PATH_TILGANGSSJEKK)
             .build()
             .toUri()
 
@@ -237,31 +226,6 @@ class IntegrasjonerClient(
 
     fun hentNavkontor(enhetsId: String): NavKontorEnhet = getForEntity<Ressurs<NavKontorEnhet>>(hentNavkontorUri(enhetsId)).getDataOrThrow()
 
-    /*
-     * Sjekker personene i behandlingen er egen ansatt, kode 6 eller kode 7. Og om saksbehandler har rettigheter til å behandle
-     * slike personer.
-     */
-    @Retryable(
-        value = [Exception::class],
-        maxAttempts = 3,
-        backoff = Backoff(delayExpression = "5000"),
-    )
-    fun sjekkTilgangTilPersoner(
-        personIdenter: List<String>,
-        tema: Tema,
-    ): List<Tilgang> {
-        val httpHeaders =
-            HttpHeaders().also {
-                it.set(HEADER_NAV_TEMA, tema.name)
-            }
-
-        return postForEntity(
-            uri = tilgangssjekkUri,
-            payload = personIdenter,
-            httpHeaders = httpHeaders,
-        )
-    }
-
     fun hentJournalposterForBruker(
         journalposterForBrukerRequest: JournalposterForBrukerRequest,
         logContext: SecureLog.Context,
@@ -275,10 +239,6 @@ class IntegrasjonerClient(
         }
 
         return postForEntity<Ressurs<List<Journalpost>>>(hentJournalpostUri(), journalposterForBrukerRequest).getDataOrThrow()
-    }
-
-    companion object {
-        private const val HEADER_NAV_TEMA = "Nav-Tema"
     }
 }
 
