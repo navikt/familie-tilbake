@@ -21,6 +21,7 @@ import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.brev.BrevHistorikk
+import no.nav.tilbakekreving.brev.VarselbrevInfo
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
@@ -393,6 +394,25 @@ class Tilbakekreving internal constructor(
             totaltFeilutbetaltBeløp = behandling.totaltFeilutbetaltBeløp(),
             hentSaksbehandlingURL = ::hentTilbakekrevingUrl,
             fullstendigPeriode = behandling.fullstendigPeriode(),
+        )
+    }
+
+    fun hentVarselbrevInfo(): VarselbrevInfo {
+        val behandling = behandlingHistorikk.nåværende().entry
+        return VarselbrevInfo(
+            ident = bruker!!.hentBrevmetadata().personIdent,
+            navn = bruker!!.hentBrevmetadata().navn,
+            språkkode = bruker!!.språkkode ?: Språkkode.NB,
+            behandlendeEnhetsNavn = behandling.hentBehandlingsinformasjon().enhet?.navn ?: "Ukjent", // Todo fjern Ukjent når enhet er på plass!
+            ansvarligSaksbehandler = behandling.hentBehandlingsinformasjon().ansvarligSaksbehandler.ident,
+            eksternFagsakId = eksternFagsak.eksternId,
+            ytelseType = eksternFagsak.ytelse.tilYtelseDTO(),
+            gjelderDødsfall = bruker!!.hentBrevmetadata().dødsdato != null,
+            revurderingsvedtaksdato = eksternFagsak.behandlinger.nåværende().entry.vedtaksdato,
+            beløp = behandling.totaltFeilutbetaltBeløp().toLong(),
+            feilutbetaltePerioder = kravgrunnlagHistorikk.nåværende().entry.perioder.map {
+                it.periode
+            },
         )
     }
 

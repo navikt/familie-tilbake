@@ -19,7 +19,7 @@ import kotlin.random.Random
 class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
     @Test
     fun `henter tekster til varselbrev`() {
-        val fnr = Random.nextLong(0, 31129999999).toString().padStart(11, '0')
+        val fnr = "12312312311"
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
         val ansvarligEnhet = KravgrunnlagGenerator.nextPaddedId(4)
