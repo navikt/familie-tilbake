@@ -14,7 +14,6 @@ import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.util.kroner
 import org.junit.jupiter.api.Test
-import kotlin.random.Random
 
 class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
     @Test
@@ -47,7 +46,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
         val tekster = forhåndsvarselService.hentVarselbrevTekster(tilbakekreving)
-        println(tekster)
+
         tekster.shouldNotBeNull()
         tekster.shouldNotBeEmpty()
         tekster.get(0).title shouldBe "overskrift"
@@ -68,7 +67,6 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             it.title shouldBe "Har du spørsmål?"
             it.body shouldContain "Du finner mer informasjon på nav.no/tilleggsstonad."
         }
-        println(tekster)
         tekster.forOne {
             it.title shouldBe "Du har rett til innsyn"
             it.body shouldContain "På nav.no/dittnav kan du se dokumentene i saken din"

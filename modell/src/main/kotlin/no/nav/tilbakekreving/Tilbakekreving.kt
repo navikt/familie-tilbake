@@ -400,14 +400,11 @@ class Tilbakekreving internal constructor(
     fun hentVarselbrevInfo(): VarselbrevInfo {
         val behandling = behandlingHistorikk.nåværende().entry
         return VarselbrevInfo(
-            ident = bruker!!.hentBrevmetadata().personIdent,
-            navn = bruker!!.hentBrevmetadata().navn,
-            språkkode = bruker!!.språkkode ?: Språkkode.NB,
+            brukerinfo = bruker!!.hentPersoninfo(),
             behandlendeEnhetsNavn = behandling.hentBehandlingsinformasjon().enhet?.navn ?: "Ukjent", // Todo fjern Ukjent når enhet er på plass!
             ansvarligSaksbehandler = behandling.hentBehandlingsinformasjon().ansvarligSaksbehandler.ident,
             eksternFagsakId = eksternFagsak.eksternId,
             ytelseType = eksternFagsak.ytelse.tilYtelseDTO(),
-            gjelderDødsfall = bruker!!.hentBrevmetadata().dødsdato != null,
             revurderingsvedtaksdato = eksternFagsak.behandlinger.nåværende().entry.vedtaksdato,
             beløp = behandling.totaltFeilutbetaltBeløp().toLong(),
             feilutbetaltePerioder = kravgrunnlagHistorikk.nåværende().entry.perioder.map {

@@ -23,15 +23,15 @@ class ForhåndsvarselService() {
 
     private fun opprettMetadata(varselbrevInfo: VarselbrevInfo): Brevmetadata {
         return Brevmetadata(
-            sakspartId = varselbrevInfo.ident,
-            sakspartsnavn = varselbrevInfo.navn,
-            mottageradresse = Adresseinfo(varselbrevInfo.ident, varselbrevInfo.navn),
+            sakspartId = varselbrevInfo.brukerinfo.ident,
+            sakspartsnavn = varselbrevInfo.brukerinfo.navn,
+            mottageradresse = Adresseinfo(varselbrevInfo.brukerinfo.ident, varselbrevInfo.brukerinfo.navn),
             behandlendeEnhetsNavn = varselbrevInfo.behandlendeEnhetsNavn,
             ansvarligSaksbehandler = varselbrevInfo.ansvarligSaksbehandler,
             saksnummer = varselbrevInfo.eksternFagsakId,
-            språkkode = varselbrevInfo.språkkode,
+            språkkode = varselbrevInfo.brukerinfo.språkkode,
             ytelsestype = varselbrevInfo.ytelseType,
-            gjelderDødsfall = varselbrevInfo.gjelderDødsfall,
+            gjelderDødsfall = varselbrevInfo.brukerinfo.dødsdato != null,
         )
     }
 
