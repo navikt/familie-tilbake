@@ -21,6 +21,7 @@ import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.brev.BrevHistorikk
+import no.nav.tilbakekreving.brev.VarselbrevInfo
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
@@ -393,6 +394,16 @@ class Tilbakekreving internal constructor(
             totaltFeilutbetaltBeløp = behandling.totaltFeilutbetaltBeløp(),
             hentSaksbehandlingURL = ::hentTilbakekrevingUrl,
             fullstendigPeriode = behandling.fullstendigPeriode(),
+        )
+    }
+
+    fun hentVarselbrevInfo(): VarselbrevInfo {
+        val behandling = behandlingHistorikk.nåværende().entry
+        return VarselbrevInfo(
+            brukerinfo = bruker!!.hentPersoninfo(),
+            forhåndsvarselinfo = behandling.hentForhåndsvarselinfo(),
+            eksternFagsakId = eksternFagsak.eksternId,
+            ytelseType = eksternFagsak.ytelse.tilYtelseDTO(),
         )
     }
 

@@ -69,6 +69,13 @@ class Bruker(
         )
     }
 
+    fun hentPersoninfo(): Brukerinfo = Brukerinfo(
+        ident = aktør.ident,
+        navn = navn!!,
+        språkkode = språkkode ?: Språkkode.NB,
+        dødsdato = dødsdato,
+    )
+
     companion object {
         fun Bruker?.tilNullableFrontendDto(): FrontendBrukerDto {
             return this?.tilFrontendDto() ?: FrontendBrukerDto(
