@@ -18,7 +18,7 @@ import no.nav.tilbakekreving.api.v1.dto.ForhåndsvisningHenleggelsesbrevDto
 import no.nav.tilbakekreving.api.v1.dto.FritekstavsnittDto
 import no.nav.tilbakekreving.api.v1.dto.HentForhåndvisningVedtaksbrevPdfDto
 import no.nav.tilbakekreving.brev.varselbrev.ForhåndsvarselService
-import no.nav.tilbakekreving.brev.varselbrev.Section
+import no.nav.tilbakekreving.brev.varselbrev.Varselbrevtekst
 import no.nav.tilbakekreving.kontrakter.ForhåndsvisVarselbrevRequest
 import no.nav.tilbakekreving.kontrakter.brev.Dokumentmalstype
 import no.nav.tilbakekreving.pdf.dokumentbestilling.vedtak.Avsnitt
@@ -50,6 +50,18 @@ class DokumentController(
         @RequestBody @Valid
         bestillBrevDto: BestillBrevDto,
     ): Ressurs<Nothing?> {
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(bestillBrevDto.behandlingId)
+        if (tilbakekreving != null) {
+            tilgangskontrollService.validerTilgangTilbakekreving(
+                tilbakekreving = tilbakekreving,
+                behandlingId = bestillBrevDto.behandlingId,
+                minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                auditLoggerEvent = AuditLoggerEvent.CREATE,
+                handling = "Sender brev",
+            )
+            tilbakekrevingService.bestillBrev(tilbakekreving, bestillBrevDto)
+            return Ressurs.success(null)
+        }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = bestillBrevDto.behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
@@ -67,6 +79,18 @@ class DokumentController(
         @RequestBody @Valid
         bestillBrevDto: BestillBrevDto,
     ): Ressurs<ByteArray> {
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(bestillBrevDto.behandlingId)
+        if (tilbakekreving != null) {
+            tilgangskontrollService.validerTilgangTilbakekreving(
+                tilbakekreving = tilbakekreving,
+                behandlingId = bestillBrevDto.behandlingId,
+                minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                auditLoggerEvent = AuditLoggerEvent.ACCESS,
+                handling = "Forhåndsviser brev",
+            )
+            return Ressurs.success(forhåndsvarselService.forhåndsvisVarselbrev(tilbakekreving, bestillBrevDto))
+        }
+
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = bestillBrevDto.behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
@@ -108,7 +132,7 @@ class DokumentController(
     )
     fun hentForhåndsvarselTekst(
         @PathVariable("behandlingId") behandlingId: UUID,
-    ): Ressurs<List<Section>> {
+    ): Ressurs<Varselbrevtekst> {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
         if (tilbakekreving != null) {
             tilgangskontrollService.validerTilgangTilbakekreving(

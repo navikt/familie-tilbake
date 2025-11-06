@@ -50,28 +50,30 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
         val tekster = forhåndsvarselService.hentVarselbrevTekster(tilbakekreving)
-
         tekster.shouldNotBeNull()
-        tekster.shouldNotBeEmpty()
-        tekster.get(0).title shouldBe "overskrift"
-        tekster.get(0).body shouldContain "Nav vurderer om du må betale tilbake"
-        tekster.forOne {
+        tekster.avsnitter.shouldNotBeEmpty()
+        tekster.overskrift shouldContain "Nav vurderer om du må betale tilbake"
+        tekster.avsnitter.forOne {
+            it.title shouldBe ""
+            it.body shouldContain "Før vi avgjør om du skal betale tilbake,"
+        }
+        tekster.avsnitter.forOne {
             it.title shouldBe "Dette har skjedd"
             it.body shouldContain "og endringen har ført til at du har fått utbetalt for mye."
         }
-        tekster.forOne {
+        tekster.avsnitter.forOne {
             it.title shouldBe "Dette legger vi vekt på i vurderingen vår"
             it.body shouldContain "For å avgjøre om vi kan kreve tilbake,"
         }
-        tekster.forOne {
+        tekster.avsnitter.forOne {
             it.title shouldBe "Slik uttaler du deg"
             it.body shouldContain "Du kan sende uttalelsen din ved å logge deg inn på"
         }
-        tekster.forOne {
+        tekster.avsnitter.forOne {
             it.title shouldBe "Har du spørsmål?"
             it.body shouldContain "Du finner mer informasjon på nav.no/tilleggsstonad."
         }
-        tekster.forOne {
+        tekster.avsnitter.forOne {
             it.title shouldBe "Du har rett til innsyn"
             it.body shouldContain "På nav.no/dittnav kan du se dokumentene i saken din"
         }

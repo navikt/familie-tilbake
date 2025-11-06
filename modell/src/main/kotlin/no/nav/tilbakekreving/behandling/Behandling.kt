@@ -27,6 +27,7 @@ import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.IverksettelseBehov
 import no.nav.tilbakekreving.beregning.Beregning
 import no.nav.tilbakekreving.brev.BrevHistorikk
+import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.endring.EndringObservatør
 import no.nav.tilbakekreving.endring.VurdertUtbetaling
@@ -226,7 +227,7 @@ class Behandling internal constructor(
                     ),
                     BehandlingsstegsinfoDto(
                         Behandlingssteg.VARSEL,
-                        Behandlingsstegstatus.AUTOUTFØRT,
+                        Behandlingsstegstatus.KLAR,
                     ),
                 ),
                 steg().klarTilVisning().map {
@@ -395,7 +396,7 @@ class Behandling internal constructor(
     }
 
     fun hentForhåndsvarselinfo(): Forhåndsvarselinfo = Forhåndsvarselinfo(
-        behandlendeEnhetNavn = enhet?.navn ?: "Ukjent", // Todo Fjern ukjent når enhet er på plass
+        behandlendeEnhet = enhet,
         ansvarligSaksbehandler = ansvarligSaksbehandler,
         beløp = totaltFeilutbetaltBeløp().toLong(),
         feilutbetaltePerioder = kravgrunnlag.entry.perioder.map {
@@ -477,6 +478,13 @@ class Behandling internal constructor(
             },
         )
     }
+
+    fun opprettVarselbrev(): Varselbrev = Varselbrev.opprett(
+        mottaker = brevmottakerSteg!!.registrertBrevmottaker,
+        brevmottakerStegId = brevmottakerSteg!!.id,
+        ansvarligSaksbehandlerIdent = ansvarligSaksbehandler.ident,
+        kravgrunnlag = kravgrunnlag,
+    ) as Varselbrev
 
     companion object {
         internal fun nyBehandling(

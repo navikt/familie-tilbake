@@ -21,6 +21,7 @@ import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.brev.BrevHistorikk
+import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.brev.VarselbrevInfo
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
@@ -405,6 +406,33 @@ class Tilbakekreving internal constructor(
             eksternFagsakId = eksternFagsak.eksternId,
             ytelseType = eksternFagsak.ytelse.tilYtelseDTO(),
         )
+    }
+
+    fun opprettVarselbrevBehov(varseltekstFraSaksbehandler: String): VarselbrevBehov {
+        val behandling = behandlingHistorikk.nåværende().entry
+        val varselbrev = behandling.opprettVarselbrev()
+        val varselbrevInfo = hentVarselbrevInfo()
+
+        return VarselbrevBehov(
+            brevId = varselbrev.id,
+            brukerIdent = varselbrevInfo.brukerinfo.ident,
+            brukerNavn = varselbrevInfo.brukerinfo.navn,
+            språkkode = varselbrevInfo.brukerinfo.språkkode,
+            behandlingId = behandling.id,
+            varselbrev = varselbrev,
+            revurderingsvedtaksdato = varselbrevInfo.forhåndsvarselinfo.revurderingsvedtaksdato,
+            varseltekstFraSaksbehandler = varseltekstFraSaksbehandler,
+            eksternFagsakId = eksternFagsak.eksternId,
+            ytelse = eksternFagsak.ytelse,
+            behandlendeEnhet = varselbrevInfo.forhåndsvarselinfo.behandlendeEnhet,
+            feilutbetaltBeløp = varselbrevInfo.forhåndsvarselinfo.beløp,
+            feilutbetaltePerioder = varselbrevInfo.forhåndsvarselinfo.feilutbetaltePerioder,
+            gjelderDødsfall = varselbrevInfo.brukerinfo.dødsdato != null,
+        )
+    }
+
+    fun lagreSendtVarselbrev(varselbrev: Varselbrev) {
+        brevHistorikk.lagre(varselbrev)
     }
 
     companion object {

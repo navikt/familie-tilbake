@@ -19,6 +19,7 @@ class FeatureToggleController(
         setOf(
             FeatureToggleConfig.KAN_SE_HISTORISKE_VURDERINGER,
             FeatureToggleConfig.SAKSBEHANDLER_KAN_RESETTE_BEHANDLING,
+            FeatureToggleConfig.FORHÅNDSVARSELSTEG,
         )
 
     @GetMapping

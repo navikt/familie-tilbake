@@ -5,7 +5,7 @@ import no.nav.tilbakekreving.saksbehandler.Behandler
 import java.time.LocalDate
 
 data class Forhåndsvarselinfo(
-    val behandlendeEnhetNavn: String,
+    val behandlendeEnhet: Enhet?,
     val ansvarligSaksbehandler: Behandler,
     val beløp: Long,
     val feilutbetaltePerioder: List<Datoperiode>,
