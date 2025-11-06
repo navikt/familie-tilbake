@@ -394,6 +394,16 @@ class Behandling internal constructor(
         )
     }
 
+    fun hentForhåndsvarselinfo(): Forhåndsvarselinfo = Forhåndsvarselinfo(
+        behandlendeEnhetNavn = enhet?.navn ?: "Ukjent", // Todo Fjern ukjent når enhet er på plass
+        ansvarligSaksbehandler = ansvarligSaksbehandler,
+        beløp = totaltFeilutbetaltBeløp().toLong(),
+        feilutbetaltePerioder = kravgrunnlag.entry.perioder.map {
+            it.periode
+        },
+        revurderingsvedtaksdato = eksternFagsakRevurdering.entry.vedtaksdato,
+    )
+
     fun oppdaterBehandler(ansvarligSaksbehandler: Behandler) {
         this.sistEndret = LocalDateTime.now()
         this.ansvarligSaksbehandler = ansvarligSaksbehandler

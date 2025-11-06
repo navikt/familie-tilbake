@@ -26,8 +26,8 @@ class ForhåndsvarselService() {
             sakspartId = varselbrevInfo.brukerinfo.ident,
             sakspartsnavn = varselbrevInfo.brukerinfo.navn,
             mottageradresse = Adresseinfo(varselbrevInfo.brukerinfo.ident, varselbrevInfo.brukerinfo.navn),
-            behandlendeEnhetsNavn = varselbrevInfo.behandlendeEnhetsNavn,
-            ansvarligSaksbehandler = varselbrevInfo.ansvarligSaksbehandler,
+            behandlendeEnhetsNavn = varselbrevInfo.forhåndsvarselinfo.behandlendeEnhetNavn,
+            ansvarligSaksbehandler = varselbrevInfo.forhåndsvarselinfo.ansvarligSaksbehandler.ident,
             saksnummer = varselbrevInfo.eksternFagsakId,
             språkkode = varselbrevInfo.brukerinfo.språkkode,
             ytelsestype = varselbrevInfo.ytelseType,
@@ -38,10 +38,10 @@ class ForhåndsvarselService() {
     private fun opprettVarselbrevsdokument(varselbrevInfo: VarselbrevInfo, brevmetadata: Brevmetadata): Varselbrevsdokument {
         return Varselbrevsdokument(
             brevmetadata = brevmetadata,
-            beløp = varselbrevInfo.beløp,
-            revurderingsvedtaksdato = varselbrevInfo.revurderingsvedtaksdato,
+            beløp = varselbrevInfo.forhåndsvarselinfo.beløp,
+            revurderingsvedtaksdato = varselbrevInfo.forhåndsvarselinfo.revurderingsvedtaksdato,
             fristdatoForTilbakemelding = Constants.brukersSvarfrist(),
-            feilutbetaltePerioder = varselbrevInfo.feilutbetaltePerioder,
+            feilutbetaltePerioder = varselbrevInfo.forhåndsvarselinfo.feilutbetaltePerioder,
         )
     }
 }

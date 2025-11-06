@@ -401,15 +401,9 @@ class Tilbakekreving internal constructor(
         val behandling = behandlingHistorikk.nåværende().entry
         return VarselbrevInfo(
             brukerinfo = bruker!!.hentPersoninfo(),
-            behandlendeEnhetsNavn = behandling.hentBehandlingsinformasjon().enhet?.navn ?: "Ukjent", // Todo fjern Ukjent når enhet er på plass!
-            ansvarligSaksbehandler = behandling.hentBehandlingsinformasjon().ansvarligSaksbehandler.ident,
+            forhåndsvarselinfo = behandling.hentForhåndsvarselinfo(),
             eksternFagsakId = eksternFagsak.eksternId,
             ytelseType = eksternFagsak.ytelse.tilYtelseDTO(),
-            revurderingsvedtaksdato = eksternFagsak.behandlinger.nåværende().entry.vedtaksdato,
-            beløp = behandling.totaltFeilutbetaltBeløp().toLong(),
-            feilutbetaltePerioder = kravgrunnlagHistorikk.nåværende().entry.perioder.map {
-                it.periode
-            },
         )
     }
 

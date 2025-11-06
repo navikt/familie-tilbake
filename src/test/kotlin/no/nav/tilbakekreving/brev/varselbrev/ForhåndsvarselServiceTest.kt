@@ -14,8 +14,12 @@ import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.util.kroner
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 
 class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
+    @Autowired
+    protected lateinit var forhåndsvarselService: ForhåndsvarselService
+
     @Test
     fun `henter tekster til varselbrev`() {
         val fnr = "12312312311"
