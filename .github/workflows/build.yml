@@ -19,7 +19,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '21'
@@ -41,7 +41,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           java-version: 21
           distribution: 'temurin'
@@ -73,7 +73,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           java-version: 21
           distribution: 'temurin'
@@ -117,7 +117,7 @@ jobs:
         if: "!contains(github.event.head_commit.message, 'e2e skip')"
         run: sed -i 's/europe-north1-docker.pkg.dev\/nais-management-233d\/tilbake\/familie-tilbake:latest/europe-north1-docker.pkg.dev\/nais-management-233d\/tilbake\/familie-tilbake:${{ github.sha }}/g' tilbake-e2e/e2e/docker-compose.yml
       - name: Set up Java 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: 21
           distribution: 'temurin'
