@@ -50,8 +50,7 @@ class DokumentController(
         @RequestBody @Valid
         bestillBrevDto: BestillBrevDto,
     ): Ressurs<Nothing?> {
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(bestillBrevDto.behandlingId)
-        if (tilbakekreving != null) {
+        val håndtert = tilbakekrevingService.hentTilbakekreving(bestillBrevDto.behandlingId) { tilbakekreving ->
             tilgangskontrollService.validerTilgangTilbakekreving(
                 tilbakekreving = tilbakekreving,
                 behandlingId = bestillBrevDto.behandlingId,
@@ -60,8 +59,12 @@ class DokumentController(
                 handling = "Sender brev",
             )
             tilbakekrevingService.bestillBrev(tilbakekreving, bestillBrevDto)
+            true
+        }
+        if (håndtert == true) {
             return Ressurs.success(null)
         }
+
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = bestillBrevDto.behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,

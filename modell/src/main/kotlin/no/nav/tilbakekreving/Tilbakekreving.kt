@@ -21,7 +21,6 @@ import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.brev.BrevHistorikk
-import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.brev.VarselbrevInfo
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
@@ -390,7 +389,7 @@ class Tilbakekreving internal constructor(
             ytelse = eksternFagsak.ytelse,
             eksternBehandlingId = eksternFagsak.behandlinger.nåværende().entry.behandlingId(),
             sakOpprettet = opprettet,
-            varselSendt = brevHistorikk.sisteVarselbrev()?.sendt,
+            varselSendt = brevHistorikk.sisteVarselbrev()?.sendtTid,
             behandlingsstatus = behandlingsstatus,
             totaltFeilutbetaltBeløp = behandling.totaltFeilutbetaltBeløp(),
             hentSaksbehandlingURL = ::hentTilbakekrevingUrl,
@@ -401,7 +400,7 @@ class Tilbakekreving internal constructor(
     fun hentVarselbrevInfo(): VarselbrevInfo {
         val behandling = behandlingHistorikk.nåværende().entry
         return VarselbrevInfo(
-            brukerinfo = bruker!!.hentPersoninfo(),
+            brukerinfo = bruker!!.hentBrukerinfo(),
             forhåndsvarselinfo = behandling.hentForhåndsvarselinfo(),
             eksternFagsakId = eksternFagsak.eksternId,
             ytelseType = eksternFagsak.ytelse.tilYtelseDTO(),
@@ -412,12 +411,11 @@ class Tilbakekreving internal constructor(
         val behandling = behandlingHistorikk.nåværende().entry
         val varselbrev = behandling.opprettVarselbrev()
         val varselbrevInfo = hentVarselbrevInfo()
+        brevHistorikk.lagre(varselbrev)
 
         return VarselbrevBehov(
             brevId = varselbrev.id,
-            brukerIdent = varselbrevInfo.brukerinfo.ident,
-            brukerNavn = varselbrevInfo.brukerinfo.navn,
-            språkkode = varselbrevInfo.brukerinfo.språkkode,
+            brukerinfo = varselbrevInfo.brukerinfo,
             behandlingId = behandling.id,
             varselbrev = varselbrev,
             revurderingsvedtaksdato = varselbrevInfo.forhåndsvarselinfo.revurderingsvedtaksdato,
@@ -431,8 +429,8 @@ class Tilbakekreving internal constructor(
         )
     }
 
-    fun lagreSendtVarselbrev(varselbrev: Varselbrev) {
-        brevHistorikk.lagre(varselbrev)
+    fun oppdaterSendtVarselbrev(journalpostId: String, varselbrevId: UUID) {
+        brevHistorikk.entry(varselbrevId).brevSendt(journalpostId)
     }
 
     companion object {

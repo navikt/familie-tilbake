@@ -73,7 +73,7 @@ class ForhåndsvarselService(
             )
         }
         dokdistClient.brevTilUtsending(varselbrevBehov, journalpost.journalpostId, logContext)
-        tilbakekreving.lagreSendtVarselbrev(varselbrevBehov.varselbrev.copy(journalpostId = journalpost.journalpostId))
+        tilbakekreving.oppdaterSendtVarselbrev(journalpostId = journalpost.journalpostId, varselbrevId = varselbrevBehov.varselbrev.id)
     }
 
     private fun opprettMetadata(varselbrevInfo: VarselbrevInfo): Brevmetadata {

@@ -43,9 +43,9 @@ class SendVarselbrevTest {
             val varselbrevBehov = it.shouldBeInstanceOf<VarselbrevBehov>()
 
             varselbrevBehov.brevId shouldBe varselbrevSendtHendelse.varselbrevId
-            varselbrevBehov.brukerIdent shouldBe bruker.ident
-            varselbrevBehov.brukerNavn shouldBe bruker.navn
-            varselbrevBehov.språkkode shouldBe bruker.språkkode
+            varselbrevBehov.brukerinfo.ident shouldBe bruker.ident
+            varselbrevBehov.brukerinfo.navn shouldBe bruker.navn
+            varselbrevBehov.brukerinfo.språkkode shouldBe bruker.språkkode
             varselbrevBehov.varselbrev.id shouldBe varselbrevSendtHendelse.varselbrevId
             varselbrevBehov.varselbrev.kravgrunnlag.entry shouldBe kravgrunnlag
             varselbrevBehov.varselbrev.mottaker shouldBe behandling.brevmottakerSteg?.registrertBrevmottaker

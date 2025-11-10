@@ -14,7 +14,7 @@ object SendVarselbrev : Tilstand {
     override val tilbakekrevingTilstand: TilbakekrevingTilstand = TilbakekrevingTilstand.SEND_VARSELBREV
 
     override fun entering(tilbakekreving: Tilbakekreving) {
-        val personinfo = tilbakekreving.bruker!!.hentPersoninfo()
+        val personinfo = tilbakekreving.bruker!!.hentBrukerinfo()
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
         val fagsak = tilbakekreving.eksternFagsak
         val kravgrunnlag = tilbakekreving.kravgrunnlagHistorikk.nåværende()
@@ -34,9 +34,7 @@ object SendVarselbrev : Tilstand {
         tilbakekreving.trengerVarselbrev(
             VarselbrevBehov(
                 brevId = varselbrev.id,
-                brukerIdent = personinfo.ident,
-                brukerNavn = personinfo.navn,
-                språkkode = personinfo.språkkode,
+                brukerinfo = tilbakekreving.bruker!!.hentBrukerinfo(),
                 behandlingId = behandling.id,
                 varselbrev = varselbrev as Varselbrev,
                 revurderingsvedtaksdato = revurderingsvedtaksdato,

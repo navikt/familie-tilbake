@@ -9,7 +9,9 @@ import java.util.UUID
 sealed interface Brev : Historikk.HistorikkInnslag<UUID> {
     var journalpostId: String?
     val opprettetDato: LocalDate
-    var sendt: LocalDateTime?
+    var sendtTid: LocalDateTime?
+
+    fun brevSendt(journalpostId: String)
 
     fun tilEntity(): BrevEntity
 }

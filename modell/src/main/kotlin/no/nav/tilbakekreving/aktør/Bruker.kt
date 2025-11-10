@@ -60,7 +60,7 @@ class Bruker(
         språkkode = hendelse.språkkode ?: språkkode
     }
 
-    fun hentPersoninfo(): Brukerinfo = Brukerinfo(
+    fun hentBrukerinfo(): Brukerinfo = Brukerinfo(
         ident = aktør.ident,
         navn = navn!!,
         språkkode = språkkode ?: Språkkode.NB,
