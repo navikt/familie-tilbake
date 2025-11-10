@@ -1,6 +1,5 @@
 package no.nav.tilbakekreving.api.v1.dto
 
-import io.swagger.v3.oas.annotations.media.Schema
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
@@ -18,7 +17,6 @@ data class BehandlingDto(
     val behandlingId: UUID,
     val erBehandlingHenlagt: Boolean,
     val type: Behandlingstype,
-    @param:Schema(name = "Behandlingsstatus")
     val status: Behandlingsstatus,
     val opprettetDato: LocalDate,
     val avsluttetDato: LocalDate? = null,
