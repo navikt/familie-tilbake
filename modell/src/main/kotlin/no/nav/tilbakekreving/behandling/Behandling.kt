@@ -226,8 +226,8 @@ class Behandling internal constructor(
                         Behandlingsstegstatus.AUTOUTFØRT,
                     ),
                     BehandlingsstegsinfoDto(
-                        Behandlingssteg.VARSEL,
-                        Behandlingsstegstatus.KLAR,
+                        Behandlingssteg.FORHÅNDSVARSEL,
+                        Behandlingsstegstatus.AUTOUTFØRT,
                     ),
                 ),
                 steg().klarTilVisning().map {
