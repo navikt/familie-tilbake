@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.entities
 
+import com.fasterxml.jackson.annotation.JsonAlias
 import no.nav.tilbakekreving.brev.Brev
 import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.feil.Sporing
@@ -14,6 +15,7 @@ data class BrevEntity(
     val brevmottakerStegRef: UUID? = null, // Todo nullable må fjernes etter prod.
     val opprettetDato: LocalDate,
     val journalpostId: String?,
+    @param:JsonAlias("sendt", "sendtTid")
     val sendtTid: LocalDateTime? = null,
     val mottaker: RegistrertBrevmottakerEntity,
     val ansvarligSaksbehandlerIdent: String?,
