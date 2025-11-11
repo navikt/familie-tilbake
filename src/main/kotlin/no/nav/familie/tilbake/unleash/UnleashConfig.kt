@@ -42,6 +42,8 @@ open class UnleashConfig(
                 defaultValue: Boolean,
             ): Boolean = System.getenv(toggleId).run { toBoolean() } || defaultValue
 
+            override fun getFrontendToggles(): Map<String, Boolean> = emptyMap()
+
             override fun destroy() {
                 // Dummy featureToggleService trenger ikke destroy, då den ikke har en unleash å lukke
             }
@@ -58,8 +60,6 @@ class UnleashProperties(
 )
 
 interface UnleashService : DisposableBean {
-    fun isEnabled(toggleId: String): Boolean = isEnabled(toggleId, false)
-
     fun isEnabled(
         toggleId: String,
         properties: Map<String, String>,
@@ -69,4 +69,6 @@ interface UnleashService : DisposableBean {
         toggleId: String,
         defaultValue: Boolean,
     ): Boolean
+
+    fun getFrontendToggles(): Map<String, Boolean>
 }

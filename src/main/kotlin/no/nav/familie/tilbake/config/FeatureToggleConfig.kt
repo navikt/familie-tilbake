@@ -17,16 +17,8 @@ class FeatureToggleConfig(
     fun strategies(): List<Strategy> = listOf(ByClusterStrategy(clusterName))
 
     companion object {
-        const val KAN_OPPRETTE_BEH_MED_EKSTERNID_SOM_HAR_AVSLUTTET_TBK =
-            "familie-tilbake.beh.kanopprettes.eksternid.avsluttet.tilbakekreving"
-
-        const val KAN_SE_HISTORISKE_VURDERINGER = "familie-tilbake.se-historiske-vurderinger"
-
-        const val SAKSBEHANDLER_KAN_RESETTE_BEHANDLING = "familie-tilbake-frontend.saksbehandler.kan.resette.behandling"
-
+        const val KAN_OPPRETTE_BEH_MED_EKSTERNID_SOM_HAR_AVSLUTTET_TBK = "familie-tilbake.beh.kanopprettes.eksternid.avsluttet.tilbakekreving"
         const val TIDLIGERE_BESLUTTER = "familie-tilbake.tidligere-beslutter"
-
-        const val FORHÅNDSVARSELSTEG = "familie-tilbake-frontend.forhaandsvarselsteg"
     }
 }
 
@@ -41,6 +33,8 @@ class FeatureToggleService(
         toggleId: String,
         defaultValue: Boolean,
     ): Boolean = unleashService.isEnabled(toggleId, defaultValue)
+
+    fun getFrontendToggles() = unleashService.getFrontendToggles()
 }
 
 class ByClusterStrategy(

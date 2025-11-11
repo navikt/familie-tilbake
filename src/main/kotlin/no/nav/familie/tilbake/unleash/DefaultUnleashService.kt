@@ -51,6 +51,12 @@ class DefaultUnleashService(
         return defaultUnleash.isEnabled(toggleId, builder.build())
     }
 
+    override fun getFrontendToggles(): Map<String, Boolean> {
+        return defaultUnleash.more().featureToggleNames
+            .filter { it.startsWith("familie-tilbake-frontend") || it.startsWith("tilbakekreving-frontend") }
+            .associateWith { defaultUnleash.isEnabled(it) }
+    }
+
     override fun destroy() {
         // Spring trigger denne ved shutdown. Gjøres for å unngå at unleash fortsetter å gjøre kall ut
         defaultUnleash.shutdown()
