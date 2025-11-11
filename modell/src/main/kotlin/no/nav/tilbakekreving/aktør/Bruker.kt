@@ -60,16 +60,7 @@ class Bruker(
         språkkode = hendelse.språkkode ?: språkkode
     }
 
-    internal fun hentBrevmetadata(): BrukerBrevmetadata {
-        return BrukerBrevmetadata(
-            personIdent = aktør.ident,
-            navn = navn!!,
-            språkkode = språkkode ?: Språkkode.NB,
-            dødsdato = dødsdato,
-        )
-    }
-
-    fun hentPersoninfo(): Brukerinfo = Brukerinfo(
+    fun hentBrukerinfo(): Brukerinfo = Brukerinfo(
         ident = aktør.ident,
         navn = navn!!,
         språkkode = språkkode ?: Språkkode.NB,
@@ -88,10 +79,3 @@ class Bruker(
         }
     }
 }
-
-data class BrukerBrevmetadata(
-    val personIdent: String,
-    val navn: String,
-    val språkkode: Språkkode,
-    val dødsdato: LocalDate?,
-)

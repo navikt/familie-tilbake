@@ -1,5 +1,10 @@
 package no.nav.tilbakekreving.brev.varselbrev
 
+data class Varselbrevtekst(
+    val overskrift: String,
+    val avsnitter: List<Section>,
+)
+
 data class Section(val title: String, val body: String)
 
 object VarselbrevParser {
@@ -15,7 +20,7 @@ object VarselbrevParser {
             .trim()
 
         val sections = mutableListOf<Section>()
-        var currentTitle: String? = null
+        var currentTitle: String? = ""
         val body = StringBuilder()
 
         fun flush() {

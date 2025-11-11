@@ -14,7 +14,7 @@ data class BrevEntity(
     val brevmottakerStegRef: UUID? = null, // Todo nullable må fjernes etter prod.
     val opprettetDato: LocalDate,
     val journalpostId: String?,
-    val sendt: LocalDateTime? = null,
+    val sendtTid: LocalDateTime? = null,
     val mottaker: RegistrertBrevmottakerEntity,
     val ansvarligSaksbehandlerIdent: String?,
     val kravgrunnlagRef: HistorikkReferanseEntity<UUID>,
@@ -28,7 +28,7 @@ data class BrevEntity(
                 brevmottakerStegId = brevmottakerStegRef,
                 opprettetDato = requireNotNull(opprettetDato) { "opprettetDato kreves for Brev" },
                 journalpostId = journalpostId,
-                sendt = sendt,
+                sendtTid = sendtTid,
                 mottaker = mottaker.fraEntity(),
                 ansvarligSaksbehandlerIdent = ansvarligSaksbehandlerIdent,
                 kravgrunnlag = kravgrunnlagHistorikk.finn(kravgrunnlagRef.id, sporing),

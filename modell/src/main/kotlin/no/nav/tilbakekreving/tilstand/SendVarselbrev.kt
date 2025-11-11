@@ -14,7 +14,7 @@ object SendVarselbrev : Tilstand {
     override val tilbakekrevingTilstand: TilbakekrevingTilstand = TilbakekrevingTilstand.SEND_VARSELBREV
 
     override fun entering(tilbakekreving: Tilbakekreving) {
-        val brukerBrevmetadata = tilbakekreving.bruker!!.hentBrevmetadata()
+        val personinfo = tilbakekreving.bruker!!.hentBrukerinfo()
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
         val fagsak = tilbakekreving.eksternFagsak
         val kravgrunnlag = tilbakekreving.kravgrunnlagHistorikk.nåværende()
@@ -34,9 +34,7 @@ object SendVarselbrev : Tilstand {
         tilbakekreving.trengerVarselbrev(
             VarselbrevBehov(
                 brevId = varselbrev.id,
-                brukerIdent = brukerBrevmetadata.personIdent,
-                brukerNavn = brukerBrevmetadata.navn,
-                språkkode = brukerBrevmetadata.språkkode,
+                brukerinfo = tilbakekreving.bruker!!.hentBrukerinfo(),
                 behandlingId = behandling.id,
                 varselbrev = varselbrev as Varselbrev,
                 revurderingsvedtaksdato = revurderingsvedtaksdato,
@@ -46,7 +44,7 @@ object SendVarselbrev : Tilstand {
                 behandlendeEnhet = behandling.hentBehandlingsinformasjon().enhet,
                 feilutbetaltBeløp = varselbrev.hentVarsletBeløp(),
                 feilutbetaltePerioder = kravgrunnlag.entry.datoperioder(),
-                gjelderDødsfall = brukerBrevmetadata.dødsdato != null,
+                gjelderDødsfall = personinfo.dødsdato != null,
             ),
         )
     }

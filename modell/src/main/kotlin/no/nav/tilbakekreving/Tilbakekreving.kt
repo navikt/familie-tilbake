@@ -389,7 +389,7 @@ class Tilbakekreving internal constructor(
             ytelse = eksternFagsak.ytelse,
             eksternBehandlingId = eksternFagsak.behandlinger.nåværende().entry.behandlingId(),
             sakOpprettet = opprettet,
-            varselSendt = brevHistorikk.sisteVarselbrev()?.sendt,
+            varselSendt = brevHistorikk.sisteVarselbrev()?.sendtTid,
             behandlingsstatus = behandlingsstatus,
             totaltFeilutbetaltBeløp = behandling.totaltFeilutbetaltBeløp(),
             hentSaksbehandlingURL = ::hentTilbakekrevingUrl,
@@ -400,11 +400,37 @@ class Tilbakekreving internal constructor(
     fun hentVarselbrevInfo(): VarselbrevInfo {
         val behandling = behandlingHistorikk.nåværende().entry
         return VarselbrevInfo(
-            brukerinfo = bruker!!.hentPersoninfo(),
+            brukerinfo = bruker!!.hentBrukerinfo(),
             forhåndsvarselinfo = behandling.hentForhåndsvarselinfo(),
             eksternFagsakId = eksternFagsak.eksternId,
             ytelseType = eksternFagsak.ytelse.tilYtelseDTO(),
         )
+    }
+
+    fun opprettVarselbrevBehov(varseltekstFraSaksbehandler: String): VarselbrevBehov {
+        val behandling = behandlingHistorikk.nåværende().entry
+        val varselbrev = behandling.opprettVarselbrev()
+        val varselbrevInfo = hentVarselbrevInfo()
+        brevHistorikk.lagre(varselbrev)
+
+        return VarselbrevBehov(
+            brevId = varselbrev.id,
+            brukerinfo = varselbrevInfo.brukerinfo,
+            behandlingId = behandling.id,
+            varselbrev = varselbrev,
+            revurderingsvedtaksdato = varselbrevInfo.forhåndsvarselinfo.revurderingsvedtaksdato,
+            varseltekstFraSaksbehandler = varseltekstFraSaksbehandler,
+            eksternFagsakId = eksternFagsak.eksternId,
+            ytelse = eksternFagsak.ytelse,
+            behandlendeEnhet = varselbrevInfo.forhåndsvarselinfo.behandlendeEnhet,
+            feilutbetaltBeløp = varselbrevInfo.forhåndsvarselinfo.beløp,
+            feilutbetaltePerioder = varselbrevInfo.forhåndsvarselinfo.feilutbetaltePerioder,
+            gjelderDødsfall = varselbrevInfo.brukerinfo.dødsdato != null,
+        )
+    }
+
+    fun oppdaterSendtVarselbrev(journalpostId: String, varselbrevId: UUID) {
+        brevHistorikk.entry(varselbrevId).brevSendt(journalpostId)
     }
 
     companion object {

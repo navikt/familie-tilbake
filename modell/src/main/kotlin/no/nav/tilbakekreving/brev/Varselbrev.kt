@@ -14,7 +14,7 @@ data class Varselbrev(
     override val id: UUID,
     override val opprettetDato: LocalDate,
     override var journalpostId: String?,
-    override var sendt: LocalDateTime?,
+    override var sendtTid: LocalDateTime?,
     val mottaker: RegistrertBrevmottaker,
     val brevmottakerStegId: UUID?,
     val ansvarligSaksbehandlerIdent: String?,
@@ -23,6 +23,11 @@ data class Varselbrev(
 ) : Brev {
     fun hentVarsletBeløp(): Long {
         return kravgrunnlag.entry.feilutbetaltBeløpForAllePerioder().toLong()
+    }
+
+    override fun brevSendt(journalpostId: String) {
+        sendtTid = LocalDateTime.now()
+        this.journalpostId = journalpostId
     }
 
     companion object {
@@ -36,7 +41,7 @@ data class Varselbrev(
                 id = UUID.randomUUID(),
                 opprettetDato = LocalDate.now(),
                 journalpostId = null,
-                sendt = null,
+                sendtTid = null,
                 mottaker = mottaker,
                 brevmottakerStegId = brevmottakerStegId,
                 ansvarligSaksbehandlerIdent = ansvarligSaksbehandlerIdent,
@@ -53,7 +58,7 @@ data class Varselbrev(
             brevmottakerStegRef = brevmottakerStegId,
             opprettetDato = opprettetDato,
             journalpostId = journalpostId,
-            sendt = sendt,
+            sendtTid = sendtTid,
             mottaker = mottaker.tilEntity(brevmottakerStegId, null),
             ansvarligSaksbehandlerIdent = ansvarligSaksbehandlerIdent,
             kravgrunnlagRef = kravgrunnlag.tilEntity(),

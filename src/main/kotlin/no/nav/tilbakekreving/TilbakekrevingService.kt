@@ -14,6 +14,7 @@ import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeslåVedtaksstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
+import no.nav.tilbakekreving.api.v1.dto.BestillBrevDto
 import no.nav.tilbakekreving.api.v1.dto.ManuellBrevmottakerRequestDto
 import no.nav.tilbakekreving.api.v2.fagsystem.behov.FagsysteminfoBehovHendelse
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
@@ -26,6 +27,7 @@ import no.nav.tilbakekreving.behov.FagsysteminfoBehov
 import no.nav.tilbakekreving.behov.IverksettelseBehov
 import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.bigquery.BigQueryService
+import no.nav.tilbakekreving.brev.varselbrev.ForhåndsvarselService
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.endring.EndringObservatørService
@@ -36,6 +38,7 @@ import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
+import no.nav.tilbakekreving.kontrakter.brev.Dokumentmalstype
 import no.nav.tilbakekreving.kontrakter.brev.MottakerType
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
@@ -44,6 +47,7 @@ import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
 import no.nav.tilbakekreving.saksbehandler.Behandler
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -62,6 +66,7 @@ class TilbakekrevingService(
     private val dokarkivClient: DokarkivClient,
     private val dokdistService: DokdistClient,
     private val featureService: FeatureService,
+    private val forhåndsvarselService: ForhåndsvarselService,
 ) {
     private val logger = TracedLogger.getLogger<TilbakekrevingService>()
 
@@ -510,6 +515,20 @@ class TilbakekrevingService(
                 message = melding,
                 frontendFeilmelding = frontendFeilmelding,
                 logContext = SecureLog.Context.fra(tilbakekreving),
+            )
+        }
+    }
+
+    fun bestillBrev(
+        tilbakekreving: Tilbakekreving,
+        bestillBrevDto: BestillBrevDto,
+    ) {
+        when (bestillBrevDto.brevmalkode) {
+            Dokumentmalstype.VARSEL -> forhåndsvarselService.bestillVarselbrev(tilbakekreving, bestillBrevDto)
+            else -> throw Feil(
+                message = "Håndtering av ${bestillBrevDto.brevmalkode} støttes ikke enda",
+                httpStatus = HttpStatus.BAD_REQUEST,
+                logContext = SecureLog.Context.utenBehandling(tilbakekreving.eksternFagsak.eksternId),
             )
         }
     }

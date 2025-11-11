@@ -25,6 +25,8 @@ class FeatureToggleConfig(
         const val SAKSBEHANDLER_KAN_RESETTE_BEHANDLING = "familie-tilbake-frontend.saksbehandler.kan.resette.behandling"
 
         const val TIDLIGERE_BESLUTTER = "familie-tilbake.tidligere-beslutter"
+
+        const val FORHÅNDSVARSELSTEG = "familie-tilbake-frontend.forhaandsvarselsteg"
     }
 }
 

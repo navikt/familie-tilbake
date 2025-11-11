@@ -120,13 +120,13 @@ class DokarkivClientImpl(
             tittel = brevdata.tittel,
             tema = varselbrevBehov.ytelse.tilTema().name,
             avsenderMottaker = AvsenderMottaker(
-                id = varselbrevBehov.brukerIdent,
+                id = varselbrevBehov.brukerinfo.ident,
                 idType = AvsenderMottakerIdType.FNR,
-                navn = varselbrevBehov.brukerNavn,
+                navn = varselbrevBehov.brukerinfo.navn,
             ),
             bruker = DokarkivBruker(
                 BrukerIdType.FNR,
-                varselbrevBehov.brukerIdent,
+                varselbrevBehov.brukerinfo.ident,
             ),
             dokumenter = hentArkivDokumenter(varselbrevBehov, brevdata, logContext),
             eksternReferanseId = lagEksternReferanseId(
@@ -180,14 +180,14 @@ class DokarkivClientImpl(
 
     private fun hentBrevMetadata(varselbrevBehov: VarselbrevBehov): Brevmetadata {
         return Brevmetadata(
-            sakspartId = varselbrevBehov.brukerIdent,
-            sakspartsnavn = varselbrevBehov.brukerNavn,
+            sakspartId = varselbrevBehov.brukerinfo.ident,
+            sakspartsnavn = varselbrevBehov.brukerinfo.navn,
             tittel = TITTEL_VARSEL_TILBAKEBETALING + varselbrevBehov.ytelse.tilYtelseDTO(),
-            mottageradresse = Adresseinfo(varselbrevBehov.brukerIdent, varselbrevBehov.brukerNavn),
+            mottageradresse = Adresseinfo(varselbrevBehov.brukerinfo.ident, varselbrevBehov.brukerinfo.navn),
             behandlendeEnhetsNavn = requireNotNull(varselbrevBehov.behandlendeEnhet) { "Enhetsnavn kreves for journalføring" }.navn,
             ansvarligSaksbehandler = requireNotNull(varselbrevBehov.varselbrev.ansvarligSaksbehandlerIdent) { "ansvarligSaksbehandlerIdent kreves for journalføring" },
             saksnummer = varselbrevBehov.eksternFagsakId,
-            språkkode = varselbrevBehov.språkkode,
+            språkkode = varselbrevBehov.brukerinfo.språkkode,
             ytelsestype = varselbrevBehov.ytelse.tilYtelseDTO(),
             gjelderDødsfall = varselbrevBehov.gjelderDødsfall,
             institusjon = null, // Todo når vi skal håndtere institusjon
