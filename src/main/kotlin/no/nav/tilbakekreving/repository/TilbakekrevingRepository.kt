@@ -107,8 +107,8 @@ class TilbakekrevingRepository(
     fun hentOgLagreResultat(
         strategy: FindTilbakekrevingStrategy,
         callback: (TilbakekrevingEntity) -> TilbakekrevingEntity,
-    ): Boolean {
-        val entity = hentForOppdatering(strategy) ?: return false
+    ) {
+        val entity = hentForOppdatering(strategy) ?: return
         val oppdatertEntity = callback(entity)
         val jsonText = objectMapper.writeValueAsString(oppdatertEntity)
         TilbakekrevingEntityMapper.updateQuery(
@@ -121,7 +121,6 @@ class TilbakekrevingRepository(
             jsonText,
             oppdatertEntity.id,
         )
-        return true
     }
 
     private fun lagreUnderobjekter(entity: TilbakekrevingEntity) {
