@@ -7,8 +7,11 @@ import no.nav.tilbakekreving.api.v1.dto.BehandlingsoppsummeringDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegsinfoDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatsperiodeDto
+import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
+import no.nav.tilbakekreving.api.v1.dto.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.api.v1.dto.TotrinnsvurderingDto
+import no.nav.tilbakekreving.api.v1.dto.Uttalelsesdetaljer
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
@@ -75,6 +78,7 @@ class Behandling internal constructor(
     private val fatteVedtakSteg: FatteVedtakSteg,
     private var påVent: PåVent?,
     var brevmottakerSteg: BrevmottakerSteg?,
+    private var brukeruttalelse: Brukeruttalelse?,
 ) : Historikk.HistorikkInnslag<UUID> {
     fun faktastegFrontendDto(
         opprettelsesvalg: Opprettelsesvalg,
@@ -117,6 +121,7 @@ class Behandling internal constructor(
             fatteVedtakStegEntity = fatteVedtakSteg.tilEntity(id),
             påVentEntity = påVent?.tilEntity(id),
             brevmottakerStegEntity = brevmottakerSteg?.tilEntity(id),
+            brukeruttalelseEntity = brukeruttalelse?.tilEntity(id),
         )
     }
 
@@ -405,6 +410,38 @@ class Behandling internal constructor(
         revurderingsvedtaksdato = eksternFagsakRevurdering.entry.vedtaksdato,
     )
 
+    fun lagreUttalelse(
+        uttalelseVurdering: String,
+        uttalelseInfo: List<UttalelseInfo>?,
+        beskrivelseVedNeiEllerUtsettFrist: String?,
+        utsettFrist: LocalDate?,
+    ) {
+        brukeruttalelse = Brukeruttalelse(
+            id = UUID.randomUUID(),
+            uttalelseVurdering = UttalelseVurdering.valueOf(uttalelseVurdering),
+            uttalelseInfo = uttalelseInfo,
+            beskrivelseVedNeiEllerUtsettFrist = beskrivelseVedNeiEllerUtsettFrist,
+            utsettFrist = utsettFrist,
+        )
+    }
+
+    fun brukeruttaleserTilFrontendDto(): BrukeruttalelseDto? {
+        return brukeruttalelse?.let { uttalese ->
+            BrukeruttalelseDto(
+                harBrukerUttaltSeg = HarBrukerUttaltSeg.valueOf(uttalese.uttalelseVurdering.name),
+                uttalelsesdetaljer = uttalese.uttalelseInfo?.map {
+                    Uttalelsesdetaljer(
+                        uttalelsesdato = it.uttalelsesdato,
+                        hvorBrukerenUttalteSeg = it.hvorBrukerenUttalteSeg,
+                        uttalelseBeskrivelse = it.uttalelseBeskrivelse,
+                    )
+                },
+                utsettFrist = uttalese.utsettFrist,
+                beskrivelseVedNeiEllerUtsettFrist = uttalese.beskrivelseVedNeiEllerUtsettFrist,
+            )
+        }
+    }
+
     fun oppdaterBehandler(ansvarligSaksbehandler: Behandler) {
         this.sistEndret = LocalDateTime.now()
         this.ansvarligSaksbehandler = ansvarligSaksbehandler
@@ -521,6 +558,7 @@ class Behandling internal constructor(
                 fatteVedtakSteg = fatteVedtakSteg,
                 påVent = null,
                 brevmottakerSteg = null,
+                brukeruttalelse = null,
             ).also {
                 it.utførSideeffekt(tilstand, behandlingObservatør)
             }
