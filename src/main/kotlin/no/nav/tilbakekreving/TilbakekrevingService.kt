@@ -122,11 +122,11 @@ class TilbakekrevingService(
     fun <T : Any> hentOgLagreTilbakekreving(
         strategy: TilbakekrevingRepository.FindTilbakekrevingStrategy,
         callback: (Tilbakekreving) -> T,
-    ): T {
+    ): T? {
         lateinit var result: T
         val observatør = Observatør()
         lateinit var logContext: SecureLog.Context
-        tilbakekrevingRepository.hentOgLagreResultat(strategy) {
+        val fantOgLagretResultat = tilbakekrevingRepository.hentOgLagreResultat(strategy) {
             kravgrunnlagBufferRepository.validerKravgrunnlagInnenforScope(it.eksternFagsak.eksternId, it.behandlingHistorikkEntities.lastOrNull()?.id?.toString())
             val tilbakekreving = it.fraEntity(observatør, bigQueryService, endringObservatørService, features = featureService.modellFeatures)
             logContext = SecureLog.Context.fra(tilbakekreving)
@@ -135,9 +135,11 @@ class TilbakekrevingService(
             tilbakekreving.tilEntity()
         }
 
-        utførSideeffekter(strategy, observatør, logContext)
-
-        return result
+        if (fantOgLagretResultat) {
+            utførSideeffekter(strategy, observatør, logContext)
+            return result
+        }
+        return null
     }
 
     private fun utførSideeffekter(
@@ -266,7 +268,7 @@ class TilbakekrevingService(
         behandlingsstegDto: BehandlingsstegDto,
         logContext: SecureLog.Context,
     ) {
-        return hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
+        hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
             when (behandlingsstegDto) {
                 is BehandlingsstegForeldelseDto -> behandleForeldelse(tilbakekreving, behandlingsstegDto, behandler)
                 is BehandlingsstegVilkårsvurderingDto -> behandleVilkårsvurdering(tilbakekreving, behandlingsstegDto, behandler)

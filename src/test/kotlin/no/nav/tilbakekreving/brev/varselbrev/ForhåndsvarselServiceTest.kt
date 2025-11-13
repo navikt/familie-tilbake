@@ -121,11 +121,11 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
         )
 
         tilbakekreving.brevHistorikk.sisteVarselbrev() shouldBe null
-        /*dokumentController.bestillBrev(bestillBrevDto)
+        dokumentController.bestillBrev(bestillBrevDto)
 
         val tilbakekrevingEtterVarselbrev = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId)
         tilbakekrevingEtterVarselbrev!!.brevHistorikk.sisteVarselbrev() shouldNotBeNull {
             journalpostId shouldBe "-1"
-        }*/
+        }
     }
 }

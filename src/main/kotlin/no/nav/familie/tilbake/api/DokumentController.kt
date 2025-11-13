@@ -50,7 +50,7 @@ class DokumentController(
         @RequestBody @Valid
         bestillBrevDto: BestillBrevDto,
     ): Ressurs<Nothing?> {
-        /*val håndtert = tilbakekrevingService.hentTilbakekreving(bestillBrevDto.behandlingId) { tilbakekreving ->
+        val håndtert = tilbakekrevingService.hentTilbakekreving(bestillBrevDto.behandlingId) { tilbakekreving ->
             tilgangskontrollService.validerTilgangTilbakekreving(
                 tilbakekreving = tilbakekreving,
                 behandlingId = bestillBrevDto.behandlingId,
@@ -64,7 +64,6 @@ class DokumentController(
         if (håndtert == true) {
             return Ressurs.success(null)
         }
-         */
 
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = bestillBrevDto.behandlingId,
