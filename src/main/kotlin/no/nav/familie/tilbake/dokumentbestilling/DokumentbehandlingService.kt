@@ -23,6 +23,8 @@ import no.nav.tilbakekreving.kontrakter.brev.Dokumentmalstype
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
+import no.nav.familie.tilbake.api.DokumentController
+import no.nav.familie.tilbake.log.TracedLogger
 
 @Service
 @Transactional
@@ -37,6 +39,8 @@ class DokumentbehandlingService(
     private val manuellBrevmottakerRepository: ManuellBrevmottakerRepository,
     private val logService: LogService,
 ) {
+    private val log = TracedLogger.getLogger<DokumentController>()
+
     fun bestillBrev(
         behandlingId: UUID,
         maltype: Dokumentmalstype,
@@ -47,6 +51,9 @@ class DokumentbehandlingService(
         val ansvarligSaksbehandler = ContextService.hentSaksbehandler(logContext)
 
         val manuelleBrevmottakere = manuellBrevmottakerRepository.findByBehandlingId(behandlingId)
+        log.medContext(logContext) {
+            info("Dokumentmalstype er: {}", maltype)
+        }
         if (!BrevmottakerAdresseValidering.erBrevmottakereGyldige(manuelleBrevmottakere)) {
             throw Feil(
                 message = "Det finnes ugyldige brevmottakere i utsending av manuelt brev",

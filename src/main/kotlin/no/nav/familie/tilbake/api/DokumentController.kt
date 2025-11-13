@@ -30,6 +30,9 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
+import no.nav.familie.tilbake.behandling.BehandlingService
+import no.nav.familie.tilbake.log.LogService
+import no.nav.familie.tilbake.log.TracedLogger
 
 @RestController
 @RequestMapping("/api/dokument")
@@ -43,14 +46,21 @@ class DokumentController(
     private val tilgangskontrollService: TilgangskontrollService,
     private val tilbakekrevingService: TilbakekrevingService,
     private val forhåndsvarselService: ForhåndsvarselService,
+    private val logService: LogService,
 ) {
+    private val log = TracedLogger.getLogger<DokumentController>()
+
     @Operation(summary = "Bestill brevsending")
     @PostMapping("/bestill")
     fun bestillBrev(
         @RequestBody @Valid
         bestillBrevDto: BestillBrevDto,
     ): Ressurs<Nothing?> {
+        val logContext = logService.contextFraBehandling(bestillBrevDto.behandlingId)
         val håndtert = tilbakekrevingService.hentTilbakekreving(bestillBrevDto.behandlingId) { tilbakekreving ->
+            log.medContext(logContext) {
+                info("BA sak burde ikke være her!!")
+            }
             tilgangskontrollService.validerTilgangTilbakekreving(
                 tilbakekreving = tilbakekreving,
                 behandlingId = bestillBrevDto.behandlingId,
@@ -62,6 +72,9 @@ class DokumentController(
             true
         }
         if (håndtert == true) {
+            log.medContext(logContext) {
+                info("Dette burde ikke være true!")
+            }
             return Ressurs.success(null)
         }
 
