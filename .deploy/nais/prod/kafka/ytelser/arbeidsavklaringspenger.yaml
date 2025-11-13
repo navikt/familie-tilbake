@@ -19,5 +19,5 @@ spec:
       application: tilbakekreving-backend
       access: readwrite
     - team: aap
-      application: api
+      application: behandlingsflyt
       access: readwrite

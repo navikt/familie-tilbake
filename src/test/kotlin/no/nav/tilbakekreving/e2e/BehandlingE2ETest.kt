@@ -396,11 +396,12 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         event.eksternFagsakId shouldBe fagsystemId
         event.hendelseOpprettet.toLocalDate() shouldBe LocalDate.now()
         event.eksternBehandlingId shouldBe eksternBehandlingId
-        event.sakOpprettet.toLocalDate() shouldBe LocalDate.now()
-        event.varselSendt shouldBe null
-        event.behandlingsstatus shouldBe ForenkletBehandlingsstatus.AVSLUTTET
-        event.totaltFeilutbetaltBeløp shouldBe 2000.0.kroner
-        event.fullstendigPeriode shouldBe PeriodeDto(1.januar(2021), 31.januar(2021))
-        event.saksbehandlingURL shouldBe "https://tilbakekreving.intern.nav.no/fagsystem/TS/fagsak/$fagsystemId/behandling/$behandlingId"
+        event.tilbakekreving.behandlingId shouldBe behandlingId
+        event.tilbakekreving.sakOpprettet.toLocalDate() shouldBe LocalDate.now()
+        event.tilbakekreving.varselSendt shouldBe null
+        event.tilbakekreving.behandlingsstatus shouldBe ForenkletBehandlingsstatus.AVSLUTTET
+        event.tilbakekreving.totaltFeilutbetaltBeløp shouldBe 2000.0.kroner
+        event.tilbakekreving.fullstendigPeriode shouldBe PeriodeDto(1.januar(2021), 31.januar(2021))
+        event.tilbakekreving.saksbehandlingURL shouldBe "https://tilbakekreving.intern.nav.no/fagsystem/TS/fagsak/$fagsystemId/behandling/$behandlingId"
     }
 }

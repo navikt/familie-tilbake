@@ -30,6 +30,7 @@ interface EndringObservatør {
     )
 
     fun behandlingEndret(
+        behandlingId: UUID,
         vedtakGjelderId: String,
         eksternFagsakId: String,
         ytelse: Ytelse,

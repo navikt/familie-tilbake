@@ -145,7 +145,7 @@ class PåminnelseE2ETest : TilbakekrevingE2EBase() {
 
         kafkaProducer.finnKafkamelding(fagsystemId, BehandlingEndretHendelse.METADATA)
             .forExactly(1) {
-                it.behandlingsstatus shouldBe ForenkletBehandlingsstatus.TIL_BEHANDLING
+                it.tilbakekreving.behandlingsstatus shouldBe ForenkletBehandlingsstatus.TIL_BEHANDLING
             }
 
         jdbcTemplate.update(
@@ -159,7 +159,7 @@ class PåminnelseE2ETest : TilbakekrevingE2EBase() {
 
         kafkaProducer.finnKafkamelding(fagsystemId, BehandlingEndretHendelse.METADATA)
             .forExactly(2) {
-                it.behandlingsstatus shouldBe ForenkletBehandlingsstatus.TIL_BEHANDLING
+                it.tilbakekreving.behandlingsstatus shouldBe ForenkletBehandlingsstatus.TIL_BEHANDLING
             }
     }
 }

@@ -83,6 +83,7 @@ class EndringObservatørService(
     }
 
     override fun behandlingEndret(
+        behandlingId: UUID,
         vedtakGjelderId: String,
         eksternFagsakId: String,
         ytelse: Ytelse,
@@ -100,12 +101,15 @@ class EndringObservatørService(
                 eksternFagsakId = eksternFagsakId,
                 hendelseOpprettet = LocalDateTime.now(),
                 eksternBehandlingId = eksternBehandlingId,
-                sakOpprettet = sakOpprettet,
-                varselSendt = varselSendt,
-                behandlingsstatus = behandlingsstatus,
-                totaltFeilutbetaltBeløp = totaltFeilutbetaltBeløp,
-                saksbehandlingURL = hentSaksbehandlingURL(applicationProperties.frontendUrl),
-                fullstendigPeriode = PeriodeDto(fullstendigPeriode.fom, fullstendigPeriode.tom),
+                tilbakekreving = BehandlingEndretHendelse.Tilbakekreving(
+                    behandlingId = behandlingId,
+                    sakOpprettet = sakOpprettet,
+                    varselSendt = varselSendt,
+                    behandlingsstatus = behandlingsstatus,
+                    totaltFeilutbetaltBeløp = totaltFeilutbetaltBeløp,
+                    saksbehandlingURL = hentSaksbehandlingURL(applicationProperties.frontendUrl),
+                    fullstendigPeriode = PeriodeDto(fullstendigPeriode.fom, fullstendigPeriode.tom),
+                ),
             ),
             BehandlingEndretHendelse.METADATA,
             vedtakGjelderId,

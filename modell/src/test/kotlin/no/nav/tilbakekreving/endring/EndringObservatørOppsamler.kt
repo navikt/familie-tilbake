@@ -43,6 +43,7 @@ class EndringObservatørOppsamler : EndringObservatør {
     }
 
     override fun behandlingEndret(
+        behandlingId: UUID,
         vedtakGjelderId: String,
         eksternFagsakId: String,
         ytelse: Ytelse,

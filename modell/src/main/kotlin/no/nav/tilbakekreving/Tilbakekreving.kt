@@ -384,6 +384,7 @@ class Tilbakekreving internal constructor(
     fun sendStatusendring(behandlingsstatus: ForenkletBehandlingsstatus) {
         val behandling = behandlingHistorikk.nåværende().entry
         endringObservatør.behandlingEndret(
+            behandlingId = behandling.id,
             vedtakGjelderId = bruker?.aktør?.ident ?: "Ukjent",
             eksternFagsakId = eksternFagsak.eksternId,
             ytelse = eksternFagsak.ytelse,
