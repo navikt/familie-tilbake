@@ -134,6 +134,7 @@ class TilBehandlingTest {
                 ),
             ),
         )
+        tilbakekreving.håndter(fagsysteminfoHendelse())
         tilbakekreving.håndter(brukerinfoHendelse())
         tilbakekreving.håndter(VarselbrevSendtHendelse(tilbakekreving.brevHistorikk.nåværende().entry.id, journalpostId = "1234"))
 

@@ -7,15 +7,11 @@ import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelsesperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
-import no.nav.tilbakekreving.behov.BrukerinfoBehov
-import no.nav.tilbakekreving.behov.FagsysteminfoBehov
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.brukerinfoHendelse
 import no.nav.tilbakekreving.defaultFeatures
-import no.nav.tilbakekreving.eksternFagsak
 import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
-import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.fagsysteminfoHendelse
 import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.februar
@@ -33,24 +29,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class TilleggsstønaderE2ETest {
-    private val bigQueryService = BigQueryServiceStub()
-
-    @Test
-    fun `hopper over innhenting av fagsystem info`() {
-        val observatør = BehovObservatørOppsamler()
-        val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse(
-            eksternFagsak = eksternFagsak(
-                ytelse = Ytelse.Tilleggsstønad,
-            ),
-        )
-        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), observatør, opprettTilbakekrevingHendelse, bigQueryService, EndringObservatørOppsamler(), features = defaultFeatures())
-        tilbakekreving.håndter(kravgrunnlag())
-
-        observatør.behovListe.size shouldBe 2
-        observatør.behovListe.filterIsInstance<BrukerinfoBehov>().size shouldBe 1
-        observatør.behovListe.filterIsInstance<FagsysteminfoBehov>().size shouldBe 1
-    }
-
     @Test
     fun `utvidelse av feilutbetalingsperiode`() {
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()

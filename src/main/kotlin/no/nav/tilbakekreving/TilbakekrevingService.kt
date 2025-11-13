@@ -91,9 +91,6 @@ class TilbakekrevingService(
         val logContext = SecureLog.Context.fra(tilbakekreving)
 
         logger.medContext(logContext) { info("Lagrer tilbakekreving") }
-        logger.medContext(logContext) {
-            info("URL til behandling er: {}", tilbakekreving.hentTilbakekrevingUrl(applicationProperties.frontendUrl))
-        }
 
         utførSideeffekter(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId), observatør, logContext)
 

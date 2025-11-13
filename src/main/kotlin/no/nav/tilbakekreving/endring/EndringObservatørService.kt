@@ -7,6 +7,7 @@ import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.VedtakPeriode
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.Vedtaksoppsummering
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.tilbakekreving.api.v2.PeriodeDto
 import no.nav.tilbakekreving.api.v2.fagsystem.BehandlingEndretHendelse
 import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
@@ -33,6 +34,8 @@ class EndringObservatørService(
     private val kafkaProducer: KafkaProducer,
     private val applicationProperties: ApplicationProperties,
 ) : EndringObservatør {
+    private val log = TracedLogger.getLogger<EndringObservatørService>()
+
     override fun behandlingsstatusOppdatert(
         behandlingId: UUID,
         forrigeBehandlingId: UUID?,
@@ -96,6 +99,11 @@ class EndringObservatørService(
         fullstendigPeriode: Datoperiode,
     ) {
         val logContext = SecureLog.Context.utenBehandling(eksternFagsakId)
+        if (behandlingsstatus == ForenkletBehandlingsstatus.OPPRETTET) {
+            log.medContext(logContext) {
+                info("URL til behandling er: {}", hentSaksbehandlingURL(applicationProperties.frontendUrl))
+            }
+        }
         kafkaProducer.sendKafkaEvent(
             BehandlingEndretHendelse(
                 eksternFagsakId = eksternFagsakId,

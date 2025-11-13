@@ -6,11 +6,14 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import no.nav.familie.tilbake.api.DokumentController
+import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.api.v1.dto.BestillBrevDto
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp.Companion.medFeilutbetaling
 import no.nav.tilbakekreving.e2e.TilbakekrevingE2EBase
 import no.nav.tilbakekreving.e2e.ytelser.TilleggsstønaderE2ETest.Companion.TILLEGGSSTØNADER_KØ_NAVN
+import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
+import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.brev.Dokumentmalstype
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -20,6 +23,9 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
+    @Autowired
+    private lateinit var fagsystemIntegrasjonService: FagsystemIntegrasjonService
+
     @Autowired
     protected lateinit var dokumentController: DokumentController
 
@@ -53,6 +59,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
                 ),
             ),
         )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
         val tekster = forhåndsvarselService.hentVarselbrevTekster(tilbakekreving)
@@ -112,6 +119,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
                 ),
             ),
         )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
         val bestillBrevDto = BestillBrevDto(

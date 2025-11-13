@@ -2,15 +2,22 @@ package no.nav.tilbakekreving.e2e
 
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.e2e.ytelser.TilleggsstønaderE2ETest.Companion.TILLEGGSSTØNADER_KØ_NAVN
+import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
+import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 
 class Under4xRettsgebyrTest : TilbakekrevingE2EBase() {
+    @Autowired
+    private lateinit var fagsystemIntegrasjonService: FagsystemIntegrasjonService
+
     @Test
     fun `behandler FORSTO_BURDE_FORSTÅTT under 4x rettsgebyr, ingen tilbakekreving`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
@@ -20,6 +27,7 @@ class Under4xRettsgebyrTest : TilbakekrevingE2EBase() {
                 fagsystemId = fagsystemId,
             ),
         )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
         val ansvarligSaksbehandler = Behandler.Saksbehandler("Z999999")
 
@@ -56,6 +64,7 @@ class Under4xRettsgebyrTest : TilbakekrevingE2EBase() {
                 fagsystemId = fagsystemId,
             ),
         )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
         val ansvarligSaksbehandler = Behandler.Saksbehandler("Z999999")
 

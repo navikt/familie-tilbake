@@ -6,7 +6,7 @@ import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import java.time.LocalDate
 
 data class FagsysteminfoHendelse(
-    val aktør: Aktør,
+    val aktør: Aktør?,
     val revurdering: Revurdering,
     val utvidPerioder: List<UtvidetPeriode>?,
 ) {

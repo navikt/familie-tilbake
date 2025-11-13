@@ -140,6 +140,9 @@ class Tilbakekreving internal constructor(
         eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
         behandler: Behandler,
     ) {
+        if (bruker == null) {
+            opprettBruker(kravgrunnlagHistorikk.nåværende().entry.vedtakGjelder)
+        }
         val behandlingId = UUID.randomUUID()
         val behandling = Behandling.nyBehandling(
             id = behandlingId,

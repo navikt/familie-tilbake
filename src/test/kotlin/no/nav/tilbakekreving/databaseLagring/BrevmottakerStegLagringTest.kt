@@ -1,11 +1,14 @@
 package no.nav.tilbakekreving.databaseLagring
 
 import io.kotest.matchers.shouldBe
+import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.e2e.TilbakekrevingE2EBase
 import no.nav.tilbakekreving.e2e.ytelser.TilleggsstønaderE2ETest.Companion.TILLEGGSSTØNADER_KØ_NAVN
 import no.nav.tilbakekreving.entities.MottakerType
+import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
+import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub
 import no.nav.tilbakekreving.kontrakter.brev.ManuellAdresseInfo
@@ -16,6 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
 
 class BrevmottakerStegLagringTest : TilbakekrevingE2EBase() {
+    @Autowired
+    private lateinit var fagsystemIntegrasjonService: FagsystemIntegrasjonService
+
     @Autowired
     private lateinit var kafkaProducer: KafkaProducerStub
 
@@ -31,6 +37,7 @@ class BrevmottakerStegLagringTest : TilbakekrevingE2EBase() {
                 fagsystemId = fagsystemId,
             ),
         )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS)
         val tilbakekrevingId = tilbakekreving(behandlingId!!).id
         val behandling = behandling(behandlingId)
@@ -52,6 +59,7 @@ class BrevmottakerStegLagringTest : TilbakekrevingE2EBase() {
                 fagsystemId = fagsystemId,
             ),
         )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS)
         val behandling = behandling(behandlingId!!)
 
@@ -88,6 +96,7 @@ class BrevmottakerStegLagringTest : TilbakekrevingE2EBase() {
                 fagsystemId = fagsystemId,
             ),
         )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS)
         val behandling = behandling(behandlingId!!)
 
@@ -145,6 +154,7 @@ class BrevmottakerStegLagringTest : TilbakekrevingE2EBase() {
                 fagsystemId = fagsystemId,
             ),
         )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS)
         val tilbakekrevingId = tilbakekreving(behandlingId!!).id
         val behandling = behandling(behandlingId)
@@ -193,6 +203,7 @@ class BrevmottakerStegLagringTest : TilbakekrevingE2EBase() {
                 fagsystemId = fagsystemId,
             ),
         )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS)
         val tilbakekrevingId = tilbakekreving(behandlingId!!).id
         val behandling = behandling(behandlingId)

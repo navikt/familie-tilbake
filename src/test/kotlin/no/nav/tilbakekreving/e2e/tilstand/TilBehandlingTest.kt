@@ -2,8 +2,8 @@ package no.nav.tilbakekreving.e2e.tilstand
 
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.kontrakter.Ressurs
+import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.api.v2.MottakerDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.api.v2.PeriodeDto
@@ -39,6 +39,7 @@ class TilBehandlingTest : TilbakekrevingE2EBase() {
                 fagsystemId = fagsystemId,
             ),
         )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
 
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
 
@@ -49,7 +50,7 @@ class TilBehandlingTest : TilbakekrevingE2EBase() {
                 eksternFagsakId = fagsystemId,
                 hendelseOpprettet = LocalDateTime.now(),
                 mottaker = MottakerDto(
-                    ident = Testdata.STANDARD_BRUKERIDENT,
+                    ident = Testdata.TESTBRUKER,
                     type = MottakerDto.MottakerType.PERSON,
                 ),
                 revurdering = FagsysteminfoSvarHendelse.RevurderingDto(
@@ -88,6 +89,7 @@ class TilBehandlingTest : TilbakekrevingE2EBase() {
                 fagsystemId = fagsystemId,
             ),
         )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
 
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
 
@@ -98,7 +100,7 @@ class TilBehandlingTest : TilbakekrevingE2EBase() {
                 eksternFagsakId = fagsystemId,
                 hendelseOpprettet = LocalDateTime.now(),
                 mottaker = MottakerDto(
-                    ident = Testdata.STANDARD_BRUKERIDENT,
+                    ident = Testdata.TESTBRUKER,
                     type = MottakerDto.MottakerType.PERSON,
                 ),
                 revurdering = FagsysteminfoSvarHendelse.RevurderingDto(
@@ -142,6 +144,7 @@ class TilBehandlingTest : TilbakekrevingE2EBase() {
                 fagsystemId = fagsystemId,
             ),
         )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
 
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
 

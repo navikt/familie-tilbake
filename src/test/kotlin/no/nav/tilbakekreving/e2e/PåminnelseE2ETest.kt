@@ -5,10 +5,13 @@ import io.kotest.inspectors.forNone
 import io.kotest.matchers.comparables.shouldBeGreaterThan
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.api.v2.fagsystem.BehandlingEndretHendelse
 import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
 import no.nav.tilbakekreving.e2e.ytelser.TilleggsstønaderE2ETest.Companion.TILLEGGSSTØNADER_KØ_NAVN
 import no.nav.tilbakekreving.entity.FieldConverter
+import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
+import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.hendelser.PåminnelseMediator
 import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub
 import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub.Companion.finnKafkamelding
@@ -23,6 +26,9 @@ import org.springframework.jdbc.core.query
 import java.time.LocalDateTime
 
 class PåminnelseE2ETest : TilbakekrevingE2EBase() {
+    @Autowired
+    private lateinit var fagsystemIntegrasjonService: FagsystemIntegrasjonService
+
     @Autowired
     private lateinit var tilbakekrevingRepository: TilbakekrevingRepository
 
@@ -40,6 +46,7 @@ class PåminnelseE2ETest : TilbakekrevingE2EBase() {
             queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId, fødselsnummer = fødselsnummer),
         )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
 
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
         val tilbakekrevingId = tilbakekreving(behandlingId).id
@@ -91,6 +98,7 @@ class PåminnelseE2ETest : TilbakekrevingE2EBase() {
                 fagsystemId = fagsystemId,
             ),
         )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
 
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
 
@@ -139,6 +147,7 @@ class PåminnelseE2ETest : TilbakekrevingE2EBase() {
             queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId),
         )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
 
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
         val tilbakekrevingId = tilbakekreving(behandlingId).id

@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.forvaltning
 
 import io.kotest.matchers.shouldBe
+import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.april
 import no.nav.tilbakekreving.e2e.KravgrunnlagE2ETest.Companion.QUEUE_NAME
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
@@ -9,15 +10,21 @@ import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp.Companion.medFeilutbetaling
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsperiode
 import no.nav.tilbakekreving.e2e.TilbakekrevingE2EBase
+import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
+import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.mai
 import no.nav.tilbakekreving.mars
 import no.nav.tilbakekreving.util.kroner
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
 
 class ForvaltningTest : TilbakekrevingE2EBase() {
+    @Autowired
+    private lateinit var fagsystemIntegrasjonService: FagsystemIntegrasjonService
+
     @Test
     fun `hentBehandlingsinfo skal hente info basert på eksternFagsakId og ytelsestype for tilleggsstønader`() {
         val fagsystemId = UUID.randomUUID().toString()
@@ -59,6 +66,8 @@ class ForvaltningTest : TilbakekrevingE2EBase() {
                 ),
             ),
         )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
+
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId)
         val behandling = tilbakekreving?.behandlingHistorikk?.nåværende()?.entry
         val kravgrunnlag = tilbakekreving?.kravgrunnlagHistorikk?.nåværende()?.entry

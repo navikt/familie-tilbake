@@ -9,6 +9,8 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 object Testdata {
+    val TESTBRUKER = "20046912345"
+
     fun fagsysteminfoSvar(
         fagsystemId: String,
         eksternBehandlingId: String = UUID.randomUUID().toString(),

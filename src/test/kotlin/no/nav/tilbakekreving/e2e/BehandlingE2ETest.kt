@@ -53,6 +53,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
                 fagsystemId = fagsystemId,
             ),
         )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
 
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
         behandling(behandlingId).apply { BrevmottakerSteg.opprett("navn", "12345678912") }
@@ -159,6 +160,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
                 fagsystemId = fagsystemId,
             ),
         )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
 
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
 
@@ -180,6 +182,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
                 fagsystemId = fagsystemId,
             ),
         )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
 
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
 
@@ -234,6 +237,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
                 ),
             ),
         )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
 
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
 
@@ -312,6 +316,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
                 fagsystemId = fagsystemId,
             ),
         )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
 
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
 

@@ -1,7 +1,6 @@
 package no.nav.tilbakekreving.fagsystem
 
 import no.nav.tilbakekreving.TilbakekrevingService
-import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.api.v2.fagsystem.svar.FagsysteminfoSvarHendelse
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
@@ -19,7 +18,8 @@ class FagsystemIntegrasjonServiceImpl(
         ) { tilbakekreving ->
             tilbakekreving.håndter(
                 FagsysteminfoHendelse(
-                    aktør = Aktør.Person(""),
+                    // TODO: Gjør det mulig for fagsystem å overstyre hvilke bruker tilbakekrevingen gjelder
+                    aktør = null,
                     revurdering = FagsysteminfoHendelse.Revurdering(
                         behandlingId = fagsysteminfo.revurdering.behandlingId,
                         årsak = when (fagsysteminfo.revurdering.årsak) {

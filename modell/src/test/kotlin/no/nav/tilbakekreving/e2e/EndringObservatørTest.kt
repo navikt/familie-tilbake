@@ -12,6 +12,7 @@ import no.nav.tilbakekreving.defaultFeatures
 import no.nav.tilbakekreving.eksternFagsak
 import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.fagsystem.Ytelse
+import no.nav.tilbakekreving.fagsysteminfoHendelse
 import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.foreldelseVurdering
 import no.nav.tilbakekreving.forårsaketAvBrukerGrovtUaktsomt
@@ -39,6 +40,7 @@ class EndringObservatørTest {
         )
         val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), BehovObservatørOppsamler(), opprettTilbakekrevingHendelse, bigQueryService, endringObservatør, features = defaultFeatures())
         tilbakekreving.håndter(kravgrunnlag())
+        tilbakekreving.håndter(fagsysteminfoHendelse())
         tilbakekreving.håndter(brukerinfoHendelse())
         tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, faktastegVurdering())
         endringObservatør.statusoppdateringerFor(tilbakekreving.behandlingHistorikk.nåværende().entry.id) shouldBe listOf(
@@ -65,6 +67,7 @@ class EndringObservatørTest {
         )
         val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), behovOppsamler, opprettTilbakekrevingHendelse, bigQueryService, endringObservatør, features = defaultFeatures())
         tilbakekreving.håndter(kravgrunnlag())
+        tilbakekreving.håndter(fagsysteminfoHendelse())
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.status } shouldBe listOf(
             ForenkletBehandlingsstatus.OPPRETTET,
         )
