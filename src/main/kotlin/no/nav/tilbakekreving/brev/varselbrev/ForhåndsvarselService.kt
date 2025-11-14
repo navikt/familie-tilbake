@@ -108,7 +108,7 @@ class ForhåndsvarselService(
 
                 behandling.lagreUttalelse(
                     uttalelseVurdering = brukeruttalelse.harBrukerUttaltSeg.name,
-                    uttalelseInfo = null,
+                    uttalelseInfo = listOf(),
                     beskrivelseVedNeiEllerUtsettFrist = beskrivelse,
                     utsettFrist = null,
                 )
@@ -126,7 +126,7 @@ class ForhåndsvarselService(
 
                 behandling.lagreUttalelse(
                     uttalelseVurdering = brukeruttalelse.harBrukerUttaltSeg.name,
-                    uttalelseInfo = null,
+                    uttalelseInfo = listOf(),
                     beskrivelseVedNeiEllerUtsettFrist = beskrivelse,
                     utsettFrist = utsattFrist,
                 )

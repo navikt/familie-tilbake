@@ -412,7 +412,7 @@ class Behandling internal constructor(
 
     fun lagreUttalelse(
         uttalelseVurdering: String,
-        uttalelseInfo: List<UttalelseInfo>?,
+        uttalelseInfo: List<UttalelseInfo>,
         beskrivelseVedNeiEllerUtsettFrist: String?,
         utsettFrist: LocalDate?,
     ) {
@@ -429,7 +429,7 @@ class Behandling internal constructor(
         return brukeruttalelse?.let { uttalese ->
             BrukeruttalelseDto(
                 harBrukerUttaltSeg = HarBrukerUttaltSeg.valueOf(uttalese.uttalelseVurdering.name),
-                uttalelsesdetaljer = uttalese.uttalelseInfo?.let { info ->
+                uttalelsesdetaljer = uttalese.uttalelseInfo.let { info ->
                     info.map {
                         Uttalelsesdetaljer(
                             uttalelsesdato = it.uttalelsesdato,

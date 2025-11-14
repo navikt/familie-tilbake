@@ -10,14 +10,14 @@ data class BrukeruttalelseEntity(
     val id: UUID,
     val behandlingRef: UUID,
     val uttalelseVurdering: UttalelseVurdering,
-    val uttalelseInfoEntity: List<UttalelseInfoEntity>?,
+    val uttalelseInfoEntity: List<UttalelseInfoEntity>,
     val utsettFrist: LocalDate?,
     val beskrivelseVedNeiEllerUtsettFrist: String?,
 ) {
     fun fraEntity(): Brukeruttalelse = Brukeruttalelse(
         id = id,
         uttalelseVurdering = uttalelseVurdering,
-        uttalelseInfo = uttalelseInfoEntity?.map { it.fraEntity() },
+        uttalelseInfo = uttalelseInfoEntity.map { it.fraEntity() },
         beskrivelseVedNeiEllerUtsettFrist = beskrivelseVedNeiEllerUtsettFrist,
         utsettFrist = utsettFrist,
     )

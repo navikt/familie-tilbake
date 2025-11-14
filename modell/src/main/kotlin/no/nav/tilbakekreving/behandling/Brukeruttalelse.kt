@@ -8,7 +8,7 @@ import java.util.UUID
 class Brukeruttalelse(
     val id: UUID,
     val uttalelseVurdering: UttalelseVurdering,
-    val uttalelseInfo: List<UttalelseInfo>?,
+    val uttalelseInfo: List<UttalelseInfo>,
     val beskrivelseVedNeiEllerUtsettFrist: String?,
     val utsettFrist: LocalDate?,
 ) {
@@ -16,7 +16,7 @@ class Brukeruttalelse(
         id = id,
         uttalelseVurdering = uttalelseVurdering,
         behandlingRef = behandlingRef,
-        uttalelseInfoEntity = uttalelseInfo?.map {
+        uttalelseInfoEntity = uttalelseInfo.map {
             UttalelseInfoEntity(
                 id = UUID.randomUUID(),
                 brukeruttalelseRef = id,
