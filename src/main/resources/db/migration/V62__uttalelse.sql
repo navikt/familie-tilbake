@@ -9,7 +9,7 @@ CREATE TABLE tilbakekreving_brukeruttalelse(
 CREATE TABLE tilbakekreving_uttalelse_informasjon(
     id UUID NOT NULL PRIMARY KEY,
     brukeruttalelse_ref UUID NOT NULL REFERENCES tilbakekreving_brukeruttalelse(id),
-    uttalelsesdato DATE,
-    hvor_brukeren_uttalet_seg VARCHAR(128),
-    uttalelse_beskrivelse TEXT
+    uttalelsesdato DATE NOT NULL,
+    hvor_brukeren_uttalet_seg VARCHAR(128) NOT NULL,
+    uttalelse_beskrivelse TEXT NOT NULL
 )

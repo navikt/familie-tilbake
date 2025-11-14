@@ -37,7 +37,7 @@ object BrukerUttalelseEntityMapper : Entity<BrukeruttalelseEntity, UUID, UUID>(
 
     fun map(
         resultSet: ResultSet,
-        uttalelseInfoEntity: List<UttalelseInfoEntity>,
+        uttalelseInfoEntity: List<UttalelseInfoEntity>?,
     ): BrukeruttalelseEntity {
         return BrukeruttalelseEntity(
             id = resultSet[id],
@@ -81,9 +81,9 @@ object BrukerUttalelseEntityMapper : Entity<BrukeruttalelseEntity, UUID, UUID>(
             return UttalelseInfoEntity(
                 id = resultSet[id],
                 brukeruttalelseRef = resultSet[brukeruttalelseRef],
-                uttalelsesdato = resultSet[uttalelsesdato],
-                hvorBrukerenUttalteSeg = resultSet[hvorBrukerenUttaletSeg],
-                uttalelseBeskrivelse = resultSet[uttalelseBeskrivelse],
+                uttalelsesdato = resultSet[uttalelsesdato]!!,
+                hvorBrukerenUttalteSeg = resultSet[hvorBrukerenUttaletSeg]!!,
+                uttalelseBeskrivelse = resultSet[uttalelseBeskrivelse]!!,
             )
         }
     }

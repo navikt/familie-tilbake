@@ -21,7 +21,7 @@ data class Varselbrev(
     val brevmottakerStegId: UUID?,
     val ansvarligSaksbehandlerIdent: String?,
     val kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
-    var fristForTilbakemelding: LocalDate,
+    val fristForTilbakemelding: LocalDate,
 ) : Brev, FrontendDto<VarselbrevDto> {
     fun hentVarsletBeløp(): Long {
         return kravgrunnlag.entry.feilutbetaltBeløpForAllePerioder().toLong()

@@ -2,8 +2,8 @@ package no.nav.tilbakekreving.brev.varselbrev
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.inspectors.forOne
-import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -345,6 +345,74 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
     }
 
     @Test
+    fun `brukersuttalelse skal lagres og hentes riktig når det er flere uttalelser`() {
+        val fnr = "12312312311"
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
+        val ansvarligEnhet = KravgrunnlagGenerator.nextPaddedId(4)
+        sendKravgrunnlagOgAvventLesing(
+            TILLEGGSSTØNADER_KØ_NAVN,
+            KravgrunnlagGenerator.forTilleggsstønader(
+                fødselsnummer = fnr,
+                fagsystemId = fagsystemId,
+                vedtakId = vedtakId,
+                ansvarligEnhet = ansvarligEnhet,
+                perioder = listOf(
+                    KravgrunnlagGenerator.Tilbakekrevingsperiode(
+                        1.januar(2021) til 1.januar(2021),
+                        tilbakekrevingsbeløp = listOf(
+                            KravgrunnlagGenerator.Tilbakekrevingsbeløp.forKlassekode(
+                                klassekode = KravgrunnlagGenerator.NyKlassekode.TSTBASISP4_OP,
+                                beløpTilbakekreves = 2000.kroner,
+                                beløpOpprinneligUtbetalt = 20000.kroner,
+                            ),
+                        ).medFeilutbetaling(KravgrunnlagGenerator.NyKlassekode.KL_KODE_FEIL_ARBYT),
+                    ),
+                ),
+            ),
+        )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
+
+        val brukeruttalelseDto = BrukeruttalelseDto(
+            HarBrukerUttaltSeg.JA,
+            uttalelsesdetaljer = listOf(
+                Uttalelsesdetaljer(
+                    hvorBrukerenUttalteSeg = "Tlf",
+                    uttalelsesdato = LocalDate.of(2025, 9, 15),
+                    uttalelseBeskrivelse = "Bruker har sagt ...",
+                ),
+                Uttalelsesdetaljer(
+                    hvorBrukerenUttalteSeg = "Modia",
+                    uttalelsesdato = LocalDate.of(2025, 9, 17),
+                    uttalelseBeskrivelse = "Bruker har skrevet ...",
+                ),
+            ),
+            utsettFrist = null,
+            beskrivelseVedNeiEllerUtsettFrist = null,
+        )
+
+        dokumentController.lagreBrukeruttalelse(behandling.id, brukeruttalelseDto)
+
+        val tilbakekrevingEtterUttalelse = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+        val forhåndsvarselDto = tilbakekrevingEtterUttalelse.hentForhåndsvarselFrontendDto()
+
+        forhåndsvarselDto.brukeruttalelse.shouldNotBeNull {
+            harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.JA
+            utsettFrist shouldBe null
+            beskrivelseVedNeiEllerUtsettFrist == null
+            uttalelsesdetaljer.shouldNotBeNull().size shouldBe 2
+            uttalelsesdetaljer.shouldNotBeNull()[0].uttalelsesdato shouldBe LocalDate.of(2025, 9, 15)
+            uttalelsesdetaljer.shouldNotBeNull()[0].hvorBrukerenUttalteSeg shouldBe "Tlf"
+            uttalelsesdetaljer.shouldNotBeNull()[0].uttalelseBeskrivelse shouldBe "Bruker har sagt ..."
+            uttalelsesdetaljer.shouldNotBeNull()[1].uttalelsesdato shouldBe LocalDate.of(2025, 9, 17)
+            uttalelsesdetaljer.shouldNotBeNull()[1].hvorBrukerenUttalteSeg shouldBe "Modia"
+            uttalelsesdetaljer.shouldNotBeNull()[1].uttalelseBeskrivelse shouldBe "Bruker har skrevet ..."
+        }
+    }
+
+    @Test
     fun `Skal feile når uttalelse er JA men det er ingen detaljer`() {
         val fnr = "12312312311"
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
@@ -452,7 +520,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.NEI
             utsettFrist shouldBe null
             beskrivelseVedNeiEllerUtsettFrist == "Ville ikke"
-            uttalelsesdetaljer.shouldBeEmpty()
+            uttalelsesdetaljer.shouldBeNull()
         }
     }
 
@@ -506,12 +574,11 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
         val tilbakekrevingEtterUttalelse = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         val forhåndsvarselDto = tilbakekrevingEtterUttalelse.hentForhåndsvarselFrontendDto()
 
-        tilbakekrevingEtterUttalelse.brevHistorikk.sisteVarselbrev()!!.fristForTilbakemelding shouldBe LocalDate.of(2025, 11, 15)
         forhåndsvarselDto.brukeruttalelse.shouldNotBeNull {
             harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.UTTSETT_FRIST
             utsettFrist shouldBe LocalDate.of(2025, 11, 15)
             beskrivelseVedNeiEllerUtsettFrist == "Utsetter bare"
-            uttalelsesdetaljer.shouldBeEmpty()
+            uttalelsesdetaljer.shouldBeNull()
         }
     }
 

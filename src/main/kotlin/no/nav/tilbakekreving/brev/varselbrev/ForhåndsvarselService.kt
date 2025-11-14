@@ -114,6 +114,9 @@ class ForhåndsvarselService(
                 )
             }
             HarBrukerUttaltSeg.UTTSETT_FRIST -> {
+                requireNotNull(tilbakekreving.brevHistorikk.sisteVarselbrev()) {
+                    "Kan ikke utsette frist når forhåndsvarsel ikke er sendt"
+                }
                 val beskrivelse = requireNotNull(brukeruttalelse.beskrivelseVedNeiEllerUtsettFrist) {
                     "Det kreves en beskrivelse når frist er utsatt. Beskrivelsen var null"
                 }.also {
@@ -127,10 +130,6 @@ class ForhåndsvarselService(
                     beskrivelseVedNeiEllerUtsettFrist = beskrivelse,
                     utsettFrist = utsattFrist,
                 )
-                val varselbrev = requireNotNull(tilbakekreving.brevHistorikk.sisteVarselbrev()) {
-                    "Kan ikke utsette frist når det ikke finnes varselbrev"
-                }
-                varselbrev.fristForTilbakemelding = utsattFrist
             }
         }
     }

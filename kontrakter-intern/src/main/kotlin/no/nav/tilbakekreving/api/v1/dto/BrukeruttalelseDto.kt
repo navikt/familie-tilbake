@@ -10,9 +10,9 @@ data class BrukeruttalelseDto(
 )
 
 data class Uttalelsesdetaljer(
-    val uttalelsesdato: LocalDate?,
-    val hvorBrukerenUttalteSeg: String?,
-    val uttalelseBeskrivelse: String?,
+    val uttalelsesdato: LocalDate,
+    val hvorBrukerenUttalteSeg: String,
+    val uttalelseBeskrivelse: String,
 )
 
 enum class HarBrukerUttaltSeg {
