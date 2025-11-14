@@ -429,12 +429,14 @@ class Behandling internal constructor(
         return brukeruttalelse?.let { uttalese ->
             BrukeruttalelseDto(
                 harBrukerUttaltSeg = HarBrukerUttaltSeg.valueOf(uttalese.uttalelseVurdering.name),
-                uttalelsesdetaljer = uttalese.uttalelseInfo?.map {
-                    Uttalelsesdetaljer(
-                        uttalelsesdato = it.uttalelsesdato,
-                        hvorBrukerenUttalteSeg = it.hvorBrukerenUttalteSeg,
-                        uttalelseBeskrivelse = it.uttalelseBeskrivelse,
-                    )
+                uttalelsesdetaljer = uttalese.uttalelseInfo?.let { info ->
+                    info.map {
+                        Uttalelsesdetaljer(
+                            uttalelsesdato = it.uttalelsesdato,
+                            hvorBrukerenUttalteSeg = it.hvorBrukerenUttalteSeg,
+                            uttalelseBeskrivelse = it.uttalelseBeskrivelse,
+                        )
+                    }
                 },
                 utsettFrist = uttalese.utsettFrist,
                 beskrivelseVedNeiEllerUtsettFrist = uttalese.beskrivelseVedNeiEllerUtsettFrist,

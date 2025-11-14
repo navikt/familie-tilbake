@@ -32,9 +32,9 @@ class Brukeruttalelse(
 
 data class UttalelseInfo(
     val id: UUID,
-    val uttalelsesdato: LocalDate?,
-    val hvorBrukerenUttalteSeg: String?,
-    val uttalelseBeskrivelse: String?,
+    val uttalelsesdato: LocalDate,
+    val hvorBrukerenUttalteSeg: String,
+    val uttalelseBeskrivelse: String,
 )
 
 enum class UttalelseVurdering {

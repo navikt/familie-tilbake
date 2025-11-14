@@ -26,9 +26,9 @@ data class BrukeruttalelseEntity(
 data class UttalelseInfoEntity(
     val id: UUID,
     val brukeruttalelseRef: UUID,
-    val uttalelsesdato: LocalDate?,
-    val hvorBrukerenUttalteSeg: String?,
-    val uttalelseBeskrivelse: String?,
+    val uttalelsesdato: LocalDate,
+    val hvorBrukerenUttalteSeg: String,
+    val uttalelseBeskrivelse: String,
 ) {
     fun fraEntity(): UttalelseInfo = UttalelseInfo(id, uttalelsesdato, hvorBrukerenUttalteSeg, uttalelseBeskrivelse)
 }

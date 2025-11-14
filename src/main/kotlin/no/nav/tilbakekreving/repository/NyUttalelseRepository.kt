@@ -19,7 +19,7 @@ class NyUttalelseRepository(
             "SELECT * FROM tilbakekreving_brukeruttalelse WHERE behandling_ref = ?",
             behandlingId,
         ) { resultSet, _ ->
-            val uttalelseInfoEntity = hentUttalelseInfo(resultSet[BrukerUttalelseEntityMapper.id])
+            val uttalelseInfoEntity = hentUttalelseInfo(resultSet[BrukerUttalelseEntityMapper.id]).takeIf { it.isNotEmpty() }
             BrukerUttalelseEntityMapper.map(resultSet, uttalelseInfoEntity)
         }.singleOrNull()
     }
