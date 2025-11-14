@@ -2,8 +2,8 @@ package no.nav.tilbakekreving.brev.varselbrev
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.inspectors.forOne
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
-import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -520,7 +520,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.NEI
             utsettFrist shouldBe null
             beskrivelseVedNeiEllerUtsettFrist == "Ville ikke"
-            uttalelsesdetaljer.shouldBeNull()
+            uttalelsesdetaljer.shouldBeEmpty()
         }
     }
 
@@ -578,7 +578,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.UTTSETT_FRIST
             utsettFrist shouldBe LocalDate.of(2025, 11, 15)
             beskrivelseVedNeiEllerUtsettFrist == "Utsetter bare"
-            uttalelsesdetaljer.shouldBeNull()
+            uttalelsesdetaljer.shouldBeEmpty()
         }
     }
 
