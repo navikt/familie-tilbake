@@ -1,5 +1,7 @@
 package no.nav.tilbakekreving.brev
 
+import no.nav.tilbakekreving.FrontendDto
+import no.nav.tilbakekreving.api.v1.dto.VarselbrevDto
 import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
 import no.nav.tilbakekreving.entities.BrevEntity
 import no.nav.tilbakekreving.entities.Brevtype
@@ -20,7 +22,7 @@ data class Varselbrev(
     val ansvarligSaksbehandlerIdent: String?,
     val kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
     val fristForTilbakemelding: LocalDate,
-) : Brev {
+) : Brev, FrontendDto<VarselbrevDto> {
     fun hentVarsletBeløp(): Long {
         return kravgrunnlag.entry.feilutbetaltBeløpForAllePerioder().toLong()
     }
@@ -64,5 +66,9 @@ data class Varselbrev(
             kravgrunnlagRef = kravgrunnlag.tilEntity(),
             fristForTilbakemelding = fristForTilbakemelding,
         )
+    }
+
+    override fun tilFrontendDto(): VarselbrevDto {
+        return VarselbrevDto(varselbrevSendtTid = sendtTid, uttalelsesfrist = fristForTilbakemelding)
     }
 }

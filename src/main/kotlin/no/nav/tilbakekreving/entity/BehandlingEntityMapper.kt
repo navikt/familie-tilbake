@@ -4,6 +4,7 @@ import no.nav.tilbakekreving.entities.BehandlerEntity
 import no.nav.tilbakekreving.entities.BehandlerType
 import no.nav.tilbakekreving.entities.BehandlingEntity
 import no.nav.tilbakekreving.entities.BrevmottakerStegEntity
+import no.nav.tilbakekreving.entities.BrukeruttalelseEntity
 import no.nav.tilbakekreving.entities.EnhetEntity
 import no.nav.tilbakekreving.entities.FaktastegEntity
 import no.nav.tilbakekreving.entities.FatteVedtakStegEntity
@@ -95,6 +96,7 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
         fatteVedtak: FatteVedtakStegEntity,
         påVent: PåVentEntity?,
         brevmottakerSteg: BrevmottakerStegEntity?,
+        brukeruttalelseEntity: BrukeruttalelseEntity?,
     ): BehandlingEntity {
         return BehandlingEntity(
             id = resultSet[id],
@@ -118,6 +120,7 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
             fatteVedtakStegEntity = fatteVedtak,
             påVentEntity = påVent,
             brevmottakerStegEntity = brevmottakerSteg,
+            brukeruttalelseEntity = brukeruttalelseEntity,
         )
     }
 }

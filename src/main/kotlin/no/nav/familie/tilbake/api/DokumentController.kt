@@ -14,6 +14,8 @@ import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.api.v1.dto.BestillBrevDto
+import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
+import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselDto
 import no.nav.tilbakekreving.api.v1.dto.ForhåndsvisningHenleggelsesbrevDto
 import no.nav.tilbakekreving.api.v1.dto.FritekstavsnittDto
 import no.nav.tilbakekreving.api.v1.dto.HentForhåndvisningVedtaksbrevPdfDto
@@ -128,6 +130,28 @@ class DokumentController(
         return varselbrevService.hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest)
     }
 
+    @Operation(summary = "Hent forhåndsvarselinformasjon")
+    @GetMapping(
+        path = ["/forhåndsvarsel/{behandlingId}/v1"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun hentForhåndsvarselinfo(
+        @PathVariable("behandlingId") behandlingId: UUID,
+    ): Ressurs<ForhåndsvarselDto> {
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        if (tilbakekreving != null) {
+            tilgangskontrollService.validerTilgangTilbakekreving(
+                tilbakekreving = tilbakekreving,
+                behandlingId = behandlingId,
+                minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+                auditLoggerEvent = AuditLoggerEvent.ACCESS,
+                handling = "Henter vilkårsvurdering for en gitt behandling",
+            )
+            return Ressurs.success(forhåndsvarselService.hentForhåndsvarselinfo(tilbakekreving))
+        }
+        return Ressurs.failure("Fant ingen tilbakekreving til behandlingId $behandlingId")
+    }
+
     @Operation(summary = "Henter varselbrevtekst")
     @GetMapping(
         "/varselbrevtekst/{behandlingId}",
@@ -231,5 +255,31 @@ class DokumentController(
         )
         lagreUtkastVedtaksbrevService.lagreUtkast(behandlingId, fritekstavsnitt)
         return Ressurs.success("OK")
+    }
+
+    @Operation(summary = "Lagrer brukerens uttalelse")
+    @PostMapping(
+        "/forhåndsvarsel/{behandlingId}/uttalelse",
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun lagreBrukeruttalelse(
+        @PathVariable behandlingId: UUID,
+        @RequestBody brukeruttalelse: BrukeruttalelseDto,
+    ): Ressurs<Nothing?> {
+        val håndtert = tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving ->
+            tilgangskontrollService.validerTilgangTilbakekreving(
+                tilbakekreving = tilbakekreving,
+                behandlingId = behandlingId,
+                minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                auditLoggerEvent = AuditLoggerEvent.CREATE,
+                handling = "Sender brev",
+            )
+            forhåndsvarselService.lagreUttalelse(tilbakekreving, brukeruttalelse)
+            true
+        }
+        if (håndtert == true) {
+            return Ressurs.success(null)
+        }
+        return Ressurs.failure("Fant ingen tilbakekreving til behandlingId $behandlingId")
     }
 }

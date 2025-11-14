@@ -7,6 +7,7 @@ import no.nav.tilbakekreving.aktør.Bruker
 import no.nav.tilbakekreving.aktør.Bruker.Companion.tilNullableFrontendDto
 import no.nav.tilbakekreving.api.v1.dto.FagsakDto
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
+import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
 import no.nav.tilbakekreving.behandling.Behandling
@@ -435,6 +436,13 @@ class Tilbakekreving internal constructor(
 
     fun oppdaterSendtVarselbrev(journalpostId: String, varselbrevId: UUID) {
         brevHistorikk.entry(varselbrevId).brevSendt(journalpostId)
+    }
+
+    fun hentForhåndsvarselFrontendDto(): ForhåndsvarselDto {
+        return ForhåndsvarselDto(
+            varselbrevDto = brevHistorikk.sisteVarselbrev()?.tilFrontendDto(),
+            brukeruttalelse = behandlingHistorikk.nåværende().entry.brukeruttaleserTilFrontendDto(),
+        )
     }
 
     companion object {
