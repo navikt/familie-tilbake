@@ -17,6 +17,7 @@ import no.nav.familie.tilbake.integration.pdl.internal.feilsjekkOgReturnerData
 import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.familie.tilbake.log.callId
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.Tema
 import org.springframework.beans.factory.annotation.Qualifier
@@ -140,6 +141,7 @@ class PdlClientImpl(
         HttpHeaders().apply {
             add("Tema", tema.name)
             add("behandlingsnummer", tema.behandlingsnummer)
+            add("Nav-Call-Id", callId())
         }
 
     private fun mapTilTema(fagsystem: FagsystemDTO): Tema =
