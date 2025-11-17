@@ -23,14 +23,14 @@ object BrukerUttalelseEntityMapper : Entity<BrukeruttalelseEntity, UUID, UUID>(
         FieldConverter.EnumConverter.of<UttalelseVurdering>().required(),
     )
 
-    val utsettFrist = field(
-        "utsett_frist",
+    val nyFrist = field(
+        "ny_frist",
         BrukeruttalelseEntity::utsettFrist,
         FieldConverter.LocalDateConverter,
     )
 
     val beskrivelseVedNeiEllerUtsettFrist = field(
-        "beskrivelse_ved_nei_eller_utsett_frist",
+        "beskrivelse",
         BrukeruttalelseEntity::beskrivelseVedNeiEllerUtsettFrist,
         FieldConverter.StringConverter,
     )
@@ -44,7 +44,7 @@ object BrukerUttalelseEntityMapper : Entity<BrukeruttalelseEntity, UUID, UUID>(
             behandlingRef = resultSet[behandlingRef],
             uttalelseVurdering = resultSet[uttalelseVurdering],
             uttalelseInfoEntity = uttalelseInfoEntity,
-            utsettFrist = resultSet[utsettFrist],
+            utsettFrist = resultSet[nyFrist],
             beskrivelseVedNeiEllerUtsettFrist = resultSet[beskrivelseVedNeiEllerUtsettFrist],
         )
     }

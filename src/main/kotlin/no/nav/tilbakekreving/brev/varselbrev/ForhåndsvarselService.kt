@@ -11,6 +11,7 @@ import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
 import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselDto
 import no.nav.tilbakekreving.api.v1.dto.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.behandling.UttalelseInfo
+import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.brev.VarselbrevInfo
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
@@ -93,7 +94,7 @@ class ForhåndsvarselService(
                     }
                 }
                 behandling.lagreUttalelse(
-                    uttalelseVurdering = brukeruttalelse.harBrukerUttaltSeg.name,
+                    uttalelseVurdering = UttalelseVurdering.valueOf(brukeruttalelse.harBrukerUttaltSeg.name),
                     uttalelseInfo = uttalelsedetaljer.map { UttalelseInfo(UUID.randomUUID(), it.uttalelsesdato, it.hvorBrukerenUttalteSeg, it.uttalelseBeskrivelse) },
                     beskrivelseVedNeiEllerUtsettFrist = null,
                     utsettFrist = null,
@@ -107,7 +108,7 @@ class ForhåndsvarselService(
                 }
 
                 behandling.lagreUttalelse(
-                    uttalelseVurdering = brukeruttalelse.harBrukerUttaltSeg.name,
+                    uttalelseVurdering = UttalelseVurdering.valueOf(brukeruttalelse.harBrukerUttaltSeg.name),
                     uttalelseInfo = listOf(),
                     beskrivelseVedNeiEllerUtsettFrist = beskrivelse,
                     utsettFrist = null,
@@ -125,7 +126,7 @@ class ForhåndsvarselService(
                 val utsattFrist = requireNotNull(brukeruttalelse.utsettFrist) { "Det kreves en ny dato når fristen er utsatt" }
 
                 behandling.lagreUttalelse(
-                    uttalelseVurdering = brukeruttalelse.harBrukerUttaltSeg.name,
+                    uttalelseVurdering = UttalelseVurdering.valueOf(brukeruttalelse.harBrukerUttaltSeg.name),
                     uttalelseInfo = listOf(),
                     beskrivelseVedNeiEllerUtsettFrist = beskrivelse,
                     utsettFrist = utsattFrist,

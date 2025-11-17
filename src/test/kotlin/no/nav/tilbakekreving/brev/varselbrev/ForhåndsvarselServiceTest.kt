@@ -48,32 +48,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
 
     @Test
     fun `henter tekster til varselbrev`() {
-        val fnr = "12312312311"
-        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
-        val ansvarligEnhet = KravgrunnlagGenerator.nextPaddedId(4)
-        sendKravgrunnlagOgAvventLesing(
-            TILLEGGSSTØNADER_KØ_NAVN,
-            KravgrunnlagGenerator.forTilleggsstønader(
-                fødselsnummer = fnr,
-                fagsystemId = fagsystemId,
-                vedtakId = vedtakId,
-                ansvarligEnhet = ansvarligEnhet,
-                perioder = listOf(
-                    KravgrunnlagGenerator.Tilbakekrevingsperiode(
-                        1.januar(2021) til 1.januar(2021),
-                        tilbakekrevingsbeløp = listOf(
-                            KravgrunnlagGenerator.Tilbakekrevingsbeløp.forKlassekode(
-                                klassekode = KravgrunnlagGenerator.NyKlassekode.TSTBASISP4_OP,
-                                beløpTilbakekreves = 2000.kroner,
-                                beløpOpprinneligUtbetalt = 20000.kroner,
-                            ),
-                        ).medFeilutbetaling(KravgrunnlagGenerator.NyKlassekode.KL_KODE_FEIL_ARBYT),
-                    ),
-                ),
-            ),
-        )
-        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
+        val fagsystemId = opprettTilbakekrevingOgHentFagsystemId()
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
         val tekster = forhåndsvarselService.hentVarselbrevTekster(tilbakekreving)
@@ -108,32 +83,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
 
     @Test
     fun `sende forhåndsvarsel skal oppdatere varselbrevet i brevhistorikk med tid og journlaførtId`() {
-        val fnr = "12312312311"
-        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
-        val ansvarligEnhet = KravgrunnlagGenerator.nextPaddedId(4)
-        sendKravgrunnlagOgAvventLesing(
-            TILLEGGSSTØNADER_KØ_NAVN,
-            KravgrunnlagGenerator.forTilleggsstønader(
-                fødselsnummer = fnr,
-                fagsystemId = fagsystemId,
-                vedtakId = vedtakId,
-                ansvarligEnhet = ansvarligEnhet,
-                perioder = listOf(
-                    KravgrunnlagGenerator.Tilbakekrevingsperiode(
-                        1.januar(2021) til 1.januar(2021),
-                        tilbakekrevingsbeløp = listOf(
-                            KravgrunnlagGenerator.Tilbakekrevingsbeløp.forKlassekode(
-                                klassekode = KravgrunnlagGenerator.NyKlassekode.TSTBASISP4_OP,
-                                beløpTilbakekreves = 2000.kroner,
-                                beløpOpprinneligUtbetalt = 20000.kroner,
-                            ),
-                        ).medFeilutbetaling(KravgrunnlagGenerator.NyKlassekode.KL_KODE_FEIL_ARBYT),
-                    ),
-                ),
-            ),
-        )
-        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
+        val fagsystemId = opprettTilbakekrevingOgHentFagsystemId()
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
         val bestillBrevDto = BestillBrevDto(
@@ -153,32 +103,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
 
     @Test
     fun `brukersuttalelse er en tom liste når brukeren ikke har uttalet seg`() {
-        val fnr = "12312312311"
-        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
-        val ansvarligEnhet = KravgrunnlagGenerator.nextPaddedId(4)
-        sendKravgrunnlagOgAvventLesing(
-            TILLEGGSSTØNADER_KØ_NAVN,
-            KravgrunnlagGenerator.forTilleggsstønader(
-                fødselsnummer = fnr,
-                fagsystemId = fagsystemId,
-                vedtakId = vedtakId,
-                ansvarligEnhet = ansvarligEnhet,
-                perioder = listOf(
-                    KravgrunnlagGenerator.Tilbakekrevingsperiode(
-                        1.januar(2021) til 1.januar(2021),
-                        tilbakekrevingsbeløp = listOf(
-                            KravgrunnlagGenerator.Tilbakekrevingsbeløp.forKlassekode(
-                                klassekode = KravgrunnlagGenerator.NyKlassekode.TSTBASISP4_OP,
-                                beløpTilbakekreves = 2000.kroner,
-                                beløpOpprinneligUtbetalt = 20000.kroner,
-                            ),
-                        ).medFeilutbetaling(KravgrunnlagGenerator.NyKlassekode.KL_KODE_FEIL_ARBYT),
-                    ),
-                ),
-            ),
-        )
-        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
+        val fagsystemId = opprettTilbakekrevingOgHentFagsystemId()
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
 
@@ -203,32 +128,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
 
     @Test
     fun `brukersuttalelse og varselinfo skal lagres og hentes riktig når ingen varsel er sendt`() {
-        val fnr = "12312312311"
-        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
-        val ansvarligEnhet = KravgrunnlagGenerator.nextPaddedId(4)
-        sendKravgrunnlagOgAvventLesing(
-            TILLEGGSSTØNADER_KØ_NAVN,
-            KravgrunnlagGenerator.forTilleggsstønader(
-                fødselsnummer = fnr,
-                fagsystemId = fagsystemId,
-                vedtakId = vedtakId,
-                ansvarligEnhet = ansvarligEnhet,
-                perioder = listOf(
-                    KravgrunnlagGenerator.Tilbakekrevingsperiode(
-                        1.januar(2021) til 1.januar(2021),
-                        tilbakekrevingsbeløp = listOf(
-                            KravgrunnlagGenerator.Tilbakekrevingsbeløp.forKlassekode(
-                                klassekode = KravgrunnlagGenerator.NyKlassekode.TSTBASISP4_OP,
-                                beløpTilbakekreves = 2000.kroner,
-                                beløpOpprinneligUtbetalt = 20000.kroner,
-                            ),
-                        ).medFeilutbetaling(KravgrunnlagGenerator.NyKlassekode.KL_KODE_FEIL_ARBYT),
-                    ),
-                ),
-            ),
-        )
-        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
+        val fagsystemId = opprettTilbakekrevingOgHentFagsystemId()
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
         val brukeruttalelseDto = BrukeruttalelseDto(
@@ -276,32 +176,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
 
     @Test
     fun `brukersuttalelse og varselbrevinfo skal lagres og hentes riktig når varselbrev er sendt`() {
-        val fnr = "12312312311"
-        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
-        val ansvarligEnhet = KravgrunnlagGenerator.nextPaddedId(4)
-        sendKravgrunnlagOgAvventLesing(
-            TILLEGGSSTØNADER_KØ_NAVN,
-            KravgrunnlagGenerator.forTilleggsstønader(
-                fødselsnummer = fnr,
-                fagsystemId = fagsystemId,
-                vedtakId = vedtakId,
-                ansvarligEnhet = ansvarligEnhet,
-                perioder = listOf(
-                    KravgrunnlagGenerator.Tilbakekrevingsperiode(
-                        1.januar(2021) til 1.januar(2021),
-                        tilbakekrevingsbeløp = listOf(
-                            KravgrunnlagGenerator.Tilbakekrevingsbeløp.forKlassekode(
-                                klassekode = KravgrunnlagGenerator.NyKlassekode.TSTBASISP4_OP,
-                                beløpTilbakekreves = 2000.kroner,
-                                beløpOpprinneligUtbetalt = 20000.kroner,
-                            ),
-                        ).medFeilutbetaling(KravgrunnlagGenerator.NyKlassekode.KL_KODE_FEIL_ARBYT),
-                    ),
-                ),
-            ),
-        )
-        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
+        val fagsystemId = opprettTilbakekrevingOgHentFagsystemId()
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
 
@@ -346,32 +221,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
 
     @Test
     fun `brukersuttalelse skal lagres og hentes riktig når det er flere uttalelser`() {
-        val fnr = "12312312311"
-        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
-        val ansvarligEnhet = KravgrunnlagGenerator.nextPaddedId(4)
-        sendKravgrunnlagOgAvventLesing(
-            TILLEGGSSTØNADER_KØ_NAVN,
-            KravgrunnlagGenerator.forTilleggsstønader(
-                fødselsnummer = fnr,
-                fagsystemId = fagsystemId,
-                vedtakId = vedtakId,
-                ansvarligEnhet = ansvarligEnhet,
-                perioder = listOf(
-                    KravgrunnlagGenerator.Tilbakekrevingsperiode(
-                        1.januar(2021) til 1.januar(2021),
-                        tilbakekrevingsbeløp = listOf(
-                            KravgrunnlagGenerator.Tilbakekrevingsbeløp.forKlassekode(
-                                klassekode = KravgrunnlagGenerator.NyKlassekode.TSTBASISP4_OP,
-                                beløpTilbakekreves = 2000.kroner,
-                                beløpOpprinneligUtbetalt = 20000.kroner,
-                            ),
-                        ).medFeilutbetaling(KravgrunnlagGenerator.NyKlassekode.KL_KODE_FEIL_ARBYT),
-                    ),
-                ),
-            ),
-        )
-        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
+        val fagsystemId = opprettTilbakekrevingOgHentFagsystemId()
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
 
@@ -414,32 +264,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
 
     @Test
     fun `Skal feile når uttalelse er JA men det er ingen detaljer`() {
-        val fnr = "12312312311"
-        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
-        val ansvarligEnhet = KravgrunnlagGenerator.nextPaddedId(4)
-        sendKravgrunnlagOgAvventLesing(
-            TILLEGGSSTØNADER_KØ_NAVN,
-            KravgrunnlagGenerator.forTilleggsstønader(
-                fødselsnummer = fnr,
-                fagsystemId = fagsystemId,
-                vedtakId = vedtakId,
-                ansvarligEnhet = ansvarligEnhet,
-                perioder = listOf(
-                    KravgrunnlagGenerator.Tilbakekrevingsperiode(
-                        1.januar(2021) til 1.januar(2021),
-                        tilbakekrevingsbeløp = listOf(
-                            KravgrunnlagGenerator.Tilbakekrevingsbeløp.forKlassekode(
-                                klassekode = KravgrunnlagGenerator.NyKlassekode.TSTBASISP4_OP,
-                                beløpTilbakekreves = 2000.kroner,
-                                beløpOpprinneligUtbetalt = 20000.kroner,
-                            ),
-                        ).medFeilutbetaling(KravgrunnlagGenerator.NyKlassekode.KL_KODE_FEIL_ARBYT),
-                    ),
-                ),
-            ),
-        )
-        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
+        val fagsystemId = opprettTilbakekrevingOgHentFagsystemId()
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
 
@@ -475,32 +300,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
 
     @Test
     fun `uttalelse skal lagres og hentes riktig når brukeren ikke har uttalt seg`() {
-        val fnr = "12312312311"
-        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
-        val ansvarligEnhet = KravgrunnlagGenerator.nextPaddedId(4)
-        sendKravgrunnlagOgAvventLesing(
-            TILLEGGSSTØNADER_KØ_NAVN,
-            KravgrunnlagGenerator.forTilleggsstønader(
-                fødselsnummer = fnr,
-                fagsystemId = fagsystemId,
-                vedtakId = vedtakId,
-                ansvarligEnhet = ansvarligEnhet,
-                perioder = listOf(
-                    KravgrunnlagGenerator.Tilbakekrevingsperiode(
-                        1.januar(2021) til 1.januar(2021),
-                        tilbakekrevingsbeløp = listOf(
-                            KravgrunnlagGenerator.Tilbakekrevingsbeløp.forKlassekode(
-                                klassekode = KravgrunnlagGenerator.NyKlassekode.TSTBASISP4_OP,
-                                beløpTilbakekreves = 2000.kroner,
-                                beløpOpprinneligUtbetalt = 20000.kroner,
-                            ),
-                        ).medFeilutbetaling(KravgrunnlagGenerator.NyKlassekode.KL_KODE_FEIL_ARBYT),
-                    ),
-                ),
-            ),
-        )
-        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
+        val fagsystemId = opprettTilbakekrevingOgHentFagsystemId()
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
 
@@ -526,32 +326,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
 
     @Test
     fun `utsatt frist skal lagres og hentes riktig`() {
-        val fnr = "12312312311"
-        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
-        val ansvarligEnhet = KravgrunnlagGenerator.nextPaddedId(4)
-        sendKravgrunnlagOgAvventLesing(
-            TILLEGGSSTØNADER_KØ_NAVN,
-            KravgrunnlagGenerator.forTilleggsstønader(
-                fødselsnummer = fnr,
-                fagsystemId = fagsystemId,
-                vedtakId = vedtakId,
-                ansvarligEnhet = ansvarligEnhet,
-                perioder = listOf(
-                    KravgrunnlagGenerator.Tilbakekrevingsperiode(
-                        1.januar(2021) til 1.januar(2021),
-                        tilbakekrevingsbeløp = listOf(
-                            KravgrunnlagGenerator.Tilbakekrevingsbeløp.forKlassekode(
-                                klassekode = KravgrunnlagGenerator.NyKlassekode.TSTBASISP4_OP,
-                                beløpTilbakekreves = 2000.kroner,
-                                beløpOpprinneligUtbetalt = 20000.kroner,
-                            ),
-                        ).medFeilutbetaling(KravgrunnlagGenerator.NyKlassekode.KL_KODE_FEIL_ARBYT),
-                    ),
-                ),
-            ),
-        )
-        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
+        val fagsystemId = opprettTilbakekrevingOgHentFagsystemId()
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
 
@@ -584,32 +359,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
 
     @Test
     fun `Skal feile når uttalelse er NEI uten beskrivelse`() {
-        val fnr = "12312312311"
-        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
-        val ansvarligEnhet = KravgrunnlagGenerator.nextPaddedId(4)
-        sendKravgrunnlagOgAvventLesing(
-            TILLEGGSSTØNADER_KØ_NAVN,
-            KravgrunnlagGenerator.forTilleggsstønader(
-                fødselsnummer = fnr,
-                fagsystemId = fagsystemId,
-                vedtakId = vedtakId,
-                ansvarligEnhet = ansvarligEnhet,
-                perioder = listOf(
-                    KravgrunnlagGenerator.Tilbakekrevingsperiode(
-                        1.januar(2021) til 1.januar(2021),
-                        tilbakekrevingsbeløp = listOf(
-                            KravgrunnlagGenerator.Tilbakekrevingsbeløp.forKlassekode(
-                                klassekode = KravgrunnlagGenerator.NyKlassekode.TSTBASISP4_OP,
-                                beløpTilbakekreves = 2000.kroner,
-                                beløpOpprinneligUtbetalt = 20000.kroner,
-                            ),
-                        ).medFeilutbetaling(KravgrunnlagGenerator.NyKlassekode.KL_KODE_FEIL_ARBYT),
-                    ),
-                ),
-            ),
-        )
-        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
+        val fagsystemId = opprettTilbakekrevingOgHentFagsystemId()
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
 
@@ -645,32 +395,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
 
     @Test
     fun `Skal feile når uttalelse er UTSETT_FRIST uten beskrivelse eller ny dato`() {
-        val fnr = "12312312311"
-        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
-        val ansvarligEnhet = KravgrunnlagGenerator.nextPaddedId(4)
-        sendKravgrunnlagOgAvventLesing(
-            TILLEGGSSTØNADER_KØ_NAVN,
-            KravgrunnlagGenerator.forTilleggsstønader(
-                fødselsnummer = fnr,
-                fagsystemId = fagsystemId,
-                vedtakId = vedtakId,
-                ansvarligEnhet = ansvarligEnhet,
-                perioder = listOf(
-                    KravgrunnlagGenerator.Tilbakekrevingsperiode(
-                        1.januar(2021) til 1.januar(2021),
-                        tilbakekrevingsbeløp = listOf(
-                            KravgrunnlagGenerator.Tilbakekrevingsbeløp.forKlassekode(
-                                klassekode = KravgrunnlagGenerator.NyKlassekode.TSTBASISP4_OP,
-                                beløpTilbakekreves = 2000.kroner,
-                                beløpOpprinneligUtbetalt = 20000.kroner,
-                            ),
-                        ).medFeilutbetaling(KravgrunnlagGenerator.NyKlassekode.KL_KODE_FEIL_ARBYT),
-                    ),
-                ),
-            ),
-        )
-        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
+        val fagsystemId = opprettTilbakekrevingOgHentFagsystemId()
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
 
@@ -702,5 +427,35 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
         shouldThrow<Exception> {
             dokumentController.lagreBrukeruttalelse(behandling.id, brukeruttalelseTomList)
         }.message shouldBe "Det kreves en ny dato når fristen er utsatt"
+    }
+
+    fun opprettTilbakekrevingOgHentFagsystemId(): String {
+        val fnr = "12312312311"
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
+        val ansvarligEnhet = KravgrunnlagGenerator.nextPaddedId(4)
+        sendKravgrunnlagOgAvventLesing(
+            TILLEGGSSTØNADER_KØ_NAVN,
+            KravgrunnlagGenerator.forTilleggsstønader(
+                fødselsnummer = fnr,
+                fagsystemId = fagsystemId,
+                vedtakId = vedtakId,
+                ansvarligEnhet = ansvarligEnhet,
+                perioder = listOf(
+                    KravgrunnlagGenerator.Tilbakekrevingsperiode(
+                        1.januar(2021) til 1.januar(2021),
+                        tilbakekrevingsbeløp = listOf(
+                            KravgrunnlagGenerator.Tilbakekrevingsbeløp.forKlassekode(
+                                klassekode = KravgrunnlagGenerator.NyKlassekode.TSTBASISP4_OP,
+                                beløpTilbakekreves = 2000.kroner,
+                                beløpOpprinneligUtbetalt = 20000.kroner,
+                            ),
+                        ).medFeilutbetaling(KravgrunnlagGenerator.NyKlassekode.KL_KODE_FEIL_ARBYT),
+                    ),
+                ),
+            ),
+        )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
+        return fagsystemId
     }
 }

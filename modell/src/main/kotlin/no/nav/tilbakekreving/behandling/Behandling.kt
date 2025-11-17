@@ -411,14 +411,14 @@ class Behandling internal constructor(
     )
 
     fun lagreUttalelse(
-        uttalelseVurdering: String,
+        uttalelseVurdering: UttalelseVurdering,
         uttalelseInfo: List<UttalelseInfo>,
         beskrivelseVedNeiEllerUtsettFrist: String?,
         utsettFrist: LocalDate?,
     ) {
         brukeruttalelse = Brukeruttalelse(
             id = UUID.randomUUID(),
-            uttalelseVurdering = UttalelseVurdering.valueOf(uttalelseVurdering),
+            uttalelseVurdering = uttalelseVurdering,
             uttalelseInfo = uttalelseInfo,
             beskrivelseVedNeiEllerUtsettFrist = beskrivelseVedNeiEllerUtsettFrist,
             utsettFrist = utsettFrist,
