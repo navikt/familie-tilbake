@@ -18,6 +18,9 @@ spec:
     - team: tilbake
       application: tilbakekreving-backend
       access: readwrite
+    - team: tilbake
+      application: burde-forstatt
+      access: readwrite
     - team: tilleggsstonader
       application: tilleggsstonader-sak
       access: readwrite
