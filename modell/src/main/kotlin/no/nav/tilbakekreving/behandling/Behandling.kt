@@ -9,6 +9,7 @@ import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
+import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselUnntakDto
 import no.nav.tilbakekreving.api.v1.dto.TotrinnsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingDto
@@ -77,6 +78,7 @@ class Behandling internal constructor(
     private var påVent: PåVent?,
     var brevmottakerSteg: BrevmottakerSteg?,
     private var brukeruttalelse: Brukeruttalelse?,
+    private var forhåndsvarselUnntak: ForhåndsvarselUnntak?,
 ) : Historikk.HistorikkInnslag<UUID> {
     fun faktastegFrontendDto(
         opprettelsesvalg: Opprettelsesvalg,
@@ -120,6 +122,7 @@ class Behandling internal constructor(
             påVentEntity = påVent?.tilEntity(id),
             brevmottakerStegEntity = brevmottakerSteg?.tilEntity(id),
             brukeruttalelseEntity = brukeruttalelse?.tilEntity(id),
+            forhåndsvarselUnntak?.tilEntity(id),
         )
     }
 
@@ -436,6 +439,31 @@ class Behandling internal constructor(
         this.ansvarligSaksbehandler = ansvarligSaksbehandler
     }
 
+    fun lagreForhåndsvarselUnntak(
+        begrunnelseForUnntak: BegrunnelseForUnntak,
+        beskrivelse: String,
+        uttalelseInfo: List<UttalelseInfo>,
+    ) {
+        forhåndsvarselUnntak = ForhåndsvarselUnntak(
+            id = UUID.randomUUID(),
+            begrunnelseForUnntak = begrunnelseForUnntak,
+            beskrivelse = beskrivelse,
+        )
+        if (uttalelseInfo.isNotEmpty()) {
+            brukeruttalelse = Brukeruttalelse(
+                id = UUID.randomUUID(),
+                uttalelseVurdering = UttalelseVurdering.valueOf(begrunnelseForUnntak.name),
+                uttalelseInfo = uttalelseInfo,
+                kommentar = null,
+                utsettUttalselsFrist = listOf(),
+            )
+        }
+    }
+
+    fun forhåndsvarselUnntakTilFrontendDto(): ForhåndsvarselUnntakDto? {
+        return forhåndsvarselUnntak?.tilFrontendDto()
+    }
+
     internal fun utførSideeffekt(tilstand: Tilstand, observatør: BehandlingObservatør) {
         observatør.behandlingOppdatert(
             behandlingId = id,
@@ -548,6 +576,7 @@ class Behandling internal constructor(
                 påVent = null,
                 brevmottakerSteg = null,
                 brukeruttalelse = null,
+                forhåndsvarselUnntak = null,
             ).also {
                 it.utførSideeffekt(tilstand, behandlingObservatør)
             }

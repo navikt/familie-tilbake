@@ -19,6 +19,7 @@ class NyBehandlingRepository(
     private val brevmottakerRepository: NyBrevmottakerRepository,
     private val påventRepository: NyPåventRepository,
     private val uttalelseRepository: NyUttalelseRepository,
+    private val forhåndsvarselUnntakRepository: NyForhåndsvarselUnntakRepository,
 ) {
     fun hentBehandlinger(
         tilbakekrevingId: String,
@@ -42,6 +43,7 @@ class NyBehandlingRepository(
                 påVent = påventRepository.hentPåventetBehandling(behandlingId) ?: jsonBehandling.påVentEntity,
                 brevmottakerSteg = brevmottakerRepository.hentBrevmottaker(behandlingId) ?: jsonBehandling.brevmottakerStegEntity,
                 brukeruttalelseEntity = uttalelseRepository.hentBrukerUttalelsen(behandlingId),
+                forhåndsvarselUnntak = forhåndsvarselUnntakRepository.hentForhåndsvarselUnntak(behandlingId),
             )
         }
     }
@@ -57,6 +59,7 @@ class NyBehandlingRepository(
             påventRepository.lagre(behandling.påVentEntity, behandling.id)
             behandling.brevmottakerStegEntity?.let { brevmottakerRepository.lagre(it) }
             behandling.brukeruttalelseEntity?.let { uttalelseRepository.lagre(it) }
+            behandling.forhåndsvarselUnntakEntity?.let { forhåndsvarselUnntakRepository.lagre(it) }
         }
     }
 }

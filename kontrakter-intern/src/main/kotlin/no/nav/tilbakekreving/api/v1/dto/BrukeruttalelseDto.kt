@@ -24,4 +24,5 @@ enum class HarBrukerUttaltSeg {
     JA,
     NEI,
     UTTSETT_FRIST,
+    ALLEREDE_UTTALET_SEG,
 }

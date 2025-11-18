@@ -9,7 +9,10 @@ import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.BestillBrevDto
 import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
 import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselDto
+import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselUnntakDto
 import no.nav.tilbakekreving.api.v1.dto.HarBrukerUttaltSeg
+import no.nav.tilbakekreving.api.v1.dto.VarslingsUnntak
+import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
 import no.nav.tilbakekreving.behandling.UtsettFristInfo
 import no.nav.tilbakekreving.behandling.UttalelseInfo
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
@@ -131,11 +134,69 @@ class ForhåndsvarselService(
                     utsettFrist = utsattFrist.map { UtsettFristInfo(UUID.randomUUID(), it.nyFrist, it.begrunnelse) },
                 )
             }
+            HarBrukerUttaltSeg.ALLEREDE_UTTALET_SEG -> {
+                throw Feil(
+                    message = "Feil i hådntering av uttalelse for behandlingId ${behandling.id}. Hvis ingen forhåndsvarsel er sendt må hådnteres denne i forhåndsvarselUnntak.",
+                    frontendFeilmelding = "Feil i hådntering av uttalelse for behandlingId ${behandling.id}. Hvis ingen forhåndsvarsel er sendt må hådnteres denne i forhåndsvarselUnntak.",
+                    logContext = SecureLog.Context.fra(tilbakekreving),
+                )
+            }
         }
     }
 
     fun hentForhåndsvarselinfo(tilbakekreving: Tilbakekreving): ForhåndsvarselDto {
         return tilbakekreving.hentForhåndsvarselFrontendDto()
+    }
+
+    fun håndterForhåndsvarselUnntak(
+        tilbakekreving: Tilbakekreving,
+        forhåndsvarselUnntakDto: ForhåndsvarselUnntakDto,
+    ) {
+        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
+        when (forhåndsvarselUnntakDto.begrunnelseForUnntak) {
+            VarslingsUnntak.IKKE_PRAKTISK_MULIG -> {
+                behandling.lagreForhåndsvarselUnntak(
+                    begrunnelseForUnntak = BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG,
+                    beskrivelse = forhåndsvarselUnntakDto.beskrivelse,
+                    uttalelseInfo = listOf(),
+                )
+            }
+            VarslingsUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING -> {
+                behandling.lagreForhåndsvarselUnntak(
+                    begrunnelseForUnntak = BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING,
+                    beskrivelse = forhåndsvarselUnntakDto.beskrivelse,
+                    uttalelseInfo = listOf(),
+                )
+            }
+            VarslingsUnntak.ÅPENBART_UNØDVENDIG -> {
+                behandling.lagreForhåndsvarselUnntak(
+                    begrunnelseForUnntak = BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
+                    beskrivelse = forhåndsvarselUnntakDto.beskrivelse,
+                    uttalelseInfo = listOf(),
+                )
+            }
+            VarslingsUnntak.ALLEREDE_UTTALET_SEG -> {
+                val uttalelsedetaljer = requireNotNull(forhåndsvarselUnntakDto.uttalelsesdetaljer) {
+                    "Det kreves uttalelsedetaljer når brukeren har allerede uttalet seg. uttalelsedetaljer var null"
+                }.also {
+                    require(it.isNotEmpty()) {
+                        "Det kreves uttalelsedetaljer når brukeren har allerede uttalet seg. uttalelsedetaljer var tøm"
+                    }
+                }
+                behandling.lagreForhåndsvarselUnntak(
+                    begrunnelseForUnntak = BegrunnelseForUnntak.ALLEREDE_UTTALET_SEG,
+                    beskrivelse = forhåndsvarselUnntakDto.beskrivelse,
+                    uttalelseInfo = uttalelsedetaljer.map {
+                        UttalelseInfo(
+                            id = UUID.randomUUID(),
+                            uttalelsesdato = it.uttalelsesdato,
+                            hvorBrukerenUttalteSeg = it.hvorBrukerenUttalteSeg,
+                            uttalelseBeskrivelse = it.uttalelseBeskrivelse,
+                        )
+                    },
+                )
+            }
+        }
     }
 
     private fun opprettMetadata(varselbrevInfo: VarselbrevInfo): Brevmetadata {

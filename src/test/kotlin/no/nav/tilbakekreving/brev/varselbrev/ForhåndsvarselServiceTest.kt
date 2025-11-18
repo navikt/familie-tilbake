@@ -4,6 +4,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.inspectors.forOne
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -12,9 +13,11 @@ import no.nav.familie.tilbake.api.DokumentController
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.api.v1.dto.BestillBrevDto
 import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
+import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselUnntakDto
 import no.nav.tilbakekreving.api.v1.dto.FristUtsettelse
 import no.nav.tilbakekreving.api.v1.dto.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.api.v1.dto.Uttalelsesdetaljer
+import no.nav.tilbakekreving.api.v1.dto.VarslingsUnntak
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp.Companion.medFeilutbetaling
 import no.nav.tilbakekreving.e2e.TilbakekrevingE2EBase
@@ -126,6 +129,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
 
         forhåndsvarselDto.varselbrevDto shouldBe null
         forhåndsvarselDto.brukeruttalelse shouldBe null
+        forhåndsvarselDto.forhåndsvarselUnntak shouldBe null
     }
 
     @Test
@@ -174,6 +178,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             uttalelsesdetaljer.shouldNotBeNull()[0].hvorBrukerenUttalteSeg shouldBe "Modia"
             uttalelsesdetaljer.shouldNotBeNull()[0].uttalelseBeskrivelse shouldBe "Bruker har uttalet seg"
         }
+        forhåndsvarselDto.forhåndsvarselUnntak shouldBe null
     }
 
     @Test
@@ -219,6 +224,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             uttalelsesdetaljer.shouldNotBeNull()[0].hvorBrukerenUttalteSeg shouldBe "Tlf"
             uttalelsesdetaljer.shouldNotBeNull()[0].uttalelseBeskrivelse shouldBe "Bruker har sagt ..."
         }
+        forhåndsvarselDto.forhåndsvarselUnntak shouldBe null
     }
 
     @Test
@@ -262,6 +268,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             uttalelsesdetaljer.shouldNotBeNull()[1].hvorBrukerenUttalteSeg shouldBe "Modia"
             uttalelsesdetaljer.shouldNotBeNull()[1].uttalelseBeskrivelse shouldBe "Bruker har skrevet ..."
         }
+        forhåndsvarselDto.forhåndsvarselUnntak shouldBe null
     }
 
     @Test
@@ -324,6 +331,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             kommentar == "Ville ikke"
             uttalelsesdetaljer.shouldBeEmpty()
         }
+        forhåndsvarselDto.forhåndsvarselUnntak shouldBe null
     }
 
     @Test
@@ -358,6 +366,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
         }
         forhåndsvarselDto.brukeruttalelse!!.utsettFrist!![0].nyFrist shouldBe LocalDate.of(2025, 11, 15)
         forhåndsvarselDto.brukeruttalelse!!.utsettFrist!![0].begrunnelse shouldBe "Advokat vil ha mer tid"
+        forhåndsvarselDto.forhåndsvarselUnntak shouldBe null
     }
 
     @Test
@@ -397,6 +406,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
         forhåndsvarselDto.brukeruttalelse!!.utsettFrist!![0].begrunnelse shouldBe "Advokat vil ha mer tid"
         forhåndsvarselDto.brukeruttalelse!!.utsettFrist!![1].nyFrist shouldBe LocalDate.of(2025, 11, 25)
         forhåndsvarselDto.brukeruttalelse!!.utsettFrist!![1].begrunnelse shouldBe "Advokat vil ha enda mer tid"
+        forhåndsvarselDto.forhåndsvarselUnntak shouldBe null
     }
 
     @Test
@@ -471,7 +481,161 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
         }.message shouldBe "Det kreves en ny dato når fristen er utsatt"
     }
 
-    fun opprettTilbakekrevingOgHentFagsystemId(): String {
+    @Test
+    fun `skal ikke sende forhåndsvarsel ved å velge NEI og PRAKTISK_IKKE_MULIG`() {
+        val fagsystemId = opprettTilbakekrevingOgHentFagsystemId()
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
+
+        val forhåndsvarselUnntakDto = ForhåndsvarselUnntakDto(
+            behandlingId = behandling.id,
+            begrunnelseForUnntak = VarslingsUnntak.IKKE_PRAKTISK_MULIG,
+            beskrivelse = "Ikke praktisk mulig",
+            uttalelsesdetaljer = null,
+        )
+
+        dokumentController.forhåndsvarselUnntak(forhåndsvarselUnntakDto)
+
+        val tilbakekrevingEtterForrespørsel = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+        val forhåndsvarselInfo = tilbakekrevingEtterForrespørsel.hentForhåndsvarselFrontendDto()
+
+        forhåndsvarselInfo.shouldNotBeNull {
+            varselbrevDto.shouldBeNull()
+            brukeruttalelse.shouldBeNull()
+            forhåndsvarselUnntak.shouldNotBeNull {
+                begrunnelseForUnntak shouldBe VarslingsUnntak.IKKE_PRAKTISK_MULIG
+                beskrivelse shouldBe "Ikke praktisk mulig"
+                uttalelsesdetaljer.shouldBeNull()
+            }
+        }
+    }
+
+    @Test
+    fun `skal ikke sende forhåndsvarsel ved å velge NEI og UKJENT_ADRESSE`() {
+        val fagsystemId = opprettTilbakekrevingOgHentFagsystemId()
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
+
+        val forhåndsvarselUnntakDto = ForhåndsvarselUnntakDto(
+            behandlingId = behandling.id,
+            begrunnelseForUnntak = VarslingsUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING,
+            beskrivelse = "Ukjent adresse",
+            uttalelsesdetaljer = null,
+        )
+
+        dokumentController.forhåndsvarselUnntak(forhåndsvarselUnntakDto)
+
+        val tilbakekrevingEtterForrespørsel = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+        val forhåndsvarselInfo = tilbakekrevingEtterForrespørsel.hentForhåndsvarselFrontendDto()
+
+        forhåndsvarselInfo.shouldNotBeNull {
+            varselbrevDto.shouldBeNull()
+            brukeruttalelse.shouldBeNull()
+            forhåndsvarselUnntak.shouldNotBeNull {
+                begrunnelseForUnntak shouldBe VarslingsUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING
+                beskrivelse shouldBe "Ukjent adresse"
+                uttalelsesdetaljer.shouldBeNull()
+            }
+        }
+    }
+
+    @Test
+    fun `skal feile når det er forhåndsvarsel unntak, ALLEREDE_UTTALET_SEG, men ingen uttalelse er oppgitt `() {
+        val fagsystemId = opprettTilbakekrevingOgHentFagsystemId()
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
+
+        val forhåndsvarselUnntakDto = ForhåndsvarselUnntakDto(
+            behandlingId = behandling.id,
+            begrunnelseForUnntak = VarslingsUnntak.ALLEREDE_UTTALET_SEG,
+            beskrivelse = "Allerede Uttalet seg",
+            uttalelsesdetaljer = null,
+        )
+
+        shouldThrow<Exception> {
+            dokumentController.forhåndsvarselUnntak(forhåndsvarselUnntakDto)
+        }.message shouldBe "Det kreves uttalelsedetaljer når brukeren har allerede uttalet seg. uttalelsedetaljer var null"
+
+        val forhåndsvarselUnntakDtoTomListe = ForhåndsvarselUnntakDto(
+            behandlingId = behandling.id,
+            begrunnelseForUnntak = VarslingsUnntak.ALLEREDE_UTTALET_SEG,
+            beskrivelse = "Allerede Uttalet seg",
+            uttalelsesdetaljer = listOf(),
+        )
+
+        shouldThrow<Exception> {
+            dokumentController.forhåndsvarselUnntak(forhåndsvarselUnntakDtoTomListe)
+        }.message shouldBe "Det kreves uttalelsedetaljer når brukeren har allerede uttalet seg. uttalelsedetaljer var tøm"
+    }
+
+    @Test
+    fun `skal ikke sende forhåndsvarsel ved å velge NEI og ÅPENBART_UNØDVENDIG`() {
+        val fagsystemId = opprettTilbakekrevingOgHentFagsystemId()
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
+
+        val forhåndsvarselUnntakDto = ForhåndsvarselUnntakDto(
+            behandlingId = behandling.id,
+            begrunnelseForUnntak = VarslingsUnntak.ÅPENBART_UNØDVENDIG,
+            beskrivelse = "Unødvendig",
+            uttalelsesdetaljer = null,
+        )
+
+        dokumentController.forhåndsvarselUnntak(forhåndsvarselUnntakDto)
+
+        val tilbakekrevingEtterForrespørsel = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+        val forhåndsvarselInfo = tilbakekrevingEtterForrespørsel.hentForhåndsvarselFrontendDto()
+
+        forhåndsvarselInfo.shouldNotBeNull {
+            varselbrevDto.shouldBeNull()
+            brukeruttalelse.shouldBeNull()
+            forhåndsvarselUnntak.shouldNotBeNull {
+                begrunnelseForUnntak shouldBe VarslingsUnntak.ÅPENBART_UNØDVENDIG
+                beskrivelse shouldBe "Unødvendig"
+                uttalelsesdetaljer.shouldBeNull()
+            }
+        }
+    }
+
+    @Test
+    fun `skal ikke sende forhåndsvarsel ved å velge NEI og ALLEREDE_UTTALET`() {
+        val fagsystemId = opprettTilbakekrevingOgHentFagsystemId()
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
+
+        val forhåndsvarselUnntakDto = ForhåndsvarselUnntakDto(
+            behandlingId = behandling.id,
+            begrunnelseForUnntak = VarslingsUnntak.ALLEREDE_UTTALET_SEG,
+            beskrivelse = "Brukeren allerede uttalet seg",
+            uttalelsesdetaljer = listOf(
+                Uttalelsesdetaljer(
+                    hvorBrukerenUttalteSeg = "Modia",
+                    uttalelsesdato = LocalDate.of(2025, 10, 15),
+                    uttalelseBeskrivelse = "Bruker har uttalet seg",
+                ),
+            ),
+        )
+
+        dokumentController.forhåndsvarselUnntak(forhåndsvarselUnntakDto)
+
+        val tilbakekrevingEtterForrespørsel = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+        val forhåndsvarselInfo = tilbakekrevingEtterForrespørsel.hentForhåndsvarselFrontendDto()
+
+        forhåndsvarselInfo.shouldNotBeNull {
+            varselbrevDto.shouldBeNull()
+            brukeruttalelse.shouldBeNull()
+            forhåndsvarselUnntak.shouldNotBeNull {
+                begrunnelseForUnntak shouldBe VarslingsUnntak.ALLEREDE_UTTALET_SEG
+                beskrivelse shouldBe "Brukeren allerede uttalet seg"
+                uttalelsesdetaljer!!.size shouldBe 1
+                uttalelsesdetaljer!![0].hvorBrukerenUttalteSeg shouldBe "Modia"
+                uttalelsesdetaljer!![0].uttalelsesdato shouldBe LocalDate.of(2025, 10, 15)
+                uttalelsesdetaljer!![0].uttalelseBeskrivelse shouldBe "Bruker har uttalet seg"
+            }
+        }
+    }
+
+    private fun opprettTilbakekrevingOgHentFagsystemId(): String {
         val fnr = "12312312311"
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)

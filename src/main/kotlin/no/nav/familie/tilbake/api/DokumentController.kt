@@ -16,6 +16,7 @@ import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.api.v1.dto.BestillBrevDto
 import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
 import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselDto
+import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselUnntakDto
 import no.nav.tilbakekreving.api.v1.dto.ForhåndsvisningHenleggelsesbrevDto
 import no.nav.tilbakekreving.api.v1.dto.FritekstavsnittDto
 import no.nav.tilbakekreving.api.v1.dto.HentForhåndvisningVedtaksbrevPdfDto
@@ -172,6 +173,32 @@ class DokumentController(
             return Ressurs.success(forhåndsvarselService.hentVarselbrevTekster(tilbakekreving))
         }
         return Ressurs.failure("Fant ingen tilbakekreving til behandlingId $behandlingId")
+    }
+
+    @Operation(summary = "Skal ikke sendes forhåndsvarsel")
+    @PostMapping(
+        "/forhåndsvarsel/unntak",
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun forhåndsvarselUnntak(
+        @Valid @RequestBody
+        dto: ForhåndsvarselUnntakDto,
+    ): Ressurs<Nothing?> {
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(dto.behandlingId!!)
+        if (tilbakekreving != null) {
+            tilgangskontrollService.validerTilgangTilbakekreving(
+                tilbakekreving = tilbakekreving,
+                behandlingId = dto.behandlingId,
+                minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+                auditLoggerEvent = AuditLoggerEvent.ACCESS,
+                handling = "Sender ikke forhåndsvarsel",
+            )
+            tilbakekrevingService.hentTilbakekreving(dto.behandlingId!!) { tilbakekreving ->
+                forhåndsvarselService.håndterForhåndsvarselUnntak(tilbakekreving, dto)
+            }
+            return Ressurs.success(null)
+        }
+        return Ressurs.failure("Fant ingen tilbakekreving til behandlingId ${dto.behandlingId}")
     }
 
     @Operation(summary = "Forhåndsvis henleggelsesbrev")
