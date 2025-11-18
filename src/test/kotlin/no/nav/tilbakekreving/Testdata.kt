@@ -34,5 +34,6 @@ object Testdata {
             vedtaksdato = LocalDate.now(),
         ),
         utvidPerioder = utvidPerioder,
+        behandlendeEnhet = "0425",
     )
 }

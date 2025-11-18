@@ -94,6 +94,7 @@ class BehovE2ETest : TilbakekrevingE2EBase() {
                         vedtaksperiode = PeriodeDto(1.januar(2021), 31.januar(2021)),
                     ),
                 ),
+                behandlendeEnhet = "0425",
             ),
         )
     }

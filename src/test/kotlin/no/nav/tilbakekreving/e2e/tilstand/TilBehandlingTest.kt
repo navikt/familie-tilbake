@@ -65,6 +65,7 @@ class TilBehandlingTest : TilbakekrevingE2EBase() {
                         vedtaksperiode = PeriodeDto(fom = 1.januar(2021), tom = 31.januar(2021)),
                     ),
                 ),
+                behandlendeEnhet = "0425",
             ),
         )
 
@@ -115,6 +116,7 @@ class TilBehandlingTest : TilbakekrevingE2EBase() {
                         vedtaksperiode = PeriodeDto(fom = 1.januar(2021), tom = 31.januar(2021)),
                     ),
                 ),
+                behandlendeEnhet = "0425",
             ),
         )
 

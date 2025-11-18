@@ -12,6 +12,7 @@ data class FagsysteminfoSvarHendelse(
     val mottaker: MottakerDto,
     val revurdering: RevurderingDto,
     val utvidPerioder: List<UtvidetPeriodeDto>?,
+    val behandlendeEnhet: String?,
 ) : KafkameldingFraFagsystem {
     data class UtvidetPeriodeDto(
         val kravgrunnlagPeriode: PeriodeDto,

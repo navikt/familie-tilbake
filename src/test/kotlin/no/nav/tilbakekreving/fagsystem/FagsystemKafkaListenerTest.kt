@@ -45,7 +45,8 @@ class FagsystemKafkaListenerTest {
                                 "tom": "2023-01-31"
                               }
                             }
-                          ]
+                          ],
+                          "behandlendeEnhet": "0425"
                         }
             """.trimIndent(),
         )
@@ -70,6 +71,7 @@ class FagsystemKafkaListenerTest {
                         vedtaksperiode = PeriodeDto(1.januar(2023), 31.januar(2023)),
                     ),
                 ),
+                behandlendeEnhet = "0425",
             ),
         )
     }
