@@ -9,6 +9,7 @@ import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
+import no.nav.tilbakekreving.api.v1.dto.FristUtsettelse
 import no.nav.tilbakekreving.api.v1.dto.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.api.v1.dto.TotrinnsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.Uttalelsesdetaljer
@@ -413,15 +414,15 @@ class Behandling internal constructor(
     fun lagreUttalelse(
         uttalelseVurdering: UttalelseVurdering,
         uttalelseInfo: List<UttalelseInfo>,
-        beskrivelseVedNeiEllerUtsettFrist: String?,
-        utsettFrist: LocalDate?,
+        kommentar: String?,
+        utsettFrist: List<UtsettFristInfo>,
     ) {
         brukeruttalelse = Brukeruttalelse(
             id = UUID.randomUUID(),
             uttalelseVurdering = uttalelseVurdering,
             uttalelseInfo = uttalelseInfo,
-            beskrivelseVedNeiEllerUtsettFrist = beskrivelseVedNeiEllerUtsettFrist,
-            utsettFrist = utsettFrist,
+            kommentar = kommentar,
+            utsettUttalselsFrist = utsettFrist,
         )
     }
 
@@ -438,8 +439,15 @@ class Behandling internal constructor(
                         )
                     }
                 },
-                utsettFrist = uttalese.utsettFrist,
-                beskrivelseVedNeiEllerUtsettFrist = uttalese.beskrivelseVedNeiEllerUtsettFrist,
+                utsettFrist = uttalese.utsettUttalselsFrist.let { utsattFrist ->
+                    utsattFrist.map {
+                        FristUtsettelse(
+                            nyFrist = it.nyFrist,
+                            begrunnelse = it.begrunnelse,
+                        )
+                    }
+                },
+                kommentar = uttalese.kommentar,
             )
         }
     }

@@ -12,6 +12,7 @@ import no.nav.familie.tilbake.api.DokumentController
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.api.v1.dto.BestillBrevDto
 import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
+import no.nav.tilbakekreving.api.v1.dto.FristUtsettelse
 import no.nav.tilbakekreving.api.v1.dto.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.api.v1.dto.Uttalelsesdetaljer
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
@@ -42,6 +43,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
 
     @BeforeEach
     fun cleanup() {
+        jdbcTemplate.update("DELETE FROM tilbakekreving_utsett_uttalelse")
         jdbcTemplate.update("DELETE FROM tilbakekreving_uttalelse_informasjon")
         jdbcTemplate.update("DELETE FROM tilbakekreving_brukeruttalelse")
     }
@@ -141,7 +143,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
                 ),
             ),
             utsettFrist = null,
-            beskrivelseVedNeiEllerUtsettFrist = null,
+            kommentar = null,
         )
 
         dokumentController.lagreBrukeruttalelse(behandling.id, brukeruttalelseDto)
@@ -165,8 +167,8 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
         forhåndsvarselDto.varselbrevDto shouldBe null
         forhåndsvarselDto.brukeruttalelse.shouldNotBeNull {
             harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.JA
-            utsettFrist shouldBe null
-            beskrivelseVedNeiEllerUtsettFrist == null
+            utsettFrist.shouldBeEmpty()
+            kommentar == null
             uttalelsesdetaljer.shouldNotBeNull().size shouldBe 1
             uttalelsesdetaljer.shouldNotBeNull()[0].uttalelsesdato shouldBe LocalDate.of(2025, 10, 15)
             uttalelsesdetaljer.shouldNotBeNull()[0].hvorBrukerenUttalteSeg shouldBe "Modia"
@@ -197,7 +199,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
                 ),
             ),
             utsettFrist = null,
-            beskrivelseVedNeiEllerUtsettFrist = null,
+            kommentar = null,
         )
 
         dokumentController.lagreBrukeruttalelse(behandling.id, brukeruttalelseDto)
@@ -210,8 +212,8 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
         }
         forhåndsvarselDto.brukeruttalelse.shouldNotBeNull {
             harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.JA
-            utsettFrist shouldBe null
-            beskrivelseVedNeiEllerUtsettFrist == null
+            utsettFrist.shouldBeEmpty()
+            kommentar == null
             uttalelsesdetaljer.shouldNotBeNull().size shouldBe 1
             uttalelsesdetaljer.shouldNotBeNull()[0].uttalelsesdato shouldBe LocalDate.of(2025, 9, 15)
             uttalelsesdetaljer.shouldNotBeNull()[0].hvorBrukerenUttalteSeg shouldBe "Tlf"
@@ -240,7 +242,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
                 ),
             ),
             utsettFrist = null,
-            beskrivelseVedNeiEllerUtsettFrist = null,
+            kommentar = null,
         )
 
         dokumentController.lagreBrukeruttalelse(behandling.id, brukeruttalelseDto)
@@ -250,8 +252,8 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
 
         forhåndsvarselDto.brukeruttalelse.shouldNotBeNull {
             harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.JA
-            utsettFrist shouldBe null
-            beskrivelseVedNeiEllerUtsettFrist == null
+            utsettFrist.shouldBeEmpty()
+            kommentar == null
             uttalelsesdetaljer.shouldNotBeNull().size shouldBe 2
             uttalelsesdetaljer.shouldNotBeNull()[0].uttalelsesdato shouldBe LocalDate.of(2025, 9, 15)
             uttalelsesdetaljer.shouldNotBeNull()[0].hvorBrukerenUttalteSeg shouldBe "Tlf"
@@ -279,7 +281,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             HarBrukerUttaltSeg.JA,
             uttalelsesdetaljer = null,
             utsettFrist = null,
-            beskrivelseVedNeiEllerUtsettFrist = null,
+            kommentar = null,
         )
 
         shouldThrow<Exception> {
@@ -290,7 +292,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             HarBrukerUttaltSeg.JA,
             uttalelsesdetaljer = listOf(),
             utsettFrist = null,
-            beskrivelseVedNeiEllerUtsettFrist = null,
+            kommentar = null,
         )
 
         shouldThrow<Exception> {
@@ -308,7 +310,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             HarBrukerUttaltSeg.NEI,
             uttalelsesdetaljer = null,
             utsettFrist = null,
-            beskrivelseVedNeiEllerUtsettFrist = "Ville ikke",
+            kommentar = "Ville ikke",
         )
 
         dokumentController.lagreBrukeruttalelse(behandling.id, brukeruttalelseDto)
@@ -318,8 +320,8 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
 
         forhåndsvarselDto.brukeruttalelse.shouldNotBeNull {
             harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.NEI
-            utsettFrist shouldBe null
-            beskrivelseVedNeiEllerUtsettFrist == "Ville ikke"
+            utsettFrist.shouldBeEmpty()
+            kommentar == "Ville ikke"
             uttalelsesdetaljer.shouldBeEmpty()
         }
     }
@@ -340,8 +342,8 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
         val brukeruttalelseDto = BrukeruttalelseDto(
             HarBrukerUttaltSeg.UTTSETT_FRIST,
             uttalelsesdetaljer = null,
-            utsettFrist = LocalDate.of(2025, 11, 15),
-            beskrivelseVedNeiEllerUtsettFrist = "Utsetter bare",
+            utsettFrist = listOf(FristUtsettelse(LocalDate.of(2025, 11, 15), "Advokat vil ha mer tid")),
+            kommentar = null,
         )
 
         dokumentController.lagreBrukeruttalelse(behandling.id, brukeruttalelseDto)
@@ -351,10 +353,50 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
 
         forhåndsvarselDto.brukeruttalelse.shouldNotBeNull {
             harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.UTTSETT_FRIST
-            utsettFrist shouldBe LocalDate.of(2025, 11, 15)
-            beskrivelseVedNeiEllerUtsettFrist == "Utsetter bare"
+            utsettFrist!!.size shouldBe 1
             uttalelsesdetaljer.shouldBeEmpty()
         }
+        forhåndsvarselDto.brukeruttalelse!!.utsettFrist!![0].nyFrist shouldBe LocalDate.of(2025, 11, 15)
+        forhåndsvarselDto.brukeruttalelse!!.utsettFrist!![0].begrunnelse shouldBe "Advokat vil ha mer tid"
+    }
+
+    @Test
+    fun `flere utsatt frist skal lagres og hentes riktig`() {
+        val fagsystemId = opprettTilbakekrevingOgHentFagsystemId()
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
+
+        val bestillBrevDto = BestillBrevDto(
+            behandlingId = behandling.id,
+            brevmalkode = Dokumentmalstype.VARSEL,
+            fritekst = "Tekst fra saksbehandler",
+        )
+        dokumentController.bestillBrev(bestillBrevDto)
+
+        val brukeruttalelseDto = BrukeruttalelseDto(
+            HarBrukerUttaltSeg.UTTSETT_FRIST,
+            uttalelsesdetaljer = null,
+            utsettFrist = listOf(
+                FristUtsettelse(LocalDate.of(2025, 11, 15), "Advokat vil ha mer tid"),
+                FristUtsettelse(LocalDate.of(2025, 11, 25), "Advokat vil ha enda mer tid"),
+            ),
+            kommentar = null,
+        )
+
+        dokumentController.lagreBrukeruttalelse(behandling.id, brukeruttalelseDto)
+
+        val tilbakekrevingEtterUttalelse = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+        val forhåndsvarselDto = tilbakekrevingEtterUttalelse.hentForhåndsvarselFrontendDto()
+
+        forhåndsvarselDto.brukeruttalelse.shouldNotBeNull {
+            harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.UTTSETT_FRIST
+            utsettFrist!!.size shouldBe 2
+            uttalelsesdetaljer.shouldBeEmpty()
+        }
+        forhåndsvarselDto.brukeruttalelse!!.utsettFrist!![0].nyFrist shouldBe LocalDate.of(2025, 11, 15)
+        forhåndsvarselDto.brukeruttalelse!!.utsettFrist!![0].begrunnelse shouldBe "Advokat vil ha mer tid"
+        forhåndsvarselDto.brukeruttalelse!!.utsettFrist!![1].nyFrist shouldBe LocalDate.of(2025, 11, 25)
+        forhåndsvarselDto.brukeruttalelse!!.utsettFrist!![1].begrunnelse shouldBe "Advokat vil ha enda mer tid"
     }
 
     @Test
@@ -374,27 +416,27 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             HarBrukerUttaltSeg.NEI,
             uttalelsesdetaljer = null,
             utsettFrist = null,
-            beskrivelseVedNeiEllerUtsettFrist = null,
+            kommentar = null,
         )
 
         shouldThrow<Exception> {
             dokumentController.lagreBrukeruttalelse(behandling.id, brukeruttalelseDto)
-        }.message shouldBe "Det kreves en beskrivelse når brukeren ikke uttaler seg. Beskrivelsen var null"
+        }.message shouldBe "Det kreves en kommentar når brukeren ikke uttaler seg. Kommentar var null"
 
         val brukeruttalelseTomList = BrukeruttalelseDto(
             HarBrukerUttaltSeg.NEI,
             uttalelsesdetaljer = null,
             utsettFrist = null,
-            beskrivelseVedNeiEllerUtsettFrist = "",
+            kommentar = "",
         )
 
         shouldThrow<Exception> {
             dokumentController.lagreBrukeruttalelse(behandling.id, brukeruttalelseTomList)
-        }.message shouldBe "Det kreves en beskrivelse når brukeren ikke uttaler seg. Beskrivelsen var tøm"
+        }.message shouldBe "Det kreves en kommentar når brukeren ikke uttaler seg. Kommentar var tøm"
     }
 
     @Test
-    fun `Skal feile når uttalelse er UTSETT_FRIST uten beskrivelse eller ny dato`() {
+    fun `Skal feile når uttalelse er UTSETT_FRIST uten ny dato`() {
         val fagsystemId = opprettTilbakekrevingOgHentFagsystemId()
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
@@ -409,23 +451,23 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
         val brukeruttalelseDto = BrukeruttalelseDto(
             HarBrukerUttaltSeg.UTTSETT_FRIST,
             uttalelsesdetaljer = null,
-            utsettFrist = LocalDate.of(2025, 11, 15),
-            beskrivelseVedNeiEllerUtsettFrist = null,
+            utsettFrist = null,
+            kommentar = null,
         )
 
         shouldThrow<Exception> {
             dokumentController.lagreBrukeruttalelse(behandling.id, brukeruttalelseDto)
-        }.message shouldBe "Det kreves en beskrivelse når frist er utsatt. Beskrivelsen var null"
+        }.message shouldBe "Det kreves en ny dato når fristen er utsatt"
 
-        val brukeruttalelseTomList = BrukeruttalelseDto(
+        val brukeruttalelseDtoTomListe = BrukeruttalelseDto(
             HarBrukerUttaltSeg.UTTSETT_FRIST,
-            uttalelsesdetaljer = listOf(),
-            utsettFrist = null,
-            beskrivelseVedNeiEllerUtsettFrist = "Utsetter",
+            uttalelsesdetaljer = null,
+            utsettFrist = listOf(),
+            kommentar = null,
         )
 
         shouldThrow<Exception> {
-            dokumentController.lagreBrukeruttalelse(behandling.id, brukeruttalelseTomList)
+            dokumentController.lagreBrukeruttalelse(behandling.id, brukeruttalelseDtoTomListe)
         }.message shouldBe "Det kreves en ny dato når fristen er utsatt"
     }
 

@@ -10,6 +10,7 @@ import no.nav.tilbakekreving.api.v1.dto.BestillBrevDto
 import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
 import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselDto
 import no.nav.tilbakekreving.api.v1.dto.HarBrukerUttaltSeg
+import no.nav.tilbakekreving.behandling.UtsettFristInfo
 import no.nav.tilbakekreving.behandling.UttalelseInfo
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.brev.VarselbrevInfo
@@ -96,40 +97,38 @@ class ForhåndsvarselService(
                 behandling.lagreUttalelse(
                     uttalelseVurdering = UttalelseVurdering.valueOf(brukeruttalelse.harBrukerUttaltSeg.name),
                     uttalelseInfo = uttalelsedetaljer.map { UttalelseInfo(UUID.randomUUID(), it.uttalelsesdato, it.hvorBrukerenUttalteSeg, it.uttalelseBeskrivelse) },
-                    beskrivelseVedNeiEllerUtsettFrist = null,
-                    utsettFrist = null,
+                    kommentar = null,
+                    utsettFrist = listOf(),
                 )
             }
             HarBrukerUttaltSeg.NEI -> {
-                val beskrivelse = requireNotNull(brukeruttalelse.beskrivelseVedNeiEllerUtsettFrist) {
-                    "Det kreves en beskrivelse når brukeren ikke uttaler seg. Beskrivelsen var null"
+                val kommentar = requireNotNull(brukeruttalelse.kommentar) {
+                    "Det kreves en kommentar når brukeren ikke uttaler seg. Kommentar var null"
                 }.also {
-                    require(it.isNotBlank()) { "Det kreves en beskrivelse når brukeren ikke uttaler seg. Beskrivelsen var tøm" }
+                    require(it.isNotBlank()) { "Det kreves en kommentar når brukeren ikke uttaler seg. Kommentar var tøm" }
                 }
 
                 behandling.lagreUttalelse(
                     uttalelseVurdering = UttalelseVurdering.valueOf(brukeruttalelse.harBrukerUttaltSeg.name),
                     uttalelseInfo = listOf(),
-                    beskrivelseVedNeiEllerUtsettFrist = beskrivelse,
-                    utsettFrist = null,
+                    kommentar = kommentar,
+                    utsettFrist = listOf(),
                 )
             }
             HarBrukerUttaltSeg.UTTSETT_FRIST -> {
                 requireNotNull(tilbakekreving.brevHistorikk.sisteVarselbrev()) {
                     "Kan ikke utsette frist når forhåndsvarsel ikke er sendt"
                 }
-                val beskrivelse = requireNotNull(brukeruttalelse.beskrivelseVedNeiEllerUtsettFrist) {
-                    "Det kreves en beskrivelse når frist er utsatt. Beskrivelsen var null"
-                }.also {
-                    require(it.isNotBlank()) { "Det kreves en beskrivelse når frist er utsatt. Beskrivelsen var tøm" }
-                }
                 val utsattFrist = requireNotNull(brukeruttalelse.utsettFrist) { "Det kreves en ny dato når fristen er utsatt" }
+                    .also {
+                        require(it.isNotEmpty()) { "Det kreves en ny dato når fristen er utsatt" }
+                    }
 
                 behandling.lagreUttalelse(
                     uttalelseVurdering = UttalelseVurdering.valueOf(brukeruttalelse.harBrukerUttaltSeg.name),
                     uttalelseInfo = listOf(),
-                    beskrivelseVedNeiEllerUtsettFrist = beskrivelse,
-                    utsettFrist = utsattFrist,
+                    kommentar = null,
+                    utsettFrist = utsattFrist.map { UtsettFristInfo(UUID.randomUUID(), it.nyFrist, it.begrunnelse) },
                 )
             }
         }
