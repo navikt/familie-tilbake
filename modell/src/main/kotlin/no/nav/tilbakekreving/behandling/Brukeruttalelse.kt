@@ -83,4 +83,5 @@ enum class UttalelseVurdering {
     JA,
     NEI,
     UTTSETT_FRIST,
+    ALLEREDE_UTTALET_SEG,
 }

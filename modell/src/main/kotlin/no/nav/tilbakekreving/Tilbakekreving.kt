@@ -8,6 +8,7 @@ import no.nav.tilbakekreving.aktør.Bruker.Companion.tilNullableFrontendDto
 import no.nav.tilbakekreving.api.v1.dto.FagsakDto
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
 import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselDto
+import no.nav.tilbakekreving.api.v1.dto.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
 import no.nav.tilbakekreving.behandling.Behandling
@@ -444,9 +445,21 @@ class Tilbakekreving internal constructor(
     }
 
     fun hentForhåndsvarselFrontendDto(): ForhåndsvarselDto {
+        val behandling = behandlingHistorikk.nåværende().entry
+        val brukeruttalelseDto = behandling.brukeruttaleserTilFrontendDto()
+        val harAlleredeUttaltSeg =
+            brukeruttalelseDto?.harBrukerUttaltSeg == HarBrukerUttaltSeg.ALLEREDE_UTTALET_SEG
+
+        val forhåndsvarselUnntakDto = if (harAlleredeUttaltSeg) {
+            behandling.forhåndsvarselUnntakTilFrontendDto()!!.copy(uttalelsesdetaljer = brukeruttalelseDto.uttalelsesdetaljer)
+        } else {
+            behandling.forhåndsvarselUnntakTilFrontendDto()
+        }
+
         return ForhåndsvarselDto(
             varselbrevDto = brevHistorikk.sisteVarselbrev()?.tilFrontendDto(),
-            brukeruttalelse = behandlingHistorikk.nåværende().entry.brukeruttaleserTilFrontendDto(),
+            brukeruttalelse = if (harAlleredeUttaltSeg) null else brukeruttalelseDto,
+            forhåndsvarselUnntak = forhåndsvarselUnntakDto,
         )
     }
 
