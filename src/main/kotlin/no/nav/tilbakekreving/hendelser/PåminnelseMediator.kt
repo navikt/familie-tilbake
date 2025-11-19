@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.hendelser
 
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.tilbakekreving.TilbakekrevingService
@@ -21,12 +22,19 @@ class PåminnelseMediator(
     fun påminnSaker() {
         val tilbakekrevinger = tilbakekrevingRepository.hentTilbakekrevinger(TilbakekrevingRepository.FindTilbakekrevingStrategy.TrengerPåminnelse)
         for (tilbakekrevingEntity in tilbakekrevinger) {
-            tilbakekrevinService.hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingEntity.id)) { tilbakekreving ->
-                val context = SecureLog.Context.fra(tilbakekreving)
-                logger.medContext(context) {
-                    info("Sender påminnelse")
+            var context = SecureLog.Context.tom()
+            try {
+                tilbakekrevinService.hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingEntity.id)) { tilbakekreving ->
+                    context = SecureLog.Context.fra(tilbakekreving)
+                    logger.medContext(context) {
+                        info("Sender påminnelse")
+                    }
+                    tilbakekreving.håndter(Påminnelse(LocalDateTime.now()))
                 }
-                tilbakekreving.håndter(Påminnelse(LocalDateTime.now()))
+            } catch (e: Exception) {
+                logger.medContext(context) {
+                    error("Feilet under påminnelse av sak med {}", keyValue("tilbakekrevingId", tilbakekrevingEntity.id), e)
+                }
             }
         }
     }

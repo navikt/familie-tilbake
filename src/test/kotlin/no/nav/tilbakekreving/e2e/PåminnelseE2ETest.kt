@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.e2e
 
 import io.kotest.inspectors.forExactly
 import io.kotest.inspectors.forNone
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.comparables.shouldBeGreaterThan
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -170,5 +171,51 @@ class PåminnelseE2ETest : TilbakekrevingE2EBase() {
             .forExactly(2) {
                 it.tilbakekreving.behandlingsstatus shouldBe ForenkletBehandlingsstatus.TIL_BEHANDLING
             }
+    }
+
+    @Test
+    fun `påminnelser som feiler skal ikke blokkere andre saker`() {
+        val fagsystemId1 = KravgrunnlagGenerator.nextPaddedId(6)
+        val fagsystemId2 = KravgrunnlagGenerator.nextPaddedId(6)
+
+        sendKravgrunnlagOgAvventLesing(
+            queueName = TILLEGGSSTØNADER_KØ_NAVN,
+            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId1),
+        )
+        sendKravgrunnlagOgAvventLesing(
+            queueName = TILLEGGSSTØNADER_KØ_NAVN,
+            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId2),
+        )
+
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId1))
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId2))
+
+        kafkaProducer
+            .finnKafkamelding(fagsystemId1, BehandlingEndretHendelse.METADATA)
+            .filter { it.tilbakekreving.behandlingsstatus == ForenkletBehandlingsstatus.TIL_BEHANDLING }
+            .shouldHaveSize(1)
+        kafkaProducer
+            .finnKafkamelding(fagsystemId2, BehandlingEndretHendelse.METADATA)
+            .filter { it.tilbakekreving.behandlingsstatus == ForenkletBehandlingsstatus.TIL_BEHANDLING }
+            .shouldHaveSize(1)
+
+        jdbcTemplate.update(
+            "UPDATE tilbakekreving SET neste_påminnelse=? WHERE id IN(?, ?);",
+            FieldConverter.LocalDateTimeConverter.convert(LocalDateTime.now().minusSeconds(1)),
+            tilbakekreving(FagsystemDTO.TS, fagsystemId1).shouldNotBeNull().id,
+            tilbakekreving(FagsystemDTO.TS, fagsystemId2).shouldNotBeNull().id,
+        )
+
+        kafkaProducer.vedMelding(BehandlingEndretHendelse.METADATA, fagsystemId1) { error("Tvungen feil ved test") }
+        påminnelseMediator.påminnSaker()
+
+        kafkaProducer
+            .finnKafkamelding(fagsystemId1, BehandlingEndretHendelse.METADATA)
+            .filter { it.tilbakekreving.behandlingsstatus == ForenkletBehandlingsstatus.TIL_BEHANDLING }
+            .shouldHaveSize(1)
+        kafkaProducer
+            .finnKafkamelding(fagsystemId2, BehandlingEndretHendelse.METADATA)
+            .filter { it.tilbakekreving.behandlingsstatus == ForenkletBehandlingsstatus.TIL_BEHANDLING }
+            .shouldHaveSize(2)
     }
 }

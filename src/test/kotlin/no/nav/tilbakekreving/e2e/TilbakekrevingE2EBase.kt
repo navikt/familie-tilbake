@@ -115,6 +115,8 @@ open class TilbakekrevingE2EBase : E2EBase() {
 
     fun tilbakekreving(behandlingId: UUID): Tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId).shouldNotBeNull()
 
+    fun tilbakekreving(fagsystem: FagsystemDTO, fagsystemId: String): Tilbakekreving? = tilbakekrevingService.hentTilbakekreving(fagsystem, fagsystemId)
+
     fun behandling(behandlingId: UUID): Behandling {
         return tilbakekreving(behandlingId).behandlingHistorikk.nåværende().entry
     }
