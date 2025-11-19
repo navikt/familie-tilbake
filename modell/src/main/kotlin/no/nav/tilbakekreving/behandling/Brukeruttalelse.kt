@@ -1,5 +1,9 @@
 package no.nav.tilbakekreving.behandling
 
+import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
+import no.nav.tilbakekreving.api.v1.dto.FristUtsettelse
+import no.nav.tilbakekreving.api.v1.dto.HarBrukerUttaltSeg
+import no.nav.tilbakekreving.api.v1.dto.Uttalelsesdetaljer
 import no.nav.tilbakekreving.entities.BrukeruttalelseEntity
 import no.nav.tilbakekreving.entities.UtsettFristInfoEntity
 import no.nav.tilbakekreving.entities.UttalelseInfoEntity
@@ -7,12 +11,36 @@ import java.time.LocalDate
 import java.util.UUID
 
 class Brukeruttalelse(
-    val id: UUID,
-    val uttalelseVurdering: UttalelseVurdering,
-    val uttalelseInfo: List<UttalelseInfo>,
-    val kommentar: String?,
-    val utsettUttalselsFrist: List<UtsettFristInfo>,
+    private val id: UUID,
+    private val uttalelseVurdering: UttalelseVurdering,
+    private val uttalelseInfo: List<UttalelseInfo>,
+    private val kommentar: String?,
+    private val utsettUttalselsFrist: List<UtsettFristInfo>,
 ) {
+    fun tilFrontendDto(): BrukeruttalelseDto {
+        return BrukeruttalelseDto(
+            harBrukerUttaltSeg = HarBrukerUttaltSeg.valueOf(uttalelseVurdering.name),
+            uttalelsesdetaljer = uttalelseInfo.let { info ->
+                info.map {
+                    Uttalelsesdetaljer(
+                        uttalelsesdato = it.uttalelsesdato,
+                        hvorBrukerenUttalteSeg = it.hvorBrukerenUttalteSeg,
+                        uttalelseBeskrivelse = it.uttalelseBeskrivelse,
+                    )
+                }
+            },
+            utsettFrist = utsettUttalselsFrist.let { utsattFrist ->
+                utsattFrist.map {
+                    FristUtsettelse(
+                        nyFrist = it.nyFrist,
+                        begrunnelse = it.begrunnelse,
+                    )
+                }
+            },
+            kommentar = kommentar,
+        )
+    }
+
     fun tilEntity(behandlingRef: UUID): BrukeruttalelseEntity = BrukeruttalelseEntity(
         id = id,
         uttalelseVurdering = uttalelseVurdering,

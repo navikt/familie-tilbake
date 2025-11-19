@@ -9,10 +9,7 @@ import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
-import no.nav.tilbakekreving.api.v1.dto.FristUtsettelse
-import no.nav.tilbakekreving.api.v1.dto.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.api.v1.dto.TotrinnsvurderingDto
-import no.nav.tilbakekreving.api.v1.dto.Uttalelsesdetaljer
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
@@ -427,29 +424,7 @@ class Behandling internal constructor(
     }
 
     fun brukeruttaleserTilFrontendDto(): BrukeruttalelseDto? {
-        return brukeruttalelse?.let { uttalese ->
-            BrukeruttalelseDto(
-                harBrukerUttaltSeg = HarBrukerUttaltSeg.valueOf(uttalese.uttalelseVurdering.name),
-                uttalelsesdetaljer = uttalese.uttalelseInfo.let { info ->
-                    info.map {
-                        Uttalelsesdetaljer(
-                            uttalelsesdato = it.uttalelsesdato,
-                            hvorBrukerenUttalteSeg = it.hvorBrukerenUttalteSeg,
-                            uttalelseBeskrivelse = it.uttalelseBeskrivelse,
-                        )
-                    }
-                },
-                utsettFrist = uttalese.utsettUttalselsFrist.let { utsattFrist ->
-                    utsattFrist.map {
-                        FristUtsettelse(
-                            nyFrist = it.nyFrist,
-                            begrunnelse = it.begrunnelse,
-                        )
-                    }
-                },
-                kommentar = uttalese.kommentar,
-            )
-        }
+        return brukeruttalelse?.tilFrontendDto()
     }
 
     fun oppdaterBehandler(ansvarligSaksbehandler: Behandler) {
