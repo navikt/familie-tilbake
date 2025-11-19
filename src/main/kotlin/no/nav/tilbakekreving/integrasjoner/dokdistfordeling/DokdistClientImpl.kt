@@ -56,7 +56,12 @@ class DokdistClientImpl(
             if (response.status.isSuccess()) {
                 return response.body<DistribuerJournalpostResponse>()
             } else {
-                return DistribuerJournalpostResponse("123412341234")
+                val body = response.bodyAsText()
+                throw Feil(
+                    message = "Utsendig av brev for behandling: $behandlingId feilet med status: ${response.status}: og melding: $body",
+                    frontendFeilmelding = "Utsendig av brev for behandling: $behandlingId feilet med status: ${response.status}: og melding: $body",
+                    logContext = logContext,
+                )
             }
         } catch (e: Exception) {
             throw Feil(
