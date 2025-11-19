@@ -7,6 +7,7 @@ import no.nav.tilbakekreving.api.v1.dto.BehandlingsoppsummeringDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegsinfoDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatsperiodeDto
+import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
 import no.nav.tilbakekreving.api.v1.dto.TotrinnsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelseDto
@@ -75,6 +76,7 @@ class Behandling internal constructor(
     private val fatteVedtakSteg: FatteVedtakSteg,
     private var påVent: PåVent?,
     var brevmottakerSteg: BrevmottakerSteg?,
+    private var brukeruttalelse: Brukeruttalelse?,
 ) : Historikk.HistorikkInnslag<UUID> {
     fun faktastegFrontendDto(
         opprettelsesvalg: Opprettelsesvalg,
@@ -117,6 +119,7 @@ class Behandling internal constructor(
             fatteVedtakStegEntity = fatteVedtakSteg.tilEntity(id),
             påVentEntity = påVent?.tilEntity(id),
             brevmottakerStegEntity = brevmottakerSteg?.tilEntity(id),
+            brukeruttalelseEntity = brukeruttalelse?.tilEntity(id),
         )
     }
 
@@ -405,6 +408,25 @@ class Behandling internal constructor(
         revurderingsvedtaksdato = eksternFagsakRevurdering.entry.vedtaksdato,
     )
 
+    fun lagreUttalelse(
+        uttalelseVurdering: UttalelseVurdering,
+        uttalelseInfo: List<UttalelseInfo>,
+        kommentar: String?,
+        utsettFrist: List<UtsettFristInfo>,
+    ) {
+        brukeruttalelse = Brukeruttalelse(
+            id = UUID.randomUUID(),
+            uttalelseVurdering = uttalelseVurdering,
+            uttalelseInfo = uttalelseInfo,
+            kommentar = kommentar,
+            utsettUttalselsFrist = utsettFrist,
+        )
+    }
+
+    fun brukeruttaleserTilFrontendDto(): BrukeruttalelseDto? {
+        return brukeruttalelse?.tilFrontendDto()
+    }
+
     fun oppdaterBehandler(ansvarligSaksbehandler: Behandler) {
         this.sistEndret = LocalDateTime.now()
         this.ansvarligSaksbehandler = ansvarligSaksbehandler
@@ -521,6 +543,7 @@ class Behandling internal constructor(
                 fatteVedtakSteg = fatteVedtakSteg,
                 påVent = null,
                 brevmottakerSteg = null,
+                brukeruttalelse = null,
             ).also {
                 it.utførSideeffekt(tilstand, behandlingObservatør)
             }

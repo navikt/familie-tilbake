@@ -7,6 +7,12 @@ import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevUtil
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.BestillBrevDto
+import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
+import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselDto
+import no.nav.tilbakekreving.api.v1.dto.HarBrukerUttaltSeg
+import no.nav.tilbakekreving.behandling.UtsettFristInfo
+import no.nav.tilbakekreving.behandling.UttalelseInfo
+import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.brev.VarselbrevInfo
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
@@ -18,6 +24,7 @@ import no.nav.tilbakekreving.pdf.dokumentbestilling.varsel.TekstformatererVarsel
 import no.nav.tilbakekreving.pdf.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.util.UUID
 
 @Service
 class ForhåndsvarselService(
@@ -74,6 +81,61 @@ class ForhåndsvarselService(
         }
         dokdistClient.brevTilUtsending(varselbrevBehov, journalpost.journalpostId, logContext)
         tilbakekreving.oppdaterSendtVarselbrev(journalpostId = journalpost.journalpostId, varselbrevId = varselbrevBehov.varselbrev.id)
+    }
+
+    fun lagreUttalelse(tilbakekreving: Tilbakekreving, brukeruttalelse: BrukeruttalelseDto) {
+        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
+        when (brukeruttalelse.harBrukerUttaltSeg) {
+            HarBrukerUttaltSeg.JA -> {
+                val uttalelsedetaljer = requireNotNull(brukeruttalelse.uttalelsesdetaljer) {
+                    "Det kreves uttalelsedetaljer når brukeren har uttalet seg. uttalelsedetaljer var null"
+                }.also {
+                    require(it.isNotEmpty()) {
+                        "Det kreves uttalelsedetaljer når brukeren har uttalet seg. uttalelsedetaljer var tøm"
+                    }
+                }
+                behandling.lagreUttalelse(
+                    uttalelseVurdering = UttalelseVurdering.valueOf(brukeruttalelse.harBrukerUttaltSeg.name),
+                    uttalelseInfo = uttalelsedetaljer.map { UttalelseInfo(UUID.randomUUID(), it.uttalelsesdato, it.hvorBrukerenUttalteSeg, it.uttalelseBeskrivelse) },
+                    kommentar = null,
+                    utsettFrist = listOf(),
+                )
+            }
+            HarBrukerUttaltSeg.NEI -> {
+                val kommentar = requireNotNull(brukeruttalelse.kommentar) {
+                    "Det kreves en kommentar når brukeren ikke uttaler seg. Kommentar var null"
+                }.also {
+                    require(it.isNotBlank()) { "Det kreves en kommentar når brukeren ikke uttaler seg. Kommentar var tøm" }
+                }
+
+                behandling.lagreUttalelse(
+                    uttalelseVurdering = UttalelseVurdering.valueOf(brukeruttalelse.harBrukerUttaltSeg.name),
+                    uttalelseInfo = listOf(),
+                    kommentar = kommentar,
+                    utsettFrist = listOf(),
+                )
+            }
+            HarBrukerUttaltSeg.UTTSETT_FRIST -> {
+                requireNotNull(tilbakekreving.brevHistorikk.sisteVarselbrev()) {
+                    "Kan ikke utsette frist når forhåndsvarsel ikke er sendt"
+                }
+                val utsattFrist = requireNotNull(brukeruttalelse.utsettFrist) { "Det kreves en ny dato når fristen er utsatt" }
+                    .also {
+                        require(it.isNotEmpty()) { "Det kreves en ny dato når fristen er utsatt" }
+                    }
+
+                behandling.lagreUttalelse(
+                    uttalelseVurdering = UttalelseVurdering.valueOf(brukeruttalelse.harBrukerUttaltSeg.name),
+                    uttalelseInfo = listOf(),
+                    kommentar = null,
+                    utsettFrist = utsattFrist.map { UtsettFristInfo(UUID.randomUUID(), it.nyFrist, it.begrunnelse) },
+                )
+            }
+        }
+    }
+
+    fun hentForhåndsvarselinfo(tilbakekreving: Tilbakekreving): ForhåndsvarselDto {
+        return tilbakekreving.hentForhåndsvarselFrontendDto()
     }
 
     private fun opprettMetadata(varselbrevInfo: VarselbrevInfo): Brevmetadata {
