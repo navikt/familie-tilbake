@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.api.baks
 
 import jakarta.transaction.Transactional
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.historikkinnslag.Aktør.Vedtaksløsning
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
@@ -24,14 +25,14 @@ class BAKSPorteføljejusteringController(
     private val behandlingRepository: BehandlingRepository,
     private val integrasjonerClient: IntegrasjonerClient,
     private val historikkService: HistorikkService,
+    private val behandlingTilstandService: BehandlingTilstandService,
 ) {
     @Transactional
     @PutMapping("/oppdater-behandlende-enhet")
     fun oppdaterBehandlendeEnhetPåBehandling(
         @RequestBody oppdaterBehandlendeEnhetRequest: OppdaterBehandlendeEnhetRequest,
     ): Ressurs<String> {
-        val behandlingEksternBrukId = oppdaterBehandlendeEnhetRequest.behandlingEksternBrukId
-        val nyEnhetId = oppdaterBehandlendeEnhetRequest.nyEnhet
+        val (behandlingEksternBrukId, nyEnhetId) = oppdaterBehandlendeEnhetRequest
 
         val behandling = behandlingRepository.findByEksternBrukId(behandlingEksternBrukId)
             ?: throw IllegalStateException("Fant ikke behandling for eksternBrukId=$behandlingEksternBrukId")
@@ -57,6 +58,8 @@ class BAKSPorteføljejusteringController(
             opprettetTidspunkt = LocalDateTime.now(),
             beskrivelse = "Behandlende enhet endret i forbindelse med porteføljejustering.",
         )
+
+        behandlingTilstandService.opprettSendingAvBehandlingenManuelt(behandlingId = behandling.id)
 
         return Ressurs.success("Behandlende enhet oppdatert til $nyEnhetId for behandling med eksternBrukId=$behandling")
     }
