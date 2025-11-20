@@ -126,4 +126,6 @@ interface BehandlingRepository :
         """,
     )
     fun finnAlleGamleBehandlingerUtenKravgrunnlag(utgaattDato: LocalDate): List<Behandling>
+
+    fun findByEksternBrukId(eksternBrukId: UUID): Behandling?
 }
