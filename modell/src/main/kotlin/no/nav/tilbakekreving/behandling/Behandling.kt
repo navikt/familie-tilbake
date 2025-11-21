@@ -77,8 +77,7 @@ class Behandling internal constructor(
     private val fatteVedtakSteg: FatteVedtakSteg,
     private var påVent: PåVent?,
     var brevmottakerSteg: BrevmottakerSteg?,
-    private var brukeruttalelse: Brukeruttalelse?,
-    private var forhåndsvarselUnntak: ForhåndsvarselUnntak?,
+    private val forhåndsvarsel: Forhåndsvarsel,
 ) : Historikk.HistorikkInnslag<UUID> {
     fun faktastegFrontendDto(
         opprettelsesvalg: Opprettelsesvalg,
@@ -121,8 +120,7 @@ class Behandling internal constructor(
             fatteVedtakStegEntity = fatteVedtakSteg.tilEntity(id),
             påVentEntity = påVent?.tilEntity(id),
             brevmottakerStegEntity = brevmottakerSteg?.tilEntity(id),
-            brukeruttalelseEntity = brukeruttalelse?.tilEntity(id),
-            forhåndsvarselUnntak?.tilEntity(id),
+            forhåndsvarselEntity = forhåndsvarsel?.tilEntity(id),
         )
     }
 
@@ -421,17 +419,16 @@ class Behandling internal constructor(
         kommentar: String?,
         utsettFrist: List<UtsettFristInfo>,
     ) {
-        brukeruttalelse = Brukeruttalelse(
-            id = UUID.randomUUID(),
+        forhåndsvarsel.lagreUttalelse(
             uttalelseVurdering = uttalelseVurdering,
             uttalelseInfo = uttalelseInfo,
             kommentar = kommentar,
-            utsettUttalselsFrist = utsettFrist,
+            utsettFrist = utsettFrist,
         )
     }
 
     fun brukeruttaleserTilFrontendDto(): BrukeruttalelseDto? {
-        return brukeruttalelse?.tilFrontendDto()
+        return forhåndsvarsel.brukeruttaleserTilFrontendDto()
     }
 
     fun oppdaterBehandler(ansvarligSaksbehandler: Behandler) {
@@ -444,24 +441,15 @@ class Behandling internal constructor(
         beskrivelse: String,
         uttalelseInfo: List<UttalelseInfo>,
     ) {
-        forhåndsvarselUnntak = ForhåndsvarselUnntak(
-            id = UUID.randomUUID(),
+        forhåndsvarsel.lagreForhåndsvarselUnntak(
             begrunnelseForUnntak = begrunnelseForUnntak,
             beskrivelse = beskrivelse,
+            uttalelseInfo = uttalelseInfo,
         )
-        if (uttalelseInfo.isNotEmpty()) {
-            brukeruttalelse = Brukeruttalelse(
-                id = UUID.randomUUID(),
-                uttalelseVurdering = UttalelseVurdering.valueOf(begrunnelseForUnntak.name),
-                uttalelseInfo = uttalelseInfo,
-                kommentar = null,
-                utsettUttalselsFrist = listOf(),
-            )
-        }
     }
 
     fun forhåndsvarselUnntakTilFrontendDto(): ForhåndsvarselUnntakDto? {
-        return forhåndsvarselUnntak?.tilFrontendDto()
+        return forhåndsvarsel.forhåndsvarselUnntakTilFrontendDto()
     }
 
     internal fun utførSideeffekt(tilstand: Tilstand, observatør: BehandlingObservatør) {
@@ -575,8 +563,7 @@ class Behandling internal constructor(
                 fatteVedtakSteg = fatteVedtakSteg,
                 påVent = null,
                 brevmottakerSteg = null,
-                brukeruttalelse = null,
-                forhåndsvarselUnntak = null,
+                forhåndsvarsel = Forhåndsvarsel(null, null),
             ).also {
                 it.utførSideeffekt(tilstand, behandlingObservatør)
             }
