@@ -1,5 +1,8 @@
 package no.nav.tilbakekreving.hendelser
 
+import io.micrometer.core.instrument.Metrics
+import io.micrometer.core.instrument.MultiGauge
+import io.micrometer.core.instrument.Tags
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
@@ -17,6 +20,8 @@ class PåminnelseMediator(
     private val tilbakekrevinService: TilbakekrevingService,
 ) {
     private val logger = TracedLogger.getLogger<PåminnelseMediator>()
+    private val sakerITilstand = MultiGauge.builder("current_state")
+        .register(Metrics.globalRegistry)
 
     @Scheduled(fixedRate = 10, timeUnit = TimeUnit.MINUTES)
     fun påminnSaker() {
@@ -37,5 +42,15 @@ class PåminnelseMediator(
                 }
             }
         }
+        sakerITilstand.register(
+            tilbakekrevingRepository.antallSakerPerTilstand()
+                .map { (tilstand, antall) ->
+                    MultiGauge.Row.of(
+                        Tags.of("state", tilstand.name),
+                        antall,
+                    )
+                },
+            true,
+        )
     }
 }

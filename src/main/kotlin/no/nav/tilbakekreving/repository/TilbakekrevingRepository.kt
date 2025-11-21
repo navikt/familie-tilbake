@@ -10,6 +10,7 @@ import no.nav.tilbakekreving.entity.Entity.Companion.get
 import no.nav.tilbakekreving.entity.FieldConverter
 import no.nav.tilbakekreving.entity.TilbakekrevingEntityMapper
 import no.nav.tilbakekreving.fagsystem.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.RowMapper
@@ -127,6 +128,12 @@ class TilbakekrevingRepository(
         eksternFagsakRepository.lagre(entity.eksternFagsak)
         kravgrunnlagRepository.lagre(entity.kravgrunnlagHistorikkEntities)
         behandlingRepository.lagreBehandlinger(entity.behandlingHistorikkEntities)
+    }
+
+    fun antallSakerPerTilstand(): List<Pair<TilbakekrevingTilstand, Int>> {
+        return jdbcTemplate.query("SELECT nåværende_tilstand, COUNT(*) AS antall_saker FROM tilbakekreving GROUP BY nåværende_tilstand;") { resultSet, _ ->
+            enumValueOf<TilbakekrevingTilstand>(resultSet.getString("nåværende_tilstand")) to resultSet.getInt("antall_saker")
+        }
     }
 
     sealed interface FindTilbakekrevingStrategy {
