@@ -122,9 +122,9 @@ class ForhåndsvarselService(
                 requireNotNull(tilbakekreving.brevHistorikk.sisteVarselbrev()) {
                     "Kan ikke utsette frist når forhåndsvarsel ikke er sendt"
                 }
-                val utsattFrist = requireNotNull(brukeruttalelse.utsettFrist) { "Det kreves en ny dato når fristen er utsatt" }
+                val utsattFrist = requireNotNull(brukeruttalelse.utsettFrist) { "Det kreves en ny dato når fristen er utsatt. utsettFrist var null" }
                     .also {
-                        require(it.isNotEmpty()) { "Det kreves en ny dato når fristen er utsatt" }
+                        require(it.isNotEmpty()) { "Det kreves en ny dato når fristen er utsatt. utsettFrist var tøm" }
                     }
 
                 behandling.lagreUttalelse(

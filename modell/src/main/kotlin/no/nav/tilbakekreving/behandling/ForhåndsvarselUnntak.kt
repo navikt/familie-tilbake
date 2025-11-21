@@ -11,7 +11,6 @@ data class ForhåndsvarselUnntak(
     private val beskrivelse: String,
 ) {
     fun tilFrontendDto(): ForhåndsvarselUnntakDto = ForhåndsvarselUnntakDto(
-        null,
         begrunnelseForUnntak = VarslingsUnntak.valueOf(begrunnelseForUnntak.name),
         beskrivelse = beskrivelse,
         uttalelsesdetaljer = null,
