@@ -23,6 +23,7 @@ import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.endring.EndringObservatør
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
+import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
@@ -350,6 +351,12 @@ class ForvaltningController(
             ?.map { it.hentTilbakekrevingUrl(applicationProperties.frontendUrl) }
             ?: emptyList()
         return Ressurs.success(urler)
+    }
+
+    @Operation(summary = "Kjør en påminnelse for alle saker i tilstand selv om de ikke er ")
+    @PostMapping("/poke")
+    fun sendPåminnelseTilAlleSakerITilstand(tilstand: TilbakekrevingTilstand) {
+        tilbakekrevingRepository.oppdaterNestePåminnelse(tilstand)
     }
 }
 
