@@ -128,6 +128,7 @@ fun feilutbetalteBeløp() =
 
 fun fagsysteminfoHendelse(
     utvidPerioder: List<FagsysteminfoHendelse.UtvidetPeriode>? = null,
+    behandlendeEnhet: String? = "0425",
 ) = FagsysteminfoHendelse(
     aktør = Aktør.Person(bruker().ident),
     revurdering = FagsysteminfoHendelse.Revurdering(
@@ -137,6 +138,7 @@ fun fagsysteminfoHendelse(
         vedtaksdato = LocalDate.now(),
     ),
     utvidPerioder = utvidPerioder,
+    behandlendeEnhet = behandlendeEnhet,
 )
 
 fun varselbrevHendelse(varselbrevId: UUID) = VarselbrevSendtHendelse(
