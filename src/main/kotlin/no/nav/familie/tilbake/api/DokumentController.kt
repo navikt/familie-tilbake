@@ -181,24 +181,25 @@ class DokumentController(
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun forhåndsvarselUnntak(
+        @PathVariable behandlingId: UUID,
         @Valid @RequestBody
         dto: ForhåndsvarselUnntakDto,
     ): Ressurs<Nothing?> {
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(dto.behandlingId!!)
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
         if (tilbakekreving != null) {
             tilgangskontrollService.validerTilgangTilbakekreving(
                 tilbakekreving = tilbakekreving,
-                behandlingId = dto.behandlingId,
+                behandlingId = behandlingId,
                 minimumBehandlerrolle = Behandlerrolle.VEILEDER,
                 auditLoggerEvent = AuditLoggerEvent.ACCESS,
                 handling = "Sender ikke forhåndsvarsel",
             )
-            tilbakekrevingService.hentTilbakekreving(dto.behandlingId!!) { tilbakekreving ->
+            tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving ->
                 forhåndsvarselService.håndterForhåndsvarselUnntak(tilbakekreving, dto)
             }
             return Ressurs.success(null)
         }
-        return Ressurs.failure("Fant ingen tilbakekreving til behandlingId ${dto.behandlingId}")
+        return Ressurs.failure("Fant ingen tilbakekreving til behandlingId $behandlingId")
     }
 
     @Operation(summary = "Forhåndsvis henleggelsesbrev")
@@ -299,7 +300,7 @@ class DokumentController(
                 behandlingId = behandlingId,
                 minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                 auditLoggerEvent = AuditLoggerEvent.CREATE,
-                handling = "Sender brev",
+                handling = "Lagrer brukers uttalelse",
             )
             forhåndsvarselService.lagreUttalelse(tilbakekreving, brukeruttalelse)
             true

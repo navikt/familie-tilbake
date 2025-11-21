@@ -1,9 +1,6 @@
 package no.nav.tilbakekreving.api.v1.dto
 
-import java.util.UUID
-
 data class ForhåndsvarselUnntakDto(
-    val behandlingId: UUID?,
     val begrunnelseForUnntak: VarslingsUnntak,
     val beskrivelse: String,
     val uttalelsesdetaljer: List<Uttalelsesdetaljer>?,
