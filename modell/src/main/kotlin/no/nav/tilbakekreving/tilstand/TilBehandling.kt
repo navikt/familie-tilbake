@@ -25,7 +25,6 @@ object TilBehandling : Tilstand {
     }
 
     override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse) {
-        tilbakekreving.trengerFagsysteminfo()
         tilbakekreving.sendStatusendring(ForenkletBehandlingsstatus.TIL_BEHANDLING)
     }
 
