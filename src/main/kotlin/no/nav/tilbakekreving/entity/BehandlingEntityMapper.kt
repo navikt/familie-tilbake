@@ -10,6 +10,7 @@ import no.nav.tilbakekreving.entities.FaktastegEntity
 import no.nav.tilbakekreving.entities.FatteVedtakStegEntity
 import no.nav.tilbakekreving.entities.ForeldelsesstegEntity
 import no.nav.tilbakekreving.entities.ForeslåVedtakStegEntity
+import no.nav.tilbakekreving.entities.ForhåndsvarselEntity
 import no.nav.tilbakekreving.entities.ForhåndsvarselUnntakEntity
 import no.nav.tilbakekreving.entities.HistorikkReferanseEntity
 import no.nav.tilbakekreving.entities.PåVentEntity
@@ -122,8 +123,7 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
             fatteVedtakStegEntity = fatteVedtak,
             påVentEntity = påVent,
             brevmottakerStegEntity = brevmottakerSteg,
-            brukeruttalelseEntity = brukeruttalelseEntity,
-            forhåndsvarselUnntakEntity = forhåndsvarselUnntak,
+            forhåndsvarselEntity = ForhåndsvarselEntity(brukeruttalelseEntity, forhåndsvarselUnntak),
         )
     }
 }
