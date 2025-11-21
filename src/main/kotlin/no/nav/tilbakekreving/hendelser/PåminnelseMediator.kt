@@ -44,10 +44,10 @@ class PåminnelseMediator(
         }
         sakerITilstand.register(
             tilbakekrevingRepository.antallSakerPerTilstand()
-                .map { (tilstand, antall) ->
+                .map { info ->
                     MultiGauge.Row.of(
-                        Tags.of("state", tilstand.name),
-                        antall,
+                        Tags.of("state", info.tilstand).and("ytelse", info.ytelse),
+                        info.antallSaker,
                     )
                 },
             true,
