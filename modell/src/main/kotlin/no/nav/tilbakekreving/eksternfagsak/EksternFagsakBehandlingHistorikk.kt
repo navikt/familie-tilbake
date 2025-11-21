@@ -25,6 +25,8 @@ class EksternFagsakBehandlingHistorikk(
         return HistorikkReferanse(this, id)
     }
 
+    internal fun harRevurdering() = historikk.isNotEmpty() && nåværende().entry is EksternFagsakRevurdering.Revurdering
+
     override fun entry(id: UUID): EksternFagsakRevurdering {
         return historikk.first { it.id == id }
     }

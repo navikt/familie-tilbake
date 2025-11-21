@@ -62,6 +62,7 @@ class EksternFagsak(
         eksternBehandlingId: String,
         vedtakGjelderId: String,
     ) {
+        if (behandlinger.harRevurdering()) return
         behovObservatør.håndter(
             FagsysteminfoBehov(
                 eksternFagsakId = eksternId,
