@@ -45,7 +45,7 @@ repositories {
 }
 
 dependencies {
-    api("org.springframework.boot:spring-boot-starter-web:3.5.4")
+    api("org.springframework.boot:spring-boot-starter-web:4.0.0")
     api("io.swagger.core.v3:swagger-annotations:2.2.40")
     api("jakarta.validation:jakarta.validation-api:3.1.1")
 }
