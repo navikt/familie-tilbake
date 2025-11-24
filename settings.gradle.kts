@@ -8,3 +8,6 @@ include("kontrakter-frontend")
 include("kontrakter-intern")
 include("modell")
 include("pdf")
+
+include("kontrakter-frontend:api")
+include("kontrakter-frontend:dtoer")
