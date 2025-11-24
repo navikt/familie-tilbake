@@ -6,4 +6,5 @@ build/
 .gradle/
 .kotlin/
 .run
-kontrakter-frontend/src/main/generated
+kontrakter-frontend/dtoer/src/main/generated
+kontrakter-frontend/api/src/main/generated
