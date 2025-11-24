@@ -9,6 +9,7 @@ data class FagsysteminfoHendelse(
     val aktør: Aktør?,
     val revurdering: Revurdering,
     val utvidPerioder: List<UtvidetPeriode>?,
+    val behandlendeEnhet: String?,
 ) {
     data class UtvidetPeriode(
         val kravgrunnlagPeriode: Datoperiode,

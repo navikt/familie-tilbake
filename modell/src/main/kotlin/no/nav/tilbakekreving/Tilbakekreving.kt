@@ -13,6 +13,7 @@ import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.BehandlingHistorikk
 import no.nav.tilbakekreving.behandling.BehandlingObservatør
+import no.nav.tilbakekreving.behandling.Enhet
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
@@ -112,8 +113,11 @@ class Tilbakekreving internal constructor(
 
     fun oppdaterFagsysteminfo(fagsysteminfo: FagsysteminfoHendelse) {
         val eksternFagsak = eksternFagsak.lagre(fagsysteminfo)
-        behandlingHistorikk.nåværende().entry
-            .oppdaterEksternFagsak(eksternFagsak)
+        val behandling = behandlingHistorikk.nåværende().entry
+        behandling.oppdaterEksternFagsak(eksternFagsak)
+        if (fagsysteminfo.behandlendeEnhet != null) {
+            behandling.oppdaterBehandlendeEnhet(fagsysteminfo.behandlendeEnhet)
+        }
     }
 
     fun sporingsinformasjon(): Sporing {
@@ -140,6 +144,7 @@ class Tilbakekreving internal constructor(
     fun opprettBehandling(
         eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
         behandler: Behandler,
+        behandlendeEnhet: String?,
     ) {
         if (bruker == null) {
             opprettBruker(kravgrunnlagHistorikk.nåværende().entry.vedtakGjelder)
@@ -148,7 +153,7 @@ class Tilbakekreving internal constructor(
         val behandling = Behandling.nyBehandling(
             id = behandlingId,
             type = Behandlingstype.TILBAKEKREVING,
-            enhet = null,
+            enhet = behandlendeEnhet?.let(Enhet::forKode),
             ansvarligSaksbehandler = behandler,
             eksternFagsakRevurdering = eksternFagsakRevurdering,
             kravgrunnlag = kravgrunnlagHistorikk.nåværende(),
@@ -179,7 +184,7 @@ class Tilbakekreving internal constructor(
         val kravgrunnlag = kravgrunnlagHistorikk.nåværende().entry
         // Å bruke kravgrunnlagreferanse er nok ikke alltid riktig her, men de fleste fagsystem bruker behandlingsid som referanse i kravgrunnlaget.
         val eksternBehandling = eksternFagsak.lagreTomBehandling(kravgrunnlag.fagsystemVedtaksdato, kravgrunnlag.referanse)
-        opprettBehandling(eksternBehandling, Behandler.Vedtaksløsning)
+        opprettBehandling(eksternBehandling, Behandler.Vedtaksløsning, null)
         opprettBruker(kravgrunnlag.vedtakGjelder)
         byttTilstand(AvventerBrukerinfo)
     }

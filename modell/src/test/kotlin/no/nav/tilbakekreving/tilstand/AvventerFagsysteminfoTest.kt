@@ -42,4 +42,21 @@ class AvventerFagsysteminfoTest {
                 )
         }
     }
+
+    @Test
+    fun `behandlende enhet blir oppdatert`() {
+        val oppsamler = BehovObservatørOppsamler()
+        val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
+        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), oppsamler, opprettTilbakekrevingEvent, bigQueryService, EndringObservatørOppsamler(), features = defaultFeatures())
+
+        val kravgrunnlag = kravgrunnlag()
+        tilbakekreving.håndter(kravgrunnlag)
+        tilbakekreving.tilstand shouldBe AvventerFagsysteminfo
+
+        tilbakekreving.håndter(fagsysteminfoHendelse(behandlendeEnhet = "0425"))
+
+        val enhet = tilbakekreving.behandlingHistorikk.nåværende().entry.hentBehandlingsinformasjon().enhet
+        enhet?.kode shouldBe "0425"
+        enhet?.navn shouldBe "Nav Solør"
+    }
 }

@@ -1,7 +1,7 @@
 package no.nav.tilbakekreving.e2e
 
 import io.kotest.matchers.shouldBe
-import no.nav.familie.tilbake.data.Testdata
+import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.api.v2.MottakerDto
 import no.nav.tilbakekreving.api.v2.PeriodeDto
 import no.nav.tilbakekreving.api.v2.fagsystem.behov.FagsysteminfoBehovHendelse
@@ -15,6 +15,8 @@ import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub
 import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub.Companion.finnKafkamelding
 import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.periode.til
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.util.kroner
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -79,7 +81,7 @@ class BehovE2ETest : TilbakekrevingE2EBase() {
                 eksternFagsakId = fagsystemId,
                 hendelseOpprettet = LocalDateTime.now(),
                 mottaker = MottakerDto(
-                    Testdata.STANDARD_BRUKERIDENT,
+                    Testdata.TESTBRUKER,
                     MottakerDto.MottakerType.PERSON,
                 ),
                 revurdering = FagsysteminfoSvarHendelse.RevurderingDto(
@@ -97,5 +99,7 @@ class BehovE2ETest : TilbakekrevingE2EBase() {
                 behandlendeEnhet = "0425",
             ),
         )
+
+        tilbakekreving(FagsystemDTO.TS, fagsystemId)?.frontendDtoForBehandling(Behandler.Vedtaksløsning, false)?.enhetskode shouldBe "0425"
     }
 }

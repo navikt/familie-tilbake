@@ -64,7 +64,7 @@ class Behandling internal constructor(
     private val type: Behandlingstype,
     private val opprettet: LocalDateTime,
     private var sistEndret: LocalDateTime,
-    private val enhet: Enhet?,
+    private var enhet: Enhet?,
     private val revurderingsårsak: Behandlingsårsakstype?,
     private var ansvarligSaksbehandler: Behandler,
     private var eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
@@ -331,6 +331,10 @@ class Behandling internal constructor(
             this.eksternFagsakRevurdering = eksternFagsakRevurdering
             flyttTilbakeTilFakta()
         }
+    }
+
+    internal fun oppdaterBehandlendeEnhet(enhetKode: String) {
+        enhet = Enhet.forKode(enhetKode)
     }
 
     internal fun fjernManuelBrevmottaker(

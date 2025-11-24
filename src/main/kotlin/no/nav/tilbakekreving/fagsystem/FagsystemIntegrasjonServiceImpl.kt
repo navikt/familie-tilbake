@@ -37,6 +37,7 @@ class FagsystemIntegrasjonServiceImpl(
                             vedtaksperiode = it.vedtaksperiode.fom til it.vedtaksperiode.tom,
                         )
                     },
+                    behandlendeEnhet = fagsysteminfo.behandlendeEnhet,
                 ),
             )
         }

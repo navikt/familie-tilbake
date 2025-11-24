@@ -22,6 +22,7 @@ class KafkaProducerStub() : KafkaProducer {
     private val kafkameldinger = mutableMapOf<String, MutableList<Pair<EventMetadata<*>, Kafkamelding>>>()
 
     private val fagsystemInfoSvarHandlers = mutableMapOf<String, () -> Unit>()
+    private val handlerFor = mutableMapOf<HandkerKey, () -> Unit>()
 
     override fun <K : Kafkamelding> sendKafkaEvent(
         kafkamelding: K,
@@ -30,13 +31,11 @@ class KafkaProducerStub() : KafkaProducer {
         ytelse: Ytelse,
         logContext: SecureLog.Context,
     ) {
+        handlerFor.remove(HandkerKey(metadata, kafkamelding.eksternFagsakId))?.invoke()
         kafkameldinger.computeIfAbsent(kafkamelding.eksternFagsakId) { mutableListOf() }.add(metadata to kafkamelding)
         when (metadata) {
             FagsysteminfoBehovHendelse.METADATA -> {
-                val eventHandler = fagsystemInfoSvarHandlers.remove(kafkamelding.eksternFagsakId)
-                if (eventHandler != null) {
-                    eventHandler()
-                }
+                fagsystemInfoSvarHandlers.remove(kafkamelding.eksternFagsakId)?.invoke()
             }
         }
     }
@@ -63,6 +62,10 @@ class KafkaProducerStub() : KafkaProducer {
         fagsystemInfoSvarHandlers[eksternFagsakId] = handler
     }
 
+    fun vedMelding(metadata: EventMetadata<*>, fagsystemId: String, callback: () -> Unit) {
+        handlerFor[HandkerKey(metadata, fagsystemId)] = callback
+    }
+
     companion object {
         inline fun <reified T : Kafkamelding> KafkaProducerStub.finnKafkamelding(eksternFagsakId: String, type: EventMetadata<T>): List<T> {
             return finnKafkamelding(eksternFagsakId)
@@ -71,4 +74,9 @@ class KafkaProducerStub() : KafkaProducer {
                 .map { it.shouldBeInstanceOf() }
         }
     }
+
+    data class HandkerKey(
+        val metadata: EventMetadata<*>,
+        val eksternFagsakId: String,
+    )
 }

@@ -10,6 +10,7 @@ import no.nav.tilbakekreving.entity.Entity.Companion.get
 import no.nav.tilbakekreving.entity.FieldConverter
 import no.nav.tilbakekreving.entity.TilbakekrevingEntityMapper
 import no.nav.tilbakekreving.fagsystem.Ytelsestype
+import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.RowMapper
@@ -129,6 +130,24 @@ class TilbakekrevingRepository(
         behandlingRepository.lagreBehandlinger(entity.behandlingHistorikkEntities)
     }
 
+    fun antallSakerPerTilstand(): List<ForenkletTilstandStatistikk> {
+        return jdbcTemplate.query("SELECT t.nåværende_tilstand, ef.ytelse, COUNT(*) AS antall_saker FROM tilbakekreving t JOIN tilbakekreving_ekstern_fagsak ef ON t.id = ef.tilbakekreving_ref GROUP BY nåværende_tilstand, ef.ytelse;") { resultSet, _ ->
+            ForenkletTilstandStatistikk(
+                tilstand = resultSet.getString("nåværende_tilstand"),
+                ytelse = resultSet.getString("ytelse"),
+                antallSaker = resultSet.getInt("antall_saker"),
+            )
+        }
+    }
+
+    fun oppdaterNestePåminnelse(tilstand: TilbakekrevingTilstand) {
+        jdbcTemplate.update(
+            "UPDATE tilbakekreving SET neste_påminnelse=? WHERE nåværende_tilstand=?;",
+            FieldConverter.LocalDateTimeConverter.convert(LocalDateTime.now()),
+            FieldConverter.EnumConverter.of<TilbakekrevingTilstand>().convert(tilstand),
+        )
+    }
+
     sealed interface FindTilbakekrevingStrategy {
         fun select(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity>
 
@@ -209,4 +228,10 @@ class TilbakekrevingRepository(
             }
         }
     }
+
+    data class ForenkletTilstandStatistikk(
+        val tilstand: String,
+        val ytelse: String,
+        val antallSaker: Int,
+    )
 }
