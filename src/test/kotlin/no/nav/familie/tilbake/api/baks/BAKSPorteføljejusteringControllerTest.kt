@@ -146,7 +146,7 @@ class BAKSPorteføljejusteringControllerTest {
                 historikkinnslagstype = ENDRET_ENHET,
                 aktør = Vedtaksløsning,
                 opprettetTidspunkt = any(),
-                beskrivelse = "Behandlende enhet endret i forbindelse med porteføljejustering.",
+                beskrivelse = "Behandlende enhet endret fra testverdi til Nav Kontor i forbindelse med porteføljejustering januar 2026.",
             )
         }
 

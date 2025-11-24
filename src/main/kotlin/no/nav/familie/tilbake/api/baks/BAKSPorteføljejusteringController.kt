@@ -37,17 +37,19 @@ class BAKSPorteføljejusteringController(
         val behandling = behandlingRepository.findByEksternBrukId(behandlingEksternBrukId)
             ?: throw IllegalStateException("Fant ikke behandling for eksternBrukId=$behandlingEksternBrukId")
 
+        val gammelEnhetNavn = behandling.behandlendeEnhetsNavn
+
         if (behandling.behandlendeEnhet == nyEnhetId) {
             return Ressurs.success("Behandlende enhet er allerede satt til $nyEnhetId for behandling med eksternBrukId=$behandlingEksternBrukId")
         }
 
-        val enhet = integrasjonerClient.hentNavkontor(nyEnhetId)
+        val nyEnhet = integrasjonerClient.hentNavkontor(nyEnhetId)
         behandlingRepository.update(
             behandling.copy(
                 ansvarligSaksbehandler = Vedtaksløsning.ident,
                 ansvarligBeslutter = null,
                 behandlendeEnhet = nyEnhetId,
-                behandlendeEnhetsNavn = enhet.navn,
+                behandlendeEnhetsNavn = nyEnhet.navn,
             ),
         )
 
@@ -56,7 +58,7 @@ class BAKSPorteføljejusteringController(
             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.ENDRET_ENHET,
             aktør = Vedtaksløsning,
             opprettetTidspunkt = LocalDateTime.now(),
-            beskrivelse = "Behandlende enhet endret i forbindelse med porteføljejustering.",
+            beskrivelse = "Behandlende enhet endret fra $gammelEnhetNavn til ${nyEnhet.navn} i forbindelse med porteføljejustering januar 2026.",
         )
 
         behandlingTilstandService.opprettSendingAvBehandlingenManuelt(behandlingId = behandling.id)
