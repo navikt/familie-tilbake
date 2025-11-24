@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.brev.varselbrev
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.inspectors.forOne
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -13,7 +14,7 @@ import no.nav.tilbakekreving.api.v1.dto.BestillBrevDto
 import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
 import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselDto
 import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselUnntakDto
-import no.nav.tilbakekreving.api.v1.dto.FristUtsettelse
+import no.nav.tilbakekreving.api.v1.dto.FristUtsettelseDto
 import no.nav.tilbakekreving.api.v1.dto.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.api.v1.dto.Uttalelsesdetaljer
 import no.nav.tilbakekreving.api.v1.dto.VarslingsUnntak
@@ -44,8 +45,9 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
 
     @BeforeEach
     fun cleanup() {
-        jdbcTemplate.update("DELETE FROM tilbakekreving_utsett_uttalelse")
         jdbcTemplate.update("DELETE FROM tilbakekreving_uttalelse_informasjon")
+        jdbcTemplate.update("DELETE FROM tilbakekreving_forhåndsvarsel_unntak")
+        jdbcTemplate.update("DELETE FROM tilbakekreving_utsett_uttalelse")
         jdbcTemplate.update("DELETE FROM tilbakekreving_brukeruttalelse")
     }
 
@@ -135,7 +137,6 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
 
         brukeruttalelse.harBrukerUttaltSeg shouldBe case.forventetHarBrukerUttaltSeg
         brukeruttalelse.uttalelsesdetaljer.orEmpty().size shouldBe case.forventetAntallDetaljer
-        brukeruttalelse.utsettFrist.orEmpty().size shouldBe case.forventetAntallUtsettelser
         brukeruttalelse.kommentar shouldBe case.forventetKommentar
     }
 
@@ -163,8 +164,51 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
         forhåndsvarsel.forhåndsvarselUnntak.shouldNotBeNull {
             begrunnelseForUnntak shouldBe case.forventetBegrunnelseForUnntak
             beskrivelse shouldBe case.forventetBeskrivelse
-            uttalelsesdetaljer?.size shouldBe case.forventetAntallDetaljer
         }
+    }
+
+    @Test
+    fun `utsettelse av frist lagres og hentes riktig`() {
+        val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
+        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
+        val bestillBrevDto = BestillBrevDto(
+            behandlingId = behandling.id,
+            brevmalkode = Dokumentmalstype.VARSEL,
+            fritekst = "Tekst fra saksbehandler",
+        )
+        dokumentController.bestillBrev(bestillBrevDto)
+
+        val førsteFrist = FristUtsettelseDto(
+            LocalDate.of(2025, 11, 15),
+            "Advokat vil ha mer tid",
+        )
+        dokumentController.utsettUttalelseFrist(behandling.id, førsteFrist)
+
+        val etterFørsteUtsettelse = tilbakekrevingService
+            .hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
+            .shouldNotBeNull().hentForhåndsvarselFrontendDto()
+
+        etterFørsteUtsettelse.utsettUttalelseFrist.shouldNotBeNull {
+            size shouldBe 1
+            etterFørsteUtsettelse.utsettUttalelseFrist?.get(0)?.nyFrist shouldBe LocalDate.of(2025, 11, 15)
+        }
+
+        val andreFrist = FristUtsettelseDto(
+            LocalDate.of(2025, 11, 25),
+            "Advokat vil ha enda mer tid",
+        )
+        dokumentController.utsettUttalelseFrist(behandling.id, andreFrist)
+
+        val etterAndreUtsettelse = tilbakekrevingService
+            .hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
+            .shouldNotBeNull().hentForhåndsvarselFrontendDto()
+        etterAndreUtsettelse.utsettUttalelseFrist.shouldNotBeNull {
+            size shouldBe 2
+            etterAndreUtsettelse.utsettUttalelseFrist.get(0).nyFrist shouldBe LocalDate.of(2025, 11, 15)
+            etterAndreUtsettelse.utsettUttalelseFrist.get(1).nyFrist shouldBe LocalDate.of(2025, 11, 25)
+        }
+        etterAndreUtsettelse.forhåndsvarselUnntak shouldBe null
+        etterAndreUtsettelse.brukeruttalelse shouldBe null
     }
 
     private fun opprettTilbakekrevingOgHentFagsystemId(): Tilbakekreving {
@@ -210,11 +254,13 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
 
         dokumentController.lagreBrukeruttalelse(behandling.id, input)
 
-        val etter = tilbakekrevingService
+        val forhåndsvarselDto = tilbakekrevingService
             .hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
-            .shouldNotBeNull()
+            .shouldNotBeNull().hentForhåndsvarselFrontendDto()
+        forhåndsvarselDto.forhåndsvarselUnntak shouldBe null
+        forhåndsvarselDto.utsettUttalelseFrist.shouldBeEmpty()
 
-        return etter.hentForhåndsvarselFrontendDto()
+        return forhåndsvarselDto
     }
 
     private fun lagreOgHentFohåndsvarselUnntak(input: ForhåndsvarselUnntakDto): ForhåndsvarselDto {
@@ -222,11 +268,13 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
 
         dokumentController.forhåndsvarselUnntak(behandling.id, input)
-        val etter = tilbakekrevingService
+        val forhåndsvarselDto = tilbakekrevingService
             .hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
-            .shouldNotBeNull()
+            .shouldNotBeNull().hentForhåndsvarselFrontendDto()
+        forhåndsvarselDto.brukeruttalelse shouldBe null
+        forhåndsvarselDto.utsettUttalelseFrist.shouldBeEmpty()
 
-        return etter.hentForhåndsvarselFrontendDto()
+        return forhåndsvarselDto
     }
 
     companion object {
@@ -237,50 +285,27 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
                 input = ForhåndsvarselUnntakDto(
                     begrunnelseForUnntak = VarslingsUnntak.IKKE_PRAKTISK_MULIG,
                     beskrivelse = "Ikke mulig",
-                    uttalelsesdetaljer = null,
                 ),
                 forventetBegrunnelseForUnntak = VarslingsUnntak.IKKE_PRAKTISK_MULIG,
                 forventetBeskrivelse = "Ikke mulig",
-                forventetAntallDetaljer = null,
             ),
             ForhåndsvarselUnntakCase(
                 navn = "Unntak UKJENT_ADRESSE",
                 input = ForhåndsvarselUnntakDto(
                     begrunnelseForUnntak = VarslingsUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING,
                     beskrivelse = "Ukjent adresse",
-                    uttalelsesdetaljer = null,
                 ),
                 forventetBegrunnelseForUnntak = VarslingsUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING,
                 forventetBeskrivelse = "Ukjent adresse",
-                forventetAntallDetaljer = null,
             ),
             ForhåndsvarselUnntakCase(
                 navn = "Unntak ÅPENBART_UNØDVENDIG",
                 input = ForhåndsvarselUnntakDto(
                     begrunnelseForUnntak = VarslingsUnntak.ÅPENBART_UNØDVENDIG,
                     beskrivelse = "Åpenbart unødvendig",
-                    uttalelsesdetaljer = null,
                 ),
                 forventetBegrunnelseForUnntak = VarslingsUnntak.ÅPENBART_UNØDVENDIG,
                 forventetBeskrivelse = "Åpenbart unødvendig",
-                forventetAntallDetaljer = null,
-            ),
-            ForhåndsvarselUnntakCase(
-                navn = "Unntak ALLEREDE_UTTALET_SEG",
-                input = ForhåndsvarselUnntakDto(
-                    begrunnelseForUnntak = VarslingsUnntak.ALLEREDE_UTTALET_SEG,
-                    beskrivelse = "Allerede uttalet seg",
-                    uttalelsesdetaljer = listOf(
-                        Uttalelsesdetaljer(
-                            hvorBrukerenUttalteSeg = "Modia",
-                            uttalelsesdato = LocalDate.of(2025, 10, 15),
-                            uttalelseBeskrivelse = "Bruker har uttalet seg",
-                        ),
-                    ),
-                ),
-                forventetBegrunnelseForUnntak = VarslingsUnntak.ALLEREDE_UTTALET_SEG,
-                forventetBeskrivelse = "Allerede uttalet seg",
-                forventetAntallDetaljer = 1,
             ),
         )
 
@@ -298,12 +323,10 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
                             uttalelseBeskrivelse = "Bruker har uttalet seg",
                         ),
                     ),
-                    utsettFrist = null,
                     kommentar = null,
                 ),
                 forventetHarBrukerUttaltSeg = HarBrukerUttaltSeg.JA,
                 forventetAntallDetaljer = 1,
-                forventetAntallUtsettelser = 0,
                 forventetKommentar = null,
             ),
             // 2)Har bruker uttalet seg:  JA, to uttalelser
@@ -323,12 +346,10 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
                             uttalelseBeskrivelse = "Bruker har skrevet ...",
                         ),
                     ),
-                    utsettFrist = null,
                     kommentar = null,
                 ),
                 forventetHarBrukerUttaltSeg = HarBrukerUttaltSeg.JA,
                 forventetAntallDetaljer = 2,
-                forventetAntallUtsettelser = 0,
                 forventetKommentar = null,
             ),
             // 3) Har bruker uttalet seg:NEI
@@ -337,54 +358,27 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
                 input = BrukeruttalelseDto(
                     harBrukerUttaltSeg = HarBrukerUttaltSeg.NEI,
                     uttalelsesdetaljer = null,
-                    utsettFrist = null,
                     kommentar = "Ville ikke",
                 ),
                 forventetHarBrukerUttaltSeg = HarBrukerUttaltSeg.NEI,
                 forventetAntallDetaljer = 0,
-                forventetAntallUtsettelser = 0,
                 forventetKommentar = "Ville ikke",
             ),
-            // 8) Har bruker uttalet seg: UTTSETT_FRIST, én frist
             GyldigBrukeruttalelseCase(
-                navn = "UTTSETT_FRIST – én frist",
+                navn = "ALLEREDE_UTTALET_SEG",
                 input = BrukeruttalelseDto(
-                    harBrukerUttaltSeg = HarBrukerUttaltSeg.UTTSETT_FRIST,
-                    uttalelsesdetaljer = null,
-                    utsettFrist = listOf(
-                        FristUtsettelse(
-                            LocalDate.of(2025, 11, 15),
-                            "Advokat vil ha mer tid",
+                    harBrukerUttaltSeg = HarBrukerUttaltSeg.ALLEREDE_UTTALET_SEG,
+                    uttalelsesdetaljer = listOf(
+                        Uttalelsesdetaljer(
+                            hvorBrukerenUttalteSeg = "Tlf",
+                            uttalelsesdato = LocalDate.of(2025, 9, 15),
+                            uttalelseBeskrivelse = "Bruker har sagt ...",
                         ),
                     ),
                     kommentar = null,
                 ),
-                forventetHarBrukerUttaltSeg = HarBrukerUttaltSeg.UTTSETT_FRIST,
-                forventetAntallDetaljer = 0,
-                forventetAntallUtsettelser = 1,
-                forventetKommentar = null,
-            ),
-            // 9) Har bruker uttalet seg: UTTSETT_FRIST, to frister
-            GyldigBrukeruttalelseCase(
-                navn = "UTTSETT_FRIST – to frister",
-                input = BrukeruttalelseDto(
-                    harBrukerUttaltSeg = HarBrukerUttaltSeg.UTTSETT_FRIST,
-                    uttalelsesdetaljer = null,
-                    utsettFrist = listOf(
-                        FristUtsettelse(
-                            LocalDate.of(2025, 11, 15),
-                            "Advokat vil ha mer tid",
-                        ),
-                        FristUtsettelse(
-                            LocalDate.of(2025, 11, 25),
-                            "Advokat vil ha enda mer tid",
-                        ),
-                    ),
-                    kommentar = null,
-                ),
-                forventetHarBrukerUttaltSeg = HarBrukerUttaltSeg.UTTSETT_FRIST,
-                forventetAntallDetaljer = 0,
-                forventetAntallUtsettelser = 2,
+                forventetHarBrukerUttaltSeg = HarBrukerUttaltSeg.ALLEREDE_UTTALET_SEG,
+                forventetAntallDetaljer = 1,
                 forventetKommentar = null,
             ),
         )
@@ -396,7 +390,6 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
                 input = BrukeruttalelseDto(
                     harBrukerUttaltSeg = HarBrukerUttaltSeg.JA,
                     uttalelsesdetaljer = null,
-                    utsettFrist = null,
                     kommentar = null,
                 ),
                 forventetFeilmelding = "Det kreves uttalelsedetaljer når brukeren har uttalet seg. uttalelsedetaljer var null",
@@ -406,17 +399,15 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
                 input = BrukeruttalelseDto(
                     harBrukerUttaltSeg = HarBrukerUttaltSeg.JA,
                     uttalelsesdetaljer = listOf(),
-                    utsettFrist = null,
                     kommentar = null,
                 ),
-                forventetFeilmelding = "Det kreves uttalelsedetaljer når brukeren har uttalet seg. uttalelsedetaljer var tøm",
+                forventetFeilmelding = "Det kreves uttalelsedetaljer når brukeren har uttalet seg. uttalelsedetaljer var tom",
             ),
             UgyldigBrukeruttalelseCase(
                 navn = "NEI – uten kommentar (null)",
                 input = BrukeruttalelseDto(
                     harBrukerUttaltSeg = HarBrukerUttaltSeg.NEI,
                     uttalelsesdetaljer = null,
-                    utsettFrist = null,
                     kommentar = null,
                 ),
                 forventetFeilmelding = "Det kreves en kommentar når brukeren ikke uttaler seg. Kommentar var null",
@@ -426,30 +417,9 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
                 input = BrukeruttalelseDto(
                     harBrukerUttaltSeg = HarBrukerUttaltSeg.NEI,
                     uttalelsesdetaljer = null,
-                    utsettFrist = null,
                     kommentar = "",
                 ),
-                forventetFeilmelding = "Det kreves en kommentar når brukeren ikke uttaler seg. Kommentar var tøm",
-            ),
-            UgyldigBrukeruttalelseCase(
-                navn = "UTTSETT_FRIST – utsettFrist null",
-                input = BrukeruttalelseDto(
-                    harBrukerUttaltSeg = HarBrukerUttaltSeg.UTTSETT_FRIST,
-                    uttalelsesdetaljer = null,
-                    utsettFrist = null,
-                    kommentar = null,
-                ),
-                forventetFeilmelding = "Det kreves en ny dato når fristen er utsatt. utsettFrist var null",
-            ),
-            UgyldigBrukeruttalelseCase(
-                navn = "UTTSETT_FRIST – utsettFrist tøm liste",
-                input = BrukeruttalelseDto(
-                    harBrukerUttaltSeg = HarBrukerUttaltSeg.UTTSETT_FRIST,
-                    uttalelsesdetaljer = null,
-                    utsettFrist = listOf(),
-                    kommentar = null,
-                ),
-                forventetFeilmelding = "Det kreves en ny dato når fristen er utsatt. utsettFrist var tøm",
+                forventetFeilmelding = "Det kreves en kommentar når brukeren ikke uttaler seg. Kommentar var tom",
             ),
         )
     }
@@ -460,7 +430,6 @@ data class GyldigBrukeruttalelseCase(
     val input: BrukeruttalelseDto,
     val forventetHarBrukerUttaltSeg: HarBrukerUttaltSeg?,
     val forventetAntallDetaljer: Int,
-    val forventetAntallUtsettelser: Int,
     val forventetKommentar: String?,
 )
 
@@ -475,5 +444,4 @@ data class ForhåndsvarselUnntakCase(
     val input: ForhåndsvarselUnntakDto,
     val forventetBegrunnelseForUnntak: VarslingsUnntak,
     val forventetBeskrivelse: String,
-    val forventetAntallDetaljer: Int?,
 )

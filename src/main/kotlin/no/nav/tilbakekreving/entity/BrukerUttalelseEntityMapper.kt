@@ -2,7 +2,6 @@ package no.nav.tilbakekreving.entity
 
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.entities.BrukeruttalelseEntity
-import no.nav.tilbakekreving.entities.UtsettFristInfoEntity
 import no.nav.tilbakekreving.entities.UttalelseInfoEntity
 import java.sql.ResultSet
 import java.util.UUID
@@ -33,14 +32,12 @@ object BrukerUttalelseEntityMapper : Entity<BrukeruttalelseEntity, UUID, UUID>(
     fun map(
         resultSet: ResultSet,
         uttalelseInfoEntity: List<UttalelseInfoEntity>,
-        utsettFristInfoEntity: List<UtsettFristInfoEntity>,
     ): BrukeruttalelseEntity {
         return BrukeruttalelseEntity(
             id = resultSet[id],
             behandlingRef = resultSet[behandlingRef],
             uttalelseVurdering = resultSet[uttalelseVurdering],
             uttalelseInfoEntity = uttalelseInfoEntity,
-            utsettFristEntity = utsettFristInfoEntity,
             kommentar = resultSet[kommentar],
         )
     }
@@ -81,39 +78,6 @@ object BrukerUttalelseEntityMapper : Entity<BrukeruttalelseEntity, UUID, UUID>(
                 uttalelsesdato = resultSet[uttalelsesdato]!!,
                 hvorBrukerenUttalteSeg = resultSet[hvorBrukerenUttaletSeg]!!,
                 uttalelseBeskrivelse = resultSet[uttalelseBeskrivelse]!!,
-            )
-        }
-    }
-
-    object UtsettFrist : Entity<UtsettFristInfoEntity, UUID, UUID>(
-        "tilbakekreving_utsett_uttalelse",
-        UtsettFristInfoEntity::id,
-        FieldConverter.UUIDConverter.required(),
-    ) {
-        val brukeruttalelseRef = field(
-            "brukeruttalelse_ref",
-            UtsettFristInfoEntity::brukeruttalelseRef,
-            FieldConverter.UUIDConverter.required(),
-        )
-
-        val nyFrist = field(
-            "ny_frist",
-            UtsettFristInfoEntity::nyFrist,
-            FieldConverter.LocalDateConverter.required(),
-        )
-
-        val begrunnelse = field(
-            "begrunnelse",
-            UtsettFristInfoEntity::begrunnelse,
-            FieldConverter.StringConverter.required(),
-        )
-
-        fun map(resultSet: ResultSet): UtsettFristInfoEntity {
-            return UtsettFristInfoEntity(
-                id = resultSet[id],
-                brukeruttalelseRef = resultSet[brukeruttalelseRef],
-                nyFrist = resultSet[nyFrist],
-                begrunnelse = resultSet[begrunnelse],
             )
         }
     }

@@ -13,7 +13,6 @@ data class ForhåndsvarselUnntak(
     fun tilFrontendDto(): ForhåndsvarselUnntakDto = ForhåndsvarselUnntakDto(
         begrunnelseForUnntak = VarslingsUnntak.valueOf(begrunnelseForUnntak.name),
         beskrivelse = beskrivelse,
-        uttalelsesdetaljer = null,
     )
 
     fun tilEntity(behandlingRef: UUID): ForhåndsvarselUnntakEntity = ForhåndsvarselUnntakEntity(

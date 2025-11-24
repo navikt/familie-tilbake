@@ -10,6 +10,7 @@ import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
 import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselUnntakDto
+import no.nav.tilbakekreving.api.v1.dto.FristUtsettelseDto
 import no.nav.tilbakekreving.api.v1.dto.TotrinnsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingDto
@@ -59,6 +60,7 @@ import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.UUID
+import kotlin.collections.listOf
 
 class Behandling internal constructor(
     override val id: UUID,
@@ -120,7 +122,7 @@ class Behandling internal constructor(
             fatteVedtakStegEntity = fatteVedtakSteg.tilEntity(id),
             påVentEntity = påVent?.tilEntity(id),
             brevmottakerStegEntity = brevmottakerSteg?.tilEntity(id),
-            forhåndsvarselEntity = forhåndsvarsel?.tilEntity(id),
+            forhåndsvarselEntity = forhåndsvarsel.tilEntity(id),
         )
     }
 
@@ -417,18 +419,27 @@ class Behandling internal constructor(
         uttalelseVurdering: UttalelseVurdering,
         uttalelseInfo: List<UttalelseInfo>,
         kommentar: String?,
-        utsettFrist: List<UtsettFristInfo>,
     ) {
         forhåndsvarsel.lagreUttalelse(
             uttalelseVurdering = uttalelseVurdering,
             uttalelseInfo = uttalelseInfo,
             kommentar = kommentar,
-            utsettFrist = utsettFrist,
+        )
+    }
+
+    fun lagreFristUtsettelse(nyFrist: LocalDate, begrunnelse: String) {
+        forhåndsvarsel.lagreFristUtsettelse(
+            nyFrist = nyFrist,
+            begrunnelse = begrunnelse,
         )
     }
 
     fun brukeruttaleserTilFrontendDto(): BrukeruttalelseDto? {
         return forhåndsvarsel.brukeruttaleserTilFrontendDto()
+    }
+
+    fun utsettUttalelseFristTilFrontendDto(): List<FristUtsettelseDto> {
+        return forhåndsvarsel.utsettUttalelseFristTilFrontendDto()
     }
 
     fun oppdaterBehandler(ansvarligSaksbehandler: Behandler) {
@@ -439,12 +450,10 @@ class Behandling internal constructor(
     fun lagreForhåndsvarselUnntak(
         begrunnelseForUnntak: BegrunnelseForUnntak,
         beskrivelse: String,
-        uttalelseInfo: List<UttalelseInfo>,
     ) {
         forhåndsvarsel.lagreForhåndsvarselUnntak(
             begrunnelseForUnntak = begrunnelseForUnntak,
             beskrivelse = beskrivelse,
-            uttalelseInfo = uttalelseInfo,
         )
     }
 
@@ -563,7 +572,7 @@ class Behandling internal constructor(
                 fatteVedtakSteg = fatteVedtakSteg,
                 påVent = null,
                 brevmottakerSteg = null,
-                forhåndsvarsel = Forhåndsvarsel(null, null),
+                forhåndsvarsel = Forhåndsvarsel(null, null, mutableListOf<UtsettFrist>()),
             ).also {
                 it.utførSideeffekt(tilstand, behandlingObservatør)
             }

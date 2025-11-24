@@ -12,6 +12,7 @@ import no.nav.tilbakekreving.entities.ForeldelsesstegEntity
 import no.nav.tilbakekreving.entities.ForeslåVedtakStegEntity
 import no.nav.tilbakekreving.entities.ForhåndsvarselEntity
 import no.nav.tilbakekreving.entities.ForhåndsvarselUnntakEntity
+import no.nav.tilbakekreving.entities.FristUtsettelseEntity
 import no.nav.tilbakekreving.entities.HistorikkReferanseEntity
 import no.nav.tilbakekreving.entities.PåVentEntity
 import no.nav.tilbakekreving.entities.VilkårsvurderingstegEntity
@@ -100,6 +101,7 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
         brevmottakerSteg: BrevmottakerStegEntity?,
         brukeruttalelseEntity: BrukeruttalelseEntity?,
         forhåndsvarselUnntak: ForhåndsvarselUnntakEntity?,
+        fristUtsettelse: List<FristUtsettelseEntity>,
     ): BehandlingEntity {
         return BehandlingEntity(
             id = resultSet[id],
@@ -123,7 +125,7 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
             fatteVedtakStegEntity = fatteVedtak,
             påVentEntity = påVent,
             brevmottakerStegEntity = brevmottakerSteg,
-            forhåndsvarselEntity = ForhåndsvarselEntity(brukeruttalelseEntity, forhåndsvarselUnntak),
+            forhåndsvarselEntity = ForhåndsvarselEntity(brukeruttalelseEntity, forhåndsvarselUnntak, fristUtsettelse),
         )
     }
 }

@@ -2,18 +2,22 @@ package no.nav.tilbakekreving.behandling
 
 import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
 import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselUnntakDto
+import no.nav.tilbakekreving.api.v1.dto.FristUtsettelseDto
 import no.nav.tilbakekreving.entities.ForhåndsvarselEntity
+import java.time.LocalDate
 import java.util.UUID
 
 class Forhåndsvarsel(
     private var brukeruttalelse: Brukeruttalelse?,
     private var forhåndsvarselUnntak: ForhåndsvarselUnntak?,
+    private var utsattFrist: MutableList<UtsettFrist>,
 ) {
     fun tilEntity(behandlingRef: UUID): ForhåndsvarselEntity? {
-        if (brukeruttalelse != null || forhåndsvarselUnntak != null) {
+        if (brukeruttalelse != null || utsattFrist.isNotEmpty() || forhåndsvarselUnntak != null) {
             return ForhåndsvarselEntity(
                 brukeruttalelseEntity = brukeruttalelse?.tilEntity(behandlingRef),
                 forhåndsvarselUnntakEntity = forhåndsvarselUnntak?.tilEntity(behandlingRef),
+                fristUtsettelseEntity = utsattFrist.map { it.tilEntity(behandlingRef) }.toList(),
             )
         }
         return null
@@ -23,40 +27,42 @@ class Forhåndsvarsel(
         uttalelseVurdering: UttalelseVurdering,
         uttalelseInfo: List<UttalelseInfo>,
         kommentar: String?,
-        utsettFrist: List<UtsettFristInfo>,
     ) {
         brukeruttalelse = Brukeruttalelse(
             id = UUID.randomUUID(),
             uttalelseVurdering = uttalelseVurdering,
             uttalelseInfo = uttalelseInfo,
             kommentar = kommentar,
-            utsettUttalselsFrist = utsettFrist,
+        )
+    }
+
+    fun lagreFristUtsettelse(nyFrist: LocalDate, begrunnelse: String) {
+        utsattFrist.add(
+            UtsettFrist(
+                id = UUID.randomUUID(),
+                nyFrist = nyFrist,
+                begrunnelse = begrunnelse,
+            ),
         )
     }
 
     fun lagreForhåndsvarselUnntak(
         begrunnelseForUnntak: BegrunnelseForUnntak,
         beskrivelse: String,
-        uttalelseInfo: List<UttalelseInfo>,
     ) {
         forhåndsvarselUnntak = ForhåndsvarselUnntak(
             id = UUID.randomUUID(),
             begrunnelseForUnntak = begrunnelseForUnntak,
             beskrivelse = beskrivelse,
         )
-        if (uttalelseInfo.isNotEmpty()) {
-            brukeruttalelse = Brukeruttalelse(
-                id = UUID.randomUUID(),
-                uttalelseVurdering = UttalelseVurdering.valueOf(begrunnelseForUnntak.name),
-                uttalelseInfo = uttalelseInfo,
-                kommentar = null,
-                utsettUttalselsFrist = listOf(),
-            )
-        }
     }
 
     fun brukeruttaleserTilFrontendDto(): BrukeruttalelseDto? {
         return brukeruttalelse?.tilFrontendDto()
+    }
+
+    fun utsettUttalelseFristTilFrontendDto(): List<FristUtsettelseDto> {
+        return utsattFrist.map { it.tilFrontendDto() }
     }
 
     fun forhåndsvarselUnntakTilFrontendDto(): ForhåndsvarselUnntakDto? {
