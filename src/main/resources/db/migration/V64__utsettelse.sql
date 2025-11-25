@@ -1,6 +1,3 @@
-CREATE TABLE tilbakekreving_utsett_uttalelse(
-    id UUID NOT NULL PRIMARY KEY,
-    behandling_ref UUID NOT NULL REFERENCES tilbakekreving_behandling(id),
-    ny_frist DATE NOT NULL,
-    begrunnelse TEXT NOT NULL
-);
+ALTER TABLE tilbakekreving_utsett_uttalelse
+    DROP COLUMN brukeruttalelse_ref,
+    ADD COLUMN behandling_ref UUID NOT NULL REFERENCES tilbakekreving_behandling(id);
