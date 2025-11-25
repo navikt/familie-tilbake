@@ -2,8 +2,6 @@ package no.nav.tilbakekreving.entities
 
 import com.fasterxml.jackson.annotation.JsonAlias
 import no.nav.tilbakekreving.behandling.Behandling
-import no.nav.tilbakekreving.behandling.Forhåndsvarsel
-import no.nav.tilbakekreving.behandling.UtsettFrist
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
 import no.nav.tilbakekreving.feil.Sporing
@@ -33,7 +31,7 @@ data class BehandlingEntity(
     val fatteVedtakStegEntity: FatteVedtakStegEntity,
     val påVentEntity: PåVentEntity?,
     val brevmottakerStegEntity: BrevmottakerStegEntity?,
-    val forhåndsvarselEntity: ForhåndsvarselEntity?,
+    val forhåndsvarselEntity: ForhåndsvarselEntity,
 ) {
     fun fraEntity(
         eksternFagsakBehandlingHistorikk: EksternFagsakBehandlingHistorikk,
@@ -61,7 +59,7 @@ data class BehandlingEntity(
             fatteVedtakSteg = fatteVedtakStegEntity.fraEntity(),
             påVent = påVentEntity?.fraEntity(),
             brevmottakerSteg = brevmottakerStegEntity?.fraEntity(),
-            forhåndsvarsel = forhåndsvarselEntity?.fraEntity() ?: Forhåndsvarsel(null, null, mutableListOf<UtsettFrist>()),
+            forhåndsvarsel = forhåndsvarselEntity.fraEntity(),
         )
     }
 }

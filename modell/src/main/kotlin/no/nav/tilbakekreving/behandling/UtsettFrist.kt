@@ -6,9 +6,9 @@ import java.time.LocalDate
 import java.util.UUID
 
 class UtsettFrist(
-    val id: UUID,
-    val nyFrist: LocalDate,
-    val begrunnelse: String,
+    private val id: UUID,
+    private val nyFrist: LocalDate,
+    private val begrunnelse: String,
 ) {
     fun tilFrontendDto(): FristUtsettelseDto {
         return FristUtsettelseDto(

@@ -12,15 +12,12 @@ class Forhåndsvarsel(
     private var forhåndsvarselUnntak: ForhåndsvarselUnntak?,
     private var utsattFrist: MutableList<UtsettFrist>,
 ) {
-    fun tilEntity(behandlingRef: UUID): ForhåndsvarselEntity? {
-        if (brukeruttalelse != null || utsattFrist.isNotEmpty() || forhåndsvarselUnntak != null) {
-            return ForhåndsvarselEntity(
-                brukeruttalelseEntity = brukeruttalelse?.tilEntity(behandlingRef),
-                forhåndsvarselUnntakEntity = forhåndsvarselUnntak?.tilEntity(behandlingRef),
-                fristUtsettelseEntity = utsattFrist.map { it.tilEntity(behandlingRef) }.toList(),
-            )
-        }
-        return null
+    fun tilEntity(behandlingRef: UUID): ForhåndsvarselEntity {
+        return ForhåndsvarselEntity(
+            brukeruttalelseEntity = brukeruttalelse?.tilEntity(behandlingRef),
+            forhåndsvarselUnntakEntity = forhåndsvarselUnntak?.tilEntity(behandlingRef),
+            fristUtsettelseEntity = utsattFrist.map { it.tilEntity(behandlingRef) }.toList(),
+        )
     }
 
     fun lagreUttalelse(

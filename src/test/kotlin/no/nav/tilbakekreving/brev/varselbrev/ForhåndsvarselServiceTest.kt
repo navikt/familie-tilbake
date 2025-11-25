@@ -12,7 +12,6 @@ import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.BestillBrevDto
 import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
-import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselDto
 import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselUnntakDto
 import no.nav.tilbakekreving.api.v1.dto.FristUtsettelseDto
 import no.nav.tilbakekreving.api.v1.dto.HarBrukerUttaltSeg
@@ -132,7 +131,24 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
     @ParameterizedTest(name = "{index} {0}")
     @MethodSource("uttalelseGyldigeCases")
     fun `gyldige brukeruttalelser lagres riktig`(case: GyldigBrukeruttalelseCase) {
-        val forhåndsvarsel = lagreOgHentUttalelse(case.input)
+        val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
+        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
+
+        val bestillBrevDto = BestillBrevDto(
+            behandlingId = behandling.id,
+            brevmalkode = Dokumentmalstype.VARSEL,
+            fritekst = "Tekst fra saksbehandler",
+        )
+        dokumentController.bestillBrev(bestillBrevDto)
+
+        dokumentController.lagreBrukeruttalelse(behandling.id, case.input)
+
+        val forhåndsvarsel = tilbakekrevingService
+            .hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
+            .shouldNotBeNull().hentForhåndsvarselFrontendDto()
+        forhåndsvarsel.forhåndsvarselUnntak shouldBe null
+        forhåndsvarsel.utsettUttalelseFrist.shouldBeEmpty()
+
         val brukeruttalelse = forhåndsvarsel.brukeruttalelse.shouldNotBeNull()
 
         brukeruttalelse.harBrukerUttaltSeg shouldBe case.forventetHarBrukerUttaltSeg
@@ -160,7 +176,16 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
     @ParameterizedTest(name = "{index} {0}")
     @MethodSource("forhåndsvarseUnntakCases")
     fun `forhåndsvarsel unntak lagres og hentes riktig`(case: ForhåndsvarselUnntakCase) {
-        val forhåndsvarsel = lagreOgHentFohåndsvarselUnntak(case.input)
+        val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
+        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
+
+        dokumentController.forhåndsvarselUnntak(behandling.id, case.input)
+        val forhåndsvarsel = tilbakekrevingService
+            .hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
+            .shouldNotBeNull().hentForhåndsvarselFrontendDto()
+        forhåndsvarsel.brukeruttalelse shouldBe null
+        forhåndsvarsel.utsettUttalelseFrist.shouldBeEmpty()
+
         forhåndsvarsel.forhåndsvarselUnntak.shouldNotBeNull {
             begrunnelseForUnntak shouldBe case.forventetBegrunnelseForUnntak
             beskrivelse shouldBe case.forventetBeskrivelse
@@ -239,42 +264,6 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
         return tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
-    }
-
-    private fun lagreOgHentUttalelse(input: BrukeruttalelseDto): ForhåndsvarselDto {
-        val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
-        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
-
-        val bestillBrevDto = BestillBrevDto(
-            behandlingId = behandling.id,
-            brevmalkode = Dokumentmalstype.VARSEL,
-            fritekst = "Tekst fra saksbehandler",
-        )
-        dokumentController.bestillBrev(bestillBrevDto)
-
-        dokumentController.lagreBrukeruttalelse(behandling.id, input)
-
-        val forhåndsvarselDto = tilbakekrevingService
-            .hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
-            .shouldNotBeNull().hentForhåndsvarselFrontendDto()
-        forhåndsvarselDto.forhåndsvarselUnntak shouldBe null
-        forhåndsvarselDto.utsettUttalelseFrist.shouldBeEmpty()
-
-        return forhåndsvarselDto
-    }
-
-    private fun lagreOgHentFohåndsvarselUnntak(input: ForhåndsvarselUnntakDto): ForhåndsvarselDto {
-        val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
-        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
-
-        dokumentController.forhåndsvarselUnntak(behandling.id, input)
-        val forhåndsvarselDto = tilbakekrevingService
-            .hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
-            .shouldNotBeNull().hentForhåndsvarselFrontendDto()
-        forhåndsvarselDto.brukeruttalelse shouldBe null
-        forhåndsvarselDto.utsettUttalelseFrist.shouldBeEmpty()
-
-        return forhåndsvarselDto
     }
 
     companion object {

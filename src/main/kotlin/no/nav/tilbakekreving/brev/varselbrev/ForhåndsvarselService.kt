@@ -139,26 +139,14 @@ class ForhåndsvarselService(
         forhåndsvarselUnntakDto: ForhåndsvarselUnntakDto,
     ) {
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
-        when (forhåndsvarselUnntakDto.begrunnelseForUnntak) {
-            VarslingsUnntak.IKKE_PRAKTISK_MULIG -> {
-                behandling.lagreForhåndsvarselUnntak(
-                    begrunnelseForUnntak = BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG,
-                    beskrivelse = forhåndsvarselUnntakDto.beskrivelse,
-                )
-            }
-            VarslingsUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING -> {
-                behandling.lagreForhåndsvarselUnntak(
-                    begrunnelseForUnntak = BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING,
-                    beskrivelse = forhåndsvarselUnntakDto.beskrivelse,
-                )
-            }
-            VarslingsUnntak.ÅPENBART_UNØDVENDIG -> {
-                behandling.lagreForhåndsvarselUnntak(
-                    begrunnelseForUnntak = BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
-                    beskrivelse = forhåndsvarselUnntakDto.beskrivelse,
-                )
-            }
-        }
+        behandling.lagreForhåndsvarselUnntak(
+            begrunnelseForUnntak = when (forhåndsvarselUnntakDto.begrunnelseForUnntak) {
+                VarslingsUnntak.IKKE_PRAKTISK_MULIG -> BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG
+                VarslingsUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING -> BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING
+                VarslingsUnntak.ÅPENBART_UNØDVENDIG -> BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG
+            },
+            beskrivelse = forhåndsvarselUnntakDto.beskrivelse,
+        )
     }
 
     private fun opprettMetadata(varselbrevInfo: VarselbrevInfo): Brevmetadata {
