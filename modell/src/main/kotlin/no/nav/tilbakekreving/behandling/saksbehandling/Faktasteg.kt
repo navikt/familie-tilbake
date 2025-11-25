@@ -1,5 +1,9 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
+import no.nav.kontrakter.frontend.models.BestemmelseEllerGrunnlagDto
+import no.nav.kontrakter.frontend.models.FaktaDto
+import no.nav.kontrakter.frontend.models.FaktaPeriodeDto
+import no.nav.kontrakter.frontend.models.RettsligGrunnlagDto
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
 import no.nav.tilbakekreving.api.v1.dto.FeilutbetalingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurderingAvBrukersUttalelseDto
@@ -40,6 +44,16 @@ class Faktasteg(
 
     internal fun vurder(vurdering: Vurdering) {
         this.vurdering = vurdering
+    }
+
+    fun nyTilFrontendDto(kravgrunnlag: KravgrunnlagHendelse): FaktaDto {
+        return FaktaDto(
+            perioder = vurdering.perioder.map {
+                it.tilFrontendDto(
+                    kravgrunnlag = kravgrunnlag,
+                )
+            },
+        )
     }
 
     fun tilFrontendDto(
@@ -156,6 +170,22 @@ class Faktasteg(
                 periode = DatoperiodeEntity(fom = periode.fom, tom = periode.tom),
                 rettsligGrunnlag = rettsligGrunnlag,
                 rettsligGrunnlagUnderkategori = rettsligGrunnlagUnderkategori,
+            )
+        }
+
+        fun tilFrontendDto(kravgrunnlag: KravgrunnlagHendelse): FaktaPeriodeDto {
+            return FaktaPeriodeDto(
+                id = id.toString(),
+                fom = periode.fom,
+                tom = periode.tom,
+                feilutbetaltBeløp = kravgrunnlag.totaltBeløpFor(periode).toInt(),
+                splittbarePerioder = emptyList(),
+                rettsligGrunnlag = listOf(
+                    RettsligGrunnlagDto(
+                        bestemmelse = BestemmelseEllerGrunnlagDto(rettsligGrunnlag.name, rettsligGrunnlag.beskrivelse()),
+                        grunnlag = BestemmelseEllerGrunnlagDto(rettsligGrunnlagUnderkategori.name, rettsligGrunnlagUnderkategori.beskrivelse()),
+                    ),
+                ),
             )
         }
     }
