@@ -444,9 +444,12 @@ class Tilbakekreving internal constructor(
     }
 
     fun hentForhåndsvarselFrontendDto(): ForhåndsvarselDto {
+        val behandling = behandlingHistorikk.nåværende().entry
         return ForhåndsvarselDto(
             varselbrevDto = brevHistorikk.sisteVarselbrev()?.tilFrontendDto(),
-            brukeruttalelse = behandlingHistorikk.nåværende().entry.brukeruttaleserTilFrontendDto(),
+            brukeruttalelse = behandling.brukeruttaleserTilFrontendDto(),
+            forhåndsvarselUnntak = behandling.forhåndsvarselUnntakTilFrontendDto(),
+            utsettUttalelseFrist = behandling.utsettUttalelseFristTilFrontendDto(),
         )
     }
 
