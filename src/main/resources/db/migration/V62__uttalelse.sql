@@ -12,3 +12,10 @@ CREATE TABLE tilbakekreving_uttalelse_informasjon(
     hvor_brukeren_uttalet_seg VARCHAR(128) NOT NULL,
     uttalelse_beskrivelse TEXT NOT NULL
 );
+
+CREATE TABLE tilbakekreving_utsett_uttalelse(
+    id UUID NOT NULL PRIMARY KEY,
+    brukeruttalelse_ref UUID NOT NULL REFERENCES tilbakekreving_brukeruttalelse(id),
+    ny_frist DATE NOT NULL,
+    begrunnelse TEXT NOT NULL
+);
