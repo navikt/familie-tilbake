@@ -28,6 +28,7 @@ subprojects {
         remoteInputSpec = "https://raw.githubusercontent.com/navikt/tilbakekreving-kontrakter/refs/heads/main/tsp-output/schema/openapi.yaml"
         outputDir = "$projectDir/src/main/generated"
         packageName = "no.nav.kontrakter.frontend"
+        modelNameSuffix = "Dto"
         cleanupOutput = true
         configOptions.put("dateLibrary", "java8")
         configOptions.put("interfaceOnly", "true")
