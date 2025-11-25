@@ -31,7 +31,7 @@ data class BehandlingEntity(
     val fatteVedtakStegEntity: FatteVedtakStegEntity,
     val påVentEntity: PåVentEntity?,
     val brevmottakerStegEntity: BrevmottakerStegEntity?,
-    val forhåndsvarselEntity: ForhåndsvarselEntity,
+    val forhåndsvarselEntity: ForhåndsvarselEntity = ForhåndsvarselEntity(null, null, listOf()), // todo denne opprettelsen skal fjernes etter prodsetting
 ) {
     fun fraEntity(
         eksternFagsakBehandlingHistorikk: EksternFagsakBehandlingHistorikk,
