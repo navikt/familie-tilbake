@@ -5,12 +5,14 @@ import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.kontrakter.frontend.apis.BehandlingApi
 import no.nav.kontrakter.frontend.models.FaktaDto
+import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.TilbakekrevingService
 import org.springframework.http.ResponseEntity
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 import java.util.UUID
 
-@Service
+@Component
+@ProtectedWithClaims(issuer = "azuread")
 class BehandlingApiController(
     private val tilbakekrevingService: TilbakekrevingService,
     private val tilgangskontrollService: TilgangskontrollService,
