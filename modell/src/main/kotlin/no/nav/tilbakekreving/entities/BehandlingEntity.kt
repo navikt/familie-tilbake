@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.entities
 
 import com.fasterxml.jackson.annotation.JsonAlias
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
@@ -11,6 +12,7 @@ import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import java.time.LocalDateTime
 import java.util.UUID
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class BehandlingEntity(
     val id: UUID,
     val tilbakekrevingId: String,
@@ -31,7 +33,7 @@ data class BehandlingEntity(
     val fatteVedtakStegEntity: FatteVedtakStegEntity,
     val påVentEntity: PåVentEntity?,
     val brevmottakerStegEntity: BrevmottakerStegEntity?,
-    val brukeruttalelseEntity: BrukeruttalelseEntity?,
+    val forhåndsvarselEntity: ForhåndsvarselEntity = ForhåndsvarselEntity(null, null, listOf()), // todo denne opprettelsen skal fjernes etter prodsetting
 ) {
     fun fraEntity(
         eksternFagsakBehandlingHistorikk: EksternFagsakBehandlingHistorikk,
@@ -59,7 +61,7 @@ data class BehandlingEntity(
             fatteVedtakSteg = fatteVedtakStegEntity.fraEntity(),
             påVent = påVentEntity?.fraEntity(),
             brevmottakerSteg = brevmottakerStegEntity?.fraEntity(),
-            brukeruttalelse = brukeruttalelseEntity?.fraEntity(),
+            forhåndsvarsel = forhåndsvarselEntity.fraEntity(),
         )
     }
 }

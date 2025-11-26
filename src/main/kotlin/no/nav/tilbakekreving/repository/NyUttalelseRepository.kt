@@ -1,10 +1,8 @@
 package no.nav.tilbakekreving.repository
 
 import no.nav.tilbakekreving.entities.BrukeruttalelseEntity
-import no.nav.tilbakekreving.entities.UtsettFristInfoEntity
 import no.nav.tilbakekreving.entities.UttalelseInfoEntity
 import no.nav.tilbakekreving.entity.BrukerUttalelseEntityMapper
-import no.nav.tilbakekreving.entity.BrukerUttalelseEntityMapper.UttalelseInfo.brukeruttalelseRef
 import no.nav.tilbakekreving.entity.Entity.Companion.get
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.query
@@ -21,18 +19,8 @@ class NyUttalelseRepository(
             behandlingId,
         ) { resultSet, _ ->
             val uttalelseInfoEntity = hentUttalelseInfo(resultSet[BrukerUttalelseEntityMapper.id])
-            val utsettUttalelseFrist = hentUtsettUttalselsFrist(resultSet[BrukerUttalelseEntityMapper.id])
-            BrukerUttalelseEntityMapper.map(resultSet, uttalelseInfoEntity, utsettUttalelseFrist)
+            BrukerUttalelseEntityMapper.map(resultSet, uttalelseInfoEntity)
         }.singleOrNull()
-    }
-
-    private fun hentUtsettUttalselsFrist(brukeruttalelseRef: UUID): List<UtsettFristInfoEntity> {
-        return jdbcTemplate.query(
-            "SELECT * FROM tilbakekreving_utsett_uttalelse WHERE brukeruttalelse_ref=?",
-            brukeruttalelseRef,
-        ) { resultSet, _ ->
-            BrukerUttalelseEntityMapper.UtsettFrist.map(resultSet)
-        }
     }
 
     private fun hentUttalelseInfo(brukeruttalelseRef: UUID): List<UttalelseInfoEntity> {
@@ -47,12 +35,8 @@ class NyUttalelseRepository(
     fun lagre(brukerUttaleserEntity: BrukeruttalelseEntity?) {
         BrukerUttalelseEntityMapper.insertQuery(jdbcTemplate, brukerUttaleserEntity!!)
         jdbcTemplate.update("DELETE FROM tilbakekreving_uttalelse_informasjon WHERE brukeruttalelse_ref=?;", brukerUttaleserEntity.id)
-        jdbcTemplate.update("DELETE FROM tilbakekreving_utsett_uttalelse WHERE brukeruttalelse_ref=?;", brukerUttaleserEntity.id)
         brukerUttaleserEntity.uttalelseInfoEntity.forEach {
             BrukerUttalelseEntityMapper.UttalelseInfo.upsertQuery(jdbcTemplate, it)
-        }
-        brukerUttaleserEntity.utsettFristEntity.forEach {
-            BrukerUttalelseEntityMapper.UtsettFrist.upsertQuery(jdbcTemplate, it)
         }
     }
 }

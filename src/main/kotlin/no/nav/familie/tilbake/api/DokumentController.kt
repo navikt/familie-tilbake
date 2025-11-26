@@ -16,7 +16,9 @@ import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.api.v1.dto.BestillBrevDto
 import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
 import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselDto
+import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselUnntakDto
 import no.nav.tilbakekreving.api.v1.dto.ForhåndsvisningHenleggelsesbrevDto
+import no.nav.tilbakekreving.api.v1.dto.FristUtsettelseDto
 import no.nav.tilbakekreving.api.v1.dto.FritekstavsnittDto
 import no.nav.tilbakekreving.api.v1.dto.HentForhåndvisningVedtaksbrevPdfDto
 import no.nav.tilbakekreving.brev.varselbrev.ForhåndsvarselService
@@ -174,6 +176,60 @@ class DokumentController(
         return Ressurs.failure("Fant ingen tilbakekreving til behandlingId $behandlingId")
     }
 
+    @Operation(summary = "Skal utsette uttalelse frist")
+    @PostMapping(
+        "/forhåndsvarsel/utsettelse",
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun utsettUttalelseFrist(
+        @PathVariable behandlingId: UUID,
+        @Valid @RequestBody
+        dto: FristUtsettelseDto,
+    ): Ressurs<Nothing?> {
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        if (tilbakekreving != null) {
+            tilgangskontrollService.validerTilgangTilbakekreving(
+                tilbakekreving = tilbakekreving,
+                behandlingId = behandlingId,
+                minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+                auditLoggerEvent = AuditLoggerEvent.ACCESS,
+                handling = "Utsette frist på uttalelsen",
+            )
+            tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving ->
+                forhåndsvarselService.utsettUttalelseFrist(tilbakekreving, dto)
+            }
+            return Ressurs.success(null)
+        }
+        return Ressurs.failure("Fant ingen tilbakekreving til behandlingId $behandlingId")
+    }
+
+    @Operation(summary = "Skal ikke sendes forhåndsvarsel")
+    @PostMapping(
+        "/forhåndsvarsel/unntak",
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun forhåndsvarselUnntak(
+        @PathVariable behandlingId: UUID,
+        @Valid @RequestBody
+        dto: ForhåndsvarselUnntakDto,
+    ): Ressurs<Nothing?> {
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        if (tilbakekreving != null) {
+            tilgangskontrollService.validerTilgangTilbakekreving(
+                tilbakekreving = tilbakekreving,
+                behandlingId = behandlingId,
+                minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+                auditLoggerEvent = AuditLoggerEvent.ACCESS,
+                handling = "Sender ikke forhåndsvarsel",
+            )
+            tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving ->
+                forhåndsvarselService.håndterForhåndsvarselUnntak(tilbakekreving, dto)
+            }
+            return Ressurs.success(null)
+        }
+        return Ressurs.failure("Fant ingen tilbakekreving til behandlingId $behandlingId")
+    }
+
     @Operation(summary = "Forhåndsvis henleggelsesbrev")
     @PostMapping(
         "/forhandsvis-henleggelsesbrev",
@@ -272,7 +328,7 @@ class DokumentController(
                 behandlingId = behandlingId,
                 minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                 auditLoggerEvent = AuditLoggerEvent.CREATE,
-                handling = "Sender brev",
+                handling = "Lagrer brukers uttalelse",
             )
             forhåndsvarselService.lagreUttalelse(tilbakekreving, brukeruttalelse)
             true

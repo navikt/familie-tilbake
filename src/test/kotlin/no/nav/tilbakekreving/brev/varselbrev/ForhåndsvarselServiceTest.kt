@@ -6,15 +6,17 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
 import no.nav.familie.tilbake.api.DokumentController
 import no.nav.tilbakekreving.Testdata
+import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.BestillBrevDto
 import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
-import no.nav.tilbakekreving.api.v1.dto.FristUtsettelse
+import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselUnntakDto
+import no.nav.tilbakekreving.api.v1.dto.FristUtsettelseDto
 import no.nav.tilbakekreving.api.v1.dto.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.api.v1.dto.Uttalelsesdetaljer
+import no.nav.tilbakekreving.api.v1.dto.VarslingsUnntak
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp.Companion.medFeilutbetaling
 import no.nav.tilbakekreving.e2e.TilbakekrevingE2EBase
@@ -28,6 +30,8 @@ import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.util.kroner
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
@@ -38,75 +42,51 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
     @Autowired
     protected lateinit var dokumentController: DokumentController
 
-    @Autowired
-    protected lateinit var forhåndsvarselService: ForhåndsvarselService
-
     @BeforeEach
     fun cleanup() {
-        jdbcTemplate.update("DELETE FROM tilbakekreving_utsett_uttalelse")
         jdbcTemplate.update("DELETE FROM tilbakekreving_uttalelse_informasjon")
+        jdbcTemplate.update("DELETE FROM tilbakekreving_forhåndsvarsel_unntak")
+        jdbcTemplate.update("DELETE FROM tilbakekreving_utsett_uttalelse")
         jdbcTemplate.update("DELETE FROM tilbakekreving_brukeruttalelse")
     }
 
     @Test
-    fun `henter tekster til varselbrev`() {
-        val fagsystemId = opprettTilbakekrevingOgHentFagsystemId()
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+    fun `henter tekster til varselbrev når det skal sendes forhåndsvarsel`() {
+        val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
+        val tekster = dokumentController.hentForhåndsvarselTekst(tilbakekreving.behandlingHistorikk.nåværende().entry.id)
 
-        val tekster = forhåndsvarselService.hentVarselbrevTekster(tilbakekreving)
-        tekster.shouldNotBeNull()
-        tekster.avsnitter.shouldNotBeEmpty()
-        tekster.overskrift shouldContain "Nav vurderer om du må betale tilbake"
-        tekster.avsnitter.forOne {
+        tekster.data.shouldNotBeNull()
+        tekster.data.avsnitter.shouldNotBeEmpty()
+        tekster.data.overskrift shouldContain "Nav vurderer om du må betale tilbake"
+        tekster.data.avsnitter.forOne {
             it.title shouldBe ""
             it.body shouldContain "Før vi avgjør om du skal betale tilbake,"
         }
-        tekster.avsnitter.forOne {
+        tekster.data.avsnitter.forOne {
             it.title shouldBe "Dette har skjedd"
             it.body shouldContain "og endringen har ført til at du har fått utbetalt for mye."
         }
-        tekster.avsnitter.forOne {
+        tekster.data.avsnitter.forOne {
             it.title shouldBe "Dette legger vi vekt på i vurderingen vår"
             it.body shouldContain "For å avgjøre om vi kan kreve tilbake,"
         }
-        tekster.avsnitter.forOne {
+        tekster.data.avsnitter.forOne {
             it.title shouldBe "Slik uttaler du deg"
             it.body shouldContain "Du kan sende uttalelsen din ved å logge deg inn på"
         }
-        tekster.avsnitter.forOne {
+        tekster.data.avsnitter.forOne {
             it.title shouldBe "Har du spørsmål?"
             it.body shouldContain "Du finner mer informasjon på nav.no/tilleggsstonad."
         }
-        tekster.avsnitter.forOne {
+        tekster.data.avsnitter.forOne {
             it.title shouldBe "Du har rett til innsyn"
             it.body shouldContain "På nav.no/dittnav kan du se dokumentene i saken din"
         }
     }
 
     @Test
-    fun `sende forhåndsvarsel skal oppdatere varselbrevet i brevhistorikk med tid og journlaførtId`() {
-        val fagsystemId = opprettTilbakekrevingOgHentFagsystemId()
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
-        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
-        val bestillBrevDto = BestillBrevDto(
-            behandlingId = behandling.id,
-            brevmalkode = Dokumentmalstype.VARSEL,
-            fritekst = "Tekst fra saksbehandler",
-        )
-
-        tilbakekreving.brevHistorikk.sisteVarselbrev() shouldBe null
-        dokumentController.bestillBrev(bestillBrevDto)
-
-        val tilbakekrevingEtterVarselbrev = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId)
-        tilbakekrevingEtterVarselbrev!!.brevHistorikk.sisteVarselbrev() shouldNotBeNull {
-            journalpostId shouldBe "-1"
-        }
-    }
-
-    @Test
-    fun `brukersuttalelse er en tom liste når brukeren ikke har uttalet seg`() {
-        val fagsystemId = opprettTilbakekrevingOgHentFagsystemId()
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+    fun `forhåndsvarsel detaljene er null når varselbrev ikke er sendt`() {
+        val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
 
         val antall = jdbcTemplate.queryForObject(
@@ -126,60 +106,32 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
 
         forhåndsvarselDto.varselbrevDto shouldBe null
         forhåndsvarselDto.brukeruttalelse shouldBe null
+        forhåndsvarselDto.forhåndsvarselUnntak shouldBe null
     }
 
     @Test
-    fun `brukersuttalelse og varselinfo skal lagres og hentes riktig når ingen varsel er sendt`() {
-        val fagsystemId = opprettTilbakekrevingOgHentFagsystemId()
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+    fun `sende forhåndsvarsel skal oppdatere varselbrevet i brevhistorikk med tid og journlaførtId`() {
+        val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
-        val brukeruttalelseDto = BrukeruttalelseDto(
-            HarBrukerUttaltSeg.JA,
-            uttalelsesdetaljer = listOf(
-                Uttalelsesdetaljer(
-                    hvorBrukerenUttalteSeg = "Modia",
-                    uttalelsesdato = LocalDate.of(2025, 10, 15),
-                    uttalelseBeskrivelse = "Bruker har uttalet seg",
-                ),
-            ),
-            utsettFrist = null,
-            kommentar = null,
+        val bestillBrevDto = BestillBrevDto(
+            behandlingId = behandling.id,
+            brevmalkode = Dokumentmalstype.VARSEL,
+            fritekst = "Tekst fra saksbehandler",
         )
 
-        dokumentController.lagreBrukeruttalelse(behandling.id, brukeruttalelseDto)
+        tilbakekreving.brevHistorikk.sisteVarselbrev() shouldBe null
+        dokumentController.bestillBrev(bestillBrevDto)
 
-        val antallBrukeruttalelser = jdbcTemplate.queryForObject(
-            "SELECT count(*) FROM tilbakekreving_brukeruttalelse WHERE behandling_ref = ?",
-            Int::class.java,
-            behandling.id,
-        )
-        antallBrukeruttalelser shouldBe 1
-
-        val antallUttalelseinfo = jdbcTemplate.queryForObject(
-            "SELECT COUNT(*) FROM tilbakekreving_uttalelse_informasjon",
-            Int::class.java,
-        )
-        antallUttalelseinfo shouldBe 1
-
-        val tilbakekrevingEtterUttalelse = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
-        val forhåndsvarselDto = tilbakekrevingEtterUttalelse.hentForhåndsvarselFrontendDto()
-
-        forhåndsvarselDto.varselbrevDto shouldBe null
-        forhåndsvarselDto.brukeruttalelse.shouldNotBeNull {
-            harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.JA
-            utsettFrist.shouldBeEmpty()
-            kommentar == null
-            uttalelsesdetaljer.shouldNotBeNull().size shouldBe 1
-            uttalelsesdetaljer.shouldNotBeNull()[0].uttalelsesdato shouldBe LocalDate.of(2025, 10, 15)
-            uttalelsesdetaljer.shouldNotBeNull()[0].hvorBrukerenUttalteSeg shouldBe "Modia"
-            uttalelsesdetaljer.shouldNotBeNull()[0].uttalelseBeskrivelse shouldBe "Bruker har uttalet seg"
+        val tilbakekrevingEtterVarselbrev = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
+        tilbakekrevingEtterVarselbrev!!.brevHistorikk.sisteVarselbrev() shouldNotBeNull {
+            journalpostId shouldBe "-1"
         }
     }
 
-    @Test
-    fun `brukersuttalelse og varselbrevinfo skal lagres og hentes riktig når varselbrev er sendt`() {
-        val fagsystemId = opprettTilbakekrevingOgHentFagsystemId()
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+    @ParameterizedTest(name = "{index} {0}")
+    @MethodSource("uttalelseGyldigeCases")
+    fun `gyldige brukeruttalelser lagres riktig`(case: GyldigBrukeruttalelseCase) {
+        val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
 
         val bestillBrevDto = BestillBrevDto(
@@ -189,87 +141,26 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
         )
         dokumentController.bestillBrev(bestillBrevDto)
 
-        val brukeruttalelseDto = BrukeruttalelseDto(
-            HarBrukerUttaltSeg.JA,
-            uttalelsesdetaljer = listOf(
-                Uttalelsesdetaljer(
-                    hvorBrukerenUttalteSeg = "Tlf",
-                    uttalelsesdato = LocalDate.of(2025, 9, 15),
-                    uttalelseBeskrivelse = "Bruker har sagt ...",
-                ),
-            ),
-            utsettFrist = null,
-            kommentar = null,
-        )
+        dokumentController.lagreBrukeruttalelse(behandling.id, case.input)
 
-        dokumentController.lagreBrukeruttalelse(behandling.id, brukeruttalelseDto)
+        val forhåndsvarsel = tilbakekrevingService
+            .hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
+            .shouldNotBeNull().hentForhåndsvarselFrontendDto()
+        forhåndsvarsel.forhåndsvarselUnntak shouldBe null
+        forhåndsvarsel.utsettUttalelseFrist.shouldBeEmpty()
 
-        val tilbakekrevingEtterUttalelse = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
-        val forhåndsvarselDto = tilbakekrevingEtterUttalelse.hentForhåndsvarselFrontendDto()
+        val brukeruttalelse = forhåndsvarsel.brukeruttalelse.shouldNotBeNull()
 
-        forhåndsvarselDto.varselbrevDto shouldNotBeNull {
-            varselbrevSendtTid shouldNotBe null
-        }
-        forhåndsvarselDto.brukeruttalelse.shouldNotBeNull {
-            harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.JA
-            utsettFrist.shouldBeEmpty()
-            kommentar == null
-            uttalelsesdetaljer.shouldNotBeNull().size shouldBe 1
-            uttalelsesdetaljer.shouldNotBeNull()[0].uttalelsesdato shouldBe LocalDate.of(2025, 9, 15)
-            uttalelsesdetaljer.shouldNotBeNull()[0].hvorBrukerenUttalteSeg shouldBe "Tlf"
-            uttalelsesdetaljer.shouldNotBeNull()[0].uttalelseBeskrivelse shouldBe "Bruker har sagt ..."
-        }
+        brukeruttalelse.harBrukerUttaltSeg shouldBe case.forventetHarBrukerUttaltSeg
+        brukeruttalelse.uttalelsesdetaljer.orEmpty().size shouldBe case.forventetAntallDetaljer
+        brukeruttalelse.kommentar shouldBe case.forventetKommentar
     }
 
-    @Test
-    fun `brukersuttalelse skal lagres og hentes riktig når det er flere uttalelser`() {
-        val fagsystemId = opprettTilbakekrevingOgHentFagsystemId()
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+    @ParameterizedTest(name = "{index} {0}")
+    @MethodSource("uttalelseUgyldigeCases")
+    fun `ugyldige brukeruttalelser gir valideringsfeil`(case: UgyldigBrukeruttalelseCase) {
+        val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
-
-        val brukeruttalelseDto = BrukeruttalelseDto(
-            HarBrukerUttaltSeg.JA,
-            uttalelsesdetaljer = listOf(
-                Uttalelsesdetaljer(
-                    hvorBrukerenUttalteSeg = "Tlf",
-                    uttalelsesdato = LocalDate.of(2025, 9, 15),
-                    uttalelseBeskrivelse = "Bruker har sagt ...",
-                ),
-                Uttalelsesdetaljer(
-                    hvorBrukerenUttalteSeg = "Modia",
-                    uttalelsesdato = LocalDate.of(2025, 9, 17),
-                    uttalelseBeskrivelse = "Bruker har skrevet ...",
-                ),
-            ),
-            utsettFrist = null,
-            kommentar = null,
-        )
-
-        dokumentController.lagreBrukeruttalelse(behandling.id, brukeruttalelseDto)
-
-        val tilbakekrevingEtterUttalelse = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
-        val forhåndsvarselDto = tilbakekrevingEtterUttalelse.hentForhåndsvarselFrontendDto()
-
-        forhåndsvarselDto.brukeruttalelse.shouldNotBeNull {
-            harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.JA
-            utsettFrist.shouldBeEmpty()
-            kommentar == null
-            uttalelsesdetaljer.shouldNotBeNull().size shouldBe 2
-            uttalelsesdetaljer.shouldNotBeNull()[0].uttalelsesdato shouldBe LocalDate.of(2025, 9, 15)
-            uttalelsesdetaljer.shouldNotBeNull()[0].hvorBrukerenUttalteSeg shouldBe "Tlf"
-            uttalelsesdetaljer.shouldNotBeNull()[0].uttalelseBeskrivelse shouldBe "Bruker har sagt ..."
-            uttalelsesdetaljer.shouldNotBeNull()[1].uttalelsesdato shouldBe LocalDate.of(2025, 9, 17)
-            uttalelsesdetaljer.shouldNotBeNull()[1].hvorBrukerenUttalteSeg shouldBe "Modia"
-            uttalelsesdetaljer.shouldNotBeNull()[1].uttalelseBeskrivelse shouldBe "Bruker har skrevet ..."
-        }
-    }
-
-    @Test
-    fun `Skal feile når uttalelse er JA men det er ingen detaljer`() {
-        val fagsystemId = opprettTilbakekrevingOgHentFagsystemId()
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
-        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
-
         val bestillBrevDto = BestillBrevDto(
             behandlingId = behandling.id,
             brevmalkode = Dokumentmalstype.VARSEL,
@@ -277,61 +168,34 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
         )
         dokumentController.bestillBrev(bestillBrevDto)
 
-        val brukeruttalelseDto = BrukeruttalelseDto(
-            HarBrukerUttaltSeg.JA,
-            uttalelsesdetaljer = null,
-            utsettFrist = null,
-            kommentar = null,
-        )
-
         shouldThrow<Exception> {
-            dokumentController.lagreBrukeruttalelse(behandling.id, brukeruttalelseDto)
-        }.message shouldBe "Det kreves uttalelsedetaljer når brukeren har uttalet seg. uttalelsedetaljer var null"
-
-        val brukeruttalelseTomList = BrukeruttalelseDto(
-            HarBrukerUttaltSeg.JA,
-            uttalelsesdetaljer = listOf(),
-            utsettFrist = null,
-            kommentar = null,
-        )
-
-        shouldThrow<Exception> {
-            dokumentController.lagreBrukeruttalelse(behandling.id, brukeruttalelseTomList)
-        }.message shouldBe "Det kreves uttalelsedetaljer når brukeren har uttalet seg. uttalelsedetaljer var tøm"
+            dokumentController.lagreBrukeruttalelse(behandling.id, case.input)
+        }.message shouldBe case.forventetFeilmelding
     }
 
-    @Test
-    fun `uttalelse skal lagres og hentes riktig når brukeren ikke har uttalt seg`() {
-        val fagsystemId = opprettTilbakekrevingOgHentFagsystemId()
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+    @ParameterizedTest(name = "{index} {0}")
+    @MethodSource("forhåndsvarseUnntakCases")
+    fun `forhåndsvarsel unntak lagres og hentes riktig`(case: ForhåndsvarselUnntakCase) {
+        val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
 
-        val brukeruttalelseDto = BrukeruttalelseDto(
-            HarBrukerUttaltSeg.NEI,
-            uttalelsesdetaljer = null,
-            utsettFrist = null,
-            kommentar = "Ville ikke",
-        )
+        dokumentController.forhåndsvarselUnntak(behandling.id, case.input)
+        val forhåndsvarsel = tilbakekrevingService
+            .hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
+            .shouldNotBeNull().hentForhåndsvarselFrontendDto()
+        forhåndsvarsel.brukeruttalelse shouldBe null
+        forhåndsvarsel.utsettUttalelseFrist.shouldBeEmpty()
 
-        dokumentController.lagreBrukeruttalelse(behandling.id, brukeruttalelseDto)
-
-        val tilbakekrevingEtterUttalelse = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
-        val forhåndsvarselDto = tilbakekrevingEtterUttalelse.hentForhåndsvarselFrontendDto()
-
-        forhåndsvarselDto.brukeruttalelse.shouldNotBeNull {
-            harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.NEI
-            utsettFrist.shouldBeEmpty()
-            kommentar == "Ville ikke"
-            uttalelsesdetaljer.shouldBeEmpty()
+        forhåndsvarsel.forhåndsvarselUnntak.shouldNotBeNull {
+            begrunnelseForUnntak shouldBe case.forventetBegrunnelseForUnntak
+            beskrivelse shouldBe case.forventetBeskrivelse
         }
     }
 
     @Test
-    fun `utsatt frist skal lagres og hentes riktig`() {
-        val fagsystemId = opprettTilbakekrevingOgHentFagsystemId()
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+    fun `utsettelse av frist lagres og hentes riktig`() {
+        val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
-
         val bestillBrevDto = BestillBrevDto(
             behandlingId = behandling.id,
             brevmalkode = Dokumentmalstype.VARSEL,
@@ -339,139 +203,40 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
         )
         dokumentController.bestillBrev(bestillBrevDto)
 
-        val brukeruttalelseDto = BrukeruttalelseDto(
-            HarBrukerUttaltSeg.UTTSETT_FRIST,
-            uttalelsesdetaljer = null,
-            utsettFrist = listOf(FristUtsettelse(LocalDate.of(2025, 11, 15), "Advokat vil ha mer tid")),
-            kommentar = null,
+        val førsteFrist = FristUtsettelseDto(
+            LocalDate.of(2025, 11, 15),
+            "Advokat vil ha mer tid",
         )
+        dokumentController.utsettUttalelseFrist(behandling.id, førsteFrist)
 
-        dokumentController.lagreBrukeruttalelse(behandling.id, brukeruttalelseDto)
+        val etterFørsteUtsettelse = tilbakekrevingService
+            .hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
+            .shouldNotBeNull().hentForhåndsvarselFrontendDto()
 
-        val tilbakekrevingEtterUttalelse = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
-        val forhåndsvarselDto = tilbakekrevingEtterUttalelse.hentForhåndsvarselFrontendDto()
-
-        forhåndsvarselDto.brukeruttalelse.shouldNotBeNull {
-            harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.UTTSETT_FRIST
-            utsettFrist!!.size shouldBe 1
-            uttalelsesdetaljer.shouldBeEmpty()
+        etterFørsteUtsettelse.utsettUttalelseFrist.shouldNotBeNull {
+            size shouldBe 1
+            etterFørsteUtsettelse.utsettUttalelseFrist?.get(0)?.nyFrist shouldBe LocalDate.of(2025, 11, 15)
         }
-        forhåndsvarselDto.brukeruttalelse!!.utsettFrist!![0].nyFrist shouldBe LocalDate.of(2025, 11, 15)
-        forhåndsvarselDto.brukeruttalelse!!.utsettFrist!![0].begrunnelse shouldBe "Advokat vil ha mer tid"
-    }
 
-    @Test
-    fun `flere utsatt frist skal lagres og hentes riktig`() {
-        val fagsystemId = opprettTilbakekrevingOgHentFagsystemId()
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
-        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
-
-        val bestillBrevDto = BestillBrevDto(
-            behandlingId = behandling.id,
-            brevmalkode = Dokumentmalstype.VARSEL,
-            fritekst = "Tekst fra saksbehandler",
+        val andreFrist = FristUtsettelseDto(
+            LocalDate.of(2025, 11, 25),
+            "Advokat vil ha enda mer tid",
         )
-        dokumentController.bestillBrev(bestillBrevDto)
+        dokumentController.utsettUttalelseFrist(behandling.id, andreFrist)
 
-        val brukeruttalelseDto = BrukeruttalelseDto(
-            HarBrukerUttaltSeg.UTTSETT_FRIST,
-            uttalelsesdetaljer = null,
-            utsettFrist = listOf(
-                FristUtsettelse(LocalDate.of(2025, 11, 15), "Advokat vil ha mer tid"),
-                FristUtsettelse(LocalDate.of(2025, 11, 25), "Advokat vil ha enda mer tid"),
-            ),
-            kommentar = null,
-        )
-
-        dokumentController.lagreBrukeruttalelse(behandling.id, brukeruttalelseDto)
-
-        val tilbakekrevingEtterUttalelse = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
-        val forhåndsvarselDto = tilbakekrevingEtterUttalelse.hentForhåndsvarselFrontendDto()
-
-        forhåndsvarselDto.brukeruttalelse.shouldNotBeNull {
-            harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.UTTSETT_FRIST
-            utsettFrist!!.size shouldBe 2
-            uttalelsesdetaljer.shouldBeEmpty()
+        val etterAndreUtsettelse = tilbakekrevingService
+            .hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
+            .shouldNotBeNull().hentForhåndsvarselFrontendDto()
+        etterAndreUtsettelse.utsettUttalelseFrist.shouldNotBeNull {
+            size shouldBe 2
+            etterAndreUtsettelse.utsettUttalelseFrist.get(0).nyFrist shouldBe LocalDate.of(2025, 11, 15)
+            etterAndreUtsettelse.utsettUttalelseFrist.get(1).nyFrist shouldBe LocalDate.of(2025, 11, 25)
         }
-        forhåndsvarselDto.brukeruttalelse!!.utsettFrist!![0].nyFrist shouldBe LocalDate.of(2025, 11, 15)
-        forhåndsvarselDto.brukeruttalelse!!.utsettFrist!![0].begrunnelse shouldBe "Advokat vil ha mer tid"
-        forhåndsvarselDto.brukeruttalelse!!.utsettFrist!![1].nyFrist shouldBe LocalDate.of(2025, 11, 25)
-        forhåndsvarselDto.brukeruttalelse!!.utsettFrist!![1].begrunnelse shouldBe "Advokat vil ha enda mer tid"
+        etterAndreUtsettelse.forhåndsvarselUnntak shouldBe null
+        etterAndreUtsettelse.brukeruttalelse shouldBe null
     }
 
-    @Test
-    fun `Skal feile når uttalelse er NEI uten beskrivelse`() {
-        val fagsystemId = opprettTilbakekrevingOgHentFagsystemId()
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
-        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
-
-        val bestillBrevDto = BestillBrevDto(
-            behandlingId = behandling.id,
-            brevmalkode = Dokumentmalstype.VARSEL,
-            fritekst = "Tekst fra saksbehandler",
-        )
-        dokumentController.bestillBrev(bestillBrevDto)
-
-        val brukeruttalelseDto = BrukeruttalelseDto(
-            HarBrukerUttaltSeg.NEI,
-            uttalelsesdetaljer = null,
-            utsettFrist = null,
-            kommentar = null,
-        )
-
-        shouldThrow<Exception> {
-            dokumentController.lagreBrukeruttalelse(behandling.id, brukeruttalelseDto)
-        }.message shouldBe "Det kreves en kommentar når brukeren ikke uttaler seg. Kommentar var null"
-
-        val brukeruttalelseTomList = BrukeruttalelseDto(
-            HarBrukerUttaltSeg.NEI,
-            uttalelsesdetaljer = null,
-            utsettFrist = null,
-            kommentar = "",
-        )
-
-        shouldThrow<Exception> {
-            dokumentController.lagreBrukeruttalelse(behandling.id, brukeruttalelseTomList)
-        }.message shouldBe "Det kreves en kommentar når brukeren ikke uttaler seg. Kommentar var tøm"
-    }
-
-    @Test
-    fun `Skal feile når uttalelse er UTSETT_FRIST uten ny dato`() {
-        val fagsystemId = opprettTilbakekrevingOgHentFagsystemId()
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
-        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
-
-        val bestillBrevDto = BestillBrevDto(
-            behandlingId = behandling.id,
-            brevmalkode = Dokumentmalstype.VARSEL,
-            fritekst = "Tekst fra saksbehandler",
-        )
-        dokumentController.bestillBrev(bestillBrevDto)
-
-        val brukeruttalelseDto = BrukeruttalelseDto(
-            HarBrukerUttaltSeg.UTTSETT_FRIST,
-            uttalelsesdetaljer = null,
-            utsettFrist = null,
-            kommentar = null,
-        )
-
-        shouldThrow<Exception> {
-            dokumentController.lagreBrukeruttalelse(behandling.id, brukeruttalelseDto)
-        }.message shouldBe "Det kreves en ny dato når fristen er utsatt"
-
-        val brukeruttalelseDtoTomListe = BrukeruttalelseDto(
-            HarBrukerUttaltSeg.UTTSETT_FRIST,
-            uttalelsesdetaljer = null,
-            utsettFrist = listOf(),
-            kommentar = null,
-        )
-
-        shouldThrow<Exception> {
-            dokumentController.lagreBrukeruttalelse(behandling.id, brukeruttalelseDtoTomListe)
-        }.message shouldBe "Det kreves en ny dato når fristen er utsatt"
-    }
-
-    fun opprettTilbakekrevingOgHentFagsystemId(): String {
+    private fun opprettTilbakekrevingOgHentFagsystemId(): Tilbakekreving {
         val fnr = "12312312311"
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
@@ -498,6 +263,174 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             ),
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
-        return fagsystemId
+        return tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+    }
+
+    companion object {
+        @JvmStatic
+        fun forhåndsvarseUnntakCases() = listOf(
+            ForhåndsvarselUnntakCase(
+                navn = "Unntak IKKE_PRAKTISK_MULIG",
+                input = ForhåndsvarselUnntakDto(
+                    begrunnelseForUnntak = VarslingsUnntak.IKKE_PRAKTISK_MULIG,
+                    beskrivelse = "Ikke mulig",
+                ),
+                forventetBegrunnelseForUnntak = VarslingsUnntak.IKKE_PRAKTISK_MULIG,
+                forventetBeskrivelse = "Ikke mulig",
+            ),
+            ForhåndsvarselUnntakCase(
+                navn = "Unntak UKJENT_ADRESSE",
+                input = ForhåndsvarselUnntakDto(
+                    begrunnelseForUnntak = VarslingsUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING,
+                    beskrivelse = "Ukjent adresse",
+                ),
+                forventetBegrunnelseForUnntak = VarslingsUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING,
+                forventetBeskrivelse = "Ukjent adresse",
+            ),
+            ForhåndsvarselUnntakCase(
+                navn = "Unntak ÅPENBART_UNØDVENDIG",
+                input = ForhåndsvarselUnntakDto(
+                    begrunnelseForUnntak = VarslingsUnntak.ÅPENBART_UNØDVENDIG,
+                    beskrivelse = "Åpenbart unødvendig",
+                ),
+                forventetBegrunnelseForUnntak = VarslingsUnntak.ÅPENBART_UNØDVENDIG,
+                forventetBeskrivelse = "Åpenbart unødvendig",
+            ),
+        )
+
+        @JvmStatic
+        fun uttalelseGyldigeCases() = listOf(
+            // 1) Har bruker uttalet seg: JA, én uttalelse
+            GyldigBrukeruttalelseCase(
+                navn = "JA – én uttalelse (Modia)",
+                input = BrukeruttalelseDto(
+                    harBrukerUttaltSeg = HarBrukerUttaltSeg.JA,
+                    uttalelsesdetaljer = listOf(
+                        Uttalelsesdetaljer(
+                            hvorBrukerenUttalteSeg = "Modia",
+                            uttalelsesdato = LocalDate.of(2025, 10, 15),
+                            uttalelseBeskrivelse = "Bruker har uttalet seg",
+                        ),
+                    ),
+                    kommentar = null,
+                ),
+                forventetHarBrukerUttaltSeg = HarBrukerUttaltSeg.JA,
+                forventetAntallDetaljer = 1,
+                forventetKommentar = null,
+            ),
+            // 2)Har bruker uttalet seg:  JA, to uttalelser
+            GyldigBrukeruttalelseCase(
+                navn = "JA – to uttalelser (Tlf + Modia)",
+                input = BrukeruttalelseDto(
+                    harBrukerUttaltSeg = HarBrukerUttaltSeg.JA,
+                    uttalelsesdetaljer = listOf(
+                        Uttalelsesdetaljer(
+                            hvorBrukerenUttalteSeg = "Tlf",
+                            uttalelsesdato = LocalDate.of(2025, 9, 15),
+                            uttalelseBeskrivelse = "Bruker har sagt ...",
+                        ),
+                        Uttalelsesdetaljer(
+                            hvorBrukerenUttalteSeg = "Modia",
+                            uttalelsesdato = LocalDate.of(2025, 9, 17),
+                            uttalelseBeskrivelse = "Bruker har skrevet ...",
+                        ),
+                    ),
+                    kommentar = null,
+                ),
+                forventetHarBrukerUttaltSeg = HarBrukerUttaltSeg.JA,
+                forventetAntallDetaljer = 2,
+                forventetKommentar = null,
+            ),
+            // 3) Har bruker uttalet seg:NEI
+            GyldigBrukeruttalelseCase(
+                navn = "NEI – med kommentar",
+                input = BrukeruttalelseDto(
+                    harBrukerUttaltSeg = HarBrukerUttaltSeg.NEI,
+                    uttalelsesdetaljer = null,
+                    kommentar = "Ville ikke",
+                ),
+                forventetHarBrukerUttaltSeg = HarBrukerUttaltSeg.NEI,
+                forventetAntallDetaljer = 0,
+                forventetKommentar = "Ville ikke",
+            ),
+            GyldigBrukeruttalelseCase(
+                navn = "ALLEREDE_UTTALET_SEG",
+                input = BrukeruttalelseDto(
+                    harBrukerUttaltSeg = HarBrukerUttaltSeg.ALLEREDE_UTTALET_SEG,
+                    uttalelsesdetaljer = listOf(
+                        Uttalelsesdetaljer(
+                            hvorBrukerenUttalteSeg = "Tlf",
+                            uttalelsesdato = LocalDate.of(2025, 9, 15),
+                            uttalelseBeskrivelse = "Bruker har sagt ...",
+                        ),
+                    ),
+                    kommentar = null,
+                ),
+                forventetHarBrukerUttaltSeg = HarBrukerUttaltSeg.ALLEREDE_UTTALET_SEG,
+                forventetAntallDetaljer = 1,
+                forventetKommentar = null,
+            ),
+        )
+
+        @JvmStatic
+        fun uttalelseUgyldigeCases() = listOf(
+            UgyldigBrukeruttalelseCase(
+                navn = "JA – uten detaljer (null)",
+                input = BrukeruttalelseDto(
+                    harBrukerUttaltSeg = HarBrukerUttaltSeg.JA,
+                    uttalelsesdetaljer = null,
+                    kommentar = null,
+                ),
+                forventetFeilmelding = "Det kreves uttalelsedetaljer når brukeren har uttalet seg. uttalelsedetaljer var null",
+            ),
+            UgyldigBrukeruttalelseCase(
+                navn = "JA – tom liste med detaljer",
+                input = BrukeruttalelseDto(
+                    harBrukerUttaltSeg = HarBrukerUttaltSeg.JA,
+                    uttalelsesdetaljer = listOf(),
+                    kommentar = null,
+                ),
+                forventetFeilmelding = "Det kreves uttalelsedetaljer når brukeren har uttalet seg. uttalelsedetaljer var tom",
+            ),
+            UgyldigBrukeruttalelseCase(
+                navn = "NEI – uten kommentar (null)",
+                input = BrukeruttalelseDto(
+                    harBrukerUttaltSeg = HarBrukerUttaltSeg.NEI,
+                    uttalelsesdetaljer = null,
+                    kommentar = null,
+                ),
+                forventetFeilmelding = "Det kreves en kommentar når brukeren ikke uttaler seg. Kommentar var null",
+            ),
+            UgyldigBrukeruttalelseCase(
+                navn = "NEI – tom kommentar ('')",
+                input = BrukeruttalelseDto(
+                    harBrukerUttaltSeg = HarBrukerUttaltSeg.NEI,
+                    uttalelsesdetaljer = null,
+                    kommentar = "",
+                ),
+                forventetFeilmelding = "Det kreves en kommentar når brukeren ikke uttaler seg. Kommentar var tom",
+            ),
+        )
     }
 }
+
+data class GyldigBrukeruttalelseCase(
+    val navn: String,
+    val input: BrukeruttalelseDto,
+    val forventetHarBrukerUttaltSeg: HarBrukerUttaltSeg?,
+    val forventetAntallDetaljer: Int,
+    val forventetKommentar: String?,
+)
+
+data class UgyldigBrukeruttalelseCase(
+    val navn: String,
+    val input: BrukeruttalelseDto,
+    val forventetFeilmelding: String,
+)
+
+data class ForhåndsvarselUnntakCase(
+    val navn: String,
+    val input: ForhåndsvarselUnntakDto,
+    val forventetBegrunnelseForUnntak: VarslingsUnntak,
+    val forventetBeskrivelse: String,
+)
