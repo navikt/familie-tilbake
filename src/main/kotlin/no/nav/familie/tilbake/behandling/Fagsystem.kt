@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.behandling
 
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.kontrakter.ytelse.DokarkivFagsaksystem
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import org.springframework.http.HttpStatus
 
@@ -24,6 +25,13 @@ enum class Fagsystem(
         EF -> FagsystemDTO.EF
         KS, KONT -> FagsystemDTO.KONT
         IT01 -> FagsystemDTO.IT01
+    }
+
+    fun tilDokarkivFagsaksystem() = when (this) {
+        BA -> DokarkivFagsaksystem.BA
+        EF -> DokarkivFagsaksystem.EF
+        KS, KONT -> DokarkivFagsaksystem.KONT
+        IT01 -> DokarkivFagsaksystem.IT01
     }
 
     companion object {
