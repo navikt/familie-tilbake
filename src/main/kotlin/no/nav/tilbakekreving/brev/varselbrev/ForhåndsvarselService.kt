@@ -1,10 +1,22 @@
 package no.nav.tilbakekreving.brev.varselbrev
 
+import kotlinx.coroutines.runBlocking
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.Constants
+import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevUtil
+import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevUtil.Companion.TITTEL_VARSEL_TILBAKEBETALING
+import no.nav.familie.tilbake.kontrakter.dokarkiv.AvsenderMottaker
+import no.nav.familie.tilbake.kontrakter.dokarkiv.v2.ArkiverDokumentRequest
+import no.nav.familie.tilbake.kontrakter.dokarkiv.v2.Dokument
+import no.nav.familie.tilbake.kontrakter.dokarkiv.v2.Filtype
+import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstidspunkt
+import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstype
+import no.nav.familie.tilbake.kontrakter.journalpost.AvsenderMottakerIdType
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.familie.tilbake.log.callId
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.BestillBrevDto
 import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
@@ -16,13 +28,22 @@ import no.nav.tilbakekreving.api.v1.dto.VarslingsUnntak
 import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
 import no.nav.tilbakekreving.behandling.UttalelseInfo
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
+import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.brev.VarselbrevInfo
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
+import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostResponse
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
+import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.domain.DistribuerJournalpostRequest
+import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.domain.DistribuerJournalpostResponse
+import no.nav.tilbakekreving.pdf.Dokumentvariant
+import no.nav.tilbakekreving.pdf.PdfGenerator
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmetadata
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.header.TekstformatererHeader
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.Brevdata
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.DokprodTilHtml
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.Dokumentklass
 import no.nav.tilbakekreving.pdf.dokumentbestilling.varsel.TekstformatererVarselbrev
 import no.nav.tilbakekreving.pdf.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
 import org.springframework.stereotype.Service
@@ -35,7 +56,10 @@ class ForhåndsvarselService(
     private val varselbrevUtil: VarselbrevUtil,
     private val dokarkivClient: DokarkivClient,
     private val dokdistClient: DokdistClient,
+    private val pdfFactory: () -> PdfGenerator = { PdfGenerator() },
 ) {
+    private val logger = TracedLogger.getLogger<ForhåndsvarselService>()
+
     fun hentVarselbrevTekster(tilbakekreving: Tilbakekreving): Varselbrevtekst {
         val brevmetadata = opprettMetadata(tilbakekreving.hentVarselbrevInfo())
         val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(brevmetadata, false)
@@ -74,7 +98,7 @@ class ForhåndsvarselService(
         val logContext = SecureLog.Context.fra(tilbakekreving)
 
         val varselbrevBehov = tilbakekreving.opprettVarselbrevBehov(bestillBrevDto.fritekst)
-        val journalpost = dokarkivClient.journalførVarselbrev(varselbrevBehov, logContext)
+        val journalpost = journalførVarselbrev(varselbrevBehov, logContext)
         if (journalpost.journalpostId == null) {
             throw Feil(
                 message = "journalførin av varselbrev til behandlingId ${varselbrevBehov.behandlingId} misslykket med denne meldingen: ${journalpost.melding}",
@@ -82,7 +106,7 @@ class ForhåndsvarselService(
                 logContext = SecureLog.Context.fra(tilbakekreving),
             )
         }
-        dokdistClient.brevTilUtsending(varselbrevBehov, journalpost.journalpostId, logContext)
+        brevTilUtsending(varselbrevBehov, journalpost.journalpostId, logContext)
         tilbakekreving.oppdaterSendtVarselbrev(journalpostId = journalpost.journalpostId, varselbrevId = varselbrevBehov.varselbrev.id)
     }
 
@@ -173,5 +197,152 @@ class ForhåndsvarselService(
             varsletBeløp = varselbrevInfo.forhåndsvarselinfo.beløp,
             varsletDato = LocalDate.now(),
         )
+    }
+
+    fun journalførVarselbrev(
+        varselbrevBehov: VarselbrevBehov,
+        logContext: SecureLog.Context,
+    ): OpprettJournalpostResponse {
+        val brevdata = hentBrevdata(varselbrevBehov, logContext)
+        val dokument = Dokument(
+            dokument = hentPdf(brevdata, logContext),
+            filtype = Filtype.PDFA,
+            filnavn = "brev.pdf",
+            tittel = brevdata.tittel,
+        )
+
+        val arkiverDokument =
+            ArkiverDokumentRequest(
+                fnr = varselbrevBehov.brukerinfo.ident,
+                forsøkFerdigstill = true,
+                hoveddokumentvarianter = listOf(dokument),
+                fagsakId = varselbrevBehov.eksternFagsakId,
+                journalførendeEnhet = varselbrevBehov.behandlendeEnhet!!.kode,
+                avsenderMottaker = AvsenderMottaker(
+                    id = varselbrevBehov.brukerinfo.ident,
+                    idType = AvsenderMottakerIdType.FNR,
+                    navn = varselbrevBehov.brukerinfo.navn,
+                ),
+                eksternReferanseId = lagEksternReferanseId(
+                    varselbrevBehov.behandlingId,
+                    Brevtype.VARSEL,
+                    brevdata.mottager,
+                ),
+            )
+
+        return dokarkivClient.opprettOgSendJournalpostRequest(
+            arkiverDokument = arkiverDokument,
+            fagsaksystem = varselbrevBehov.ytelse.tilDokarkivFagsaksystem(),
+            brevkode = varselbrevBehov.ytelse.tilFagsystemDTO().name + "-TILB",
+            tema = varselbrevBehov.ytelse.tilTema(),
+            dokuemntkategori = Dokumentklass.B,
+            behandlingId = varselbrevBehov.behandlingId,
+        )
+    }
+
+    private fun brevTilUtsending(behov: VarselbrevBehov, journalpostId: String, logContext: SecureLog.Context): DistribuerJournalpostResponse {
+        return runBlocking {
+            dokdistClient.sendBrev(
+                request = DistribuerJournalpostRequest(
+                    journalpostId = journalpostId,
+                    batchId = null,
+                    bestillendeFagsystem = behov.ytelse.tilFagsystemDTO().name,
+                    adresse = null,
+                    dokumentProdApp = "tilbakekreving",
+                    distribusjonstype = Distribusjonstype.VIKTIG,
+                    distribusjonstidspunkt = Distribusjonstidspunkt.KJERNETID,
+                ),
+                behandlingId = behov.behandlingId,
+                logContext = logContext,
+            )
+        }
+    }
+
+    private fun hentBrevdata(
+        varselbrevBehov: VarselbrevBehov,
+        logContext: SecureLog.Context,
+    ): Brevdata {
+        val brevmetadata = hentBrevMetadata(varselbrevBehov)
+        val varselbrevsdokument = Varselbrevsdokument(
+            brevmetadata = brevmetadata,
+            beløp = varselbrevBehov.feilutbetaltBeløp,
+            revurderingsvedtaksdato = varselbrevBehov.revurderingsvedtaksdato,
+            fristdatoForTilbakemelding = varselbrevBehov.varselbrev.fristForTilbakemelding,
+            varseltekstFraSaksbehandler = varselbrevBehov.varseltekstFraSaksbehandler,
+            feilutbetaltePerioder = varselbrevBehov.feilutbetaltePerioder,
+        )
+
+        return Brevdata(
+            mottager = Brevmottager.BRUKER,
+            metadata = brevmetadata,
+            overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(brevmetadata, false),
+            brevtekst = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false),
+            vedleggHtml = hentVedlegg(varselbrevsdokument, varselbrevBehov.eksternFagsakId, logContext),
+        )
+    }
+
+    private fun hentBrevMetadata(varselbrevBehov: VarselbrevBehov): Brevmetadata {
+        return Brevmetadata(
+            sakspartId = varselbrevBehov.brukerinfo.ident,
+            sakspartsnavn = varselbrevBehov.brukerinfo.navn,
+            tittel = TITTEL_VARSEL_TILBAKEBETALING + varselbrevBehov.ytelse.tilYtelseDTO(),
+            mottageradresse = Adresseinfo(varselbrevBehov.brukerinfo.ident, varselbrevBehov.brukerinfo.navn),
+            behandlendeEnhetsNavn = requireNotNull(varselbrevBehov.behandlendeEnhet) { "Enhetsnavn kreves for journalføring" }.navn,
+            ansvarligSaksbehandler = requireNotNull(varselbrevBehov.varselbrev.ansvarligSaksbehandlerIdent) { "ansvarligSaksbehandlerIdent kreves for journalføring" },
+            saksnummer = varselbrevBehov.eksternFagsakId,
+            språkkode = varselbrevBehov.brukerinfo.språkkode,
+            ytelsestype = varselbrevBehov.ytelse.tilYtelseDTO(),
+            gjelderDødsfall = varselbrevBehov.gjelderDødsfall,
+            institusjon = null, // Todo når vi skal håndtere institusjon
+        )
+    }
+
+    private fun hentVedlegg(
+        varselbrevsdokument: Varselbrevsdokument,
+        eksternFagsakId: String,
+        logContext: SecureLog.Context,
+    ): String {
+        return varselbrevUtil.lagVedlegg(
+            varselbrevsdokument,
+            eksternFagsakId,
+            varselbrevsdokument.beløp,
+            logContext,
+        )
+    }
+
+    private fun hentPdf(brevdata: Brevdata, logContext: SecureLog.Context): ByteArray {
+        val pdfGenerator = pdfFactory()
+        val html = lagHtml(brevdata)
+        try {
+            return pdfGenerator.genererPDFMedLogo(
+                html = html,
+                dokumentvariant = Dokumentvariant.ENDELIG,
+                dokumenttittel = brevdata.overskrift,
+            )
+        } catch (e: Exception) {
+            logger.medContext(logContext) {
+                info("Feil ved generering av brev: brevData=$brevdata, html=$html", e)
+            }
+            throw e
+        }
+    }
+
+    private fun lagHtml(data: Brevdata): String {
+        val header = TekstformatererHeader.lagHeader(
+            brevmetadata = data.metadata,
+            overskrift = data.overskrift,
+        )
+        val innholdHtml = DokprodTilHtml.dokprodInnholdTilHtml(data.brevtekst)
+        return header + innholdHtml + data.vedleggHtml
+    }
+
+    private fun lagEksternReferanseId(
+        behandlingId: UUID,
+        brevtype: Brevtype,
+        mottager: Brevmottager,
+    ): String {
+        // alle brev kan potensielt bli sendt til både bruker og kopi verge. 2 av breva kan potensielt bli sendt flere gonger
+        val callId = callId()
+        return "${behandlingId}_${brevtype.name.lowercase()}_${mottager.name.lowercase()}_$callId"
     }
 }

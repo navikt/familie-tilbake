@@ -209,7 +209,7 @@ class TilbakekrevingService(
 
             is VarselbrevBehov -> {
                 val logContext = SecureLog.Context.utenBehandling(behov.eksternFagsakId)
-                val arkivert = dokarkivClient.journalførVarselbrev(behov, logContext)
+                val arkivert = forhåndsvarselService.journalførVarselbrev(behov, logContext)
                 if (arkivert.journalpostId == null) {
                     throw Feil(
                         message = "journalførin av varselbrev til behandlingId ${behov.behandlingId} misslykket med denne meldingen: ${arkivert.melding}",

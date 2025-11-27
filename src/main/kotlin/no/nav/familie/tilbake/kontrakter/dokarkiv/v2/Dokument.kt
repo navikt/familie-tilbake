@@ -8,5 +8,5 @@ class Dokument(
     @field:NotEmpty val filtype: Filtype,
     val filnavn: String? = null,
     val tittel: String? = null,
-    @field:NotEmpty val dokumenttype: Dokumenttype,
+    val dokumenttype: Dokumenttype? = null,
 )
