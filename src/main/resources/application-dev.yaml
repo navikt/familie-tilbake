@@ -21,6 +21,7 @@ tilbakekreving:
     tilgangsmaskinen-enabled: true
     ny-modell:
       SendVarselbrev: true
+      Arkivering: false
   tilgangsstyring:
     grupper:
       ts:
