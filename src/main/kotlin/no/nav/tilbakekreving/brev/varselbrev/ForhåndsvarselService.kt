@@ -71,9 +71,11 @@ class ForhåndsvarselService(
         tilbakekreving: Tilbakekreving,
         bestillBrevDto: BestillBrevDto,
     ) {
+        println("=====>>> bestillVarselbrev")
         val logContext = SecureLog.Context.fra(tilbakekreving)
 
         val varselbrevBehov = tilbakekreving.opprettVarselbrevBehov(bestillBrevDto.fritekst)
+        println("=====>>> varselbrevBehov er opprettet")
         val journalpost = dokarkivClient.journalførVarselbrev(varselbrevBehov, logContext)
         if (journalpost.journalpostId == null) {
             throw Feil(

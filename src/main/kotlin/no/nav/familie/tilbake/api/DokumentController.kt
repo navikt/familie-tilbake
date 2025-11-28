@@ -54,8 +54,10 @@ class DokumentController(
         @RequestBody @Valid
         bestillBrevDto: BestillBrevDto,
     ): Ressurs<Nothing?> {
+        println("======>>> i kontrolleren")
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(bestillBrevDto.behandlingId)
         if (tilbakekreving != null) {
+            println("=====>>> Fant tilbakekreving: $tilbakekreving")
             tilgangskontrollService.validerTilgangTilbakekreving(
                 tilbakekreving = tilbakekreving,
                 behandlingId = bestillBrevDto.behandlingId,
@@ -63,6 +65,7 @@ class DokumentController(
                 auditLoggerEvent = AuditLoggerEvent.CREATE,
                 handling = "Sender brev",
             )
+            println("=====>>> Tilgang validert")
             tilbakekrevingService.hentTilbakekreving(bestillBrevDto.behandlingId) { tilbakekreving ->
                 tilbakekrevingService.bestillBrev(tilbakekreving, bestillBrevDto)
             }

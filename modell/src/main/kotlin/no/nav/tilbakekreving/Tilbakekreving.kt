@@ -421,7 +421,9 @@ class Tilbakekreving internal constructor(
         val behandling = behandlingHistorikk.nåværende().entry
         val varselbrev = behandling.opprettVarselbrev()
         val varselbrevInfo = hentVarselbrevInfo()
+        println("=====>>> skal lagre varselbrev")
         brevHistorikk.lagre(varselbrev)
+        println("=====>>> varselbrev lagret")
 
         return VarselbrevBehov(
             brevId = varselbrev.id,

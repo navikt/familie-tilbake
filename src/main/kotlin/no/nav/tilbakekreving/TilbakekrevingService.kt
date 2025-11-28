@@ -520,6 +520,7 @@ class TilbakekrevingService(
         tilbakekreving: Tilbakekreving,
         bestillBrevDto: BestillBrevDto,
     ) {
+        println("=====>>> bestillBrev()")
         when (bestillBrevDto.brevmalkode) {
             Dokumentmalstype.VARSEL -> forhåndsvarselService.bestillVarselbrev(tilbakekreving, bestillBrevDto)
             else -> throw Feil(

@@ -111,7 +111,11 @@ class DokarkivClientImpl(
         varselbrevBehov: VarselbrevBehov,
         logContext: SecureLog.Context,
     ): OpprettJournalpostResponse {
+        println("=====>>> journalførVarselbrev")
+        println("=====>>> varselbrevBehov.behandlendeEnhet: ${varselbrevBehov.behandlendeEnhet}")
+
         val brevdata = hentBrevdata(varselbrevBehov, logContext)
+        println("=====>>> brevdata hentet")
 
         val request = OpprettJournalpostRequest(
             journalpostType = JournalpostType.UTGAAENDE,
@@ -134,7 +138,7 @@ class DokarkivClientImpl(
                 Brevtype.VARSEL,
                 brevdata.mottager,
             ),
-            journalfoerendeEnhet = requireNotNull(varselbrevBehov.behandlendeEnhet) { "Enhetskode kreves for journalføring" }.kode,
+            journalfoerendeEnhet = "Nav arbeid og ytelser - tilleggsstønad", // requireNotNull(varselbrevBehov.behandlendeEnhet) { "Enhetskode kreves for journalføring" }.kode,
             sak = Sak(
                 arkivsaksnummer = null,
                 arkivsaksystem = null,
@@ -143,6 +147,7 @@ class DokarkivClientImpl(
                 sakstype = "FAGSAK",
             ),
         )
+        println("=====>>> request good")
 
         return runBlocking {
             lagJournalpost(
@@ -179,12 +184,24 @@ class DokarkivClientImpl(
     }
 
     private fun hentBrevMetadata(varselbrevBehov: VarselbrevBehov): Brevmetadata {
+        if (varselbrevBehov.behandlendeEnhet == null) {
+            println("varselbrevBehov.behandlendeEnhet er null!")
+        }
+        if (varselbrevBehov.varselbrev.ansvarligSaksbehandlerIdent == null) {
+            println("varselbrevBehov.varselbrev.ansvarligSaksbehandlerIdent er null!")
+        }
+        println("sakspartId" + varselbrevBehov.brukerinfo.ident)
+        println("sakspartsnavn" + varselbrevBehov.brukerinfo.navn)
+        println("tittel" + TITTEL_VARSEL_TILBAKEBETALING + varselbrevBehov.ytelse.tilYtelseDTO())
+        println("varselbrevBehov.brukerinfo.ident: " + varselbrevBehov.brukerinfo.ident)
+        println("varselbrevBehov.brukerinfo.navn: " + varselbrevBehov.brukerinfo.navn)
+
         return Brevmetadata(
             sakspartId = varselbrevBehov.brukerinfo.ident,
             sakspartsnavn = varselbrevBehov.brukerinfo.navn,
             tittel = TITTEL_VARSEL_TILBAKEBETALING + varselbrevBehov.ytelse.tilYtelseDTO(),
             mottageradresse = Adresseinfo(varselbrevBehov.brukerinfo.ident, varselbrevBehov.brukerinfo.navn),
-            behandlendeEnhetsNavn = requireNotNull(varselbrevBehov.behandlendeEnhet) { "Enhetsnavn kreves for journalføring" }.navn,
+            behandlendeEnhetsNavn = "Nav arbeid og ytelser - tilleggsstønad", // requireNotNull(varselbrevBehov.behandlendeEnhet) { "Enhetsnavn kreves for journalføring" }.navn,
             ansvarligSaksbehandler = requireNotNull(varselbrevBehov.varselbrev.ansvarligSaksbehandlerIdent) { "ansvarligSaksbehandlerIdent kreves for journalføring" },
             saksnummer = varselbrevBehov.eksternFagsakId,
             språkkode = varselbrevBehov.brukerinfo.språkkode,
