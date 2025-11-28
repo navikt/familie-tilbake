@@ -83,12 +83,10 @@ class IntegrasjonerClient(
         oppgaveId: Long,
         nyEnhet: String,
         fjernMappeFraOppgave: Boolean,
-        nullstillTilordnetRessurs: Boolean,
     ) = UriComponentsBuilder
         .fromUri(integrasjonerConfig.integrasjonUri)
         .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, oppgaveId.toString(), "enhet", nyEnhet)
         .queryParam("fjernMappeFraOppgave", fjernMappeFraOppgave)
-        .queryParam("nullstillTilordnetRessurs", nullstillTilordnetRessurs)
         .build()
         .toUri()
 
@@ -206,9 +204,8 @@ class IntegrasjonerClient(
         oppgaveId: Long,
         nyEnhet: String,
         fjernMappeFraOppgave: Boolean,
-        nullstillTilordnetRessurs: Boolean,
     ): OppgaveResponse {
-        val uri = tilordneOppgaveNyEnhetUri(oppgaveId, nyEnhet, fjernMappeFraOppgave, nullstillTilordnetRessurs)
+        val uri = tilordneOppgaveNyEnhetUri(oppgaveId, nyEnhet, fjernMappeFraOppgave)
         return patchForEntity<Ressurs<OppgaveResponse>>(uri, "", HttpHeaders().medContentTypeJsonUTF8()).getDataOrThrow()
     }
 

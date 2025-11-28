@@ -239,8 +239,7 @@ class OppgaveService(
         oppgaveId: Long,
         nyEnhet: String,
         fjernMappeFraOppgave: Boolean,
-        nullstillTilordnetRessurs: Boolean,
-    ): OppgaveResponse = integrasjonerClient.tilordneOppgaveNyEnhet(oppgaveId, nyEnhet, fjernMappeFraOppgave, nullstillTilordnetRessurs)
+    ): OppgaveResponse = integrasjonerClient.tilordneOppgaveNyEnhet(oppgaveId, nyEnhet, fjernMappeFraOppgave)
 
     fun oppdaterEnhetOgSaksbehandler(
         behandlingId: UUID,
@@ -255,7 +254,9 @@ class OppgaveService(
             LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yy hh:mm")) + ":" +
                 beskrivelse + System.lineSeparator() + oppgave.beskrivelse
         var patchetOppgave = oppgave.copy(beskrivelse = nyBeskrivelse)
-        if (!saksbehandler.isNullOrEmpty() && saksbehandler != Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
+        if (oppgave.tema == Tema.BAR) {
+            patchetOppgave = patchetOppgave.copy(tilordnetRessurs = null)
+        } else if (!saksbehandler.isNullOrEmpty() && saksbehandler != Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
             patchetOppgave = patchetOppgave.copy(tilordnetRessurs = saksbehandler)
         }
 
@@ -269,11 +270,9 @@ class OppgaveService(
         }
 
         if (oppgave.tema == Tema.ENF) {
-            tilordneOppgaveNyEnhet(oppgave.id!!, enhetId, false, false) // ENF bruker generelle mapper
+            tilordneOppgaveNyEnhet(oppgave.id!!, enhetId, false) // ENF bruker generelle mapper
         } else if (oppgave.tema == Tema.BAR) {
-            tilordneOppgaveNyEnhet(oppgave.id!!, enhetId, true, true) // BAR bruker mapper som hører til enhetene og nullstiller tilordnetRessurs
-        } else {
-            tilordneOppgaveNyEnhet(oppgave.id!!, enhetId, true, false) // KON bruker mapper som hører til enhetene
+            tilordneOppgaveNyEnhet(oppgave.id!!, enhetId, true) // BAR og KON bruker mapper som hører til enhetene
         }
     }
 
