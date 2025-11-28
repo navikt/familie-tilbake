@@ -14,6 +14,7 @@ import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
 import no.nav.tilbakekreving.ytelsesbeløp
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -48,6 +49,11 @@ class FaktastegEntityTest {
                 ),
                 årsakTilFeilutbetaling = årsak,
                 uttalelse = Faktasteg.Uttalelse.Ja(uttalelse),
+                oppdaget = Faktasteg.Vurdering.Oppdaget.Vurdering(
+                    dato = LocalDate.now(),
+                    beskrivelse = "Oppdaget beskrivelse",
+                    av = Faktasteg.Vurdering.Oppdaget.Av.Nav,
+                ),
             ),
         )
 

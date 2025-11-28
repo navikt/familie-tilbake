@@ -1,14 +1,19 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
 import no.nav.kontrakter.frontend.models.BestemmelseEllerGrunnlagDto
-import no.nav.kontrakter.frontend.models.FaktaDto
+import no.nav.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.kontrakter.frontend.models.FaktaPeriodeDto
+import no.nav.kontrakter.frontend.models.FeilutbetalingDto
+import no.nav.kontrakter.frontend.models.MuligeRettsligGrunnlagDto
+import no.nav.kontrakter.frontend.models.OppdagetDto
 import no.nav.kontrakter.frontend.models.RettsligGrunnlagDto
+import no.nav.kontrakter.frontend.models.VurderingDto
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
 import no.nav.tilbakekreving.api.v1.dto.FeilutbetalingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurderingAvBrukersUttalelseDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.brev.BrevHistorikk
+import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.FaktastegEntity
@@ -21,6 +26,7 @@ import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -46,13 +52,28 @@ class Faktasteg(
         this.vurdering = vurdering
     }
 
-    fun nyTilFrontendDto(kravgrunnlag: KravgrunnlagHendelse): FaktaDto {
-        return FaktaDto(
+    fun nyTilFrontendDto(kravgrunnlag: KravgrunnlagHendelse, revurdering: EksternFagsakRevurdering, varselbrev: Varselbrev?): FaktaOmFeilutbetalingDto {
+        val beløpTilbakekreves = kravgrunnlag.feilutbetaltBeløpForAllePerioder().toInt()
+        return FaktaOmFeilutbetalingDto(
             perioder = vurdering.perioder.map {
                 it.tilFrontendDto(
                     kravgrunnlag = kravgrunnlag,
                 )
             },
+            feilutbetaling = FeilutbetalingDto(
+                beløp = beløpTilbakekreves,
+                fom = vurdering.perioder.minOf { it.periode.fom },
+                tom = vurdering.perioder.minOf { it.periode.tom },
+                revurdering = revurdering.tilFrontendDto(),
+            ),
+            muligeRettsligGrunnlag = listOf(
+                MuligeRettsligGrunnlagDto(
+                    BestemmelseEllerGrunnlagDto(Hendelsestype.ANNET.name, Hendelsestype.ANNET.beskrivelse()),
+                    listOf(BestemmelseEllerGrunnlagDto(Hendelsesundertype.ANNET_FRITEKST.name, Hendelsesundertype.ANNET_FRITEKST.beskrivelse())),
+                ),
+            ),
+            vurdering = vurdering.tilFrontendDto(),
+            tidligereVarsletBeløp = varselbrev?.hentVarsletBeløp()?.toInt()?.takeIf { it != beløpTilbakekreves },
         )
     }
 
@@ -115,6 +136,7 @@ class Faktasteg(
             },
             årsakTilFeilutbetaling = vurdering.årsakTilFeilutbetaling,
             vurderingAvBrukersUttalelse = (vurdering.uttalelse as? Uttalelse.Ja)?.begrunnelse,
+            oppdaget = vurdering.oppdaget.tilEntity(id),
         )
     }
 
@@ -143,6 +165,7 @@ class Faktasteg(
                 },
                 årsakTilFeilutbetaling = eksternFagsakRevurdering.årsakTilFeilutbetaling,
                 uttalelse = Uttalelse.IkkeVurdert,
+                oppdaget = Vurdering.Oppdaget.IkkeVurdert,
             )
         }
     }
@@ -151,9 +174,71 @@ class Faktasteg(
         val perioder: List<FaktaPeriode>,
         val årsakTilFeilutbetaling: String,
         val uttalelse: Uttalelse,
+        val oppdaget: Oppdaget,
     ) {
         fun erFullstendig(): Boolean {
             return uttalelse.erFullstendig()
+        }
+
+        fun tilFrontendDto(): VurderingDto {
+            return VurderingDto(
+                årsak = årsakTilFeilutbetaling,
+                oppdaget = oppdaget.tilFrontendDto(),
+            )
+        }
+
+        sealed interface Oppdaget {
+            fun tilFrontendDto(): OppdagetDto
+
+            fun tilEntity(faktavurderingRef: UUID): FaktastegEntity.OppdagetEntity?
+
+            class Vurdering(
+                val dato: LocalDate,
+                val beskrivelse: String,
+                val av: Av,
+            ) : Oppdaget {
+                override fun tilFrontendDto(): OppdagetDto {
+                    return OppdagetDto(
+                        dato = dato,
+                        av = when (av) {
+                            Av.Nav -> OppdagetDto.Av.NAV
+                            Av.Bruker -> OppdagetDto.Av.BRUKER
+                        },
+                        beskrivelse = beskrivelse,
+                    )
+                }
+
+                override fun tilEntity(faktavurderingRef: UUID): FaktastegEntity.OppdagetEntity {
+                    return FaktastegEntity.OppdagetEntity(
+                        av = when (av) {
+                            Av.Nav -> FaktastegEntity.OppdagetAv.Nav
+                            Av.Bruker -> FaktastegEntity.OppdagetAv.Bruker
+                        },
+                        dato = dato,
+                        beskrivelse = beskrivelse,
+                        faktavurderingRef = faktavurderingRef,
+                    )
+                }
+            }
+
+            data object IkkeVurdert : Oppdaget {
+                override fun tilFrontendDto(): OppdagetDto {
+                    return OppdagetDto(
+                        dato = null,
+                        av = OppdagetDto.Av.IKKE_VURDERT,
+                        beskrivelse = null,
+                    )
+                }
+
+                override fun tilEntity(faktavurderingRef: UUID): FaktastegEntity.OppdagetEntity? {
+                    return null
+                }
+            }
+
+            enum class Av {
+                Nav,
+                Bruker,
+            }
         }
     }
 
@@ -182,8 +267,8 @@ class Faktasteg(
                 splittbarePerioder = emptyList(),
                 rettsligGrunnlag = listOf(
                     RettsligGrunnlagDto(
-                        bestemmelse = BestemmelseEllerGrunnlagDto(rettsligGrunnlag.name, rettsligGrunnlag.beskrivelse()),
-                        grunnlag = BestemmelseEllerGrunnlagDto(rettsligGrunnlagUnderkategori.name, rettsligGrunnlagUnderkategori.beskrivelse()),
+                        bestemmelse = rettsligGrunnlag.name,
+                        grunnlag = rettsligGrunnlagUnderkategori.name,
                     ),
                 ),
             )

@@ -206,6 +206,11 @@ fun faktastegVurdering(
         ),
         årsakTilFeilutbetaling = årsak,
         uttalelse = uttalelse,
+        oppdaget = Faktasteg.Vurdering.Oppdaget.Vurdering(
+            dato = LocalDate.now(),
+            beskrivelse = "Hva som helst",
+            av = Faktasteg.Vurdering.Oppdaget.Av.Nav,
+        ),
     )
 }
 
