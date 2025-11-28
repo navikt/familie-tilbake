@@ -16,8 +16,18 @@ class NyFaktavurderingRepository(private val jdbcTemplate: JdbcTemplate) {
             behandlingId,
         ) { resultSet, _ ->
             val id = resultSet[FaktavurderingEntityMapper.id]
-            FaktavurderingEntityMapper.map(resultSet, hentPerioder(id))
+            FaktavurderingEntityMapper.map(
+                resultSet,
+                hentPerioder(id),
+                oppdaget = hentOppdagetVurdering(id),
+            )
         }.single()
+    }
+
+    private fun hentOppdagetVurdering(faktavurderingRef: UUID): FaktastegEntity.OppdagetEntity? {
+        return jdbcTemplate.query("SELECT * FROM tilbakekreving_faktavurdering_feilutbetaling_oppdaget WHERE faktavurdering_ref=?;", faktavurderingRef) { resultSet, _ ->
+            FaktavurderingEntityMapper.OppdagetEntityMapper.map(resultSet)
+        }.singleOrNull()
     }
 
     fun lagre(faktavurdering: FaktastegEntity) {

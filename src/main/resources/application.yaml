@@ -55,7 +55,9 @@ spring:
     proxy-target-class: true
 
 springdoc:
-  packages-to-scan: "no.nav.familie.tilbake"
+  packages-to-scan:
+    - "no.nav.familie.tilbake"
+    - "no.nav.tilbakekreving.api"
   paths-to-match: "/api/**"
   swagger-ui:
     oauth:
