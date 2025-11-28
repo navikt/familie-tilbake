@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.eksternfagsak
 
+import no.nav.kontrakter.frontend.models.RevurderingDto
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.EksternFagsakBehandlingEntity
 import no.nav.tilbakekreving.entities.EksternFagsakBehandlingType
@@ -53,6 +54,14 @@ sealed class EksternFagsakRevurdering(
                 vedtaksdato = vedtaksdato,
             )
         }
+
+        override fun tilFrontendDto(): RevurderingDto {
+            return RevurderingDto(
+                årsak = årsakTilFeilutbetaling,
+                vedtaksdato = vedtaksdato,
+                resultat = "Ukjent",
+            )
+        }
     }
 
     class UtvidetPeriode(
@@ -99,9 +108,19 @@ sealed class EksternFagsakRevurdering(
                 utvidedePerioder = null,
             )
         }
+
+        override fun tilFrontendDto(): RevurderingDto {
+            return RevurderingDto(
+                årsak = årsakTilFeilutbetaling,
+                vedtaksdato = vedtaksdato,
+                resultat = "Ukjent",
+            )
+        }
     }
 
     abstract fun tilEntity(eksternFagsakRef: UUID): EksternFagsakBehandlingEntity
+
+    abstract fun tilFrontendDto(): RevurderingDto
 
     enum class Revurderingsårsak(private val entity: RevurderingsårsakType, val beskrivelse: String) {
         NYE_OPPLYSNINGER(RevurderingsårsakType.NYE_OPPLYSNINGER, "Nye opplysninger"),
