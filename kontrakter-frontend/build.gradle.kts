@@ -50,7 +50,7 @@ subprojects {
     }
 
     dependencies {
-        api("io.swagger.core.v3:swagger-annotations:2.2.40")
+        api("io.swagger.core.v3:swagger-annotations:2.2.41")
         api("jakarta.validation:jakarta.validation-api:3.1.1")
     }
 }
