@@ -1,6 +1,5 @@
 package no.nav.tilbakekreving.brev.varselbrev
 
-import kotlinx.coroutines.runBlocking
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
@@ -33,8 +32,6 @@ import no.nav.tilbakekreving.brev.VarselbrevInfo
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostResponse
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
-import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.domain.DistribuerJournalpostRequest
-import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.domain.DistribuerJournalpostResponse
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.pdf.Dokumentvariant
 import no.nav.tilbakekreving.pdf.PdfGenerator
@@ -107,7 +104,15 @@ class ForhåndsvarselService(
                 logContext = SecureLog.Context.fra(tilbakekreving),
             )
         }
-        brevTilUtsending(varselbrevBehov, journalpost.journalpostId, logContext)
+        dokdistClient.brevTilUtsending(
+            behandlingId = varselbrevBehov.behandlingId,
+            journalpostId = journalpost.journalpostId,
+            fagsystem = varselbrevBehov.ytelse.tilFagsystemDTO(),
+            distribusjonstype = Distribusjonstype.VIKTIG,
+            distribusjonstidspunkt = Distribusjonstidspunkt.KJERNETID,
+            adresse = null,
+            logContext = logContext,
+        )
         tilbakekreving.oppdaterSendtVarselbrev(journalpostId = journalpost.journalpostId, varselbrevId = varselbrevBehov.varselbrev.id)
     }
 
@@ -239,24 +244,6 @@ class ForhåndsvarselService(
             dokuemntkategori = DokumentKlasse.B,
             behandlingId = varselbrevBehov.behandlingId,
         )
-    }
-
-    private fun brevTilUtsending(behov: VarselbrevBehov, journalpostId: String, logContext: SecureLog.Context): DistribuerJournalpostResponse {
-        return runBlocking {
-            dokdistClient.sendBrev(
-                request = DistribuerJournalpostRequest(
-                    journalpostId = journalpostId,
-                    batchId = null,
-                    bestillendeFagsystem = behov.ytelse.tilFagsystemDTO().name,
-                    adresse = null,
-                    dokumentProdApp = "tilbakekreving",
-                    distribusjonstype = Distribusjonstype.VIKTIG,
-                    distribusjonstidspunkt = Distribusjonstidspunkt.KJERNETID,
-                ),
-                behandlingId = behov.behandlingId,
-                logContext = logContext,
-            )
-        }
     }
 
     private fun hentBrevdata(

@@ -14,6 +14,9 @@ import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstidspunkt
 import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstype
 import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.tilbakekreving.Toggle
+import no.nav.tilbakekreving.config.FeatureService
+import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -36,6 +39,8 @@ class DistribuerDokumentVedDødsfallTask(
     private val integrasjonerClient: IntegrasjonerClient,
     private val historikkService: HistorikkService,
     private val behandlingRepository: BehandlingRepository,
+    private val featureService: FeatureService,
+    private val dokdistClient: DokdistClient,
 ) : AsyncTaskStep {
     private val log = TracedLogger.getLogger<DistribuerDokumentVedDødsfallTask>()
 
@@ -53,12 +58,24 @@ class DistribuerDokumentVedDødsfallTask(
             opprettHistorikkinnslag(task, TilbakekrevingHistorikkinnslagstype.DISTRIBUSJON_BREV_DØDSBO_FEILET_6_MND, true)
         } else {
             try {
-                integrasjonerClient.distribuerJournalpost(
-                    journalpostId,
-                    Fagsystem.valueOf(fagsystem).tilDTO(),
-                    Distribusjonstype.valueOf(task.metadata.getProperty("distribusjonstype")),
-                    Distribusjonstidspunkt.valueOf(task.metadata.getProperty("distribusjonstidspunkt")),
-                )
+                if (featureService.modellFeatures[Toggle.Brevutsending]) {
+                    dokdistClient.brevTilUtsending(
+                        behandlingId = UUID.fromString(task.payload),
+                        journalpostId = journalpostId,
+                        fagsystem = Fagsystem.valueOf(fagsystem).tilDTO(),
+                        distribusjonstype = Distribusjonstype.valueOf(task.metadata.getProperty("distribusjonstype")),
+                        distribusjonstidspunkt = Distribusjonstidspunkt.valueOf(task.metadata.getProperty("distribusjonstidspunkt")),
+                        adresse = null,
+                        logContext = logContext,
+                    )
+                } else {
+                    integrasjonerClient.distribuerJournalpost(
+                        journalpostId,
+                        Fagsystem.valueOf(fagsystem).tilDTO(),
+                        Distribusjonstype.valueOf(task.metadata.getProperty("distribusjonstype")),
+                        Distribusjonstidspunkt.valueOf(task.metadata.getProperty("distribusjonstidspunkt")),
+                    )
+                }
 
                 log.medContext(logContext) { info("Task \"DistribuerDokumentVedDødsfallTask\" har kjørt suksessfullt, og brev er sendt") }
                 opprettHistorikkinnslag(task, TilbakekrevingHistorikkinnslagstype.DISTRIBUSJON_BREV_DØDSBO_SUKSESS)

@@ -19,8 +19,8 @@ import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstidspunkt
 import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstype
 import no.nav.familie.tilbake.log.SecureLog
-import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.config.ApplicationProperties
+import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.domain.AdresseTo
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.domain.DistribuerJournalpostRequest
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.domain.DistribuerJournalpostResponse
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
@@ -36,7 +36,7 @@ class DokdistClientImpl(
         }
     },
 ) : DokdistClient {
-    override suspend fun sendBrev(
+    private suspend fun sendBrev(
         request: DistribuerJournalpostRequest,
         behandlingId: UUID,
         logContext: SecureLog.Context,
@@ -72,25 +72,39 @@ class DokdistClientImpl(
         }
     }
 
-    override fun brevTilUtsending(behov: VarselbrevBehov, journalpostId: String, logContext: SecureLog.Context): DistribuerJournalpostResponse {
+    override fun brevTilUtsending(
+        behandlingId: UUID,
+        journalpostId: String,
+        fagsystem: FagsystemDTO,
+        distribusjonstype: Distribusjonstype,
+        distribusjonstidspunkt: Distribusjonstidspunkt,
+        adresse: AdresseTo?,
+        logContext: SecureLog.Context,
+    ): DistribuerJournalpostResponse {
         return runBlocking {
             sendBrev(
-                request = opprettDistribuerJournalpostRequest(journalpostId, behov.ytelse.tilFagsystemDTO()),
-                behandlingId = behov.behandlingId,
+                request = opprettDistribuerJournalpostRequest(journalpostId, fagsystem, distribusjonstype, distribusjonstidspunkt, adresse),
+                behandlingId = behandlingId,
                 logContext = logContext,
             )
         }
     }
 
-    private fun opprettDistribuerJournalpostRequest(journalpostId: String, fagsystem: FagsystemDTO): DistribuerJournalpostRequest {
+    private fun opprettDistribuerJournalpostRequest(
+        journalpostId: String,
+        fagsystem: FagsystemDTO,
+        distribusjonstype: Distribusjonstype,
+        distribusjonstidspunkt: Distribusjonstidspunkt,
+        addresse: AdresseTo?,
+    ): DistribuerJournalpostRequest {
         return DistribuerJournalpostRequest(
             journalpostId = journalpostId,
             batchId = null,
             bestillendeFagsystem = fagsystem.name,
-            adresse = null,
+            adresse = addresse,
             dokumentProdApp = "tilbakekreving",
-            distribusjonstype = Distribusjonstype.VIKTIG,
-            distribusjonstidspunkt = Distribusjonstidspunkt.KJERNETID,
+            distribusjonstype = distribusjonstype,
+            distribusjonstidspunkt = distribusjonstidspunkt,
         )
     }
 }

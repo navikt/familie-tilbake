@@ -18,15 +18,14 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
 import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstidspunkt
 import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstype
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.tilbakekreving.applicationProps
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClientImpl
-import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.domain.DistribuerJournalpostRequest
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.domain.DistribuerJournalpostResponse
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -69,23 +68,15 @@ class DokdistClientImplTest {
             httpClient = httpClient,
         )
 
-        val request = DistribuerJournalpostRequest(
+        val resp = dokdistService.brevTilUtsending(
+            behandlingId = UUID.randomUUID(),
             journalpostId = "",
-            batchId = null,
-            bestillendeFagsystem = "",
-            adresse = null,
-            dokumentProdApp = "",
+            fagsystem = FagsystemDTO.TS,
             distribusjonstype = Distribusjonstype.VIKTIG,
             distribusjonstidspunkt = Distribusjonstidspunkt.KJERNETID,
+            adresse = null,
+            logContext = logContext,
         )
-
-        val resp = runBlocking {
-            dokdistService.sendBrev(
-                request = request,
-                behandlingId = UUID.randomUUID(),
-                logContext = logContext,
-            )
-        }
 
         resp shouldBe forventetResponse
         coVerify { tokenExchange.clientCredentialsToken(scope) }
@@ -109,24 +100,16 @@ class DokdistClientImplTest {
             httpClient = httpClient,
         )
 
-        val request = DistribuerJournalpostRequest(
-            journalpostId = "",
-            batchId = null,
-            bestillendeFagsystem = "",
-            adresse = null,
-            dokumentProdApp = "",
-            distribusjonstype = Distribusjonstype.VIKTIG,
-            distribusjonstidspunkt = Distribusjonstidspunkt.KJERNETID,
-        )
-
         shouldThrow<Exception> {
-            runBlocking {
-                dokdistService.sendBrev(
-                    request = request,
-                    behandlingId = UUID.randomUUID(),
-                    logContext = logContext,
-                )
-            }
+            dokdistService.brevTilUtsending(
+                behandlingId = UUID.randomUUID(),
+                journalpostId = "",
+                fagsystem = FagsystemDTO.TS,
+                distribusjonstype = Distribusjonstype.VIKTIG,
+                distribusjonstidspunkt = Distribusjonstidspunkt.KJERNETID,
+                adresse = null,
+                logContext = logContext,
+            )
         }.message shouldContain "Utsending av brev feilet: Utsendig av brev for behandling:"
     }
 }
