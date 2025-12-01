@@ -30,7 +30,7 @@ import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClientImpl
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostResponse
 import no.nav.tilbakekreving.kontrakter.ytelse.DokarkivFagsaksystem
 import no.nav.tilbakekreving.kontrakter.ytelse.Tema
-import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.Dokumentklass
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.DokumentKlasse
 import no.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -100,7 +100,7 @@ class DokarkivClientImplTest {
             fagsaksystem = DokarkivFagsaksystem.TILLEGGSSTONADER,
             brevkode = "brev",
             tema = Tema.TSO,
-            dokuemntkategori = Dokumentklass.B,
+            dokuemntkategori = DokumentKlasse.B,
             behandlingId = UUID.randomUUID(),
         )
 
@@ -150,7 +150,7 @@ class DokarkivClientImplTest {
                 ),
                 fagsaksystem = DokarkivFagsaksystem.TILLEGGSSTONADER,
                 tema = Tema.TSO,
-                dokuemntkategori = Dokumentklass.B,
+                dokuemntkategori = DokumentKlasse.B,
                 brevkode = "brev",
                 behandlingId = UUID.randomUUID(),
             )

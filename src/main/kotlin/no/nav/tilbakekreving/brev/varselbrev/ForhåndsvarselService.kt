@@ -35,6 +35,7 @@ import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostRes
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.domain.DistribuerJournalpostRequest
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.domain.DistribuerJournalpostResponse
+import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.pdf.Dokumentvariant
 import no.nav.tilbakekreving.pdf.PdfGenerator
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
@@ -43,7 +44,7 @@ import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.header.TekstformatererHeader
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.Brevdata
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.DokprodTilHtml
-import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.Dokumentklass
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.DokumentKlasse
 import no.nav.tilbakekreving.pdf.dokumentbestilling.varsel.TekstformatererVarselbrev
 import no.nav.tilbakekreving.pdf.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
 import org.springframework.stereotype.Service
@@ -235,7 +236,7 @@ class ForhåndsvarselService(
             fagsaksystem = varselbrevBehov.ytelse.tilDokarkivFagsaksystem(),
             brevkode = varselbrevBehov.ytelse.tilFagsystemDTO().name + "-TILB",
             tema = varselbrevBehov.ytelse.tilTema(),
-            dokuemntkategori = Dokumentklass.B,
+            dokuemntkategori = DokumentKlasse.B,
             behandlingId = varselbrevBehov.behandlingId,
         )
     }
@@ -285,7 +286,7 @@ class ForhåndsvarselService(
         return Brevmetadata(
             sakspartId = varselbrevBehov.brukerinfo.ident,
             sakspartsnavn = varselbrevBehov.brukerinfo.navn,
-            tittel = TITTEL_VARSEL_TILBAKEBETALING + varselbrevBehov.ytelse.tilYtelseDTO(),
+            tittel = hentVarselbrevTittel(varselbrevBehov),
             mottageradresse = Adresseinfo(varselbrevBehov.brukerinfo.ident, varselbrevBehov.brukerinfo.navn),
             behandlendeEnhetsNavn = requireNotNull(varselbrevBehov.behandlendeEnhet) { "Enhetsnavn kreves for journalføring" }.navn,
             ansvarligSaksbehandler = requireNotNull(varselbrevBehov.varselbrev.ansvarligSaksbehandlerIdent) { "ansvarligSaksbehandlerIdent kreves for journalføring" },
@@ -344,5 +345,9 @@ class ForhåndsvarselService(
         // alle brev kan potensielt bli sendt til både bruker og kopi verge. 2 av breva kan potensielt bli sendt flere gonger
         val callId = callId()
         return "${behandlingId}_${brevtype.name.lowercase()}_${mottager.name.lowercase()}_$callId"
+    }
+
+    private fun hentVarselbrevTittel(varselbrevBehov: VarselbrevBehov): String {
+        return "$TITTEL_VARSEL_TILBAKEBETALING ${varselbrevBehov.ytelse.hentYtelsesnavn(Språkkode.NB)}"
     }
 }

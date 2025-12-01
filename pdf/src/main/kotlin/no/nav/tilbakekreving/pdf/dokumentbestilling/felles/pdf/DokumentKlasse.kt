@@ -1,6 +1,6 @@
 package no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf
 
-enum class Dokumentklass(
+enum class DokumentKlasse(
     private val beskrivelse: String,
 ) {
     B("Brev"),

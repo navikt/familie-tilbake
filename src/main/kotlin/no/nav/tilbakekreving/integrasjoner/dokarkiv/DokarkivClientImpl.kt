@@ -30,7 +30,7 @@ import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostRes
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.Sak
 import no.nav.tilbakekreving.kontrakter.ytelse.DokarkivFagsaksystem
 import no.nav.tilbakekreving.kontrakter.ytelse.Tema
-import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.Dokumentklass
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.DokumentKlasse
 import no.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
 import org.springframework.context.annotation.Profile
 import java.util.UUID
@@ -94,7 +94,7 @@ class DokarkivClientImpl(
         fagsaksystem: DokarkivFagsaksystem,
         brevkode: String,
         tema: Tema,
-        dokuemntkategori: Dokumentklass,
+        dokuemntkategori: DokumentKlasse,
         behandlingId: UUID,
     ): OpprettJournalpostResponse {
         val dokument = arkiverDokument.hoveddokumentvarianter[0]

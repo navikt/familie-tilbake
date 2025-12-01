@@ -28,8 +28,8 @@ import no.nav.tilbakekreving.kontrakter.ytelse.Tema
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmetadata
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.DokumentKlasse
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.Dokumentkategori
-import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.Dokumentklass
 import no.nav.tilbakekreving.pdf.dokumentbestilling.fritekstbrev.JournalpostIdOgDokumentId
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -111,8 +111,8 @@ class JournalføringService(
                 brevkode = fagsak.fagsystem.navn + "-TILB",
                 tema = hentTema(fagsak.fagsystem),
                 dokuemntkategori = when (dokumentkategori) {
-                    Dokumentkategori.BREV -> Dokumentklass.B
-                    Dokumentkategori.VEDTAKSBREV -> Dokumentklass.VB
+                    Dokumentkategori.BREV -> DokumentKlasse.B
+                    Dokumentkategori.VEDTAKSBREV -> DokumentKlasse.VB
                 },
                 behandlingId = behandling.id,
             )
