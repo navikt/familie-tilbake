@@ -250,6 +250,12 @@ class OppgaveService(
         saksbehandler: String? = ContextService.hentSaksbehandler(logContext),
     ) {
         val oppgave = finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
+        if (oppgave.tildeltEnhetsnr == enhetId) {
+            log.medContext(logContext) {
+                info("Prøvde å oppdatere ansvarlig enhet, men oppgaven var allerede tildelt enheten")
+            }
+            return
+        }
 
         val nyBeskrivelse =
             LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yy hh:mm")) + ":" +

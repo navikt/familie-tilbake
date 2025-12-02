@@ -8,6 +8,7 @@ import no.nav.tilbakekreving.kontrakter.ytelse.Tema
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class Oppgave(
     val id: Long? = null,
+    val tildeltEnhetsnr: String? = null,
     val tilordnetRessurs: String? = null,
     val beskrivelse: String? = null,
     val tema: Tema? = null,
