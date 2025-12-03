@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.fagsystem
 
 import no.nav.tilbakekreving.entities.YtelseEntity
+import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.ytelse.DokarkivFagsaksystem
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.Tema
@@ -19,6 +20,8 @@ sealed interface Ytelse {
 
     fun tilTema(): Tema
 
+    fun hentYtelsesnavn(språkkode: Språkkode): String
+
     val kafkaTopic: String
 
     fun tilEntity(): YtelseEntity
@@ -33,6 +36,13 @@ sealed interface Ytelse {
         override fun tilYtelsestype(): Ytelsestype = Ytelsestype.BARNETRYGD
 
         override fun tilTema(): Tema = Tema.BAR
+
+        override fun hentYtelsesnavn(språkkode: Språkkode): String {
+            return when (språkkode) {
+                Språkkode.NB -> "Barnetrygd"
+                Språkkode.NN -> "Barnetrygd"
+            }
+        }
 
         override fun tilDokarkivFagsaksystem(): DokarkivFagsaksystem = DokarkivFagsaksystem.BA
 
@@ -52,6 +62,13 @@ sealed interface Ytelse {
 
         override fun tilTema(): Tema = Tema.TSO
 
+        override fun hentYtelsesnavn(språkkode: Språkkode): String {
+            return when (språkkode) {
+                Språkkode.NB -> "Tilleggsstønad"
+                Språkkode.NN -> "Tilleggsstønad"
+            }
+        }
+
         override fun tilDokarkivFagsaksystem(): DokarkivFagsaksystem = DokarkivFagsaksystem.TILLEGGSSTONADER
 
         override val kafkaTopic: String = "tilbake.privat-tilbakekreving-tilleggsstonad"
@@ -69,6 +86,13 @@ sealed interface Ytelse {
         override fun tilYtelsestype(): Ytelsestype = Ytelsestype.ARBEIDSAVKLARINGSPENGER
 
         override fun tilTema(): Tema = Tema.AAP
+
+        override fun hentYtelsesnavn(språkkode: Språkkode): String {
+            return when (språkkode) {
+                Språkkode.NB -> "Arbeidsavklaringspenger"
+                Språkkode.NN -> "Arbeidsavklaringspengar"
+            }
+        }
 
         override fun tilDokarkivFagsaksystem(): DokarkivFagsaksystem = DokarkivFagsaksystem.KELVIN
 
