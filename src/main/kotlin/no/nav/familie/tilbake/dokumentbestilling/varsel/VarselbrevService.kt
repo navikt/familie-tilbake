@@ -124,7 +124,7 @@ class VarselbrevService(
         val varsel = behandling.aktivtVarsel
 
         return Varselbrevsdokument(
-            brevmetadata = metadata.copy(tittel = TITTEL_VARSEL_TILBAKEBETALING + fagsak.ytelsesnavn),
+            brevmetadata = metadata.copy(tittel = "$TITTEL_VARSEL_TILBAKEBETALING ${fagsak.ytelsesnavn}"),
             beløp = varsel?.varselbeløp ?: 0L,
             revurderingsvedtaksdato = behandling.aktivFagsystemsbehandling.revurderingsvedtaksdato,
             fristdatoForTilbakemelding = Constants.brukersSvarfrist(),

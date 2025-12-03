@@ -6,7 +6,6 @@ import no.nav.tilbakekreving.kontrakter.ytelse.DokarkivFagsaksystem
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.Tema
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
-import kotlin.collections.mapOf
 
 sealed interface Ytelse {
     fun tilFagsystemDTO(): FagsystemDTO
@@ -20,6 +19,8 @@ sealed interface Ytelse {
     fun tilDokarkivFagsaksystem(): DokarkivFagsaksystem
 
     fun tilTema(): Tema
+
+    fun hentYtelsesnavn(språkkode: Språkkode): String
 
     val kafkaTopic: String
 
@@ -35,6 +36,13 @@ sealed interface Ytelse {
         override fun tilYtelsestype(): Ytelsestype = Ytelsestype.BARNETRYGD
 
         override fun tilTema(): Tema = Tema.BAR
+
+        override fun hentYtelsesnavn(språkkode: Språkkode): String {
+            return when (språkkode) {
+                Språkkode.NB -> "Barnetrygd"
+                Språkkode.NN -> "Barnetrygd"
+            }
+        }
 
         override fun tilDokarkivFagsaksystem(): DokarkivFagsaksystem = DokarkivFagsaksystem.BA
 
@@ -54,6 +62,13 @@ sealed interface Ytelse {
 
         override fun tilTema(): Tema = Tema.TSO
 
+        override fun hentYtelsesnavn(språkkode: Språkkode): String {
+            return when (språkkode) {
+                Språkkode.NB -> "Tilleggsstønad"
+                Språkkode.NN -> "Tilleggsstønad"
+            }
+        }
+
         override fun tilDokarkivFagsaksystem(): DokarkivFagsaksystem = DokarkivFagsaksystem.TILLEGGSSTONADER
 
         override val kafkaTopic: String = "tilbake.privat-tilbakekreving-tilleggsstonad"
@@ -72,6 +87,13 @@ sealed interface Ytelse {
 
         override fun tilTema(): Tema = Tema.AAP
 
+        override fun hentYtelsesnavn(språkkode: Språkkode): String {
+            return when (språkkode) {
+                Språkkode.NB -> "Arbeidsavklaringspenger"
+                Språkkode.NN -> "Arbeidsavklaringspengar"
+            }
+        }
+
         override fun tilDokarkivFagsaksystem(): DokarkivFagsaksystem = DokarkivFagsaksystem.KELVIN
 
         override val kafkaTopic: String = "tilbake.privat-tilbakekreving-arbeidsavklaringspenger"
@@ -86,47 +108,11 @@ sealed interface Ytelse {
     }
 }
 
-enum class Ytelsestype(val kode: String, val navn: Map<Språkkode, String>) {
-    BARNETRYGD(
-        "BA",
-        mapOf(
-            Språkkode.NB to "Barnetrygd",
-            Språkkode.NN to "Barnetrygd",
-        ),
-    ),
-    TILLEGGSSTØNAD(
-        "TSO",
-        mapOf(
-            Språkkode.NB to "Tilleggsstønad",
-            Språkkode.NN to "Tilleggsstønad",
-        ),
-    ),
-    KONTANTSTØTTE(
-        "KS",
-        mapOf(
-            Språkkode.NB to "Kontantstøtte",
-            Språkkode.NN to "Kontantstøtte",
-        ),
-    ),
-    OVERGANGSSTØNAD(
-        "EF",
-        mapOf(
-            Språkkode.NB to "Overgangsstønad",
-            Språkkode.NN to "Overgangsstønad",
-        ),
-    ),
-    INFOTRYGD(
-        "IT01",
-        mapOf(
-            Språkkode.NB to "Infotrygd",
-            Språkkode.NN to "Infotrygd",
-        ),
-    ),
-    ARBEIDSAVKLARINGSPENGER(
-        "AAP",
-        mapOf(
-            Språkkode.NB to "Arbeidsavklaringspenger",
-            Språkkode.NN to "Arbeidsavklaringspengar",
-        ),
-    ),
+enum class Ytelsestype(val kode: String) {
+    BARNETRYGD("BA"),
+    TILLEGGSSTØNAD("TSO"),
+    KONTANTSTØTTE("KS"),
+    OVERGANGSSTØNAD("EF"),
+    INFOTRYGD("IT01"),
+    ARBEIDSAVKLARINGSPENGER("AAP"),
 }

@@ -40,7 +40,7 @@ class VarselbrevUtil(
 ) {
     companion object {
         const val TITTEL_KORRIGERT_VARSEL_TILBAKEBETALING = "Korrigert Varsel tilbakebetaling "
-        const val TITTEL_VARSEL_TILBAKEBETALING = "Varsel om tilbakebetaling av feilutbetalt "
+        const val TITTEL_VARSEL_TILBAKEBETALING = "Varsel om tilbakebetaling av feilutbetalt"
     }
 
     fun sammenstillInfoForForhåndvisningVarselbrev(
@@ -253,7 +253,7 @@ class VarselbrevUtil(
         if (erKorrigert) {
             TITTEL_KORRIGERT_VARSEL_TILBAKEBETALING + ytelsesnavn
         } else {
-            TITTEL_VARSEL_TILBAKEBETALING + ytelsesnavn
+            "$TITTEL_VARSEL_TILBAKEBETALING $ytelsesnavn"
         }
 
     private fun mapFeilutbetaltePerioder(feilutbetaltePerioderDto: FeilutbetaltePerioderDto): List<Datoperiode> =

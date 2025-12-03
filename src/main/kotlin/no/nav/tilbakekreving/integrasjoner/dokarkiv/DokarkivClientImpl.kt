@@ -264,6 +264,6 @@ class DokarkivClientImpl(
     }
 
     private fun hentVarselbrevTittel(varselbrevBehov: VarselbrevBehov): String {
-        return TITTEL_VARSEL_TILBAKEBETALING + varselbrevBehov.ytelse.tilYtelsestype().navn[Språkkode.NB]
+        return "$TITTEL_VARSEL_TILBAKEBETALING ${varselbrevBehov.ytelse.hentYtelsesnavn(Språkkode.NB)}"
     }
 }
