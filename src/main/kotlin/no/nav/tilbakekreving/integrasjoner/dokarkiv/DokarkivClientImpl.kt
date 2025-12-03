@@ -36,6 +36,7 @@ import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.JournalpostType
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostRequest
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostResponse
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.Sak
+import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.pdf.Dokumentvariant
 import no.nav.tilbakekreving.pdf.PdfGenerator
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
@@ -183,7 +184,7 @@ class DokarkivClientImpl(
         return Brevmetadata(
             sakspartId = varselbrevBehov.brukerinfo.ident,
             sakspartsnavn = varselbrevBehov.brukerinfo.navn,
-            tittel = TITTEL_VARSEL_TILBAKEBETALING + varselbrevBehov.ytelse.tilYtelseDTO(),
+            tittel = hentVarselbrevTittel(varselbrevBehov),
             mottageradresse = Adresseinfo(varselbrevBehov.brukerinfo.ident, varselbrevBehov.brukerinfo.navn),
             behandlendeEnhetsNavn = requireNotNull(varselbrevBehov.behandlendeEnhet) { "Enhetsnavn kreves for journalføring" }.navn,
             ansvarligSaksbehandler = requireNotNull(varselbrevBehov.varselbrev.ansvarligSaksbehandlerIdent) { "ansvarligSaksbehandlerIdent kreves for journalføring" },
@@ -260,5 +261,9 @@ class DokarkivClientImpl(
         // alle brev kan potensielt bli sendt til både bruker og kopi verge. 2 av breva kan potensielt bli sendt flere gonger
         val callId = callId()
         return "${behandlingId}_${brevtype.name.lowercase()}_${mottager.name.lowercase()}_$callId"
+    }
+
+    private fun hentVarselbrevTittel(varselbrevBehov: VarselbrevBehov): String {
+        return TITTEL_VARSEL_TILBAKEBETALING + varselbrevBehov.ytelse.tilYtelsestype().navn[Språkkode.NB]
     }
 }

@@ -1,10 +1,12 @@
 package no.nav.tilbakekreving.fagsystem
 
 import no.nav.tilbakekreving.entities.YtelseEntity
+import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.ytelse.DokarkivFagsaksystem
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.Tema
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
+import kotlin.collections.mapOf
 
 sealed interface Ytelse {
     fun tilFagsystemDTO(): FagsystemDTO
@@ -84,11 +86,47 @@ sealed interface Ytelse {
     }
 }
 
-enum class Ytelsestype(val kode: String) {
-    BARNETRYGD("BA"),
-    TILLEGGSSTØNAD("TSO"),
-    KONTANTSTØTTE("KS"),
-    OVERGANGSSTØNAD("EF"),
-    INFOTRYGD("IT01"),
-    ARBEIDSAVKLARINGSPENGER("AAP"),
+enum class Ytelsestype(val kode: String, val navn: Map<Språkkode, String>) {
+    BARNETRYGD(
+        "BA",
+        mapOf(
+            Språkkode.NB to "Barnetrygd",
+            Språkkode.NN to "Barnetrygd",
+        ),
+    ),
+    TILLEGGSSTØNAD(
+        "TSO",
+        mapOf(
+            Språkkode.NB to "Tilleggsstønad",
+            Språkkode.NN to "Tilleggsstønad",
+        ),
+    ),
+    KONTANTSTØTTE(
+        "KS",
+        mapOf(
+            Språkkode.NB to "Kontantstøtte",
+            Språkkode.NN to "Kontantstøtte",
+        ),
+    ),
+    OVERGANGSSTØNAD(
+        "EF",
+        mapOf(
+            Språkkode.NB to "Overgangsstønad",
+            Språkkode.NN to "Overgangsstønad",
+        ),
+    ),
+    INFOTRYGD(
+        "IT01",
+        mapOf(
+            Språkkode.NB to "Infotrygd",
+            Språkkode.NN to "Infotrygd",
+        ),
+    ),
+    ARBEIDSAVKLARINGSPENGER(
+        "AAP",
+        mapOf(
+            Språkkode.NB to "Arbeidsavklaringspenger",
+            Språkkode.NN to "Arbeidsavklaringspengar",
+        ),
+    ),
 }

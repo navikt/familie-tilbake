@@ -40,7 +40,7 @@ class VarselbrevUtil(
 ) {
     companion object {
         const val TITTEL_KORRIGERT_VARSEL_TILBAKEBETALING = "Korrigert Varsel tilbakebetaling "
-        const val TITTEL_VARSEL_TILBAKEBETALING = "Varsel tilbakebetaling "
+        const val TITTEL_VARSEL_TILBAKEBETALING = "Varsel om tilbakebetaling av feilutbetalt "
     }
 
     fun sammenstillInfoForForhåndvisningVarselbrev(
