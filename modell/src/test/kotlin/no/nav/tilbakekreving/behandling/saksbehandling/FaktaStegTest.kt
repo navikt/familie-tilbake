@@ -1,6 +1,9 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
 import io.kotest.matchers.shouldBe
+import no.nav.kontrakter.frontend.models.OppdagetDto
+import no.nav.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
+import no.nav.kontrakter.frontend.models.RettsligGrunnlagDto
 import no.nav.tilbakekreving.api.v1.dto.FeilutbetalingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurderingAvBrukersUttalelseDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
@@ -109,5 +112,105 @@ class FaktaStegTest {
         )
 
         faktasteg.erFullstendig() shouldBe true
+    }
+
+    @Test
+    fun `vurdering av faktaperioder blir oppdatert`() {
+        val periode = 1.januar til 1.januar
+        val tilbakekrevesBeløp = 9000.kroner
+        val bestemmelse = Hendelsestype.ANNET
+        val grunnlag = Hendelsesundertype.ANNET_FRITEKST
+        val revurdering = eksternFagsakBehandling()
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(kravgrunnlagPeriode(periode, ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = tilbakekrevesBeløp))),
+        )
+
+        val faktasteg = Faktasteg.opprett(
+            eksternFagsakRevurdering = revurdering,
+            kravgrunnlag = kravgrunnlag,
+            brevHistorikk = BrevHistorikk(historikk = mutableListOf()),
+        )
+        val perioder = faktasteg.nyTilFrontendDto(
+            kravgrunnlag = kravgrunnlag,
+            revurdering = revurdering,
+            varselbrev = null,
+        ).perioder
+
+        perioder.single().rettsligGrunnlag shouldBe listOf(
+            RettsligGrunnlagDto(
+                bestemmelse = bestemmelse.name,
+                grunnlag = grunnlag.name,
+            ),
+        )
+
+        faktasteg.vurder(
+            listOf(
+                OppdaterFaktaPeriodeDto(
+                    id = perioder.single().id,
+                    rettsligGrunnlag = listOf(
+                        RettsligGrunnlagDto(
+                            bestemmelse = Hendelsestype.VILKÅR_SØKER.name,
+                            grunnlag = Hendelsesundertype.KONTANTSTØTTE.name,
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        faktasteg.nyTilFrontendDto(
+            kravgrunnlag = kravgrunnlag,
+            revurdering = revurdering,
+            varselbrev = null,
+        ).perioder.single().rettsligGrunnlag shouldBe listOf(
+            RettsligGrunnlagDto(
+                bestemmelse = Hendelsestype.VILKÅR_SØKER.name,
+                grunnlag = Hendelsesundertype.KONTANTSTØTTE.name,
+            ),
+        )
+    }
+
+    @Test
+    fun `vurdering av oppdaget blir oppdatert`() {
+        val periode = 1.januar til 1.januar
+        val tilbakekrevesBeløp = 9000.kroner
+        val revurdering = eksternFagsakBehandling()
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(kravgrunnlagPeriode(periode, ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = tilbakekrevesBeløp))),
+        )
+
+        val faktasteg = Faktasteg.opprett(
+            eksternFagsakRevurdering = revurdering,
+            kravgrunnlag = kravgrunnlag,
+            brevHistorikk = BrevHistorikk(historikk = mutableListOf()),
+        )
+
+        faktasteg.nyTilFrontendDto(
+            kravgrunnlag = kravgrunnlag,
+            revurdering = revurdering,
+            varselbrev = null,
+        ).vurdering.oppdaget shouldBe OppdagetDto(
+            dato = null,
+            av = OppdagetDto.Av.IKKE_VURDERT,
+            beskrivelse = null,
+        )
+
+        val oppdagetDato = LocalDate.now()
+        faktasteg.vurder(
+            OppdagetDto(
+                dato = oppdagetDato,
+                beskrivelse = "beskrivelse",
+                av = OppdagetDto.Av.NAV,
+            ),
+        )
+
+        faktasteg.nyTilFrontendDto(
+            kravgrunnlag = kravgrunnlag,
+            revurdering = revurdering,
+            varselbrev = null,
+        ).vurdering.oppdaget shouldBe OppdagetDto(
+            dato = oppdagetDato,
+            av = OppdagetDto.Av.NAV,
+            beskrivelse = "beskrivelse",
+        )
     }
 }

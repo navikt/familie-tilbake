@@ -59,7 +59,7 @@ sealed class EksternFagsakRevurdering(
             return RevurderingDto(
                 årsak = årsakTilFeilutbetaling,
                 vedtaksdato = vedtaksdato,
-                resultat = "Ukjent",
+                resultat = RevurderingDto.Resultat.INNVILGET,
             )
         }
     }
@@ -113,7 +113,7 @@ sealed class EksternFagsakRevurdering(
             return RevurderingDto(
                 årsak = årsakTilFeilutbetaling,
                 vedtaksdato = vedtaksdato,
-                resultat = "Ukjent",
+                resultat = RevurderingDto.Resultat.INNVILGET,
             )
         }
     }

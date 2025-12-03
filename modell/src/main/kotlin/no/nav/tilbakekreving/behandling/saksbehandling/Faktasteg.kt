@@ -6,6 +6,7 @@ import no.nav.kontrakter.frontend.models.FaktaPeriodeDto
 import no.nav.kontrakter.frontend.models.FeilutbetalingDto
 import no.nav.kontrakter.frontend.models.MuligeRettsligGrunnlagDto
 import no.nav.kontrakter.frontend.models.OppdagetDto
+import no.nav.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
 import no.nav.kontrakter.frontend.models.RettsligGrunnlagDto
 import no.nav.kontrakter.frontend.models.VurderingDto
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
@@ -50,6 +51,14 @@ class Faktasteg(
 
     internal fun vurder(vurdering: Vurdering) {
         this.vurdering = vurdering
+    }
+
+    internal fun vurder(perioder: List<OppdaterFaktaPeriodeDto>) {
+        vurdering.vurder(perioder)
+    }
+
+    internal fun vurder(oppdaget: OppdagetDto) {
+        vurdering.vurder(oppdaget)
     }
 
     fun nyTilFrontendDto(kravgrunnlag: KravgrunnlagHendelse, revurdering: EksternFagsakRevurdering, varselbrev: Varselbrev?): FaktaOmFeilutbetalingDto {
@@ -136,7 +145,7 @@ class Faktasteg(
             },
             årsakTilFeilutbetaling = vurdering.årsakTilFeilutbetaling,
             vurderingAvBrukersUttalelse = (vurdering.uttalelse as? Uttalelse.Ja)?.begrunnelse,
-            oppdaget = vurdering.oppdaget.tilEntity(id),
+            oppdaget = vurdering.tilOppdagetEntity(id),
         )
     }
 
@@ -174,7 +183,7 @@ class Faktasteg(
         val perioder: List<FaktaPeriode>,
         val årsakTilFeilutbetaling: String,
         val uttalelse: Uttalelse,
-        val oppdaget: Oppdaget,
+        private var oppdaget: Oppdaget,
     ) {
         fun erFullstendig(): Boolean {
             return uttalelse.erFullstendig()
@@ -185,6 +194,29 @@ class Faktasteg(
                 årsak = årsakTilFeilutbetaling,
                 oppdaget = oppdaget.tilFrontendDto(),
             )
+        }
+
+        fun vurder(perioder: List<OppdaterFaktaPeriodeDto>) {
+            perioder.forEach { oppdatering ->
+                val periode = this.perioder.single { it.id.toString() == oppdatering.id }
+                periode.vurder(oppdatering)
+            }
+        }
+
+        fun vurder(oppdaget: OppdagetDto) {
+            this.oppdaget = Oppdaget.Vurdering(
+                dato = oppdaget.dato!!,
+                beskrivelse = oppdaget.beskrivelse!!,
+                av = when (oppdaget.av) {
+                    OppdagetDto.Av.NAV -> Oppdaget.Av.Nav
+                    OppdagetDto.Av.BRUKER -> Oppdaget.Av.Bruker
+                    OppdagetDto.Av.IKKE_VURDERT -> throw IllegalArgumentException("Kan ikke vurdere oppdaget som IKKE_VURDERT")
+                },
+            )
+        }
+
+        fun tilOppdagetEntity(id: UUID): FaktastegEntity.OppdagetEntity? {
+            return oppdaget.tilEntity(id)
         }
 
         sealed interface Oppdaget {
@@ -245,8 +277,8 @@ class Faktasteg(
     class FaktaPeriode(
         val id: UUID,
         val periode: Datoperiode,
-        val rettsligGrunnlag: Hendelsestype,
-        val rettsligGrunnlagUnderkategori: Hendelsesundertype,
+        var rettsligGrunnlag: Hendelsestype,
+        var rettsligGrunnlagUnderkategori: Hendelsesundertype,
     ) {
         fun tilEntity(faktavurderingRef: UUID): FaktastegEntity.FaktaPeriodeEntity {
             return FaktastegEntity.FaktaPeriodeEntity(
@@ -272,6 +304,11 @@ class Faktasteg(
                     ),
                 ),
             )
+        }
+
+        fun vurder(oppdatering: OppdaterFaktaPeriodeDto) {
+            rettsligGrunnlag = enumValueOf(oppdatering.rettsligGrunnlag.single().bestemmelse)
+            rettsligGrunnlagUnderkategori = enumValueOf(oppdatering.rettsligGrunnlag.single().grunnlag)
         }
     }
 

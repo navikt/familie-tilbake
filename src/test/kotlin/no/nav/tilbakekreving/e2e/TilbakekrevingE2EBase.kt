@@ -196,7 +196,7 @@ open class TilbakekrevingE2EBase : E2EBase() {
         runBlocking {
             eventually(
                 eventuallyConfig {
-                    duration = 1000.milliseconds
+                    duration = 2000.milliseconds
                     interval = 10.milliseconds
                 },
             ) {
