@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.integrasjoner.dokumenthenting.config
 
+import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.integrasjoner.dokumenthenting.SafClient
 import no.nav.tilbakekreving.integrasjoner.dokumenthenting.SafClientImpl
@@ -17,9 +18,11 @@ class SafBeans(
     @Profile("dev", "prod")
     fun safClient(
         tokenExchangeService: TokenExchangeService,
+        tokenValidationContextHolder: TokenValidationContextHolder,
     ): SafClient = SafClientImpl(
         applicationProperties = props,
         tokenExchangeService = tokenExchangeService,
+        tokenValidationContextHolder = tokenValidationContextHolder,
     )
 
     @Bean("sakClient")

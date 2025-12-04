@@ -56,7 +56,7 @@ tilbakekreving:
     base-url: https://dokdistfordeling.dev-fss-pub.nais.io
     scope: api://dev-fss.teamdokumenthandtering.dokdistfordeling/.default
   saf:
-    base-url: https://saf.intern.dev.nav.no
+    base-url: https://saf-q2.dev-fss-pub.nais.io
     scope: api://dev-fss.teamdokumenthandtering.saf/.default
 rolle:
   barnetrygd:

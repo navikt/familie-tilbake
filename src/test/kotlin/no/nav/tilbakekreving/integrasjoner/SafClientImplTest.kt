@@ -19,6 +19,8 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.security.token.support.core.context.TokenValidationContext
+import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.tilbakekreving.applicationProps
 import no.nav.tilbakekreving.integrasjoner.dokumenthenting.SafClientImpl
@@ -27,22 +29,27 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class SafClientImplTest {
-    private val jwtToken = mockk<JwtToken>()
     private val scope = "api://saf/.default"
+    private val jwtToken = mockk<JwtToken> {
+        every { encodedToken } returns "USER_TOKEN"
+    }
 
     private val tokenExchange = mockk<TokenExchangeService> {
         coEvery { clientCredentialsToken(scope) } returns "BEARER"
+        coEvery { onBehalfOfToken("USER_TOKEN", scope) } returns "token"
+    }
+
+    private val tokenvalidationHolder = mockk<TokenValidationContextHolder> {
+        coEvery { getTokenValidationContext() } returns TokenValidationContext(mapOf("" to jwtToken))
     }
 
     @Test
     fun `dokumenthenting returnerer ByteArray ved success`() {
         val forventetResponse = ByteArray(0)
 
-        every { jwtToken.encodedToken } returns "USER_TOKEN"
-
         val engine = MockEngine { req ->
-            req.url.fullPath shouldBe "/hentdokument/111/222/ARKIV"
-            req.headers[HttpHeaders.Authorization] shouldBe "Bearer BEARER"
+            req.url.fullPath shouldBe "/rest/hentdokument/111/222/ARKIV"
+            req.headers[HttpHeaders.Authorization] shouldBe "Bearer token"
 
             respond(
                 content = jacksonObjectMapper().writeValueAsString(forventetResponse),
@@ -58,6 +65,7 @@ class SafClientImplTest {
         val safClient = SafClientImpl(
             applicationProperties = applicationProps(),
             tokenExchangeService = tokenExchange,
+            tokenValidationContextHolder = tokenvalidationHolder,
             httpClient = httpClient,
         )
 
@@ -68,12 +76,11 @@ class SafClientImplTest {
         )
 
         resp.shouldBeTypeOf<ByteArray>()
-        coVerify { tokenExchange.clientCredentialsToken(scope) }
+        coVerify { tokenExchange.onBehalfOfToken("USER_TOKEN", scope) }
     }
 
     @Test
     fun `dokumenthenting kaster exception ved feil`() {
-        every { jwtToken.encodedToken } returns "USER_TOKEN"
         val engine = MockEngine {
             respond(
                 content = """{"message":"bad request"}""",
@@ -86,6 +93,7 @@ class SafClientImplTest {
         val safClient = SafClientImpl(
             applicationProperties = applicationProps(),
             tokenExchangeService = tokenExchange,
+            tokenValidationContextHolder = tokenvalidationHolder,
             httpClient = httpClient,
         )
 
