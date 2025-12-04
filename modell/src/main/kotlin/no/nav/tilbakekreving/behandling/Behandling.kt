@@ -410,7 +410,7 @@ class Behandling internal constructor(
         ansvarligSaksbehandler = ansvarligSaksbehandler,
         beløp = totaltFeilutbetaltBeløp().toLong(),
         feilutbetaltePerioder = kravgrunnlag.entry.perioder.map {
-            it.periode
+            eksternFagsakRevurdering.entry.utvidPeriode(it.periode)
         },
         revurderingsvedtaksdato = eksternFagsakRevurdering.entry.vedtaksdato,
     )
