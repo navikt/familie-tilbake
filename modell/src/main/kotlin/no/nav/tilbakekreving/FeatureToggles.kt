@@ -10,4 +10,5 @@ class FeatureToggles(
 
 enum class Toggle(val default: Boolean) {
     SendVarselbrev(default = false),
+    Dokumenthenting(default = false),
 }
