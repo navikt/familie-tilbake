@@ -79,3 +79,6 @@ tilbakekreving:
   dokdist:
     base-url: https://dokdistfordeling.prod-fss-pub.nais.io
     scope: api://prod-fss.teamdokumenthandtering.dokdistfordeling/.default
+  saf:
+    base-url: https://saf.intern.nav.no
+    scope: api://prod-fss.teamdokumenthandtering.saf/.default

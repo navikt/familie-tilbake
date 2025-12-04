@@ -6,6 +6,7 @@ import no.nav.tilbakekreving.config.BigQueryProperties
 import no.nav.tilbakekreving.config.Tilgangsstyring
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.config.DokarkivConfig
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.config.DokdistConfig
+import no.nav.tilbakekreving.integrasjoner.dokumenthenting.config.SafConfig
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.tilbakekreving.integrasjoner.persontilgang.PersontilgangService
 import no.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
@@ -41,6 +42,10 @@ fun applicationProps(): ApplicationProperties {
         dokdist = DokdistConfig(
             baseUrl = "http://dokdist",
             scope = "api://dokdist/.default",
+        ),
+        saf = SafConfig(
+            baseUrl = "http://saf",
+            scope = "api://saf/.default",
         ),
     )
 }

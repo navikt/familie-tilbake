@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
+import no.nav.tilbakekreving.TilbakekrevingService
+import no.nav.tilbakekreving.integrasjoner.dokumenthenting.SafClient
 
 @RestController
 @RequestMapping("/api/behandling")
@@ -22,6 +24,8 @@ import java.util.UUID
 class JournalpostController(
     private val journalføringService: JournalføringService,
     private val tilgangskontrollService: TilgangskontrollService,
+    private val tilbakekrevingService: TilbakekrevingService,
+    private val safClient: SafClient,
 ) {
     @Operation(summary = "Hent dokument fra journalføring")
     @GetMapping("/{behandlingId}/journalpost/{journalpostId}/dokument/{dokumentInfoId}")
@@ -30,13 +34,30 @@ class JournalpostController(
         @PathVariable journalpostId: String,
         @PathVariable dokumentInfoId: String,
     ): Ressurs<ByteArray> {
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        if (tilbakekreving != null) {
+            tilgangskontrollService.validerTilgangTilbakekreving(
+                tilbakekreving = tilbakekreving,
+                behandlingId = behandlingId,
+                minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+                auditLoggerEvent = AuditLoggerEvent.ACCESS,
+                handling = "Henter vilkårsvurdering for en gitt behandling",
+            )
+            return Ressurs.success(safClient.hentDokument(
+                behandlingId = behandlingId,
+                journalpostId = journalpostId,
+                dokumentInfoId = dokumentInfoId,
+                ),
+                "OK"
+            )
+        }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.VEILEDER,
             auditLoggerEvent = AuditLoggerEvent.ACCESS,
             handling = "Henter journalført dokument",
         )
-        return Ressurs.success(journalføringService.hentDokument(journalpostId, dokumentInfoId), "OK")
+        return Ressurs.success(journalføringService.hentDokument(journalpostId, dokumentInfoId, behandlingId), "OK")
     }
 
     @Operation(summary = "Hent journalpost informasjon")
