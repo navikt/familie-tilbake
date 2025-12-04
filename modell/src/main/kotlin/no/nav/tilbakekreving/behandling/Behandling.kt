@@ -1,6 +1,8 @@
 package no.nav.tilbakekreving.behandling
 
 import no.nav.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
+import no.nav.kontrakter.frontend.models.OppdagetDto
+import no.nav.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
 import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
@@ -536,6 +538,18 @@ class Behandling internal constructor(
         ansvarligSaksbehandlerIdent = ansvarligSaksbehandler.ident,
         kravgrunnlag = kravgrunnlag,
     )
+
+    fun vurder(oppdaget: OppdagetDto) {
+        faktasteg.vurder(oppdaget)
+    }
+
+    fun vurder(årsak: String) {
+        faktasteg.vurder(årsak)
+    }
+
+    fun vurderFaktaPerioder(perioder: List<OppdaterFaktaPeriodeDto>) {
+        faktasteg.vurder(perioder)
+    }
 
     companion object {
         internal fun nyBehandling(

@@ -210,6 +210,7 @@ fun faktastegVurdering(
             dato = LocalDate.now(),
             beskrivelse = "Hva som helst",
             av = Faktasteg.Vurdering.Oppdaget.Av.Nav,
+            id = UUID.randomUUID(),
         ),
     )
 }

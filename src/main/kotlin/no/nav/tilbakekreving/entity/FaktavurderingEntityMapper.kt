@@ -98,9 +98,14 @@ object FaktavurderingEntityMapper : Entity<FaktastegEntity, UUID, UUID>(
 
     object OppdagetEntityMapper : Entity<FaktastegEntity.OppdagetEntity, UUID, UUID>(
         "tilbakekreving_faktavurdering_feilutbetaling_oppdaget",
-        FaktastegEntity.OppdagetEntity::faktavurderingRef,
+        FaktastegEntity.OppdagetEntity::id,
         FieldConverter.UUIDConverter.required(),
     ) {
+        val faktavurderingRef = field(
+            "faktavurdering_ref",
+            FaktastegEntity.OppdagetEntity::faktavurderingRef,
+            FieldConverter.UUIDConverter.required(),
+        )
         val av = field(
             "av",
             FaktastegEntity.OppdagetEntity::av,
@@ -119,7 +124,8 @@ object FaktavurderingEntityMapper : Entity<FaktastegEntity, UUID, UUID>(
 
         fun map(resultSet: ResultSet): FaktastegEntity.OppdagetEntity {
             return FaktastegEntity.OppdagetEntity(
-                faktavurderingRef = resultSet[id],
+                id = resultSet[id],
+                faktavurderingRef = resultSet[faktavurderingRef],
                 av = resultSet[av],
                 dato = resultSet[dato],
                 beskrivelse = resultSet[beskrivelse],

@@ -62,6 +62,7 @@ data class FaktastegEntity(
     }
 
     class OppdagetEntity(
+        val id: UUID,
         val faktavurderingRef: UUID,
         val av: OppdagetAv,
         val dato: LocalDate,
@@ -69,6 +70,7 @@ data class FaktastegEntity(
     ) {
         internal fun fraEntity(): Faktasteg.Vurdering.Oppdaget.Vurdering {
             return Faktasteg.Vurdering.Oppdaget.Vurdering(
+                id = id,
                 dato = dato,
                 beskrivelse = beskrivelse,
                 av = when (av) {

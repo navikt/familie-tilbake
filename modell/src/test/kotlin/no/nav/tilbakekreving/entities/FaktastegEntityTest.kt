@@ -53,6 +53,7 @@ class FaktastegEntityTest {
                     dato = LocalDate.now(),
                     beskrivelse = "Oppdaget beskrivelse",
                     av = Faktasteg.Vurdering.Oppdaget.Av.Nav,
+                    id = UUID.randomUUID(),
                 ),
             ),
         )

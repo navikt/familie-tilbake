@@ -61,6 +61,10 @@ class Faktasteg(
         vurdering.vurder(oppdaget)
     }
 
+    internal fun vurder(årsak: String) {
+        vurdering.vurder(årsak)
+    }
+
     fun nyTilFrontendDto(kravgrunnlag: KravgrunnlagHendelse, revurdering: EksternFagsakRevurdering, varselbrev: Varselbrev?): FaktaOmFeilutbetalingDto {
         val beløpTilbakekreves = kravgrunnlag.feilutbetaltBeløpForAllePerioder().toInt()
         return FaktaOmFeilutbetalingDto(
@@ -133,20 +137,7 @@ class Faktasteg(
     }
 
     fun tilEntity(behandlingRef: UUID): FaktastegEntity {
-        return FaktastegEntity(
-            id = id,
-            behandlingRef = behandlingRef,
-            perioder = vurdering.perioder.map { it.tilEntity(id) },
-            uttalelse = when (vurdering.uttalelse) {
-                is Uttalelse.Ja -> FaktastegEntity.Uttalelse.Ja
-                is Uttalelse.Nei -> FaktastegEntity.Uttalelse.Nei
-                is Uttalelse.IkkeAktuelt -> FaktastegEntity.Uttalelse.IkkeAktuelt
-                is Uttalelse.IkkeVurdert -> FaktastegEntity.Uttalelse.IkkeVurdert
-            },
-            årsakTilFeilutbetaling = vurdering.årsakTilFeilutbetaling,
-            vurderingAvBrukersUttalelse = (vurdering.uttalelse as? Uttalelse.Ja)?.begrunnelse,
-            oppdaget = vurdering.tilOppdagetEntity(id),
-        )
+        return vurdering.tilEntity(id, behandlingRef)
     }
 
     companion object {
@@ -181,7 +172,7 @@ class Faktasteg(
 
     class Vurdering(
         val perioder: List<FaktaPeriode>,
-        val årsakTilFeilutbetaling: String,
+        var årsakTilFeilutbetaling: String,
         val uttalelse: Uttalelse,
         private var oppdaget: Oppdaget,
     ) {
@@ -205,6 +196,7 @@ class Faktasteg(
 
         fun vurder(oppdaget: OppdagetDto) {
             this.oppdaget = Oppdaget.Vurdering(
+                id = (this.oppdaget as? Oppdaget.Vurdering)?.id ?: UUID.randomUUID(),
                 dato = oppdaget.dato!!,
                 beskrivelse = oppdaget.beskrivelse!!,
                 av = when (oppdaget.av) {
@@ -215,8 +207,28 @@ class Faktasteg(
             )
         }
 
-        fun tilOppdagetEntity(id: UUID): FaktastegEntity.OppdagetEntity? {
-            return oppdaget.tilEntity(id)
+        fun vurder(årsak: String) {
+            this.årsakTilFeilutbetaling = årsak
+        }
+
+        fun tilEntity(
+            id: UUID,
+            behandlingRef: UUID,
+        ): FaktastegEntity {
+            return FaktastegEntity(
+                id = id,
+                behandlingRef = behandlingRef,
+                perioder = perioder.map { it.tilEntity(id) },
+                uttalelse = when (uttalelse) {
+                    is Uttalelse.Ja -> FaktastegEntity.Uttalelse.Ja
+                    is Uttalelse.Nei -> FaktastegEntity.Uttalelse.Nei
+                    is Uttalelse.IkkeAktuelt -> FaktastegEntity.Uttalelse.IkkeAktuelt
+                    is Uttalelse.IkkeVurdert -> FaktastegEntity.Uttalelse.IkkeVurdert
+                },
+                årsakTilFeilutbetaling = årsakTilFeilutbetaling,
+                vurderingAvBrukersUttalelse = (uttalelse as? Uttalelse.Ja)?.begrunnelse,
+                oppdaget = oppdaget.tilEntity(id),
+            )
         }
 
         sealed interface Oppdaget {
@@ -225,6 +237,7 @@ class Faktasteg(
             fun tilEntity(faktavurderingRef: UUID): FaktastegEntity.OppdagetEntity?
 
             class Vurdering(
+                val id: UUID,
                 val dato: LocalDate,
                 val beskrivelse: String,
                 val av: Av,
@@ -242,6 +255,7 @@ class Faktasteg(
 
                 override fun tilEntity(faktavurderingRef: UUID): FaktastegEntity.OppdagetEntity {
                     return FaktastegEntity.OppdagetEntity(
+                        id = id,
                         av = when (av) {
                             Av.Nav -> FaktastegEntity.OppdagetAv.Nav
                             Av.Bruker -> FaktastegEntity.OppdagetAv.Bruker

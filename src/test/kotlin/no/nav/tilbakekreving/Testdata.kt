@@ -20,6 +20,7 @@ object Testdata {
                 vedtaksperiode = PeriodeDto(fom = 1.januar(2021), tom = 31.januar(2021)),
             ),
         ),
+        årsakTilFeilutbetaling: String? = "ingen",
     ) = FagsysteminfoSvarHendelse(
         eksternFagsakId = fagsystemId,
         hendelseOpprettet = LocalDateTime.now(),
@@ -30,7 +31,7 @@ object Testdata {
         revurdering = FagsysteminfoSvarHendelse.RevurderingDto(
             behandlingId = eksternBehandlingId,
             årsak = FagsysteminfoSvarHendelse.RevurderingDto.Årsak.NYE_OPPLYSNINGER,
-            årsakTilFeilutbetaling = "ingen",
+            årsakTilFeilutbetaling = årsakTilFeilutbetaling,
             vedtaksdato = LocalDate.now(),
         ),
         utvidPerioder = utvidPerioder,
