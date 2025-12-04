@@ -24,6 +24,7 @@ import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostResponse
+import no.nav.tilbakekreving.integrasjoner.dokumenthenting.SafClient
 import no.nav.tilbakekreving.kontrakter.ytelse.Tema
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmetadata
@@ -41,13 +42,20 @@ class JournalføringService(
     private val fagsakRepository: FagsakRepository,
     private val featureService: FeatureService,
     private val dokarkivClient: DokarkivClient,
+    private val safClient: SafClient,
 ) {
     private val log = TracedLogger.getLogger<JournalføringService>()
 
     fun hentDokument(
         journalpostId: String,
         dokumentInfoId: String,
-    ): ByteArray = integrasjonerClient.hentDokument(dokumentInfoId, journalpostId)
+        behandlingId: UUID,
+    ): ByteArray {
+        if (featureService.modellFeatures[Toggle.Dokumenthenting]) {
+            safClient.hentDokument(behandlingId, journalpostId, dokumentInfoId)
+        }
+        return integrasjonerClient.hentDokument(dokumentInfoId, journalpostId)
+    }
 
     fun hentJournalposter(behandlingId: UUID): List<Journalpost> {
         val behandling = behandlingRepository.findById(behandlingId).orElseThrow()
