@@ -72,6 +72,9 @@ tilbakekreving:
   dokdist:
     base-url: https://dokdistfordeling.dev-fss-pub.nais.io
     scope: api://dev-fss.teamdokumenthandtering.dokdistfordeling/.default
+  saf:
+    base-url: https://saf.intern.dev.nav.no
+    scope: api://dev-fss.teamdokumenthandtering.saf/.default
 
 logging:
   config: "classpath:logback-e2e.xml"

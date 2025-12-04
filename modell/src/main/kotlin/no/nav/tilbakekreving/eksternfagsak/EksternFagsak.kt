@@ -81,4 +81,6 @@ class EksternFagsak(
             behandlinger = behandlinger.tilEntity(id),
         )
     }
+
+    fun hentYtelse() = ytelse
 }

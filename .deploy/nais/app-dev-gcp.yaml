@@ -124,6 +124,9 @@ spec:
         - application: dokdistfordeling
           namespace: teamdokumenthandtering
           cluster: dev-gcp
+        - application: saf
+          namespace: teamdokumenthandtering
+          cluster: dev-gcp
     outbound:
       rules:
         - application: populasjonstilgangskontroll
