@@ -17,6 +17,7 @@ data class Oppgave(
     val opprettetTidspunkt: String? = null,
     val prioritet: OppgavePrioritet? = null,
     val status: StatusEnum? = null,
+    val endretAvEnhetsnr: String? = null,
 )
 
 enum class StatusEnum {

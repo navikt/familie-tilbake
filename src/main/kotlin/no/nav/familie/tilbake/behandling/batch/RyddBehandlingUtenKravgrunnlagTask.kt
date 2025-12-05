@@ -12,10 +12,10 @@ import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingService
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.SendBrevTaskdata
 import no.nav.familie.tilbake.kontrakter.objectMapper
+import no.nav.familie.tilbake.kontrakter.oppgave.OppgavePrioritet
 import no.nav.familie.tilbake.kontrakter.oppgave.Oppgavetype
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.TracedLogger
-import no.nav.familie.tilbake.oppgave.OppgavePrioritetService
 import no.nav.familie.tilbake.oppgave.OppgaveService
 import no.nav.tilbakekreving.api.v1.dto.HenleggelsesbrevFritekstDto
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
@@ -38,7 +38,6 @@ class RyddBehandlingUtenKravgrunnlagTask(
     private val brevSporingService: BrevsporingService,
     private val logService: LogService,
     private val oppgaveService: OppgaveService,
-    private val oppgavePrioritetService: OppgavePrioritetService,
 ) : AsyncTaskStep {
     private val log = TracedLogger.getLogger<RyddBehandlingUtenKravgrunnlagTask>()
 
@@ -51,7 +50,6 @@ class RyddBehandlingUtenKravgrunnlagTask(
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
 
         if (brevSporingService.erVarselSendt(behandlingId)) {
-            val prioritet = oppgavePrioritetService.utledOppgaveprioritet(behandling.id)
             val fristForFerdigstillelse = LocalDate.now().plusDays(7)
 
             val beskrivelse =
@@ -65,7 +63,7 @@ class RyddBehandlingUtenKravgrunnlagTask(
                 beskrivelse,
                 fristForFerdigstillelse,
                 behandling.ansvarligSaksbehandler,
-                prioritet,
+                OppgavePrioritet.NORM,
                 logContext,
                 behandlesAvApplikasjon = null,
                 saksId = null,

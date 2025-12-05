@@ -245,10 +245,9 @@ class OppgaveService(
     fun oppdaterEnhetOgSaksbehandler(
         behandlingId: UUID,
         enhetId: String,
-        beskrivelse: String,
         logContext: SecureLog.Context,
-        saksbehandler: String? = ContextService.hentSaksbehandler(logContext),
     ) {
+        val saksbehandler = ContextService.hentSaksbehandler(logContext)
         val oppgave = finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
         if (oppgave.tildeltEnhetsnr == enhetId) {
             log.medContext(logContext) {
@@ -256,16 +255,15 @@ class OppgaveService(
             }
             return
         }
-
-        val nyBeskrivelse =
-            LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yy hh:mm")) + ":" +
-                beskrivelse + System.lineSeparator() + oppgave.beskrivelse
-        var patchetOppgave = oppgave.copy(beskrivelse = nyBeskrivelse)
-        if (!saksbehandler.isNullOrEmpty() && saksbehandler != Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
-            patchetOppgave = patchetOppgave.copy(tilordnetRessurs = saksbehandler)
+        if (saksbehandler != Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
+            patchOppgave(
+                Oppgave(
+                    id = oppgave.id,
+                    tilordnetRessurs = saksbehandler,
+                    endretAvEnhetsnr = integrasjonerClient.hentSaksbehandler(saksbehandler).enhet,
+                ),
+            )
         }
-
-        patchOppgave(patchetOppgave)
 
         SecureLog.medContext(logContext) {
             info(

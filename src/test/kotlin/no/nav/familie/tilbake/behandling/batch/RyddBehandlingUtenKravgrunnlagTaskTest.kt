@@ -79,7 +79,6 @@ internal class RyddBehandlingUtenKravgrunnlagTaskTest : OppslagSpringRunnerTest(
                 brevSporingService,
                 logService,
                 mockOppgaveService,
-                oppgavePrioritetService,
             )
     }
 

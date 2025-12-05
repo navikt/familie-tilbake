@@ -1427,9 +1427,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         verify(exactly = 1) {
             oppgaveService.patchOppgave(
                 match {
-                    it.id == 1L &&
-                        it.beskrivelse?.endsWith("Endret tildelt enhet: 4806\nnull") ?: false &&
-                        it.tilordnetRessurs == "Z0000"
+                    it.id == 1L && it.tilordnetRessurs == "Z0000" && it.endretAvEnhetsnr == "0425"
                 },
             )
         }
