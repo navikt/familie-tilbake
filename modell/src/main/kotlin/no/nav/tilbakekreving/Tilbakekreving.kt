@@ -189,8 +189,32 @@ class Tilbakekreving internal constructor(
         byttTilstand(AvventerBrukerinfo)
     }
 
-    fun trengerVarselbrev(varselbrevBehov: VarselbrevBehov) {
-        behovObservatør.håndter(varselbrevBehov)
+    fun trengerVarselbrev() {
+        val personinfo = bruker!!.hentBrukerinfo()
+        val behandling = behandlingHistorikk.nåværende().entry
+
+        val varseltekstFraSaksbehandler = "Todo" // todo Kanskje vi skal ha en varselTekst i behandling?
+
+        val varselbrev = behandling.opprettVarselbrev()
+        val varselbrevInfo = behandling.hentForhåndsvarselinfo()
+
+        brevHistorikk.lagre(varselbrev)
+        behovObservatør.håndter(
+            VarselbrevBehov(
+                brevId = varselbrev.id,
+                brukerinfo = bruker!!.hentBrukerinfo(),
+                behandlingId = behandling.id,
+                varselbrev = varselbrev,
+                revurderingsvedtaksdato = varselbrevInfo.revurderingsvedtaksdato,
+                varseltekstFraSaksbehandler = varseltekstFraSaksbehandler,
+                eksternFagsakId = eksternFagsak.eksternId,
+                ytelse = eksternFagsak.ytelse,
+                behandlendeEnhet = varselbrevInfo.behandlendeEnhet,
+                feilutbetaltBeløp = varselbrev.hentVarsletBeløp(),
+                feilutbetaltePerioder = varselbrevInfo.feilutbetaltePerioder,
+                gjelderDødsfall = personinfo.dødsdato != null,
+            ),
+        )
     }
 
     fun trengerBrukerinfo() {

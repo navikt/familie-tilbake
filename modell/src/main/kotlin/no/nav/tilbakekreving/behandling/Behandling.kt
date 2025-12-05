@@ -409,9 +409,7 @@ class Behandling internal constructor(
         behandlendeEnhet = enhet,
         ansvarligSaksbehandler = ansvarligSaksbehandler,
         beløp = totaltFeilutbetaltBeløp().toLong(),
-        feilutbetaltePerioder = kravgrunnlag.entry.perioder.map {
-            eksternFagsakRevurdering.entry.utvidPeriode(it.periode)
-        },
+        feilutbetaltePerioder = kravgrunnlag.entry.datoperioder(eksternFagsakRevurdering.entry),
         revurderingsvedtaksdato = eksternFagsakRevurdering.entry.vedtaksdato,
     )
 
@@ -471,7 +469,7 @@ class Behandling internal constructor(
             ansvarligSaksbehandler = ansvarligSaksbehandler.ident,
             ansvarligBeslutter = fatteVedtakSteg.ansvarligBeslutter?.ident,
             totaltFeilutbetaltBeløp = kravgrunnlag.entry.feilutbetaltBeløpForAllePerioder(),
-            totalFeilutbetaltPeriode = kravgrunnlag.entry.perioder.minOf { it.periode.fom } til kravgrunnlag.entry.perioder.maxOf { it.periode.tom },
+            totalFeilutbetaltPeriode = fullstendigPeriode(),
         )
     }
 
@@ -487,9 +485,8 @@ class Behandling internal constructor(
     }
 
     fun fullstendigPeriode(): Datoperiode {
-        val perioder = kravgrunnlag.entry.perioder.map { it.periode }
-            .map { eksternFagsakRevurdering.entry.utvidPeriode(it) }
-        return perioder.minOf { it.fom } til perioder.maxOf { it.tom }
+        val kravgrunnlagPerioder = kravgrunnlag.entry.datoperioder(eksternFagsakRevurdering.entry)
+        return kravgrunnlagPerioder.minOf { it.fom } til kravgrunnlagPerioder.maxOf { it.tom }
     }
 
     fun flyttTilbakeTilFakta() = steg().forEach { it.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry) }
@@ -535,7 +532,7 @@ class Behandling internal constructor(
         brevmottakerStegId = brevmottakerSteg!!.id,
         ansvarligSaksbehandlerIdent = ansvarligSaksbehandler.ident,
         kravgrunnlag = kravgrunnlag,
-    ) as Varselbrev
+    )
 
     companion object {
         internal fun nyBehandling(

@@ -161,10 +161,8 @@ class Vilkårsvurderingsteg(
             eksternFagsakRevurdering: EksternFagsakRevurdering,
             kravgrunnlagHendelse: KravgrunnlagHendelse,
         ): List<Vilkårsvurderingsperiode> {
-            return kravgrunnlagHendelse.datoperioder().map {
-                Vilkårsvurderingsperiode.opprett(
-                    periode = eksternFagsakRevurdering.utvidPeriode(it),
-                )
+            return kravgrunnlagHendelse.datoperioder(eksternFagsakRevurdering).map {
+                Vilkårsvurderingsperiode.opprett(eksternFagsakRevurdering.utvidPeriode(it))
             }
         }
     }

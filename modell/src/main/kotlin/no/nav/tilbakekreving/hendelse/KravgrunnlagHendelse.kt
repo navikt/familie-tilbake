@@ -4,6 +4,7 @@ import no.nav.tilbakekreving.UtenforScope
 import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagAdapter
 import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagPeriodeAdapter
+import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.entities.BeløpEntity
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.KravgrunnlagHendelseEntity
@@ -30,7 +31,7 @@ class KravgrunnlagHendelse(
     internal val kravgrunnlagId: String,
     // Brukes som eksternId i henting av fagsysteminfo, hva betyr det egentlig?
     val referanse: String,
-    val perioder: List<Periode>,
+    private val perioder: List<Periode>,
 ) : Historikk.HistorikkInnslag<UUID>, KravgrunnlagAdapter {
     fun valider(sporing: Sporing) {
         if (vedtakGjelder !is Aktør.Person || utbetalesTil !is Aktør.Person) {
@@ -50,7 +51,7 @@ class KravgrunnlagHendelse(
         perioder.single { kgPeriode -> kgPeriode.gjelderFor(periode) }
             .feilutbetaltYtelsesbeløp()
 
-    fun datoperioder() = perioder.map { it.periode }
+    fun datoperioder(eksternFagsakRevurdering: EksternFagsakRevurdering) = perioder.map { eksternFagsakRevurdering.utvidPeriode(it.periode) }
 
     fun feilutbetaltBeløpForAllePerioder() = perioder.sumOf { it.feilutbetaltYtelsesbeløp() }
 

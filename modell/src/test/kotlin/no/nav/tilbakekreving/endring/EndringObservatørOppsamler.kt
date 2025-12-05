@@ -38,6 +38,7 @@ class EndringObservatørOppsamler : EndringObservatør {
                 Statusoppdatering(
                     ansvarligSaksbehandler = ansvarligSaksbehandler,
                     vedtaksresultat = vedtaksresultat,
+                    totalFeilutbetaltPeriode = totalFeilutbetaltPeriode,
                 ),
             )
     }
@@ -90,6 +91,7 @@ class EndringObservatørOppsamler : EndringObservatør {
     data class Statusoppdatering(
         private val ansvarligSaksbehandler: String?,
         private val vedtaksresultat: Vedtaksresultat?,
+        private val totalFeilutbetaltPeriode: Datoperiode?,
     )
 
     data class FattetVedtak(

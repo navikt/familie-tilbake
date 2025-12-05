@@ -12,6 +12,8 @@ import no.nav.tilbakekreving.defaultFeatures
 import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.fagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
+import no.nav.tilbakekreving.januar
+import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import org.junit.jupiter.api.Test
@@ -54,7 +56,7 @@ class SendVarselbrevTest {
             varselbrevBehov.feilutbetaltBeløp shouldBe kravgrunnlag.feilutbetaltBeløpForAllePerioder().toLong()
             varselbrevBehov.revurderingsvedtaksdato shouldBe fagsak.revurdering.vedtaksdato
             varselbrevBehov.varseltekstFraSaksbehandler shouldBe "Todo" // Hardkodet todo i koden også må fikses når vi vet mer
-            varselbrevBehov.feilutbetaltePerioder shouldBe kravgrunnlag.datoperioder()
+            varselbrevBehov.feilutbetaltePerioder shouldBe listOf(1.januar til 31.januar)
             varselbrevBehov.gjelderDødsfall shouldBe false
             varselbrevBehov.eksternFagsakId shouldBe tilbakekreving.eksternFagsak.eksternId
             varselbrevBehov.ytelse shouldBe tilbakekreving.eksternFagsak.ytelse

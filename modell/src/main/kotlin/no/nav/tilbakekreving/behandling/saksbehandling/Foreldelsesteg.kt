@@ -183,11 +183,7 @@ class Foreldelsesteg(
             eksternFagsakRevurdering: EksternFagsakRevurdering,
             kravgrunnlag: KravgrunnlagHendelse,
         ): List<Foreldelseperiode> {
-            return kravgrunnlag.datoperioder().map { kravgrunnlagPeriode ->
-                Foreldelseperiode.opprett(
-                    periode = eksternFagsakRevurdering.utvidPeriode(kravgrunnlagPeriode),
-                )
-            }
+            return kravgrunnlag.datoperioder(eksternFagsakRevurdering).map(Foreldelseperiode::opprett)
         }
     }
 }

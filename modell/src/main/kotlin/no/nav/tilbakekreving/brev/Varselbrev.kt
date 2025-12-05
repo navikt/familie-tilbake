@@ -38,7 +38,7 @@ data class Varselbrev(
             brevmottakerStegId: UUID,
             ansvarligSaksbehandlerIdent: String,
             kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
-        ): Brev {
+        ): Varselbrev {
             return Varselbrev(
                 id = UUID.randomUUID(),
                 opprettetDato = LocalDate.now(),

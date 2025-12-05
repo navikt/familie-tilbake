@@ -119,10 +119,10 @@ class Faktasteg(
 
         private fun tomVurdering(kravgrunnlag: KravgrunnlagHendelse, eksternFagsakRevurdering: EksternFagsakRevurdering): Vurdering {
             return Vurdering(
-                perioder = kravgrunnlag.datoperioder().map {
+                perioder = kravgrunnlag.datoperioder(eksternFagsakRevurdering).map {
                     FaktaPeriode(
                         id = UUID.randomUUID(),
-                        periode = eksternFagsakRevurdering.utvidPeriode(it),
+                        periode = it,
                         rettsligGrunnlag = Hendelsestype.ANNET,
                         rettsligGrunnlagUnderkategori = Hendelsesundertype.ANNET_FRITEKST,
                     )
