@@ -263,6 +263,7 @@ class ForhåndsvarselService(
         return Brevdata(
             mottager = Brevmottager.BRUKER,
             metadata = brevmetadata,
+            tittel = brevmetadata.tittel,
             overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(brevmetadata, false),
             brevtekst = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false),
             vedleggHtml = hentVedlegg(varselbrevsdokument, varselbrevBehov.eksternFagsakId, logContext),
