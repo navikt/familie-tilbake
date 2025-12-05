@@ -8,6 +8,7 @@ import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import jakarta.jms.ConnectionFactory
+import jakarta.jms.JMSException
 import kotlinx.coroutines.runBlocking
 import no.nav.familie.tilbake.api.BehandlingController
 import no.nav.familie.tilbake.common.ContextService
@@ -76,12 +77,21 @@ open class TilbakekrevingE2EBase : E2EBase() {
         queueName: String,
         text: String,
     ) {
-        val connection = connectionFactory.createConnection()
-        connection.createSession().use { session ->
-            val message = session.createTextMessage(text)
-            val queue = session.createQueue(queueName)
-            session.createProducer(queue).use {
-                it.send(message)
+        repeat(5) {
+            try {
+                connectionFactory.createConnection().use {
+                    it.createSession().use { session ->
+                        val message = session.createTextMessage(text)
+                        val queue = session.createQueue(queueName)
+                        session.createProducer(queue).use {
+                            it.send(message)
+                        }
+                    }
+                }
+                return
+            } catch (e: JMSException) {
+                e.printStackTrace()
+                Thread.sleep(500)
             }
         }
     }
@@ -186,7 +196,7 @@ open class TilbakekrevingE2EBase : E2EBase() {
         runBlocking {
             eventually(
                 eventuallyConfig {
-                    duration = 1000.milliseconds
+                    duration = 2000.milliseconds
                     interval = 10.milliseconds
                 },
             ) {

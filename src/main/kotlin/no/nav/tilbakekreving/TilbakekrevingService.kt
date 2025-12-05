@@ -298,6 +298,7 @@ class TilbakekrevingService(
                     HarBrukerUttaltSeg.IKKE_AKTUELT -> Faktasteg.Uttalelse.IkkeAktuelt
                     HarBrukerUttaltSeg.IKKE_VURDERT, null -> Faktasteg.Uttalelse.IkkeVurdert
                 },
+                oppdaget = Faktasteg.Vurdering.Oppdaget.IkkeVurdert,
             ),
         )
     }

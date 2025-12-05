@@ -25,7 +25,7 @@ subprojects {
 
     tasks.withType<GenerateTask> {
         generatorName = "kotlin-spring"
-        remoteInputSpec = "https://raw.githubusercontent.com/navikt/tilbakekreving-kontrakter/refs/heads/main/tsp-output/schema/openapi.yaml"
+        remoteInputSpec = "https://raw.githubusercontent.com/navikt/tilbakekreving-kontrakter/87facf1e49aa7117332defdd302d64c26ca303d0/tsp-output/schema/openapi.yaml"
         outputDir = "$projectDir/src/main/generated"
         packageName = "no.nav.kontrakter.frontend"
         modelNameSuffix = "Dto"
@@ -50,8 +50,8 @@ subprojects {
     }
 
     dependencies {
-        api("io.swagger.core.v3:swagger-annotations:2.2.40")
-        api("jakarta.validation:jakarta.validation-api:3.1.1")
+        compileOnly("io.swagger.core.v3:swagger-annotations:2.2.40")
+        compileOnly("jakarta.validation:jakarta.validation-api:3.1.1")
     }
 }
 

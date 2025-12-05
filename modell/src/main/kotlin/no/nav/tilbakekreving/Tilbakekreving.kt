@@ -2,6 +2,7 @@ package no.nav.tilbakekreving
 
 import io.ktor.http.URLBuilder
 import io.ktor.http.path
+import no.nav.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.aktør.Bruker
 import no.nav.tilbakekreving.aktør.Bruker.Companion.tilNullableFrontendDto
@@ -474,6 +475,12 @@ class Tilbakekreving internal constructor(
             brukeruttalelse = behandling.brukeruttaleserTilFrontendDto(),
             forhåndsvarselUnntak = behandling.forhåndsvarselUnntakTilFrontendDto(),
             utsettUttalelseFrist = behandling.utsettUttalelseFristTilFrontendDto(),
+        )
+    }
+
+    fun tilFeilutbetalingFrontendDto(): FaktaOmFeilutbetalingDto {
+        return behandlingHistorikk.nåværende().entry.nyFaktastegFrontendDto(
+            varselbrev = brevHistorikk.sisteVarselbrev(),
         )
     }
 

@@ -38,6 +38,7 @@ object FaktavurderingEntityMapper : Entity<FaktastegEntity, UUID, UUID>(
     fun map(
         resultSet: ResultSet,
         perioder: List<FaktaPeriodeEntity>,
+        oppdaget: FaktastegEntity.OppdagetEntity?,
     ): FaktastegEntity {
         return FaktastegEntity(
             id = resultSet[id],
@@ -46,6 +47,7 @@ object FaktavurderingEntityMapper : Entity<FaktastegEntity, UUID, UUID>(
             årsakTilFeilutbetaling = resultSet[årsakTilFeilutbetaling],
             uttalelse = resultSet[uttalelse],
             vurderingAvBrukersUttalelse = resultSet[vurderingAvBrukersUttalelse],
+            oppdaget = oppdaget,
         )
     }
 
@@ -90,6 +92,43 @@ object FaktavurderingEntityMapper : Entity<FaktastegEntity, UUID, UUID>(
                 ),
                 rettsligGrunnlag = resultSet[rettsligGrunnlag],
                 rettsligGrunnlagUnderkategori = resultSet[rettsligGrunnlagUnderkategori],
+            )
+        }
+    }
+
+    object OppdagetEntityMapper : Entity<FaktastegEntity.OppdagetEntity, UUID, UUID>(
+        "tilbakekreving_faktavurdering_feilutbetaling_oppdaget",
+        FaktastegEntity.OppdagetEntity::id,
+        FieldConverter.UUIDConverter.required(),
+    ) {
+        val faktavurderingRef = field(
+            "faktavurdering_ref",
+            FaktastegEntity.OppdagetEntity::faktavurderingRef,
+            FieldConverter.UUIDConverter.required(),
+        )
+        val av = field(
+            "av",
+            FaktastegEntity.OppdagetEntity::av,
+            FieldConverter.EnumConverter.of<FaktastegEntity.OppdagetAv>().required(),
+        )
+        val dato = field(
+            "dato",
+            FaktastegEntity.OppdagetEntity::dato,
+            FieldConverter.LocalDateConverter.required(),
+        )
+        val beskrivelse = field(
+            "beskrivelse",
+            FaktastegEntity.OppdagetEntity::beskrivelse,
+            FieldConverter.StringConverter.required(),
+        )
+
+        fun map(resultSet: ResultSet): FaktastegEntity.OppdagetEntity {
+            return FaktastegEntity.OppdagetEntity(
+                id = resultSet[id],
+                faktavurderingRef = resultSet[faktavurderingRef],
+                av = resultSet[av],
+                dato = resultSet[dato],
+                beskrivelse = resultSet[beskrivelse],
             )
         }
     }

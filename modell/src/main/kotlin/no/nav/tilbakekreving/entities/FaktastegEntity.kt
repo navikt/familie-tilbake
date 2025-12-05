@@ -4,6 +4,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
+import java.time.LocalDate
 import java.util.UUID
 
 data class FaktastegEntity(
@@ -13,6 +14,7 @@ data class FaktastegEntity(
     val årsakTilFeilutbetaling: String,
     val uttalelse: Uttalelse,
     val vurderingAvBrukersUttalelse: String?,
+    val oppdaget: OppdagetEntity?,
 ) {
     fun fraEntity(
         brevHistorikk: BrevHistorikk,
@@ -35,6 +37,7 @@ data class FaktastegEntity(
                 Uttalelse.IkkeAktuelt -> Faktasteg.Uttalelse.IkkeAktuelt
                 Uttalelse.IkkeVurdert -> Faktasteg.Uttalelse.IkkeVurdert
             },
+            oppdaget = oppdaget?.fraEntity() ?: Faktasteg.Vurdering.Oppdaget.IkkeVurdert,
         ),
     )
 
@@ -52,4 +55,29 @@ data class FaktastegEntity(
         val rettsligGrunnlag: Hendelsestype,
         val rettsligGrunnlagUnderkategori: Hendelsesundertype,
     )
+
+    enum class OppdagetAv {
+        Nav,
+        Bruker,
+    }
+
+    class OppdagetEntity(
+        val id: UUID,
+        val faktavurderingRef: UUID,
+        val av: OppdagetAv,
+        val dato: LocalDate,
+        val beskrivelse: String,
+    ) {
+        internal fun fraEntity(): Faktasteg.Vurdering.Oppdaget.Vurdering {
+            return Faktasteg.Vurdering.Oppdaget.Vurdering(
+                id = id,
+                dato = dato,
+                beskrivelse = beskrivelse,
+                av = when (av) {
+                    OppdagetAv.Nav -> Faktasteg.Vurdering.Oppdaget.Av.Nav
+                    OppdagetAv.Bruker -> Faktasteg.Vurdering.Oppdaget.Av.Bruker
+                },
+            )
+        }
+    }
 }

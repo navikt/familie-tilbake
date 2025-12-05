@@ -115,6 +115,7 @@ dependencies {
     api(project(":integrasjoner"))
     api(project(":kontrakter-ekstern"))
     api(project(":kontrakter-intern"))
+    api(project(":kontrakter-frontend:api"))
     api(project(":modell"))
     api(project(":pdf"))
     api("no.nav.familie:prosessering-core:2.20250728105838_1f618e2") {
