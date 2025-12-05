@@ -20,10 +20,15 @@ import no.nav.familie.tilbake.kontrakter.journalpost.Journalpost
 import no.nav.familie.tilbake.kontrakter.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.tilbakekreving.Toggle
+import no.nav.tilbakekreving.config.FeatureService
+import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
+import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostResponse
 import no.nav.tilbakekreving.kontrakter.ytelse.Tema
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmetadata
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.DokumentKlasse
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.Dokumentkategori
 import no.nav.tilbakekreving.pdf.dokumentbestilling.fritekstbrev.JournalpostIdOgDokumentId
 import org.springframework.stereotype.Service
@@ -34,6 +39,8 @@ class JournalføringService(
     private val integrasjonerClient: IntegrasjonerClient,
     private val behandlingRepository: BehandlingRepository,
     private val fagsakRepository: FagsakRepository,
+    private val featureService: FeatureService,
+    private val dokarkivClient: DokarkivClient,
 ) {
     private val log = TracedLogger.getLogger<JournalføringService>()
 
@@ -71,7 +78,7 @@ class JournalføringService(
         brevmetadata: Brevmetadata,
         brevmottager: Brevmottager,
         vedleggPdf: ByteArray,
-        eksternReferanseId: String?,
+        eksternReferanseId: String,
         logContext: SecureLog.Context,
     ): JournalpostIdOgDokumentId {
         log.medContext(logContext) {
@@ -85,6 +92,7 @@ class JournalføringService(
                 tittel = brevmetadata.tittel,
                 dokumenttype = velgDokumenttype(fagsak, dokumentkategori),
             )
+
         val request =
             ArkiverDokumentRequest(
                 fnr = fagsak.bruker.ident,
@@ -95,8 +103,28 @@ class JournalføringService(
                 avsenderMottaker = lagMottager(behandling, brevmottager, brevmetadata),
                 eksternReferanseId = eksternReferanseId,
             )
-
-        val response = integrasjonerClient.arkiver(request)
+        var response: OpprettJournalpostResponse
+        if (featureService.modellFeatures[Toggle.Arkivering]) {
+            response = dokarkivClient.opprettOgSendJournalpostRequest(
+                arkiverDokument = request,
+                fagsaksystem = fagsak.fagsystem.tilDokarkivFagsaksystem(),
+                brevkode = fagsak.fagsystem.navn + "-TILB",
+                tema = hentTema(fagsak.fagsystem),
+                dokuemntkategori = when (dokumentkategori) {
+                    Dokumentkategori.BREV -> DokumentKlasse.B
+                    Dokumentkategori.VEDTAKSBREV -> DokumentKlasse.VB
+                },
+                behandlingId = behandling.id,
+            )
+        } else {
+            val responseGammel = integrasjonerClient.arkiver(request)
+            response = OpprettJournalpostResponse(
+                journalpostId = responseGammel.journalpostId,
+                melding = null,
+                journalpostferdigstilt = responseGammel.ferdigstilt,
+                dokumenter = responseGammel.dokumenter,
+            )
+        }
 
         val dokumentinfoId =
             response.dokumenter?.first()?.dokumentInfoId
@@ -113,7 +141,7 @@ class JournalføringService(
                 response.journalpostId,
             )
         }
-        return JournalpostIdOgDokumentId(response.journalpostId, dokumentinfoId)
+        return JournalpostIdOgDokumentId(response.journalpostId!!, dokumentinfoId)
     }
 
     private fun lagMottager(

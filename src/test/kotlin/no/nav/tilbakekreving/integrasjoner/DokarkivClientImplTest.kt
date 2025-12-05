@@ -18,21 +18,24 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
-import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.kontrakter.dokarkiv.AvsenderMottaker
+import no.nav.familie.tilbake.kontrakter.dokarkiv.v2.ArkiverDokumentRequest
+import no.nav.familie.tilbake.kontrakter.dokarkiv.v2.Dokument
+import no.nav.familie.tilbake.kontrakter.dokarkiv.v2.Filtype
+import no.nav.familie.tilbake.kontrakter.journalpost.AvsenderMottakerIdType
 import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.tilbakekreving.applicationProps
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClientImpl
-import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.JournalpostType
-import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostRequest
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostResponse
-import no.nav.tilbakekreving.pdf.PdfGenerator
+import no.nav.tilbakekreving.kontrakter.ytelse.DokarkivFagsaksystem
+import no.nav.tilbakekreving.kontrakter.ytelse.Tema
+import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.DokumentKlasse
 import no.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 class DokarkivClientImplTest {
-    private val logContext = SecureLog.Context.tom()
     private val jwtToken = mockk<JwtToken>()
     private val scope = "api://dokarkiv/.default"
 
@@ -68,34 +71,38 @@ class DokarkivClientImplTest {
         val dokarkivService = DokarkivClientImpl(
             applicationProperties = applicationProps(),
             tokenExchangeService = tokenExchange,
-            varselbrevUtil = mockk(),
-            pdfFactory = { mockk<PdfGenerator>(relaxed = true) },
             httpClient = httpClient,
         )
 
-        val request = OpprettJournalpostRequest(
-            journalpostType = JournalpostType.UTGAAENDE,
-            avsenderMottaker = null,
-            bruker = null,
-            tema = null,
-            behandlingstema = null,
-            tittel = null,
-            kanal = null,
-            journalfoerendeEnhet = null,
-            eksternReferanseId = null,
-            sak = null,
-            dokumenter = emptyList(),
+        val arkiverDokumentRequest = ArkiverDokumentRequest(
+            fnr = "12345678911",
+            forsøkFerdigstill = true,
+            hoveddokumentvarianter = listOf(
+                Dokument(
+                    dokument = "dummy data".toByteArray(),
+                    filtype = Filtype.PDFA,
+                    filnavn = "testfil.pdf",
+                    tittel = "Test Tittel",
+                ),
+            ),
+            fagsakId = "1234",
+            journalførendeEnhet = "4321",
+            eksternReferanseId = "1111",
+            avsenderMottaker = AvsenderMottaker(
+                id = "12345678911",
+                idType = AvsenderMottakerIdType.FNR,
+                navn = "Navn Navnesen",
+            ),
         )
 
-        val resp = runBlocking {
-            dokarkivService.lagJournalpost(
-                request = request,
-                ferdigstill = true,
-                behandlingId = "behandling-1",
-                eksternFagsakId = "fagsak-1",
-                logContext = logContext,
-            )
-        }
+        val resp = dokarkivService.opprettOgSendJournalpostRequest(
+            arkiverDokument = arkiverDokumentRequest,
+            fagsaksystem = DokarkivFagsaksystem.TILLEGGSSTONADER,
+            brevkode = "brev",
+            tema = Tema.TSO,
+            dokuemntkategori = DokumentKlasse.B,
+            behandlingId = UUID.randomUUID(),
+        )
 
         resp shouldBe expectedResponse
         coVerify { tokenExchange.clientCredentialsToken(scope) }
@@ -116,33 +123,37 @@ class DokarkivClientImplTest {
         val dokarkivService = DokarkivClientImpl(
             applicationProperties = applicationProps(),
             tokenExchangeService = tokenExchange,
-            varselbrevUtil = mockk(),
             httpClient = httpClient,
-            pdfFactory = { mockk<PdfGenerator>(relaxed = true) },
         )
 
         shouldThrow<Feil> {
-            runBlocking {
-                dokarkivService.lagJournalpost(
-                    request = OpprettJournalpostRequest(
-                        journalpostType = JournalpostType.UTGAAENDE,
-                        avsenderMottaker = null,
-                        bruker = null,
-                        tema = null,
-                        behandlingstema = null,
-                        tittel = null,
-                        kanal = null,
-                        journalfoerendeEnhet = null,
-                        eksternReferanseId = null,
-                        sak = null,
-                        dokumenter = emptyList(),
+            dokarkivService.opprettOgSendJournalpostRequest(
+                arkiverDokument = ArkiverDokumentRequest(
+                    fnr = "12345678911",
+                    forsøkFerdigstill = true,
+                    hoveddokumentvarianter = listOf(
+                        Dokument(
+                            dokument = "dummy data".toByteArray(),
+                            filtype = Filtype.PDFA,
+                            filnavn = "testfil.pdf",
+                            tittel = "Test Tittel",
+                        ),
                     ),
-                    ferdigstill = true,
-                    behandlingId = "b",
-                    eksternFagsakId = "f",
-                    logContext = logContext,
-                )
-            }
+                    fagsakId = "1234",
+                    journalførendeEnhet = "4321",
+                    eksternReferanseId = "1111",
+                    avsenderMottaker = AvsenderMottaker(
+                        id = "12345678911",
+                        idType = AvsenderMottakerIdType.FNR,
+                        navn = "Navn Navnesen",
+                    ),
+                ),
+                fagsaksystem = DokarkivFagsaksystem.TILLEGGSSTONADER,
+                tema = Tema.TSO,
+                dokuemntkategori = DokumentKlasse.B,
+                brevkode = "brev",
+                behandlingId = UUID.randomUUID(),
+            )
         }.message shouldContain "bad request"
     }
 }

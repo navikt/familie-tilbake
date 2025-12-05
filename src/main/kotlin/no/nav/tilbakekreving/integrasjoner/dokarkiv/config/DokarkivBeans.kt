@@ -1,6 +1,5 @@
 package no.nav.tilbakekreving.integrasjoner.dokarkiv.config
 
-import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevUtil
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClientImpl
@@ -18,12 +17,10 @@ class DokarkivBeans(
     @Profile("dev", "prod")
     fun dokarkivClient(
         tokenExchangeService: TokenExchangeService,
-        varselbrevUtil: VarselbrevUtil,
     ): DokarkivClient =
         DokarkivClientImpl(
             applicationProperties = props,
             tokenExchangeService = tokenExchangeService,
-            varselbrevUtil = varselbrevUtil,
         )
 
     @Bean(name = ["dokarkivClient"])
