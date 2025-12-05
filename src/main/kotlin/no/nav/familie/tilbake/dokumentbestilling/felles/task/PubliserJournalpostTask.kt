@@ -14,6 +14,10 @@ import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.tilbakekreving.Toggle
+import no.nav.tilbakekreving.config.FeatureService
+import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
+import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.domain.AdresseTo
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -28,6 +32,8 @@ import java.util.UUID
 class PubliserJournalpostTask(
     private val integrasjonerClient: IntegrasjonerClient,
     private val taskService: TracableTaskService,
+    private val featureService: FeatureService,
+    private val dokdistClient: DokdistClient,
 ) : AsyncTaskStep {
     private val log = TracedLogger.getLogger<PubliserJournalpostTask>()
 
@@ -52,13 +58,33 @@ class PubliserJournalpostTask(
         logContext: SecureLog.Context,
     ) {
         try {
-            integrasjonerClient.distribuerJournalpost(
-                journalpostId,
-                Fagsystem.valueOf(task.metadata.getProperty("fagsystem")).tilDTO(),
-                Distribusjonstype.valueOf(task.metadata.getProperty("distribusjonstype")),
-                Distribusjonstidspunkt.valueOf(task.metadata.getProperty("distribusjonstidspunkt")),
-                manuellAdresse,
-            )
+            if (featureService.modellFeatures[Toggle.Brevutsending]) {
+                dokdistClient.brevTilUtsending(
+                    behandlingId = UUID.fromString(task.payload),
+                    journalpostId = journalpostId,
+                    fagsystem = Fagsystem.valueOf(task.metadata.getProperty("fagsystem")).tilDTO(),
+                    distribusjonstype = Distribusjonstype.valueOf(task.metadata.getProperty("distribusjonstype")),
+                    distribusjonstidspunkt = Distribusjonstidspunkt.valueOf(task.metadata.getProperty("distribusjonstidspunkt")),
+                    adresse = AdresseTo(
+                        adressetype = manuellAdresse?.adresseType!!.name,
+                        postnummer = manuellAdresse.postnummer,
+                        poststed = manuellAdresse.poststed,
+                        adresselinje1 = manuellAdresse.adresselinje1,
+                        adresselinje2 = manuellAdresse.adresselinje2,
+                        adresselinje3 = manuellAdresse.adresselinje3,
+                        land = manuellAdresse.land,
+                    ),
+                    logContext = logContext,
+                )
+            } else {
+                integrasjonerClient.distribuerJournalpost(
+                    journalpostId,
+                    Fagsystem.valueOf(task.metadata.getProperty("fagsystem")).tilDTO(),
+                    Distribusjonstype.valueOf(task.metadata.getProperty("distribusjonstype")),
+                    Distribusjonstidspunkt.valueOf(task.metadata.getProperty("distribusjonstidspunkt")),
+                    manuellAdresse,
+                )
+            }
         } catch (ressursException: RessursException) {
             when {
                 mottakerErIkkeDigitalOgHarUkjentAdresse(ressursException) -> {

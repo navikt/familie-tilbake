@@ -5,6 +5,8 @@ import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.integration.pdl.PdlClient
 import no.nav.familie.tilbake.integration.pdl.internal.PdlKjønnType
+import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstidspunkt
+import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstype
 import no.nav.familie.tilbake.kontrakter.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
@@ -218,8 +220,12 @@ class TilbakekrevingService(
                     )
                 }
                 dokdistService.brevTilUtsending(
-                    behov = behov,
+                    behandlingId = behov.behandlingId,
                     journalpostId = arkivert.journalpostId,
+                    fagsystem = behov.ytelse.tilFagsystemDTO(),
+                    distribusjonstype = Distribusjonstype.VIKTIG,
+                    distribusjonstidspunkt = Distribusjonstidspunkt.KJERNETID,
+                    adresse = null,
                     logContext = logContext,
                 )
                 tilbakekreving.håndter(
