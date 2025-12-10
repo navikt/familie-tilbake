@@ -21,6 +21,8 @@ import no.nav.familie.tilbake.kontrakter.oppgave.Oppgavetype
 import no.nav.familie.tilbake.kontrakter.organisasjon.Organisasjon
 import no.nav.familie.tilbake.kontrakter.saksbehandler.Saksbehandler
 import no.tilbakekreving.integrasjoner.norg2.kontrakter.NavKontorEnhet
+import no.nav.tilbakekreving.integrasjoner.arbeidsforhold.EregClient
+import no.nav.tilbakekreving.integrasjoner.arbeidsforhold.EregClientStub
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -304,6 +306,33 @@ class IntegrasjonerClientConfig {
             )
 
         return integrasjonerClient
+    }
+
+    @Primary
+    @Bean
+    fun eregClientMock(): EregClient {
+        val eregClient: EregClientStub = mockk(relaxed = true)
+        val organisasjonsnummer = slot<String>()
+        every { eregClient.hentOrganisasjon(capture(organisasjonsnummer)) } answers {
+            when (organisasjonsnummer.captured) {
+                "998765432" ->
+                    Organisasjon(
+                        "998765432",
+                        "Testinstitusjon",
+                    )
+                "999876543" ->
+                    Organisasjon(
+                        "999876543",
+                        "Testinstitusjon med langt navn for test i frontend",
+                    )
+                else ->
+                    Organisasjon(
+                        "987654321",
+                        "Bobs Burgers",
+                    )
+            }
+        }
+        return eregClient
     }
 
     fun readMockfileFromResources(): ByteArray = javaClass.getResource("/mockpdf/mocktest.pdf").readBytes()

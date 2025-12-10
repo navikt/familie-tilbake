@@ -30,6 +30,7 @@ import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.person.PersonService
 import no.nav.tilbakekreving.api.v1.dto.VergeDto
+import no.nav.tilbakekreving.applicationProps
 import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.integrasjoner.arbeidsforhold.EregClient
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
@@ -77,6 +78,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
     private lateinit var fagsak: Fagsak
 
     private lateinit var eregClient: EregClient
+
     private lateinit var featureService: FeatureService
 
     private val vergeDto =
@@ -90,7 +92,10 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
     @BeforeEach
     fun setUp() {
         fagsak = fagsakRepository.insert(Testdata.fagsak())
-
+        featureService = FeatureService(applicationProperties = applicationProps())
+        eregClient = mockk<EregClient> {
+            every { validerOrganisasjon(any()) } returns true
+        }
         vergeService =
             VergeService(
                 behandlingRepository,
@@ -103,13 +108,13 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
                 featureService,
                 eregClient,
             )
+
         clearAllMocks(answers = false)
     }
 
     @Test
     fun `lagreVerge skal lagre verge i basen`() {
         val behandlingId = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id)).id
-
         vergeService.lagreVerge(behandlingId, vergeDto)
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
@@ -177,6 +182,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
             )
 
         every { mockIntegrasjonerClient.validerOrganisasjon(any()) } returns false
+        every { eregClient.validerOrganisasjon(any()) } returns false
 
         val behandlingId = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id)).id
         val exception = shouldThrow<RuntimeException> { vergeService.lagreVerge(behandlingId, vergeDto) }

@@ -23,7 +23,7 @@ class EregBeans(
         )
 
     @Bean("eregClient")
-    @Profile("e2e", "local", "integrasjonstest")
+    @Profile("e2e", "local")
     fun eregClientStub(): EregClientStub =
         EregClientStub()
 }
