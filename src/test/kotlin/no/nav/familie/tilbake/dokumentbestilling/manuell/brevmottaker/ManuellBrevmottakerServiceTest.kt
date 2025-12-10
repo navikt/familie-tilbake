@@ -33,6 +33,8 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.api.v1.dto.ManuellBrevmottakerRequestDto
+import no.nav.tilbakekreving.config.FeatureService
+import no.nav.tilbakekreving.integrasjoner.arbeidsforhold.EregClient
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
@@ -79,6 +81,8 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
 
     private lateinit var behandling: Behandling
     private lateinit var manuellBrevmottakerService: ManuellBrevmottakerService
+    private lateinit var eregClient: EregClient
+    private lateinit var featureService: FeatureService
 
     private val manuellBrevmottakerRequestDto =
         ManuellBrevmottakerRequestDto(
@@ -128,6 +132,8 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                 integrasjonerClient = mockIntegrasjonerClient,
                 validerBrevmottakerService = validerBrevmottakerService,
                 logService = logService,
+                featureService = featureService,
+                eregClient = eregClient,
             )
 
         every {

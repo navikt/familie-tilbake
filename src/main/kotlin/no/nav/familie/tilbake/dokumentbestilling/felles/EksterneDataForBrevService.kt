@@ -8,6 +8,9 @@ import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.kontrakter.organisasjon.Organisasjon
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.person.PersonService
+import no.nav.tilbakekreving.Toggle
+import no.nav.tilbakekreving.config.FeatureService
+import no.nav.tilbakekreving.integrasjoner.arbeidsforhold.EregClient
 import no.nav.tilbakekreving.kontrakter.verge.Vergetype
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
@@ -18,6 +21,8 @@ import no.nav.tilbakekreving.kontrakter.verge.Verge as VergeDto
 class EksterneDataForBrevService(
     private val personService: PersonService,
     private val integrasjonerClient: IntegrasjonerClient,
+    private val featureService: FeatureService,
+    private val eregClient: EregClient,
 ) {
     fun hentPerson(
         ident: String,
@@ -101,7 +106,11 @@ class EksterneDataForBrevService(
         personinfo: Personinfo,
         brevmottager: Brevmottager,
     ): Adresseinfo {
-        val organisasjon = integrasjonerClient.hentOrganisasjon(organisasjonsnummer)
+        val organisasjon = if (featureService.modellFeatures[Toggle.EregServices]) {
+            eregClient.hentOrganisasjon(organisasjonsnummer)
+        } else {
+            integrasjonerClient.hentOrganisasjon(organisasjonsnummer)
+        }
         return lagAdresseinfo(organisasjon, vergenavn, personinfo, brevmottager)
     }
 

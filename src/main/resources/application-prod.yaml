@@ -82,3 +82,6 @@ tilbakekreving:
   saf:
     base-url: https://saf.intern.nav.no
     scope: api://prod-fss.teamdokumenthandtering.saf/.default
+  eregServices:
+    base-url: https://ereg-services.intern.nav.no
+    scope: api://prod-fss.arbeidsforhold.ereg-services/.default
