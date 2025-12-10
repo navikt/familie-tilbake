@@ -30,6 +30,8 @@ import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.person.PersonService
 import no.nav.tilbakekreving.api.v1.dto.VergeDto
+import no.nav.tilbakekreving.config.FeatureService
+import no.nav.tilbakekreving.integrasjoner.arbeidsforhold.EregClient
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
@@ -74,6 +76,9 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
 
     private lateinit var fagsak: Fagsak
 
+    private lateinit var eregClient: EregClient
+    private lateinit var featureService: FeatureService
+
     private val vergeDto =
         VergeDto(
             orgNr = "987654321",
@@ -95,6 +100,8 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
                 integrasjonerClient,
                 personService,
                 logService,
+                featureService,
+                eregClient,
             )
         clearAllMocks(answers = false)
     }
@@ -165,6 +172,8 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
                 mockIntegrasjonerClient,
                 personService,
                 logService,
+                featureService,
+                eregClient,
             )
 
         every { mockIntegrasjonerClient.validerOrganisasjon(any()) } returns false
@@ -196,6 +205,8 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
                 integrasjonerClient,
                 personService,
                 logService,
+                featureService,
+                eregClient,
             )
 
         every { mockPdlClient.hentPersoninfo(any(), any(), any()) } throws Feil(message = "Feil ved oppslag på person", logContext = SecureLog.Context.tom())

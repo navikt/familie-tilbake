@@ -230,7 +230,12 @@ class ManuellBrevmottakerService(
                     logContext = logContext,
                 ).navn
         } ?: dto.organisasjonsnummer?.let {
-            if (!integrasjonerClient.validerOrganisasjon(it)) {
+            val erGyldig = if (featureService.modellFeatures[Toggle.EregServices]) {
+                eregClient.validerOrganisasjon(it)
+            } else {
+                integrasjonerClient.validerOrganisasjon(it)
+            }
+            if (!erGyldig) {
                 throw Feil(
                     message = "Organisasjon $it er ikke gyldig",
                     frontendFeilmelding = "Organisasjon $it er ikke gyldig",

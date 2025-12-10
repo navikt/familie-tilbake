@@ -11,4 +11,6 @@ class EregClientStub() : EregClient {
             navn = "sammensattnavn",
         )
     }
+
+    override fun validerOrganisasjon(orgnr: String): Boolean = false
 }

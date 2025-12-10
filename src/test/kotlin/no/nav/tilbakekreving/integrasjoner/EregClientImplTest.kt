@@ -22,6 +22,7 @@ import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.kontrakter.organisasjon.Organisasjon
 import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.tilbakekreving.applicationProps
+import no.nav.tilbakekreving.integrasjoner.arbeidsforhold.EregClient
 import no.nav.tilbakekreving.integrasjoner.arbeidsforhold.EregClientImpl
 import no.nav.tilbakekreving.integrasjoner.arbeidsforhold.domain.HentOrganisasjonResponse
 import no.nav.tilbakekreving.integrasjoner.arbeidsforhold.domain.Navn
@@ -39,33 +40,7 @@ class EregClientImplTest {
     @Test
     fun `henter organisasjon ved success`() {
         val forventetResponse = Organisasjon(organisasjonsnummer = "123456789", navn = "navn")
-        val eregRespons = HentOrganisasjonResponse(
-            navn = Navn(sammensattnavn = "navn"),
-            adresse = null,
-        )
-
-        every { jwtToken.encodedToken } returns "USER_TOKEN"
-
-        val engine = MockEngine { req ->
-            req.url.fullPath shouldBe "/123456789/noekkelinfo"
-            req.headers[HttpHeaders.Authorization] shouldBe "Bearer BEARER"
-
-            respond(
-                content = jacksonObjectMapper().writeValueAsString(eregRespons),
-                status = HttpStatusCode.OK,
-                headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString()),
-            )
-        }
-
-        val httpClient = HttpClient(engine) {
-            install(ContentNegotiation) { jackson() }
-        }
-
-        val eregClient = EregClientImpl(
-            applicationProperties = applicationProps(),
-            tokenExchangeService = tokenExchange,
-            httpClient = httpClient,
-        )
+        val eregClient = hentEregClient()
 
         val response = eregClient.hentOrganisasjon("123456789")
 
@@ -93,6 +68,68 @@ class EregClientImplTest {
 
         shouldThrow<Feil> {
             eregClient.hentOrganisasjon("123456789")
-        }.message shouldContain "bad request"
+        }.message shouldContain "Henting av organisasjoninfo for orgnr"
+    }
+
+    @Test
+    fun `validering av organisasjon return true ved success`() {
+        val eregClient = hentEregClient()
+        val response = eregClient.validerOrganisasjon("123456789")
+        response shouldBe true
+    }
+
+    @Test
+    fun `validering av organisasjon return false ved not found`() {
+        every { jwtToken.encodedToken } returns "USER_TOKEN"
+
+        val engine = MockEngine { req ->
+            req.url.fullPath shouldBe "/123456789/noekkelinfo"
+            req.headers[HttpHeaders.Authorization] shouldBe "Bearer BEARER"
+
+            respond("{}", HttpStatusCode.NotFound)
+        }
+
+        val httpClient = HttpClient(engine) {
+            install(ContentNegotiation) { jackson() }
+        }
+
+        val eregClient = EregClientImpl(
+            applicationProperties = applicationProps(),
+            tokenExchangeService = tokenExchange,
+            httpClient = httpClient,
+        )
+
+        val response = eregClient.validerOrganisasjon("123456789")
+        response shouldBe false
+    }
+
+    private fun hentEregClient(): EregClient {
+        val eregRespons = HentOrganisasjonResponse(
+            navn = Navn(sammensattnavn = "navn"),
+            adresse = null,
+        )
+
+        every { jwtToken.encodedToken } returns "USER_TOKEN"
+
+        val engine = MockEngine { req ->
+            req.url.fullPath shouldBe "/123456789/noekkelinfo"
+            req.headers[HttpHeaders.Authorization] shouldBe "Bearer BEARER"
+
+            respond(
+                content = jacksonObjectMapper().writeValueAsString(eregRespons),
+                status = HttpStatusCode.OK,
+                headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString()),
+            )
+        }
+
+        val httpClient = HttpClient(engine) {
+            install(ContentNegotiation) { jackson() }
+        }
+
+        return EregClientImpl(
+            applicationProperties = applicationProps(),
+            tokenExchangeService = tokenExchange,
+            httpClient = httpClient,
+        )
     }
 }
