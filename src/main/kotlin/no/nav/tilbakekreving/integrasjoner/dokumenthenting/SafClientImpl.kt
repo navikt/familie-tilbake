@@ -139,8 +139,8 @@ class SafClientImpl(
             } else {
                 val body = response.bodyAsText()
                 throw Feil(
-                    message = "Henting av journalposter feilet: $body ",
-                    frontendFeilmelding = "Henting av journalposter feilet. ",
+                    message = "Henting av journalposter feilet. Status: ${response.status}, melding: $body ",
+                    frontendFeilmelding = "Henting av journalposter feilet. Status: ${response.status}",
                     logContext = SecureLog.Context.tom(),
                 )
             }
