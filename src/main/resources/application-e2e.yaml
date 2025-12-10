@@ -79,6 +79,9 @@ tilbakekreving:
     base-url: https://norg2.dev.adeo.no/norg2/
     scope: api://dev-fss.org.norg2/.default
 
+  eregServices:
+    base-url: https://ereg-services-q1.dev.intern.nav.no
+    scope: api://dev-fss.arbeidsforhold.ereg-services/.default
 logging:
   config: "classpath:logback-e2e.xml"
 

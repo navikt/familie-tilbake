@@ -4,6 +4,7 @@ import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.config.BigQueryProperties
 import no.nav.tilbakekreving.config.Tilgangsstyring
+import no.nav.tilbakekreving.integrasjoner.arbeidsforhold.config.EregServicesConfig
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.config.DokarkivConfig
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.config.DokdistConfig
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
@@ -51,6 +52,10 @@ fun applicationProps(): ApplicationProperties {
         norg2 = Norg2Client.Companion.Config(
             baseUrl = "http://norg2",
             scope = "api://norg2/.default",
+        ),
+        eregServices = EregServicesConfig(
+            baseUrl = "http://eregServices",
+            scope = "api://ereg-services/.default",
         ),
     )
 }

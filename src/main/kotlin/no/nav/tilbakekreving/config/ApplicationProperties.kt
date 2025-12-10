@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.config
 
+import no.nav.tilbakekreving.integrasjoner.arbeidsforhold.config.EregServicesConfig
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.config.DokarkivConfig
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.config.DokdistConfig
 import no.tilbakekreving.integrasjoner.dokument.saf.SafClient
@@ -22,4 +23,5 @@ data class ApplicationProperties(
     val dokdist: DokdistConfig,
     val saf: SafClient.Companion.Config,
     val norg2: Norg2Client.Companion.Config,
+    val eregServices: EregServicesConfig,
 )

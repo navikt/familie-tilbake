@@ -85,3 +85,6 @@ tilbakekreving:
   norg2:
     base-url: https://norg2.intern.nav.no
     scope: api://prod-gcp.org.norg2/.default
+  eregServices:
+    base-url: https://ereg-services.intern.nav.no
+    scope: api://prod-fss.arbeidsforhold.ereg-services/.default
