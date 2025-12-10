@@ -33,6 +33,7 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.api.v1.dto.ManuellBrevmottakerRequestDto
+import no.nav.tilbakekreving.applicationProps
 import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.integrasjoner.arbeidsforhold.EregClient
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
@@ -120,6 +121,12 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
     fun init() {
         val fagsak = fagsakRepository.insert(Testdata.fagsak())
         behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId = fagsak.id))
+        featureService = FeatureService(applicationProperties = applicationProps())
+        eregClient = mockk<EregClient> {
+            every { validerOrganisasjon(any()) } returns true
+            every { hentOrganisasjon("123456789") } returns
+                Organisasjon("123456789", navn = "Organisasjon AS")
+        }
 
         manuellBrevmottakerService =
             ManuellBrevmottakerService(
