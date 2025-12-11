@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.config
 
+import no.nav.tilbakekreving.integrasjoner.azure.config.AzureGraphConfig
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.config.DokarkivConfig
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.config.DokdistConfig
 import no.tilbakekreving.integrasjoner.persontilgang.PersontilgangService
@@ -18,4 +19,5 @@ data class ApplicationProperties(
     val kravgrunnlagMapping: Map<String, String> = emptyMap(),
     val dokarkiv: DokarkivConfig,
     val dokdist: DokdistConfig,
+    val azureGraph: AzureGraphConfig,
 )
