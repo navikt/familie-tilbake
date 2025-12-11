@@ -24,7 +24,7 @@ class DokdistBeans(
         )
 
     @Bean("dokdistClient")
-    @Profile("e2e", "local", "integrasjonstest")
+    @Profile("e2e", "local")
     fun dokdistClientStub(): DokdistClient =
         DokdistClientStub()
 }
