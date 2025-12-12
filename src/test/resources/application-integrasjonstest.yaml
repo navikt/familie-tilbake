@@ -64,3 +64,6 @@ tilbakekreving:
   dokdist:
     base-url: dummy
     scope: dummy
+  saf:
+    base-url: dummy
+    scope: dummy
