@@ -13,4 +13,5 @@ enum class Toggle(val default: Boolean) {
     Arkivering(default = false),
     Brevutsending(default = false),
     Dokumenthenting(default = false),
+    Journalposthenting(default = false),
 }

@@ -22,9 +22,9 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.config.FeatureService
+import no.nav.tilbakekreving.dokumentHåndtering.saf.SafService
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostResponse
-import no.nav.tilbakekreving.integrasjoner.dokumenthenting.SafClient
 import no.nav.tilbakekreving.kontrakter.ytelse.Tema
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmetadata
@@ -42,7 +42,7 @@ class JournalføringService(
     private val fagsakRepository: FagsakRepository,
     private val featureService: FeatureService,
     private val dokarkivClient: DokarkivClient,
-    private val safClient: SafClient,
+    private val safService: SafService,
 ) {
     private val log = TracedLogger.getLogger<JournalføringService>()
 
@@ -52,7 +52,7 @@ class JournalføringService(
         behandlingId: UUID,
     ): ByteArray {
         if (featureService.modellFeatures[Toggle.Dokumenthenting]) {
-            safClient.hentDokument(behandlingId, journalpostId, dokumentInfoId)
+            safService.hentDokument(behandlingId, journalpostId, dokumentInfoId, null)
         }
         return integrasjonerClient.hentDokument(dokumentInfoId, journalpostId)
     }
@@ -61,7 +61,9 @@ class JournalføringService(
         val behandling = behandlingRepository.findById(behandlingId).orElseThrow()
         val fagsak = behandling.let { fagsakRepository.findById(it.fagsakId).orElseThrow() }
         val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandling.id.toString())
-        val journalposter =
+        val journalposter = if (featureService.modellFeatures[Toggle.Journalposthenting]) {
+            safService.hentJournalposter(null, fagsak.bruker.ident, listOf(hentTema(fagsystem = fagsak.fagsystem)))
+        } else {
             fagsak.let {
                 integrasjonerClient.hentJournalposterForBruker(
                     JournalposterForBrukerRequest(
@@ -76,6 +78,7 @@ class JournalføringService(
                     logContext,
                 )
             }
+        }
         return journalposter.filter { it.sak?.fagsakId == fagsak.eksternFagsakId }
     }
 

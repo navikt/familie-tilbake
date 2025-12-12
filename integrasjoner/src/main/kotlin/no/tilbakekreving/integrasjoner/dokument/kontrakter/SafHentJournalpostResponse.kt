@@ -1,6 +1,4 @@
-package no.nav.tilbakekreving.integrasjoner.dokumenthenting.domain
-
-import no.nav.familie.tilbake.kontrakter.journalpost.Journalpost
+package no.tilbakekreving.integrasjoner.dokument.kontrakter
 
 data class SafHentJournalpostResponse(
     val data: SafJournalpostData?,
@@ -11,5 +9,5 @@ data class SafJournalpostData(
 )
 
 data class DokumentoversiktBruker(
-    val journalposter: List<Journalpost>,
+    val journalposter: List<JournalpostResponse>,
 )

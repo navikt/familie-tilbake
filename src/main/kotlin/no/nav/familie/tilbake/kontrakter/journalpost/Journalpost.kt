@@ -1,8 +1,5 @@
 package no.nav.familie.tilbake.kontrakter.journalpost
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-
-@JsonIgnoreProperties(ignoreUnknown = true)
 data class Journalpost(
     val journalpostId: String,
     val journalposttype: Journalposttype,

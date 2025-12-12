@@ -1,6 +1,4 @@
-package no.nav.tilbakekreving.integrasjoner.dokumenthenting.domain
-
-import no.nav.familie.tilbake.kontrakter.journalpost.JournalposterForBrukerRequest
+package no.tilbakekreving.integrasjoner.dokument.kontrakter
 
 data class SafJournalpostRequest(
     val variables: JournalposterForBrukerRequest,

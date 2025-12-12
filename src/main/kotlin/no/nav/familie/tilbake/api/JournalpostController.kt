@@ -9,7 +9,7 @@ import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.TilbakekrevingService
-import no.nav.tilbakekreving.integrasjoner.dokumenthenting.SafClient
+import no.nav.tilbakekreving.dokumentHåndtering.saf.SafService
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -25,7 +25,7 @@ class JournalpostController(
     private val journalføringService: JournalføringService,
     private val tilgangskontrollService: TilgangskontrollService,
     private val tilbakekrevingService: TilbakekrevingService,
-    private val safClient: SafClient,
+    private val safService: SafService,
 ) {
     @Operation(summary = "Hent dokument fra journalføring")
     @GetMapping("/{behandlingId}/journalpost/{journalpostId}/dokument/{dokumentInfoId}")
@@ -44,10 +44,11 @@ class JournalpostController(
                 handling = "Henter vilkårsvurdering for en gitt behandling",
             )
             return Ressurs.success(
-                safClient.hentDokument(
+                safService.hentDokument(
                     behandlingId = behandlingId,
                     journalpostId = journalpostId,
                     dokumentInfoId = dokumentInfoId,
+                    tilbakekreving.eksternFagsak.eksternId,
                 ),
                 "OK",
             )
@@ -75,7 +76,7 @@ class JournalpostController(
                 auditLoggerEvent = AuditLoggerEvent.ACCESS,
                 handling = "Henter vilkårsvurdering for en gitt behandling",
             )
-            return Ressurs.success(safClient.hentJournalposter(tilbakekreving))
+            return Ressurs.success(safService.hentJournalposter(tilbakekreving, null, null))
         }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
