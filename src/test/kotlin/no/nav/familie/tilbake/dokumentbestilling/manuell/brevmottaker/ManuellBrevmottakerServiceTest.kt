@@ -34,8 +34,8 @@ import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.api.v1.dto.ManuellBrevmottakerRequestDto
 import no.nav.tilbakekreving.applicationProps
+import no.nav.tilbakekreving.arbeidsforhold.ArbeidsforholdService
 import no.nav.tilbakekreving.config.FeatureService
-import no.nav.tilbakekreving.integrasjoner.arbeidsforhold.EregClient
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
@@ -43,6 +43,7 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.brev.ManuellAdresseInfo
 import no.nav.tilbakekreving.kontrakter.brev.MottakerType.DØDSBO
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.tilbakekreving.integrasjoner.arbeidsforhold.EregClient
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -82,8 +83,8 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
 
     private lateinit var behandling: Behandling
     private lateinit var manuellBrevmottakerService: ManuellBrevmottakerService
-    private lateinit var eregClient: EregClient
     private lateinit var featureService: FeatureService
+    private lateinit var arbeidsforholdService: ArbeidsforholdService
 
     private val manuellBrevmottakerRequestDto =
         ManuellBrevmottakerRequestDto(
@@ -122,12 +123,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
         val fagsak = fagsakRepository.insert(Testdata.fagsak())
         behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId = fagsak.id))
         featureService = FeatureService(applicationProperties = applicationProps())
-        eregClient = mockk<EregClient> {
-            every { validerOrganisasjon(any()) } returns true
-            every { hentOrganisasjon("123456789") } returns
-                Organisasjon("123456789", navn = "Organisasjon AS")
-        }
-
+        arbeidsforholdService = ArbeidsforholdService(mockk<EregClient>())
         manuellBrevmottakerService =
             ManuellBrevmottakerService(
                 manuellBrevmottakerRepository = manuellBrevmottakerRepository,
@@ -140,7 +136,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                 validerBrevmottakerService = validerBrevmottakerService,
                 logService = logService,
                 featureService = featureService,
-                eregClient = eregClient,
+                arbeidsforholdService = arbeidsforholdService,
             )
 
         every {

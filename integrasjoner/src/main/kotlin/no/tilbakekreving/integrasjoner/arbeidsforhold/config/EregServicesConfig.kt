@@ -1,4 +1,4 @@
-package no.nav.tilbakekreving.integrasjoner.arbeidsforhold.config
+package no.tilbakekreving.integrasjoner.arbeidsforhold.config
 
 data class EregServicesConfig(
     val baseUrl: String,

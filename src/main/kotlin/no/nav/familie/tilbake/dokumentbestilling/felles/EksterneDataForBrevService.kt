@@ -9,8 +9,8 @@ import no.nav.familie.tilbake.kontrakter.organisasjon.Organisasjon
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.person.PersonService
 import no.nav.tilbakekreving.Toggle
+import no.nav.tilbakekreving.arbeidsforhold.ArbeidsforholdService
 import no.nav.tilbakekreving.config.FeatureService
-import no.nav.tilbakekreving.integrasjoner.arbeidsforhold.EregClient
 import no.nav.tilbakekreving.kontrakter.verge.Vergetype
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
@@ -22,7 +22,7 @@ class EksterneDataForBrevService(
     private val personService: PersonService,
     private val integrasjonerClient: IntegrasjonerClient,
     private val featureService: FeatureService,
-    private val eregClient: EregClient,
+    private val arbeidsforholdService: ArbeidsforholdService,
 ) {
     fun hentPerson(
         ident: String,
@@ -107,7 +107,7 @@ class EksterneDataForBrevService(
         brevmottager: Brevmottager,
     ): Adresseinfo {
         val organisasjon = if (featureService.modellFeatures[Toggle.EregServices]) {
-            eregClient.hentOrganisasjon(organisasjonsnummer)
+            arbeidsforholdService.hentOrganisasjon(organisasjonsnummer)
         } else {
             integrasjonerClient.hentOrganisasjon(organisasjonsnummer)
         }

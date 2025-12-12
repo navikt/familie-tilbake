@@ -308,32 +308,5 @@ class IntegrasjonerClientConfig {
         return integrasjonerClient
     }
 
-    @Primary
-    @Bean
-    fun eregClientMock(): EregClient {
-        val eregClient: EregClientStub = mockk(relaxed = true)
-        val organisasjonsnummer = slot<String>()
-        every { eregClient.hentOrganisasjon(capture(organisasjonsnummer)) } answers {
-            when (organisasjonsnummer.captured) {
-                "998765432" ->
-                    Organisasjon(
-                        "998765432",
-                        "Testinstitusjon",
-                    )
-                "999876543" ->
-                    Organisasjon(
-                        "999876543",
-                        "Testinstitusjon med langt navn for test i frontend",
-                    )
-                else ->
-                    Organisasjon(
-                        "987654321",
-                        "Bobs Burgers",
-                    )
-            }
-        }
-        return eregClient
-    }
-
     fun readMockfileFromResources(): ByteArray = javaClass.getResource("/mockpdf/mocktest.pdf").readBytes()
 }
