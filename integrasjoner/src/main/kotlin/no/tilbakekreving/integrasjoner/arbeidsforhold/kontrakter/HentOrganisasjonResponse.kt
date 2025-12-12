@@ -1,4 +1,4 @@
-package no.nav.tilbakekreving.integrasjoner.arbeidsforhold.domain
+package no.tilbakekreving.integrasjoner.arbeidsforhold.kontrakter
 
 data class HentOrganisasjonResponse(
     val navn: Navn,

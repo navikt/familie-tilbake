@@ -18,8 +18,8 @@ import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.api.v1.dto.ManuellBrevmottakerRequestDto
+import no.nav.tilbakekreving.arbeidsforhold.ArbeidsforholdService
 import no.nav.tilbakekreving.config.FeatureService
-import no.nav.tilbakekreving.integrasjoner.arbeidsforhold.EregClient
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import org.springframework.http.HttpStatus
@@ -41,7 +41,7 @@ class ManuellBrevmottakerService(
     private val validerBrevmottakerService: ValiderBrevmottakerService,
     private val logService: LogService,
     private val featureService: FeatureService,
-    private val eregClient: EregClient,
+    private val arbeidsforholdService: ArbeidsforholdService,
 ) {
     @Transactional
     fun leggTilBrevmottaker(
@@ -231,7 +231,7 @@ class ManuellBrevmottakerService(
                 ).navn
         } ?: dto.organisasjonsnummer?.let {
             val erGyldig = if (featureService.modellFeatures[Toggle.EregServices]) {
-                eregClient.validerOrganisasjon(it)
+                arbeidsforholdService.validerOrganisasjon(it)
             } else {
                 integrasjonerClient.validerOrganisasjon(it)
             }
@@ -243,7 +243,7 @@ class ManuellBrevmottakerService(
                 )
             }
             if (featureService.modellFeatures[Toggle.EregServices]) {
-                eregClient.hentOrganisasjon(it).navn + if (dto.navn.isNotBlank()) " v/ ${dto.navn}" else ""
+                arbeidsforholdService.hentOrganisasjon(it).navn + if (dto.navn.isNotBlank()) " v/ ${dto.navn}" else ""
             } else {
                 integrasjonerClient.hentOrganisasjon(it).navn + if (dto.navn.isNotBlank()) " v/ ${dto.navn}" else ""
             }
