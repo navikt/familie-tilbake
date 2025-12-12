@@ -82,38 +82,38 @@ class SafService(
     private fun mapTilJournalposter(journalposter: List<JournalpostResponse>): List<Journalpost> {
         return journalposter.map { it ->
             Journalpost(
-                it.journalpostId,
-                Journalposttype.valueOf(it.journalposttype.name),
-                Journalstatus.valueOf(it.journalstatus.name),
-                it.tema,
-                it.tittel,
-                Sak(
-                    it.sak?.arkivsaksystem,
-                    it.sak?.arkivsaksystem,
-                    it.sak?.fagsakId,
-                    it.sak?.sakstype,
-                    it.sak?.fagsaksystem,
+                journalpostId = it.journalpostId,
+                journalposttype = Journalposttype.valueOf(it.journalposttype.name),
+                journalstatus = Journalstatus.valueOf(it.journalstatus.name),
+                tema = it.tema,
+                tittel = it.tittel,
+                sak = Sak(
+                    arkivsaksnummer = it.sak?.arkivsaksystem,
+                    arkivsaksystem = it.sak?.arkivsaksystem,
+                    fagsakId = it.sak?.fagsakId,
+                    sakstype = it.sak?.sakstype,
+                    fagsaksystem = it.sak?.fagsaksystem,
                 ),
-                it.dokumenter?.map {
+                dokumenter = it.dokumenter?.map {
                     DokumentInfo(
-                        it.dokumentInfoId,
-                        it.tittel,
-                        it.brevkode,
-                        it.logiskeVedlegg?.map {
+                        dokumentInfoId = it.dokumentInfoId,
+                        tittel = it.tittel,
+                        brevkode = it.brevkode,
+                        logiskeVedlegg = it.logiskeVedlegg?.map {
                             LogiskVedlegg(
-                                it.logiskVedleggId,
-                                it.tittel,
+                                logiskVedleggId = it.logiskVedleggId,
+                                tittel = it.tittel,
                             )
                         },
                     )
                 },
-                it.relevanteDatoer?.map {
+                relevanteDatoer = it.relevanteDatoer?.map {
                     RelevantDato(
                         it.dato,
                         it.datotype,
                     )
                 },
-                it.eksternReferanseId,
+                eksternReferanseId = it.eksternReferanseId,
             )
         }
     }
