@@ -33,6 +33,9 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.api.v1.dto.ManuellBrevmottakerRequestDto
+import no.nav.tilbakekreving.applicationProps
+import no.nav.tilbakekreving.arbeidsforhold.ArbeidsforholdService
+import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
@@ -40,6 +43,9 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.brev.ManuellAdresseInfo
 import no.nav.tilbakekreving.kontrakter.brev.MottakerType.DØDSBO
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.tilbakekreving.integrasjoner.arbeidsforhold.EregClient
+import no.tilbakekreving.integrasjoner.arbeidsforhold.kontrakter.HentOrganisasjonResponse
+import no.tilbakekreving.integrasjoner.arbeidsforhold.kontrakter.Navn
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -79,6 +85,9 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
 
     private lateinit var behandling: Behandling
     private lateinit var manuellBrevmottakerService: ManuellBrevmottakerService
+    private lateinit var featureService: FeatureService
+    private lateinit var arbeidsforholdService: ArbeidsforholdService
+    private lateinit var eregClient: EregClient
 
     private val manuellBrevmottakerRequestDto =
         ManuellBrevmottakerRequestDto(
@@ -116,7 +125,11 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
     fun init() {
         val fagsak = fagsakRepository.insert(Testdata.fagsak())
         behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId = fagsak.id))
-
+        featureService = FeatureService(applicationProperties = applicationProps())
+        eregClient = mockk<EregClient> {
+            every { hentOrganisasjon(any()) } returns HentOrganisasjonResponse(Navn(""), null)
+        }
+        arbeidsforholdService = ArbeidsforholdService(eregClient)
         manuellBrevmottakerService =
             ManuellBrevmottakerService(
                 manuellBrevmottakerRepository = manuellBrevmottakerRepository,
@@ -128,6 +141,8 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                 integrasjonerClient = mockIntegrasjonerClient,
                 validerBrevmottakerService = validerBrevmottakerService,
                 logService = logService,
+                featureService = featureService,
+                arbeidsforholdService = arbeidsforholdService,
             )
 
         every {
@@ -399,6 +414,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `skal hente og legge til navn fra registeroppslag når request inneholder identinformasjon`() {
+        every { eregClient.hentOrganisasjon(any()) } returns HentOrganisasjonResponse(Navn("Organisasjon AS"), null)
         val requestMedPersonIdent =
             manuellBrevmottakerRequestDto.copy(
                 personIdent = "12345678910",

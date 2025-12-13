@@ -14,7 +14,10 @@ import no.nav.familie.tilbake.kontrakter.Applikasjon
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.person.PersonService
+import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.api.v1.dto.VergeDto
+import no.nav.tilbakekreving.arbeidsforhold.ArbeidsforholdService
+import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.verge.Vergetype
@@ -33,6 +36,8 @@ class VergeService(
     private val integrasjonerClient: IntegrasjonerClient,
     private val personService: PersonService,
     private val logService: LogService,
+    private val featureService: FeatureService,
+    private val arbeidsforholdService: ArbeidsforholdService,
 ) {
     @Transactional
     fun lagreVerge(
@@ -128,7 +133,11 @@ class VergeService(
         when (vergeDto.type) {
             Vergetype.ADVOKAT -> {
                 val orgnummer = requireNotNull(vergeDto.orgNr) { "orgNr kan ikke være null for ${Vergetype.ADVOKAT}" }
-                val erGyldig = integrasjonerClient.validerOrganisasjon(orgnummer)
+                val erGyldig = if (featureService.modellFeatures[Toggle.EregServices]) {
+                    arbeidsforholdService.validerOrganisasjon(orgnummer)
+                } else {
+                    integrasjonerClient.validerOrganisasjon(orgnummer)
+                }
                 if (!erGyldig) {
                     throw Feil(
                         message = "Organisasjon ${vergeDto.orgNr} er ikke gyldig",
