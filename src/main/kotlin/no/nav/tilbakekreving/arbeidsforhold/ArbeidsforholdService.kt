@@ -1,8 +1,8 @@
 package no.nav.tilbakekreving.arbeidsforhold
 
-import no.nav.familie.tilbake.common.exceptionhandler.NotFoundError
 import no.nav.familie.tilbake.kontrakter.organisasjon.Organisasjon
 import no.tilbakekreving.integrasjoner.arbeidsforhold.EregClient
+import no.tilbakekreving.integrasjoner.feil.NotFoundException
 import org.springframework.stereotype.Service
 
 @Service
@@ -21,7 +21,7 @@ class ArbeidsforholdService(
         try {
             hentOrganisasjon(orgnr)
             true
-        } catch (e: NotFoundError) {
+        } catch (e: NotFoundException) {
             false
         }
 }
