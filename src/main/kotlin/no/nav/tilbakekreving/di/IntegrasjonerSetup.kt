@@ -4,6 +4,7 @@ import no.nav.tilbakekreving.config.ApplicationProperties
 import no.tilbakekreving.integrasjoner.dokument.saf.SafClient
 import no.tilbakekreving.integrasjoner.norg2.Norg2Client
 import no.tilbakekreving.integrasjoner.arbeidsforhold.EregClient
+import no.tilbakekreving.integrasjoner.dokument.saf.SafClient
 import no.tilbakekreving.integrasjoner.persontilgang.PersontilgangService
 import no.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
 import org.springframework.context.annotation.Bean

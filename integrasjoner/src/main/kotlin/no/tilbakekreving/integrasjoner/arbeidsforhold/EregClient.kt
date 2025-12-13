@@ -10,8 +10,6 @@ import no.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
 interface EregClient {
     fun hentOrganisasjon(orgnr: String): HentOrganisasjonResponse
 
-    fun validerOrganisasjon(orgnr: String): Boolean
-
     companion object {
         fun opprett(
             config: Config,

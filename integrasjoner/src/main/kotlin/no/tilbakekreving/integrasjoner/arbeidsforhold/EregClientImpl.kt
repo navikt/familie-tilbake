@@ -27,14 +27,6 @@ class EregClientImpl(
         }
     }
 
-    override fun validerOrganisasjon(orgnr: String): Boolean =
-        try {
-            hentOrganisasjon(orgnr)
-            true
-        } catch (e: NotFoundException) {
-            false
-        }
-
     private suspend fun hentOrganisasjonNøkkelinfo(orgnr: String): HentOrganisasjonResponse {
         val baseUrl = config.baseUrl
         val scope = config.scope
