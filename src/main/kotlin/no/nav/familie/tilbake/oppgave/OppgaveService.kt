@@ -27,7 +27,10 @@ import no.nav.familie.tilbake.kontrakter.oppgave.StatusEnum
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.person.PersonService
+import no.nav.tilbakekreving.Toggle
+import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.kontrakter.ytelse.Tema
+import no.nav.tilbakekreving.saksbehandler.SaksbehandlerService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -43,6 +46,8 @@ class OppgaveService(
     private val integrasjonerClient: IntegrasjonerClient,
     private val personService: PersonService,
     private val taskService: TaskService,
+    private val featureService: FeatureService,
+    private val saksbehandlerService: SaksbehandlerService,
     @Value("\${tilbakekreving.frontendUrl}")
     private val frontendUrl: String,
 ) {
@@ -260,7 +265,11 @@ class OppgaveService(
                 Oppgave(
                     id = oppgave.id,
                     tilordnetRessurs = saksbehandler,
-                    endretAvEnhetsnr = integrasjonerClient.hentSaksbehandler(saksbehandler).enhet,
+                    endretAvEnhetsnr = if (featureService.modellFeatures[Toggle.AzureGraph]) {
+                        saksbehandlerService.hentSaksbehandler(saksbehandler).enhet
+                    } else {
+                        integrasjonerClient.hentSaksbehandler(saksbehandler).enhet
+                    },
                 ),
             )
         }

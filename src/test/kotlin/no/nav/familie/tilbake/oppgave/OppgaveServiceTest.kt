@@ -26,6 +26,11 @@ import no.nav.familie.tilbake.kontrakter.oppgave.Oppgavetype
 import no.nav.familie.tilbake.kontrakter.oppgave.OpprettOppgaveRequest
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.person.PersonService
+import no.nav.tilbakekreving.applicationProps
+import no.nav.tilbakekreving.config.FeatureService
+import no.nav.tilbakekreving.saksbehandler.SaksbehandlerService
+import no.tilbakekreving.integrasjoner.azure.AzureGraphClient
+import no.tilbakekreving.integrasjoner.azure.AzureGraphClientImpl
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -58,9 +63,15 @@ class OppgaveServiceTest {
     private lateinit var oppgaveService: OppgaveService
     private lateinit var behandling: Behandling
     private lateinit var fagsak: Fagsak
+    private lateinit var featureService: FeatureService
+    private lateinit var saksbehandlerService: SaksbehandlerService
+    private lateinit var azureGraphClient: AzureGraphClient
 
     @BeforeEach
     fun setUp() {
+        azureGraphClient = mockk<AzureGraphClientImpl>(relaxed = true)
+        featureService = FeatureService(applicationProperties = applicationProps())
+        saksbehandlerService = SaksbehandlerService(azureGraphClient = azureGraphClient)
         clearMocks(integrasjonerClient)
         fagsak = fagsak()
         behandling = Testdata.lagBehandling(fagsak.id)
@@ -71,6 +82,8 @@ class OppgaveServiceTest {
                 integrasjonerClient,
                 personService,
                 taskService,
+                featureService,
+                saksbehandlerService,
                 "https://tilbakekreving.intern.nav.no",
             )
         every { fagsakRepository.findById(fagsak.id) } returns Optional.of(fagsak)

@@ -16,4 +16,5 @@ enum class Toggle(val default: Boolean) {
     Journalposthenting(default = false),
     Norg2(default = true),
     EregServices(default = false),
+    AzureGraph(default = false),
 }
