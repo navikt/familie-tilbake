@@ -21,6 +21,8 @@ import no.nav.familie.tilbake.kontrakter.oppgave.Oppgave
 import no.nav.familie.tilbake.kontrakter.oppgave.Oppgavetype
 import no.nav.familie.tilbake.kontrakter.organisasjon.Organisasjon
 import no.nav.familie.tilbake.kontrakter.saksbehandler.Saksbehandler
+import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
+import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.domain.DistribuerJournalpostResponse
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -304,6 +306,42 @@ class IntegrasjonerClientConfig {
             )
 
         return integrasjonerClient
+    }
+
+    @Primary
+    @Bean
+    fun dokdistClient(): DokdistClient {
+        val dokdistClient = mockk<DokdistClient>(relaxed = true)
+
+        val journalpostId = slot<String>()
+        every { dokdistClient.brevTilUtsending(any(), capture(journalpostId), any(), any(), any(), any(), any()) } answers {
+            when (
+                journalpostId.captured
+            ) {
+                "jpUkjentDødsbo" ->
+                    throw RessursException(
+                        httpStatus = HttpStatus.GONE,
+                        ressurs = Ressurs.failure("Ukjent adresse dødsbo"),
+                        cause = RestClientResponseException("Ukjent adresse dødsbo", 410, "gone", null, null, null),
+                    )
+
+                "jpUkjentAdresse" ->
+                    throw RessursException(
+                        httpStatus = HttpStatus.BAD_REQUEST,
+                        ressurs = Ressurs.failure("Mottaker har ukjent adresse"),
+                        cause = RestClientResponseException("Mottaker har ukjent adresse", 401, "not there", null, null, null),
+                    )
+                "jpDuplikatDistribusjon" ->
+                    throw RessursException(
+                        httpStatus = HttpStatus.CONFLICT,
+                        ressurs = Ressurs.failure("Dokumentet er allerede distribuert"),
+                        cause = RestClientResponseException("Dokumentet er allerede distribuert", 409, "conflict", null, null, null),
+                    )
+
+                else -> DistribuerJournalpostResponse("42")
+            }
+        }
+        return dokdistClient
     }
 
     fun readMockfileFromResources(): ByteArray = javaClass.getResource("/mockpdf/mocktest.pdf").readBytes()
