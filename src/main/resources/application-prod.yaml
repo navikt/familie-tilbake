@@ -88,3 +88,6 @@ tilbakekreving:
   eregServices:
     base-url: https://ereg-services.intern.nav.no
     scope: api://prod-fss.arbeidsforhold.ereg-services/.default
+  azureGraph:
+    base-url: https://graph.microsoft.com/v1.0/
+    scope: https://graph.microsoft.com/.default

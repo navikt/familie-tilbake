@@ -66,7 +66,7 @@ tilbakekreving:
     scope: api://dev-fss.arbeidsforhold.ereg-services/.default
   azureGraph:
     base-url: https://graph.microsoft.com/v1.0/
-    scope: Mangles for nå
+    scope: https://graph.microsoft.com/.default
 rolle:
   barnetrygd:
     veileder: "93a26831-9866-4410-927b-74ff51a9107c"

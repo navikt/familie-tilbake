@@ -1,4 +1,4 @@
-package no.nav.tilbakekreving.integrasjoner.azure.domain
+package no.tilbakekreving.integrasjoner.azure.kontrakter
 
 import java.util.UUID
 

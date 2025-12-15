@@ -276,6 +276,7 @@ class IntegrasjonerClientConfig {
                 "Bob",
                 "Burger",
                 "0425",
+                null,
             )
 
         every { integrasjonerClient.finnOppgaver(any()) } answers

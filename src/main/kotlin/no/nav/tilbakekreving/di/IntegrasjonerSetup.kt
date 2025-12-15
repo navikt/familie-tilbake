@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.di
 
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.tilbakekreving.integrasjoner.arbeidsforhold.EregClient
+import no.tilbakekreving.integrasjoner.azure.AzureGraphClient
 import no.tilbakekreving.integrasjoner.dokument.saf.SafClient
 import no.tilbakekreving.integrasjoner.norg2.Norg2Client
 import no.tilbakekreving.integrasjoner.persontilgang.PersontilgangService
@@ -36,5 +37,10 @@ class IntegrasjonerSetup(
     @Bean
     fun eregClient(tokenExchangeService: TokenExchangeService): EregClient {
         return EregClient.opprett(applicationProperties.eregServices, tokenExchangeService)
+    }
+
+    @Bean
+    fun azyreGraphClient(tokenExchangeService: TokenExchangeService): AzureGraphClient {
+        return AzureGraphClient.opprett(applicationProperties.azureGraph, tokenExchangeService)
     }
 }
