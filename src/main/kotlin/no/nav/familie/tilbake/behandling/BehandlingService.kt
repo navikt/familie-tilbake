@@ -91,7 +91,6 @@ class BehandlingService(
     private val validerBehandlingService: ValiderBehandlingService,
     private val oppgaveService: OppgaveService,
     private val logService: LogService,
-    private val featureService: FeatureService,
     private val norg2Service: Norg2Service,
     private val featureService: FeatureService,
     private val saksbehandlerService: SaksbehandlerService,
@@ -653,11 +652,12 @@ class BehandlingService(
         fagsak: Fagsak,
         erAutomatiskOgFeatureTogglePå: Boolean,
     ): Behandling {
-        val ansvarligsaksbehandler = if (featureService.modellFeatures[Toggle.AzureGraph]) {
+        val ansvarligsaksbehandler = if (featureService.modellFeatures[Toggle.EntraProxy]) {
             saksbehandlerService.hentSaksbehandler(opprettTilbakekrevingRequest.saksbehandlerIdent)
         } else {
             integrasjonerClient.hentSaksbehandler(opprettTilbakekrevingRequest.saksbehandlerIdent)
         }
+
         val behandling =
             BehandlingMapper.tilDomeneBehandling(
                 opprettTilbakekrevingRequest,

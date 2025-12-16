@@ -132,6 +132,9 @@ spec:
         - application: populasjonstilgangskontroll
           namespace: tilgangsmaskin
           cluster: dev-gcp
+        - application: entra-proxy
+          namespace: sikkerhetstjenesten
+          cluster: dev-gcp
       external:
         - host: tilbake-unleash-api.nav.cloud.nais.io
         - host: familie-integrasjoner.dev-fss-pub.nais.io

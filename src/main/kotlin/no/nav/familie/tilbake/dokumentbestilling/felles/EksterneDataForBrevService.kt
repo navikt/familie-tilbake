@@ -33,7 +33,7 @@ class EksterneDataForBrevService(
     ): Personinfo = personService.hentPersoninfo(ident, fagsystem, logContext)
 
     fun hentSaksbehandlernavn(id: String): String {
-        val saksbehandler = if (featureService.modellFeatures[Toggle.AzureGraph]) {
+        val saksbehandler = if (featureService.modellFeatures[Toggle.EntraProxy]) {
             saksbehandlerService.hentSaksbehandler(id)
         } else {
             integrasjonerClient.hentSaksbehandler(id)
@@ -46,7 +46,7 @@ class EksterneDataForBrevService(
         logContext: SecureLog.Context,
     ): String {
         val saksbehandlerId = ContextService.hentPåloggetSaksbehandler(defaultId, logContext)
-        val saksbehandler = if (featureService.modellFeatures[Toggle.AzureGraph]) {
+        val saksbehandler = if (featureService.modellFeatures[Toggle.EntraProxy]) {
             saksbehandlerService.hentSaksbehandler(saksbehandlerId)
         } else {
             integrasjonerClient.hentSaksbehandler(saksbehandlerId)

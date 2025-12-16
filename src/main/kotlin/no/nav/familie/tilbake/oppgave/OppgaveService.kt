@@ -265,7 +265,7 @@ class OppgaveService(
                 Oppgave(
                     id = oppgave.id,
                     tilordnetRessurs = saksbehandler,
-                    endretAvEnhetsnr = if (featureService.modellFeatures[Toggle.AzureGraph]) {
+                    endretAvEnhetsnr = if (featureService.modellFeatures[Toggle.EntraProxy]) {
                         saksbehandlerService.hentSaksbehandler(saksbehandler).enhet
                     } else {
                         integrasjonerClient.hentSaksbehandler(saksbehandler).enhet

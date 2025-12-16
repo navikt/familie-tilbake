@@ -29,8 +29,8 @@ import no.nav.familie.tilbake.person.PersonService
 import no.nav.tilbakekreving.applicationProps
 import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.saksbehandler.SaksbehandlerService
-import no.tilbakekreving.integrasjoner.azure.AzureGraphClient
-import no.tilbakekreving.integrasjoner.azure.AzureGraphClientImpl
+import no.tilbakekreving.integrasjoner.entraProxy.EntraProxyClient
+import no.tilbakekreving.integrasjoner.entraProxy.EntraProxyClientImpl
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -65,13 +65,13 @@ class OppgaveServiceTest {
     private lateinit var fagsak: Fagsak
     private lateinit var featureService: FeatureService
     private lateinit var saksbehandlerService: SaksbehandlerService
-    private lateinit var azureGraphClient: AzureGraphClient
+    private lateinit var entraProxyClient: EntraProxyClient
 
     @BeforeEach
     fun setUp() {
-        azureGraphClient = mockk<AzureGraphClientImpl>(relaxed = true)
+        entraProxyClient = mockk<EntraProxyClientImpl>(relaxed = true)
         featureService = FeatureService(applicationProperties = applicationProps())
-        saksbehandlerService = SaksbehandlerService(azureGraphClient = azureGraphClient)
+        saksbehandlerService = SaksbehandlerService(entraProxyClient = entraProxyClient)
         clearMocks(integrasjonerClient)
         fagsak = fagsak()
         behandling = Testdata.lagBehandling(fagsak.id)
