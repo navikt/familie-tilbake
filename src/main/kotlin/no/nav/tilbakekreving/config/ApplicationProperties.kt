@@ -3,8 +3,8 @@ package no.nav.tilbakekreving.config
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.config.DokarkivConfig
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.config.DokdistConfig
 import no.tilbakekreving.integrasjoner.arbeidsforhold.EregClient
-import no.tilbakekreving.integrasjoner.azure.AzureGraphClient
 import no.tilbakekreving.integrasjoner.dokument.saf.SafClient
+import no.tilbakekreving.integrasjoner.entraProxy.EntraProxyClient
 import no.tilbakekreving.integrasjoner.norg2.Norg2Client
 import no.tilbakekreving.integrasjoner.persontilgang.PersontilgangService
 import no.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
@@ -25,5 +25,5 @@ data class ApplicationProperties(
     val saf: SafClient.Companion.Config,
     val norg2: Norg2Client.Companion.Config,
     val eregServices: EregClient.Companion.Config,
-    val azureGraph: AzureGraphClient.Companion.Config,
+    val entraProxy: EntraProxyClient.Companion.Config,
 )

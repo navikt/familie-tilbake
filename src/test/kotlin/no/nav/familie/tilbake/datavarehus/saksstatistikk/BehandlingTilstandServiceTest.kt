@@ -19,6 +19,9 @@ import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.log.LogService
+import no.nav.security.token.support.core.context.TokenValidationContext
+import no.nav.security.token.support.core.context.TokenValidationContextHolder
+import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.tilbakekreving.api.v1.dto.BehandlingPåVentDto
 import no.nav.tilbakekreving.kontrakter.Faktainfo
 import no.nav.tilbakekreving.kontrakter.OpprettTilbakekrevingRequest
@@ -37,7 +40,10 @@ import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -76,8 +82,17 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
     private lateinit var behandling: Behandling
     private lateinit var fagsak: Fagsak
 
+    @MockitoBean
+    lateinit var tokenValidationContextHolder: TokenValidationContextHolder
+
     @BeforeEach
     fun setup() {
+        val ctx = mock(TokenValidationContext::class.java)
+        val token = mock(JwtToken::class.java)
+        `when`(token.encodedToken).thenReturn("dummy.jwt.token")
+        `when`(ctx.firstValidToken).thenReturn(token)
+        `when`(tokenValidationContextHolder.getTokenValidationContext()).thenReturn(ctx)
+
         service =
             BehandlingTilstandService(
                 behandlingRepository,

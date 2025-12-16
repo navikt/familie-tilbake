@@ -28,7 +28,6 @@ import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.RestClientResponseException
 import java.time.LocalDateTime
-import java.util.UUID
 
 @Configuration
 @Profile("mock-integrasjoner")
@@ -271,12 +270,11 @@ class IntegrasjonerClientConfig {
 
         every { integrasjonerClient.hentSaksbehandler(any()) } returns
             Saksbehandler(
-                UUID.randomUUID(),
-                "bb1234",
-                "Bob",
-                "Burger",
-                "0425",
-                null,
+                navIdent = "bb1234",
+                fornavn = "Bob",
+                etternavn = "Burger",
+                enhet = "0425",
+                enhetsnavn = "",
             )
 
         every { integrasjonerClient.finnOppgaver(any()) } answers

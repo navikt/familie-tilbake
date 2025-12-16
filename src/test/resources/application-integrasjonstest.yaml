@@ -73,6 +73,6 @@ tilbakekreving:
   eregServices:
     base-url: dummy
     scope: dummy
-  azureGraph:
+  entraProxy:
     base-url: dummy
     scope: dummy
