@@ -39,11 +39,13 @@ import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangService
 import no.nav.tilbakekreving.FagsystemUtil
+import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingPåVentDto
 import no.nav.tilbakekreving.api.v1.dto.ByttEnhetDto
 import no.nav.tilbakekreving.api.v1.dto.HenleggelsesbrevFritekstDto
 import no.nav.tilbakekreving.api.v1.dto.OpprettRevurderingDto
+import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandling
 import no.nav.tilbakekreving.kontrakter.OpprettManueltTilbakekrevingRequest
 import no.nav.tilbakekreving.kontrakter.OpprettTilbakekrevingRequest
@@ -57,6 +59,7 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.brev.Brevmottaker
+import no.nav.tilbakekreving.norg2.Norg2Service
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -87,6 +90,8 @@ class BehandlingService(
     private val validerBehandlingService: ValiderBehandlingService,
     private val oppgaveService: OppgaveService,
     private val logService: LogService,
+    private val featureService: FeatureService,
+    private val norg2Service: Norg2Service,
 ) {
     private val log = TracedLogger.getLogger<BehandlingService>()
 
@@ -495,7 +500,11 @@ class BehandlingService(
                 logContext = logContext,
             )
         }
-        val enhet = integrasjonerClient.hentNavkontor(byttEnhetDto.enhet)
+        val enhet = if (featureService.modellFeatures[Toggle.Norg2]) {
+            norg2Service.hentNavKontor(byttEnhetDto.enhet)
+        } else {
+            integrasjonerClient.hentNavkontor(byttEnhetDto.enhet)
+        }
         behandlingRepository.update(
             behandling.copy(
                 behandlendeEnhet = byttEnhetDto.enhet,

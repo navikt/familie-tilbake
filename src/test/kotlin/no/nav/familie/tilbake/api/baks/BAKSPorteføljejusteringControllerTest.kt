@@ -14,7 +14,11 @@ import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.ENDRET_ENHET
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.kontrakter.Ressurs
-import no.nav.familie.tilbake.kontrakter.navkontor.NavKontorEnhet
+import no.nav.tilbakekreving.applicationProps
+import no.nav.tilbakekreving.config.FeatureService
+import no.nav.tilbakekreving.norg2.Norg2Service
+import no.tilbakekreving.integrasjoner.norg2.Norg2Client
+import no.tilbakekreving.integrasjoner.norg2.kontrakter.NavKontorEnhet
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -26,6 +30,9 @@ class BAKSPorteføljejusteringControllerTest {
     private val integrasjonerClient = mockk<IntegrasjonerClient>()
     private val historikkService = mockk<HistorikkService>()
     private val behandlingTilstandService = mockk<BehandlingTilstandService>()
+    private val featureService: FeatureService = FeatureService(applicationProperties = applicationProps())
+    private val norg2Client: Norg2Client = mockk<Norg2Client>()
+    private val norg2Service = Norg2Service(norg2Client)
 
     private val baksPorteføljejusteringController =
         BAKSPorteføljejusteringController(
@@ -33,6 +40,8 @@ class BAKSPorteføljejusteringControllerTest {
             integrasjonerClient = integrasjonerClient,
             historikkService = historikkService,
             behandlingTilstandService = behandlingTilstandService,
+            featureService = featureService,
+            norg2Service = norg2Service,
         )
 
     private val nyEnhetId = "1234"
@@ -40,6 +49,13 @@ class BAKSPorteføljejusteringControllerTest {
     @BeforeEach
     fun setUp() {
         every { integrasjonerClient.hentNavkontor(nyEnhetId) } returns NavKontorEnhet(
+            enhetId = nyEnhetId.toInt(),
+            navn = "Nav Kontor",
+            enhetNr = "1",
+            status = "Eksisterer",
+        )
+
+        every { norg2Client.hentNavkontor(nyEnhetId) } returns NavKontorEnhet(
             enhetId = nyEnhetId.toInt(),
             navn = "Nav Kontor",
             enhetNr = "1",

@@ -15,12 +15,12 @@ import no.nav.familie.tilbake.kontrakter.journalpost.Journalpost
 import no.nav.familie.tilbake.kontrakter.journalpost.Journalposttype
 import no.nav.familie.tilbake.kontrakter.journalpost.Journalstatus
 import no.nav.familie.tilbake.kontrakter.journalpost.RelevantDato
-import no.nav.familie.tilbake.kontrakter.navkontor.NavKontorEnhet
 import no.nav.familie.tilbake.kontrakter.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.tilbake.kontrakter.oppgave.Oppgave
 import no.nav.familie.tilbake.kontrakter.oppgave.Oppgavetype
 import no.nav.familie.tilbake.kontrakter.organisasjon.Organisasjon
 import no.nav.familie.tilbake.kontrakter.saksbehandler.Saksbehandler
+import no.tilbakekreving.integrasjoner.norg2.kontrakter.NavKontorEnhet
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary

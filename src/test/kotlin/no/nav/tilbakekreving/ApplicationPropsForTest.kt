@@ -8,6 +8,7 @@ import no.nav.tilbakekreving.integrasjoner.dokarkiv.config.DokarkivConfig
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.config.DokdistConfig
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.tilbakekreving.integrasjoner.dokument.saf.SafClient
+import no.tilbakekreving.integrasjoner.norg2.Norg2Client
 import no.tilbakekreving.integrasjoner.persontilgang.PersontilgangService
 import no.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
 
@@ -46,6 +47,10 @@ fun applicationProps(): ApplicationProperties {
         saf = SafClient.Companion.Config(
             baseUrl = "http://saf",
             scope = "api://saf/.default",
+        ),
+        norg2 = Norg2Client.Companion.Config(
+            baseUrl = "http://norg2",
+            scope = "api://norg2/.default",
         ),
     )
 }

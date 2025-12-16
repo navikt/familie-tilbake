@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.kontrakter.navkontor
+package no.tilbakekreving.integrasjoner.norg2.kontrakter
 
 data class NavKontorEnhet(
     val enhetId: Int,

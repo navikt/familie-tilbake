@@ -13,7 +13,6 @@ import no.nav.familie.tilbake.kontrakter.dokdist.ManuellAdresse
 import no.nav.familie.tilbake.kontrakter.getDataOrThrow
 import no.nav.familie.tilbake.kontrakter.journalpost.Journalpost
 import no.nav.familie.tilbake.kontrakter.journalpost.JournalposterForBrukerRequest
-import no.nav.familie.tilbake.kontrakter.navkontor.NavKontorEnhet
 import no.nav.familie.tilbake.kontrakter.oppgave.FinnOppgaveRequest
 import no.nav.familie.tilbake.kontrakter.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.tilbake.kontrakter.oppgave.MappeDto
@@ -24,6 +23,7 @@ import no.nav.familie.tilbake.kontrakter.organisasjon.Organisasjon
 import no.nav.familie.tilbake.kontrakter.saksbehandler.Saksbehandler
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.tilbakekreving.integrasjoner.norg2.kontrakter.NavKontorEnhet
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpHeaders
