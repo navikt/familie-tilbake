@@ -59,7 +59,7 @@ tilbakekreving:
     base-url: https://saf-q2.dev-fss-pub.nais.io
     scope: api://dev-fss.teamdokumenthandtering.saf/.default
   norg2:
-    base-url: https://norg2.dev.adeo.no/norg2/
+    base-url: https://norg2.dev-fss-pub.nais.io
     scope: api://dev-fss.org.norg2/.default
 rolle:
   barnetrygd:

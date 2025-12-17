@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service
 class Norg2Service(
     private val norg2Client: Norg2Client,
 ) {
-    fun hentNavKontor(enhetsId: String): NavKontorEnhet {
+    fun hentNavKontor(
+        enhetsId: String,
+    ): NavKontorEnhet {
         return norg2Client.hentNavkontor(enhetsId)
     }
 }

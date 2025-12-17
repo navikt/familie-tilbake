@@ -32,7 +32,7 @@ class BAKSPorteføljejusteringControllerTest {
     private val behandlingTilstandService = mockk<BehandlingTilstandService>()
     private val featureService: FeatureService = FeatureService(applicationProperties = applicationProps())
     private val norg2Client: Norg2Client = mockk<Norg2Client>()
-    private val norg2Service = Norg2Service(norg2Client)
+    private val norg2Service = Norg2Service(norg2Client = norg2Client)
 
     private val baksPorteføljejusteringController =
         BAKSPorteføljejusteringController(

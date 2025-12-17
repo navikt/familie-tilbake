@@ -19,7 +19,6 @@ interface Norg2Client {
         ): Norg2Client {
             return Norg2ClientImpl(
                 config = config,
-                tokenExchangeService = tokenExchangeService,
                 httpClient = HttpClient(Apache) {
                     install(ContentNegotiation) {
                         jackson {
