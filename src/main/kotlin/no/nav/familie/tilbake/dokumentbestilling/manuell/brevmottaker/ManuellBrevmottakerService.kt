@@ -243,9 +243,9 @@ class ManuellBrevmottakerService(
                 )
             }
             if (featureService.modellFeatures[Toggle.EregServices]) {
-                arbeidsforholdService.hentOrganisasjon(it).navn + if (dto.navn.isNotBlank()) " v/ ${dto.navn}" else ""
+                "${arbeidsforholdService.hentOrganisasjon(it).navn}${if (dto.navn.isNotBlank()) " v/ ${dto.navn}" else ""}"
             } else {
-                integrasjonerClient.hentOrganisasjon(it).navn + if (dto.navn.isNotBlank()) " v/ ${dto.navn}" else ""
+                "${integrasjonerClient.hentOrganisasjon(it).navn}${if (dto.navn.isNotBlank()) " v/ ${dto.navn}" else ""}"
             }
         }
 }

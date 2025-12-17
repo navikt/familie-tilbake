@@ -21,8 +21,6 @@ import no.nav.familie.tilbake.kontrakter.oppgave.Oppgavetype
 import no.nav.familie.tilbake.kontrakter.organisasjon.Organisasjon
 import no.nav.familie.tilbake.kontrakter.saksbehandler.Saksbehandler
 import no.tilbakekreving.integrasjoner.norg2.kontrakter.NavKontorEnhet
-import no.nav.tilbakekreving.integrasjoner.arbeidsforhold.EregClient
-import no.nav.tilbakekreving.integrasjoner.arbeidsforhold.EregClientStub
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary

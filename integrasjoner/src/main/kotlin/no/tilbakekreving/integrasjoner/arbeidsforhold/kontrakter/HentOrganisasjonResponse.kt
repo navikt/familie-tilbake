@@ -16,7 +16,6 @@ data class OrganisasjonAdresse(
     val landkode: String?,
 )
 
-data class
-Navn(
+data class Navn(
     val sammensattnavn: String,
 )

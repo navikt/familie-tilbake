@@ -32,7 +32,7 @@ class EregClientImpl(
         val scope = config.scope
         val token = tokenExchangeService.clientCredentialsToken(scope)
 
-        val response = httpClient.get("$baseUrl/$orgnr/noekkelinfo") {
+        val response = httpClient.get("$baseUrl/v2/$orgnr/noekkelinfo") {
             contentType(ContentType.Application.Json)
             accept(ContentType.Application.Json)
             header(HttpHeaders.Authorization, "Bearer $token")
@@ -43,14 +43,14 @@ class EregClientImpl(
             HttpStatusCode.NotFound -> throw NotFoundException(
                 statusCode = HttpStatusCode.NotFound,
                 message = "Organisasjon med orgnr $orgnr finnes ikke",
-                response = response.body(),
+                response = response.bodyAsText(),
             )
             else -> {
                 val body = response.bodyAsText()
                 throw UnexpectedResponseException(
                     message = "Henting av organisasjoninfo for orgnr $orgnr feilet med status ${response.status} og melding: $body",
                     statusCode = response.status,
-                    response = response.body(),
+                    response = body,
                 )
             }
         }
