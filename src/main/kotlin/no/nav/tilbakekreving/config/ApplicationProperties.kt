@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.config
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.config.DokarkivConfig
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.config.DokdistConfig
 import no.tilbakekreving.integrasjoner.dokument.saf.SafClient
+import no.tilbakekreving.integrasjoner.norg2.Norg2Client
 import no.tilbakekreving.integrasjoner.persontilgang.PersontilgangService
 import no.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
 import org.springframework.boot.context.properties.ConfigurationProperties
@@ -20,4 +21,5 @@ data class ApplicationProperties(
     val dokarkiv: DokarkivConfig,
     val dokdist: DokdistConfig,
     val saf: SafClient.Companion.Config,
+    val norg2: Norg2Client.Companion.Config,
 )

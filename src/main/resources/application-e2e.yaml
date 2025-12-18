@@ -75,6 +75,9 @@ tilbakekreving:
   saf:
     base-url: https://saf.intern.dev.nav.no
     scope: api://dev-fss.teamdokumenthandtering.saf/.default
+  norg2:
+    base-url: https://norg2.dev.adeo.no/norg2/
+    scope: api://dev-fss.org.norg2/.default
 
 logging:
   config: "classpath:logback-e2e.xml"

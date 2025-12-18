@@ -9,6 +9,9 @@ import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagsty
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.tilbakekreving.Toggle
+import no.nav.tilbakekreving.config.FeatureService
+import no.nav.tilbakekreving.norg2.Norg2Service
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -26,6 +29,8 @@ class BAKSPorteføljejusteringController(
     private val integrasjonerClient: IntegrasjonerClient,
     private val historikkService: HistorikkService,
     private val behandlingTilstandService: BehandlingTilstandService,
+    private val featureService: FeatureService,
+    private val norg2Service: Norg2Service,
 ) {
     @Transactional
     @PutMapping("/oppdater-behandlende-enhet")
@@ -43,7 +48,11 @@ class BAKSPorteføljejusteringController(
             return Ressurs.success("Behandlende enhet er allerede satt til $nyEnhetId for behandling med eksternBrukId=$behandlingEksternBrukId")
         }
 
-        val nyEnhet = integrasjonerClient.hentNavkontor(nyEnhetId)
+        val nyEnhet = if (featureService.modellFeatures[Toggle.Norg2]) {
+            norg2Service.hentNavKontor(nyEnhetId)
+        } else {
+            integrasjonerClient.hentNavkontor(nyEnhetId)
+        }
         behandlingRepository.update(
             behandling.copy(
                 ansvarligSaksbehandler = Vedtaksløsning.ident,
