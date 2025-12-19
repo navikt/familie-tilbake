@@ -8,7 +8,6 @@ import no.tilbakekreving.integrasjoner.persontilgang.PersontilgangService
 import no.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Profile
 
 @Configuration
 class IntegrasjonerSetup(
@@ -35,7 +34,6 @@ class IntegrasjonerSetup(
     }
 
     @Bean
-    @Profile("dev", "prod")
     fun eregClient(tokenExchangeService: TokenExchangeService): EregClient {
         return EregClient.opprett(applicationProperties.eregServices, tokenExchangeService)
     }

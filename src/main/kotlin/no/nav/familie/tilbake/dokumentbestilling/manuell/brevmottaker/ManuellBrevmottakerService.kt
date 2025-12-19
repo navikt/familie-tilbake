@@ -242,10 +242,11 @@ class ManuellBrevmottakerService(
                     logContext = logContext,
                 )
             }
-            if (featureService.modellFeatures[Toggle.EregServices]) {
-                "${arbeidsforholdService.hentOrganisasjon(it).navn}${if (dto.navn.isNotBlank()) " v/ ${dto.navn}" else ""}"
+            val organisasjonsnavn = if (featureService.modellFeatures[Toggle.EregServices]) {
+                arbeidsforholdService.hentOrganisasjon(it).navn
             } else {
-                "${integrasjonerClient.hentOrganisasjon(it).navn}${if (dto.navn.isNotBlank()) " v/ ${dto.navn}" else ""}"
+                integrasjonerClient.hentOrganisasjon(it).navn
             }
+            "$organisasjonsnavn${if (dto.navn.isNotBlank()) " v/ ${dto.navn}" else ""}"
         }
 }
