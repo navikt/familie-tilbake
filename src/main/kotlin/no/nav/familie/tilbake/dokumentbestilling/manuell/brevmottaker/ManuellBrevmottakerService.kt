@@ -16,7 +16,10 @@ import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.integration.pdl.PdlClient
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.api.v1.dto.ManuellBrevmottakerRequestDto
+import no.nav.tilbakekreving.arbeidsforhold.ArbeidsforholdService
+import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import org.springframework.http.HttpStatus
@@ -37,6 +40,8 @@ class ManuellBrevmottakerService(
     private val integrasjonerClient: IntegrasjonerClient,
     private val validerBrevmottakerService: ValiderBrevmottakerService,
     private val logService: LogService,
+    private val featureService: FeatureService,
+    private val arbeidsforholdService: ArbeidsforholdService,
 ) {
     @Transactional
     fun leggTilBrevmottaker(
@@ -225,13 +230,23 @@ class ManuellBrevmottakerService(
                     logContext = logContext,
                 ).navn
         } ?: dto.organisasjonsnummer?.let {
-            if (!integrasjonerClient.validerOrganisasjon(it)) {
+            val erGyldig = if (featureService.modellFeatures[Toggle.EregServices]) {
+                arbeidsforholdService.validerOrganisasjon(it)
+            } else {
+                integrasjonerClient.validerOrganisasjon(it)
+            }
+            if (!erGyldig) {
                 throw Feil(
                     message = "Organisasjon $it er ikke gyldig",
                     frontendFeilmelding = "Organisasjon $it er ikke gyldig",
                     logContext = logContext,
                 )
             }
-            integrasjonerClient.hentOrganisasjon(it).navn + if (dto.navn.isNotBlank()) " v/ ${dto.navn}" else ""
+            val organisasjonsnavn = if (featureService.modellFeatures[Toggle.EregServices]) {
+                arbeidsforholdService.hentOrganisasjon(it).navn
+            } else {
+                integrasjonerClient.hentOrganisasjon(it).navn
+            }
+            "$organisasjonsnavn${if (dto.navn.isNotBlank()) " v/ ${dto.navn}" else ""}"
         }
 }

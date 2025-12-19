@@ -7,6 +7,7 @@ import no.nav.tilbakekreving.config.Tilgangsstyring
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.config.DokarkivConfig
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.config.DokdistConfig
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.tilbakekreving.integrasjoner.arbeidsforhold.EregClient
 import no.tilbakekreving.integrasjoner.dokument.saf.SafClient
 import no.tilbakekreving.integrasjoner.norg2.Norg2Client
 import no.tilbakekreving.integrasjoner.persontilgang.PersontilgangService
@@ -51,6 +52,10 @@ fun applicationProps(): ApplicationProperties {
         norg2 = Norg2Client.Companion.Config(
             baseUrl = "http://norg2",
             scope = "api://norg2/.default",
+        ),
+        eregServices = EregClient.Companion.Config(
+            baseUrl = "http://eregServices",
+            scope = "api://ereg-services/.default",
         ),
     )
 }

@@ -70,3 +70,6 @@ tilbakekreving:
   norg2:
     base-url: dummy
     scope: dummy
+  eregServices:
+    base-url: dummy
+    scope: dummy
