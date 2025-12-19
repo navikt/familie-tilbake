@@ -79,8 +79,12 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             it.body shouldContain "Du finner mer informasjon på nav.no/tilleggsstonad."
         }
         tekster.data.avsnitter.forOne {
-            it.title shouldBe "Du har rett til innsyn"
-            it.body shouldContain "På nav.no/dittnav kan du se dokumentene i saken din"
+            it.title shouldBe "Du har rett til innsyn i saken din"
+            it.body shouldContain "Du har rett til å se dokumentene i saken din. Dette følger av forvaltningsloven § 18"
+        }
+        tekster.data.avsnitter.forOne {
+            it.title shouldBe "Du har rettigheter knyttet til personopplysningene dine"
+            it.body shouldContain "Du finner informasjon om hvordan Nav behandler personopplysningene dine,"
         }
     }
 
