@@ -73,3 +73,6 @@ tilbakekreving:
   eregServices:
     base-url: dummy
     scope: dummy
+  entraProxy:
+    base-url: dummy
+    scope: dummy

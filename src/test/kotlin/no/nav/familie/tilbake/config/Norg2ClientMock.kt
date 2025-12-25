@@ -11,7 +11,7 @@ class Norg2ClientMock : Norg2Client {
     override fun hentNavkontor(enhetId: String): NavKontorEnhet {
         return NavKontorEnhet(
             enhetId = 4806,
-            navn = "Mock Nav Drammen",
+            navn = "jnkmmk",
             enhetNr = "mock",
             status = "mock",
         )
