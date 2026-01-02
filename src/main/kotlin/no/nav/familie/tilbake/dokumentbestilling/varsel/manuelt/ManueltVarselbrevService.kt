@@ -13,6 +13,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevServi
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevUtil
+import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevUtil.Companion.TITTEL_VARSEL_TILBAKEBETALING
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
@@ -212,6 +213,6 @@ class ManueltVarselbrevService(
         if (erKorrigert) {
             VarselbrevUtil.TITTEL_KORRIGERT_VARSEL_TILBAKEBETALING + ytelsesnavn
         } else {
-            VarselbrevUtil.TITTEL_VARSEL_TILBAKEBETALING + ytelsesnavn
+            "$TITTEL_VARSEL_TILBAKEBETALING $ytelsesnavn"
         }
 }
