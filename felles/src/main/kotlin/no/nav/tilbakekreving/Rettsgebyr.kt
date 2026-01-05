@@ -10,6 +10,7 @@ object Rettsgebyr {
             Datobeløp(LocalDate.of(2023, 1, 1), 1243),
             Datobeløp(LocalDate.of(2024, 1, 1), 1277),
             Datobeløp(LocalDate.of(2025, 1, 1), 1314),
+            Datobeløp(LocalDate.of(2026, 1, 1), 1345),
         )
 
     fun rettsgebyrForÅr(år: Int) = rettsgebyrForDato.filter { it.gyldigFra.year <= år }.maxByOrNull { it.gyldigFra }?.beløp
