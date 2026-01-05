@@ -81,12 +81,13 @@ class DokumentController(
     }
 
     @Operation(summary = "Forhåndsvis brev")
-    @PostMapping("/forhandsvis")
+    @PostMapping("/forhandsvis/behandling/{behandlingId}")
     fun forhåndsvisBrev(
+        @PathVariable("behandlingId") behandlingId: UUID,
         @RequestBody @Valid
         bestillBrevDto: BestillBrevDto,
     ): Ressurs<ByteArray> {
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(bestillBrevDto.behandlingId)
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
         if (tilbakekreving != null) {
             tilgangskontrollService.validerTilgangTilbakekreving(
                 tilbakekreving = tilbakekreving,
@@ -134,7 +135,7 @@ class DokumentController(
 
     @Operation(summary = "Hent forhåndsvarselinformasjon")
     @GetMapping(
-        path = ["/forhåndsvarsel/{behandlingId}/v1"],
+        path = ["/forhåndsvarsel/behandling/{behandlingId}/v1"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun hentForhåndsvarselinfo(
@@ -178,7 +179,7 @@ class DokumentController(
 
     @Operation(summary = "Skal utsette uttalelse frist")
     @PostMapping(
-        "/forhåndsvarsel/utsettelse",
+        "/forhåndsvarsel/behandling/{behandlingId}/utsettelse",
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun utsettUttalelseFrist(
@@ -205,7 +206,7 @@ class DokumentController(
 
     @Operation(summary = "Skal ikke sendes forhåndsvarsel")
     @PostMapping(
-        "/forhåndsvarsel/unntak",
+        "/forhåndsvarsel/behandling/{behandlingId}/unntak",
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun forhåndsvarselUnntak(
@@ -315,7 +316,7 @@ class DokumentController(
 
     @Operation(summary = "Lagrer brukerens uttalelse")
     @PostMapping(
-        "/forhåndsvarsel/{behandlingId}/uttalelse",
+        "/forhåndsvarsel/behandling/{behandlingId}/uttalelse",
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun lagreBrukeruttalelse(
