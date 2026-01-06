@@ -29,9 +29,6 @@ import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEventPublishe
 import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
-import no.nav.security.token.support.core.context.TokenValidationContext
-import no.nav.security.token.support.core.context.TokenValidationContextHolder
-import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.tilbakekreving.kontrakter.Faktainfo
 import no.nav.tilbakekreving.kontrakter.OpprettTilbakekrevingRequest
 import no.nav.tilbakekreving.kontrakter.Tilbakekrevingsvalg
@@ -44,10 +41,7 @@ import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.math.BigInteger
 import java.time.LocalDate
 import java.util.UUID
@@ -115,17 +109,8 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
     private val eksternFagsakId = "testverdi"
 
-    @MockitoBean
-    lateinit var tokenValidationContextHolder: TokenValidationContextHolder
-
     @BeforeEach
     fun init() {
-        val ctx = mock(TokenValidationContext::class.java)
-        val token = mock(JwtToken::class.java)
-        `when`(token.encodedToken).thenReturn("dummy.jwt.token")
-        `when`(ctx.firstValidToken).thenReturn(token)
-        `when`(tokenValidationContextHolder.getTokenValidationContext()).thenReturn(ctx)
-
         hentFagsystemsbehandlingService = HentFagsystemsbehandlingService(requestSendtRepository, kafkaProducer)
         kravgrunnlagService =
             KravgrunnlagService(

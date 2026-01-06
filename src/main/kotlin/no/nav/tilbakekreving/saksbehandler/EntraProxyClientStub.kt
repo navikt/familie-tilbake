@@ -12,8 +12,7 @@ class EntraProxyClientStub : EntraProxyClient {
             fornavn = "Bob",
             etternavn = "Burger",
             epost = "",
-            enhet = Enhet(enhetnummer = "0425", navn = "jnkmmk"),
-            tIdent = "",
+            enhet = Enhet(enhetnummer = "0425"),
         )
     }
 }

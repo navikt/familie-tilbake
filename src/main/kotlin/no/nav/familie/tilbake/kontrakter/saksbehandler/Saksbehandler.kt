@@ -5,5 +5,4 @@ class Saksbehandler(
     val fornavn: String,
     val etternavn: String,
     val enhet: String,
-    val enhetsnavn: String?,
 )

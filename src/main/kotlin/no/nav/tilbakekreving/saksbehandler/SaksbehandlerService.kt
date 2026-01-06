@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.saksbehandler
 
+import no.nav.familie.tilbake.config.Constants.BRUKER_ID_VEDTAKSLØSNINGEN
 import no.nav.familie.tilbake.kontrakter.saksbehandler.Saksbehandler
 import no.tilbakekreving.integrasjoner.entraProxy.EntraProxyClient
 import org.springframework.stereotype.Service
@@ -11,13 +12,12 @@ class SaksbehandlerService(
     fun hentSaksbehandler(
         id: String,
     ): Saksbehandler {
-        if (id == ID_VEDTAKSLØSNINGEN) {
+        if (id == BRUKER_ID_VEDTAKSLØSNINGEN) {
             return Saksbehandler(
-                navIdent = ID_VEDTAKSLØSNINGEN,
+                navIdent = BRUKER_ID_VEDTAKSLØSNINGEN,
                 fornavn = "Vedtaksløsning",
                 etternavn = "Nav",
                 enhet = "9999",
-                enhetsnavn = null,
             )
         }
         val entraBruker = entraProxyClient.hentSaksbehandler(id)
@@ -27,11 +27,6 @@ class SaksbehandlerService(
             fornavn = entraBruker.fornavn,
             etternavn = entraBruker.etternavn,
             enhet = entraBruker.enhet.enhetnummer,
-            enhetsnavn = entraBruker.enhet.navn,
         )
-    }
-
-    companion object {
-        const val ID_VEDTAKSLØSNINGEN = "VL"
     }
 }

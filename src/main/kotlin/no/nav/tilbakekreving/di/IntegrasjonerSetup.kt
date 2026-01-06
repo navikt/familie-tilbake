@@ -40,7 +40,7 @@ class IntegrasjonerSetup(
     }
 
     @Bean
-    fun azyreGraphClient(tokenExchangeService: TokenExchangeService): EntraProxyClient {
+    fun entraProxyClient(tokenExchangeService: TokenExchangeService): EntraProxyClient {
         return EntraProxyClient.opprett(applicationProperties.entraProxy, tokenExchangeService)
     }
 }

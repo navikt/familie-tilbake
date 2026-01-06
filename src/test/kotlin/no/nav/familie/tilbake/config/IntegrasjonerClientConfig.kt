@@ -274,7 +274,6 @@ class IntegrasjonerClientConfig {
                 fornavn = "Bob",
                 etternavn = "Burger",
                 enhet = "0425",
-                enhetsnavn = "",
             )
 
         every { integrasjonerClient.finnOppgaver(any()) } answers

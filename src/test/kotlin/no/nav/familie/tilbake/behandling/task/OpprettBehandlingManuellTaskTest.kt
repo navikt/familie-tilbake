@@ -30,9 +30,6 @@ import no.nav.familie.tilbake.integration.kafka.KafkaProperties
 import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
-import no.nav.security.token.support.core.context.TokenValidationContext
-import no.nav.security.token.support.core.context.TokenValidationContextHolder
-import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.tilbakekreving.FagsystemUtil
 import no.nav.tilbakekreving.kontrakter.Faktainfo
 import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandling
@@ -47,12 +44,9 @@ import org.apache.kafka.clients.producer.RecordMetadata
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.support.SendResult
-import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.time.LocalDate
 import java.util.Properties
 import java.util.UUID
@@ -91,17 +85,8 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
     private val eksternId = "testverdi"
     private val ansvarligSaksbehandler = "Z0000"
 
-    @MockitoBean
-    lateinit var tokenValidationContextHolder: TokenValidationContextHolder
-
     @BeforeEach
     fun init() {
-        val ctx = mock(TokenValidationContext::class.java)
-        val token = mock(JwtToken::class.java)
-        `when`(token.encodedToken).thenReturn("dummy.jwt.token")
-        `when`(ctx.firstValidToken).thenReturn(token)
-        `when`(tokenValidationContextHolder.getTokenValidationContext()).thenReturn(ctx)
-
         spyKafkaProducer = spyk(DefaultKafkaProducer(mockKafkaTemplate, KafkaProperties(KafkaProperties.HentFagsystem("request", "response"))))
         hentFagsystemsbehandlingService = HentFagsystemsbehandlingService(requestSendtRepository, spyKafkaProducer)
         behandlingManuellOpprettelseService = BehandlingManuellOpprettelseService(behandlingService)

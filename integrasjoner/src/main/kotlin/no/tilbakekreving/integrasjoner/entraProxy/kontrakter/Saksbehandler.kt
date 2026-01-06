@@ -1,5 +1,8 @@
 package no.tilbakekreving.integrasjoner.entraProxy.kontrakter
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class Saksbehandler(
     val navIdent: String,
     val visningNavn: String,
@@ -7,10 +10,9 @@ data class Saksbehandler(
     val etternavn: String,
     val epost: String,
     val enhet: Enhet,
-    val tIdent: String,
 )
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class Enhet(
     val enhetnummer: String,
-    val navn: String,
 )
