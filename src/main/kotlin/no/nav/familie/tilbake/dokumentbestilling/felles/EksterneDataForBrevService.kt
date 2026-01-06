@@ -14,6 +14,7 @@ import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.kontrakter.verge.Vergetype
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
+import no.nav.tilbakekreving.saksbehandler.SaksbehandlerService
 import org.springframework.stereotype.Service
 import no.nav.tilbakekreving.kontrakter.verge.Verge as VergeDto
 
@@ -21,8 +22,9 @@ import no.nav.tilbakekreving.kontrakter.verge.Verge as VergeDto
 class EksterneDataForBrevService(
     private val personService: PersonService,
     private val integrasjonerClient: IntegrasjonerClient,
-    private val featureService: FeatureService,
     private val arbeidsforholdService: ArbeidsforholdService,
+    private val featureService: FeatureService,
+    private val saksbehandlerService: SaksbehandlerService,
 ) {
     fun hentPerson(
         ident: String,
@@ -31,7 +33,11 @@ class EksterneDataForBrevService(
     ): Personinfo = personService.hentPersoninfo(ident, fagsystem, logContext)
 
     fun hentSaksbehandlernavn(id: String): String {
-        val saksbehandler = integrasjonerClient.hentSaksbehandler(id)
+        val saksbehandler = if (featureService.modellFeatures[Toggle.EntraProxy]) {
+            saksbehandlerService.hentSaksbehandler(id)
+        } else {
+            integrasjonerClient.hentSaksbehandler(id)
+        }
         return saksbehandler.fornavn + " " + saksbehandler.etternavn
     }
 
@@ -40,7 +46,11 @@ class EksterneDataForBrevService(
         logContext: SecureLog.Context,
     ): String {
         val saksbehandlerId = ContextService.hentPåloggetSaksbehandler(defaultId, logContext)
-        val saksbehandler = integrasjonerClient.hentSaksbehandler(saksbehandlerId)
+        val saksbehandler = if (featureService.modellFeatures[Toggle.EntraProxy]) {
+            saksbehandlerService.hentSaksbehandler(saksbehandlerId)
+        } else {
+            integrasjonerClient.hentSaksbehandler(saksbehandlerId)
+        }
         return saksbehandler.fornavn + " " + saksbehandler.etternavn
     }
 

@@ -88,3 +88,6 @@ tilbakekreving:
   eregServices:
     base-url: https://ereg-services.intern.nav.no
     scope: api://prod-fss.arbeidsforhold.ereg-services/.default
+  entraProxy:
+    base-url: http://entra-proxy.sikkerhetstjenesten.svc.cluster.local
+    scope: api://prod-gcp.sikkerhetstjenesten.entra-proxy/.default

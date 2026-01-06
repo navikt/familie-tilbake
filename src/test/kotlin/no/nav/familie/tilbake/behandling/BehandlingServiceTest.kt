@@ -1422,7 +1422,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandling.behandlendeEnhet shouldBe "4806"
-        behandling.behandlendeEnhetsNavn shouldBe "Mock Nav Drammen"
+        behandling.behandlendeEnhetsNavn shouldBe "jnkmmk"
 
         verify(exactly = 1) {
             oppgaveService.patchOppgave(
@@ -1431,6 +1431,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 },
             )
         }
+
         verify(exactly = 1) {
             oppgaveService.tilordneOppgaveNyEnhet(1L, "4806", true, false)
         }

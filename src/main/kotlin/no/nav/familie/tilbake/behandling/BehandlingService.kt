@@ -60,6 +60,7 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatu
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.brev.Brevmottaker
 import no.nav.tilbakekreving.norg2.Norg2Service
+import no.nav.tilbakekreving.saksbehandler.SaksbehandlerService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -90,8 +91,9 @@ class BehandlingService(
     private val validerBehandlingService: ValiderBehandlingService,
     private val oppgaveService: OppgaveService,
     private val logService: LogService,
-    private val featureService: FeatureService,
     private val norg2Service: Norg2Service,
+    private val featureService: FeatureService,
+    private val saksbehandlerService: SaksbehandlerService,
 ) {
     private val log = TracedLogger.getLogger<BehandlingService>()
 
@@ -650,8 +652,12 @@ class BehandlingService(
         fagsak: Fagsak,
         erAutomatiskOgFeatureTogglePå: Boolean,
     ): Behandling {
-        val ansvarligsaksbehandler =
+        val ansvarligsaksbehandler = if (featureService.modellFeatures[Toggle.EntraProxy]) {
+            saksbehandlerService.hentSaksbehandler(opprettTilbakekrevingRequest.saksbehandlerIdent)
+        } else {
             integrasjonerClient.hentSaksbehandler(opprettTilbakekrevingRequest.saksbehandlerIdent)
+        }
+
         val behandling =
             BehandlingMapper.tilDomeneBehandling(
                 opprettTilbakekrevingRequest,
