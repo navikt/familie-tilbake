@@ -150,11 +150,12 @@ class TilBehandlingTest : TilbakekrevingE2EBase() {
 
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
 
-        utførSteg(
-            ident = behandlerIdent,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(),
-        )
+        somSaksbehandler(behandlerIdent) {
+            behandlingApiController.oppdaterFakta(
+                behandlingId = behandlingId.toString(),
+                oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
+            )
+        }
 
         utførSteg(
             ident = behandlerIdent,

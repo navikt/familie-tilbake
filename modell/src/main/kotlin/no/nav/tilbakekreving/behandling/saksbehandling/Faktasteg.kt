@@ -87,6 +87,7 @@ class Faktasteg(
             ),
             vurdering = vurdering.tilFrontendDto(),
             tidligereVarsletBeløp = varselbrev?.hentVarsletBeløp()?.toInt()?.takeIf { it != beløpTilbakekreves },
+            ferdigvurdert = erFullstendig(),
         )
     }
 
@@ -177,7 +178,7 @@ class Faktasteg(
         private var oppdaget: Oppdaget,
     ) {
         fun erFullstendig(): Boolean {
-            return uttalelse.erFullstendig()
+            return oppdaget.erFullstendig()
         }
 
         fun tilFrontendDto(): VurderingDto {
@@ -236,6 +237,8 @@ class Faktasteg(
 
             fun tilEntity(faktavurderingRef: UUID): FaktastegEntity.OppdagetEntity?
 
+            fun erFullstendig(): Boolean
+
             class Vurdering(
                 val id: UUID,
                 val dato: LocalDate,
@@ -252,6 +255,8 @@ class Faktasteg(
                         beskrivelse = beskrivelse,
                     )
                 }
+
+                override fun erFullstendig(): Boolean = beskrivelse.isNotBlank()
 
                 override fun tilEntity(faktavurderingRef: UUID): FaktastegEntity.OppdagetEntity {
                     return FaktastegEntity.OppdagetEntity(
@@ -275,6 +280,8 @@ class Faktasteg(
                         beskrivelse = null,
                     )
                 }
+
+                override fun erFullstendig(): Boolean = false
 
                 override fun tilEntity(faktavurderingRef: UUID): FaktastegEntity.OppdagetEntity? {
                     return null

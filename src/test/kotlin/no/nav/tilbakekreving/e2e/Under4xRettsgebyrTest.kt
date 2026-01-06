@@ -31,11 +31,12 @@ class Under4xRettsgebyrTest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
         val ansvarligSaksbehandler = Behandler.Saksbehandler("Z999999")
 
-        utførSteg(
-            ident = ansvarligSaksbehandler.ident,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(),
-        )
+        somSaksbehandler(ansvarligSaksbehandler.ident) {
+            behandlingApiController.oppdaterFakta(
+                behandlingId = behandlingId.toString(),
+                oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
+            )
+        }
 
         utførSteg(
             ident = ansvarligSaksbehandler.ident,
@@ -68,11 +69,12 @@ class Under4xRettsgebyrTest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
         val ansvarligSaksbehandler = Behandler.Saksbehandler("Z999999")
 
-        utførSteg(
-            ident = ansvarligSaksbehandler.ident,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(),
-        )
+        somSaksbehandler(ansvarligSaksbehandler.ident) {
+            behandlingApiController.oppdaterFakta(
+                behandlingId = behandlingId.toString(),
+                oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
+            )
+        }
 
         utførSteg(
             ident = ansvarligSaksbehandler.ident,

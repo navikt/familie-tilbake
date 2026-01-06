@@ -282,6 +282,25 @@ class Behandling internal constructor(
 
     internal fun håndter(
         behandler: Behandler,
+        oppdaget: OppdagetDto?,
+        årsak: String?,
+        perioder: List<OppdaterFaktaPeriodeDto>?,
+    ) {
+        validerBehandlingstatus(håndtertSteg = "fakta", faktasteg)
+        if (oppdaget != null) {
+            faktasteg.vurder(oppdaget)
+        }
+        if (årsak != null) {
+            faktasteg.vurder(årsak)
+        }
+        if (perioder != null) {
+            faktasteg.vurder(perioder)
+        }
+        oppdaterBehandler(behandler)
+    }
+
+    internal fun håndter(
+        behandler: Behandler,
         periode: Datoperiode,
         vurdering: ForårsaketAvBruker,
         observatør: BehandlingObservatør,
@@ -538,18 +557,6 @@ class Behandling internal constructor(
         ansvarligSaksbehandlerIdent = ansvarligSaksbehandler.ident,
         kravgrunnlag = kravgrunnlag,
     )
-
-    fun vurder(oppdaget: OppdagetDto) {
-        faktasteg.vurder(oppdaget)
-    }
-
-    fun vurder(årsak: String) {
-        faktasteg.vurder(årsak)
-    }
-
-    fun vurderFaktaPerioder(perioder: List<OppdaterFaktaPeriodeDto>) {
-        faktasteg.vurder(perioder)
-    }
 
     companion object {
         internal fun nyBehandling(

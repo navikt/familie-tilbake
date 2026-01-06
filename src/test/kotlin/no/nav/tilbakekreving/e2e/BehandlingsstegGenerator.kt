@@ -1,20 +1,21 @@
 package no.nav.tilbakekreving.e2e
 
+import no.nav.kontrakter.frontend.models.OppdagetDto
+import no.nav.kontrakter.frontend.models.OppdaterFaktaOmFeilutbetalingDto
+import no.nav.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
+import no.nav.kontrakter.frontend.models.RettsligGrunnlagDto
+import no.nav.kontrakter.frontend.models.VurderingDto
 import no.nav.tilbakekreving.api.v1.dto.AktsomhetDto
-import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFaktaDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeslåVedtaksstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
-import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.ForeldelsesperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.FritekstavsnittDto
 import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
-import no.nav.tilbakekreving.api.v1.dto.VurderingAvBrukersUttalelseDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertTotrinnDto
 import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
-import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
@@ -23,21 +24,30 @@ import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import java.math.BigDecimal
+import java.time.LocalDate
+import java.util.UUID
 
 object BehandlingsstegGenerator {
-    fun lagFaktastegVurderingFritekst(vararg perioder: Datoperiode = arrayOf(1.januar(2021) til 1.januar(2021))): BehandlingsstegFaktaDto {
-        return BehandlingsstegFaktaDto(
-            feilutbetaltePerioder = perioder.map { periode ->
-                FaktaFeilutbetalingsperiodeDto(
-                    periode = periode,
-                    hendelsestype = Hendelsestype.ANNET,
-                    hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
+    fun lagFaktastegVurderingFritekst(perioder: List<UUID>): OppdaterFaktaOmFeilutbetalingDto {
+        return OppdaterFaktaOmFeilutbetalingDto(
+            perioder = perioder.map { periodeId ->
+                OppdaterFaktaPeriodeDto(
+                    id = periodeId.toString(),
+                    rettsligGrunnlag = listOf(
+                        RettsligGrunnlagDto(
+                            bestemmelse = Hendelsestype.ANNET.name,
+                            grunnlag = Hendelsesundertype.ANNET_FRITEKST.name,
+                        ),
+                    ),
                 )
             },
-            begrunnelse = "Begrunnelse",
-            vurderingAvBrukersUttalelse = VurderingAvBrukersUttalelseDto(
-                harBrukerUttaltSeg = HarBrukerUttaltSeg.JA,
-                beskrivelse = "Ja, hvorfor ikke?",
+            vurdering = VurderingDto(
+                årsak = "Begrunnelse",
+                oppdaget = OppdagetDto(
+                    dato = LocalDate.now(),
+                    av = OppdagetDto.Av.NAV,
+                    beskrivelse = "Beskrivelse",
+                ),
             ),
         )
     }

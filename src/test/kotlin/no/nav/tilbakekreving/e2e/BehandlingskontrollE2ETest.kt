@@ -76,11 +76,12 @@ class BehandlingskontrollE2ETest : TilbakekrevingE2EBase() {
             .shouldNotBeNull()
             .behandlingsstegstatus shouldBe Behandlingsstegstatus.KLAR
 
-        utførSteg(
-            ident = ansvarligSaksbehandler.ident,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(),
-        )
+        somSaksbehandler(ansvarligSaksbehandler.ident) {
+            behandlingApiController.oppdaterFakta(
+                behandlingId = behandlingId.toString(),
+                oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
+            )
+        }
 
         val dtoEtterUtførtFakta = tilbakekreving(behandlingId).frontendDtoForBehandling(ansvarligSaksbehandler, true)
         dtoEtterUtførtFakta.behandlingsstegsinfo.find { it.behandlingssteg == Behandlingssteg.FAKTA }

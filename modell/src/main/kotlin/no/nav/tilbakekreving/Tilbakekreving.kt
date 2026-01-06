@@ -3,6 +3,8 @@ package no.nav.tilbakekreving
 import io.ktor.http.URLBuilder
 import io.ktor.http.path
 import no.nav.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
+import no.nav.kontrakter.frontend.models.OppdagetDto
+import no.nav.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
 import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.aktør.Bruker
 import no.nav.tilbakekreving.aktør.Bruker.Companion.tilNullableFrontendDto
@@ -284,6 +286,18 @@ class Tilbakekreving internal constructor(
     ) {
         val behandling = behandlingHistorikk.nåværende().entry
         behandling.håndter(behandler, vurdering, this)
+        behandling.utførSideeffekt(tilstand, this)
+    }
+
+    fun vurderFakta(
+        behandlingId: UUID,
+        behandler: Behandler,
+        oppdaget: OppdagetDto?,
+        årsak: String?,
+        perioder: List<OppdaterFaktaPeriodeDto>?,
+    ) {
+        val behandling = behandlingHistorikk.finn(behandlingId, sporingsinformasjon()).entry
+        behandling.håndter(behandler, oppdaget, årsak, perioder)
         behandling.utførSideeffekt(tilstand, this)
     }
 

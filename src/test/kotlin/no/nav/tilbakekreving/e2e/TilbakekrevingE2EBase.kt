@@ -18,8 +18,10 @@ import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.InnloggetBrukertilgang
 import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
+import no.nav.kontrakter.frontend.models.FaktaPeriodeDto
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.TilbakekrevingService
+import no.nav.tilbakekreving.api.BehandlingApiController
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
@@ -67,6 +69,9 @@ open class TilbakekrevingE2EBase : E2EBase() {
 
     @Autowired
     protected lateinit var jdbcTemplate: JdbcTemplate
+
+    @Autowired
+    protected lateinit var behandlingApiController: BehandlingApiController
 
     @AfterEach
     fun reset() {
@@ -131,6 +136,13 @@ open class TilbakekrevingE2EBase : E2EBase() {
         return tilbakekreving(behandlingId).behandlingHistorikk.nåværende().entry
     }
 
+    fun allePeriodeIder(behandlingId: UUID): List<UUID> = tilbakekreving(behandlingId)
+        .shouldNotBeNull()
+        .tilFeilutbetalingFrontendDto()
+        .perioder
+        .map(FaktaPeriodeDto::id)
+        .map(UUID::fromString)
+
     fun somSaksbehandler(
         ident: String,
         callback: () -> Unit,
@@ -160,11 +172,12 @@ open class TilbakekrevingE2EBase : E2EBase() {
         behandlerIdent: String = "Z111111",
         beslutterIdent: String = "Z999999",
     ) {
-        utførSteg(
-            ident = behandlerIdent,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(),
-        )
+        somSaksbehandler(behandlerIdent) {
+            behandlingApiController.oppdaterFakta(
+                behandlingId.toString(),
+                BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
+            )
+        }
 
         utførSteg(
             ident = behandlerIdent,

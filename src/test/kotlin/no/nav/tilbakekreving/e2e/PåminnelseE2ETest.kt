@@ -103,11 +103,12 @@ class PåminnelseE2ETest : TilbakekrevingE2EBase() {
 
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
 
-        utførSteg(
-            ident = "Z999999",
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(1.januar(2021) til 1.januar(2021)),
-        )
+        somSaksbehandler("Z999999") {
+            behandlingApiController.oppdaterFakta(
+                behandlingId = behandlingId.toString(),
+                oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
+            )
+        }
 
         utførSteg(
             ident = "Z999999",

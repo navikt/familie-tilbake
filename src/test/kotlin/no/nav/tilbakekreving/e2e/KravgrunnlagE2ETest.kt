@@ -244,7 +244,13 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
 
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
 
-        utførSteg("Z999999", behandlingId, BehandlingsstegGenerator.lagFaktastegVurderingFritekst(1.januar(2021) til 31.januar(2021)))
+        somSaksbehandler("Z999999") {
+            behandlingApiController.oppdaterFakta(
+                behandlingId = behandlingId.toString(),
+                oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
+            )
+        }
+
         utførSteg("Z999999", behandlingId, BehandlingsstegGenerator.lagIkkeForeldetVurdering(1.januar(2021) til 31.januar(2021)))
         utførSteg("Z999999", behandlingId, BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving(1.januar(2021) til 31.januar(2021)))
         utførSteg("Z999999", behandlingId, BehandlingsstegGenerator.lagForeslåVedtakVurdering())

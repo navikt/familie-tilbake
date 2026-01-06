@@ -1,5 +1,7 @@
 package no.nav.tilbakekreving.api
 
+import no.nav.familie.tilbake.common.ContextService
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
@@ -44,15 +46,14 @@ class BehandlingApiController(
             handling = "Henter fakta om feilutbetalingen",
         )
         return tilbakekrevingService.hentTilbakekreving(UUID.fromString(behandlingId)) {
-            if (oppdaterFaktaOmFeilutbetalingDto.vurdering?.oppdaget != null) {
-                it.behandlingHistorikk.nåværende().entry.vurder(oppdaterFaktaOmFeilutbetalingDto.vurdering!!.oppdaget!!)
-            }
-            if (oppdaterFaktaOmFeilutbetalingDto.vurdering?.årsak != null) {
-                it.behandlingHistorikk.nåværende().entry.vurder(oppdaterFaktaOmFeilutbetalingDto.vurdering!!.årsak!!)
-            }
-            if (oppdaterFaktaOmFeilutbetalingDto.perioder != null) {
-                it.behandlingHistorikk.nåværende().entry.vurderFaktaPerioder(oppdaterFaktaOmFeilutbetalingDto.perioder!!)
-            }
+            val logContext = SecureLog.Context.fra(tilbakekreving)
+            it.vurderFakta(
+                behandlingId = UUID.fromString(behandlingId),
+                behandler = ContextService.hentBehandler(logContext),
+                oppdaget = oppdaterFaktaOmFeilutbetalingDto.vurdering?.oppdaget,
+                årsak = oppdaterFaktaOmFeilutbetalingDto.vurdering?.årsak,
+                perioder = oppdaterFaktaOmFeilutbetalingDto.perioder,
+            )
             ResponseEntity.ok(it.tilFeilutbetalingFrontendDto())
         } ?: ResponseEntity.notFound().build()
     }
