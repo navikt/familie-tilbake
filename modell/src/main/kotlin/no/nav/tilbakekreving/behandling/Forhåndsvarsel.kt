@@ -12,6 +12,10 @@ class Forhåndsvarsel(
     private var forhåndsvarselUnntak: ForhåndsvarselUnntak?,
     private var utsattFrist: MutableList<UtsettFrist>,
 ) {
+    fun erFullstendig(): Boolean {
+        return brukeruttalelse != null || forhåndsvarselUnntak != null
+    }
+
     fun tilEntity(behandlingRef: UUID): ForhåndsvarselEntity {
         return ForhåndsvarselEntity(
             brukeruttalelseEntity = brukeruttalelse?.tilEntity(behandlingRef),
