@@ -57,6 +57,7 @@ kafka:
 tilbakekreving:
   kravgrunnlag:
     - QA.P_TILLEGGSSTONADER.KRAVGRUNNLAG
+    - QA.P_TILBAKEKREVING.KRAVGRUNNLAG
   toggles:
     tilgangsmaskinen-enabled: true
   tilgangsmaskinen:
@@ -67,6 +68,10 @@ tilbakekreving:
         veileder: "0f841c83-0d64-407c-80d5-4eb51dfaee1e"
         saksbehandler: "c1e9edec-0c10-4df2-8c74-324ab9922220"
         beslutter: "224b5097-d0af-462c-8d8e-49c0e8a42661"
+      aap:
+        veileder: "dc8b0182-1449-445a-833c-1a4620b7c2be" # 0000-GA-AAP_SAKSBEHANDLER_OPPFOLGING
+        saksbehandler: "3a65f41a-b3f3-4b1c-830a-df20ff020980" # 0000-GA-AAP_SAKSBEHANDLER_NASJONAL
+        beslutter: "5763b52f-f16a-483d-8f40-25be9de95c0a" # 0000-GA-AAP_BESLUTTER
   bigQuery:
     prosjektId: tilbake-prod-d235
     dataset: tilbakekreving_dataset
