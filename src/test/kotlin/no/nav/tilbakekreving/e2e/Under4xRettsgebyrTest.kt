@@ -29,6 +29,8 @@ class Under4xRettsgebyrTest : TilbakekrevingE2EBase() {
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        lagreUttalelse(behandlingId)
+
         val ansvarligSaksbehandler = Behandler.Saksbehandler("Z999999")
 
         somSaksbehandler(ansvarligSaksbehandler.ident) {
@@ -67,6 +69,8 @@ class Under4xRettsgebyrTest : TilbakekrevingE2EBase() {
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        lagreUttalelse(behandlingId)
+
         val ansvarligSaksbehandler = Behandler.Saksbehandler("Z999999")
 
         somSaksbehandler(ansvarligSaksbehandler.ident) {

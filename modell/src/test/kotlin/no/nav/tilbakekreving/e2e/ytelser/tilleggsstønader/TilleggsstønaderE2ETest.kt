@@ -5,6 +5,7 @@ import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.FeilutbetalingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelsesperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsperiodeDto
+import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
@@ -66,6 +67,7 @@ class TilleggsstønaderE2ETest {
             ),
         )
         tilbakekreving.håndter(brukerinfoHendelse())
+        tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, listOf(), "")
 
         val faktastegDto = tilbakekreving.faktastegFrontendDto()
         faktastegDto.feilutbetaltePerioder shouldBe listOf(

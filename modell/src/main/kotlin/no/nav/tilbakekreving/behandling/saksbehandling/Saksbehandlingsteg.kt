@@ -26,9 +26,12 @@ internal interface Saksbehandlingsteg {
             }
         }
 
-        fun Collection<Saksbehandlingsteg>.klarTilVisning(): List<Saksbehandlingsteg> {
+        fun Collection<Saksbehandlingsteg>.klarTilVisning(forhåndsvarselErFullstendig: Boolean): List<Saksbehandlingsteg> {
             val klarTilBehandling = mutableListOf<Saksbehandlingsteg>()
+
             for (steg in this) {
+                val kanLeggesTil = steg is Faktasteg || forhåndsvarselErFullstendig
+                if (!kanLeggesTil) return klarTilBehandling
                 klarTilBehandling.add(steg)
                 if (!steg.erFullstendig()) return klarTilBehandling
             }

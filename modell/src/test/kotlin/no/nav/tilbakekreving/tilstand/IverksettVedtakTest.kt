@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.tilstand
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Tilbakekreving
+import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
@@ -80,6 +81,7 @@ class IverksettVedtakTest {
             håndter(fagsysteminfoHendelse())
             håndter(brukerinfoHendelse())
             tilbakekreving.håndter(VarselbrevSendtHendelse(varselbrevId = tilbakekreving.brevHistorikk.nåværende().entry.id, journalpostId = "1234"))
+            tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, listOf(), "")
             håndter(
                 Behandler.Saksbehandler("Ansvarlig saksbehandler"),
                 faktastegVurdering(),

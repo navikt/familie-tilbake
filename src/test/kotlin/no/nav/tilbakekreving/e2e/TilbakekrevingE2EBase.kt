@@ -24,12 +24,14 @@ import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.api.BehandlingApiController
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
 import no.nav.tilbakekreving.behandling.Behandling
+import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagMediator
 import no.nav.tilbakekreving.repository.NyBehandlingRepository
 import no.nav.tilbakekreving.repository.NyBrevmottakerRepository
+import no.nav.tilbakekreving.repository.TilbakekrevingRepository
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
@@ -126,6 +128,15 @@ open class TilbakekrevingE2EBase : E2EBase() {
     ): UUID? {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(fagsystem, fagsystemId) ?: return null
         return tilbakekreving.frontendDtoForBehandling(Behandler.Saksbehandler("A123456"), true).behandlingId
+    }
+
+    fun lagreUttalelse(
+        behandlingId: UUID,
+    ) {
+        val tilbakekrevingId = tilbakekrevingService.hentTilbakekreving(behandlingId)!!.id
+        tilbakekrevingService.hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
+            tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, listOf(), "")
+        }
     }
 
     fun tilbakekreving(behandlingId: UUID): Tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId).shouldNotBeNull()

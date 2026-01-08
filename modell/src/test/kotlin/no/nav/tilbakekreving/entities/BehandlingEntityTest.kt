@@ -6,6 +6,7 @@ import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.BehandlingObservatørOppsamler
 import no.nav.tilbakekreving.behandling.Enhet
+import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.behov.IverksettelseBehov
 import no.nav.tilbakekreving.brev.BrevHistorikk
@@ -56,6 +57,7 @@ class BehandlingEntityTest {
             behandlingObservatør = BehandlingObservatørOppsamler(),
             tilstand = TilBehandling,
         )
+        behandlingFørLagring.lagreUttalelse(UttalelseVurdering.JA, listOf(), null)
 
         val behandlingEtterLagring = behandlingFørLagring
             .tilEntity("not_needed")

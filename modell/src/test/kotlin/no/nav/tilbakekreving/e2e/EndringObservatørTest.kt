@@ -5,6 +5,7 @@ import no.nav.tilbakekreving.ANSVARLIG_BESLUTTER
 import no.nav.tilbakekreving.ANSVARLIG_SAKSBEHANDLER
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
+import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.brukerinfoHendelse
@@ -112,6 +113,7 @@ class EndringObservatørTest {
         )
         tilbakekreving.håndter(brukerinfoHendelse())
         tilbakekreving.håndter(varselbrevHendelse(behovOppsamler.sisteVarselbrevId()))
+        tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, listOf(), "")
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.status } shouldBe listOf(
             ForenkletBehandlingsstatus.OPPRETTET,
             ForenkletBehandlingsstatus.TIL_BEHANDLING,

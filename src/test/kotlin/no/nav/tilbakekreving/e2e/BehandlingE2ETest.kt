@@ -64,6 +64,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
 
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        lagreUttalelse(behandlingId)
         somSaksbehandler(ansvarligSaksbehandler) {
             behandlingApiController.oppdaterFakta(
                 behandlingId = behandlingId.toString(),
@@ -194,6 +195,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
 
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        lagreUttalelse(behandlingId)
 
         somSaksbehandler(ansvarligSaksbehandler) {
             behandlingApiController.oppdaterFakta(
@@ -250,6 +252,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
 
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        lagreUttalelse(behandlingId)
 
         somSaksbehandler(ansvarligSaksbehandler) {
             behandlingApiController.oppdaterFakta(
@@ -327,6 +330,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
 
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        lagreUttalelse(behandlingId)
 
         somSaksbehandler(ansvarligSaksbehandler) {
             behandlingApiController.oppdaterFakta(
@@ -400,6 +404,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         )
 
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        lagreUttalelse(behandlingId)
 
         tilbakekrevVedtak(behandlingId, listOf(1.januar(2021) til 31.januar(2021)))
 

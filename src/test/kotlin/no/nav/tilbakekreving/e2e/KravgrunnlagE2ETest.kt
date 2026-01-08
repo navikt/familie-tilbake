@@ -243,6 +243,7 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
         )
 
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        lagreUttalelse(behandlingId)
 
         somSaksbehandler("Z999999") {
             behandlingApiController.oppdaterFakta(

@@ -25,4 +25,6 @@ class UtsettFrist(
             begrunnelse = begrunnelse,
         )
     }
+
+    fun hentFrist() = nyFrist
 }

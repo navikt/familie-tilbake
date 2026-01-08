@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving
 
+import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
@@ -45,5 +46,6 @@ fun tilbakekrevingTilBehandling(
         håndter(brukerinfoHendelse())
         håndter(VarselbrevSendtHendelse(varselbrevId = tilbakekreving.brevHistorikk.nåværende().entry.id, journalpostId = "1234"))
     }
+    tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, listOf(), "")
     return tilbakekreving
 }

@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.e2e
 
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Tilbakekreving
+import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.brukerinfoHendelse
@@ -47,6 +48,7 @@ class FrontendE2ETest {
         tilbakekreving.frontendDtoForBehandling(behandler, true).status shouldBe Behandlingsstatus.OPPRETTET
 
         tilbakekreving.håndter(VarselbrevSendtHendelse(varselbrevId = tilbakekreving.brevHistorikk.nåværende().entry.id, journalpostId = "1234"))
+        tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, listOf(), "")
         tilbakekreving.frontendDtoForBehandling(behandler, true).status shouldBe Behandlingsstatus.UTREDES
 
         tilbakekreving.håndter(behandler, faktastegVurdering())

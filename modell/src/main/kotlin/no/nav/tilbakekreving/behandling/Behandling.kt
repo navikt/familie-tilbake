@@ -236,17 +236,31 @@ class Behandling internal constructor(
                         Behandlingssteg.GRUNNLAG,
                         Behandlingsstegstatus.AUTOUTFØRT,
                     ),
-                    BehandlingsstegsinfoDto(
-                        Behandlingssteg.FORHÅNDSVARSEL,
-                        Behandlingsstegstatus.AUTOUTFØRT,
-                    ),
                 ),
-                steg().klarTilVisning().map {
-                    BehandlingsstegsinfoDto(
-                        it.type,
-                        it.behandlingsstegstatus(),
-                    )
-                },
+                steg().klarTilVisning(forhåndsvarsel.erFullstendig())
+                    .map {
+                        BehandlingsstegsinfoDto(
+                            it.type,
+                            it.behandlingsstegstatus(),
+                        )
+                    }
+                    .toMutableList()
+                    .apply {
+                        val skalLeggesTil = forhåndsvarsel.erFullstendig() || faktasteg.erFullstendig()
+
+                        if (skalLeggesTil) {
+                            val forhåndsvarselDto = BehandlingsstegsinfoDto(
+                                behandlingssteg = Behandlingssteg.FORHÅNDSVARSEL,
+                                behandlingsstegstatus =
+                                    if (forhåndsvarsel.erFullstendig()) {
+                                        Behandlingsstegstatus.UTFØRT
+                                    } else {
+                                        Behandlingsstegstatus.KLAR
+                                    },
+                            )
+                            add(forhåndsvarselDto)
+                        }
+                    },
             ).flatten(),
             fagsystemsbehandlingId = eksternFagsakRevurdering.entry.eksternId,
             // TODO
@@ -398,9 +412,9 @@ class Behandling internal constructor(
     }
 
     private fun validerBehandlingstatus(håndtertSteg: String, steg: Saksbehandlingsteg) {
-        if (!steg().klarTilVisning().contains(steg)) {
+        if (!steg().klarTilVisning(forhåndsvarsel.erFullstendig()).contains(steg)) {
             throw ModellFeil.UgyldigOperasjonException(
-                "Behandlingen er i ${steg().klarTilVisning().last().type} og kan ikke behandle vurdering for ${steg.type}",
+                "Behandlingen er i ${steg().klarTilVisning(forhåndsvarsel.erFullstendig()).last().type} og kan ikke behandle vurdering for ${steg.type}",
                 sporingsinformasjon(),
             )
         }
@@ -593,7 +607,7 @@ class Behandling internal constructor(
                 fatteVedtakSteg = fatteVedtakSteg,
                 påVent = null,
                 brevmottakerSteg = null,
-                forhåndsvarsel = Forhåndsvarsel(null, null, mutableListOf<UtsettFrist>()),
+                forhåndsvarsel = Forhåndsvarsel(null, null, mutableListOf<UtsettFrist>(), brevHistorikk.sisteVarselbrev()?.fristForTilbakemelding),
             ).also {
                 it.utførSideeffekt(tilstand, behandlingObservatør)
             }

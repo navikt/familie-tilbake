@@ -11,7 +11,16 @@ class Forhåndsvarsel(
     private var brukeruttalelse: Brukeruttalelse?,
     private var forhåndsvarselUnntak: ForhåndsvarselUnntak?,
     private var utsattFrist: MutableList<UtsettFrist>,
+    private var opprinneligFrist: LocalDate?,
 ) {
+    fun erFullstendig(): Boolean {
+        val gjeldendeFrist = utsattFrist.lastOrNull()?.hentFrist() ?: opprinneligFrist
+
+        return brukeruttalelse != null ||
+            forhåndsvarselUnntak != null ||
+            (gjeldendeFrist?.isBefore(LocalDate.now()) == true)
+    }
+
     fun tilEntity(behandlingRef: UUID): ForhåndsvarselEntity {
         return ForhåndsvarselEntity(
             brukeruttalelseEntity = brukeruttalelse?.tilEntity(behandlingRef),
