@@ -4,7 +4,7 @@ import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
 
 plugins {
     kotlin("jvm")
-    id("org.openapi.generator") version "7.17.0" apply false
+    id("org.openapi.generator") version "7.18.0" apply false
 }
 
 group = "no.nav"
@@ -25,7 +25,7 @@ subprojects {
 
     tasks.withType<GenerateTask> {
         generatorName = "kotlin-spring"
-        remoteInputSpec = "https://raw.githubusercontent.com/navikt/tilbakekreving-kontrakter/1aafba5a8c13af8987b2d8dd11b2cf01f6577b82/tsp-output/schema/openapi.yaml"
+        remoteInputSpec = "https://raw.githubusercontent.com/navikt/tilbakekreving-kontrakter/74d0fae516f329aee9ed6906af23dd84b893656d/tsp-output/schema/openapi.yaml"
         outputDir = "$projectDir/src/main/generated"
         packageName = "no.nav.kontrakter.frontend"
         modelNameSuffix = "Dto"

@@ -438,6 +438,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
                 oppdaterFaktaOmFeilutbetalingDto = OppdaterFaktaOmFeilutbetalingDto(
                     perioder = null,
                     vurdering = VurderingDto(
+                        årsak = "Årsak til feilutbetaling",
                         oppdaget = OppdagetDto(
                             dato = oppdagetDato,
                             av = OppdagetDto.Av.BRUKER,
