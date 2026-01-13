@@ -17,6 +17,7 @@ import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.FagsystemUtil
 import no.nav.tilbakekreving.Observatør
 import no.nav.tilbakekreving.Rettsgebyr
+import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.config.ApplicationProperties
@@ -357,6 +358,24 @@ class ForvaltningController(
     @PostMapping("/poke")
     fun sendPåminnelseTilAlleSakerITilstand(tilstand: TilbakekrevingTilstand) {
         tilbakekrevingRepository.oppdaterNestePåminnelse(tilstand)
+    }
+
+    @Operation(summary = "Tving oppdatering av fagsysteminfo")
+    @PostMapping("/oppdater-fagsysteminfo/{behandlingId}")
+    fun oppdaterFagsysteminfo(
+        @PathVariable behandlingId: UUID,
+    ) {
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        if (tilbakekreving != null) {
+            tilgangskontrollService.validerTilgangTilbakekreving(
+                tilbakekreving = tilbakekreving,
+                behandlingId = behandlingId,
+                minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+                auditLoggerEvent = AuditLoggerEvent.UPDATE,
+                handling = "Hent oppdatert fagsysteminfo",
+            )
+            tilbakekrevingService.hentTilbakekreving(behandlingId, Tilbakekreving::trengerFagsysteminfo)
+        }
     }
 }
 
