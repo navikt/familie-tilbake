@@ -139,6 +139,8 @@ spec:
         - application: norg2
           namespace: org
           cluster: prod-gcp
+        - application: logging
+          namespace: nais-system
       external:
         - host: tilbake-unleash-api.nav.cloud.nais.io
         - host: familie-integrasjoner.prod-fss-pub.nais.io

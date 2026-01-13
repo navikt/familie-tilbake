@@ -135,6 +135,8 @@ spec:
         - application: entra-proxy
           namespace: sikkerhetstjenesten
           cluster: dev-gcp
+        - application: logging
+          namespace: nais-system
       external:
         - host: tilbake-unleash-api.nav.cloud.nais.io
         - host: familie-integrasjoner.dev-fss-pub.nais.io
