@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.tilbakekreving.ANSVARLIG_BESLUTTER
 import no.nav.tilbakekreving.ANSVARLIG_SAKSBEHANDLER
+import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
@@ -179,6 +180,7 @@ class TilBehandlingTest {
         opprettTilbakekrevingHendelse: OpprettTilbakekrevingHendelse,
         behandler: Behandler,
     ) = tilbakekrevingTilBehandling(oppsamler, opprettTilbakekrevingHendelse).apply {
+        behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, listOf(), "")
         håndter(
             behandler,
             faktastegVurdering(),

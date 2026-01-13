@@ -137,6 +137,7 @@ class Behandling internal constructor(
 
     internal fun steg(): List<Saksbehandlingsteg> = listOf(
         faktasteg,
+        forhåndsvarsel,
         foreldelsesteg,
         vilkårsvurderingsteg,
         foreslåVedtakSteg,
@@ -234,10 +235,6 @@ class Behandling internal constructor(
                 listOf(
                     BehandlingsstegsinfoDto(
                         Behandlingssteg.GRUNNLAG,
-                        Behandlingsstegstatus.AUTOUTFØRT,
-                    ),
-                    BehandlingsstegsinfoDto(
-                        Behandlingssteg.FORHÅNDSVARSEL,
                         Behandlingsstegstatus.AUTOUTFØRT,
                     ),
                 ),
@@ -593,7 +590,7 @@ class Behandling internal constructor(
                 fatteVedtakSteg = fatteVedtakSteg,
                 påVent = null,
                 brevmottakerSteg = null,
-                forhåndsvarsel = Forhåndsvarsel(null, null, mutableListOf<UtsettFrist>()),
+                forhåndsvarsel = Forhåndsvarsel(null, null, mutableListOf<UtsettFrist>(), brevHistorikk.sisteVarselbrev()?.fristForTilbakemelding),
             ).also {
                 it.utførSideeffekt(tilstand, behandlingObservatør)
             }

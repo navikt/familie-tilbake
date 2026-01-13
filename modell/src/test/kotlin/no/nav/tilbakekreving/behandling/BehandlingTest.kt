@@ -32,6 +32,7 @@ class BehandlingTest {
         val behandling = behandling()
         val ansvarligSaksbehandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
         val periode = 1.januar til 31.januar
+        behandling.lagreUttalelse(UttalelseVurdering.JA, listOf(), null)
         behandling.settPåVent(Venteårsak.MANGLER_STØTTE, LocalDate.MAX, "Begrunnelse")
 
         val faktasteg = faktastegVurdering(periode)
@@ -118,6 +119,7 @@ class BehandlingTest {
         val behandling = behandling(kravgrunnlag)
         behandling.apply {
             brevmottakerSteg = BrevmottakerSteg(behandling.id, false, RegistrertBrevmottaker.DefaultMottaker(navn = "navn", personIdent = "ident"))
+            lagreUttalelse(UttalelseVurdering.JA, listOf(), null)
         }
 
         val periode = 1.januar til 31.januar
@@ -141,6 +143,7 @@ class BehandlingTest {
         val behandling = behandling()
         behandling.apply {
             brevmottakerSteg = BrevmottakerSteg(behandling.id, false, RegistrertBrevmottaker.DefaultMottaker(navn = "navn", personIdent = "ident"))
+            lagreUttalelse(UttalelseVurdering.JA, listOf(), null)
         }
 
         val periode = 1.januar til 31.januar
