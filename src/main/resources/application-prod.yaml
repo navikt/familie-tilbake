@@ -83,7 +83,7 @@ tilbakekreving:
     base-url: https://saf.intern.nav.no
     scope: api://prod-fss.teamdokumenthandtering.saf/.default
   norg2:
-    base-url: https://norg2.intern.nav.no
+    base-url: https://norg2.org.svc.cluster.local
     scope: api://prod-gcp.org.norg2/.default
   eregServices:
     base-url: https://ereg-services.intern.nav.no
