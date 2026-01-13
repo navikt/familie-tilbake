@@ -104,6 +104,7 @@ sealed interface Ytelse {
     companion object {
         fun ytelser() = setOf(
             Tilleggsstønad,
+            Arbeidsavklaringspenger,
         )
     }
 }
