@@ -17,9 +17,7 @@ class FagsystemKafkaListener(
     private val fagsystemIntegrasjonService: FagsystemIntegrasjonService,
 ) : MessageListener<String, String> {
     val log = TracedLogger.getLogger<FagsystemKafkaListener>()
-    private val ytelseForTopics = mapOf(
-        Ytelse.Tilleggsstønad.kafkaTopic to Ytelse.Tilleggsstønad,
-    )
+    private val ytelseForTopics = Ytelse.ytelser().associateBy { it.kafkaTopic }
 
     override fun onMessage(data: ConsumerRecord<String, String>) {
         val ytelse = ytelseForTopics[data.topic()]
