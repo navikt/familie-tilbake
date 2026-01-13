@@ -152,6 +152,9 @@ class DefaultKafkaProducer(
         ytelse: Ytelse,
         logContext: SecureLog.Context,
     ) {
+        log.medContext(logContext) {
+            info("Sender event til {} med type {}(versjon {})", ytelse.kafkaTopic, metadata.hendelsestype, metadata.versjon)
+        }
         val json = objectMapper.createObjectNode()
         objectMapper.updateValue(json, metadata)
         objectMapper.updateValue(json, kafkamelding)
