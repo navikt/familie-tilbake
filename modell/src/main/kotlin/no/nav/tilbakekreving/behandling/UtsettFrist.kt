@@ -10,6 +10,8 @@ class UtsettFrist(
     private val nyFrist: LocalDate,
     private val begrunnelse: String,
 ) {
+    fun hentFrist() = nyFrist
+
     fun tilFrontendDto(): FristUtsettelseDto {
         return FristUtsettelseDto(
             nyFrist = nyFrist,
