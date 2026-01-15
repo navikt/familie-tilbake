@@ -26,8 +26,12 @@ object SendVarselbrev : Tilstand {
     ) {
         when (val brev = tilbakekreving.brevHistorikk.entry(varselbrevSendtHendelse.varselbrevId)) {
             is Varselbrev -> {
-                brev.journalpostId = varselbrevSendtHendelse.journalpostId
-                // TODO: Oppdatere sendt når varselbrev faktisk blir sendt
+                brev.brevSendt(
+                    journalpostId = varselbrevSendtHendelse.journalpostId!!,
+                    tekstFraSaksbehandler = varselbrevSendtHendelse.tekstFraSaksbehandler,
+                    sendtTid = varselbrevSendtHendelse.sendtTid,
+                    fristForUttalelse = varselbrevSendtHendelse.fristForUttalelse,
+                )
             }
             else -> error("Forventet Varselbrev for id=${varselbrevSendtHendelse.varselbrevId}, men var ${brev::class.simpleName}")
         }

@@ -46,6 +46,7 @@ import no.nav.tilbakekreving.pdf.dokumentbestilling.varsel.TekstformatererVarsel
 import no.nav.tilbakekreving.pdf.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.Period
 import java.util.UUID
 
 @Service
@@ -94,9 +95,13 @@ class ForhåndsvarselService(
         bestillBrevDto: BestillBrevDto,
     ) {
         val logContext = SecureLog.Context.fra(tilbakekreving)
-
+        val sendtTid = LocalDate.now()
         val varselbrevBehov = tilbakekreving.opprettVarselbrevBehov(bestillBrevDto.fritekst)
-        val journalpost = journalførVarselbrev(varselbrevBehov, logContext)
+        val journalpost = journalførVarselbrev(
+            varselbrevBehov = varselbrevBehov,
+            fristForUttalelse = sendtTid.plus(Period.ofWeeks(3)),
+            logContext = logContext,
+        )
         if (journalpost.journalpostId == null) {
             throw Feil(
                 message = "journalførin av varselbrev til behandlingId ${varselbrevBehov.behandlingId} misslykket med denne meldingen: ${journalpost.melding}",
@@ -113,7 +118,13 @@ class ForhåndsvarselService(
             adresse = null,
             logContext = logContext,
         )
-        tilbakekreving.oppdaterSendtVarselbrev(journalpostId = journalpost.journalpostId, varselbrevId = varselbrevBehov.varselbrev.id)
+        tilbakekreving.oppdaterSendtVarselbrev(
+            journalpostId = journalpost.journalpostId,
+            varselbrevId = varselbrevBehov.varselbrev.id,
+            tekstFraSaksbehandler = varselbrevBehov.varseltekstFraSaksbehandler,
+            sendtTid = sendtTid,
+            fristForUttalelse = sendtTid.plus(Period.ofWeeks(3)),
+        )
     }
 
     fun lagreUttalelse(tilbakekreving: Tilbakekreving, brukeruttalelse: BrukeruttalelseDto) {
@@ -207,9 +218,10 @@ class ForhåndsvarselService(
 
     fun journalførVarselbrev(
         varselbrevBehov: VarselbrevBehov,
+        fristForUttalelse: LocalDate,
         logContext: SecureLog.Context,
     ): OpprettJournalpostResponse {
-        val brevdata = hentBrevdata(varselbrevBehov, logContext)
+        val brevdata = hentBrevdata(varselbrevBehov, fristForUttalelse, logContext)
         val dokument = Dokument(
             dokument = hentPdf(brevdata, logContext),
             filtype = Filtype.PDFA,
@@ -248,6 +260,7 @@ class ForhåndsvarselService(
 
     private fun hentBrevdata(
         varselbrevBehov: VarselbrevBehov,
+        fristForUttalelse: LocalDate,
         logContext: SecureLog.Context,
     ): Brevdata {
         val brevmetadata = hentBrevMetadata(varselbrevBehov)
@@ -255,7 +268,7 @@ class ForhåndsvarselService(
             brevmetadata = brevmetadata,
             beløp = varselbrevBehov.feilutbetaltBeløp,
             revurderingsvedtaksdato = varselbrevBehov.revurderingsvedtaksdato,
-            fristdatoForTilbakemelding = varselbrevBehov.varselbrev.fristForTilbakemelding,
+            fristdatoForTilbakemelding = fristForUttalelse,
             varseltekstFraSaksbehandler = varselbrevBehov.varseltekstFraSaksbehandler,
             feilutbetaltePerioder = varselbrevBehov.feilutbetaltePerioder,
         )

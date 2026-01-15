@@ -11,11 +11,11 @@ import no.nav.tilbakekreving.brukerinfoHendelse
 import no.nav.tilbakekreving.defaultFeatures
 import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.fagsysteminfoHendelse
-import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
+import no.nav.tilbakekreving.varselbrevHendelse
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.Period
@@ -35,7 +35,7 @@ class SendVarselbrevTest {
         tilbakekreving.håndter(kravgrunnlag)
         tilbakekreving.håndter(fagsak)
         tilbakekreving.håndter(bruker)
-        val varselbrevSendtHendelse = VarselbrevSendtHendelse(varselbrevId = tilbakekreving.brevHistorikk.nåværende().entry.id, journalpostId = "1234")
+        val varselbrevSendtHendelse = varselbrevHendelse(tilbakekreving.brevHistorikk.nåværende().entry.id)
         tilbakekreving.håndter(varselbrevSendtHendelse)
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
 
@@ -52,7 +52,7 @@ class SendVarselbrevTest {
             varselbrevBehov.varselbrev.kravgrunnlag.entry shouldBe kravgrunnlag
             varselbrevBehov.varselbrev.mottaker shouldBe behandling.brevmottakerSteg?.registrertBrevmottaker
             varselbrevBehov.varselbrev.ansvarligSaksbehandlerIdent shouldBe behandling.hentBehandlingsinformasjon().ansvarligSaksbehandler.ident
-            varselbrevBehov.varselbrev.fristForTilbakemelding shouldBe LocalDate.now().plus(Period.ofWeeks(3))
+            varselbrevBehov.varselbrev.fristForUttalelse shouldBe LocalDate.of(2025, 12, 10).plus(Period.ofWeeks(3))
             varselbrevBehov.feilutbetaltBeløp shouldBe kravgrunnlag.feilutbetaltBeløpForAllePerioder().toLong()
             varselbrevBehov.revurderingsvedtaksdato shouldBe fagsak.revurdering.vedtaksdato
             varselbrevBehov.varseltekstFraSaksbehandler shouldBe "Todo" // Hardkodet todo i koden også må fikses når vi vet mer
