@@ -14,13 +14,13 @@ import no.nav.tilbakekreving.foreldelseVurdering
 import no.nav.tilbakekreving.forårsaketAvBrukerGrovtUaktsomt
 import no.nav.tilbakekreving.godkjenning
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
-import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.varselbrevHendelse
 import org.junit.jupiter.api.Test
 import java.math.BigInteger
 import java.util.UUID
@@ -48,7 +48,7 @@ class FrontendE2ETest {
 
         tilbakekreving.frontendDtoForBehandling(behandler, true).status shouldBe Behandlingsstatus.OPPRETTET
 
-        tilbakekreving.håndter(VarselbrevSendtHendelse(varselbrevId = tilbakekreving.brevHistorikk.nåværende().entry.id, journalpostId = "1234"))
+        tilbakekreving.håndter(varselbrevHendelse(tilbakekreving.brevHistorikk.nåværende().entry.id))
         tilbakekreving.frontendDtoForBehandling(behandler, true).status shouldBe Behandlingsstatus.UTREDES
 
         tilbakekreving.håndter(behandler, faktastegVurdering())

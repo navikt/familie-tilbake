@@ -4,7 +4,6 @@ import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
-import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import java.util.EnumMap
 import java.util.UUID
 
@@ -43,7 +42,7 @@ fun tilbakekrevingTilBehandling(
         håndter(kravgrunnlag())
         håndter(fagsysteminfoHendelse())
         håndter(brukerinfoHendelse())
-        håndter(VarselbrevSendtHendelse(varselbrevId = tilbakekreving.brevHistorikk.nåværende().entry.id, journalpostId = "1234"))
+        håndter(varselbrevHendelse(tilbakekreving.brevHistorikk.nåværende().entry.id))
     }
     return tilbakekreving
 }

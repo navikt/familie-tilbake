@@ -55,6 +55,7 @@ import no.nav.tilbakekreving.tilstand.IverksettVedtak
 import no.nav.tilbakekreving.tilstand.Start
 import no.nav.tilbakekreving.tilstand.Tilstand
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -478,8 +479,8 @@ class Tilbakekreving internal constructor(
         )
     }
 
-    fun oppdaterSendtVarselbrev(journalpostId: String, varselbrevId: UUID) {
-        brevHistorikk.entry(varselbrevId).brevSendt(journalpostId)
+    fun oppdaterSendtVarselbrev(journalpostId: String, varselbrevId: UUID, tekstFraSaksbehandler: String, sendtTid: LocalDate, fristForUttalelse: LocalDate) {
+        brevHistorikk.entry(varselbrevId).brevSendt(journalpostId, tekstFraSaksbehandler, sendtTid, fristForUttalelse)
     }
 
     fun hentForhåndsvarselFrontendDto(): ForhåndsvarselDto {
