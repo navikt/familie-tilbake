@@ -21,7 +21,6 @@ import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.godkjenning
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
-import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -31,6 +30,7 @@ import no.nav.tilbakekreving.opprettTilbakekreving
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.tilbakekrevingTilBehandling
+import no.nav.tilbakekreving.varselbrevHendelse
 import org.junit.jupiter.api.Test
 
 class TilBehandlingTest {
@@ -137,7 +137,7 @@ class TilBehandlingTest {
         )
         tilbakekreving.håndter(fagsysteminfoHendelse())
         tilbakekreving.håndter(brukerinfoHendelse())
-        tilbakekreving.håndter(VarselbrevSendtHendelse(tilbakekreving.brevHistorikk.nåværende().entry.id, journalpostId = "1234"))
+        tilbakekreving.håndter(varselbrevHendelse(tilbakekreving.brevHistorikk.nåværende().entry.id))
 
         tilbakekreving.tilstand shouldBe TilBehandling
 

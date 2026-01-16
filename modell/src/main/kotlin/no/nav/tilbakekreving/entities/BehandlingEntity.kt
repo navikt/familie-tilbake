@@ -61,7 +61,7 @@ data class BehandlingEntity(
             fatteVedtakSteg = fatteVedtakStegEntity.fraEntity(),
             påVent = påVentEntity?.fraEntity(),
             brevmottakerSteg = brevmottakerStegEntity?.fraEntity(),
-            forhåndsvarsel = forhåndsvarselEntity.fraEntity(brevHistorikk.sisteVarselbrev()?.fristForTilbakemelding),
+            forhåndsvarsel = forhåndsvarselEntity.fraEntity(brevHistorikk.sisteVarselbrev()?.fristForUttalelse),
         )
     }
 }
