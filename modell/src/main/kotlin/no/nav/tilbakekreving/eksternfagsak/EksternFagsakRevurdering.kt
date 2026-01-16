@@ -57,7 +57,7 @@ sealed class EksternFagsakRevurdering(
 
         override fun tilFrontendDto(): RevurderingDto {
             return RevurderingDto(
-                årsak = årsakTilFeilutbetaling,
+                årsak = revurderingsårsak.beskrivelse,
                 vedtaksdato = vedtaksdato,
                 resultat = RevurderingDto.Resultat.INNVILGET,
             )
