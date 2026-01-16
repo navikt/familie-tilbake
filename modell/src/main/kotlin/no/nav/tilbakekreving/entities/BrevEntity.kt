@@ -20,6 +20,7 @@ data class BrevEntity(
     val mottaker: RegistrertBrevmottakerEntity,
     val ansvarligSaksbehandlerIdent: String?,
     val kravgrunnlagRef: HistorikkReferanseEntity<UUID>,
+    @param:JsonAlias("fristForUttalelse")
     val fristForTilbakemelding: LocalDate,
 ) {
     fun fraEntity(kravgrunnlagHistorikk: KravgrunnlagHistorikk): Brev {
