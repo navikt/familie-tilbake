@@ -1,11 +1,11 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
-val springDocVersion = "2.8.9"
-val testcontainersVersion = "1.21.3"
-val tokenValidationVersion = "5.0.33"
+val springDocVersion = "3.0.1"
+val testcontainersVersion = "1.21.4"
+val tokenValidationVersion = "6.0.1"
 val flywayVersion = "11.3.4"
-val ktorVersion = "3.2.2"
+val ktorVersion = "3.3.3"
 ext["ktorVersion"] = ktorVersion
 
 group = "no.nav"
@@ -13,10 +13,10 @@ description = "familie-tilbake"
 java.sourceCompatibility = JavaVersion.VERSION_21
 
 plugins {
-    kotlin("jvm") version "2.2.0"
-    id("org.springframework.boot") version "3.5.4"
-    id("org.jetbrains.kotlin.plugin.spring") version "2.2.0"
-    id("org.jlleitschuh.gradle.ktlint") version "13.0.0"
+    kotlin("jvm") version "2.3.0"
+    id("org.springframework.boot") version "4.0.1"
+    id("org.jetbrains.kotlin.plugin.spring") version "2.3.0"
+    id("org.jlleitschuh.gradle.ktlint") version "14.0.1"
 }
 
 springBoot {
@@ -54,9 +54,9 @@ subprojects {
     }
 
     dependencies {
-        testImplementation("org.junit.jupiter:junit-jupiter:5.13.4")
+        testImplementation("org.junit.jupiter:junit-jupiter:6.0.2")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-        testImplementation("io.kotest:kotest-assertions-core:5.9.1")
+        testImplementation("io.kotest:kotest-assertions-core:6.0.7")
     }
 
     tasks.test {
@@ -87,7 +87,7 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson-jvm:$ktorVersion")
-    implementation("com.google.cloud:google-cloud-bigquery:2.54.0")
+    implementation("com.google.cloud:google-cloud-bigquery:2.57.1")
 
     api("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocVersion")
     api("org.springdoc:springdoc-openapi-starter-common:$springDocVersion")
@@ -100,7 +100,7 @@ dependencies {
     api("com.fasterxml.jackson.core:jackson-databind")
     api("com.fasterxml.jackson.module:jackson-module-kotlin")
 
-    api("com.ibm.mq:com.ibm.mq.jakarta.client:9.4.3.0")
+    api("com.ibm.mq:com.ibm.mq.jakarta.client:9.4.4.1")
     api("jakarta.jms:jakarta.jms-api")
     api("org.apache.activemq:activemq-jms-pool")
     api("org.springframework:spring-jms")
@@ -133,23 +133,23 @@ dependencies {
     api("ch.qos.logback:logback-classic")
     api("com.papertrailapp:logback-syslog4j:1.0.0")
     api("io.micrometer:micrometer-registry-prometheus")
-    api("net.logstash.logback:logstash-logback-encoder:8.1")
+    api("net.logstash.logback:logstash-logback-encoder:9.0")
 
-    api("io.getunleash:unleash-client-java:11.0.2")
-    api("org.messaginghub:pooled-jms:3.1.7")
+    api("io.getunleash:unleash-client-java:12.0.1")
+    api("org.messaginghub:pooled-jms:3.2.2")
     api("org.flywaydb:flyway-core")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
 
-    testImplementation("org.junit.jupiter:junit-jupiter:5.13.4")
+    testImplementation("org.junit.jupiter:junit-jupiter:6.0.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    testImplementation("io.mockk:mockk-jvm:1.14.5")
-    testImplementation("io.kotest:kotest-assertions-core-jvm:6.0.1")
+    testImplementation("io.mockk:mockk-jvm:1.14.7")
+    testImplementation("io.kotest:kotest-assertions-core-jvm:6.0.7")
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
-    testImplementation("io.jsonwebtoken:jjwt:0.12.6")
+    testImplementation("io.jsonwebtoken:jjwt:0.13.0")
     testImplementation("no.nav.security:token-validation-spring-test:$tokenValidationVersion")
 
     testImplementation("org.testcontainers:junit-jupiter:$testcontainersVersion")
@@ -158,6 +158,6 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers:$testcontainersVersion")
 
     testImplementation("org.apache.kafka:kafka_2.13")
-    testImplementation("org.wiremock:wiremock-standalone:3.13.1")
+    testImplementation("org.wiremock:wiremock-standalone:3.13.2")
     testImplementation("org.apache.activemq:activemq-client")
 }
