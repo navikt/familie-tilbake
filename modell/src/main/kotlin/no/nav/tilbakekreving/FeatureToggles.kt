@@ -9,7 +9,7 @@ class FeatureToggles(
 }
 
 enum class Toggle(val default: Boolean) {
-    SendVarselbrev(default = false),
+    SendAutomatiskVarselbrev(default = false),
     Arkivering(default = false),
     Brevutsending(default = false),
     Dokumenthenting(default = false),

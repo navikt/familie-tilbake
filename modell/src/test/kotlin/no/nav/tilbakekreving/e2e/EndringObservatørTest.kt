@@ -26,7 +26,6 @@ import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
-import no.nav.tilbakekreving.varselbrevHendelse
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
@@ -112,7 +111,6 @@ class EndringObservatørTest {
             ForenkletBehandlingsstatus.OPPRETTET,
         )
         tilbakekreving.håndter(brukerinfoHendelse())
-        tilbakekreving.håndter(varselbrevHendelse(behovOppsamler.sisteVarselbrevId()))
         tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, listOf(), "")
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.status } shouldBe listOf(
             ForenkletBehandlingsstatus.OPPRETTET,

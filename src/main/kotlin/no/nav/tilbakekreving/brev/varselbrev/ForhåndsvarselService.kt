@@ -1,6 +1,5 @@
 package no.nav.tilbakekreving.brev.varselbrev
 
-import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
@@ -10,8 +9,6 @@ import no.nav.familie.tilbake.kontrakter.dokarkiv.AvsenderMottaker
 import no.nav.familie.tilbake.kontrakter.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.tilbake.kontrakter.dokarkiv.v2.Dokument
 import no.nav.familie.tilbake.kontrakter.dokarkiv.v2.Filtype
-import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstidspunkt
-import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstype
 import no.nav.familie.tilbake.kontrakter.journalpost.AvsenderMottakerIdType
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
@@ -46,7 +43,6 @@ import no.nav.tilbakekreving.pdf.dokumentbestilling.varsel.TekstformatererVarsel
 import no.nav.tilbakekreving.pdf.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import java.time.Period
 import java.util.UUID
 
 @Service
@@ -94,37 +90,7 @@ class ForhåndsvarselService(
         tilbakekreving: Tilbakekreving,
         bestillBrevDto: BestillBrevDto,
     ) {
-        val logContext = SecureLog.Context.fra(tilbakekreving)
-        val sendtTid = LocalDate.now()
-        val varselbrevBehov = tilbakekreving.opprettVarselbrevBehov(bestillBrevDto.fritekst)
-        val journalpost = journalførVarselbrev(
-            varselbrevBehov = varselbrevBehov,
-            fristForUttalelse = sendtTid.plus(Period.ofWeeks(3)),
-            logContext = logContext,
-        )
-        if (journalpost.journalpostId == null) {
-            throw Feil(
-                message = "journalførin av varselbrev til behandlingId ${varselbrevBehov.behandlingId} misslykket med denne meldingen: ${journalpost.melding}",
-                frontendFeilmelding = "journalførin av varselbrev til behandlingId ${varselbrevBehov.behandlingId} misslykket med denne meldingen: ${journalpost.melding}",
-                logContext = SecureLog.Context.fra(tilbakekreving),
-            )
-        }
-        dokdistClient.brevTilUtsending(
-            behandlingId = varselbrevBehov.behandlingId,
-            journalpostId = journalpost.journalpostId,
-            fagsystem = varselbrevBehov.ytelse.tilFagsystemDTO(),
-            distribusjonstype = Distribusjonstype.VIKTIG,
-            distribusjonstidspunkt = Distribusjonstidspunkt.KJERNETID,
-            adresse = null,
-            logContext = logContext,
-        )
-        tilbakekreving.oppdaterSendtVarselbrev(
-            journalpostId = journalpost.journalpostId,
-            varselbrevId = varselbrevBehov.varselbrev.id,
-            tekstFraSaksbehandler = varselbrevBehov.varseltekstFraSaksbehandler,
-            sendtTid = sendtTid,
-            fristForUttalelse = sendtTid.plus(Period.ofWeeks(3)),
-        )
+        tilbakekreving.trengerVarselbrev(bestillBrevDto.fritekst)
     }
 
     fun lagreUttalelse(tilbakekreving: Tilbakekreving, brukeruttalelse: BrukeruttalelseDto) {

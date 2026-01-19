@@ -53,7 +53,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.Period
 import java.util.UUID
 
 @Service
@@ -212,10 +211,9 @@ class TilbakekrevingService(
 
             is VarselbrevBehov -> {
                 val logContext = SecureLog.Context.utenBehandling(behov.eksternFagsakId)
-                val sendtTid = LocalDate.now()
                 val arkivert = forhåndsvarselService.journalførVarselbrev(
                     varselbrevBehov = behov,
-                    fristForUttalelse = sendtTid.plus(Period.ofWeeks(3)),
+                    fristForUttalelse = behov.varselbrev.fristForUttalelse,
                     logContext = logContext,
                 )
                 if (arkivert.journalpostId == null) {
@@ -238,9 +236,6 @@ class TilbakekrevingService(
                     VarselbrevSendtHendelse(
                         varselbrevId = behov.brevId,
                         journalpostId = arkivert.journalpostId,
-                        tekstFraSaksbehandler = behov.varseltekstFraSaksbehandler,
-                        sendtTid = sendtTid,
-                        fristForUttalelse = sendtTid.plus(Period.ofWeeks(3)),
                     ),
                 )
             }

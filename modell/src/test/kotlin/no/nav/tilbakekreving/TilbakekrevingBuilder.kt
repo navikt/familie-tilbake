@@ -14,7 +14,7 @@ fun defaultFeatures(
 ): FeatureToggles = FeatureToggles(
     EnumMap(
         mutableMapOf(
-            Toggle.SendVarselbrev to true,
+            Toggle.SendAutomatiskVarselbrev to false,
         ).apply { putAll(overrides) },
     ),
 )
@@ -42,7 +42,6 @@ fun tilbakekrevingTilBehandling(
         håndter(kravgrunnlag())
         håndter(fagsysteminfoHendelse())
         håndter(brukerinfoHendelse())
-        håndter(varselbrevHendelse(tilbakekreving.brevHistorikk.nåværende().entry.id))
     }
     return tilbakekreving
 }

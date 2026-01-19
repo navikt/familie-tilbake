@@ -20,7 +20,6 @@ import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
-import no.nav.tilbakekreving.varselbrevHendelse
 import org.junit.jupiter.api.Test
 import java.math.BigInteger
 import java.util.UUID
@@ -44,14 +43,13 @@ class FrontendE2ETest {
         tilbakekreving.håndter(kravgrunnlag())
         tilbakekreving.håndter(fagsysteminfoHendelse())
         tilbakekreving.håndter(brukerinfoHendelse())
-        tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, listOf(), "")
 
-        tilbakekreving.frontendDtoForBehandling(behandler, true).status shouldBe Behandlingsstatus.OPPRETTET
-
-        tilbakekreving.håndter(varselbrevHendelse(tilbakekreving.brevHistorikk.nåværende().entry.id))
         tilbakekreving.frontendDtoForBehandling(behandler, true).status shouldBe Behandlingsstatus.UTREDES
 
         tilbakekreving.håndter(behandler, faktastegVurdering())
+        tilbakekreving.trengerVarselbrev("Tekst fra saksbehandler")
+        tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, listOf(), null)
+
         tilbakekreving.håndter(behandler, 1.januar til 31.januar, foreldelseVurdering())
         tilbakekreving.håndter(behandler, 1.januar til 31.januar, forårsaketAvBrukerGrovtUaktsomt())
         tilbakekreving.frontendDtoForBehandling(behandler, true).status shouldBe Behandlingsstatus.UTREDES

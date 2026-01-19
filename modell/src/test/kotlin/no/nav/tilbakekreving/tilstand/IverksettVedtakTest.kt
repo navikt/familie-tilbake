@@ -27,7 +27,6 @@ import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
-import no.nav.tilbakekreving.varselbrevHendelse
 import org.junit.jupiter.api.Test
 import java.math.BigInteger
 import java.util.UUID
@@ -79,7 +78,6 @@ class IverksettVedtakTest {
             håndter(kravgrunnlag())
             håndter(fagsysteminfoHendelse())
             håndter(brukerinfoHendelse())
-            tilbakekreving.håndter(varselbrevHendelse(tilbakekreving.brevHistorikk.nåværende().entry.id))
             behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, listOf(), "")
             håndter(
                 Behandler.Saksbehandler("Ansvarlig saksbehandler"),

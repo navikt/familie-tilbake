@@ -48,7 +48,7 @@ class AvventerBrukerinfoTest {
         tilbakekreving.håndter(fagsysteminfoHendelse())
         tilbakekreving.håndter(brukerinfoHendelse())
 
-        tilbakekreving.tilstand shouldBe SendVarselbrev
+        tilbakekreving.tilstand shouldBe TilBehandling
         oppsamler.behovListe.forOne {
             it shouldBeEqual BrukerinfoBehov(
                 bruker().ident,

@@ -1,7 +1,6 @@
 package no.nav.tilbakekreving.tilstand
 
 import no.nav.tilbakekreving.Tilbakekreving
-import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
@@ -13,7 +12,7 @@ object SendVarselbrev : Tilstand {
     override val tilbakekrevingTilstand: TilbakekrevingTilstand = TilbakekrevingTilstand.SEND_VARSELBREV
 
     override fun entering(tilbakekreving: Tilbakekreving) {
-        tilbakekreving.trengerVarselbrev()
+        // Støttes ikke inntil videre. Entry er bak toggle for nå.
     }
 
     override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse) {
@@ -24,18 +23,7 @@ object SendVarselbrev : Tilstand {
         tilbakekreving: Tilbakekreving,
         varselbrevSendtHendelse: VarselbrevSendtHendelse,
     ) {
-        when (val brev = tilbakekreving.brevHistorikk.entry(varselbrevSendtHendelse.varselbrevId)) {
-            is Varselbrev -> {
-                brev.brevSendt(
-                    journalpostId = varselbrevSendtHendelse.journalpostId!!,
-                    tekstFraSaksbehandler = varselbrevSendtHendelse.tekstFraSaksbehandler,
-                    sendtTid = varselbrevSendtHendelse.sendtTid,
-                    fristForUttalelse = varselbrevSendtHendelse.fristForUttalelse,
-                )
-            }
-            else -> error("Forventet Varselbrev for id=${varselbrevSendtHendelse.varselbrevId}, men var ${brev::class.simpleName}")
-        }
-
+        tilbakekreving.brevHistorikk.entry(varselbrevSendtHendelse.varselbrevId).brevSendt(journalpostId = varselbrevSendtHendelse.journalpostId!!)
         tilbakekreving.byttTilstand(TilBehandling)
     }
 

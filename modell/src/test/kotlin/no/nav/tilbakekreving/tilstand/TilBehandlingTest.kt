@@ -30,7 +30,6 @@ import no.nav.tilbakekreving.opprettTilbakekreving
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.tilbakekrevingTilBehandling
-import no.nav.tilbakekreving.varselbrevHendelse
 import org.junit.jupiter.api.Test
 
 class TilBehandlingTest {
@@ -137,7 +136,6 @@ class TilBehandlingTest {
         )
         tilbakekreving.håndter(fagsysteminfoHendelse())
         tilbakekreving.håndter(brukerinfoHendelse())
-        tilbakekreving.håndter(varselbrevHendelse(tilbakekreving.brevHistorikk.nåværende().entry.id))
 
         tilbakekreving.tilstand shouldBe TilBehandling
 

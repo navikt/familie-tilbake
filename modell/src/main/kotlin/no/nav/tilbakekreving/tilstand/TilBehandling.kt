@@ -6,6 +6,7 @@ import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
+import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.time.Duration
@@ -38,5 +39,12 @@ object TilBehandling : Tilstand {
 
     override fun håndterTrekkTilbakeFraGodkjenning(behandling: Behandling, sporing: Sporing) {
         behandling.trekkTilbakeFraGodkjenning()
+    }
+
+    override fun håndter(
+        tilbakekreving: Tilbakekreving,
+        varselbrevSendtHendelse: VarselbrevSendtHendelse,
+    ) {
+        tilbakekreving.brevHistorikk.entry(varselbrevSendtHendelse.varselbrevId).brevSendt(journalpostId = varselbrevSendtHendelse.journalpostId!!)
     }
 }

@@ -548,11 +548,12 @@ class Behandling internal constructor(
         )
     }
 
-    fun opprettVarselbrev(): Varselbrev = Varselbrev.opprett(
+    fun opprettVarselbrev(varseltekstFraSaksbehandler: String): Varselbrev = Varselbrev.opprett(
         mottaker = brevmottakerSteg!!.registrertBrevmottaker,
         brevmottakerStegId = brevmottakerSteg!!.id,
         ansvarligSaksbehandlerIdent = ansvarligSaksbehandler.ident,
         kravgrunnlag = kravgrunnlag,
+        varseltekstFraSaksbehandler = varseltekstFraSaksbehandler,
     )
 
     companion object {

@@ -8,29 +8,27 @@ import no.nav.tilbakekreving.entities.Brevtype
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import java.time.LocalDate
+import java.time.Period
 import java.util.UUID
 
 data class Varselbrev(
     override val id: UUID,
     override val opprettetDato: LocalDate,
     override var journalpostId: String?,
-    override var sendtTid: LocalDate?,
+    override var sendtTid: LocalDate,
     val mottaker: RegistrertBrevmottaker,
     val brevmottakerStegId: UUID?,
     val ansvarligSaksbehandlerIdent: String?,
     val kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
-    var fristForUttalelse: LocalDate?,
+    var fristForUttalelse: LocalDate,
     var tekstFraSaksbehandler: String?,
 ) : Brev, FrontendDto<VarselbrevDto> {
     fun hentVarsletBeløp(): Long {
         return kravgrunnlag.entry.feilutbetaltBeløpForAllePerioder().toLong()
     }
 
-    override fun brevSendt(journalpostId: String, tekstFraSaksbehandler: String, sendtTid: LocalDate, fristForUttalelse: LocalDate?) {
-        this.sendtTid = sendtTid
-        this.tekstFraSaksbehandler = tekstFraSaksbehandler
+    override fun brevSendt(journalpostId: String) {
         this.journalpostId = journalpostId
-        this.fristForUttalelse = fristForUttalelse
     }
 
     companion object {
@@ -39,18 +37,20 @@ data class Varselbrev(
             brevmottakerStegId: UUID,
             ansvarligSaksbehandlerIdent: String,
             kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
+            varseltekstFraSaksbehandler: String,
         ): Varselbrev {
+            val sendtTid = LocalDate.now()
             return Varselbrev(
                 id = UUID.randomUUID(),
                 opprettetDato = LocalDate.now(),
                 journalpostId = null,
-                sendtTid = null,
+                sendtTid = sendtTid,
                 mottaker = mottaker,
                 brevmottakerStegId = brevmottakerStegId,
                 ansvarligSaksbehandlerIdent = ansvarligSaksbehandlerIdent,
                 kravgrunnlag = kravgrunnlag,
-                fristForUttalelse = null,
-                tekstFraSaksbehandler = null,
+                fristForUttalelse = sendtTid.plus(Period.ofWeeks(3)),
+                tekstFraSaksbehandler = varseltekstFraSaksbehandler,
             )
         }
     }

@@ -22,7 +22,6 @@ import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
-import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
@@ -36,7 +35,6 @@ import no.nav.tilbakekreving.tilstand.TilBehandling
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
-import java.time.Period
 import java.util.Random
 import java.util.UUID
 
@@ -141,17 +139,6 @@ fun fagsysteminfoHendelse(
     utvidPerioder = utvidPerioder,
     behandlendeEnhet = behandlendeEnhet,
 )
-
-fun varselbrevHendelse(varselbrevId: UUID): VarselbrevSendtHendelse {
-    val sendtTid = LocalDate.of(2025, 12, 10)
-    return VarselbrevSendtHendelse(
-        varselbrevId = varselbrevId,
-        journalpostId = "1234",
-        tekstFraSaksbehandler = "Saksbehandler har skrevet denne...",
-        sendtTid = sendtTid,
-        fristForUttalelse = sendtTid.plus(Period.ofWeeks(3)),
-    )
-}
 
 fun brukerinfoHendelse() = BrukerinfoHendelse(
     ident = bruker().ident,
