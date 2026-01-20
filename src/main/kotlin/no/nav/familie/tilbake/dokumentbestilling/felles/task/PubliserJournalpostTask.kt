@@ -60,20 +60,22 @@ class PubliserJournalpostTask(
         try {
             if (featureService.modellFeatures[Toggle.Brevutsending]) {
                 dokdistClient.brevTilUtsending(
-                    behandlingId = UUID.fromString(task.payload),
+                    behandlingId = behandlingId,
                     journalpostId = journalpostId,
                     fagsystem = Fagsystem.valueOf(task.metadata.getProperty("fagsystem")).tilDTO(),
                     distribusjonstype = Distribusjonstype.valueOf(task.metadata.getProperty("distribusjonstype")),
                     distribusjonstidspunkt = Distribusjonstidspunkt.valueOf(task.metadata.getProperty("distribusjonstidspunkt")),
-                    adresse = AdresseTo(
-                        adressetype = manuellAdresse?.adresseType!!.name,
-                        postnummer = manuellAdresse.postnummer,
-                        poststed = manuellAdresse.poststed,
-                        adresselinje1 = manuellAdresse.adresselinje1,
-                        adresselinje2 = manuellAdresse.adresselinje2,
-                        adresselinje3 = manuellAdresse.adresselinje3,
-                        land = manuellAdresse.land,
-                    ),
+                    adresse = manuellAdresse?.let {
+                        AdresseTo(
+                            adressetype = manuellAdresse.adresseType.name,
+                            postnummer = manuellAdresse.postnummer,
+                            poststed = manuellAdresse.poststed,
+                            adresselinje1 = manuellAdresse.adresselinje1,
+                            adresselinje2 = manuellAdresse.adresselinje2,
+                            adresselinje3 = manuellAdresse.adresselinje3,
+                            land = manuellAdresse.land,
+                        )
+                    },
                     logContext = logContext,
                 )
             } else {
