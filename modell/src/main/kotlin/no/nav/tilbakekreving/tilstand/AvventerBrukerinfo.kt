@@ -25,7 +25,7 @@ object AvventerBrukerinfo : Tilstand {
     ) {
         tilbakekreving.bruker!!.oppdater(brukerinfo)
         tilbakekreving.opprettBrevmottakerSteg(brukerinfo.navn, brukerinfo.ident)
-        if (tilbakekreving.features[Toggle.SendVarselbrev]) {
+        if (tilbakekreving.features[Toggle.SendAutomatiskVarselbrev]) {
             tilbakekreving.byttTilstand(SendVarselbrev)
         } else {
             tilbakekreving.byttTilstand(TilBehandling)

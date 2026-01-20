@@ -102,6 +102,7 @@ class Tilbakekreving internal constructor(
 
     fun håndter(varselbrevSendt: VarselbrevSendtHendelse) {
         tilstand.håndter(this, varselbrevSendt)
+        behandlingHistorikk.nåværende().entry.utførSideeffekt(tilstand, this)
     }
 
     fun håndter(iverksettelseHendelse: IverksettelseHendelse) {
@@ -192,16 +193,12 @@ class Tilbakekreving internal constructor(
         byttTilstand(AvventerBrukerinfo)
     }
 
-    fun trengerVarselbrev() {
+    fun trengerVarselbrev(varseltekstFraSaksbehandler: String) {
         val personinfo = bruker!!.hentBrukerinfo()
         val behandling = behandlingHistorikk.nåværende().entry
-
-        val varseltekstFraSaksbehandler = "Todo" // todo Kanskje vi skal ha en varselTekst i behandling?
-
-        val varselbrev = behandling.opprettVarselbrev()
+        val varselbrev = behandling.opprettVarselbrev(varseltekstFraSaksbehandler)
         val varselbrevInfo = behandling.hentForhåndsvarselinfo()
 
-        brevHistorikk.lagre(varselbrev)
         behovObservatør.håndter(
             VarselbrevBehov(
                 brevId = varselbrev.id,
@@ -218,6 +215,7 @@ class Tilbakekreving internal constructor(
                 gjelderDødsfall = personinfo.dødsdato != null,
             ),
         )
+        brevHistorikk.lagre(varselbrev)
     }
 
     fun trengerBrukerinfo() {
@@ -454,32 +452,6 @@ class Tilbakekreving internal constructor(
             eksternFagsakId = eksternFagsak.eksternId,
             ytelseType = eksternFagsak.ytelse.tilYtelseDTO(),
         )
-    }
-
-    fun opprettVarselbrevBehov(varseltekstFraSaksbehandler: String): VarselbrevBehov {
-        val behandling = behandlingHistorikk.nåværende().entry
-        val varselbrev = behandling.opprettVarselbrev()
-        val varselbrevInfo = hentVarselbrevInfo()
-        brevHistorikk.lagre(varselbrev)
-
-        return VarselbrevBehov(
-            brevId = varselbrev.id,
-            brukerinfo = varselbrevInfo.brukerinfo,
-            behandlingId = behandling.id,
-            varselbrev = varselbrev,
-            revurderingsvedtaksdato = varselbrevInfo.forhåndsvarselinfo.revurderingsvedtaksdato,
-            varseltekstFraSaksbehandler = varseltekstFraSaksbehandler,
-            eksternFagsakId = eksternFagsak.eksternId,
-            ytelse = eksternFagsak.ytelse,
-            behandlendeEnhet = varselbrevInfo.forhåndsvarselinfo.behandlendeEnhet,
-            feilutbetaltBeløp = varselbrevInfo.forhåndsvarselinfo.beløp,
-            feilutbetaltePerioder = varselbrevInfo.forhåndsvarselinfo.feilutbetaltePerioder,
-            gjelderDødsfall = varselbrevInfo.brukerinfo.dødsdato != null,
-        )
-    }
-
-    fun oppdaterSendtVarselbrev(journalpostId: String, varselbrevId: UUID) {
-        brevHistorikk.entry(varselbrevId).brevSendt(journalpostId)
     }
 
     fun hentForhåndsvarselFrontendDto(): ForhåndsvarselDto {

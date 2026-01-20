@@ -20,7 +20,7 @@ tilbakekreving:
   toggles:
     tilgangsmaskinen-enabled: true
     ny-modell:
-      SendVarselbrev: true
+      SendAutomatiskVarselbrev: false
       Arkivering: false
   tilgangsstyring:
     grupper:

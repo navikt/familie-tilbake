@@ -6,7 +6,7 @@ import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import java.time.LocalDate
-import java.time.LocalDateTime
+import java.time.Period
 import java.util.UUID
 
 data class BrevEntity(
@@ -16,14 +16,17 @@ data class BrevEntity(
     val opprettetDato: LocalDate,
     val journalpostId: String?,
     @param:JsonAlias("sendt", "sendtTid")
-    val sendtTid: LocalDateTime? = null,
+    val sendtTid: LocalDate? = null,
     val mottaker: RegistrertBrevmottakerEntity,
     val ansvarligSaksbehandlerIdent: String?,
     val kravgrunnlagRef: HistorikkReferanseEntity<UUID>,
-    val fristForTilbakemelding: LocalDate,
+    @param:JsonAlias("fristForTilbakemelding", "fristForUttalelse")
+    val fristForUttalelse: LocalDate?,
+    val tekstFraSaksbehandler: String?,
 ) {
     fun fraEntity(kravgrunnlagHistorikk: KravgrunnlagHistorikk): Brev {
         val sporing = Sporing("Ukjent", id.toString())
+        val sendtTid = sendtTid ?: opprettetDato
         return when (brevType) {
             Brevtype.VARSEL_BREV -> Varselbrev(
                 id = requireNotNull(id) { "Id kreves for Brev" },
@@ -34,7 +37,8 @@ data class BrevEntity(
                 mottaker = mottaker.fraEntity(),
                 ansvarligSaksbehandlerIdent = ansvarligSaksbehandlerIdent,
                 kravgrunnlag = kravgrunnlagHistorikk.finn(kravgrunnlagRef.id, sporing),
-                fristForTilbakemelding = fristForTilbakemelding,
+                fristForUttalelse = fristForUttalelse ?: sendtTid.plus(Period.ofWeeks(3)),
+                tekstFraSaksbehandler = tekstFraSaksbehandler,
             )
         }
     }

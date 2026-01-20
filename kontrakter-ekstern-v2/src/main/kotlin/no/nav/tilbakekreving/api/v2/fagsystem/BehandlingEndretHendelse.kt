@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.api.v2.fagsystem
 import com.fasterxml.jackson.annotation.JsonFormat
 import no.nav.tilbakekreving.api.v2.PeriodeDto
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -15,7 +16,7 @@ data class BehandlingEndretHendelse(
     data class Tilbakekreving(
         val behandlingId: UUID,
         val sakOpprettet: LocalDateTime,
-        val varselSendt: LocalDateTime?,
+        val varselSendt: LocalDate?,
         val behandlingsstatus: ForenkletBehandlingsstatus,
         @field:JsonFormat(shape = JsonFormat.Shape.STRING)
         val totaltFeilutbetaltBeløp: BigDecimal,

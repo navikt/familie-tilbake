@@ -8,7 +8,6 @@ import no.nav.tilbakekreving.entities.Brevtype
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.Period
 import java.util.UUID
 
@@ -16,19 +15,19 @@ data class Varselbrev(
     override val id: UUID,
     override val opprettetDato: LocalDate,
     override var journalpostId: String?,
-    override var sendtTid: LocalDateTime?,
+    override var sendtTid: LocalDate,
     val mottaker: RegistrertBrevmottaker,
     val brevmottakerStegId: UUID?,
     val ansvarligSaksbehandlerIdent: String?,
     val kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
-    val fristForTilbakemelding: LocalDate,
+    var fristForUttalelse: LocalDate,
+    var tekstFraSaksbehandler: String?,
 ) : Brev, FrontendDto<VarselbrevDto> {
     fun hentVarsletBeløp(): Long {
         return kravgrunnlag.entry.feilutbetaltBeløpForAllePerioder().toLong()
     }
 
     override fun brevSendt(journalpostId: String) {
-        sendtTid = LocalDateTime.now()
         this.journalpostId = journalpostId
     }
 
@@ -38,17 +37,20 @@ data class Varselbrev(
             brevmottakerStegId: UUID,
             ansvarligSaksbehandlerIdent: String,
             kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
+            varseltekstFraSaksbehandler: String,
         ): Varselbrev {
+            val sendtTid = LocalDate.now()
             return Varselbrev(
                 id = UUID.randomUUID(),
                 opprettetDato = LocalDate.now(),
                 journalpostId = null,
-                sendtTid = null,
+                sendtTid = sendtTid,
                 mottaker = mottaker,
                 brevmottakerStegId = brevmottakerStegId,
                 ansvarligSaksbehandlerIdent = ansvarligSaksbehandlerIdent,
                 kravgrunnlag = kravgrunnlag,
-                fristForTilbakemelding = LocalDate.now().plus(Period.ofWeeks(3)),
+                fristForUttalelse = sendtTid.plus(Period.ofWeeks(3)),
+                tekstFraSaksbehandler = varseltekstFraSaksbehandler,
             )
         }
     }
@@ -64,11 +66,12 @@ data class Varselbrev(
             mottaker = mottaker.tilEntity(brevmottakerStegId, null),
             ansvarligSaksbehandlerIdent = ansvarligSaksbehandlerIdent,
             kravgrunnlagRef = kravgrunnlag.tilEntity(),
-            fristForTilbakemelding = fristForTilbakemelding,
+            fristForUttalelse = fristForUttalelse,
+            tekstFraSaksbehandler = tekstFraSaksbehandler,
         )
     }
 
     override fun tilFrontendDto(): VarselbrevDto {
-        return VarselbrevDto(varselbrevSendtTid = sendtTid, uttalelsesfrist = fristForTilbakemelding)
+        return VarselbrevDto(varselbrevSendtTid = sendtTid, opprinneligFristForUttalelse = fristForUttalelse, tekstFraSaksbehandler = tekstFraSaksbehandler)
     }
 }

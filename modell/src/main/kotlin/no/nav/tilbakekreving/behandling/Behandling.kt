@@ -548,11 +548,12 @@ class Behandling internal constructor(
         )
     }
 
-    fun opprettVarselbrev(): Varselbrev = Varselbrev.opprett(
+    fun opprettVarselbrev(varseltekstFraSaksbehandler: String): Varselbrev = Varselbrev.opprett(
         mottaker = brevmottakerSteg!!.registrertBrevmottaker,
         brevmottakerStegId = brevmottakerSteg!!.id,
         ansvarligSaksbehandlerIdent = ansvarligSaksbehandler.ident,
         kravgrunnlag = kravgrunnlag,
+        varseltekstFraSaksbehandler = varseltekstFraSaksbehandler,
     )
 
     companion object {
@@ -590,7 +591,7 @@ class Behandling internal constructor(
                 fatteVedtakSteg = fatteVedtakSteg,
                 påVent = null,
                 brevmottakerSteg = null,
-                forhåndsvarsel = Forhåndsvarsel(null, null, mutableListOf<UtsettFrist>(), brevHistorikk.sisteVarselbrev()?.fristForTilbakemelding),
+                forhåndsvarsel = Forhåndsvarsel(null, null, mutableListOf<UtsettFrist>(), brevHistorikk.sisteVarselbrev()?.fristForUttalelse),
             ).also {
                 it.utførSideeffekt(tilstand, behandlingObservatør)
             }

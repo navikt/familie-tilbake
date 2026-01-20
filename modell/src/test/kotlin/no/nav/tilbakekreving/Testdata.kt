@@ -22,7 +22,6 @@ import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
-import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
@@ -139,11 +138,6 @@ fun fagsysteminfoHendelse(
     ),
     utvidPerioder = utvidPerioder,
     behandlendeEnhet = behandlendeEnhet,
-)
-
-fun varselbrevHendelse(varselbrevId: UUID) = VarselbrevSendtHendelse(
-    varselbrevId = varselbrevId,
-    journalpostId = UUID.randomUUID().toString(),
 )
 
 fun brukerinfoHendelse() = BrukerinfoHendelse(
