@@ -59,4 +59,16 @@ class AvventerFagsysteminfoTest {
         enhet?.kode shouldBe "0425"
         enhet?.navn shouldBe "Nav Solør"
     }
+
+    @Test
+    fun `skal ikke feile dersom vi prøver å hente URL for sak uten behandling`() {
+        val oppsamler = BehovObservatørOppsamler()
+        val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
+        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), oppsamler, opprettTilbakekrevingEvent, bigQueryService, EndringObservatørOppsamler(), features = defaultFeatures())
+
+        val kravgrunnlag = kravgrunnlag()
+        tilbakekreving.håndter(kravgrunnlag)
+        tilbakekreving.tilstand shouldBe AvventerFagsysteminfo
+        tilbakekreving.hentTilbakekrevingUrl("https://tilbakekreving.ansatt.dev.nav.no") shouldBe "https://tilbakekreving.ansatt.dev.nav.no/fagsystem/BA/fagsak/101010"
+    }
 }

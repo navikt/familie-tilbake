@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving
 
 import io.ktor.http.URLBuilder
+import io.ktor.http.appendPathSegments
 import io.ktor.http.path
 import no.nav.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.kontrakter.frontend.models.OppdagetDto
@@ -383,18 +384,11 @@ class Tilbakekreving internal constructor(
     }
 
     fun hentTilbakekrevingUrl(baseUrl: String): String {
-        val behandling = requireNotNull(behandlingHistorikk.nåværende())
-        val fagsystem = eksternFagsak.ytelse.tilFagsystemDTO()
-
         return URLBuilder(baseUrl).apply {
-            path(
-                "fagsystem",
-                fagsystem.toString(),
-                "fagsak",
-                eksternFagsak.eksternId,
-                "behandling",
-                behandling.entry.id.toString(),
-            )
+            path("fagsystem", eksternFagsak.ytelse.tilFagsystemDTO().toString(), "fagsak", eksternFagsak.eksternId)
+            if (behandlingHistorikk.harBehandling()) {
+                appendPathSegments("behandling", behandlingHistorikk.nåværende().entry.id.toString())
+            }
         }.buildString()
     }
 
