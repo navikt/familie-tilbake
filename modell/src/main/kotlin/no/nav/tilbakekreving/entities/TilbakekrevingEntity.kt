@@ -46,7 +46,10 @@ data class TilbakekrevingEntity(
         val eksternFagsakBehandlingHistorikk = EksternFagsakBehandlingHistorikk(eksternFagsak.behandlinger.map { it.fraEntity() }.toMutableList())
 
         val brevHistorikk = BrevHistorikk(
-            historikk = brevHistorikkEntities.map { it.fraEntity(kravgrunnlagHistorikk) }.toMutableList(),
+            historikk = brevHistorikkEntities
+                .filter { it.journalpostId != null || nåværendeTilstand == TilbakekrevingTilstand.SEND_VARSELBREV }
+                .map { it.fraEntity(kravgrunnlagHistorikk) }
+                .toMutableList(),
         )
 
         val behandlingHistorikk = BehandlingHistorikk(

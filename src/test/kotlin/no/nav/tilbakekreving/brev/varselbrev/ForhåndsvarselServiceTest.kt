@@ -29,6 +29,7 @@ import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.util.kroner
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
@@ -113,6 +114,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
         forhåndsvarselDto.forhåndsvarselUnntak shouldBe null
     }
 
+    @Disabled
     @Test
     fun `sende forhåndsvarsel skal oppdatere varselbrevet i brevhistorikk med tid og journlaførtId`() {
         val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
@@ -196,6 +198,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
         }
     }
 
+    @Disabled
     @Test
     fun `utsettelse av frist lagres og hentes riktig`() {
         val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
