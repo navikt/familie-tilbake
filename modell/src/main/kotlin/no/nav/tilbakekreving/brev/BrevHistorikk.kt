@@ -38,6 +38,6 @@ class BrevHistorikk(
     }
 
     fun tilEntity(): List<BrevEntity> {
-        return historikk.map { it.tilEntity() }
+        return historikk.map { it.tilEntity() }.filter { it.journalpostId != null }
     }
 }
