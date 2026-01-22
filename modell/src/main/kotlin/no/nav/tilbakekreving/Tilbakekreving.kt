@@ -197,7 +197,7 @@ class Tilbakekreving internal constructor(
     fun trengerVarselbrev(varseltekstFraSaksbehandler: String) {
         val personinfo = bruker!!.hentBrukerinfo()
         val behandling = behandlingHistorikk.nåværende().entry
-        val varselbrev = behandling.opprettVarselbrev(varseltekstFraSaksbehandler)
+        val varselbrev = behandling.opprettVarselbrev(varseltekstFraSaksbehandler, features)
         val varselbrevInfo = behandling.hentForhåndsvarselinfo()
 
         behovObservatør.håndter(

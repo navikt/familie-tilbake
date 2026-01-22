@@ -22,6 +22,7 @@ tilbakekreving:
     ny-modell:
       SendAutomatiskVarselbrev: false
       Arkivering: false
+      FjernUttalelsesfrist: true
   tilgangsstyring:
     grupper:
       ts:

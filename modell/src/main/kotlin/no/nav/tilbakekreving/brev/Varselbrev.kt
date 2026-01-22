@@ -1,6 +1,8 @@
 package no.nav.tilbakekreving.brev
 
+import no.nav.tilbakekreving.FeatureToggles
 import no.nav.tilbakekreving.FrontendDto
+import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.api.v1.dto.VarselbrevDto
 import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
 import no.nav.tilbakekreving.entities.BrevEntity
@@ -38,8 +40,14 @@ data class Varselbrev(
             ansvarligSaksbehandlerIdent: String,
             kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
             varseltekstFraSaksbehandler: String,
+            features: FeatureToggles,
         ): Varselbrev {
             val sendtTid = LocalDate.now()
+            val frist = if (features[Toggle.FjernUttalelsesfrist]) {
+                Period.ZERO
+            } else {
+                Period.ofWeeks(3)
+            }
             return Varselbrev(
                 id = UUID.randomUUID(),
                 opprettetDato = LocalDate.now(),
@@ -49,7 +57,7 @@ data class Varselbrev(
                 brevmottakerStegId = brevmottakerStegId,
                 ansvarligSaksbehandlerIdent = ansvarligSaksbehandlerIdent,
                 kravgrunnlag = kravgrunnlag,
-                fristForUttalelse = sendtTid.plus(Period.ofWeeks(3)),
+                fristForUttalelse = sendtTid.plus(frist),
                 tekstFraSaksbehandler = varseltekstFraSaksbehandler,
             )
         }

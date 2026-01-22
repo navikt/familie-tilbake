@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.behandling
 import no.nav.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.kontrakter.frontend.models.OppdagetDto
 import no.nav.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
+import no.nav.tilbakekreving.FeatureToggles
 import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
@@ -548,12 +549,16 @@ class Behandling internal constructor(
         )
     }
 
-    fun opprettVarselbrev(varseltekstFraSaksbehandler: String): Varselbrev = Varselbrev.opprett(
+    fun opprettVarselbrev(
+        varseltekstFraSaksbehandler: String,
+        features: FeatureToggles,
+    ): Varselbrev = Varselbrev.opprett(
         mottaker = brevmottakerSteg!!.registrertBrevmottaker,
         brevmottakerStegId = brevmottakerSteg!!.id,
         ansvarligSaksbehandlerIdent = ansvarligSaksbehandler.ident,
         kravgrunnlag = kravgrunnlag,
         varseltekstFraSaksbehandler = varseltekstFraSaksbehandler,
+        features = features,
     )
 
     companion object {

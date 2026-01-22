@@ -17,4 +17,5 @@ enum class Toggle(val default: Boolean) {
     Norg2(default = true),
     EregServices(default = false),
     EntraProxy(default = true),
+    FjernUttalelsesfrist(default = false),
 }
