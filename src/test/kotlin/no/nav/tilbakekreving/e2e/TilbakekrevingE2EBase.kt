@@ -30,7 +30,6 @@ import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagMediator
 import no.nav.tilbakekreving.repository.NyBehandlingRepository
-import no.nav.tilbakekreving.repository.NyBrevmottakerRepository
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.junit.jupiter.api.AfterEach
@@ -44,9 +43,6 @@ import kotlin.time.Duration.Companion.milliseconds
 open class TilbakekrevingE2EBase : E2EBase() {
     @Autowired
     protected lateinit var behandlingRepository: NyBehandlingRepository
-
-    @Autowired
-    protected lateinit var brevmottakerRepository: NyBrevmottakerRepository
 
     @Autowired
     protected lateinit var kravgrunnlagBufferRepository: KravgrunnlagBufferRepository

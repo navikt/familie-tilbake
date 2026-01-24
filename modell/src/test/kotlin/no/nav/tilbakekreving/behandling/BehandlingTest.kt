@@ -5,10 +5,8 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling
-import no.nav.tilbakekreving.behandling.saksbehandling.BrevmottakerSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
-import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
 import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.feil.ModellFeil
@@ -87,9 +85,6 @@ class BehandlingTest {
     @Test
     fun `flytt behandling tilbake til fakta - nullstiller fakta`() {
         val behandling = behandling()
-        behandling.apply {
-            brevmottakerSteg = BrevmottakerSteg(behandling.id, false, RegistrertBrevmottaker.DefaultMottaker(navn = "navn", personIdent = "ident"))
-        }
         val ansvarligSaksbehandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
         val periode = 1.januar til 31.januar
 
@@ -118,7 +113,6 @@ class BehandlingTest {
         val kravgrunnlag = kravgrunnlag()
         val behandling = behandling(kravgrunnlag)
         behandling.apply {
-            brevmottakerSteg = BrevmottakerSteg(behandling.id, false, RegistrertBrevmottaker.DefaultMottaker(navn = "navn", personIdent = "ident"))
             lagreUttalelse(UttalelseVurdering.JA, listOf(), null)
         }
 
@@ -142,10 +136,8 @@ class BehandlingTest {
     fun `flytt behandling tilbake til fakta - nullstiller vilkårsvurderingen`() {
         val behandling = behandling()
         behandling.apply {
-            brevmottakerSteg = BrevmottakerSteg(behandling.id, false, RegistrertBrevmottaker.DefaultMottaker(navn = "navn", personIdent = "ident"))
             lagreUttalelse(UttalelseVurdering.JA, listOf(), null)
         }
-
         val periode = 1.januar til 31.januar
         val ansvarligSaksbehandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
 

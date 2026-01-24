@@ -4,9 +4,7 @@ import io.kotest.inspectors.forExactly
 import io.kotest.inspectors.forOne
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.tilbakekreving.Tilbakekreving
-import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.behov.BrukerinfoBehov
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
@@ -34,8 +32,6 @@ class AvventerBrukerinfoTest {
         tilbakekreving.håndter(kravgrunnlag())
         tilbakekreving.håndter(fagsysteminfoHendelse())
         tilbakekreving.håndter(brukerinfoHendelse())
-
-        tilbakekreving.behandlingHistorikk.nåværende().entry.brevmottakerSteg?.hentRegistrertBrevmottaker().shouldBeInstanceOf<RegistrertBrevmottaker.DefaultMottaker>()
     }
 
     @Test

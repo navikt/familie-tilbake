@@ -28,6 +28,7 @@ class TilbakekrevingRepository(
     private val behandlingRepository: NyBehandlingRepository,
     private val kravgrunnlagRepository: NyKravgrunnlagRepository,
     private val eksternFagsakRepository: NyEksternFagsakRepository,
+    private val brevRepository: NyBrevRepository,
 ) {
     private val objectMapper = jacksonObjectMapper()
         .registerModule(KotlinModule.Builder().build())
@@ -52,13 +53,14 @@ class TilbakekrevingRepository(
             val jsonText = rs.getString("snapshot")
             objectMapper.readValue(jsonText, TilbakekrevingEntity::class.java)
         }.single()
-
         return TilbakekrevingEntityMapper.map(
             resultSet = resultSet,
             eksternFagsak = eksternFagsakRepository.hentEksternFagsak(id),
             behandlingHistorikk = behandlingRepository.hentBehandlinger(id, json.behandlingHistorikkEntities),
             kravgrunnlagHistorikk = kravgrunnlagRepository.hentKravgrunnlag(id),
-            brevHistorikk = json.brevHistorikkEntities,
+            brevHistorikk = brevRepository.hentBrev(id)
+                .takeIf { it.isNotEmpty() }
+                ?: json.brevHistorikkEntities,
             bruker = json.bruker,
         )
     }
@@ -128,6 +130,7 @@ class TilbakekrevingRepository(
         eksternFagsakRepository.lagre(entity.eksternFagsak)
         kravgrunnlagRepository.lagre(entity.kravgrunnlagHistorikkEntities)
         behandlingRepository.lagreBehandlinger(entity.behandlingHistorikkEntities)
+        brevRepository.lagre(entity.brevHistorikkEntities)
     }
 
     fun antallSakerPerTilstand(): List<ForenkletTilstandStatistikk> {
