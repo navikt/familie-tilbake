@@ -33,8 +33,8 @@ class NyUttalelseRepository(
     }
 
     fun lagre(brukerUttaleserEntity: BrukeruttalelseEntity?) {
+        jdbcTemplate.update("DELETE FROM tilbakekreving_brukeruttalelse WHERE behandling_ref=?;", brukerUttaleserEntity!!.behandlingRef)
         BrukerUttalelseEntityMapper.insertQuery(jdbcTemplate, brukerUttaleserEntity!!)
-        jdbcTemplate.update("DELETE FROM tilbakekreving_uttalelse_informasjon WHERE brukeruttalelse_ref=?;", brukerUttaleserEntity.id)
         brukerUttaleserEntity.uttalelseInfoEntity.forEach {
             BrukerUttalelseEntityMapper.UttalelseInfo.upsertQuery(jdbcTemplate, it)
         }
