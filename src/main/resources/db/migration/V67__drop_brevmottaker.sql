@@ -1,0 +1,2 @@
+DROP TABLE tilbakekreving_registrert_brevmottaker;
+DROP TABLE tilbakekreving_brevmottaker;

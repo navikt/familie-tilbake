@@ -32,7 +32,6 @@ data class BehandlingEntity(
     val foreslåVedtakStegEntity: ForeslåVedtakStegEntity,
     val fatteVedtakStegEntity: FatteVedtakStegEntity,
     val påVentEntity: PåVentEntity?,
-    val brevmottakerStegEntity: BrevmottakerStegEntity?,
     val forhåndsvarselEntity: ForhåndsvarselEntity = ForhåndsvarselEntity(null, null, listOf()), // todo denne opprettelsen skal fjernes etter prodsetting
 ) {
     fun fraEntity(
@@ -60,7 +59,6 @@ data class BehandlingEntity(
             foreslåVedtakSteg = foreslåVedtakStegEntity.fraEntity(),
             fatteVedtakSteg = fatteVedtakStegEntity.fraEntity(),
             påVent = påVentEntity?.fraEntity(),
-            brevmottakerSteg = brevmottakerStegEntity?.fraEntity(),
             forhåndsvarsel = forhåndsvarselEntity.fraEntity(brevHistorikk.sisteVarselbrev()?.fristForUttalelse),
         )
     }

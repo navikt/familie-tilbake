@@ -19,12 +19,10 @@ import no.nav.tilbakekreving.api.v1.dto.TotrinnsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
-import no.nav.tilbakekreving.behandling.saksbehandling.BrevmottakerSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
-import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg.Companion.behandlingsstegstatus
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg.Companion.klarTilVisning
@@ -82,7 +80,6 @@ class Behandling internal constructor(
     private val foreslåVedtakSteg: ForeslåVedtakSteg,
     private val fatteVedtakSteg: FatteVedtakSteg,
     private var påVent: PåVent?,
-    var brevmottakerSteg: BrevmottakerSteg?,
     private val forhåndsvarsel: Forhåndsvarsel,
 ) : Historikk.HistorikkInnslag<UUID> {
     internal fun nyFaktastegFrontendDto(varselbrev: Varselbrev?): FaktaOmFeilutbetalingDto = faktasteg.nyTilFrontendDto(kravgrunnlag.entry, eksternFagsakRevurdering.entry, varselbrev)
@@ -127,7 +124,6 @@ class Behandling internal constructor(
             foreslåVedtakStegEntity = foreslåVedtakSteg.tilEntity(id),
             fatteVedtakStegEntity = fatteVedtakSteg.tilEntity(id),
             påVentEntity = påVent?.tilEntity(id),
-            brevmottakerStegEntity = brevmottakerSteg?.tilEntity(id),
             forhåndsvarselEntity = forhåndsvarsel.tilEntity(id),
         )
     }
@@ -340,15 +336,6 @@ class Behandling internal constructor(
         oppdaterBehandler(ansvarligSaksbehandler)
     }
 
-    internal fun håndter(
-        behandler: Behandler,
-        brevmottaker: RegistrertBrevmottaker,
-        observatør: BehandlingObservatør,
-    ) {
-        brevmottakerSteg!!.håndter(brevmottaker, sporingsinformasjon())
-        oppdaterBehandler(behandler)
-    }
-
     internal fun oppdaterEksternFagsak(
         eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
     ) {
@@ -360,22 +347,6 @@ class Behandling internal constructor(
 
     internal fun oppdaterBehandlendeEnhet(enhetKode: String) {
         enhet = Enhet.forKode(enhetKode)
-    }
-
-    internal fun fjernManuelBrevmottaker(
-        behandler: Behandler,
-        manuellBrevmottakerId: UUID,
-        observatør: BehandlingObservatør,
-    ) {
-        brevmottakerSteg!!.fjernManuellBrevmottaker(manuellBrevmottakerId, sporingsinformasjon())
-        oppdaterBehandler(behandler)
-    }
-
-    internal fun opprettBrevmottaker(
-        navn: String,
-        ident: String,
-    ) {
-        brevmottakerSteg = BrevmottakerSteg.opprett(navn, ident)
     }
 
     fun settPåVent(
@@ -409,10 +380,6 @@ class Behandling internal constructor(
             )
         }
     }
-
-    fun aktiverBrevmottakerSteg() = brevmottakerSteg!!.aktiverSteg()
-
-    fun deaktiverBrevmottakerSteg() = brevmottakerSteg!!.deaktiverSteg()
 
     fun kanUtbetales(): Boolean = fatteVedtakSteg.erFullstendig()
 
@@ -553,8 +520,6 @@ class Behandling internal constructor(
         varseltekstFraSaksbehandler: String,
         features: FeatureToggles,
     ): Varselbrev = Varselbrev.opprett(
-        mottaker = brevmottakerSteg!!.registrertBrevmottaker,
-        brevmottakerStegId = brevmottakerSteg!!.id,
         ansvarligSaksbehandlerIdent = ansvarligSaksbehandler.ident,
         kravgrunnlag = kravgrunnlag,
         varseltekstFraSaksbehandler = varseltekstFraSaksbehandler,
@@ -595,7 +560,6 @@ class Behandling internal constructor(
                 foreslåVedtakSteg = foreslåVedtakSteg,
                 fatteVedtakSteg = fatteVedtakSteg,
                 påVent = null,
-                brevmottakerSteg = null,
                 forhåndsvarsel = Forhåndsvarsel(null, null, mutableListOf<UtsettFrist>(), brevHistorikk.sisteVarselbrev()?.fristForUttalelse),
             ).also {
                 it.utførSideeffekt(tilstand, behandlingObservatør)

@@ -3,7 +3,6 @@ package no.nav.tilbakekreving.entity
 import no.nav.tilbakekreving.entities.BehandlerEntity
 import no.nav.tilbakekreving.entities.BehandlerType
 import no.nav.tilbakekreving.entities.BehandlingEntity
-import no.nav.tilbakekreving.entities.BrevmottakerStegEntity
 import no.nav.tilbakekreving.entities.BrukeruttalelseEntity
 import no.nav.tilbakekreving.entities.EnhetEntity
 import no.nav.tilbakekreving.entities.FaktastegEntity
@@ -96,7 +95,6 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
         foreslåVedtak: ForeslåVedtakStegEntity,
         fatteVedtak: FatteVedtakStegEntity,
         påVent: PåVentEntity?,
-        brevmottakerSteg: BrevmottakerStegEntity?,
         brukeruttalelseEntity: BrukeruttalelseEntity?,
         forhåndsvarselUnntak: ForhåndsvarselUnntakEntity?,
         fristUtsettelse: List<FristUtsettelseEntity>,
@@ -120,7 +118,6 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
             foreslåVedtakStegEntity = foreslåVedtak,
             fatteVedtakStegEntity = fatteVedtak,
             påVentEntity = påVent,
-            brevmottakerStegEntity = brevmottakerSteg,
             forhåndsvarselEntity = ForhåndsvarselEntity(brukeruttalelseEntity, forhåndsvarselUnntak, fristUtsettelse),
         )
     }

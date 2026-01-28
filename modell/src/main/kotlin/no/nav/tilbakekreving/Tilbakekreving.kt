@@ -21,7 +21,6 @@ import no.nav.tilbakekreving.behandling.Enhet
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
-import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.VarselbrevBehov
@@ -137,13 +136,6 @@ class Tilbakekreving internal constructor(
     fun håndterTrekkTilbakeFraGodkjenning() {
         val nåværendeBehandling = behandlingHistorikk.nåværende().entry
         tilstand.håndterTrekkTilbakeFraGodkjenning(nåværendeBehandling, sporingsinformasjon())
-    }
-
-    fun opprettBrevmottakerSteg(
-        navn: String,
-        ident: String,
-    ) {
-        behandlingHistorikk.nåværende().entry.opprettBrevmottaker(navn, ident)
     }
 
     fun opprettBehandling(
@@ -331,36 +323,6 @@ class Tilbakekreving internal constructor(
         behandling.utførSideeffekt(tilstand, this)
     }
 
-    fun håndter(
-        behandler: Behandler,
-        brevmottaker: RegistrertBrevmottaker,
-    ) {
-        val behandling = behandlingHistorikk.nåværende().entry
-        behandling.håndter(behandler, brevmottaker, this)
-        behandling.utførSideeffekt(tilstand, this)
-    }
-
-    fun aktiverBrevmottakerSteg() {
-        val behandling = behandlingHistorikk.nåværende().entry
-        behandling.aktiverBrevmottakerSteg()
-        behandling.utførSideeffekt(tilstand, this)
-    }
-
-    fun deaktiverBrevmottakerSteg() = {
-        val behandling = behandlingHistorikk.nåværende().entry
-        behandling.deaktiverBrevmottakerSteg()
-        behandling.utførSideeffekt(tilstand, this)
-    }
-
-    fun fjernManuelBrevmottaker(
-        behandler: Behandler,
-        manuellBrevmottakerId: UUID,
-    ) {
-        val behandling = behandlingHistorikk.nåværende().entry
-        behandling.fjernManuelBrevmottaker(behandler, manuellBrevmottakerId, this)
-        behandling.utførSideeffekt(tilstand, this)
-    }
-
     fun frontendDtoForBehandling(
         behandler: Behandler,
         kanBeslutte: Boolean,
@@ -375,7 +337,7 @@ class Tilbakekreving internal constructor(
             eksternFagsak = this.eksternFagsak.tilEntity(id),
             behandlingHistorikkEntities = this.behandlingHistorikk.tilEntity(id),
             kravgrunnlagHistorikkEntities = this.kravgrunnlagHistorikk.tilEntity(id),
-            brevHistorikkEntities = this.brevHistorikk.tilEntity(),
+            brevHistorikkEntities = this.brevHistorikk.tilEntity(id),
             opprettet = this.opprettet,
             opprettelsesvalg = this.opprettelsesvalg,
             nestePåminnelse = nestePåminnelse,
