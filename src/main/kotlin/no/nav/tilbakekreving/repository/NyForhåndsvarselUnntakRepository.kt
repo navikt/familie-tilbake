@@ -21,7 +21,8 @@ class NyForhåndsvarselUnntakRepository(
     }
 
     fun lagre(forhåndsvarselUnntakEntity: ForhåndsvarselUnntakEntity) {
-        jdbcTemplate.update("DELETE FROM tilbakekreving_forhåndsvarsel_unntak WHERE id=?", forhåndsvarselUnntakEntity.id)
+        jdbcTemplate.update("DELETE FROM tilbakekreving_brukeruttalelse WHERE behandling_ref=?;", forhåndsvarselUnntakEntity.behandlingRef)
+        jdbcTemplate.update("DELETE FROM tilbakekreving_forhåndsvarsel_unntak WHERE behandling_ref=?", forhåndsvarselUnntakEntity.behandlingRef)
         ForhåndsvarselUnntakEntityMapper.upsertQuery(jdbcTemplate, forhåndsvarselUnntakEntity)
     }
 }

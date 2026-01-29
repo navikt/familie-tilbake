@@ -63,6 +63,9 @@ class Forhåndsvarsel(
         begrunnelseForUnntak: BegrunnelseForUnntak,
         beskrivelse: String,
     ) {
+        if (begrunnelseForUnntak != BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG) {
+            brukeruttalelse = null
+        }
         forhåndsvarselUnntak = ForhåndsvarselUnntak(
             id = UUID.randomUUID(),
             begrunnelseForUnntak = begrunnelseForUnntak,
