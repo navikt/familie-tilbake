@@ -10,6 +10,7 @@ import no.nav.tilbakekreving.kontrakter.bruker.FrontendBrukerDto
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import java.time.LocalDate
+import java.util.UUID
 
 class Bruker(
     val aktør: Aktør,
@@ -41,8 +42,10 @@ class Bruker(
         )
     }
 
-    fun tilEntity(): BrukerEntity {
+    fun tilEntity(tilbakekrevingId: String): BrukerEntity {
         return BrukerEntity(
+            id = UUID.randomUUID(),
+            tilbakekrevingRef = tilbakekrevingId,
             aktørEntity = aktør.tilEntity(),
             språkkode = språkkode,
             navn = navn,

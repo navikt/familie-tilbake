@@ -4,8 +4,11 @@ import no.nav.tilbakekreving.aktør.Bruker
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import java.time.LocalDate
+import java.util.UUID
 
 data class BrukerEntity(
+    val id: UUID? = null, // Todo nullabe må fjernes etter deploy og kjørt migrering
+    val tilbakekrevingRef: String? = null, // Todo nullabe må fjernes etter deploy og kjørt migrering
     val aktørEntity: AktørEntity,
     var språkkode: Språkkode?,
     var navn: String?,
