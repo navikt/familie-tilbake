@@ -341,7 +341,7 @@ class Tilbakekreving internal constructor(
             opprettet = this.opprettet,
             opprettelsesvalg = this.opprettelsesvalg,
             nestePåminnelse = nestePåminnelse,
-            bruker = this.bruker?.tilEntity(),
+            bruker = this.bruker?.tilEntity(id),
         )
     }
 

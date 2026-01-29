@@ -29,6 +29,7 @@ class TilbakekrevingRepository(
     private val kravgrunnlagRepository: NyKravgrunnlagRepository,
     private val eksternFagsakRepository: NyEksternFagsakRepository,
     private val brevRepository: NyBrevRepository,
+    private val brukerRepository: NyBrukerRepository,
 ) {
     private val objectMapper = jacksonObjectMapper()
         .registerModule(KotlinModule.Builder().build())
@@ -61,7 +62,7 @@ class TilbakekrevingRepository(
             brevHistorikk = brevRepository.hentBrev(id)
                 .takeIf { it.isNotEmpty() }
                 ?: json.brevHistorikkEntities,
-            bruker = json.bruker,
+            bruker = brukerRepository.hentBruker(id) ?: json.bruker,
         )
     }
 
@@ -131,6 +132,7 @@ class TilbakekrevingRepository(
         kravgrunnlagRepository.lagre(entity.kravgrunnlagHistorikkEntities)
         behandlingRepository.lagreBehandlinger(entity.behandlingHistorikkEntities)
         brevRepository.lagre(entity.brevHistorikkEntities)
+        entity.bruker?.let { brukerRepository.lagre(it) }
     }
 
     fun antallSakerPerTilstand(): List<ForenkletTilstandStatistikk> {
