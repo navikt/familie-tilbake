@@ -16,7 +16,6 @@ class NyBehandlingRepository(
     private val fatteVedtakRepository: NyFatteVedtakRepository,
     private val foreslåVedtakRepository: NyForeslåVedtakRepository,
     private val vilkårsvurderingRepository: NyVilkårsvurderingRepository,
-    private val brevmottakerRepository: NyBrevmottakerRepository,
     private val påventRepository: NyPåventRepository,
     private val uttalelseRepository: NyUttalelseRepository,
     private val forhåndsvarselUnntakRepository: NyForhåndsvarselUnntakRepository,
@@ -40,7 +39,6 @@ class NyBehandlingRepository(
                 foreslåVedtak = foreslåVedtakRepository.hentForeslåttVedtak(behandlingId) ?: jsonBehandling.foreslåVedtakStegEntity,
                 fatteVedtak = fatteVedtakRepository.hentVedtaksvurdering(behandlingId) ?: jsonBehandling.fatteVedtakStegEntity,
                 påVent = påventRepository.hentPåventetBehandling(behandlingId) ?: jsonBehandling.påVentEntity,
-                brevmottakerSteg = brevmottakerRepository.hentBrevmottaker(behandlingId) ?: jsonBehandling.brevmottakerStegEntity,
                 brukeruttalelseEntity = uttalelseRepository.hentBrukerUttalelsen(behandlingId),
                 forhåndsvarselUnntak = forhåndsvarselUnntakRepository.hentForhåndsvarselUnntak(behandlingId),
                 fristUtsettelse = utsettUttalelseRepository.hentUtsettUttalelseFrist(behandlingId),
@@ -57,7 +55,6 @@ class NyBehandlingRepository(
             vilkårsvurderingRepository.lagre(behandling.vilkårsvurderingstegEntity)
             foreslåVedtakRepository.lagre(behandling.foreslåVedtakStegEntity)
             påventRepository.lagre(behandling.påVentEntity, behandling.id)
-            behandling.brevmottakerStegEntity?.let { brevmottakerRepository.lagre(it) }
             behandling.forhåndsvarselEntity?.let {
                 it.brukeruttalelseEntity?.let { uttalelseRepository.lagre(it) }
                 it.forhåndsvarselUnntakEntity?.let { forhåndsvarselUnntakRepository.lagre(it) }

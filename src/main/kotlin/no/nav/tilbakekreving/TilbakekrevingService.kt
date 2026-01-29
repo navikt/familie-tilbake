@@ -17,12 +17,10 @@ import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeslåVedtaksstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.BestillBrevDto
-import no.nav.tilbakekreving.api.v1.dto.ManuellBrevmottakerRequestDto
 import no.nav.tilbakekreving.api.v2.fagsystem.behov.FagsysteminfoBehovHendelse
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
-import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
 import no.nav.tilbakekreving.behov.Behov
 import no.nav.tilbakekreving.behov.BrukerinfoBehov
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
@@ -41,7 +39,6 @@ import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.brev.Dokumentmalstype
-import no.nav.tilbakekreving.kontrakter.brev.MottakerType
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
@@ -370,68 +367,6 @@ class TilbakekrevingService(
         )
     }
 
-    fun behandleBrevmottaker(
-        behandler: Behandler,
-        tilbakekrevingId: String,
-        brevmottakerDto: ManuellBrevmottakerRequestDto,
-        id: UUID,
-    ) {
-        hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
-            when (brevmottakerDto.type) {
-                MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE -> {
-                    tilbakekreving.håndter(
-                        behandler,
-                        RegistrertBrevmottaker.UtenlandskAdresseMottaker(
-                            id = id,
-                            navn = brevmottakerDto.navn,
-                            manuellAdresseInfo = brevmottakerDto.manuellAdresseInfo,
-                        ),
-                    )
-                }
-
-                MottakerType.FULLMEKTIG -> {
-                    tilbakekreving.håndter(
-                        behandler,
-                        RegistrertBrevmottaker.FullmektigMottaker(
-                            id = id,
-                            navn = brevmottakerDto.navn,
-                            organisasjonsnummer = brevmottakerDto.organisasjonsnummer,
-                            personIdent = brevmottakerDto.personIdent,
-                            vergeType = requireNotNull(brevmottakerDto.vergetype) { "FullmektigMottaker krever vergetype" },
-                            manuellAdresseInfo = brevmottakerDto.manuellAdresseInfo,
-                        ),
-                    )
-                }
-
-                MottakerType.VERGE -> {
-                    tilbakekreving.håndter(
-                        behandler,
-                        RegistrertBrevmottaker.VergeMottaker(
-                            id = id,
-                            navn = brevmottakerDto.navn,
-                            personIdent = brevmottakerDto.personIdent,
-                            vergeType = requireNotNull(brevmottakerDto.vergetype) { "VergeMottaker krever vergetype" },
-                            manuellAdresseInfo = brevmottakerDto.manuellAdresseInfo,
-                        ),
-                    )
-                }
-
-                MottakerType.DØDSBO -> {
-                    tilbakekreving.håndter(
-                        behandler,
-                        RegistrertBrevmottaker.DødsboMottaker(
-                            id = id,
-                            navn = brevmottakerDto.navn,
-                            manuellAdresseInfo = brevmottakerDto.manuellAdresseInfo,
-                        ),
-                    )
-                }
-
-                else -> throw IllegalArgumentException("Default eller ugydlig mottaker type ${brevmottakerDto.type}")
-            }
-        }
-    }
-
     fun settPåVent(tilbakekrevingId: String, venteårsak: Venteårsak, tidsfrist: LocalDate, begrunnelse: String?) {
         hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
             tilbakekreving.behandlingHistorikk.nåværende().entry.settPåVent(
@@ -457,29 +392,6 @@ class TilbakekrevingService(
     fun trekkTilbakeFraGodkjenning(tilbakekrevingId: String) {
         hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
             tilbakekreving.håndterTrekkTilbakeFraGodkjenning()
-        }
-    }
-
-    fun aktiverBrevmottakerSteg(tilbakekrevingId: String) {
-        hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
-            validerBrevmottaker(tilbakekreving)
-            tilbakekreving.aktiverBrevmottakerSteg()
-        }
-    }
-
-    fun fjernBrevmottakerSteg(tilbakekrevingId: String) {
-        hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
-            tilbakekreving.deaktiverBrevmottakerSteg()
-        }
-    }
-
-    fun fjernManuelBrevmottaker(
-        behandler: Behandler,
-        tilbakekrevingId: String,
-        manuellBrevmottakerId: UUID,
-    ) {
-        hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
-            tilbakekreving.fjernManuelBrevmottaker(behandler, manuellBrevmottakerId)
         }
     }
 

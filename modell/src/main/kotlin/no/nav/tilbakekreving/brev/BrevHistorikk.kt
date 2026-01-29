@@ -37,7 +37,7 @@ class BrevHistorikk(
         return historikk.filterIsInstance<Varselbrev>().lastOrNull()
     }
 
-    fun tilEntity(): List<BrevEntity> {
-        return historikk.map { it.tilEntity() }
+    fun tilEntity(tilbakekrevingId: String): List<BrevEntity> {
+        return historikk.map { it.tilEntity(tilbakekrevingId) }
     }
 }

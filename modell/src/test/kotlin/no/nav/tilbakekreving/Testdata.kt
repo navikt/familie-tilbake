@@ -9,7 +9,6 @@ import no.nav.tilbakekreving.behandling.Enhet
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
-import no.nav.tilbakekreving.behandling.saksbehandling.RegistrertBrevmottaker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonSærligeGrunner
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Skyldgrad
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
@@ -147,12 +146,6 @@ fun brukerinfoHendelse() = BrukerinfoHendelse(
     kjønn = Kjønn.MANN,
     dødsdato = null,
     språkkode = bruker().språkkode,
-)
-
-fun defaultBrevmottaker() = RegistrertBrevmottaker.DefaultMottaker(
-    id = UUID.randomUUID(),
-    navn = "test bruker",
-    personIdent = bruker().ident,
 )
 
 fun eksternFagsakBehandling(): EksternFagsakRevurdering {
