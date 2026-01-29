@@ -69,8 +69,6 @@ data class Varselbrev(
                 fristForUttalelse = fristForUttalelse,
                 tekstFraSaksbehandler = tekstFraSaksbehandler,
             ),
-            // Todo denne må fjernes etter deploy og kjørt migrering.
-            ansvarligSaksbehandlerIdent = ansvarligSaksbehandlerIdent,
         )
     }
 

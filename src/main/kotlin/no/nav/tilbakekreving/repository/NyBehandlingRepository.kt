@@ -23,22 +23,20 @@ class NyBehandlingRepository(
 ) {
     fun hentBehandlinger(
         tilbakekrevingId: String,
-        jsonBehandlinger: List<BehandlingEntity>,
     ): List<BehandlingEntity> {
         return jdbcTemplate.query(
             "SELECT * FROM tilbakekreving_behandling WHERE tilbakekreving_id = ?",
             FieldConverter.NumericId.convert(tilbakekrevingId),
         ) { resultSet, _ ->
             val behandlingId = resultSet[BehandlingEntityMapper.id]
-            val jsonBehandling = jsonBehandlinger.single { it.id == behandlingId }
             BehandlingEntityMapper.map(
                 resultSet = resultSet,
                 foreldelsessteg = foreldelseRepository.hentForeldelsesvurdering(behandlingId),
                 faktasteg = faktavurderingRepository.hentFaktavurdering(behandlingId),
-                vilkårsvurdering = vilkårsvurderingRepository.hentVilkårsvurdering(behandlingId) ?: jsonBehandling.vilkårsvurderingstegEntity,
-                foreslåVedtak = foreslåVedtakRepository.hentForeslåttVedtak(behandlingId) ?: jsonBehandling.foreslåVedtakStegEntity,
-                fatteVedtak = fatteVedtakRepository.hentVedtaksvurdering(behandlingId) ?: jsonBehandling.fatteVedtakStegEntity,
-                påVent = påventRepository.hentPåventetBehandling(behandlingId) ?: jsonBehandling.påVentEntity,
+                vilkårsvurdering = vilkårsvurderingRepository.hentVilkårsvurdering(behandlingId),
+                foreslåVedtak = foreslåVedtakRepository.hentForeslåttVedtak(behandlingId),
+                fatteVedtak = fatteVedtakRepository.hentVedtaksvurdering(behandlingId),
+                påVent = påventRepository.hentPåventetBehandling(behandlingId),
                 brukeruttalelseEntity = uttalelseRepository.hentBrukerUttalelsen(behandlingId),
                 forhåndsvarselUnntak = forhåndsvarselUnntakRepository.hentForhåndsvarselUnntak(behandlingId),
                 fristUtsettelse = utsettUttalelseRepository.hentUtsettUttalelseFrist(behandlingId),

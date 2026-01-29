@@ -7,8 +7,8 @@ import java.time.LocalDate
 import java.util.UUID
 
 data class BrukerEntity(
-    val id: UUID? = null, // Todo nullabe må fjernes etter deploy og kjørt migrering
-    val tilbakekrevingRef: String? = null, // Todo nullabe må fjernes etter deploy og kjørt migrering
+    val id: UUID,
+    val tilbakekrevingRef: String,
     val aktørEntity: AktørEntity,
     var språkkode: Språkkode?,
     var navn: String?,
