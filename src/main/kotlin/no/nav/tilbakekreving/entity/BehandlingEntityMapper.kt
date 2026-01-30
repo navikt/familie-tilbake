@@ -66,13 +66,13 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
     val ansvarligSaksbehandlerType = field(
         column = "ansvarlig_saksbehandler_type",
         getter = { it.ansvarligSaksbehandler.type },
-        converter = FieldConverter.EnumConverter.of<BehandlerType>().required(),
+        converter = FieldConverter.EnumConverter.of<BehandlerType>(),
     )
 
     val ansvarligSaksbehandlerIdent = field(
         column = "ansvarlig_saksbehandler_ident",
         getter = { it.ansvarligSaksbehandler.ident },
-        converter = FieldConverter.StringConverter.required(),
+        converter = FieldConverter.StringConverter,
     )
 
     val enhetId = field(
@@ -89,6 +89,8 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
 
     fun map(
         resultSet: ResultSet,
+        enhet: EnhetEntity?,
+        ansvarligSaksbehandler: BehandlerEntity,
         foreldelsessteg: ForeldelsesstegEntity,
         faktasteg: FaktastegEntity,
         vilkårsvurdering: VilkårsvurderingstegEntity,
@@ -107,9 +109,11 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
             sistEndret = resultSet[sistEndret],
             enhet = resultSet[enhetId]?.let {
                 EnhetEntity(kode = it, navn = resultSet[enhetNavn]!!)
-            },
+            } ?: enhet,
             revurderingsårsak = resultSet[årsak],
-            ansvarligSaksbehandler = BehandlerEntity(type = resultSet[ansvarligSaksbehandlerType], ident = resultSet[ansvarligSaksbehandlerIdent]),
+            ansvarligSaksbehandler = resultSet[ansvarligSaksbehandlerType]?.let {
+                BehandlerEntity(type = it, ident = resultSet[ansvarligSaksbehandlerIdent]!!)
+            } ?: ansvarligSaksbehandler,
             eksternFagsakBehandlingRef = HistorikkReferanseEntity(resultSet[eksternFagsakBehandlingId]),
             kravgrunnlagRef = HistorikkReferanseEntity(resultSet[kravgrunnlagId]),
             foreldelsestegEntity = foreldelsessteg,
