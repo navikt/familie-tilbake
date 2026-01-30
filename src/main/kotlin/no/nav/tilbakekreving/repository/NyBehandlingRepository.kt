@@ -33,8 +33,6 @@ class NyBehandlingRepository(
             val jsonBehandling = jsonBehandlinger.single { it.id == behandlingId }
             BehandlingEntityMapper.map(
                 resultSet = resultSet,
-                enhet = jsonBehandling.enhet,
-                ansvarligSaksbehandler = jsonBehandling.ansvarligSaksbehandler,
                 foreldelsessteg = foreldelseRepository.hentForeldelsesvurdering(behandlingId),
                 faktasteg = faktavurderingRepository.hentFaktavurdering(behandlingId),
                 vilkårsvurdering = vilkårsvurderingRepository.hentVilkårsvurdering(behandlingId) ?: jsonBehandling.vilkårsvurderingstegEntity,
