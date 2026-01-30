@@ -13,7 +13,7 @@ class NyForeslåVedtakRepository(
 ) {
     fun hentForeslåttVedtak(
         behandlingId: UUID,
-    ): ForeslåVedtakStegEntity? {
+    ): ForeslåVedtakStegEntity {
         return jdbcTemplate.query(
             "SELECT * FROM tilbakekreving_foreslåvedtak WHERE behandling_ref = ?",
             behandlingId,
@@ -21,7 +21,7 @@ class NyForeslåVedtakRepository(
             ForeslåVedtakEntityMapper.map(
                 resultSet,
             )
-        }.singleOrNull()
+        }.single()
     }
 
     fun lagre(foreslåVedtakStegEntity: ForeslåVedtakStegEntity) {

@@ -74,8 +74,7 @@ data class AktsomhetsvurderingEntity(
 }
 
 data class GodTroEntity(
-    // TODO: Fjerne default etter prod er ok
-    val periodeRef: UUID? = null,
+    val periodeRef: UUID?,
     val begrunnelse: String = "",
     val beholdType: BeholdType,
     val beløp: BigDecimal?,

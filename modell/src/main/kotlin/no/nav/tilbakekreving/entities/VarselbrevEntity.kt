@@ -1,6 +1,5 @@
 package no.nav.tilbakekreving.entities
 
-import com.fasterxml.jackson.annotation.JsonAlias
 import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
@@ -12,10 +11,8 @@ data class VarselbrevEntity(
     val id: UUID = UUID.randomUUID(),
     val brevRef: UUID,
     val journalpostId: String?,
-    @param:JsonAlias("sendt", "sendtTid")
     val sendtTid: LocalDate? = null,
     val ansvarligSaksbehandlerIdent: String,
-    @param:JsonAlias("fristForTilbakemelding", "fristForUttalelse")
     val fristForUttalelse: LocalDate?,
     val tekstFraSaksbehandler: String?,
 ) {

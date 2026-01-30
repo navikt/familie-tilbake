@@ -37,8 +37,6 @@ object BrevEntityMapper : Entity<BrevEntity, UUID, UUID>(
             brevType = resultSet[brevType],
             kravgrunnlagRef = HistorikkReferanseEntity(resultSet[kravgrunnlagRef]),
             varselbrevEntity = varselbrevEntity,
-            // todo denne må fjernes etter deploy og kjørt migrering
-            ansvarligSaksbehandlerIdent = varselbrevEntity?.ansvarligSaksbehandlerIdent,
         )
     }
 

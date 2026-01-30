@@ -20,11 +20,11 @@ class NyVilkårsvurderingRepository(private val jdbcTemplate: JdbcTemplate) {
         lagreVurderinger(vilkårsvurdering.vurderinger)
     }
 
-    fun hentVilkårsvurdering(behandlingId: UUID): VilkårsvurderingstegEntity? {
+    fun hentVilkårsvurdering(behandlingId: UUID): VilkårsvurderingstegEntity {
         return jdbcTemplate.query("SELECT * FROM tilbakekreving_vilkårsvurdering WHERE behandling_ref=?;", behandlingId) { resultSet, _ ->
             val vurderingId = resultSet[VilkårsvurderingEntityMapper.id]
             VilkårsvurderingEntityMapper.map(resultSet, hentVurdertePerioder(vurderingId))
-        }.singleOrNull()
+        }.single()
     }
 
     fun lagreVurderinger(perioder: List<VilkårsvurderingsperiodeEntity>) {
