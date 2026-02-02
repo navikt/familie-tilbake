@@ -112,3 +112,9 @@ AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_BARNETILSYN: 1
 AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_OVERGANGSSTØNAD: 1
 AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_SKOLEPENGER: 1
 AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_KONTANTSTØTTE: 1
+
+bigquery:
+  flyway:
+    enabled: true
+    dataset: tilbakekreving_dataset
+    jdbc-url: "jdbc:bigquery://https://www.googleapis.com/bigquery/v2:443;OAuthType=3;ProjectId=tilbake-dev-d683;"

@@ -1,5 +1,7 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.kotlin.dsl.register
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
+import java.net.URI
 
 val springDocVersion = "2.8.9"
 val testcontainersVersion = "1.21.3"
@@ -80,6 +82,94 @@ repositories {
     }
 }
 
+abstract class DownloadFileTask : DefaultTask() {
+    @get:Input
+    abstract val url: Property<String>
+
+    @get:OutputFile
+    abstract val outputFile: RegularFileProperty
+
+    @TaskAction
+    fun run() {
+        val out = outputFile.get().asFile
+        out.parentFile.mkdirs()
+
+        URI.create(url.get()).toURL().openStream().use { input ->
+            out.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
+    }
+}
+
+val bigqueryDriverUrl =
+    "https://storage.googleapis.com/simba-bq-release/jdbc/SimbaJDBCDriverforGoogleBigQuery42_1.6.5.1002.zip"
+
+val bigQueryDriverDir = layout.buildDirectory.dir("libs/bigquery-jdbc")
+val bigQueryZip = layout.buildDirectory.file("downloads/bigquery-jdbc.zip")
+
+val downloadBigQueryDriver = tasks.register<DownloadFileTask>("downloadBigQueryJdbc") {
+    url.set(bigqueryDriverUrl)
+    outputFile.set(bigQueryZip)
+}
+
+val unzipBigQueryDriver = tasks.register<Copy>("unzipBigQueryDriver") {
+    dependsOn(downloadBigQueryDriver)
+    from(zipTree(bigQueryZip))
+    into(bigQueryDriverDir)
+}
+
+val cleanupBigQueryDownloads = tasks.register<Delete>("cleanupBigQueryDownloads") {
+    delete(layout.buildDirectory.dir("downloads"))
+}
+
+unzipBigQueryDriver.configure {
+    finalizedBy(cleanupBigQueryDownloads)
+}
+
+val bigQueryDriver by configurations.creating
+
+val bigQueryDriverJarsTree = fileTree(bigQueryDriverDir) {
+    include("**/*.jar")
+
+    exclude("**/httpclient5-*.jar")
+    exclude("**/httpcore5-*.jar")
+    exclude("**/httpcore5-h2-*.jar")
+    exclude("**/httpclient-*.jar")
+    exclude("**/httpcore-*.jar")
+
+    exclude("**/jspecify-*.jar")
+    exclude("**/opentelemetry-*.jar")
+    exclude("**/commons-codec-*.jar")
+    exclude("**/json-*.jar")
+    exclude("**/protobuf-java-util-*.jar")
+    exclude("**/threetenbp-*.jar")
+    exclude("**/google-api-client-*.jar")
+    exclude("**/google-oauth-client-*.jar")
+    exclude("**/opencensus-api-*.jar")
+    exclude("**/opencensus-contrib-http-util-*.jar")
+    exclude("**/checker-compat-qual-*.jar")
+    exclude("**/jsr305-*.jar")
+    exclude("**/javax.annotation-api-*.jar")
+    exclude("**/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar")
+    exclude("**/threeten-extra-*.jar")
+    exclude("**/protobuf-java-*.jar")
+    exclude("**/animal-sniffer-annotations-*.jar")
+    exclude("**/annotations-*.jar")
+    exclude("**/arrow-*.jar")
+    exclude("**/conscrypt-openjdk-uber-*.jar")
+    exclude("**/flatbuffers-java-*.jar")
+    exclude("**/perfmark-api-*.jar")
+    exclude("**/jackson-annotations-*.jar")
+    exclude("**/jackson-core-*.jar")
+    exclude("**/jackson-databind-*.jar")
+    exclude("**/jackson-module-*.jar")
+    exclude("**/jackson-datatype-*.jar")
+}
+
+val bigQueryDriverJars: FileCollection =
+    files(bigQueryDriverJarsTree).builtBy(unzipBigQueryDriver)
+
 dependencies {
     implementation(platform(SpringBootPlugin.BOM_COORDINATES))
 
@@ -88,6 +178,9 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson-jvm:$ktorVersion")
     implementation("com.google.cloud:google-cloud-bigquery:2.54.0")
+    implementation("org.apache.httpcomponents.client5:httpclient5")
+    implementation("org.apache.httpcomponents.core5:httpcore5")
+    implementation("org.apache.httpcomponents.core5:httpcore5-h2")
 
     api("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocVersion")
     api("org.springdoc:springdoc-openapi-starter-common:$springDocVersion")
@@ -138,7 +231,9 @@ dependencies {
     api("io.getunleash:unleash-client-java:11.0.2")
     api("org.messaginghub:pooled-jms:3.1.7")
     api("org.flywaydb:flyway-core")
+    api("org.flywaydb:flyway-gcp-bigquery")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
+    runtimeOnly(bigQueryDriverJars)
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.13.4")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")

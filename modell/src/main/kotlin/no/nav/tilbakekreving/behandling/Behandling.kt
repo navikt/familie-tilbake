@@ -11,6 +11,7 @@ import no.nav.tilbakekreving.api.v1.dto.BehandlingsoppsummeringDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegsinfoDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatsperiodeDto
+import no.nav.tilbakekreving.api.v1.dto.BigQueryBehandlingDataDto
 import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
 import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselUnntakDto
@@ -31,6 +32,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkår
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.IverksettelseBehov
 import no.nav.tilbakekreving.beregning.Beregning
+import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
 import no.nav.tilbakekreving.breeeev.Signatur
 import no.nav.tilbakekreving.brev.BrevHistorikk
@@ -85,6 +87,21 @@ class Behandling internal constructor(
     private val forhåndsvarsel: Forhåndsvarsel,
 ) : Historikk.HistorikkInnslag<UUID> {
     internal fun nyFaktastegFrontendDto(varselbrev: Varselbrev?): FaktaOmFeilutbetalingDto = faktasteg.nyTilFrontendDto(kravgrunnlag.entry, eksternFagsakRevurdering.entry, varselbrev)
+
+    private fun bigqueryData(tilstand: Tilstand, ytelse: String): BigQueryBehandlingDataDto {
+        return BigQueryBehandlingDataDto(
+            behandlingId = id.toString(),
+            opprettetDato = opprettet,
+            periode = fullstendigPeriode(),
+            behandlingstype = type.name,
+            ytelse = ytelse,
+            beløp = totaltFeilutbetaltBeløp().toLong(),
+            enhetNavn = enhet?.navn,
+            enhetKode = enhet?.kode,
+            status = tilstand.behandlingsstatus(this).name,
+            resultat = hentVedtaksresultat()?.name,
+        )
+    }
 
     fun faktastegFrontendDto(
         opprettelsesvalg: Opprettelsesvalg,
@@ -460,7 +477,7 @@ class Behandling internal constructor(
         return forhåndsvarsel.forhåndsvarselUnntakTilFrontendDto()
     }
 
-    internal fun utførSideeffekt(tilstand: Tilstand, observatør: BehandlingObservatør) {
+    internal fun utførSideeffekt(tilstand: Tilstand, observatør: BehandlingObservatør, bigQueryService: BigQueryService, ytelsesNavn: String) {
         observatør.behandlingOppdatert(
             behandlingId = id,
             eksternBehandlingId = eksternFagsakRevurdering.entry.eksternId,
@@ -471,6 +488,9 @@ class Behandling internal constructor(
             ansvarligBeslutter = fatteVedtakSteg.ansvarligBeslutter?.ident,
             totaltFeilutbetaltBeløp = kravgrunnlag.entry.feilutbetaltBeløpForAllePerioder(),
             totalFeilutbetaltPeriode = fullstendigPeriode(),
+        )
+        bigQueryService.oppdaterBehandling(
+            bigqueryData(tilstand, ytelsesNavn),
         )
     }
 
@@ -549,6 +569,8 @@ class Behandling internal constructor(
             brevHistorikk: BrevHistorikk,
             behandlingObservatør: BehandlingObservatør,
             tilstand: Tilstand,
+            bigQueryService: BigQueryService,
+            ytelsesNavn: String,
         ): Behandling {
             val opprettet = LocalDateTime.now()
             return Behandling(
@@ -569,7 +591,7 @@ class Behandling internal constructor(
                 påVent = null,
                 forhåndsvarsel = Forhåndsvarsel(null, null, mutableListOf<UtsettFrist>(), brevHistorikk.sisteVarselbrev()?.fristForUttalelse),
             ).also {
-                it.utførSideeffekt(tilstand, behandlingObservatør)
+                it.utførSideeffekt(tilstand, behandlingObservatør, bigQueryService, ytelsesNavn)
             }
         }
     }
