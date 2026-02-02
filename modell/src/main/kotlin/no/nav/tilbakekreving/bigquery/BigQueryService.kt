@@ -1,13 +1,9 @@
 package no.nav.tilbakekreving.bigquery
 
-import java.time.LocalDateTime
+import no.nav.tilbakekreving.api.v1.dto.BigQueryBehandlingDataDto
 
 interface BigQueryService {
-    fun leggeTilBehanlingInfo(
-        behandlingId: String,
-        opprettetTid: LocalDateTime,
-        ytelsestypeKode: String,
-        behandlingstype: String,
-        behandlendeEnhet: String?,
+    fun oppdaterBehandling(
+        bigqueryData: BigQueryBehandlingDataDto,
     )
 }

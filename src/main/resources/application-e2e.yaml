@@ -128,3 +128,10 @@ NAIS_APP_NAME: familie-klage
 UNLEASH_SERVER_API_URL: http://localhost:4242/api
 UNLEASH_SERVER_API_TOKEN: token
 NAIS_CLUSTER_NAME: dev-gcp
+
+bigquery:
+  flyway:
+    enabled: false
+    dataset: tilbakekreving_dataset
+    jdbc-url: "jdbc:bigquery://https://www.googleapis.com/bigquery/v2:443;OAuthType=3;ProjectId=tilbake-dev-d683;"
+    lock-retry-count: -1

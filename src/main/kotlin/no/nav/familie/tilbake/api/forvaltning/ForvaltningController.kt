@@ -338,6 +338,7 @@ class ForvaltningController(
                 logger.medContext(SecureLog.Context.fra(tilbakekreving)) {
                     info("Migrerer sak {}", tilbakekreving.hentTilbakekrevingUrl(applicationProperties.frontendUrl))
                 }
+                tilbakekreving.migrerBigQueryData() // Denne må fjernes etter at eksisterende data er migrert
                 tilbakekreving.tilEntity()
             }
         }

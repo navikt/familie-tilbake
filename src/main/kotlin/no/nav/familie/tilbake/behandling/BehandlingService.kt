@@ -42,9 +42,11 @@ import no.nav.tilbakekreving.FagsystemUtil
 import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingPåVentDto
+import no.nav.tilbakekreving.api.v1.dto.BigQueryBehandlingDataDto
 import no.nav.tilbakekreving.api.v1.dto.ByttEnhetDto
 import no.nav.tilbakekreving.api.v1.dto.HenleggelsesbrevFritekstDto
 import no.nav.tilbakekreving.api.v1.dto.OpprettRevurderingDto
+import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandling
 import no.nav.tilbakekreving.kontrakter.OpprettManueltTilbakekrevingRequest
@@ -94,6 +96,7 @@ class BehandlingService(
     private val norg2Service: Norg2Service,
     private val featureService: FeatureService,
     private val saksbehandlerService: SaksbehandlerService,
+    private val bigQueryService: BigQueryService,
 ) {
     private val log = TracedLogger.getLogger<BehandlingService>()
 
@@ -182,6 +185,7 @@ class BehandlingService(
         val revurdering =
             BehandlingMapper.tilDomeneBehandlingRevurdering(originalBehandling, opprettRevurderingDto.årsakstype, logContext)
         behandlingRepository.insert(revurdering)
+        oppdaterBigQuery(revurdering)
 
         val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(opprettRevurderingDto.ytelsestype)
         historikkService.lagHistorikkinnslag(
@@ -381,6 +385,7 @@ class BehandlingService(
         oppdaterAnsvarligSaksbehandler(behandlingId)
         behandlingTilstandService.opprettSendingAvBehandlingenHenlagt(behandlingId, logContext)
         val fagsystem = fagsakService.finnFagsystem(behandling.fagsakId)
+        oppdaterBigQuery(behandling)
 
         val aktør =
             when (behandlingsresultatstype) {
@@ -421,6 +426,7 @@ class BehandlingService(
         val gjeldendeSaksbehandler = ContextService.hentSaksbehandler(logContext)
         if (behandling.ansvarligSaksbehandler != gjeldendeSaksbehandler) {
             behandlingRepository.update(behandling.copy(ansvarligSaksbehandler = gjeldendeSaksbehandler))
+            oppdaterBigQuery(behandling)
         }
     }
 
@@ -475,6 +481,7 @@ class BehandlingService(
                 regelverk = respons.regelverk,
             ),
         )
+        oppdaterBigQuery(behandling)
     }
 
     @Transactional
@@ -484,6 +491,7 @@ class BehandlingService(
     ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         behandlingRepository.update(behandling.copy(saksbehandlingstype = Saksbehandlingstype.ORDINÆR))
+        oppdaterBigQuery(behandling)
     }
 
     @Transactional
@@ -667,6 +675,7 @@ class BehandlingService(
                 erAutomatiskOgFeatureTogglePå,
             )
         behandlingRepository.insert(behandling)
+        oppdaterBigQuery(behandling)
         return behandling
     }
 
@@ -846,6 +855,25 @@ class BehandlingService(
                 httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
+    }
+
+    private fun oppdaterBigQuery(behandling: Behandling) {
+        val kravgrunnlag = kravgrunnlagRepository.findByBehandlingId(behandling.id).lastOrNull()
+        val ytelsestype = fagsakService.finnFagsystemForBehandlingId(behandling.id).navn
+        bigQueryService.oppdaterBehandling(
+            BigQueryBehandlingDataDto(
+                behandlingId = behandling.id.toString(),
+                opprettetDato = behandling.opprettetTidspunkt,
+                periode = kravgrunnlag?.samletPeriode(),
+                behandlingstype = behandling.type.name,
+                ytelse = ytelsestype,
+                beløp = kravgrunnlag?.sumFeilutbetaling()?.toLong(),
+                enhetNavn = behandling.behandlendeEnhetsNavn,
+                enhetKode = behandling.behandlendeEnhet,
+                status = behandling.status.name,
+                resultat = behandling.sisteResultat?.type?.name,
+            ),
+        )
     }
 
     companion object {

@@ -78,3 +78,11 @@ tilbakekreving:
   entraProxy:
     base-url: dummy
     scope: dummy
+
+bigquery:
+  flyway:
+    enabled: false
+    dataset: ""
+    locations: classpath:db/migration-bigquery
+    lock-retry-count: -1
+    jdbc-url: ""
