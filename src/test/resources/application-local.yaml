@@ -86,3 +86,11 @@ NAIS_CLUSTER_NAME: dev-gcp
 
 ainntekt:
   baseUrl: http://localhost:8080/mock-path
+
+bigquery:
+  flyway:
+    enabled: false
+    dataset: ""
+    locations: classpath:db/migration-bigquery
+    lock-retry-count: -1
+    jdbc-url: ""

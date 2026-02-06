@@ -202,3 +202,11 @@ kafka:
     requestTopic: "tilbake.privat-tbk-hentfagsystemsbehandling"
     responseTopic: "tilbake.privat-tbk-hentfagsystemsbehandling-svar"
 
+bigquery:
+  flyway:
+    enabled: false
+    dataset: ""                 # settes per miljø
+    locations: classpath:db/migration-bigquery
+    lock-retry-count: -1
+    jdbc-url: ""                # settes per miljø
+

@@ -80,6 +80,12 @@ repositories {
     }
 }
 
+val bigQueryJdbc by configurations.creating
+
+configurations.runtimeClasspath {
+    extendsFrom(bigQueryJdbc)
+}
+
 dependencies {
     implementation(platform(SpringBootPlugin.BOM_COORDINATES))
 
@@ -88,6 +94,9 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson-jvm:$ktorVersion")
     implementation("com.google.cloud:google-cloud-bigquery:2.54.0")
+    implementation("org.apache.httpcomponents.client5:httpclient5")
+    implementation("org.apache.httpcomponents.core5:httpcore5")
+    implementation("org.apache.httpcomponents.core5:httpcore5-h2")
 
     api("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocVersion")
     api("org.springdoc:springdoc-openapi-starter-common:$springDocVersion")
@@ -138,8 +147,26 @@ dependencies {
     api("io.getunleash:unleash-client-java:11.0.2")
     api("org.messaginghub:pooled-jms:3.1.7")
     api("org.flywaydb:flyway-core")
+    api("org.flywaydb:flyway-gcp-bigquery")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
+    bigQueryJdbc(
+        fileTree("libs/bigquery-jdbc") {
+            include("*.jar")
 
+            // Unngå kollisjon med Spring Boot sin Apache HttpClient 5.5
+            exclude("httpclient5-*.jar")
+            exclude("httpcore5-*.jar")
+            exclude("httpcore5-h2-*.jar")
+
+            // Unngå gammelt HttpClient 4.x i samme runtime
+            exclude("httpclient-*.jar")
+            exclude("httpcore-*.jar")
+
+            // Disse er transports for google-http-client som ofte ender i konflikt/overstyring
+            exclude("google-http-client-apache-v2-*.jar")
+            exclude("google-http-client-apache-v5-*.jar")
+        },
+    )
     testImplementation("org.junit.jupiter:junit-jupiter:5.13.4")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
