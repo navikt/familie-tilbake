@@ -26,13 +26,19 @@ tilbakekreving:
   tilgangsstyring:
     grupper:
       ts:
-        veileder: ${rolle.enslig.veileder}
-        saksbehandler: ${rolle.enslig.saksbehandler}
-        beslutter: ${rolle.enslig.beslutter}
+        veileder:
+          - ${rolle.enslig.veileder}
+        saksbehandler:
+          - ${rolle.enslig.saksbehandler}
+        beslutter:
+          - ${rolle.enslig.beslutter}
       aap:
-        veileder: ${rolle.enslig.veileder}
-        saksbehandler: ${rolle.enslig.saksbehandler}
-        beslutter: ${rolle.enslig.beslutter}
+        veileder:
+          - ${rolle.enslig.veileder}
+        saksbehandler:
+          - ${rolle.enslig.saksbehandler}
+        beslutter:
+          - ${rolle.enslig.beslutter}
   tilgangsmaskinen:
     scope: api://dev-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
   bigQuery:

@@ -19,7 +19,7 @@ fun applicationProps(): ApplicationProperties {
         tilgangsstyring = Tilgangsstyring(
             grupper = mapOf(
                 FagsystemDTO.TS to mapOf(
-                    Behandlerrolle.SYSTEM to "",
+                    Behandlerrolle.SYSTEM to listOf(""),
                 ),
             ),
             forvalterGruppe = "",

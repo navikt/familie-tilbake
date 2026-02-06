@@ -6,17 +6,17 @@ tilbakekreving:
   tilgangsstyring:
     grupper:
       ba:
-        veileder: ${rolle.barnetrygd.veileder}
-        beslutter: ${rolle.barnetrygd.beslutter}
-        saksbehandler: ${rolle.barnetrygd.saksbehandler}
+        veileder: [ "${rolle.barnetrygd.veileder}" ]
+        beslutter: [ "${rolle.barnetrygd.beslutter}" ]
+        saksbehandler: [ "${rolle.barnetrygd.saksbehandler}" ]
       ef:
-        veileder: ${rolle.enslig.veileder}
-        beslutter: ${rolle.enslig.beslutter}
-        saksbehandler: ${rolle.enslig.saksbehandler}
+        veileder: [ "${rolle.enslig.veileder}" ]
+        beslutter: [ "${rolle.enslig.beslutter}" ]
+        saksbehandler: [ "${rolle.enslig.saksbehandler}" ]
       kont:
-        veileder: ${rolle.kontantstøtte.veileder}
-        beslutter: ${rolle.kontantstøtte.beslutter}
-        saksbehandler: ${rolle.kontantstøtte.saksbehandler}
+        veileder: [ "${rolle.kontantstøtte.veileder}" ]
+        beslutter: [ "${rolle.kontantstøtte.beslutter}" ]
+        saksbehandler: [ "${rolle.kontantstøtte.saksbehandler}" ]
     forvalterGruppe: ${rolle.teamfamilie.forvalter}
   token-exchange:
     token-endpoint: ${NAIS_TOKEN_ENDPOINT}

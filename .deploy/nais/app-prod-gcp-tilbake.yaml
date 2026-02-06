@@ -78,6 +78,7 @@ spec:
           - id: 224b5097-d0af-462c-8d8e-49c0e8a42661 # TS beslutter
           - id: dc8b0182-1449-445a-833c-1a4620b7c2be # 0000-GA-AAP_SAKSBEHANDLER_OPPFOLGING
           - id: 3a65f41a-b3f3-4b1c-830a-df20ff020980 # 0000-GA-AAP_SAKSBEHANDLER_NASJONAL
+          - id: 963df3e5-04f7-415e-8d13-1de981603940 # 0000-GA-AAP_LES
           - id: 5763b52f-f16a-483d-8f40-25be9de95c0a # 0000-GA-AAP_BESLUTTER
       enabled: true
       replyURLs:

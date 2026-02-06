@@ -47,10 +47,12 @@ tilbakekreving:
   tilgangsstyring:
     ts:
       grupper:
-        veileder: ${rolle.teamfamilie.forvalter}
-        forvalter: ${rolle.teamfamilie.forvalter}
-        saksbehandler: ${rolle.teamfamilie.forvalter}
-        beslutter: ${rolle.teamfamilie.forvalter}
+        veileder:
+          - ${rolle.teamfamilie.forvalter}
+        saksbehandler:
+          - ${rolle.teamfamilie.forvalter}
+        beslutter:
+          - ${rolle.teamfamilie.forvalter}
   tilgangsmaskinen:
     scope: api://dev-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
   bigQuery:

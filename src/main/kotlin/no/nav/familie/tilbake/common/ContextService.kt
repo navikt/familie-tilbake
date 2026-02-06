@@ -102,7 +102,7 @@ object ContextService {
 
         for ((fagsystem, grupper) in tilgangsstyring.grupper) {
             val tilgjengeligeRoller = grupper
-                .filterValues { gruppeId -> gruppeId in gruppeMedlemskap }
+                .filterValues { gruppeIder -> gruppeIder.any(gruppeMedlemskap::contains) }
                 .keys
                 .toMutableList()
 
