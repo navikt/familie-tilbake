@@ -23,7 +23,7 @@ class LagreVarselbrevsporingTask(
     private val log = TracedLogger.getLogger<LagreVarselbrevsporingTask>()
 
     override fun doTask(task: Task) {
-        log.medContext(task.logContext()) { info("{} prosesserer med id={} og metadata {}", this::class.simpleName, task.id, task.metadata.toString()) }
+        log.medContext(task.logContext()) { info("{} prosesserer med id={}", this::class.simpleName, task.id) }
 
         val varseltekstBase64: String = task.metadata.getProperty("fritekst")
         val varseltekst = Base64.getDecoder().decode(varseltekstBase64).decodeToString()
