@@ -11,6 +11,7 @@ import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
+import no.nav.familie.tilbake.bigQuery.BigQueryAdapterService
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -94,6 +95,7 @@ class BehandlingService(
     private val norg2Service: Norg2Service,
     private val featureService: FeatureService,
     private val saksbehandlerService: SaksbehandlerService,
+    private val bigQueryAdapterService: BigQueryAdapterService,
 ) {
     private val log = TracedLogger.getLogger<BehandlingService>()
 
@@ -182,6 +184,7 @@ class BehandlingService(
         val revurdering =
             BehandlingMapper.tilDomeneBehandlingRevurdering(originalBehandling, opprettRevurderingDto.årsakstype, logContext)
         behandlingRepository.insert(revurdering)
+        bigQueryAdapterService.oppdaterBigQuery(revurdering)
 
         val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(opprettRevurderingDto.ytelsestype)
         historikkService.lagHistorikkinnslag(
@@ -370,13 +373,14 @@ class BehandlingService(
         behandlingskontrollService.henleggBehandlingssteg(behandlingId)
 
         // oppdaterer behandlingsresultat og behandling
-        behandlingRepository.update(
+        val oppdatertBehandling = behandlingRepository.update(
             behandling.copy(
                 resultater = setOf(Behandlingsresultat(type = behandlingsresultatstype)),
                 status = Behandlingsstatus.AVSLUTTET,
                 avsluttetDato = LocalDate.now(),
             ),
         )
+        bigQueryAdapterService.oppdaterBigQuery(oppdatertBehandling)
 
         oppdaterAnsvarligSaksbehandler(behandlingId)
         behandlingTilstandService.opprettSendingAvBehandlingenHenlagt(behandlingId, logContext)
@@ -507,12 +511,13 @@ class BehandlingService(
         } else {
             integrasjonerClient.hentNavkontor(byttEnhetDto.enhet)
         }
-        behandlingRepository.update(
+        val oppdatertBehandling = behandlingRepository.update(
             behandling.copy(
                 behandlendeEnhet = byttEnhetDto.enhet,
                 behandlendeEnhetsNavn = enhet.navn,
             ),
         )
+        bigQueryAdapterService.oppdaterBigQuery(oppdatertBehandling)
         oppdaterAnsvarligSaksbehandler(behandlingId)
 
         historikkService.lagHistorikkinnslag(
@@ -551,12 +556,13 @@ class BehandlingService(
         }
 
         behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        behandlingRepository.update(
+        val oppdatertBehandling = behandlingRepository.update(
             behandling.copy(
                 status = Behandlingsstatus.AVSLUTTET,
                 avsluttetDato = LocalDate.now(),
             ),
         )
+        bigQueryAdapterService.oppdaterBigQuery(oppdatertBehandling)
 
         behandlingskontrollService
             .oppdaterBehandlingsstegStatus(
@@ -667,6 +673,7 @@ class BehandlingService(
                 erAutomatiskOgFeatureTogglePå,
             )
         behandlingRepository.insert(behandling)
+        bigQueryAdapterService.oppdaterBigQuery(behandling)
         return behandling
     }
 

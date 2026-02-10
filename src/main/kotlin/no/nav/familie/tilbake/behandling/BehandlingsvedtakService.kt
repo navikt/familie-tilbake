@@ -5,6 +5,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingsvedtak
 import no.nav.familie.tilbake.behandling.domain.Iverksettingsstatus
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
+import no.nav.familie.tilbake.bigQuery.BigQueryAdapterService
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
@@ -19,6 +20,7 @@ class BehandlingsvedtakService(
     private val behandlingRepository: BehandlingRepository,
     private val tellerService: TellerService,
     private val tilbakeBeregningService: TilbakekrevingsberegningService,
+    private val bigQueryAdapterService: BigQueryAdapterService,
 ) {
     @Transactional
     fun opprettBehandlingsvedtak(behandlingId: UUID) {
@@ -37,7 +39,9 @@ class BehandlingsvedtakService(
                 type = behandlingsresultatstype,
                 behandlingsvedtak = behandlingsvedtak,
             )
-        behandlingRepository.update(behandling.copy(resultater = setOf(behandlingsresultat)))
+        val oppdatertBehandling = behandlingRepository.update(behandling.copy(resultater = setOf(behandlingsresultat)))
+        bigQueryAdapterService.oppdaterBigQuery(oppdatertBehandling)
+
         tellerService.tellVedtak(behandlingsresultatstype, behandling)
     }
 
@@ -53,7 +57,9 @@ class BehandlingsvedtakService(
         val oppdatertBehandlingsresultat =
             aktivBehandlingsresultat
                 .copy(behandlingsvedtak = behandlingsvedtak.copy(iverksettingsstatus = iverksettingsstatus))
-        return behandlingRepository.update(behandling.copy(resultater = setOf(oppdatertBehandlingsresultat)))
+        val oppdatertBehandling = behandlingRepository.update(behandling.copy(resultater = setOf(oppdatertBehandlingsresultat)))
+        bigQueryAdapterService.oppdaterBigQuery(oppdatertBehandling)
+        return oppdatertBehandling
     }
 
     private fun utledBehandlingsresultatstype(vedtaksresultat: Vedtaksresultat): Behandlingsresultatstype =

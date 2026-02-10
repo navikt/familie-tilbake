@@ -14,6 +14,7 @@ import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
+import no.nav.familie.tilbake.bigQuery.BigQueryAdapterService
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.exceptionhandler.feilHvis
@@ -65,6 +66,7 @@ class ForvaltningService(
     private val taskService: TracableTaskService,
     private val endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher,
     private val logService: LogService,
+    private val bigQueryAdapterService: BigQueryAdapterService,
 ) {
     private val log = TracedLogger.getLogger<ForvaltningService>()
 
@@ -182,7 +184,7 @@ class ForvaltningService(
 
         // oppdaterer behandlingsresultat og behandling
         val behandlingsresultat = Behandlingsresultat(type = Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD)
-        behandlingRepository.update(
+        val oppdatertBehandling = behandlingRepository.update(
             behandling.copy(
                 resultater = setOf(behandlingsresultat),
                 status = Behandlingsstatus.AVSLUTTET,
@@ -190,6 +192,7 @@ class ForvaltningService(
                 avsluttetDato = LocalDate.now(),
             ),
         )
+        bigQueryAdapterService.oppdaterBigQuery(oppdatertBehandling)
         behandlingTilstandService.opprettSendingAvBehandlingenHenlagt(behandlingId, logContext)
 
         historikkService.lagHistorikkinnslag(
