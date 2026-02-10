@@ -67,7 +67,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         lagreUttalelse(behandlingId)
 
         somSaksbehandler(ansvarligSaksbehandler) {
-            behandlingApiController.oppdaterFakta(
+            behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
@@ -175,7 +175,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
 
         somSaksbehandler(ansvarligSaksbehandler) {
-            behandlingApiController.oppdaterFakta(
+            behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
@@ -199,7 +199,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         lagreUttalelse(behandlingId)
 
         somSaksbehandler(ansvarligSaksbehandler) {
-            behandlingApiController.oppdaterFakta(
+            behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
@@ -256,7 +256,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         lagreUttalelse(behandlingId)
 
         somSaksbehandler(ansvarligSaksbehandler) {
-            behandlingApiController.oppdaterFakta(
+            behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
@@ -334,7 +334,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         lagreUttalelse(behandlingId)
 
         somSaksbehandler(ansvarligSaksbehandler) {
-            behandlingApiController.oppdaterFakta(
+            behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
@@ -439,7 +439,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
 
         val oppdagetDato = LocalDate.now()
         somSaksbehandler("Z999999") {
-            behandlingApiController.oppdaterFakta(
+            behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = OppdaterFaktaOmFeilutbetalingDto(
                     perioder = null,
@@ -456,7 +456,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         }
 
         somSaksbehandler("Z999999") {
-            behandlingApiController.fakta(
+            behandlingApiController.behandlingFakta(
                 behandlingId = behandlingId.toString(),
             ).body?.vurdering?.oppdaget shouldBe OppdagetDto(
                 dato = oppdagetDato,
@@ -479,7 +479,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
 
         somSaksbehandler("Z999999") {
-            behandlingApiController.oppdaterFakta(
+            behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = OppdaterFaktaOmFeilutbetalingDto(
                     vurdering = VurderingDto(
@@ -490,7 +490,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         }
 
         somSaksbehandler("Z999999") {
-            behandlingApiController.fakta(
+            behandlingApiController.behandlingFakta(
                 behandlingId = behandlingId.toString(),
             ).body?.vurdering?.årsak shouldBe "årsak"
         }
@@ -509,7 +509,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
 
         somSaksbehandler("Z999999") {
-            behandlingApiController.fakta(
+            behandlingApiController.behandlingFakta(
                 behandlingId = behandlingId.toString(),
             ).body?.perioder?.single()?.rettsligGrunnlag shouldBe listOf(
                 RettsligGrunnlagDto(
@@ -532,7 +532,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
             ),
         )
         somSaksbehandler("Z999999") {
-            behandlingApiController.oppdaterFakta(
+            behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = OppdaterFaktaOmFeilutbetalingDto(
                     perioder = faktaPerioder,
@@ -541,7 +541,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         }
 
         somSaksbehandler("Z999999") {
-            behandlingApiController.fakta(
+            behandlingApiController.behandlingFakta(
                 behandlingId = behandlingId.toString(),
             ).body?.perioder?.single()?.rettsligGrunnlag shouldBe
                 listOf(
@@ -579,7 +579,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         )
         val oppdagetDato = LocalDate.now()
         somSaksbehandler("Z999999") {
-            behandlingApiController.oppdaterFakta(
+            behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = OppdaterFaktaOmFeilutbetalingDto(
                     perioder = faktaPerioder,
@@ -599,7 +599,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
             behandlingController.flyttBehandlingTilFakta(behandlingId).status shouldBe Ressurs.Status.SUKSESS
         }
         somSaksbehandler("Z999999") {
-            val faktaSteg = behandlingApiController.fakta(
+            val faktaSteg = behandlingApiController.behandlingFakta(
                 behandlingId = behandlingId.toString(),
             ).body
 

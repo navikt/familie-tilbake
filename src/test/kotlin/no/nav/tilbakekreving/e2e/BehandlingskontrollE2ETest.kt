@@ -77,7 +77,7 @@ class BehandlingskontrollE2ETest : TilbakekrevingE2EBase() {
             .behandlingsstegstatus shouldBe Behandlingsstegstatus.KLAR
 
         somSaksbehandler(ansvarligSaksbehandler.ident) {
-            behandlingApiController.oppdaterFakta(
+            behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )

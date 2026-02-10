@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering
 import no.nav.tilbakekreving.api.v1.dto.VurdertAktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsresultatDto
 import no.nav.tilbakekreving.beregning.Reduksjon
+import no.nav.tilbakekreving.breeeev.PåkrevdBegrunnelse
 import no.nav.tilbakekreving.endring.VurdertUtbetaling
 import no.nav.tilbakekreving.entities.AktsomhetType
 import no.nav.tilbakekreving.entities.AktsomhetsvurderingEntity
@@ -29,6 +30,8 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
         override fun reduksjon(): Reduksjon = kanUnnlates4XRettsgebyr.reduksjon()
 
         override fun vurderingstype(): Aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET
+
+        override fun påkrevdeVurderinger(): Set<PåkrevdBegrunnelse> = kanUnnlates4XRettsgebyr.påkrevdeVurderinger()
 
         override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
             return VurdertUtbetaling.Vilkårsvurdering(
@@ -110,6 +113,8 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
 
         override fun reduksjon(): Reduksjon = reduksjonSærligeGrunner.skalReduseres.reduksjon()
 
+        override fun påkrevdeVurderinger(): Set<PåkrevdBegrunnelse> = reduksjonSærligeGrunner.skalReduseres.påkrevdeVurderinger()
+
         override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
             return VurdertUtbetaling.Vilkårsvurdering(
                 aktsomhetFørUtbetaling = vurderingstype(),
@@ -168,6 +173,8 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
         override fun vurderingstype(): Aktsomhet = Aktsomhet.FORSETT
 
         override fun reduksjon(): Reduksjon = Reduksjon.FullstendigTilbakekreving()
+
+        override fun påkrevdeVurderinger(): Set<PåkrevdBegrunnelse> = setOf(PåkrevdBegrunnelse.SÆRLIGE_GRUNNER)
 
         override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
             return VurdertUtbetaling.Vilkårsvurdering(

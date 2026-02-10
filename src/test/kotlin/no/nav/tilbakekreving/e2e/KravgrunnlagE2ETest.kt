@@ -246,7 +246,7 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
         lagreUttalelse(behandlingId)
 
         somSaksbehandler("Z999999") {
-            behandlingApiController.oppdaterFakta(
+            behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )

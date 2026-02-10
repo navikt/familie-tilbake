@@ -152,7 +152,7 @@ class TilBehandlingTest : TilbakekrevingE2EBase() {
         lagreUttalelse(behandlingId)
 
         somSaksbehandler(behandlerIdent) {
-            behandlingApiController.oppdaterFakta(
+            behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )

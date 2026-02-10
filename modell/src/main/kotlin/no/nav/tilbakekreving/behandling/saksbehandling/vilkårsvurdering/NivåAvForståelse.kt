@@ -4,6 +4,7 @@ import no.nav.tilbakekreving.api.v1.dto.VurdertAktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertGodTroDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsresultatDto
 import no.nav.tilbakekreving.beregning.Reduksjon
+import no.nav.tilbakekreving.breeeev.PåkrevdBegrunnelse
 import no.nav.tilbakekreving.endring.VurdertUtbetaling
 import no.nav.tilbakekreving.entities.AktsomhetType
 import no.nav.tilbakekreving.entities.AktsomhetsvurderingEntity
@@ -47,6 +48,10 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             )
         }
 
+        override fun påkrevdeVurderinger(): Set<PåkrevdBegrunnelse> {
+            return aktsomhet.påkrevdeVurderinger()
+        }
+
         override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
             return AktsomhetsvurderingEntity(
                 vurderingType = VurderingType.IKKE_FORÅRSAKET_AV_BRUKER_FORSTOD,
@@ -84,6 +89,10 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 særligeGrunner = aktsomhet.oppsummerSærligeGrunnerVurdering(),
                 beløpUnnlatesUnder4Rettsgebyr = aktsomhet.oppsummer4RettsgebyrVurdering(),
             )
+        }
+
+        override fun påkrevdeVurderinger(): Set<PåkrevdBegrunnelse> {
+            return aktsomhet.påkrevdeVurderinger()
         }
 
         override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
@@ -129,6 +138,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 beløpUnnlatesUnder4Rettsgebyr = VurdertUtbetaling.JaNeiVurdering.Nei,
             )
         }
+
+        override fun påkrevdeVurderinger(): Set<PåkrevdBegrunnelse> = emptySet()
 
         override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
             return AktsomhetsvurderingEntity(
@@ -195,6 +206,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
 
         fun oppsummer4RettsgebyrVurdering(): VurdertUtbetaling.JaNeiVurdering
 
+        fun påkrevdeVurderinger(): Set<PåkrevdBegrunnelse>
+
         class Forsett(
             override val begrunnelse: String,
         ) : Aktsomhet {
@@ -225,6 +238,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             override fun oppsummer4RettsgebyrVurdering(): VurdertUtbetaling.JaNeiVurdering {
                 return VurdertUtbetaling.JaNeiVurdering.Nei
             }
+
+            override fun påkrevdeVurderinger(): Set<PåkrevdBegrunnelse> = emptySet()
 
             override fun tilEntity(periodeRef: UUID): VurdertAktsomhetEntity {
                 return VurdertAktsomhetEntity(
@@ -272,6 +287,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 return VurdertUtbetaling.JaNeiVurdering.Nei
             }
 
+            override fun påkrevdeVurderinger(): Set<PåkrevdBegrunnelse> = emptySet()
+
             override fun tilEntity(periodeRef: UUID): VurdertAktsomhetEntity {
                 return VurdertAktsomhetEntity(
                     periodeRef = periodeRef,
@@ -302,6 +319,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr, is KanUnnlates4xRettsgebyr.SkalIkkeUnnlates -> VurdertUtbetaling.JaNeiVurdering.Nei
                 is KanUnnlates4xRettsgebyr.Unnlates -> VurdertUtbetaling.JaNeiVurdering.Ja
             }
+
+            override fun påkrevdeVurderinger(): Set<PåkrevdBegrunnelse> = emptySet()
 
             override fun tilFrontendDto(): VurdertAktsomhetDto {
                 return VurdertAktsomhetDto(
@@ -347,6 +366,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr, is KanUnnlates4xRettsgebyr.SkalIkkeUnnlates -> VurdertUtbetaling.JaNeiVurdering.Nei
                 is KanUnnlates4xRettsgebyr.Unnlates -> VurdertUtbetaling.JaNeiVurdering.Ja
             }
+
+            override fun påkrevdeVurderinger(): Set<PåkrevdBegrunnelse> = emptySet()
 
             override fun tilFrontendDto(): VurdertAktsomhetDto {
                 return VurdertAktsomhetDto(

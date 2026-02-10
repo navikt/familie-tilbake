@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.fagsystem
 
+import no.nav.kontrakter.frontend.models.YtelseDto
 import no.nav.tilbakekreving.entities.YtelseEntity
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.ytelse.DokarkivFagsaksystem
@@ -26,6 +27,8 @@ sealed interface Ytelse {
 
     fun tilEntity(): YtelseEntity
 
+    fun brevmeta(): YtelseDto
+
     object Barnetrygd : Ytelse {
         override fun tilFagsystemDTO(): FagsystemDTO = FagsystemDTO.BA
 
@@ -49,6 +52,14 @@ sealed interface Ytelse {
         override val kafkaTopic: String = "tilbake.privat-tilbakekreving-barnetrygd"
 
         override fun tilEntity(): YtelseEntity = YtelseEntity(Ytelsestype.BARNETRYGD)
+
+        override fun brevmeta(): YtelseDto {
+            return YtelseDto(
+                url = "nav.no/barnetrygd",
+                ubestemtEntall = "barnetrygd",
+                bestemtEntall = "barnetrygden",
+            )
+        }
     }
 
     object Tilleggsstønad : Ytelse {
@@ -74,6 +85,14 @@ sealed interface Ytelse {
         override val kafkaTopic: String = "tilbake.privat-tilbakekreving-tilleggsstonad"
 
         override fun tilEntity(): YtelseEntity = YtelseEntity(Ytelsestype.TILLEGGSSTØNAD)
+
+        override fun brevmeta(): YtelseDto {
+            return YtelseDto(
+                url = "nav.no/tilleggsstonader",
+                ubestemtEntall = "tilleggsstønad",
+                bestemtEntall = "tilleggsstønaden",
+            )
+        }
     }
 
     object Arbeidsavklaringspenger : Ytelse {
@@ -99,6 +118,14 @@ sealed interface Ytelse {
         override val kafkaTopic: String = "tilbake.privat-tilbakekreving-arbeidsavklaringspenger"
 
         override fun tilEntity(): YtelseEntity = YtelseEntity(Ytelsestype.ARBEIDSAVKLARINGSPENGER)
+
+        override fun brevmeta(): YtelseDto {
+            return YtelseDto(
+                url = "nav.no/aap",
+                ubestemtEntall = "arbeidsavklaringspenger",
+                bestemtEntall = "arbeidsavklaringspengene",
+            )
+        }
     }
 
     companion object {

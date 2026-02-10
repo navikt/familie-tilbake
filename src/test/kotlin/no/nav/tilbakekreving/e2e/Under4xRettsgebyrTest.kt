@@ -33,7 +33,7 @@ class Under4xRettsgebyrTest : TilbakekrevingE2EBase() {
         val ansvarligSaksbehandler = Behandler.Saksbehandler("Z999999")
 
         somSaksbehandler(ansvarligSaksbehandler.ident) {
-            behandlingApiController.oppdaterFakta(
+            behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
@@ -72,7 +72,7 @@ class Under4xRettsgebyrTest : TilbakekrevingE2EBase() {
         val ansvarligSaksbehandler = Behandler.Saksbehandler("Z999999")
 
         somSaksbehandler(ansvarligSaksbehandler.ident) {
-            behandlingApiController.oppdaterFakta(
+            behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )

@@ -86,7 +86,7 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
         tilbakekreving(behandlingId) avventerBehandling Behandlingssteg.FORELDELSE
 
         somSaksbehandler("Z999999") {
-            behandlingApiController.oppdaterFakta(
+            behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
@@ -182,7 +182,7 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
         lagreUttalelse(behandlingId)
 
         somSaksbehandler("Z999999") {
-            behandlingApiController.oppdaterFakta(
+            behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )

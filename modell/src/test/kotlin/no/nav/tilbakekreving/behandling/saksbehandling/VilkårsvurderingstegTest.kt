@@ -27,7 +27,6 @@ class VilkårsvurderingstegTest {
         val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
             eksternFagsakBehandling(),
             kravgrunnlag,
-            Foreldelsesteg.opprett(eksternFagsakBehandling(), kravgrunnlag),
         )
         vilkårsvurderingsteg.vurder(
             1.januar til 31.januar,
@@ -54,7 +53,6 @@ class VilkårsvurderingstegTest {
             Vilkårsvurderingsteg.opprett(
                 eksternFagsakRevurdering = eksternFagsakBehandling(),
                 kravgrunnlagHendelse = kravgrunnlag,
-                foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakBehandling(), kravgrunnlag),
             )
         vilkårsvurderingsteg.vurder(
             1.januar til 31.januar,
@@ -90,7 +88,6 @@ class VilkårsvurderingstegTest {
             Vilkårsvurderingsteg.opprett(
                 eksternFagsakRevurdering = eksternFagsakBehandling(),
                 kravgrunnlagHendelse = kravgrunnlag,
-                foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakBehandling(), kravgrunnlag),
             )
         vilkårsvurderingsteg.vurder(
             1.januar til 31.januar,
@@ -124,7 +121,6 @@ class VilkårsvurderingstegTest {
             Vilkårsvurderingsteg.opprett(
                 eksternFagsakRevurdering = eksternFagsakBehandling(),
                 kravgrunnlagHendelse = kravgrunnlag,
-                foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakBehandling(), kravgrunnlag),
             )
         vilkårsvurderingsteg.vurder(
             1.januar til 31.januar,

@@ -9,6 +9,8 @@ import no.nav.tilbakekreving.behandling.Enhet
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonSærligeGrunner
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Skyldgrad
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
@@ -148,28 +150,31 @@ fun brukerinfoHendelse() = BrukerinfoHendelse(
     språkkode = bruker().språkkode,
 )
 
-fun eksternFagsakBehandling(): EksternFagsakRevurdering {
+fun eksternFagsakBehandling(
+    utvidPerioder: List<EksternFagsakRevurdering.UtvidetPeriode> = emptyList(),
+): EksternFagsakRevurdering {
     return EksternFagsakRevurdering.Revurdering(
         id = UUID.randomUUID(),
         eksternId = UUID.randomUUID().toString(),
         årsakTilFeilutbetaling = "",
         revurderingsårsak = EksternFagsakRevurdering.Revurderingsårsak.NYE_OPPLYSNINGER,
         vedtaksdato = LocalDate.now(),
-        utvidedePerioder = emptyList(),
+        utvidedePerioder = utvidPerioder,
     )
 }
 
 fun behandling(
     kravgrunnlag: KravgrunnlagHendelse = kravgrunnlag(),
+    eksternFagsakBehandling: EksternFagsakRevurdering = eksternFagsakBehandling(),
 ): Behandling {
     val kravgrunnlagReferanse = HistorikkStub.fakeReferanse(kravgrunnlag)
-    val eksternFagsakBehandling = HistorikkStub.fakeReferanse(eksternFagsakBehandling())
+    val eksternFagsakBehandlingReferanse = HistorikkStub.fakeReferanse(eksternFagsakBehandling)
     return Behandling.nyBehandling(
         id = UUID.randomUUID(),
         type = Behandlingstype.TILBAKEKREVING,
         enhet = Enhet("", ""),
         ansvarligSaksbehandler = ANSVARLIG_SAKSBEHANDLER,
-        eksternFagsakRevurdering = eksternFagsakBehandling,
+        eksternFagsakRevurdering = eksternFagsakBehandlingReferanse,
         kravgrunnlag = kravgrunnlagReferanse,
         brevHistorikk = BrevHistorikk(mutableListOf()),
         behandlingObservatør = BehandlingObservatørOppsamler(),
@@ -204,16 +209,72 @@ fun faktastegVurdering(
 
 fun foreldelseVurdering() = Foreldelsesteg.Vurdering.IkkeForeldet("")
 
-fun forårsaketAvBrukerGrovtUaktsomt() = Skyldgrad.GrovUaktsomhet(
+fun godTro(
+    beløpIBehold: NivåAvForståelse.GodTro.BeløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.Nei,
+) = NivåAvForståelse.GodTro(
+    beløpIBehold = beløpIBehold,
+    begrunnelse = "",
+    begrunnelseForGodTro = "",
+)
+
+fun forårsaketAvNavBurdeForstått(
+    aktsomhet: NivåAvForståelse.Aktsomhet = NivåAvForståelse.Aktsomhet.Uaktsomhet(
+        kanUnnlates4XRettsgebyr = skalIkkeUnnlates(),
+        begrunnelse = "",
+    ),
+) = NivåAvForståelse.BurdeForstått(
+    aktsomhet = aktsomhet,
+    begrunnelse = "",
+)
+
+fun forårsaketAvNavForstod(
+    aktsomhet: NivåAvForståelse.Aktsomhet = NivåAvForståelse.Aktsomhet.Forsett(
+        begrunnelse = "",
+    ),
+) = NivåAvForståelse.BurdeForstått(
+    aktsomhet = aktsomhet,
+    begrunnelse = "",
+)
+
+fun forårsaketAvBrukerUaktsomt(
+    unnlates4xRettsgebyr: KanUnnlates4xRettsgebyr = skalIkkeUnnlates(),
+) = Skyldgrad.Uaktsomt(
+    begrunnelse = "",
+    begrunnelseAktsomhet = "",
+    kanUnnlates4XRettsgebyr = unnlates4xRettsgebyr,
+    feilaktigeEllerMangelfulleOpplysninger = Skyldgrad.FeilaktigEllerMangelfull.FEILAKTIG,
+)
+
+fun forårsaketAvBrukerGrovtUaktsomt(
+    skalReduseres: ReduksjonSærligeGrunner.SkalReduseres = ReduksjonSærligeGrunner.SkalReduseres.Nei,
+) = Skyldgrad.GrovUaktsomhet(
     begrunnelse = "",
     begrunnelseAktsomhet = "",
     reduksjonSærligeGrunner = ReduksjonSærligeGrunner(
         begrunnelse = "",
         grunner = emptySet(),
-        skalReduseres = ReduksjonSærligeGrunner.SkalReduseres.Nei,
+        skalReduseres = skalReduseres,
     ),
     feilaktigeEllerMangelfulleOpplysninger = Skyldgrad.FeilaktigEllerMangelfull.FEILAKTIG,
 )
+
+fun forårsaketAvBrukerMedForsett() = Skyldgrad.Forsett(
+    begrunnelse = "",
+    begrunnelseAktsomhet = "",
+    feilaktigeEllerMangelfulleOpplysninger = Skyldgrad.FeilaktigEllerMangelfull.FEILAKTIG,
+)
+
+fun skalIkkeUnnlates(
+    skalReduseres: ReduksjonSærligeGrunner.SkalReduseres = ReduksjonSærligeGrunner.SkalReduseres.Nei,
+) = KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
+    reduksjonSærligeGrunner = ReduksjonSærligeGrunner(
+        begrunnelse = "",
+        grunner = emptySet(),
+        skalReduseres = skalReduseres,
+    ),
+)
+
+fun unnlates() = KanUnnlates4xRettsgebyr.Unnlates
 
 fun godkjenning() = listOf(
     Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,

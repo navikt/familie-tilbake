@@ -8,6 +8,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg
 import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurderingAdapter
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurdertPeriodeAdapter
+import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.VilkårsvurderingsperiodeEntity
@@ -23,7 +24,6 @@ import java.util.UUID
 class Vilkårsvurderingsteg(
     private val id: UUID,
     private var vurderinger: List<Vilkårsvurderingsperiode>,
-    private val foreldelsesteg: Foreldelsesteg,
 ) : Saksbehandlingsteg, VilkårsvurderingAdapter {
     override val type: Behandlingssteg = Behandlingssteg.VILKÅRSVURDERING
 
@@ -81,6 +81,7 @@ class Vilkårsvurderingsteg(
 
     fun tilFrontendDto(
         kravgrunnlag: KravgrunnlagHendelse,
+        foreldelsesteg: Foreldelsesteg,
     ): VurdertVilkårsvurderingDto {
         return VurdertVilkårsvurderingDto(
             perioder = vurderinger.map {
@@ -98,6 +99,15 @@ class Vilkårsvurderingsteg(
             rettsgebyr = Rettsgebyr.rettsgebyr, // Todo burde bruke rettsgebyret som var gjeldene ved utbetalingen. Oppdateres etter avklaring med jurist.
             opprettetTid = LocalDateTime.now(),
         )
+    }
+
+    fun vurdertePerioderForBrev(): List<BegrunnetPeriode> {
+        return vurderinger.map {
+            BegrunnetPeriode(
+                periode = it.periode,
+                påkrevdeVurderinger = it.vurdering.påkrevdeVurderinger(),
+            )
+        }
     }
 
     class Vilkårsvurderingsperiode(
@@ -148,12 +158,10 @@ class Vilkårsvurderingsteg(
         fun opprett(
             eksternFagsakRevurdering: EksternFagsakRevurdering,
             kravgrunnlagHendelse: KravgrunnlagHendelse,
-            foreldelsesteg: Foreldelsesteg,
         ): Vilkårsvurderingsteg {
             return Vilkårsvurderingsteg(
                 id = UUID.randomUUID(),
                 vurderinger = tomVurdering(eksternFagsakRevurdering, kravgrunnlagHendelse),
-                foreldelsesteg = foreldelsesteg,
             )
         }
 

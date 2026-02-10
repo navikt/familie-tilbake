@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.aktør
 
+import no.nav.kontrakter.frontend.models.BrevmottakerDto
 import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.BrukerinfoBehov
@@ -69,6 +70,13 @@ class Bruker(
         språkkode = språkkode ?: Språkkode.NB,
         dødsdato = dødsdato,
     )
+
+    fun brevmeta(): BrevmottakerDto {
+        return BrevmottakerDto(
+            navn = navn!!,
+            personIdent = aktør.ident,
+        )
+    }
 
     companion object {
         fun Bruker?.tilNullableFrontendDto(): FrontendBrukerDto {

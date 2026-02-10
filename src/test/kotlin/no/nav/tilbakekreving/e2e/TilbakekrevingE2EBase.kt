@@ -180,7 +180,7 @@ open class TilbakekrevingE2EBase : E2EBase() {
         beslutterIdent: String = "Z999999",
     ) {
         somSaksbehandler(behandlerIdent) {
-            behandlingApiController.oppdaterFakta(
+            behandlingApiController.behandlingOppdaterFakta(
                 behandlingId.toString(),
                 BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )

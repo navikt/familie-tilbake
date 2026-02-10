@@ -31,6 +31,8 @@ import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkår
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.IverksettelseBehov
 import no.nav.tilbakekreving.beregning.Beregning
+import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
+import no.nav.tilbakekreving.breeeev.Signatur
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
@@ -100,7 +102,7 @@ class Behandling internal constructor(
         foreldelsesteg.tilFrontendDto(kravgrunnlag.entry)
     }
     val vilkårsvurderingsstegDto: FrontendDto<VurdertVilkårsvurderingDto> get() = FrontendDto {
-        vilkårsvurderingsteg.tilFrontendDto(kravgrunnlag.entry)
+        vilkårsvurderingsteg.tilFrontendDto(kravgrunnlag.entry, foreldelsesteg)
     }
     val fatteVedtakStegDto: FrontendDto<TotrinnsvurderingDto> get() = fatteVedtakSteg
 
@@ -429,6 +431,16 @@ class Behandling internal constructor(
         return forhåndsvarsel.utsettUttalelseFristTilFrontendDto()
     }
 
+    fun vurdertePerioderForBrev(): List<BegrunnetPeriode> {
+        return vilkårsvurderingsteg.vurdertePerioderForBrev()
+    }
+
+    fun brevSignatur(): Signatur = Signatur(
+        ansvarligSaksbehandlerIdent = ansvarligSaksbehandler.ident,
+        ansvarligBeslutterIdent = fatteVedtakSteg.ansvarligBeslutter?.ident,
+        ansvarligEnhet = enhet!!.navn,
+    )
+
     fun oppdaterBehandler(ansvarligSaksbehandler: Behandler) {
         this.sistEndret = LocalDateTime.now()
         this.ansvarligSaksbehandler = ansvarligSaksbehandler
@@ -538,11 +550,6 @@ class Behandling internal constructor(
             behandlingObservatør: BehandlingObservatør,
             tilstand: Tilstand,
         ): Behandling {
-            val foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakRevurdering.entry, kravgrunnlag.entry)
-            val faktasteg = Faktasteg.opprett(eksternFagsakRevurdering.entry, kravgrunnlag.entry, brevHistorikk)
-            val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(eksternFagsakRevurdering.entry, kravgrunnlag.entry, foreldelsesteg)
-            val foreslåVedtakSteg = ForeslåVedtakSteg.opprett()
-            val fatteVedtakSteg = FatteVedtakSteg.opprett()
             val opprettet = LocalDateTime.now()
             return Behandling(
                 id = id,
@@ -554,11 +561,11 @@ class Behandling internal constructor(
                 ansvarligSaksbehandler = ansvarligSaksbehandler,
                 eksternFagsakRevurdering = eksternFagsakRevurdering,
                 kravgrunnlag = kravgrunnlag,
-                foreldelsesteg = foreldelsesteg,
-                faktasteg = faktasteg,
-                vilkårsvurderingsteg = vilkårsvurderingsteg,
-                foreslåVedtakSteg = foreslåVedtakSteg,
-                fatteVedtakSteg = fatteVedtakSteg,
+                foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakRevurdering.entry, kravgrunnlag.entry),
+                faktasteg = Faktasteg.opprett(eksternFagsakRevurdering.entry, kravgrunnlag.entry, brevHistorikk),
+                vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(eksternFagsakRevurdering.entry, kravgrunnlag.entry),
+                foreslåVedtakSteg = ForeslåVedtakSteg.opprett(),
+                fatteVedtakSteg = FatteVedtakSteg.opprett(),
                 påVent = null,
                 forhåndsvarsel = Forhåndsvarsel(null, null, mutableListOf<UtsettFrist>(), brevHistorikk.sisteVarselbrev()?.fristForUttalelse),
             ).also {
