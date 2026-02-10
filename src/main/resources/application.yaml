@@ -202,3 +202,9 @@ kafka:
     requestTopic: "tilbake.privat-tbk-hentfagsystemsbehandling"
     responseTopic: "tilbake.privat-tbk-hentfagsystemsbehandling-svar"
 
+bigquery:
+  flyway:
+    enabled: false
+    dataset: ""
+    jdbc-url: ""
+

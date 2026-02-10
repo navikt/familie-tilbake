@@ -103,3 +103,10 @@ tilbakekreving:
   entraProxy:
     base-url: http://entra-proxy.sikkerhetstjenesten.svc.cluster.local
     scope: api://prod-gcp.sikkerhetstjenesten.entra-proxy/.default
+
+bigquery:
+  flyway:
+    enabled: true
+    dataset: tilbakekreving_dataset
+    jdbc-url: "jdbc:bigquery://https://www.googleapis.com/bigquery/v2:443;OAuthType=3;ProjectId=tilbake-prod-d235;"
+    lock-retry-count: -1

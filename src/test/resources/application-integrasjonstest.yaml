@@ -78,3 +78,9 @@ tilbakekreving:
   entraProxy:
     base-url: dummy
     scope: dummy
+
+bigquery:
+  flyway:
+    enabled: false
+    dataset: ""
+    jdbc-url: ""

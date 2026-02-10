@@ -102,12 +102,14 @@ class Tilbakekreving internal constructor(
 
     fun håndter(varselbrevSendt: VarselbrevSendtHendelse) {
         tilstand.håndter(this, varselbrevSendt)
-        behandlingHistorikk.nåværende().entry.utførSideeffekt(tilstand, this)
+        val behandling = behandlingHistorikk.nåværende().entry
+        behandling.utførSideeffekt(tilstand, this, bigQueryService, eksternFagsak.ytelse.hentYtelsesnavn(Språkkode.NB))
     }
 
     fun håndter(iverksettelseHendelse: IverksettelseHendelse) {
         tilstand.håndter(this, iverksettelseHendelse)
-        behandlingHistorikk.nåværende().entry.utførSideeffekt(tilstand, this)
+        val behandling = behandlingHistorikk.nåværende().entry
+        behandling.utførSideeffekt(tilstand, this, bigQueryService, eksternFagsak.ytelse.hentYtelsesnavn(Språkkode.NB))
     }
 
     fun håndter(påminnelse: Påminnelse) {
@@ -157,17 +159,10 @@ class Tilbakekreving internal constructor(
             brevHistorikk = brevHistorikk,
             behandlingObservatør = this,
             tilstand = tilstand,
+            bigQueryService = bigQueryService,
+            ytelsesNavn = eksternFagsak.ytelse.hentYtelsesnavn(Språkkode.NB),
         )
         behandlingHistorikk.lagre(behandling)
-
-        val behandlingInfo = behandling.hentBehandlingsinformasjon()
-        bigQueryService.leggeTilBehanlingInfo(
-            behandlingId = behandlingInfo.behandlingId.toString(),
-            opprettetTid = opprettet,
-            ytelsestypeKode = hentFagsysteminfo().tilYtelsestype().kode,
-            behandlingstype = behandlingInfo.behandlingstype.name,
-            behandlendeEnhet = behandlingInfo.enhet?.kode,
-        )
         sendStatusendring(ForenkletBehandlingsstatus.OPPRETTET)
     }
 
@@ -268,7 +263,7 @@ class Tilbakekreving internal constructor(
         if (behandling.kanUtbetales()) {
             byttTilstand(IverksettVedtak)
         }
-        behandling.utførSideeffekt(tilstand, this)
+        behandling.utførSideeffekt(tilstand, this, bigQueryService, eksternFagsak.ytelse.hentYtelsesnavn(Språkkode.NB))
     }
 
     fun håndter(
@@ -277,7 +272,7 @@ class Tilbakekreving internal constructor(
     ) {
         val behandling = behandlingHistorikk.nåværende().entry
         behandling.håndter(behandler, vurdering, this)
-        behandling.utførSideeffekt(tilstand, this)
+        behandling.utførSideeffekt(tilstand, this, bigQueryService, eksternFagsak.ytelse.hentYtelsesnavn(Språkkode.NB))
     }
 
     fun vurderFakta(
@@ -289,7 +284,7 @@ class Tilbakekreving internal constructor(
     ) {
         val behandling = behandlingHistorikk.finn(behandlingId, sporingsinformasjon()).entry
         behandling.håndter(behandler, oppdaget, årsak, perioder)
-        behandling.utførSideeffekt(tilstand, this)
+        behandling.utførSideeffekt(tilstand, this, bigQueryService, eksternFagsak.ytelse.hentYtelsesnavn(Språkkode.NB))
     }
 
     fun håndter(
@@ -299,7 +294,7 @@ class Tilbakekreving internal constructor(
     ) {
         val behandling = behandlingHistorikk.nåværende().entry
         behandling.håndter(behandler, periode, vurdering, this)
-        behandling.utførSideeffekt(tilstand, this)
+        behandling.utførSideeffekt(tilstand, this, bigQueryService, eksternFagsak.ytelse.hentYtelsesnavn(Språkkode.NB))
     }
 
     fun håndter(
@@ -309,7 +304,7 @@ class Tilbakekreving internal constructor(
     ) {
         val behandling = behandlingHistorikk.nåværende().entry
         behandling.håndter(behandler, periode, vurdering, this)
-        behandling.utførSideeffekt(tilstand, this)
+        behandling.utførSideeffekt(tilstand, this, bigQueryService, eksternFagsak.ytelse.hentYtelsesnavn(Språkkode.NB))
     }
 
     fun håndterForeslåVedtak(
@@ -320,7 +315,7 @@ class Tilbakekreving internal constructor(
             behandler,
             this,
         )
-        behandling.utførSideeffekt(tilstand, this)
+        behandling.utførSideeffekt(tilstand, this, bigQueryService, eksternFagsak.ytelse.hentYtelsesnavn(Språkkode.NB))
     }
 
     fun frontendDtoForBehandling(

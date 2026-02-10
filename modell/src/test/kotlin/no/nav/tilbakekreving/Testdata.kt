@@ -14,6 +14,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAv
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonSærligeGrunner
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Skyldgrad
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
+import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.fagsystem.Ytelse
@@ -179,6 +180,8 @@ fun behandling(
         brevHistorikk = BrevHistorikk(mutableListOf()),
         behandlingObservatør = BehandlingObservatørOppsamler(),
         tilstand = TilBehandling,
+        bigQueryService = BigQueryServiceStub(),
+        ytelsesNavn = Ytelse.Tilleggsstønad.hentYtelsesnavn(Språkkode.NB),
     )
 }
 
