@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.tilstand
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
 import no.nav.tilbakekreving.behandling.Behandling
+import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
@@ -26,6 +27,9 @@ object TilBehandling : Tilstand {
     }
 
     override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse) {
+        if (tilbakekreving.eksternFagsak.behandlinger.nåværende().entry is EksternFagsakRevurdering.Ukjent) {
+            tilbakekreving.trengerFagsysteminfo()
+        }
         tilbakekreving.sendStatusendring(ForenkletBehandlingsstatus.TIL_BEHANDLING)
     }
 
