@@ -6,6 +6,7 @@ import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
+import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
@@ -50,5 +51,12 @@ object TilBehandling : Tilstand {
         varselbrevSendtHendelse: VarselbrevSendtHendelse,
     ) {
         tilbakekreving.brevHistorikk.entry(varselbrevSendtHendelse.varselbrevId).brevSendt(journalpostId = varselbrevSendtHendelse.journalpostId!!)
+    }
+
+    override fun håndter(
+        tilbakekreving: Tilbakekreving,
+        kravgrunnlag: KravgrunnlagHendelse,
+    ) {
+        tilbakekreving.hånterEndretKravgrunnlag(kravgrunnlag)
     }
 }

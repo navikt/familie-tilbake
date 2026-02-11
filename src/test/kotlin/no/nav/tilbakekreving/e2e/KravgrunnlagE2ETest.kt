@@ -201,7 +201,7 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
 
-        sendKravgrunnlagOgAvventLesing(QUEUE_NAME, KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId, kravStatusKode = "ENDR"))
+        sendKravgrunnlagOgAvventLesing(QUEUE_NAME, KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId, kravStatusKode = "ANNU"))
 
         shouldThrow<ModellFeil.UtenforScopeException> {
             tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId)
