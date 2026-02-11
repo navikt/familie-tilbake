@@ -75,7 +75,7 @@ class KravgrunnlagService(
         val behandling: Behandling? = finnÅpenBehandling(ytelsestype, fagsystemId)
         val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype.tilDTO())
         log.medContext(logContext) {
-            info("BehandleKravgrunnlagTask prosesserer med id={} og metadata {}", taskId, taskMetadata.toString())
+            info("BehandleKravgrunnlagTask prosesserer med id={}", taskId)
         }
         SecureLog.medContext(logContext) {
             info(

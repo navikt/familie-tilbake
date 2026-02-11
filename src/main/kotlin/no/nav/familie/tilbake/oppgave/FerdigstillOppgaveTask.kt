@@ -22,7 +22,7 @@ class FerdigstillOppgaveTask(
     private val log = TracedLogger.getLogger<FerdigstillOppgaveTask>()
 
     override fun doTask(task: Task) {
-        log.medContext(task.logContext()) { info("FerdigstillOppgaveTask prosesserer med id={} og metadata {}", task.id, task.metadata.toString()) }
+        log.medContext(task.logContext()) { info("FerdigstillOppgaveTask prosesserer med id={}", task.id) }
         val oppgavetype =
             if (task.metadata.containsKey("oppgavetype")) {
                 Oppgavetype.valueOf(task.metadata.getProperty("oppgavetype"))

@@ -21,7 +21,7 @@ class AutomatiskGjenopptaBehandlingTask(
     private val log = TracedLogger.getLogger<AutomatiskGjenopptaBehandlingTask>()
 
     override fun doTask(task: Task) {
-        log.medContext(task.logContext()) { info("AutomatiskGjenopptaBehandlingTask prosesserer med id={} og metadata {}", task.id, task.metadata.toString()) }
+        log.medContext(task.logContext()) { info("AutomatiskGjenopptaBehandlingTask prosesserer med id={}", task.id) }
         val behandlingId = UUID.fromString(task.payload)
         automatiskGjenopptaBehandlingService.gjenopptaBehandling(behandlingId, task.id, task.metadata)
     }

@@ -28,7 +28,7 @@ class OppdaterFaktainfoTask(
         val eksternFagsakId = task.metadata.getProperty("eksternFagsakId")
         val logContext = SecureLog.Context.utenBehandling(eksternFagsakId)
         log.medContext(logContext) {
-            info("OppdaterFaktainfoTask prosesserer med id={} og metadata {}", task.id, task.metadata.toString())
+            info("OppdaterFaktainfoTask prosesserer med id={}", task.id)
         }
         val ytelsestype = Ytelsestype.valueOf(task.metadata.getProperty("ytelsestype"))
         val eksternId = task.metadata.getProperty("eksternId")

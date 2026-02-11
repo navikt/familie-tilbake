@@ -46,7 +46,7 @@ class DistribuerDokumentVedDødsfallTask(
 
     override fun doTask(task: Task) {
         val logContext = task.logContext()
-        log.medContext(logContext) { info("{} prosesserer med id={} og metadata {}", this::class.simpleName, task.id, task.metadata.toString()) }
+        log.medContext(logContext) { info("{} prosesserer med id={}", DistribuerDokumentVedDødsfallTask::class.simpleName, task.id) }
 
         val journalpostId = task.metadata.getProperty("journalpostId")
         val fagsystem = task.metadata.getProperty("fagsystem")

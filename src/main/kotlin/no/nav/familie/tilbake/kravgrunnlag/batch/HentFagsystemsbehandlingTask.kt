@@ -27,7 +27,7 @@ class HentFagsystemsbehandlingTask(
     private val log = TracedLogger.getLogger<HentFagsystemsbehandlingTask>()
 
     override fun doTask(task: Task) {
-        log.medContext(task.logContext()) { info("HentFagsystemsbehandlingTask prosesserer med id={} og metadata {}", task.id, task.metadata.toString()) }
+        log.medContext(task.logContext()) { info("HentFagsystemsbehandlingTask prosesserer med id={}", task.id) }
         val mottattXmlId = UUID.fromString(task.payload)
         val mottattXml = gammelKravgrunnlagService.hentFrakobletKravgrunnlag(mottattXmlId)
         task.metadata["eksternFagsakId"] = mottattXml.eksternFagsakId

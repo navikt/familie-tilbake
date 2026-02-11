@@ -31,7 +31,7 @@ class OpprettBehandlingManueltTask(
         val eksternFagsakId = task.metadata.getProperty("eksternFagsakId")
         val logContext = SecureLog.Context.utenBehandling(eksternFagsakId)
         log.medContext(logContext) {
-            info("Henter fagsystemsbehandling for OpprettBehandlingManueltTask med id ${task.id} og metadata ${task.metadata}")
+            info("Henter fagsystemsbehandling for OpprettBehandlingManueltTask med id {}", task.id)
         }
         val ytelsestype = Ytelsestype.valueOf(task.metadata.getProperty("ytelsestype"))
         val eksternId = task.metadata.getProperty("eksternId")
@@ -43,7 +43,7 @@ class OpprettBehandlingManueltTask(
         val eksternFagsakId = task.metadata.getProperty("eksternFagsakId")
         val logContext = SecureLog.Context.utenBehandling(eksternFagsakId)
         log.medContext(logContext) {
-            info("OpprettBehandlingManueltTask prosesserer med id={} og metadata {}", task.id, task.metadata.toString())
+            info("OpprettBehandlingManueltTask prosesserer med id={}", task.id)
         }
         val ytelsestype = Ytelsestype.valueOf(task.metadata.getProperty("ytelsestype"))
         val eksternId = task.metadata.getProperty("eksternId")

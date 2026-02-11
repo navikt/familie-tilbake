@@ -36,7 +36,7 @@ class SendØkonomiTilbakekrevingsvedtakTask(
         val behandlingId = UUID.fromString(task.payload)
         val logContext = logService.contextFraBehandling(behandlingId)
         log.medContext(logContext) {
-            info("SendØkonomiTilbakekrevingsvedtakTask prosesserer med id={} og metadata {}", task.id, task.metadata.toString())
+            info("SendØkonomiTilbakekrevingsvedtakTask prosesserer med id={}", task.id)
         }
         iverksettelseService.sendIverksettVedtak(behandlingId)
 
@@ -44,8 +44,8 @@ class SendØkonomiTilbakekrevingsvedtakTask(
             .oppdaterBehandlingsstegStatus(
                 behandlingId,
                 Behandlingsstegsinfo(
-                    behandlingssteg = no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg.IVERKSETT_VEDTAK,
-                    behandlingsstegstatus = no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus.UTFØRT,
+                    behandlingssteg = Behandlingssteg.IVERKSETT_VEDTAK,
+                    behandlingsstegstatus = Behandlingsstegstatus.UTFØRT,
                 ),
                 logContext,
             )

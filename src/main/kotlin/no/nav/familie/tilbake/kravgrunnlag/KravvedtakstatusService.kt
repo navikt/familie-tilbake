@@ -66,11 +66,10 @@ class KravvedtakstatusService(
 
         val behandling: Behandling? = finnÅpenBehandling(ytelsestype, fagsystemId)
 
-        log.info("BehandleStatusmeldingTask prosesserer med id={} og metadata {}", taskId, taskMetadata)
-        SecureLog
-            .medBehandling(fagsystemId, behandling?.id?.toString()) {
-                info("BehandleStatusmeldingTask prosesserer med id={} og metadata {}", taskId, taskMetadata)
-            }
+        log.info("BehandleStatusmeldingTask prosesserer med id={}", taskId)
+        SecureLog.medBehandling(fagsystemId, behandling?.id?.toString()) {
+            info("BehandleStatusmeldingTask prosesserer med id={} og metadata {}", taskId, taskMetadata)
+        }
 
         if (behandling == null) {
             val kravgrunnlagXmlListe =

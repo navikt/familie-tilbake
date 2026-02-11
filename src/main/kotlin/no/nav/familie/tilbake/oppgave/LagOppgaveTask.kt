@@ -32,7 +32,7 @@ class LagOppgaveTask(
 
     override fun doTask(task: Task) {
         val logContext = task.logContext()
-        log.medContext(logContext) { info("LagOppgaveTask prosesserer med id={} og metadata {}", task.id, task.metadata.toString()) }
+        log.medContext(logContext) { info("LagOppgaveTask prosesserer med id={}", task.id) }
         val oppgavetype = Oppgavetype.valueOf(task.metadata.getProperty("oppgavetype"))
         val saksbehandler = task.metadata.getProperty("saksbehandler")
         val enhet = task.metadata.getProperty(PropertyName.ENHET) ?: "" // elvis-operator for bakoverkompatibilitet

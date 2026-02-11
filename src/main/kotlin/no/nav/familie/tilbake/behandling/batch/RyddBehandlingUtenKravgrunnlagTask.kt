@@ -45,7 +45,7 @@ class RyddBehandlingUtenKravgrunnlagTask(
         val behandlingId = UUID.fromString(task.payload)
         val logContext = logService.contextFraBehandling(behandlingId)
         log.medContext(logContext) {
-            info("HenleggTilbakekrevingsbehandlingUtenKravgrunnlag prosesserer med id={} og metadata {}", task.id, task.metadata.toString())
+            info("HenleggTilbakekrevingsbehandlingUtenKravgrunnlag prosesserer med id={}", task.id)
         }
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
 

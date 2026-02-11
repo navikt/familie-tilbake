@@ -39,7 +39,7 @@ class PubliserJournalpostTask(
 
     override fun doTask(task: Task) {
         val logContext = task.logContext()
-        log.medContext(logContext) { info("{} prosesserer med id={} og metadata {}", this::class.simpleName, task.id, task.metadata.toString()) }
+        log.medContext(logContext) { info("{} prosesserer med id={}", PubliserJournalpostTask::class.simpleName, task.id) }
 
         val journalpostId = task.metadata.getProperty("journalpostId")
         val (behandlingId, manuellAdresse) =

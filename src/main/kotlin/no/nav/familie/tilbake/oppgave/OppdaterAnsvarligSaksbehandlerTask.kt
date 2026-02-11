@@ -27,7 +27,7 @@ class OppdaterAnsvarligSaksbehandlerTask(
 
     override fun doTask(task: Task) {
         val logContext = task.logContext()
-        log.medContext(logContext) { info("OppdaterSaksbehandlerPåOppgaveTask prosesserer med id={} og metadata {}", task.id, task.metadata.toString()) }
+        log.medContext(logContext) { info("OppdaterSaksbehandlerPåOppgaveTask prosesserer med id={}", task.id) }
         val behandlingId = UUID.fromString(task.payload)
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)

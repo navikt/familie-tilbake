@@ -39,7 +39,7 @@ class FinnKravgrunnlagTask(
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val logContext = SecureLog.Context.medBehandling(fagsak.eksternFagsakId, behandling.id.toString())
         log.medContext(logContext) {
-            info("FinnKravgrunnlagTask prosesserer med id={} og metadata {}", task.id, task.metadata.toString())
+            info("FinnKravgrunnlagTask prosesserer med id={}", task.id)
         }
 
         val mottattKravgrunnlagene =

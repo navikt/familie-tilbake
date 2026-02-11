@@ -33,7 +33,7 @@ class OppdaterOppgaveTask(
 
     override fun doTask(task: Task) {
         val logContext = task.logContext()
-        log.medContext(logContext) { info("OppdaterOppgaveTask prosesserer med id={} og metadata {}", task.id, task.metadata.toString()) }
+        log.medContext(logContext) { info("OppdaterOppgaveTask prosesserer med id={}", task.id) }
         if (environment.activeProfiles.contains("e2e")) return
 
         val frist = task.metadata.getProperty("frist")

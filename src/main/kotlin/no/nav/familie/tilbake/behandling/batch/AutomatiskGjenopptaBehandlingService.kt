@@ -43,7 +43,7 @@ class AutomatiskGjenopptaBehandlingService(
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val logContext = logService.contextFraBehandling(behandling.id)
         log.medContext(logContext) {
-            info("AutomatiskGjenopptaBehandlingService prosesserer med id=$taskId og metadata $taskMetadata")
+            info("AutomatiskGjenopptaBehandlingService prosesserer med id={}", taskId)
         }
         val behandlingsstegstilstand =
             behandlingskontrollService.finnAktivStegstilstand(behandlingId)

@@ -26,7 +26,7 @@ class AvsluttBehandlingTask(
         val behandlingId = UUID.fromString(task.payload)
         val logContext = task.logContext()
         log.medContext(logContext) {
-            info("AvsluttBehandlingTask prosesserer med id={} og metadata {}", task.id, task.metadata.toString())
+            info("AvsluttBehandlingTask prosesserer med id={}", task.id)
         }
 
         behandlingService.avslutt(behandlingId, logContext)

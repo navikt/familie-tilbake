@@ -36,7 +36,7 @@ class LagreBrevsporingTask(
     private val log = TracedLogger.getLogger<LagreBrevsporingTask>()
 
     override fun doTask(task: Task) {
-        log.medContext(task.logContext()) { info("{} prosesserer med id={} og metadata {}", this::class.simpleName, task.id, task.metadata.toString()) }
+        log.medContext(task.logContext()) { info("{} prosesserer med id={}", LagreBrevsporingTask::class.simpleName, task.id) }
         val behandlingId = UUID.fromString(task.payload)
         val dokumentId = task.metadata.getProperty("dokumentId")
         val journalpostId = task.metadata.getProperty("journalpostId")
