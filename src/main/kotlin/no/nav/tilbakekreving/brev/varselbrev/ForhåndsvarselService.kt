@@ -96,7 +96,7 @@ class ForhåndsvarselService(
     fun lagreUttalelse(tilbakekreving: Tilbakekreving, brukeruttalelse: BrukeruttalelseDto) {
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
         when (brukeruttalelse.harBrukerUttaltSeg) {
-            HarBrukerUttaltSeg.JA, HarBrukerUttaltSeg.ALLEREDE_UTTALET_SEG -> {
+            HarBrukerUttaltSeg.JA_ETTER_FORHÅNDSVARSEL, HarBrukerUttaltSeg.UNNTAK_ALLEREDE_UTTALET_SEG -> {
                 val uttalelsedetaljer = requireNotNull(brukeruttalelse.uttalelsesdetaljer) {
                     "Det kreves uttalelsedetaljer når brukeren har uttalet seg. uttalelsedetaljer var null"
                 }.also {
@@ -110,7 +110,7 @@ class ForhåndsvarselService(
                     kommentar = null,
                 )
             }
-            HarBrukerUttaltSeg.NEI -> {
+            HarBrukerUttaltSeg.NEI_ETTER_FORHÅNDSVARSEL, HarBrukerUttaltSeg.UNNTAK_INGEN_UTTALELSE -> {
                 val kommentar = requireNotNull(brukeruttalelse.kommentar) {
                     "Det kreves en kommentar når brukeren ikke uttaler seg. Kommentar var null"
                 }.also {

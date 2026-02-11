@@ -32,11 +32,13 @@ class NyUttalelseRepository(
         }
     }
 
-    fun lagre(brukerUttaleserEntity: BrukeruttalelseEntity?) {
-        jdbcTemplate.update("DELETE FROM tilbakekreving_brukeruttalelse WHERE behandling_ref=?;", brukerUttaleserEntity!!.behandlingRef)
-        BrukerUttalelseEntityMapper.insertQuery(jdbcTemplate, brukerUttaleserEntity!!)
-        brukerUttaleserEntity.uttalelseInfoEntity.forEach {
-            BrukerUttalelseEntityMapper.UttalelseInfo.upsertQuery(jdbcTemplate, it)
+    fun lagre(brukerUttaleserEntity: BrukeruttalelseEntity?, behandlingId: UUID) {
+        jdbcTemplate.update("DELETE FROM tilbakekreving_brukeruttalelse WHERE behandling_ref=?;", behandlingId)
+        brukerUttaleserEntity?.let { uttalelse ->
+            BrukerUttalelseEntityMapper.insertQuery(jdbcTemplate, uttalelse)
+            uttalelse.uttalelseInfoEntity.forEach {
+                BrukerUttalelseEntityMapper.UttalelseInfo.insertQuery(jdbcTemplate, it)
+            }
         }
     }
 }

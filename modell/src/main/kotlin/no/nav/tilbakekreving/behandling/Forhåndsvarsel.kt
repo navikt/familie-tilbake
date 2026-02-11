@@ -41,6 +41,10 @@ class Forhåndsvarsel(
         uttalelseInfo: List<UttalelseInfo>,
         kommentar: String?,
     ) {
+        if (uttalelseVurdering != UttalelseVurdering.UNNTAK_INGEN_UTTALELSE && uttalelseVurdering != UttalelseVurdering.UNNTAK_ALLEREDE_UTTALT_SEG) {
+            forhåndsvarselUnntak = null
+        }
+
         brukeruttalelse = Brukeruttalelse(
             id = UUID.randomUUID(),
             uttalelseVurdering = uttalelseVurdering,

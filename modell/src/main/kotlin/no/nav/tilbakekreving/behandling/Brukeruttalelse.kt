@@ -55,8 +55,9 @@ data class UttalelseInfo(
 )
 
 enum class UttalelseVurdering {
-    JA,
-    NEI,
+    JA_ETTER_FORHÅNDSVARSEL,
+    NEI_ETTER_FORHÅNDSVARSEL,
     UTTSETT_FRIST,
-    ALLEREDE_UTTALET_SEG,
+    UNNTAK_ALLEREDE_UTTALT_SEG,
+    UNNTAK_INGEN_UTTALELSE,
 }

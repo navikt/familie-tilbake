@@ -54,11 +54,11 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
     fun `uttalelse kan redigeres`() {
         val behandlingId = hentBehandlingId()
 
-        documentController.lagreBrukeruttalelse(behandlingId, hentBrukerUttalelseDto(LocalDate.of(2026, 1, 2)))
+        documentController.lagreBrukeruttalelse(behandlingId, hentBrukerUttalelseDto(HarBrukerUttaltSeg.JA_ETTER_FORHÅNDSVARSEL, LocalDate.of(2026, 1, 2)))
 
         documentController.hentForhåndsvarselinfo(behandlingId).data.shouldNotBeNull {
             brukeruttalelse.shouldNotBeNull {
-                harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.JA
+                harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.JA_ETTER_FORHÅNDSVARSEL
                 uttalelsesdetaljer.shouldNotBeNull {
                     size shouldBe 1
                     get(0).uttalelsesdato shouldBe LocalDate.of(2026, 1, 2)
@@ -66,11 +66,11 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
             }
         }
 
-        documentController.lagreBrukeruttalelse(behandlingId, hentBrukerUttalelseDto(LocalDate.of(2025, 12, 2)))
+        documentController.lagreBrukeruttalelse(behandlingId, hentBrukerUttalelseDto(HarBrukerUttaltSeg.JA_ETTER_FORHÅNDSVARSEL, LocalDate.of(2025, 12, 2)))
 
         documentController.hentForhåndsvarselinfo(behandlingId).data.shouldNotBeNull {
             brukeruttalelse.shouldNotBeNull {
-                harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.JA
+                harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.JA_ETTER_FORHÅNDSVARSEL
                 uttalelsesdetaljer.shouldNotBeNull {
                     size shouldBe 1
                     get(0).uttalelsesdato shouldBe LocalDate.of(2025, 12, 2)
@@ -126,7 +126,7 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
             ),
         )
 
-        documentController.lagreBrukeruttalelse(behandlingId, hentBrukerUttalelseDto(LocalDate.of(2026, 1, 2)))
+        documentController.lagreBrukeruttalelse(behandlingId, hentBrukerUttalelseDto(HarBrukerUttaltSeg.UNNTAK_ALLEREDE_UTTALET_SEG, LocalDate.of(2026, 1, 2)))
 
         documentController.hentForhåndsvarselinfo(behandlingId).data.shouldNotBeNull {
             forhåndsvarselUnntak.shouldNotBeNull {
@@ -134,19 +134,31 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
                 beskrivelse shouldBe "allerede uttalet seg"
             }
             brukeruttalelse.shouldNotBeNull {
-                harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.JA
+                harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.UNNTAK_ALLEREDE_UTTALET_SEG
                 uttalelsesdetaljer.shouldNotBeNull {
                     get(0).uttalelsesdato shouldBe LocalDate.of(2026, 1, 2)
                 }
             }
         }
 
-        documentController.lagreBrukeruttalelse(behandlingId, hentBrukerUttalelseDto(LocalDate.of(2025, 12, 2)))
+        documentController.lagreBrukeruttalelse(behandlingId, hentBrukerUttalelseDto(HarBrukerUttaltSeg.UNNTAK_ALLEREDE_UTTALET_SEG, LocalDate.of(2025, 12, 2)))
 
         documentController.hentForhåndsvarselinfo(behandlingId).data.shouldNotBeNull {
             forhåndsvarselUnntak.shouldNotBeNull()
             brukeruttalelse.shouldNotBeNull {
-                harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.JA
+                harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.UNNTAK_ALLEREDE_UTTALET_SEG
+                uttalelsesdetaljer.shouldNotBeNull {
+                    get(0).uttalelsesdato shouldBe LocalDate.of(2025, 12, 2)
+                }
+            }
+        }
+
+        documentController.lagreBrukeruttalelse(behandlingId, hentBrukerUttalelseDto(HarBrukerUttaltSeg.JA_ETTER_FORHÅNDSVARSEL, LocalDate.of(2025, 12, 2)))
+
+        documentController.hentForhåndsvarselinfo(behandlingId).data.shouldNotBeNull {
+            forhåndsvarselUnntak.shouldBeNull()
+            brukeruttalelse.shouldNotBeNull {
+                harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.JA_ETTER_FORHÅNDSVARSEL
                 uttalelsesdetaljer.shouldNotBeNull {
                     get(0).uttalelsesdato shouldBe LocalDate.of(2025, 12, 2)
                 }
@@ -156,16 +168,16 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
         documentController.lagreBrukeruttalelse(
             behandlingId,
             BrukeruttalelseDto(
-                harBrukerUttaltSeg = HarBrukerUttaltSeg.NEI,
+                harBrukerUttaltSeg = HarBrukerUttaltSeg.NEI_ETTER_FORHÅNDSVARSEL,
                 uttalelsesdetaljer = null,
                 kommentar = "har ikke uttalet seg",
             ),
         )
 
         documentController.hentForhåndsvarselinfo(behandlingId).data.shouldNotBeNull {
-            forhåndsvarselUnntak.shouldNotBeNull()
+            forhåndsvarselUnntak.shouldBeNull()
             brukeruttalelse.shouldNotBeNull {
-                harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.NEI
+                harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.NEI_ETTER_FORHÅNDSVARSEL
                 uttalelsesdetaljer.shouldBeEmpty()
                 kommentar shouldBe "har ikke uttalet seg"
             }
@@ -200,8 +212,8 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
         return behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
     }
 
-    private fun hentBrukerUttalelseDto(uttalelsesdato: LocalDate) = BrukeruttalelseDto(
-        harBrukerUttaltSeg = HarBrukerUttaltSeg.JA,
+    private fun hentBrukerUttalelseDto(harBrukerUttaltSeg: HarBrukerUttaltSeg, uttalelsesdato: LocalDate) = BrukeruttalelseDto(
+        harBrukerUttaltSeg = harBrukerUttaltSeg,
         uttalelsesdetaljer = listOf(
             Uttalelsesdetaljer(
                 uttalelsesdato = uttalelsesdato,

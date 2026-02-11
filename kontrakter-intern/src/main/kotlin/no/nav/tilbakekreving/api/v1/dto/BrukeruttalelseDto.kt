@@ -15,7 +15,8 @@ data class Uttalelsesdetaljer(
 )
 
 enum class HarBrukerUttaltSeg {
-    JA,
-    NEI,
-    ALLEREDE_UTTALET_SEG,
+    JA_ETTER_FORHÅNDSVARSEL,
+    NEI_ETTER_FORHÅNDSVARSEL,
+    UNNTAK_ALLEREDE_UTTALET_SEG,
+    UNNTAK_INGEN_UTTALELSE,
 }

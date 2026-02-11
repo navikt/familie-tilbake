@@ -308,7 +308,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             GyldigBrukeruttalelseCase(
                 navn = "JA – én uttalelse (Modia)",
                 input = BrukeruttalelseDto(
-                    harBrukerUttaltSeg = HarBrukerUttaltSeg.JA,
+                    harBrukerUttaltSeg = HarBrukerUttaltSeg.JA_ETTER_FORHÅNDSVARSEL,
                     uttalelsesdetaljer = listOf(
                         Uttalelsesdetaljer(
                             hvorBrukerenUttalteSeg = "Modia",
@@ -318,7 +318,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
                     ),
                     kommentar = null,
                 ),
-                forventetHarBrukerUttaltSeg = HarBrukerUttaltSeg.JA,
+                forventetHarBrukerUttaltSeg = HarBrukerUttaltSeg.JA_ETTER_FORHÅNDSVARSEL,
                 forventetAntallDetaljer = 1,
                 forventetKommentar = null,
             ),
@@ -326,7 +326,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             GyldigBrukeruttalelseCase(
                 navn = "JA – to uttalelser (Tlf + Modia)",
                 input = BrukeruttalelseDto(
-                    harBrukerUttaltSeg = HarBrukerUttaltSeg.JA,
+                    harBrukerUttaltSeg = HarBrukerUttaltSeg.JA_ETTER_FORHÅNDSVARSEL,
                     uttalelsesdetaljer = listOf(
                         Uttalelsesdetaljer(
                             hvorBrukerenUttalteSeg = "Tlf",
@@ -341,7 +341,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
                     ),
                     kommentar = null,
                 ),
-                forventetHarBrukerUttaltSeg = HarBrukerUttaltSeg.JA,
+                forventetHarBrukerUttaltSeg = HarBrukerUttaltSeg.JA_ETTER_FORHÅNDSVARSEL,
                 forventetAntallDetaljer = 2,
                 forventetKommentar = null,
             ),
@@ -349,18 +349,18 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             GyldigBrukeruttalelseCase(
                 navn = "NEI – med kommentar",
                 input = BrukeruttalelseDto(
-                    harBrukerUttaltSeg = HarBrukerUttaltSeg.NEI,
+                    harBrukerUttaltSeg = HarBrukerUttaltSeg.NEI_ETTER_FORHÅNDSVARSEL,
                     uttalelsesdetaljer = null,
                     kommentar = "Ville ikke",
                 ),
-                forventetHarBrukerUttaltSeg = HarBrukerUttaltSeg.NEI,
+                forventetHarBrukerUttaltSeg = HarBrukerUttaltSeg.NEI_ETTER_FORHÅNDSVARSEL,
                 forventetAntallDetaljer = 0,
                 forventetKommentar = "Ville ikke",
             ),
             GyldigBrukeruttalelseCase(
                 navn = "ALLEREDE_UTTALET_SEG",
                 input = BrukeruttalelseDto(
-                    harBrukerUttaltSeg = HarBrukerUttaltSeg.ALLEREDE_UTTALET_SEG,
+                    harBrukerUttaltSeg = HarBrukerUttaltSeg.UNNTAK_ALLEREDE_UTTALET_SEG,
                     uttalelsesdetaljer = listOf(
                         Uttalelsesdetaljer(
                             hvorBrukerenUttalteSeg = "Tlf",
@@ -370,7 +370,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
                     ),
                     kommentar = null,
                 ),
-                forventetHarBrukerUttaltSeg = HarBrukerUttaltSeg.ALLEREDE_UTTALET_SEG,
+                forventetHarBrukerUttaltSeg = HarBrukerUttaltSeg.UNNTAK_ALLEREDE_UTTALET_SEG,
                 forventetAntallDetaljer = 1,
                 forventetKommentar = null,
             ),
@@ -381,7 +381,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             UgyldigBrukeruttalelseCase(
                 navn = "JA – uten detaljer (null)",
                 input = BrukeruttalelseDto(
-                    harBrukerUttaltSeg = HarBrukerUttaltSeg.JA,
+                    harBrukerUttaltSeg = HarBrukerUttaltSeg.JA_ETTER_FORHÅNDSVARSEL,
                     uttalelsesdetaljer = null,
                     kommentar = null,
                 ),
@@ -390,7 +390,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             UgyldigBrukeruttalelseCase(
                 navn = "JA – tom liste med detaljer",
                 input = BrukeruttalelseDto(
-                    harBrukerUttaltSeg = HarBrukerUttaltSeg.JA,
+                    harBrukerUttaltSeg = HarBrukerUttaltSeg.JA_ETTER_FORHÅNDSVARSEL,
                     uttalelsesdetaljer = listOf(),
                     kommentar = null,
                 ),
@@ -399,7 +399,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             UgyldigBrukeruttalelseCase(
                 navn = "NEI – uten kommentar (null)",
                 input = BrukeruttalelseDto(
-                    harBrukerUttaltSeg = HarBrukerUttaltSeg.NEI,
+                    harBrukerUttaltSeg = HarBrukerUttaltSeg.NEI_ETTER_FORHÅNDSVARSEL,
                     uttalelsesdetaljer = null,
                     kommentar = null,
                 ),
@@ -408,7 +408,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             UgyldigBrukeruttalelseCase(
                 navn = "NEI – tom kommentar ('')",
                 input = BrukeruttalelseDto(
-                    harBrukerUttaltSeg = HarBrukerUttaltSeg.NEI,
+                    harBrukerUttaltSeg = HarBrukerUttaltSeg.NEI_ETTER_FORHÅNDSVARSEL,
                     uttalelsesdetaljer = null,
                     kommentar = "",
                 ),

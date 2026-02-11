@@ -20,9 +20,9 @@ class NyForhåndsvarselUnntakRepository(
         }.singleOrNull()
     }
 
-    fun lagre(forhåndsvarselUnntakEntity: ForhåndsvarselUnntakEntity) {
-        jdbcTemplate.update("DELETE FROM tilbakekreving_brukeruttalelse WHERE behandling_ref=?;", forhåndsvarselUnntakEntity.behandlingRef)
-        jdbcTemplate.update("DELETE FROM tilbakekreving_forhåndsvarsel_unntak WHERE behandling_ref=?", forhåndsvarselUnntakEntity.behandlingRef)
-        ForhåndsvarselUnntakEntityMapper.upsertQuery(jdbcTemplate, forhåndsvarselUnntakEntity)
+    fun lagre(forhåndsvarselUnntakEntity: ForhåndsvarselUnntakEntity?, behandlingId: UUID) {
+        jdbcTemplate.update("DELETE FROM tilbakekreving_brukeruttalelse WHERE behandling_ref=?;", behandlingId)
+        jdbcTemplate.update("DELETE FROM tilbakekreving_forhåndsvarsel_unntak WHERE behandling_ref=?", behandlingId)
+        forhåndsvarselUnntakEntity?.let { ForhåndsvarselUnntakEntityMapper.upsertQuery(jdbcTemplate, it) }
     }
 }

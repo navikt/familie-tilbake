@@ -131,7 +131,7 @@ open class TilbakekrevingE2EBase : E2EBase() {
     ) {
         val tilbakekrevingId = tilbakekrevingService.hentTilbakekreving(behandlingId)!!.id
         tilbakekrevingService.hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
-            tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, listOf(), "")
+            tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, listOf(), "")
         }
     }
 
