@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.kravgrunnlag.domain
 
 import no.nav.familie.tilbake.common.repository.Sporbar
+import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
@@ -52,6 +53,14 @@ data class Kravgrunnlag431(
         perioder.sumOf { periode ->
             periode.beløp.filter { beløp -> beløp.klassetype == Klassetype.FEIL }.sumOf { it.nyttBeløp }
         }
+
+    fun samletPeriode(): Datoperiode? {
+        if (perioder.isEmpty()) return null
+        return Datoperiode(
+            fom = perioder.minOf { it.periode.fom },
+            tom = perioder.maxOf { it.periode.tom },
+        )
+    }
 }
 
 data class Kravgrunnlagsperiode432(

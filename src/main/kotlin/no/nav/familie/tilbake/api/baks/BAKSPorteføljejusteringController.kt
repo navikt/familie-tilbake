@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.api.baks
 
 import jakarta.transaction.Transactional
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.bigQuery.BigQueryAdapterService
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.historikkinnslag.Aktør.Vedtaksløsning
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
@@ -31,6 +32,7 @@ class BAKSPorteføljejusteringController(
     private val behandlingTilstandService: BehandlingTilstandService,
     private val featureService: FeatureService,
     private val norg2Service: Norg2Service,
+    private val bigQueryAdapterService: BigQueryAdapterService,
 ) {
     @Transactional
     @PutMapping("/oppdater-behandlende-enhet")
@@ -53,7 +55,7 @@ class BAKSPorteføljejusteringController(
         } else {
             integrasjonerClient.hentNavkontor(nyEnhetId)
         }
-        behandlingRepository.update(
+        val oppdatertBehandling = behandlingRepository.update(
             behandling.copy(
                 ansvarligSaksbehandler = Vedtaksløsning.ident,
                 ansvarligBeslutter = null,
@@ -61,6 +63,7 @@ class BAKSPorteføljejusteringController(
                 behandlendeEnhetsNavn = nyEnhet.navn,
             ),
         )
+        bigQueryAdapterService.oppdaterBigQuery(oppdatertBehandling)
 
         historikkService.lagHistorikkinnslag(
             behandlingId = behandling.id,

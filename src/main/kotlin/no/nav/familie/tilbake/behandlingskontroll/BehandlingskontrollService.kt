@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.behandlingskontroll
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
+import no.nav.familie.tilbake.bigQuery.BigQueryAdapterService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
@@ -37,6 +38,7 @@ class BehandlingskontrollService(
     private val kravgrunnlagRepository: KravgrunnlagRepository,
     private val historikkService: HistorikkService,
     private val brevmottakerRepository: ManuellBrevmottakerRepository,
+    private val bigQueryAdapterService: BigQueryAdapterService,
 ) {
     private val log = TracedLogger.getLogger<BehandlingskontrollService>()
 
@@ -479,7 +481,8 @@ class BehandlingskontrollService(
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         // Oppdaterer tilsvarende behandlingsstatus bortsett fra Avsluttet steg. Det håndteres separat av AvsluttBehandlingTask
         if (Behandlingssteg.AVSLUTTET != behandlingssteg) {
-            behandlingRepository.update(behandling.copy(status = behandlingssteg.behandlingsstatus))
+            val oppdatertBehandling = behandlingRepository.update(behandling.copy(status = behandlingssteg.behandlingsstatus))
+            bigQueryAdapterService.oppdaterBigQuery(oppdatertBehandling)
         }
     }
 

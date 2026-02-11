@@ -7,6 +7,7 @@ import io.mockk.runs
 import io.mockk.verify
 import no.nav.familie.tilbake.api.baks.BAKSPorteføljejusteringController.OppdaterBehandlendeEnhetRequest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.bigQuery.BigQueryAdapterService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.historikkinnslag.Aktør.Vedtaksløsning
@@ -33,6 +34,7 @@ class BAKSPorteføljejusteringControllerTest {
     private val featureService: FeatureService = FeatureService(applicationProperties = applicationProps())
     private val norg2Client: Norg2Client = mockk<Norg2Client>()
     private val norg2Service = Norg2Service(norg2Client = norg2Client)
+    private val bigQueryAdapterService = mockk<BigQueryAdapterService>()
 
     private val baksPorteføljejusteringController =
         BAKSPorteføljejusteringController(
@@ -42,6 +44,7 @@ class BAKSPorteføljejusteringControllerTest {
             behandlingTilstandService = behandlingTilstandService,
             featureService = featureService,
             norg2Service = norg2Service,
+            bigQueryAdapterService = bigQueryAdapterService,
         )
 
     private val nyEnhetId = "1234"
@@ -61,6 +64,8 @@ class BAKSPorteføljejusteringControllerTest {
             enhetNr = "1",
             status = "Eksisterer",
         )
+
+        every { bigQueryAdapterService.oppdaterBigQuery(any()) } just runs
     }
 
     @Test
