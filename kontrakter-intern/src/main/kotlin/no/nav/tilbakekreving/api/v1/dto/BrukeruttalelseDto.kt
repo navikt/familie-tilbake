@@ -15,7 +15,14 @@ data class Uttalelsesdetaljer(
 )
 
 enum class HarBrukerUttaltSeg {
+    JA_ETTER_FORHÅNDSVARSEL,
+    NEI_ETTER_FORHÅNDSVARSEL,
+    UNNTAK_ALLEREDE_UTTALT_SEG,
+    UNNTAK_INGEN_UTTALELSE,
+
+    @Deprecated("midreltidig, fjernes etter prodsatt og migrering")
     JA,
+
+    @Deprecated("midreltidig, fjernes etter prodsatt og migrering")
     NEI,
-    ALLEREDE_UTTALET_SEG,
 }

@@ -54,9 +54,9 @@ class NyBehandlingRepository(
             foreslåVedtakRepository.lagre(behandling.foreslåVedtakStegEntity)
             påventRepository.lagre(behandling.påVentEntity, behandling.id)
             behandling.forhåndsvarselEntity.let {
-                it.forhåndsvarselUnntakEntity?.let { forhåndsvarselUnntakRepository.lagre(it) }
-                it.brukeruttalelseEntity?.let { uttalelseRepository.lagre(it) }
-                it.fristUtsettelseEntity.let { utsettUttalelseRepository.lagre(it) }
+                forhåndsvarselUnntakRepository.lagre(it.forhåndsvarselUnntakEntity, behandling.id)
+                uttalelseRepository.lagre(it.brukeruttalelseEntity, behandling.id)
+                utsettUttalelseRepository.lagre(it.fristUtsettelseEntity)
             }
         }
     }
