@@ -13,9 +13,11 @@ import no.nav.kontrakter.frontend.models.RentekstElementDto
 import no.nav.kontrakter.frontend.models.SignaturDto
 import no.nav.kontrakter.frontend.models.VedtaksbrevDto
 import no.nav.kontrakter.frontend.models.VedtaksbrevPeriodeDto
+import no.nav.kontrakter.frontend.models.VedtaksbrevRedigerbareDataDto
 import no.nav.kontrakter.frontend.models.VedtaksbrevVurderingDto
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.TilbakekrevingService
+import no.nav.tilbakekreving.brev.vedtaksbrev.VedtaksbrevDataRepository
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import java.util.UUID
@@ -26,6 +28,7 @@ class BehandlingApiController(
     private val tilbakekrevingService: TilbakekrevingService,
     private val tilgangskontrollService: TilgangskontrollService,
     private val eksterneDataForBrevService: EksterneDataForBrevService,
+    private val vedtaksbrevDataRepository: VedtaksbrevDataRepository,
 ) : BehandlingApi {
     override fun behandlingFakta(behandlingId: String): ResponseEntity<FaktaOmFeilutbetalingDto> {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(UUID.fromString(behandlingId))
@@ -105,5 +108,20 @@ class BehandlingApiController(
                 ),
             ),
         )
+    }
+
+    override fun behandlingOppdaterVedtaksbrev(behandlingId: UUID, vedtaksbrevRedigerbareDataDto: VedtaksbrevRedigerbareDataDto): ResponseEntity<VedtaksbrevRedigerbareDataDto> {
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+            ?: return ResponseEntity.notFound().build()
+
+        tilgangskontrollService.validerTilgangTilbakekreving(
+            tilbakekreving = tilbakekreving,
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+            auditLoggerEvent = AuditLoggerEvent.ACCESS,
+            handling = "Henter informasjon for bruk i brev",
+        )
+
+        return ResponseEntity.ok(vedtaksbrevDataRepository.oppdaterVedtaksbrevData(behandlingId, vedtaksbrevRedigerbareDataDto))
     }
 }
