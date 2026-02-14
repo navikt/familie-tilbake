@@ -1,14 +1,5 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
-import no.nav.kontrakter.frontend.models.BestemmelseEllerGrunnlagDto
-import no.nav.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
-import no.nav.kontrakter.frontend.models.FaktaPeriodeDto
-import no.nav.kontrakter.frontend.models.FeilutbetalingDto
-import no.nav.kontrakter.frontend.models.MuligeRettsligGrunnlagDto
-import no.nav.kontrakter.frontend.models.OppdagetDto
-import no.nav.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
-import no.nav.kontrakter.frontend.models.RettsligGrunnlagDto
-import no.nav.kontrakter.frontend.models.VurderingDto
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
 import no.nav.tilbakekreving.api.v1.dto.FeilutbetalingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurderingAvBrukersUttalelseDto
@@ -25,6 +16,15 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
+import no.nav.tilbakekreving.kontrakter.frontend.models.BestemmelseEllerGrunnlagDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaPeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.FeilutbetalingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.MuligeRettsligGrunnlagDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.RettsligGrunnlagDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VurderingDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import java.time.LocalDate

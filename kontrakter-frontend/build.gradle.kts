@@ -4,7 +4,7 @@ import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
 
 plugins {
     kotlin("jvm")
-    id("org.openapi.generator") version "7.18.0" apply false
+    id("org.openapi.generator") version "7.19.0" apply false
 }
 
 group = "no.nav"
@@ -15,7 +15,7 @@ subprojects {
 
     sourceSets {
         main {
-            kotlin.srcDir("src/main/generated")
+            java.srcDir("src/main/generated")
         }
     }
 
@@ -25,12 +25,13 @@ subprojects {
 
     tasks.withType<GenerateTask> {
         generatorName = "kotlin-spring"
-        remoteInputSpec = "https://raw.githubusercontent.com/navikt/tilbakekreving-kontrakter/7e37eacd5fc373054f1e62bdccc5e6f24ae3ab85/tsp-output/schema/openapi.yaml"
+        remoteInputSpec = "https://raw.githubusercontent.com/navikt/tilbakekreving-kontrakter/4b68785de39e264fc6bce0a3e1777d14a736ad58/tsp-output/schema/openapi.yaml"
         outputDir = "$projectDir/src/main/generated"
-        packageName = "no.nav.kontrakter.frontend"
+        packageName = "no.nav.tilbakekreving.kontrakter.frontend"
         modelNameSuffix = "Dto"
         cleanupOutput = true
         configOptions.put("dateLibrary", "java8")
+        configOptions.put("useSealed", "true")
         configOptions.put("interfaceOnly", "true")
         configOptions.put("useSpringBoot3", "true")
         configOptions.put("useTags", "true")

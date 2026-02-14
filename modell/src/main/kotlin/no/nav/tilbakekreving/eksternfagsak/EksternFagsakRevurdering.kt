@@ -1,12 +1,12 @@
 package no.nav.tilbakekreving.eksternfagsak
 
-import no.nav.kontrakter.frontend.models.RevurderingDto
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.EksternFagsakBehandlingEntity
 import no.nav.tilbakekreving.entities.EksternFagsakBehandlingType
 import no.nav.tilbakekreving.entities.RevurderingsårsakType
 import no.nav.tilbakekreving.entities.UtvidetPeriodeEntity
 import no.nav.tilbakekreving.historikk.Historikk
+import no.nav.tilbakekreving.kontrakter.frontend.models.RevurderingDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import java.time.LocalDate
 import java.util.UUID

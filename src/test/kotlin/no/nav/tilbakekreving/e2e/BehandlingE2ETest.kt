@@ -6,11 +6,6 @@ import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.SærligeGrunner
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.UtvidetVilkårsresultat
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.VedtakPeriode
 import no.nav.familie.tilbake.kontrakter.Ressurs
-import no.nav.kontrakter.frontend.models.OppdagetDto
-import no.nav.kontrakter.frontend.models.OppdaterFaktaOmFeilutbetalingDto
-import no.nav.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
-import no.nav.kontrakter.frontend.models.RettsligGrunnlagDto
-import no.nav.kontrakter.frontend.models.VurderingDto
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.api.v1.dto.AktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
@@ -30,6 +25,11 @@ import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
+import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaOmFeilutbetalingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.RettsligGrunnlagDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VurderingDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
