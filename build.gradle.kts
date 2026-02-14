@@ -3,11 +3,11 @@ import org.gradle.kotlin.dsl.register
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
 import java.net.URI
 
-val springDocVersion = "2.8.9"
-val testcontainersVersion = "1.21.3"
-val tokenValidationVersion = "5.0.33"
+val springDocVersion = "3.0.1"
+val testcontainersVersion = "1.21.4"
+val tokenValidationVersion = "6.0.2"
 val flywayVersion = "11.3.4"
-val ktorVersion = "3.2.2"
+val ktorVersion = "3.4.0"
 ext["ktorVersion"] = ktorVersion
 
 group = "no.nav"
@@ -15,10 +15,10 @@ description = "familie-tilbake"
 java.sourceCompatibility = JavaVersion.VERSION_21
 
 plugins {
-    kotlin("jvm") version "2.2.0"
-    id("org.springframework.boot") version "3.5.4"
-    id("org.jetbrains.kotlin.plugin.spring") version "2.2.0"
-    id("org.jlleitschuh.gradle.ktlint") version "13.0.0"
+    kotlin("jvm") version "2.3.10"
+    id("org.springframework.boot") version "4.0.2"
+    id("org.jetbrains.kotlin.plugin.spring") version "2.3.10"
+    id("org.jlleitschuh.gradle.ktlint") version "14.0.1"
 }
 
 springBoot {
@@ -56,9 +56,9 @@ subprojects {
     }
 
     dependencies {
-        testImplementation("org.junit.jupiter:junit-jupiter:5.13.4")
+        testImplementation("org.junit.jupiter:junit-jupiter:6.0.2")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-        testImplementation("io.kotest:kotest-assertions-core:5.9.1")
+        testImplementation("io.kotest:kotest-assertions-core:6.1.3")
     }
 
     tasks.test {
@@ -177,7 +177,7 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson-jvm:$ktorVersion")
-    implementation("com.google.cloud:google-cloud-bigquery:2.54.0")
+    implementation("com.google.cloud:google-cloud-bigquery:2.59.0")
     implementation("org.apache.httpcomponents.client5:httpclient5")
     implementation("org.apache.httpcomponents.core5:httpcore5")
     implementation("org.apache.httpcomponents.core5:httpcore5-h2")
@@ -193,7 +193,7 @@ dependencies {
     api("com.fasterxml.jackson.core:jackson-databind")
     api("com.fasterxml.jackson.module:jackson-module-kotlin")
 
-    api("com.ibm.mq:com.ibm.mq.jakarta.client:9.4.3.0")
+    api("com.ibm.mq:com.ibm.mq.jakarta.client:9.4.5.0")
     api("jakarta.jms:jakarta.jms-api")
     api("org.apache.activemq:activemq-jms-pool")
     api("org.springframework:spring-jms")
@@ -216,7 +216,7 @@ dependencies {
         exclude("org.flywaydb")
     }
     api("no.nav.familie.tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon:1.0_20250425112447_49835df")
-    api("no.nav.tjenestespesifikasjoner:avstemming-v1-tjenestespesifikasjon:2643.2f3e8e9")
+    api("no.nav.tjenestespesifikasjoner:avstemming-v1-tjenestespesifikasjon:2648.7dd4e44")
 
     api("no.nav.security:token-client-core:$tokenValidationVersion")
     api("no.nav.security:token-client-spring:$tokenValidationVersion")
@@ -226,25 +226,25 @@ dependencies {
     api("ch.qos.logback:logback-classic")
     api("com.papertrailapp:logback-syslog4j:1.0.0")
     api("io.micrometer:micrometer-registry-prometheus")
-    api("net.logstash.logback:logstash-logback-encoder:8.1")
+    api("net.logstash.logback:logstash-logback-encoder:9.0")
 
-    api("io.getunleash:unleash-client-java:11.0.2")
-    api("org.messaginghub:pooled-jms:3.1.7")
+    api("io.getunleash:unleash-client-java:12.1.1")
+    api("org.messaginghub:pooled-jms:3.2.2")
     api("org.flywaydb:flyway-core")
     api("org.flywaydb:flyway-gcp-bigquery")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
     runtimeOnly(bigQueryDriverJars)
 
-    testImplementation("org.junit.jupiter:junit-jupiter:5.13.4")
+    testImplementation("org.junit.jupiter:junit-jupiter:6.0.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    testImplementation("io.mockk:mockk-jvm:1.14.5")
-    testImplementation("io.kotest:kotest-assertions-core-jvm:6.0.1")
+    testImplementation("io.mockk:mockk-jvm:1.14.9")
+    testImplementation("io.kotest:kotest-assertions-core-jvm:6.1.3")
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
-    testImplementation("io.jsonwebtoken:jjwt:0.12.6")
+    testImplementation("io.jsonwebtoken:jjwt:0.13.0")
     testImplementation("no.nav.security:token-validation-spring-test:$tokenValidationVersion")
 
     testImplementation("org.testcontainers:junit-jupiter:$testcontainersVersion")
@@ -253,6 +253,6 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers:$testcontainersVersion")
 
     testImplementation("org.apache.kafka:kafka_2.13")
-    testImplementation("org.wiremock:wiremock-standalone:3.13.1")
+    testImplementation("org.wiremock:wiremock-standalone:3.13.2")
     testImplementation("org.apache.activemq:activemq-client")
 }
