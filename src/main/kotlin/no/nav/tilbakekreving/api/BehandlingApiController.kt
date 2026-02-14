@@ -6,20 +6,21 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
-import no.nav.kontrakter.frontend.apis.BehandlingApi
-import no.nav.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
-import no.nav.kontrakter.frontend.models.OppdaterFaktaOmFeilutbetalingDto
-import no.nav.kontrakter.frontend.models.RentekstElementDto
-import no.nav.kontrakter.frontend.models.SignaturDto
-import no.nav.kontrakter.frontend.models.VedtaksbrevDto
-import no.nav.kontrakter.frontend.models.VedtaksbrevPeriodeDto
-import no.nav.kontrakter.frontend.models.VedtaksbrevRedigerbareDataDto
-import no.nav.kontrakter.frontend.models.VedtaksbrevVurderingDto
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.TilbakekrevingService
+import no.nav.tilbakekreving.brev.vedtaksbrev.BrevFormatterer
 import no.nav.tilbakekreving.brev.vedtaksbrev.VedtaksbrevDataRepository
+import no.nav.tilbakekreving.kontrakter.frontend.apis.BehandlingApi
+import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.HovedavsnittDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaOmFeilutbetalingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.RentekstElementDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.SignaturDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevDataDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDataDto
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
+import java.time.LocalDate
 import java.util.UUID
 
 @Component
@@ -68,7 +69,7 @@ class BehandlingApiController(
         } ?: ResponseEntity.notFound().build()
     }
 
-    override fun behandlingHentVedtaksbrev(behandlingId: String): ResponseEntity<VedtaksbrevDto> {
+    override fun behandlingHentVedtaksbrev(behandlingId: String): ResponseEntity<VedtaksbrevDataDto> {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(UUID.fromString(behandlingId))
             ?: return ResponseEntity.notFound().build()
 
@@ -83,24 +84,15 @@ class BehandlingApiController(
         val behandling = tilbakekreving.behandlingHistorikk.finn(UUID.fromString(behandlingId), tilbakekreving.sporingsinformasjon())
         val signatur = behandling.entry.brevSignatur()
         return ResponseEntity.ok(
-            VedtaksbrevDto(
-                innledning = listOf(RentekstElementDto("")),
-                perioder = behandling.entry.vurdertePerioderForBrev().map { vurdertPeriode ->
-                    VedtaksbrevPeriodeDto(
-                        fom = vurdertPeriode.periode.fom,
-                        tom = vurdertPeriode.periode.tom,
-                        beskrivelse = listOf(RentekstElementDto("")),
-                        konklusjon = listOf(RentekstElementDto("")),
-                        vurderinger = vurdertPeriode.påkrevdeVurderinger.map {
-                            VedtaksbrevVurderingDto(
-                                tittel = it.tittel,
-                                beskrivelse = listOf(RentekstElementDto("")),
-                            )
-                        },
-                    )
-                },
+            VedtaksbrevDataDto(
+                hovedavsnitt = HovedavsnittDto(
+                    tittel = "Du må betale tilbake",
+                    underavsnitt = listOf(RentekstElementDto("")),
+                ),
+                avsnitt = BrevFormatterer.lagAvsnitt(behandling.entry.vurdertePerioderForBrev()),
                 brevGjelder = tilbakekreving.bruker!!.brevmeta(),
                 ytelse = tilbakekreving.eksternFagsak.brevmeta(),
+                sendtDato = BrevFormatterer.norskDato(LocalDate.now()),
                 signatur = SignaturDto(
                     signatur.ansvarligEnhet,
                     eksterneDataForBrevService.hentSaksbehandlernavn(signatur.ansvarligSaksbehandlerIdent),

@@ -1,6 +1,5 @@
 package no.nav.tilbakekreving.aktør
 
-import no.nav.kontrakter.frontend.models.BrevmottakerDto
 import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.BrukerinfoBehov
@@ -10,6 +9,7 @@ import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.kontrakter.bruker.FrontendBrukerDto
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
+import no.nav.tilbakekreving.kontrakter.frontend.models.BrevmottakerDto
 import java.time.LocalDate
 import java.util.UUID
 

@@ -2,7 +2,7 @@ package no.nav.tilbakekreving.brev.vedtaksbrev
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.tilbake.kontrakter.objectMapper
-import no.nav.kontrakter.frontend.models.VedtaksbrevRedigerbareDataDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDataDto
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Repository

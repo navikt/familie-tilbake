@@ -1,8 +1,8 @@
 package no.nav.tilbakekreving.fagsystem
 
-import no.nav.kontrakter.frontend.models.YtelseDto
 import no.nav.tilbakekreving.entities.YtelseEntity
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
+import no.nav.tilbakekreving.kontrakter.frontend.models.YtelseDto
 import no.nav.tilbakekreving.kontrakter.ytelse.DokarkivFagsaksystem
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.Tema
