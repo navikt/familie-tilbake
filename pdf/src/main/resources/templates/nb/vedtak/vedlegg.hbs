@@ -22,13 +22,7 @@
         <tr>
             <td class="periode">{{{kortdato periode.fom}}} – {{{kortdato periode.tom}}}</td>
             <td class="tall">{{{kroner kravgrunnlag.feilutbetaltBeløp}}}</td>
-            {{#if (not resultat.tilbakekrevesBeløp)}}
-            <td>Ingen tilbakebetaling</td>
-            {{else if (eq resultat.tilbakekrevesBeløp kravgrunnlag.feilutbetaltBeløp)}}
-            <td>Hele beløpet</td>
-            {{else}}
-            <td>Deler av beløpet</td>
-            {{/if}}
+            <td>{{#if (not resultat.tilbakekrevesBeløp)}}Ingen tilbakebetaling{{else if (eq resultat.tilbakekrevesBeløp kravgrunnlag.feilutbetaltBeløp)}}Hele beløpet{{else}}Deler av beløpet{{/if}}</td>
             {{#if totalresultat.totaltRentebeløp}}
             <td class="tall">{{#if resultat.rentebeløp}}{{{kroner resultat.rentebeløp}}}{{/if}}</td>
             {{/if}}
