@@ -4,8 +4,8 @@ import no.nav.familie.tilbake.config.ApplicationConfig
 import no.nav.familie.tilbake.config.TestLauncherConfig
 import no.nav.familie.tilbake.database.DbContainerInitializer
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
 import org.springframework.boot.builder.SpringApplicationBuilder
+import org.springframework.boot.webmvc.autoconfigure.error.ErrorMvcAutoConfiguration
 
 @SpringBootApplication(exclude = [ErrorMvcAutoConfiguration::class])
 class LauncherLocal

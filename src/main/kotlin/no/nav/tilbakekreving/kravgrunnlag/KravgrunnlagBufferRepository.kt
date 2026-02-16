@@ -63,7 +63,7 @@ class KravgrunnlagBufferRepository(
         override fun mapRow(
             rs: ResultSet,
             rowNum: Int,
-        ): Entity? {
+        ): Entity {
             return Entity(
                 rs.getString("kravgrunnlag"),
                 rs.getString("kravgrunnlag_id"),

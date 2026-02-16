@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.config
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import no.nav.familie.prosessering.config.ProsesseringInfoProvider
 import no.nav.familie.tilbake.log.LogTracingHttpFilter
@@ -10,17 +9,17 @@ import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.SpringBootConfiguration
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
-import org.springframework.boot.web.client.RestTemplateBuilder
-import org.springframework.boot.web.embedded.jetty.JettyServletWebServerFactory
+import org.springframework.boot.jetty.servlet.JettyServletWebServerFactory
+import org.springframework.boot.restclient.RestTemplateBuilder
+import org.springframework.boot.web.server.servlet.ServletWebServerFactory
 import org.springframework.boot.web.servlet.FilterRegistrationBean
-import org.springframework.boot.web.servlet.server.ServletWebServerFactory
-import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Primary
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.web.client.RestTemplate
+import tools.jackson.databind.json.JsonMapper
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 
@@ -29,7 +28,6 @@ import java.time.temporal.ChronoUnit
 @EnableJwtTokenValidation(ignore = ["org.springframework", "org.springdoc"])
 @EnableOAuth2Client(cacheEnabled = true)
 @EnableScheduling
-@EnableCaching
 @ConfigurationPropertiesScan
 class ApplicationConfig {
     @Bean
@@ -42,7 +40,7 @@ class ApplicationConfig {
     @Bean
     fun logFilter(): FilterRegistrationBean<LogTracingHttpFilter> {
         val filterRegistration = FilterRegistrationBean<LogTracingHttpFilter>()
-        filterRegistration.filter = LogTracingHttpFilter()
+        filterRegistration.setFilter(LogTracingHttpFilter())
         filterRegistration.order = 1
         return filterRegistration
     }
@@ -55,8 +53,8 @@ class ApplicationConfig {
      */
     @Bean
     @Primary
-    fun restTemplateBuilder(objectMapper: ObjectMapper): RestTemplateBuilder {
-        val jackson2HttpMessageConverter = MappingJackson2HttpMessageConverter(objectMapper)
+    fun restTemplateBuilder(jsonMapper: JsonMapper): RestTemplateBuilder {
+        val jackson2HttpMessageConverter = JacksonJsonHttpMessageConverter(jsonMapper)
         return RestTemplateBuilder()
             .connectTimeout(Duration.of(2, ChronoUnit.SECONDS))
             .readTimeout(Duration.of(30, ChronoUnit.SECONDS))

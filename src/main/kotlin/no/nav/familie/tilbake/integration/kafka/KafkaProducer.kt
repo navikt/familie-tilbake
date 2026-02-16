@@ -31,7 +31,7 @@ interface KafkaProducer {
     )
 
     fun sendRåFagsystemsbehandlingResponse(
-        behandlingId: UUID?,
+        behandlingId: UUID,
         response: String,
     )
 
@@ -101,13 +101,13 @@ class DefaultKafkaProducer(
     }
 
     override fun sendRåFagsystemsbehandlingResponse(
-        behandlingId: UUID?,
+        behandlingId: UUID,
         response: String,
     ) {
         val producerRecord =
             ProducerRecord(
                 kafkaProperties.hentFagsystem.responseTopic,
-                behandlingId?.toString(),
+                behandlingId.toString(),
                 response,
             )
         kafkaTemplate.send(producerRecord)
@@ -187,7 +187,7 @@ class E2EKafkaProducer : KafkaProducer {
     }
 
     override fun sendRåFagsystemsbehandlingResponse(
-        behandlingId: UUID?,
+        behandlingId: UUID,
         request: String,
     ) {
         log.medContext(SecureLog.Context.tom()) {

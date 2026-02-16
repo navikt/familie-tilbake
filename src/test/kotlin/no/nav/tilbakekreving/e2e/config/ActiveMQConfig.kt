@@ -2,7 +2,7 @@ package no.nav.tilbakekreving.e2e.config
 
 import jakarta.jms.ConnectionFactory
 import org.apache.activemq.ActiveMQConnectionFactory
-import org.springframework.boot.autoconfigure.jms.DefaultJmsListenerContainerFactoryConfigurer
+import org.springframework.boot.jms.autoconfigure.DefaultJmsListenerContainerFactoryConfigurer
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary

@@ -16,7 +16,7 @@ class KafkaListenerConfig {
     fun listeners(
         consumerFactory: DefaultKafkaConsumerFactory<String, String>,
         fagsystemKafkaListener: FagsystemKafkaListener,
-    ): KafkaMessageListenerContainer<String?, String?> {
+    ): KafkaMessageListenerContainer<String, String> {
         val listenerContainer = KafkaMessageListenerContainer(
             consumerFactory,
             ContainerProperties(*Ytelse.ytelser().map { it.kafkaTopic }.toTypedArray()),

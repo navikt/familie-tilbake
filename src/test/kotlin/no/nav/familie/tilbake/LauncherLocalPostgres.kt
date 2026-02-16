@@ -2,8 +2,8 @@ package no.nav.familie.tilbake
 
 import no.nav.familie.tilbake.config.TestLauncherConfig
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
 import org.springframework.boot.builder.SpringApplicationBuilder
+import org.springframework.boot.webmvc.autoconfigure.error.ErrorMvcAutoConfiguration
 import java.util.Properties
 
 @SpringBootApplication(exclude = [ErrorMvcAutoConfiguration::class])

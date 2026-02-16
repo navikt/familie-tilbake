@@ -12,7 +12,7 @@ ext["ktorVersion"] = ktorVersion
 
 group = "no.nav"
 description = "familie-tilbake"
-java.sourceCompatibility = JavaVersion.VERSION_21
+java.sourceCompatibility = JavaVersion.VERSION_25
 
 plugins {
     kotlin("jvm") version "2.3.10"
@@ -38,7 +38,7 @@ tasks.withType<Test> {
 }
 
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(25)
 }
 
 configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
@@ -188,7 +188,8 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-jetty")
     api("org.springframework.boot:spring-boot-starter-validation")
     api("org.springframework.boot:spring-boot-starter-web")
-    api("org.springframework.retry:spring-retry")
+    api("org.springframework.boot:spring-boot-jms")
+    api("org.springframework.boot:spring-boot-flyway")
 
     api("com.fasterxml.jackson.core:jackson-databind")
     api("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -243,6 +244,7 @@ dependencies {
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-resttestclient")
 
     testImplementation("io.jsonwebtoken:jjwt:0.13.0")
     testImplementation("no.nav.security:token-validation-spring-test:$tokenValidationVersion")

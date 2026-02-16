@@ -11,9 +11,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
-import org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration
+import org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration
+import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration
+import org.springframework.boot.transaction.autoconfigure.TransactionAutoConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration

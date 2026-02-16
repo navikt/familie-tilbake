@@ -64,11 +64,8 @@ class DatabaseConfig : AbstractJdbcConfiguration() {
     }
 
     @WritingConverter
-    class YearMonthTilLocalDateConverter : Converter<YearMonth?, LocalDate> {
-        override fun convert(yearMonth: YearMonth?): LocalDate? =
-            yearMonth?.let {
-                LocalDate.of(it.year, it.month, 1)
-            }
+    class YearMonthTilLocalDateConverter : Converter<YearMonth, LocalDate> {
+        override fun convert(yearMonth: YearMonth): LocalDate = yearMonth.atDay(1)
     }
 
     @ReadingConverter

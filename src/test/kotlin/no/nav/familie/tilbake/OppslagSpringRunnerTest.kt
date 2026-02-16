@@ -47,10 +47,9 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.resttestclient.TestRestTemplate
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.server.LocalServerPort
-import org.springframework.cache.CacheManager
 import org.springframework.context.ApplicationContext
 import org.springframework.data.jdbc.core.JdbcAggregateOperations
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
@@ -79,9 +78,6 @@ abstract class OppslagSpringRunnerTest {
     private lateinit var applicationContext: ApplicationContext
 
     @Autowired
-    private lateinit var cacheManager: CacheManager
-
-    @Autowired
     private lateinit var mockOAuth2Server: MockOAuth2Server
 
     @LocalServerPort
@@ -101,7 +97,6 @@ abstract class OppslagSpringRunnerTest {
         if (tømDBEtterHverTest) {
             resetDatabase()
         }
-        clearCaches()
         resetWiremockServers()
     }
 
@@ -118,12 +113,6 @@ abstract class OppslagSpringRunnerTest {
 
     private fun resetWiremockServers() {
         applicationContext.getBeansOfType(WireMockServer::class.java).values.forEach(WireMockServer::resetRequests)
-    }
-
-    private fun clearCaches() {
-        cacheManager.cacheNames
-            .mapNotNull { cacheManager.getCache(it) }
-            .forEach { it.clear() }
     }
 
     private fun resetDatabase() {

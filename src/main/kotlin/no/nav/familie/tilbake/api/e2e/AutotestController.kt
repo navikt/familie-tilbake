@@ -149,7 +149,7 @@ class AutotestController(
             requestSendtRepository.update(requestSendt!!.copy(respons = melding))
         } else {
             kafkaProducer.sendRåFagsystemsbehandlingResponse(
-                requestSendt?.id,
+                requestSendt!!.id,
                 melding,
             )
         }

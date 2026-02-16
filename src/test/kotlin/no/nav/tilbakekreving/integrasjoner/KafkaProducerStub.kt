@@ -48,7 +48,7 @@ class KafkaProducerStub() : KafkaProducer {
         vedtak.computeIfAbsent(behandlingId) { mutableListOf() }.add(request)
     }
 
-    override fun sendRåFagsystemsbehandlingResponse(behandlingId: UUID?, response: String) {}
+    override fun sendRåFagsystemsbehandlingResponse(behandlingId: UUID, response: String) {}
 
     override fun sendHentFagsystemsbehandlingRequest(requestId: UUID, request: HentFagsystemsbehandlingRequest, logContext: SecureLog.Context) {}
 

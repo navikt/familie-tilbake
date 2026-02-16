@@ -59,7 +59,7 @@ abstract class AbstractPingableRestClient(
         httpHeaders: HttpHeaders? = null,
     ): T = executeMedMetrics(uri) { operations.exchange<T>(uri, HttpMethod.DELETE, HttpEntity(payload, httpHeaders)) }
 
-    private fun <T> validerOgPakkUt(
+    private fun <T : Any> validerOgPakkUt(
         response: ResponseEntity<T>,
         uri: URI,
     ): T {
@@ -71,7 +71,7 @@ abstract class AbstractPingableRestClient(
         return response.body as T
     }
 
-    fun <T> executeMedMetrics(
+    fun <T : Any> executeMedMetrics(
         uri: URI,
         function: () -> ResponseEntity<T>,
     ): T {
