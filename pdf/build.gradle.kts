@@ -13,8 +13,12 @@ dependencies {
     api("io.github.openhtmltopdf:openhtmltopdf-pdfbox:$openHtmlToPdfVersion")
     api("io.github.openhtmltopdf:openhtmltopdf-slf4j:$openHtmlToPdfVersion")
     api("io.github.openhtmltopdf:openhtmltopdf-svg-support:$openHtmlToPdfVersion")
-    api("org.verapdf:core-jakarta:$veraPdfVersion")
-    api("org.verapdf:validation-model-jakarta:$veraPdfVersion")
+    api("org.verapdf:core-jakarta:$veraPdfVersion") {
+        exclude("org.glassfish.jaxb")
+    }
+    api("org.verapdf:validation-model-jakarta:$veraPdfVersion") {
+        exclude("org.glassfish.jaxb")
+    }
 
     api("com.fasterxml.jackson.core:jackson-databind")
     api("com.fasterxml.jackson.module:jackson-module-kotlin")
