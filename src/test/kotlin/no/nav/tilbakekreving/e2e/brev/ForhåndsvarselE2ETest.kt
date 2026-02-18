@@ -153,6 +153,8 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
             }
         }
 
+        documentController.bestillBrev(BestillBrevDto(behandlingId, Dokumentmalstype.VARSEL, "TEST"))
+
         documentController.lagreBrukeruttalelse(behandlingId, hentBrukerUttalelseDto(HarBrukerUttaltSeg.JA_ETTER_FORHÅNDSVARSEL, LocalDate.of(2025, 12, 2)))
 
         documentController.hentForhåndsvarselinfo(behandlingId).data.shouldNotBeNull {
