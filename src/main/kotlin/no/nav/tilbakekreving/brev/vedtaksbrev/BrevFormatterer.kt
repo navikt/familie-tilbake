@@ -15,18 +15,20 @@ object BrevFormatterer {
         .withLocale(Locale.of("nb"))
 
     fun lagAvsnitt(perioder: List<BegrunnetPeriode>): List<AvsnittDto> {
-        return perioder.map { vurdertPeriode ->
+        val startPeriode = perioder.minOf { it.periode.fom }
+        val sluttPeriode = perioder.maxOf { it.periode.tom }
+        return listOf(
             AvsnittDto(
-                tittel = "Perioden fra og med 1. februar 2025 til og med 28. februar 2025",
+                tittel = "Perioden fra og med ${norskDato(startPeriode)} til og med ${norskDato(sluttPeriode)}",
                 id = UUID.randomUUID(),
-                underavsnitt = vurdertPeriode.påkrevdeVurderinger.map {
+                underavsnitt = perioder.first().påkrevdeVurderinger.map {
                     UnderavsnittElementDto(
                         tittel = it.tittel,
                         underavsnitt = listOf(RentekstElementDto("")),
                     )
                 },
-            )
-        }
+            ),
+        )
     }
 
     fun norskDato(date: LocalDate): String = dateFormatter.format(date)
