@@ -21,6 +21,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDa
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import java.time.LocalDate
+import java.time.OffsetDateTime
 import java.util.UUID
 
 @Component
@@ -93,6 +94,7 @@ class BehandlingApiController(
                 brevGjelder = tilbakekreving.bruker!!.brevmeta(),
                 ytelse = tilbakekreving.eksternFagsak.brevmeta(),
                 sendtDato = BrevFormatterer.norskDato(LocalDate.now()),
+                sistOppdatert = OffsetDateTime.now(),
                 signatur = SignaturDto(
                     signatur.ansvarligEnhet,
                     eksterneDataForBrevService.hentSaksbehandlernavn(signatur.ansvarligSaksbehandlerIdent),
