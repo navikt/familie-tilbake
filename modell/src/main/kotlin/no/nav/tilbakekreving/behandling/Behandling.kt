@@ -103,6 +103,8 @@ class Behandling internal constructor(
         )
     }
 
+    fun nullstillForhåndsvarselUnntakOgUttalelse() = forhåndsvarsel.nullstillUnntakOgUttalelse()
+
     fun faktastegFrontendDto(
         opprettelsesvalg: Opprettelsesvalg,
         tilbakekrevingOpprettet: LocalDateTime,

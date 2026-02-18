@@ -36,6 +36,11 @@ class Forhåndsvarsel(
         )
     }
 
+    fun nullstillUnntakOgUttalelse() {
+        forhåndsvarselUnntak = null
+        brukeruttalelse = null
+    }
+
     fun lagreUttalelse(
         uttalelseVurdering: UttalelseVurdering,
         uttalelseInfo: List<UttalelseInfo>,

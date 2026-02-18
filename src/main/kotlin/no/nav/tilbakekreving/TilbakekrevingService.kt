@@ -444,7 +444,10 @@ class TilbakekrevingService(
         bestillBrevDto: BestillBrevDto,
     ) {
         when (bestillBrevDto.brevmalkode) {
-            Dokumentmalstype.VARSEL -> forhåndsvarselService.bestillVarselbrev(tilbakekreving, bestillBrevDto)
+            Dokumentmalstype.VARSEL -> {
+                tilbakekreving.behandlingHistorikk.nåværende().entry.nullstillForhåndsvarselUnntakOgUttalelse()
+                forhåndsvarselService.bestillVarselbrev(tilbakekreving, bestillBrevDto)
+            }
             else -> throw Feil(
                 message = "Håndtering av ${bestillBrevDto.brevmalkode} støttes ikke enda",
                 httpStatus = HttpStatus.BAD_REQUEST,
