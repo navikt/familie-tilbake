@@ -24,7 +24,7 @@ object FaktaFeilutbetalingMapper {
             LogiskPeriodeUtil.utledLogiskPeriode(KravgrunnlagUtil.finnFeilutbetalingPrPeriode(kravgrunnlag))
         val fagsystemsbehandling = behandling.aktivFagsystemsbehandling
         println("======>>>> faktaFeilutbetaling perioder: ${faktaFeilutbetaling?.perioder}")
-        println("======>>>> logiskePerioder perioder: ${faktaFeilutbetaling?.perioder}")
+        println("======>>>> logiskePerioder perioder: $logiskePerioder")
         val feilutbetaltePerioder =
             hentFeilutbetaltePerioder(
                 faktaFeilutbetaling = faktaFeilutbetaling,
