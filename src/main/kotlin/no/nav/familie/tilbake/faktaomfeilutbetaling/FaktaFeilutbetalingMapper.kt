@@ -79,7 +79,15 @@ object FaktaFeilutbetalingMapper {
     private fun hentFeilutbetaltBeløp(
         logiskePerioder: List<LogiskPeriode>,
         faktaPeriode: Månedsperiode,
-    ): BigDecimal = logiskePerioder.first { faktaPeriode == it.periode }.feilutbetaltBeløp
+    ): BigDecimal {
+        val beløp = logiskePerioder.first {
+            println("====>>>> faktaPeriode: $faktaPeriode ")
+            println("====>>>> logiskperiode: ${it.periode} - beløp: ${it.feilutbetaltBeløp}")
+            faktaPeriode == it.periode
+        }.feilutbetaltBeløp
+
+        return beløp
+    }
 
     private fun utledTotalFeilutbetaltPeriode(perioder: List<LogiskPeriode>): Datoperiode {
         var totalPeriodeFom: YearMonth? = null
