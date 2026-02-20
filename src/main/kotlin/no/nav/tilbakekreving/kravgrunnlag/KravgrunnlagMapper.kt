@@ -81,7 +81,7 @@ object KravgrunnlagMapper {
     }
 
     fun ytelseFor(kravgrunnlag: DetaljertKravgrunnlagDto) = when (kravgrunnlag.kodeFagomraade) {
-        "TILLST", "TILLSTDR" -> Ytelse.Tilleggsstønad
+        "TILLST", "TILLSTDR", "TILLSTBO", "TILLSTFL", "TILLSTLM", "TILLSTPB", "TILLSTRA", "TILLSTRO", "TILLISTRS" -> Ytelse.Tilleggsstønad
         "AAP" -> Ytelse.Arbeidsavklaringspenger
         else -> throw Feil(
             message = "Kan ikke håndtere saker for ${kravgrunnlag.kodeFagomraade} med ny modell",
