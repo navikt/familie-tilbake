@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.behandling
 
 import no.nav.tilbakekreving.FeatureToggles
 import no.nav.tilbakekreving.FrontendDto
+import no.nav.tilbakekreving.UtenforScope
 import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsoppsummeringDto
@@ -77,7 +78,7 @@ class Behandling internal constructor(
     private val revurderingsårsak: Behandlingsårsakstype?,
     private var ansvarligSaksbehandler: Behandler,
     private var eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
-    private val kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
+    private var kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
     val foreldelsesteg: Foreldelsesteg,
     private val faktasteg: Faktasteg,
     private val vilkårsvurderingsteg: Vilkårsvurderingsteg,
@@ -104,6 +105,14 @@ class Behandling internal constructor(
     }
 
     fun nullstillForhåndsvarselUnntakOgUttalelse() = forhåndsvarsel.nullstillUnntakOgUttalelse()
+
+    fun fåttNyttKravgrunnlag(oppdatertKravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>) {
+        if (!faktasteg.erFullstendig()) {
+            kravgrunnlag = oppdatertKravgrunnlag
+        } else {
+            throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagStatusIkkeStøttetEtterBehandlingenErPåbegynt, sporingsinformasjon())
+        }
+    }
 
     fun faktastegFrontendDto(
         opprettelsesvalg: Opprettelsesvalg,

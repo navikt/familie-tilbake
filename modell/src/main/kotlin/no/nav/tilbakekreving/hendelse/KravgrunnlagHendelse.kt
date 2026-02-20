@@ -42,10 +42,12 @@ class KravgrunnlagHendelse(
             throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagBrukerIkkeLikMottaker, sporing)
         }
 
-        if (kravstatuskode != Kravstatuskode.NY) {
+        if (kravstatuskode !in arrayOf(Kravstatuskode.NY, Kravstatuskode.ENDRET)) {
             throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagStatusIkkeStøttet, sporing)
         }
     }
+
+    fun skalOppretteNySak() = kravstatuskode == Kravstatuskode.NY
 
     fun totaltBeløpFor(periode: Datoperiode): BigDecimal =
         perioder.single { kgPeriode -> kgPeriode.gjelderFor(periode) }

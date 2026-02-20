@@ -47,9 +47,9 @@ class KravgrunnlagBufferRepository(
     }
 
     fun validerKravgrunnlagInnenforScope(fagsystemId: String, behandlingId: String?) {
-        jdbcTemplate.query("SELECT COUNT(1) AS antall FROM kravgrunnlag_buffer WHERE fagsystem_id=?;", fagsystemId) { resultSet, _ ->
-            if (resultSet.getInt("antall") > 1) {
-                throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagStatusIkkeStøttet, Sporing(fagsystemId, behandlingId ?: "Ukjent"))
+        jdbcTemplate.query("SELECT COUNT(1) AS antall FROM kravgrunnlag_buffer WHERE fagsystem_id=? AND utenfor_scope=true;", fagsystemId) { resultSet, _ ->
+            if (resultSet.getInt("antall") > 0) {
+                throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagStatusIkkeStøttetEtterBehandlingenErPåbegynt, Sporing(fagsystemId, behandlingId ?: "Ukjent"))
             }
         }
     }

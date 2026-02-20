@@ -117,6 +117,13 @@ class Tilbakekreving internal constructor(
         oppdaterPåminnelsestidspunkt()
     }
 
+    internal fun hånterEndretKravgrunnlag(kravgrunnlagHendelse: KravgrunnlagHendelse) {
+        val behandling = behandlingHistorikk.nåværende().entry
+        kravgrunnlagHistorikk.lagre(kravgrunnlagHendelse)
+        behandling.fåttNyttKravgrunnlag(kravgrunnlagHistorikk.nåværende())
+        behandling.utførSideeffekt(tilstand, this, bigQueryService, eksternFagsak.ytelse.hentYtelsesnavn(Språkkode.NB))
+    }
+
     fun oppdaterFagsysteminfo(fagsysteminfo: FagsysteminfoHendelse) {
         val eksternFagsak = eksternFagsak.lagre(fagsysteminfo)
         val behandling = behandlingHistorikk.nåværende().entry
