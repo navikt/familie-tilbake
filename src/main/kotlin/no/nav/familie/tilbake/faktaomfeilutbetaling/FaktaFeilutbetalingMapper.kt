@@ -23,8 +23,6 @@ object FaktaFeilutbetalingMapper {
         val logiskePerioder =
             LogiskPeriodeUtil.utledLogiskPeriode(KravgrunnlagUtil.finnFeilutbetalingPrPeriode(kravgrunnlag))
         val fagsystemsbehandling = behandling.aktivFagsystemsbehandling
-        println("======>>>> faktaFeilutbetaling perioder: ${faktaFeilutbetaling?.perioder}")
-        println("======>>>> logiskePerioder perioder: $logiskePerioder")
         val feilutbetaltePerioder =
             hentFeilutbetaltePerioder(
                 faktaFeilutbetaling = faktaFeilutbetaling,
@@ -81,15 +79,7 @@ object FaktaFeilutbetalingMapper {
     private fun hentFeilutbetaltBeløp(
         logiskePerioder: List<LogiskPeriode>,
         faktaPeriode: Månedsperiode,
-    ): BigDecimal {
-        val beløp = logiskePerioder.first {
-            println("====>>>> faktaPeriode: $faktaPeriode ")
-            println("====>>>> logiskperiode: ${it.periode} - beløp: ${it.feilutbetaltBeløp}")
-            faktaPeriode == it.periode
-        }.feilutbetaltBeløp
-
-        return beløp
-    }
+    ): BigDecimal = logiskePerioder.first { faktaPeriode == it.periode }.feilutbetaltBeløp
 
     private fun utledTotalFeilutbetaltPeriode(perioder: List<LogiskPeriode>): Datoperiode {
         var totalPeriodeFom: YearMonth? = null
