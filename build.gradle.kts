@@ -5,7 +5,7 @@ import java.net.URI
 
 val springDocVersion = "3.0.1"
 val testcontainersVersion = "1.21.4"
-val tokenValidationVersion = "6.0.2"
+val tokenValidationVersion = "6.0.3"
 val flywayVersion = "11.3.4"
 val ktorVersion = "3.4.0"
 ext["ktorVersion"] = ktorVersion
@@ -16,7 +16,7 @@ java.sourceCompatibility = JavaVersion.VERSION_25
 
 plugins {
     kotlin("jvm") version "2.3.10"
-    id("org.springframework.boot") version "4.0.2"
+    id("org.springframework.boot") version "4.0.3"
     id("org.jetbrains.kotlin.plugin.spring") version "2.3.10"
     id("org.jlleitschuh.gradle.ktlint") version "14.0.1"
 }
@@ -56,7 +56,7 @@ subprojects {
     }
 
     dependencies {
-        testImplementation("org.junit.jupiter:junit-jupiter:6.0.2")
+        testImplementation("org.junit.jupiter:junit-jupiter:6.0.3")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
         testImplementation("io.kotest:kotest-assertions-core:6.1.3")
     }
@@ -232,14 +232,14 @@ dependencies {
     api("io.micrometer:micrometer-registry-prometheus")
     api("net.logstash.logback:logstash-logback-encoder:9.0")
 
-    api("io.getunleash:unleash-client-java:12.1.1")
+    api("io.getunleash:unleash-client-java:12.1.2")
     api("org.messaginghub:pooled-jms:3.2.2")
     api("org.flywaydb:flyway-core")
     api("org.flywaydb:flyway-gcp-bigquery")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
     runtimeOnly(bigQueryDriverJars)
 
-    testImplementation("org.junit.jupiter:junit-jupiter:6.0.2")
+    testImplementation("org.junit.jupiter:junit-jupiter:6.0.3")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     testImplementation("io.mockk:mockk-jvm:1.14.9")
