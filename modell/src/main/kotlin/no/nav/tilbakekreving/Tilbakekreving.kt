@@ -22,9 +22,10 @@ import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Forårs
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.bigquery.BigQueryService
-import no.nav.tilbakekreving.breeeev.Vedtaksbrev
+import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.brev.VarselbrevInfo
+import no.nav.tilbakekreving.brev.Vedtaksbrev
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
@@ -33,8 +34,10 @@ import no.nav.tilbakekreving.entities.TilbakekrevingEntity
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
+import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
+import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
@@ -109,8 +112,14 @@ class Tilbakekreving internal constructor(
 
     fun håndter(iverksettelseHendelse: IverksettelseHendelse) {
         tilstand.håndter(this, iverksettelseHendelse)
-        val behandling = behandlingHistorikk.nåværende().entry
-        behandling.utførSideeffekt(tilstand, this, bigQueryService, eksternFagsak.ytelse.hentYtelsesnavn(Språkkode.NB))
+    }
+
+    fun håndter(journalføringHendelse: JournalføringHendelse) {
+        tilstand.håndter(this, journalføringHendelse)
+    }
+
+    fun håndter(distribusjonHendelse: DistribusjonHendelse) {
+        tilstand.håndter(this, distribusjonHendelse)
     }
 
     fun håndter(påminnelse: Påminnelse) {
@@ -221,8 +230,34 @@ class Tilbakekreving internal constructor(
     fun trengerIverksettelse() {
         behandlingHistorikk.nåværende().entry.trengerIverksettelse(
             behovObservatør,
-            ytelsestype = eksternFagsak.ytelse.tilYtelsestype(),
+            ytelse = eksternFagsak.ytelse,
             aktør = requireNotNull(bruker) { "Aktør kreves for Iverksettelse." }.aktør,
+        )
+    }
+
+    fun trengerJournalføring() {
+        val behandling = behandlingHistorikk.nåværende().entry
+        val vedtaksbrev = Vedtaksbrev.opprett()
+
+        behandling.trengerJournalføring(
+            behovObservatør,
+            brevId = vedtaksbrev.id,
+            ytelse = eksternFagsak.ytelse,
+            brukerInfo = bruker!!.hentBrukerinfo(),
+            fagsakId = eksternFagsak.eksternId,
+            vedtaksbrevInfo = hentVedtaksbrevInfo(behandling.id),
+        )
+
+        brevHistorikk.lagre(vedtaksbrev)
+    }
+
+    fun trengerDistribusjon() {
+        val behandling = behandlingHistorikk.nåværende().entry
+
+        behandling.trengerDistribusjon(
+            behovObservatør,
+            journalpostId = brevHistorikk.nåværende().entry.journalpostId!!,
+            fagsystem = eksternFagsak.ytelse.tilFagsystemDTO(),
         )
     }
 
@@ -248,9 +283,9 @@ class Tilbakekreving internal constructor(
         return eksternFagsak.ytelse
     }
 
-    fun hentVedtaksbrev(behandlingId: UUID): Vedtaksbrev {
+    fun hentVedtaksbrevInfo(behandlingId: UUID): VedtaksbrevInfo {
         val behandling = behandlingHistorikk.entry(behandlingId)
-        return Vedtaksbrev(
+        return VedtaksbrevInfo(
             brukerdata = requireNotNull(bruker).brevmeta(),
             ytelse = eksternFagsak.ytelse.brevmeta(),
             signatur = behandling.brevSignatur(),
@@ -437,6 +472,11 @@ class Tilbakekreving internal constructor(
         return behandlingHistorikk.nåværende().entry.nyFaktastegFrontendDto(
             varselbrev = brevHistorikk.sisteVarselbrev(),
         )
+    }
+
+    fun utførSideeffekt() {
+        behandlingHistorikk.nåværende().entry
+            .utførSideeffekt(tilstand, this, bigQueryService, eksternFagsak.ytelse.hentYtelsesnavn(Språkkode.NB))
     }
 
     companion object {

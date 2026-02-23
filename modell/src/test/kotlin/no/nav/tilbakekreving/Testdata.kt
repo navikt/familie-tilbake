@@ -20,8 +20,10 @@ import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
+import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
+import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
@@ -293,3 +295,11 @@ fun iverksettelse(): IverksettelseHendelse {
         vedtakId = BigInteger.ZERO,
     )
 }
+
+fun journalføring(brevId: UUID): JournalføringHendelse =
+    JournalføringHendelse(
+        brevId = brevId,
+        journalpostId = "123",
+    )
+
+fun distribusjon(): DistribusjonHendelse = DistribusjonHendelse("123")

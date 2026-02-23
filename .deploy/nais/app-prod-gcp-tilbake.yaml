@@ -145,6 +145,7 @@ spec:
           cluster: prod-gcp
         - application: logging
           namespace: nais-system
+        - application: tilbakekreving-pdf
       external:
         - host: tilbake-unleash-api.nav.cloud.nais.io
         - host: familie-integrasjoner.prod-fss-pub.nais.io

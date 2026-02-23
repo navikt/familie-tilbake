@@ -5,8 +5,10 @@ import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
+import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
+import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
@@ -68,6 +70,20 @@ internal sealed interface Tilstand {
         iverksettelseHendelse: IverksettelseHendelse,
     ) {
         throw ModellFeil.UgyldigOperasjonException("Forventet ikke IverksettelseHendelse i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
+    }
+
+    fun håndter(
+        tilbakekreving: Tilbakekreving,
+        journalføringHendelse: JournalføringHendelse,
+    ) {
+        throw ModellFeil.UgyldigOperasjonException("Forventet ikke JournalføringHendelse i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
+    }
+
+    fun håndter(
+        tilbakekreving: Tilbakekreving,
+        distribusjonHendelse: DistribusjonHendelse,
+    ) {
+        throw ModellFeil.UgyldigOperasjonException("Forventet ikke DistribusjonHendelse i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
     }
 
     fun håndterNullstilling(nåværendeBehandling: Behandling, sporing: Sporing) {

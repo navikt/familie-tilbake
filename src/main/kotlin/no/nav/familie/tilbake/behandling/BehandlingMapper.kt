@@ -221,9 +221,11 @@ object BehandlingMapper {
             Behandlingsstatus.AVSLUTTET -> no.nav.tilbakekreving.kontrakter.Behandlingsstatus.AVSLUTTET
             Behandlingsstatus.UTREDES -> no.nav.tilbakekreving.kontrakter.Behandlingsstatus.UTREDES
             Behandlingsstatus.FATTER_VEDTAK -> no.nav.tilbakekreving.kontrakter.Behandlingsstatus.FATTER_VEDTAK
-            Behandlingsstatus.IVERKSETTER_VEDTAK ->
+            Behandlingsstatus.IVERKSETTER_VEDTAK, Behandlingsstatus.JOURNALFØR_VEDTAK ->
                 no.nav.tilbakekreving.kontrakter.Behandlingsstatus.IVERKSETTER_VEDTAK
             Behandlingsstatus.OPPRETTET -> no.nav.tilbakekreving.kontrakter.Behandlingsstatus.OPPRETTET
+            Behandlingsstatus.DISTRIUBER_VEDTAK,
+            -> throw IllegalArgumentException("DISTRIUBER_VEDTAK er til ny modell!")
         }
 
     private fun mapÅrsak(behandling: Behandling): no.nav.tilbakekreving.kontrakter.Behandlingsårsakstype? {

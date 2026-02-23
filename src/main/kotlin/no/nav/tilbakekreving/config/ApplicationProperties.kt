@@ -6,6 +6,7 @@ import no.tilbakekreving.integrasjoner.arbeidsforhold.EregClient
 import no.tilbakekreving.integrasjoner.dokument.saf.SafClient
 import no.tilbakekreving.integrasjoner.entraProxy.EntraProxyClient
 import no.tilbakekreving.integrasjoner.norg2.Norg2Client
+import no.tilbakekreving.integrasjoner.pdfGen.PdfGenClient
 import no.tilbakekreving.integrasjoner.persontilgang.PersontilgangService
 import no.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
 import org.springframework.boot.context.properties.ConfigurationProperties
@@ -26,4 +27,5 @@ data class ApplicationProperties(
     val norg2: Norg2Client.Companion.Config,
     val eregServices: EregClient.Companion.Config,
     val entraProxy: EntraProxyClient.Companion.Config,
+    val tilbakekrevingPdf: PdfGenClient.Companion.Config,
 )

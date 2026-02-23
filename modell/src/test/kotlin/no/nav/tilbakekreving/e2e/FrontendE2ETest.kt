@@ -4,6 +4,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
+import no.nav.tilbakekreving.behov.JournalføringBehov
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.brukerinfoHendelse
 import no.nav.tilbakekreving.defaultFeatures
@@ -13,7 +14,9 @@ import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.foreldelseVurdering
 import no.nav.tilbakekreving.forårsaketAvBrukerGrovtUaktsomt
 import no.nav.tilbakekreving.godkjenning
+import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
+import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -30,10 +33,10 @@ class FrontendE2ETest {
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
         val behandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
         val beslutter = Behandler.Saksbehandler("Ansvarlig beslutter")
-
+        val behovOppsamler = BehovObservatørOppsamler()
         val tilbakekreving = Tilbakekreving.opprett(
             UUID.randomUUID().toString(),
-            BehovObservatørOppsamler(),
+            behovOppsamler,
             opprettTilbakekrevingHendelse,
             BigQueryServiceStub(),
             EndringObservatørOppsamler(),
@@ -66,6 +69,15 @@ class FrontendE2ETest {
                 vedtakId = BigInteger.ZERO,
             ),
         )
+        tilbakekreving.frontendDtoForBehandling(behandler, true).status shouldBe Behandlingsstatus.JOURNALFØR_VEDTAK
+        tilbakekreving.håndter(
+            JournalføringHendelse(
+                brevId = (behovOppsamler.behovListe.last() as JournalføringBehov).brevId,
+                journalpostId = "123",
+            ),
+        )
+        tilbakekreving.frontendDtoForBehandling(behandler, true).status shouldBe Behandlingsstatus.DISTRIUBER_VEDTAK
+        tilbakekreving.håndter(DistribusjonHendelse("1234"))
         tilbakekreving.frontendDtoForBehandling(behandler, true).status shouldBe Behandlingsstatus.AVSLUTTET
     }
 }

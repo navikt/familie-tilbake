@@ -27,5 +27,13 @@ class BehovObservatørOppsamler() : BehovObservatør {
         behovListe.add(behov)
     }
 
+    override fun håndter(behov: JournalføringBehov) {
+        behovListe.add(behov)
+    }
+
+    override fun håndter(behov: DistribusjonBehov) {
+        behovListe.add(behov)
+    }
+
     fun sisteVarselbrevId() = behovListe.filterIsInstance<VarselbrevBehov>().lastOrNull().shouldNotBeNull().brevId
 }
