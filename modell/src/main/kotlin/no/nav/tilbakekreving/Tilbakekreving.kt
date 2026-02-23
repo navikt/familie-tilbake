@@ -22,6 +22,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Forårs
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.bigquery.BigQueryService
+import no.nav.tilbakekreving.breeeev.Vedtaksbrev
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.brev.VarselbrevInfo
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
@@ -245,6 +246,16 @@ class Tilbakekreving internal constructor(
 
     fun hentFagsysteminfo(): Ytelse {
         return eksternFagsak.ytelse
+    }
+
+    fun hentVedtaksbrev(behandlingId: UUID): Vedtaksbrev {
+        val behandling = behandlingHistorikk.entry(behandlingId)
+        return Vedtaksbrev(
+            brukerdata = requireNotNull(bruker).brevmeta(),
+            ytelse = eksternFagsak.ytelse.brevmeta(),
+            signatur = behandling.brevSignatur(),
+            perioder = behandling.vurdertePerioderForBrev(),
+        )
     }
 
     override fun tilFrontendDto(): FagsakDto {

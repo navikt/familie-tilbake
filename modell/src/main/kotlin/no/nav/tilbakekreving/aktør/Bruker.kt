@@ -71,7 +71,7 @@ class Bruker(
         dødsdato = dødsdato,
     )
 
-    fun brevmeta(): BrevmottakerDto {
+    internal fun brevmeta(): BrevmottakerDto {
         return BrevmottakerDto(
             navn = navn!!,
             personIdent = aktør.ident,

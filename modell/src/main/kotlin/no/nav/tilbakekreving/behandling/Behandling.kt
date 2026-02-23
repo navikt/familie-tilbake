@@ -459,11 +459,11 @@ class Behandling internal constructor(
         return forhåndsvarsel.utsettUttalelseFristTilFrontendDto()
     }
 
-    fun vurdertePerioderForBrev(): List<BegrunnetPeriode> {
+    internal fun vurdertePerioderForBrev(): List<BegrunnetPeriode> {
         return vilkårsvurderingsteg.vurdertePerioderForBrev()
     }
 
-    fun brevSignatur(): Signatur = Signatur(
+    internal fun brevSignatur(): Signatur = Signatur(
         ansvarligSaksbehandlerIdent = ansvarligSaksbehandler.ident,
         ansvarligBeslutterIdent = fatteVedtakSteg.ansvarligBeslutter?.ident,
         ansvarligEnhet = enhet!!.navn,

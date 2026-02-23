@@ -1,27 +1,21 @@
 package no.nav.tilbakekreving.api
 
 import no.nav.familie.tilbake.common.ContextService
-import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.TilbakekrevingService
-import no.nav.tilbakekreving.brev.vedtaksbrev.BrevFormatterer
+import no.nav.tilbakekreving.brev.vedtaksbrev.NyVedtaksbrevService
 import no.nav.tilbakekreving.brev.vedtaksbrev.VedtaksbrevDataRepository
 import no.nav.tilbakekreving.kontrakter.frontend.apis.BehandlingApi
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.HovedavsnittDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaOmFeilutbetalingDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.RentekstElementDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.SignaturDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevDataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDataDto
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
-import java.time.LocalDate
-import java.time.OffsetDateTime
 import java.util.UUID
 
 @Component
@@ -29,8 +23,8 @@ import java.util.UUID
 class BehandlingApiController(
     private val tilbakekrevingService: TilbakekrevingService,
     private val tilgangskontrollService: TilgangskontrollService,
-    private val eksterneDataForBrevService: EksterneDataForBrevService,
     private val vedtaksbrevDataRepository: VedtaksbrevDataRepository,
+    private val nyVedtaksbrevService: NyVedtaksbrevService,
 ) : BehandlingApi {
     override fun behandlingFakta(behandlingId: String): ResponseEntity<FaktaOmFeilutbetalingDto> {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(UUID.fromString(behandlingId))
@@ -82,26 +76,7 @@ class BehandlingApiController(
             handling = "Henter informasjon for bruk i brev",
         )
 
-        val behandling = tilbakekreving.behandlingHistorikk.finn(UUID.fromString(behandlingId), tilbakekreving.sporingsinformasjon())
-        val signatur = behandling.entry.brevSignatur()
-        return ResponseEntity.ok(
-            VedtaksbrevDataDto(
-                hovedavsnitt = HovedavsnittDto(
-                    tittel = "Du må betale tilbake",
-                    underavsnitt = listOf(RentekstElementDto("")),
-                ),
-                avsnitt = BrevFormatterer.lagAvsnitt(behandling.entry.vurdertePerioderForBrev()),
-                brevGjelder = tilbakekreving.bruker!!.brevmeta(),
-                ytelse = tilbakekreving.eksternFagsak.brevmeta(),
-                sendtDato = BrevFormatterer.norskDato(LocalDate.now()),
-                sistOppdatert = OffsetDateTime.now(),
-                signatur = SignaturDto(
-                    signatur.ansvarligEnhet,
-                    eksterneDataForBrevService.hentSaksbehandlernavn(signatur.ansvarligSaksbehandlerIdent),
-                    signatur.ansvarligBeslutterIdent?.let(eksterneDataForBrevService::hentSaksbehandlernavn),
-                ),
-            ),
-        )
+        return ResponseEntity.ok(nyVedtaksbrevService.hentVedtaksbrevData(UUID.fromString(behandlingId), tilbakekreving.hentVedtaksbrev(UUID.fromString(behandlingId))))
     }
 
     override fun behandlingOppdaterVedtaksbrev(behandlingId: UUID, vedtaksbrevRedigerbareDataDto: VedtaksbrevRedigerbareDataDto): ResponseEntity<VedtaksbrevRedigerbareDataDto> {

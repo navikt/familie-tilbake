@@ -82,7 +82,7 @@ class EksternFagsak(
         )
     }
 
-    fun brevmeta() = ytelse.brevmeta()
+    internal fun brevmeta() = ytelse.brevmeta()
 
     fun hentYtelse() = ytelse
 }
