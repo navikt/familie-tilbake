@@ -21,7 +21,7 @@ object BrevFormatterer {
             AvsnittDto(
                 tittel = "Perioden fra og med ${norskDato(startPeriode)} til og med ${norskDato(sluttPeriode)}",
                 id = UUID.randomUUID(),
-                underavsnitt = perioder.first().påkrevdeVurderinger.map {
+                underavsnitt = listOf(RentekstElementDto("")) + perioder.first().påkrevdeVurderinger.map {
                     UnderavsnittElementDto(
                         tittel = it.tittel,
                         underavsnitt = listOf(RentekstElementDto("")),

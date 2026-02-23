@@ -21,7 +21,7 @@ class NyVedtaksbrevService(
 
         return VedtaksbrevDataDto(
             hovedavsnitt = lagredeData?.hovedavsnitt ?: HovedavsnittDto(
-                tittel = "Du må betale tilbake",
+                tittel = "Du må betale tilbake ${vedtaksbrev.ytelse.bestemtEntall}",
                 underavsnitt = listOf(RentekstElementDto("")),
             ),
             avsnitt = lagredeData?.avsnitt ?: BrevFormatterer.lagAvsnitt(vedtaksbrev.perioder),
