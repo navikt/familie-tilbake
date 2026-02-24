@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 )
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type", visible = true)
 @JsonSubTypes(
-    JsonSubTypes.Type(value = PakrevdBegrunnelseUpdateItemDto::class, name = "påkrevd_begrunnelse"),
+    JsonSubTypes.Type(value = PakrevdBegrunnelseDto::class, name = "påkrevd_begrunnelse"),
     JsonSubTypes.Type(value = RentekstElementDto::class, name = "rentekst"),
     JsonSubTypes.Type(value = UnderavsnittElementDto::class, name = "underavsnitt"),
 )
