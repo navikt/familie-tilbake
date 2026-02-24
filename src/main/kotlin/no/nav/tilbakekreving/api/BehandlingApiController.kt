@@ -14,6 +14,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevDataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDataDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDataUpdateDto
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import java.util.UUID
@@ -79,7 +80,7 @@ class BehandlingApiController(
         return ResponseEntity.ok(nyVedtaksbrevService.hentVedtaksbrevData(UUID.fromString(behandlingId), tilbakekreving.hentVedtaksbrev(UUID.fromString(behandlingId))))
     }
 
-    override fun behandlingOppdaterVedtaksbrev(behandlingId: UUID, vedtaksbrevRedigerbareDataDto: VedtaksbrevRedigerbareDataDto): ResponseEntity<VedtaksbrevRedigerbareDataDto> {
+    override fun behandlingOppdaterVedtaksbrev(behandlingId: UUID, vedtaksbrevRedigerbareDataUpdateDto: VedtaksbrevRedigerbareDataUpdateDto): ResponseEntity<VedtaksbrevRedigerbareDataDto> {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
             ?: return ResponseEntity.notFound().build()
 
@@ -91,6 +92,6 @@ class BehandlingApiController(
             handling = "Henter informasjon for bruk i brev",
         )
 
-        return ResponseEntity.ok(vedtaksbrevDataRepository.oppdaterVedtaksbrevData(behandlingId, vedtaksbrevRedigerbareDataDto))
+        return ResponseEntity.ok(nyVedtaksbrevService.oppdaterVedtaksbrevData(behandlingId, vedtaksbrevRedigerbareDataUpdateDto))
     }
 }

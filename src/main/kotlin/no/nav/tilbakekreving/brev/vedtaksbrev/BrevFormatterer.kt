@@ -1,9 +1,10 @@
 package no.nav.tilbakekreving.brev.vedtaksbrev
 
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
+import no.nav.tilbakekreving.breeeev.PåkrevdBegrunnelse
 import no.nav.tilbakekreving.kontrakter.frontend.models.AvsnittDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.PakrevdBegrunnelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.RentekstElementDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.UnderavsnittElementDto
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -22,14 +23,22 @@ object BrevFormatterer {
                 tittel = "Perioden fra og med ${norskDato(startPeriode)} til og med ${norskDato(sluttPeriode)}",
                 id = UUID.randomUUID(),
                 underavsnitt = listOf(RentekstElementDto("")) + perioder.first().påkrevdeVurderinger.map {
-                    UnderavsnittElementDto(
-                        tittel = it.tittel,
-                        underavsnitt = listOf(RentekstElementDto("")),
-                    )
+                    it.tilDto()
                 },
             ),
         )
     }
 
     fun norskDato(date: LocalDate): String = dateFormatter.format(date)
+
+    fun PåkrevdBegrunnelse.tilDto(
+        underavsnitt: List<RentekstElementDto> = listOf(RentekstElementDto("")),
+    ): PakrevdBegrunnelseDto {
+        return PakrevdBegrunnelseDto(
+            tittel = tittel,
+            forklaring = forklaring,
+            begrunnelseType = name,
+            underavsnitt = underavsnitt,
+        )
+    }
 }

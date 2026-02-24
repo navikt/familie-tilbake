@@ -14,18 +14,19 @@ import no.nav.tilbakekreving.e2e.ytelser.TilleggsstønaderE2ETest.Companion.TILL
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.januar
-import no.nav.tilbakekreving.kontrakter.frontend.models.AvsnittDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.AvsnittUpdateItemDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.BrevmottakerDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.HovedavsnittDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.HovedavsnittUpdateDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.PakrevdBegrunnelseDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.PakrevdBegrunnelseUpdateItemDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.RentekstElementDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SignaturDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.UnderavsnittElementDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDataDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDataUpdateDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import java.time.OffsetDateTime
 import java.util.UUID
 
 class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
@@ -55,7 +56,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
             perioder = listOf(
                 BegrunnetPeriode(
                     periode = 1.januar(2021) til 31.januar(2021),
-                    påkrevdeVurderinger = setOf(PåkrevdBegrunnelse.SÆRLIGE_GRUNNER),
+                    påkrevdeVurderinger = setOf(PåkrevdBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER),
                 ),
             ),
         )
@@ -74,8 +75,10 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
             it.avsnitt[0].tittel shouldBe "Perioden fra og med 1. januar 2021 til og med 31. januar 2021"
             it.avsnitt[0].underavsnitt shouldBe listOf(
                 RentekstElementDto(""),
-                UnderavsnittElementDto(
-                    tittel = "Er det særlige grunner til å redusere beløpet?",
+                PakrevdBegrunnelseDto(
+                    tittel = PåkrevdBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.tittel,
+                    forklaring = PåkrevdBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.forklaring,
+                    begrunnelseType = PåkrevdBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.name,
                     underavsnitt = listOf(RentekstElementDto("")),
                 ),
             )
@@ -83,28 +86,27 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
 
         vedtaksbrevDataRepository.oppdaterVedtaksbrevData(
             behandlingId,
-            VedtaksbrevRedigerbareDataDto(
-                hovedavsnitt = HovedavsnittDto(
+            VedtaksbrevRedigerbareDataUpdateDto(
+                hovedavsnitt = HovedavsnittUpdateDto(
                     tittel = "Du må betale tilbake arbeidsavklaringspengene",
                     underavsnitt = listOf(
                         RentekstElementDto("Vi oppdaget at du stjal penger"),
                     ),
                 ),
                 avsnitt = listOf(
-                    AvsnittDto(
+                    AvsnittUpdateItemDto(
                         tittel = "Perioden fra og med 1. januar 2021 til og med 31. januar 2021",
                         id = initielleData.avsnitt.single().id,
                         underavsnitt = listOf(
                             RentekstElementDto("Det var jo litt uaktsomt..."),
                             RentekstElementDto("Derfor må du betale tilbake"),
-                            UnderavsnittElementDto(
-                                tittel = "Er det særlige grunner til å redusere beløpet?",
+                            PakrevdBegrunnelseUpdateItemDto(
+                                begrunnelseType = PåkrevdBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.name,
                                 underavsnitt = listOf(RentekstElementDto("Ja, det syntes jeg.")),
                             ),
                         ),
                     ),
                 ),
-                sistOppdatert = OffsetDateTime.now(),
             ),
         )
 
@@ -125,8 +127,10 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
             it.avsnitt[0].underavsnitt shouldBe listOf(
                 RentekstElementDto("Det var jo litt uaktsomt..."),
                 RentekstElementDto("Derfor må du betale tilbake"),
-                UnderavsnittElementDto(
-                    tittel = "Er det særlige grunner til å redusere beløpet?",
+                PakrevdBegrunnelseDto(
+                    begrunnelseType = PåkrevdBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.name,
+                    forklaring = PåkrevdBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.forklaring,
+                    tittel = PåkrevdBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.tittel,
                     underavsnitt = listOf(RentekstElementDto("Ja, det syntes jeg.")),
                 ),
             )

@@ -48,7 +48,7 @@ class ReduksjonSærligeGrunner(
 
         fun lagStatistikk(): VurdertUtbetaling.JaNeiVurdering
 
-        fun påkrevdeVurderinger(): Set<PåkrevdBegrunnelse> = setOf(PåkrevdBegrunnelse.SÆRLIGE_GRUNNER)
+        fun påkrevdeVurderinger(): Set<PåkrevdBegrunnelse> = setOf(PåkrevdBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER)
 
         class Ja(val prosentdel: Int) : SkalReduseres {
             override fun reduksjon(): Reduksjon {

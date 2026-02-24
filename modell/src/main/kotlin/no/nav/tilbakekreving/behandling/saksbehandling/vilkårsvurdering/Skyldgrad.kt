@@ -174,7 +174,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
 
         override fun reduksjon(): Reduksjon = Reduksjon.FullstendigTilbakekreving()
 
-        override fun påkrevdeVurderinger(): Set<PåkrevdBegrunnelse> = setOf(PåkrevdBegrunnelse.SÆRLIGE_GRUNNER)
+        override fun påkrevdeVurderinger(): Set<PåkrevdBegrunnelse> = setOf(PåkrevdBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER)
 
         override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
             return VurdertUtbetaling.Vilkårsvurdering(

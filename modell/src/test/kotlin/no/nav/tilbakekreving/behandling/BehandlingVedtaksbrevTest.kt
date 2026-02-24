@@ -72,7 +72,7 @@ class BehandlingVedtaksbrevTest {
                 Arguments.argumentSet(
                     "Forårsaket av bruker, uaktsomt, skal ikke unnlates",
                     forårsaketAvBrukerUaktsomt(skalIkkeUnnlates()),
-                    setOf(PåkrevdBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR, PåkrevdBegrunnelse.SÆRLIGE_GRUNNER),
+                    setOf(PåkrevdBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR, PåkrevdBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER),
                 ),
                 Arguments.argumentSet(
                     "Forårsaket av bruker, uaktsomt, unnlates",
@@ -82,12 +82,12 @@ class BehandlingVedtaksbrevTest {
                 Arguments.argumentSet(
                     "Forårsaket av bruker, grovt uaktsomt",
                     forårsaketAvBrukerGrovtUaktsomt(),
-                    setOf(PåkrevdBegrunnelse.SÆRLIGE_GRUNNER),
+                    setOf(PåkrevdBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER),
                 ),
                 Arguments.argumentSet(
                     "Forårsaket av bruker, forsettelig",
                     forårsaketAvBrukerMedForsett(),
-                    setOf(PåkrevdBegrunnelse.SÆRLIGE_GRUNNER),
+                    setOf(PåkrevdBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER),
                 ),
                 Arguments.argumentSet(
                     "Forsårsaket av Nav, burde forstått",
