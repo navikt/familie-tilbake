@@ -15,6 +15,7 @@ import no.nav.familie.tilbake.bigQuery.BigQueryAdapterService
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingService
@@ -785,8 +786,8 @@ class BehandlingService(
         ansvarligSaksbehandler: String,
         behandlerRolle: Behandlerrolle,
         logContext: SecureLog.Context,
-    ) = ContextService.hentSaksbehandler(logContext) == ansvarligSaksbehandler &&
-        (behandlerRolle == Behandlerrolle.SAKSBEHANDLER || behandlerRolle == Behandlerrolle.BESLUTTER)
+    ) = ansvarligSaksbehandler in arrayOf(Constants.BRUKER_ID_VEDTAKSLØSNINGEN, ContextService.hentSaksbehandler(logContext)) &&
+        behandlerRolle in arrayOf(Behandlerrolle.SAKSBEHANDLER, Behandlerrolle.BESLUTTER)
 
     private fun behandlingUtredesOgErIkkePåVent(behandling: Behandling) = !behandlingskontrollService.erBehandlingPåVent(behandling.id)
 
