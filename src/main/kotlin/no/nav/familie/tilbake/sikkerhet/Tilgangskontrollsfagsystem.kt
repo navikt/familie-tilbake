@@ -11,6 +11,7 @@ enum class Tilgangskontrollsfagsystem(
     KONTANTSTØTTE("KONT"),
     TILLEGGSSTØNAD("TS"),
     ARBEIDSAVKLARINGSPENGER("AAP"),
+    TILTAKSPENGER("TILTAKSPENGER"),
     FORVALTER_TILGANG("FT"), // brukes internt bare for tilgangsskontroll
     SYSTEM_TILGANG(""), // brukes internt bare for tilgangsskontroll
     ;
