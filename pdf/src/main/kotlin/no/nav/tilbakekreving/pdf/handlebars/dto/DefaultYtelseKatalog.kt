@@ -58,6 +58,13 @@ object DefaultYtelseKatalog : YtelseKatalog {
                             Språkkode.NN to Ytelsesnavn("arbeidsavklaringspengar", "arbeidsavklaringspengane", "arbeidsavklaringspengane dine"),
                         ),
                     )
+                    YtelsestypeDTO.TILTAKSPENGER -> Ytelsesinfo(
+                        url = "nav.no/tiltakspenger",
+                        navn = mapOf(
+                            Språkkode.NB to Ytelsesnavn("tiltakspenger", "tiltakspenger", "tiltakspengene dine"),
+                            Språkkode.NN to Ytelsesnavn("tiltakspengar", "tiltakspengar", "tiltakspengane dine"),
+                        ),
+                    )
                     YtelsestypeDTO.INFOTRYGD -> error("INFOTRYGD støttes ikke.")
                 }
             }

@@ -11,6 +11,7 @@ data class YtelseEntity(
             Ytelsestype.BARNETRYGD -> Ytelse.Barnetrygd
             Ytelsestype.TILLEGGSSTØNAD -> Ytelse.Tilleggsstønad
             Ytelsestype.ARBEIDSAVKLARINGSPENGER -> Ytelse.Arbeidsavklaringspenger
+            Ytelsestype.TILTAKSPENGER -> Ytelse.Tiltakspenger
             Ytelsestype.KONTANTSTØTTE, Ytelsestype.OVERGANGSSTØNAD, Ytelsestype.INFOTRYGD -> TODO()
         }
     }

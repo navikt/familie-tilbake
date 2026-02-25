@@ -17,6 +17,7 @@ tilbakekreving:
   kravgrunnlag:
     - Q1_TILLEGGSSTONADER.KRAVGRUNNLAG
     - Q1_TILBAKEKREVING.KRAVGRUNNLAG
+    - Q1_TILTAKSPENGER.KRAVGRUNNLAG
   toggles:
     tilgangsmaskinen-enabled: true
     ny-modell:
@@ -33,6 +34,13 @@ tilbakekreving:
         beslutter:
           - ${rolle.enslig.beslutter}
       aap:
+        veileder:
+          - ${rolle.enslig.veileder}
+        saksbehandler:
+          - ${rolle.enslig.saksbehandler}
+        beslutter:
+          - ${rolle.enslig.beslutter}
+      tp:
         veileder:
           - ${rolle.enslig.veileder}
         saksbehandler:

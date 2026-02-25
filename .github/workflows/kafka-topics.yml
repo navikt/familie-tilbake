@@ -18,7 +18,7 @@ jobs:
           CLUSTER: dev-gcp
           RESOURCE: ./.deploy/nais/dev/kafka/ytelser/tilleggsstønader.yaml
           ENVIRONMENT: dev-gcp:tilbake
-      - name: Apply tilleggsstønader kafka topic to dev-gcp
+      - name: Apply tilleggsstønader kafka topic to prod-gcp
         uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: prod-gcp
@@ -30,9 +30,21 @@ jobs:
           CLUSTER: dev-gcp
           RESOURCE: ./.deploy/nais/dev/kafka/ytelser/arbeidsavklaringspenger.yaml
           ENVIRONMENT: dev-gcp:tilbake
-      - name: Apply arbeidsavklaringspenger kafka topic to dev-gcp
+      - name: Apply arbeidsavklaringspenger kafka topic to prod-gcp
         uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: prod-gcp
           RESOURCE: ./.deploy/nais/prod/kafka/ytelser/arbeidsavklaringspenger.yaml
+          ENVIRONMENT: prod-gcp:tilbake
+      - name: Apply tiltakspenger kafka topic to dev-gcp
+        uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: ./.deploy/nais/dev/kafka/ytelser/tiltakspenger.yaml
+          ENVIRONMENT: dev-gcp:tilbake
+      - name: Apply tiltakspenger kafka topic to prod-gcp
+        uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: prod-gcp
+          RESOURCE: ./.deploy/nais/prod/kafka/ytelser/tiltakspenger.yaml
           ENVIRONMENT: prod-gcp:tilbake

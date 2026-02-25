@@ -10,4 +10,5 @@ enum class IntegrasjonTema(
     AAP("AAP", "B287"),
     OPP("OPP", "B288"),
     TSO("TSO", "B289"),
+    IND("TILTAKSPENGER", "B470"),
 }

@@ -9,4 +9,5 @@ enum class YtelsestypeDTO {
     TILLEGGSSTØNAD,
     INFOTRYGD,
     ARBEIDSAVKLARINGSPENGER,
+    TILTAKSPENGER,
 }
