@@ -7,4 +7,5 @@ enum class DokarkivFagsaksystem {
     IT01,
     TILLEGGSSTONADER,
     KELVIN,
+    TILTAKSPENGER,
 }

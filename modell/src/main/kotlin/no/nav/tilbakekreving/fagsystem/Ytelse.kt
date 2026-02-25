@@ -133,7 +133,7 @@ sealed interface Ytelse {
 
         override fun tilYtelseDTO(): YtelsestypeDTO = YtelsestypeDTO.TILTAKSPENGER
 
-        override fun integrererMotFagsystem(): Boolean = false
+        override fun integrererMotFagsystem(): Boolean = true
 
         override fun tilYtelsestype(): Ytelsestype = Ytelsestype.TILTAKSPENGER
 
@@ -146,7 +146,7 @@ sealed interface Ytelse {
             }
         }
 
-        override fun tilDokarkivFagsaksystem(): DokarkivFagsaksystem = DokarkivFagsaksystem.KELVIN
+        override fun tilDokarkivFagsaksystem(): DokarkivFagsaksystem = DokarkivFagsaksystem.TILTAKSPENGER
 
         override val kafkaTopic: String = "tilbake.privat-tilbakekreving-tiltakspenger"
 
