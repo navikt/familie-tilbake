@@ -12,4 +12,5 @@ enum class FagsystemDTO {
     KONT,
     IT01,
     TS,
+    TP,
 }
