@@ -167,6 +167,7 @@ object BehandlingsstegGenerator {
     fun lagGodkjennVedtakVurdering(
         vararg behandlingssteg: Behandlingssteg = arrayOf(
             Behandlingssteg.FAKTA,
+            Behandlingssteg.FORHÅNDSVARSEL,
             Behandlingssteg.FORELDELSE,
             Behandlingssteg.VILKÅRSVURDERING,
             Behandlingssteg.FORESLÅ_VEDTAK,

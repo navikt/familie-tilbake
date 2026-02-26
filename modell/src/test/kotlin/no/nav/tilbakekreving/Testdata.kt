@@ -281,6 +281,7 @@ fun unnlates() = KanUnnlates4xRettsgebyr.Unnlates
 
 fun godkjenning() = listOf(
     Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
+    Behandlingssteg.FORHÅNDSVARSEL to FatteVedtakSteg.Vurdering.Godkjent,
     Behandlingssteg.FORELDELSE to FatteVedtakSteg.Vurdering.Godkjent,
     Behandlingssteg.VILKÅRSVURDERING to FatteVedtakSteg.Vurdering.Godkjent,
     Behandlingssteg.FORESLÅ_VEDTAK to FatteVedtakSteg.Vurdering.Godkjent,

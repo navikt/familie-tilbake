@@ -122,6 +122,11 @@ class FatteVedtakSteg internal constructor(
                     ),
                     VurdertSteg(
                         id = UUID.randomUUID(),
+                        steg = Behandlingssteg.FORHÅNDSVARSEL,
+                        vurdering = Vurdering.IkkeVurdert,
+                    ),
+                    VurdertSteg(
+                        id = UUID.randomUUID(),
                         steg = Behandlingssteg.FORELDELSE,
                         vurdering = Vurdering.IkkeVurdert,
                     ),
