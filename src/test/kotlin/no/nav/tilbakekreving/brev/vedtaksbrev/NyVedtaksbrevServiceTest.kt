@@ -5,9 +5,9 @@ import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
-import no.nav.tilbakekreving.breeeev.PåkrevdBegrunnelse
 import no.nav.tilbakekreving.breeeev.Signatur
 import no.nav.tilbakekreving.breeeev.Vedtaksbrev
+import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.e2e.TilbakekrevingE2EBase
 import no.nav.tilbakekreving.e2e.ytelser.TilleggsstønaderE2ETest.Companion.TILLEGGSSTØNADER_KØ_NAVN
@@ -56,7 +56,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
             perioder = listOf(
                 BegrunnetPeriode(
                     periode = 1.januar(2021) til 31.januar(2021),
-                    påkrevdeVurderinger = setOf(PåkrevdBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER),
+                    påkrevdeVurderinger = setOf(VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER),
                 ),
             ),
         )
@@ -76,9 +76,9 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
             it.avsnitt[0].underavsnitt shouldBe listOf(
                 RentekstElementDto(""),
                 PakrevdBegrunnelseDto(
-                    tittel = PåkrevdBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.tittel,
-                    forklaring = PåkrevdBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.forklaring,
-                    begrunnelseType = PåkrevdBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.name,
+                    tittel = VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.tittel,
+                    forklaring = VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.forklaring,
+                    begrunnelseType = VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.name,
                     underavsnitt = listOf(RentekstElementDto("")),
                 ),
             )
@@ -101,7 +101,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
                             RentekstElementDto("Det var jo litt uaktsomt..."),
                             RentekstElementDto("Derfor må du betale tilbake"),
                             PakrevdBegrunnelseUpdateItemDto(
-                                begrunnelseType = PåkrevdBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.name,
+                                begrunnelseType = VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.name,
                                 underavsnitt = listOf(RentekstElementDto("Ja, det syntes jeg.")),
                             ),
                         ),
@@ -128,9 +128,9 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
                 RentekstElementDto("Det var jo litt uaktsomt..."),
                 RentekstElementDto("Derfor må du betale tilbake"),
                 PakrevdBegrunnelseDto(
-                    begrunnelseType = PåkrevdBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.name,
-                    forklaring = PåkrevdBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.forklaring,
-                    tittel = PåkrevdBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.tittel,
+                    begrunnelseType = VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.name,
+                    forklaring = VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.forklaring,
+                    tittel = VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.tittel,
                     underavsnitt = listOf(RentekstElementDto("Ja, det syntes jeg.")),
                 ),
             )

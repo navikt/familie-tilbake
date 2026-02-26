@@ -6,7 +6,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAv
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
-import no.nav.tilbakekreving.breeeev.PåkrevdBegrunnelse
+import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.eksternFagsakBehandling
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.forårsaketAvBrukerGrovtUaktsomt
@@ -31,7 +31,7 @@ class BehandlingVedtaksbrevTest {
     @MethodSource("vurderinger")
     fun `Lager korrekte perioder for behandling`(
         forårsaketAvBruker: ForårsaketAvBruker,
-        påkrevdeBegrunnelser: Set<PåkrevdBegrunnelse>,
+        påkrevdeBegrunnelser: Set<VilkårsvurderingBegrunnelse>,
     ) {
         val vilkårsvurdering = Vilkårsvurderingsteg.opprett(
             eksternFagsakBehandling(
@@ -62,42 +62,42 @@ class BehandlingVedtaksbrevTest {
                 Arguments.argumentSet(
                     "God tro, beløp i behold",
                     godTro(NivåAvForståelse.GodTro.BeløpIBehold.Ja(1400.kroner)),
-                    emptySet<PåkrevdBegrunnelse>(),
+                    emptySet<VilkårsvurderingBegrunnelse>(),
                 ),
                 Arguments.argumentSet(
                     "God tro, beløp i behold",
                     godTro(NivåAvForståelse.GodTro.BeløpIBehold.Nei),
-                    emptySet<PåkrevdBegrunnelse>(),
+                    emptySet<VilkårsvurderingBegrunnelse>(),
                 ),
                 Arguments.argumentSet(
                     "Forårsaket av bruker, uaktsomt, skal ikke unnlates",
                     forårsaketAvBrukerUaktsomt(skalIkkeUnnlates()),
-                    setOf(PåkrevdBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR, PåkrevdBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER),
+                    setOf(VilkårsvurderingBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR, VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER),
                 ),
                 Arguments.argumentSet(
                     "Forårsaket av bruker, uaktsomt, unnlates",
                     forårsaketAvBrukerUaktsomt(unnlates()),
-                    setOf(PåkrevdBegrunnelse.UNNLATES_4_RETTSGEBYR),
+                    setOf(VilkårsvurderingBegrunnelse.UNNLATES_4_RETTSGEBYR),
                 ),
                 Arguments.argumentSet(
                     "Forårsaket av bruker, grovt uaktsomt",
                     forårsaketAvBrukerGrovtUaktsomt(),
-                    setOf(PåkrevdBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER),
+                    setOf(VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER),
                 ),
                 Arguments.argumentSet(
                     "Forårsaket av bruker, forsettelig",
                     forårsaketAvBrukerMedForsett(),
-                    setOf(PåkrevdBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER),
+                    setOf(VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER),
                 ),
                 Arguments.argumentSet(
                     "Forsårsaket av Nav, burde forstått",
                     forårsaketAvNavBurdeForstått(),
-                    emptySet<PåkrevdBegrunnelse>(),
+                    emptySet<VilkårsvurderingBegrunnelse>(),
                 ),
                 Arguments.argumentSet(
                     "Forsårsaket av Nav, burde forstått",
                     forårsaketAvNavForstod(),
-                    emptySet<PåkrevdBegrunnelse>(),
+                    emptySet<VilkårsvurderingBegrunnelse>(),
                 ),
             )
         }

@@ -2,7 +2,7 @@ package no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering
 
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsresultatDto
 import no.nav.tilbakekreving.beregning.Reduksjon
-import no.nav.tilbakekreving.breeeev.PåkrevdBegrunnelse
+import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.endring.VurdertUtbetaling
 import no.nav.tilbakekreving.entities.AktsomhetsvurderingEntity
 import no.nav.tilbakekreving.entities.VurderingType
@@ -24,7 +24,7 @@ interface ForårsaketAvBruker {
 
     fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering
 
-    fun påkrevdeVurderinger(): Set<PåkrevdBegrunnelse>
+    fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse>
 
     sealed interface Ja : ForårsaketAvBruker
 
@@ -45,7 +45,7 @@ interface ForårsaketAvBruker {
             throw NotImplementedError("Kan ikke lage statistikk for en uvurdert utbetaling")
         }
 
-        override fun påkrevdeVurderinger(): Set<PåkrevdBegrunnelse> = emptySet()
+        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = emptySet()
 
         override val navn: String
             get() = "IkkeVurdert"

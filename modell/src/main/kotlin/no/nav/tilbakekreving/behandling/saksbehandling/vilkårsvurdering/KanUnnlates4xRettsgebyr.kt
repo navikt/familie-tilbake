@@ -1,7 +1,7 @@
 package no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering
 
 import no.nav.tilbakekreving.beregning.Reduksjon
-import no.nav.tilbakekreving.breeeev.PåkrevdBegrunnelse
+import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.endring.VurdertUtbetaling
 import no.nav.tilbakekreving.entities.KanUnnlates
 
@@ -13,7 +13,7 @@ sealed interface KanUnnlates4xRettsgebyr {
 
     fun tilEntity(): KanUnnlates
 
-    fun påkrevdeVurderinger(): Set<PåkrevdBegrunnelse>
+    fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse>
 
     data object Unnlates : KanUnnlates4xRettsgebyr {
         override fun reduksjon(): Reduksjon = Reduksjon.IngenTilbakekreving()
@@ -22,7 +22,7 @@ sealed interface KanUnnlates4xRettsgebyr {
             return VurdertUtbetaling.JaNeiVurdering.Ja
         }
 
-        override fun påkrevdeVurderinger(): Set<PåkrevdBegrunnelse> = setOf(PåkrevdBegrunnelse.UNNLATES_4_RETTSGEBYR)
+        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.UNNLATES_4_RETTSGEBYR)
 
         override fun tilEntity(): KanUnnlates = KanUnnlates.UNNLATES
     }
@@ -36,8 +36,8 @@ sealed interface KanUnnlates4xRettsgebyr {
             return VurdertUtbetaling.JaNeiVurdering.Nei
         }
 
-        override fun påkrevdeVurderinger(): Set<PåkrevdBegrunnelse> {
-            return setOf(PåkrevdBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR) + reduksjonSærligeGrunner.skalReduseres.påkrevdeVurderinger()
+        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> {
+            return setOf(VilkårsvurderingBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR) + reduksjonSærligeGrunner.skalReduseres.påkrevdeVurderinger()
         }
 
         override fun tilEntity(): KanUnnlates = KanUnnlates.SKAL_IKKE_UNNLATES
@@ -54,7 +54,7 @@ sealed interface KanUnnlates4xRettsgebyr {
             return VurdertUtbetaling.JaNeiVurdering.Nei
         }
 
-        override fun påkrevdeVurderinger(): Set<PåkrevdBegrunnelse> = reduksjonSærligeGrunner.skalReduseres.påkrevdeVurderinger()
+        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = reduksjonSærligeGrunner.skalReduseres.påkrevdeVurderinger()
 
         override fun tilEntity(): KanUnnlates = KanUnnlates.SKAL_IKKE_UNNLATES
     }

@@ -1,8 +1,9 @@
 package no.nav.tilbakekreving.breeeev
 
+import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 
 data class BegrunnetPeriode(
     val periode: Datoperiode,
-    val påkrevdeVurderinger: Set<PåkrevdBegrunnelse>,
+    val påkrevdeVurderinger: Set<VilkårsvurderingBegrunnelse>,
 )

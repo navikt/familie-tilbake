@@ -8,7 +8,6 @@ import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.brev.vedtaksbrev.NyVedtaksbrevService
-import no.nav.tilbakekreving.brev.vedtaksbrev.VedtaksbrevDataRepository
 import no.nav.tilbakekreving.kontrakter.frontend.apis.BehandlingApi
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaOmFeilutbetalingDto
@@ -24,7 +23,6 @@ import java.util.UUID
 class BehandlingApiController(
     private val tilbakekrevingService: TilbakekrevingService,
     private val tilgangskontrollService: TilgangskontrollService,
-    private val vedtaksbrevDataRepository: VedtaksbrevDataRepository,
     private val nyVedtaksbrevService: NyVedtaksbrevService,
 ) : BehandlingApi {
     override fun behandlingFakta(behandlingId: String): ResponseEntity<FaktaOmFeilutbetalingDto> {

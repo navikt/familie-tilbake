@@ -1,8 +1,9 @@
 package no.nav.tilbakekreving.brev.vedtaksbrev
 
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
-import no.nav.tilbakekreving.breeeev.PåkrevdBegrunnelse
 import no.nav.tilbakekreving.breeeev.Vedtaksbrev
+import no.nav.tilbakekreving.breeeev.begrunnelse.Forklaringstekster
+import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.brev.vedtaksbrev.BrevFormatterer.tilDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.AvsnittDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.AvsnittUpdateItemDto
@@ -77,6 +78,7 @@ class NyVedtaksbrevService(
     fun mapAvsnitt(avsnitt: AvsnittUpdateItemDto): AvsnittDto {
         return AvsnittDto(
             tittel = avsnitt.tittel,
+            forklaring = Forklaringstekster.PERIODE_AVSNITT,
             id = avsnitt.id,
             underavsnitt = avsnitt.underavsnitt.map(::mapUnderavsnitt),
         )
@@ -84,7 +86,7 @@ class NyVedtaksbrevService(
 
     fun mapUnderavsnitt(avsnitt: RotElementUpdateItemDto): RotElementDto {
         return when (avsnitt) {
-            is PakrevdBegrunnelseUpdateItemDto -> PåkrevdBegrunnelse.valueOf(avsnitt.begrunnelseType).tilDto(avsnitt.underavsnitt)
+            is PakrevdBegrunnelseUpdateItemDto -> VilkårsvurderingBegrunnelse.valueOf(avsnitt.begrunnelseType).tilDto(avsnitt.underavsnitt)
             is RotElementDto -> avsnitt
         }
     }
