@@ -7,9 +7,11 @@ import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
+import no.nav.tilbakekreving.behov.JournalføringBehov
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.brukerinfoHendelse
 import no.nav.tilbakekreving.defaultFeatures
+import no.nav.tilbakekreving.distribusjon
 import no.nav.tilbakekreving.eksternFagsak
 import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.fagsystem.Ytelse
@@ -21,6 +23,7 @@ import no.nav.tilbakekreving.godkjenning
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.iverksettelse
 import no.nav.tilbakekreving.januar
+import no.nav.tilbakekreving.journalføring
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
@@ -124,6 +127,8 @@ class EndringObservatørTest {
 
         tilbakekreving.håndter(ANSVARLIG_BESLUTTER, godkjenning())
         tilbakekreving.håndter(iverksettelse())
+        tilbakekreving.håndter(journalføring((behovOppsamler.behovListe.last() as JournalføringBehov).brevId))
+        tilbakekreving.håndter(distribusjon())
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.status } shouldBe listOf(
             ForenkletBehandlingsstatus.OPPRETTET,
             ForenkletBehandlingsstatus.TIL_BEHANDLING,

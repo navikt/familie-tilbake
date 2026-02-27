@@ -6,7 +6,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
 import no.nav.tilbakekreving.breeeev.Signatur
-import no.nav.tilbakekreving.breeeev.Vedtaksbrev
+import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.e2e.TilbakekrevingE2EBase
@@ -42,7 +42,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
     @Test
     fun `fletter inn lagrede felter i vedtaksbrev-data`() {
         val behandlingId = lagBehandlingId()
-        val vedtaksbrev = Vedtaksbrev(
+        val vedtaksbrevInfo = VedtaksbrevInfo(
             brukerdata = BrevmottakerDto(
                 navn = "Toasty Testy",
                 personIdent = "20046912345",
@@ -60,7 +60,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
                 ),
             ),
         )
-        val initielleData = nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, vedtaksbrev)
+        val initielleData = nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, vedtaksbrevInfo)
         initielleData.should {
             it.hovedavsnitt shouldBe HovedavsnittDto(
                 tittel = "Du må betale tilbake arbeidsavklaringspengene",
@@ -110,7 +110,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
             ),
         )
 
-        nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, vedtaksbrev).should {
+        nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, vedtaksbrevInfo).should {
             it.hovedavsnitt shouldBe HovedavsnittDto(
                 tittel = "Du må betale tilbake arbeidsavklaringspengene",
                 underavsnitt = listOf(

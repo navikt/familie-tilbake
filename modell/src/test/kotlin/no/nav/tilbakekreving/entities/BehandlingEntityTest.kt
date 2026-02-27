@@ -13,7 +13,6 @@ import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.fagsystem.Ytelse
-import no.nav.tilbakekreving.fagsystem.Ytelsestype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kravgrunnlag
@@ -68,7 +67,7 @@ class BehandlingEntityTest {
         behandlingEtterLagring.tilFrontendDto(TilBehandling, behandler, true) shouldBe behandlingFørLagring.tilFrontendDto(TilBehandling, behandler, true)
 
         val observatør = BehovObservatørOppsamler()
-        behandlingEtterLagring.trengerIverksettelse(observatør, Ytelsestype.TILLEGGSSTØNAD, Aktør.Person("20046912345"))
+        behandlingEtterLagring.trengerIverksettelse(observatør, Ytelse.Tilleggsstønad, Aktør.Person("20046912345"))
 
         val behov = observatør.behovListe.single().shouldBeInstanceOf<IverksettelseBehov>()
         behov.kravgrunnlagId shouldBe kravgrunnlag.entry.kravgrunnlagId

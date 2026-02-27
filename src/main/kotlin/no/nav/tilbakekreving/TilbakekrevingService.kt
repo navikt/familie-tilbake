@@ -23,16 +23,21 @@ import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behov.Behov
 import no.nav.tilbakekreving.behov.BrukerinfoBehov
+import no.nav.tilbakekreving.behov.DistribusjonBehov
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
 import no.nav.tilbakekreving.behov.IverksettelseBehov
+import no.nav.tilbakekreving.behov.JournalføringBehov
 import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.brev.varselbrev.ForhåndsvarselService
+import no.nav.tilbakekreving.brev.vedtaksbrev.NyVedtaksbrevService
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.endring.EndringObservatørService
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
+import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
+import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
@@ -66,6 +71,7 @@ class TilbakekrevingService(
     private val dokdistService: DokdistClient,
     private val featureService: FeatureService,
     private val forhåndsvarselService: ForhåndsvarselService,
+    private val vedtaksbrevService: NyVedtaksbrevService,
 ) {
     private val logger = TracedLogger.getLogger<TilbakekrevingService>()
 
@@ -254,12 +260,35 @@ class TilbakekrevingService(
 
             is IverksettelseBehov -> {
                 val iverksattVedtak = iverksettService.iverksett(behov, logContext)
+
                 tilbakekreving.håndter(
                     IverksettelseHendelse(
                         iverksattVedtakId = iverksattVedtak.id,
                         vedtakId = iverksattVedtak.vedtakId,
                     ),
                 )
+            }
+
+            is JournalføringBehov -> {
+                val journalpost = vedtaksbrevService.journalførVedtaksbrev(behov)
+                if (journalpost.journalpostId == null) {
+                    throw Feil(
+                        message = "journalføring av vedtaksbrev til behandlingId ${behov.behandlingId} misslykket med denne meldingen: ${journalpost.melding}",
+                        frontendFeilmelding = "journalføring av vedtaksbrev til behandlingId ${behov.behandlingId} misslykket med denne meldingen: ${journalpost.melding}",
+                        logContext = SecureLog.Context.fra(tilbakekreving),
+                    )
+                }
+                tilbakekreving.håndter(
+                    JournalføringHendelse(
+                        brevId = behov.brevId,
+                        journalpostId = journalpost.journalpostId,
+                    ),
+                )
+            }
+
+            is DistribusjonBehov -> {
+                val bestillingId = vedtaksbrevService.distribuereVedtaksbrev(behov, logContext)
+                tilbakekreving.håndter(DistribusjonHendelse(bestillingId))
             }
         }
     }

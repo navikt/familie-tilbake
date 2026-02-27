@@ -7,4 +7,6 @@ dependencies {
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
 
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+
+    api(project(":kontrakter-frontend:api"))
 }

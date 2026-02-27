@@ -14,4 +14,8 @@ interface BehovObservatør {
     )
 
     fun håndter(behov: IverksettelseBehov)
+
+    fun håndter(behov: JournalføringBehov)
+
+    fun håndter(behov: DistribusjonBehov)
 }

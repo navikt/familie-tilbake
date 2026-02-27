@@ -17,6 +17,7 @@ data class Varselbrev(
     override val id: UUID,
     override var journalpostId: String?,
     override var sendtTid: LocalDate,
+    override val brevtype: Brevtype,
     val ansvarligSaksbehandlerIdent: String,
     val kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
     var fristForUttalelse: LocalDate,
@@ -47,6 +48,7 @@ data class Varselbrev(
                 id = UUID.randomUUID(),
                 journalpostId = null,
                 sendtTid = sendtTid,
+                brevtype = Brevtype.VARSELBREV,
                 ansvarligSaksbehandlerIdent = ansvarligSaksbehandlerIdent,
                 kravgrunnlag = kravgrunnlag,
                 fristForUttalelse = sendtTid.plus(frist),
@@ -59,16 +61,17 @@ data class Varselbrev(
         return BrevEntity(
             id = id,
             tilbakekrevingRef = tilbakekrevingId,
-            brevType = Brevtype.VARSEL_BREV,
-            kravgrunnlagRef = kravgrunnlag.tilEntity(),
+            brevtype = brevtype,
             varselbrevEntity = VarselbrevEntity(
                 brevRef = id,
+                kravgrunnlagRef = kravgrunnlag.tilEntity(),
                 journalpostId = journalpostId,
                 sendtTid = sendtTid,
                 ansvarligSaksbehandlerIdent = ansvarligSaksbehandlerIdent,
                 fristForUttalelse = fristForUttalelse,
                 tekstFraSaksbehandler = tekstFraSaksbehandler,
             ),
+            vedtaksbrevEntity = null,
         )
     }
 

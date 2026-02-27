@@ -4,6 +4,7 @@ import no.nav.tilbakekreving.FeatureToggles
 import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.UtenforScope
 import no.nav.tilbakekreving.aktør.Aktør
+import no.nav.tilbakekreving.aktør.Brukerinfo
 import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsoppsummeringDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegsinfoDto
@@ -28,11 +29,14 @@ import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg.Compan
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.behov.BehovObservatør
+import no.nav.tilbakekreving.behov.DistribusjonBehov
 import no.nav.tilbakekreving.behov.IverksettelseBehov
+import no.nav.tilbakekreving.behov.JournalføringBehov
 import no.nav.tilbakekreving.beregning.Beregning
 import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
 import no.nav.tilbakekreving.breeeev.Signatur
+import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
@@ -40,7 +44,6 @@ import no.nav.tilbakekreving.endring.EndringObservatør
 import no.nav.tilbakekreving.endring.VurdertUtbetaling
 import no.nav.tilbakekreving.entities.BehandlingEntity
 import no.nav.tilbakekreving.fagsystem.Ytelse
-import no.nav.tilbakekreving.fagsystem.Ytelsestype
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
@@ -59,6 +62,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.tilstand.Tilstand
 import java.math.BigDecimal
@@ -203,7 +207,7 @@ class Behandling internal constructor(
 
     fun trengerIverksettelse(
         behovObservatør: BehovObservatør,
-        ytelsestype: Ytelsestype,
+        ytelse: Ytelse,
         aktør: Aktør,
     ) {
         val beregning = lagBeregning()
@@ -214,9 +218,44 @@ class Behandling internal constructor(
                 kravgrunnlagId = kravgrunnlag.entry.kravgrunnlagId,
                 delperioder = delperioder,
                 ansvarligSaksbehandler = ansvarligSaksbehandler.ident,
-                ytelsestype = ytelsestype,
+                ytelse = ytelse,
                 aktør = aktør,
                 behandlingstype = type,
+            ),
+        )
+    }
+
+    fun trengerJournalføring(
+        behovObservatør: BehovObservatør,
+        brevId: UUID,
+        ytelse: Ytelse,
+        brukerInfo: Brukerinfo,
+        fagsakId: String,
+        vedtaksbrevInfo: VedtaksbrevInfo,
+    ) {
+        behovObservatør.håndter(
+            JournalføringBehov(
+                brevId = brevId,
+                behandlingId = id,
+                ytelse = ytelse,
+                bruker = brukerInfo,
+                fagsakId = fagsakId,
+                journalførendeEnhet = enhet!!.kode,
+                vedtaksbrevInfo = vedtaksbrevInfo,
+            ),
+        )
+    }
+
+    fun trengerDistribusjon(
+        bebehovObservatør: BehovObservatør,
+        journalpostId: String,
+        fagsystem: FagsystemDTO,
+    ) {
+        bebehovObservatør.håndter(
+            DistribusjonBehov(
+                behandlingId = id,
+                journalpostId = journalpostId,
+                fagsystem = fagsystem,
             ),
         )
     }

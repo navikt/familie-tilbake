@@ -1,30 +1,38 @@
 package no.nav.tilbakekreving.entities
 
 import no.nav.tilbakekreving.brev.Brev
-import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import java.util.UUID
 
 data class BrevEntity(
     val id: UUID,
     val tilbakekrevingRef: String,
-    val brevType: Brevtype,
-    val kravgrunnlagRef: HistorikkReferanseEntity<UUID>,
+    val brevtype: Brevtype,
     val varselbrevEntity: VarselbrevEntity?,
+    val vedtaksbrevEntity: VedtaksbrevEntity?,
 ) {
     fun fraEntity(kravgrunnlagHistorikk: KravgrunnlagHistorikk): Brev {
-        val sporing = Sporing("Ukjent", id.toString())
-        return when (brevType) {
-            Brevtype.VARSEL_BREV -> {
+        return when (brevtype) {
+            Brevtype.VARSELBREV -> {
                 varselbrevEntity!!.fraEntity(
                     id,
-                    kravgrunnlagHistorikk.finn(kravgrunnlagRef.id, sporing),
+                    brevtype,
+                    kravgrunnlagHistorikk,
                 )
+            }
+            Brevtype.VEDTAKSBREV -> {
+                vedtaksbrevEntity!!.fraEntity(id, brevtype)
+            }
+            Brevtype.VARSEL_BREV -> {
+                throw IllegalArgumentException("Deprecated enum")
             }
         }
     }
 }
 
 enum class Brevtype {
+    @Deprecated("midreltidig, fjernes etter prodsatt og migrering")
     VARSEL_BREV,
+    VARSELBREV,
+    VEDTAKSBREV,
 }

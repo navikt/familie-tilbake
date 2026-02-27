@@ -15,7 +15,9 @@ import no.nav.tilbakekreving.tilstand.Avsluttet
 import no.nav.tilbakekreving.tilstand.AvventerBrukerinfo
 import no.nav.tilbakekreving.tilstand.AvventerFagsysteminfo
 import no.nav.tilbakekreving.tilstand.AvventerKravgrunnlag
+import no.nav.tilbakekreving.tilstand.DistribuerVedtak
 import no.nav.tilbakekreving.tilstand.IverksettVedtak
+import no.nav.tilbakekreving.tilstand.JournalførVedtak
 import no.nav.tilbakekreving.tilstand.SendVarselbrev
 import no.nav.tilbakekreving.tilstand.Start
 import no.nav.tilbakekreving.tilstand.TilBehandling
@@ -78,6 +80,8 @@ data class TilbakekrevingEntity(
                 TilbakekrevingTilstand.SEND_VARSELBREV -> SendVarselbrev
                 TilbakekrevingTilstand.IVERKSETT_VEDTAK -> IverksettVedtak
                 TilbakekrevingTilstand.TIL_BEHANDLING -> TilBehandling
+                TilbakekrevingTilstand.JOURNALFØR_VEDTAK -> JournalførVedtak
+                TilbakekrevingTilstand.DISTRIUBER_VEDTAK -> DistribuerVedtak
                 TilbakekrevingTilstand.AVSLUTTET -> Avsluttet
             },
             bigQueryService = bigQueryService,

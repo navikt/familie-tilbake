@@ -3,7 +3,7 @@ package no.nav.tilbakekreving.breeeev
 import no.nav.tilbakekreving.kontrakter.frontend.models.BrevmottakerDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.YtelseDto
 
-data class Vedtaksbrev(
+data class VedtaksbrevInfo(
     val brukerdata: BrevmottakerDto,
     val ytelse: YtelseDto,
     val signatur: Signatur,

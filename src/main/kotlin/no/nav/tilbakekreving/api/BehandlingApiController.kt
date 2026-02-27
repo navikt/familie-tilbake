@@ -75,7 +75,7 @@ class BehandlingApiController(
             handling = "Henter informasjon for bruk i brev",
         )
 
-        return ResponseEntity.ok(nyVedtaksbrevService.hentVedtaksbrevData(UUID.fromString(behandlingId), tilbakekreving.hentVedtaksbrev(UUID.fromString(behandlingId))))
+        return ResponseEntity.ok(nyVedtaksbrevService.hentVedtaksbrevData(UUID.fromString(behandlingId), tilbakekreving.hentVedtaksbrevInfo(UUID.fromString(behandlingId))))
     }
 
     override fun behandlingOppdaterVedtaksbrev(behandlingId: UUID, vedtaksbrevRedigerbareDataUpdateDto: VedtaksbrevRedigerbareDataUpdateDto): ResponseEntity<VedtaksbrevRedigerbareDataDto> {

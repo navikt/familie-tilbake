@@ -114,7 +114,7 @@ class IverksettVedtakTest {
     }
 
     @Test
-    fun `tilbakekrevingen er avsluttet når vedtak er iverksatt`() {
+    fun `tilbakekrevingen er JournalførVedtak når vedtak er iverksatt`() {
         val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
         val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingEvent, oppsamler)
@@ -136,7 +136,7 @@ class IverksettVedtakTest {
                 vedtakId = BigInteger("1234"),
             ),
         )
-        tilbakekreving.tilstand shouldBe Avsluttet
+        tilbakekreving.tilstand shouldBe JournalførVedtak
     }
 
     @Test

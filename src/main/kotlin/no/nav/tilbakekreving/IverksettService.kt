@@ -67,7 +67,7 @@ class IverksettService(
             behandlingId = iverksettelseBehov.behandlingId,
             vedtakId = request.tilbakekrevingsvedtak.vedtakId,
             aktør = iverksettelseBehov.aktør.tilEntity(),
-            ytelsestypeKode = iverksettelseBehov.ytelsestype.kode,
+            ytelsestypeKode = iverksettelseBehov.ytelse.tilYtelsestype().kode,
             kvittering = kvittering.mmel.alvorlighetsgrad,
             tilbakekrevingsvedtak = request.tilbakekrevingsvedtak,
             behandlingstype = iverksettelseBehov.behandlingstype,

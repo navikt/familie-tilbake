@@ -78,6 +78,8 @@ tilbakekreving:
   entraProxy:
     base-url: dummy
     scope: dummy
+  tilbakekrevingPdf:
+    base-url: dummy
 
 bigquery:
   flyway:
