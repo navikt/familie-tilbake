@@ -117,6 +117,7 @@ class EndringObservatørTest {
             ForenkletBehandlingsstatus.TIL_BEHANDLING,
         )
         tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, faktastegVurdering())
+        tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, listOf(), "")
         tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar til 31.januar, foreldelseVurdering())
         tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar til 31.januar, forårsaketAvBrukerGrovtUaktsomt())
         tilbakekreving.håndterForeslåVedtak(ANSVARLIG_SAKSBEHANDLER)

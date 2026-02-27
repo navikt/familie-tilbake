@@ -42,6 +42,13 @@ class FatteVedtakStegTest {
         fatteVedtakSteg.håndter(
             ansvarligBeslutter,
             ansvarligSaksbehandler,
+            Behandlingssteg.FORHÅNDSVARSEL,
+            FatteVedtakSteg.Vurdering.Godkjent,
+            Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+        )
+        fatteVedtakSteg.håndter(
+            ansvarligBeslutter,
+            ansvarligSaksbehandler,
             Behandlingssteg.FORELDELSE,
             FatteVedtakSteg.Vurdering.Godkjent,
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
