@@ -41,6 +41,7 @@ tilbakekreving:
         beslutter:
           - ${rolle.enslig.beslutter}
       tp:
+        veileder: [] # Tiltakspenger har ikke veileder-tilgang ennå
         saksbehandler:
           - "1b3a2c4d-d620-4fcf-a29b-a6cdadf29680" # 0000-GA-Tiltakspenger-Saksbehandler
         beslutter:
