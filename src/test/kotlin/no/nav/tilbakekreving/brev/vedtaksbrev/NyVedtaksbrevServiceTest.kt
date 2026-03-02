@@ -7,6 +7,7 @@ import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
 import no.nav.tilbakekreving.breeeev.Signatur
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
+import no.nav.tilbakekreving.breeeev.begrunnelse.Forklaringstekster
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.e2e.TilbakekrevingE2EBase
@@ -64,6 +65,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
         initielleData.should {
             it.hovedavsnitt shouldBe HovedavsnittDto(
                 tittel = "Du må betale tilbake arbeidsavklaringspengene",
+                forklaring = Forklaringstekster.HOVEDAVSNITT,
                 underavsnitt = listOf(RentekstElementDto("")),
             )
             it.ytelse shouldBe Ytelse.Arbeidsavklaringspenger.brevmeta()
@@ -113,6 +115,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
         nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, vedtaksbrevInfo).should {
             it.hovedavsnitt shouldBe HovedavsnittDto(
                 tittel = "Du må betale tilbake arbeidsavklaringspengene",
+                forklaring = Forklaringstekster.HOVEDAVSNITT,
                 underavsnitt = listOf(
                     RentekstElementDto("Vi oppdaget at du stjal penger"),
                 ),

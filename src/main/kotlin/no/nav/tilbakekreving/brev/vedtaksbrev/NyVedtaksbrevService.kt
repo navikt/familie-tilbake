@@ -59,6 +59,7 @@ class NyVedtaksbrevService(
         val (sistOppdatert, lagredeData) = vedtaksbrevDataRepository.hentVedtaksbrevData(behandlingId) ?: return VedtaksbrevDataDto(
             hovedavsnitt = HovedavsnittDto(
                 tittel = "Du må betale tilbake ${vedtaksbrevInfo.ytelse.bestemtEntall}",
+                forklaring = Forklaringstekster.HOVEDAVSNITT,
                 underavsnitt = listOf(RentekstElementDto("")),
             ),
             avsnitt = BrevFormatterer.lagAvsnitt(vedtaksbrevInfo.perioder),
@@ -92,6 +93,7 @@ class NyVedtaksbrevService(
     fun mapHovedavsnitt(hovedavsnitt: HovedavsnittUpdateDto): HovedavsnittDto {
         return HovedavsnittDto(
             tittel = hovedavsnitt.tittel,
+            forklaring = Forklaringstekster.HOVEDAVSNITT,
             underavsnitt = hovedavsnitt.underavsnitt.map(::mapUnderavsnitt),
         )
     }
