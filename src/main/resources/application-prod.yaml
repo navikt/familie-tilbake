@@ -79,6 +79,11 @@ tilbakekreving:
           - "3a65f41a-b3f3-4b1c-830a-df20ff020980" # 0000-GA-AAP_SAKSBEHANDLER_NASJONAL
         beslutter:
           - "5763b52f-f16a-483d-8f40-25be9de95c0a" # 0000-GA-AAP_BESLUTTER
+      tp:
+        saksbehandler:
+          - "6c6ce2e8-b2e2-4c4b-8194-215c8e27a5c7" # 0000-GA-Tiltakspenger-Saksbehandler
+        beslutter:
+          - "de518927-f657-4f37-9a64-14fdfd968dd2" # 0000-GA-Tiltakspenger-Beslutter
   bigQuery:
     prosjektId: tilbake-prod-d235
     dataset: tilbakekreving_dataset
