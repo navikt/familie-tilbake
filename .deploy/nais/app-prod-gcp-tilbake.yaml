@@ -168,8 +168,6 @@ spec:
       cpu: 50m
   ingresses:
     - https://tilbakekreving-backend.intern.nav.no
-  secureLogs:
-    enabled: true
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: prod
