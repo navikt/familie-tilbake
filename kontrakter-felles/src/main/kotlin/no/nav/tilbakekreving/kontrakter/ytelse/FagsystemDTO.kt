@@ -12,5 +12,5 @@ enum class FagsystemDTO {
     KONT,
     IT01,
     TS,
-    TILTAKSPENGER,
+    TP,
 }

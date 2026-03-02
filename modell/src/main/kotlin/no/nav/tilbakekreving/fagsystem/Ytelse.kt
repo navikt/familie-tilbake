@@ -129,7 +129,7 @@ sealed interface Ytelse {
     }
 
     object Tiltakspenger : Ytelse {
-        override fun tilFagsystemDTO(): FagsystemDTO = FagsystemDTO.TILTAKSPENGER
+        override fun tilFagsystemDTO(): FagsystemDTO = FagsystemDTO.TP
 
         override fun tilYtelseDTO(): YtelsestypeDTO = YtelsestypeDTO.TILTAKSPENGER
 

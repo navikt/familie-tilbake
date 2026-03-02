@@ -40,7 +40,7 @@ tilbakekreving:
           - ${rolle.enslig.saksbehandler}
         beslutter:
           - ${rolle.enslig.beslutter}
-      tiltakspenger:
+      tp:
         veileder:
           - ${rolle.enslig.veileder}
         saksbehandler:
