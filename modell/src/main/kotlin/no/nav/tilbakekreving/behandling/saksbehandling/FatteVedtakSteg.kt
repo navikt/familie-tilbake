@@ -58,6 +58,10 @@ class FatteVedtakSteg internal constructor(
         )
     }
 
+    fun erVedtakUnderkjent(): Boolean {
+        return vurderteSteg.any { it.erVurderingUnderkjent() }
+    }
+
     class VurdertSteg(
         private val id: UUID,
         private val steg: Behandlingssteg,
@@ -73,6 +77,10 @@ class FatteVedtakSteg internal constructor(
 
         fun erFerdigvurdert(): Boolean {
             return vurdering !is Vurdering.IkkeVurdert
+        }
+
+        fun erVurderingUnderkjent(): Boolean {
+            return vurdering is Vurdering.Underkjent
         }
 
         override fun tilFrontendDto(): Totrinnsstegsinfo {

@@ -18,6 +18,7 @@ data class BehandlingEndretHendelse(
         val sakOpprettet: LocalDateTime,
         val varselSendt: LocalDate?,
         val behandlingsstatus: ForenkletBehandlingsstatus,
+        val forrigeBehandlingsstatus: ForenkletBehandlingsstatus?,
         @field:JsonFormat(shape = JsonFormat.Shape.STRING)
         val totaltFeilutbetaltBeløp: BigDecimal,
         val saksbehandlingURL: String,

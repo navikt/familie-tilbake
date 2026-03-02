@@ -24,14 +24,14 @@ object TilBehandling : Tilstand {
     }
 
     override fun entering(tilbakekreving: Tilbakekreving) {
-        tilbakekreving.sendStatusendring(ForenkletBehandlingsstatus.TIL_BEHANDLING)
+        tilbakekreving.sendStatusendring(ForenkletBehandlingsstatus.TIL_BEHANDLING, ForenkletBehandlingsstatus.OPPRETTET)
     }
 
     override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse) {
         if (tilbakekreving.eksternFagsak.behandlinger.nåværende().entry is EksternFagsakRevurdering.Ukjent) {
             tilbakekreving.trengerFagsysteminfo()
         }
-        tilbakekreving.sendStatusendring(ForenkletBehandlingsstatus.TIL_BEHANDLING)
+        tilbakekreving.sendStatusendring(ForenkletBehandlingsstatus.TIL_BEHANDLING, ForenkletBehandlingsstatus.OPPRETTET)
     }
 
     override fun håndterNullstilling(nåværendeBehandling: Behandling, sporing: Sporing) {
