@@ -21,7 +21,6 @@ import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.godkjenning
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
-import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
@@ -29,6 +28,7 @@ import no.nav.tilbakekreving.kravgrunnlagPeriode
 import no.nav.tilbakekreving.opprettTilbakekreving
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.tilbakekrevingTilBehandling
 import org.junit.jupiter.api.Test
 
@@ -131,7 +131,7 @@ class TilBehandlingTest {
         tilbakekreving.håndter(
             kravgrunnlag(
                 perioder = listOf(
-                    kravgrunnlagPeriode(1.januar til 1.januar),
+                    kravgrunnlagPeriode(1.januar(2021) til 1.januar(2021)),
                 ),
             ),
         )
@@ -144,8 +144,8 @@ class TilBehandlingTest {
             fagsysteminfoHendelse(
                 utvidPerioder = listOf(
                     FagsysteminfoHendelse.UtvidetPeriode(
-                        kravgrunnlagPeriode = 1.januar til 1.januar,
-                        vedtaksperiode = 1.januar til 31.januar,
+                        kravgrunnlagPeriode = 1.januar(2021) til 1.januar(2021),
+                        vedtaksperiode = 1.januar(2021) til 31.januar(2021),
                     ),
                 ),
             ),
@@ -159,7 +159,7 @@ class TilBehandlingTest {
             .perioder
             .map { it.periode }
 
-        perioder shouldBe listOf(1.januar til 31.januar)
+        perioder shouldBe listOf(1.januar(2021) til 31.januar(2021))
     }
 
     @Test
@@ -186,14 +186,14 @@ class TilBehandlingTest {
         )
         håndter(
             Behandler.Saksbehandler("Ansvarlig saksbehandler"),
-            periode = 1.januar til 31.januar,
+            periode = 1.januar(2021) til 31.januar(2021),
             vurdering = Foreldelsesteg.Vurdering.IkkeForeldet(
                 "Siste utbetaling er innenfor 3 år",
             ),
         )
         håndter(
             Behandler.Saksbehandler("Ansvarlig saksbehandler"),
-            periode = 1.januar til 31.januar,
+            periode = 1.januar(2021) til 31.januar(2021),
             vurdering = NivåAvForståelse.BurdeForstått(
                 begrunnelse = "Brukeren gikk opp i lønn",
                 aktsomhet = NivåAvForståelse.Aktsomhet.Uaktsomhet(

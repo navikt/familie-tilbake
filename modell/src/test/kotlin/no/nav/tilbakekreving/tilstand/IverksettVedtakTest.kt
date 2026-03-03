@@ -20,13 +20,13 @@ import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
-import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.test.januar
 import org.junit.jupiter.api.Test
 import java.math.BigInteger
 import java.util.UUID
@@ -86,14 +86,14 @@ class IverksettVedtakTest {
             )
             håndter(
                 Behandler.Saksbehandler("Ansvarlig saksbehandler"),
-                periode = 1.januar til 31.januar,
+                periode = 1.januar(2021) til 31.januar(2021),
                 vurdering = Foreldelsesteg.Vurdering.IkkeForeldet(
                     "Siste utbetaling er innenfor 3 år",
                 ),
             )
             håndter(
                 Behandler.Saksbehandler("Ansvarlig saksbehandler"),
-                periode = 1.januar til 31.januar,
+                periode = 1.januar(2021) til 31.januar(2021),
                 vurdering = NivåAvForståelse.BurdeForstått(
                     aktsomhet = NivåAvForståelse.Aktsomhet.Uaktsomhet(
                         kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
@@ -194,7 +194,7 @@ class IverksettVedtakTest {
         vedtak.vurderteUtbetalinger.size shouldBe 1
 
         val utbetaling = vedtak.vurderteUtbetalinger.single()
-        utbetaling.periode shouldBe (1.januar til 31.januar)
+        utbetaling.periode shouldBe (1.januar(2021) til 31.januar(2021))
         utbetaling.vilkårsvurdering.aktsomhetFørUtbetaling shouldBe null
         utbetaling.vilkårsvurdering.aktsomhetEtterUtbetaling shouldBe Aktsomhet.SIMPEL_UAKTSOMHET
         utbetaling.vilkårsvurdering.særligeGrunner?.beløpReduseres shouldBe VurdertUtbetaling.JaNeiVurdering.Nei

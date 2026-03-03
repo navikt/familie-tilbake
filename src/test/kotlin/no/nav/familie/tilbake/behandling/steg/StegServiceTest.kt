@@ -27,7 +27,6 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstan
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.data.Testdata.lagKravgrunnlagsperiode
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.historikkinnslag.Aktør
@@ -56,8 +55,6 @@ import no.nav.tilbakekreving.api.v1.dto.GodTroDto
 import no.nav.tilbakekreving.api.v1.dto.PeriodeMedTekstDto
 import no.nav.tilbakekreving.api.v1.dto.VergeDto
 import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
-import no.nav.tilbakekreving.februar
-import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.Regelverk
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
@@ -73,6 +70,8 @@ import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode.Companion.til
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.verge.Vergetype
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
+import no.nav.tilbakekreving.test.februar
+import no.nav.tilbakekreving.test.januar
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -455,7 +454,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         val tom = LocalDate.of(2010, 1, 31)
 
         lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
-        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id, setOf(lagKravgrunnlagsperiode(januar(2010) til januar(2010)))))
+        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id, setOf(Testdata.lagKravgrunnlagsperiode(januar(2010) til januar(2010)))))
         stegService.håndterSteg(behandling.id, lagBehandlingsstegFaktaDto(fom, tom), SecureLog.Context.tom())
 
         // foreldelsesteg vurderte som IKKE_FORELDET med første omgang

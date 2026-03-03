@@ -2,9 +2,9 @@ package no.nav.tilbakekreving.e2e
 
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp.Companion.medFeilutbetaling
-import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
+import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.util.kroner
 import no.nav.tilbakekreving.util.prosent
 import org.intellij.lang.annotations.Language

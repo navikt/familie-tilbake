@@ -50,9 +50,6 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import no.nav.tilbakekreving.api.v1.dto.FritekstavsnittDto
 import no.nav.tilbakekreving.api.v1.dto.HentForhåndvisningVedtaksbrevPdfDto
 import no.nav.tilbakekreving.api.v1.dto.PeriodeMedTekstDto
-import no.nav.tilbakekreving.april
-import no.nav.tilbakekreving.februar
-import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
@@ -67,8 +64,6 @@ import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
-import no.nav.tilbakekreving.mars
-import no.nav.tilbakekreving.oktober
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.Brevdata
@@ -76,6 +71,11 @@ import no.nav.tilbakekreving.pdf.dokumentbestilling.vedtak.Avsnittstype
 import no.nav.tilbakekreving.pdf.dokumentbestilling.vedtak.Underavsnitt
 import no.nav.tilbakekreving.pdf.dokumentbestilling.vedtak.Underavsnittstype
 import no.nav.tilbakekreving.pdf.validering.PdfaValidator
+import no.nav.tilbakekreving.test.april
+import no.nav.tilbakekreving.test.februar
+import no.nav.tilbakekreving.test.januar
+import no.nav.tilbakekreving.test.mars
+import no.nav.tilbakekreving.test.oktober
 import org.apache.commons.lang3.RandomStringUtils
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

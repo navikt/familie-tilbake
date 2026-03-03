@@ -5,7 +5,7 @@ import no.nav.familie.tilbake.data.Testdata
 import no.nav.tilbakekreving.api.v2.MottakerDto
 import no.nav.tilbakekreving.api.v2.PeriodeDto
 import no.nav.tilbakekreving.api.v2.fagsystem.svar.FagsysteminfoSvarHendelse
-import no.nav.tilbakekreving.januar
+import no.nav.tilbakekreving.test.januar
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime

@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.e2e
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.ANSVARLIG_BESLUTTER
 import no.nav.tilbakekreving.ANSVARLIG_SAKSBEHANDLER
+import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
@@ -19,11 +20,9 @@ import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.fagsysteminfoHendelse
 import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.foreldelseVurdering
-import no.nav.tilbakekreving.forårsaketAvBrukerGrovtUaktsomt
 import no.nav.tilbakekreving.godkjenning
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.iverksettelse
-import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.journalføring
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -31,6 +30,7 @@ import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.test.januar
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
@@ -54,12 +54,12 @@ class EndringObservatørTest {
             EndringObservatørOppsamler.Statusoppdatering(
                 ansvarligSaksbehandler = Behandler.Vedtaksløsning.ident,
                 vedtaksresultat = null,
-                totalFeilutbetaltPeriode = 1.januar til 31.januar,
+                totalFeilutbetaltPeriode = 1.januar(2021) til 31.januar(2021),
             ),
             EndringObservatørOppsamler.Statusoppdatering(
                 ansvarligSaksbehandler = ANSVARLIG_SAKSBEHANDLER.ident,
                 vedtaksresultat = null,
-                totalFeilutbetaltPeriode = 1.januar til 31.januar,
+                totalFeilutbetaltPeriode = 1.januar(2021) til 31.januar(2021),
             ),
         )
     }
@@ -72,13 +72,13 @@ class EndringObservatørTest {
             ),
         )
         val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), BehovObservatørOppsamler(), opprettTilbakekrevingHendelse, bigQueryService, endringObservatør, features = defaultFeatures())
-        tilbakekreving.håndter(kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(1.januar til 1.januar))))
+        tilbakekreving.håndter(kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(1.januar(2021) til 1.januar(2021)))))
         tilbakekreving.håndter(
             fagsysteminfoHendelse(
                 utvidPerioder = listOf(
                     FagsysteminfoHendelse.UtvidetPeriode(
-                        kravgrunnlagPeriode = 1.januar til 1.januar,
-                        vedtaksperiode = 1.januar til 31.januar,
+                        kravgrunnlagPeriode = 1.januar(2021) til 1.januar(2021),
+                        vedtaksperiode = 1.januar(2021) til 31.januar(2021),
                     ),
                 ),
             ),
@@ -89,12 +89,12 @@ class EndringObservatørTest {
             EndringObservatørOppsamler.Statusoppdatering(
                 ansvarligSaksbehandler = Behandler.Vedtaksløsning.ident,
                 vedtaksresultat = null,
-                totalFeilutbetaltPeriode = 1.januar til 31.januar,
+                totalFeilutbetaltPeriode = 1.januar(2021) til 31.januar(2021),
             ),
             EndringObservatørOppsamler.Statusoppdatering(
                 ansvarligSaksbehandler = ANSVARLIG_SAKSBEHANDLER.ident,
                 vedtaksresultat = null,
-                totalFeilutbetaltPeriode = 1.januar til 31.januar,
+                totalFeilutbetaltPeriode = 1.januar(2021) til 31.januar(2021),
             ),
         )
     }
@@ -123,8 +123,8 @@ class EndringObservatørTest {
         )
         tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, faktastegVurdering())
         tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, listOf(), "")
-        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar til 31.januar, foreldelseVurdering())
-        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar til 31.januar, forårsaketAvBrukerGrovtUaktsomt())
+        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
+        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
         tilbakekreving.håndterForeslåVedtak(ANSVARLIG_SAKSBEHANDLER)
 
         tilbakekreving.håndter(ANSVARLIG_BESLUTTER, godkjenning())
@@ -163,8 +163,8 @@ class EndringObservatørTest {
         )
         tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, faktastegVurdering())
         tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, listOf(), "")
-        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar til 31.januar, foreldelseVurdering())
-        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar til 31.januar, forårsaketAvBrukerGrovtUaktsomt())
+        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
+        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
         tilbakekreving.håndterForeslåVedtak(ANSVARLIG_SAKSBEHANDLER)
 
         endringObservatør.behandlingEndretEventsFor(fagsakId).last().forrigeStatus shouldBe ForenkletBehandlingsstatus.TIL_BEHANDLING
@@ -203,8 +203,8 @@ class EndringObservatørTest {
         )
         tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, faktastegVurdering())
         tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, listOf(), "")
-        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar til 31.januar, foreldelseVurdering())
-        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar til 31.januar, forårsaketAvBrukerGrovtUaktsomt())
+        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
+        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
         tilbakekreving.håndterForeslåVedtak(ANSVARLIG_SAKSBEHANDLER)
 
         tilbakekreving.håndter(

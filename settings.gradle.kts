@@ -11,3 +11,5 @@ include("pdf")
 
 include("kontrakter-frontend:api")
 include("kontrakter-frontend:dtoer")
+
+include("testdata")

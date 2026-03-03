@@ -19,12 +19,12 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Klassekode
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
-import no.nav.tilbakekreving.april
-import no.nav.tilbakekreving.august
-import no.nav.tilbakekreving.desember
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode.Companion.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
-import no.nav.tilbakekreving.oktober
+import no.nav.tilbakekreving.test.april
+import no.nav.tilbakekreving.test.august
+import no.nav.tilbakekreving.test.desember
+import no.nav.tilbakekreving.test.oktober
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

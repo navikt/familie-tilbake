@@ -9,10 +9,6 @@ import no.nav.tilbakekreving.behandling.Enhet
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonSærligeGrunner
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Skyldgrad
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.brev.BrevHistorikk
@@ -35,6 +31,7 @@ import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.tilstand.TilBehandling
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -90,7 +87,7 @@ fun kravgrunnlag(
 }
 
 fun kravgrunnlagPeriode(
-    periode: Datoperiode = 1.januar til 31.januar,
+    periode: Datoperiode = 1.januar(2021) til 31.januar(2021),
     ytelsesbeløp: List<KravgrunnlagHendelse.Periode.Beløp> = ytelsesbeløp(),
 ) =
     KravgrunnlagHendelse.Periode(
@@ -188,7 +185,7 @@ fun behandling(
 }
 
 fun faktastegVurdering(
-    periode: Datoperiode = 1.januar til 31.januar,
+    periode: Datoperiode = 1.januar(2021) til 31.januar(2021),
     årsak: String = "Årsak",
     uttalelse: Faktasteg.Uttalelse = Faktasteg.Uttalelse.Nei,
 ): Faktasteg.Vurdering {
@@ -213,73 +210,6 @@ fun faktastegVurdering(
 }
 
 fun foreldelseVurdering() = Foreldelsesteg.Vurdering.IkkeForeldet("")
-
-fun godTro(
-    beløpIBehold: NivåAvForståelse.GodTro.BeløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.Nei,
-) = NivåAvForståelse.GodTro(
-    beløpIBehold = beløpIBehold,
-    begrunnelse = "",
-    begrunnelseForGodTro = "",
-)
-
-fun forårsaketAvNavBurdeForstått(
-    aktsomhet: NivåAvForståelse.Aktsomhet = NivåAvForståelse.Aktsomhet.Uaktsomhet(
-        kanUnnlates4XRettsgebyr = skalIkkeUnnlates(),
-        begrunnelse = "",
-    ),
-) = NivåAvForståelse.BurdeForstått(
-    aktsomhet = aktsomhet,
-    begrunnelse = "",
-)
-
-fun forårsaketAvNavForstod(
-    aktsomhet: NivåAvForståelse.Aktsomhet = NivåAvForståelse.Aktsomhet.Forsett(
-        begrunnelse = "",
-    ),
-) = NivåAvForståelse.BurdeForstått(
-    aktsomhet = aktsomhet,
-    begrunnelse = "",
-)
-
-fun forårsaketAvBrukerUaktsomt(
-    unnlates4xRettsgebyr: KanUnnlates4xRettsgebyr = skalIkkeUnnlates(),
-) = Skyldgrad.Uaktsomt(
-    begrunnelse = "",
-    begrunnelseAktsomhet = "",
-    kanUnnlates4XRettsgebyr = unnlates4xRettsgebyr,
-    feilaktigeEllerMangelfulleOpplysninger = Skyldgrad.FeilaktigEllerMangelfull.FEILAKTIG,
-)
-
-fun forårsaketAvBrukerGrovtUaktsomt(
-    skalReduseres: ReduksjonSærligeGrunner.SkalReduseres = ReduksjonSærligeGrunner.SkalReduseres.Nei,
-) = Skyldgrad.GrovUaktsomhet(
-    begrunnelse = "",
-    begrunnelseAktsomhet = "",
-    reduksjonSærligeGrunner = ReduksjonSærligeGrunner(
-        begrunnelse = "",
-        grunner = emptySet(),
-        skalReduseres = skalReduseres,
-    ),
-    feilaktigeEllerMangelfulleOpplysninger = Skyldgrad.FeilaktigEllerMangelfull.FEILAKTIG,
-)
-
-fun forårsaketAvBrukerMedForsett() = Skyldgrad.Forsett(
-    begrunnelse = "",
-    begrunnelseAktsomhet = "",
-    feilaktigeEllerMangelfulleOpplysninger = Skyldgrad.FeilaktigEllerMangelfull.FEILAKTIG,
-)
-
-fun skalIkkeUnnlates(
-    skalReduseres: ReduksjonSærligeGrunner.SkalReduseres = ReduksjonSærligeGrunner.SkalReduseres.Nei,
-) = KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
-    reduksjonSærligeGrunner = ReduksjonSærligeGrunner(
-        begrunnelse = "",
-        grunner = emptySet(),
-        skalReduseres = skalReduseres,
-    ),
-)
-
-fun unnlates() = KanUnnlates4xRettsgebyr.Unnlates
 
 fun godkjenning() = listOf(
     Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,

@@ -11,7 +11,6 @@ import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAv
 import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
-import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
@@ -19,6 +18,7 @@ import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.tilstand.TilBehandling
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -29,7 +29,7 @@ class BehandlingTest {
     fun `sett behandling på vent`() {
         val behandling = behandling()
         val ansvarligSaksbehandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
-        val periode = 1.januar til 31.januar
+        val periode = 1.januar(2021) til 31.januar(2021)
         behandling.lagreUttalelse(UttalelseVurdering.JA, listOf(), null)
         behandling.settPåVent(Venteårsak.MANGLER_STØTTE, LocalDate.MAX, "Begrunnelse")
 
@@ -86,7 +86,7 @@ class BehandlingTest {
     fun `flytt behandling tilbake til fakta - nullstiller fakta`() {
         val behandling = behandling()
         val ansvarligSaksbehandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
-        val periode = 1.januar til 31.januar
+        val periode = 1.januar(2021) til 31.januar(2021)
 
         behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).vurderingAvBrukersUttalelse.beskrivelse shouldBe null
         behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).vurderingAvBrukersUttalelse.harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.IKKE_VURDERT
@@ -116,7 +116,7 @@ class BehandlingTest {
             lagreUttalelse(UttalelseVurdering.JA, listOf(), null)
         }
 
-        val periode = 1.januar til 31.januar
+        val periode = 1.januar(2021) til 31.januar(2021)
         val ansvarligSaksbehandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
 
         val faktasteg = faktastegVurdering(periode)
@@ -138,7 +138,7 @@ class BehandlingTest {
         behandling.apply {
             lagreUttalelse(UttalelseVurdering.JA, listOf(), null)
         }
-        val periode = 1.januar til 31.januar
+        val periode = 1.januar(2021) til 31.januar(2021)
         val ansvarligSaksbehandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
 
         val faktasteg = faktastegVurdering(periode)

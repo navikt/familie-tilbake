@@ -8,11 +8,11 @@ import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Reduksj
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.eksternFagsakBehandling
-import no.nav.tilbakekreving.februar
-import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
+import no.nav.tilbakekreving.test.februar
+import no.nav.tilbakekreving.test.januar
 import org.junit.jupiter.api.Test
 
 class VilkårsvurderingstegTest {
@@ -20,8 +20,8 @@ class VilkårsvurderingstegTest {
     fun `vilkårsvurdering på en av to perioder`() {
         val kravgrunnlag = kravgrunnlag(
             perioder = listOf(
-                kravgrunnlagPeriode(1.januar til 31.januar),
-                kravgrunnlagPeriode(1.februar til 28.februar),
+                kravgrunnlagPeriode(1.januar(2021) til 31.januar(2021)),
+                kravgrunnlagPeriode(1.februar(2021) til 28.februar(2021)),
             ),
         )
         val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
@@ -29,7 +29,7 @@ class VilkårsvurderingstegTest {
             kravgrunnlag,
         )
         vilkårsvurderingsteg.vurder(
-            1.januar til 31.januar,
+            1.januar(2021) til 31.januar(2021),
             NivåAvForståelse.GodTro(
                 begrunnelse = "Brukeren fikk penger som de ikke hadde krav på",
                 beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.Nei,
@@ -45,8 +45,8 @@ class VilkårsvurderingstegTest {
         val kravgrunnlag = kravgrunnlag(
             perioder =
                 listOf(
-                    kravgrunnlagPeriode(1.januar til 31.januar),
-                    kravgrunnlagPeriode(1.februar til 28.februar),
+                    kravgrunnlagPeriode(1.januar(2021) til 31.januar(2021)),
+                    kravgrunnlagPeriode(1.februar(2021) til 28.februar(2021)),
                 ),
         )
         val vilkårsvurderingsteg =
@@ -55,7 +55,7 @@ class VilkårsvurderingstegTest {
                 kravgrunnlagHendelse = kravgrunnlag,
             )
         vilkårsvurderingsteg.vurder(
-            1.januar til 31.januar,
+            1.januar(2021) til 31.januar(2021),
             NivåAvForståelse.GodTro(
                 begrunnelse = "Brukeren fikk penger som de ikke hadde krav på",
                 beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.Nei,
@@ -65,7 +65,7 @@ class VilkårsvurderingstegTest {
         vilkårsvurderingsteg.erFullstendig() shouldBe false
 
         vilkårsvurderingsteg.vurder(
-            1.februar til 28.februar,
+            1.februar(2021) til 28.februar(2021),
             NivåAvForståelse.GodTro(
                 begrunnelse = "Brukeren fikk penger som de ikke hadde krav på",
                 beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.Nei,
@@ -80,8 +80,8 @@ class VilkårsvurderingstegTest {
     fun `vilkårsvurdering for under 4x rettgebyr med delvis tilbakekreving`() {
         val kravgrunnlag = kravgrunnlag(
             perioder = listOf(
-                kravgrunnlagPeriode(1.januar til 31.januar),
-                kravgrunnlagPeriode(1.februar til 28.februar),
+                kravgrunnlagPeriode(1.januar(2021) til 31.januar(2021)),
+                kravgrunnlagPeriode(1.februar(2021) til 28.februar(2021)),
             ),
         )
         val vilkårsvurderingsteg =
@@ -90,7 +90,7 @@ class VilkårsvurderingstegTest {
                 kravgrunnlagHendelse = kravgrunnlag,
             )
         vilkårsvurderingsteg.vurder(
-            1.januar til 31.januar,
+            1.januar(2021) til 31.januar(2021),
             NivåAvForståelse.BurdeForstått(
                 begrunnelse = "Brukeren brukte alt på en tur til Vegas",
                 aktsomhet = NivåAvForståelse.Aktsomhet.Uaktsomhet(
@@ -113,8 +113,8 @@ class VilkårsvurderingstegTest {
     fun `vilkårsvurdering for under 4x rettgebyr med ingen tilbakekreving`() {
         val kravgrunnlag = kravgrunnlag(
             perioder = listOf(
-                kravgrunnlagPeriode(1.januar til 31.januar),
-                kravgrunnlagPeriode(1.februar til 28.februar),
+                kravgrunnlagPeriode(1.januar(2021) til 31.januar(2021)),
+                kravgrunnlagPeriode(1.februar(2021) til 28.februar(2021)),
             ),
         )
         val vilkårsvurderingsteg =
@@ -123,7 +123,7 @@ class VilkårsvurderingstegTest {
                 kravgrunnlagHendelse = kravgrunnlag,
             )
         vilkårsvurderingsteg.vurder(
-            1.januar til 31.januar,
+            1.januar(2021) til 31.januar(2021),
             NivåAvForståelse.BurdeForstått(
                 begrunnelse = "Brukeren brukte alt på en tur til Vegas",
                 aktsomhet = NivåAvForståelse.Aktsomhet.Uaktsomhet(

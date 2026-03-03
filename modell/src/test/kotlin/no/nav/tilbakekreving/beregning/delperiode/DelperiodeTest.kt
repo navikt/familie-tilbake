@@ -5,26 +5,26 @@ import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Com
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.prosent
 import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagPeriodeAdapter
 import no.nav.tilbakekreving.beregning.modell.Beregningsresultatsperiode
-import no.nav.tilbakekreving.februar
-import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
-import no.nav.tilbakekreving.mars
+import no.nav.tilbakekreving.test.februar
+import no.nav.tilbakekreving.test.januar
+import no.nav.tilbakekreving.test.mars
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 
 class DelperiodeTest {
     @Test
     fun `slår sammen foreldet perioder`() {
-        val foreldelsesperiode = 1.januar til 31.mars
+        val foreldelsesperiode = 1.januar(2021) til 31.mars(2021)
         val foreldelser = listOf(
             Foreldet.opprett(
                 foreldelsesperiode,
                 listOf(
-                    KravgrunnlagPeriode(1.januar til 31.januar),
-                    KravgrunnlagPeriode(1.februar til 28.februar),
-                    KravgrunnlagPeriode(1.mars til 31.mars),
+                    KravgrunnlagPeriode(1.januar(2021) til 31.januar(2021)),
+                    KravgrunnlagPeriode(1.februar(2021) til 28.februar(2021)),
+                    KravgrunnlagPeriode(1.mars(2021) til 31.mars(2021)),
                 ),
             ),
         )

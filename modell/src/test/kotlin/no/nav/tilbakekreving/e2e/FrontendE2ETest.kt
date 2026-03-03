@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.e2e
 
 import io.kotest.matchers.shouldBe
+import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
@@ -12,17 +13,16 @@ import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.fagsysteminfoHendelse
 import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.foreldelseVurdering
-import no.nav.tilbakekreving.forårsaketAvBrukerGrovtUaktsomt
 import no.nav.tilbakekreving.godkjenning
 import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.JournalføringHendelse
-import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.test.januar
 import org.junit.jupiter.api.Test
 import java.math.BigInteger
 import java.util.UUID
@@ -53,8 +53,8 @@ class FrontendE2ETest {
         tilbakekreving.trengerVarselbrev("Tekst fra saksbehandler")
         tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, listOf(), null)
 
-        tilbakekreving.håndter(behandler, 1.januar til 31.januar, foreldelseVurdering())
-        tilbakekreving.håndter(behandler, 1.januar til 31.januar, forårsaketAvBrukerGrovtUaktsomt())
+        tilbakekreving.håndter(behandler, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
+        tilbakekreving.håndter(behandler, 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
         tilbakekreving.frontendDtoForBehandling(behandler, true).status shouldBe Behandlingsstatus.UTREDES
 
         tilbakekreving.håndterForeslåVedtak(behandler)

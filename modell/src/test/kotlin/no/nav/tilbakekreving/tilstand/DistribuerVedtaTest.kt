@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.tilstand
 
 import io.kotest.matchers.shouldBe
+import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
@@ -13,17 +14,16 @@ import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.fagsysteminfoHendelse
 import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.foreldelseVurdering
-import no.nav.tilbakekreving.forårsaketAvBrukerUaktsomt
 import no.nav.tilbakekreving.godkjenning
 import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.iverksettelse
-import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.journalføring
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.test.januar
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
@@ -77,13 +77,13 @@ class DistribuerVedtaTest {
             )
             håndter(
                 Behandler.Saksbehandler("Ansvarlig saksbehandler"),
-                periode = 1.januar til 31.januar,
+                periode = 1.januar(2021) til 31.januar(2021),
                 foreldelseVurdering(),
             )
             håndter(
                 Behandler.Saksbehandler("Ansvarlig saksbehandler"),
-                periode = 1.januar til 31.januar,
-                vurdering = forårsaketAvBrukerUaktsomt(),
+                periode = 1.januar(2021) til 31.januar(2021),
+                vurdering = forårsaketAvBruker().uaktsomt(),
             )
             håndterForeslåVedtak(Behandler.Saksbehandler("Ansvarlig saksbehandler"))
             tilbakekreving.håndter(

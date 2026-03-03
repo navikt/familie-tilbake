@@ -34,7 +34,6 @@ import no.nav.tilbakekreving.api.v1.dto.ForeldelsesperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.GodTroDto
 import no.nav.tilbakekreving.api.v1.dto.SærligGrunnDto
 import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
-import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
@@ -44,6 +43,7 @@ import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType.ANNET
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType.GRAD_AV_UAKTSOMHET
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType.HELT_ELLER_DELVIS_NAVS_FEIL
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
+import no.nav.tilbakekreving.test.januar
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

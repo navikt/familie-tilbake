@@ -7,7 +7,6 @@ import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternFagsakBehandling
-import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
@@ -17,6 +16,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.RettsligGrunnlagDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
+import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.ytelsesbeløp
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -26,7 +26,7 @@ import java.util.UUID
 class FaktaStegTest {
     @Test
     fun `send inn fakta blir vist i dto-en`() {
-        val periode = 1.januar til 1.januar
+        val periode = 1.januar(2021) til 1.januar(2021)
         val tilbakekrevesBeløp = 2000.kroner
         val kravgrunnlag = kravgrunnlag(
             perioder = listOf(
@@ -79,7 +79,7 @@ class FaktaStegTest {
 
     @Test
     fun `fakta-steget er fullstendig når det er vurdert`() {
-        val periode = 1.januar til 1.januar
+        val periode = 1.januar(2021) til 1.januar(2021)
         val tilbakekrevesBeløp = 2000.kroner
         val faktasteg = Faktasteg.opprett(
             eksternFagsakRevurdering = eksternFagsakBehandling(),
@@ -118,7 +118,7 @@ class FaktaStegTest {
 
     @Test
     fun `vurdering av faktaperioder blir oppdatert`() {
-        val periode = 1.januar til 1.januar
+        val periode = 1.januar(2021) til 1.januar(2021)
         val tilbakekrevesBeløp = 9000.kroner
         val bestemmelse = Hendelsestype.ANNET
         val grunnlag = Hendelsesundertype.ANNET_FRITEKST
@@ -173,7 +173,7 @@ class FaktaStegTest {
 
     @Test
     fun `vurdering av oppdaget blir oppdatert`() {
-        val periode = 1.januar til 1.januar
+        val periode = 1.januar(2021) til 1.januar(2021)
         val tilbakekrevesBeløp = 9000.kroner
         val revurdering = eksternFagsakBehandling()
         val kravgrunnlag = kravgrunnlag(

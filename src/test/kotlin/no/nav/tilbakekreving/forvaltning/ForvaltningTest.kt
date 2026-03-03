@@ -2,7 +2,6 @@ package no.nav.tilbakekreving.forvaltning
 
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Testdata
-import no.nav.tilbakekreving.april
 import no.nav.tilbakekreving.e2e.KravgrunnlagE2ETest.Companion.QUEUE_NAME
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.NyKlassekode
@@ -14,8 +13,9 @@ import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
-import no.nav.tilbakekreving.mai
-import no.nav.tilbakekreving.mars
+import no.nav.tilbakekreving.test.april
+import no.nav.tilbakekreving.test.mai
+import no.nav.tilbakekreving.test.mars
 import no.nav.tilbakekreving.util.kroner
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

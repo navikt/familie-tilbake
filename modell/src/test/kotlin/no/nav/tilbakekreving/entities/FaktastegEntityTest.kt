@@ -6,12 +6,12 @@ import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternFagsakBehandling
-import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
+import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.ytelsesbeløp
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -21,7 +21,7 @@ import java.util.UUID
 class FaktastegEntityTest {
     @Test
     fun `vurdering av fakta steg blir lagret`() {
-        val periode = 1.januar til 1.januar
+        val periode = 1.januar(2021) til 1.januar(2021)
         val tilbakekrevesBeløp = 2000.kroner
         val kravgrunnlag = kravgrunnlag(
             perioder = listOf(

@@ -1,4 +1,4 @@
-package no.nav.tilbakekreving
+package no.nav.tilbakekreving.test
 
 import java.time.LocalDate
 import java.time.Month

@@ -19,15 +19,15 @@ import no.nav.tilbakekreving.beregning.adapter.VilkårsvurdertPeriodeAdapter
 import no.nav.tilbakekreving.beregning.delperiode.Delperiode
 import no.nav.tilbakekreving.beregning.modell.Beregningsresultat
 import no.nav.tilbakekreving.beregning.modell.Beregningsresultatsperiode
-import no.nav.tilbakekreving.februar
 import no.nav.tilbakekreving.feil.Sporing
-import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
-import no.nav.tilbakekreving.mars
+import no.nav.tilbakekreving.test.februar
+import no.nav.tilbakekreving.test.januar
+import no.nav.tilbakekreving.test.mars
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.util.UUID
@@ -39,11 +39,11 @@ class BeregningTest {
             beregnRenter = true,
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
-                1.januar til 31.januar burdeForstått medForsett(),
+                1.januar(2021) til 31.januar(2021) burdeForstått medForsett(),
             ),
             foreldetPerioder = emptyList(),
             kravgrunnlag = perioder(
-                1.januar til 31.januar medTilbakekrevesBeløp 1500.kroner,
+                1.januar(2021) til 31.januar(2021) medTilbakekrevesBeløp 1500.kroner,
             ),
             sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -51,7 +51,7 @@ class BeregningTest {
         val delperioder = beregning.beregn()
         delperioder shouldHaveSize 1
         delperioder[0].shouldMatch(
-            periode = 1.januar til 31.januar,
+            periode = 1.januar(2021) til 31.januar(2021),
             renter = 0.kroner,
             tilbakekrevesBruttoMedRenter = 1500.kroner,
             feilutbetaltBeløp = 1500.kroner,
@@ -65,7 +65,7 @@ class BeregningTest {
         beregning.oppsummer() shouldBe Beregningsresultat(
             listOf(
                 Beregningsresultatsperiode(
-                    periode = 1.januar til 31.januar,
+                    periode = 1.januar(2021) til 31.januar(2021),
                     vurdering = Aktsomhet.FORSETT,
                     feilutbetaltBeløp = 1500.kroner,
                     andelAvBeløp = 100.prosent,
@@ -90,11 +90,11 @@ class BeregningTest {
             beregnRenter = true,
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
-                (1.januar til 31.januar).forårsaketFeilutbetalingMedForsett(),
+                (1.januar(2021) til 31.januar(2021)).forårsaketFeilutbetalingMedForsett(),
             ),
             foreldetPerioder = emptyList(),
             kravgrunnlag = perioder(
-                1.januar til 31.januar medBeløp beløp(tilbakekrevesBeløp = 1500.kroner, skatteprosent = 50.prosent),
+                1.januar(2021) til 31.januar(2021) medBeløp beløp(tilbakekrevesBeløp = 1500.kroner, skatteprosent = 50.prosent),
             ),
             sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -102,7 +102,7 @@ class BeregningTest {
         val delperioder = beregning.beregn()
         delperioder shouldHaveSize 1
         delperioder[0].shouldMatch(
-            periode = 1.januar til 31.januar,
+            periode = 1.januar(2021) til 31.januar(2021),
             renter = 150.kroner,
             tilbakekrevesBruttoMedRenter = 1650.kroner,
             feilutbetaltBeløp = 1500.kroner,
@@ -116,7 +116,7 @@ class BeregningTest {
         beregning.oppsummer() shouldBe Beregningsresultat(
             listOf(
                 Beregningsresultatsperiode(
-                    periode = 1.januar til 31.januar,
+                    periode = 1.januar(2021) til 31.januar(2021),
                     vurdering = Aktsomhet.FORSETT,
                     feilutbetaltBeløp = 1500.kroner,
                     andelAvBeløp = 100.prosent,
@@ -141,19 +141,19 @@ class BeregningTest {
             beregnRenter = true,
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
-                1.januar til 28.februar godTro medBeløpIBehold(beløp = 1999.kroner),
+                1.januar(2021) til 28.februar(2021) godTro medBeløpIBehold(beløp = 1999.kroner),
             ),
             foreldetPerioder = emptyList(),
             kravgrunnlag = perioder(
-                1.januar til 31.januar medTilbakekrevesBeløp 1500.kroner,
-                1.februar til 28.februar medTilbakekrevesBeløp 1500.kroner,
+                1.januar(2021) til 31.januar(2021) medTilbakekrevesBeløp 1500.kroner,
+                1.februar(2021) til 28.februar(2021) medTilbakekrevesBeløp 1500.kroner,
             ),
             sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
 
         val delperiode = beregning.beregn()
         delperiode[0].shouldMatch(
-            periode = 1.januar til 31.januar,
+            periode = 1.januar(2021) til 31.januar(2021),
             renter = 0.kroner,
             tilbakekrevesBruttoMedRenter = 1000.kroner,
             feilutbetaltBeløp = 1500.kroner,
@@ -165,7 +165,7 @@ class BeregningTest {
             ),
         )
         delperiode[1].shouldMatch(
-            periode = 1.februar til 28.februar,
+            periode = 1.februar(2021) til 28.februar(2021),
             renter = 0.kroner,
             tilbakekrevesBruttoMedRenter = 999.kroner,
             feilutbetaltBeløp = 1500.kroner,
@@ -180,7 +180,7 @@ class BeregningTest {
         beregning.oppsummer() shouldBe Beregningsresultat(
             listOf(
                 Beregningsresultatsperiode(
-                    periode = 1.januar til 28.februar,
+                    periode = 1.januar(2021) til 28.februar(2021),
                     vurdering = AnnenVurdering.GOD_TRO,
                     feilutbetaltBeløp = 3000.kroner,
                     andelAvBeløp = null,
@@ -205,12 +205,12 @@ class BeregningTest {
             beregnRenter = true,
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
-                1.januar til 28.februar godTro utenBeløpIBehold(),
+                1.januar(2021) til 28.februar(2021) godTro utenBeløpIBehold(),
             ),
             foreldetPerioder = emptyList(),
             kravgrunnlag = perioder(
-                1.januar til 31.januar medTilbakekrevesBeløp 1500.kroner,
-                1.februar til 28.februar medTilbakekrevesBeløp 1500.kroner,
+                1.januar(2021) til 31.januar(2021) medTilbakekrevesBeløp 1500.kroner,
+                1.februar(2021) til 28.februar(2021) medTilbakekrevesBeløp 1500.kroner,
             ),
             sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -218,7 +218,7 @@ class BeregningTest {
         val delperioder = beregning.beregn()
         delperioder shouldHaveSize 2
         delperioder[0].shouldMatch(
-            periode = 1.januar til 31.januar,
+            periode = 1.januar(2021) til 31.januar(2021),
             renter = 0.kroner,
             tilbakekrevesBruttoMedRenter = 0.kroner,
             feilutbetaltBeløp = 1500.kroner,
@@ -230,7 +230,7 @@ class BeregningTest {
             ),
         )
         delperioder[1].shouldMatch(
-            periode = 1.februar til 28.februar,
+            periode = 1.februar(2021) til 28.februar(2021),
             renter = 0.kroner,
             tilbakekrevesBruttoMedRenter = 0.kroner,
             feilutbetaltBeløp = 1500.kroner,
@@ -244,7 +244,7 @@ class BeregningTest {
         beregning.oppsummer() shouldBe Beregningsresultat(
             listOf(
                 Beregningsresultatsperiode(
-                    periode = 1.januar til 28.februar,
+                    periode = 1.januar(2021) til 28.februar(2021),
                     vurdering = AnnenVurdering.GOD_TRO,
                     feilutbetaltBeløp = 3000.kroner,
                     andelAvBeløp = 0.prosent,
@@ -269,12 +269,12 @@ class BeregningTest {
             beregnRenter = true,
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
-                1.januar til 28.februar burdeForstått medSimpelUaktsomhet(prosentdel = 50.prosent),
+                1.januar(2021) til 28.februar(2021) burdeForstått medSimpelUaktsomhet(prosentdel = 50.prosent),
             ),
             foreldetPerioder = emptyList(),
             kravgrunnlag = perioder(
-                1.januar til 31.januar medTilbakekrevesBeløp 1499.kroner,
-                1.februar til 28.februar medTilbakekrevesBeløp 1499.kroner,
+                1.januar(2021) til 31.januar(2021) medTilbakekrevesBeløp 1499.kroner,
+                1.februar(2021) til 28.februar(2021) medTilbakekrevesBeløp 1499.kroner,
             ),
             sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -282,7 +282,7 @@ class BeregningTest {
         val delperioder = beregning.beregn()
         delperioder shouldHaveSize 2
         delperioder[0].shouldMatch(
-            periode = 1.januar til 31.januar,
+            periode = 1.januar(2021) til 31.januar(2021),
             renter = 0.kroner,
             tilbakekrevesBruttoMedRenter = 750.kroner,
             feilutbetaltBeløp = 1499.kroner,
@@ -294,7 +294,7 @@ class BeregningTest {
             ),
         )
         delperioder[1].shouldMatch(
-            periode = 1.februar til 28.februar,
+            periode = 1.februar(2021) til 28.februar(2021),
             renter = 0.kroner,
             tilbakekrevesBruttoMedRenter = 749.kroner,
             feilutbetaltBeløp = 1499.kroner,
@@ -308,7 +308,7 @@ class BeregningTest {
         beregning.oppsummer() shouldBe Beregningsresultat(
             listOf(
                 Beregningsresultatsperiode(
-                    periode = 1.januar til 28.februar,
+                    periode = 1.januar(2021) til 28.februar(2021),
                     vurdering = Aktsomhet.SIMPEL_UAKTSOMHET,
                     feilutbetaltBeløp = 2998.kroner,
                     andelAvBeløp = 50.prosent,
@@ -333,13 +333,13 @@ class BeregningTest {
             beregnRenter = true,
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
-                (1.januar til 31.mars).forårsaketFeilutbetalingMedGrovUaktsomhet(),
+                (1.januar(2021) til 31.mars(2021)).forårsaketFeilutbetalingMedGrovUaktsomhet(),
             ),
             foreldetPerioder = emptyList(),
             kravgrunnlag = perioder(
-                1.januar til 31.januar medBeløp beløp(tilbakekrevesBeløp = 18609.kroner, skatteprosent = 50.prosent, originaltUtbetaltBeløp = 44093.kroner, riktigYtelsesbeløp = 25484.kroner),
-                1.februar til 28.februar medBeløp beløp(tilbakekrevesBeløp = 18609.kroner, skatteprosent = 50.prosent, originaltUtbetaltBeløp = 44093.kroner, riktigYtelsesbeløp = 25484.kroner),
-                1.mars til 31.mars medBeløp beløp(tilbakekrevesBeløp = 18609.kroner, skatteprosent = 50.prosent, originaltUtbetaltBeløp = 44093.kroner, riktigYtelsesbeløp = 25484.kroner),
+                1.januar(2021) til 31.januar(2021) medBeløp beløp(tilbakekrevesBeløp = 18609.kroner, skatteprosent = 50.prosent, originaltUtbetaltBeløp = 44093.kroner, riktigYtelsesbeløp = 25484.kroner),
+                1.februar(2021) til 28.februar(2021) medBeløp beløp(tilbakekrevesBeløp = 18609.kroner, skatteprosent = 50.prosent, originaltUtbetaltBeløp = 44093.kroner, riktigYtelsesbeløp = 25484.kroner),
+                1.mars(2021) til 31.mars(2021) medBeløp beløp(tilbakekrevesBeløp = 18609.kroner, skatteprosent = 50.prosent, originaltUtbetaltBeløp = 44093.kroner, riktigYtelsesbeløp = 25484.kroner),
             ),
             sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -347,7 +347,7 @@ class BeregningTest {
         val delperioder = beregning.beregn()
         delperioder shouldHaveSize 3
         delperioder[0].shouldMatch(
-            periode = 1.januar til 31.januar,
+            periode = 1.januar(2021) til 31.januar(2021),
             renter = 1861.kroner,
             tilbakekrevesBruttoMedRenter = 20470.kroner,
             feilutbetaltBeløp = 18609.kroner,
@@ -359,7 +359,7 @@ class BeregningTest {
             ),
         )
         delperioder[1].shouldMatch(
-            periode = 1.februar til 28.februar,
+            periode = 1.februar(2021) til 28.februar(2021),
             renter = 1861.kroner,
             tilbakekrevesBruttoMedRenter = 20470.kroner,
             feilutbetaltBeløp = 18609.kroner,
@@ -371,7 +371,7 @@ class BeregningTest {
             ),
         )
         delperioder[2].shouldMatch(
-            periode = 1.mars til 31.mars,
+            periode = 1.mars(2021) til 31.mars(2021),
             renter = 1860.kroner,
             tilbakekrevesBruttoMedRenter = 20469.kroner,
             feilutbetaltBeløp = 18609.kroner,
@@ -386,7 +386,7 @@ class BeregningTest {
         beregning.oppsummer() shouldBe Beregningsresultat(
             listOf(
                 Beregningsresultatsperiode(
-                    periode = 1.januar til 31.mars,
+                    periode = 1.januar(2021) til 31.mars(2021),
                     vurdering = Aktsomhet.GROV_UAKTSOMHET,
                     feilutbetaltBeløp = 55827.kroner,
                     andelAvBeløp = 100.prosent,
@@ -411,12 +411,12 @@ class BeregningTest {
             beregnRenter = true,
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
-                1.januar til 28.februar burdeForstått medSimpelUaktsomhet(prosentdel = 50.prosent),
+                1.januar(2021) til 28.februar(2021) burdeForstått medSimpelUaktsomhet(prosentdel = 50.prosent),
             ),
             foreldetPerioder = emptyList(),
             kravgrunnlag = perioder(
-                1.januar til 31.januar medBeløp beløp(1755.kroner, skatteprosent = 44.prosent, originaltUtbetaltBeløp = 19950.kroner, riktigYtelsesbeløp = 18195.kroner),
-                1.februar til 28.februar medBeløp beløp(1755.kroner, skatteprosent = 50.prosent, originaltUtbetaltBeløp = 19950.kroner, riktigYtelsesbeløp = 18195.kroner),
+                1.januar(2021) til 31.januar(2021) medBeløp beløp(1755.kroner, skatteprosent = 44.prosent, originaltUtbetaltBeløp = 19950.kroner, riktigYtelsesbeløp = 18195.kroner),
+                1.februar(2021) til 28.februar(2021) medBeløp beløp(1755.kroner, skatteprosent = 50.prosent, originaltUtbetaltBeløp = 19950.kroner, riktigYtelsesbeløp = 18195.kroner),
             ),
             sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -424,7 +424,7 @@ class BeregningTest {
         val delperioder = beregning.beregn()
         delperioder.size shouldBe 2
         delperioder[0].shouldMatch(
-            periode = 1.januar til 31.januar,
+            periode = 1.januar(2021) til 31.januar(2021),
             renter = 0.kroner,
             tilbakekrevesBruttoMedRenter = 878.kroner,
             feilutbetaltBeløp = 1755.kroner,
@@ -436,7 +436,7 @@ class BeregningTest {
             ),
         )
         delperioder[1].shouldMatch(
-            periode = 1.februar til 28.februar,
+            periode = 1.februar(2021) til 28.februar(2021),
             renter = 0.kroner,
             tilbakekrevesBruttoMedRenter = 877.kroner,
             feilutbetaltBeløp = 1755.kroner,
@@ -450,7 +450,7 @@ class BeregningTest {
         beregning.oppsummer() shouldBe Beregningsresultat(
             listOf(
                 Beregningsresultatsperiode(
-                    periode = 1.januar til 28.februar,
+                    periode = 1.januar(2021) til 28.februar(2021),
                     vurdering = Aktsomhet.SIMPEL_UAKTSOMHET,
                     feilutbetaltBeløp = 3510.kroner,
                     andelAvBeløp = 50.prosent,
@@ -475,13 +475,13 @@ class BeregningTest {
             beregnRenter = true,
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
-                1.februar til 28.februar burdeForstått medForsett(),
-                1.januar til 31.januar burdeForstått medForsett(),
+                1.februar(2021) til 28.februar(2021) burdeForstått medForsett(),
+                1.januar(2021) til 31.januar(2021) burdeForstått medForsett(),
             ),
             foreldetPerioder = emptyList(),
             kravgrunnlag = perioder(
-                1.januar til 31.januar medBeløp beløp(tilbakekrevesBeløp = 1755.kroner, originaltUtbetaltBeløp = 19950.kroner, riktigYtelsesbeløp = 18195.kroner),
-                1.februar til 28.februar medBeløp beløp(tilbakekrevesBeløp = 1755.kroner, originaltUtbetaltBeløp = 19950.kroner, riktigYtelsesbeløp = 18195.kroner),
+                1.januar(2021) til 31.januar(2021) medBeløp beløp(tilbakekrevesBeløp = 1755.kroner, originaltUtbetaltBeløp = 19950.kroner, riktigYtelsesbeløp = 18195.kroner),
+                1.februar(2021) til 28.februar(2021) medBeløp beløp(tilbakekrevesBeløp = 1755.kroner, originaltUtbetaltBeløp = 19950.kroner, riktigYtelsesbeløp = 18195.kroner),
             ),
             sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -489,7 +489,7 @@ class BeregningTest {
         val delperioder = beregning.beregn()
         delperioder.size shouldBe 2
         delperioder[0].shouldMatch(
-            periode = 1.januar til 31.januar,
+            periode = 1.januar(2021) til 31.januar(2021),
             renter = 0.kroner,
             tilbakekrevesBruttoMedRenter = 1755.kroner,
             feilutbetaltBeløp = 1755.kroner,
@@ -501,7 +501,7 @@ class BeregningTest {
             ),
         )
         delperioder[1].shouldMatch(
-            periode = 1.februar til 28.februar,
+            periode = 1.februar(2021) til 28.februar(2021),
             renter = 0.kroner,
             tilbakekrevesBruttoMedRenter = 1755.kroner,
             feilutbetaltBeløp = 1755.kroner,
@@ -516,7 +516,7 @@ class BeregningTest {
         beregning.oppsummer() shouldBe Beregningsresultat(
             listOf(
                 Beregningsresultatsperiode(
-                    periode = 1.januar til 31.januar,
+                    periode = 1.januar(2021) til 31.januar(2021),
                     vurdering = Aktsomhet.FORSETT,
                     feilutbetaltBeløp = 1755.kroner,
                     andelAvBeløp = 100.prosent,
@@ -531,7 +531,7 @@ class BeregningTest {
                     riktigYtelsesbeløp = 18195.kroner,
                 ),
                 Beregningsresultatsperiode(
-                    periode = 1.februar til 28.februar,
+                    periode = 1.februar(2021) til 28.februar(2021),
                     vurdering = Aktsomhet.FORSETT,
                     feilutbetaltBeløp = 1755.kroner,
                     andelAvBeløp = 100.prosent,
@@ -557,11 +557,11 @@ class BeregningTest {
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(),
             foreldetPerioder = listOf(
-                1.januar til 28.februar,
+                1.januar(2021) til 28.februar(2021),
             ),
             kravgrunnlag = perioder(
-                1.januar til 31.januar medTilbakekrevesBeløp 2000.kroner,
-                1.februar til 28.februar medTilbakekrevesBeløp 2000.kroner,
+                1.januar(2021) til 31.januar(2021) medTilbakekrevesBeløp 2000.kroner,
+                1.februar(2021) til 28.februar(2021) medTilbakekrevesBeløp 2000.kroner,
             ),
             sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
@@ -569,7 +569,7 @@ class BeregningTest {
         val delperioder = beregning.beregn()
         delperioder.size shouldBe 2
         delperioder[0].shouldMatch(
-            periode = 1.januar til 31.januar,
+            periode = 1.januar(2021) til 31.januar(2021),
             renter = 0.kroner,
             tilbakekrevesBruttoMedRenter = 0.kroner,
             feilutbetaltBeløp = 2000.kroner,
@@ -581,7 +581,7 @@ class BeregningTest {
             ),
         )
         delperioder[1].shouldMatch(
-            periode = 1.februar til 28.februar,
+            periode = 1.februar(2021) til 28.februar(2021),
             renter = 0.kroner,
             tilbakekrevesBruttoMedRenter = 0.kroner,
             feilutbetaltBeløp = 2000.kroner,
@@ -596,7 +596,7 @@ class BeregningTest {
         beregning.oppsummer() shouldBe Beregningsresultat(
             beregningsresultatsperioder = listOf(
                 Beregningsresultatsperiode(
-                    periode = 1.januar til 28.februar,
+                    periode = 1.januar(2021) til 28.februar(2021),
                     vurdering = AnnenVurdering.FORELDET,
                     feilutbetaltBeløp = 4000.kroner,
                     andelAvBeløp = 0.prosent,
@@ -621,11 +621,11 @@ class BeregningTest {
             beregnRenter = true,
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
-                1.januar til 31.januar burdeForstått medSimpelUaktsomhet(prosentdel = 50.prosent),
+                1.januar(2021) til 31.januar(2021) burdeForstått medSimpelUaktsomhet(prosentdel = 50.prosent),
             ),
             foreldetPerioder = emptyList(),
             kravgrunnlag = perioder(
-                1.januar til 31.januar medBeløp beløp(tilbakekrevesBeløp = 1000.kroner, originaltUtbetaltBeløp = 10000.kroner, klassekode = "BATR")
+                1.januar(2021) til 31.januar(2021) medBeløp beløp(tilbakekrevesBeløp = 1000.kroner, originaltUtbetaltBeløp = 10000.kroner, klassekode = "BATR")
                     medBeløp beløp(500.kroner, originaltUtbetaltBeløp = 10000.kroner, klassekode = "BAUTV-OP"),
             ),
             sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
@@ -634,7 +634,7 @@ class BeregningTest {
         val delperioder = beregning.beregn()
         delperioder.size shouldBe 1
         delperioder[0].shouldMatch(
-            periode = 1.januar til 31.januar,
+            periode = 1.januar(2021) til 31.januar(2021),
             renter = 0.kroner,
             tilbakekrevesBruttoMedRenter = 750.kroner,
             feilutbetaltBeløp = 1500.kroner,
@@ -655,7 +655,7 @@ class BeregningTest {
         beregning.oppsummer() shouldBe Beregningsresultat(
             beregningsresultatsperioder = listOf(
                 Beregningsresultatsperiode(
-                    periode = 1.januar til 31.januar,
+                    periode = 1.januar(2021) til 31.januar(2021),
                     vurdering = Aktsomhet.SIMPEL_UAKTSOMHET,
                     feilutbetaltBeløp = 1500.kroner,
                     andelAvBeløp = 50.prosent,
@@ -680,12 +680,12 @@ class BeregningTest {
             beregnRenter = true,
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
-                1.januar til 28.februar godTro medBeløpIBehold(4000.kroner),
+                1.januar(2021) til 28.februar(2021) godTro medBeløpIBehold(4000.kroner),
             ),
             foreldetPerioder = emptyList(),
             kravgrunnlag = perioder(
-                1.januar til 31.januar medBeløp beløp(tilbakekrevesBeløp = 4000.kroner, originaltUtbetaltBeløp = 10000.kroner, klassekode = "BATR"),
-                1.februar til 28.februar medBeløp beløp(tilbakekrevesBeløp = 4000.kroner, originaltUtbetaltBeløp = 10000.kroner, klassekode = "BATR")
+                1.januar(2021) til 31.januar(2021) medBeløp beløp(tilbakekrevesBeløp = 4000.kroner, originaltUtbetaltBeløp = 10000.kroner, klassekode = "BATR"),
+                1.februar(2021) til 28.februar(2021) medBeløp beløp(tilbakekrevesBeløp = 4000.kroner, originaltUtbetaltBeløp = 10000.kroner, klassekode = "BATR")
                     medBeløp beløp(tilbakekrevesBeløp = 2000.kroner, originaltUtbetaltBeløp = 10000.kroner, klassekode = "BAUTV-OP"),
             ),
             sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
@@ -694,7 +694,7 @@ class BeregningTest {
         val delperioder = beregning.beregn()
         delperioder.size shouldBe 2
         delperioder[0].shouldMatch(
-            periode = 1.januar til 31.januar,
+            periode = 1.januar(2021) til 31.januar(2021),
             renter = 0.kroner,
             tilbakekrevesBruttoMedRenter = 1600.kroner,
             feilutbetaltBeløp = 4000.kroner,
@@ -707,7 +707,7 @@ class BeregningTest {
         )
 
         delperioder[1].shouldMatch(
-            periode = 1.februar til 28.februar,
+            periode = 1.februar(2021) til 28.februar(2021),
             renter = 0.kroner,
             tilbakekrevesBruttoMedRenter = 2400.kroner,
             feilutbetaltBeløp = 6000.kroner,
@@ -728,7 +728,7 @@ class BeregningTest {
         beregning.oppsummer() shouldBe Beregningsresultat(
             beregningsresultatsperioder = listOf(
                 Beregningsresultatsperiode(
-                    periode = 1.januar til 28.februar,
+                    periode = 1.januar(2021) til 28.februar(2021),
                     vurdering = AnnenVurdering.GOD_TRO,
                     feilutbetaltBeløp = 10000.kroner,
                     andelAvBeløp = null,
