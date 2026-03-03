@@ -92,7 +92,7 @@ tilbakekreving:
     569173: xdYwRVATSvaDgXKCh5y9OA==
     564495: FK12N0b8TOCwuZ2IeJeuMw==
   dokarkiv:
-    base-url: https://dokarkiv.intern.nav.no
+    base-url: https://dokarkiv.prod-fss-pub.nais.io
     scope: api://prod-fss.teamdokumenthandtering.dokarkiv/.default
   dokdist:
     base-url: https://dokdistfordeling.prod-fss-pub.nais.io
