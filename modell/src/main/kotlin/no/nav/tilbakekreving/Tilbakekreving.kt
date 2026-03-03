@@ -180,7 +180,7 @@ class Tilbakekreving internal constructor(
             ytelsesNavn = eksternFagsak.ytelse.hentYtelsesnavn(Språkkode.NB),
         )
         behandlingHistorikk.lagre(behandling)
-        sendStatusendring(ForenkletBehandlingsstatus.OPPRETTET)
+        sendStatusendring(null, ForenkletBehandlingsstatus.OPPRETTET)
     }
 
     fun opprettBruker(aktør: Aktør) {
@@ -316,6 +316,9 @@ class Tilbakekreving internal constructor(
         if (behandling.kanUtbetales()) {
             byttTilstand(IverksettVedtak)
         }
+        if (behandling.underkjentVedtak()) {
+            sendStatusendring(ForenkletBehandlingsstatus.TIL_GODKJENNING, ForenkletBehandlingsstatus.TIL_BEHANDLING)
+        }
         behandling.utførSideeffekt(tilstand, this, bigQueryService, eksternFagsak.ytelse.hentYtelsesnavn(Språkkode.NB))
     }
 
@@ -368,6 +371,7 @@ class Tilbakekreving internal constructor(
             behandler,
             this,
         )
+        sendStatusendring(ForenkletBehandlingsstatus.TIL_BEHANDLING, ForenkletBehandlingsstatus.TIL_GODKJENNING)
         behandling.utførSideeffekt(tilstand, this, bigQueryService, eksternFagsak.ytelse.hentYtelsesnavn(Språkkode.NB))
     }
 
@@ -431,7 +435,7 @@ class Tilbakekreving internal constructor(
         )
     }
 
-    fun sendStatusendring(behandlingsstatus: ForenkletBehandlingsstatus) {
+    fun sendStatusendring(forrigeBehandlingsstatus: ForenkletBehandlingsstatus?, behandlingsstatus: ForenkletBehandlingsstatus) {
         val behandling = behandlingHistorikk.nåværende().entry
         endringObservatør.behandlingEndret(
             behandlingId = behandling.id,
@@ -442,6 +446,7 @@ class Tilbakekreving internal constructor(
             sakOpprettet = opprettet,
             varselSendt = brevHistorikk.sisteVarselbrev()?.sendtTid,
             behandlingsstatus = behandlingsstatus,
+            forrigeBehandlingsstatus = forrigeBehandlingsstatus,
             totaltFeilutbetaltBeløp = behandling.totaltFeilutbetaltBeløp(),
             hentSaksbehandlingURL = ::hentTilbakekrevingUrl,
             fullstendigPeriode = behandling.fullstendigPeriode(),

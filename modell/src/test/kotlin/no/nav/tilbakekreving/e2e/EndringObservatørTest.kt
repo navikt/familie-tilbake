@@ -6,6 +6,7 @@ import no.nav.tilbakekreving.ANSVARLIG_SAKSBEHANDLER
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
+import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.behov.JournalføringBehov
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
@@ -24,6 +25,7 @@ import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.iverksettelse
 import no.nav.tilbakekreving.januar
 import no.nav.tilbakekreving.journalføring
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
@@ -132,7 +134,91 @@ class EndringObservatørTest {
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.status } shouldBe listOf(
             ForenkletBehandlingsstatus.OPPRETTET,
             ForenkletBehandlingsstatus.TIL_BEHANDLING,
+            ForenkletBehandlingsstatus.TIL_GODKJENNING,
             ForenkletBehandlingsstatus.AVSLUTTET,
         )
+    }
+
+    @Test
+    fun `behandlingsstatus skal oppdateres til TIL_GODKJENNING når behandling sendes til godkjenning og AVSLUTTET når det godkjennes`() {
+        val behovOppsamler = BehovObservatørOppsamler()
+        val fagsakId = "123456"
+        val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse(
+            eksternFagsak = eksternFagsak(
+                eksternId = fagsakId,
+                ytelse = Ytelse.Tilleggsstønad,
+            ),
+        )
+        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), behovOppsamler, opprettTilbakekrevingHendelse, bigQueryService, endringObservatør, features = defaultFeatures())
+        tilbakekreving.håndter(kravgrunnlag())
+        tilbakekreving.håndter(fagsysteminfoHendelse())
+        endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.status } shouldBe listOf(
+            ForenkletBehandlingsstatus.OPPRETTET,
+        )
+        tilbakekreving.håndter(brukerinfoHendelse())
+        tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, listOf(), "")
+        endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.status } shouldBe listOf(
+            ForenkletBehandlingsstatus.OPPRETTET,
+            ForenkletBehandlingsstatus.TIL_BEHANDLING,
+        )
+        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, faktastegVurdering())
+        tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, listOf(), "")
+        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar til 31.januar, foreldelseVurdering())
+        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar til 31.januar, forårsaketAvBrukerGrovtUaktsomt())
+        tilbakekreving.håndterForeslåVedtak(ANSVARLIG_SAKSBEHANDLER)
+
+        endringObservatør.behandlingEndretEventsFor(fagsakId).last().forrigeStatus shouldBe ForenkletBehandlingsstatus.TIL_BEHANDLING
+        endringObservatør.behandlingEndretEventsFor(fagsakId).last().status shouldBe ForenkletBehandlingsstatus.TIL_GODKJENNING
+
+        tilbakekreving.håndter(ANSVARLIG_BESLUTTER, godkjenning())
+        tilbakekreving.håndter(iverksettelse())
+        tilbakekreving.håndter(journalføring(tilbakekreving.brevHistorikk.nåværende().entry.id))
+        tilbakekreving.håndter(distribusjon())
+
+        endringObservatør.behandlingEndretEventsFor(fagsakId).last().forrigeStatus shouldBe ForenkletBehandlingsstatus.TIL_GODKJENNING
+        endringObservatør.behandlingEndretEventsFor(fagsakId).last().status shouldBe ForenkletBehandlingsstatus.AVSLUTTET
+    }
+
+    @Test
+    fun `behandlingsstatus skal oppdateres til TIL_BEHANDLING når vedtaket ikke godkjennes`() {
+        val behovOppsamler = BehovObservatørOppsamler()
+        val fagsakId = "123456"
+        val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse(
+            eksternFagsak = eksternFagsak(
+                eksternId = fagsakId,
+                ytelse = Ytelse.Tilleggsstønad,
+            ),
+        )
+        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), behovOppsamler, opprettTilbakekrevingHendelse, bigQueryService, endringObservatør, features = defaultFeatures())
+        tilbakekreving.håndter(kravgrunnlag())
+        tilbakekreving.håndter(fagsysteminfoHendelse())
+        endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.status } shouldBe listOf(
+            ForenkletBehandlingsstatus.OPPRETTET,
+        )
+        tilbakekreving.håndter(brukerinfoHendelse())
+        tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, listOf(), "")
+        endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.status } shouldBe listOf(
+            ForenkletBehandlingsstatus.OPPRETTET,
+            ForenkletBehandlingsstatus.TIL_BEHANDLING,
+        )
+        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, faktastegVurdering())
+        tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, listOf(), "")
+        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar til 31.januar, foreldelseVurdering())
+        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar til 31.januar, forårsaketAvBrukerGrovtUaktsomt())
+        tilbakekreving.håndterForeslåVedtak(ANSVARLIG_SAKSBEHANDLER)
+
+        tilbakekreving.håndter(
+            ANSVARLIG_BESLUTTER,
+            listOf(
+                Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Underkjent("Ikke godkjent"),
+                Behandlingssteg.FORHÅNDSVARSEL to FatteVedtakSteg.Vurdering.Underkjent("Ikke godkjent"),
+                Behandlingssteg.FORELDELSE to FatteVedtakSteg.Vurdering.Underkjent("Ikke godkjent"),
+                Behandlingssteg.VILKÅRSVURDERING to FatteVedtakSteg.Vurdering.Underkjent("Ikke godkjent"),
+                Behandlingssteg.FORESLÅ_VEDTAK to FatteVedtakSteg.Vurdering.Underkjent("Ikke godkjent"),
+            ),
+        )
+
+        endringObservatør.behandlingEndretEventsFor(fagsakId).last().forrigeStatus shouldBe ForenkletBehandlingsstatus.TIL_GODKJENNING
+        endringObservatør.behandlingEndretEventsFor(fagsakId).last().status shouldBe ForenkletBehandlingsstatus.TIL_BEHANDLING
     }
 }

@@ -452,6 +452,8 @@ class Behandling internal constructor(
 
     fun kanUtbetales(): Boolean = fatteVedtakSteg.erFullstendig()
 
+    fun underkjentVedtak(): Boolean = fatteVedtakSteg.erVedtakUnderkjent()
+
     fun hentBehandlingsinformasjon(): Behandlingsinformasjon {
         return Behandlingsinformasjon(
             kravgrunnlagReferanse = kravgrunnlag.entry.referanse,

@@ -53,13 +53,14 @@ class EndringObservatørOppsamler : EndringObservatør {
         sakOpprettet: LocalDateTime,
         varselSendt: LocalDate?,
         behandlingsstatus: ForenkletBehandlingsstatus,
+        forrigeBehandlingsstatus: ForenkletBehandlingsstatus?,
         totaltFeilutbetaltBeløp: BigDecimal,
         hentSaksbehandlingURL: (String) -> String,
         fullstendigPeriode: Datoperiode,
     ) {
         behandlingEndretEvents
             .computeIfAbsent(eksternFagsakId) { mutableListOf() }
-            .add(BehandlingEndret(status = behandlingsstatus))
+            .add(BehandlingEndret(forrigeStatus = forrigeBehandlingsstatus, status = behandlingsstatus))
     }
 
     override fun vedtakFattet(
@@ -99,5 +100,8 @@ class EndringObservatørOppsamler : EndringObservatør {
         val vurderteUtbetalinger: List<VurdertUtbetaling>,
     )
 
-    data class BehandlingEndret(val status: ForenkletBehandlingsstatus)
+    data class BehandlingEndret(
+        val forrigeStatus: ForenkletBehandlingsstatus?,
+        val status: ForenkletBehandlingsstatus,
+    )
 }

@@ -39,6 +39,7 @@ interface EndringObservatør {
         sakOpprettet: LocalDateTime,
         varselSendt: LocalDate?,
         behandlingsstatus: ForenkletBehandlingsstatus,
+        forrigeBehandlingsstatus: ForenkletBehandlingsstatus?,
         totaltFeilutbetaltBeløp: BigDecimal,
         hentSaksbehandlingURL: (String) -> String,
         fullstendigPeriode: Datoperiode,
