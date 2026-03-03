@@ -17,14 +17,13 @@ data class VarselbrevEntity(
     val fristForUttalelse: LocalDate?,
     val tekstFraSaksbehandler: String?,
 ) {
-    fun fraEntity(id: UUID, brevType: Brevtype, kravgrunnlagHistorikk: KravgrunnlagHistorikk): Varselbrev {
+    fun fraEntity(id: UUID, kravgrunnlagHistorikk: KravgrunnlagHistorikk): Varselbrev {
         val sendtTid = sendtTid ?: LocalDate.now()
         val sporing = Sporing("Ukjent", id.toString())
         return Varselbrev(
             id = id,
             journalpostId = journalpostId,
             sendtTid = sendtTid,
-            brevtype = brevType,
             ansvarligSaksbehandlerIdent = ansvarligSaksbehandlerIdent,
             kravgrunnlag = kravgrunnlagHistorikk.finn(kravgrunnlagRef.id, sporing),
             fristForUttalelse = fristForUttalelse ?: sendtTid.plus(Period.ofWeeks(3)),

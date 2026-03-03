@@ -1,13 +1,13 @@
 package no.nav.tilbakekreving.e2e.brev
 
 import io.kotest.matchers.nulls.shouldNotBeNull
-import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.tilbakekreving.Testdata
+import no.nav.tilbakekreving.brev.Vedtaksbrev
 import no.nav.tilbakekreving.e2e.BehandlingsstegGenerator
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.e2e.TilbakekrevingE2EBase
 import no.nav.tilbakekreving.e2e.ytelser.TilleggsstønaderE2ETest.Companion.TILLEGGSSTØNADER_KØ_NAVN
-import no.nav.tilbakekreving.entities.Brevtype
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
@@ -63,7 +63,7 @@ class VedtaksbrevE2ETest : TilbakekrevingE2EBase() {
         )
 
         tilbakekrevingService.hentTilbakekreving(behandlingId).shouldNotBeNull {
-            brevHistorikk.nåværende().entry.brevtype shouldBe Brevtype.VEDTAKSBREV
+            brevHistorikk.nåværende().entry.shouldBeInstanceOf<Vedtaksbrev>()
         }
     }
 }

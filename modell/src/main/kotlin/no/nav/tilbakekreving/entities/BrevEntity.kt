@@ -16,12 +16,11 @@ data class BrevEntity(
             Brevtype.VARSELBREV, Brevtype.VARSEL_BREV -> {
                 varselbrevEntity!!.fraEntity(
                     id,
-                    brevtype,
                     kravgrunnlagHistorikk,
                 )
             }
             Brevtype.VEDTAKSBREV -> {
-                vedtaksbrevEntity!!.fraEntity(id, brevtype)
+                vedtaksbrevEntity!!.fraEntity(id)
             }
         }
     }

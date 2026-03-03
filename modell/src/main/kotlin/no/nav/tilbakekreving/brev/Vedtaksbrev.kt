@@ -10,7 +10,6 @@ data class Vedtaksbrev(
     override val id: UUID,
     override var journalpostId: String?,
     override var sendtTid: LocalDate,
-    override val brevtype: Brevtype,
 ) : Brev {
     override fun brevSendt(journalpostId: String) {
         this.journalpostId = journalpostId
@@ -20,7 +19,7 @@ data class Vedtaksbrev(
         return BrevEntity(
             id = id,
             tilbakekrevingRef = tilbakekrevingId,
-            brevtype = brevtype,
+            brevtype = Brevtype.VEDTAKSBREV,
             varselbrevEntity = null,
             vedtaksbrevEntity = VedtaksbrevEntity(
                 id = UUID.randomUUID(),
@@ -37,7 +36,6 @@ data class Vedtaksbrev(
                 id = UUID.randomUUID(),
                 journalpostId = null,
                 sendtTid = LocalDate.now(),
-                brevtype = Brevtype.VEDTAKSBREV,
             )
         }
     }
