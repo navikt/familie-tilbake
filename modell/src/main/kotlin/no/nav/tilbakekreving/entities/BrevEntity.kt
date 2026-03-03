@@ -13,7 +13,7 @@ data class BrevEntity(
 ) {
     fun fraEntity(kravgrunnlagHistorikk: KravgrunnlagHistorikk): Brev {
         return when (brevtype) {
-            Brevtype.VARSELBREV -> {
+            Brevtype.VARSELBREV, Brevtype.VARSEL_BREV -> {
                 varselbrevEntity!!.fraEntity(
                     id,
                     brevtype,
@@ -22,9 +22,6 @@ data class BrevEntity(
             }
             Brevtype.VEDTAKSBREV -> {
                 vedtaksbrevEntity!!.fraEntity(id, brevtype)
-            }
-            Brevtype.VARSEL_BREV -> {
-                throw IllegalArgumentException("Deprecated enum")
             }
         }
     }
