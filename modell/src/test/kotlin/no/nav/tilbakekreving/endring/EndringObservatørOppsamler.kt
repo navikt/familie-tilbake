@@ -60,7 +60,7 @@ class EndringObservatørOppsamler : EndringObservatør {
     ) {
         behandlingEndretEvents
             .computeIfAbsent(eksternFagsakId) { mutableListOf() }
-            .add(BehandlingEndret(status = behandlingsstatus, forrigeStatus = forrigeBehandlingsstatus))
+            .add(BehandlingEndret(forrigeStatus = forrigeBehandlingsstatus, status = behandlingsstatus))
     }
 
     override fun vedtakFattet(
@@ -101,7 +101,7 @@ class EndringObservatørOppsamler : EndringObservatør {
     )
 
     data class BehandlingEndret(
-        val status: ForenkletBehandlingsstatus,
         val forrigeStatus: ForenkletBehandlingsstatus?,
+        val status: ForenkletBehandlingsstatus,
     )
 }

@@ -16,7 +16,7 @@ object Avsluttet : Tilstand {
 
     override fun entering(tilbakekreving: Tilbakekreving) {
         tilbakekreving.utførSideeffekt()
-        tilbakekreving.sendStatusendring(ForenkletBehandlingsstatus.AVSLUTTET, ForenkletBehandlingsstatus.TIL_GODKJENNING)
+        tilbakekreving.sendStatusendring(ForenkletBehandlingsstatus.TIL_GODKJENNING, ForenkletBehandlingsstatus.AVSLUTTET)
     }
 
     override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse) {
