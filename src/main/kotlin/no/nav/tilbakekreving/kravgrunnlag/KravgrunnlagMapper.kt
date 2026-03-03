@@ -83,6 +83,7 @@ object KravgrunnlagMapper {
     fun ytelseFor(kravgrunnlag: DetaljertKravgrunnlagDto) = when (kravgrunnlag.kodeFagomraade) {
         "TILLST", "TILLSTDR", "TILLSTBO", "TILLSTFL", "TILLSTLM", "TILLSTPB", "TILLSTRA", "TILLSTRO", "TILLISTRS" -> Ytelse.Tilleggsstønad
         "AAP" -> Ytelse.Arbeidsavklaringspenger
+        "TILTPENG" -> Ytelse.Tiltakspenger
         else -> throw Feil(
             message = "Kan ikke håndtere saker for ${kravgrunnlag.kodeFagomraade} med ny modell",
             httpStatus = HttpStatus.BAD_REQUEST,
