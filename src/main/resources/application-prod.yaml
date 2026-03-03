@@ -98,7 +98,7 @@ tilbakekreving:
     base-url: https://dokdistfordeling.prod-fss-pub.nais.io
     scope: api://prod-fss.teamdokumenthandtering.dokdistfordeling/.default
   saf:
-    base-url: https://saf.intern.nav.no
+    base-url: https://saf.prod-fss-pub.nais.io
     scope: api://prod-fss.teamdokumenthandtering.saf/.default
   norg2:
     base-url: http://norg2.org.svc.cluster.local
