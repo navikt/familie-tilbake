@@ -92,13 +92,13 @@ tilbakekreving:
     569173: xdYwRVATSvaDgXKCh5y9OA==
     564495: FK12N0b8TOCwuZ2IeJeuMw==
   dokarkiv:
-    base-url: https://dokarkiv.intern.nav.no
+    base-url: https://dokarkiv.prod-fss-pub.nais.io
     scope: api://prod-fss.teamdokumenthandtering.dokarkiv/.default
   dokdist:
     base-url: https://dokdistfordeling.prod-fss-pub.nais.io
     scope: api://prod-fss.teamdokumenthandtering.dokdistfordeling/.default
   saf:
-    base-url: https://saf.intern.nav.no
+    base-url: https://saf.prod-fss-pub.nais.io
     scope: api://prod-fss.teamdokumenthandtering.saf/.default
   norg2:
     base-url: http://norg2.org.svc.cluster.local
