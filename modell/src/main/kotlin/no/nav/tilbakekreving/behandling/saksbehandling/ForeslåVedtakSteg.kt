@@ -11,11 +11,17 @@ class ForeslåVedtakSteg(
     private var vurdert: Boolean,
 ) : Saksbehandlingsteg {
     override val type = Behandlingssteg.FORESLÅ_VEDTAK
+    override var erUnderkjent: Boolean = false
 
-    override fun erFullstendig(): Boolean = vurdert
+    override fun erFullstendig(): Boolean = vurdert && !erUnderkjent
+
+    override fun underkjennSteget() {
+        this.erUnderkjent = true
+    }
 
     internal fun håndter() {
         vurdert = true
+        erUnderkjent = false
     }
 
     fun tilEntity(behandlingRef: UUID): ForeslåVedtakStegEntity {
