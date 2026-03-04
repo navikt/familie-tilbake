@@ -20,8 +20,13 @@ class Foreldelsesteg(
     private var vurdertePerioder: List<Foreldelseperiode>,
 ) : Saksbehandlingsteg {
     override val type: Behandlingssteg = Behandlingssteg.FORELDELSE
+    override var erUnderkjent: Boolean = false
 
-    override fun erFullstendig(): Boolean = vurdertePerioder.all { it.vurdering != Vurdering.IkkeVurdert }
+    override fun erFullstendig(): Boolean = vurdertePerioder.all { it.vurdering != Vurdering.IkkeVurdert } && !erUnderkjent
+
+    override fun underkjennSteget() {
+        this.erUnderkjent = true
+    }
 
     override fun nullstill(kravgrunnlag: KravgrunnlagHendelse, eksternFagsakRevurdering: EksternFagsakRevurdering) {
         vurdertePerioder = tomVurdering(eksternFagsakRevurdering, kravgrunnlag)
@@ -33,6 +38,7 @@ class Foreldelsesteg(
     ) {
         val periodeId = finnIdFor(periode) // I fremtiden ønsker vi å sende inn id, ikke periode
         vurderForeldelse(periodeId, vurdering)
+        erUnderkjent = false
     }
 
     internal fun vurderForeldelse(

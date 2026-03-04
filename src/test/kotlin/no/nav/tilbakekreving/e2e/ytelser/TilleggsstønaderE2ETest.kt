@@ -27,6 +27,7 @@ import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.test.januar
+import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.util.kroner
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -228,6 +229,61 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
         }
 
         exception.utenforScope shouldBe UtenforScope.Revurdering
+    }
+
+    @Test
+    fun `underkjenning av vedtak skal tilbakeføre behandling til tidligere steg`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        sendKravgrunnlagOgAvventLesing(
+            queueName = TILLEGGSSTØNADER_KØ_NAVN,
+            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+            ),
+        )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
+
+        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        lagreUttalelse(behandlingId)
+
+        somSaksbehandler("Z999999") {
+            behandlingApiController.behandlingOppdaterFakta(
+                behandlingId = behandlingId.toString(),
+                oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
+            )
+        }
+        utførSteg(
+            ident = "Z999999",
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(),
+        )
+        utførSteg(
+            ident = "Z999999",
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving(),
+        )
+        utførSteg(
+            ident = "Z999999",
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagForeslåVedtakVurdering(),
+        )
+        tilbakekreving(behandlingId).frontendDtoForBehandling(Behandler.Saksbehandler("Z999999"), true).status shouldBe Behandlingsstatus.FATTER_VEDTAK
+        utførSteg(
+            ident = "Z111111",
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagIkkeGodkjennVedtakVurdering(),
+        )
+        tilbakekreving(behandlingId).frontendDtoForBehandling(Behandler.Saksbehandler("Z999999"), true).status shouldBe Behandlingsstatus.UTREDES
+        utførSteg(
+            ident = "Z999999",
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagForeslåVedtakVurdering(),
+        )
+        utførSteg(
+            ident = "Z111111",
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagGodkjennVedtakVurdering(),
+        )
+        tilbakekreving(behandlingId).frontendDtoForBehandling(Behandler.Saksbehandler("Z999999"), true).status shouldBe Behandlingsstatus.AVSLUTTET
     }
 
     companion object {
