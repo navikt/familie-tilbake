@@ -2,7 +2,6 @@ package no.nav.tilbakekreving.brev.varselbrev
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.inspectors.forOne
-import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -151,7 +150,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             .hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
             .shouldNotBeNull().hentForhåndsvarselFrontendDto()
         forhåndsvarsel.forhåndsvarselUnntak shouldBe null
-        forhåndsvarsel.utsettUttalelseFrist.shouldBeEmpty()
+        forhåndsvarsel.utsettUttalelseFrist shouldBe null
 
         val brukeruttalelse = forhåndsvarsel.brukeruttalelse.shouldNotBeNull()
 
@@ -188,7 +187,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             .hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
             .shouldNotBeNull().hentForhåndsvarselFrontendDto()
         forhåndsvarsel.brukeruttalelse shouldBe null
-        forhåndsvarsel.utsettUttalelseFrist.shouldBeEmpty()
+        forhåndsvarsel.utsettUttalelseFrist shouldBe null
 
         forhåndsvarsel.forhåndsvarselUnntak.shouldNotBeNull {
             begrunnelseForUnntak shouldBe case.forventetBegrunnelseForUnntak
@@ -218,8 +217,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             .shouldNotBeNull().hentForhåndsvarselFrontendDto()
 
         etterFørsteUtsettelse.utsettUttalelseFrist.shouldNotBeNull {
-            size shouldBe 1
-            etterFørsteUtsettelse.utsettUttalelseFrist?.get(0)?.nyFrist shouldBe LocalDate.of(2025, 11, 15)
+            nyFrist shouldBe LocalDate.of(2025, 11, 15)
         }
 
         val andreFrist = FristUtsettelseDto(
@@ -232,9 +230,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             .hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
             .shouldNotBeNull().hentForhåndsvarselFrontendDto()
         etterAndreUtsettelse.utsettUttalelseFrist.shouldNotBeNull {
-            size shouldBe 2
-            etterAndreUtsettelse.utsettUttalelseFrist.get(0).nyFrist shouldBe LocalDate.of(2025, 11, 15)
-            etterAndreUtsettelse.utsettUttalelseFrist.get(1).nyFrist shouldBe LocalDate.of(2025, 11, 25)
+            nyFrist shouldBe LocalDate.of(2025, 11, 25)
         }
         etterAndreUtsettelse.forhåndsvarselUnntak shouldBe null
         etterAndreUtsettelse.brukeruttalelse shouldBe null

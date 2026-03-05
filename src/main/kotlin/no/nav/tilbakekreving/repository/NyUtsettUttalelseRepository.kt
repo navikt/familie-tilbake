@@ -11,17 +11,18 @@ import java.util.UUID
 class NyUtsettUttalelseRepository(
     private val jdbcTemplate: JdbcTemplate,
 ) {
-    fun hentUtsettUttalelseFrist(behandlingId: UUID): List<FristUtsettelseEntity> {
+    fun hentUtsettUttalelseFrist(behandlingId: UUID): FristUtsettelseEntity? {
         return jdbcTemplate.query(
             "SELECT * FROM tilbakekreving_utsett_uttalelse WHERE behandling_ref=?",
             behandlingId,
         ) { resultSet, _ ->
             FristUtsettelseEntityMapper.map(resultSet)
-        }
+        }.singleOrNull()
     }
 
-    fun lagre(fristUtsettelseEntity: List<FristUtsettelseEntity>) {
-        fristUtsettelseEntity.forEach { fristUtsettelse ->
+    fun lagre(fristUtsettelseEntity: FristUtsettelseEntity?, behandlingId: UUID) {
+        jdbcTemplate.update("DELETE FROM tilbakekreving_utsett_uttalelse WHERE behandling_ref = ?", behandlingId)
+        fristUtsettelseEntity?.let { fristUtsettelse ->
             FristUtsettelseEntityMapper.upsertQuery(jdbcTemplate, fristUtsettelse)
         }
     }

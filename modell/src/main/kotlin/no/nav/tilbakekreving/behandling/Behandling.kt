@@ -496,7 +496,7 @@ class Behandling internal constructor(
         return forhåndsvarsel.brukeruttaleserTilFrontendDto()
     }
 
-    fun utsettUttalelseFristTilFrontendDto(): List<FristUtsettelseDto> {
+    fun utsettUttalelseFristTilFrontendDto(): FristUtsettelseDto? {
         return forhåndsvarsel.utsettUttalelseFristTilFrontendDto()
     }
 
@@ -641,7 +641,7 @@ class Behandling internal constructor(
                 foreslåVedtakSteg = ForeslåVedtakSteg.opprett(),
                 fatteVedtakSteg = FatteVedtakSteg.opprett(),
                 påVent = null,
-                forhåndsvarsel = Forhåndsvarsel(null, null, mutableListOf<UtsettFrist>(), brevHistorikk.sisteVarselbrev()?.fristForUttalelse),
+                forhåndsvarsel = Forhåndsvarsel(null, null, null, brevHistorikk.sisteVarselbrev()?.fristForUttalelse),
             ).also {
                 it.utførSideeffekt(tilstand, behandlingObservatør, bigQueryService, ytelsesNavn)
             }
