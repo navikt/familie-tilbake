@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.api
 
+import jakarta.validation.Valid
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
@@ -16,6 +17,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDa
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDataUpdateDto
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
+import org.springframework.validation.annotation.Validated
 import java.util.UUID
 
 @Component
@@ -39,7 +41,11 @@ class BehandlingApiController(
         return ResponseEntity.ok(tilbakekreving.tilFeilutbetalingFrontendDto())
     }
 
-    override fun behandlingOppdaterFakta(behandlingId: String, oppdaterFaktaOmFeilutbetalingDto: OppdaterFaktaOmFeilutbetalingDto): ResponseEntity<FaktaOmFeilutbetalingDto> {
+    @Validated
+    override fun behandlingOppdaterFakta(
+        behandlingId: String,
+        @Valid oppdaterFaktaOmFeilutbetalingDto: OppdaterFaktaOmFeilutbetalingDto,
+    ): ResponseEntity<FaktaOmFeilutbetalingDto> {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(UUID.fromString(behandlingId))
             ?: return ResponseEntity.notFound().build()
 
