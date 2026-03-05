@@ -25,5 +25,5 @@ spec:
       application: tiltakspenger-saksbehandling-api
       access: readwrite
     - team: tpts
-    - application: tiltakspenger-kafka-manager
-    - access: read
+      application: tiltakspenger-kafka-manager
+      access: read
