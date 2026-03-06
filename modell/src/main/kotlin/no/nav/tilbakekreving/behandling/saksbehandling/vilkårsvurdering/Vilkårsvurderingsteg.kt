@@ -5,6 +5,7 @@ import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg
+import no.nav.tilbakekreving.behandling.saksbehandling.UnderkjennbarSteg
 import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurderingAdapter
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurdertPeriodeAdapter
@@ -24,13 +25,15 @@ import java.util.UUID
 class Vilkårsvurderingsteg(
     private val id: UUID,
     private var vurderinger: List<Vilkårsvurderingsperiode>,
-) : Saksbehandlingsteg, VilkårsvurderingAdapter {
+) : Saksbehandlingsteg, VilkårsvurderingAdapter, UnderkjennbarSteg {
     override val type: Behandlingssteg = Behandlingssteg.VILKÅRSVURDERING
     override var erUnderkjent: Boolean = false
 
-    override fun erFullstendig(): Boolean = vurderinger.none { it.vurdering is ForårsaketAvBruker.IkkeVurdert } && !erUnderkjent
+    override fun erFullstendig(): Boolean = vurderinger.none { it.vurdering is ForårsaketAvBruker.IkkeVurdert }
 
     override fun underkjennSteget() {
+        println("====>>> Vilkårsvurdering underkjent")
+
         this.erUnderkjent = true
     }
 

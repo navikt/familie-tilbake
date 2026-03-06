@@ -9,11 +9,8 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatu
 internal interface Saksbehandlingsteg {
     val type: Behandlingssteg
     val behandlingsstatus: Behandlingsstatus get() = Behandlingsstatus.UTREDES
-    val erUnderkjent: Boolean
 
     fun erFullstendig(): Boolean
-
-    fun underkjennSteget()
 
     fun nullstill(
         kravgrunnlag: KravgrunnlagHendelse,
@@ -37,5 +34,15 @@ internal interface Saksbehandlingsteg {
             }
             return klarTilBehandling
         }
+    }
+}
+
+internal interface UnderkjennbarSteg : Saksbehandlingsteg {
+    val erUnderkjent: Boolean
+
+    fun underkjennSteget()
+
+    fun erKlar(): Boolean {
+        return erFullstendig() && !erUnderkjent
     }
 }

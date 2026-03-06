@@ -18,13 +18,15 @@ import java.util.UUID
 class Foreldelsesteg(
     private val id: UUID,
     private var vurdertePerioder: List<Foreldelseperiode>,
-) : Saksbehandlingsteg {
+) : Saksbehandlingsteg, UnderkjennbarSteg {
     override val type: Behandlingssteg = Behandlingssteg.FORELDELSE
     override var erUnderkjent: Boolean = false
 
-    override fun erFullstendig(): Boolean = vurdertePerioder.all { it.vurdering != Vurdering.IkkeVurdert } && !erUnderkjent
+    override fun erFullstendig(): Boolean = vurdertePerioder.all { it.vurdering != Vurdering.IkkeVurdert }
 
     override fun underkjennSteget() {
+        println("====>>> foreldelse underkjent")
+
         this.erUnderkjent = true
     }
 

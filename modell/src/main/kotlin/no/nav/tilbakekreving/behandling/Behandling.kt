@@ -26,6 +26,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg.Companion.behandlingsstegstatus
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg.Companion.klarTilVisning
+import no.nav.tilbakekreving.behandling.saksbehandling.UnderkjennbarSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.behov.BehovObservatør
@@ -111,7 +112,7 @@ class Behandling internal constructor(
     fun nullstillForhåndsvarselUnntakOgUttalelse() = forhåndsvarsel.nullstillUnntakOgUttalelse()
 
     fun fåttNyttKravgrunnlag(oppdatertKravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>) {
-        if (!faktasteg.erFullstendig()) {
+        if (!faktasteg.erKlar()) {
             kravgrunnlag = oppdatertKravgrunnlag
         } else {
             throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagStatusIkkeStøttetEtterBehandlingenErPåbegynt, sporingsinformasjon())
@@ -175,6 +176,14 @@ class Behandling internal constructor(
         vilkårsvurderingsteg,
         foreslåVedtakSteg,
         fatteVedtakSteg,
+    )
+
+    internal fun underkjennbarSteg(): List<UnderkjennbarSteg> = listOf(
+        faktasteg,
+        forhåndsvarsel,
+        foreldelsesteg,
+        vilkårsvurderingsteg,
+        foreslåVedtakSteg,
     )
 
     private fun lagBeregning(): Beregning {
@@ -272,7 +281,7 @@ class Behandling internal constructor(
 
     private fun kanEndres(behandler: Behandler, kanBeslutte: Boolean): Boolean {
         if (kanBesluttes(behandler, kanBeslutte)) return false
-        return !foreslåVedtakSteg.erFullstendig() || behandler != ansvarligSaksbehandler && kanBeslutte
+        return !foreslåVedtakSteg.erKlar() || behandler != ansvarligSaksbehandler && kanBeslutte
     }
 
     internal fun tilFrontendDto(tilstand: Tilstand, behandler: Behandler, kanBeslutte: Boolean): BehandlingDto {
@@ -626,13 +635,10 @@ class Behandling internal constructor(
     )
 
     fun tilbakeførUnderkjentBehandling(underkjenteSteg: List<Behandlingssteg>) {
-        steg()
+        underkjennbarSteg()
             .filter { it.type in underkjenteSteg }
             .forEach { steg ->
                 steg.underkjennSteget()
-                if (steg.type == Behandlingssteg.FORESLÅ_VEDTAK) {
-                    steg.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry)
-                }
             }
     }
 
