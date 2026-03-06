@@ -2,10 +2,9 @@ package no.nav.tilbakekreving.beregning
 
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonSærligeGrunner
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Skyldgrad
+import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
+import no.nav.tilbakekreving.ModellTestdata.forårsaketAvNav
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.medBeløp
@@ -26,8 +25,12 @@ import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
 import no.nav.tilbakekreving.test.februar
+import no.nav.tilbakekreving.test.forsettelig
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.test.mars
+import no.nav.tilbakekreving.test.prosentReduksjon
+import no.nav.tilbakekreving.test.skalIkkeUnnlates
+import no.nav.tilbakekreving.test.uaktsomt
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.util.UUID
@@ -39,7 +42,12 @@ class BeregningTest {
             beregnRenter = true,
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
-                1.januar(2021) til 31.januar(2021) burdeForstått medForsett(),
+                (1.januar(2021) til 31.januar(2021))
+                    .medVurdering(
+                        forårsaketAvNav().burdeForstått {
+                            aktsomhet = forsettelig()
+                        },
+                    ),
             ),
             foreldetPerioder = emptyList(),
             kravgrunnlag = perioder(
@@ -90,7 +98,8 @@ class BeregningTest {
             beregnRenter = true,
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
-                (1.januar(2021) til 31.januar(2021)).forårsaketFeilutbetalingMedForsett(),
+                (1.januar(2021) til 31.januar(2021))
+                    .medVurdering(forårsaketAvBruker().medForsett()),
             ),
             foreldetPerioder = emptyList(),
             kravgrunnlag = perioder(
@@ -141,7 +150,9 @@ class BeregningTest {
             beregnRenter = true,
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
-                1.januar(2021) til 28.februar(2021) godTro medBeløpIBehold(beløp = 1999.kroner),
+                (1.januar(2021) til 28.februar(2021)).medVurdering(
+                    forårsaketAvNav().godTro(beløpIBehold = 1999.kroner),
+                ),
             ),
             foreldetPerioder = emptyList(),
             kravgrunnlag = perioder(
@@ -205,7 +216,9 @@ class BeregningTest {
             beregnRenter = true,
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
-                1.januar(2021) til 28.februar(2021) godTro utenBeløpIBehold(),
+                (1.januar(2021) til 28.februar(2021)).medVurdering(
+                    forårsaketAvNav().godTro(beløpIBehold = null),
+                ),
             ),
             foreldetPerioder = emptyList(),
             kravgrunnlag = perioder(
@@ -269,7 +282,11 @@ class BeregningTest {
             beregnRenter = true,
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
-                1.januar(2021) til 28.februar(2021) burdeForstått medSimpelUaktsomhet(prosentdel = 50.prosent),
+                (1.januar(2021) til 28.februar(2021)).medVurdering(
+                    forårsaketAvNav().burdeForstått {
+                        aktsomhet = uaktsomt(skalIkkeUnnlates(reduksjon = 50.prosentReduksjon))
+                    },
+                ),
             ),
             foreldetPerioder = emptyList(),
             kravgrunnlag = perioder(
@@ -333,7 +350,9 @@ class BeregningTest {
             beregnRenter = true,
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
-                (1.januar(2021) til 31.mars(2021)).forårsaketFeilutbetalingMedGrovUaktsomhet(),
+                (1.januar(2021) til 31.mars(2021)).medVurdering(
+                    forårsaketAvBruker().grovtUaktsomt(),
+                ),
             ),
             foreldetPerioder = emptyList(),
             kravgrunnlag = perioder(
@@ -411,7 +430,12 @@ class BeregningTest {
             beregnRenter = true,
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
-                1.januar(2021) til 28.februar(2021) burdeForstått medSimpelUaktsomhet(prosentdel = 50.prosent),
+                (1.januar(2021) til 28.februar(2021)).medVurdering(
+                    forårsaketAvNav()
+                        .burdeForstått {
+                            aktsomhet = uaktsomt(skalIkkeUnnlates(50.prosentReduksjon))
+                        },
+                ),
             ),
             foreldetPerioder = emptyList(),
             kravgrunnlag = perioder(
@@ -475,8 +499,16 @@ class BeregningTest {
             beregnRenter = true,
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
-                1.februar(2021) til 28.februar(2021) burdeForstått medForsett(),
-                1.januar(2021) til 31.januar(2021) burdeForstått medForsett(),
+                (1.februar(2021) til 28.februar(2021)).medVurdering(
+                    forårsaketAvNav().burdeForstått {
+                        aktsomhet = forsettelig()
+                    },
+                ),
+                (1.januar(2021) til 31.januar(2021)).medVurdering(
+                    forårsaketAvNav().burdeForstått {
+                        aktsomhet = forsettelig()
+                    },
+                ),
             ),
             foreldetPerioder = emptyList(),
             kravgrunnlag = perioder(
@@ -621,7 +653,11 @@ class BeregningTest {
             beregnRenter = true,
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
-                1.januar(2021) til 31.januar(2021) burdeForstått medSimpelUaktsomhet(prosentdel = 50.prosent),
+                (1.januar(2021) til 31.januar(2021)).medVurdering(
+                    forårsaketAvNav().burdeForstått {
+                        aktsomhet = uaktsomt(skalIkkeUnnlates(reduksjon = 50.prosentReduksjon))
+                    },
+                ),
             ),
             foreldetPerioder = emptyList(),
             kravgrunnlag = perioder(
@@ -680,7 +716,9 @@ class BeregningTest {
             beregnRenter = true,
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
-                1.januar(2021) til 28.februar(2021) godTro medBeløpIBehold(4000.kroner),
+                (1.januar(2021) til 28.februar(2021)).medVurdering(
+                    forårsaketAvNav().godTro(beløpIBehold = 4000.kroner),
+                ),
             ),
             foreldetPerioder = emptyList(),
             kravgrunnlag = perioder(
@@ -763,72 +801,12 @@ class BeregningTest {
         }
     }
 
-    infix fun Datoperiode.godTro(beløpIBehold: NivåAvForståelse.GodTro.BeløpIBehold) = Vilkårsvurderingsteg.Vilkårsvurderingsperiode(
+    fun Datoperiode.medVurdering(vurdering: ForårsaketAvBruker) = Vilkårsvurderingsteg.Vilkårsvurderingsperiode(
         id = UUID.randomUUID(),
         periode = this,
         begrunnelseForTilbakekreving = "",
-        _vurdering = NivåAvForståelse.GodTro(
-            beløpIBehold = beløpIBehold,
-            begrunnelse = "",
-            begrunnelseForGodTro = "",
-        ),
+        _vurdering = vurdering,
     )
-
-    infix fun Datoperiode.burdeForstått(aktsomhet: NivåAvForståelse.Aktsomhet) = Vilkårsvurderingsteg.Vilkårsvurderingsperiode(
-        id = UUID.randomUUID(),
-        periode = this,
-        begrunnelseForTilbakekreving = "",
-        _vurdering = NivåAvForståelse.BurdeForstått(
-            aktsomhet,
-            "",
-        ),
-    )
-
-    fun medForsett(): NivåAvForståelse.Aktsomhet {
-        return NivåAvForståelse.Aktsomhet.Forsett("")
-    }
-
-    fun medSimpelUaktsomhet(prosentdel: BigDecimal) = NivåAvForståelse.Aktsomhet.Uaktsomhet(
-        begrunnelse = "",
-        kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
-            ReduksjonSærligeGrunner(
-                begrunnelse = "",
-                grunner = emptySet(),
-                skalReduseres = ReduksjonSærligeGrunner.SkalReduseres.Ja(prosentdel.toInt()),
-            ),
-        ),
-    )
-
-    fun Datoperiode.forårsaketFeilutbetalingMedForsett(): Vilkårsvurderingsteg.Vilkårsvurderingsperiode {
-        return Vilkårsvurderingsteg.Vilkårsvurderingsperiode(
-            id = UUID.randomUUID(),
-            periode = this,
-            begrunnelseForTilbakekreving = "",
-            _vurdering = Skyldgrad.Forsett("", "", Skyldgrad.FeilaktigEllerMangelfull.FEILAKTIG),
-        )
-    }
-
-    fun Datoperiode.forårsaketFeilutbetalingMedGrovUaktsomhet(): Vilkårsvurderingsteg.Vilkårsvurderingsperiode {
-        return Vilkårsvurderingsteg.Vilkårsvurderingsperiode(
-            id = UUID.randomUUID(),
-            periode = this,
-            begrunnelseForTilbakekreving = "",
-            _vurdering = Skyldgrad.GrovUaktsomhet(
-                begrunnelse = "",
-                begrunnelseAktsomhet = "",
-                reduksjonSærligeGrunner = ReduksjonSærligeGrunner(
-                    begrunnelse = "",
-                    grunner = emptySet(),
-                    skalReduseres = ReduksjonSærligeGrunner.SkalReduseres.Nei,
-                ),
-                feilaktigeEllerMangelfulleOpplysninger = Skyldgrad.FeilaktigEllerMangelfull.FEILAKTIG,
-            ),
-        )
-    }
-
-    fun medBeløpIBehold(beløp: BigDecimal) = NivåAvForståelse.GodTro.BeløpIBehold.Ja(beløp)
-
-    fun utenBeløpIBehold() = NivåAvForståelse.GodTro.BeløpIBehold.Nei
 
     fun Delperiode<out Delperiode.Beløp>.shouldMatch(
         periode: Datoperiode,
