@@ -2,9 +2,7 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonSærligeGrunner
+import no.nav.tilbakekreving.ModellTestdata.forårsaketAvNav
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.eksternFagsakBehandling
@@ -13,6 +11,10 @@ import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
 import no.nav.tilbakekreving.test.februar
 import no.nav.tilbakekreving.test.januar
+import no.nav.tilbakekreving.test.prosentReduksjon
+import no.nav.tilbakekreving.test.skalIkkeUnnlates
+import no.nav.tilbakekreving.test.skalUnnlates
+import no.nav.tilbakekreving.test.uaktsomt
 import org.junit.jupiter.api.Test
 
 class VilkårsvurderingstegTest {
@@ -30,11 +32,7 @@ class VilkårsvurderingstegTest {
         )
         vilkårsvurderingsteg.vurder(
             1.januar(2021) til 31.januar(2021),
-            NivåAvForståelse.GodTro(
-                begrunnelse = "Brukeren fikk penger som de ikke hadde krav på",
-                beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.Nei,
-                begrunnelseForGodTro = "Brukeren brukte alt på en tur til Vegas",
-            ),
+            forårsaketAvNav().godTro(beløpIBehold = null),
         )
 
         vilkårsvurderingsteg.erFullstendig() shouldBe false
@@ -56,21 +54,13 @@ class VilkårsvurderingstegTest {
             )
         vilkårsvurderingsteg.vurder(
             1.januar(2021) til 31.januar(2021),
-            NivåAvForståelse.GodTro(
-                begrunnelse = "Brukeren fikk penger som de ikke hadde krav på",
-                beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.Nei,
-                begrunnelseForGodTro = "Brukeren brukte alt på en tur til Vegas",
-            ),
+            forårsaketAvNav().godTro(beløpIBehold = null),
         )
         vilkårsvurderingsteg.erFullstendig() shouldBe false
 
         vilkårsvurderingsteg.vurder(
             1.februar(2021) til 28.februar(2021),
-            NivåAvForståelse.GodTro(
-                begrunnelse = "Brukeren fikk penger som de ikke hadde krav på",
-                beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.Nei,
-                begrunnelseForGodTro = "Brukeren brukte alt på en tur til Vegas",
-            ),
+            forårsaketAvNav().godTro(beløpIBehold = null),
         )
 
         vilkårsvurderingsteg.erFullstendig() shouldBe true
@@ -91,19 +81,7 @@ class VilkårsvurderingstegTest {
             )
         vilkårsvurderingsteg.vurder(
             1.januar(2021) til 31.januar(2021),
-            NivåAvForståelse.BurdeForstått(
-                begrunnelse = "Brukeren brukte alt på en tur til Vegas",
-                aktsomhet = NivåAvForståelse.Aktsomhet.Uaktsomhet(
-                    begrunnelse = "Begrunnelse",
-                    kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
-                        ReduksjonSærligeGrunner(
-                            begrunnelse = "begrunnelse til ReduksjonSærligeGrunner",
-                            skalReduseres = ReduksjonSærligeGrunner.SkalReduseres.Ja(50),
-                            grunner = setOf(),
-                        ),
-                    ),
-                ),
-            ),
+            forårsaketAvNav().burdeForstått(uaktsomt(skalIkkeUnnlates(), 50.prosentReduksjon)),
         )
 
         vilkårsvurderingsteg.perioder().first().reduksjon().shouldBeInstanceOf<Reduksjon.Prosentdel>()
@@ -124,13 +102,7 @@ class VilkårsvurderingstegTest {
             )
         vilkårsvurderingsteg.vurder(
             1.januar(2021) til 31.januar(2021),
-            NivåAvForståelse.BurdeForstått(
-                begrunnelse = "Brukeren brukte alt på en tur til Vegas",
-                aktsomhet = NivåAvForståelse.Aktsomhet.Uaktsomhet(
-                    begrunnelse = "Begrunnelse",
-                    kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.Unnlates,
-                ),
-            ),
+            forårsaketAvNav().burdeForstått(uaktsomt(skalUnnlates())),
         )
 
         vilkårsvurderingsteg.perioder().first().reduksjon().shouldBeInstanceOf<Reduksjon.IngenTilbakekreving>()

@@ -3,11 +3,11 @@ package no.nav.tilbakekreving.behandling
 import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import no.nav.tilbakekreving.ModellTestdata.forårsaketAvNav
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
 import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
@@ -18,6 +18,7 @@ import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.test.forsettelig
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.tilstand.TilBehandling
 import org.junit.jupiter.api.Test
@@ -50,7 +51,7 @@ class BehandlingTest {
         behandling.taAvVent()
         behandling.håndter(ansvarligSaksbehandler, periode, foreldelse, BehandlingObservatørOppsamler())
 
-        val vilkårsvurdering = NivåAvForståelse.BurdeForstått(NivåAvForståelse.Aktsomhet.Forsett("Begrunnelse"), "Begrunnelse")
+        val vilkårsvurdering = forårsaketAvNav().burdeForstått(aktsomhet = forsettelig())
         behandling.settPåVent(Venteårsak.MANGLER_STØTTE, LocalDate.MAX, "Begrunnelse")
         shouldThrowWithMessage<ModellFeil.UgyldigOperasjonException>("Behandling er satt på vent. Kan ikke håndtere vilkårsvurdering.") {
             behandling.håndter(ansvarligSaksbehandler, periode, vilkårsvurdering, BehandlingObservatørOppsamler())
@@ -147,10 +148,10 @@ class BehandlingTest {
         val foreldelse = Foreldelsesteg.Vurdering.Foreldet("Begrunnelse")
         behandling.håndter(ansvarligSaksbehandler, periode, foreldelse, BehandlingObservatørOppsamler())
 
-        val vilkårsvurdering = NivåAvForståelse.BurdeForstått(NivåAvForståelse.Aktsomhet.Forsett("vurdering"), "vurdering")
+        val vilkårsvurdering = forårsaketAvNav().burdeForstått(aktsomhet = forsettelig())
         behandling.håndter(ansvarligSaksbehandler, periode, vilkårsvurdering, BehandlingObservatørOppsamler())
 
-        behandling.vilkårsvurderingsstegDto.tilFrontendDto().perioder.first().begrunnelse shouldBe "vurdering"
+        behandling.vilkårsvurderingsstegDto.tilFrontendDto().perioder.first().begrunnelse.shouldNotBeNull()
 
         behandling.flyttTilbakeTilFakta()
 

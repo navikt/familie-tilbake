@@ -2,13 +2,11 @@ package no.nav.tilbakekreving.tilstand
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import no.nav.tilbakekreving.ModellTestdata.forårsaketAvNav
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonSærligeGrunner
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.brukerinfoHendelse
@@ -26,7 +24,10 @@ import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.test.ingenReduksjon
 import no.nav.tilbakekreving.test.januar
+import no.nav.tilbakekreving.test.skalIkkeUnnlates
+import no.nav.tilbakekreving.test.uaktsomt
 import org.junit.jupiter.api.Test
 import java.math.BigInteger
 import java.util.UUID
@@ -94,19 +95,7 @@ class IverksettVedtakTest {
             håndter(
                 Behandler.Saksbehandler("Ansvarlig saksbehandler"),
                 periode = 1.januar(2021) til 31.januar(2021),
-                vurdering = NivåAvForståelse.BurdeForstått(
-                    aktsomhet = NivåAvForståelse.Aktsomhet.Uaktsomhet(
-                        kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
-                            ReduksjonSærligeGrunner(
-                                begrunnelse = "Jaha",
-                                grunner = emptySet(),
-                                skalReduseres = ReduksjonSærligeGrunner.SkalReduseres.Nei,
-                            ),
-                        ),
-                        begrunnelse = "",
-                    ),
-                    begrunnelse = "",
-                ),
+                vurdering = forårsaketAvNav().burdeForstått(aktsomhet = uaktsomt(skalIkkeUnnlates(), ingenReduksjon())),
             )
             håndterForeslåVedtak(Behandler.Saksbehandler("Ansvarlig saksbehandler"))
         }
