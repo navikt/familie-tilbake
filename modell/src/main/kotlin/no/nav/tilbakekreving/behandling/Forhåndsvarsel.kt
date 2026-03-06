@@ -14,13 +14,13 @@ import java.util.UUID
 class Forhåndsvarsel(
     private var brukeruttalelse: Brukeruttalelse?,
     private var forhåndsvarselUnntak: ForhåndsvarselUnntak?,
-    private var utsattFrist: MutableList<UtsettFrist>,
+    private var utsattFrist: UtsettFrist?,
     private var opprinneligFrist: LocalDate?,
 ) : Saksbehandlingsteg {
     override val type: Behandlingssteg = Behandlingssteg.FORHÅNDSVARSEL
 
     override fun erFullstendig(): Boolean {
-        val gjeldendeFrist = utsattFrist.lastOrNull()?.hentFrist() ?: opprinneligFrist
+        val gjeldendeFrist = utsattFrist?.hentFrist() ?: opprinneligFrist
         return brukeruttalelse != null ||
             forhåndsvarselUnntak != null ||
             (gjeldendeFrist?.isBefore(LocalDate.now()) == true)
@@ -32,7 +32,7 @@ class Forhåndsvarsel(
         return ForhåndsvarselEntity(
             brukeruttalelseEntity = brukeruttalelse?.tilEntity(behandlingRef),
             forhåndsvarselUnntakEntity = forhåndsvarselUnntak?.tilEntity(behandlingRef),
-            fristUtsettelseEntity = utsattFrist.map { it.tilEntity(behandlingRef) }.toList(),
+            fristUtsettelseEntity = utsattFrist?.tilEntity(behandlingRef),
         )
     }
 
@@ -55,12 +55,10 @@ class Forhåndsvarsel(
     }
 
     fun lagreFristUtsettelse(nyFrist: LocalDate, begrunnelse: String) {
-        utsattFrist.add(
-            UtsettFrist(
-                id = UUID.randomUUID(),
-                nyFrist = nyFrist,
-                begrunnelse = begrunnelse,
-            ),
+        utsattFrist = UtsettFrist(
+            id = UUID.randomUUID(),
+            nyFrist = nyFrist,
+            begrunnelse = begrunnelse,
         )
     }
 
@@ -82,8 +80,8 @@ class Forhåndsvarsel(
         return brukeruttalelse?.tilFrontendDto()
     }
 
-    fun utsettUttalelseFristTilFrontendDto(): List<FristUtsettelseDto> {
-        return utsattFrist.map { it.tilFrontendDto() }
+    fun utsettUttalelseFristTilFrontendDto(): FristUtsettelseDto? {
+        return utsattFrist?.tilFrontendDto()
     }
 
     fun forhåndsvarselUnntakTilFrontendDto(): ForhåndsvarselUnntakDto? {

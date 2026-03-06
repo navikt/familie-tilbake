@@ -56,7 +56,7 @@ class NyBehandlingRepository(
             behandling.forhåndsvarselEntity.let {
                 forhåndsvarselUnntakRepository.lagre(it.forhåndsvarselUnntakEntity, behandling.id)
                 uttalelseRepository.lagre(it.brukeruttalelseEntity, behandling.id)
-                utsettUttalelseRepository.lagre(it.fristUtsettelseEntity)
+                utsettUttalelseRepository.lagre(it.fristUtsettelseEntity, behandling.id)
             }
         }
     }

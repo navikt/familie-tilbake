@@ -97,7 +97,7 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
         påVent: PåVentEntity?,
         brukeruttalelseEntity: BrukeruttalelseEntity?,
         forhåndsvarselUnntak: ForhåndsvarselUnntakEntity?,
-        fristUtsettelse: List<FristUtsettelseEntity>,
+        fristUtsettelse: FristUtsettelseEntity?,
     ): BehandlingEntity {
         return BehandlingEntity(
             id = resultSet[id],
@@ -118,7 +118,11 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
             foreslåVedtakStegEntity = foreslåVedtak,
             fatteVedtakStegEntity = fatteVedtak,
             påVentEntity = påVent,
-            forhåndsvarselEntity = ForhåndsvarselEntity(brukeruttalelseEntity, forhåndsvarselUnntak, fristUtsettelse),
+            forhåndsvarselEntity = ForhåndsvarselEntity(
+                brukeruttalelseEntity,
+                forhåndsvarselUnntak,
+                fristUtsettelse,
+            ),
         )
     }
 }

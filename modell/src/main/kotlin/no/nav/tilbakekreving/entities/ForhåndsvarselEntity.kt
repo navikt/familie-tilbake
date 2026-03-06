@@ -7,12 +7,12 @@ import java.time.LocalDate
 data class ForhåndsvarselEntity(
     val brukeruttalelseEntity: BrukeruttalelseEntity?,
     val forhåndsvarselUnntakEntity: ForhåndsvarselUnntakEntity?,
-    val fristUtsettelseEntity: List<FristUtsettelseEntity>,
+    val fristUtsettelseEntity: FristUtsettelseEntity?,
 ) {
     fun fraEntity(opprinneligFrist: LocalDate?): Forhåndsvarsel = Forhåndsvarsel(
         brukeruttalelse = midlertidigMapping(forhåndsvarselUnntakEntity, brukeruttalelseEntity)?.fraEntity(),
         forhåndsvarselUnntak = forhåndsvarselUnntakEntity?.fraEntity(),
-        utsattFrist = fristUtsettelseEntity.map { it.fraEntity() }.toMutableList(),
+        utsattFrist = fristUtsettelseEntity?.fraEntity(),
         opprinneligFrist = opprinneligFrist,
     )
 
