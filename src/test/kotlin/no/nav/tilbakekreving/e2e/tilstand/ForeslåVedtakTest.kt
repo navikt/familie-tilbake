@@ -58,7 +58,7 @@ class ForeslåVedtakTest : TilbakekrevingE2EBase() {
         tilbakekreving(behandlingId) kanBehandle Behandlingssteg.FORESLÅ_VEDTAK
 
         somSaksbehandler(ansvarligSaksbehandler) {
-            val response = behandlingApiController.behandlingForeslVedtak(behandlingId)
+            val response = behandlingApiController.behandlingForeslaaVedtak(behandlingId)
             response.statusCode shouldBe HttpStatus.OK
         }
 

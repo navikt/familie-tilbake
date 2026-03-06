@@ -84,7 +84,7 @@ class BehandlingApiController(
         return ResponseEntity.ok(nyVedtaksbrevService.hentVedtaksbrevData(UUID.fromString(behandlingId), tilbakekreving.hentVedtaksbrevInfo(UUID.fromString(behandlingId))))
     }
 
-    override fun behandlingForeslVedtak(behandlingId: UUID): ResponseEntity<Unit> {
+    override fun behandlingForeslaaVedtak(behandlingId: UUID): ResponseEntity<Unit> {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
             ?: return ResponseEntity.notFound().build()
 
