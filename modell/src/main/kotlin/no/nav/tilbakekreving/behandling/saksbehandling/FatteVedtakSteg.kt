@@ -21,14 +21,9 @@ class FatteVedtakSteg internal constructor(
     private var _ansvarligBeslutter: Behandler?,
 ) : Saksbehandlingsteg, FrontendDto<TotrinnsvurderingDto> {
     override val type: Behandlingssteg = Behandlingssteg.FATTE_VEDTAK
-    override var erUnderkjent: Boolean = false
     val ansvarligBeslutter: Behandler? get() = _ansvarligBeslutter
 
-    override fun erFullstendig(): Boolean = vurderteSteg.all { it.erFerdigvurdert() } && !erUnderkjent
-
-    override fun underkjennSteget() {
-        this.erUnderkjent = true
-    }
+    override fun erFullstendig(): Boolean = vurderteSteg.all { it.erFerdigvurdert() }
 
     override val behandlingsstatus: Behandlingsstatus = Behandlingsstatus.FATTER_VEDTAK
 
@@ -48,7 +43,6 @@ class FatteVedtakSteg internal constructor(
         _ansvarligBeslutter = beslutter
         vurderteSteg.single { it.erFor(behandlingssteg) }
             .oppdaterVurdering(vurdering)
-        erUnderkjent = false
     }
 
     override fun tilFrontendDto(): TotrinnsvurderingDto {

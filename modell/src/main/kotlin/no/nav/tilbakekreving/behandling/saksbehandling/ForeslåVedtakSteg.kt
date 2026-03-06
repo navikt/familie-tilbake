@@ -9,13 +9,14 @@ import java.util.UUID
 class ForeslåVedtakSteg(
     private val id: UUID,
     private var vurdert: Boolean,
-) : Saksbehandlingsteg {
+) : Saksbehandlingsteg, UnderkjennbarSteg {
     override val type = Behandlingssteg.FORESLÅ_VEDTAK
     override var erUnderkjent: Boolean = false
 
-    override fun erFullstendig(): Boolean = vurdert && !erUnderkjent
+    override fun erFullstendig(): Boolean = vurdert
 
     override fun underkjennSteget() {
+        vurdert = false
         this.erUnderkjent = true
     }
 

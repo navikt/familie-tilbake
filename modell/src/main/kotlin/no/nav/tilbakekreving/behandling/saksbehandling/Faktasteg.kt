@@ -35,15 +35,16 @@ class Faktasteg(
     private val id: UUID,
     private val brevHistorikk: BrevHistorikk,
     private var vurdering: Vurdering,
-) : Saksbehandlingsteg {
+) : Saksbehandlingsteg, UnderkjennbarSteg {
     override val type: Behandlingssteg = Behandlingssteg.FAKTA
     override var erUnderkjent: Boolean = false
 
     override fun erFullstendig(): Boolean {
-        return vurdering.erFullstendig() && !erUnderkjent
+        return vurdering.erFullstendig()
     }
 
     override fun underkjennSteget() {
+        println("====>>> fakta underkjent")
         this.erUnderkjent = true
     }
 
@@ -96,7 +97,7 @@ class Faktasteg(
             ),
             vurdering = vurdering.tilFrontendDto(),
             tidligereVarsletBeløp = varselbrev?.hentVarsletBeløp()?.toInt()?.takeIf { it != beløpTilbakekreves },
-            ferdigvurdert = erFullstendig(),
+            ferdigvurdert = erKlar(),
         )
     }
 
