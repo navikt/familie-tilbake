@@ -84,6 +84,24 @@ class BehandlingApiController(
         return ResponseEntity.ok(nyVedtaksbrevService.hentVedtaksbrevData(UUID.fromString(behandlingId), tilbakekreving.hentVedtaksbrevInfo(UUID.fromString(behandlingId))))
     }
 
+    override fun behandlingForeslVedtak(behandlingId: UUID): ResponseEntity<Unit> {
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+            ?: return ResponseEntity.notFound().build()
+
+        tilgangskontrollService.validerTilgangTilbakekreving(
+            tilbakekreving = tilbakekreving,
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.UPDATE,
+            handling = "Foreslår vedtak",
+        )
+        return tilbakekrevingService.hentTilbakekreving(behandlingId) {
+            val logContext = SecureLog.Context.fra(it)
+            it.håndterForeslåVedtak(ContextService.hentBehandler(logContext))
+            ResponseEntity.ok(Unit)
+        } ?: ResponseEntity.notFound().build()
+    }
+
     override fun behandlingOppdaterVedtaksbrev(behandlingId: UUID, vedtaksbrevRedigerbareDataUpdateDto: VedtaksbrevRedigerbareDataUpdateDto): ResponseEntity<VedtaksbrevRedigerbareDataDto> {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
             ?: return ResponseEntity.notFound().build()
