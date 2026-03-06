@@ -3,11 +3,11 @@ import org.gradle.kotlin.dsl.register
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
 import java.net.URI
 
-val springDocVersion = "3.0.1"
+val springDocVersion = "3.0.2"
 val testcontainersVersion = "1.21.4"
 val tokenValidationVersion = "6.0.3"
 val flywayVersion = "11.3.4"
-val ktorVersion = "3.4.0"
+val ktorVersion = "3.4.1"
 ext["ktorVersion"] = ktorVersion
 
 group = "no.nav"
@@ -18,7 +18,7 @@ plugins {
     kotlin("jvm") version "2.3.10"
     id("org.springframework.boot") version "4.0.3"
     id("org.jetbrains.kotlin.plugin.spring") version "2.3.10"
-    id("org.jlleitschuh.gradle.ktlint") version "14.0.1"
+    id("org.jlleitschuh.gradle.ktlint") version "14.1.0"
 }
 
 springBoot {
@@ -58,7 +58,7 @@ subprojects {
     dependencies {
         testImplementation("org.junit.jupiter:junit-jupiter:6.0.3")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-        testImplementation("io.kotest:kotest-assertions-core:6.1.3")
+        testImplementation("io.kotest:kotest-assertions-core:6.1.4")
     }
 
     tasks.test {
@@ -180,7 +180,7 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson-jvm:$ktorVersion")
-    implementation("com.google.cloud:google-cloud-bigquery:2.59.0")
+    implementation("com.google.cloud:google-cloud-bigquery:2.60.0")
     implementation("org.apache.httpcomponents.client5:httpclient5")
     implementation("org.apache.httpcomponents.core5:httpcore5")
     implementation("org.apache.httpcomponents.core5:httpcore5-h2")
@@ -232,7 +232,7 @@ dependencies {
     api("io.micrometer:micrometer-registry-prometheus")
     api("net.logstash.logback:logstash-logback-encoder:9.0")
 
-    api("io.getunleash:unleash-client-java:12.1.2")
+    api("io.getunleash:unleash-client-java:12.2.0")
     api("org.messaginghub:pooled-jms:3.2.2")
     api("org.flywaydb:flyway-core")
     api("org.flywaydb:flyway-gcp-bigquery")
@@ -243,7 +243,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     testImplementation("io.mockk:mockk-jvm:1.14.9")
-    testImplementation("io.kotest:kotest-assertions-core-jvm:6.1.3")
+    testImplementation("io.kotest:kotest-assertions-core-jvm:6.1.4")
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
