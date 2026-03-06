@@ -1,28 +1,32 @@
 package no.nav.tilbakekreving.test.vilkårsvurdering
 
+import no.nav.tilbakekreving.test.grovtUaktsomt
 import java.math.BigDecimal
 
 sealed interface ForårsaketAvNavBuilder<T> {
     fun build(builder: VilkårsvurderingProvider<*, T>): T
 
-    class GodTroBuilder<T>(
-        var beløpIBehold: BigDecimal? = null,
+    @ConsistentCopyVisibility
+    data class GodTroBuilder<T> internal constructor(
+        var beløpIBehold: BigDecimal?,
     ) : ForårsaketAvNavBuilder<T> {
         override fun build(builder: VilkårsvurderingProvider<*, T>): T {
             return builder.build(this)
         }
     }
 
-    class BurdeForstått<T>(
-        var aktsomhet: AktsomhetBuilder = AktsomhetBuilder.GrovtUaktsomt(),
+    @ConsistentCopyVisibility
+    data class BurdeForstått<T> internal constructor(
+        var aktsomhet: AktsomhetBuilder,
     ) : ForårsaketAvNavBuilder<T> {
         override fun build(builder: VilkårsvurderingProvider<*, T>): T {
             return builder.build(this)
         }
     }
 
-    class Forstod<T>(
-        var aktsomhet: AktsomhetBuilder = AktsomhetBuilder.GrovtUaktsomt(),
+    @ConsistentCopyVisibility
+    data class Forstod<T> internal constructor(
+        var aktsomhet: AktsomhetBuilder = grovtUaktsomt(),
     ) : ForårsaketAvNavBuilder<T> {
         override fun build(builder: VilkårsvurderingProvider<*, T>): T {
             return builder.build(this)

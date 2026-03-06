@@ -1,10 +1,8 @@
 package no.nav.tilbakekreving.test.vilkårsvurdering
 
-data class KanUnnlates4xRettsgebyrBuilder(
-    var unnlates: Boolean = false,
-    var reduksjon: ReduksjonSærligeGrunnerBuilder = ReduksjonSærligeGrunnerBuilder(),
-) {
-    fun <T> build(builder: VilkårsvurderingValgProvider<T, *, *>): T {
-        return builder.build(this)
+@ConsistentCopyVisibility
+data class KanUnnlates4xRettsgebyrBuilder internal constructor(var unnlates: Boolean) {
+    fun <T> build(builder: VilkårsvurderingValgProvider<T, *, *>, reduksjon: ReduksjonSærligeGrunnerBuilder): T {
+        return builder.build(this, reduksjon)
     }
 }

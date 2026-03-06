@@ -40,7 +40,7 @@ object VilkårsvurderingBuilderImpl : VilkårsvurderingProvider<ForårsaketAvBru
         return Skyldgrad.Uaktsomt(
             begrunnelse = "",
             begrunnelseAktsomhet = "",
-            kanUnnlates4XRettsgebyr = vurdering.skalUnnlates.build(this),
+            kanUnnlates4XRettsgebyr = vurdering.unnlates.build(this, vurdering.reduksjon),
             feilaktigeEllerMangelfulleOpplysninger = Skyldgrad.FeilaktigEllerMangelfull.FEILAKTIG,
         )
     }
@@ -73,18 +73,18 @@ object VilkårsvurderingBuilderImpl : VilkårsvurderingProvider<ForårsaketAvBru
         )
     }
 
-    override fun build(unnlates: KanUnnlates4xRettsgebyrBuilder): KanUnnlates4xRettsgebyr {
+    override fun build(unnlates: KanUnnlates4xRettsgebyrBuilder, reduksjon: ReduksjonSærligeGrunnerBuilder): KanUnnlates4xRettsgebyr {
         return when (unnlates.unnlates) {
             true -> KanUnnlates4xRettsgebyr.Unnlates
             false -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
-                unnlates.reduksjon.build(this),
+                reduksjon.build(this),
             )
         }
     }
 
     override fun build(aktsomhet: AktsomhetBuilder.Uaktsomt): NivåAvForståelse.Aktsomhet {
         return NivåAvForståelse.Aktsomhet.Uaktsomhet(
-            kanUnnlates4XRettsgebyr = aktsomhet.unnlates.build(this),
+            kanUnnlates4XRettsgebyr = aktsomhet.unnlates.build(this, aktsomhet.reduksjon),
             begrunnelse = "",
         )
     }

@@ -1,7 +1,7 @@
 package no.nav.tilbakekreving.test.vilkårsvurdering
 
 interface VilkårsvurderingValgProvider<BuiltUnnlates4xRettsgebyr, BuiltReduksjonSærligeGrunner, BuiltAktsomhet> {
-    fun build(unnlates: KanUnnlates4xRettsgebyrBuilder): BuiltUnnlates4xRettsgebyr
+    fun build(unnlates: KanUnnlates4xRettsgebyrBuilder, reduksjon: ReduksjonSærligeGrunnerBuilder): BuiltUnnlates4xRettsgebyr
 
     fun build(reduksjon: ReduksjonSærligeGrunnerBuilder): BuiltReduksjonSærligeGrunner
 

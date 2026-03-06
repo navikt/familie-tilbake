@@ -4,26 +4,24 @@ import no.nav.tilbakekreving.test.vilkårsvurdering.AktsomhetBuilder
 import no.nav.tilbakekreving.test.vilkårsvurdering.KanUnnlates4xRettsgebyrBuilder
 import no.nav.tilbakekreving.test.vilkårsvurdering.ReduksjonSærligeGrunnerBuilder
 
-fun uaktsomt(unnlates: KanUnnlates4xRettsgebyrBuilder = skalIkkeUnnlates()) = AktsomhetBuilder.Uaktsomt().apply {
+fun uaktsomt(
+    unnlates: KanUnnlates4xRettsgebyrBuilder = skalIkkeUnnlates(),
+    reduksjon: ReduksjonSærligeGrunnerBuilder = ingenReduksjon(),
+) = AktsomhetBuilder.Uaktsomt(unnlates, reduksjon).apply {
     this.unnlates = unnlates
 }
 
+fun grovtUaktsomt(
+    unnlates: KanUnnlates4xRettsgebyrBuilder = skalIkkeUnnlates(),
+    reduksjon: ReduksjonSærligeGrunnerBuilder = ingenReduksjon(),
+) = AktsomhetBuilder.GrovtUaktsomt(unnlates, reduksjon)
+
 fun forsettelig() = AktsomhetBuilder.Forsettelig
 
-fun skalUnnlates(): KanUnnlates4xRettsgebyrBuilder = KanUnnlates4xRettsgebyrBuilder().apply {
-    this.unnlates = true
-}
+fun skalUnnlates(): KanUnnlates4xRettsgebyrBuilder = KanUnnlates4xRettsgebyrBuilder(unnlates = true)
 
-fun skalIkkeUnnlates(reduksjon: ReduksjonSærligeGrunnerBuilder = ingenReduksjon()): KanUnnlates4xRettsgebyrBuilder = KanUnnlates4xRettsgebyrBuilder().apply {
-    this.unnlates = false
-    this.reduksjon = reduksjon
-}
+fun skalIkkeUnnlates(): KanUnnlates4xRettsgebyrBuilder = KanUnnlates4xRettsgebyrBuilder(unnlates = false)
 
-fun ingenReduksjon() = ReduksjonSærligeGrunnerBuilder().apply {
-    this.skalReduseres = false
-}
+fun ingenReduksjon() = ReduksjonSærligeGrunnerBuilder(skalReduseres = false, reduksjon = 0)
 
-val Int.prosentReduksjon get() = ReduksjonSærligeGrunnerBuilder().apply {
-    skalReduseres = true
-    reduksjon = this@prosentReduksjon
-}
+val Int.prosentReduksjon get() = ReduksjonSærligeGrunnerBuilder(skalReduseres = true, reduksjon = this)

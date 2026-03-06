@@ -29,7 +29,6 @@ import no.nav.tilbakekreving.test.forsettelig
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.test.mars
 import no.nav.tilbakekreving.test.prosentReduksjon
-import no.nav.tilbakekreving.test.skalIkkeUnnlates
 import no.nav.tilbakekreving.test.uaktsomt
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -44,9 +43,7 @@ class BeregningTest {
             vilkårsvurdering = vurdering(
                 (1.januar(2021) til 31.januar(2021))
                     .medVurdering(
-                        forårsaketAvNav().burdeForstått {
-                            aktsomhet = forsettelig()
-                        },
+                        forårsaketAvNav().burdeForstått(aktsomhet = forsettelig()),
                     ),
             ),
             foreldetPerioder = emptyList(),
@@ -283,9 +280,7 @@ class BeregningTest {
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
                 (1.januar(2021) til 28.februar(2021)).medVurdering(
-                    forårsaketAvNav().burdeForstått {
-                        aktsomhet = uaktsomt(skalIkkeUnnlates(reduksjon = 50.prosentReduksjon))
-                    },
+                    forårsaketAvNav().burdeForstått(aktsomhet = uaktsomt(reduksjon = 50.prosentReduksjon)),
                 ),
             ),
             foreldetPerioder = emptyList(),
@@ -431,10 +426,7 @@ class BeregningTest {
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
                 (1.januar(2021) til 28.februar(2021)).medVurdering(
-                    forårsaketAvNav()
-                        .burdeForstått {
-                            aktsomhet = uaktsomt(skalIkkeUnnlates(50.prosentReduksjon))
-                        },
+                    forårsaketAvNav().burdeForstått(aktsomhet = uaktsomt(reduksjon = 50.prosentReduksjon)),
                 ),
             ),
             foreldetPerioder = emptyList(),
@@ -500,14 +492,10 @@ class BeregningTest {
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
                 (1.februar(2021) til 28.februar(2021)).medVurdering(
-                    forårsaketAvNav().burdeForstått {
-                        aktsomhet = forsettelig()
-                    },
+                    forårsaketAvNav().burdeForstått(aktsomhet = forsettelig()),
                 ),
                 (1.januar(2021) til 31.januar(2021)).medVurdering(
-                    forårsaketAvNav().burdeForstått {
-                        aktsomhet = forsettelig()
-                    },
+                    forårsaketAvNav().burdeForstått(aktsomhet = forsettelig()),
                 ),
             ),
             foreldetPerioder = emptyList(),
@@ -654,9 +642,7 @@ class BeregningTest {
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
                 (1.januar(2021) til 31.januar(2021)).medVurdering(
-                    forårsaketAvNav().burdeForstått {
-                        aktsomhet = uaktsomt(skalIkkeUnnlates(reduksjon = 50.prosentReduksjon))
-                    },
+                    forårsaketAvNav().burdeForstått(aktsomhet = uaktsomt(reduksjon = 50.prosentReduksjon)),
                 ),
             ),
             foreldetPerioder = emptyList(),
