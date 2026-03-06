@@ -36,3 +36,13 @@ internal interface Saksbehandlingsteg {
         }
     }
 }
+
+internal interface UnderkjennbarSteg : Saksbehandlingsteg {
+    val erUnderkjent: Boolean
+
+    fun underkjennSteget()
+
+    fun erKlar(): Boolean {
+        return erFullstendig() && !erUnderkjent
+    }
+}

@@ -58,8 +58,10 @@ class FatteVedtakSteg internal constructor(
         )
     }
 
-    fun erVedtakUnderkjent(): Boolean {
-        return vurderteSteg.any { it.erVurderingUnderkjent() }
+    fun erVedtakUnderkjent(): List<Behandlingssteg> {
+        return vurderteSteg
+            .filter { it.erVurderingUnderkjent() }
+            .map { it.hentSteg() }
     }
 
     class VurdertSteg(
@@ -76,12 +78,14 @@ class FatteVedtakSteg internal constructor(
         }
 
         fun erFerdigvurdert(): Boolean {
-            return vurdering !is Vurdering.IkkeVurdert
+            return vurdering is Vurdering.Godkjent
         }
 
         fun erVurderingUnderkjent(): Boolean {
             return vurdering is Vurdering.Underkjent
         }
+
+        fun hentSteg(): Behandlingssteg = steg
 
         override fun tilFrontendDto(): Totrinnsstegsinfo {
             return Totrinnsstegsinfo(
