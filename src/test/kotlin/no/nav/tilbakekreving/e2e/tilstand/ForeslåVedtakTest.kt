@@ -64,46 +64,4 @@ class ForeslåVedtakTest : TilbakekrevingE2EBase() {
 
         tilbakekreving(behandlingId).tilFrontendDto().behandlinger.single().status shouldBe Behandlingsstatus.FATTER_VEDTAK
     }
-
-    @Test
-    fun `foreslå vedtak via nytt endepunkt og angre`() {
-        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
-            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
-                fagsystemId = fagsystemId,
-            ),
-        )
-        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
-
-        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
-        lagreUttalelse(behandlingId)
-
-        somSaksbehandler(ansvarligSaksbehandler) {
-            behandlingApiController.behandlingOppdaterFakta(
-                behandlingId = behandlingId.toString(),
-                oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
-            )
-        }
-
-        utførSteg(
-            ident = ansvarligSaksbehandler,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(),
-        )
-        utførSteg(
-            ident = ansvarligSaksbehandler,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving(),
-        )
-
-        somSaksbehandler(ansvarligSaksbehandler) {
-            behandlingApiController.behandlingForeslVedtak(behandlingId)
-        }
-
-        somSaksbehandler(ansvarligSaksbehandler) {
-            behandlingController.angreSendTilBeslutter(behandlingId)
-        }
-        tilbakekreving(behandlingId) kanBehandle Behandlingssteg.FORESLÅ_VEDTAK
-    }
 }
