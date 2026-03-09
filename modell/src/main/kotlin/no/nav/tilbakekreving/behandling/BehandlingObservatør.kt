@@ -17,5 +17,6 @@ interface BehandlingObservatør {
         ansvarligBeslutter: String?,
         totaltFeilutbetaltBeløp: BigDecimal?,
         totalFeilutbetaltPeriode: Datoperiode?,
+        ansvarligEnhet: String?,
     )
 }

@@ -540,6 +540,7 @@ class Behandling internal constructor(
             ansvarligBeslutter = fatteVedtakSteg.ansvarligBeslutter?.ident,
             totaltFeilutbetaltBeløp = kravgrunnlag.entry.feilutbetaltBeløpForAllePerioder(),
             totalFeilutbetaltPeriode = fullstendigPeriode(),
+            ansvarligEnhet = enhet?.kode,
         )
         bigQueryService.oppdaterBehandling(
             bigqueryData(tilstand, ytelsesNavn),
@@ -571,6 +572,7 @@ class Behandling internal constructor(
         eksternFagsystemId: String,
         ytelse: Ytelse,
         endringObservatør: EndringObservatør,
+        ansvarligEnhet: String?,
     ) {
         val beregning = lagBeregning()
         endringObservatør.vedtakFattet(
@@ -581,7 +583,7 @@ class Behandling internal constructor(
             eksternBehandlingId = eksternFagsakRevurdering.entry.eksternId,
             ytelse = ytelse,
             vedtakFattetTidspunkt = OffsetDateTime.now(ZoneOffset.UTC),
-            ansvarligEnhet = null,
+            ansvarligEnhet = ansvarligEnhet,
             ansvarligSaksbehandler = ansvarligSaksbehandler.ident,
             ansvarligBeslutter = fatteVedtakSteg.ansvarligBeslutter!!.ident,
             vurderteUtbetalinger = beregning.beregn().map {

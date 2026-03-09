@@ -276,6 +276,7 @@ class Tilbakekreving internal constructor(
             eksternFagsystemId = eksternFagsak.eksternId,
             ytelse = eksternFagsak.ytelse,
             endringObservatør = endringObservatør,
+            ansvarligEnhet = nåværendeBehandling.hentBehandlingsinformasjon().enhet?.kode,
         )
     }
 
@@ -416,6 +417,7 @@ class Tilbakekreving internal constructor(
         ansvarligBeslutter: String?,
         totaltFeilutbetaltBeløp: BigDecimal?,
         totalFeilutbetaltPeriode: Datoperiode?,
+        ansvarligEnhet: String?,
     ) {
         endringObservatør.behandlingsstatusOppdatert(
             behandlingId = behandlingId,
@@ -427,7 +429,7 @@ class Tilbakekreving internal constructor(
             behandlingstatus = behandlingstatus,
             vedtaksresultat = vedtaksresultat,
             venterPåBruker = venterPåBruker,
-            ansvarligEnhet = null,
+            ansvarligEnhet = ansvarligEnhet,
             ansvarligSaksbehandler = ansvarligSaksbehandler,
             ansvarligBeslutter = ansvarligBeslutter,
             totaltFeilutbetaltBeløp = totaltFeilutbetaltBeløp,
