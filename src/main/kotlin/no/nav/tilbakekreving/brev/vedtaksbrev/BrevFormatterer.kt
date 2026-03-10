@@ -17,11 +17,9 @@ object BrevFormatterer {
         .withLocale(Locale.of("nb"))
 
     fun lagAvsnitt(perioder: List<BegrunnetPeriode>): List<AvsnittDto> {
-        val startPeriode = perioder.minOf { it.periode.fom }
-        val sluttPeriode = perioder.maxOf { it.periode.tom }
         return listOf(
             AvsnittDto(
-                tittel = "Perioden fra og med ${norskDato(startPeriode)} til og med ${norskDato(sluttPeriode)}",
+                tittel = "Dette er grunnen til at du har fått for mye utbetalt",
                 id = UUID.randomUUID(),
                 forklaring = Forklaringstekster.PERIODE_AVSNITT,
                 underavsnitt = listOf(RentekstElementDto("")) + perioder.first().påkrevdeVurderinger.map {

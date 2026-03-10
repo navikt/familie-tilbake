@@ -74,7 +74,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
                 ansvarligSaksbehandler = "Bob Burger",
                 besluttendeSaksbehandler = null,
             )
-            it.avsnitt[0].tittel shouldBe "Perioden fra og med 1. januar 2021 til og med 31. januar 2021"
+            it.avsnitt[0].tittel shouldBe "Dette er grunnen til at du har fått for mye utbetalt"
             it.avsnitt[0].underavsnitt shouldBe listOf(
                 RentekstElementDto(""),
                 PakrevdBegrunnelseDto(
