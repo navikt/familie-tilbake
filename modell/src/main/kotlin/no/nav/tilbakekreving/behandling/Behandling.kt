@@ -57,9 +57,16 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
+import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatVurderingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksresultatDto
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
+import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatDto as FrontendBeregningsresultatDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatsperiodeDto as FrontendBeregningsresultatsperiodeDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
@@ -202,6 +209,27 @@ class Behandling internal constructor(
             },
             beregning.vedtaksresultat,
             faktasteg.vurderingAvBrukersUttalelse(),
+        )
+    }
+
+    fun hentVedtaksresultatForFrontend(): FrontendBeregningsresultatDto {
+        val beregning = lagBeregning().oppsummer()
+        return FrontendBeregningsresultatDto(
+            beregningsresultatsperioder = beregning.beregningsresultatsperioder.mapNotNull { periode ->
+                val vurdering = periode.vurdering?.tilBeregningsresultatVurderingDto() ?: return@mapNotNull null
+                FrontendBeregningsresultatsperiodeDto(
+                    fom = periode.periode.fom,
+                    tom = periode.periode.tom,
+                    feilutbetaltBeløp = periode.feilutbetaltBeløp.toInt(),
+                    vurdering = vurdering,
+                    andelAvBeløp = "${periode.andelAvBeløp?.toInt() ?: 0}%",
+                    renteprosent = "${periode.renteprosent?.toInt() ?: 0}%",
+                    tilbakekrevingsbeløp = periode.tilbakekrevingsbeløp.toInt(),
+                    tilbakekrevesBeløpEtterSkatt = periode.tilbakekrevingsbeløpEtterSkatt.toInt(),
+                )
+            },
+            vedtaksresultat = beregning.vedtaksresultat.tilVedtaksresultatDto(),
+            harBrukerUttaltSeg = faktasteg.vurderingAvBrukersUttalelse().harBrukerUttaltSeg == HarBrukerUttaltSeg.JA,
         )
     }
 
@@ -648,5 +676,23 @@ class Behandling internal constructor(
                 it.utførSideeffekt(tilstand, behandlingObservatør, bigQueryService, ytelsesNavn)
             }
         }
+    }
+}
+
+private fun no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering.tilBeregningsresultatVurderingDto(): BeregningsresultatVurderingDto? {
+    return when (this) {
+        Aktsomhet.FORSETT -> BeregningsresultatVurderingDto.FORSETT
+        Aktsomhet.GROV_UAKTSOMHET -> BeregningsresultatVurderingDto.GROV_UAKTSOMHET
+        Aktsomhet.SIMPEL_UAKTSOMHET -> BeregningsresultatVurderingDto.UAKTSOMHET
+        AnnenVurdering.GOD_TRO -> BeregningsresultatVurderingDto.GOD_TRO
+        else -> null
+    }
+}
+
+private fun Vedtaksresultat.tilVedtaksresultatDto(): VedtaksresultatDto {
+    return when (this) {
+        Vedtaksresultat.FULL_TILBAKEBETALING -> VedtaksresultatDto.FULL_TILBAKEBETALING
+        Vedtaksresultat.DELVIS_TILBAKEBETALING -> VedtaksresultatDto.DELVIS_TILBAKEBETALING
+        Vedtaksresultat.INGEN_TILBAKEBETALING -> VedtaksresultatDto.INGEN_TILBAKEBETALING
     }
 }
