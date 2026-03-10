@@ -63,12 +63,10 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksresultatDto
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
-import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatDto as FrontendBeregningsresultatDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatsperiodeDto as FrontendBeregningsresultatsperiodeDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.tilstand.Tilstand
@@ -79,6 +77,8 @@ import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.UUID
 import kotlin.collections.listOf
+import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatDto as FrontendBeregningsresultatDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatsperiodeDto as FrontendBeregningsresultatsperiodeDto
 
 class Behandling internal constructor(
     override val id: UUID,

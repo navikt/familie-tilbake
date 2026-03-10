@@ -19,7 +19,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 
 class VedtaksresultatE2ETest : TilbakekrevingE2EBase() {
-
     @Autowired
     private lateinit var fagsystemIntegrasjonService: FagsystemIntegrasjonService
 
