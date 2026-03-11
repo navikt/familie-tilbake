@@ -41,8 +41,8 @@ class Beregningsresultat(
                     tom = periode.periode.tom,
                     feilutbetaltBeløp = periode.feilutbetaltBeløp.toInt(),
                     vurdering = vurdering,
-                    andelAvBeløp = periode.andelAvBeløp?.toInt() ?: 0,
-                    renteprosent = periode.renteprosent?.toInt() ?: 0,
+                    andelAvBeløp = periode.andelAvBeløp?.toInt(),
+                    renteprosent = periode.renteprosent?.toInt(),
                     tilbakekrevingsbeløp = periode.tilbakekrevingsbeløp.toInt(),
                     tilbakekrevesBeløpEtterSkatt = periode.tilbakekrevingsbeløpEtterSkatt.toInt(),
                 )
