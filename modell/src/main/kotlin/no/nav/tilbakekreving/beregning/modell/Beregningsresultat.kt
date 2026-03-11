@@ -56,7 +56,7 @@ private fun no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering.tilBere
     return when (this) {
         Aktsomhet.FORSETT -> BeregningsresultatVurderingDto.Forsett
         Aktsomhet.GROV_UAKTSOMHET -> BeregningsresultatVurderingDto.GrovUaktsomhet
-        Aktsomhet.SIMPEL_UAKTSOMHET -> BeregningsresultatVurderingDto.SimpelUaktsomhet
+        Aktsomhet.SIMPEL_UAKTSOMHET -> BeregningsresultatVurderingDto.Uaktsomhet
         AnnenVurdering.GOD_TRO -> BeregningsresultatVurderingDto.GodTro
         else -> null
     }
