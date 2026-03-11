@@ -61,11 +61,11 @@ class VedtaksresultatE2ETest : TilbakekrevingE2EBase() {
         response.statusCode shouldBe HttpStatus.OK
         val resultat = response.body.shouldNotBeNull()
 
-        resultat.vedtaksresultat shouldBe VedtaksresultatDto.FULL_TILBAKEBETALING
+        resultat.vedtaksresultat shouldBe VedtaksresultatDto.FullTilbakebetaling
         resultat.beregningsresultatsperioder shouldHaveSize 1
 
         val periode = resultat.beregningsresultatsperioder.first()
-        periode.vurdering shouldBe BeregningsresultatVurderingDto.GROV_UAKTSOMHET
+        periode.vurdering shouldBe BeregningsresultatVurderingDto.GrovUaktsomhet
         periode.feilutbetaltBeløp shouldBe 2000
         periode.andelAvBeløp shouldBe "100%"
         periode.renteprosent shouldBe "0%"
@@ -113,7 +113,7 @@ class VedtaksresultatE2ETest : TilbakekrevingE2EBase() {
         response.statusCode shouldBe HttpStatus.OK
         val resultat = response.body.shouldNotBeNull()
 
-        resultat.vedtaksresultat shouldBe VedtaksresultatDto.INGEN_TILBAKEBETALING
+        resultat.vedtaksresultat shouldBe VedtaksresultatDto.IngenTilbakebetaling
         resultat.beregningsresultatsperioder.first().tilbakekrevingsbeløp shouldBe 0
     }
 }
