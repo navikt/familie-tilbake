@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class VedtaksresultatE2ETest {
-
     @Test
     fun `hentVedtaksresultat returnerer beregningsresultat for full tilbakekreving`() {
         val behandler = Behandler.Saksbehandler("Z999999")
