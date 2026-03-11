@@ -226,8 +226,8 @@ class Foreslåvedtakssteg(
 
         if (oppgave == null) {
             throw Feil(
-                message = "Oppgaven for behandlingen er ikke tilgjengelig. Vennligst vent og prøv igjen om litt.",
-                frontendFeilmelding = "Oppgaven for behandlingen er ikke tilgjengelig. Vennligst vent og prøv igjen om litt.",
+                message = "Vi får ikke til å opprette oppgaven i Gosys.",
+                frontendFeilmelding = "Vi får ikke til å opprette oppgaven i Gosys.",
                 logContext = logContext,
                 httpStatus = HttpStatus.BAD_REQUEST,
             )
