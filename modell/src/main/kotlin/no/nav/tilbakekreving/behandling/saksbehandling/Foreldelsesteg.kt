@@ -18,16 +18,18 @@ import java.util.UUID
 class Foreldelsesteg(
     private val id: UUID,
     private var vurdertePerioder: List<Foreldelseperiode>,
-) : Saksbehandlingsteg, UnderkjennbarSteg {
+) : Saksbehandlingsteg {
     override val type: Behandlingssteg = Behandlingssteg.FORELDELSE
-    override var erUnderkjent: Boolean = false
+    private var underkjent: Boolean = false
 
     override fun erFullstendig(): Boolean = vurdertePerioder.all { it.vurdering != Vurdering.IkkeVurdert }
 
-    override fun underkjennSteget() {
-        println("====>>> foreldelse underkjent")
+    override fun erUnderkjent(): Boolean {
+        return underkjent
+    }
 
-        this.erUnderkjent = true
+    override fun underkjennSteget() {
+        this.underkjent = true
     }
 
     override fun nullstill(kravgrunnlag: KravgrunnlagHendelse, eksternFagsakRevurdering: EksternFagsakRevurdering) {
@@ -40,7 +42,7 @@ class Foreldelsesteg(
     ) {
         val periodeId = finnIdFor(periode) // I fremtiden ønsker vi å sende inn id, ikke periode
         vurderForeldelse(periodeId, vurdering)
-        erUnderkjent = false
+        underkjent = false
     }
 
     internal fun vurderForeldelse(

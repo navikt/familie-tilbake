@@ -4,7 +4,6 @@ import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
 import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselUnntakDto
 import no.nav.tilbakekreving.api.v1.dto.FristUtsettelseDto
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg
-import no.nav.tilbakekreving.behandling.saksbehandling.UnderkjennbarSteg
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.entities.ForhåndsvarselEntity
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
@@ -17,9 +16,9 @@ class Forhåndsvarsel(
     private var forhåndsvarselUnntak: ForhåndsvarselUnntak?,
     private var utsattFrist: UtsettFrist?,
     private var opprinneligFrist: LocalDate?,
-) : Saksbehandlingsteg, UnderkjennbarSteg {
+) : Saksbehandlingsteg {
     override val type: Behandlingssteg = Behandlingssteg.FORHÅNDSVARSEL
-    override var erUnderkjent: Boolean = false
+    private var underkjent: Boolean = false
 
     override fun erFullstendig(): Boolean {
         val gjeldendeFrist = utsattFrist?.hentFrist() ?: opprinneligFrist
@@ -28,10 +27,12 @@ class Forhåndsvarsel(
             gjeldendeFrist?.isBefore(LocalDate.now()) == true
     }
 
-    override fun underkjennSteget() {
-        println("====>>> forhåndsvarsel underkjent")
+    override fun erUnderkjent(): Boolean {
+        return underkjent
+    }
 
-        this.erUnderkjent = true
+    override fun underkjennSteget() {
+        this.underkjent = true
     }
 
     override fun nullstill(kravgrunnlag: KravgrunnlagHendelse, eksternFagsakRevurdering: EksternFagsakRevurdering) {}

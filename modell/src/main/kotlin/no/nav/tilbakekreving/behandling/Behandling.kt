@@ -26,7 +26,6 @@ import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg.Companion.behandlingsstegstatus
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg.Companion.klarTilVisning
-import no.nav.tilbakekreving.behandling.saksbehandling.UnderkjennbarSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.behov.BehovObservatør
@@ -176,14 +175,6 @@ class Behandling internal constructor(
         vilkårsvurderingsteg,
         foreslåVedtakSteg,
         fatteVedtakSteg,
-    )
-
-    internal fun underkjennbarSteg(): List<UnderkjennbarSteg> = listOf(
-        faktasteg,
-        forhåndsvarsel,
-        foreldelsesteg,
-        vilkårsvurderingsteg,
-        foreslåVedtakSteg,
     )
 
     private fun lagBeregning(): Beregning {
@@ -416,6 +407,11 @@ class Behandling internal constructor(
         validerBehandlingstatus("behandlingsutfall", fatteVedtakSteg)
         for ((behandlingssteg, vurdering) in vurderinger) {
             fatteVedtakSteg.håndter(beslutter, ansvarligSaksbehandler, behandlingssteg, vurdering, sporingsinformasjon())
+            if (vurdering is FatteVedtakSteg.Vurdering.Underkjent) {
+                steg()
+                    .filter { it.type == behandlingssteg }
+                    .forEach { it.underkjennSteget() }
+            }
         }
         oppdaterBehandler(ansvarligSaksbehandler)
     }
@@ -468,12 +464,7 @@ class Behandling internal constructor(
     fun kanUtbetales(): Boolean = fatteVedtakSteg.erFullstendig()
 
     fun underkjentVedtak(): Boolean {
-        val underkjenteSteg = fatteVedtakSteg.erVedtakUnderkjent()
-        if (underkjenteSteg.isNotEmpty()) {
-            tilbakeførUnderkjentBehandling(underkjenteSteg)
-            return true
-        }
-        return false
+        return fatteVedtakSteg.erVedtakUnderkjent()
     }
 
     fun hentBehandlingsinformasjon(): Behandlingsinformasjon {
@@ -633,14 +624,6 @@ class Behandling internal constructor(
         varseltekstFraSaksbehandler = varseltekstFraSaksbehandler,
         features = features,
     )
-
-    fun tilbakeførUnderkjentBehandling(underkjenteSteg: List<Behandlingssteg>) {
-        underkjennbarSteg()
-            .filter { it.type in underkjenteSteg }
-            .forEach { steg ->
-                steg.underkjennSteget()
-            }
-    }
 
     companion object {
         internal fun nyBehandling(
