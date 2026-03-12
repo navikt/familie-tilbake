@@ -111,7 +111,7 @@ class Behandling internal constructor(
     fun nullstillForhåndsvarselUnntakOgUttalelse() = forhåndsvarsel.nullstillUnntakOgUttalelse()
 
     fun fåttNyttKravgrunnlag(oppdatertKravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>) {
-        if (!faktasteg.erFullstendig()) {
+        if (!faktasteg.erKlar()) {
             kravgrunnlag = oppdatertKravgrunnlag
         } else {
             throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagStatusIkkeStøttetEtterBehandlingenErPåbegynt, sporingsinformasjon())
@@ -272,7 +272,7 @@ class Behandling internal constructor(
 
     private fun kanEndres(behandler: Behandler, kanBeslutte: Boolean): Boolean {
         if (kanBesluttes(behandler, kanBeslutte)) return false
-        return !foreslåVedtakSteg.erFullstendig() || behandler != ansvarligSaksbehandler && kanBeslutte
+        return !foreslåVedtakSteg.erKlar() || behandler != ansvarligSaksbehandler && kanBeslutte
     }
 
     internal fun tilFrontendDto(tilstand: Tilstand, behandler: Behandler, kanBeslutte: Boolean): BehandlingDto {
@@ -407,6 +407,11 @@ class Behandling internal constructor(
         validerBehandlingstatus("behandlingsutfall", fatteVedtakSteg)
         for ((behandlingssteg, vurdering) in vurderinger) {
             fatteVedtakSteg.håndter(beslutter, ansvarligSaksbehandler, behandlingssteg, vurdering, sporingsinformasjon())
+            if (vurdering is FatteVedtakSteg.Vurdering.Underkjent) {
+                steg()
+                    .filter { it.type == behandlingssteg }
+                    .forEach { it.underkjennSteget() }
+            }
         }
         oppdaterBehandler(ansvarligSaksbehandler)
     }
@@ -458,7 +463,9 @@ class Behandling internal constructor(
 
     fun kanUtbetales(): Boolean = fatteVedtakSteg.erFullstendig()
 
-    fun underkjentVedtak(): Boolean = fatteVedtakSteg.erVedtakUnderkjent()
+    fun underkjentVedtak(): Boolean {
+        return fatteVedtakSteg.erVedtakUnderkjent()
+    }
 
     fun hentBehandlingsinformasjon(): Behandlingsinformasjon {
         return Behandlingsinformasjon(

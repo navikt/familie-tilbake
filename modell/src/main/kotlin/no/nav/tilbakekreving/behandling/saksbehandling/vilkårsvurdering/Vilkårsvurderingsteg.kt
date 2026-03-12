@@ -26,8 +26,17 @@ class Vilkårsvurderingsteg(
     private var vurderinger: List<Vilkårsvurderingsperiode>,
 ) : Saksbehandlingsteg, VilkårsvurderingAdapter {
     override val type: Behandlingssteg = Behandlingssteg.VILKÅRSVURDERING
+    private var underkjent: Boolean = false
 
     override fun erFullstendig(): Boolean = vurderinger.none { it.vurdering is ForårsaketAvBruker.IkkeVurdert }
+
+    override fun erUnderkjent(): Boolean {
+        return underkjent
+    }
+
+    override fun underkjennSteget() {
+        this.underkjent = true
+    }
 
     fun tilEntity(behandlingRef: UUID): VilkårsvurderingstegEntity {
         return VilkårsvurderingstegEntity(

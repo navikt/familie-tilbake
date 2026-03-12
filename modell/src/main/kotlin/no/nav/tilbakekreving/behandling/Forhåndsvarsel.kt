@@ -18,12 +18,21 @@ class Forhåndsvarsel(
     private var opprinneligFrist: LocalDate?,
 ) : Saksbehandlingsteg {
     override val type: Behandlingssteg = Behandlingssteg.FORHÅNDSVARSEL
+    private var underkjent: Boolean = false
 
     override fun erFullstendig(): Boolean {
         val gjeldendeFrist = utsattFrist?.hentFrist() ?: opprinneligFrist
         return brukeruttalelse != null ||
             forhåndsvarselUnntak != null ||
-            (gjeldendeFrist?.isBefore(LocalDate.now()) == true)
+            gjeldendeFrist?.isBefore(LocalDate.now()) == true
+    }
+
+    override fun erUnderkjent(): Boolean {
+        return underkjent
+    }
+
+    override fun underkjennSteget() {
+        this.underkjent = true
     }
 
     override fun nullstill(kravgrunnlag: KravgrunnlagHendelse, eksternFagsakRevurdering: EksternFagsakRevurdering) {}

@@ -12,6 +12,14 @@ internal interface Saksbehandlingsteg {
 
     fun erFullstendig(): Boolean
 
+    fun erUnderkjent(): Boolean
+
+    fun underkjennSteget()
+
+    fun erKlar(): Boolean {
+        return erFullstendig() && !erUnderkjent()
+    }
+
     fun nullstill(
         kravgrunnlag: KravgrunnlagHendelse,
         eksternFagsakRevurdering: EksternFagsakRevurdering,
