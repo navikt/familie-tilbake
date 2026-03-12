@@ -47,6 +47,7 @@ import no.nav.tilbakekreving.kontrakter.brev.Dokumentmalstype
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
+import no.nav.tilbakekreving.kontrakter.frontend.models.LogginnslagDto
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
@@ -483,5 +484,9 @@ class TilbakekrevingService(
                 logContext = SecureLog.Context.utenBehandling(tilbakekreving.eksternFagsak.eksternId),
             )
         }
+    }
+
+    fun hentHistorikk(tilbakekreving: Tilbakekreving): List<LogginnslagDto> {
+        return tilbakekreving.hentBehandlingslogg()
     }
 }

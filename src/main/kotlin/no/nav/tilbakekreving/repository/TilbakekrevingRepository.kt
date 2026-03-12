@@ -26,6 +26,7 @@ class TilbakekrevingRepository(
     private val eksternFagsakRepository: NyEksternFagsakRepository,
     private val brevRepository: NyBrevRepository,
     private val brukerRepository: NyBrukerRepository,
+    private val behandlingsloggRepository: NyBehandlingsloggRepository,
 ) {
     private val modelReadTimer = Timer.builder("tilbakekreving_load_time")
         .publishPercentiles(0.5, 0.9, 0.95, 0.99)
@@ -53,6 +54,7 @@ class TilbakekrevingRepository(
             kravgrunnlagHistorikk = kravgrunnlagRepository.hentKravgrunnlag(id),
             brevHistorikk = brevRepository.hentBrev(id),
             bruker = brukerRepository.hentBruker(id),
+            behandlingsloggEntity = behandlingsloggRepository.hentBehandlingslogg(id),
         )
     }
 
@@ -116,6 +118,7 @@ class TilbakekrevingRepository(
         behandlingRepository.lagreBehandlinger(entity.behandlingHistorikkEntities)
         brevRepository.lagre(entity.brevHistorikkEntities)
         entity.bruker?.let { brukerRepository.lagre(it) }
+        behandlingsloggRepository.lagre(entity.behandlingsloggEntities)
     }
 
     fun antallSakerPerTilstand(): List<ForenkletTilstandStatistikk> {

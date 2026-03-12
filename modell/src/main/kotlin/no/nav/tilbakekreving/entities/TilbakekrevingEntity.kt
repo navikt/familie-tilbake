@@ -4,6 +4,7 @@ import no.nav.tilbakekreving.FeatureToggles
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.BehandlingHistorikk
+import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.brev.BrevHistorikk
@@ -34,6 +35,7 @@ data class TilbakekrevingEntity(
     val nestePåminnelse: LocalDateTime?,
     val opprettelsesvalg: Opprettelsesvalg,
     val bruker: BrukerEntity?,
+    val behandlingsloggEntities: List<LoggInnlagEntity>,
 ) {
     fun fraEntity(
         behovObservatør: BehovObservatør,
@@ -58,6 +60,12 @@ data class TilbakekrevingEntity(
                     kravgrunnlagHistorikk = kravgrunnlagHistorikk,
                     brevHistorikk = brevHistorikk,
                 )
+            }.toMutableList(),
+        )
+
+        val behandlingslogg = Behandlingslogg(
+            historikk = behandlingsloggEntities.map {
+                it.fraEntity()
             }.toMutableList(),
         )
 
@@ -87,6 +95,7 @@ data class TilbakekrevingEntity(
             bigQueryService = bigQueryService,
             endringObservatør = endringObservatør,
             features = features,
+            behandlingslogg = behandlingslogg,
         )
 
         return tilbakekreving
