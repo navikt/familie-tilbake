@@ -69,7 +69,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                         is KanUnnlates4xRettsgebyr.SkalIkkeUnnlates -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja
                         is KanUnnlates4xRettsgebyr.Unnlates -> false
                     },
-                    tilbakekrevSmåbeløp = true,
+                    tilbakekrevSmåbeløp = kanUnnlates4XRettsgebyr.skalTilbakekreves(),
                     særligeGrunnerBegrunnelse = when (kanUnnlates4XRettsgebyr) {
                         is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.begrunnelse
                         is KanUnnlates4xRettsgebyr.SkalIkkeUnnlates -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.begrunnelse

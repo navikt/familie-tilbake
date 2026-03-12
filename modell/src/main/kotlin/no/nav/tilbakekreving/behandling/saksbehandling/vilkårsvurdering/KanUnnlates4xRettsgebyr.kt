@@ -15,6 +15,8 @@ sealed interface KanUnnlates4xRettsgebyr {
 
     fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse>
 
+    fun skalTilbakekreves(): Boolean
+
     data object Unnlates : KanUnnlates4xRettsgebyr {
         override fun reduksjon(): Reduksjon = Reduksjon.IngenTilbakekreving()
 
@@ -25,6 +27,8 @@ sealed interface KanUnnlates4xRettsgebyr {
         override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.UNNLATES_4_RETTSGEBYR)
 
         override fun tilEntity(): KanUnnlates = KanUnnlates.UNNLATES
+
+        override fun skalTilbakekreves(): Boolean = false
     }
 
     class SkalIkkeUnnlates(
@@ -41,6 +45,8 @@ sealed interface KanUnnlates4xRettsgebyr {
         }
 
         override fun tilEntity(): KanUnnlates = KanUnnlates.SKAL_IKKE_UNNLATES
+
+        override fun skalTilbakekreves(): Boolean = true
     }
 
     class ErOver4xRettsgebyr(
@@ -57,5 +63,7 @@ sealed interface KanUnnlates4xRettsgebyr {
         override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = reduksjonSærligeGrunner.skalReduseres.påkrevdeVurderinger()
 
         override fun tilEntity(): KanUnnlates = KanUnnlates.SKAL_IKKE_UNNLATES
+
+        override fun skalTilbakekreves(): Boolean = true
     }
 }
