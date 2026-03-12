@@ -103,13 +103,14 @@ class NyVedtaksbrevService(
             tittel = avsnitt.tittel,
             forklaring = Forklaringstekster.PERIODE_AVSNITT,
             id = avsnitt.id,
+            meldingerTilSaksbehandler = emptyList(),
             underavsnitt = avsnitt.underavsnitt.map(::mapUnderavsnitt),
         )
     }
 
     fun mapUnderavsnitt(avsnitt: RotElementUpdateItemDto): RotElementDto {
         return when (avsnitt) {
-            is PakrevdBegrunnelseUpdateItemDto -> VilkårsvurderingBegrunnelse.valueOf(avsnitt.begrunnelseType).tilDto(avsnitt.underavsnitt)
+            is PakrevdBegrunnelseUpdateItemDto -> VilkårsvurderingBegrunnelse.valueOf(avsnitt.begrunnelseType).tilDto(emptyList(), avsnitt.underavsnitt)
             is RotElementDto -> avsnitt
         }
     }

@@ -9,6 +9,7 @@ import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurderingAdapter
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurdertPeriodeAdapter
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
+import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.VilkårsvurderingsperiodeEntity
@@ -110,11 +111,12 @@ class Vilkårsvurderingsteg(
         )
     }
 
-    fun vurdertePerioderForBrev(): List<BegrunnetPeriode> {
+    fun vurdertePerioderForBrev(meldingerTilSaksbehandler: Set<MeldingTilSaksbehandler>): List<BegrunnetPeriode> {
         return vurderinger.map {
             BegrunnetPeriode(
                 periode = it.periode,
                 påkrevdeVurderinger = it.vurdering.påkrevdeVurderinger(),
+                meldingerTilSaksbehandler = meldingerTilSaksbehandler,
             )
         }
     }

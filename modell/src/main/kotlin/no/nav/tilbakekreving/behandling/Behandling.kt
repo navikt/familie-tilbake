@@ -514,7 +514,7 @@ class Behandling internal constructor(
     }
 
     internal fun vurdertePerioderForBrev(): List<BegrunnetPeriode> {
-        return vilkårsvurderingsteg.vurdertePerioderForBrev()
+        return vilkårsvurderingsteg.vurdertePerioderForBrev(steg().flatMap { it.meldingerTilSaksbehandler() }.toSet())
     }
 
     internal fun brevSignatur(): Signatur = Signatur(
@@ -656,7 +656,7 @@ class Behandling internal constructor(
                 foreslåVedtakSteg = ForeslåVedtakSteg.opprett(),
                 fatteVedtakSteg = FatteVedtakSteg.opprett(),
                 påVent = null,
-                forhåndsvarsel = Forhåndsvarsel(null, null, null, brevHistorikk.sisteVarselbrev()?.fristForUttalelse),
+                forhåndsvarsel = Forhåndsvarsel.opprett(brevHistorikk.sisteVarselbrev()?.fristForUttalelse),
             ).also {
                 it.utførSideeffekt(tilstand, behandlingObservatør, bigQueryService, ytelsesNavn)
             }

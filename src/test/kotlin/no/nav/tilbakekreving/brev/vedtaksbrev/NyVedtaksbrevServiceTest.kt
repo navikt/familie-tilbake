@@ -57,6 +57,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
             perioder = listOf(
                 BegrunnetPeriode(
                     periode = 1.januar(2021) til 31.januar(2021),
+                    meldingerTilSaksbehandler = emptySet(),
                     påkrevdeVurderinger = setOf(VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER),
                 ),
             ),
@@ -82,6 +83,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
                     forklaring = VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.forklaring,
                     begrunnelseType = VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.name,
                     underavsnitt = listOf(RentekstElementDto("")),
+                    meldingerTilSaksbehandler = emptyList(),
                 ),
             )
         }
@@ -135,6 +137,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
                     forklaring = VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.forklaring,
                     tittel = VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.tittel,
                     underavsnitt = listOf(RentekstElementDto("Ja, det syntes jeg.")),
+                    meldingerTilSaksbehandler = emptyList(),
                 ),
             )
         }

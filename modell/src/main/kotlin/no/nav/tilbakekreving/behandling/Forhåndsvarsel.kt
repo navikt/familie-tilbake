@@ -4,6 +4,7 @@ import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
 import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselUnntakDto
 import no.nav.tilbakekreving.api.v1.dto.FristUtsettelseDto
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg
+import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.entities.ForhåndsvarselEntity
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
@@ -95,5 +96,15 @@ class Forhåndsvarsel(
 
     fun forhåndsvarselUnntakTilFrontendDto(): ForhåndsvarselUnntakDto? {
         return forhåndsvarselUnntak?.tilFrontendDto()
+    }
+
+    override fun meldingerTilSaksbehandler(): Set<MeldingTilSaksbehandler> {
+        return brukeruttalelse?.meldingerTilSaksbehandler() ?: emptySet()
+    }
+
+    companion object {
+        fun opprett(fristForUttalelse: LocalDate?): Forhåndsvarsel {
+            return Forhåndsvarsel(null, null, null, fristForUttalelse)
+        }
     }
 }

@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.behandling
 import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
 import no.nav.tilbakekreving.api.v1.dto.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.api.v1.dto.Uttalelsesdetaljer
+import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
 import no.nav.tilbakekreving.entities.BrukeruttalelseEntity
 import no.nav.tilbakekreving.entities.UttalelseInfoEntity
 import java.time.LocalDate
@@ -45,6 +46,8 @@ class Brukeruttalelse(
         },
         kommentar = kommentar,
     )
+
+    fun meldingerTilSaksbehandler() = uttalelseVurdering.meldingerTilSaksbehandler
 }
 
 data class UttalelseInfo(
@@ -54,16 +57,16 @@ data class UttalelseInfo(
     val uttalelseBeskrivelse: String,
 )
 
-enum class UttalelseVurdering {
-    JA_ETTER_FORHÅNDSVARSEL,
-    NEI_ETTER_FORHÅNDSVARSEL,
-    UTTSETT_FRIST,
-    UNNTAK_ALLEREDE_UTTALT_SEG,
-    UNNTAK_INGEN_UTTALELSE,
+enum class UttalelseVurdering(val meldingerTilSaksbehandler: Set<MeldingTilSaksbehandler>) {
+    JA_ETTER_FORHÅNDSVARSEL(setOf(MeldingTilSaksbehandler.BEGRUNN_BRUKERS_UTTALELSE)),
+    NEI_ETTER_FORHÅNDSVARSEL(emptySet()),
+    UTTSETT_FRIST(emptySet()),
+    UNNTAK_ALLEREDE_UTTALT_SEG(setOf(MeldingTilSaksbehandler.BEGRUNN_BRUKERS_UTTALELSE)),
+    UNNTAK_INGEN_UTTALELSE(emptySet()),
 
     @Deprecated("midreltidig, fjernes etter prodsatt og migrering")
-    JA,
+    JA(setOf(MeldingTilSaksbehandler.BEGRUNN_BRUKERS_UTTALELSE)),
 
     @Deprecated("midreltidig, fjernes etter prodsatt og migrering")
-    NEI,
+    NEI(emptySet()),
 }
