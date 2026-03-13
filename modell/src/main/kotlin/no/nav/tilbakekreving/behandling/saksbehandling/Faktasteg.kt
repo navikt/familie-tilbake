@@ -37,9 +37,18 @@ class Faktasteg(
     private var vurdering: Vurdering,
 ) : Saksbehandlingsteg {
     override val type: Behandlingssteg = Behandlingssteg.FAKTA
+    private var underkjent: Boolean = false
 
     override fun erFullstendig(): Boolean {
         return vurdering.erFullstendig()
+    }
+
+    override fun erUnderkjent(): Boolean {
+        return underkjent
+    }
+
+    override fun underkjennSteget() {
+        this.underkjent = true
     }
 
     override fun nullstill(
@@ -51,18 +60,22 @@ class Faktasteg(
 
     internal fun vurder(vurdering: Vurdering) {
         this.vurdering = vurdering
+        underkjent = false
     }
 
     internal fun vurder(perioder: List<OppdaterFaktaPeriodeDto>) {
         vurdering.vurder(perioder)
+        underkjent = false
     }
 
     internal fun vurder(oppdaget: OppdagetDto) {
         vurdering.vurder(oppdaget)
+        underkjent = false
     }
 
     internal fun vurder(årsak: String) {
         vurdering.vurder(årsak)
+        underkjent = false
     }
 
     fun nyTilFrontendDto(kravgrunnlag: KravgrunnlagHendelse, revurdering: EksternFagsakRevurdering, varselbrev: Varselbrev?): FaktaOmFeilutbetalingDto {
@@ -87,7 +100,7 @@ class Faktasteg(
             ),
             vurdering = vurdering.tilFrontendDto(),
             tidligereVarsletBeløp = varselbrev?.hentVarsletBeløp()?.toInt()?.takeIf { it != beløpTilbakekreves },
-            ferdigvurdert = erFullstendig(),
+            ferdigvurdert = erKlar(),
         )
     }
 

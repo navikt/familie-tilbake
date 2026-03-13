@@ -9,6 +9,7 @@ import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurderingAdapter
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurdertPeriodeAdapter
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
+import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.VilkårsvurderingsperiodeEntity
@@ -26,8 +27,17 @@ class Vilkårsvurderingsteg(
     private var vurderinger: List<Vilkårsvurderingsperiode>,
 ) : Saksbehandlingsteg, VilkårsvurderingAdapter {
     override val type: Behandlingssteg = Behandlingssteg.VILKÅRSVURDERING
+    private var underkjent: Boolean = false
 
     override fun erFullstendig(): Boolean = vurderinger.none { it.vurdering is ForårsaketAvBruker.IkkeVurdert }
+
+    override fun erUnderkjent(): Boolean {
+        return underkjent
+    }
+
+    override fun underkjennSteget() {
+        this.underkjent = true
+    }
 
     fun tilEntity(behandlingRef: UUID): VilkårsvurderingstegEntity {
         return VilkårsvurderingstegEntity(
@@ -101,11 +111,12 @@ class Vilkårsvurderingsteg(
         )
     }
 
-    fun vurdertePerioderForBrev(): List<BegrunnetPeriode> {
+    fun vurdertePerioderForBrev(meldingerTilSaksbehandler: Set<MeldingTilSaksbehandler>): List<BegrunnetPeriode> {
         return vurderinger.map {
             BegrunnetPeriode(
                 periode = it.periode,
                 påkrevdeVurderinger = it.vurdering.påkrevdeVurderinger(),
+                meldingerTilSaksbehandler = meldingerTilSaksbehandler,
             )
         }
     }

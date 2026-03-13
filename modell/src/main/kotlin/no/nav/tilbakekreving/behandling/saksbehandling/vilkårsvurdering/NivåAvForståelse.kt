@@ -73,7 +73,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
 
         override fun renter(): Boolean = false
 
-        override fun tilFrontendDto(): VurdertVilkårsvurderingsresultatDto? {
+        override fun tilFrontendDto(): VurdertVilkårsvurderingsresultatDto {
             return VurdertVilkårsvurderingsresultatDto(
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
                 godTro = null,
@@ -226,7 +226,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     begrunnelse = begrunnelse,
                     særligeGrunner = null,
                     særligeGrunnerTilReduksjon = false,
-                    tilbakekrevSmåbeløp = false,
+                    tilbakekrevSmåbeløp = true,
                     særligeGrunnerBegrunnelse = null,
                 )
             }
@@ -331,7 +331,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     begrunnelse = begrunnelse,
                     særligeGrunner = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.SkalIkkeUnnlates)?.reduksjonSærligeGrunner?.vurderteGrunner(),
                     særligeGrunnerTilReduksjon = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.SkalIkkeUnnlates)?.reduksjonSærligeGrunner?.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja,
-                    tilbakekrevSmåbeløp = kanUnnlates4XRettsgebyr is KanUnnlates4xRettsgebyr.SkalIkkeUnnlates,
+                    tilbakekrevSmåbeløp = kanUnnlates4XRettsgebyr.skalTilbakekreves(),
                     særligeGrunnerBegrunnelse = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.SkalIkkeUnnlates)?.reduksjonSærligeGrunner?.begrunnelse,
                 )
             }
@@ -378,7 +378,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     begrunnelse = begrunnelse,
                     særligeGrunner = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.SkalIkkeUnnlates)?.reduksjonSærligeGrunner?.vurderteGrunner(),
                     særligeGrunnerTilReduksjon = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.SkalIkkeUnnlates)?.reduksjonSærligeGrunner?.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja,
-                    tilbakekrevSmåbeløp = kanUnnlates4XRettsgebyr is KanUnnlates4xRettsgebyr.SkalIkkeUnnlates,
+                    tilbakekrevSmåbeløp = kanUnnlates4XRettsgebyr.skalTilbakekreves(),
                     særligeGrunnerBegrunnelse = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.SkalIkkeUnnlates)?.reduksjonSærligeGrunner?.begrunnelse,
                 )
             }

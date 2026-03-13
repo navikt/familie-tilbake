@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
+import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
@@ -10,7 +11,17 @@ internal interface Saksbehandlingsteg {
     val type: Behandlingssteg
     val behandlingsstatus: Behandlingsstatus get() = Behandlingsstatus.UTREDES
 
+    fun meldingerTilSaksbehandler(): Set<MeldingTilSaksbehandler> = emptySet()
+
     fun erFullstendig(): Boolean
+
+    fun erUnderkjent(): Boolean
+
+    fun underkjennSteget()
+
+    fun erKlar(): Boolean {
+        return erFullstendig() && !erUnderkjent()
+    }
 
     fun nullstill(
         kravgrunnlag: KravgrunnlagHendelse,

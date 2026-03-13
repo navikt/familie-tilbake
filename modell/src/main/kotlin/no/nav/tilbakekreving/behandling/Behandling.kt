@@ -71,7 +71,7 @@ import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.UUID
-import kotlin.collections.listOf
+import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatDto as FrontendBeregningsresultatDto
 
 class Behandling internal constructor(
     override val id: UUID,
@@ -111,7 +111,7 @@ class Behandling internal constructor(
     fun nullstillForhåndsvarselUnntakOgUttalelse() = forhåndsvarsel.nullstillUnntakOgUttalelse()
 
     fun fåttNyttKravgrunnlag(oppdatertKravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>) {
-        if (!faktasteg.erFullstendig()) {
+        if (!faktasteg.erKlar()) {
             kravgrunnlag = oppdatertKravgrunnlag
         } else {
             throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagStatusIkkeStøttetEtterBehandlingenErPåbegynt, sporingsinformasjon())
@@ -130,12 +130,14 @@ class Behandling internal constructor(
         )
     }
 
-    val foreldelsestegDto: FrontendDto<VurdertForeldelseDto> get() = FrontendDto {
-        foreldelsesteg.tilFrontendDto(kravgrunnlag.entry)
-    }
-    val vilkårsvurderingsstegDto: FrontendDto<VurdertVilkårsvurderingDto> get() = FrontendDto {
-        vilkårsvurderingsteg.tilFrontendDto(kravgrunnlag.entry, foreldelsesteg)
-    }
+    val foreldelsestegDto: FrontendDto<VurdertForeldelseDto>
+        get() = FrontendDto {
+            foreldelsesteg.tilFrontendDto(kravgrunnlag.entry)
+        }
+    val vilkårsvurderingsstegDto: FrontendDto<VurdertVilkårsvurderingDto>
+        get() = FrontendDto {
+            vilkårsvurderingsteg.tilFrontendDto(kravgrunnlag.entry, foreldelsesteg)
+        }
     val fatteVedtakStegDto: FrontendDto<TotrinnsvurderingDto> get() = fatteVedtakSteg
 
     fun harLikePerioder(): Boolean = vilkårsvurderingsteg.harLikePerioder()
@@ -205,6 +207,10 @@ class Behandling internal constructor(
         )
     }
 
+    fun hentVedtaksresultatForFrontend(): FrontendBeregningsresultatDto {
+        return lagBeregning().oppsummer().tilFrontendDto()
+    }
+
     fun trengerIverksettelse(
         behovObservatør: BehovObservatør,
         ytelse: Ytelse,
@@ -266,7 +272,7 @@ class Behandling internal constructor(
 
     private fun kanEndres(behandler: Behandler, kanBeslutte: Boolean): Boolean {
         if (kanBesluttes(behandler, kanBeslutte)) return false
-        return !foreslåVedtakSteg.erFullstendig() || behandler != ansvarligSaksbehandler && kanBeslutte
+        return !foreslåVedtakSteg.erKlar() || behandler != ansvarligSaksbehandler && kanBeslutte
     }
 
     internal fun tilFrontendDto(tilstand: Tilstand, behandler: Behandler, kanBeslutte: Boolean): BehandlingDto {
@@ -401,6 +407,11 @@ class Behandling internal constructor(
         validerBehandlingstatus("behandlingsutfall", fatteVedtakSteg)
         for ((behandlingssteg, vurdering) in vurderinger) {
             fatteVedtakSteg.håndter(beslutter, ansvarligSaksbehandler, behandlingssteg, vurdering, sporingsinformasjon())
+            if (vurdering is FatteVedtakSteg.Vurdering.Underkjent) {
+                steg()
+                    .filter { it.type == behandlingssteg }
+                    .forEach { it.underkjennSteget() }
+            }
         }
         oppdaterBehandler(ansvarligSaksbehandler)
     }
@@ -452,7 +463,9 @@ class Behandling internal constructor(
 
     fun kanUtbetales(): Boolean = fatteVedtakSteg.erFullstendig()
 
-    fun underkjentVedtak(): Boolean = fatteVedtakSteg.erVedtakUnderkjent()
+    fun underkjentVedtak(): Boolean {
+        return fatteVedtakSteg.erVedtakUnderkjent()
+    }
 
     fun hentBehandlingsinformasjon(): Behandlingsinformasjon {
         return Behandlingsinformasjon(
@@ -501,7 +514,7 @@ class Behandling internal constructor(
     }
 
     internal fun vurdertePerioderForBrev(): List<BegrunnetPeriode> {
-        return vilkårsvurderingsteg.vurdertePerioderForBrev()
+        return vilkårsvurderingsteg.vurdertePerioderForBrev(steg().flatMap { it.meldingerTilSaksbehandler() }.toSet())
     }
 
     internal fun brevSignatur(): Signatur = Signatur(
@@ -643,7 +656,7 @@ class Behandling internal constructor(
                 foreslåVedtakSteg = ForeslåVedtakSteg.opprett(),
                 fatteVedtakSteg = FatteVedtakSteg.opprett(),
                 påVent = null,
-                forhåndsvarsel = Forhåndsvarsel(null, null, null, brevHistorikk.sisteVarselbrev()?.fristForUttalelse),
+                forhåndsvarsel = Forhåndsvarsel.opprett(brevHistorikk.sisteVarselbrev()?.fristForUttalelse),
             ).also {
                 it.utførSideeffekt(tilstand, behandlingObservatør, bigQueryService, ytelsesNavn)
             }

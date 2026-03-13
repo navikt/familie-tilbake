@@ -100,4 +100,92 @@ class FatteVedtakStegTest {
             )
         }
     }
+
+    @Test
+    fun `underkjenn alle steg i vedtaket`() {
+        val fatteVedtakSteg = FatteVedtakSteg.opprett()
+
+        fatteVedtakSteg.håndter(
+            ansvarligBeslutter,
+            ansvarligSaksbehandler,
+            Behandlingssteg.FAKTA,
+            FatteVedtakSteg.Vurdering.Underkjent("Ikke bra"),
+            Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+        )
+        fatteVedtakSteg.håndter(
+            ansvarligBeslutter,
+            ansvarligSaksbehandler,
+            Behandlingssteg.FORHÅNDSVARSEL,
+            FatteVedtakSteg.Vurdering.Underkjent("Ikke bra"),
+            Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+        )
+        fatteVedtakSteg.håndter(
+            ansvarligBeslutter,
+            ansvarligSaksbehandler,
+            Behandlingssteg.FORELDELSE,
+            FatteVedtakSteg.Vurdering.Underkjent("Ikke bra"),
+            Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+        )
+        fatteVedtakSteg.håndter(
+            ansvarligBeslutter,
+            ansvarligSaksbehandler,
+            Behandlingssteg.VILKÅRSVURDERING,
+            FatteVedtakSteg.Vurdering.Underkjent("Ikke bra"),
+            Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+        )
+        fatteVedtakSteg.håndter(
+            ansvarligBeslutter,
+            ansvarligSaksbehandler,
+            Behandlingssteg.FORESLÅ_VEDTAK,
+            FatteVedtakSteg.Vurdering.Underkjent("Ikke bra"),
+            Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+        )
+
+        fatteVedtakSteg.erFullstendig() shouldBe false
+        fatteVedtakSteg.erVedtakUnderkjent() shouldBe true
+    }
+
+    @Test
+    fun `underkjenn noen av steg i vedtaket`() {
+        val fatteVedtakSteg = FatteVedtakSteg.opprett()
+
+        fatteVedtakSteg.håndter(
+            ansvarligBeslutter,
+            ansvarligSaksbehandler,
+            Behandlingssteg.FAKTA,
+            FatteVedtakSteg.Vurdering.Godkjent,
+            Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+        )
+        fatteVedtakSteg.håndter(
+            ansvarligBeslutter,
+            ansvarligSaksbehandler,
+            Behandlingssteg.FORHÅNDSVARSEL,
+            FatteVedtakSteg.Vurdering.Godkjent,
+            Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+        )
+        fatteVedtakSteg.håndter(
+            ansvarligBeslutter,
+            ansvarligSaksbehandler,
+            Behandlingssteg.FORELDELSE,
+            FatteVedtakSteg.Vurdering.Godkjent,
+            Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+        )
+        fatteVedtakSteg.håndter(
+            ansvarligBeslutter,
+            ansvarligSaksbehandler,
+            Behandlingssteg.VILKÅRSVURDERING,
+            FatteVedtakSteg.Vurdering.Underkjent("Ikke bra"),
+            Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+        )
+        fatteVedtakSteg.håndter(
+            ansvarligBeslutter,
+            ansvarligSaksbehandler,
+            Behandlingssteg.FORESLÅ_VEDTAK,
+            FatteVedtakSteg.Vurdering.Underkjent("Ikke bra"),
+            Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+        )
+
+        fatteVedtakSteg.erFullstendig() shouldBe false
+        fatteVedtakSteg.erVedtakUnderkjent() shouldBe true
+    }
 }

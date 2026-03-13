@@ -66,6 +66,10 @@ spec:
           - id: 79985315-b2de-40b8-a740-9510796993c6 # 0000-GA-Tiltakspenger-Beslutter
           - id: 3e28466f-c53d-46da-8b44-a4abc2ad4593 # 0000-GA-Dagpenger-Saksbehandler
           - id: 11b8475a-fb12-41aa-b1f6-8497c1b5385b # 0000-GA-Dagpenger-Beslutter
+          - id: 96e18023-db50-45f7-b023-3251279df28d # 0000-GA-AAP_LES
+          - id: 33e00155-169b-41e5-8a3f-5582ed975a15 # 0000-GA-AAP_SAKSBEHANDLER_OPPFOLGING
+          - id: 3377dc51-ca61-4e36-b812-21b5fc34474f # 0000-GA-AAP_SAKSBEHANDLER_NASJONAL
+          - id: f0f6cad5-e3c0-4308-99a2-3630ac60174a # 0000-GA-AAP_BESLUTTER
       enabled: true
       tenant: trygdeetaten.no
       replyURLs:

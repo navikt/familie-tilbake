@@ -175,4 +175,16 @@ object BehandlingsstegGenerator {
     ) = BehandlingsstegFatteVedtaksstegDto(
         totrinnsvurderinger = behandlingssteg.map { VurdertTotrinnDto(behandlingssteg = it, godkjent = true, begrunnelse = null) },
     )
+
+    fun lagIkkeGodkjennVedtakVurdering(
+        vararg behandlingssteg: Behandlingssteg = arrayOf(
+            Behandlingssteg.FAKTA,
+            Behandlingssteg.FORHÅNDSVARSEL,
+            Behandlingssteg.FORELDELSE,
+            Behandlingssteg.VILKÅRSVURDERING,
+            Behandlingssteg.FORESLÅ_VEDTAK,
+        ),
+    ) = BehandlingsstegFatteVedtaksstegDto(
+        totrinnsvurderinger = behandlingssteg.map { VurdertTotrinnDto(behandlingssteg = it, godkjent = false, begrunnelse = "Begrunnelse") },
+    )
 }

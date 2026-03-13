@@ -45,8 +45,8 @@ class BehandlingVedtaksbrevTest {
 
         vilkårsvurdering.vurder(1.januar(2021) til 31.januar(2021), forårsaketAvBruker)
 
-        vilkårsvurdering.vurdertePerioderForBrev() shouldBe listOf(
-            BegrunnetPeriode(1.januar(2021) til 31.januar(2021), påkrevdeBegrunnelser),
+        vilkårsvurdering.vurdertePerioderForBrev(emptySet()) shouldBe listOf(
+            BegrunnetPeriode(1.januar(2021) til 31.januar(2021), emptySet(), påkrevdeBegrunnelser),
         )
     }
 

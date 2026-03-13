@@ -481,6 +481,10 @@ class Tilbakekreving internal constructor(
         )
     }
 
+    fun hentVedtaksresultatForFrontend(): no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatDto {
+        return behandlingHistorikk.nåværende().entry.hentVedtaksresultatForFrontend()
+    }
+
     fun utførSideeffekt() {
         behandlingHistorikk.nåværende().entry
             .utførSideeffekt(tilstand, this, bigQueryService, eksternFagsak.ytelse.hentYtelsesnavn(Språkkode.NB))

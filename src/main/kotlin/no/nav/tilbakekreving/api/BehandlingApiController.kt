@@ -10,6 +10,7 @@ import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.brev.vedtaksbrev.NyVedtaksbrevService
 import no.nav.tilbakekreving.kontrakter.frontend.apis.BehandlingApi
+import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevDataDto
@@ -115,5 +116,20 @@ class BehandlingApiController(
         )
 
         return ResponseEntity.ok(nyVedtaksbrevService.oppdaterVedtaksbrevData(behandlingId, vedtaksbrevRedigerbareDataUpdateDto))
+    }
+
+    override fun behandlingHentVedtaksresultat(behandlingId: UUID): ResponseEntity<BeregningsresultatDto> {
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+            ?: return ResponseEntity.notFound().build()
+
+        tilgangskontrollService.validerTilgangTilbakekreving(
+            tilbakekreving = tilbakekreving,
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+            auditLoggerEvent = AuditLoggerEvent.ACCESS,
+            handling = "Henter vedtaksresultat",
+        )
+
+        return ResponseEntity.ok(tilbakekreving.hentVedtaksresultatForFrontend())
     }
 }

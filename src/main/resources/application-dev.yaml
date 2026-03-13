@@ -35,11 +35,12 @@ tilbakekreving:
           - ${rolle.enslig.beslutter}
       aap:
         veileder:
-          - ${rolle.enslig.veileder}
+          - "33e00155-169b-41e5-8a3f-5582ed975a15" # 0000-GA-AAP_SAKSBEHANDLER_OPPFOLGING
+          - "96e18023-db50-45f7-b023-3251279df28d" # 0000-GA-AAP_LES
         saksbehandler:
-          - ${rolle.enslig.saksbehandler}
+          - "3377dc51-ca61-4e36-b812-21b5fc34474f" # 0000-GA-AAP_SAKSBEHANDLER_NASJONAL
         beslutter:
-          - ${rolle.enslig.beslutter}
+          - "f0f6cad5-e3c0-4308-99a2-3630ac60174a" # 0000-GA-AAP_BESLUTTER
       tp:
         veileder: [] # Tiltakspenger har ikke veileder-tilgang ennå
         saksbehandler:
