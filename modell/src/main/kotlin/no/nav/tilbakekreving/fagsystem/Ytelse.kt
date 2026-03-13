@@ -161,7 +161,6 @@ sealed interface Ytelse {
         }
     }
 
-    // TODO: Bekreft alle verdier for dagpenger (fagsystem, tema, dokarkiv, url, brevtekster)
     object Dagpenger : Ytelse {
         override fun tilFagsystemDTO(): FagsystemDTO = FagsystemDTO.DP
 

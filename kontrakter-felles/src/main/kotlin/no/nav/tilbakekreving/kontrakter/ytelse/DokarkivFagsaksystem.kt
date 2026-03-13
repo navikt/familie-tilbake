@@ -8,5 +8,5 @@ enum class DokarkivFagsaksystem {
     TILLEGGSSTONADER,
     KELVIN,
     TILTAKSPENGER,
-    DAGPENGER, // TODO: Bekreft DokarkivFagsaksystem-verdi for dagpenger
+    DAGPENGER,
 }

@@ -10,5 +10,5 @@ enum class YtelsestypeDTO {
     INFOTRYGD,
     ARBEIDSAVKLARINGSPENGER,
     TILTAKSPENGER,
-    DAGPENGER, // TODO: Bekreft at dette er riktig enum-navn for dagpenger
+    DAGPENGER,
 }
