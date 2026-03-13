@@ -47,6 +47,12 @@ tilbakekreving:
           - "1b3a2c4d-d620-4fcf-a29b-a6cdadf29680" # 0000-GA-Tiltakspenger-Saksbehandler
         beslutter:
           - "79985315-b2de-40b8-a740-9510796993c6" # 0000-GA-Tiltakspenger-Beslutter
+      dp:
+        veileder: [] # Dagpenger har ikke veileder-tilgang ennå
+        saksbehandler:
+          - "3e28466f-c53d-46da-8b44-a4abc2ad4593" # 0000-GA-Dagpenger-Saksbehandler
+        beslutter:
+          - "11b8475a-fb12-41aa-b1f6-8497c1b5385b" # 0000-GA-Dagpenger-Beslutter
   tilgangsmaskinen:
     scope: api://dev-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
   bigQuery:

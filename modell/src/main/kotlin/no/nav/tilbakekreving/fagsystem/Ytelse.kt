@@ -161,11 +161,45 @@ sealed interface Ytelse {
         }
     }
 
+    object Dagpenger : Ytelse {
+        override fun tilFagsystemDTO(): FagsystemDTO = FagsystemDTO.DP
+
+        override fun tilYtelseDTO(): YtelsestypeDTO = YtelsestypeDTO.DAGPENGER
+
+        override fun integrererMotFagsystem(): Boolean = true
+
+        override fun tilYtelsestype(): Ytelsestype = Ytelsestype.DAGPENGER
+
+        override fun tilTema(): Tema = Tema.DAG
+
+        override fun hentYtelsesnavn(språkkode: Språkkode): String {
+            return when (språkkode) {
+                Språkkode.NB -> "Dagpenger"
+                Språkkode.NN -> "Dagpengar"
+            }
+        }
+
+        override fun tilDokarkivFagsaksystem(): DokarkivFagsaksystem = DokarkivFagsaksystem.DAGPENGER
+
+        override val kafkaTopic: String = "tilbake.privat-tilbakekreving-dagpenger"
+
+        override fun tilEntity(): YtelseEntity = YtelseEntity(Ytelsestype.DAGPENGER)
+
+        override fun brevmeta(): YtelseDto {
+            return YtelseDto(
+                url = "nav.no/dagpenger",
+                ubestemtEntall = "dagpenger",
+                bestemtEntall = "dagpengene",
+            )
+        }
+    }
+
     companion object {
         fun ytelser() = setOf(
             Tilleggsstønad,
             Arbeidsavklaringspenger,
             Tiltakspenger,
+            Dagpenger,
         )
     }
 }
@@ -178,4 +212,5 @@ enum class Ytelsestype(val kode: String) {
     INFOTRYGD("IT01"),
     ARBEIDSAVKLARINGSPENGER("AAP"),
     TILTAKSPENGER("TILTAKSPENGER"),
+    DAGPENGER("DAGPENGER"),
 }

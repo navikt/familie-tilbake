@@ -145,6 +145,7 @@ class TilbakekrevingRepository(
                 FagsystemDTO.TS -> Ytelsestype.TILLEGGSSTØNAD
                 FagsystemDTO.AAP -> Ytelsestype.ARBEIDSAVKLARINGSPENGER
                 FagsystemDTO.TP -> Ytelsestype.TILTAKSPENGER
+                FagsystemDTO.DP -> Ytelsestype.DAGPENGER
             }.name
 
             override fun select(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
