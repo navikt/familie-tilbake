@@ -65,7 +65,6 @@ object DefaultYtelseKatalog : YtelseKatalog {
                             Språkkode.NN to Ytelsesnavn("tiltakspengar", "tiltakspengar", "tiltakspengane dine"),
                         ),
                     )
-                    // TODO: Bekreft URL og brevtekster for dagpenger
                     YtelsestypeDTO.DAGPENGER -> Ytelsesinfo(
                         url = "nav.no/dagpenger",
                         navn = mapOf(

@@ -212,5 +212,5 @@ enum class Ytelsestype(val kode: String) {
     INFOTRYGD("IT01"),
     ARBEIDSAVKLARINGSPENGER("AAP"),
     TILTAKSPENGER("TILTAKSPENGER"),
-    DAGPENGER("DAG"), // TODO: Bekreft ytelsestype-kode for dagpenger
+    DAGPENGER("DAGPENGER"),
 }
