@@ -1,5 +1,7 @@
 package no.nav.tilbakekreving.repository
 
+import io.micrometer.core.instrument.Metrics
+import io.micrometer.core.instrument.Timer
 import no.nav.tilbakekreving.entities.TilbakekrevingEntity
 import no.nav.tilbakekreving.entity.Entity.Companion.get
 import no.nav.tilbakekreving.entity.FieldConverter
@@ -25,6 +27,15 @@ class TilbakekrevingRepository(
     private val brevRepository: NyBrevRepository,
     private val brukerRepository: NyBrukerRepository,
 ) {
+    private val modelReadTimer = Timer.builder("tilbakekreving_load_time")
+        .publishPercentiles(0.5, 0.9, 0.95, 0.99)
+        .tag("readonly", "true")
+        .register(Metrics.globalRegistry)
+    private val modelWriteTimer = Timer.builder("tilbakekreving_load_time")
+        .publishPercentiles(0.5, 0.9, 0.95, 0.99)
+        .tag("readonly", "false")
+        .register(Metrics.globalRegistry)
+
     fun nesteId(): String {
         return jdbcTemplate.query("SELECT nextval('tilbakekreving_id')") { rs, _ ->
             FieldConverter.NumericId.convert(rs, "nextval")
@@ -46,7 +57,9 @@ class TilbakekrevingRepository(
     }
 
     fun hentTilbakekreving(strategy: FindTilbakekrevingStrategy): TilbakekrevingEntity? {
-        return hentTilbakekrevinger(strategy).firstOrNull()
+        return modelReadTimer.record<TilbakekrevingEntity?> {
+            hentTilbakekrevinger(strategy).firstOrNull()
+        }
     }
 
     fun hentTilbakekrevinger(strategy: FindTilbakekrevingStrategy): List<TilbakekrevingEntity> {
@@ -86,13 +99,15 @@ class TilbakekrevingRepository(
         strategy: FindTilbakekrevingStrategy,
         callback: (TilbakekrevingEntity) -> TilbakekrevingEntity,
     ) {
-        val entity = hentForOppdatering(strategy) ?: return
-        val oppdatertEntity = callback(entity)
-        TilbakekrevingEntityMapper.updateQuery(
-            jdbcTemplate,
-            oppdatertEntity,
-        )
-        lagreUnderobjekter(oppdatertEntity)
+        modelWriteTimer.record<Unit> {
+            val entity = hentForOppdatering(strategy) ?: return@record
+            val oppdatertEntity = callback(entity)
+            TilbakekrevingEntityMapper.updateQuery(
+                jdbcTemplate,
+                oppdatertEntity,
+            )
+            lagreUnderobjekter(oppdatertEntity)
+        }
     }
 
     private fun lagreUnderobjekter(entity: TilbakekrevingEntity) {
