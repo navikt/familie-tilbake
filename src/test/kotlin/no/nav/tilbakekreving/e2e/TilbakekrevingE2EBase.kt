@@ -22,7 +22,10 @@ import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.api.BehandlingApiController
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
+import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.behandling.Behandling
+import no.nav.tilbakekreving.behandling.UttalelseInfo
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaPeriodeDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
@@ -36,6 +39,7 @@ import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.test.context.ActiveProfiles
+import java.time.LocalDate
 import java.util.UUID
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -128,10 +132,22 @@ open class TilbakekrevingE2EBase : E2EBase() {
 
     fun lagreUttalelse(
         behandlingId: UUID,
+        uttalelse: String? = "",
     ) {
         val tilbakekrevingId = tilbakekrevingService.hentTilbakekreving(behandlingId)!!.id
         tilbakekrevingService.hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
-            tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, listOf(), "")
+            val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
+            if (uttalelse == null) {
+                behandling.lagreUttalelse(UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL, emptyList(), "")
+            } else {
+                behandling.lagreUttalelse(
+                    UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL,
+                    listOf(
+                        UttalelseInfo(UUID.randomUUID(), LocalDate.now(), "Reddit", uttalelse),
+                    ),
+                    "",
+                )
+            }
         }
     }
 
@@ -171,6 +187,14 @@ open class TilbakekrevingE2EBase : E2EBase() {
         somSaksbehandler(ident) {
             behandlingController.utførBehandlingssteg(behandlingId, stegData).status shouldBe Ressurs.Status.SUKSESS
         }
+    }
+
+    fun håndterVilkårsvurdering(
+        ident: String,
+        behandlingId: UUID,
+        vararg vurderinger: VilkårsvurderingsperiodeDto,
+    ) {
+        utførSteg(ident, behandlingId, BehandlingsstegVilkårsvurderingDto(vurderinger.toList()))
     }
 
     fun tilbakekrevVedtak(

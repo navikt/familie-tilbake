@@ -24,7 +24,7 @@ sealed interface KanUnnlates4xRettsgebyr {
             return VurdertUtbetaling.JaNeiVurdering.Ja
         }
 
-        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.UNNLATES_4_RETTSGEBYR)
+        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.INGEN_TILBAKEKREVING, VilkårsvurderingBegrunnelse.UNNLATES_4_RETTSGEBYR)
 
         override fun tilEntity(): KanUnnlates = KanUnnlates.UNNLATES
 
@@ -41,7 +41,7 @@ sealed interface KanUnnlates4xRettsgebyr {
         }
 
         override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> {
-            return setOf(VilkårsvurderingBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR) + reduksjonSærligeGrunner.skalReduseres.påkrevdeVurderinger()
+            return setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES, VilkårsvurderingBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR) + reduksjonSærligeGrunner.skalReduseres.påkrevdeVurderinger()
         }
 
         override fun tilEntity(): KanUnnlates = KanUnnlates.SKAL_IKKE_UNNLATES
@@ -60,7 +60,7 @@ sealed interface KanUnnlates4xRettsgebyr {
             return VurdertUtbetaling.JaNeiVurdering.Nei
         }
 
-        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = reduksjonSærligeGrunner.skalReduseres.påkrevdeVurderinger()
+        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES) + reduksjonSærligeGrunner.skalReduseres.påkrevdeVurderinger()
 
         override fun tilEntity(): KanUnnlates = KanUnnlates.SKAL_IKKE_UNNLATES
 
