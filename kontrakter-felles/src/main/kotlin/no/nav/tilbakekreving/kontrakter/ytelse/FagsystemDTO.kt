@@ -13,4 +13,5 @@ enum class FagsystemDTO {
     IT01,
     TS,
     TP,
+    DP, // TODO: Bekreft fagsystem-kode for dagpenger (AO01 i dokarkiv, men DP her?)
 }

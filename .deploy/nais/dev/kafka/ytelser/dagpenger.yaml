@@ -1,0 +1,26 @@
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: privat-tilbakekreving-dagpenger
+  namespace: tilbake
+  labels:
+    team: tilbake
+spec:
+  pool: nav-dev
+  config:
+    cleanupPolicy: delete
+    minimumInSyncReplicas: 2
+    partitions: 1
+    replication: 3
+    retentionBytes: -1
+    retentionHours: -1
+  acl:
+    - team: tilbake
+      application: tilbakekreving-backend
+      access: readwrite
+    - team: teamdagpenger
+      application: dp-behandling
+      access: readwrite
+    - team: teamdagpenger
+      application: dp-saksbehandling
+      access: read

@@ -48,3 +48,9 @@ jobs:
           CLUSTER: prod-gcp
           RESOURCE: ./.deploy/nais/prod/kafka/ytelser/tiltakspenger.yaml
           ENVIRONMENT: prod-gcp:tilbake
+      - name: Apply dagpenger kafka topic to dev-gcp
+        uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: ./.deploy/nais/dev/kafka/ytelser/dagpenger.yaml
+          ENVIRONMENT: dev-gcp:tilbake
