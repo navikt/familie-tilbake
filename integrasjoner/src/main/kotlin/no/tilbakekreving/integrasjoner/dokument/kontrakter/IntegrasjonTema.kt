@@ -11,5 +11,5 @@ enum class IntegrasjonTema(
     OPP("OPP", "B288"),
     TSO("TSO", "B289"),
     IND("TILTAKSPENGER", "B470"),
-    DAG("DAG", "B286"), // TODO: Bekreft behandlingsnummer B286 for dagpenger tilbakekreving
+    DAG("DAGPENGER", "B286"), // TODO: Bekreft behandlingsnummer B286 for dagpenger tilbakekreving
 }
