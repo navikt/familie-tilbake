@@ -21,6 +21,7 @@ import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
@@ -198,6 +199,12 @@ class TilBehandlingTest {
 
         val tilbakekrevingDtoEtter = tilbakekreving.frontendDtoForBehandling(ANSVARLIG_SAKSBEHANDLER, false)
         tilbakekrevingDtoEtter.status shouldBe Behandlingsstatus.UTREDES
+
+        val foreslåVedtakStegInfo = tilbakekrevingDtoEtter.behandlingsstegsinfo.single { it.behandlingssteg == Behandlingssteg.FORESLÅ_VEDTAK }
+        foreslåVedtakStegInfo.behandlingsstegstatus shouldBe Behandlingsstegstatus.KLAR
+
+        val fatteVedtakStegInfo = tilbakekrevingDtoEtter.behandlingsstegsinfo.single { it.behandlingssteg == Behandlingssteg.FATTE_VEDTAK }
+        fatteVedtakStegInfo.behandlingsstegstatus shouldBe Behandlingsstegstatus.TILBAKEFØRT
     }
 
     private fun tilbakekrevingTilGodkjenning(
