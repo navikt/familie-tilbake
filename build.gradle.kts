@@ -132,6 +132,7 @@ val bigQueryDriver by configurations.creating
 val bigQueryDriverJarsTree = fileTree(bigQueryDriverDir) {
     include("**/*.jar")
 
+    exclude("**/auto-value-annotations-*.jar")
     exclude("**/failureaccess-*.jar")
     exclude("**/guava-*.jar")
     exclude("**/httpclient5-*.jar")
