@@ -133,7 +133,15 @@ management:
     base-path: "/internal"
     path-mapping:
       info: "status/isAlive"
-  metrics.export.prometheus.enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        http.client.requests: true
   health:
     db:
       enabled: true
