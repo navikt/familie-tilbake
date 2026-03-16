@@ -3,7 +3,7 @@ package no.nav.tilbakekreving.tilstand
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
 import no.nav.tilbakekreving.behandling.Behandling
-import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
+import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg.Companion.klarTilVisning
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
@@ -19,10 +19,7 @@ object TilBehandling : Tilstand {
     override val tilbakekrevingTilstand: TilbakekrevingTilstand = TilbakekrevingTilstand.TIL_BEHANDLING
 
     override fun behandlingsstatus(behandling: Behandling): Behandlingsstatus {
-        if (behandling.underkjentVedtak()) {
-            return Behandlingsstatus.UTREDES
-        }
-        return behandling.steg().firstOrNull { !it.erFullstendig() }
+        return behandling.steg().klarTilVisning().lastOrNull()
             ?.behandlingsstatus
             ?: Behandlingsstatus.UTREDES
     }

@@ -178,7 +178,7 @@ class TilBehandlingTest {
     }
 
     @Test
-    fun `beslutter underkjenner vedtak og status endres til utredes`() {
+    fun `beslutter underkjenner vedtak og status endres til utredes for tilbakekreving, og riktig status for behandlingsstegene`() {
         val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
         val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingHendelse, ANSVARLIG_SAKSBEHANDLER)
@@ -200,11 +200,13 @@ class TilBehandlingTest {
         val tilbakekrevingDtoEtter = tilbakekreving.frontendDtoForBehandling(ANSVARLIG_SAKSBEHANDLER, false)
         tilbakekrevingDtoEtter.status shouldBe Behandlingsstatus.UTREDES
 
-        val foreslåVedtakStegInfo = tilbakekrevingDtoEtter.behandlingsstegsinfo.single { it.behandlingssteg == Behandlingssteg.FORESLÅ_VEDTAK }
-        foreslåVedtakStegInfo.behandlingsstegstatus shouldBe Behandlingsstegstatus.KLAR
+        val faktaStegInfo = tilbakekrevingDtoEtter.behandlingsstegsinfo.single { it.behandlingssteg == Behandlingssteg.FAKTA }
+        faktaStegInfo.behandlingsstegstatus shouldBe Behandlingsstegstatus.TILBAKEFØRT
 
-        val fatteVedtakStegInfo = tilbakekrevingDtoEtter.behandlingsstegsinfo.single { it.behandlingssteg == Behandlingssteg.FATTE_VEDTAK }
-        fatteVedtakStegInfo.behandlingsstegstatus shouldBe Behandlingsstegstatus.TILBAKEFØRT
+        val foreslåVedtakStegInfo = tilbakekrevingDtoEtter.behandlingsstegsinfo.none { it.behandlingssteg == Behandlingssteg.FORESLÅ_VEDTAK }
+        val fatteVedtakStegInfo = tilbakekrevingDtoEtter.behandlingsstegsinfo.none { it.behandlingssteg == Behandlingssteg.FATTE_VEDTAK }
+        foreslåVedtakStegInfo shouldBe true
+        fatteVedtakStegInfo shouldBe true
     }
 
     private fun tilbakekrevingTilGodkjenning(

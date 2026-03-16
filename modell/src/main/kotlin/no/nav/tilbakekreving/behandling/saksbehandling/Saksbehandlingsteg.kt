@@ -32,6 +32,7 @@ internal interface Saksbehandlingsteg {
         fun Saksbehandlingsteg?.behandlingsstegstatus(): Behandlingsstegstatus {
             return when {
                 this == null -> Behandlingsstegstatus.VENTER
+                this.erUnderkjent() -> Behandlingsstegstatus.TILBAKEFØRT
                 this.erFullstendig() -> Behandlingsstegstatus.UTFØRT
                 else -> Behandlingsstegstatus.KLAR
             }
@@ -41,7 +42,7 @@ internal interface Saksbehandlingsteg {
             val klarTilBehandling = mutableListOf<Saksbehandlingsteg>()
             for (steg in this) {
                 klarTilBehandling.add(steg)
-                if (!steg.erFullstendig()) return klarTilBehandling
+                if (!steg.erKlar()) return klarTilBehandling
             }
             return klarTilBehandling
         }

@@ -315,14 +315,9 @@ class Behandling internal constructor(
                     ),
                 ),
                 steg().klarTilVisning().map {
-                    val stegstatus = when {
-                        underkjentVedtak() && it.type == Behandlingssteg.FATTE_VEDTAK -> Behandlingsstegstatus.TILBAKEFØRT
-                        underkjentVedtak() && it.type == Behandlingssteg.FORESLÅ_VEDTAK -> Behandlingsstegstatus.KLAR
-                        else -> it.behandlingsstegstatus()
-                    }
                     BehandlingsstegsinfoDto(
                         it.type,
-                        stegstatus,
+                        it.behandlingsstegstatus(),
                     )
                 },
             ).flatten(),
