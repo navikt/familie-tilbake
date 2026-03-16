@@ -43,6 +43,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
     @Test
     fun `fletter inn lagrede felter i vedtaksbrev-data`() {
         val behandlingId = lagBehandlingId()
+        val periodeId = UUID.randomUUID()
         val vedtaksbrevInfo = VedtaksbrevInfo(
             brukerdata = BrevmottakerDto(
                 navn = "Toasty Testy",
@@ -56,6 +57,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
             ),
             perioder = listOf(
                 BegrunnetPeriode(
+                    id = periodeId,
                     periode = 1.januar(2021) til 31.januar(2021),
                     meldingerTilSaksbehandler = emptySet(),
                     påkrevdeVurderinger = setOf(VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER),
@@ -88,7 +90,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
             )
         }
 
-        vedtaksbrevDataRepository.oppdaterVedtaksbrevData(
+        nyVedtaksbrevService.oppdaterVedtaksbrevData(
             behandlingId,
             VedtaksbrevRedigerbareDataUpdateDto(
                 hovedavsnitt = HovedavsnittUpdateDto(
@@ -99,8 +101,8 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
                 ),
                 avsnitt = listOf(
                     AvsnittUpdateItemDto(
-                        tittel = "Perioden fra og med 1. januar 2021 til og med 31. januar 2021",
-                        id = initielleData.avsnitt.single().id,
+                        tittel = "Dette er grunnen til at du har fått for mye utbetalt",
+                        id = periodeId,
                         underavsnitt = listOf(
                             RentekstElementDto("Det var jo litt uaktsomt..."),
                             RentekstElementDto("Derfor må du betale tilbake"),
@@ -112,6 +114,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
                     ),
                 ),
             ),
+            vedtaksbrevInfo,
         )
 
         nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, vedtaksbrevInfo).should {
@@ -128,7 +131,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
                 ansvarligSaksbehandler = "Bob Burger",
                 besluttendeSaksbehandler = null,
             )
-            it.avsnitt[0].tittel shouldBe "Perioden fra og med 1. januar 2021 til og med 31. januar 2021"
+            it.avsnitt[0].tittel shouldBe "Dette er grunnen til at du har fått for mye utbetalt"
             it.avsnitt[0].underavsnitt shouldBe listOf(
                 RentekstElementDto("Det var jo litt uaktsomt..."),
                 RentekstElementDto("Derfor må du betale tilbake"),

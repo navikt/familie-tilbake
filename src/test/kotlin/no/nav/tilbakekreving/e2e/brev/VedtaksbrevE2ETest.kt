@@ -159,7 +159,7 @@ class VedtaksbrevE2ETest : TilbakekrevingE2EBase() {
             VedtaksbrevDataDto::avsnitt,
         )
         avsnittEtterOppdatering.avsnitt.shouldMatchEach(avsnittFørOppdatering.avsnitt) { actual, expected ->
-            actual.shouldBeEqualToIgnoringFields(expected, AvsnittDto::underavsnitt, AvsnittDto::meldingerTilSaksbehandler)
+            actual.shouldBeEqualToIgnoringFields(expected, AvsnittDto::underavsnitt, AvsnittDto::meldingerTilSaksbehandler, AvsnittDto::id)
             actual.meldingerTilSaksbehandler shouldContainExactly expected.meldingerTilSaksbehandler
             actual.underavsnitt shouldContainExactly expected.underavsnitt
         }

@@ -6,7 +6,6 @@ import no.nav.tilbakekreving.ModellTestdata.forårsaketAvNav
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
-import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.eksternFagsakBehandling
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
@@ -45,9 +44,10 @@ class BehandlingVedtaksbrevTest {
 
         vilkårsvurdering.vurder(1.januar(2021) til 31.januar(2021), forårsaketAvBruker)
 
-        vilkårsvurdering.vurdertePerioderForBrev(emptySet()) shouldBe listOf(
-            BegrunnetPeriode(1.januar(2021) til 31.januar(2021), emptySet(), påkrevdeBegrunnelser),
-        )
+        val vurderingForPeriode = vilkårsvurdering.vurdertePerioderForBrev(emptySet()).single()
+        vurderingForPeriode.periode shouldBe (1.januar(2021) til 31.januar(2021))
+        vurderingForPeriode.meldingerTilSaksbehandler shouldBe emptySet()
+        vurderingForPeriode.påkrevdeVurderinger shouldBe påkrevdeBegrunnelser
     }
 
     companion object {
@@ -57,42 +57,42 @@ class BehandlingVedtaksbrevTest {
                 Arguments.argumentSet(
                     "God tro, beløp i behold",
                     forårsaketAvNav().godTro(beløpIBehold = 1400.kroner),
-                    emptySet<VilkårsvurderingBegrunnelse>(),
+                    setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES),
                 ),
                 Arguments.argumentSet(
                     "God tro, beløp i behold",
                     forårsaketAvNav().godTro(beløpIBehold = null),
-                    emptySet<VilkårsvurderingBegrunnelse>(),
+                    setOf(VilkårsvurderingBegrunnelse.INGEN_TILBAKEKREVING),
                 ),
                 Arguments.argumentSet(
                     "Forårsaket av bruker, uaktsomt, skal ikke unnlates",
                     forårsaketAvBruker().uaktsomt(unnlates = skalIkkeUnnlates()),
-                    setOf(VilkårsvurderingBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR, VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER),
+                    setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES, VilkårsvurderingBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR, VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER),
                 ),
                 Arguments.argumentSet(
                     "Forårsaket av bruker, uaktsomt, unnlates",
                     forårsaketAvBruker().uaktsomt(unnlates = skalUnnlates()),
-                    setOf(VilkårsvurderingBegrunnelse.UNNLATES_4_RETTSGEBYR),
+                    setOf(VilkårsvurderingBegrunnelse.INGEN_TILBAKEKREVING, VilkårsvurderingBegrunnelse.UNNLATES_4_RETTSGEBYR),
                 ),
                 Arguments.argumentSet(
                     "Forårsaket av bruker, grovt uaktsomt",
                     forårsaketAvBruker().grovtUaktsomt(),
-                    setOf(VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER),
+                    setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES, VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER),
                 ),
                 Arguments.argumentSet(
                     "Forårsaket av bruker, forsettelig",
                     forårsaketAvBruker().medForsett(),
-                    setOf(VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER),
+                    setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES, VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER),
                 ),
                 Arguments.argumentSet(
                     "Forsårsaket av Nav, burde forstått",
                     forårsaketAvNav().burdeForstått(),
-                    emptySet<VilkårsvurderingBegrunnelse>(),
+                    setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES, VilkårsvurderingBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR, VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER),
                 ),
                 Arguments.argumentSet(
                     "Forsårsaket av Nav, forstod",
                     forårsaketAvNav().forstod(),
-                    emptySet<VilkårsvurderingBegrunnelse>(),
+                    setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES),
                 ),
             )
         }

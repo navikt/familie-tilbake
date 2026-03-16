@@ -139,7 +139,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             )
         }
 
-        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = emptySet()
+        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = beløpIBehold.påkrevdeVurderinger()
 
         override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
             return AktsomhetsvurderingEntity(
@@ -154,12 +154,16 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
         sealed interface BeløpIBehold {
             fun reduksjon(): Reduksjon
 
+            fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse>
+
             fun tilEntity(periodeRef: UUID, begrunnelse: String): GodTroEntity
 
             class Ja(val beløp: BigDecimal) : BeløpIBehold {
                 override fun reduksjon(): Reduksjon {
                     return Reduksjon.ManueltBeløp(beløp)
                 }
+
+                override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES)
 
                 override fun tilEntity(periodeRef: UUID, begrunnelse: String): GodTroEntity {
                     return GodTroEntity(
@@ -175,6 +179,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 override fun reduksjon(): Reduksjon {
                     return Reduksjon.IngenTilbakekreving()
                 }
+
+                override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.INGEN_TILBAKEKREVING)
 
                 override fun tilEntity(periodeRef: UUID, begrunnelse: String): GodTroEntity {
                     return GodTroEntity(
@@ -239,7 +245,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 return VurdertUtbetaling.JaNeiVurdering.Nei
             }
 
-            override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = emptySet()
+            override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES)
 
             override fun tilEntity(periodeRef: UUID): VurdertAktsomhetEntity {
                 return VurdertAktsomhetEntity(
@@ -287,7 +293,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 return VurdertUtbetaling.JaNeiVurdering.Nei
             }
 
-            override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = emptySet()
+            override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES)
 
             override fun tilEntity(periodeRef: UUID): VurdertAktsomhetEntity {
                 return VurdertAktsomhetEntity(
@@ -320,7 +326,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 is KanUnnlates4xRettsgebyr.Unnlates -> VurdertUtbetaling.JaNeiVurdering.Ja
             }
 
-            override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = emptySet()
+            override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = kanUnnlates4XRettsgebyr.påkrevdeVurderinger()
 
             override fun tilFrontendDto(): VurdertAktsomhetDto {
                 return VurdertAktsomhetDto(
@@ -367,7 +373,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 is KanUnnlates4xRettsgebyr.Unnlates -> VurdertUtbetaling.JaNeiVurdering.Ja
             }
 
-            override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = emptySet()
+            override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = kanUnnlates4XRettsgebyr.påkrevdeVurderinger()
 
             override fun tilFrontendDto(): VurdertAktsomhetDto {
                 return VurdertAktsomhetDto(

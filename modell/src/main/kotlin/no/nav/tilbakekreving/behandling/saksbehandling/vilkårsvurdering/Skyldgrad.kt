@@ -113,7 +113,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
 
         override fun reduksjon(): Reduksjon = reduksjonSærligeGrunner.skalReduseres.reduksjon()
 
-        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = reduksjonSærligeGrunner.skalReduseres.påkrevdeVurderinger()
+        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES) + reduksjonSærligeGrunner.skalReduseres.påkrevdeVurderinger()
 
         override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
             return VurdertUtbetaling.Vilkårsvurdering(
@@ -174,7 +174,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
 
         override fun reduksjon(): Reduksjon = Reduksjon.FullstendigTilbakekreving()
 
-        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER)
+        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES, VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER)
 
         override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
             return VurdertUtbetaling.Vilkårsvurdering(

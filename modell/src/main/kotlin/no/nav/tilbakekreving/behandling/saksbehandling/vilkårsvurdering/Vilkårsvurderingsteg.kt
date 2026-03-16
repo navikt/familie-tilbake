@@ -116,6 +116,7 @@ class Vilkårsvurderingsteg(
     fun vurdertePerioderForBrev(meldingerTilSaksbehandler: Set<MeldingTilSaksbehandler>): List<BegrunnetPeriode> {
         return vurderinger.map {
             BegrunnetPeriode(
+                id = it.id,
                 periode = it.periode,
                 påkrevdeVurderinger = it.vurdering.påkrevdeVurderinger(),
                 meldingerTilSaksbehandler = meldingerTilSaksbehandler,

@@ -13,22 +13,25 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.callId
 import no.nav.tilbakekreving.behov.VedtaksbrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.VedtaksbrevJournalføringBehov
+import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.breeeev.begrunnelse.Forklaringstekster
+import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
+import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler.Companion.forBegrunnelse
+import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler.Companion.forPeriodeavsnitt
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
-import no.nav.tilbakekreving.brev.vedtaksbrev.BrevFormatterer.tilDto
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostResponse
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
 import no.nav.tilbakekreving.kontrakter.frontend.models.AvsnittDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.AvsnittUpdateItemDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.HovedavsnittDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.HovedavsnittUpdateDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.PakrevdBegrunnelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PakrevdBegrunnelseUpdateItemDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.RentekstElementDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.RotElementDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.RotElementUpdateItemDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SignaturDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UnderavsnittElementDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevDataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDataUpdateDto
@@ -58,11 +61,11 @@ class NyVedtaksbrevService(
 
         val (sistOppdatert, lagredeData) = vedtaksbrevDataRepository.hentVedtaksbrevData(behandlingId) ?: return VedtaksbrevDataDto(
             hovedavsnitt = HovedavsnittDto(
-                tittel = "Du må betale tilbake ${vedtaksbrevInfo.ytelse.bestemtEntall}",
+                tittel = BrevFormatterer.lagHovedavsnittTittel(vedtaksbrevInfo),
                 forklaring = Forklaringstekster.HOVEDAVSNITT,
                 underavsnitt = listOf(RentekstElementDto("")),
             ),
-            avsnitt = BrevFormatterer.lagAvsnitt(vedtaksbrevInfo.perioder),
+            avsnitt = vedtaksbrevInfo.perioder.map(BrevFormatterer::lagAvsnitt),
             sistOppdatert = OffsetDateTime.now(),
             brevGjelder = vedtaksbrevInfo.brukerdata,
             sendtDato = BrevFormatterer.norskDato(LocalDate.now()),
@@ -71,8 +74,10 @@ class NyVedtaksbrevService(
         )
 
         return VedtaksbrevDataDto(
-            hovedavsnitt = lagredeData.hovedavsnitt.let(::mapHovedavsnitt),
-            avsnitt = lagredeData.avsnitt.map(::mapAvsnitt),
+            hovedavsnitt = mapHovedavsnitt(lagredeData.hovedavsnitt, vedtaksbrevInfo),
+            avsnitt = vedtaksbrevInfo.perioder.map {
+                mapAvsnitt(it, lagredeData.avsnitt)
+            },
             brevGjelder = vedtaksbrevInfo.brukerdata,
             ytelse = vedtaksbrevInfo.ytelse,
             sendtDato = BrevFormatterer.norskDato(LocalDate.now()),
@@ -81,37 +86,91 @@ class NyVedtaksbrevService(
         )
     }
 
-    fun oppdaterVedtaksbrevData(behandlingId: UUID, data: VedtaksbrevRedigerbareDataUpdateDto): VedtaksbrevRedigerbareDataDto {
-        val (sistOppdatert, data) = vedtaksbrevDataRepository.oppdaterVedtaksbrevData(behandlingId, data)
+    fun oppdaterVedtaksbrevData(
+        behandlingId: UUID,
+        data: VedtaksbrevRedigerbareDataUpdateDto,
+        info: VedtaksbrevInfo,
+    ): VedtaksbrevRedigerbareDataDto {
+        val (sistOppdatert, data) = vedtaksbrevDataRepository.oppdaterVedtaksbrevData(
+            behandlingId,
+            VedtaksbrevDataRepository.VedtaksbrevEntity(
+                hovedavsnitt = VedtaksbrevDataRepository.HovedavsnittEntity(
+                    underavsnitt = data.hovedavsnitt.underavsnitt.map(::tilEntity),
+                ),
+                avsnitt = data.avsnitt.map {
+                    VedtaksbrevDataRepository.PeriodeavsnittEntity(
+                        id = it.id,
+                        underavsnitt = it.underavsnitt.map(::tilEntity),
+                    )
+                },
+            ),
+        )
         return VedtaksbrevRedigerbareDataDto(
-            hovedavsnitt = mapHovedavsnitt(data.hovedavsnitt),
-            avsnitt = data.avsnitt.map(::mapAvsnitt),
+            hovedavsnitt = mapHovedavsnitt(data.hovedavsnitt, info),
+            avsnitt = info.perioder.map { mapAvsnitt(it, data.avsnitt) },
             sistOppdatert = sistOppdatert.atOffset(ZoneOffset.UTC),
         )
     }
 
-    fun mapHovedavsnitt(hovedavsnitt: HovedavsnittUpdateDto): HovedavsnittDto {
+    fun mapHovedavsnitt(
+        data: VedtaksbrevDataRepository.HovedavsnittEntity,
+        info: VedtaksbrevInfo,
+    ): HovedavsnittDto {
         return HovedavsnittDto(
-            tittel = hovedavsnitt.tittel,
+            tittel = BrevFormatterer.lagHovedavsnittTittel(info),
             forklaring = Forklaringstekster.HOVEDAVSNITT,
-            underavsnitt = hovedavsnitt.underavsnitt.map(::mapUnderavsnitt),
+            underavsnitt = data.underavsnitt.map {
+                mapUnderavsnitt(it, emptyList())
+            },
         )
     }
 
-    fun mapAvsnitt(avsnitt: AvsnittUpdateItemDto): AvsnittDto {
+    fun mapAvsnitt(
+        periode: BegrunnetPeriode,
+        avsnitt: List<VedtaksbrevDataRepository.PeriodeavsnittEntity>,
+    ): AvsnittDto {
+        val lagretAvsnitt = avsnitt
+            .firstOrNull { lagretAvsnitt -> lagretAvsnitt.id == periode.id }
+            ?: return BrevFormatterer.lagAvsnitt(periode)
         return AvsnittDto(
-            tittel = avsnitt.tittel,
             forklaring = Forklaringstekster.PERIODE_AVSNITT,
-            id = avsnitt.id,
-            meldingerTilSaksbehandler = emptyList(),
-            underavsnitt = avsnitt.underavsnitt.map(::mapUnderavsnitt),
+            id = lagretAvsnitt.id,
+            meldingerTilSaksbehandler = periode.meldingerTilSaksbehandler
+                .forPeriodeavsnitt()
+                .map { it.melding },
+            tittel = BrevFormatterer.lagPeriodeavsnittTittel(periode.periode),
+            underavsnitt = lagretAvsnitt.underavsnitt.map {
+                mapUnderavsnitt(it, periode.meldingerTilSaksbehandler.toList())
+            },
         )
     }
 
-    fun mapUnderavsnitt(avsnitt: RotElementUpdateItemDto): RotElementDto {
-        return when (avsnitt) {
-            is PakrevdBegrunnelseUpdateItemDto -> VilkårsvurderingBegrunnelse.valueOf(avsnitt.begrunnelseType).tilDto(emptyList(), avsnitt.underavsnitt)
-            is RotElementDto -> avsnitt
+    fun mapUnderavsnitt(
+        avsnitt: VedtaksbrevDataRepository.UnderavsnittEntity,
+        meldingerTilSaksbehandler: List<MeldingTilSaksbehandler>,
+    ): RotElementDto {
+        return when (avsnitt.type) {
+            VedtaksbrevDataRepository.UnderavsnittEntity.Type.PÅKREVD_BEGRUNNELSE -> {
+                val påkrevdBegrunnelse = VilkårsvurderingBegrunnelse.valueOf(avsnitt.undertype!!)
+                PakrevdBegrunnelseDto(
+                    tittel = påkrevdBegrunnelse.tittel,
+                    forklaring = påkrevdBegrunnelse.forklaring,
+                    meldingerTilSaksbehandler = meldingerTilSaksbehandler
+                        .forBegrunnelse(påkrevdBegrunnelse)
+                        .map { it.melding },
+                    begrunnelseType = påkrevdBegrunnelse.name,
+                    underavsnitt = avsnitt.underavsnitt!!.map { RentekstElementDto(it.tekst!!) },
+                )
+            }
+
+            VedtaksbrevDataRepository.UnderavsnittEntity.Type.RENTEKST -> RentekstElementDto(
+                tekst = avsnitt.tekst!!,
+            )
+
+            VedtaksbrevDataRepository.UnderavsnittEntity.Type.UNDERAVSNITT -> UnderavsnittElementDto(
+                tittel = avsnitt.tittel!!,
+                underavsnitt = avsnitt.underavsnitt!!.map { RentekstElementDto(it.tekst!!) },
+            )
         }
     }
 
@@ -167,5 +226,35 @@ class NyVedtaksbrevService(
     ): String {
         val callId = callId()
         return "${behandlingId}_${brevtype.name.lowercase()}_${mottager.name.lowercase()}_$callId"
+    }
+
+    private fun tilEntity(dto: RotElementUpdateItemDto): VedtaksbrevDataRepository.UnderavsnittEntity {
+        return when (dto) {
+            is PakrevdBegrunnelseUpdateItemDto -> VedtaksbrevDataRepository.UnderavsnittEntity(
+                type = VedtaksbrevDataRepository.UnderavsnittEntity.Type.PÅKREVD_BEGRUNNELSE,
+                undertype = dto.begrunnelseType,
+                tittel = null,
+                tekst = null,
+                underavsnitt = dto.underavsnitt.map(::tilEntity),
+            )
+
+            is RentekstElementDto -> VedtaksbrevDataRepository.UnderavsnittEntity(
+                type = VedtaksbrevDataRepository.UnderavsnittEntity.Type.RENTEKST,
+                undertype = null,
+                tittel = null,
+                tekst = dto.tekst,
+                underavsnitt = null,
+            )
+
+            is UnderavsnittElementDto -> VedtaksbrevDataRepository.UnderavsnittEntity(
+                type = VedtaksbrevDataRepository.UnderavsnittEntity.Type.UNDERAVSNITT,
+                undertype = null,
+                tittel = dto.tittel,
+                tekst = null,
+                underavsnitt = dto.underavsnitt.map(::tilEntity),
+            )
+
+            is PakrevdBegrunnelseDto -> error("JSON-mapper gav ugyldig type")
+        }
     }
 }
