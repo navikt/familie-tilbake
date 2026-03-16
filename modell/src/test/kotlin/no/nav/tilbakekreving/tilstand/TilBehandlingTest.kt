@@ -19,6 +19,7 @@ import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.godkjenning
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
@@ -173,6 +174,30 @@ class TilBehandlingTest {
             tilbakekreving.håndter(ANSVARLIG_BESLUTTER, godkjenning())
         }
         exception.message shouldBe "Behandlingen er i FORESLÅ_VEDTAK og kan ikke behandle vurdering for FATTE_VEDTAK"
+    }
+
+    @Test
+    fun `beslutter underkjenner vedtak og status endres til utredes`() {
+        val oppsamler = BehovObservatørOppsamler()
+        val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
+        val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingHendelse, ANSVARLIG_SAKSBEHANDLER)
+
+        val tilbakekrevingDtoFør = tilbakekreving.frontendDtoForBehandling(ANSVARLIG_BESLUTTER, true)
+        tilbakekrevingDtoFør.status shouldBe Behandlingsstatus.FATTER_VEDTAK
+
+        tilbakekreving.håndter(
+            ANSVARLIG_BESLUTTER,
+            listOf(
+                Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Underkjent("Fakta må vurderes på nytt"),
+                Behandlingssteg.FORHÅNDSVARSEL to FatteVedtakSteg.Vurdering.Godkjent,
+                Behandlingssteg.FORELDELSE to FatteVedtakSteg.Vurdering.Godkjent,
+                Behandlingssteg.VILKÅRSVURDERING to FatteVedtakSteg.Vurdering.Godkjent,
+                Behandlingssteg.FORESLÅ_VEDTAK to FatteVedtakSteg.Vurdering.Godkjent,
+            ),
+        )
+
+        val tilbakekrevingDtoEtter = tilbakekreving.frontendDtoForBehandling(ANSVARLIG_SAKSBEHANDLER, false)
+        tilbakekrevingDtoEtter.status shouldBe Behandlingsstatus.UTREDES
     }
 
     private fun tilbakekrevingTilGodkjenning(

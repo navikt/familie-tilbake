@@ -19,6 +19,9 @@ object TilBehandling : Tilstand {
     override val tilbakekrevingTilstand: TilbakekrevingTilstand = TilbakekrevingTilstand.TIL_BEHANDLING
 
     override fun behandlingsstatus(behandling: Behandling): Behandlingsstatus {
+        if (behandling.underkjentVedtak()) {
+            return Behandlingsstatus.UTREDES
+        }
         return behandling.steg().firstOrNull { !it.erFullstendig() }
             ?.behandlingsstatus
             ?: Behandlingsstatus.UTREDES
