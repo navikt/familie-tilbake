@@ -15,10 +15,10 @@ description = "familie-tilbake"
 java.sourceCompatibility = JavaVersion.VERSION_25
 
 plugins {
-    kotlin("jvm") version "2.3.10"
+    kotlin("jvm") version "2.3.20"
     id("org.springframework.boot") version "4.0.3"
-    id("org.jetbrains.kotlin.plugin.spring") version "2.3.10"
-    id("org.jlleitschuh.gradle.ktlint") version "14.1.0"
+    id("org.jetbrains.kotlin.plugin.spring") version "2.3.20"
+    id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
 }
 
 springBoot {
@@ -58,7 +58,7 @@ subprojects {
     dependencies {
         testImplementation("org.junit.jupiter:junit-jupiter:6.0.3")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-        testImplementation("io.kotest:kotest-assertions-core:6.1.6")
+        testImplementation("io.kotest:kotest-assertions-core:6.1.7")
     }
 
     tasks.test {
@@ -132,6 +132,7 @@ val bigQueryDriver by configurations.creating
 val bigQueryDriverJarsTree = fileTree(bigQueryDriverDir) {
     include("**/*.jar")
 
+    exclude("**/auto-value-annotations-*.jar")
     exclude("**/failureaccess-*.jar")
     exclude("**/guava-*.jar")
     exclude("**/httpclient5-*.jar")
@@ -180,7 +181,7 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson-jvm:$ktorVersion")
-    implementation("com.google.cloud:google-cloud-bigquery:2.60.0")
+    implementation("com.google.cloud:google-cloud-bigquery:2.61.0")
     implementation("org.apache.httpcomponents.client5:httpclient5")
     implementation("org.apache.httpcomponents.core5:httpcore5")
     implementation("org.apache.httpcomponents.core5:httpcore5-h2")
@@ -243,7 +244,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     testImplementation("io.mockk:mockk-jvm:1.14.9")
-    testImplementation("io.kotest:kotest-assertions-core-jvm:6.1.6")
+    testImplementation("io.kotest:kotest-assertions-core-jvm:6.1.7")
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
