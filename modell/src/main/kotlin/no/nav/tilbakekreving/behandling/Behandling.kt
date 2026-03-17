@@ -28,6 +28,10 @@ import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg.Compan
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg.Companion.klarTilVisning
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
+import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
+import no.nav.tilbakekreving.behandlingslogg.Behandlingsloggstype
+import no.nav.tilbakekreving.behandlingslogg.LoggInnslag
+import no.nav.tilbakekreving.behandlingslogg.Utfører
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.DistribusjonBehov
 import no.nav.tilbakekreving.behov.IverksettelseBehov
@@ -343,10 +347,18 @@ class Behandling internal constructor(
         behandler: Behandler,
         vurdering: Faktasteg.Vurdering,
         observatør: BehandlingObservatør,
+        behandlingslogg: Behandlingslogg,
     ) {
         validerBehandlingstatus(håndtertSteg = "fakta", faktasteg)
         faktasteg.vurder(vurdering)
         oppdaterBehandler(behandler)
+        behandlingslogg.lagre(
+            opprettLoggInnslag(
+                behandlingsloggstype = Behandlingsloggstype.FAKTA_VURDERT,
+                utfører = Utfører.SAKSBEHANDLER,
+                behandler = behandler,
+            ),
+        )
     }
 
     internal fun håndter(
@@ -354,6 +366,7 @@ class Behandling internal constructor(
         oppdaget: OppdagetDto?,
         årsak: String?,
         perioder: List<OppdaterFaktaPeriodeDto>?,
+        behandlingslogg: Behandlingslogg,
     ) {
         validerBehandlingstatus(håndtertSteg = "fakta", faktasteg)
         if (oppdaget != null) {
@@ -366,6 +379,13 @@ class Behandling internal constructor(
             faktasteg.vurder(perioder)
         }
         oppdaterBehandler(behandler)
+        behandlingslogg.lagre(
+            opprettLoggInnslag(
+                behandlingsloggstype = Behandlingsloggstype.FAKTA_VURDERT,
+                utfører = Utfører.SAKSBEHANDLER,
+                behandler = behandler,
+            ),
+        )
     }
 
     internal fun håndter(
@@ -373,10 +393,18 @@ class Behandling internal constructor(
         periode: Datoperiode,
         vurdering: ForårsaketAvBruker,
         observatør: BehandlingObservatør,
+        behandlingslogg: Behandlingslogg,
     ) {
         validerBehandlingstatus("vilkårsvurdering", vilkårsvurderingsteg)
         vilkårsvurderingsteg.vurder(periode, vurdering)
         oppdaterBehandler(behandler)
+        behandlingslogg.lagre(
+            opprettLoggInnslag(
+                behandlingsloggstype = Behandlingsloggstype.VILKÅRSVURDERING_VURDERT,
+                utfører = Utfører.SAKSBEHANDLER,
+                behandler = behandler,
+            ),
+        )
     }
 
     internal fun håndter(
@@ -384,25 +412,42 @@ class Behandling internal constructor(
         periode: Datoperiode,
         vurdering: Foreldelsesteg.Vurdering,
         observatør: BehandlingObservatør,
+        behandlingslogg: Behandlingslogg,
     ) {
         validerBehandlingstatus("foreldelse", foreldelsesteg)
         foreldelsesteg.vurderForeldelse(periode, vurdering)
         oppdaterBehandler(behandler)
+        behandlingslogg.lagre(
+            opprettLoggInnslag(
+                behandlingsloggstype = Behandlingsloggstype.FORELDELSE_VURDERT,
+                utfører = Utfører.SAKSBEHANDLER,
+                behandler = behandler,
+            ),
+        )
     }
 
     internal fun håndterForeslåVedtak(
         behandler: Behandler,
         observatør: BehandlingObservatør,
+        behandlingslogg: Behandlingslogg,
     ) {
         validerBehandlingstatus("vedtaksforslag", foreslåVedtakSteg)
         foreslåVedtakSteg.håndter()
         oppdaterBehandler(behandler)
+        behandlingslogg.lagre(
+            opprettLoggInnslag(
+                behandlingsloggstype = Behandlingsloggstype.FORESLÅ_VEDTAK_VURDERT,
+                utfører = Utfører.SAKSBEHANDLER,
+                behandler = behandler,
+            ),
+        )
     }
 
     internal fun håndter(
         beslutter: Behandler,
         vurderinger: List<Pair<Behandlingssteg, FatteVedtakSteg.Vurdering>>,
         observatør: BehandlingObservatør,
+        behandlingslogg: Behandlingslogg,
     ) {
         validerBehandlingstatus("behandlingsutfall", fatteVedtakSteg)
         for ((behandlingssteg, vurdering) in vurderinger) {
@@ -414,14 +459,33 @@ class Behandling internal constructor(
             }
         }
         oppdaterBehandler(ansvarligSaksbehandler)
+        if (kanUtbetales()) {
+            behandlingslogg.lagre(
+                opprettLoggInnslag(
+                    behandlingsloggstype = Behandlingsloggstype.VEDTAK_FATTET,
+                    utfører = Utfører.BESLUTTER,
+                    behandler = ansvarligSaksbehandler,
+                ),
+            )
+        }
+        if (underkjentVedtak()) {
+            behandlingslogg.lagre(
+                opprettLoggInnslag(
+                    behandlingsloggstype = Behandlingsloggstype.BEHANDLING_SENDT_TILBAKE_TIL_SAKSBEHANDLER,
+                    utfører = Utfører.BESLUTTER,
+                    behandler = ansvarligSaksbehandler,
+                ),
+            )
+        }
     }
 
     internal fun oppdaterEksternFagsak(
         eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
+        behandlingslogg: Behandlingslogg,
     ) {
         if (sistEndret == opprettet) {
             this.eksternFagsakRevurdering = eksternFagsakRevurdering
-            flyttTilbakeTilFakta()
+            flyttTilbakeTilFakta(behandlingslogg)
         }
     }
 
@@ -576,9 +640,29 @@ class Behandling internal constructor(
         return kravgrunnlagPerioder.minOf { it.fom } til kravgrunnlagPerioder.maxOf { it.tom }
     }
 
-    fun flyttTilbakeTilFakta() = steg().forEach { it.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry) }
+    fun flyttTilbakeTilFakta(behandlingslogg: Behandlingslogg) {
+        steg().forEach {
+            it.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry)
+        }
+        behandlingslogg.lagre(
+            opprettLoggInnslag(
+                behandlingsloggstype = Behandlingsloggstype.BEHANDLING_NULLSTILLT,
+                utfører = Utfører.SAKSBEHANDLER,
+                behandler = ansvarligSaksbehandler,
+            ),
+        )
+    }
 
-    fun trekkTilbakeFraGodkjenning() = foreslåVedtakSteg.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry)
+    fun trekkTilbakeFraGodkjenning(behandlingslogg: Behandlingslogg) {
+        foreslåVedtakSteg.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry)
+        behandlingslogg.lagre(
+            opprettLoggInnslag(
+                behandlingsloggstype = Behandlingsloggstype.ANGRE_SEND_TIL_BESLUTTER,
+                utfører = Utfører.SAKSBEHANDLER,
+                behandler = ansvarligSaksbehandler,
+            ),
+        )
+    }
 
     fun sendVedtakIverksatt(
         forrigeBehandlingId: UUID?,
@@ -624,6 +708,17 @@ class Behandling internal constructor(
         varseltekstFraSaksbehandler = varseltekstFraSaksbehandler,
         features = features,
     )
+
+    fun opprettLoggInnslag(behandlingsloggstype: Behandlingsloggstype, utfører: Utfører, behandler: Behandler): LoggInnslag {
+        return LoggInnslag(
+            id = UUID.randomUUID(),
+            behandlingId = id,
+            opprettetTid = LocalDateTime.now(),
+            behandlingsloggstype = behandlingsloggstype,
+            utfører = utfører,
+            utførerIdent = behandler.ident,
+        )
+    }
 
     companion object {
         internal fun nyBehandling(

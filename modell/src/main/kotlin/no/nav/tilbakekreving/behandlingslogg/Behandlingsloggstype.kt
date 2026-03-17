@@ -6,24 +6,40 @@ import no.nav.tilbakekreving.kontrakter.historikk.Historikkinnslagstype
 enum class Behandlingsloggstype(
     val tittel: String,
     val tekst: String?,
-    val type: Historikkinnslagstype = Historikkinnslagstype.HENDELSE,
+    val type: Historikkinnslagstype,
     val steg: Behandlingssteg?,
 ) {
-    BEHANDLING_OPPRETTET(
-        tittel = "Behandling opprettet",
+    KRAVGRUNNLAG_MOTTATT(
+        tittel = "Kravgrunnlag mottatt",
         tekst = null,
+        type = Historikkinnslagstype.HENDELSE,
+        steg = null,
+    ),
+    TILBAKEKREVING_OPPRETTET(
+        tittel = "Tilbakekreving opprettet",
+        tekst = null,
+        type = Historikkinnslagstype.HENDELSE,
         steg = null,
     ),
 
-    FAGSYSTEMINFO_HENT(
-        tittel = "Fagsysteminfo innhentet",
+    BEHANDLING_OPPRETTET(
+        tittel = "Behandling opprettet",
         tekst = null,
+        type = Historikkinnslagstype.HENDELSE,
+        steg = null,
+    ),
+
+    FAGSYSTEMINFO_OPPDATERT(
+        tittel = "Fagsysteminfo oppdatert",
+        tekst = null,
+        type = Historikkinnslagstype.HENDELSE,
         steg = null,
     ),
 
     BRUKERINFO_HENT(
         tittel = "Brukerinfo innhentet",
         tekst = null,
+        type = Historikkinnslagstype.HENDELSE,
         steg = null,
     ),
 
@@ -56,24 +72,28 @@ enum class Behandlingsloggstype(
     ANGRE_SEND_TIL_BESLUTTER(
         tittel = "Angre send til beslutter",
         tekst = null,
+        type = Historikkinnslagstype.HENDELSE,
         steg = null,
     ),
 
     BEHANDLING_SENDT_TILBAKE_TIL_SAKSBEHANDLER(
         tittel = "Vedtak underkjent",
         tekst = null,
+        type = Historikkinnslagstype.HENDELSE,
         steg = null,
     ),
 
     VEDTAK_FATTET(
         tittel = "Vedtak fattet",
-        tekst = "Resultat: ",
+        tekst = null,
+        type = Historikkinnslagstype.HENDELSE,
         steg = null,
     ),
 
     BEHANDLING_AVSLUTTET(
         tittel = "Behandling avsluttet",
         tekst = null,
+        type = Historikkinnslagstype.HENDELSE,
         steg = null,
     ),
 
@@ -93,16 +113,19 @@ enum class Behandlingsloggstype(
     DOKUMENT_JOURNALFØRT(
         tittel = "Dokument journalført",
         tekst = null,
+        type = Historikkinnslagstype.HENDELSE,
         steg = null,
     ),
     BEHANDLING_NULLSTILLT(
         tittel = "Behandling nullstilt",
         tekst = null,
+        type = Historikkinnslagstype.HENDELSE,
         steg = null,
     ),
     BEHANDLING_PÅ_VENT(
         tittel = "Behandling er satt på vent",
-        tekst = "Årsak: ",
+        tekst = null,
+        type = Historikkinnslagstype.HENDELSE,
         steg = null,
     ),
 }

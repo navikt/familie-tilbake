@@ -10,6 +10,7 @@ import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.api.v1.dto.HistorikkinnslagDto
 import no.nav.tilbakekreving.config.ApplicationProperties
+import no.nav.tilbakekreving.kontrakter.historikk.Historikkinnslagstype
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -44,7 +45,25 @@ class HistorikkController(
                 auditLoggerEvent = AuditLoggerEvent.ACCESS,
                 handling = "Henter tilbakekrevingsbehandling",
             )
-            return Ressurs.success(emptyList())
+            // Mapper til gammel Dto inntil frontend er klar til å bruke ny endepunkt.
+            return Ressurs.success(
+                tilbakekrevingService
+                    .hentHistorikk(tilbakekreving)
+                    .map { innslag ->
+                        HistorikkinnslagDto(
+                            behandlingId = innslag.behandlingId,
+                            type = Historikkinnslagstype.valueOf(innslag.type),
+                            aktør = HistorikkinnslagDto.AktørDto.valueOf(innslag.aktør),
+                            aktørIdent = innslag.aktørIdent,
+                            tittel = innslag.tittel,
+                            tekst = innslag.tekst,
+                            steg = innslag.steg,
+                            journalpostId = null,
+                            dokumentId = null,
+                            opprettetTid = innslag.opprettetTid.toLocalDateTime(),
+                        )
+                    },
+            )
         }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,

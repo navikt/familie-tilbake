@@ -1,8 +1,8 @@
 package no.nav.tilbakekreving.entity
 
+import no.nav.tilbakekreving.behandlingslogg.Behandlingsloggstype
 import no.nav.tilbakekreving.behandlingslogg.Utfører
 import no.nav.tilbakekreving.entities.LoggInnlagEntity
-import no.nav.tilbakekreving.kontrakter.historikk.Historikkinnslagstype
 import java.sql.ResultSet
 import java.util.UUID
 
@@ -20,13 +20,13 @@ object BehandlingsloggMapper : Entity<LoggInnlagEntity, UUID, UUID>(
     val behandlingId = field(
         "behandling_id",
         { it.behandlingId },
-        FieldConverter.UUIDConverter.required(),
+        FieldConverter.UUIDConverter,
     )
 
-    val type = field(
-        "type",
-        { it.type },
-        FieldConverter.EnumConverter.of<Historikkinnslagstype>().required(),
+    val behandlingsloggstype = field(
+        "behandlingsloggstype",
+        { it.behandlingsloggstype },
+        FieldConverter.EnumConverter.of<Behandlingsloggstype>().required(),
     )
 
     val utfører = field(
@@ -39,24 +39,6 @@ object BehandlingsloggMapper : Entity<LoggInnlagEntity, UUID, UUID>(
         "utfører_ident",
         { it.utførerIdent },
         FieldConverter.StringConverter.required(),
-    )
-
-    val tittel = field(
-        "tittel",
-        { it.tittel },
-        FieldConverter.StringConverter.required(),
-    )
-
-    val tekst = field(
-        "tekst",
-        { it.tekst },
-        FieldConverter.StringConverter,
-    )
-
-    val steg = field(
-        "steg",
-        { it.steg },
-        FieldConverter.StringConverter,
     )
 
     val opprettetTid = field(
@@ -72,13 +54,10 @@ object BehandlingsloggMapper : Entity<LoggInnlagEntity, UUID, UUID>(
             id = resultSet[BrevEntityMapper.id],
             tilbakekrevingRef = resultSet[tilbakekrevingRef],
             behandlingId = resultSet[behandlingId],
-            type = resultSet[type],
             utfører = resultSet[utfører],
             utførerIdent = resultSet[utførerIdent],
-            tittel = resultSet[tittel],
-            tekst = resultSet[tekst],
-            steg = resultSet[steg],
             opprettetTid = resultSet[opprettetTid],
+            behandlingsloggstype = resultSet[behandlingsloggstype],
         )
     }
 }

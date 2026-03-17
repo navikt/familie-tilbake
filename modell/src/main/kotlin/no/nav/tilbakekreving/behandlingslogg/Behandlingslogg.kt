@@ -39,12 +39,12 @@ data class Behandlingslogg(
         return historikk.map {
             LogginnslagDto(
                 behandlingId = it.behandlingId.toString(),
-                type = it.type.toString(),
+                type = it.behandlingsloggstype.type.toString(),
                 aktør = it.utfører.toString(),
                 aktørIdent = it.utførerIdent,
-                tittel = it.tittel,
-                tekst = it.tekst,
-                steg = it.steg,
+                tittel = it.behandlingsloggstype.tittel,
+                tekst = it.behandlingsloggstype.tekst,
+                steg = it.behandlingsloggstype.steg.toString(),
                 opprettetTid = it.opprettetTid.atOffset(ZoneOffset.UTC),
             )
         }

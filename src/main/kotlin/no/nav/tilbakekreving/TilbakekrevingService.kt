@@ -240,6 +240,7 @@ class TilbakekrevingService(
                     VarselbrevSendtHendelse(
                         varselbrevId = behov.brevId,
                         journalpostId = arkivert.journalpostId,
+                        behandlerIdent = behov.varselbrev.ansvarligSaksbehandlerIdent,
                     ),
                 )
             }
