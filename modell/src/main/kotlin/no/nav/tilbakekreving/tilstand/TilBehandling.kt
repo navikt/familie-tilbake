@@ -58,5 +58,6 @@ object TilBehandling : Tilstand {
         kravgrunnlag: KravgrunnlagHendelse,
     ) {
         tilbakekreving.hånterEndretKravgrunnlag(kravgrunnlag)
+        tilbakekreving.trengerFagsysteminfo()
     }
 }
