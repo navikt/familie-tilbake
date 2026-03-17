@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.tilstand
 
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.Behandling
+import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
@@ -86,11 +87,11 @@ internal sealed interface Tilstand {
         throw ModellFeil.UgyldigOperasjonException("Forventet ikke DistribusjonHendelse i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
     }
 
-    fun håndterNullstilling(nåværendeBehandling: Behandling, sporing: Sporing) {
+    fun håndterNullstilling(nåværendeBehandling: Behandling, sporing: Sporing, behandlingslogg: Behandlingslogg) {
         throw ModellFeil.UgyldigOperasjonException("Kan ikke flytte tilbake til fakta i $tilbakekrevingTilstand", sporing)
     }
 
-    fun håndterTrekkTilbakeFraGodkjenning(behandling: Behandling, sporing: Sporing) {
+    fun håndterTrekkTilbakeFraGodkjenning(behandling: Behandling, sporing: Sporing, behandlingslogg: Behandlingslogg) {
         throw ModellFeil.UgyldigOperasjonException("Kan ikke trekke tilbake fra godkjenning $tilbakekrevingTilstand", sporing)
     }
 }

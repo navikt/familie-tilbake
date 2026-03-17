@@ -50,6 +50,7 @@ class JournalførVedtakTest {
             IverksettelseHendelse(
                 iverksattVedtakId = UUID.randomUUID(),
                 vedtakId = BigInteger("1234"),
+                behandlingId = UUID.randomUUID(),
             ),
         )
         val brevId = (oppsamler.behovListe.last() as JournalføringBehov).brevId

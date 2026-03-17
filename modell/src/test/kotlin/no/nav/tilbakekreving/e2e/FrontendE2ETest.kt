@@ -67,6 +67,7 @@ class FrontendE2ETest {
             IverksettelseHendelse(
                 iverksattVedtakId = UUID.randomUUID(),
                 vedtakId = BigInteger.ZERO,
+                behandlingId = UUID.randomUUID(),
             ),
         )
         tilbakekreving.frontendDtoForBehandling(behandler, true).status shouldBe Behandlingsstatus.JOURNALFØR_VEDTAK
@@ -74,10 +75,11 @@ class FrontendE2ETest {
             JournalføringHendelse(
                 brevId = (behovOppsamler.behovListe.last() as JournalføringBehov).brevId,
                 journalpostId = "123",
+                behandlingId = UUID.randomUUID(),
             ),
         )
         tilbakekreving.frontendDtoForBehandling(behandler, true).status shouldBe Behandlingsstatus.DISTRIUBER_VEDTAK
-        tilbakekreving.håndter(DistribusjonHendelse("1234"))
+        tilbakekreving.håndter(DistribusjonHendelse(bestillingsId = "1234", behandlingId = UUID.randomUUID()))
         tilbakekreving.frontendDtoForBehandling(behandler, true).status shouldBe Behandlingsstatus.AVSLUTTET
     }
 }

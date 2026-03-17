@@ -12,6 +12,7 @@ import no.nav.tilbakekreving.brev.vedtaksbrev.NyVedtaksbrevService
 import no.nav.tilbakekreving.kontrakter.frontend.apis.BehandlingApi
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.LogginnslagDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevDataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDataDto
@@ -131,5 +132,19 @@ class BehandlingApiController(
         )
 
         return ResponseEntity.ok(tilbakekreving.hentVedtaksresultatForFrontend())
+    }
+
+    override fun behandlingBehandlingslogg(behandlingId: UUID): ResponseEntity<List<LogginnslagDto>> {
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+            ?: return ResponseEntity.notFound().build()
+
+        tilgangskontrollService.validerTilgangTilbakekreving(
+            tilbakekreving = tilbakekreving,
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+            auditLoggerEvent = AuditLoggerEvent.ACCESS,
+            handling = "Henter informasjon for bruk i brev",
+        )
+        return ResponseEntity.ok(tilbakekrevingService.hentHistorikk(tilbakekreving))
     }
 }
