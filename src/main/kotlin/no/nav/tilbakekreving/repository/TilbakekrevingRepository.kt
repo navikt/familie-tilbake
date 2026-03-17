@@ -118,7 +118,7 @@ class TilbakekrevingRepository(
         behandlingRepository.lagreBehandlinger(entity.behandlingHistorikkEntities)
         brevRepository.lagre(entity.brevHistorikkEntities)
         entity.bruker?.let { brukerRepository.lagre(it) }
-        behandlingsloggRepository.lagre(entity.behandlingsloggEntities)
+        behandlingsloggRepository.lagre(entity.loggInnlagEntities)
     }
 
     fun antallSakerPerTilstand(): List<ForenkletTilstandStatistikk> {

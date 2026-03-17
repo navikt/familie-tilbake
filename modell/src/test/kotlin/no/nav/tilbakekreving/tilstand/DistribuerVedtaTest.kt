@@ -40,6 +40,7 @@ class DistribuerVedtaTest {
             JournalføringHendelse(
                 brevId = brevId,
                 journalpostId = "123",
+                behandlingId = UUID.randomUUID(),
             ),
         )
         tilbakekreving.tilstand shouldBe DistribuerVedtak

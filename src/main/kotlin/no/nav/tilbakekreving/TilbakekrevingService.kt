@@ -239,6 +239,7 @@ class TilbakekrevingService(
                 tilbakekreving.håndter(
                     VarselbrevSendtHendelse(
                         varselbrevId = behov.brevId,
+                        behandlingId = behov.behandlingId,
                         journalpostId = arkivert.journalpostId,
                         behandlerIdent = behov.varselbrev.ansvarligSaksbehandlerIdent,
                     ),
@@ -266,6 +267,7 @@ class TilbakekrevingService(
                 tilbakekreving.håndter(
                     IverksettelseHendelse(
                         iverksattVedtakId = iverksattVedtak.id,
+                        behandlingId = iverksattVedtak.behandlingId,
                         vedtakId = iverksattVedtak.vedtakId,
                     ),
                 )
@@ -283,6 +285,7 @@ class TilbakekrevingService(
                 tilbakekreving.håndter(
                     JournalføringHendelse(
                         brevId = behov.brevId,
+                        behandlingId = behov.behandlingId,
                         journalpostId = journalpost.journalpostId,
                     ),
                 )
@@ -290,7 +293,7 @@ class TilbakekrevingService(
 
             is DistribusjonBehov -> {
                 val bestillingId = vedtaksbrevService.distribuereVedtaksbrev(behov, logContext)
-                tilbakekreving.håndter(DistribusjonHendelse(bestillingId))
+                tilbakekreving.håndter(DistribusjonHendelse(bestillingId, behov.behandlingId))
             }
         }
     }

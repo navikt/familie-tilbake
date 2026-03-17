@@ -57,7 +57,7 @@ object TilbakekrevingEntityMapper : Entity<TilbakekrevingEntity, String, Long>(
             opprettelsesvalg = resultSet[opprettelsesvalg],
             nestePåminnelse = resultSet[nestePåminnelse],
             bruker = bruker,
-            behandlingsloggEntities = behandlingsloggEntity,
+            loggInnlagEntities = behandlingsloggEntity,
         )
     }
 }

@@ -77,9 +77,11 @@ class Behandlingslogg {
 
         tilbakekreving.behandlingslogg.tilFrontend().shouldNotHaveSize(0)
         tilbakekreving.behandlingslogg.tilFrontend().map { it.tittel } shouldContainAll listOf(
+            "Kravgrunnlag mottatt",
+            "Tilbakekreving opprettet",
             "Behandling opprettet",
-            "Fagsysteminfo innhentet",
-            "Brukerinfo innhentet",
+            "Fagsysteminfo oppdatert",
+            "Brukerinfo oppdatert",
             "Fakta vurdert",
             "Foreldelse vurdert",
             "Vilkår vurdert",

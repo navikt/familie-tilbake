@@ -2,7 +2,7 @@ package no.nav.tilbakekreving.entities
 
 import no.nav.tilbakekreving.behandlingslogg.Behandlingsloggstype
 import no.nav.tilbakekreving.behandlingslogg.LoggInnslag
-import no.nav.tilbakekreving.behandlingslogg.Utfører
+import no.nav.tilbakekreving.behandlingslogg.Rolle
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -11,8 +11,8 @@ data class LoggInnlagEntity(
     val tilbakekrevingRef: String,
     val behandlingId: UUID?,
     val opprettetTid: LocalDateTime,
-    val utfører: Utfører,
-    val utførerIdent: String,
+    val rolle: Rolle,
+    val behandlerIdent: String,
     val behandlingsloggstype: Behandlingsloggstype,
 ) {
     fun fraEntity(): LoggInnslag = LoggInnslag(
@@ -20,7 +20,7 @@ data class LoggInnlagEntity(
         behandlingId = behandlingId,
         opprettetTid = opprettetTid,
         behandlingsloggstype = behandlingsloggstype,
-        utfører = utfører,
-        utførerIdent = utførerIdent,
+        rolle = rolle,
+        behandlerIdent = behandlerIdent,
     )
 }

@@ -4,6 +4,7 @@ import java.util.UUID
 
 data class VarselbrevSendtHendelse(
     val varselbrevId: UUID,
+    val behandlingId: UUID,
     val journalpostId: String?,
     val behandlerIdent: String,
 )

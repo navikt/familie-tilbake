@@ -31,7 +31,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkår
 import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
 import no.nav.tilbakekreving.behandlingslogg.Behandlingsloggstype
 import no.nav.tilbakekreving.behandlingslogg.LoggInnslag
-import no.nav.tilbakekreving.behandlingslogg.Utfører
+import no.nav.tilbakekreving.behandlingslogg.Rolle
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.DistribusjonBehov
 import no.nav.tilbakekreving.behov.IverksettelseBehov
@@ -355,7 +355,7 @@ class Behandling internal constructor(
         behandlingslogg.lagre(
             opprettLoggInnslag(
                 behandlingsloggstype = Behandlingsloggstype.FAKTA_VURDERT,
-                utfører = Utfører.SAKSBEHANDLER,
+                rolle = Rolle.SAKSBEHANDLER,
                 behandler = behandler,
             ),
         )
@@ -382,7 +382,7 @@ class Behandling internal constructor(
         behandlingslogg.lagre(
             opprettLoggInnslag(
                 behandlingsloggstype = Behandlingsloggstype.FAKTA_VURDERT,
-                utfører = Utfører.SAKSBEHANDLER,
+                rolle = Rolle.SAKSBEHANDLER,
                 behandler = behandler,
             ),
         )
@@ -401,7 +401,7 @@ class Behandling internal constructor(
         behandlingslogg.lagre(
             opprettLoggInnslag(
                 behandlingsloggstype = Behandlingsloggstype.VILKÅRSVURDERING_VURDERT,
-                utfører = Utfører.SAKSBEHANDLER,
+                rolle = Rolle.SAKSBEHANDLER,
                 behandler = behandler,
             ),
         )
@@ -420,7 +420,7 @@ class Behandling internal constructor(
         behandlingslogg.lagre(
             opprettLoggInnslag(
                 behandlingsloggstype = Behandlingsloggstype.FORELDELSE_VURDERT,
-                utfører = Utfører.SAKSBEHANDLER,
+                rolle = Rolle.SAKSBEHANDLER,
                 behandler = behandler,
             ),
         )
@@ -437,7 +437,7 @@ class Behandling internal constructor(
         behandlingslogg.lagre(
             opprettLoggInnslag(
                 behandlingsloggstype = Behandlingsloggstype.FORESLÅ_VEDTAK_VURDERT,
-                utfører = Utfører.SAKSBEHANDLER,
+                rolle = Rolle.SAKSBEHANDLER,
                 behandler = behandler,
             ),
         )
@@ -463,7 +463,7 @@ class Behandling internal constructor(
             behandlingslogg.lagre(
                 opprettLoggInnslag(
                     behandlingsloggstype = Behandlingsloggstype.VEDTAK_FATTET,
-                    utfører = Utfører.BESLUTTER,
+                    rolle = Rolle.BESLUTTER,
                     behandler = ansvarligSaksbehandler,
                 ),
             )
@@ -472,7 +472,7 @@ class Behandling internal constructor(
             behandlingslogg.lagre(
                 opprettLoggInnslag(
                     behandlingsloggstype = Behandlingsloggstype.BEHANDLING_SENDT_TILBAKE_TIL_SAKSBEHANDLER,
-                    utfører = Utfører.BESLUTTER,
+                    rolle = Rolle.BESLUTTER,
                     behandler = ansvarligSaksbehandler,
                 ),
             )
@@ -647,7 +647,7 @@ class Behandling internal constructor(
         behandlingslogg.lagre(
             opprettLoggInnslag(
                 behandlingsloggstype = Behandlingsloggstype.BEHANDLING_NULLSTILLT,
-                utfører = Utfører.SAKSBEHANDLER,
+                rolle = Rolle.SAKSBEHANDLER,
                 behandler = ansvarligSaksbehandler,
             ),
         )
@@ -657,8 +657,8 @@ class Behandling internal constructor(
         foreslåVedtakSteg.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry)
         behandlingslogg.lagre(
             opprettLoggInnslag(
-                behandlingsloggstype = Behandlingsloggstype.ANGRE_SEND_TIL_BESLUTTER,
-                utfører = Utfører.SAKSBEHANDLER,
+                behandlingsloggstype = Behandlingsloggstype.TREKK_TILBAKE_FRA_GODKJENNING,
+                rolle = Rolle.SAKSBEHANDLER,
                 behandler = ansvarligSaksbehandler,
             ),
         )
@@ -709,14 +709,14 @@ class Behandling internal constructor(
         features = features,
     )
 
-    fun opprettLoggInnslag(behandlingsloggstype: Behandlingsloggstype, utfører: Utfører, behandler: Behandler): LoggInnslag {
+    fun opprettLoggInnslag(behandlingsloggstype: Behandlingsloggstype, rolle: Rolle, behandler: Behandler): LoggInnslag {
         return LoggInnslag(
             id = UUID.randomUUID(),
             behandlingId = id,
             opprettetTid = LocalDateTime.now(),
             behandlingsloggstype = behandlingsloggstype,
-            utfører = utfører,
-            utførerIdent = behandler.ident,
+            rolle = rolle,
+            behandlerIdent = behandler.ident,
         )
     }
 

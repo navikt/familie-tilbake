@@ -123,6 +123,7 @@ class IverksettVedtakTest {
             IverksettelseHendelse(
                 iverksattVedtakId = UUID.randomUUID(),
                 vedtakId = BigInteger("1234"),
+                behandlingId = UUID.randomUUID(),
             ),
         )
         tilbakekreving.tilstand shouldBe JournalførVedtak
@@ -146,6 +147,7 @@ class IverksettVedtakTest {
                 IverksettelseHendelse(
                     iverksattVedtakId = UUID.randomUUID(),
                     vedtakId = BigInteger("1234"),
+                    behandlingId = UUID.randomUUID(),
                 ),
             )
         }

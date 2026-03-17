@@ -35,7 +35,7 @@ data class TilbakekrevingEntity(
     val nestePåminnelse: LocalDateTime?,
     val opprettelsesvalg: Opprettelsesvalg,
     val bruker: BrukerEntity?,
-    val behandlingsloggEntities: List<LoggInnlagEntity>,
+    val loggInnlagEntities: List<LoggInnlagEntity>,
 ) {
     fun fraEntity(
         behovObservatør: BehovObservatør,
@@ -64,7 +64,7 @@ data class TilbakekrevingEntity(
         )
 
         val behandlingslogg = Behandlingslogg(
-            historikk = behandlingsloggEntities.map {
+            historikk = loggInnlagEntities.map {
                 it.fraEntity()
             }.toMutableList(),
         )

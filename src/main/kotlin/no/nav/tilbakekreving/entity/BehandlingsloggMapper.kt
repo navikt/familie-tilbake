@@ -1,7 +1,7 @@
 package no.nav.tilbakekreving.entity
 
 import no.nav.tilbakekreving.behandlingslogg.Behandlingsloggstype
-import no.nav.tilbakekreving.behandlingslogg.Utfører
+import no.nav.tilbakekreving.behandlingslogg.Rolle
 import no.nav.tilbakekreving.entities.LoggInnlagEntity
 import java.sql.ResultSet
 import java.util.UUID
@@ -29,15 +29,15 @@ object BehandlingsloggMapper : Entity<LoggInnlagEntity, UUID, UUID>(
         FieldConverter.EnumConverter.of<Behandlingsloggstype>().required(),
     )
 
-    val utfører = field(
-        "utfører",
-        { it.utfører },
-        FieldConverter.EnumConverter.of<Utfører>().required(),
+    val rolle = field(
+        "rolle",
+        { it.rolle },
+        FieldConverter.EnumConverter.of<Rolle>().required(),
     )
 
-    val utførerIdent = field(
-        "utfører_ident",
-        { it.utførerIdent },
+    val behandlerIdent = field(
+        "behandler_ident",
+        { it.behandlerIdent },
         FieldConverter.StringConverter.required(),
     )
 
@@ -54,8 +54,8 @@ object BehandlingsloggMapper : Entity<LoggInnlagEntity, UUID, UUID>(
             id = resultSet[BrevEntityMapper.id],
             tilbakekrevingRef = resultSet[tilbakekrevingRef],
             behandlingId = resultSet[behandlingId],
-            utfører = resultSet[utfører],
-            utførerIdent = resultSet[utførerIdent],
+            rolle = resultSet[rolle],
+            behandlerIdent = resultSet[behandlerIdent],
             opprettetTid = resultSet[opprettetTid],
             behandlingsloggstype = resultSet[behandlingsloggstype],
         )

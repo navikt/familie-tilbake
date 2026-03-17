@@ -36,8 +36,8 @@ enum class Behandlingsloggstype(
         steg = null,
     ),
 
-    BRUKERINFO_HENT(
-        tittel = "Brukerinfo innhentet",
+    BRUKERINFO_OPPDATERT(
+        tittel = "Brukerinfo oppdatert",
         tekst = null,
         type = Historikkinnslagstype.HENDELSE,
         steg = null,
@@ -69,8 +69,8 @@ enum class Behandlingsloggstype(
         steg = Behandlingssteg.FORESLÅ_VEDTAK,
     ),
 
-    ANGRE_SEND_TIL_BESLUTTER(
-        tittel = "Angre send til beslutter",
+    TREKK_TILBAKE_FRA_GODKJENNING(
+        tittel = "Trekk tilbake fra godkjenning",
         tekst = null,
         type = Historikkinnslagstype.HENDELSE,
         steg = null,

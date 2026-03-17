@@ -22,7 +22,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Forårs
 import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
 import no.nav.tilbakekreving.behandlingslogg.Behandlingsloggstype
 import no.nav.tilbakekreving.behandlingslogg.LoggInnslag
-import no.nav.tilbakekreving.behandlingslogg.Utfører
+import no.nav.tilbakekreving.behandlingslogg.Rolle
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.bigquery.BigQueryService
@@ -99,8 +99,9 @@ class Tilbakekreving internal constructor(
         behandlingslogg.lagre(
             opprettLoggInnslag(
                 behandlingsloggstype = Behandlingsloggstype.TILBAKEKREVING_OPPRETTET,
-                utfører = Utfører.VEDTAKSLØSNING,
+                rolle = Rolle.VEDTAKSLØSNING,
                 behandler = Behandler.Vedtaksløsning,
+                behandlingId = null,
             ),
         )
     }
@@ -110,8 +111,9 @@ class Tilbakekreving internal constructor(
         behandlingslogg.lagre(
             opprettLoggInnslag(
                 behandlingsloggstype = Behandlingsloggstype.KRAVGRUNNLAG_MOTTATT,
-                utfører = Utfører.VEDTAKSLØSNING,
+                rolle = Rolle.VEDTAKSLØSNING,
                 behandler = Behandler.Vedtaksløsning,
+                behandlingId = null,
             ),
         )
     }
@@ -121,8 +123,9 @@ class Tilbakekreving internal constructor(
         behandlingslogg.lagre(
             opprettLoggInnslag(
                 behandlingsloggstype = Behandlingsloggstype.FAGSYSTEMINFO_OPPDATERT,
-                utfører = Utfører.VEDTAKSLØSNING,
+                rolle = Rolle.VEDTAKSLØSNING,
                 behandler = Behandler.Vedtaksløsning,
+                behandlingId = null,
             ),
         )
     }
@@ -131,9 +134,10 @@ class Tilbakekreving internal constructor(
         tilstand.håndter(this, brukerinfo)
         behandlingslogg.lagre(
             opprettLoggInnslag(
-                behandlingsloggstype = Behandlingsloggstype.BRUKERINFO_HENT,
-                utfører = Utfører.VEDTAKSLØSNING,
+                behandlingsloggstype = Behandlingsloggstype.BRUKERINFO_OPPDATERT,
+                rolle = Rolle.VEDTAKSLØSNING,
                 behandler = Behandler.Vedtaksløsning,
+                behandlingId = null,
             ),
         )
     }
@@ -144,8 +148,9 @@ class Tilbakekreving internal constructor(
         behandlingslogg.lagre(
             opprettLoggInnslag(
                 behandlingsloggstype = Behandlingsloggstype.VARSELBREV_SENDT,
-                utfører = Utfører.SAKSBEHANDLER,
+                rolle = Rolle.SAKSBEHANDLER,
                 behandler = Behandler.Saksbehandler(varselbrevSendt.behandlerIdent),
+                behandlingId = varselbrevSendt.behandlingId,
             ),
         )
         behandling.utførSideeffekt(tilstand, this, bigQueryService, eksternFagsak.ytelse.hentYtelsesnavn(Språkkode.NB))
@@ -156,8 +161,9 @@ class Tilbakekreving internal constructor(
         behandlingslogg.lagre(
             opprettLoggInnslag(
                 behandlingsloggstype = Behandlingsloggstype.BEHANDLING_AVSLUTTET,
-                utfører = Utfører.VEDTAKSLØSNING,
+                rolle = Rolle.VEDTAKSLØSNING,
                 behandler = Behandler.Vedtaksløsning,
+                behandlingId = iverksettelseHendelse.behandlingId,
             ),
         )
     }
@@ -167,8 +173,9 @@ class Tilbakekreving internal constructor(
         behandlingslogg.lagre(
             opprettLoggInnslag(
                 behandlingsloggstype = Behandlingsloggstype.DOKUMENT_JOURNALFØRT,
-                utfører = Utfører.VEDTAKSLØSNING,
+                rolle = Rolle.VEDTAKSLØSNING,
                 behandler = Behandler.Vedtaksløsning,
+                behandlingId = journalføringHendelse.behandlingId,
             ),
         )
     }
@@ -178,8 +185,9 @@ class Tilbakekreving internal constructor(
         behandlingslogg.lagre(
             opprettLoggInnslag(
                 behandlingsloggstype = Behandlingsloggstype.VEDTAKSBREV_SENDT,
-                utfører = Utfører.VEDTAKSLØSNING,
+                rolle = Rolle.VEDTAKSLØSNING,
                 behandler = Behandler.Vedtaksløsning,
+                behandlingId = distribusjonHendelse.behandlingId,
             ),
         )
     }
@@ -245,8 +253,9 @@ class Tilbakekreving internal constructor(
         behandlingslogg.lagre(
             opprettLoggInnslag(
                 behandlingsloggstype = Behandlingsloggstype.BEHANDLING_OPPRETTET,
-                utfører = Utfører.VEDTAKSLØSNING,
+                rolle = Rolle.VEDTAKSLØSNING,
                 behandler = Behandler.Vedtaksløsning,
+                behandlingId = behandlingId,
             ),
         )
         sendStatusendring(null, ForenkletBehandlingsstatus.OPPRETTET)
@@ -465,7 +474,7 @@ class Tilbakekreving internal constructor(
             opprettelsesvalg = this.opprettelsesvalg,
             nestePåminnelse = nestePåminnelse,
             bruker = this.bruker?.tilEntity(id),
-            behandlingsloggEntities = behandlingslogg.tilEntity(id),
+            loggInnlagEntities = behandlingslogg.tilEntity(id),
         )
     }
 
@@ -565,14 +574,14 @@ class Tilbakekreving internal constructor(
         return behandlingslogg.tilFrontend()
     }
 
-    fun opprettLoggInnslag(behandlingsloggstype: Behandlingsloggstype, utfører: Utfører, behandler: Behandler): LoggInnslag {
+    fun opprettLoggInnslag(behandlingsloggstype: Behandlingsloggstype, rolle: Rolle, behandler: Behandler, behandlingId: UUID?): LoggInnslag {
         return LoggInnslag(
             id = UUID.randomUUID(),
-            behandlingId = behandlingHistorikk.takeIf { it.harBehandling() }?.nåværende()?.entry?.id,
+            behandlingId = behandlingId,
             behandlingsloggstype = behandlingsloggstype,
             opprettetTid = LocalDateTime.now(),
-            utfører = utfører,
-            utførerIdent = behandler.ident,
+            rolle = rolle,
+            behandlerIdent = behandler.ident,
         )
     }
 

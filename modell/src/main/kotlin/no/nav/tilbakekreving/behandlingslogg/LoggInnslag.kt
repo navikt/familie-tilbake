@@ -10,21 +10,21 @@ data class LoggInnslag(
     val behandlingId: UUID?,
     val opprettetTid: LocalDateTime,
     val behandlingsloggstype: Behandlingsloggstype,
-    val utfører: Utfører,
-    val utførerIdent: String,
+    val rolle: Rolle,
+    val behandlerIdent: String,
 ) : Historikk.HistorikkInnslag<UUID> {
     fun tilEntity(tilbakekrevingId: String): LoggInnlagEntity = LoggInnlagEntity(
         id = id,
         tilbakekrevingRef = tilbakekrevingId,
         behandlingId = behandlingId,
         behandlingsloggstype = behandlingsloggstype,
-        utfører = utfører,
-        utførerIdent = utførerIdent,
+        rolle = rolle,
+        behandlerIdent = behandlerIdent,
         opprettetTid = opprettetTid,
     )
 }
 
-enum class Utfører {
+enum class Rolle {
     SAKSBEHANDLER,
     BESLUTTER,
     VEDTAKSLØSNING,

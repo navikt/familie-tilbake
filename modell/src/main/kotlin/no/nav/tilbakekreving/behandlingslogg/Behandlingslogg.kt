@@ -40,8 +40,8 @@ data class Behandlingslogg(
             LogginnslagDto(
                 behandlingId = it.behandlingId.toString(),
                 type = it.behandlingsloggstype.type.toString(),
-                aktør = it.utfører.toString(),
-                aktørIdent = it.utførerIdent,
+                aktør = it.rolle.toString(),
+                aktørIdent = it.behandlerIdent,
                 tittel = it.behandlingsloggstype.tittel,
                 tekst = it.behandlingsloggstype.tekst,
                 steg = it.behandlingsloggstype.steg.toString(),
