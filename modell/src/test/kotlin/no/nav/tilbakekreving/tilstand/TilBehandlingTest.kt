@@ -1,11 +1,16 @@
 package no.nav.tilbakekreving.tilstand
 
+import io.kotest.assertions.fail
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.inspectors.forOne
+import io.kotest.inspectors.shouldForOne
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.tilbakekreving.ANSVARLIG_BESLUTTER
 import no.nav.tilbakekreving.ANSVARLIG_SAKSBEHANDLER
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvNav
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegsinfoDto
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
@@ -199,14 +204,13 @@ class TilBehandlingTest {
 
         val tilbakekrevingDtoEtter = tilbakekreving.frontendDtoForBehandling(ANSVARLIG_SAKSBEHANDLER, false)
         tilbakekrevingDtoEtter.status shouldBe Behandlingsstatus.UTREDES
+        tilbakekrevingDtoEtter.behandlingsstegsinfo.skalHaSteg(Behandlingssteg.FAKTA).behandlingsstegstatus shouldBe Behandlingsstegstatus.TILBAKEFØRT
+        tilbakekrevingDtoEtter.behandlingsstegsinfo.skalHaSteg(Behandlingssteg.FORESLÅ_VEDTAK).behandlingsstegstatus shouldBe Behandlingsstegstatus.UTFØRT
+        tilbakekrevingDtoEtter.behandlingsstegsinfo.skalHaSteg(Behandlingssteg.FATTE_VEDTAK).behandlingsstegstatus shouldBe Behandlingsstegstatus.KLAR
+    }
 
-        val faktaStegInfo = tilbakekrevingDtoEtter.behandlingsstegsinfo.single { it.behandlingssteg == Behandlingssteg.FAKTA }
-        faktaStegInfo.behandlingsstegstatus shouldBe Behandlingsstegstatus.TILBAKEFØRT
-
-        val foreslåVedtakStegInfo = tilbakekrevingDtoEtter.behandlingsstegsinfo.none { it.behandlingssteg == Behandlingssteg.FORESLÅ_VEDTAK }
-        val fatteVedtakStegInfo = tilbakekrevingDtoEtter.behandlingsstegsinfo.none { it.behandlingssteg == Behandlingssteg.FATTE_VEDTAK }
-        foreslåVedtakStegInfo shouldBe true
-        fatteVedtakStegInfo shouldBe true
+    private fun List<BehandlingsstegsinfoDto>.skalHaSteg(behandlingssteg: Behandlingssteg): BehandlingsstegsinfoDto {
+        return this.singleOrNull { it.behandlingssteg == behandlingssteg } ?: fail("Fant ikke $behandlingssteg i ${this.map(BehandlingsstegsinfoDto::behandlingssteg)}")
     }
 
     private fun tilbakekrevingTilGodkjenning(

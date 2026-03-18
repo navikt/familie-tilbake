@@ -42,7 +42,7 @@ internal interface Saksbehandlingsteg {
             val klarTilBehandling = mutableListOf<Saksbehandlingsteg>()
             for (steg in this) {
                 klarTilBehandling.add(steg)
-                if (!steg.erKlar()) return klarTilBehandling
+                if (!steg.erFullstendig()) return klarTilBehandling
             }
             return klarTilBehandling
         }
