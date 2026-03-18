@@ -32,6 +32,12 @@ rolle:
   teamfamilie:
     forvalter: "3d718ae5-f25e-47a4-b4b3-084a97604c1d"
   prosessering: "87190cf3-b278-457d-8ab7-1a5c55a9edd7" # Gruppen teamfamilie
+  dp:
+    veileder: [] # Dagpenger har ikke veileder-tilgang ennå
+    saksbehandler:
+      - "2e9c63d8-322e-4c1f-b500-a0abb812761c" # 0000-GA-Dagpenger-Saksbehandler
+    beslutter:
+      - "70d54cad-53a3-4788-bbe3-565096f01da7" # 0000-GA-Dagpenger-Beslutter
 
 
 SECURITYTOKENSERVICE_URL:  https://security-token-service.nais.adeo.no/SecurityTokenServiceProvider/
