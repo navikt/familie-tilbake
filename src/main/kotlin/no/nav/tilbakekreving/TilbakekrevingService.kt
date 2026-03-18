@@ -47,6 +47,7 @@ import no.nav.tilbakekreving.kontrakter.brev.Dokumentmalstype
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
+import no.nav.tilbakekreving.kontrakter.frontend.models.LogginnslagDto
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
@@ -238,7 +239,9 @@ class TilbakekrevingService(
                 tilbakekreving.håndter(
                     VarselbrevSendtHendelse(
                         varselbrevId = behov.brevId,
+                        behandlingId = behov.behandlingId,
                         journalpostId = arkivert.journalpostId,
+                        behandlerIdent = behov.varselbrev.ansvarligSaksbehandlerIdent,
                     ),
                 )
             }
@@ -264,6 +267,7 @@ class TilbakekrevingService(
                 tilbakekreving.håndter(
                     IverksettelseHendelse(
                         iverksattVedtakId = iverksattVedtak.id,
+                        behandlingId = iverksattVedtak.behandlingId,
                         vedtakId = iverksattVedtak.vedtakId,
                     ),
                 )
@@ -281,6 +285,7 @@ class TilbakekrevingService(
                 tilbakekreving.håndter(
                     JournalføringHendelse(
                         brevId = behov.brevId,
+                        behandlingId = behov.behandlingId,
                         journalpostId = journalpost.journalpostId,
                     ),
                 )
@@ -288,7 +293,7 @@ class TilbakekrevingService(
 
             is DistribusjonBehov -> {
                 val bestillingId = vedtaksbrevService.distribuereVedtaksbrev(behov, logContext)
-                tilbakekreving.håndter(DistribusjonHendelse(bestillingId))
+                tilbakekreving.håndter(DistribusjonHendelse(bestillingId, behov.behandlingId))
             }
         }
     }
@@ -483,5 +488,9 @@ class TilbakekrevingService(
                 logContext = SecureLog.Context.utenBehandling(tilbakekreving.eksternFagsak.eksternId),
             )
         }
+    }
+
+    fun hentHistorikk(tilbakekreving: Tilbakekreving): List<LogginnslagDto> {
+        return tilbakekreving.hentBehandlingslogg()
     }
 }

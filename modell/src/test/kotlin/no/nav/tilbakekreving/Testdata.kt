@@ -223,6 +223,7 @@ fun iverksettelse(): IverksettelseHendelse {
     return IverksettelseHendelse(
         iverksattVedtakId = UUID.randomUUID(),
         vedtakId = BigInteger.ZERO,
+        behandlingId = UUID.randomUUID(),
     )
 }
 
@@ -230,6 +231,7 @@ fun journalføring(brevId: UUID): JournalføringHendelse =
     JournalføringHendelse(
         brevId = brevId,
         journalpostId = "123",
+        behandlingId = UUID.randomUUID(),
     )
 
-fun distribusjon(): DistribusjonHendelse = DistribusjonHendelse("123")
+fun distribusjon(): DistribusjonHendelse = DistribusjonHendelse(bestillingsId = "123", behandlingId = UUID.randomUUID())

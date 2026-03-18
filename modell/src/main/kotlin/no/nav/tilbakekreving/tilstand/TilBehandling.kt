@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.tilstand
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
 import no.nav.tilbakekreving.behandling.Behandling
+import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
@@ -34,16 +35,16 @@ object TilBehandling : Tilstand {
         tilbakekreving.sendStatusendring(ForenkletBehandlingsstatus.OPPRETTET, ForenkletBehandlingsstatus.TIL_BEHANDLING)
     }
 
-    override fun håndterNullstilling(nåværendeBehandling: Behandling, sporing: Sporing) {
-        nåværendeBehandling.flyttTilbakeTilFakta()
+    override fun håndterNullstilling(nåværendeBehandling: Behandling, sporing: Sporing, behandlingslogg: Behandlingslogg) {
+        nåværendeBehandling.flyttTilbakeTilFakta(behandlingslogg)
     }
 
     override fun håndter(tilbakekreving: Tilbakekreving, fagsysteminfo: FagsysteminfoHendelse) {
         tilbakekreving.oppdaterFagsysteminfo(fagsysteminfo)
     }
 
-    override fun håndterTrekkTilbakeFraGodkjenning(behandling: Behandling, sporing: Sporing) {
-        behandling.trekkTilbakeFraGodkjenning()
+    override fun håndterTrekkTilbakeFraGodkjenning(behandling: Behandling, sporing: Sporing, behandlingslogg: Behandlingslogg) {
+        behandling.trekkTilbakeFraGodkjenning(behandlingslogg)
     }
 
     override fun håndter(
@@ -58,5 +59,6 @@ object TilBehandling : Tilstand {
         kravgrunnlag: KravgrunnlagHendelse,
     ) {
         tilbakekreving.hånterEndretKravgrunnlag(kravgrunnlag)
+        tilbakekreving.trengerFagsysteminfo()
     }
 }
