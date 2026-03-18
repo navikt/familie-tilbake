@@ -34,6 +34,7 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
             id = resultSet[id],
             behandlingRef = resultSet[behandlingRef],
             vurderinger = vurdertePerioder,
+            underkjent = false,
         )
     }
 

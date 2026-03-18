@@ -2,9 +2,6 @@ package no.nav.tilbakekreving.tilstand
 
 import io.kotest.assertions.fail
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.inspectors.forOne
-import io.kotest.inspectors.shouldForOne
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.tilbakekreving.ANSVARLIG_BESLUTTER

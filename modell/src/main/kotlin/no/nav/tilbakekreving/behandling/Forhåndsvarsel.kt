@@ -43,6 +43,7 @@ class Forhåndsvarsel(
             brukeruttalelseEntity = brukeruttalelse?.tilEntity(behandlingRef),
             forhåndsvarselUnntakEntity = forhåndsvarselUnntak?.tilEntity(behandlingRef),
             fristUtsettelseEntity = utsattFrist?.tilEntity(behandlingRef),
+            underkjent = underkjent,
         )
     }
 

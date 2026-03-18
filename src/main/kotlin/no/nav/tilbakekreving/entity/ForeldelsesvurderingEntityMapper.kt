@@ -27,6 +27,7 @@ object ForeldelsesvurderingEntityMapper : Entity<ForeldelsesstegEntity, UUID, UU
             id = resultSet[id],
             behandlingRef = resultSet[behandlingRef],
             vurdertePerioder = vurdertePerioder,
+            underkjent = false,
         )
     }
 

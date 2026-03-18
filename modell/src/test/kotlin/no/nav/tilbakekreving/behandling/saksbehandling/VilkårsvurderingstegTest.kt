@@ -25,6 +25,7 @@ import no.nav.tilbakekreving.test.skalIkkeUnnlates
 import no.nav.tilbakekreving.test.skalUnnlates
 import no.nav.tilbakekreving.test.uaktsomt
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 class VilkårsvurderingstegTest {
     @Test
@@ -166,5 +167,17 @@ class VilkårsvurderingstegTest {
             begrunnelse = "",
             foreldet = false,
         )
+    }
+
+    @Test
+    fun `underkjenning blir lagret`() {
+        val vilkårsvurderingssteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakRevurdering = eksternFagsakBehandling(),
+            kravgrunnlagHendelse = kravgrunnlag(),
+        )
+
+        vilkårsvurderingssteg.underkjennSteget()
+
+        vilkårsvurderingssteg.tilEntity(UUID.randomUUID()).underkjent shouldBe true
     }
 }

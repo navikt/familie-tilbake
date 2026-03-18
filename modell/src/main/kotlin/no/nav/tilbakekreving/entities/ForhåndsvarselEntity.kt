@@ -8,6 +8,7 @@ data class ForhåndsvarselEntity(
     val brukeruttalelseEntity: BrukeruttalelseEntity?,
     val forhåndsvarselUnntakEntity: ForhåndsvarselUnntakEntity?,
     val fristUtsettelseEntity: FristUtsettelseEntity?,
+    val underkjent: Boolean,
 ) {
     fun fraEntity(opprinneligFrist: LocalDate?): Forhåndsvarsel = Forhåndsvarsel(
         brukeruttalelse = midlertidigMapping(forhåndsvarselUnntakEntity, brukeruttalelseEntity)?.fraEntity(),
@@ -27,21 +28,25 @@ data class ForhåndsvarselEntity(
         val harUnntak = forhåndsvarselUnntakEntity != null
 
         val nyVurdering = when (legacy) {
-            UttalelseVurdering.JA ->
+            UttalelseVurdering.JA -> {
                 if (harUnntak) {
                     UttalelseVurdering.UNNTAK_ALLEREDE_UTTALT_SEG
                 } else {
                     UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL
                 }
+            }
 
-            UttalelseVurdering.NEI ->
+            UttalelseVurdering.NEI -> {
                 if (harUnntak) {
                     UttalelseVurdering.UNNTAK_INGEN_UTTALELSE
                 } else {
                     UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL
                 }
+            }
 
-            else -> legacy
+            else -> {
+                legacy
+            }
         }
 
         return entity.copy(uttalelseVurdering = nyVurdering)

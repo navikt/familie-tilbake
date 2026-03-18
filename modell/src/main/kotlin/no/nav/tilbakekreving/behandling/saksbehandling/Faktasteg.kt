@@ -151,7 +151,7 @@ class Faktasteg(
     }
 
     fun tilEntity(behandlingRef: UUID): FaktastegEntity {
-        return vurdering.tilEntity(id, behandlingRef)
+        return vurdering.tilEntity(id, behandlingRef, underkjent)
     }
 
     companion object {
@@ -228,6 +228,7 @@ class Faktasteg(
         fun tilEntity(
             id: UUID,
             behandlingRef: UUID,
+            underkjent: Boolean,
         ): FaktastegEntity {
             return FaktastegEntity(
                 id = id,
@@ -242,6 +243,7 @@ class Faktasteg(
                 årsakTilFeilutbetaling = årsakTilFeilutbetaling,
                 vurderingAvBrukersUttalelse = (uttalelse as? Uttalelse.Ja)?.begrunnelse,
                 oppdaget = oppdaget.tilEntity(id),
+                underkjent = underkjent,
             )
         }
 

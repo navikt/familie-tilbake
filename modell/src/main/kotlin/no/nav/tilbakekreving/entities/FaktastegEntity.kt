@@ -15,6 +15,7 @@ data class FaktastegEntity(
     val uttalelse: Uttalelse,
     val vurderingAvBrukersUttalelse: String?,
     val oppdaget: OppdagetEntity?,
+    val underkjent: Boolean,
 ) {
     fun fraEntity(
         brevHistorikk: BrevHistorikk,

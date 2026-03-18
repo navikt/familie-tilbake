@@ -7,6 +7,7 @@ data class VilkårsvurderingstegEntity(
     val id: UUID = UUID.randomUUID(),
     val behandlingRef: UUID?,
     val vurderinger: List<VilkårsvurderingsperiodeEntity>,
+    val underkjent: Boolean,
 ) {
     fun fraEntity(): Vilkårsvurderingsteg {
         return Vilkårsvurderingsteg(

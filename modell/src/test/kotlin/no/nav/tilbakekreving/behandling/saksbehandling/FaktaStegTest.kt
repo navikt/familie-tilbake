@@ -215,4 +215,17 @@ class FaktaStegTest {
             beskrivelse = "beskrivelse",
         )
     }
+
+    @Test
+    fun `underkjenning blir lagret`() {
+        val faktasteg = Faktasteg.opprett(
+            eksternFagsakRevurdering = eksternFagsakBehandling(),
+            kravgrunnlag = kravgrunnlag(),
+            brevHistorikk = BrevHistorikk(historikk = mutableListOf()),
+        )
+
+        faktasteg.underkjennSteget()
+
+        faktasteg.tilEntity(UUID.randomUUID()).underkjent shouldBe true
+    }
 }

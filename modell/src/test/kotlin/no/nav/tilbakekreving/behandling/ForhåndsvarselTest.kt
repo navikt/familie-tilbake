@@ -25,4 +25,13 @@ class ForhåndsvarselTest {
 
         forhåndsvarsel.meldingerTilSaksbehandler() shouldBe setOf(MeldingTilSaksbehandler.BEGRUNN_BRUKERS_UTTALELSE)
     }
+
+    @Test
+    fun `underkjenning blir lagret`() {
+        val forhåndsvarsel = Forhåndsvarsel.opprett(null)
+
+        forhåndsvarsel.underkjennSteget()
+
+        forhåndsvarsel.tilEntity(UUID.randomUUID()).underkjent shouldBe true
+    }
 }

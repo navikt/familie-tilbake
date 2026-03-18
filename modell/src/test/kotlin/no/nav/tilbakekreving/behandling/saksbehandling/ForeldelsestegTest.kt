@@ -8,6 +8,7 @@ import no.nav.tilbakekreving.kravgrunnlagPeriode
 import no.nav.tilbakekreving.test.februar
 import no.nav.tilbakekreving.test.januar
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 class ForeldelsestegTest {
     @Test
@@ -74,5 +75,17 @@ class ForeldelsestegTest {
         foreldelsesteg.vurderForeldelse(1.januar(2021) til 28.februar(2021), Foreldelsesteg.Vurdering.IkkeForeldet(""))
 
         foreldelsesteg.erPeriodeForeldet(1.januar(2021) til 31.januar(2021)) shouldBe false
+    }
+
+    @Test
+    fun `underkjenning blir lagret`() {
+        val forelgelse = Foreldelsesteg.opprett(
+            eksternFagsakRevurdering = eksternFagsakBehandling(),
+            kravgrunnlag = kravgrunnlag(),
+        )
+
+        forelgelse.underkjennSteget()
+
+        forelgelse.tilEntity(UUID.randomUUID()).underkjent shouldBe true
     }
 }

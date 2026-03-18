@@ -48,6 +48,7 @@ object FaktavurderingEntityMapper : Entity<FaktastegEntity, UUID, UUID>(
             uttalelse = resultSet[uttalelse],
             vurderingAvBrukersUttalelse = resultSet[vurderingAvBrukersUttalelse],
             oppdaget = oppdaget,
+            underkjent = false,
         )
     }
 

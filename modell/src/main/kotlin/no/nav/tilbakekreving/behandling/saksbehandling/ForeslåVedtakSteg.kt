@@ -34,6 +34,7 @@ class ForeslåVedtakSteg(
             id = id,
             behandlingRef = behandlingRef,
             vurdert = vurdert,
+            underkjent = underkjent,
         )
     }
 

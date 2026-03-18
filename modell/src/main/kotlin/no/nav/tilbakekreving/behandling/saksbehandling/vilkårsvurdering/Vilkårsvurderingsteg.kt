@@ -44,6 +44,7 @@ class Vilkårsvurderingsteg(
             id = id,
             behandlingRef = behandlingRef,
             vurderinger = vurderinger.map { it.tilEntity(id) },
+            underkjent = underkjent,
         )
     }
 

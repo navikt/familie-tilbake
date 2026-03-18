@@ -94,6 +94,7 @@ class Foreldelsesteg(
             id = id,
             behandlingRef = behandlingRef,
             vurdertePerioder = vurdertePerioder.map { it.tilEntity(id) },
+            underkjent = underkjent,
         )
     }
 

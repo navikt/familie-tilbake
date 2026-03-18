@@ -28,6 +28,7 @@ object ForeslåVedtakEntityMapper : Entity<ForeslåVedtakStegEntity, UUID, UUID>
             id = resultSet[id],
             behandlingRef = resultSet[behandlingRef],
             vurdert = resultSet[vurdert],
+            underkjent = false,
         )
     }
 }

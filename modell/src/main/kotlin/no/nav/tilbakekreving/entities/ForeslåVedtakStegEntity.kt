@@ -7,6 +7,7 @@ data class ForeslåVedtakStegEntity(
     val id: UUID = UUID.randomUUID(),
     val behandlingRef: UUID? = null,
     val vurdert: Boolean = false,
+    val underkjent: Boolean,
 ) {
     fun fraEntity(): ForeslåVedtakSteg {
         return ForeslåVedtakSteg(
