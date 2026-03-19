@@ -1304,7 +1304,7 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
             utbetaltBeløp = BigDecimal(4237),
             tilbakekrevesBeløp = BigDecimal(209),
             uinnkrevdBeløp = BigDecimal.ZERO,
-            skattBeløp = BigDecimal(104),
+            skattBeløp = BigDecimal(105),
             kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
         )
 
@@ -1525,7 +1525,7 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
             utbetaltBeløp = BigDecimal(19950),
             tilbakekrevesBeløp = BigDecimal(877),
             uinnkrevdBeløp = BigDecimal(878),
-            skattBeløp = BigDecimal(438),
+            skattBeløp = BigDecimal(439),
             kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING,
         )
     }
@@ -1737,7 +1737,7 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
             utbetaltBeløp = BigDecimal(12607),
             tilbakekrevesBeløp = BigDecimal(2962),
             uinnkrevdBeløp = BigDecimal.ZERO,
-            skattBeløp = BigDecimal(429),
+            skattBeløp = BigDecimal(430),
             kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
         )
 

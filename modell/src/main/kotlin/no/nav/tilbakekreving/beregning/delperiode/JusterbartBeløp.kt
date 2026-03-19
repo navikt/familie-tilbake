@@ -46,7 +46,7 @@ class JusterbartBeløp(
         }
 
         fun Iterable<JusterbartBeløp>.fordelSkattebeløp() {
-            fordel(JusterbartBeløp::skattebeløp, JusterbartBeløp::periode, RoundingMode.DOWN) {
+            fordel(JusterbartBeløp::skattebeløp, JusterbartBeløp::periode, RoundingMode.HALF_UP) {
                 skattebeløpAvrunding = BigDecimal.ONE
             }
         }

@@ -379,7 +379,7 @@ class BeregningTest {
             feilutbetaltBeløp = 18609.kroner,
             BeregnetBeløp(
                 tilbakekrevesBrutto = 18609.kroner,
-                skatt = 9304.kroner,
+                skatt = 9305.kroner,
                 utbetaltYtelsesbeløp = 44093.kroner,
                 klassekode = "BATR",
             ),
@@ -409,8 +409,8 @@ class BeregningTest {
                     tilbakekrevingsbeløpUtenRenter = 55827.kroner,
                     rentebeløp = 5582.kroner,
                     tilbakekrevingsbeløp = 61409.kroner,
-                    skattebeløp = 27913.kroner,
-                    tilbakekrevingsbeløpEtterSkatt = 33496.kroner,
+                    skattebeløp = 27914.kroner,
+                    tilbakekrevingsbeløpEtterSkatt = 33495.kroner,
                     utbetaltYtelsesbeløp = 132279.kroner,
                     riktigYtelsesbeløp = 76452.kroner,
                 ),
@@ -458,7 +458,7 @@ class BeregningTest {
             feilutbetaltBeløp = 1755.kroner,
             BeregnetBeløp(
                 tilbakekrevesBrutto = 877.kroner,
-                skatt = 438.kroner,
+                skatt = 439.kroner,
                 utbetaltYtelsesbeløp = 19950.kroner,
                 klassekode = "BATR",
             ),
@@ -475,8 +475,8 @@ class BeregningTest {
                     tilbakekrevingsbeløpUtenRenter = 1755.kroner,
                     rentebeløp = 0.kroner,
                     tilbakekrevingsbeløp = 1755.kroner,
-                    skattebeløp = 824.kroner,
-                    tilbakekrevingsbeløpEtterSkatt = 931.kroner,
+                    skattebeløp = 825.kroner,
+                    tilbakekrevingsbeløpEtterSkatt = 930.kroner,
                     utbetaltYtelsesbeløp = 39900.kroner,
                     riktigYtelsesbeløp = 36390.kroner,
                 ),
@@ -768,6 +768,68 @@ class BeregningTest {
                 ),
             ),
             vedtaksresultat = Vedtaksresultat.DELVIS_TILBAKEBETALING,
+        )
+    }
+
+    @Test
+    fun `skattebeløp rundes til nærmeste krone`() {
+        val beregning = Beregning(
+            beregnRenter = false,
+            tilbakekrevLavtBeløp = false,
+            vilkårsvurdering = vurdering(
+                (1.januar(2021) til 31.januar(2021)).medVurdering(forårsaketAvNav().burdeForstått()),
+            ),
+            foreldetPerioder = emptyList(),
+            kravgrunnlag = perioder(
+                1.januar(2021) til 31.januar(2021) medBeløp beløp(8000.kroner, skatteprosent = BigDecimal("25.111")),
+            ),
+            sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+        )
+
+        val delperioder = beregning.beregn()
+        delperioder.size shouldBe 1
+        delperioder[0].shouldMatch(
+            periode = 1.januar(2021) til 31.januar(2021),
+            renter = 0.kroner,
+            tilbakekrevesBruttoMedRenter = 8000.kroner,
+            feilutbetaltBeløp = 8000.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 8000.kroner,
+                skatt = 2009.kroner,
+                utbetaltYtelsesbeløp = 20000.kroner,
+                klassekode = "BATR",
+            ),
+        )
+    }
+
+    @Test
+    fun `skattebeløp rundes opp til nærmeste krone`() {
+        val beregning = Beregning(
+            beregnRenter = false,
+            tilbakekrevLavtBeløp = false,
+            vilkårsvurdering = vurdering(
+                (1.januar(2021) til 31.januar(2021)).medVurdering(forårsaketAvNav().burdeForstått()),
+            ),
+            foreldetPerioder = emptyList(),
+            kravgrunnlag = perioder(
+                1.januar(2021) til 31.januar(2021) medBeløp beløp(7998.kroner, skatteprosent = 25.prosent),
+            ),
+            sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+        )
+
+        val delperioder = beregning.beregn()
+        delperioder.size shouldBe 1
+        delperioder[0].shouldMatch(
+            periode = 1.januar(2021) til 31.januar(2021),
+            renter = 0.kroner,
+            tilbakekrevesBruttoMedRenter = 7998.kroner,
+            feilutbetaltBeløp = 7998.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 7998.kroner,
+                skatt = 2000.kroner,
+                utbetaltYtelsesbeløp = 20000.kroner,
+                klassekode = "BATR",
+            ),
         )
     }
 
