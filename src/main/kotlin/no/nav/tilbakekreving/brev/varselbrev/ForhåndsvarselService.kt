@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.brev.varselbrev
 
 import no.nav.familie.tilbake.config.Constants
+import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevUtil
@@ -51,6 +52,7 @@ class ForhåndsvarselService(
     private val varselbrevUtil: VarselbrevUtil,
     private val dokarkivClient: DokarkivClient,
     private val dokdistClient: DokdistClient,
+    private val eksterneDataForBrevService: EksterneDataForBrevService,
     private val pdfFactory: () -> PdfGenerator = { PdfGenerator() },
 ) {
     private val logger = TracedLogger.getLogger<ForhåndsvarselService>()
@@ -162,8 +164,8 @@ class ForhåndsvarselService(
             sakspartId = varselbrevInfo.brukerinfo.ident,
             sakspartsnavn = varselbrevInfo.brukerinfo.navn,
             mottageradresse = Adresseinfo(varselbrevInfo.brukerinfo.ident, varselbrevInfo.brukerinfo.navn),
-            behandlendeEnhetsNavn = varselbrevInfo.forhåndsvarselinfo.behandlendeEnhet?.navn ?: "Ukjent", // Todo Fjern ukjent når enhet er på plass,
-            ansvarligSaksbehandler = varselbrevInfo.forhåndsvarselinfo.ansvarligSaksbehandler.ident,
+            behandlendeEnhetsNavn = requireNotNull(varselbrevInfo.forhåndsvarselinfo.behandlendeEnhet) { "Enhetsnavn kreves for journalføring" }.navn,
+            ansvarligSaksbehandler = eksterneDataForBrevService.hentSaksbehandlernavn(varselbrevInfo.forhåndsvarselinfo.ansvarligSaksbehandler.ident),
             saksnummer = varselbrevInfo.eksternFagsakId,
             språkkode = varselbrevInfo.brukerinfo.språkkode,
             ytelsestype = varselbrevInfo.ytelseType,
@@ -257,7 +259,7 @@ class ForhåndsvarselService(
             tittel = hentVarselbrevTittel(varselbrevBehov),
             mottageradresse = Adresseinfo(varselbrevBehov.brukerinfo.ident, varselbrevBehov.brukerinfo.navn),
             behandlendeEnhetsNavn = requireNotNull(varselbrevBehov.behandlendeEnhet) { "Enhetsnavn kreves for journalføring" }.navn,
-            ansvarligSaksbehandler = requireNotNull(varselbrevBehov.varselbrev.ansvarligSaksbehandlerIdent) { "ansvarligSaksbehandlerIdent kreves for journalføring" },
+            ansvarligSaksbehandler = eksterneDataForBrevService.hentSaksbehandlernavn(varselbrevBehov.varselbrev.ansvarligSaksbehandlerIdent),
             saksnummer = varselbrevBehov.eksternFagsakId,
             språkkode = varselbrevBehov.brukerinfo.språkkode,
             ytelsestype = varselbrevBehov.ytelse.tilYtelseDTO(),
