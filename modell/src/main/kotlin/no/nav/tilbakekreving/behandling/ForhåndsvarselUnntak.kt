@@ -9,7 +9,14 @@ data class ForhåndsvarselUnntak(
     private val id: UUID,
     private val begrunnelseForUnntak: BegrunnelseForUnntak,
     private val beskrivelse: String,
+    private var trengerNyVurdering: Boolean,
 ) {
+    fun trengerNyVurdering(): Boolean = trengerNyVurdering
+
+    fun vurderPåNytt() {
+        trengerNyVurdering = true
+    }
+
     fun tilFrontendDto(): ForhåndsvarselUnntakDto = ForhåndsvarselUnntakDto(
         begrunnelseForUnntak = VarslingsUnntak.valueOf(begrunnelseForUnntak.name),
         beskrivelse = beskrivelse,
@@ -20,6 +27,7 @@ data class ForhåndsvarselUnntak(
         behandlingRef = behandlingRef,
         begrunnelseForUnntak = begrunnelseForUnntak,
         beskrivelse = beskrivelse,
+        trengerNyVurdering = trengerNyVurdering,
     )
 }
 

@@ -14,7 +14,14 @@ class Brukeruttalelse(
     private val uttalelseVurdering: UttalelseVurdering,
     private val uttalelseInfo: List<UttalelseInfo>,
     private val kommentar: String?,
+    private var trengerNyVurdering: Boolean,
 ) {
+    fun trengerNyVurdering(): Boolean = trengerNyVurdering
+
+    fun vurderPåNytt() {
+        trengerNyVurdering = true
+    }
+
     fun tilFrontendDto(): BrukeruttalelseDto {
         return BrukeruttalelseDto(
             harBrukerUttaltSeg = HarBrukerUttaltSeg.valueOf(uttalelseVurdering.name),
@@ -45,6 +52,7 @@ class Brukeruttalelse(
             )
         },
         kommentar = kommentar,
+        trengerNyVurdering = trengerNyVurdering,
     )
 
     fun meldingerTilSaksbehandler() = uttalelseVurdering.meldingerTilSaksbehandler

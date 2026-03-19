@@ -30,8 +30,19 @@ class ForhåndsvarselTest {
     fun `underkjenning blir lagret`() {
         val forhåndsvarsel = Forhåndsvarsel.opprett(null)
 
+        forhåndsvarsel.lagreForhåndsvarselUnntak(
+            begrunnelseForUnntak = BegrunnelseForUnntak.ALLEREDE_UTTALET_SEG,
+            beskrivelse = "",
+        )
+        forhåndsvarsel.lagreUttalelse(
+            UttalelseVurdering.UNNTAK_ALLEREDE_UTTALT_SEG,
+            uttalelseInfo = emptyList(),
+            kommentar = "",
+        )
         forhåndsvarsel.underkjennSteget()
 
-        forhåndsvarsel.tilEntity(UUID.randomUUID()).underkjent shouldBe true
+        val forhåndsvarselEntity = forhåndsvarsel.tilEntity(UUID.randomUUID())
+        forhåndsvarselEntity.forhåndsvarselUnntakEntity?.trengerNyVurdering shouldBe true
+        forhåndsvarselEntity.brukeruttalelseEntity?.trengerNyVurdering shouldBe true
     }
 }

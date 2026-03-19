@@ -9,9 +9,9 @@ import java.util.UUID
 class ForeslåVedtakSteg(
     private val id: UUID,
     private var vurdert: Boolean,
+    private var underkjent: Boolean,
 ) : Saksbehandlingsteg {
     override val type = Behandlingssteg.FORESLÅ_VEDTAK
-    private var underkjent: Boolean = false
 
     override fun erFullstendig(): Boolean = vurdert
 
@@ -34,7 +34,7 @@ class ForeslåVedtakSteg(
             id = id,
             behandlingRef = behandlingRef,
             vurdert = vurdert,
-            underkjent = underkjent,
+            trengerNyVurdering = underkjent,
         )
     }
 
@@ -49,6 +49,7 @@ class ForeslåVedtakSteg(
         fun opprett() = ForeslåVedtakSteg(
             id = UUID.randomUUID(),
             vurdert = false,
+            underkjent = false,
         )
     }
 }

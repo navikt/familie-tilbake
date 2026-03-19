@@ -35,9 +35,9 @@ class Faktasteg(
     private val id: UUID,
     private val brevHistorikk: BrevHistorikk,
     private var vurdering: Vurdering,
+    private var underkjent: Boolean,
 ) : Saksbehandlingsteg {
     override val type: Behandlingssteg = Behandlingssteg.FAKTA
-    private var underkjent: Boolean = false
 
     override fun erFullstendig(): Boolean {
         return vurdering.erFullstendig()
@@ -164,6 +164,7 @@ class Faktasteg(
                 id = UUID.randomUUID(),
                 brevHistorikk = brevHistorikk,
                 vurdering = tomVurdering(kravgrunnlag, eksternFagsakRevurdering),
+                underkjent = false,
             )
         }
 
@@ -243,7 +244,7 @@ class Faktasteg(
                 årsakTilFeilutbetaling = årsakTilFeilutbetaling,
                 vurderingAvBrukersUttalelse = (uttalelse as? Uttalelse.Ja)?.begrunnelse,
                 oppdaget = oppdaget.tilEntity(id),
-                underkjent = underkjent,
+                trengerNyVurdering = underkjent,
             )
         }
 

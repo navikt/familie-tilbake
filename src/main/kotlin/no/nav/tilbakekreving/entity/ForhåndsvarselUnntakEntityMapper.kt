@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.entity
 
 import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
+import no.nav.tilbakekreving.entities.FaktastegEntity
 import no.nav.tilbakekreving.entities.ForhåndsvarselUnntakEntity
 import java.sql.ResultSet
 import java.util.UUID
@@ -28,6 +29,12 @@ object ForhåndsvarselUnntakEntityMapper : Entity<ForhåndsvarselUnntakEntity, U
         FieldConverter.StringConverter.required(),
     )
 
+    val trengerNyVurdering = FaktavurderingEntityMapper.field(
+        "trenger_ny_vurdering",
+        FaktastegEntity::trengerNyVurdering,
+        FieldConverter.BooleanConverter.required(),
+    )
+
     fun map(
         resultSet: ResultSet,
     ): ForhåndsvarselUnntakEntity {
@@ -36,6 +43,7 @@ object ForhåndsvarselUnntakEntityMapper : Entity<ForhåndsvarselUnntakEntity, U
             behandlingRef = resultSet[behandlingRef],
             beskrivelse = resultSet[beskrivelse],
             begrunnelseForUnntak = resultSet[begrunnelseForUnntak],
+            trengerNyVurdering = resultSet[trengerNyVurdering],
         )
     }
 }

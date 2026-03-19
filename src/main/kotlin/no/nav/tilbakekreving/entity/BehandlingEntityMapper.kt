@@ -122,7 +122,6 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
                 brukeruttalelseEntity,
                 forhåndsvarselUnntak,
                 fristUtsettelse,
-                false,
             ),
         )
     }

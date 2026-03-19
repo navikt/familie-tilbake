@@ -19,7 +19,6 @@ class Forhåndsvarsel(
     private var opprinneligFrist: LocalDate?,
 ) : Saksbehandlingsteg {
     override val type: Behandlingssteg = Behandlingssteg.FORHÅNDSVARSEL
-    private var underkjent: Boolean = false
 
     override fun erFullstendig(): Boolean {
         val gjeldendeFrist = utsattFrist?.hentFrist() ?: opprinneligFrist
@@ -29,11 +28,12 @@ class Forhåndsvarsel(
     }
 
     override fun erUnderkjent(): Boolean {
-        return underkjent
+        return brukeruttalelse?.trengerNyVurdering() == true || forhåndsvarselUnntak?.trengerNyVurdering() == true
     }
 
     override fun underkjennSteget() {
-        this.underkjent = true
+        brukeruttalelse?.vurderPåNytt()
+        forhåndsvarselUnntak?.vurderPåNytt()
     }
 
     override fun nullstill(kravgrunnlag: KravgrunnlagHendelse, eksternFagsakRevurdering: EksternFagsakRevurdering) {}
@@ -43,7 +43,6 @@ class Forhåndsvarsel(
             brukeruttalelseEntity = brukeruttalelse?.tilEntity(behandlingRef),
             forhåndsvarselUnntakEntity = forhåndsvarselUnntak?.tilEntity(behandlingRef),
             fristUtsettelseEntity = utsattFrist?.tilEntity(behandlingRef),
-            underkjent = underkjent,
         )
     }
 
@@ -62,6 +61,7 @@ class Forhåndsvarsel(
             uttalelseVurdering = uttalelseVurdering,
             uttalelseInfo = uttalelseInfo,
             kommentar = kommentar,
+            trengerNyVurdering = false,
         )
     }
 
@@ -84,6 +84,7 @@ class Forhåndsvarsel(
             id = UUID.randomUUID(),
             begrunnelseForUnntak = begrunnelseForUnntak,
             beskrivelse = beskrivelse,
+            trengerNyVurdering = false,
         )
     }
 
@@ -105,7 +106,12 @@ class Forhåndsvarsel(
 
     companion object {
         fun opprett(fristForUttalelse: LocalDate?): Forhåndsvarsel {
-            return Forhåndsvarsel(null, null, null, fristForUttalelse)
+            return Forhåndsvarsel(
+                brukeruttalelse = null,
+                forhåndsvarselUnntak = null,
+                utsattFrist = null,
+                opprinneligFrist = fristForUttalelse,
+            )
         }
     }
 }

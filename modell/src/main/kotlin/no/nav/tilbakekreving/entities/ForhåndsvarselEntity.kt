@@ -8,7 +8,6 @@ data class ForhåndsvarselEntity(
     val brukeruttalelseEntity: BrukeruttalelseEntity?,
     val forhåndsvarselUnntakEntity: ForhåndsvarselUnntakEntity?,
     val fristUtsettelseEntity: FristUtsettelseEntity?,
-    val underkjent: Boolean,
 ) {
     fun fraEntity(opprinneligFrist: LocalDate?): Forhåndsvarsel = Forhåndsvarsel(
         brukeruttalelse = midlertidigMapping(forhåndsvarselUnntakEntity, brukeruttalelseEntity)?.fraEntity(),

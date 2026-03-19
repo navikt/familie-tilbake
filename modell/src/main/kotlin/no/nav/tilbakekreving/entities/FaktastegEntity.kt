@@ -15,13 +15,14 @@ data class FaktastegEntity(
     val uttalelse: Uttalelse,
     val vurderingAvBrukersUttalelse: String?,
     val oppdaget: OppdagetEntity?,
-    val underkjent: Boolean,
+    val trengerNyVurdering: Boolean,
 ) {
     fun fraEntity(
         brevHistorikk: BrevHistorikk,
     ): Faktasteg = Faktasteg(
         id = id,
         brevHistorikk = brevHistorikk,
+        underkjent = trengerNyVurdering,
         vurdering = Faktasteg.Vurdering(
             perioder = perioder.map {
                 Faktasteg.FaktaPeriode(

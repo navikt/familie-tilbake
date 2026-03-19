@@ -20,6 +20,6 @@ class ForeslåVedtakStegTest {
 
         foreslåVedtakSteg.underkjennSteget()
 
-        foreslåVedtakSteg.tilEntity(UUID.randomUUID()).underkjent shouldBe true
+        foreslåVedtakSteg.tilEntity(UUID.randomUUID()).trengerNyVurdering shouldBe true
     }
 }

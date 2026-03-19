@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.e2e
 
+import io.kotest.assertions.fail
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.SærligeGrunner
@@ -9,6 +10,7 @@ import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.api.v1.dto.AktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegsinfoDto
 import no.nav.tilbakekreving.api.v1.dto.GodTroDto
 import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.api.v2.PeriodeDto
@@ -21,6 +23,8 @@ import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub
 import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub.Companion.finnKafkamelding
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
@@ -618,5 +622,76 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
                 ),
             )
         }
+    }
+
+    @Test
+    fun `trenger ny vurdering av steg blir lagret`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        sendKravgrunnlagOgAvventLesing(
+            queueName = TILLEGGSSTØNADER_KØ_NAVN,
+            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+            ),
+        )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
+
+        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        lagreUttalelse(behandlingId)
+
+        somSaksbehandler(ansvarligSaksbehandler) {
+            behandlingApiController.behandlingOppdaterFakta(
+                behandlingId = behandlingId.toString(),
+                oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
+            )
+        }
+
+        utførSteg(
+            ident = ansvarligSaksbehandler,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(),
+        )
+
+        utførSteg(
+            ident = ansvarligSaksbehandler,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegVilkårsvurderingDto(
+                vilkårsvurderingsperioder = listOf(
+                    VilkårsvurderingsperiodeDto(
+                        periode = 1.januar(2021) til 1.januar(2021),
+                        vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
+                        begrunnelse = "Jepp",
+                        godTroDto = GodTroDto(
+                            beløpErIBehold = false,
+                            beløpTilbakekreves = null,
+                            begrunnelse = "Japp",
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        utførSteg(
+            ident = ansvarligSaksbehandler,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagForeslåVedtakVurdering(),
+        )
+
+        utførSteg(
+            ident = ansvarligBeslutter,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagIkkeGodkjennVedtakVurdering(),
+        )
+
+        val behandling = somSaksbehandler(ansvarligSaksbehandler) { behandlingController.hentBehandling(behandlingId).data.shouldNotBeNull() }
+        behandling.status shouldBe Behandlingsstatus.UTREDES
+        behandling.behandlingsstegsinfo.skalHaSteg(Behandlingssteg.FAKTA).behandlingsstegstatus shouldBe Behandlingsstegstatus.TILBAKEFØRT
+        behandling.behandlingsstegsinfo.skalHaSteg(Behandlingssteg.FORHÅNDSVARSEL).behandlingsstegstatus shouldBe Behandlingsstegstatus.TILBAKEFØRT
+        behandling.behandlingsstegsinfo.skalHaSteg(Behandlingssteg.FORELDELSE).behandlingsstegstatus shouldBe Behandlingsstegstatus.TILBAKEFØRT
+        behandling.behandlingsstegsinfo.skalHaSteg(Behandlingssteg.VILKÅRSVURDERING).behandlingsstegstatus shouldBe Behandlingsstegstatus.TILBAKEFØRT
+        behandling.behandlingsstegsinfo.skalHaSteg(Behandlingssteg.FORESLÅ_VEDTAK).behandlingsstegstatus shouldBe Behandlingsstegstatus.TILBAKEFØRT
+    }
+
+    private fun List<BehandlingsstegsinfoDto>.skalHaSteg(behandlingssteg: Behandlingssteg): BehandlingsstegsinfoDto {
+        return this.singleOrNull { it.behandlingssteg == behandlingssteg } ?: fail("Fant ikke $behandlingssteg i ${this.map(BehandlingsstegsinfoDto::behandlingssteg)}")
     }
 }

@@ -18,9 +18,9 @@ import java.util.UUID
 class Foreldelsesteg(
     private val id: UUID,
     private var vurdertePerioder: List<Foreldelseperiode>,
+    private var underkjent: Boolean,
 ) : Saksbehandlingsteg {
     override val type: Behandlingssteg = Behandlingssteg.FORELDELSE
-    private var underkjent: Boolean = false
 
     override fun erFullstendig(): Boolean = vurdertePerioder.all { it.vurdering != Vurdering.IkkeVurdert }
 
@@ -94,7 +94,7 @@ class Foreldelsesteg(
             id = id,
             behandlingRef = behandlingRef,
             vurdertePerioder = vurdertePerioder.map { it.tilEntity(id) },
-            underkjent = underkjent,
+            trengerNyVurdering = underkjent,
         )
     }
 
@@ -187,6 +187,7 @@ class Foreldelsesteg(
             return Foreldelsesteg(
                 id = UUID.randomUUID(),
                 vurdertePerioder = tomVurdering(eksternFagsakRevurdering, kravgrunnlag),
+                underkjent = false,
             )
         }
 

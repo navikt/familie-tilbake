@@ -86,6 +86,6 @@ class ForeldelsestegTest {
 
         forelgelse.underkjennSteget()
 
-        forelgelse.tilEntity(UUID.randomUUID()).underkjent shouldBe true
+        forelgelse.tilEntity(UUID.randomUUID()).trengerNyVurdering shouldBe true
     }
 }

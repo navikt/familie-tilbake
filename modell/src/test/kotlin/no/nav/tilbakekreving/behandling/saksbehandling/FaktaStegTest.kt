@@ -226,6 +226,6 @@ class FaktaStegTest {
 
         faktasteg.underkjennSteget()
 
-        faktasteg.tilEntity(UUID.randomUUID()).underkjent shouldBe true
+        faktasteg.tilEntity(UUID.randomUUID()).trengerNyVurdering shouldBe true
     }
 }

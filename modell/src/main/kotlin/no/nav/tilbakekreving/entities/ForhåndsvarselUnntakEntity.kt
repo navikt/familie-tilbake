@@ -9,12 +9,14 @@ data class ForhåndsvarselUnntakEntity(
     val behandlingRef: UUID,
     val begrunnelseForUnntak: BegrunnelseForUnntak,
     val beskrivelse: String,
+    val trengerNyVurdering: Boolean,
 ) {
     fun fraEntity(): ForhåndsvarselUnntak {
         return ForhåndsvarselUnntak(
             id = id,
             begrunnelseForUnntak = begrunnelseForUnntak,
             beskrivelse = beskrivelse,
+            trengerNyVurdering = trengerNyVurdering,
         )
     }
 }

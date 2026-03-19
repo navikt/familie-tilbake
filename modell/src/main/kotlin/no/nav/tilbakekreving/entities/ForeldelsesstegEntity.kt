@@ -7,10 +7,11 @@ data class ForeldelsesstegEntity(
     val id: UUID,
     val behandlingRef: UUID,
     val vurdertePerioder: List<ForeldelseperiodeEntity>,
-    val underkjent: Boolean,
+    val trengerNyVurdering: Boolean,
 ) {
     fun fraEntity(): Foreldelsesteg = Foreldelsesteg(
         id = id,
         vurdertePerioder = vurdertePerioder.map { it.fraEntity() },
+        underkjent = trengerNyVurdering,
     )
 }

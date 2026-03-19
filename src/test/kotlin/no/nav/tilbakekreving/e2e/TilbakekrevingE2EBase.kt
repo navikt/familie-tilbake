@@ -150,17 +150,18 @@ open class TilbakekrevingE2EBase : E2EBase() {
         .map(FaktaPeriodeDto::id)
         .map(UUID::fromString)
 
-    fun somSaksbehandler(
+    fun <T> somSaksbehandler(
         ident: String,
-        callback: () -> Unit,
-    ) {
+        callback: () -> T,
+    ): T {
         mockkObject(ContextService)
         every { ContextService.hentPåloggetSaksbehandler(any(), any()) } returns ident
         every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) } returns InnloggetBrukertilgang(
             Tilgangskontrollsfagsystem.entries.associateWith { Behandlerrolle.BESLUTTER },
         )
-        callback()
+        val result = callback()
         unmockkObject(ContextService)
+        return result
     }
 
     fun utførSteg(

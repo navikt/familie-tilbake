@@ -178,6 +178,6 @@ class VilkårsvurderingstegTest {
 
         vilkårsvurderingssteg.underkjennSteget()
 
-        vilkårsvurderingssteg.tilEntity(UUID.randomUUID()).underkjent shouldBe true
+        vilkårsvurderingssteg.tilEntity(UUID.randomUUID()).trengerNyVurdering shouldBe true
     }
 }

@@ -12,12 +12,14 @@ data class BrukeruttalelseEntity(
     val uttalelseVurdering: UttalelseVurdering,
     val uttalelseInfoEntity: List<UttalelseInfoEntity>,
     val kommentar: String?,
+    val trengerNyVurdering: Boolean,
 ) {
     fun fraEntity(): Brukeruttalelse = Brukeruttalelse(
         id = id,
         uttalelseVurdering = uttalelseVurdering,
         uttalelseInfo = uttalelseInfoEntity.map { it.fraEntity() },
         kommentar = kommentar,
+        trengerNyVurdering = trengerNyVurdering,
     )
 }
 

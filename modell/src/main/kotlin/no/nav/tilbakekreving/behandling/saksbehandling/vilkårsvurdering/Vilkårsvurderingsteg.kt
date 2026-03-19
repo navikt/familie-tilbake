@@ -25,9 +25,9 @@ import java.util.UUID
 class Vilkårsvurderingsteg(
     private val id: UUID,
     private var vurderinger: List<Vilkårsvurderingsperiode>,
+    private var underkjent: Boolean,
 ) : Saksbehandlingsteg, VilkårsvurderingAdapter {
     override val type: Behandlingssteg = Behandlingssteg.VILKÅRSVURDERING
-    private var underkjent: Boolean = false
 
     override fun erFullstendig(): Boolean = vurderinger.none { it.vurdering is ForårsaketAvBruker.IkkeVurdert }
 
@@ -44,7 +44,7 @@ class Vilkårsvurderingsteg(
             id = id,
             behandlingRef = behandlingRef,
             vurderinger = vurderinger.map { it.tilEntity(id) },
-            underkjent = underkjent,
+            trengerNyVurdering = underkjent,
         )
     }
 
@@ -174,6 +174,7 @@ class Vilkårsvurderingsteg(
             return Vilkårsvurderingsteg(
                 id = UUID.randomUUID(),
                 vurderinger = tomVurdering(eksternFagsakRevurdering, kravgrunnlagHendelse),
+                underkjent = false,
             )
         }
 

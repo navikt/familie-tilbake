@@ -29,12 +29,18 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
         FieldConverter.UUIDConverter.required(),
     )
 
+    val trengerNyVurdering = field(
+        "trenger_ny_vurdering",
+        VilkårsvurderingstegEntity::trengerNyVurdering,
+        FieldConverter.BooleanConverter.required(),
+    )
+
     fun map(resultSet: ResultSet, vurdertePerioder: List<VilkårsvurderingsperiodeEntity>): VilkårsvurderingstegEntity {
         return VilkårsvurderingstegEntity(
             id = resultSet[id],
             behandlingRef = resultSet[behandlingRef],
             vurderinger = vurdertePerioder,
-            underkjent = false,
+            trengerNyVurdering = resultSet[trengerNyVurdering],
         )
     }
 

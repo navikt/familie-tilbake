@@ -19,6 +19,12 @@ object ForeldelsesvurderingEntityMapper : Entity<ForeldelsesstegEntity, UUID, UU
         FieldConverter.UUIDConverter.required(),
     )
 
+    val trengerNyVurdering = field(
+        "trenger_ny_vurdering",
+        ForeldelsesstegEntity::trengerNyVurdering,
+        FieldConverter.BooleanConverter.required(),
+    )
+
     fun map(
         resultSet: ResultSet,
         vurdertePerioder: List<ForeldelseperiodeEntity>,
@@ -27,7 +33,7 @@ object ForeldelsesvurderingEntityMapper : Entity<ForeldelsesstegEntity, UUID, UU
             id = resultSet[id],
             behandlingRef = resultSet[behandlingRef],
             vurdertePerioder = vurdertePerioder,
-            underkjent = false,
+            trengerNyVurdering = resultSet[trengerNyVurdering],
         )
     }
 

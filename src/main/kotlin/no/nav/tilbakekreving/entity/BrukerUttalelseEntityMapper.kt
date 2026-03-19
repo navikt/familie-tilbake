@@ -29,6 +29,12 @@ object BrukerUttalelseEntityMapper : Entity<BrukeruttalelseEntity, UUID, UUID>(
         FieldConverter.StringConverter,
     )
 
+    val trengerNyVurdering = field(
+        "trenger_ny_vurdering",
+        BrukeruttalelseEntity::trengerNyVurdering,
+        FieldConverter.BooleanConverter.required(),
+    )
+
     fun map(
         resultSet: ResultSet,
         uttalelseInfoEntity: List<UttalelseInfoEntity>,
@@ -39,6 +45,7 @@ object BrukerUttalelseEntityMapper : Entity<BrukeruttalelseEntity, UUID, UUID>(
             uttalelseVurdering = resultSet[uttalelseVurdering],
             uttalelseInfoEntity = uttalelseInfoEntity,
             kommentar = resultSet[kommentar],
+            trengerNyVurdering = resultSet[trengerNyVurdering],
         )
     }
 

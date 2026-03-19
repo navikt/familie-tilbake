@@ -21,6 +21,12 @@ object ForeslåVedtakEntityMapper : Entity<ForeslåVedtakStegEntity, UUID, UUID>
         FieldConverter.BooleanConverter.required(),
     )
 
+    val trengerNyVurdering = field(
+        "trenger_ny_vurdering",
+        ForeslåVedtakStegEntity::trengerNyVurdering,
+        FieldConverter.BooleanConverter.required(),
+    )
+
     fun map(
         resultSet: ResultSet,
     ): ForeslåVedtakStegEntity {
@@ -28,7 +34,7 @@ object ForeslåVedtakEntityMapper : Entity<ForeslåVedtakStegEntity, UUID, UUID>
             id = resultSet[id],
             behandlingRef = resultSet[behandlingRef],
             vurdert = resultSet[vurdert],
-            underkjent = false,
+            trengerNyVurdering = resultSet[trengerNyVurdering],
         )
     }
 }
