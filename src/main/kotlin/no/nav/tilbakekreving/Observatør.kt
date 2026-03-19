@@ -7,7 +7,8 @@ import no.nav.tilbakekreving.behov.DistribusjonBehov
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
 import no.nav.tilbakekreving.behov.IverksettelseBehov
 import no.nav.tilbakekreving.behov.JournalføringBehov
-import no.nav.tilbakekreving.behov.VarselbrevBehov
+import no.nav.tilbakekreving.behov.VarselbrevDistribusjonBehov
+import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
 
 class Observatør() : BehovObservatør {
     private val behovListe = mutableListOf<Behov>()
@@ -23,7 +24,13 @@ class Observatør() : BehovObservatør {
     }
 
     override fun håndter(
-        behov: VarselbrevBehov,
+        behov: VarselbrevJournalføringBehov,
+    ) {
+        behovListe.add(behov)
+    }
+
+    override fun håndter(
+        behov: VarselbrevDistribusjonBehov,
     ) {
         behovListe.add(behov)
     }

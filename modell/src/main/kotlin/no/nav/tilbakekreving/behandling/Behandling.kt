@@ -36,6 +36,8 @@ import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.DistribusjonBehov
 import no.nav.tilbakekreving.behov.IverksettelseBehov
 import no.nav.tilbakekreving.behov.JournalføringBehov
+import no.nav.tilbakekreving.behov.VarselbrevDistribusjonBehov
+import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
 import no.nav.tilbakekreving.beregning.Beregning
 import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
@@ -43,6 +45,7 @@ import no.nav.tilbakekreving.breeeev.Signatur
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.brev.Varselbrev
+import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.endring.EndringObservatør
 import no.nav.tilbakekreving.endring.VurdertUtbetaling
@@ -216,6 +219,47 @@ class Behandling internal constructor(
         return lagBeregning().oppsummer().tilFrontendDto()
     }
 
+    fun opprettOgJournalførVarselbrev(
+        behovObservatør: BehovObservatør,
+        eksternFagsak: EksternFagsak,
+        varseltekstFraSaksbehandler: String,
+        brukerinfo: Brukerinfo,
+        features: FeatureToggles,
+    ): Varselbrev {
+        val varselbrev = opprettVarselbrev(varseltekstFraSaksbehandler, features)
+        behovObservatør.håndter(opprettVarselbrevJournalføringBehov(varselbrev, eksternFagsak, brukerinfo))
+        return varselbrev
+    }
+
+    fun prøvÅJournalføreVarsebrevPåNytt(
+        behovObservatør: BehovObservatør,
+        varselbrev: Varselbrev,
+        eksternFagsak: EksternFagsak,
+        brukerinfo: Brukerinfo,
+    ) {
+        behovObservatør.håndter(opprettVarselbrevJournalføringBehov(varselbrev, eksternFagsak, brukerinfo))
+    }
+
+    private fun opprettVarselbrevJournalføringBehov(
+        varselbrev: Varselbrev,
+        eksternFagsak: EksternFagsak,
+        brukerinfo: Brukerinfo,
+    ): VarselbrevJournalføringBehov =
+        VarselbrevJournalføringBehov(
+            brevId = varselbrev.id,
+            brukerinfo = brukerinfo,
+            behandlingId = id,
+            varselbrev = varselbrev,
+            revurderingsvedtaksdato = eksternFagsakRevurdering.entry.vedtaksdato,
+            varseltekstFraSaksbehandler = varselbrev.tekstFraSaksbehandler,
+            eksternFagsakId = eksternFagsak.eksternId,
+            ytelse = eksternFagsak.ytelse,
+            behandlendeEnhet = enhet,
+            feilutbetaltBeløp = varselbrev.hentVarsletBeløp(),
+            feilutbetaltePerioder = kravgrunnlag.entry.datoperioder(eksternFagsakRevurdering.entry),
+            gjelderDødsfall = brukerinfo.dødsdato != null,
+        )
+
     fun trengerIverksettelse(
         behovObservatør: BehovObservatør,
         ytelse: Ytelse,
@@ -253,6 +297,23 @@ class Behandling internal constructor(
                 fagsakId = fagsakId,
                 journalførendeEnhet = enhet!!.kode,
                 vedtaksbrevInfo = vedtaksbrevInfo,
+            ),
+        )
+    }
+
+    fun trengerVarselbrevDistribusjon(
+        bebehovObservatør: BehovObservatør,
+        journalpostId: String,
+        ytelse: Ytelse,
+        brevId: UUID,
+    ) {
+        bebehovObservatør.håndter(
+            VarselbrevDistribusjonBehov(
+                behandlingId = id,
+                journalpostId = journalpostId,
+                ytelse = ytelse,
+                brevId = brevId,
+                behandlerIdent = ansvarligSaksbehandler.ident,
             ),
         )
     }
@@ -715,7 +776,7 @@ class Behandling internal constructor(
         )
     }
 
-    fun opprettVarselbrev(
+    private fun opprettVarselbrev(
         varseltekstFraSaksbehandler: String,
         features: FeatureToggles,
     ): Varselbrev = Varselbrev.opprett(

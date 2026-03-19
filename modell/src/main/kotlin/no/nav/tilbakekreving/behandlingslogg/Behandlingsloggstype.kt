@@ -110,6 +110,12 @@ enum class Behandlingsloggstype(
         type = Historikkinnslagstype.BREV,
         steg = null,
     ),
+    VARSELBREV_JOURNALFØRT(
+        tittel = "Varselbrev journalført",
+        tekst = null,
+        type = Historikkinnslagstype.HENDELSE,
+        steg = null,
+    ),
     DOKUMENT_JOURNALFØRT(
         tittel = "Dokument journalført",
         tekst = null,

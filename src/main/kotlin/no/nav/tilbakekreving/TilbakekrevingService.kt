@@ -27,7 +27,8 @@ import no.nav.tilbakekreving.behov.DistribusjonBehov
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
 import no.nav.tilbakekreving.behov.IverksettelseBehov
 import no.nav.tilbakekreving.behov.JournalføringBehov
-import no.nav.tilbakekreving.behov.VarselbrevBehov
+import no.nav.tilbakekreving.behov.VarselbrevDistribusjonBehov
+import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
 import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.brev.varselbrev.ForhåndsvarselService
 import no.nav.tilbakekreving.brev.vedtaksbrev.NyVedtaksbrevService
@@ -36,6 +37,7 @@ import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.endring.EndringObservatørService
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
+import no.nav.tilbakekreving.hendelse.Hendelsestype
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
@@ -213,23 +215,33 @@ class TilbakekrevingService(
                 )
             }
 
-            is VarselbrevBehov -> {
-                val logContext = SecureLog.Context.utenBehandling(behov.eksternFagsakId)
-                val arkivert = forhåndsvarselService.journalførVarselbrev(
+            is VarselbrevJournalføringBehov -> {
+                val journalpostResponse = forhåndsvarselService.journalførVarselbrev(
                     varselbrevBehov = behov,
-                    fristForUttalelse = behov.varselbrev.fristForUttalelse,
                     logContext = logContext,
                 )
-                if (arkivert.journalpostId == null) {
+                if (journalpostResponse.journalpostId == null) {
                     throw Feil(
-                        message = "journalførin av varselbrev til behandlingId ${behov.behandlingId} misslykket med denne meldingen: ${arkivert.melding}",
-                        frontendFeilmelding = "journalførin av varselbrev til behandlingId ${behov.behandlingId} misslykket med denne meldingen: ${arkivert.melding}",
+                        message = "journalførin av varselbrev til behandlingId ${behov.behandlingId} misslykket med denne meldingen: ${journalpostResponse.melding}",
+                        frontendFeilmelding = "journalførin av varselbrev til behandlingId ${behov.behandlingId} misslykket med denne meldingen: ${journalpostResponse.melding}",
                         logContext = SecureLog.Context.fra(tilbakekreving),
                     )
                 }
+                tilbakekreving.håndter(
+                    VarselbrevSendtHendelse(
+                        varselbrevId = behov.brevId,
+                        behandlingId = behov.behandlingId,
+                        journalpostId = journalpostResponse.journalpostId,
+                        behandlerIdent = behov.varselbrev.ansvarligSaksbehandlerIdent,
+                        type = Hendelsestype.JOURNALFØRING,
+                    ),
+                )
+            }
+
+            is VarselbrevDistribusjonBehov -> {
                 dokdistService.brevTilUtsending(
                     behandlingId = behov.behandlingId,
-                    journalpostId = arkivert.journalpostId,
+                    journalpostId = behov.journalpostId,
                     fagsystem = behov.ytelse.tilFagsystemDTO(),
                     distribusjonstype = Distribusjonstype.VIKTIG,
                     distribusjonstidspunkt = Distribusjonstidspunkt.KJERNETID,
@@ -240,8 +252,9 @@ class TilbakekrevingService(
                     VarselbrevSendtHendelse(
                         varselbrevId = behov.brevId,
                         behandlingId = behov.behandlingId,
-                        journalpostId = arkivert.journalpostId,
-                        behandlerIdent = behov.varselbrev.ansvarligSaksbehandlerIdent,
+                        journalpostId = behov.journalpostId,
+                        behandlerIdent = behov.behandlerIdent,
+                        type = Hendelsestype.DISTRIBUERING,
                     ),
                 )
             }

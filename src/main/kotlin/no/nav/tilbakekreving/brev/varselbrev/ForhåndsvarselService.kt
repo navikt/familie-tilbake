@@ -25,7 +25,7 @@ import no.nav.tilbakekreving.api.v1.dto.VarslingsUnntak
 import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
 import no.nav.tilbakekreving.behandling.UttalelseInfo
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
-import no.nav.tilbakekreving.behov.VarselbrevBehov
+import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
 import no.nav.tilbakekreving.brev.VarselbrevInfo
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostResponse
@@ -186,10 +186,10 @@ class ForhåndsvarselService(
     }
 
     fun journalførVarselbrev(
-        varselbrevBehov: VarselbrevBehov,
-        fristForUttalelse: LocalDate,
+        varselbrevBehov: VarselbrevJournalføringBehov,
         logContext: SecureLog.Context,
     ): OpprettJournalpostResponse {
+        val fristForUttalelse = varselbrevBehov.varselbrev.fristForUttalelse
         val brevdata = hentBrevdata(varselbrevBehov, fristForUttalelse, logContext)
         val dokument = Dokument(
             dokument = hentPdf(brevdata, logContext),
@@ -228,7 +228,7 @@ class ForhåndsvarselService(
     }
 
     private fun hentBrevdata(
-        varselbrevBehov: VarselbrevBehov,
+        varselbrevBehov: VarselbrevJournalføringBehov,
         fristForUttalelse: LocalDate,
         logContext: SecureLog.Context,
     ): Brevdata {
@@ -252,7 +252,7 @@ class ForhåndsvarselService(
         )
     }
 
-    private fun hentBrevMetadata(varselbrevBehov: VarselbrevBehov): Brevmetadata {
+    private fun hentBrevMetadata(varselbrevBehov: VarselbrevJournalføringBehov): Brevmetadata {
         return Brevmetadata(
             sakspartId = varselbrevBehov.brukerinfo.ident,
             sakspartsnavn = varselbrevBehov.brukerinfo.navn,
@@ -317,7 +317,7 @@ class ForhåndsvarselService(
         return "${behandlingId}_${brevtype.name.lowercase()}_${mottager.name.lowercase()}_$callId"
     }
 
-    private fun hentVarselbrevTittel(varselbrevBehov: VarselbrevBehov): String {
+    private fun hentVarselbrevTittel(varselbrevBehov: VarselbrevJournalføringBehov): String {
         return "$TITTEL_VARSEL_TILBAKEBETALING ${varselbrevBehov.ytelse.hentYtelsesnavn(Språkkode.NB)}"
     }
 }
