@@ -1,7 +1,6 @@
 package no.nav.tilbakekreving.entity
 
 import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
-import no.nav.tilbakekreving.entities.FaktastegEntity
 import no.nav.tilbakekreving.entities.ForhåndsvarselUnntakEntity
 import java.sql.ResultSet
 import java.util.UUID
@@ -29,9 +28,9 @@ object ForhåndsvarselUnntakEntityMapper : Entity<ForhåndsvarselUnntakEntity, U
         FieldConverter.StringConverter.required(),
     )
 
-    val trengerNyVurdering = FaktavurderingEntityMapper.field(
+    val trengerNyVurdering = field(
         "trenger_ny_vurdering",
-        FaktastegEntity::trengerNyVurdering,
+        ForhåndsvarselUnntakEntity::trengerNyVurdering,
         FieldConverter.BooleanConverter.required(),
     )
 
