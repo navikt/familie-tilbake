@@ -44,7 +44,4 @@ data class Datoperiode(
 
 infix fun LocalDate.til(tom: LocalDate) = Datoperiode(this, tom)
 
-fun List<Datoperiode>.slåSammenTilEnPeriode(): List<Datoperiode> {
-    if (size <= 1) return this
-    return listOf(Datoperiode(minOf { it.fom }, maxOf { it.tom }))
-}
+fun List<Datoperiode>.slåSammenTilEnPeriode(): List<Datoperiode> = listOf(Datoperiode(minOf { it.fom }, maxOf { it.tom }))
