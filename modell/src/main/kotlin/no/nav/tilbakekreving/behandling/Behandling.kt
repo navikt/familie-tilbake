@@ -317,7 +317,7 @@ class Behandling internal constructor(
                 steg().klarTilVisning().map {
                     BehandlingsstegsinfoDto(
                         it.type,
-                        it.behandlingsstegstatus(),
+                        it.behandlingsstegstatus(steg().klarTilVisning()),
                     )
                 },
             ).flatten(),
@@ -527,7 +527,7 @@ class Behandling internal constructor(
         }
     }
 
-    fun kanUtbetales(): Boolean = fatteVedtakSteg.erFullstendig()
+    fun kanUtbetales(): Boolean = fatteVedtakSteg.erFullstendig() && !fatteVedtakSteg.erVedtakUnderkjent()
 
     fun underkjentVedtak(): Boolean {
         return fatteVedtakSteg.erVedtakUnderkjent()

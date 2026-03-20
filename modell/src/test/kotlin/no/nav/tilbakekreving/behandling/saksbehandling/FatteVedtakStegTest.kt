@@ -141,7 +141,7 @@ class FatteVedtakStegTest {
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
 
-        fatteVedtakSteg.erFullstendig() shouldBe false
+        fatteVedtakSteg.erFullstendig() shouldBe true
         fatteVedtakSteg.erVedtakUnderkjent() shouldBe true
     }
 
@@ -185,7 +185,7 @@ class FatteVedtakStegTest {
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
 
-        fatteVedtakSteg.erFullstendig() shouldBe false
+        fatteVedtakSteg.erFullstendig() shouldBe true
         fatteVedtakSteg.erVedtakUnderkjent() shouldBe true
     }
 }

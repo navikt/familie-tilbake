@@ -29,9 +29,14 @@ internal interface Saksbehandlingsteg {
     )
 
     companion object {
-        fun Saksbehandlingsteg?.behandlingsstegstatus(): Behandlingsstegstatus {
+        fun Saksbehandlingsteg?.behandlingsstegstatus(
+            alleSynligeSteg: List<Saksbehandlingsteg>,
+        ): Behandlingsstegstatus {
+            val tidligereStegErTilbakeført = alleSynligeSteg
+                .takeWhile { it != this }
+                .any { it.erUnderkjent() }
             return when {
-                this == null -> Behandlingsstegstatus.VENTER
+                this == null || tidligereStegErTilbakeført -> Behandlingsstegstatus.VENTER
                 this.erUnderkjent() -> Behandlingsstegstatus.TILBAKEFØRT
                 this.erFullstendig() -> Behandlingsstegstatus.UTFØRT
                 else -> Behandlingsstegstatus.KLAR
@@ -39,12 +44,8 @@ internal interface Saksbehandlingsteg {
         }
 
         fun Collection<Saksbehandlingsteg>.klarTilVisning(): List<Saksbehandlingsteg> {
-            val klarTilBehandling = mutableListOf<Saksbehandlingsteg>()
-            for (steg in this) {
-                klarTilBehandling.add(steg)
-                if (!steg.erFullstendig()) return klarTilBehandling
-            }
-            return klarTilBehandling
+            val sisteFerdigstilteSteg = this.indexOfLast { it.erKlar() }
+            return take(sisteFerdigstilteSteg + 2)
         }
     }
 }
