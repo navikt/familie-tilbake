@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.tilstand
 
 import io.kotest.assertions.fail
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.inspectors.forNone
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.tilbakekreving.ANSVARLIG_BESLUTTER
@@ -202,8 +203,8 @@ class TilBehandlingTest {
         val tilbakekrevingDtoEtter = tilbakekreving.frontendDtoForBehandling(ANSVARLIG_SAKSBEHANDLER, false)
         tilbakekrevingDtoEtter.status shouldBe Behandlingsstatus.UTREDES
         tilbakekrevingDtoEtter.behandlingsstegsinfo.skalHaSteg(Behandlingssteg.FAKTA).behandlingsstegstatus shouldBe Behandlingsstegstatus.TILBAKEFØRT
-        tilbakekrevingDtoEtter.behandlingsstegsinfo.skalHaSteg(Behandlingssteg.FORESLÅ_VEDTAK).behandlingsstegstatus shouldBe Behandlingsstegstatus.UTFØRT
-        tilbakekrevingDtoEtter.behandlingsstegsinfo.skalHaSteg(Behandlingssteg.FATTE_VEDTAK).behandlingsstegstatus shouldBe Behandlingsstegstatus.KLAR
+        tilbakekrevingDtoEtter.behandlingsstegsinfo.skalHaSteg(Behandlingssteg.FORESLÅ_VEDTAK).behandlingsstegstatus shouldBe Behandlingsstegstatus.KLAR
+        tilbakekrevingDtoEtter.behandlingsstegsinfo.forNone { it.behandlingssteg shouldBe Behandlingssteg.FATTE_VEDTAK }
     }
 
     private fun List<BehandlingsstegsinfoDto>.skalHaSteg(behandlingssteg: Behandlingssteg): BehandlingsstegsinfoDto {

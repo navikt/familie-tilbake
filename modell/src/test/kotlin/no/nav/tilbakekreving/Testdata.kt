@@ -219,6 +219,20 @@ fun godkjenning() = listOf(
     Behandlingssteg.FORESLÅ_VEDTAK to FatteVedtakSteg.Vurdering.Godkjent,
 )
 
+fun fatteVedtakVurdering(
+    vararg overrides: Pair<Behandlingssteg, FatteVedtakSteg.Vurdering>,
+): List<Pair<Behandlingssteg, FatteVedtakSteg.Vurdering>> {
+    val steg = mutableMapOf<Behandlingssteg, FatteVedtakSteg.Vurdering>(
+        Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
+        Behandlingssteg.FORHÅNDSVARSEL to FatteVedtakSteg.Vurdering.Godkjent,
+        Behandlingssteg.FORELDELSE to FatteVedtakSteg.Vurdering.Godkjent,
+        Behandlingssteg.VILKÅRSVURDERING to FatteVedtakSteg.Vurdering.Godkjent,
+        Behandlingssteg.FORESLÅ_VEDTAK to FatteVedtakSteg.Vurdering.Godkjent,
+    )
+    steg.putAll(overrides)
+    return steg.toList()
+}
+
 fun iverksettelse(): IverksettelseHendelse {
     return IverksettelseHendelse(
         iverksattVedtakId = UUID.randomUUID(),

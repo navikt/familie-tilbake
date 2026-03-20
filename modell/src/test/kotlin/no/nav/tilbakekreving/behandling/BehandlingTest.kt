@@ -11,8 +11,10 @@ import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
 import no.nav.tilbakekreving.behandlingslogg.LoggInnslag
 import no.nav.tilbakekreving.faktastegVurdering
+import no.nav.tilbakekreving.fatteVedtakVurdering
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
+import no.nav.tilbakekreving.foreldelseVurdering
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
@@ -28,46 +30,49 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 class BehandlingTest {
+    val behandlingObservatør = BehandlingObservatørOppsamler()
+    val ansvarligSaksbehandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
+    val ansvarligBeslutter = Behandler.Saksbehandler("Ansvarlig beslutter")
+    val behandlingslogg = Behandlingslogg(listOf<LoggInnslag>().toMutableList())
+    val periode = 1.januar(2021) til 31.januar(2021)
+
     @Test
     fun `sett behandling på vent`() {
         val behandling = behandling()
-        val ansvarligSaksbehandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
-        val periode = 1.januar(2021) til 31.januar(2021)
-        val behandlingslogg = Behandlingslogg(listOf<LoggInnslag>().toMutableList())
         behandling.lagreUttalelse(UttalelseVurdering.JA, listOf(), null)
         behandling.settPåVent(Venteårsak.MANGLER_STØTTE, LocalDate.MAX, "Begrunnelse")
 
         val faktasteg = faktastegVurdering(periode)
         shouldThrowWithMessage<ModellFeil.UgyldigOperasjonException>("Behandling er satt på vent. Kan ikke håndtere fakta.") {
-            behandling.håndter(ansvarligSaksbehandler, faktasteg, BehandlingObservatørOppsamler(), behandlingslogg)
+            behandling.håndter(ansvarligSaksbehandler, faktasteg, behandlingObservatør, behandlingslogg)
         }
 
         behandling.taAvVent()
-        behandling.håndter(ansvarligSaksbehandler, faktasteg, BehandlingObservatørOppsamler(), behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, faktasteg, behandlingObservatør, behandlingslogg)
 
         val foreldelse = Foreldelsesteg.Vurdering.IkkeForeldet("Begrunnelse")
         behandling.settPåVent(Venteårsak.MANGLER_STØTTE, LocalDate.MAX, "Begrunnelse")
         shouldThrowWithMessage<ModellFeil.UgyldigOperasjonException>("Behandling er satt på vent. Kan ikke håndtere foreldelse.") {
-            behandling.håndter(ansvarligSaksbehandler, periode, foreldelse, BehandlingObservatørOppsamler(), behandlingslogg)
+            behandling.håndter(ansvarligSaksbehandler, periode, foreldelse, behandlingObservatør, behandlingslogg)
         }
 
         behandling.taAvVent()
-        behandling.håndter(ansvarligSaksbehandler, periode, foreldelse, BehandlingObservatørOppsamler(), behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, periode, foreldelse, behandlingObservatør, behandlingslogg)
 
         val vilkårsvurdering = forårsaketAvNav().burdeForstått(aktsomhet = forsettelig())
         behandling.settPåVent(Venteårsak.MANGLER_STØTTE, LocalDate.MAX, "Begrunnelse")
         shouldThrowWithMessage<ModellFeil.UgyldigOperasjonException>("Behandling er satt på vent. Kan ikke håndtere vilkårsvurdering.") {
-            behandling.håndter(ansvarligSaksbehandler, periode, vilkårsvurdering, BehandlingObservatørOppsamler(), behandlingslogg)
+            behandling.håndter(ansvarligSaksbehandler, periode, vilkårsvurdering, behandlingObservatør, behandlingslogg)
         }
 
         behandling.taAvVent()
-        behandling.håndter(ansvarligSaksbehandler, periode, vilkårsvurdering, BehandlingObservatørOppsamler(), behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, periode, vilkårsvurdering, behandlingObservatør, behandlingslogg)
 
         behandling.settPåVent(Venteårsak.MANGLER_STØTTE, LocalDate.MAX, "Begrunnelse")
         shouldThrowWithMessage<ModellFeil.UgyldigOperasjonException>("Behandling er satt på vent. Kan ikke håndtere vedtaksforslag.") {
             behandling.håndterForeslåVedtak(
                 ansvarligSaksbehandler,
-                BehandlingObservatørOppsamler(),
+                behandlingObservatør,
                 behandlingslogg,
             )
         }
@@ -75,31 +80,28 @@ class BehandlingTest {
         behandling.taAvVent()
         behandling.håndterForeslåVedtak(
             ansvarligSaksbehandler,
-            BehandlingObservatørOppsamler(),
+            behandlingObservatør,
             behandlingslogg,
         )
 
         behandling.settPåVent(Venteårsak.MANGLER_STØTTE, LocalDate.MAX, "Begrunnelse")
         shouldThrowWithMessage<ModellFeil.UgyldigOperasjonException>("Behandling er satt på vent. Kan ikke håndtere behandlingsutfall.") {
-            behandling.håndter(Behandler.Saksbehandler("Ansvarlig beslutter"), listOf(Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent), BehandlingObservatørOppsamler(), behandlingslogg)
+            behandling.håndter(ansvarligBeslutter, listOf(Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent), behandlingObservatør, behandlingslogg)
         }
 
         behandling.taAvVent()
-        behandling.håndter(Behandler.Saksbehandler("Ansvarlig beslutter"), listOf(Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent), BehandlingObservatørOppsamler(), behandlingslogg)
+        behandling.håndter(ansvarligBeslutter, listOf(Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent), behandlingObservatør, behandlingslogg)
     }
 
     @Test
     fun `flytt behandling tilbake til fakta - nullstiller fakta`() {
         val behandling = behandling()
-        val ansvarligSaksbehandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
-        val periode = 1.januar(2021) til 31.januar(2021)
-        val behandlingslogg = Behandlingslogg(listOf<LoggInnslag>().toMutableList())
 
         behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).vurderingAvBrukersUttalelse.beskrivelse shouldBe null
         behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).vurderingAvBrukersUttalelse.harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.IKKE_VURDERT
 
         val faktasteg = faktastegVurdering(periode)
-        behandling.håndter(ansvarligSaksbehandler, faktasteg, BehandlingObservatørOppsamler(), behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, faktasteg, behandlingObservatør, behandlingslogg)
 
         behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).vurderingAvBrukersUttalelse.beskrivelse shouldBe null
         behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).vurderingAvBrukersUttalelse.harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.NEI
@@ -123,15 +125,11 @@ class BehandlingTest {
             lagreUttalelse(UttalelseVurdering.JA, listOf(), null)
         }
 
-        val periode = 1.januar(2021) til 31.januar(2021)
-        val ansvarligSaksbehandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
-        val behandlingslogg = Behandlingslogg(listOf<LoggInnslag>().toMutableList())
-
         val faktasteg = faktastegVurdering(periode)
-        behandling.håndter(ansvarligSaksbehandler, faktasteg, BehandlingObservatørOppsamler(), behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, faktasteg, behandlingObservatør, behandlingslogg)
 
         val foreldelse = Foreldelsesteg.Vurdering.Foreldet("Begrunnelse")
-        behandling.håndter(ansvarligSaksbehandler, periode, foreldelse, BehandlingObservatørOppsamler(), behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, periode, foreldelse, behandlingObservatør, behandlingslogg)
 
         behandling.foreldelsesteg.tilFrontendDto(kravgrunnlag).foreldetPerioder.first().begrunnelse shouldBe "Begrunnelse"
 
@@ -146,23 +144,56 @@ class BehandlingTest {
         behandling.apply {
             lagreUttalelse(UttalelseVurdering.JA, listOf(), null)
         }
-        val periode = 1.januar(2021) til 31.januar(2021)
-        val ansvarligSaksbehandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
-        val behandlingslogg = Behandlingslogg(listOf<LoggInnslag>().toMutableList())
 
         val faktasteg = faktastegVurdering(periode)
-        behandling.håndter(ansvarligSaksbehandler, faktasteg, BehandlingObservatørOppsamler(), behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, faktasteg, behandlingObservatør, behandlingslogg)
 
         val foreldelse = Foreldelsesteg.Vurdering.Foreldet("Begrunnelse")
-        behandling.håndter(ansvarligSaksbehandler, periode, foreldelse, BehandlingObservatørOppsamler(), behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, periode, foreldelse, behandlingObservatør, behandlingslogg)
 
         val vilkårsvurdering = forårsaketAvNav().burdeForstått(aktsomhet = forsettelig())
-        behandling.håndter(ansvarligSaksbehandler, periode, vilkårsvurdering, BehandlingObservatørOppsamler(), behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, periode, vilkårsvurdering, behandlingObservatør, behandlingslogg)
 
         behandling.vilkårsvurderingsstegDto.tilFrontendDto().perioder.first().begrunnelse.shouldNotBeNull()
 
         behandling.flyttTilbakeTilFakta(behandlingslogg)
 
         behandling.vilkårsvurderingsstegDto.tilFrontendDto().perioder.first().begrunnelse shouldBe null
+    }
+
+    @Test
+    fun `vedtak kan endres etter alle tilbakeførte vurderinger er gjennomgått`() {
+        val behandling = behandling()
+        behandling.håndter(ansvarligSaksbehandler, faktastegVurdering(), behandlingObservatør, behandlingslogg)
+        behandling.lagreForhåndsvarselUnntak(BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG, "Trenger ikke forhåndsvarsel i test lol")
+        behandling.håndter(ansvarligSaksbehandler, periode, foreldelseVurdering(), behandlingObservatør, behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, periode, forårsaketAvNav().godTro(), behandlingObservatør, behandlingslogg)
+        behandling.tilFrontendDto(TilBehandling, ansvarligSaksbehandler, true).kanEndres shouldBe true
+
+        behandling.håndterForeslåVedtak(ansvarligSaksbehandler, behandlingObservatør, behandlingslogg)
+
+        behandling.håndter(
+            beslutter = ansvarligBeslutter,
+            vurderinger = fatteVedtakVurdering(
+                Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Underkjent("Må vurderes på nytt"),
+            ),
+            observatør = behandlingObservatør,
+            behandlingslogg = behandlingslogg,
+        )
+        behandling.tilFrontendDto(TilBehandling, ansvarligSaksbehandler, true).kanEndres shouldBe true
+
+        behandling.håndter(ansvarligSaksbehandler, faktastegVurdering(), behandlingObservatør, behandlingslogg)
+        behandling.tilFrontendDto(TilBehandling, ansvarligSaksbehandler, true).kanEndres shouldBe true
+
+        behandling.håndterForeslåVedtak(ansvarligSaksbehandler, behandlingObservatør, behandlingslogg)
+        behandling.tilFrontendDto(TilBehandling, ansvarligSaksbehandler, true).kanEndres shouldBe false
+
+        behandling.håndter(
+            beslutter = ansvarligBeslutter,
+            vurderinger = fatteVedtakVurdering(),
+            observatør = behandlingObservatør,
+            behandlingslogg = behandlingslogg,
+        )
+        behandling.tilFrontendDto(TilBehandling, ansvarligSaksbehandler, true).kanEndres shouldBe false
     }
 }

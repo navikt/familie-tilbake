@@ -276,7 +276,7 @@ class Behandling internal constructor(
 
     private fun kanEndres(behandler: Behandler, kanBeslutte: Boolean): Boolean {
         if (kanBesluttes(behandler, kanBeslutte)) return false
-        return !foreslåVedtakSteg.erKlar() || behandler != ansvarligSaksbehandler && kanBeslutte
+        return !foreslåVedtakSteg.erFullstendig() || behandler != ansvarligSaksbehandler && kanBeslutte
     }
 
     internal fun tilFrontendDto(tilstand: Tilstand, behandler: Behandler, kanBeslutte: Boolean): BehandlingDto {
@@ -469,6 +469,7 @@ class Behandling internal constructor(
             )
         }
         if (underkjentVedtak()) {
+            foreslåVedtakSteg.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry)
             behandlingslogg.lagre(
                 opprettLoggInnslag(
                     behandlingsloggstype = Behandlingsloggstype.BEHANDLING_SENDT_TILBAKE_TIL_SAKSBEHANDLER,
