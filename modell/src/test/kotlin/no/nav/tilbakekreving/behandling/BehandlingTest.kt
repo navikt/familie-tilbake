@@ -4,7 +4,9 @@ import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvNav
+import no.nav.tilbakekreving.api.v1.dto.Totrinnsstegsinfo
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
+import no.nav.tilbakekreving.assertions.skalHaSteg
 import no.nav.tilbakekreving.behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
@@ -195,5 +197,60 @@ class BehandlingTest {
             behandlingslogg = behandlingslogg,
         )
         behandling.tilFrontendDto(TilBehandling, ansvarligSaksbehandler, true).kanEndres shouldBe false
+    }
+
+    @Test
+    fun `behandling sendt til godkjenning etter underkjenning skal ikke beholde vurdering`() {
+        val behandling = behandling()
+        behandling.håndter(ansvarligSaksbehandler, faktastegVurdering(), behandlingObservatør, behandlingslogg)
+        behandling.lagreForhåndsvarselUnntak(BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG, "Trenger ikke forhåndsvarsel i test lol")
+        behandling.håndter(ansvarligSaksbehandler, periode, foreldelseVurdering(), behandlingObservatør, behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, periode, forårsaketAvNav().godTro(), behandlingObservatør, behandlingslogg)
+        behandling.tilFrontendDto(TilBehandling, ansvarligSaksbehandler, true).kanEndres shouldBe true
+
+        behandling.håndterForeslåVedtak(ansvarligSaksbehandler, behandlingObservatør, behandlingslogg)
+
+        behandling.håndter(
+            beslutter = ansvarligBeslutter,
+            vurderinger = fatteVedtakVurdering(
+                Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Underkjent("Må vurderes på nytt"),
+            ),
+            observatør = behandlingObservatør,
+            behandlingslogg = behandlingslogg,
+        )
+
+        behandling.håndter(ansvarligSaksbehandler, faktastegVurdering(), behandlingObservatør, behandlingslogg)
+        behandling.håndterForeslåVedtak(ansvarligSaksbehandler, behandlingObservatør, behandlingslogg)
+        val frontendDto = behandling.tilFrontendDto(TilBehandling, ansvarligSaksbehandler, true)
+
+        val fatteVedtakSteg = frontendDto.behandlingsstegsinfo.skalHaSteg(Behandlingssteg.FATTE_VEDTAK)
+        fatteVedtakSteg.behandlingsstegstatus shouldBe Behandlingsstegstatus.KLAR
+        behandling.fatteVedtakStegDto.tilFrontendDto().totrinnsstegsinfo shouldBe listOf(
+            Totrinnsstegsinfo(
+                behandlingssteg = Behandlingssteg.FAKTA,
+                godkjent = null,
+                begrunnelse = null,
+            ),
+            Totrinnsstegsinfo(
+                behandlingssteg = Behandlingssteg.FORHÅNDSVARSEL,
+                godkjent = null,
+                begrunnelse = null,
+            ),
+            Totrinnsstegsinfo(
+                behandlingssteg = Behandlingssteg.FORELDELSE,
+                godkjent = null,
+                begrunnelse = null,
+            ),
+            Totrinnsstegsinfo(
+                behandlingssteg = Behandlingssteg.VILKÅRSVURDERING,
+                godkjent = null,
+                begrunnelse = null,
+            ),
+            Totrinnsstegsinfo(
+                behandlingssteg = Behandlingssteg.FORESLÅ_VEDTAK,
+                godkjent = null,
+                begrunnelse = null,
+            ),
+        )
     }
 }

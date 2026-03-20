@@ -431,6 +431,7 @@ class Behandling internal constructor(
         observatør: BehandlingObservatør,
         behandlingslogg: Behandlingslogg,
     ) {
+        fatteVedtakSteg.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry)
         validerBehandlingstatus("vedtaksforslag", foreslåVedtakSteg)
         foreslåVedtakSteg.håndter()
         oppdaterBehandler(behandler)

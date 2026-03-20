@@ -37,7 +37,11 @@ class FatteVedtakSteg internal constructor(
     override fun nullstill(
         kravgrunnlag: KravgrunnlagHendelse,
         eksternFagsakRevurdering: EksternFagsakRevurdering,
-    ) {}
+    ) {
+        vurderteSteg.forEach {
+            it.nullstill()
+        }
+    }
 
     internal fun håndter(
         beslutter: Behandler,
@@ -88,6 +92,10 @@ class FatteVedtakSteg internal constructor(
 
         fun erVurderingUnderkjent(): Boolean {
             return vurdering is Vurdering.Underkjent
+        }
+
+        fun nullstill() {
+            vurdering = Vurdering.IkkeVurdert
         }
 
         fun hentSteg(): Behandlingssteg = steg
