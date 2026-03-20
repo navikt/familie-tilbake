@@ -31,6 +31,7 @@ import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostResponse
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
+import no.nav.tilbakekreving.kontrakter.periode.slåSammenTilEnPeriode
 import no.nav.tilbakekreving.pdf.Dokumentvariant
 import no.nav.tilbakekreving.pdf.PdfGenerator
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
@@ -112,6 +113,7 @@ class ForhåndsvarselService(
                     kommentar = null,
                 )
             }
+
             HarBrukerUttaltSeg.NEI_ETTER_FORHÅNDSVARSEL, HarBrukerUttaltSeg.UNNTAK_INGEN_UTTALELSE -> {
                 val kommentar = requireNotNull(brukeruttalelse.kommentar) {
                     "Det kreves en kommentar når brukeren ikke uttaler seg. Kommentar var null"
@@ -125,7 +127,10 @@ class ForhåndsvarselService(
                     kommentar = kommentar,
                 )
             }
-            else -> throw IllegalArgumentException("Ukjent verdi for uttalelseVurdering: ${brukeruttalelse.harBrukerUttaltSeg} ")
+
+            else -> {
+                throw IllegalArgumentException("Ukjent verdi for uttalelseVurdering: ${brukeruttalelse.harBrukerUttaltSeg} ")
+            }
         }
     }
 
@@ -179,7 +184,8 @@ class ForhåndsvarselService(
             beløp = varselbrevInfo.forhåndsvarselinfo.beløp,
             revurderingsvedtaksdato = varselbrevInfo.forhåndsvarselinfo.revurderingsvedtaksdato,
             fristdatoForTilbakemelding = Constants.brukersSvarfrist(),
-            feilutbetaltePerioder = varselbrevInfo.forhåndsvarselinfo.feilutbetaltePerioder,
+            feilutbetaltePerioder = varselbrevInfo.forhåndsvarselinfo.feilutbetaltePerioder.slåSammenTilEnPeriode(),
+            sammenslått = true,
             varsletBeløp = varselbrevInfo.forhåndsvarselinfo.beløp,
             varsletDato = LocalDate.now(),
         )
@@ -239,7 +245,8 @@ class ForhåndsvarselService(
             revurderingsvedtaksdato = varselbrevBehov.revurderingsvedtaksdato,
             fristdatoForTilbakemelding = fristForUttalelse,
             varseltekstFraSaksbehandler = varselbrevBehov.varseltekstFraSaksbehandler,
-            feilutbetaltePerioder = varselbrevBehov.feilutbetaltePerioder,
+            feilutbetaltePerioder = varselbrevBehov.feilutbetaltePerioder.slåSammenTilEnPeriode(),
+            sammenslått = true,
         )
 
         return Brevdata(

@@ -1,8 +1,12 @@
 package no.nav.tilbakekreving.pdf.dokumentbestilling.varsel
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNot
+import io.kotest.matchers.string.contain
+import io.kotest.matchers.string.shouldContain
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
+import no.nav.tilbakekreving.kontrakter.periode.slåSammenTilEnPeriode
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmetadata
@@ -319,6 +323,41 @@ class TekstformatererVarselbrevTest {
 
         val fasit = les("/varselbrev/vedlegg/vedlegg_nn_med_skatt.txt")
         html shouldBe fasit
+    }
+
+    @Test
+    fun `lagVarselbrevsfritekst skal vise sammenhengende perioder som én setning etter sammenslåing av perioder`() {
+        val metadata = metadata.copy(ytelsestype = YtelsestypeDTO.ARBEIDSAVKLARINGSPENGER)
+        val månedligePerioder = listOf(
+            Datoperiode(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 31)),
+            Datoperiode(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 29)),
+            Datoperiode(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 31)),
+        )
+        val varselbrevsdokument = varselbrevsdokument.copy(
+            brevmetadata = metadata,
+            feilutbetaltePerioder = månedligePerioder.slåSammenTilEnPeriode(),
+            sammenslått = true,
+        )
+        val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false)
+
+        generertBrev shouldContain "Perioden du har fått for mye utbetalt for, er fra og med 1. januar 2024 til og med 31. mars 2024"
+    }
+
+    @Test
+    fun `lagVarselbrevsfritekst skal vise perioder med gap som én setning fra første fom til siste tom`() {
+        val metadata = metadata.copy(ytelsestype = YtelsestypeDTO.ARBEIDSAVKLARINGSPENGER)
+        val perioderMedGap = listOf(
+            Datoperiode(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 31)),
+            Datoperiode(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 5, 31)),
+        )
+        val varselbrevsdokument = varselbrevsdokument.copy(
+            brevmetadata = metadata,
+            feilutbetaltePerioder = perioderMedGap.slåSammenTilEnPeriode(),
+            sammenslått = true,
+        )
+        val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false)
+
+        generertBrev shouldContain "Perioden du har fått for mye utbetalt for, er fra og med 1. januar 2024 til og med 31. mai 2024"
     }
 
     private fun lagFeilutbetalingerMedFlerePerioder(): List<Datoperiode> {

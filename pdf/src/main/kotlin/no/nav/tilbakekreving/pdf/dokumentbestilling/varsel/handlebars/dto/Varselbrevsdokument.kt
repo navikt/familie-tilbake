@@ -17,6 +17,7 @@ data class Varselbrevsdokument(
     val varsletDato: LocalDate? = null,
     val varsletBeløp: Long? = null,
     val erKorrigert: Boolean = false,
+    val sammenslått: Boolean = false,
 ) : BaseDokument(
         brevmetadata.ytelsestype,
         brevmetadata.språkkode,
@@ -30,7 +31,7 @@ data class Varselbrevsdokument(
     val harVedlegg: Boolean = brevmetadata.ytelsestype in setOf(YtelsestypeDTO.BARNETILSYN, YtelsestypeDTO.OVERGANGSSTØNAD)
 
     private val datoerHvisSammenhengendePeriode: Datoperiode? =
-        if (feilutbetaltePerioder.size == 1) {
+        if (!sammenslått && feilutbetaltePerioder.size == 1) {
             Datoperiode(
                 feilutbetaltePerioder.first().fom,
                 feilutbetaltePerioder.first().tom,
@@ -58,7 +59,7 @@ data class Varselbrevsdokument(
         get() = finnesVerge
 
     init {
-        if (feilutbetaltePerioder.size == 1) {
+        if (!sammenslått && feilutbetaltePerioder.size == 1) {
             requireNotNull(datoerHvisSammenhengendePeriode) { "datoer for sammenhengende periode" }
         } else if (feilutbetaltePerioder.size > 1) {
             feilutbetaltePerioder.forEach {
