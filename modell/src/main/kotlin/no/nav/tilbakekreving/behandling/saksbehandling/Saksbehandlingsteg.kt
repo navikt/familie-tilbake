@@ -36,8 +36,9 @@ internal interface Saksbehandlingsteg {
                 .takeWhile { it != this }
                 .any { it.erUnderkjent() }
             return when {
-                this == null || tidligereStegErTilbakeført -> Behandlingsstegstatus.VENTER
+                this == null -> Behandlingsstegstatus.VENTER
                 this.erUnderkjent() -> Behandlingsstegstatus.TILBAKEFØRT
+                tidligereStegErTilbakeført -> Behandlingsstegstatus.VENTER
                 this.erFullstendig() -> Behandlingsstegstatus.UTFØRT
                 else -> Behandlingsstegstatus.KLAR
             }
