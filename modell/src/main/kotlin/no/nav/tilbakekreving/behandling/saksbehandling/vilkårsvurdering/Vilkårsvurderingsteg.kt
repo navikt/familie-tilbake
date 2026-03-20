@@ -69,6 +69,7 @@ class Vilkårsvurderingsteg(
     ) {
         // TODO: Ordentlig feilhåndtering i stedet for NoSuchElementException ved ugyldig periode
         vurderinger.single { it.id == id }.vurder(vurdering)
+        underkjent = false
     }
 
     private fun finnIdForPeriode(periode: Datoperiode): UUID {

@@ -81,10 +81,9 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
         frontendDto.behandlinger shouldHaveSize 1
         frontendDto.behandlinger.single().status shouldBe Behandlingsstatus.UTREDES
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
-        lagreUttalelse(behandlingId)
 
         tilbakekreving(behandlingId) kanBehandle Behandlingssteg.FAKTA
-        tilbakekreving(behandlingId) avventerBehandling Behandlingssteg.FORELDELSE
+        tilbakekreving(behandlingId) avventerBehandling Behandlingssteg.FORHÅNDSVARSEL
 
         somSaksbehandler("Z999999") {
             behandlingApiController.behandlingOppdaterFakta(
@@ -92,6 +91,11 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
         }
+
+        tilbakekreving(behandlingId) kanBehandle Behandlingssteg.FORHÅNDSVARSEL
+        tilbakekreving(behandlingId) avventerBehandling Behandlingssteg.FORELDELSE
+
+        lagreUttalelse(behandlingId)
 
         tilbakekreving(behandlingId) kanBehandle Behandlingssteg.FORELDELSE
         tilbakekreving(behandlingId) avventerBehandling Behandlingssteg.VILKÅRSVURDERING
@@ -273,6 +277,16 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
             stegData = BehandlingsstegGenerator.lagIkkeGodkjennVedtakVurdering(),
         )
         tilbakekreving(behandlingId).frontendDtoForBehandling(Behandler.Saksbehandler("Z999999"), true).status shouldBe Behandlingsstatus.UTREDES
+        utførSteg(
+            ident = "Z999999",
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(),
+        )
+        utførSteg(
+            ident = "Z999999",
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving(),
+        )
         utførSteg(
             ident = "Z999999",
             behandlingId = behandlingId,

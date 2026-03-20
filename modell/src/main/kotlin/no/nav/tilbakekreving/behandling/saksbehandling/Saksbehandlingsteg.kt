@@ -32,13 +32,13 @@ internal interface Saksbehandlingsteg {
         fun Saksbehandlingsteg?.behandlingsstegstatus(
             alleSynligeSteg: List<Saksbehandlingsteg>,
         ): Behandlingsstegstatus {
-            val tidligereStegErTilbakeført = alleSynligeSteg
+            val tidligereStegManglerBehandling = alleSynligeSteg
                 .takeWhile { it != this }
-                .any { it.erUnderkjent() }
+                .any { !it.erKlar() }
             return when {
                 this == null -> Behandlingsstegstatus.VENTER
                 this.erUnderkjent() -> Behandlingsstegstatus.TILBAKEFØRT
-                tidligereStegErTilbakeført -> Behandlingsstegstatus.VENTER
+                tidligereStegManglerBehandling -> Behandlingsstegstatus.VENTER
                 this.erFullstendig() -> Behandlingsstegstatus.UTFØRT
                 else -> Behandlingsstegstatus.KLAR
             }
