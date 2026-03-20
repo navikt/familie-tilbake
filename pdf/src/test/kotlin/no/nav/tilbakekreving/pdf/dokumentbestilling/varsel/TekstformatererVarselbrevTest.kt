@@ -1,8 +1,6 @@
 package no.nav.tilbakekreving.pdf.dokumentbestilling.varsel
 
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNot
-import io.kotest.matchers.string.contain
 import io.kotest.matchers.string.shouldContain
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
