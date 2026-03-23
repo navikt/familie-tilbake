@@ -85,7 +85,7 @@ tilbakekreving:
     base-url: http://entra-proxy.sikkerhetstjenesten.svc.cluster.local
     scope: api://dev-gcp.sikkerhetstjenesten.entra-proxy/.default
   tilbakekrevingPdf:
-    base-url: https://tilbakekreving.intern.dev.nav.no/api/v1/brev
+    base-url: https://tilbakekreving-pdf
 
 logging:
   config: "classpath:logback-e2e.xml"
