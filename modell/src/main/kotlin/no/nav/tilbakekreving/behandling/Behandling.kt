@@ -68,6 +68,7 @@ import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.tekst.slåSammen
 import no.nav.tilbakekreving.tilstand.Tilstand
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -431,6 +432,19 @@ class Behandling internal constructor(
         observatør: BehandlingObservatør,
         behandlingslogg: Behandlingslogg,
     ) {
+        val tidligereManglendeSteg = steg()
+            .takeWhile { it.type != Behandlingssteg.FORESLÅ_VEDTAK }
+            .filter { !it.erKlar() }
+        if (tidligereManglendeSteg.isNotEmpty()) {
+            val stegtyper = tidligereManglendeSteg
+                .map { it.type }
+                .map { it.kortNavn }
+                .slåSammen()
+            throw ModellFeil.UgyldigOperasjonException(
+                "Du må gjøre en ny vurdering av $stegtyper før du kan sende vedtaket til godkjenning hos beslutter",
+                sporing = sporingsinformasjon(),
+            )
+        }
         fatteVedtakSteg.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry)
         validerBehandlingstatus("vedtaksforslag", foreslåVedtakSteg)
         foreslåVedtakSteg.håndter()

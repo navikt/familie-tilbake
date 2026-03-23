@@ -277,6 +277,15 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
             stegData = BehandlingsstegGenerator.lagIkkeGodkjennVedtakVurdering(),
         )
         tilbakekreving(behandlingId).frontendDtoForBehandling(Behandler.Saksbehandler("Z999999"), true).status shouldBe Behandlingsstatus.UTREDES
+
+        lagreUttalelse(behandlingId)
+
+        somSaksbehandler("Z999999") {
+            behandlingApiController.behandlingOppdaterFakta(
+                behandlingId = behandlingId.toString(),
+                oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
+            )
+        }
         utførSteg(
             ident = "Z999999",
             behandlingId = behandlingId,

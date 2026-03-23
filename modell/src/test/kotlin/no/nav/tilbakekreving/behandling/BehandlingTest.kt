@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.behandling
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -252,5 +253,55 @@ class BehandlingTest {
                 begrunnelse = null,
             ),
         )
+    }
+
+    @Test
+    fun `kan ikke sende tilbake til beslutter om en av vurderingene ikke er fullstendige`() {
+        val behandling = behandling()
+        behandling.håndter(ansvarligSaksbehandler, faktastegVurdering(), behandlingObservatør, behandlingslogg)
+        behandling.lagreForhåndsvarselUnntak(BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG, "Trenger ikke forhåndsvarsel i test lol")
+        behandling.håndter(ansvarligSaksbehandler, periode, foreldelseVurdering(), behandlingObservatør, behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, periode, forårsaketAvNav().godTro(), behandlingObservatør, behandlingslogg)
+        behandling.håndterForeslåVedtak(ansvarligSaksbehandler, behandlingObservatør, behandlingslogg)
+
+        behandling.håndter(
+            beslutter = ansvarligBeslutter,
+            vurderinger = fatteVedtakVurdering(
+                Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Underkjent("Må vurderes på nytt"),
+            ),
+            observatør = behandlingObservatør,
+            behandlingslogg = behandlingslogg,
+        )
+
+        val exception = shouldThrow<ModellFeil.UgyldigOperasjonException> {
+            behandling.håndterForeslåVedtak(ansvarligSaksbehandler, behandlingObservatør, behandlingslogg)
+        }
+        exception.message shouldBe "Du må gjøre en ny vurdering av fakta før du kan sende vedtaket til godkjenning hos beslutter"
+    }
+
+    @Test
+    fun `kan ikke sende tilbake til beslutter om en av vurderingene ikke er fullstendige - flere steg`() {
+        val behandling = behandling()
+        behandling.håndter(ansvarligSaksbehandler, faktastegVurdering(), behandlingObservatør, behandlingslogg)
+        behandling.lagreForhåndsvarselUnntak(BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG, "Trenger ikke forhåndsvarsel i test lol")
+        behandling.håndter(ansvarligSaksbehandler, periode, foreldelseVurdering(), behandlingObservatør, behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, periode, forårsaketAvNav().godTro(), behandlingObservatør, behandlingslogg)
+        behandling.håndterForeslåVedtak(ansvarligSaksbehandler, behandlingObservatør, behandlingslogg)
+
+        behandling.håndter(
+            beslutter = ansvarligBeslutter,
+            vurderinger = fatteVedtakVurdering(
+                Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Underkjent("Må vurderes på nytt"),
+                Behandlingssteg.FORELDELSE to FatteVedtakSteg.Vurdering.Underkjent("Må vurderes på nytt"),
+                Behandlingssteg.VILKÅRSVURDERING to FatteVedtakSteg.Vurdering.Underkjent("Må vurderes på nytt"),
+            ),
+            observatør = behandlingObservatør,
+            behandlingslogg = behandlingslogg,
+        )
+
+        val exception = shouldThrow<ModellFeil.UgyldigOperasjonException> {
+            behandling.håndterForeslåVedtak(ansvarligSaksbehandler, behandlingObservatør, behandlingslogg)
+        }
+        exception.message shouldBe "Du må gjøre en ny vurdering av fakta, foreldelse og vilkår før du kan sende vedtaket til godkjenning hos beslutter"
     }
 }
