@@ -16,6 +16,6 @@ class TextUtilTest {
 
     @Test
     fun `a, b og c`() {
-        listOf("a, b og c").slåSammen() shouldBe "a, b og c"
+        listOf("a", "b", "c").slåSammen() shouldBe "a, b og c"
     }
 }
