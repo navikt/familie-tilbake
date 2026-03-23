@@ -83,7 +83,7 @@ tilbakekreving:
     base-url: http://entra-proxy.sikkerhetstjenesten.svc.cluster.local
     scope: api://dev-gcp.sikkerhetstjenesten.entra-proxy/.default
   tilbakekrevingPdf:
-    base-url: https://tilbakekreving.intern.dev.nav.no
+    base-url: https://tilbakekreving-pdf
 rolle:
   barnetrygd:
     veileder: "93a26831-9866-4410-927b-74ff51a9107c"
