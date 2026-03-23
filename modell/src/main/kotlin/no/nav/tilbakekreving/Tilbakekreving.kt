@@ -39,13 +39,13 @@ import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
-import no.nav.tilbakekreving.hendelse.Hendelsestype
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
-import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
+import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
+import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
@@ -144,18 +144,29 @@ class Tilbakekreving internal constructor(
         )
     }
 
-    fun håndter(varselbrevSendt: VarselbrevSendtHendelse) {
-        tilstand.håndter(this, varselbrevSendt)
+    fun håndter(varselbrevJournalføringHendelse: VarselbrevJournalføringHendelse) {
+        tilstand.håndter(this, varselbrevJournalføringHendelse)
         val behandling = behandlingHistorikk.nåværende().entry
         behandlingslogg.lagre(
             opprettLoggInnslag(
-                behandlingsloggstype = when (varselbrevSendt.type) {
-                    Hendelsestype.JOURNALFØRING -> Behandlingsloggstype.VARSELBREV_JOURNALFØRT
-                    Hendelsestype.DISTRIBUERING -> Behandlingsloggstype.VARSELBREV_SENDT
-                },
+                behandlingsloggstype = Behandlingsloggstype.VARSELBREV_JOURNALFØRT,
                 rolle = Rolle.SAKSBEHANDLER,
-                behandler = Behandler.Saksbehandler(varselbrevSendt.behandlerIdent),
-                behandlingId = varselbrevSendt.behandlingId,
+                behandler = Behandler.Saksbehandler(varselbrevJournalføringHendelse.behandlerIdent),
+                behandlingId = varselbrevJournalføringHendelse.behandlingId,
+            ),
+        )
+        behandling.utførSideeffekt(tilstand, this, bigQueryService, eksternFagsak.ytelse.hentYtelsesnavn(Språkkode.NB))
+    }
+
+    fun håndter(varselbrevDistribueringHendelse: VarselbrevDistribueringHendelse) {
+        tilstand.håndter(this, varselbrevDistribueringHendelse)
+        val behandling = behandlingHistorikk.nåværende().entry
+        behandlingslogg.lagre(
+            opprettLoggInnslag(
+                behandlingsloggstype = Behandlingsloggstype.VARSELBREV_SENDT,
+                rolle = Rolle.SAKSBEHANDLER,
+                behandler = Behandler.Saksbehandler(varselbrevDistribueringHendelse.behandlerIdent),
+                behandlingId = varselbrevDistribueringHendelse.behandlingId,
             ),
         )
         behandling.utførSideeffekt(tilstand, this, bigQueryService, eksternFagsak.ytelse.hentYtelsesnavn(Språkkode.NB))
@@ -282,23 +293,16 @@ class Tilbakekreving internal constructor(
     }
 
     fun trengerVarselbrev(varseltekstFraSaksbehandler: String) {
-        val varselbrev = behandlingHistorikk.nåværende().entry.opprettOgJournalførVarselbrev(
-            behovObservatør = behovObservatør,
-            eksternFagsak = eksternFagsak,
-            varseltekstFraSaksbehandler = varseltekstFraSaksbehandler,
-            brukerinfo = bruker!!.hentBrukerinfo(),
-            features = features,
-        )
-        brevHistorikk.lagre(varselbrev)
+        brevHistorikk.lagre(behandlingHistorikk.nåværende().entry.opprettVarselbrev(varseltekstFraSaksbehandler, features))
         byttTilstand(SendVarselbrev)
     }
 
-    fun prøvÅJournalføreVarsebrevPåNytt() {
-        behandlingHistorikk.nåværende().entry.prøvÅJournalføreVarsebrevPåNytt(
+    fun trengerVarselbrevJournalføring() {
+        behandlingHistorikk.nåværende().entry.trengerVarselbrevJournalføring(
             behovObservatør = behovObservatør,
-            varselbrev = brevHistorikk.sisteVarselbrev()!!,
             eksternFagsak = eksternFagsak,
             brukerinfo = bruker!!.hentBrukerinfo(),
+            varselbrev = brevHistorikk.sisteVarselbrev()!!,
         )
     }
 

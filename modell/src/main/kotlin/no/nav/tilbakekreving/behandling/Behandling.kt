@@ -219,46 +219,29 @@ class Behandling internal constructor(
         return lagBeregning().oppsummer().tilFrontendDto()
     }
 
-    fun opprettOgJournalførVarselbrev(
+    fun trengerVarselbrevJournalføring(
         behovObservatør: BehovObservatør,
         eksternFagsak: EksternFagsak,
-        varseltekstFraSaksbehandler: String,
         brukerinfo: Brukerinfo,
-        features: FeatureToggles,
-    ): Varselbrev {
-        val varselbrev = opprettVarselbrev(varseltekstFraSaksbehandler, features)
-        behovObservatør.håndter(opprettVarselbrevJournalføringBehov(varselbrev, eksternFagsak, brukerinfo))
-        return varselbrev
-    }
-
-    fun prøvÅJournalføreVarsebrevPåNytt(
-        behovObservatør: BehovObservatør,
         varselbrev: Varselbrev,
-        eksternFagsak: EksternFagsak,
-        brukerinfo: Brukerinfo,
     ) {
-        behovObservatør.håndter(opprettVarselbrevJournalføringBehov(varselbrev, eksternFagsak, brukerinfo))
-    }
-
-    private fun opprettVarselbrevJournalføringBehov(
-        varselbrev: Varselbrev,
-        eksternFagsak: EksternFagsak,
-        brukerinfo: Brukerinfo,
-    ): VarselbrevJournalføringBehov =
-        VarselbrevJournalføringBehov(
-            brevId = varselbrev.id,
-            brukerinfo = brukerinfo,
-            behandlingId = id,
-            varselbrev = varselbrev,
-            revurderingsvedtaksdato = eksternFagsakRevurdering.entry.vedtaksdato,
-            varseltekstFraSaksbehandler = varselbrev.tekstFraSaksbehandler,
-            eksternFagsakId = eksternFagsak.eksternId,
-            ytelse = eksternFagsak.ytelse,
-            behandlendeEnhet = enhet,
-            feilutbetaltBeløp = varselbrev.hentVarsletBeløp(),
-            feilutbetaltePerioder = kravgrunnlag.entry.datoperioder(eksternFagsakRevurdering.entry),
-            gjelderDødsfall = brukerinfo.dødsdato != null,
+        behovObservatør.håndter(
+            VarselbrevJournalføringBehov(
+                brevId = varselbrev.id,
+                brukerinfo = brukerinfo,
+                behandlingId = id,
+                varselbrev = varselbrev,
+                revurderingsvedtaksdato = eksternFagsakRevurdering.entry.vedtaksdato,
+                varseltekstFraSaksbehandler = varselbrev.tekstFraSaksbehandler,
+                eksternFagsakId = eksternFagsak.eksternId,
+                ytelse = eksternFagsak.ytelse,
+                behandlendeEnhet = enhet,
+                feilutbetaltBeløp = varselbrev.hentVarsletBeløp(),
+                feilutbetaltePerioder = kravgrunnlag.entry.datoperioder(eksternFagsakRevurdering.entry),
+                gjelderDødsfall = brukerinfo.dødsdato != null,
+            ),
         )
+    }
 
     fun trengerIverksettelse(
         behovObservatør: BehovObservatør,
@@ -776,7 +759,7 @@ class Behandling internal constructor(
         )
     }
 
-    private fun opprettVarselbrev(
+    fun opprettVarselbrev(
         varseltekstFraSaksbehandler: String,
         features: FeatureToggles,
     ): Varselbrev = Varselbrev.opprett(

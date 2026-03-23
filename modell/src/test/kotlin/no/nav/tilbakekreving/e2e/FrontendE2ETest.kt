@@ -15,10 +15,10 @@ import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.foreldelseVurdering
 import no.nav.tilbakekreving.godkjenning
 import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
-import no.nav.tilbakekreving.hendelse.Hendelsestype
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.JournalføringHendelse
-import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
+import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
+import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
@@ -54,21 +54,18 @@ class FrontendE2ETest {
         tilbakekreving.håndter(behandler, faktastegVurdering())
         tilbakekreving.trengerVarselbrev("Tekst fra saksbehandler")
         tilbakekreving.håndter(
-            VarselbrevSendtHendelse(
+            VarselbrevJournalføringHendelse(
                 varselbrevId = tilbakekreving.brevHistorikk.sisteVarselbrev()!!.id,
                 behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id,
                 journalpostId = "1234",
                 behandlerIdent = behandler.ident,
-                type = Hendelsestype.JOURNALFØRING,
             ),
         )
+
         tilbakekreving.håndter(
-            VarselbrevSendtHendelse(
-                varselbrevId = tilbakekreving.brevHistorikk.sisteVarselbrev()!!.id,
+            VarselbrevDistribueringHendelse(
                 behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id,
-                journalpostId = "1234",
                 behandlerIdent = behandler.ident,
-                type = Hendelsestype.DISTRIBUERING,
             ),
         )
         tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, listOf(), null)

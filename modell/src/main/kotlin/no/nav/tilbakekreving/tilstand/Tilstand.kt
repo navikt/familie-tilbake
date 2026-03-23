@@ -13,7 +13,8 @@ import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
-import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
+import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
+import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.time.Duration
@@ -56,9 +57,16 @@ internal sealed interface Tilstand {
 
     fun håndter(
         tilbakekreving: Tilbakekreving,
-        varselbrevSendtHendelse: VarselbrevSendtHendelse,
+        varselbrevJournalføringHendelse: VarselbrevJournalføringHendelse,
     ) {
-        throw ModellFeil.UgyldigOperasjonException("Forventet ikke VarselbrevSendtHendelse i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
+        throw ModellFeil.UgyldigOperasjonException("Forventet ikke journalføring av varselbrev i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
+    }
+
+    fun håndter(
+        tilbakekreving: Tilbakekreving,
+        varselbrevDistribueringHendelse: VarselbrevDistribueringHendelse,
+    ) {
+        throw ModellFeil.UgyldigOperasjonException("Forventet ikke distribuering av varselbrev i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
     }
 
     fun håndter(

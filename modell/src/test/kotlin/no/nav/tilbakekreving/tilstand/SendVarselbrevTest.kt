@@ -7,14 +7,13 @@ import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
-import no.nav.tilbakekreving.bruker
 import no.nav.tilbakekreving.brukerinfoHendelse
 import no.nav.tilbakekreving.defaultFeatures
 import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.fagsysteminfoHendelse
-import no.nav.tilbakekreving.hendelse.Hendelsestype
 import no.nav.tilbakekreving.hendelse.Påminnelse
-import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
+import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
+import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import org.junit.jupiter.api.Test
@@ -60,23 +59,19 @@ class SendVarselbrevTest {
         oppsamler.behovListe.filterIsInstance<VarselbrevJournalføringBehov>().shouldHaveSize(1)
 
         tilbakekreving.håndter(
-            VarselbrevSendtHendelse(
+            VarselbrevJournalføringHendelse(
                 varselbrevId = tilbakekreving.brevHistorikk.sisteVarselbrev()!!.id,
                 behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id,
                 journalpostId = "1234",
                 behandlerIdent = "4321",
-                type = Hendelsestype.JOURNALFØRING,
             ),
         )
         tilbakekreving.tilstand shouldBe DistribuerVarselbrev
 
         tilbakekreving.håndter(
-            VarselbrevSendtHendelse(
-                varselbrevId = tilbakekreving.brevHistorikk.sisteVarselbrev()!!.id,
+            VarselbrevDistribueringHendelse(
                 behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id,
-                journalpostId = "1234",
                 behandlerIdent = "4321",
-                type = Hendelsestype.DISTRIBUERING,
             ),
         )
         tilbakekreving.tilstand shouldBe TilBehandling
@@ -106,23 +101,19 @@ class SendVarselbrevTest {
         varselbrevBehov.map { it.brevId }.distinct().shouldHaveSize(1)
 
         tilbakekreving.håndter(
-            VarselbrevSendtHendelse(
+            VarselbrevJournalføringHendelse(
                 varselbrevId = tilbakekreving.brevHistorikk.sisteVarselbrev()!!.id,
                 behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id,
                 journalpostId = "1234",
                 behandlerIdent = "4321",
-                type = Hendelsestype.JOURNALFØRING,
             ),
         )
         tilbakekreving.tilstand shouldBe DistribuerVarselbrev
 
         tilbakekreving.håndter(
-            VarselbrevSendtHendelse(
-                varselbrevId = tilbakekreving.brevHistorikk.sisteVarselbrev()!!.id,
+            VarselbrevDistribueringHendelse(
                 behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id,
-                journalpostId = "1234",
                 behandlerIdent = "4321",
-                type = Hendelsestype.DISTRIBUERING,
             ),
         )
         tilbakekreving.tilstand shouldBe TilBehandling

@@ -2,7 +2,7 @@ package no.nav.tilbakekreving.tilstand
 
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.hendelse.Påminnelse
-import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
+import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.time.Duration
 
@@ -20,7 +20,7 @@ object DistribuerVarselbrev : Tilstand {
 
     override fun håndter(
         tilbakekreving: Tilbakekreving,
-        varselbrevSendtHendelse: VarselbrevSendtHendelse,
+        varselbrevJournalføringHendelse: VarselbrevDistribueringHendelse,
     ) {
         tilbakekreving.byttTilstand(TilBehandling)
     }

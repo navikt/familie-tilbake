@@ -37,11 +37,11 @@ import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.endring.EndringObservatørService
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
-import no.nav.tilbakekreving.hendelse.Hendelsestype
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
-import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
+import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
+import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
@@ -228,12 +228,11 @@ class TilbakekrevingService(
                     )
                 }
                 tilbakekreving.håndter(
-                    VarselbrevSendtHendelse(
+                    VarselbrevJournalføringHendelse(
                         varselbrevId = behov.brevId,
                         behandlingId = behov.behandlingId,
                         journalpostId = journalpostResponse.journalpostId,
                         behandlerIdent = behov.varselbrev.ansvarligSaksbehandlerIdent,
-                        type = Hendelsestype.JOURNALFØRING,
                     ),
                 )
             }
@@ -249,12 +248,9 @@ class TilbakekrevingService(
                     logContext = logContext,
                 )
                 tilbakekreving.håndter(
-                    VarselbrevSendtHendelse(
-                        varselbrevId = behov.brevId,
+                    VarselbrevDistribueringHendelse(
                         behandlingId = behov.behandlingId,
-                        journalpostId = behov.journalpostId,
                         behandlerIdent = behov.behandlerIdent,
-                        type = Hendelsestype.DISTRIBUERING,
                     ),
                 )
             }

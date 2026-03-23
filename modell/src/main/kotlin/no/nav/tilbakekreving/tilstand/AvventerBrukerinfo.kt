@@ -25,7 +25,10 @@ object AvventerBrukerinfo : Tilstand {
     ) {
         tilbakekreving.bruker!!.oppdater(brukerinfo)
         if (tilbakekreving.features[Toggle.SendAutomatiskVarselbrev]) {
-            tilbakekreving.byttTilstand(SendVarselbrev)
+            /*Todo
+                Vi må vurdere hvordan tekst fra saksbehandler skal hentes her når Automatisk varselbrev er på plass
+             */
+            tilbakekreving.trengerVarselbrev("To do")
         } else {
             tilbakekreving.byttTilstand(TilBehandling)
         }
