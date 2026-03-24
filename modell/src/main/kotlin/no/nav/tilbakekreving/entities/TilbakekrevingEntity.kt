@@ -16,6 +16,7 @@ import no.nav.tilbakekreving.tilstand.Avsluttet
 import no.nav.tilbakekreving.tilstand.AvventerBrukerinfo
 import no.nav.tilbakekreving.tilstand.AvventerFagsysteminfo
 import no.nav.tilbakekreving.tilstand.AvventerKravgrunnlag
+import no.nav.tilbakekreving.tilstand.DistribuerVarselbrev
 import no.nav.tilbakekreving.tilstand.DistribuerVedtak
 import no.nav.tilbakekreving.tilstand.IverksettVedtak
 import no.nav.tilbakekreving.tilstand.JournalførVedtak
@@ -86,6 +87,7 @@ data class TilbakekrevingEntity(
                 TilbakekrevingTilstand.AVVENTER_FAGSYSTEMINFO -> AvventerFagsysteminfo
                 TilbakekrevingTilstand.AVVENTER_BRUKERINFO -> AvventerBrukerinfo
                 TilbakekrevingTilstand.SEND_VARSELBREV -> SendVarselbrev
+                TilbakekrevingTilstand.DISTRIUBER_VARSELBREV -> DistribuerVarselbrev
                 TilbakekrevingTilstand.IVERKSETT_VEDTAK -> IverksettVedtak
                 TilbakekrevingTilstand.TIL_BEHANDLING -> TilBehandling
                 TilbakekrevingTilstand.JOURNALFØR_VEDTAK -> JournalførVedtak

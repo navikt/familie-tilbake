@@ -24,7 +24,6 @@ import no.nav.tilbakekreving.behandlingslogg.Behandlingsloggstype
 import no.nav.tilbakekreving.behandlingslogg.LoggInnslag
 import no.nav.tilbakekreving.behandlingslogg.Rolle
 import no.nav.tilbakekreving.behov.BehovObservatør
-import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.brev.BrevHistorikk
@@ -45,13 +44,15 @@ import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
-import no.nav.tilbakekreving.hendelse.VarselbrevSendtHendelse
+import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
+import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
+import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.LogginnslagDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
@@ -61,6 +62,7 @@ import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.tilstand.AvventerBrukerinfo
 import no.nav.tilbakekreving.tilstand.IverksettVedtak
+import no.nav.tilbakekreving.tilstand.SendVarselbrev
 import no.nav.tilbakekreving.tilstand.Start
 import no.nav.tilbakekreving.tilstand.Tilstand
 import java.math.BigDecimal
@@ -142,15 +144,29 @@ class Tilbakekreving internal constructor(
         )
     }
 
-    fun håndter(varselbrevSendt: VarselbrevSendtHendelse) {
-        tilstand.håndter(this, varselbrevSendt)
+    fun håndter(varselbrevJournalføringHendelse: VarselbrevJournalføringHendelse) {
+        tilstand.håndter(this, varselbrevJournalføringHendelse)
+        val behandling = behandlingHistorikk.nåværende().entry
+        behandlingslogg.lagre(
+            opprettLoggInnslag(
+                behandlingsloggstype = Behandlingsloggstype.VARSELBREV_JOURNALFØRT,
+                rolle = Rolle.SAKSBEHANDLER,
+                behandler = Behandler.Saksbehandler(varselbrevJournalføringHendelse.behandlerIdent),
+                behandlingId = varselbrevJournalføringHendelse.behandlingId,
+            ),
+        )
+        behandling.utførSideeffekt(tilstand, this, bigQueryService, eksternFagsak.ytelse.hentYtelsesnavn(Språkkode.NB))
+    }
+
+    fun håndter(varselbrevDistribueringHendelse: VarselbrevDistribueringHendelse) {
+        tilstand.håndter(this, varselbrevDistribueringHendelse)
         val behandling = behandlingHistorikk.nåværende().entry
         behandlingslogg.lagre(
             opprettLoggInnslag(
                 behandlingsloggstype = Behandlingsloggstype.VARSELBREV_SENDT,
                 rolle = Rolle.SAKSBEHANDLER,
-                behandler = Behandler.Saksbehandler(varselbrevSendt.behandlerIdent),
-                behandlingId = varselbrevSendt.behandlingId,
+                behandler = Behandler.Saksbehandler(varselbrevDistribueringHendelse.behandlerIdent),
+                behandlingId = varselbrevDistribueringHendelse.behandlingId,
             ),
         )
         behandling.utførSideeffekt(tilstand, this, bigQueryService, eksternFagsak.ytelse.hentYtelsesnavn(Språkkode.NB))
@@ -172,7 +188,7 @@ class Tilbakekreving internal constructor(
         tilstand.håndter(this, journalføringHendelse)
         behandlingslogg.lagre(
             opprettLoggInnslag(
-                behandlingsloggstype = Behandlingsloggstype.DOKUMENT_JOURNALFØRT,
+                behandlingsloggstype = Behandlingsloggstype.VARSELBREV_JOURNALFØRT,
                 rolle = Rolle.VEDTAKSLØSNING,
                 behandler = Behandler.Vedtaksløsning,
                 behandlingId = journalføringHendelse.behandlingId,
@@ -277,28 +293,17 @@ class Tilbakekreving internal constructor(
     }
 
     fun trengerVarselbrev(varseltekstFraSaksbehandler: String) {
-        val personinfo = bruker!!.hentBrukerinfo()
-        val behandling = behandlingHistorikk.nåværende().entry
-        val varselbrev = behandling.opprettVarselbrev(varseltekstFraSaksbehandler, features)
-        val varselbrevInfo = behandling.hentForhåndsvarselinfo()
+        brevHistorikk.lagre(behandlingHistorikk.nåværende().entry.opprettVarselbrev(varseltekstFraSaksbehandler, features))
+        byttTilstand(SendVarselbrev)
+    }
 
-        behovObservatør.håndter(
-            VarselbrevBehov(
-                brevId = varselbrev.id,
-                brukerinfo = bruker!!.hentBrukerinfo(),
-                behandlingId = behandling.id,
-                varselbrev = varselbrev,
-                revurderingsvedtaksdato = varselbrevInfo.revurderingsvedtaksdato,
-                varseltekstFraSaksbehandler = varseltekstFraSaksbehandler,
-                eksternFagsakId = eksternFagsak.eksternId,
-                ytelse = eksternFagsak.ytelse,
-                behandlendeEnhet = varselbrevInfo.behandlendeEnhet,
-                feilutbetaltBeløp = varselbrev.hentVarsletBeløp(),
-                feilutbetaltePerioder = varselbrevInfo.feilutbetaltePerioder,
-                gjelderDødsfall = personinfo.dødsdato != null,
-            ),
+    fun trengerVarselbrevJournalføring() {
+        behandlingHistorikk.nåværende().entry.trengerVarselbrevJournalføring(
+            behovObservatør = behovObservatør,
+            eksternFagsak = eksternFagsak,
+            brukerinfo = bruker!!.hentBrukerinfo(),
+            varselbrev = brevHistorikk.sisteVarselbrev()!!,
         )
-        brevHistorikk.lagre(varselbrev)
     }
 
     fun trengerBrukerinfo() {
@@ -327,6 +332,17 @@ class Tilbakekreving internal constructor(
         )
 
         brevHistorikk.lagre(vedtaksbrev)
+    }
+
+    fun trengerVarselbrevDistribusjon() {
+        val behandling = behandlingHistorikk.nåværende().entry
+
+        behandling.trengerVarselbrevDistribusjon(
+            behovObservatør,
+            journalpostId = brevHistorikk.sisteVarselbrev()!!.journalpostId!!,
+            ytelse = eksternFagsak.ytelse,
+            brevId = brevHistorikk.sisteVarselbrev()!!.id,
+        )
     }
 
     fun trengerDistribusjon() {
@@ -561,7 +577,7 @@ class Tilbakekreving internal constructor(
         )
     }
 
-    fun hentVedtaksresultatForFrontend(): no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatDto {
+    fun hentVedtaksresultatForFrontend(): BeregningsresultatDto {
         return behandlingHistorikk.nåværende().entry.hentVedtaksresultatForFrontend()
     }
 

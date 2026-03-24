@@ -6,7 +6,11 @@ interface BehovObservatør {
     )
 
     fun håndter(
-        behov: VarselbrevBehov,
+        behov: VarselbrevJournalføringBehov,
+    )
+
+    fun håndter(
+        behov: VarselbrevDistribusjonBehov,
     )
 
     fun håndter(

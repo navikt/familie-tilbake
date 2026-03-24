@@ -8,7 +8,7 @@ import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import java.time.LocalDate
 import java.util.UUID
 
-data class VarselbrevBehov(
+data class VarselbrevJournalføringBehov(
     val brevId: UUID,
     val brukerinfo: Brukerinfo,
     val behandlingId: UUID,
@@ -21,4 +21,12 @@ data class VarselbrevBehov(
     val feilutbetaltBeløp: Long,
     val feilutbetaltePerioder: List<Datoperiode>,
     val gjelderDødsfall: Boolean,
+) : Behov
+
+data class VarselbrevDistribusjonBehov(
+    val brevId: UUID,
+    val behandlingId: UUID,
+    val journalpostId: String,
+    val ytelse: Ytelse,
+    val behandlerIdent: String,
 ) : Behov

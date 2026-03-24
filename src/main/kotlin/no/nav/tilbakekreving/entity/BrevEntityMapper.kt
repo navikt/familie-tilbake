@@ -83,7 +83,7 @@ object BrevEntityMapper : Entity<BrevEntity, UUID, UUID>(
         val tekstFraSaksbehandler = field(
             "tekst_fra_saksbehandler",
             VarselbrevEntity::tekstFraSaksbehandler,
-            FieldConverter.StringConverter,
+            FieldConverter.StringConverter.required(),
         )
 
         fun map(resultSet: ResultSet): VarselbrevEntity {

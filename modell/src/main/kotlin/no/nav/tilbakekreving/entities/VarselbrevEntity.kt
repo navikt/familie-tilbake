@@ -15,7 +15,7 @@ data class VarselbrevEntity(
     val sendtTid: LocalDate? = null,
     val ansvarligSaksbehandlerIdent: String,
     val fristForUttalelse: LocalDate?,
-    val tekstFraSaksbehandler: String?,
+    val tekstFraSaksbehandler: String,
 ) {
     fun fraEntity(id: UUID, kravgrunnlagHistorikk: KravgrunnlagHistorikk): Varselbrev {
         val sendtTid = sendtTid ?: LocalDate.now()

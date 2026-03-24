@@ -6,6 +6,7 @@ import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.behov.JournalføringBehov
+import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.brukerinfoHendelse
 import no.nav.tilbakekreving.defaultFeatures
@@ -17,6 +18,8 @@ import no.nav.tilbakekreving.godkjenning
 import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.JournalføringHendelse
+import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
+import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
@@ -51,6 +54,22 @@ class FrontendE2ETest {
 
         tilbakekreving.håndter(behandler, faktastegVurdering())
         tilbakekreving.trengerVarselbrev("Tekst fra saksbehandler")
+        val varselbrevId = behovOppsamler.behovListe.filterIsInstance<VarselbrevJournalføringBehov>().first().varselbrev.id
+        tilbakekreving.håndter(
+            VarselbrevJournalføringHendelse(
+                varselbrevId = varselbrevId,
+                behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id,
+                journalpostId = "1234",
+                behandlerIdent = behandler.ident,
+            ),
+        )
+
+        tilbakekreving.håndter(
+            VarselbrevDistribueringHendelse(
+                behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id,
+                behandlerIdent = behandler.ident,
+            ),
+        )
         tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, listOf(), null)
 
         tilbakekreving.håndter(behandler, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
