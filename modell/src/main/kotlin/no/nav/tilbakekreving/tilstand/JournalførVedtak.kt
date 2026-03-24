@@ -9,7 +9,7 @@ import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.time.Duration
 
 object JournalførVedtak : Tilstand {
-    override val tidTilPåminnelse: Duration? = Duration.ofHours(1)
+    override val tidTilPåminnelse: Duration? = Duration.ofMinutes(3)
     override val tilbakekrevingTilstand: TilbakekrevingTilstand = TilbakekrevingTilstand.JOURNALFØR_VEDTAK
 
     override fun behandlingsstatus(behandling: Behandling): Behandlingsstatus = Behandlingsstatus.JOURNALFØR_VEDTAK
@@ -19,6 +19,7 @@ object JournalførVedtak : Tilstand {
     }
 
     override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse) {
+        println("=======>>>>> behandlingID: ${tilbakekreving.behandlingHistorikk.nåværende().entry.id}")
         tilbakekreving.trengerVedtaksbrevJournalføring()
     }
 

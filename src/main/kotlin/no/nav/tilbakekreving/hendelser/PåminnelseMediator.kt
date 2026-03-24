@@ -23,11 +23,14 @@ class PåminnelseMediator(
     private val sakerITilstand = MultiGauge.builder("current_state")
         .register(Metrics.globalRegistry)
 
-    @Scheduled(fixedRate = 10, timeUnit = TimeUnit.MINUTES)
+    @Scheduled(fixedRate = 2, timeUnit = TimeUnit.MINUTES)
     fun påminnSaker() {
         val tilbakekrevinger = tilbakekrevingRepository.hentTilbakekrevinger(TilbakekrevingRepository.FindTilbakekrevingStrategy.TrengerPåminnelse)
         for (tilbakekrevingEntity in tilbakekrevinger) {
             var context = SecureLog.Context.tom()
+            logger.medContext(context) {
+                info("==========>>>>>> Påminnsaker: tilbakekreving=${tilbakekrevingEntity.id}")
+            }
             try {
                 tilbakekrevinService.hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingEntity.id)) { tilbakekreving ->
                     context = SecureLog.Context.fra(tilbakekreving)
