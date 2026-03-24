@@ -110,7 +110,7 @@ tilbakekreving:
     base-url: http://entra-proxy.sikkerhetstjenesten.svc.cluster.local
     scope: api://prod-gcp.sikkerhetstjenesten.entra-proxy/.default
   tilbakekrevingPdf:
-    base-url: https://tilbakekreving-pdf
+    base-url: http://tilbakekreving-pdf
 
 bigquery:
   flyway:
