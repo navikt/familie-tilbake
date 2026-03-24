@@ -48,12 +48,14 @@ class ReduksjonSærligeGrunner(
 
         fun lagStatistikk(): VurdertUtbetaling.JaNeiVurdering
 
-        fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER)
+        fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse>
 
         class Ja(val prosentdel: Int) : SkalReduseres {
             override fun reduksjon(): Reduksjon {
                 return Reduksjon.Prosentdel(prosentdel.toBigDecimal())
             }
+
+            override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.REDUSERT_SÆRLIGE_GRUNNER)
 
             override fun lagStatistikk(): VurdertUtbetaling.JaNeiVurdering = VurdertUtbetaling.JaNeiVurdering.Ja
 
@@ -66,6 +68,8 @@ class ReduksjonSærligeGrunner(
             override fun reduksjon(): Reduksjon {
                 return Reduksjon.FullstendigTilbakekreving()
             }
+
+            override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER)
 
             override fun lagStatistikk(): VurdertUtbetaling.JaNeiVurdering = VurdertUtbetaling.JaNeiVurdering.Nei
 

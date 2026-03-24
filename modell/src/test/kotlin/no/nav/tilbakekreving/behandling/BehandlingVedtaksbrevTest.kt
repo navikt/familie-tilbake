@@ -57,12 +57,12 @@ class BehandlingVedtaksbrevTest {
                 Arguments.argumentSet(
                     "God tro, beløp i behold",
                     forårsaketAvNav().godTro(beløpIBehold = 1400.kroner),
-                    setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES),
+                    setOf(VilkårsvurderingBegrunnelse.GOD_TRO_BELØP_I_BEHOLD),
                 ),
                 Arguments.argumentSet(
                     "God tro, beløp i behold",
                     forårsaketAvNav().godTro(beløpIBehold = null),
-                    setOf(VilkårsvurderingBegrunnelse.INGEN_TILBAKEKREVING),
+                    setOf(VilkårsvurderingBegrunnelse.GOD_TRO_BELØP_IKKE_I_BEHOLD),
                 ),
                 Arguments.argumentSet(
                     "Forårsaket av bruker, uaktsomt, skal ikke unnlates",

@@ -163,7 +163,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     return Reduksjon.ManueltBeløp(beløp)
                 }
 
-                override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES)
+                override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.GOD_TRO_BELØP_I_BEHOLD)
 
                 override fun tilEntity(periodeRef: UUID, begrunnelse: String): GodTroEntity {
                     return GodTroEntity(
@@ -180,7 +180,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     return Reduksjon.IngenTilbakekreving()
                 }
 
-                override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.INGEN_TILBAKEKREVING)
+                override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.GOD_TRO_BELØP_IKKE_I_BEHOLD)
 
                 override fun tilEntity(periodeRef: UUID, begrunnelse: String): GodTroEntity {
                     return GodTroEntity(
