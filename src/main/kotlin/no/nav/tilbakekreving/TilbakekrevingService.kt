@@ -27,7 +27,6 @@ import no.nav.tilbakekreving.behov.FagsysteminfoBehov
 import no.nav.tilbakekreving.behov.IverksettelseBehov
 import no.nav.tilbakekreving.behov.VarselbrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
-import no.nav.tilbakekreving.behov.VarselbrevBehov
 import no.nav.tilbakekreving.behov.VedtaksbrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.VedtaksbrevJournalføringBehov
 import no.nav.tilbakekreving.bigquery.BigQueryService

@@ -5,6 +5,7 @@ import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.UtenforScope
 import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.aktør.Bruker
+import no.nav.tilbakekreving.aktør.Brukerinfo
 import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsoppsummeringDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegsinfoDto
@@ -768,7 +769,7 @@ class Behandling internal constructor(
         features = features,
     )
 
-    fun hentVedtaksbrevInfo(bruker: Bruker, ytelse: Ytelse): VedtaksbrevInfo {
+    internal fun hentVedtaksbrevInfo(bruker: Bruker, ytelse: Ytelse): VedtaksbrevInfo {
         return VedtaksbrevInfo(
             brukerdata = bruker.brevmeta(),
             ytelse = ytelse.brevmeta(),
