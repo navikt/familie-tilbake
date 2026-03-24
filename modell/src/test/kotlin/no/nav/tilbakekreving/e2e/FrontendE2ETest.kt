@@ -6,6 +6,7 @@ import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.behov.JournalføringBehov
+import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.brukerinfoHendelse
 import no.nav.tilbakekreving.defaultFeatures
@@ -53,9 +54,10 @@ class FrontendE2ETest {
 
         tilbakekreving.håndter(behandler, faktastegVurdering())
         tilbakekreving.trengerVarselbrev("Tekst fra saksbehandler")
+        val varselbrevId = behovOppsamler.behovListe.filterIsInstance<VarselbrevJournalføringBehov>().first().varselbrev.id
         tilbakekreving.håndter(
             VarselbrevJournalføringHendelse(
-                varselbrevId = tilbakekreving.brevHistorikk.sisteVarselbrev()!!.id,
+                varselbrevId = varselbrevId,
                 behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id,
                 journalpostId = "1234",
                 behandlerIdent = behandler.ident,

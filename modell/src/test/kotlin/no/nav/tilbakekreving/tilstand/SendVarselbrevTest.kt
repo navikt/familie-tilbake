@@ -24,21 +24,6 @@ class SendVarselbrevTest {
     private val bigQueryService = BigQueryServiceStub()
 
     @Test
-    fun `tilbakekreving ved AutomatiskVarselbrev er i SendVarselbrev tilstand når bruker er håndtert`() {
-        val oppsamler = BehovObservatørOppsamler()
-        val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
-        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), oppsamler, opprettTilbakekrevingEvent, bigQueryService, EndringObservatørOppsamler(), features = defaultFeatures(Toggle.SendAutomatiskVarselbrev to true))
-        val bruker = brukerinfoHendelse()
-        val kravgrunnlag = kravgrunnlag()
-        val fagsak = fagsysteminfoHendelse()
-        tilbakekreving.håndter(kravgrunnlag)
-        tilbakekreving.håndter(fagsak)
-        tilbakekreving.håndter(bruker)
-
-        tilbakekreving.tilstand shouldBe SendVarselbrev
-    }
-
-    @Test
     fun `tilbakekreving tilstand endres til SendVarselbrev når forhåndsvarsel skal sendes`() {
         val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
@@ -56,11 +41,10 @@ class SendVarselbrevTest {
 
         oppsamler.behovListe.size shouldBe 3
 
-        oppsamler.behovListe.filterIsInstance<VarselbrevJournalføringBehov>().shouldHaveSize(1)
-
+        val varselbrev = oppsamler.behovListe.filterIsInstance<VarselbrevJournalføringBehov>().shouldHaveSize(1)
         tilbakekreving.håndter(
             VarselbrevJournalføringHendelse(
-                varselbrevId = tilbakekreving.brevHistorikk.sisteVarselbrev()!!.id,
+                varselbrevId = varselbrev.first().varselbrev.id,
                 behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id,
                 journalpostId = "1234",
                 behandlerIdent = "4321",
@@ -102,7 +86,7 @@ class SendVarselbrevTest {
 
         tilbakekreving.håndter(
             VarselbrevJournalføringHendelse(
-                varselbrevId = tilbakekreving.brevHistorikk.sisteVarselbrev()!!.id,
+                varselbrevId = varselbrevBehov.first().brevId,
                 behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id,
                 journalpostId = "1234",
                 behandlerIdent = "4321",

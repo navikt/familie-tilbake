@@ -1,7 +1,6 @@
 package no.nav.tilbakekreving.tilstand
 
 import no.nav.tilbakekreving.Tilbakekreving
-import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
@@ -24,13 +23,7 @@ object AvventerBrukerinfo : Tilstand {
         brukerinfo: BrukerinfoHendelse,
     ) {
         tilbakekreving.bruker!!.oppdater(brukerinfo)
-        if (tilbakekreving.features[Toggle.SendAutomatiskVarselbrev]) {
-            /*Todo
-                Vi må vurdere hvordan tekst fra saksbehandler skal hentes her når Automatisk varselbrev er på plass
-             */
-            tilbakekreving.trengerVarselbrev("To do")
-        } else {
-            tilbakekreving.byttTilstand(TilBehandling)
-        }
+        // todo her kan vi bytte til SendVarselbrev tilstand når Automatisk varselbrev er på plass
+        tilbakekreving.byttTilstand(TilBehandling)
     }
 }
