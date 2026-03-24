@@ -15,11 +15,11 @@ object JournalførVedtak : Tilstand {
     override fun behandlingsstatus(behandling: Behandling): Behandlingsstatus = Behandlingsstatus.JOURNALFØR_VEDTAK
 
     override fun entering(tilbakekreving: Tilbakekreving) {
-        tilbakekreving.trengerJournalføring()
+        tilbakekreving.trengerVedtaksbrevJournalføring()
     }
 
     override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse) {
-        tilbakekreving.trengerJournalføring()
+        tilbakekreving.trengerVedtaksbrevJournalføring()
     }
 
     override fun håndter(

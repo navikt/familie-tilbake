@@ -31,11 +31,11 @@ class BehovObservatørOppsamler() : BehovObservatør {
         behovListe.add(behov)
     }
 
-    override fun håndter(behov: JournalføringBehov) {
+    override fun håndter(behov: VedtaksbrevJournalføringBehov) {
         behovListe.add(behov)
     }
 
-    override fun håndter(behov: DistribusjonBehov) {
+    override fun håndter(behov: VedtaksbrevDistribusjonBehov) {
         behovListe.add(behov)
     }
 }

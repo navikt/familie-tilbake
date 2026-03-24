@@ -9,7 +9,7 @@ import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
-import no.nav.tilbakekreving.behov.JournalføringBehov
+import no.nav.tilbakekreving.behov.VedtaksbrevJournalføringBehov
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.brukerinfoHendelse
 import no.nav.tilbakekreving.defaultFeatures
@@ -129,7 +129,7 @@ class EndringObservatørTest {
 
         tilbakekreving.håndter(ANSVARLIG_BESLUTTER, godkjenning())
         tilbakekreving.håndter(iverksettelse())
-        tilbakekreving.håndter(journalføring((behovOppsamler.behovListe.last() as JournalføringBehov).brevId))
+        tilbakekreving.håndter(journalføring((behovOppsamler.behovListe.last() as VedtaksbrevJournalføringBehov).brevId))
         tilbakekreving.håndter(distribusjon())
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.status } shouldBe listOf(
             ForenkletBehandlingsstatus.OPPRETTET,

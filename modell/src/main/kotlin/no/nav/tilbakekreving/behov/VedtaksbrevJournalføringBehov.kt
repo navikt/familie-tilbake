@@ -5,7 +5,7 @@ import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import java.util.UUID
 
-class JournalføringBehov(
+class VedtaksbrevJournalføringBehov(
     val brevId: UUID,
     val behandlingId: UUID,
     val ytelse: Ytelse,

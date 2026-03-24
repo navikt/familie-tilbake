@@ -23,12 +23,12 @@ import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behov.Behov
 import no.nav.tilbakekreving.behov.BrukerinfoBehov
-import no.nav.tilbakekreving.behov.DistribusjonBehov
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
 import no.nav.tilbakekreving.behov.IverksettelseBehov
-import no.nav.tilbakekreving.behov.JournalføringBehov
 import no.nav.tilbakekreving.behov.VarselbrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
+import no.nav.tilbakekreving.behov.VedtaksbrevDistribusjonBehov
+import no.nav.tilbakekreving.behov.VedtaksbrevJournalføringBehov
 import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.brev.varselbrev.ForhåndsvarselService
 import no.nav.tilbakekreving.brev.vedtaksbrev.NyVedtaksbrevService
@@ -282,7 +282,7 @@ class TilbakekrevingService(
                 )
             }
 
-            is JournalføringBehov -> {
+            is VedtaksbrevJournalføringBehov -> {
                 val journalpost = vedtaksbrevService.journalførVedtaksbrev(behov)
                 if (journalpost.journalpostId == null) {
                     throw Feil(
@@ -300,7 +300,7 @@ class TilbakekrevingService(
                 )
             }
 
-            is DistribusjonBehov -> {
+            is VedtaksbrevDistribusjonBehov -> {
                 val bestillingId = vedtaksbrevService.distribuereVedtaksbrev(behov, logContext)
                 tilbakekreving.håndter(DistribusjonHendelse(bestillingId, behov.behandlingId))
             }
