@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.brev.vedtaksbrev
 
+import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.tilbakekreving.entity.FieldConverter
@@ -48,8 +49,13 @@ class VedtaksbrevDataRepository(
         val underavsnitt: List<UnderavsnittEntity>?,
     ) {
         enum class Type {
+            @JsonAlias("RENTEKST", "rentekst")
             RENTEKST,
+
+            @JsonAlias("PÅKREVD_BEGRUNNELSE", "påkrevd_begrunnelse")
             PÅKREVD_BEGRUNNELSE,
+
+            @JsonAlias("UNDERAVSNITT", "underavsnitt")
             UNDERAVSNITT,
         }
     }
