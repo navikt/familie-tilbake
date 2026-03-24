@@ -5,8 +5,8 @@ import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
-import no.nav.tilbakekreving.behov.JournalføringBehov
 import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
+import no.nav.tilbakekreving.behov.VedtaksbrevJournalføringBehov
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.brukerinfoHendelse
 import no.nav.tilbakekreving.defaultFeatures
@@ -92,7 +92,7 @@ class FrontendE2ETest {
         tilbakekreving.frontendDtoForBehandling(behandler, true).status shouldBe Behandlingsstatus.JOURNALFØR_VEDTAK
         tilbakekreving.håndter(
             JournalføringHendelse(
-                brevId = (behovOppsamler.behovListe.last() as JournalføringBehov).brevId,
+                brevId = (behovOppsamler.behovListe.last() as VedtaksbrevJournalføringBehov).brevId,
                 journalpostId = "123",
                 behandlingId = UUID.randomUUID(),
             ),

@@ -11,8 +11,8 @@ import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstype
 import no.nav.familie.tilbake.kontrakter.journalpost.AvsenderMottakerIdType
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.callId
-import no.nav.tilbakekreving.behov.DistribusjonBehov
-import no.nav.tilbakekreving.behov.JournalføringBehov
+import no.nav.tilbakekreving.behov.VedtaksbrevDistribusjonBehov
+import no.nav.tilbakekreving.behov.VedtaksbrevJournalføringBehov
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.breeeev.begrunnelse.Forklaringstekster
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
@@ -116,7 +116,7 @@ class NyVedtaksbrevService(
     }
 
     fun journalførVedtaksbrev(
-        behov: JournalføringBehov,
+        behov: VedtaksbrevJournalføringBehov,
     ): OpprettJournalpostResponse {
         val arkiverDokumentRequest = ArkiverDokumentRequest(
             fnr = behov.bruker.ident,
@@ -148,7 +148,7 @@ class NyVedtaksbrevService(
         )
     }
 
-    fun distribuereVedtaksbrev(behov: DistribusjonBehov, logContext: SecureLog.Context): String {
+    fun distribuereVedtaksbrev(behov: VedtaksbrevDistribusjonBehov, logContext: SecureLog.Context): String {
         return dokdistClient.brevTilUtsending(
             behandlingId = behov.behandlingId,
             journalpostId = behov.journalpostId,

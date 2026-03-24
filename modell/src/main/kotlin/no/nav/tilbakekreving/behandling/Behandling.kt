@@ -4,7 +4,7 @@ import no.nav.tilbakekreving.FeatureToggles
 import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.UtenforScope
 import no.nav.tilbakekreving.aktør.Aktør
-import no.nav.tilbakekreving.aktør.Brukerinfo
+import no.nav.tilbakekreving.aktør.Bruker
 import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsoppsummeringDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegsinfoDto
@@ -33,11 +33,11 @@ import no.nav.tilbakekreving.behandlingslogg.Behandlingsloggstype
 import no.nav.tilbakekreving.behandlingslogg.LoggInnslag
 import no.nav.tilbakekreving.behandlingslogg.Rolle
 import no.nav.tilbakekreving.behov.BehovObservatør
-import no.nav.tilbakekreving.behov.DistribusjonBehov
 import no.nav.tilbakekreving.behov.IverksettelseBehov
-import no.nav.tilbakekreving.behov.JournalføringBehov
 import no.nav.tilbakekreving.behov.VarselbrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
+import no.nav.tilbakekreving.behov.VedtaksbrevDistribusjonBehov
+import no.nav.tilbakekreving.behov.VedtaksbrevJournalføringBehov
 import no.nav.tilbakekreving.beregning.Beregning
 import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
@@ -263,23 +263,22 @@ class Behandling internal constructor(
         )
     }
 
-    fun trengerJournalføring(
+    fun trengerVedtaksbrevJournalføring(
         behovObservatør: BehovObservatør,
         brevId: UUID,
         ytelse: Ytelse,
-        brukerInfo: Brukerinfo,
+        bruker: Bruker,
         fagsakId: String,
-        vedtaksbrevInfo: VedtaksbrevInfo,
     ) {
         behovObservatør.håndter(
-            JournalføringBehov(
+            VedtaksbrevJournalføringBehov(
                 brevId = brevId,
                 behandlingId = id,
                 ytelse = ytelse,
-                bruker = brukerInfo,
+                bruker = bruker.hentBrukerinfo(),
                 fagsakId = fagsakId,
                 journalførendeEnhet = enhet!!.kode,
-                vedtaksbrevInfo = vedtaksbrevInfo,
+                vedtaksbrevInfo = hentVedtaksbrevInfo(bruker, ytelse),
             ),
         )
     }
@@ -301,13 +300,13 @@ class Behandling internal constructor(
         )
     }
 
-    fun trengerDistribusjon(
+    fun trengerVedtaksbrevDistribusjon(
         bebehovObservatør: BehovObservatør,
         journalpostId: String,
         fagsystem: FagsystemDTO,
     ) {
         bebehovObservatør.håndter(
-            DistribusjonBehov(
+            VedtaksbrevDistribusjonBehov(
                 behandlingId = id,
                 journalpostId = journalpostId,
                 fagsystem = fagsystem,
@@ -768,6 +767,15 @@ class Behandling internal constructor(
         varseltekstFraSaksbehandler = varseltekstFraSaksbehandler,
         features = features,
     )
+
+    fun hentVedtaksbrevInfo(bruker: Bruker, ytelse: Ytelse): VedtaksbrevInfo {
+        return VedtaksbrevInfo(
+            brukerdata = bruker.brevmeta(),
+            ytelse = ytelse.brevmeta(),
+            signatur = brevSignatur(),
+            perioder = vurdertePerioderForBrev(),
+        )
+    }
 
     fun opprettLoggInnslag(behandlingsloggstype: Behandlingsloggstype, rolle: Rolle, behandler: Behandler): LoggInnslag {
         return LoggInnslag(

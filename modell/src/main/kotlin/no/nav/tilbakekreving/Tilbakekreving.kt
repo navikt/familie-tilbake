@@ -318,20 +318,18 @@ class Tilbakekreving internal constructor(
         )
     }
 
-    fun trengerJournalføring() {
-        val behandling = behandlingHistorikk.nåværende().entry
-        val vedtaksbrev = Vedtaksbrev.opprett()
+    fun opprettVedtaksbrev() {
+        brevHistorikk.lagre(Vedtaksbrev.opprett())
+    }
 
-        behandling.trengerJournalføring(
+    fun trengerVedtaksbrevJournalføring() {
+        behandlingHistorikk.nåværende().entry.trengerVedtaksbrevJournalføring(
             behovObservatør,
-            brevId = vedtaksbrev.id,
+            brevId = brevHistorikk.nåværende().entry.id,
             ytelse = eksternFagsak.ytelse,
-            brukerInfo = bruker!!.hentBrukerinfo(),
+            bruker = requireNotNull(bruker) { "Bruker kreves for journalføring av vedtaksbrev." },
             fagsakId = eksternFagsak.eksternId,
-            vedtaksbrevInfo = hentVedtaksbrevInfo(behandling.id),
         )
-
-        brevHistorikk.lagre(vedtaksbrev)
     }
 
     fun trengerVarselbrevDistribusjon() {
@@ -345,10 +343,8 @@ class Tilbakekreving internal constructor(
         )
     }
 
-    fun trengerDistribusjon() {
-        val behandling = behandlingHistorikk.nåværende().entry
-
-        behandling.trengerDistribusjon(
+    fun trengerVedtaksbrevDistribusjon() {
+        behandlingHistorikk.nåværende().entry.trengerVedtaksbrevDistribusjon(
             behovObservatør,
             journalpostId = brevHistorikk.nåværende().entry.journalpostId!!,
             fagsystem = eksternFagsak.ytelse.tilFagsystemDTO(),
@@ -379,12 +375,9 @@ class Tilbakekreving internal constructor(
     }
 
     fun hentVedtaksbrevInfo(behandlingId: UUID): VedtaksbrevInfo {
-        val behandling = behandlingHistorikk.entry(behandlingId)
-        return VedtaksbrevInfo(
-            brukerdata = requireNotNull(bruker).brevmeta(),
-            ytelse = eksternFagsak.ytelse.brevmeta(),
-            signatur = behandling.brevSignatur(),
-            perioder = behandling.vurdertePerioderForBrev(),
+        return behandlingHistorikk.entry(behandlingId).hentVedtaksbrevInfo(
+            requireNotNull(bruker) { { "Bruker kreves for å hente vedtaksbrev informajson." } },
+            eksternFagsak.ytelse,
         )
     }
 

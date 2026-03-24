@@ -3,12 +3,12 @@ package no.nav.tilbakekreving
 import no.nav.tilbakekreving.behov.Behov
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.BrukerinfoBehov
-import no.nav.tilbakekreving.behov.DistribusjonBehov
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
 import no.nav.tilbakekreving.behov.IverksettelseBehov
-import no.nav.tilbakekreving.behov.JournalføringBehov
 import no.nav.tilbakekreving.behov.VarselbrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
+import no.nav.tilbakekreving.behov.VedtaksbrevDistribusjonBehov
+import no.nav.tilbakekreving.behov.VedtaksbrevJournalføringBehov
 
 class Observatør() : BehovObservatør {
     private val behovListe = mutableListOf<Behov>()
@@ -45,11 +45,11 @@ class Observatør() : BehovObservatør {
         behovListe.add(behov)
     }
 
-    override fun håndter(behov: JournalføringBehov) {
+    override fun håndter(behov: VedtaksbrevJournalføringBehov) {
         behovListe.add(behov)
     }
 
-    override fun håndter(behov: DistribusjonBehov) {
+    override fun håndter(behov: VedtaksbrevDistribusjonBehov) {
         behovListe.add(behov)
     }
 }

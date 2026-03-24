@@ -15,11 +15,11 @@ object DistribuerVedtak : Tilstand {
     override fun behandlingsstatus(behandling: Behandling): Behandlingsstatus = Behandlingsstatus.DISTRIUBER_VEDTAK
 
     override fun entering(tilbakekreving: Tilbakekreving) {
-        tilbakekreving.trengerDistribusjon()
+        tilbakekreving.trengerVedtaksbrevDistribusjon()
     }
 
     override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse) {
-        tilbakekreving.trengerDistribusjon()
+        tilbakekreving.trengerVedtaksbrevDistribusjon()
     }
 
     override fun håndter(
