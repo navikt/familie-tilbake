@@ -196,6 +196,7 @@ class ForhåndsvarselService(
             filtype = Filtype.PDFA,
             filnavn = "brev.pdf",
             tittel = brevdata.tittel,
+            dokumenttype = null,
         )
 
         val arkiverDokument =

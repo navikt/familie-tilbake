@@ -23,6 +23,8 @@ import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostResponse
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
+import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
+import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.AvsnittDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.HovedavsnittDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PakrevdBegrunnelseDto
@@ -185,6 +187,8 @@ class NyVedtaksbrevService(
                     dokument = pdfGenClient.hentPdfForVedtak(hentVedtaksbrevData(behov.behandlingId, behov.vedtaksbrevInfo)),
                     filtype = Filtype.PDFA,
                     filnavn = "vedtak.pdf",
+                    tittel = lagTittel(behov),
+                    dokumenttype = null,
                 ),
             ),
             fagsakId = behov.fagsakId,
@@ -256,5 +260,20 @@ class NyVedtaksbrevService(
 
             is PakrevdBegrunnelseDto -> error("JSON-mapper gav ugyldig type")
         }
+    }
+
+    private fun lagTittel(vedtaksbrevBehov: VedtaksbrevJournalføringBehov): String {
+        val tittel =
+            when (vedtaksbrevBehov.vedtaksresultat) {
+                Vedtaksresultat.INGEN_TILBAKEBETALING -> TITTEL_VEDTAK_INGEN_TILBAKEBETALING
+                else -> TITTEL_VEDTAK_TILBAKEBETALING
+            }
+
+        return "$tittel ${vedtaksbrevBehov.ytelse.hentYtelsesnavn(Språkkode.NB)}"
+    }
+
+    companion object {
+        private const val TITTEL_VEDTAK_TILBAKEBETALING = "Vedtak tilbakebetaling "
+        private const val TITTEL_VEDTAK_INGEN_TILBAKEBETALING = "Vedtak ingen tilbakebetaling "
     }
 }
