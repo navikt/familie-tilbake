@@ -4,6 +4,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
 import no.nav.tilbakekreving.Tilbakekreving
+import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.behov.VedtaksbrevDistribusjonBehov
@@ -87,7 +88,7 @@ class DistribuerVedtaTest {
         oppsamler: BehovObservatørOppsamler,
         endringOppsamler: EndringObservatørOppsamler = EndringObservatørOppsamler(),
     ): Tilbakekreving {
-        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), oppsamler, opprettTilbakekrevingHendelse, bigQueryService, endringOppsamler, features = defaultFeatures())
+        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), oppsamler, opprettTilbakekrevingHendelse, bigQueryService, endringOppsamler, features = defaultFeatures(Toggle.Vedtaksbrev to true))
         tilbakekreving.apply {
             håndter(kravgrunnlag())
             håndter(fagsysteminfoHendelse())

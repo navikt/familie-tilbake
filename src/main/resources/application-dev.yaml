@@ -24,6 +24,7 @@ tilbakekreving:
       SendAutomatiskVarselbrev: false
       Arkivering: false
       FjernUttalelsesfrist: true
+      Vedtaksbrev: true
   tilgangsstyring:
     grupper:
       ts:

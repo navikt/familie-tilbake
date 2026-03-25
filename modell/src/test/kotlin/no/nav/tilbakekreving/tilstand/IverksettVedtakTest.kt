@@ -4,6 +4,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvNav
 import no.nav.tilbakekreving.Tilbakekreving
+import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
@@ -75,7 +76,7 @@ class IverksettVedtakTest {
         oppsamler: BehovObservatørOppsamler,
         endringOppsamler: EndringObservatørOppsamler = EndringObservatørOppsamler(),
     ): Tilbakekreving {
-        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), oppsamler, opprettTilbakekrevingHendelse, bigQueryService, endringOppsamler, features = defaultFeatures())
+        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), oppsamler, opprettTilbakekrevingHendelse, bigQueryService, endringOppsamler, features = defaultFeatures(Toggle.Vedtaksbrev to true))
         tilbakekreving.apply {
             håndter(kravgrunnlag())
             håndter(fagsysteminfoHendelse())

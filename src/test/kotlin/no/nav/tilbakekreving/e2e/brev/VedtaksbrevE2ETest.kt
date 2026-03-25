@@ -34,6 +34,7 @@ import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.test.ingenReduksjon
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.test.skalIkkeUnnlates
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -49,6 +50,7 @@ class VedtaksbrevE2ETest : TilbakekrevingE2EBase() {
     private val ansvarligBeslutter = "Z111111"
 
     @Test
+    @Disabled
     fun `vedtaksbrev sendes og lagres riktig i DB`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(

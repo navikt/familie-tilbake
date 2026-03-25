@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.tilstand
 
 import no.nav.tilbakekreving.Tilbakekreving
+import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
@@ -28,7 +29,11 @@ object IverksettVedtak : Tilstand {
         tilbakekreving: Tilbakekreving,
         iverksettelseHendelse: IverksettelseHendelse,
     ) {
-        tilbakekreving.opprettVedtaksbrev()
-        tilbakekreving.byttTilstand(JournalførVedtak)
+        if (tilbakekreving.features[Toggle.Vedtaksbrev]) {
+            tilbakekreving.opprettVedtaksbrev()
+            tilbakekreving.byttTilstand(JournalførVedtak)
+        } else {
+            tilbakekreving.byttTilstand(Avsluttet)
+        }
     }
 }
