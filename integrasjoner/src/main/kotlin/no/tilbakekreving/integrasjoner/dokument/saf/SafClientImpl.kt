@@ -57,6 +57,8 @@ class SafClientImpl(
             header(HttpHeaders.Authorization, "Bearer $token")
         }
 
+        println("=====> RESPONSE status: ${response.status}: response body: ${response.bodyAsText()}")
+
         when (response.status) {
             HttpStatusCode.OK -> {
                 return response.body<ByteArray>()
