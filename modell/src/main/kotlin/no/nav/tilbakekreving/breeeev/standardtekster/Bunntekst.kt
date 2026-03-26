@@ -25,7 +25,7 @@ enum class Bunntekst(
     HVORDAN_BETALE_TILBAKE(
         tittel = "Hvordan betaler du tilbake?",
         avsnitt = arrayOf(
-            "Du vil få faktura fra Skatteetaten på det beløpet du skal betale tilbake. Dato: 09.02.2026 Side 2 av 3 På fakturaen vil det stå informasjon om nøyaktig beløp, kontonummer og forfallsdato. Du trenger ikke å gjøre noe før du får fakturaen.",
+            "Du vil få faktura fra Skatteetaten på det beløpet du skal betale tilbake. På fakturaen vil det stå informasjon om nøyaktig beløp, kontonummer og forfallsdato. Du trenger ikke å gjøre noe før du får fakturaen.",
             "Du finner mer informasjon på skatteetaten.no/betale.",
         ),
     ),
