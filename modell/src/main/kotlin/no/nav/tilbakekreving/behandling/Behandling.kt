@@ -280,6 +280,7 @@ class Behandling internal constructor(
                 fagsakId = fagsakId,
                 journalførendeEnhet = enhet!!.kode,
                 vedtaksbrevInfo = hentVedtaksbrevInfo(bruker, ytelse),
+                vedtaksresultat = hentVedtaksresultat()!!,
             ),
         )
     }

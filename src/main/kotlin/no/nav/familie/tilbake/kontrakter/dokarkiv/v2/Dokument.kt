@@ -6,7 +6,7 @@ import no.nav.familie.tilbake.kontrakter.dokarkiv.Dokumenttype
 class Dokument(
     @field:NotEmpty val dokument: ByteArray,
     @field:NotEmpty val filtype: Filtype,
-    val filnavn: String? = null,
-    val tittel: String? = null,
-    val dokumenttype: Dokumenttype? = null,
+    val filnavn: String?,
+    val tittel: String?,
+    val dokumenttype: Dokumenttype?,
 )
