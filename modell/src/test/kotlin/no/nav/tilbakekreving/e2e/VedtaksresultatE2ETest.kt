@@ -46,7 +46,7 @@ class VedtaksresultatE2ETest {
         tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, listOf(), null)
 
         tilbakekreving.håndter(behandler, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
-        tilbakekreving.håndter(behandler, 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
+        tilbakekreving.håndter(behandler, 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().uaktsomt())
 
         val resultat = tilbakekreving.hentVedtaksresultatForFrontend()
 
@@ -54,7 +54,7 @@ class VedtaksresultatE2ETest {
         resultat.beregningsresultatsperioder shouldHaveSize 1
 
         val periode = resultat.beregningsresultatsperioder.first()
-        periode.vurdering shouldBe BeregningsresultatVurderingDto.GrovUaktsomhet
+        periode.vurdering shouldBe BeregningsresultatVurderingDto.Uaktsomhet
         periode.feilutbetaltBeløp shouldBe 2000
         periode.andelAvBeløp shouldBe 100
         periode.tilbakekrevingsbeløp shouldBe 4000

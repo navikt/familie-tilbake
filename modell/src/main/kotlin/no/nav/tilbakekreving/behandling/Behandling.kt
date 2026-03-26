@@ -189,7 +189,7 @@ class Behandling internal constructor(
 
     private fun lagBeregning(): Beregning {
         return Beregning(
-            beregnRenter = false,
+            beregnRenter = true,
             tilbakekrevLavtBeløp = true,
             vilkårsvurderingsteg,
             foreldelsesteg.perioder(),
