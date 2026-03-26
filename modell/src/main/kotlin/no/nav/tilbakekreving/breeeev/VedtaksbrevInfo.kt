@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.breeeev
 
+import no.nav.tilbakekreving.breeeev.standardtekster.Bunntekst
 import no.nav.tilbakekreving.kontrakter.frontend.models.BrevmottakerDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.YtelseDto
 
@@ -8,4 +9,5 @@ data class VedtaksbrevInfo(
     val ytelse: YtelseDto,
     val signatur: Signatur,
     val perioder: List<BegrunnetPeriode>,
+    val bunntekster: Set<Bunntekst>,
 )

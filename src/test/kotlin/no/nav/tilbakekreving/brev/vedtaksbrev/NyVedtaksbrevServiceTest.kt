@@ -63,6 +63,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
                     påkrevdeVurderinger = setOf(VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER),
                 ),
             ),
+            bunntekster = emptySet(),
         )
         val initielleData = nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, vedtaksbrevInfo)
         initielleData.should {

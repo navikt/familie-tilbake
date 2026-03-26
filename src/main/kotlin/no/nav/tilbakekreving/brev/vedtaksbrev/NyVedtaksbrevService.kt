@@ -20,6 +20,7 @@ import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler.Companion.forBegrunnelse
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler.Companion.forPeriodeavsnitt
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
+import no.nav.tilbakekreving.breeeev.standardtekster.Bunntekst
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostResponse
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
@@ -33,6 +34,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.RentekstElementDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.RotElementDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.RotElementUpdateItemDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SignaturDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.StandardtekstDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UnderavsnittElementDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevDataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDataDto
@@ -72,6 +74,7 @@ class NyVedtaksbrevService(
             brevGjelder = vedtaksbrevInfo.brukerdata,
             sendtDato = BrevFormatterer.norskDato(LocalDate.now()),
             ytelse = vedtaksbrevInfo.ytelse,
+            bunntekster = vedtaksbrevInfo.bunntekster.map(::tilStandardtekst),
             signatur = signatur,
         )
 
@@ -84,6 +87,7 @@ class NyVedtaksbrevService(
             ytelse = vedtaksbrevInfo.ytelse,
             sendtDato = BrevFormatterer.norskDato(LocalDate.now()),
             sistOppdatert = sistOppdatert.atOffset(ZoneOffset.UTC),
+            bunntekster = vedtaksbrevInfo.bunntekster.map(::tilStandardtekst),
             signatur = signatur,
         )
     }
@@ -271,6 +275,11 @@ class NyVedtaksbrevService(
 
         return "$tittel ${vedtaksbrevBehov.ytelse.hentYtelsesnavn(Språkkode.NB)}"
     }
+
+    fun tilStandardtekst(bunntekst: Bunntekst) = StandardtekstDto(
+        tittel = bunntekst.tittel,
+        underavsnitt = bunntekst.avsnitt.map(::RentekstElementDto),
+    )
 
     companion object {
         private const val TITTEL_VEDTAK_TILBAKEBETALING = "Vedtak tilbakebetaling "

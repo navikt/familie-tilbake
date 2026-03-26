@@ -44,6 +44,7 @@ import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
 import no.nav.tilbakekreving.breeeev.Signatur
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
+import no.nav.tilbakekreving.breeeev.standardtekster.Bunntekst
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
@@ -776,6 +777,18 @@ class Behandling internal constructor(
             ytelse = ytelse.brevmeta(),
             signatur = brevSignatur(),
             perioder = vurdertePerioderForBrev(),
+            bunntekster = buildSet {
+                val vedtakOppsummering = lagBeregning().oppsummer()
+                if (vedtakOppsummering.vedtaksresultat == Vedtaksresultat.INGEN_TILBAKEBETALING) {
+                    if (vedtakOppsummering.totaltRentebeløp > BigDecimal.ZERO) {
+                        add(Bunntekst.RENTER)
+                    }
+                    add(Bunntekst.SKATT)
+                    add(Bunntekst.HVORDAN_BETALE_TILBAKE)
+                    add(Bunntekst.RETT_TIL_Å_KLAGE)
+                }
+                addAll(Bunntekst.STANDARD_BUNNTEKSTER)
+            },
         )
     }
 
