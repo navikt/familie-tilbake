@@ -1,4 +1,4 @@
-package no.nav.tilbakekreving.breeev.begrunnelse
+package no.nav.tilbakekreving.breeeev.begrunnelse
 
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe

@@ -25,6 +25,8 @@ sealed interface Ytelse {
 
     val kafkaTopic: String
 
+    val beregnerSkatt: Boolean
+
     fun tilEntity(): YtelseEntity
 
     fun brevmeta(): YtelseDto
@@ -50,6 +52,8 @@ sealed interface Ytelse {
         override fun tilDokarkivFagsaksystem(): DokarkivFagsaksystem = DokarkivFagsaksystem.BA
 
         override val kafkaTopic: String = "tilbake.privat-tilbakekreving-barnetrygd"
+
+        override val beregnerSkatt: Boolean = true
 
         override fun tilEntity(): YtelseEntity = YtelseEntity(Ytelsestype.BARNETRYGD)
 
@@ -84,6 +88,8 @@ sealed interface Ytelse {
 
         override val kafkaTopic: String = "tilbake.privat-tilbakekreving-tilleggsstonad"
 
+        override val beregnerSkatt: Boolean = false
+
         override fun tilEntity(): YtelseEntity = YtelseEntity(Ytelsestype.TILLEGGSSTØNAD)
 
         override fun brevmeta(): YtelseDto {
@@ -117,6 +123,8 @@ sealed interface Ytelse {
 
         override val kafkaTopic: String = "tilbake.privat-tilbakekreving-arbeidsavklaringspenger"
 
+        override val beregnerSkatt: Boolean = true
+
         override fun tilEntity(): YtelseEntity = YtelseEntity(Ytelsestype.ARBEIDSAVKLARINGSPENGER)
 
         override fun brevmeta(): YtelseDto {
@@ -149,6 +157,8 @@ sealed interface Ytelse {
         override fun tilDokarkivFagsaksystem(): DokarkivFagsaksystem = DokarkivFagsaksystem.TILTAKSPENGER
 
         override val kafkaTopic: String = "tilbake.privat-tilbakekreving-tiltakspenger"
+
+        override val beregnerSkatt: Boolean = false
 
         override fun tilEntity(): YtelseEntity = YtelseEntity(Ytelsestype.TILTAKSPENGER)
 

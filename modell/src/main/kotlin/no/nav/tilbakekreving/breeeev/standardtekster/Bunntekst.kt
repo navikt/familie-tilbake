@@ -1,6 +1,9 @@
 package no.nav.tilbakekreving.breeeev.standardtekster
 
+import no.nav.tilbakekreving.beregning.modell.Beregningsresultat
 import no.nav.tilbakekreving.fagsystem.Ytelse
+import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
+import java.math.BigDecimal
 
 enum class Bunntekst(
     val tittel: String,
@@ -10,14 +13,14 @@ enum class Bunntekst(
     RENTER(
         tittel = "Renter",
         avsnitt = arrayOf("Etter vår vurdering må du ha forstått at du ga oss uriktige opplysninger. Derfor må du betale et rentetillegg på 10 prosent. Det vil si 3 900 kroner. Dette er i tillegg til det feilutbetalte beløpet. Vedtaket er gjort etter folketrygdloven §§ 22-15 og 22-17 a."),
-        gjelderIkkeYtelser = arrayOf(
-            Ytelse.Tiltakspenger,
-            Ytelse.Tilleggsstønad,
-        ),
     ),
     SKATT(
         tittel = "Skatt og skatteoppgjør",
         avsnitt = arrayOf("Nav gir opplysninger til Skatteetaten. Skatteetaten vil vurdere om det er grunnlag for å endre skatteoppgjør."),
+        gjelderIkkeYtelser = arrayOf(
+            Ytelse.Tiltakspenger,
+            Ytelse.Tilleggsstønad,
+        ),
     ),
     HVORDAN_BETALE_TILBAKE(
         tittel = "Hvordan betaler du tilbake?",
@@ -62,6 +65,25 @@ enum class Bunntekst(
     }
 
     companion object {
+        fun finnTekster(
+            vedtakOppsummering: Beregningsresultat,
+            ytelse: Ytelse,
+        ): Set<Bunntekst> {
+            return buildSet {
+                if (vedtakOppsummering.vedtaksresultat != Vedtaksresultat.INGEN_TILBAKEBETALING) {
+                    if (vedtakOppsummering.totaltRentebeløp > BigDecimal.ZERO) {
+                        add(RENTER)
+                    }
+                    add(SKATT)
+                    add(HVORDAN_BETALE_TILBAKE)
+                    add(RETT_TIL_Å_KLAGE)
+                }
+                addAll(Bunntekst.STANDARD_BUNNTEKSTER)
+            }
+                .filter { it.gjelder(ytelse) }
+                .toSet()
+        }
+
         val STANDARD_BUNNTEKSTER = arrayOf(
             RETT_TIL_INNSYN,
             PERSONVÆRN_ERKLÆRING,

@@ -777,18 +777,7 @@ class Behandling internal constructor(
             ytelse = ytelse.brevmeta(),
             signatur = brevSignatur(),
             perioder = vurdertePerioderForBrev(),
-            bunntekster = buildSet {
-                val vedtakOppsummering = lagBeregning().oppsummer()
-                if (vedtakOppsummering.vedtaksresultat == Vedtaksresultat.INGEN_TILBAKEBETALING) {
-                    if (vedtakOppsummering.totaltRentebeløp > BigDecimal.ZERO) {
-                        add(Bunntekst.RENTER)
-                    }
-                    add(Bunntekst.SKATT)
-                    add(Bunntekst.HVORDAN_BETALE_TILBAKE)
-                    add(Bunntekst.RETT_TIL_Å_KLAGE)
-                }
-                addAll(Bunntekst.STANDARD_BUNNTEKSTER)
-            },
+            bunntekster = Bunntekst.finnTekster(lagBeregning().oppsummer(), ytelse),
         )
     }
 
