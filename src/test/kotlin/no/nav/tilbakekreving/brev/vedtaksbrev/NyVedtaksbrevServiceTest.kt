@@ -183,6 +183,93 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
         }
     }
 
+    @Test
+    fun `gjenoppretter tidligere lagret vedtakstekster ved endring av vilkår`() {
+        val behandlingId = lagBehandlingId()
+        val periodeId = UUID.randomUUID()
+        val originalVedtaksbrevInfo = vedtaksbrevInfo(periodeId)
+        val hovedavsnitt = HovedavsnittUpdateDto(
+            tittel = "Du må betale tilbake arbeidsavklaringspengene",
+            underavsnitt = listOf(
+                RentekstElementDto("Vi oppdaget at du stjal penger"),
+            ),
+        )
+        nyVedtaksbrevService.oppdaterVedtaksbrevData(
+            behandlingId,
+            VedtaksbrevRedigerbareDataUpdateDto(
+                hovedavsnitt = hovedavsnitt,
+                avsnitt = listOf(
+                    AvsnittUpdateItemDto(
+                        tittel = "Dette er grunnen til at du har fått for mye utbetalt",
+                        id = periodeId,
+                        underavsnitt = listOf(
+                            RentekstElementDto("Det var jo litt uaktsomt..."),
+                            RentekstElementDto("Derfor må du betale tilbake"),
+                            PakrevdBegrunnelseUpdateItemDto(
+                                begrunnelseType = VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.name,
+                                underavsnitt = listOf(RentekstElementDto("Ja, det syntes jeg.")),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+            originalVedtaksbrevInfo,
+        )
+
+        val midlertidigVedtaksbrevInfo = vedtaksbrevInfo(periodeId, VilkårsvurderingBegrunnelse.REDUSERT_SÆRLIGE_GRUNNER)
+        nyVedtaksbrevService.oppdaterVedtaksbrevData(
+            behandlingId,
+            VedtaksbrevRedigerbareDataUpdateDto(
+                hovedavsnitt = hovedavsnitt,
+                avsnitt = listOf(
+                    AvsnittUpdateItemDto(
+                        tittel = "Dette er grunnen til at du har fått for mye utbetalt",
+                        id = periodeId,
+                        underavsnitt = listOf(
+                            RentekstElementDto("Det var jo litt uaktsomt..."),
+                            RentekstElementDto("Derfor må du betale tilbake"),
+                            PakrevdBegrunnelseUpdateItemDto(
+                                begrunnelseType = VilkårsvurderingBegrunnelse.REDUSERT_SÆRLIGE_GRUNNER.name,
+                                underavsnitt = listOf(RentekstElementDto("Redusert!!!")),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+            info = midlertidigVedtaksbrevInfo,
+        )
+
+        nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, midlertidigVedtaksbrevInfo).should {
+            it.avsnitt[0].tittel shouldBe "Dette er grunnen til at du har fått for mye utbetalt"
+            it.avsnitt[0].underavsnitt shouldBe listOf(
+                RentekstElementDto("Det var jo litt uaktsomt..."),
+                RentekstElementDto("Derfor må du betale tilbake"),
+                PakrevdBegrunnelseDto(
+                    begrunnelseType = VilkårsvurderingBegrunnelse.REDUSERT_SÆRLIGE_GRUNNER.name,
+                    forklaring = VilkårsvurderingBegrunnelse.REDUSERT_SÆRLIGE_GRUNNER.forklaring,
+                    tittel = VilkårsvurderingBegrunnelse.REDUSERT_SÆRLIGE_GRUNNER.tittel,
+                    underavsnitt = listOf(RentekstElementDto("Redusert!!!")),
+                    meldingerTilSaksbehandler = emptyList(),
+                ),
+            )
+        }
+
+        nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, originalVedtaksbrevInfo).should {
+            it.avsnitt[0].tittel shouldBe "Dette er grunnen til at du har fått for mye utbetalt"
+            it.avsnitt[0].underavsnitt shouldBe listOf(
+                RentekstElementDto("Det var jo litt uaktsomt..."),
+                RentekstElementDto("Derfor må du betale tilbake"),
+                PakrevdBegrunnelseDto(
+                    begrunnelseType = VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.name,
+                    forklaring = VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.forklaring,
+                    tittel = VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.tittel,
+                    underavsnitt = listOf(RentekstElementDto("Ja, det syntes jeg.")),
+                    meldingerTilSaksbehandler = emptyList(),
+                ),
+            )
+        }
+    }
+
     private fun vedtaksbrevInfo(
         periodeId: UUID,
         vararg påkrevdeBegrunnelser: VilkårsvurderingBegrunnelse = arrayOf(VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER),
