@@ -324,11 +324,12 @@ class Tilbakekreving internal constructor(
 
     fun trengerVedtaksbrevJournalføring() {
         behandlingHistorikk.nåværende().entry.trengerVedtaksbrevJournalføring(
-            behovObservatør,
+            behovObservatør = behovObservatør,
             brevId = brevHistorikk.nåværende().entry.id,
             ytelse = eksternFagsak.ytelse,
             bruker = requireNotNull(bruker) { "Bruker kreves for journalføring av vedtaksbrev." },
             fagsakId = eksternFagsak.eksternId,
+            tilbakekrevingId = id,
         )
     }
 
@@ -376,8 +377,9 @@ class Tilbakekreving internal constructor(
 
     fun hentVedtaksbrevInfo(behandlingId: UUID): VedtaksbrevInfo {
         return behandlingHistorikk.entry(behandlingId).hentVedtaksbrevInfo(
-            requireNotNull(bruker) { { "Bruker kreves for å hente vedtaksbrev informajson." } },
-            eksternFagsak.ytelse,
+            bruker = requireNotNull(bruker) { { "Bruker kreves for å hente vedtaksbrev informajson." } },
+            ytelse = eksternFagsak.ytelse,
+            tilbakekrevingId = id,
         )
     }
 

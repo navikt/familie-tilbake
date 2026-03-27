@@ -76,6 +76,7 @@ class NyVedtaksbrevService(
             ytelse = vedtaksbrevInfo.ytelse,
             bunntekster = vedtaksbrevInfo.bunntekster.map(::tilStandardtekst),
             signatur = signatur,
+            saksnummer = vedtaksbrevInfo.tilbakekrevingId,
         )
 
         return VedtaksbrevDataDto(
@@ -89,6 +90,7 @@ class NyVedtaksbrevService(
             sistOppdatert = sistOppdatert.atOffset(ZoneOffset.UTC),
             bunntekster = vedtaksbrevInfo.bunntekster.map(::tilStandardtekst),
             signatur = signatur,
+            saksnummer = vedtaksbrevInfo.tilbakekrevingId,
         )
     }
 

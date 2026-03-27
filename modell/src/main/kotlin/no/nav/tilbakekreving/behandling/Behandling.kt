@@ -271,6 +271,7 @@ class Behandling internal constructor(
         ytelse: Ytelse,
         bruker: Bruker,
         fagsakId: String,
+        tilbakekrevingId: String,
     ) {
         behovObservatør.håndter(
             VedtaksbrevJournalføringBehov(
@@ -280,7 +281,7 @@ class Behandling internal constructor(
                 bruker = bruker.hentBrukerinfo(),
                 fagsakId = fagsakId,
                 journalførendeEnhet = enhet!!.kode,
-                vedtaksbrevInfo = hentVedtaksbrevInfo(bruker, ytelse),
+                vedtaksbrevInfo = hentVedtaksbrevInfo(bruker, ytelse, tilbakekrevingId),
                 vedtaksresultat = hentVedtaksresultat()!!,
             ),
         )
@@ -771,13 +772,14 @@ class Behandling internal constructor(
         features = features,
     )
 
-    internal fun hentVedtaksbrevInfo(bruker: Bruker, ytelse: Ytelse): VedtaksbrevInfo {
+    internal fun hentVedtaksbrevInfo(bruker: Bruker, ytelse: Ytelse, tilbakekrevingId: String): VedtaksbrevInfo {
         return VedtaksbrevInfo(
             brukerdata = bruker.brevmeta(),
             ytelse = ytelse.brevmeta(),
             signatur = brevSignatur(),
             perioder = vurdertePerioderForBrev(),
             bunntekster = Bunntekst.finnTekster(lagBeregning().oppsummer(), ytelse),
+            tilbakekrevingId = tilbakekrevingId,
         )
     }
 

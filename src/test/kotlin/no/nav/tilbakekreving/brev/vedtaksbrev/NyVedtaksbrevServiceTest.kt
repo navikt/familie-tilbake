@@ -64,6 +64,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
                 ),
             ),
             bunntekster = emptySet(),
+            tilbakekrevingId = UUID.randomUUID().toString(),
         )
         val initielleData = nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, vedtaksbrevInfo)
         initielleData.should {

@@ -10,4 +10,5 @@ data class VedtaksbrevInfo(
     val signatur: Signatur,
     val perioder: List<BegrunnetPeriode>,
     val bunntekster: Set<Bunntekst>,
+    val tilbakekrevingId: String,
 )
