@@ -15,7 +15,6 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
-import java.util.UUID
 
 object BrevFormatterer {
     val dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)
@@ -24,7 +23,7 @@ object BrevFormatterer {
     fun lagAvsnitt(periode: BegrunnetPeriode): AvsnittDto {
         return AvsnittDto(
             tittel = lagPeriodeavsnittTittel(periode.periode),
-            id = UUID.randomUUID(),
+            id = periode.id,
             forklaring = Forklaringstekster.PERIODE_AVSNITT,
             meldingerTilSaksbehandler = periode.meldingerTilSaksbehandler.forPeriodeavsnitt()
                 .map { it.melding },

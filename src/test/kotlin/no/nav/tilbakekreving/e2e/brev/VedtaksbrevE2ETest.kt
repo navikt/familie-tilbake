@@ -18,6 +18,7 @@ import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.brev.Vedtaksbrev
 import no.nav.tilbakekreving.brev.vedtaksbrev.BrevFormatterer.tilDto
 import no.nav.tilbakekreving.builders.VilkårsvurderingDtoBuilder.forårsaketAvBruker
+import no.nav.tilbakekreving.builders.VilkårsvurderingDtoBuilder.forårsaketAvNav
 import no.nav.tilbakekreving.e2e.BehandlingsstegGenerator
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.e2e.TilbakekrevingE2EBase
@@ -165,6 +166,59 @@ class VedtaksbrevE2ETest : TilbakekrevingE2EBase() {
             actual.meldingerTilSaksbehandler shouldContainExactly expected.meldingerTilSaksbehandler
             actual.underavsnitt shouldContainExactly expected.underavsnitt
         }
+    }
+
+    @Test
+    fun `beholder avsnitt-id ved endring av vilkårsvurdering`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        sendKravgrunnlagOgAvventLesing(
+            queueName = TILLEGGSSTØNADER_KØ_NAVN,
+            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+            ),
+        )
+        fagsystemIntegrasjonService.håndter(
+            ytelse = Ytelse.Tilleggsstønad,
+            fagsysteminfo = Testdata.fagsysteminfoSvar(
+                fagsystemId = fagsystemId,
+                utvidPerioder = listOf(
+                    FagsysteminfoSvarHendelse.UtvidetPeriodeDto(
+                        kravgrunnlagPeriode = PeriodeDto(1.januar(2021), 1.januar(2021)),
+                        vedtaksperiode = PeriodeDto(1.januar(2021), 31.januar(2021)),
+                    ),
+                ),
+            ),
+        )
+
+        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        lagreUttalelse(behandlingId, uttalelse = "Jeg svindlet NAV")
+
+        somSaksbehandler(ansvarligSaksbehandler) {
+            behandlingApiController.behandlingOppdaterFakta(
+                behandlingId = behandlingId.toString(),
+                oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
+            )
+        }
+        utførSteg(
+            ident = ansvarligSaksbehandler,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(1.januar(2021) til 31.januar(2021)),
+        )
+        håndterVilkårsvurdering(
+            ident = ansvarligSaksbehandler,
+            behandlingId = behandlingId,
+            vurderinger = arrayOf(forårsaketAvNav().godTro()),
+        )
+        val avsnittFørOppdatering = behandlingApiController.behandlingHentVedtaksbrev(behandlingId.toString()).body.shouldNotBeNull().avsnitt.single()
+        håndterVilkårsvurdering(
+            ident = ansvarligSaksbehandler,
+            behandlingId = behandlingId,
+            vurderinger = arrayOf(forårsaketAvNav().burdeForstått()),
+        )
+
+        val avsnittEtterOppdatering = behandlingApiController.behandlingHentVedtaksbrev(behandlingId.toString()).body.shouldNotBeNull().avsnitt.single()
+
+        avsnittEtterOppdatering.id shouldBe avsnittFørOppdatering.id
     }
 
     companion object {
