@@ -17,10 +17,10 @@ import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.breeeev.begrunnelse.Forklaringstekster
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
-import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler.Companion.forBegrunnelse
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler.Companion.forPeriodeavsnitt
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.breeeev.standardtekster.Bunntekst
+import no.nav.tilbakekreving.brev.vedtaksbrev.BrevFormatterer.tilDto
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostResponse
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
@@ -103,12 +103,13 @@ class NyVedtaksbrevService(
             behandlingId,
             VedtaksbrevDataRepository.VedtaksbrevEntity(
                 hovedavsnitt = VedtaksbrevDataRepository.HovedavsnittEntity(
-                    underavsnitt = data.hovedavsnitt.underavsnitt.map(::tilEntity),
+                    underavsnitt = data.hovedavsnitt.underavsnitt.mapNotNull(::tilEntity),
                 ),
                 avsnitt = data.avsnitt.map {
                     VedtaksbrevDataRepository.PeriodeavsnittEntity(
                         id = it.id,
-                        underavsnitt = it.underavsnitt.map(::tilEntity),
+                        underavsnitt = it.underavsnitt.mapNotNull(::tilEntity),
+                        påkrevdBegrunnelser = it.underavsnitt.mapNotNull(::tilPåkrevdBegrunnelseEntities),
                     )
                 },
             ),
@@ -128,7 +129,7 @@ class NyVedtaksbrevService(
             tittel = BrevFormatterer.lagHovedavsnittTittel(info),
             forklaring = Forklaringstekster.HOVEDAVSNITT,
             underavsnitt = data.underavsnitt.map {
-                mapUnderavsnitt(it, emptyList())
+                mapUnderavsnitt(it)
             },
         )
     }
@@ -147,30 +148,32 @@ class NyVedtaksbrevService(
                 .forPeriodeavsnitt()
                 .map { it.melding },
             tittel = BrevFormatterer.lagPeriodeavsnittTittel(periode.periode),
-            underavsnitt = lagretAvsnitt.underavsnitt.map {
-                mapUnderavsnitt(it, periode.meldingerTilSaksbehandler.toList())
+            underavsnitt = lagretAvsnitt.underavsnitt.rentekst() + periode.påkrevdeVurderinger.map { påkrevd ->
+                lagretAvsnitt.påkrevdBegrunnelser
+                    .singleOrNull { it.type == påkrevd.name }
+                    ?.let { mapPåkrevdBegrunnelse(it, periode.meldingerTilSaksbehandler.toList()) }
+                    ?: påkrevd.tilDto(periode.meldingerTilSaksbehandler.toList())
             },
         )
     }
 
+    fun List<VedtaksbrevDataRepository.UnderavsnittEntity>.rentekst(): List<RotElementDto> {
+        return filter { it.type == VedtaksbrevDataRepository.UnderavsnittEntity.Type.RENTEKST }
+            .map(::mapUnderavsnitt)
+    }
+
+    fun mapPåkrevdBegrunnelse(
+        entity: VedtaksbrevDataRepository.PåkrevdBegrunnelse,
+        meldingerTilSaksbehandler: List<MeldingTilSaksbehandler>,
+    ): PakrevdBegrunnelseDto {
+        return VilkårsvurderingBegrunnelse.valueOf(entity.type)
+            .tilDto(meldingerTilSaksbehandler, entity.underavsnitt.map { RentekstElementDto(it) })
+    }
+
     fun mapUnderavsnitt(
         avsnitt: VedtaksbrevDataRepository.UnderavsnittEntity,
-        meldingerTilSaksbehandler: List<MeldingTilSaksbehandler>,
     ): RotElementDto {
         return when (avsnitt.type) {
-            VedtaksbrevDataRepository.UnderavsnittEntity.Type.PÅKREVD_BEGRUNNELSE -> {
-                val påkrevdBegrunnelse = VilkårsvurderingBegrunnelse.valueOf(avsnitt.undertype!!)
-                PakrevdBegrunnelseDto(
-                    tittel = påkrevdBegrunnelse.tittel,
-                    forklaring = påkrevdBegrunnelse.forklaring,
-                    meldingerTilSaksbehandler = meldingerTilSaksbehandler
-                        .forBegrunnelse(påkrevdBegrunnelse)
-                        .map { it.melding },
-                    begrunnelseType = påkrevdBegrunnelse.name,
-                    underavsnitt = avsnitt.underavsnitt!!.map { RentekstElementDto(it.tekst!!) },
-                )
-            }
-
             VedtaksbrevDataRepository.UnderavsnittEntity.Type.RENTEKST -> RentekstElementDto(
                 tekst = avsnitt.tekst!!,
             )
@@ -238,19 +241,10 @@ class NyVedtaksbrevService(
         return "${behandlingId}_${brevtype.name.lowercase()}_${mottager.name.lowercase()}_$callId"
     }
 
-    private fun tilEntity(dto: RotElementUpdateItemDto): VedtaksbrevDataRepository.UnderavsnittEntity {
+    private fun tilEntity(dto: RotElementUpdateItemDto): VedtaksbrevDataRepository.UnderavsnittEntity? {
         return when (dto) {
-            is PakrevdBegrunnelseUpdateItemDto -> VedtaksbrevDataRepository.UnderavsnittEntity(
-                type = VedtaksbrevDataRepository.UnderavsnittEntity.Type.PÅKREVD_BEGRUNNELSE,
-                undertype = dto.begrunnelseType,
-                tittel = null,
-                tekst = null,
-                underavsnitt = dto.underavsnitt.map(::tilEntity),
-            )
-
             is RentekstElementDto -> VedtaksbrevDataRepository.UnderavsnittEntity(
                 type = VedtaksbrevDataRepository.UnderavsnittEntity.Type.RENTEKST,
-                undertype = null,
                 tittel = null,
                 tekst = dto.tekst,
                 underavsnitt = null,
@@ -258,14 +252,21 @@ class NyVedtaksbrevService(
 
             is UnderavsnittElementDto -> VedtaksbrevDataRepository.UnderavsnittEntity(
                 type = VedtaksbrevDataRepository.UnderavsnittEntity.Type.UNDERAVSNITT,
-                undertype = null,
                 tittel = dto.tittel,
                 tekst = null,
-                underavsnitt = dto.underavsnitt.map(::tilEntity),
+                underavsnitt = dto.underavsnitt.mapNotNull(::tilEntity),
             )
 
-            is PakrevdBegrunnelseDto -> error("JSON-mapper gav ugyldig type")
+            is PakrevdBegrunnelseDto, is PakrevdBegrunnelseUpdateItemDto -> null
         }
+    }
+
+    fun tilPåkrevdBegrunnelseEntities(dto: RotElementUpdateItemDto) = when (dto) {
+        is PakrevdBegrunnelseUpdateItemDto -> VedtaksbrevDataRepository.PåkrevdBegrunnelse(
+            dto.begrunnelseType,
+            dto.underavsnitt.map { it.tekst },
+        )
+        else -> null
     }
 
     private fun lagTittel(vedtaksbrevBehov: VedtaksbrevJournalføringBehov): String {

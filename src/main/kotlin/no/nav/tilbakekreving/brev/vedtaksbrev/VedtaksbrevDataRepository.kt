@@ -38,18 +38,22 @@ class VedtaksbrevDataRepository(
     data class PeriodeavsnittEntity(
         val id: UUID,
         val underavsnitt: List<UnderavsnittEntity>,
+        val påkrevdBegrunnelser: List<PåkrevdBegrunnelse>,
+    )
+
+    data class PåkrevdBegrunnelse(
+        val type: String,
+        val underavsnitt: List<String>,
     )
 
     data class UnderavsnittEntity(
         val type: Type,
         val tittel: String?,
-        val undertype: String?,
         val tekst: String?,
         val underavsnitt: List<UnderavsnittEntity>?,
     ) {
         enum class Type {
             RENTEKST,
-            PÅKREVD_BEGRUNNELSE,
             UNDERAVSNITT,
         }
     }

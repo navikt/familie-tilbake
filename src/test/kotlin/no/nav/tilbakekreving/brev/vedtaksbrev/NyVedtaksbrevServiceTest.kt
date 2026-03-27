@@ -40,45 +40,28 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
     @Autowired
     lateinit var fagsystemIntegrasjonService: FagsystemIntegrasjonService
 
+    private val expectedSignatur = SignaturDto(
+        enhetNavn = "NAV Arbeid og Ytelser",
+        ansvarligSaksbehandler = "Bob Burger",
+        besluttendeSaksbehandler = null,
+    )
+
+    private val brevmottaker = BrevmottakerDto(
+        navn = "Toasty Testy",
+        personIdent = "20046912345",
+    )
+
     @Test
-    fun `fletter inn lagrede felter i vedtaksbrev-data`() {
-        val behandlingId = lagBehandlingId()
-        val periodeId = UUID.randomUUID()
-        val vedtaksbrevInfo = VedtaksbrevInfo(
-            brukerdata = BrevmottakerDto(
-                navn = "Toasty Testy",
-                personIdent = "20046912345",
-            ),
-            ytelse = Ytelse.Arbeidsavklaringspenger.brevmeta(),
-            signatur = Signatur(
-                ansvarligSaksbehandlerIdent = "Z999999",
-                ansvarligBeslutterIdent = null,
-                ansvarligEnhet = "NAV Arbeid og Ytelser",
-            ),
-            perioder = listOf(
-                BegrunnetPeriode(
-                    id = periodeId,
-                    periode = 1.januar(2021) til 31.januar(2021),
-                    meldingerTilSaksbehandler = emptySet(),
-                    påkrevdeVurderinger = setOf(VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER),
-                ),
-            ),
-            bunntekster = emptySet(),
-            tilbakekrevingId = UUID.randomUUID().toString(),
-        )
-        val initielleData = nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, vedtaksbrevInfo)
-        initielleData.should {
+    fun `det finnes ingen lagrede felter i vedtaksbrev`() {
+        val vedtaksbrevInfo = vedtaksbrevInfo(UUID.randomUUID())
+        nyVedtaksbrevService.hentVedtaksbrevData(lagBehandlingId(), vedtaksbrevInfo).should {
             it.hovedavsnitt shouldBe HovedavsnittDto(
                 tittel = "Du må betale tilbake arbeidsavklaringspengene",
                 forklaring = Forklaringstekster.HOVEDAVSNITT,
                 underavsnitt = listOf(RentekstElementDto("")),
             )
             it.ytelse shouldBe Ytelse.Arbeidsavklaringspenger.brevmeta()
-            it.signatur shouldBe SignaturDto(
-                enhetNavn = "NAV Arbeid og Ytelser",
-                ansvarligSaksbehandler = "Bob Burger",
-                besluttendeSaksbehandler = null,
-            )
+            it.signatur shouldBe expectedSignatur
             it.avsnitt[0].tittel shouldBe "Dette er grunnen til at du har fått for mye utbetalt"
             it.avsnitt[0].underavsnitt shouldBe listOf(
                 RentekstElementDto(""),
@@ -91,7 +74,13 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
                 ),
             )
         }
+    }
 
+    @Test
+    fun `fletter inn lagrede felter i vedtaksbrev-data`() {
+        val behandlingId = lagBehandlingId()
+        val periodeId = UUID.randomUUID()
+        val vedtaksbrevInfo = vedtaksbrevInfo(periodeId)
         nyVedtaksbrevService.oppdaterVedtaksbrevData(
             behandlingId,
             VedtaksbrevRedigerbareDataUpdateDto(
@@ -128,11 +117,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
                 ),
             )
             it.ytelse shouldBe Ytelse.Arbeidsavklaringspenger.brevmeta()
-            it.signatur shouldBe SignaturDto(
-                enhetNavn = "NAV Arbeid og Ytelser",
-                ansvarligSaksbehandler = "Bob Burger",
-                besluttendeSaksbehandler = null,
-            )
+            it.signatur shouldBe expectedSignatur
             it.avsnitt[0].tittel shouldBe "Dette er grunnen til at du har fått for mye utbetalt"
             it.avsnitt[0].underavsnitt shouldBe listOf(
                 RentekstElementDto("Det var jo litt uaktsomt..."),
@@ -147,6 +132,79 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
             )
         }
     }
+
+    @Test
+    fun `bytting av vilkårsvurdering gir nye påkrevde vurderinger`() {
+        val behandlingId = lagBehandlingId()
+        val periodeId = UUID.randomUUID()
+        val originalVedtaksbrevInfo = vedtaksbrevInfo(periodeId)
+        val hovedavsnitt = HovedavsnittUpdateDto(
+            tittel = "Du må betale tilbake arbeidsavklaringspengene",
+            underavsnitt = listOf(
+                RentekstElementDto("Vi oppdaget at du stjal penger"),
+            ),
+        )
+        nyVedtaksbrevService.oppdaterVedtaksbrevData(
+            behandlingId,
+            VedtaksbrevRedigerbareDataUpdateDto(
+                hovedavsnitt = hovedavsnitt,
+                avsnitt = listOf(
+                    AvsnittUpdateItemDto(
+                        tittel = "Dette er grunnen til at du har fått for mye utbetalt",
+                        id = periodeId,
+                        underavsnitt = listOf(
+                            RentekstElementDto("Det var jo litt uaktsomt..."),
+                            RentekstElementDto("Derfor må du betale tilbake"),
+                            PakrevdBegrunnelseUpdateItemDto(
+                                begrunnelseType = VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.name,
+                                underavsnitt = listOf(RentekstElementDto("Ja, det syntes jeg.")),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+            originalVedtaksbrevInfo,
+        )
+
+        val midlertidigVedtaksbrevInfo = vedtaksbrevInfo(periodeId, VilkårsvurderingBegrunnelse.REDUSERT_SÆRLIGE_GRUNNER)
+        nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, midlertidigVedtaksbrevInfo).should {
+            it.avsnitt[0].tittel shouldBe "Dette er grunnen til at du har fått for mye utbetalt"
+            it.avsnitt[0].underavsnitt shouldBe listOf(
+                RentekstElementDto("Det var jo litt uaktsomt..."),
+                RentekstElementDto("Derfor må du betale tilbake"),
+                PakrevdBegrunnelseDto(
+                    begrunnelseType = VilkårsvurderingBegrunnelse.REDUSERT_SÆRLIGE_GRUNNER.name,
+                    forklaring = VilkårsvurderingBegrunnelse.REDUSERT_SÆRLIGE_GRUNNER.forklaring,
+                    tittel = VilkårsvurderingBegrunnelse.REDUSERT_SÆRLIGE_GRUNNER.tittel,
+                    underavsnitt = listOf(RentekstElementDto("")),
+                    meldingerTilSaksbehandler = emptyList(),
+                ),
+            )
+        }
+    }
+
+    private fun vedtaksbrevInfo(
+        periodeId: UUID,
+        vararg påkrevdeBegrunnelser: VilkårsvurderingBegrunnelse = arrayOf(VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER),
+    ) = VedtaksbrevInfo(
+        brukerdata = brevmottaker,
+        ytelse = Ytelse.Arbeidsavklaringspenger.brevmeta(),
+        signatur = Signatur(
+            ansvarligSaksbehandlerIdent = "Z999999",
+            ansvarligBeslutterIdent = null,
+            ansvarligEnhet = "NAV Arbeid og Ytelser",
+        ),
+        perioder = listOf(
+            BegrunnetPeriode(
+                id = periodeId,
+                periode = 1.januar(2021) til 31.januar(2021),
+                meldingerTilSaksbehandler = emptySet(),
+                påkrevdeVurderinger = påkrevdeBegrunnelser.toSet(),
+            ),
+        ),
+        bunntekster = emptySet(),
+        tilbakekrevingId = UUID.randomUUID().toString(),
+    )
 
     private fun lagBehandlingId(): UUID {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
