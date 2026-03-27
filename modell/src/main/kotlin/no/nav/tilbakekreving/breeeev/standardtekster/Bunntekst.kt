@@ -32,14 +32,14 @@ enum class Bunntekst(
     RETT_TIL_Å_KLAGE(
         tittel = "Du har rett til å klage",
         avsnitt = arrayOf(
-            "Du kan klage innen 6 uker fra den datoen du mottok vedtaket. Du finner skjema og\ninformasjon på nav.no/klage.",
+            "Du kan klage innen 6 uker fra den datoen du mottok vedtaket. Du finner skjema og informasjon på nav.no/klage.",
             "Du må som hovedregel begynne å betale tilbake beløpet når du får fakturaen, selv om du klager på dette vedtaket. Dette følger av forvaltningsloven § 42. Hvis du får vedtak om at du ikke trengte å betale tilbake hele eller deler av beløpet du skyldte, betaler vi pengene tilbake til deg.",
         ),
     ),
     RETT_TIL_INNSYN(
         tittel = "Du har rett til innsyn",
         avsnitt = arrayOf(
-            "Du har rett til å se dokumentene i saken din. Dette følger av forvaltningsloven § 18. Kontakt oss om du vil se dokumentene i saken din. Ta kontakt på nav.no/kontakt eller på telefon 55 55 33 33. Du kan lese mer om \ninnsynsretten på nav.no/personvernerklaering.",
+            "Du har rett til å se dokumentene i saken din. Dette følger av forvaltningsloven § 18. Kontakt oss om du vil se dokumentene i saken din. Ta kontakt på nav.no/kontakt eller på telefon 55 55 33 33. Du kan lese mer om innsynsretten på nav.no/personvernerklaering.",
         ),
     ),
     PERSONVÆRN_ERKLÆRING(
