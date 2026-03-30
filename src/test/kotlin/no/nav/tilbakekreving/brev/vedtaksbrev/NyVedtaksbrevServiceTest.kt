@@ -15,6 +15,8 @@ import no.nav.tilbakekreving.e2e.ytelser.TilleggsstønaderE2ETest.Companion.TILL
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.frontend.models.AvsnittUpdateItemDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatVurderingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatsperiodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.BrevmottakerDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.HovedavsnittDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.HovedavsnittUpdateDto
@@ -204,6 +206,18 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
         ),
         bunntekster = emptySet(),
         tilbakekrevingId = UUID.randomUUID().toString(),
+        beregningsresultat = listOf(
+            BeregningsresultatsperiodeDto(
+                fom = 1.januar(2021),
+                tom = 31.januar(2021),
+                vurdering = BeregningsresultatVurderingDto.GodTro,
+                feilutbetaltBeløp = 4000,
+                andelAvBeløp = 0,
+                renteprosent = 0,
+                tilbakekrevingsbeløp = 4000,
+                tilbakekrevesBeløpEtterSkatt = 4000,
+            ),
+        ),
     )
 
     private fun lagBehandlingId(): UUID {

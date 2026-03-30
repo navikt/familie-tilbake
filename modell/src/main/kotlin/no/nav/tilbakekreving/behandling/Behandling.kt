@@ -780,6 +780,7 @@ class Behandling internal constructor(
             perioder = vurdertePerioderForBrev(),
             bunntekster = Bunntekst.finnTekster(lagBeregning().oppsummer(), ytelse),
             tilbakekrevingId = tilbakekrevingId,
+            beregningsresultat = hentVedtaksresultatForFrontend().beregningsresultatsperioder,
         )
     }
 

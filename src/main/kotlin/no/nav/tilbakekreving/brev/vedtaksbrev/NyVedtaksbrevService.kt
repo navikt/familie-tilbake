@@ -77,6 +77,7 @@ class NyVedtaksbrevService(
             bunntekster = vedtaksbrevInfo.bunntekster.map(::tilStandardtekst),
             signatur = signatur,
             saksnummer = vedtaksbrevInfo.tilbakekrevingId,
+            oppsummeringstabell = vedtaksbrevInfo.beregningsresultat,
         )
 
         return VedtaksbrevDataDto(
@@ -91,6 +92,7 @@ class NyVedtaksbrevService(
             bunntekster = vedtaksbrevInfo.bunntekster.map(::tilStandardtekst),
             signatur = signatur,
             saksnummer = vedtaksbrevInfo.tilbakekrevingId,
+            oppsummeringstabell = vedtaksbrevInfo.beregningsresultat,
         )
     }
 
