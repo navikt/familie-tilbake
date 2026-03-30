@@ -8,9 +8,11 @@ import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler.Compani
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler.Companion.forPeriodeavsnitt
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.kontrakter.frontend.models.AvsnittDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatVurderingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PakrevdBegrunnelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.RentekstElementDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
+import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -19,6 +21,8 @@ import java.util.Locale
 object BrevFormatterer {
     val dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)
         .withLocale(Locale.of("nb"))
+    val norskNumeriskDatoFormatter = DateTimeFormatter.ofPattern("dd.MM.uuuu", Locale.of("nb"))
+    val beløpFormat = NumberFormat.getCurrencyInstance(Locale.of("nb"))
 
     fun lagAvsnitt(periode: BegrunnetPeriode): AvsnittDto {
         return AvsnittDto(
@@ -39,6 +43,12 @@ object BrevFormatterer {
 
     fun norskDato(date: LocalDate): String = dateFormatter.format(date)
 
+    fun norskNumeriskDato(date: LocalDate): String = norskNumeriskDatoFormatter.format(date)
+
+    fun prosentString(int: Int?): String = "${int ?: 0}%"
+
+    fun beløpString(beløp: Int): String = beløpFormat.format(beløp)
+
     fun VilkårsvurderingBegrunnelse.tilDto(
         meldingerTilSaksbehandler: List<MeldingTilSaksbehandler> = emptyList(),
         underavsnitt: List<RentekstElementDto> = listOf(RentekstElementDto("")),
@@ -52,4 +62,12 @@ object BrevFormatterer {
             underavsnitt = underavsnitt,
         )
     }
+
+    fun BeregningsresultatVurderingDto.tilVisningstekst(): String =
+        when (this) {
+            BeregningsresultatVurderingDto.GodTro -> "God tro"
+            BeregningsresultatVurderingDto.Uaktsomhet -> "Uaktsomhet"
+            BeregningsresultatVurderingDto.GrovUaktsomhet -> "Grov uaktsomhet"
+            BeregningsresultatVurderingDto.Forsett -> "Forsett"
+        }
 }
