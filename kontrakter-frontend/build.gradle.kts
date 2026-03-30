@@ -4,7 +4,7 @@ import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
 
 plugins {
     kotlin("jvm")
-    id("org.openapi.generator") version "7.20.0" apply false
+    id("org.openapi.generator") version "7.21.0" apply false
 }
 
 group = "no.nav"
