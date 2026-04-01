@@ -55,9 +55,9 @@ class Beregningsresultat(
 private fun no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering.tilBeregningsresultatVurderingDto(): BeregningsresultatVurderingDto? {
     return when (this) {
         Aktsomhet.FORSETT -> BeregningsresultatVurderingDto.Forsett
-        Aktsomhet.GROV_UAKTSOMHET -> BeregningsresultatVurderingDto.GrovUaktsomhet
+        Aktsomhet.GROV_UAKTSOMHET -> BeregningsresultatVurderingDto.Grov_uaktsomhet
         Aktsomhet.SIMPEL_UAKTSOMHET -> BeregningsresultatVurderingDto.Uaktsomhet
-        AnnenVurdering.GOD_TRO -> BeregningsresultatVurderingDto.GodTro
+        AnnenVurdering.GOD_TRO -> BeregningsresultatVurderingDto.God_tro
         else -> null
     }
 }
