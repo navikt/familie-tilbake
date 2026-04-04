@@ -82,6 +82,8 @@ spec:
           - id: 5763b52f-f16a-483d-8f40-25be9de95c0a # 0000-GA-AAP_BESLUTTER
           - id: 6c6ce2e8-b2e2-4c4b-8194-215c8e27a5c7 # 0000-GA-Tiltakspenger-Saksbehandler
           - id: de518927-f657-4f37-9a64-14fdfd968dd2 # 0000-GA-Tiltakspenger-Beslutter
+          - id: 2e9c63d8-322e-4c1f-b500-a0abb812761c # 0000-GA-Dagpenger-Saksbehandler
+          - id: 70d54cad-53a3-4788-bbe3-565096f01da7 # 0000-GA-Dagpenger-Beslutter
       enabled: true
       replyURLs:
         - "https://tilbakekreving-backend.intern.nav.no/swagger-ui/oauth2-redirect.html"
