@@ -210,7 +210,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
             BeregningsresultatsperiodeDto(
                 fom = 1.januar(2021),
                 tom = 31.januar(2021),
-                vurdering = BeregningsresultatVurderingDto.GodTro,
+                vurdering = BeregningsresultatVurderingDto.God_tro,
                 feilutbetaltBeløp = 4000,
                 andelAvBeløp = 0,
                 renteprosent = 0,
