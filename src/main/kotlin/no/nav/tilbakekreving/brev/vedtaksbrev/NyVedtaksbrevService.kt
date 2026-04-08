@@ -21,13 +21,16 @@ import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler.Compani
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.breeeev.standardtekster.Bunntekst
 import no.nav.tilbakekreving.brev.vedtaksbrev.BrevFormatterer.tilDto
+import no.nav.tilbakekreving.brev.vedtaksbrev.BrevFormatterer.tilVisningstekst
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostResponse
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.AvsnittDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatsperiodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.HovedavsnittDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.OppsummeringsdataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PakrevdBegrunnelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PakrevdBegrunnelseUpdateItemDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.RentekstElementDto
@@ -77,7 +80,7 @@ class NyVedtaksbrevService(
             bunntekster = vedtaksbrevInfo.bunntekster.map(::tilStandardtekst),
             signatur = signatur,
             saksnummer = vedtaksbrevInfo.tilbakekrevingId,
-            oppsummeringstabell = vedtaksbrevInfo.beregningsresultat,
+            oppsummeringstabell = hentOppsummeringsdata(vedtaksbrevInfo.beregningsresultat),
         )
 
         return VedtaksbrevDataDto(
@@ -92,8 +95,23 @@ class NyVedtaksbrevService(
             bunntekster = vedtaksbrevInfo.bunntekster.map(::tilStandardtekst),
             signatur = signatur,
             saksnummer = vedtaksbrevInfo.tilbakekrevingId,
-            oppsummeringstabell = vedtaksbrevInfo.beregningsresultat,
+            oppsummeringstabell = hentOppsummeringsdata(vedtaksbrevInfo.beregningsresultat),
         )
+    }
+
+    private fun hentOppsummeringsdata(beregningsresultat: List<BeregningsresultatsperiodeDto>): List<OppsummeringsdataDto> {
+        return beregningsresultat.map {
+            OppsummeringsdataDto(
+                fom = BrevFormatterer.norskNumeriskDato(it.fom),
+                tom = BrevFormatterer.norskNumeriskDato(it.tom),
+                feilutbetaltBeløp = BrevFormatterer.beløpString(it.feilutbetaltBeløp),
+                vurdering = it.vurdering.tilVisningstekst(),
+                andelAvBeløp = BrevFormatterer.prosentString(it.andelAvBeløp),
+                renteprosent = BrevFormatterer.prosentString(it.renteprosent),
+                tilbakekrevingsbeløp = BrevFormatterer.beløpString(it.tilbakekrevingsbeløp),
+                tilbakekrevesBeløpEtterSkatt = BrevFormatterer.beløpString(it.tilbakekrevesBeløpEtterSkatt),
+            )
+        }
     }
 
     fun oppdaterVedtaksbrevData(
