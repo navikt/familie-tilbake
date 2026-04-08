@@ -7,6 +7,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.YtelseDto
 
 data class VedtaksbrevInfo(
     val brukerdata: BrevmottakerDto,
+    val skalTilbakekreves: Boolean,
     val ytelse: YtelseDto,
     val signatur: Signatur,
     val perioder: List<BegrunnetPeriode>,

@@ -4,9 +4,6 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Testdata
-import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
-import no.nav.tilbakekreving.breeeev.Signatur
-import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.breeeev.begrunnelse.Forklaringstekster
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
@@ -15,9 +12,6 @@ import no.nav.tilbakekreving.e2e.ytelser.TilleggsstønaderE2ETest.Companion.TILL
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.frontend.models.AvsnittUpdateItemDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatVurderingDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatsperiodeDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.BrevmottakerDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.HovedavsnittDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.HovedavsnittUpdateDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PakrevdBegrunnelseDto
@@ -25,9 +19,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.PakrevdBegrunnelseUpdate
 import no.nav.tilbakekreving.kontrakter.frontend.models.RentekstElementDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SignaturDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDataUpdateDto
-import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
-import no.nav.tilbakekreving.test.januar
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
@@ -48,17 +40,12 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
         besluttendeSaksbehandler = null,
     )
 
-    private val brevmottaker = BrevmottakerDto(
-        navn = "Toasty Testy",
-        personIdent = "20046912345",
-    )
-
     @Test
     fun `det finnes ingen lagrede felter i vedtaksbrev`() {
         val vedtaksbrevInfo = vedtaksbrevInfo(UUID.randomUUID())
         nyVedtaksbrevService.hentVedtaksbrevData(lagBehandlingId(), vedtaksbrevInfo).should {
             it.hovedavsnitt shouldBe HovedavsnittDto(
-                tittel = "Du må betale tilbake arbeidsavklaringspengene",
+                tittel = "Du må betale tilbake arbeidsavklaringspenger",
                 forklaring = Forklaringstekster.HOVEDAVSNITT,
                 underavsnitt = listOf(RentekstElementDto("")),
             )
@@ -87,7 +74,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
             behandlingId,
             VedtaksbrevRedigerbareDataUpdateDto(
                 hovedavsnitt = HovedavsnittUpdateDto(
-                    tittel = "Du må betale tilbake arbeidsavklaringspengene",
+                    tittel = "Du må betale tilbake arbeidsavklaringspenger",
                     underavsnitt = listOf(
                         RentekstElementDto("Vi oppdaget at du stjal penger"),
                     ),
@@ -112,7 +99,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
 
         nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, vedtaksbrevInfo).should {
             it.hovedavsnitt shouldBe HovedavsnittDto(
-                tittel = "Du må betale tilbake arbeidsavklaringspengene",
+                tittel = "Du må betale tilbake arbeidsavklaringspenger",
                 forklaring = Forklaringstekster.HOVEDAVSNITT,
                 underavsnitt = listOf(
                     RentekstElementDto("Vi oppdaget at du stjal penger"),
@@ -141,7 +128,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
         val periodeId = UUID.randomUUID()
         val originalVedtaksbrevInfo = vedtaksbrevInfo(periodeId)
         val hovedavsnitt = HovedavsnittUpdateDto(
-            tittel = "Du må betale tilbake arbeidsavklaringspengene",
+            tittel = "Du må betale tilbake arbeidsavklaringspenger",
             underavsnitt = listOf(
                 RentekstElementDto("Vi oppdaget at du stjal penger"),
             ),
@@ -191,7 +178,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
         val periodeId = UUID.randomUUID()
         val originalVedtaksbrevInfo = vedtaksbrevInfo(periodeId)
         val hovedavsnitt = HovedavsnittUpdateDto(
-            tittel = "Du må betale tilbake arbeidsavklaringspengene",
+            tittel = "Du må betale tilbake arbeidsavklaringspenger",
             underavsnitt = listOf(
                 RentekstElementDto("Vi oppdaget at du stjal penger"),
             ),
@@ -271,41 +258,6 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
             )
         }
     }
-
-    private fun vedtaksbrevInfo(
-        periodeId: UUID,
-        vararg påkrevdeBegrunnelser: VilkårsvurderingBegrunnelse = arrayOf(VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER),
-    ) = VedtaksbrevInfo(
-        brukerdata = brevmottaker,
-        ytelse = Ytelse.Arbeidsavklaringspenger.brevmeta(),
-        signatur = Signatur(
-            ansvarligSaksbehandlerIdent = "Z999999",
-            ansvarligBeslutterIdent = null,
-            ansvarligEnhet = "NAV Arbeid og Ytelser",
-        ),
-        perioder = listOf(
-            BegrunnetPeriode(
-                id = periodeId,
-                periode = 1.januar(2021) til 31.januar(2021),
-                meldingerTilSaksbehandler = emptySet(),
-                påkrevdeVurderinger = påkrevdeBegrunnelser.toSet(),
-            ),
-        ),
-        bunntekster = emptySet(),
-        tilbakekrevingId = UUID.randomUUID().toString(),
-        beregningsresultat = listOf(
-            BeregningsresultatsperiodeDto(
-                fom = 1.januar(2021),
-                tom = 31.januar(2021),
-                vurdering = BeregningsresultatVurderingDto.GodTro,
-                feilutbetaltBeløp = 4000,
-                andelAvBeløp = 0,
-                renteprosent = 0,
-                tilbakekrevingsbeløp = 4000,
-                tilbakekrevesBeløpEtterSkatt = 4000,
-            ),
-        ),
-    )
 
     private fun lagBehandlingId(): UUID {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)

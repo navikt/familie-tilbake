@@ -39,7 +39,10 @@ object BrevFormatterer {
 
     fun lagPeriodeavsnittTittel(periode: Datoperiode): String = "Dette er grunnen til at du har fått for mye utbetalt"
 
-    fun lagHovedavsnittTittel(info: VedtaksbrevInfo) = "Du må betale tilbake ${info.ytelse.bestemtEntall}"
+    fun lagHovedavsnittTittel(info: VedtaksbrevInfo) = when {
+        info.skalTilbakekreves -> "Du må betale tilbake ${info.ytelse.ubestemtEntall}"
+        else -> "Du må ikke betale tilbake ${info.ytelse.ubestemtEntall}"
+    }
 
     fun norskDato(date: LocalDate): String = dateFormatter.format(date)
 

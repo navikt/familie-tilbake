@@ -773,14 +773,16 @@ class Behandling internal constructor(
     )
 
     internal fun hentVedtaksbrevInfo(bruker: Bruker, ytelse: Ytelse, tilbakekrevingId: String): VedtaksbrevInfo {
+        val resultat = lagBeregning().oppsummer()
         return VedtaksbrevInfo(
             brukerdata = bruker.brevmeta(),
             ytelse = ytelse.brevmeta(),
             signatur = brevSignatur(),
             perioder = vurdertePerioderForBrev(),
             bunntekster = Bunntekst.finnTekster(lagBeregning().oppsummer(), ytelse),
+            skalTilbakekreves = resultat.vedtaksresultat != Vedtaksresultat.INGEN_TILBAKEBETALING,
             tilbakekrevingId = tilbakekrevingId,
-            beregningsresultat = hentVedtaksresultatForFrontend().beregningsresultatsperioder,
+            beregningsresultat = resultat.tilFrontendDto().beregningsresultatsperioder,
         )
     }
 

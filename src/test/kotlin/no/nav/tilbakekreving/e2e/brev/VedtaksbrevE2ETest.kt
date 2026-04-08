@@ -232,7 +232,7 @@ class VedtaksbrevE2ETest : TilbakekrevingE2EBase() {
                         .copy(periode = 1.januar(2021) til 31.januar(2021)),
                     AvsnittAssertions(
                         hovedavsnitt = HovedavsnittDto(
-                            tittel = "Du må betale tilbake tilleggsstønaden",
+                            tittel = "Du må betale tilbake tilleggsstønad",
                             forklaring = Forklaringstekster.HOVEDAVSNITT,
                             underavsnitt = listOf(RentekstElementDto(tekst = "")),
                         ),
