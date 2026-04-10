@@ -524,13 +524,12 @@ class Behandling internal constructor(
                     .forEach { it.underkjennSteget() }
             }
         }
-        oppdaterBehandler(ansvarligSaksbehandler)
         if (kanUtbetales()) {
             behandlingslogg.lagre(
                 opprettLoggInnslag(
                     behandlingsloggstype = Behandlingsloggstype.VEDTAK_FATTET,
                     rolle = Rolle.BESLUTTER,
-                    behandler = ansvarligSaksbehandler,
+                    behandler = beslutter,
                 ),
             )
         }
@@ -540,7 +539,7 @@ class Behandling internal constructor(
                 opprettLoggInnslag(
                     behandlingsloggstype = Behandlingsloggstype.BEHANDLING_SENDT_TILBAKE_TIL_SAKSBEHANDLER,
                     rolle = Rolle.BESLUTTER,
-                    behandler = ansvarligSaksbehandler,
+                    behandler = beslutter,
                 ),
             )
         }
