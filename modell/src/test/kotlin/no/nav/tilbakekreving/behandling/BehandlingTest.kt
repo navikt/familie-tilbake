@@ -201,6 +201,28 @@ class BehandlingTest {
     }
 
     @Test
+    fun `andre saksbehandlere skal kunne gjøre vurderinger på vedtak som er underkjent`() {
+        val behandling = behandling()
+        behandling.håndter(ansvarligSaksbehandler, faktastegVurdering(), behandlingObservatør, behandlingslogg)
+        behandling.lagreForhåndsvarselUnntak(BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG, "Trenger ikke forhåndsvarsel i test lol")
+        behandling.håndter(ansvarligSaksbehandler, periode, foreldelseVurdering(), behandlingObservatør, behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, periode, forårsaketAvNav().godTro(), behandlingObservatør, behandlingslogg)
+        behandling.tilFrontendDto(TilBehandling, ansvarligSaksbehandler, true).kanEndres shouldBe true
+
+        behandling.håndterForeslåVedtak(ansvarligSaksbehandler, behandlingObservatør, behandlingslogg)
+
+        behandling.håndter(
+            beslutter = ansvarligBeslutter,
+            vurderinger = fatteVedtakVurdering(
+                Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Underkjent("Må vurderes på nytt"),
+            ),
+            observatør = behandlingObservatør,
+            behandlingslogg = behandlingslogg,
+        )
+        behandling.tilFrontendDto(TilBehandling, Behandler.Saksbehandler("Z222222"), true).kanEndres shouldBe true
+    }
+
+    @Test
     fun `behandling sendt til godkjenning etter underkjenning skal ikke beholde vurdering`() {
         val behandling = behandling()
         behandling.håndter(ansvarligSaksbehandler, faktastegVurdering(), behandlingObservatør, behandlingslogg)

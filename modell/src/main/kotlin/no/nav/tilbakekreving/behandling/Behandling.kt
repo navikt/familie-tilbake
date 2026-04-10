@@ -318,13 +318,17 @@ class Behandling internal constructor(
         )
     }
 
-    private fun kanBesluttes(behandler: Behandler, kanBeslutte: Boolean): Boolean {
-        return fatteVedtakSteg.erFullstendig() && behandler != ansvarligSaksbehandler && kanBeslutte
+    private fun skalBesluttes(): Boolean {
+        return steg()
+            .takeWhile { it.type != Behandlingssteg.FATTE_VEDTAK }
+            .all { it.erFullstendig() }
     }
 
-    private fun kanEndres(behandler: Behandler, kanBeslutte: Boolean): Boolean {
-        if (kanBesluttes(behandler, kanBeslutte)) return false
-        return !foreslåVedtakSteg.erFullstendig() || behandler != ansvarligSaksbehandler && kanBeslutte
+    private fun kanEndres(behandler: Behandler, saksbehandlerKanBeslutte: Boolean): Boolean {
+        return when {
+            skalBesluttes() -> behandler != ansvarligSaksbehandler && saksbehandlerKanBeslutte
+            else -> true
+        }
     }
 
     internal fun tilFrontendDto(tilstand: Tilstand, behandler: Behandler, kanBeslutte: Boolean): BehandlingDto {
