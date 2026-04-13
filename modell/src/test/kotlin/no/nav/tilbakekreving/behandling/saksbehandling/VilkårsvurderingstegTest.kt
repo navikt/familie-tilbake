@@ -24,6 +24,7 @@ import no.nav.tilbakekreving.test.prosentReduksjon
 import no.nav.tilbakekreving.test.skalIkkeUnnlates
 import no.nav.tilbakekreving.test.skalUnnlates
 import no.nav.tilbakekreving.test.uaktsomt
+import no.nav.tilbakekreving.ytelsesbeløp
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
@@ -143,7 +144,7 @@ class VilkårsvurderingstegTest {
             forårsaketAvBruker().uaktsomt(skalUnnlates()),
         )
 
-        vilkårsvurderingsteg.tilFrontendDto(kravgrunnlag, foreldelsesteg).perioder.single() shouldBe VurdertVilkårsvurderingsperiodeDto(
+        vilkårsvurderingsteg.tilFrontendDto(kravgrunnlag, revurdering, foreldelsesteg).perioder.single() shouldBe VurdertVilkårsvurderingsperiodeDto(
             periode = 1.januar(2021) til 31.januar(2021),
             feilutbetaltBeløp = 2000.kroner,
             hendelsestype = Hendelsestype.ANNET,
@@ -179,5 +180,67 @@ class VilkårsvurderingstegTest {
         vilkårsvurderingssteg.underkjennSteget()
 
         vilkårsvurderingssteg.tilEntity(UUID.randomUUID()).trengerNyVurdering shouldBe true
+    }
+
+    @Test
+    fun `beløp under 4x rettsgebyr`() {
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(1.januar(2021) til 31.januar(2021), ytelsesbeløp(2554.kroner)),
+                kravgrunnlagPeriode(1.februar(2021) til 28.februar(2021), ytelsesbeløp(2553.kroner)),
+            ),
+        )
+        val revurdering = eksternFagsakBehandling(vedtaksdato = 1.januar(2024))
+
+        val foreldelsesteg = Foreldelsesteg.opprett(revurdering, kravgrunnlag)
+        foreldelsesteg.vurderForeldelse(
+            1.januar(2021) til 31.januar(2021),
+            Foreldelsesteg.Vurdering.IkkeForeldet(
+                begrunnelse = "Ikke forelget",
+            ),
+        )
+        foreldelsesteg.vurderForeldelse(
+            1.februar(2021) til 28.februar(2021),
+            Foreldelsesteg.Vurdering.IkkeForeldet(
+                begrunnelse = "Ikke forelget",
+            ),
+        )
+
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakRevurdering = revurdering,
+            kravgrunnlagHendelse = kravgrunnlag,
+        )
+        vilkårsvurderingsteg.tilFrontendDto(kravgrunnlag, revurdering, foreldelsesteg).kanUnnlates4xRettsgebyr shouldBe true
+    }
+
+    @Test
+    fun `beløp over 4x rettsgebyr`() {
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(1.januar(2021) til 31.januar(2021), ytelsesbeløp(2554.kroner)),
+                kravgrunnlagPeriode(1.februar(2021) til 28.februar(2021), ytelsesbeløp(2554.kroner)),
+            ),
+        )
+        val revurdering = eksternFagsakBehandling(vedtaksdato = 1.januar(2024))
+
+        val foreldelsesteg = Foreldelsesteg.opprett(revurdering, kravgrunnlag)
+        foreldelsesteg.vurderForeldelse(
+            1.januar(2021) til 31.januar(2021),
+            Foreldelsesteg.Vurdering.IkkeForeldet(
+                begrunnelse = "Ikke forelget",
+            ),
+        )
+        foreldelsesteg.vurderForeldelse(
+            1.februar(2021) til 28.februar(2021),
+            Foreldelsesteg.Vurdering.IkkeForeldet(
+                begrunnelse = "Ikke forelget",
+            ),
+        )
+
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakRevurdering = revurdering,
+            kravgrunnlagHendelse = kravgrunnlag,
+        )
+        vilkårsvurderingsteg.tilFrontendDto(kravgrunnlag, revurdering, foreldelsesteg).kanUnnlates4xRettsgebyr shouldBe false
     }
 }

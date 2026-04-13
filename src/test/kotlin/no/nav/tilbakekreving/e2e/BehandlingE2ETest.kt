@@ -12,6 +12,7 @@ import no.nav.tilbakekreving.api.v1.dto.AktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegsinfoDto
 import no.nav.tilbakekreving.api.v1.dto.GodTroDto
+import no.nav.tilbakekreving.api.v1.dto.SkalUnnlates
 import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.api.v2.PeriodeDto
 import no.nav.tilbakekreving.api.v2.fagsystem.BehandlingEndretHendelse
@@ -368,6 +369,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
                             særligeGrunner = emptyList(),
                             særligeGrunnerTilReduksjon = false,
                             tilbakekrevSmåbeløp = false,
+                            unnlates4Rettsgebyr = SkalUnnlates.JA,
                             særligeGrunnerBegrunnelse = "",
                         ),
                     ),

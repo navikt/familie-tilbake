@@ -37,6 +37,7 @@ import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.ForeldelsesperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.GodTroDto
+import no.nav.tilbakekreving.api.v1.dto.SkalUnnlates
 import no.nav.tilbakekreving.api.v1.dto.SærligGrunnDto
 import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
@@ -835,6 +836,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                     begrunnelse = "Aktsomhet begrunnelse",
                     særligeGrunner = listOf(særligGrunn),
                     tilbakekrevSmåbeløp = false,
+                    unnlates4Rettsgebyr = SkalUnnlates.JA,
                     særligeGrunnerBegrunnelse =
                         "Særlig grunner begrunnelse",
                 ),

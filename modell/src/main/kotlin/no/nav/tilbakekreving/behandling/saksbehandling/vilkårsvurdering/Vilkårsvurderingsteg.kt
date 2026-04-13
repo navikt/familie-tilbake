@@ -93,6 +93,7 @@ class Vilkårsvurderingsteg(
 
     fun tilFrontendDto(
         kravgrunnlag: KravgrunnlagHendelse,
+        revurdering: EksternFagsakRevurdering,
         foreldelsesteg: Foreldelsesteg,
     ): VurdertVilkårsvurderingDto {
         return VurdertVilkårsvurderingDto(
@@ -108,6 +109,9 @@ class Vilkårsvurderingsteg(
                     vilkårsvurderingsresultatInfo = it.vurdering.tilFrontendDto(),
                 )
             },
+            // Datoen revurdering ble vedtatt er ikke riktig her, men fører til det høyeste rettsgebyret som kan være relevant.
+            // Vi gir heller saksbehandler mulighet til å si at beløpet er under/over 4x rettsgebyr til vi klarer å finne datoen vi skal velge rettsgebyr for
+            kanUnnlates4xRettsgebyr = KanUnnlates4xRettsgebyr.kanUnnlates(revurdering.vedtaksdato, kravgrunnlag.feilutbetaltBeløpForAllePerioder()),
             rettsgebyr = Rettsgebyr.rettsgebyr, // Todo burde bruke rettsgebyret som var gjeldene ved utbetalingen. Oppdateres etter avklaring med jurist.
             opprettetTid = LocalDateTime.now(),
         )

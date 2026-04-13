@@ -49,6 +49,7 @@ data class AktsomhetsvurderingEntity(
                             kanUnnlates4XRettsgebyr = when (aktsomhet.kanUnnlates) {
                                 KanUnnlates.UNNLATES -> KanUnnlates4xRettsgebyr.Unnlates
                                 KanUnnlates.SKAL_IKKE_UNNLATES -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(aktsomhet.særligGrunner!!.fraEntity())
+                                KanUnnlates.OVER_4_RETTSGEBYR -> KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(aktsomhet.særligGrunner!!.fraEntity())
                                 null -> error("Uaktsomhet må avklare om det kan unnlates eller ikke.")
                             },
                         )

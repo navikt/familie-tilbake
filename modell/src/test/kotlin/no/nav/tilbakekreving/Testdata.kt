@@ -94,7 +94,7 @@ fun kravgrunnlagPeriode(
         id = UUID.randomUUID(),
         periode = periode,
         månedligSkattebeløp = BigDecimal("0.0"),
-        beløp = ytelsesbeløp + feilutbetalteBeløp(),
+        beløp = ytelsesbeløp + feilutbetalteBeløp(ytelsesbeløp),
     )
 
 fun ytelsesbeløp(
@@ -113,18 +113,17 @@ fun ytelsesbeløp(
         ),
     )
 
-fun feilutbetalteBeløp() =
-    listOf(
-        KravgrunnlagHendelse.Periode.Beløp(
-            id = UUID.randomUUID(),
-            klassekode = "",
-            klassetype = "FEIL",
-            opprinneligUtbetalingsbeløp = BigDecimal("12000.0"),
-            nyttBeløp = BigDecimal("10000.0"),
-            tilbakekrevesBeløp = BigDecimal("2000.0"),
-            skatteprosent = BigDecimal("0.0"),
-        ),
+fun feilutbetalteBeløp(ytelsesbeløp: List<KravgrunnlagHendelse.Periode.Beløp>) = ytelsesbeløp.map {
+    KravgrunnlagHendelse.Periode.Beløp(
+        id = UUID.randomUUID(),
+        klassekode = "",
+        klassetype = "FEIL",
+        opprinneligUtbetalingsbeløp = 0.kroner,
+        nyttBeløp = it.tilbakekrevesBeløp,
+        tilbakekrevesBeløp = it.tilbakekrevesBeløp,
+        skatteprosent = BigDecimal("0.0"),
     )
+}
 
 fun fagsysteminfoHendelse(
     utvidPerioder: List<FagsysteminfoHendelse.UtvidetPeriode>? = null,
@@ -152,13 +151,14 @@ fun brukerinfoHendelse() = BrukerinfoHendelse(
 
 fun eksternFagsakBehandling(
     utvidPerioder: List<EksternFagsakRevurdering.UtvidetPeriode> = emptyList(),
+    vedtaksdato: LocalDate = LocalDate.now(),
 ): EksternFagsakRevurdering {
     return EksternFagsakRevurdering.Revurdering(
         id = UUID.randomUUID(),
         eksternId = UUID.randomUUID().toString(),
         årsakTilFeilutbetaling = "",
         revurderingsårsak = EksternFagsakRevurdering.Revurderingsårsak.NYE_OPPLYSNINGER,
-        vedtaksdato = LocalDate.now(),
+        vedtaksdato = vedtaksdato,
         utvidedePerioder = utvidPerioder,
     )
 }

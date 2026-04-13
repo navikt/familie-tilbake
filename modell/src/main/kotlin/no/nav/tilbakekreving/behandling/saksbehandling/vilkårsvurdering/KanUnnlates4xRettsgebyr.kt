@@ -1,9 +1,12 @@
 package no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering
 
+import no.nav.tilbakekreving.Rettsgebyr
 import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.endring.VurdertUtbetaling
 import no.nav.tilbakekreving.entities.KanUnnlates
+import java.math.BigDecimal
+import java.time.LocalDate
 
 // §22-15 6. ledd
 sealed interface KanUnnlates4xRettsgebyr {
@@ -65,5 +68,11 @@ sealed interface KanUnnlates4xRettsgebyr {
         override fun tilEntity(): KanUnnlates = KanUnnlates.SKAL_IKKE_UNNLATES
 
         override fun skalTilbakekreves(): Boolean = true
+    }
+
+    companion object {
+        fun kanUnnlates(datoForRettsgebyr: LocalDate, beløp: BigDecimal): Boolean {
+            return beløp < Rettsgebyr.rettsgebyrForÅr(datoForRettsgebyr.year)!!.toBigDecimal() * 4.toBigDecimal()
+        }
     }
 }

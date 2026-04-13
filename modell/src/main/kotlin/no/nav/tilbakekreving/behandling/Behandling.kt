@@ -146,7 +146,7 @@ class Behandling internal constructor(
         }
     val vilkårsvurderingsstegDto: FrontendDto<VurdertVilkårsvurderingDto>
         get() = FrontendDto {
-            vilkårsvurderingsteg.tilFrontendDto(kravgrunnlag.entry, foreldelsesteg)
+            vilkårsvurderingsteg.tilFrontendDto(kravgrunnlag.entry, eksternFagsakRevurdering.entry, foreldelsesteg)
         }
     val fatteVedtakStegDto: FrontendDto<TotrinnsvurderingDto> get() = fatteVedtakSteg
 

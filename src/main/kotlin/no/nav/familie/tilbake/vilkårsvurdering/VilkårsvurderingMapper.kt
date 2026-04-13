@@ -16,6 +16,7 @@ import no.nav.tilbakekreving.api.v1.dto.AktivitetDto
 import no.nav.tilbakekreving.api.v1.dto.AktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.GodTroDto
 import no.nav.tilbakekreving.api.v1.dto.RedusertBeløpDto
+import no.nav.tilbakekreving.api.v1.dto.SkalUnnlates
 import no.nav.tilbakekreving.api.v1.dto.SærligGrunnDto
 import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertAktsomhetDto
@@ -24,10 +25,12 @@ import no.nav.tilbakekreving.api.v1.dto.VurdertSærligGrunnDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsresultatDto
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -83,9 +86,15 @@ object VilkårsvurderingMapper {
             )
         }
 
+        val allePerioder = foreldetPeriodeDtoer + uvurdertePeriodeDtoer + vurdertePeriodeDtoer
+
         return VurdertVilkårsvurderingDto(
-            perioder = (foreldetPeriodeDtoer + uvurdertePeriodeDtoer + vurdertePeriodeDtoer).sortedBy { it.periode.fom },
+            perioder = allePerioder.sortedBy { it.periode.fom },
             rettsgebyr = Rettsgebyr.rettsgebyr,
+            kanUnnlates4xRettsgebyr = KanUnnlates4xRettsgebyr.kanUnnlates(
+                datoForRettsgebyr = LocalDate.now(),
+                beløp = allePerioder.sumOf { it.feilutbetaltBeløp },
+            ),
             opprettetTid = opprettetTid,
         )
     }
@@ -176,7 +185,11 @@ object VilkårsvurderingMapper {
                 særligeGrunnerTilReduksjon = aktsomhetDto.særligeGrunnerTilReduksjon,
                 særligeGrunnerBegrunnelse = aktsomhetDto.særligeGrunnerBegrunnelse,
                 vilkårsvurderingSærligeGrunner = tilSærligGrunnerDomene(aktsomhetDto.særligeGrunner),
-                tilbakekrevSmåbeløp = aktsomhetDto.tilbakekrevSmåbeløp,
+                tilbakekrevSmåbeløp = when (aktsomhetDto.unnlates4Rettsgebyr) {
+                    SkalUnnlates.JA -> false
+                    SkalUnnlates.NEI, SkalUnnlates.OVER_4_RETTSGEBYR -> true
+                    null -> aktsomhetDto.tilbakekrevSmåbeløp
+                },
             )
         }
         return null

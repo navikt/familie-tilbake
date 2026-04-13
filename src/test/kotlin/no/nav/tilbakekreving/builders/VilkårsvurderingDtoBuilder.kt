@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.builders
 
 import no.nav.tilbakekreving.api.v1.dto.AktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.GodTroDto
+import no.nav.tilbakekreving.api.v1.dto.SkalUnnlates
 import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
@@ -107,6 +108,10 @@ object VilkårsvurderingDtoBuilder :
             særligeGrunner = emptyList(),
             særligeGrunnerTilReduksjon = reduksjon.skalReduseres,
             tilbakekrevSmåbeløp = !unnlates.unnlates,
+            unnlates4Rettsgebyr = when (unnlates.unnlates) {
+                true -> SkalUnnlates.JA
+                false -> SkalUnnlates.NEI
+            },
             særligeGrunnerBegrunnelse = "",
         )
     }

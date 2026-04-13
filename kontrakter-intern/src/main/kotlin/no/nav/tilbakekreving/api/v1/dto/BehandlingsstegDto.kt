@@ -146,6 +146,7 @@ data class AktsomhetDto(
     val særligeGrunner: List<SærligGrunnDto>? = null,
     val særligeGrunnerTilReduksjon: Boolean = false,
     val tilbakekrevSmåbeløp: Boolean = true,
+    val unnlates4Rettsgebyr: SkalUnnlates?,
     val særligeGrunnerBegrunnelse: String? = null,
 )
 
@@ -191,3 +192,9 @@ data class VurdertTotrinnDto(
     @Size(max = 2000, message = "begrunnelse er for lang")
     val begrunnelse: String? = null,
 )
+
+enum class SkalUnnlates {
+    JA,
+    NEI,
+    OVER_4_RETTSGEBYR,
+}

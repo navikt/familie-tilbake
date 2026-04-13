@@ -41,6 +41,7 @@ import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakResponse
 import no.nav.tilbakekreving.api.v1.dto.AktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
+import no.nav.tilbakekreving.api.v1.dto.SkalUnnlates
 import no.nav.tilbakekreving.api.v1.dto.SærligGrunnDto
 import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
@@ -294,6 +295,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
                             begrunnelse = "testverdi",
                             særligeGrunnerTilReduksjon = false,
                             tilbakekrevSmåbeløp = true,
+                            unnlates4Rettsgebyr = SkalUnnlates.NEI,
                             særligeGrunnerBegrunnelse = "testverdi",
                             særligeGrunner =
                                 listOf(

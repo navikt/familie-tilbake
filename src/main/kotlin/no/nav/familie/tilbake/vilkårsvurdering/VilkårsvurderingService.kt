@@ -21,6 +21,7 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingGodTro
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import no.nav.tilbakekreving.api.v1.dto.AktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
+import no.nav.tilbakekreving.api.v1.dto.SkalUnnlates
 import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingDto
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
@@ -178,6 +179,7 @@ class VilkårsvurderingService(
                         AktsomhetDto(
                             aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
                             tilbakekrevSmåbeløp = false,
+                            unnlates4Rettsgebyr = SkalUnnlates.JA,
                             begrunnelse = hentAutomatiskVilkårsvurderingAktsomhetBegrunnelse(behandling.saksbehandlingstype, logContext),
                         ),
                 )

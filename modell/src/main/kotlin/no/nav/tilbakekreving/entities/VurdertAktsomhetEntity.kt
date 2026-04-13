@@ -22,6 +22,9 @@ data class VurdertAktsomhetEntity(
                     begrunnelse = begrunnelse,
                     kanUnnlates4XRettsgebyr = when (kanUnnlates) {
                         KanUnnlates.UNNLATES -> KanUnnlates4xRettsgebyr.Unnlates
+                        KanUnnlates.OVER_4_RETTSGEBYR -> KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(
+                            requireNotNull(særligGrunner) { "SærligGrunner kreves for Uaktsomhet" }.fraEntity(),
+                        )
                         KanUnnlates.SKAL_IKKE_UNNLATES -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
                             requireNotNull(særligGrunner) { "SærligGrunner kreves for Uaktsomhet" }.fraEntity(),
                         )
@@ -78,6 +81,7 @@ data class SærligGrunnEntity(
 enum class KanUnnlates {
     UNNLATES,
     SKAL_IKKE_UNNLATES,
+    OVER_4_RETTSGEBYR,
 }
 
 enum class AktsomhetType {
