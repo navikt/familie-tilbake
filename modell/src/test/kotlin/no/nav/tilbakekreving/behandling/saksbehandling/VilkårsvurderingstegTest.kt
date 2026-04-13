@@ -4,6 +4,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvNav
+import no.nav.tilbakekreving.api.v1.dto.SkalUnnlates
 import no.nav.tilbakekreving.api.v1.dto.VurdertAktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsresultatDto
@@ -162,6 +163,7 @@ class VilkårsvurderingstegTest {
                     særligeGrunner = null,
                     særligeGrunnerTilReduksjon = false,
                     tilbakekrevSmåbeløp = false,
+                    unnlates4Rettsgebyr = SkalUnnlates.JA,
                     særligeGrunnerBegrunnelse = null,
                 ),
             ),

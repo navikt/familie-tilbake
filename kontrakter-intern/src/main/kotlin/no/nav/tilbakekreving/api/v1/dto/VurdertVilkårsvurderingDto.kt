@@ -47,6 +47,7 @@ data class VurdertAktsomhetDto(
     val særligeGrunner: List<VurdertSærligGrunnDto>? = null,
     val særligeGrunnerTilReduksjon: Boolean = false,
     val tilbakekrevSmåbeløp: Boolean = true,
+    val unnlates4Rettsgebyr: SkalUnnlates,
     val særligeGrunnerBegrunnelse: String? = null,
 )
 

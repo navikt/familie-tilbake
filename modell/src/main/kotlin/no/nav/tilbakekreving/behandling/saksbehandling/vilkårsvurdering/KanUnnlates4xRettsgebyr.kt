@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering
 
 import no.nav.tilbakekreving.Rettsgebyr
+import no.nav.tilbakekreving.api.v1.dto.SkalUnnlates
 import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.endring.VurdertUtbetaling
@@ -20,6 +21,8 @@ sealed interface KanUnnlates4xRettsgebyr {
 
     fun skalTilbakekreves(): Boolean
 
+    fun tilFrontendDTO(): SkalUnnlates
+
     data object Unnlates : KanUnnlates4xRettsgebyr {
         override fun reduksjon(): Reduksjon = Reduksjon.IngenTilbakekreving()
 
@@ -32,6 +35,8 @@ sealed interface KanUnnlates4xRettsgebyr {
         override fun tilEntity(): KanUnnlates = KanUnnlates.UNNLATES
 
         override fun skalTilbakekreves(): Boolean = false
+
+        override fun tilFrontendDTO(): SkalUnnlates = SkalUnnlates.JA
     }
 
     class SkalIkkeUnnlates(
@@ -50,6 +55,8 @@ sealed interface KanUnnlates4xRettsgebyr {
         override fun tilEntity(): KanUnnlates = KanUnnlates.SKAL_IKKE_UNNLATES
 
         override fun skalTilbakekreves(): Boolean = true
+
+        override fun tilFrontendDTO(): SkalUnnlates = SkalUnnlates.NEI
     }
 
     class ErOver4xRettsgebyr(
@@ -68,6 +75,8 @@ sealed interface KanUnnlates4xRettsgebyr {
         override fun tilEntity(): KanUnnlates = KanUnnlates.SKAL_IKKE_UNNLATES
 
         override fun skalTilbakekreves(): Boolean = true
+
+        override fun tilFrontendDTO(): SkalUnnlates = SkalUnnlates.OVER_4_RETTSGEBYR
     }
 
     companion object {

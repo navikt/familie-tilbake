@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering
 
+import no.nav.tilbakekreving.api.v1.dto.SkalUnnlates
 import no.nav.tilbakekreving.api.v1.dto.VurdertAktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsresultatDto
 import no.nav.tilbakekreving.beregning.Reduksjon
@@ -70,6 +71,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                         is KanUnnlates4xRettsgebyr.Unnlates -> false
                     },
                     tilbakekrevSmåbeløp = kanUnnlates4XRettsgebyr.skalTilbakekreves(),
+                    unnlates4Rettsgebyr = kanUnnlates4XRettsgebyr.tilFrontendDTO(),
                     særligeGrunnerBegrunnelse = when (kanUnnlates4XRettsgebyr) {
                         is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.begrunnelse
                         is KanUnnlates4xRettsgebyr.SkalIkkeUnnlates -> kanUnnlates4XRettsgebyr.reduksjonSærligeGrunner.begrunnelse
@@ -140,6 +142,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                     særligeGrunner = reduksjonSærligeGrunner.vurderteGrunner(),
                     særligeGrunnerTilReduksjon = reduksjonSærligeGrunner.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja,
                     tilbakekrevSmåbeløp = true,
+                    unnlates4Rettsgebyr = SkalUnnlates.NEI,
                     særligeGrunnerBegrunnelse = reduksjonSærligeGrunner.begrunnelse,
                 ),
             )
@@ -193,7 +196,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
             return VurdertVilkårsvurderingsresultatDto(
                 vilkårsvurderingsresultat = feilaktigeEllerMangelfulleOpplysninger.vilkårsvurderingsresultat,
                 aktsomhet = VurdertAktsomhetDto(
-                    aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
+                    aktsomhet = Aktsomhet.FORSETT,
                     ileggRenter = renter(),
                     andelTilbakekreves = reduksjon().andel,
                     beløpTilbakekreves = null,
@@ -201,6 +204,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                     særligeGrunner = null,
                     særligeGrunnerTilReduksjon = false,
                     tilbakekrevSmåbeløp = true,
+                    unnlates4Rettsgebyr = SkalUnnlates.NEI,
                     særligeGrunnerBegrunnelse = null,
                 ),
             )

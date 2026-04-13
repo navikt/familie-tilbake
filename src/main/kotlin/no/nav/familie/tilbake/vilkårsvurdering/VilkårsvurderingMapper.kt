@@ -166,6 +166,10 @@ object VilkårsvurderingMapper {
                             .vilkårsvurderingSærligeGrunner,
                     ),
                 tilbakekrevSmåbeløp = vilkårsvurderingAktsomhet.tilbakekrevSmåbeløp,
+                unnlates4Rettsgebyr = when (vilkårsvurderingAktsomhet.tilbakekrevSmåbeløp) {
+                    true -> SkalUnnlates.NEI
+                    false -> SkalUnnlates.JA
+                },
             )
         }
         return null

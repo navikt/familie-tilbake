@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering
 
+import no.nav.tilbakekreving.api.v1.dto.SkalUnnlates
 import no.nav.tilbakekreving.api.v1.dto.VurdertAktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertGodTroDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsresultatDto
@@ -233,6 +234,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     særligeGrunner = null,
                     særligeGrunnerTilReduksjon = false,
                     tilbakekrevSmåbeløp = true,
+                    unnlates4Rettsgebyr = SkalUnnlates.NEI,
                     særligeGrunnerBegrunnelse = null,
                 )
             }
@@ -281,6 +283,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     særligeGrunner = reduksjonSærligeGrunner.vurderteGrunner(),
                     særligeGrunnerTilReduksjon = reduksjonSærligeGrunner.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja,
                     tilbakekrevSmåbeløp = true,
+                    unnlates4Rettsgebyr = SkalUnnlates.NEI,
                     særligeGrunnerBegrunnelse = reduksjonSærligeGrunner.begrunnelse,
                 )
             }
@@ -334,6 +337,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     ileggRenter = false,
                     andelTilbakekreves = reduksjon().andel,
                     beløpTilbakekreves = null,
+                    unnlates4Rettsgebyr = kanUnnlates4XRettsgebyr.tilFrontendDTO(),
                     begrunnelse = begrunnelse,
                     særligeGrunner = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.SkalIkkeUnnlates)?.reduksjonSærligeGrunner?.vurderteGrunner(),
                     særligeGrunnerTilReduksjon = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.SkalIkkeUnnlates)?.reduksjonSærligeGrunner?.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja,
@@ -385,6 +389,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     særligeGrunner = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.SkalIkkeUnnlates)?.reduksjonSærligeGrunner?.vurderteGrunner(),
                     særligeGrunnerTilReduksjon = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.SkalIkkeUnnlates)?.reduksjonSærligeGrunner?.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja,
                     tilbakekrevSmåbeløp = kanUnnlates4XRettsgebyr.skalTilbakekreves(),
+                    unnlates4Rettsgebyr = kanUnnlates4XRettsgebyr.tilFrontendDTO(),
                     særligeGrunnerBegrunnelse = (kanUnnlates4XRettsgebyr as? KanUnnlates4xRettsgebyr.SkalIkkeUnnlates)?.reduksjonSærligeGrunner?.begrunnelse,
                 )
             }
