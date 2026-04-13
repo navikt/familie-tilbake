@@ -52,7 +52,7 @@ class TilBehandlingTest {
         )
 
         tilbakekreving.behandlingHistorikk.nåværende().entry.foreldelsesteg.erFullstendig() shouldBe true
-        tilbakekreving.håndterNullstilling()
+        tilbakekreving.håndterNullstilling(ANSVARLIG_SAKSBEHANDLER)
         tilbakekreving.behandlingHistorikk.nåværende().entry.foreldelsesteg.erFullstendig() shouldBe false
     }
 
@@ -76,7 +76,7 @@ class TilBehandlingTest {
         tilbakekreving.tilstand shouldNotBe TilBehandling
 
         val exception = shouldThrow<ModellFeil.UgyldigOperasjonException> {
-            tilbakekreving.håndterNullstilling()
+            tilbakekreving.håndterNullstilling(ANSVARLIG_SAKSBEHANDLER)
         }
         exception.message shouldBe "Kan ikke flytte tilbake til fakta i ${tilbakekreving.tilstand.tilbakekrevingTilstand}"
     }
@@ -171,7 +171,7 @@ class TilBehandlingTest {
         val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
         val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingHendelse, ANSVARLIG_SAKSBEHANDLER)
-        tilbakekreving.håndterTrekkTilbakeFraGodkjenning()
+        tilbakekreving.håndterTrekkTilbakeFraGodkjenning(ANSVARLIG_SAKSBEHANDLER)
         val exception = shouldThrow<ModellFeil> {
             tilbakekreving.håndter(ANSVARLIG_BESLUTTER, godkjenning())
         }

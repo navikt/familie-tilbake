@@ -426,15 +426,15 @@ class TilbakekrevingService(
         }
     }
 
-    fun flyttBehandlingTilFakta(tilbakekrevingId: String) {
+    fun flyttBehandlingTilFakta(tilbakekrevingId: String, saksbehandler: Behandler) {
         hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
-            tilbakekreving.håndterNullstilling()
+            tilbakekreving.håndterNullstilling(saksbehandler)
         }
     }
 
-    fun trekkTilbakeFraGodkjenning(tilbakekrevingId: String) {
+    fun trekkTilbakeFraGodkjenning(tilbakekrevingId: String, saksbehandler: Behandler) {
         hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
-            tilbakekreving.håndterTrekkTilbakeFraGodkjenning()
+            tilbakekreving.håndterTrekkTilbakeFraGodkjenning(saksbehandler)
         }
     }
 

@@ -11,6 +11,7 @@ import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
+import no.nav.tilbakekreving.saksbehandler.Behandler
 import java.time.Duration
 
 object TilBehandling : Tilstand {
@@ -34,16 +35,16 @@ object TilBehandling : Tilstand {
         tilbakekreving.sendStatusendring(ForenkletBehandlingsstatus.OPPRETTET, ForenkletBehandlingsstatus.TIL_BEHANDLING)
     }
 
-    override fun håndterNullstilling(nåværendeBehandling: Behandling, sporing: Sporing, behandlingslogg: Behandlingslogg) {
-        nåværendeBehandling.flyttTilbakeTilFakta(behandlingslogg)
+    override fun håndterNullstilling(nåværendeBehandling: Behandling, sporing: Sporing, behandlingslogg: Behandlingslogg, behandler: Behandler) {
+        nåværendeBehandling.flyttTilbakeTilFakta(behandlingslogg, behandler)
     }
 
     override fun håndter(tilbakekreving: Tilbakekreving, fagsysteminfo: FagsysteminfoHendelse) {
         tilbakekreving.oppdaterFagsysteminfo(fagsysteminfo)
     }
 
-    override fun håndterTrekkTilbakeFraGodkjenning(behandling: Behandling, sporing: Sporing, behandlingslogg: Behandlingslogg) {
-        behandling.trekkTilbakeFraGodkjenning(behandlingslogg)
+    override fun håndterTrekkTilbakeFraGodkjenning(behandling: Behandling, sporing: Sporing, behandlingslogg: Behandlingslogg, behandler: Behandler) {
+        behandling.trekkTilbakeFraGodkjenning(behandlingslogg, behandler)
     }
 
     override fun håndter(

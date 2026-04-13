@@ -524,13 +524,12 @@ class Behandling internal constructor(
                     .forEach { it.underkjennSteget() }
             }
         }
-        oppdaterBehandler(ansvarligSaksbehandler)
         if (kanUtbetales()) {
             behandlingslogg.lagre(
                 opprettLoggInnslag(
                     behandlingsloggstype = Behandlingsloggstype.VEDTAK_FATTET,
                     rolle = Rolle.BESLUTTER,
-                    behandler = ansvarligSaksbehandler,
+                    behandler = beslutter,
                 ),
             )
         }
@@ -540,7 +539,7 @@ class Behandling internal constructor(
                 opprettLoggInnslag(
                     behandlingsloggstype = Behandlingsloggstype.BEHANDLING_SENDT_TILBAKE_TIL_SAKSBEHANDLER,
                     rolle = Rolle.BESLUTTER,
-                    behandler = ansvarligSaksbehandler,
+                    behandler = beslutter,
                 ),
             )
         }
@@ -552,7 +551,7 @@ class Behandling internal constructor(
     ) {
         if (sistEndret == opprettet) {
             this.eksternFagsakRevurdering = eksternFagsakRevurdering
-            flyttTilbakeTilFakta(behandlingslogg)
+            flyttTilbakeTilFakta(behandlingslogg, Behandler.Vedtaksløsning)
         }
     }
 
@@ -707,26 +706,28 @@ class Behandling internal constructor(
         return kravgrunnlagPerioder.minOf { it.fom } til kravgrunnlagPerioder.maxOf { it.tom }
     }
 
-    fun flyttTilbakeTilFakta(behandlingslogg: Behandlingslogg) {
+    fun flyttTilbakeTilFakta(behandlingslogg: Behandlingslogg, behandler: Behandler) {
         steg().forEach {
             it.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry)
         }
+        oppdaterBehandler(behandler)
         behandlingslogg.lagre(
             opprettLoggInnslag(
                 behandlingsloggstype = Behandlingsloggstype.BEHANDLING_NULLSTILLT,
                 rolle = Rolle.SAKSBEHANDLER,
-                behandler = ansvarligSaksbehandler,
+                behandler = behandler,
             ),
         )
     }
 
-    fun trekkTilbakeFraGodkjenning(behandlingslogg: Behandlingslogg) {
+    fun trekkTilbakeFraGodkjenning(behandlingslogg: Behandlingslogg, behandler: Behandler) {
         foreslåVedtakSteg.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry)
+        oppdaterBehandler(behandler)
         behandlingslogg.lagre(
             opprettLoggInnslag(
                 behandlingsloggstype = Behandlingsloggstype.TREKK_TILBAKE_FRA_GODKJENNING,
                 rolle = Rolle.SAKSBEHANDLER,
-                behandler = ansvarligSaksbehandler,
+                behandler = behandler,
             ),
         )
     }

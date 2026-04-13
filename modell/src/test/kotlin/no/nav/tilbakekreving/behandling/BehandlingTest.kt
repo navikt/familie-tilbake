@@ -114,7 +114,7 @@ class BehandlingTest {
             .shouldNotBeNull()
             .behandlingsstegstatus shouldBe Behandlingsstegstatus.UTFØRT
 
-        TilBehandling.håndterNullstilling(behandling, Sporing("fefe", "fe"), behandlingslogg)
+        TilBehandling.håndterNullstilling(behandling, Sporing("fefe", "fe"), behandlingslogg, ansvarligSaksbehandler)
 
         behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).vurderingAvBrukersUttalelse.beskrivelse shouldBe null
         behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).vurderingAvBrukersUttalelse.harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.IKKE_VURDERT
@@ -136,7 +136,7 @@ class BehandlingTest {
 
         behandling.foreldelsesteg.tilFrontendDto(kravgrunnlag).foreldetPerioder.first().begrunnelse shouldBe "Begrunnelse"
 
-        behandling.flyttTilbakeTilFakta(behandlingslogg)
+        behandling.flyttTilbakeTilFakta(behandlingslogg, ansvarligSaksbehandler)
 
         behandling.foreldelsesteg.tilFrontendDto(kravgrunnlag).foreldetPerioder.first().begrunnelse shouldBe null
     }
@@ -159,7 +159,7 @@ class BehandlingTest {
 
         behandling.vilkårsvurderingsstegDto.tilFrontendDto().perioder.first().begrunnelse.shouldNotBeNull()
 
-        behandling.flyttTilbakeTilFakta(behandlingslogg)
+        behandling.flyttTilbakeTilFakta(behandlingslogg, ansvarligSaksbehandler)
 
         behandling.vilkårsvurderingsstegDto.tilFrontendDto().perioder.first().begrunnelse shouldBe null
     }

@@ -233,14 +233,14 @@ class Tilbakekreving internal constructor(
         return Sporing(eksternFagsak.eksternId, behandlingHistorikk.nåværende().entry.id.toString())
     }
 
-    fun håndterNullstilling() {
+    fun håndterNullstilling(behandler: Behandler) {
         val nåværendeBehandling = behandlingHistorikk.nåværende().entry
-        tilstand.håndterNullstilling(nåværendeBehandling, sporingsinformasjon(), behandlingslogg)
+        tilstand.håndterNullstilling(nåværendeBehandling, sporingsinformasjon(), behandlingslogg, behandler)
     }
 
-    fun håndterTrekkTilbakeFraGodkjenning() {
+    fun håndterTrekkTilbakeFraGodkjenning(behandler: Behandler) {
         val nåværendeBehandling = behandlingHistorikk.nåværende().entry
-        tilstand.håndterTrekkTilbakeFraGodkjenning(nåværendeBehandling, sporingsinformasjon(), behandlingslogg)
+        tilstand.håndterTrekkTilbakeFraGodkjenning(nåværendeBehandling, sporingsinformasjon(), behandlingslogg, behandler)
     }
 
     fun opprettBehandling(
@@ -270,7 +270,7 @@ class Tilbakekreving internal constructor(
             opprettLoggInnslag(
                 behandlingsloggstype = Behandlingsloggstype.BEHANDLING_OPPRETTET,
                 rolle = Rolle.VEDTAKSLØSNING,
-                behandler = Behandler.Vedtaksløsning,
+                behandler = behandler,
                 behandlingId = behandlingId,
             ),
         )
