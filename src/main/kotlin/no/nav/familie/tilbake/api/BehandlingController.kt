@@ -324,6 +324,8 @@ class BehandlingController(
     ): Ressurs<String> {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
         if (tilbakekreving != null) {
+            val logContext = SecureLog.Context.fra(tilbakekreving)
+            val saksbehandler = ContextService.hentBehandler(logContext)
             tilgangskontrollService.validerTilgangTilbakekreving(
                 tilbakekreving = tilbakekreving,
                 behandlingId = behandlingId,
@@ -331,7 +333,7 @@ class BehandlingController(
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
                 handling = "Saksbehandler angrer på send til beslutter og tar behandling tilbake til saksbehandler",
             )
-            tilbakekrevingService.trekkTilbakeFraGodkjenning(tilbakekreving.id)
+            tilbakekrevingService.trekkTilbakeFraGodkjenning(tilbakekreving.id, saksbehandler)
             return Ressurs.success("OK")
         }
         tilgangskontrollService.validerTilgangBehandlingID(
@@ -354,6 +356,8 @@ class BehandlingController(
     ): Ressurs<String> {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
         if (tilbakekreving != null) {
+            val logContext = SecureLog.Context.fra(tilbakekreving)
+            val saksbehandler = ContextService.hentBehandler(logContext)
             tilgangskontrollService.validerTilgangTilbakekreving(
                 tilbakekreving = tilbakekreving,
                 behandlingId = behandlingId,
@@ -361,7 +365,7 @@ class BehandlingController(
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
                 handling = "Flytter behandling tilbake til Fakta",
             )
-            tilbakekrevingService.flyttBehandlingTilFakta(tilbakekreving.id)
+            tilbakekrevingService.flyttBehandlingTilFakta(tilbakekreving.id, saksbehandler)
             return Ressurs.success("OK")
         }
         tilgangskontrollService.validerTilgangBehandlingID(

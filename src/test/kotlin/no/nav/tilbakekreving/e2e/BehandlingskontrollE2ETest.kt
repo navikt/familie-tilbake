@@ -88,7 +88,9 @@ class BehandlingskontrollE2ETest : TilbakekrevingE2EBase() {
             .shouldNotBeNull()
             .behandlingsstegstatus shouldBe Behandlingsstegstatus.UTFØRT
 
-        behandlingController.flyttBehandlingTilFakta(behandlingId) shouldBe Ressurs.success("OK")
+        somSaksbehandler(ansvarligSaksbehandler.ident) {
+            behandlingController.flyttBehandlingTilFakta(behandlingId) shouldBe Ressurs.success("OK")
+        }
 
         val dtoEtterTilbakeTilFakta = tilbakekreving(behandlingId).frontendDtoForBehandling(ansvarligSaksbehandler, true)
         dtoEtterTilbakeTilFakta.behandlingsstegsinfo.find { it.behandlingssteg == Behandlingssteg.FAKTA }

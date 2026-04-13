@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.api.forvaltning
 import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.familie.tilbake.behandling.Ytelsestype
+import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
 import no.nav.familie.tilbake.kontrakter.Ressurs
@@ -147,6 +148,8 @@ class ForvaltningController(
     ): Ressurs<String> {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
         if (tilbakekreving != null) {
+            val logContext = SecureLog.Context.fra(tilbakekreving)
+            val saksbehandler = ContextService.hentBehandler(logContext)
             tilgangskontrollService.validerTilgangTilbakekreving(
                 tilbakekreving = tilbakekreving,
                 behandlingId = behandlingId,
@@ -154,7 +157,7 @@ class ForvaltningController(
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
                 handling = "Flytter behandling tilbake til Fakta",
             )
-            tilbakekrevingService.flyttBehandlingTilFakta(tilbakekreving.id)
+            tilbakekrevingService.flyttBehandlingTilFakta(tilbakekreving.id, saksbehandler)
             return Ressurs.success("OK")
         }
 
