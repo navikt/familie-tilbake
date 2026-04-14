@@ -145,7 +145,6 @@ data class AktsomhetDto(
     val begrunnelse: String,
     val særligeGrunner: List<SærligGrunnDto>? = null,
     val særligeGrunnerTilReduksjon: Boolean = false,
-    val tilbakekrevSmåbeløp: Boolean = true,
     val unnlates4Rettsgebyr: SkalUnnlates?,
     val særligeGrunnerBegrunnelse: String? = null,
 )

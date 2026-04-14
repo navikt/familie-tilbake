@@ -835,7 +835,6 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                     ileggRenter = ileggRenter,
                     begrunnelse = "Aktsomhet begrunnelse",
                     særligeGrunner = listOf(særligGrunn),
-                    tilbakekrevSmåbeløp = false,
                     unnlates4Rettsgebyr = SkalUnnlates.UNNLATES,
                     særligeGrunnerBegrunnelse =
                         "Særlig grunner begrunnelse",

@@ -368,7 +368,6 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
                             begrunnelse = "Japp",
                             særligeGrunner = emptyList(),
                             særligeGrunnerTilReduksjon = false,
-                            tilbakekrevSmåbeløp = false,
                             unnlates4Rettsgebyr = SkalUnnlates.UNNLATES,
                             særligeGrunnerBegrunnelse = "",
                         ),

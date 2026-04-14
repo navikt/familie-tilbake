@@ -31,7 +31,6 @@ object VilkårsvurderingsPeriodeDomainUtil {
                 andelTilbakekreves = null,
                 begrunnelse = "testverdi",
                 særligeGrunnerTilReduksjon = false,
-                tilbakekrevSmåbeløp = true,
                 unnlates4Rettsgebyr = SkalUnnlates.TILBAKEKREVES,
                 særligeGrunnerBegrunnelse = "testverdi",
                 særligeGrunner = listOf(SærligGrunnDto(SærligGrunnType.ANNET, "testverdi")),

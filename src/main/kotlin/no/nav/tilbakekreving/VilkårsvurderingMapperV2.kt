@@ -52,11 +52,7 @@ object VilkårsvurderingMapperV2 {
                         kanUnnlates4XRettsgebyr = when (aktsomhet.unnlates4Rettsgebyr) {
                             SkalUnnlates.UNNLATES -> KanUnnlates4xRettsgebyr.Unnlates
                             SkalUnnlates.TILBAKEKREVES -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(særligeGrunner())
-                            SkalUnnlates.OVER_4_RETTSGEBYR -> KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(særligeGrunner())
-                            null -> when (aktsomhet.tilbakekrevSmåbeløp) {
-                                true -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(særligeGrunner())
-                                false -> KanUnnlates4xRettsgebyr.Unnlates
-                            }
+                            SkalUnnlates.OVER_4_RETTSGEBYR, null -> KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(særligeGrunner())
                         },
                     )
             }
@@ -81,9 +77,10 @@ object VilkårsvurderingMapperV2 {
                 begrunnelse = begrunnelse,
                 begrunnelseAktsomhet = aktsomhet.begrunnelse,
                 feilaktigeEllerMangelfulleOpplysninger = feilaktigEllerMangelfull,
-                kanUnnlates4XRettsgebyr = when (aktsomhet.tilbakekrevSmåbeløp) {
-                    true -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(særligeGrunner())
-                    false -> KanUnnlates4xRettsgebyr.Unnlates
+                kanUnnlates4XRettsgebyr = when (aktsomhet.unnlates4Rettsgebyr) {
+                    SkalUnnlates.TILBAKEKREVES -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(særligeGrunner())
+                    SkalUnnlates.UNNLATES -> KanUnnlates4xRettsgebyr.Unnlates
+                    SkalUnnlates.OVER_4_RETTSGEBYR, null -> KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(særligeGrunner())
                 },
             )
         }

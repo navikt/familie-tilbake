@@ -294,7 +294,6 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
                             aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
                             begrunnelse = "testverdi",
                             særligeGrunnerTilReduksjon = false,
-                            tilbakekrevSmåbeløp = true,
                             unnlates4Rettsgebyr = SkalUnnlates.TILBAKEKREVES,
                             særligeGrunnerBegrunnelse = "testverdi",
                             særligeGrunner =

@@ -107,7 +107,6 @@ object VilkårsvurderingDtoBuilder :
             begrunnelse = "",
             særligeGrunner = emptyList(),
             særligeGrunnerTilReduksjon = reduksjon.skalReduseres,
-            tilbakekrevSmåbeløp = !unnlates.unnlates,
             unnlates4Rettsgebyr = when (unnlates.unnlates) {
                 true -> SkalUnnlates.UNNLATES
                 false -> SkalUnnlates.TILBAKEKREVES

@@ -191,8 +191,7 @@ object VilkårsvurderingMapper {
                 vilkårsvurderingSærligeGrunner = tilSærligGrunnerDomene(aktsomhetDto.særligeGrunner),
                 tilbakekrevSmåbeløp = when (aktsomhetDto.unnlates4Rettsgebyr) {
                     SkalUnnlates.UNNLATES -> false
-                    SkalUnnlates.TILBAKEKREVES, SkalUnnlates.OVER_4_RETTSGEBYR -> true
-                    null -> aktsomhetDto.tilbakekrevSmåbeløp
+                    SkalUnnlates.TILBAKEKREVES, SkalUnnlates.OVER_4_RETTSGEBYR, null -> true
                 },
             )
         }

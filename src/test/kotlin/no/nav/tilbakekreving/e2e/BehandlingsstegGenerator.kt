@@ -24,7 +24,6 @@ import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import no.nav.tilbakekreving.test.januar
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 
@@ -82,7 +81,6 @@ object BehandlingsstegGenerator {
                     begrunnelse = "Jaha",
                     særligeGrunner = emptyList(),
                     særligeGrunnerTilReduksjon = false,
-                    tilbakekrevSmåbeløp = true,
                     unnlates4Rettsgebyr = SkalUnnlates.TILBAKEKREVES,
                     særligeGrunnerBegrunnelse = "Særlige grunner",
                 ),
@@ -103,7 +101,6 @@ object BehandlingsstegGenerator {
                 aktsomhetDto = AktsomhetDto(
                     aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
                     begrunnelse = "Jaha",
-                    tilbakekrevSmåbeløp = false,
                     unnlates4Rettsgebyr = SkalUnnlates.UNNLATES,
                 ),
             )
@@ -128,33 +125,6 @@ object BehandlingsstegGenerator {
                     begrunnelse = "Jaha",
                     særligeGrunner = emptyList(),
                     særligeGrunnerTilReduksjon = false,
-                    tilbakekrevSmåbeløp = true,
-                    unnlates4Rettsgebyr = SkalUnnlates.TILBAKEKREVES,
-                    særligeGrunnerBegrunnelse = "Særlige grunner",
-                ),
-            )
-        },
-    )
-
-    fun lagVilkårsvurderingUnder4xRettsgebyrDelvisTilbakekreving(
-        vararg perioder: Datoperiode = arrayOf(1.januar(2021) til 1.januar(2021)),
-        vilkårsvurderingsresultat: Vilkårsvurderingsresultat,
-    ): BehandlingsstegVilkårsvurderingDto = BehandlingsstegVilkårsvurderingDto(
-        vilkårsvurderingsperioder = perioder.map { periode ->
-            VilkårsvurderingsperiodeDto(
-                periode = periode,
-                vilkårsvurderingsresultat = vilkårsvurderingsresultat,
-                begrunnelse = "Jepp",
-                godTroDto = null,
-                aktsomhetDto = AktsomhetDto(
-                    aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
-                    ileggRenter = false,
-                    andelTilbakekreves = BigDecimal(50),
-                    beløpTilbakekreves = null,
-                    begrunnelse = "Jaha",
-                    særligeGrunner = emptyList(),
-                    særligeGrunnerTilReduksjon = true,
-                    tilbakekrevSmåbeløp = true,
                     unnlates4Rettsgebyr = SkalUnnlates.TILBAKEKREVES,
                     særligeGrunnerBegrunnelse = "Særlige grunner",
                 ),
