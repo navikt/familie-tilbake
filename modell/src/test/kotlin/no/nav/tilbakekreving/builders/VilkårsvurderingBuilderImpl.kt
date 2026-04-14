@@ -10,6 +10,7 @@ import no.nav.tilbakekreving.test.vilkårsvurdering.ForårsaketAvBrukerBuilder
 import no.nav.tilbakekreving.test.vilkårsvurdering.ForårsaketAvNavBuilder
 import no.nav.tilbakekreving.test.vilkårsvurdering.KanUnnlates4xRettsgebyrBuilder
 import no.nav.tilbakekreving.test.vilkårsvurdering.ReduksjonSærligeGrunnerBuilder
+import no.nav.tilbakekreving.test.vilkårsvurdering.Unnlates
 import no.nav.tilbakekreving.test.vilkårsvurdering.VilkårsvurderingProvider
 import no.nav.tilbakekreving.test.vilkårsvurdering.VilkårsvurderingValgProvider
 
@@ -75,10 +76,9 @@ object VilkårsvurderingBuilderImpl : VilkårsvurderingProvider<ForårsaketAvBru
 
     override fun build(unnlates: KanUnnlates4xRettsgebyrBuilder, reduksjon: ReduksjonSærligeGrunnerBuilder): KanUnnlates4xRettsgebyr {
         return when (unnlates.unnlates) {
-            true -> KanUnnlates4xRettsgebyr.Unnlates
-            false -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
-                reduksjon.build(this),
-            )
+            Unnlates.Unnlates -> KanUnnlates4xRettsgebyr.Unnlates
+            Unnlates.Tilbakekreves -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(reduksjon.build(this))
+            Unnlates.Over4Rettsgebyr -> KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(reduksjon.build(this))
         }
     }
 

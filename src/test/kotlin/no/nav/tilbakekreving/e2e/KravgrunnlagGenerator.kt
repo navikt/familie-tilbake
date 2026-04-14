@@ -17,12 +17,15 @@ object KravgrunnlagGenerator {
         .toString()
         .padStart(width, '0')
 
-    fun standardPeriode(periode: Datoperiode) = Tilbakekrevingsperiode(
+    fun standardPeriode(
+        periode: Datoperiode,
+        feilutbetaltBeløp: BigDecimal = 2000.kroner,
+    ) = Tilbakekrevingsperiode(
         periode = periode,
         tilbakekrevingsbeløp = listOf(
             Tilbakekrevingsbeløp.forKlassekode(
                 klassekode = NyKlassekode.TSTBASISP4_OP,
-                beløpTilbakekreves = 2000.kroner,
+                beløpTilbakekreves = feilutbetaltBeløp,
                 beløpOpprinneligUtbetalt = 20000.kroner,
             ),
         ).medFeilutbetaling(NyKlassekode.KL_KODE_FEIL_ARBYT),

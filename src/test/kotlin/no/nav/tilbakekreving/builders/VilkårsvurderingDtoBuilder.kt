@@ -16,6 +16,7 @@ import no.nav.tilbakekreving.test.vilkårsvurdering.ForårsaketAvBrukerBuilder
 import no.nav.tilbakekreving.test.vilkårsvurdering.ForårsaketAvNavBuilder
 import no.nav.tilbakekreving.test.vilkårsvurdering.KanUnnlates4xRettsgebyrBuilder
 import no.nav.tilbakekreving.test.vilkårsvurdering.ReduksjonSærligeGrunnerBuilder
+import no.nav.tilbakekreving.test.vilkårsvurdering.Unnlates
 import no.nav.tilbakekreving.test.vilkårsvurdering.VilkårsvurderingProvider
 import no.nav.tilbakekreving.test.vilkårsvurdering.VilkårsvurderingValgProvider
 
@@ -108,8 +109,9 @@ object VilkårsvurderingDtoBuilder :
             særligeGrunner = emptyList(),
             særligeGrunnerTilReduksjon = reduksjon.skalReduseres,
             unnlates4Rettsgebyr = when (unnlates.unnlates) {
-                true -> SkalUnnlates.UNNLATES
-                false -> SkalUnnlates.TILBAKEKREVES
+                Unnlates.Unnlates -> SkalUnnlates.UNNLATES
+                Unnlates.Tilbakekreves -> SkalUnnlates.TILBAKEKREVES
+                Unnlates.Over4Rettsgebyr -> SkalUnnlates.OVER_4_RETTSGEBYR
             },
             særligeGrunnerBegrunnelse = "",
         )

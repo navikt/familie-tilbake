@@ -72,7 +72,7 @@ sealed interface KanUnnlates4xRettsgebyr {
 
         override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES) + reduksjonSærligeGrunner.skalReduseres.påkrevdeVurderinger()
 
-        override fun tilEntity(): KanUnnlates = KanUnnlates.SKAL_IKKE_UNNLATES
+        override fun tilEntity(): KanUnnlates = KanUnnlates.OVER_4_RETTSGEBYR
 
         override fun skalTilbakekreves(): Boolean = true
 
