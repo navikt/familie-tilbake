@@ -167,8 +167,8 @@ object VilkårsvurderingMapper {
                     ),
                 tilbakekrevSmåbeløp = vilkårsvurderingAktsomhet.tilbakekrevSmåbeløp,
                 unnlates4Rettsgebyr = when (vilkårsvurderingAktsomhet.tilbakekrevSmåbeløp) {
-                    true -> SkalUnnlates.NEI
-                    false -> SkalUnnlates.JA
+                    true -> SkalUnnlates.TILBAKEKREVES
+                    false -> SkalUnnlates.UNNLATES
                 },
             )
         }
@@ -190,8 +190,8 @@ object VilkårsvurderingMapper {
                 særligeGrunnerBegrunnelse = aktsomhetDto.særligeGrunnerBegrunnelse,
                 vilkårsvurderingSærligeGrunner = tilSærligGrunnerDomene(aktsomhetDto.særligeGrunner),
                 tilbakekrevSmåbeløp = when (aktsomhetDto.unnlates4Rettsgebyr) {
-                    SkalUnnlates.JA -> false
-                    SkalUnnlates.NEI, SkalUnnlates.OVER_4_RETTSGEBYR -> true
+                    SkalUnnlates.UNNLATES -> false
+                    SkalUnnlates.TILBAKEKREVES, SkalUnnlates.OVER_4_RETTSGEBYR -> true
                     null -> aktsomhetDto.tilbakekrevSmåbeløp
                 },
             )

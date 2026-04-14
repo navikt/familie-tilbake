@@ -369,7 +369,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
                             særligeGrunner = emptyList(),
                             særligeGrunnerTilReduksjon = false,
                             tilbakekrevSmåbeløp = false,
-                            unnlates4Rettsgebyr = SkalUnnlates.JA,
+                            unnlates4Rettsgebyr = SkalUnnlates.UNNLATES,
                             særligeGrunnerBegrunnelse = "",
                         ),
                     ),

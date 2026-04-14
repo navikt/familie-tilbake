@@ -194,7 +194,7 @@ data class VurdertTotrinnDto(
 )
 
 enum class SkalUnnlates {
-    JA,
-    NEI,
+    UNNLATES,
+    TILBAKEKREVES,
     OVER_4_RETTSGEBYR,
 }

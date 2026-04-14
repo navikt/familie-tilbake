@@ -179,7 +179,7 @@ class VilkårsvurderingService(
                         AktsomhetDto(
                             aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
                             tilbakekrevSmåbeløp = false,
-                            unnlates4Rettsgebyr = SkalUnnlates.JA,
+                            unnlates4Rettsgebyr = SkalUnnlates.UNNLATES,
                             begrunnelse = hentAutomatiskVilkårsvurderingAktsomhetBegrunnelse(behandling.saksbehandlingstype, logContext),
                         ),
                 )

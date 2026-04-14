@@ -50,8 +50,8 @@ object VilkårsvurderingMapperV2 {
                     NivåAvForståelse.Aktsomhet.Uaktsomhet(
                         begrunnelse = aktsomhet.begrunnelse,
                         kanUnnlates4XRettsgebyr = when (aktsomhet.unnlates4Rettsgebyr) {
-                            SkalUnnlates.JA -> KanUnnlates4xRettsgebyr.Unnlates
-                            SkalUnnlates.NEI -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(særligeGrunner())
+                            SkalUnnlates.UNNLATES -> KanUnnlates4xRettsgebyr.Unnlates
+                            SkalUnnlates.TILBAKEKREVES -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(særligeGrunner())
                             SkalUnnlates.OVER_4_RETTSGEBYR -> KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(særligeGrunner())
                             null -> when (aktsomhet.tilbakekrevSmåbeløp) {
                                 true -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(særligeGrunner())

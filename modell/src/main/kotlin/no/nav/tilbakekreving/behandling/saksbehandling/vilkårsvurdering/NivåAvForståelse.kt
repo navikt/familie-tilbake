@@ -234,7 +234,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     særligeGrunner = null,
                     særligeGrunnerTilReduksjon = false,
                     tilbakekrevSmåbeløp = true,
-                    unnlates4Rettsgebyr = SkalUnnlates.NEI,
+                    unnlates4Rettsgebyr = SkalUnnlates.TILBAKEKREVES,
                     særligeGrunnerBegrunnelse = null,
                 )
             }
@@ -283,7 +283,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     særligeGrunner = reduksjonSærligeGrunner.vurderteGrunner(),
                     særligeGrunnerTilReduksjon = reduksjonSærligeGrunner.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja,
                     tilbakekrevSmåbeløp = true,
-                    unnlates4Rettsgebyr = SkalUnnlates.NEI,
+                    unnlates4Rettsgebyr = SkalUnnlates.TILBAKEKREVES,
                     særligeGrunnerBegrunnelse = reduksjonSærligeGrunner.begrunnelse,
                 )
             }

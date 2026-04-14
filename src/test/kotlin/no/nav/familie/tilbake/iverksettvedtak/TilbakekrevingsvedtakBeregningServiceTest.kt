@@ -753,7 +753,7 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
             VilkårsvurderingsperiodeDto(
                 periode = it.toDatoperiode(),
                 begrunnelse = "testverdi",
-                aktsomhetDto = AktsomhetDto(aktsomhet = Aktsomhet.FORSETT, unnlates4Rettsgebyr = SkalUnnlates.NEI, begrunnelse = "testverdi"),
+                aktsomhetDto = AktsomhetDto(aktsomhet = Aktsomhet.FORSETT, unnlates4Rettsgebyr = SkalUnnlates.TILBAKEKREVES, begrunnelse = "testverdi"),
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
             )
         }
@@ -952,7 +952,7 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                 begrunnelse = "testverdi",
                 særligeGrunnerTilReduksjon = true,
                 tilbakekrevSmåbeløp = true,
-                unnlates4Rettsgebyr = SkalUnnlates.NEI,
+                unnlates4Rettsgebyr = SkalUnnlates.TILBAKEKREVES,
                 særligeGrunnerBegrunnelse = "testverdi",
                 særligeGrunner = særligGrunner,
             ),
@@ -973,7 +973,7 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                 begrunnelse = "testverdi",
                 særligeGrunnerTilReduksjon = false,
                 tilbakekrevSmåbeløp = true,
-                unnlates4Rettsgebyr = SkalUnnlates.NEI,
+                unnlates4Rettsgebyr = SkalUnnlates.TILBAKEKREVES,
                 særligeGrunnerBegrunnelse = "testverdi",
                 særligeGrunner = særligGrunner,
             ),
@@ -1276,7 +1276,7 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
             begrunnelse = "testverdi",
             aktsomhetDto = AktsomhetDto(
                 aktsomhet = Aktsomhet.FORSETT,
-                unnlates4Rettsgebyr = SkalUnnlates.NEI,
+                unnlates4Rettsgebyr = SkalUnnlates.TILBAKEKREVES,
                 begrunnelse = "fortsett begrunnelse",
             ),
             vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
@@ -1469,7 +1469,7 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                 aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
                 begrunnelse = "simpel uaktsomhet begrunnelse",
                 tilbakekrevSmåbeløp = true,
-                unnlates4Rettsgebyr = SkalUnnlates.NEI,
+                unnlates4Rettsgebyr = SkalUnnlates.TILBAKEKREVES,
                 særligeGrunnerBegrunnelse = "test",
                 særligeGrunnerTilReduksjon = true,
                 særligeGrunner = listOf(
@@ -1559,7 +1559,7 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                 aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
                 begrunnelse = "simpel uaktsomhet begrunnelse",
                 tilbakekrevSmåbeløp = true,
-                unnlates4Rettsgebyr = SkalUnnlates.NEI,
+                unnlates4Rettsgebyr = SkalUnnlates.TILBAKEKREVES,
                 særligeGrunnerBegrunnelse = "test",
                 særligeGrunnerTilReduksjon = false,
                 særligeGrunner = listOf(SærligGrunnDto(GRAD_AV_UAKTSOMHET), SærligGrunnDto(HELT_ELLER_DELVIS_NAVS_FEIL)),
@@ -1578,7 +1578,7 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                 aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
                 begrunnelse = "simpel uaktsomhet begrunnelse",
                 tilbakekrevSmåbeløp = true,
-                unnlates4Rettsgebyr = SkalUnnlates.NEI,
+                unnlates4Rettsgebyr = SkalUnnlates.TILBAKEKREVES,
                 særligeGrunnerBegrunnelse = "test",
                 særligeGrunnerTilReduksjon = true,
                 særligeGrunner = listOf(SærligGrunnDto(HELT_ELLER_DELVIS_NAVS_FEIL)),
@@ -1707,7 +1707,7 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                 aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
                 begrunnelse = "simpel uaktsomhet begrunnelse",
                 tilbakekrevSmåbeløp = true,
-                unnlates4Rettsgebyr = SkalUnnlates.NEI,
+                unnlates4Rettsgebyr = SkalUnnlates.TILBAKEKREVES,
                 særligeGrunnerBegrunnelse = "test",
                 særligeGrunnerTilReduksjon = true,
                 særligeGrunner = listOf(
@@ -1834,7 +1834,7 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                 aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
                 begrunnelse = "simpel uaktsomhet begrunnelse",
                 tilbakekrevSmåbeløp = true,
-                unnlates4Rettsgebyr = SkalUnnlates.NEI,
+                unnlates4Rettsgebyr = SkalUnnlates.TILBAKEKREVES,
                 særligeGrunnerBegrunnelse = "test",
                 særligeGrunnerTilReduksjon = true,
                 særligeGrunner = listOf(SærligGrunnDto(HELT_ELLER_DELVIS_NAVS_FEIL)),
@@ -1913,7 +1913,7 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                     begrunnelse = "testverdi",
                     særligeGrunnerTilReduksjon = særligeGrunnerTilReduksjon,
                     tilbakekrevSmåbeløp = true,
-                    unnlates4Rettsgebyr = SkalUnnlates.NEI,
+                    unnlates4Rettsgebyr = SkalUnnlates.TILBAKEKREVES,
                     særligeGrunnerBegrunnelse = "testverdi",
                     særligeGrunner = listOf(
                         SærligGrunnDto(

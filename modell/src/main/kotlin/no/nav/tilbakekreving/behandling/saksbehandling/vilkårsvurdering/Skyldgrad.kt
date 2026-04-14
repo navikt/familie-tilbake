@@ -142,7 +142,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                     særligeGrunner = reduksjonSærligeGrunner.vurderteGrunner(),
                     særligeGrunnerTilReduksjon = reduksjonSærligeGrunner.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja,
                     tilbakekrevSmåbeløp = true,
-                    unnlates4Rettsgebyr = SkalUnnlates.NEI,
+                    unnlates4Rettsgebyr = SkalUnnlates.TILBAKEKREVES,
                     særligeGrunnerBegrunnelse = reduksjonSærligeGrunner.begrunnelse,
                 ),
             )
@@ -204,7 +204,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                     særligeGrunner = null,
                     særligeGrunnerTilReduksjon = false,
                     tilbakekrevSmåbeløp = true,
-                    unnlates4Rettsgebyr = SkalUnnlates.NEI,
+                    unnlates4Rettsgebyr = SkalUnnlates.TILBAKEKREVES,
                     særligeGrunnerBegrunnelse = null,
                 ),
             )

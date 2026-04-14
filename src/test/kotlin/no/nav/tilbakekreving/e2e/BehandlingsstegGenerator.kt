@@ -83,7 +83,7 @@ object BehandlingsstegGenerator {
                     særligeGrunner = emptyList(),
                     særligeGrunnerTilReduksjon = false,
                     tilbakekrevSmåbeløp = true,
-                    unnlates4Rettsgebyr = SkalUnnlates.NEI,
+                    unnlates4Rettsgebyr = SkalUnnlates.TILBAKEKREVES,
                     særligeGrunnerBegrunnelse = "Særlige grunner",
                 ),
             )
@@ -104,7 +104,7 @@ object BehandlingsstegGenerator {
                     aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
                     begrunnelse = "Jaha",
                     tilbakekrevSmåbeløp = false,
-                    unnlates4Rettsgebyr = SkalUnnlates.JA,
+                    unnlates4Rettsgebyr = SkalUnnlates.UNNLATES,
                 ),
             )
         },
@@ -129,7 +129,7 @@ object BehandlingsstegGenerator {
                     særligeGrunner = emptyList(),
                     særligeGrunnerTilReduksjon = false,
                     tilbakekrevSmåbeløp = true,
-                    unnlates4Rettsgebyr = SkalUnnlates.NEI,
+                    unnlates4Rettsgebyr = SkalUnnlates.TILBAKEKREVES,
                     særligeGrunnerBegrunnelse = "Særlige grunner",
                 ),
             )
@@ -155,7 +155,7 @@ object BehandlingsstegGenerator {
                     særligeGrunner = emptyList(),
                     særligeGrunnerTilReduksjon = true,
                     tilbakekrevSmåbeløp = true,
-                    unnlates4Rettsgebyr = SkalUnnlates.NEI,
+                    unnlates4Rettsgebyr = SkalUnnlates.TILBAKEKREVES,
                     særligeGrunnerBegrunnelse = "Særlige grunner",
                 ),
             )

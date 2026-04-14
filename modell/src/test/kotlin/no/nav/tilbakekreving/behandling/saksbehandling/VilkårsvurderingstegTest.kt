@@ -163,7 +163,7 @@ class VilkårsvurderingstegTest {
                     særligeGrunner = null,
                     særligeGrunnerTilReduksjon = false,
                     tilbakekrevSmåbeløp = false,
-                    unnlates4Rettsgebyr = SkalUnnlates.JA,
+                    unnlates4Rettsgebyr = SkalUnnlates.UNNLATES,
                     særligeGrunnerBegrunnelse = null,
                 ),
             ),

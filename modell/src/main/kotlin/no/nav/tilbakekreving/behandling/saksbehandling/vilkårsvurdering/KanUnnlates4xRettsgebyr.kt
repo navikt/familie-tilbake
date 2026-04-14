@@ -36,7 +36,7 @@ sealed interface KanUnnlates4xRettsgebyr {
 
         override fun skalTilbakekreves(): Boolean = false
 
-        override fun tilFrontendDTO(): SkalUnnlates = SkalUnnlates.JA
+        override fun tilFrontendDTO(): SkalUnnlates = SkalUnnlates.UNNLATES
     }
 
     class SkalIkkeUnnlates(
@@ -56,7 +56,7 @@ sealed interface KanUnnlates4xRettsgebyr {
 
         override fun skalTilbakekreves(): Boolean = true
 
-        override fun tilFrontendDTO(): SkalUnnlates = SkalUnnlates.NEI
+        override fun tilFrontendDTO(): SkalUnnlates = SkalUnnlates.TILBAKEKREVES
     }
 
     class ErOver4xRettsgebyr(
