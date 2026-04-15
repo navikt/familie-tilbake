@@ -1,7 +1,6 @@
 package no.nav.tilbakekreving.e2e
 
 import io.kotest.assertions.fail
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.SærligeGrunner
@@ -19,11 +18,9 @@ import no.nav.tilbakekreving.api.v2.PeriodeDto
 import no.nav.tilbakekreving.api.v2.fagsystem.BehandlingEndretHendelse
 import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
 import no.nav.tilbakekreving.api.v2.fagsystem.svar.FagsysteminfoSvarHendelse
-import no.nav.tilbakekreving.builders.VilkårsvurderingDtoBuilder.forårsaketAvNav
 import no.nav.tilbakekreving.e2e.ytelser.TilleggsstønaderE2ETest.Companion.TILLEGGSSTØNADER_KØ_NAVN
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
-import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub
 import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub.Companion.finnKafkamelding
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
@@ -697,63 +694,5 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
 
     private fun List<BehandlingsstegsinfoDto>.skalHaSteg(behandlingssteg: Behandlingssteg): BehandlingsstegsinfoDto {
         return this.singleOrNull { it.behandlingssteg == behandlingssteg } ?: fail("Fant ikke $behandlingssteg i ${this.map(BehandlingsstegsinfoDto::behandlingssteg)}")
-    }
-
-    @Test
-    fun `godkjenning av sak utenfor TilGodkjenning`() {
-        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
-            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
-                fagsystemId = fagsystemId,
-            ),
-        )
-        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
-
-        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
-        lagreUttalelse(behandlingId)
-
-        somSaksbehandler(ansvarligSaksbehandler) {
-            behandlingApiController.behandlingOppdaterFakta(
-                behandlingId = behandlingId.toString(),
-                oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
-            )
-        }
-
-        utførSteg(
-            ident = ansvarligSaksbehandler,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(),
-        )
-
-        utførSteg(
-            ident = ansvarligSaksbehandler,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegVilkårsvurderingDto(
-                vilkårsvurderingsperioder = listOf(forårsaketAvNav().burdeForstått().copy(periode = 1.januar(2021) til 1.januar(2021))),
-            ),
-        )
-
-        utførSteg(
-            ident = ansvarligSaksbehandler,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagForeslåVedtakVurdering(),
-        )
-
-        utførSteg(
-            ident = ansvarligBeslutter,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagGodkjennVedtakVurdering(),
-        )
-
-        val exception = shouldThrow<ModellFeil.UgyldigOperasjonException> {
-            utførSteg(
-                ident = ansvarligBeslutter,
-                behandlingId = behandlingId,
-                stegData = BehandlingsstegGenerator.lagGodkjennVedtakVurdering(),
-            )
-        }
-
-        exception.melding shouldBe "Forventet ikke totrinn vurdering i AVSLUTTET"
     }
 }

@@ -16,10 +16,13 @@ import no.nav.tilbakekreving.eksternFagsak
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.fagsysteminfoHendelse
 import no.nav.tilbakekreving.faktastegVurdering
+import no.nav.tilbakekreving.fatteVedtakVurdering
 import no.nav.tilbakekreving.feil.ModellFeil
+import no.nav.tilbakekreving.foreldelseVurdering
 import no.nav.tilbakekreving.godkjenning
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
+import no.nav.tilbakekreving.iverksettelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
@@ -203,6 +206,31 @@ class TilBehandlingTest {
         tilbakekrevingDtoEtter.behandlingsstegsinfo.skalHaSteg(Behandlingssteg.FAKTA).behandlingsstegstatus shouldBe Behandlingsstegstatus.TILBAKEFØRT
         tilbakekrevingDtoEtter.behandlingsstegsinfo.skalHaSteg(Behandlingssteg.FORESLÅ_VEDTAK).behandlingsstegstatus shouldBe Behandlingsstegstatus.VENTER
         tilbakekrevingDtoEtter.behandlingsstegsinfo.skalHaSteg(Behandlingssteg.FATTE_VEDTAK).behandlingsstegstatus shouldBe Behandlingsstegstatus.VENTER
+    }
+
+    @Test
+    fun `kan ikke behandles utenfor TilBehandling`() {
+        val oppsamler = BehovObservatørOppsamler()
+        val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
+        val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingHendelse, ANSVARLIG_SAKSBEHANDLER)
+        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, faktastegVurdering())
+        tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(
+            uttalelseVurdering = UttalelseVurdering.UNNTAK_ALLEREDE_UTTALT_SEG,
+            uttalelseInfo = emptyList(),
+            kommentar = "Trenger ikke forhåndsvarsel i test lol",
+        )
+        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
+        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar(2021) til 31.januar(2021), forårsaketAvNav().burdeForstått())
+        tilbakekreving.håndterForeslåVedtak(ANSVARLIG_SAKSBEHANDLER)
+        tilbakekreving.håndter(ANSVARLIG_BESLUTTER, fatteVedtakVurdering())
+        tilbakekreving.håndter(iverksettelse())
+
+        tilbakekreving.frontendDtoForBehandling(Behandler.Saksbehandler("Z222222"), true).kanEndres shouldBe false
+
+        val exception = shouldThrow<ModellFeil.UgyldigOperasjonException> {
+            tilbakekreving.håndter(ANSVARLIG_BESLUTTER, fatteVedtakVurdering())
+        }
+        exception.melding shouldBe "Forventet ikke totrinn vurdering i AVSLUTTET"
     }
 
     private fun tilbakekrevingTilGodkjenning(

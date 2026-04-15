@@ -19,6 +19,7 @@ import java.time.Duration
 object TilBehandling : Tilstand {
     override val tidTilPåminnelse: Duration? = Duration.ofDays(1)
     override val tilbakekrevingTilstand: TilbakekrevingTilstand = TilbakekrevingTilstand.TIL_BEHANDLING
+    override val kanEndresAvSaksbehandler: Boolean = true
 
     override fun behandlingsstatus(behandling: Behandling): Behandlingsstatus {
         return behandling.steg().firstOrNull { !it.erKlar() }

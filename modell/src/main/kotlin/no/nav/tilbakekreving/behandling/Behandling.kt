@@ -356,7 +356,7 @@ class Behandling internal constructor(
             kanHenleggeBehandling = false,
             kanRevurderingOpprettes = true,
             harVerge = false,
-            kanEndres = kanEndres(behandler, kanBeslutte),
+            kanEndres = tilstand.kanEndresAvSaksbehandler && kanEndres(behandler, kanBeslutte),
             kanSetteTilbakeTilFakta = true,
             varselSendt = false,
             behandlingsstegsinfo = listOf(

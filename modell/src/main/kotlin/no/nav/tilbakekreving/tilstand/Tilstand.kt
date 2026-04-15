@@ -25,6 +25,7 @@ import java.time.Duration
 internal sealed interface Tilstand {
     val tidTilPåminnelse: Duration?
     val tilbakekrevingTilstand: TilbakekrevingTilstand
+    val kanEndresAvSaksbehandler: Boolean get() = false
 
     fun behandlingsstatus(behandling: Behandling): Behandlingsstatus = Behandlingsstatus.OPPRETTET
 
