@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.tilstand
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
 import no.nav.tilbakekreving.behandling.Behandling
+import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.feil.Sporing
@@ -10,6 +11,7 @@ import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import java.time.Duration
@@ -41,6 +43,16 @@ object TilBehandling : Tilstand {
 
     override fun håndter(tilbakekreving: Tilbakekreving, fagsysteminfo: FagsysteminfoHendelse) {
         tilbakekreving.oppdaterFagsysteminfo(fagsysteminfo)
+    }
+
+    override fun håndter(tilbakekreving: Tilbakekreving, behandling: Behandling, beslutter: Behandler, vurderinger: List<Pair<Behandlingssteg, FatteVedtakSteg.Vurdering>>) {
+        behandling.håndter(beslutter, vurderinger, tilbakekreving, tilbakekreving.behandlingslogg)
+        if (behandling.kanUtbetales()) {
+            tilbakekreving.byttTilstand(IverksettVedtak)
+        }
+        if (behandling.underkjentVedtak()) {
+            tilbakekreving.sendStatusendring(ForenkletBehandlingsstatus.TIL_GODKJENNING, ForenkletBehandlingsstatus.TIL_BEHANDLING)
+        }
     }
 
     override fun håndterTrekkTilbakeFraGodkjenning(behandling: Behandling, sporing: Sporing, behandlingslogg: Behandlingslogg, behandler: Behandler) {

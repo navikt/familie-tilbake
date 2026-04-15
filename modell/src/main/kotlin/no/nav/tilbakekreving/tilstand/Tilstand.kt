@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.tilstand
 
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.Behandling
+import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
@@ -16,6 +17,7 @@ import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import java.time.Duration
@@ -74,6 +76,15 @@ internal sealed interface Tilstand {
         tilbakekreving: Tilbakekreving,
         påminnelse: Påminnelse,
     )
+
+    fun håndter(
+        tilbakekreving: Tilbakekreving,
+        behandling: Behandling,
+        beslutter: Behandler,
+        vurderinger: List<Pair<Behandlingssteg, FatteVedtakSteg.Vurdering>>,
+    ) {
+        throw ModellFeil.UgyldigOperasjonException("Forventet ikke totrinn vurdering i $tilbakekrevingTilstand", behandling.sporingsinformasjon())
+    }
 
     fun håndter(
         tilbakekreving: Tilbakekreving,

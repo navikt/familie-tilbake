@@ -61,7 +61,6 @@ import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.tilstand.AvventerBrukerinfo
-import no.nav.tilbakekreving.tilstand.IverksettVedtak
 import no.nav.tilbakekreving.tilstand.SendVarselbrev
 import no.nav.tilbakekreving.tilstand.Start
 import no.nav.tilbakekreving.tilstand.Tilstand
@@ -402,13 +401,7 @@ class Tilbakekreving internal constructor(
         vurderinger: List<Pair<Behandlingssteg, FatteVedtakSteg.Vurdering>>,
     ) {
         val behandling = behandlingHistorikk.nåværende().entry
-        behandling.håndter(beslutter, vurderinger, this, behandlingslogg)
-        if (behandling.kanUtbetales()) {
-            byttTilstand(IverksettVedtak)
-        }
-        if (behandling.underkjentVedtak()) {
-            sendStatusendring(ForenkletBehandlingsstatus.TIL_GODKJENNING, ForenkletBehandlingsstatus.TIL_BEHANDLING)
-        }
+        tilstand.håndter(this, behandling, beslutter, vurderinger)
         behandling.utførSideeffekt(tilstand, this, bigQueryService, eksternFagsak.ytelse.hentYtelsesnavn(Språkkode.NB))
     }
 
