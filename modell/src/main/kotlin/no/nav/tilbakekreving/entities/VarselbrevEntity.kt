@@ -15,9 +15,10 @@ data class VarselbrevEntity(
     val sendtTid: LocalDate? = null,
     val ansvarligSaksbehandlerIdent: String,
     val fristForUttalelse: LocalDate?,
-    val tekstFraSaksbehandler: String,
+    val tekstFraSaksbehandler: String?,
 ) {
-    fun fraEntity(id: UUID, kravgrunnlagHistorikk: KravgrunnlagHistorikk): Varselbrev {
+    fun fraEntity(id: UUID, kravgrunnlagHistorikk: KravgrunnlagHistorikk): Varselbrev? {
+        if (tekstFraSaksbehandler == null) return null
         val sendtTid = sendtTid ?: LocalDate.now()
         val sporing = Sporing("Ukjent", id.toString())
         return Varselbrev(
