@@ -8,7 +8,7 @@ import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 import java.util.UUID
 
 data class VurdertAktsomhetEntity(
-    val periodeRef: UUID? = null,
+    val periodeRef: UUID,
     val aktsomhetType: AktsomhetType,
     val begrunnelse: String,
     val skalIleggesRenter: Boolean?,
@@ -51,7 +51,7 @@ data class VurdertAktsomhetEntity(
 }
 
 data class SærligeGrunnerEntity(
-    val periodeRef: UUID? = null,
+    val periodeRef: UUID,
     val begrunnelse: String,
     val grunner: List<SærligGrunnEntity>,
     val skalReduseres: SkalReduseresEntity,

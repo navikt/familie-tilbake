@@ -8,17 +8,16 @@ import java.time.Period
 import java.util.UUID
 
 data class VarselbrevEntity(
-    val id: UUID = UUID.randomUUID(),
+    val id: UUID,
     val brevRef: UUID,
     val kravgrunnlagRef: HistorikkReferanseEntity<UUID>,
     val journalpostId: String?,
-    val sendtTid: LocalDate? = null,
+    val sendtTid: LocalDate,
     val ansvarligSaksbehandlerIdent: String,
     val fristForUttalelse: LocalDate?,
     val tekstFraSaksbehandler: String,
 ) {
     fun fraEntity(id: UUID, kravgrunnlagHistorikk: KravgrunnlagHistorikk): Varselbrev {
-        val sendtTid = sendtTid ?: LocalDate.now()
         val sporing = Sporing("Ukjent", id.toString())
         return Varselbrev(
             id = id,

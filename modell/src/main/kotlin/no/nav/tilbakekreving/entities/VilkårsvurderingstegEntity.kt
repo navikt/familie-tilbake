@@ -4,8 +4,8 @@ import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkår
 import java.util.UUID
 
 data class VilkårsvurderingstegEntity(
-    val id: UUID = UUID.randomUUID(),
-    val behandlingRef: UUID?,
+    val id: UUID,
+    val behandlingRef: UUID,
     val vurderinger: List<VilkårsvurderingsperiodeEntity>,
     val trengerNyVurdering: Boolean,
 ) {

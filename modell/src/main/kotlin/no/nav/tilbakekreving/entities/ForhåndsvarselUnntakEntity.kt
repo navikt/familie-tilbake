@@ -5,7 +5,7 @@ import no.nav.tilbakekreving.behandling.ForhåndsvarselUnntak
 import java.util.UUID
 
 data class ForhåndsvarselUnntakEntity(
-    val id: UUID = UUID.randomUUID(),
+    val id: UUID,
     val behandlingRef: UUID,
     val begrunnelseForUnntak: BegrunnelseForUnntak,
     val beskrivelse: String,

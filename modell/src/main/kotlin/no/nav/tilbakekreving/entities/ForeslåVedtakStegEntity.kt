@@ -4,9 +4,9 @@ import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
 import java.util.UUID
 
 data class ForeslåVedtakStegEntity(
-    val id: UUID = UUID.randomUUID(),
-    val behandlingRef: UUID? = null,
-    val vurdert: Boolean = false,
+    val id: UUID,
+    val behandlingRef: UUID,
+    val vurdert: Boolean,
     val trengerNyVurdering: Boolean,
 ) {
     fun fraEntity(): ForeslåVedtakSteg {

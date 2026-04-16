@@ -75,8 +75,8 @@ data class AktsomhetsvurderingEntity(
 }
 
 data class GodTroEntity(
-    val periodeRef: UUID?,
-    val begrunnelse: String = "",
+    val periodeRef: UUID,
+    val begrunnelse: String,
     val beholdType: BeholdType,
     val beløp: BigDecimal?,
 ) {

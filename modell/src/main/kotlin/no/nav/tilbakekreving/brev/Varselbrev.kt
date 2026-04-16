@@ -61,6 +61,7 @@ data class Varselbrev(
             tilbakekrevingRef = tilbakekrevingId,
             brevtype = Brevtype.VARSELBREV,
             varselbrevEntity = VarselbrevEntity(
+                id = id,
                 brevRef = id,
                 kravgrunnlagRef = kravgrunnlag.tilEntity(),
                 journalpostId = journalpostId,

@@ -6,8 +6,8 @@ import java.time.LocalDate
 import java.util.UUID
 
 data class PåVentEntity(
-    val id: UUID = UUID.randomUUID(),
-    val behandlingRef: UUID? = null,
+    val id: UUID,
+    val behandlingRef: UUID,
     val årsak: Venteårsak,
     val utløpsdato: LocalDate,
     val begrunnelse: String?,

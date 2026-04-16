@@ -7,8 +7,8 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import java.util.UUID
 
 data class FatteVedtakStegEntity(
-    val id: UUID = UUID.randomUUID(),
-    val behandlingRef: UUID? = null,
+    val id: UUID,
+    val behandlingRef: UUID,
     val vurderteStegEntities: List<VurdertStegEntity>,
     val ansvarligBeslutter: BehandlerEntity?,
 ) {
@@ -22,8 +22,8 @@ data class FatteVedtakStegEntity(
 }
 
 data class VurdertStegEntity(
-    val id: UUID = UUID.randomUUID(),
-    val totrinnsvurderingRef: UUID? = null,
+    val id: UUID,
+    val totrinnsvurderingRef: UUID,
     val steg: Behandlingssteg,
     val vurdering: VurdertStegType,
     val begrunnelse: String?,

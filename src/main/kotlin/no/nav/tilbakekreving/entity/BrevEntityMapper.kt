@@ -59,7 +59,7 @@ object BrevEntityMapper : Entity<BrevEntity, UUID, UUID>(
         val sendtTid = field(
             "sendt_tid",
             VarselbrevEntity::sendtTid,
-            FieldConverter.LocalDateConverter,
+            FieldConverter.LocalDateConverter.required(),
         )
 
         val fristForUttalelse = field(
