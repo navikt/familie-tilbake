@@ -12,7 +12,7 @@ enum class Bunntekst(
 ) {
     RENTER(
         tittel = "Renter",
-        avsnitt = arrayOf("Hvis du forårsaker en feilutbetaling grovt uaktsomt eller forsettlig, skal du betale et rentetillegg på 10 prosent av beløpet du skal betale tilbake. Dette står i folketrygdloven § 22‑17a. Vi har vurdert at dette er tilfelle i din sak, og at du derfor må betale et rentetillegg på 10 prosent."),
+        avsnitt = arrayOf("Hvis du forårsaker en feilutbetaling grovt uaktsomt eller forsettlig, skal du betale et rentetillegg på ti prosent av beløpet du skal betale tilbake. Dette står i folketrygdloven § 22‑17a. Vi har vurdert at dette er tilfelle i din sak, og at du derfor må betale et rentetillegg på ti prosent."),
     ),
     SKATT(
         tittel = "Skatt og skatteoppgjør",
