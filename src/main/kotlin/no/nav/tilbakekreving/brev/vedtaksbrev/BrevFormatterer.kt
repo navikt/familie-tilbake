@@ -7,6 +7,8 @@ import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler.Companion.forBegrunnelse
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler.Companion.forPeriodeavsnitt
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
+import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving
+import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving.Companion.formatter
 import no.nav.tilbakekreving.kontrakter.frontend.models.AvsnittDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatVurderingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PakrevdBegrunnelseDto
@@ -42,6 +44,10 @@ object BrevFormatterer {
     fun lagHovedavsnittTittel(info: VedtaksbrevInfo) = when {
         info.skalTilbakekreves -> "Du må betale tilbake ${info.ytelse.ubestemtEntall}"
         else -> "Du må ikke betale tilbake ${info.ytelse.ubestemtEntall}"
+    }
+
+    fun lagHjemmelAvsnitt(hjemlerForTilbakekreving: List<HjemmelForTilbakekreving>): String {
+        return "Vedtaket er gjort etter ${hjemlerForTilbakekreving.formatter()}"
     }
 
     fun norskDato(date: LocalDate): String = dateFormatter.format(date)

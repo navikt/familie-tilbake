@@ -45,6 +45,7 @@ import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
 import no.nav.tilbakekreving.breeeev.Signatur
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.breeeev.standardtekster.Bunntekst
+import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
@@ -788,6 +789,10 @@ class Behandling internal constructor(
             skalTilbakekreves = resultat.vedtaksresultat != Vedtaksresultat.INGEN_TILBAKEBETALING,
             tilbakekrevingId = tilbakekrevingId,
             beregningsresultat = resultat.tilFrontendDto().beregningsresultatsperioder,
+            hjemlerForTilbakekreving = listOf(HjemmelForTilbakekreving.FOLKETRYGDLOVEN_22_15) +
+                ytelse.hjemlerForTilbakekreving() +
+                foreldelsesteg.hjemlerForTilbakekreving() +
+                vilkårsvurderingsteg.hjemlerForTilbakekreving(),
         )
     }
 

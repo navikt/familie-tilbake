@@ -235,6 +235,7 @@ class VedtaksbrevE2ETest : TilbakekrevingE2EBase() {
                             tittel = "Du må betale tilbake tilleggsstønad",
                             forklaring = Forklaringstekster.HOVEDAVSNITT,
                             underavsnitt = listOf(RentekstElementDto(tekst = "")),
+                            hjemler = "Vedtaket er gjort etter folketrygdloven § 22-15",
                         ),
                         periodeAvsnitt = listOf(
                             AvsnittDto(

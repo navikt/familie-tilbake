@@ -4,6 +4,7 @@ import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
 import no.nav.tilbakekreving.breeeev.Signatur
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
+import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatVurderingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatsperiodeDto
@@ -52,4 +53,5 @@ fun vedtaksbrevInfo(
             tilbakekrevesBeløpEtterSkatt = 4000,
         ),
     ),
+    hjemlerForTilbakekreving = listOf(HjemmelForTilbakekreving.FOLKETRYGDLOVEN_22_15),
 )

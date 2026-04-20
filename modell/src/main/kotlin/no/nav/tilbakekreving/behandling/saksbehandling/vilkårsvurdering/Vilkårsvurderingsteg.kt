@@ -10,6 +10,7 @@ import no.nav.tilbakekreving.beregning.adapter.VilkårsvurderingAdapter
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurdertPeriodeAdapter
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
+import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.VilkårsvurderingsperiodeEntity
@@ -86,6 +87,12 @@ class Vilkårsvurderingsteg(
     fun harLikePerioder() = false
 
     fun oppsummer(periode: Datoperiode) = finnPeriode(periode).vurdering.oppsummerVurdering()
+
+    fun hjemlerForTilbakekreving(): List<HjemmelForTilbakekreving> = if (vurderinger.any { it.renter() }) {
+        listOf(HjemmelForTilbakekreving.FOLKETRYGDLOVEN_22_17A)
+    } else {
+        emptyList()
+    }
 
     override fun perioder(): Set<VilkårsvurdertPeriodeAdapter> {
         return vurderinger.toSet()

@@ -48,6 +48,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
                 tittel = "Du må betale tilbake arbeidsavklaringspenger",
                 forklaring = Forklaringstekster.HOVEDAVSNITT,
                 underavsnitt = listOf(RentekstElementDto("")),
+                hjemler = "Vedtaket er gjort etter folketrygdloven § 22-15",
             )
             it.ytelse shouldBe Ytelse.Arbeidsavklaringspenger.brevmeta()
             it.signatur shouldBe expectedSignatur
@@ -104,6 +105,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
                 underavsnitt = listOf(
                     RentekstElementDto("Vi oppdaget at du stjal penger"),
                 ),
+                hjemler = "Vedtaket er gjort etter folketrygdloven § 22-15",
             )
             it.ytelse shouldBe Ytelse.Arbeidsavklaringspenger.brevmeta()
             it.signatur shouldBe expectedSignatur

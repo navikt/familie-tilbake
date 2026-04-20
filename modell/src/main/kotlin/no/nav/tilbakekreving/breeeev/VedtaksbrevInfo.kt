@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.breeeev
 
 import no.nav.tilbakekreving.breeeev.standardtekster.Bunntekst
+import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatsperiodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.BrevmottakerDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.YtelseDto
@@ -14,4 +15,5 @@ data class VedtaksbrevInfo(
     val bunntekster: Set<Bunntekst>,
     val tilbakekrevingId: String,
     val beregningsresultat: List<BeregningsresultatsperiodeDto>,
+    val hjemlerForTilbakekreving: List<HjemmelForTilbakekreving>,
 )

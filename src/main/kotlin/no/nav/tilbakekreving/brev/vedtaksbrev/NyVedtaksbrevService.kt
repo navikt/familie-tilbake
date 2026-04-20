@@ -71,6 +71,7 @@ class NyVedtaksbrevService(
                 tittel = BrevFormatterer.lagHovedavsnittTittel(vedtaksbrevInfo),
                 forklaring = Forklaringstekster.HOVEDAVSNITT,
                 underavsnitt = listOf(RentekstElementDto("")),
+                hjemler = BrevFormatterer.lagHjemmelAvsnitt(vedtaksbrevInfo.hjemlerForTilbakekreving),
             ),
             avsnitt = vedtaksbrevInfo.perioder.map(BrevFormatterer::lagAvsnitt),
             sistOppdatert = OffsetDateTime.now(),
@@ -151,6 +152,7 @@ class NyVedtaksbrevService(
             underavsnitt = data.underavsnitt.map {
                 mapUnderavsnitt(it)
             },
+            hjemler = BrevFormatterer.lagHjemmelAvsnitt(info.hjemlerForTilbakekreving),
         )
     }
 

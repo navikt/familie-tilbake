@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelsesperiodeDto
+import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.ForeldelseperiodeEntity
@@ -56,6 +57,8 @@ class Foreldelsesteg(
     fun erPeriodeForeldet(periode: Datoperiode): Boolean {
         return vurdertePerioder.single { it.periode.inneholder(periode) }.vurdering !is Vurdering.IkkeForeldet
     }
+
+    fun hjemlerForTilbakekreving() = vurdertePerioder.flatMap { it.vurdering.hjemlerForTilbakekreving() }.distinct()
 
     private fun finnIdFor(periode: Datoperiode): UUID {
         // TODO: Ordentlig feilhåndtering i stedet for NoSuchElementException ved ugyldig periode
@@ -134,6 +137,8 @@ class Foreldelsesteg(
 
         fun tilEntity(): ForeldelsesvurderingEntity
 
+        fun hjemlerForTilbakekreving(): List<HjemmelForTilbakekreving>
+
         class IkkeForeldet(override val begrunnelse: String) : Vurdering {
             override fun tilEntity(): ForeldelsesvurderingEntity {
                 return ForeldelsesvurderingEntity(
@@ -143,6 +148,8 @@ class Foreldelsesteg(
                     oppdaget = null,
                 )
             }
+
+            override fun hjemlerForTilbakekreving(): List<HjemmelForTilbakekreving> = emptyList()
         }
 
         object IkkeVurdert : Vurdering {
@@ -154,6 +161,8 @@ class Foreldelsesteg(
                     oppdaget = null,
                 )
             }
+
+            override fun hjemlerForTilbakekreving(): List<HjemmelForTilbakekreving> = emptyList()
         }
 
         class Tilleggsfrist(override val frist: LocalDate, val oppdaget: LocalDate) : Vurdering {
@@ -165,6 +174,12 @@ class Foreldelsesteg(
                     begrunnelse = null,
                 )
             }
+
+            override fun hjemlerForTilbakekreving(): List<HjemmelForTilbakekreving> = listOf(
+                HjemmelForTilbakekreving.FORELDELSESLOVEN_2,
+                HjemmelForTilbakekreving.FORELDELSESLOVEN_3,
+                HjemmelForTilbakekreving.FORELDELSESLOVEN_10,
+            )
         }
 
         class Foreldet(override val begrunnelse: String) : Vurdering {
@@ -176,6 +191,11 @@ class Foreldelsesteg(
                     oppdaget = null,
                 )
             }
+
+            override fun hjemlerForTilbakekreving(): List<HjemmelForTilbakekreving> = listOf(
+                HjemmelForTilbakekreving.FORELDELSESLOVEN_2,
+                HjemmelForTilbakekreving.FORELDELSESLOVEN_3,
+            )
         }
     }
 

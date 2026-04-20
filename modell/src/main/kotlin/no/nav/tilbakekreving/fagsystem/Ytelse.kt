@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.fagsystem
 
+import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving
 import no.nav.tilbakekreving.entities.YtelseEntity
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.YtelseDto
@@ -31,6 +32,8 @@ sealed interface Ytelse {
 
     fun brevmeta(): YtelseDto
 
+    fun hjemlerForTilbakekreving(): List<HjemmelForTilbakekreving> = emptyList()
+
     object Barnetrygd : Ytelse {
         override fun tilFagsystemDTO(): FagsystemDTO = FagsystemDTO.BA
 
@@ -54,6 +57,8 @@ sealed interface Ytelse {
         override val kafkaTopic: String = "tilbake.privat-tilbakekreving-barnetrygd"
 
         override val beregnerSkatt: Boolean = true
+
+        override fun hjemlerForTilbakekreving(): List<HjemmelForTilbakekreving> = listOf(HjemmelForTilbakekreving.BARNETRYGDLOVEN_13)
 
         override fun tilEntity(): YtelseEntity = YtelseEntity(Ytelsestype.BARNETRYGD)
 
@@ -159,6 +164,8 @@ sealed interface Ytelse {
         override val kafkaTopic: String = "tilbake.privat-tilbakekreving-tiltakspenger"
 
         override val beregnerSkatt: Boolean = false
+
+        override fun hjemlerForTilbakekreving(): List<HjemmelForTilbakekreving> = listOf(HjemmelForTilbakekreving.ARBEIDSMARKEDSLOVEN_22)
 
         override fun tilEntity(): YtelseEntity = YtelseEntity(Ytelsestype.TILTAKSPENGER)
 
