@@ -58,6 +58,7 @@ tilbakekreving:
   kravgrunnlag:
     - QA.P_TILLEGGSSTONADER.KRAVGRUNNLAG
     - QA.P_TILBAKEKREVING.KRAVGRUNNLAG
+    - QA.P_TILTAKSPENGER.KRAVGRUNNLAG
   toggles:
     tilgangsmaskinen-enabled: true
   tilgangsmaskinen:
