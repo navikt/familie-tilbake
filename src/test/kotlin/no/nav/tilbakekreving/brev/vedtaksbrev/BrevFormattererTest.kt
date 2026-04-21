@@ -20,4 +20,10 @@ class BrevFormattererTest {
             ),
         ) shouldBe "Vedtaket er gjort etter barnetrygdloven § 13 samt folketrygdloven § 22-15"
     }
+
+    @Test
+    fun `formattering av beløp`() {
+        BrevFormatterer.beløpString(6900) shouldBe "6 900"
+        BrevFormatterer.beløpString(69000) shouldBe "69 000"
+    }
 }

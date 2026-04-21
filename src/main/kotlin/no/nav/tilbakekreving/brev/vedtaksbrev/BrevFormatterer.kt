@@ -24,7 +24,7 @@ object BrevFormatterer {
     val dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)
         .withLocale(Locale.of("nb"))
     val norskNumeriskDatoFormatter = DateTimeFormatter.ofPattern("dd.MM.uuuu", Locale.of("nb"))
-    val beløpFormat = NumberFormat.getCurrencyInstance(Locale.of("nb"))
+    val beløpFormat = NumberFormat.getIntegerInstance(Locale.of("nb"))
 
     fun lagAvsnitt(periode: BegrunnetPeriode): AvsnittDto {
         return AvsnittDto(
