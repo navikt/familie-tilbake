@@ -48,6 +48,7 @@ import no.nav.tilbakekreving.breeeev.standardtekster.Bunntekst
 import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.brev.Varselbrev
+import no.nav.tilbakekreving.brev.VarselbrevInfo
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.endring.EndringObservatør
@@ -227,7 +228,7 @@ class Behandling internal constructor(
         eksternFagsak: EksternFagsak,
         brukerinfo: Brukerinfo,
         varselbrev: Varselbrev,
-        hjemlerForTilbakekreving: List<HjemmelForTilbakekreving>,
+        varselbrevInfo: VarselbrevInfo,
     ) {
         behovObservatør.håndter(
             VarselbrevJournalføringBehov(
@@ -235,15 +236,15 @@ class Behandling internal constructor(
                 brukerinfo = brukerinfo,
                 behandlingId = id,
                 varselbrev = varselbrev,
-                revurderingsvedtaksdato = eksternFagsakRevurdering.entry.vedtaksdato,
+                revurderingsvedtaksdato = varselbrevInfo.forhåndsvarselinfo.revurderingsvedtaksdato,
                 varseltekstFraSaksbehandler = varselbrev.tekstFraSaksbehandler,
-                eksternFagsakId = eksternFagsak.eksternId,
+                eksternFagsakId = varselbrevInfo.eksternFagsakId,
                 ytelse = eksternFagsak.ytelse,
-                behandlendeEnhet = enhet,
-                feilutbetaltBeløp = varselbrev.hentVarsletBeløp(),
-                feilutbetaltePerioder = kravgrunnlag.entry.datoperioder(eksternFagsakRevurdering.entry),
+                behandlendeEnhet = varselbrevInfo.forhåndsvarselinfo.behandlendeEnhet,
+                feilutbetaltBeløp = varselbrevInfo.forhåndsvarselinfo.beløp,
+                feilutbetaltePerioder = varselbrevInfo.forhåndsvarselinfo.feilutbetaltePerioder,
                 gjelderDødsfall = brukerinfo.dødsdato != null,
-                hjemlerForTilbakekreving = hjemlerForTilbakekreving,
+                hjemlerForTilbakekreving = varselbrevInfo.hjemlerForTilbakekreving,
             ),
         )
     }
