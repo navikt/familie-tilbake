@@ -227,6 +227,7 @@ class Behandling internal constructor(
         eksternFagsak: EksternFagsak,
         brukerinfo: Brukerinfo,
         varselbrev: Varselbrev,
+        hjemlerForTilbakekreving: List<HjemmelForTilbakekreving>,
     ) {
         behovObservatør.håndter(
             VarselbrevJournalføringBehov(
@@ -242,6 +243,7 @@ class Behandling internal constructor(
                 feilutbetaltBeløp = varselbrev.hentVarsletBeløp(),
                 feilutbetaltePerioder = kravgrunnlag.entry.datoperioder(eksternFagsakRevurdering.entry),
                 gjelderDødsfall = brukerinfo.dødsdato != null,
+                hjemlerForTilbakekreving = hjemlerForTilbakekreving,
             ),
         )
     }

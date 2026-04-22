@@ -17,6 +17,7 @@ data class Varselbrevsdokument(
     val varsletDato: LocalDate? = null,
     val varsletBeløp: Long? = null,
     val erKorrigert: Boolean = false,
+    val hjemlerForTilbakekreving: String,
 ) : BaseDokument(
         brevmetadata.ytelsestype,
         brevmetadata.språkkode,

@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.dokumentbestilling.varsel
 
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.Fagsystem
+import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Varsel
@@ -14,6 +15,8 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevUtil.Companion.TITTEL_VARSEL_TILBAKEBETALING
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving
+import no.nav.tilbakekreving.brev.vedtaksbrev.BrevFormatterer
 import no.nav.tilbakekreving.kontrakter.ForhåndsvisVarselbrevRequest
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmetadata
@@ -130,6 +133,7 @@ class VarselbrevService(
             fristdatoForTilbakemelding = Constants.brukersSvarfrist(),
             varseltekstFraSaksbehandler = varsel?.varseltekst,
             feilutbetaltePerioder = mapFeilutbetaltePerioder(varsel),
+            hjemlerForTilbakekreving = BrevFormatterer.lagForhåndsvarselHjemmelAvsnitt(hjemlerForTilbakekreving(fagsak.ytelsestype), metadata.språkkode),
         )
     }
 
@@ -196,4 +200,26 @@ class VarselbrevService(
                 it.tom,
             )
         } ?: emptyList()
+
+    companion object {
+        fun hjemlerForTilbakekreving(
+            ytelsestype: Ytelsestype,
+        ): List<HjemmelForTilbakekreving> {
+            return buildList {
+                addAll(
+                    HjemmelForTilbakekreving.standardForhåndsvarselHjemler(
+                        beregnerRenter = ytelsestype !in arrayOf(Ytelsestype.BARNETRYGD, Ytelsestype.KONTANTSTØTTE),
+                    ),
+                )
+                add(HjemmelForTilbakekreving.FOLKETRYGDLOVEN_22_17A)
+                addAll(
+                    when (ytelsestype) {
+                        Ytelsestype.BARNETRYGD -> listOf(HjemmelForTilbakekreving.BARNETRYGDLOVEN_13)
+                        Ytelsestype.KONTANTSTØTTE -> listOf(HjemmelForTilbakekreving.KONTANTSTØTTELOVEN_11)
+                        else -> emptyList()
+                    },
+                )
+            }
+        }
+    }
 }

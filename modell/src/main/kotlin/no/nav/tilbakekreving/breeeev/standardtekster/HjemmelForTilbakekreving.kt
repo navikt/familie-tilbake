@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.breeeev.standardtekster
 
+import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.tekst.slåSammen
 
 enum class HjemmelForTilbakekreving(
@@ -13,18 +14,26 @@ enum class HjemmelForTilbakekreving(
     FORELDELSESLOVEN_10("10", Lovverk.FORELDELSESLOVEN),
     ARBEIDSMARKEDSLOVEN_22("22", Lovverk.ARBEIDSMARKEDSLOVEN),
     BARNETRYGDLOVEN_13("13", Lovverk.BARNETRYGDLOVEN),
+    KONTANTSTØTTELOVEN_11("11", Lovverk.KONTANTSTØTTELOVEN),
     ;
 
     companion object {
-        fun Iterable<HjemmelForTilbakekreving>.formatter(): String {
+        fun Iterable<HjemmelForTilbakekreving>.formatter(språkkode: Språkkode): String {
             return groupBy { it.lovverk }
                 .toList()
                 .sortedBy { (lovverk, _) -> lovverk.rekkefølge }
                 .map { (lovverk, paragrafer) ->
                     val flereParagrafer = if (paragrafer.size > 1) "§§" else "§"
-                    "${lovverk.navn} $flereParagrafer ${paragrafer.map { it.paragraf }.slåSammen()}"
+                    "${lovverk.tekst(språkkode)} $flereParagrafer ${paragrafer.map { it.paragraf }.slåSammen()}"
                 }
-                .slåSammen(" samt ")
+                .slåSammen(" og ")
+        }
+
+        fun standardForhåndsvarselHjemler(beregnerRenter: Boolean) = buildList {
+            add(FOLKETRYGDLOVEN_22_15)
+            if (beregnerRenter) {
+                add(FOLKETRYGDLOVEN_22_17A)
+            }
         }
     }
 }

@@ -27,6 +27,7 @@ import no.nav.tilbakekreving.behandling.UttalelseInfo
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
 import no.nav.tilbakekreving.brev.VarselbrevInfo
+import no.nav.tilbakekreving.brev.vedtaksbrev.BrevFormatterer
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostResponse
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
@@ -182,6 +183,7 @@ class ForhåndsvarselService(
             feilutbetaltePerioder = varselbrevInfo.forhåndsvarselinfo.feilutbetaltePerioder,
             varsletBeløp = varselbrevInfo.forhåndsvarselinfo.beløp,
             varsletDato = LocalDate.now(),
+            hjemlerForTilbakekreving = BrevFormatterer.lagForhåndsvarselHjemmelAvsnitt(varselbrevInfo.hjemlerForTilbakekreving, Språkkode.NB),
         )
     }
 
@@ -241,6 +243,7 @@ class ForhåndsvarselService(
             fristdatoForTilbakemelding = fristForUttalelse,
             varseltekstFraSaksbehandler = varselbrevBehov.varseltekstFraSaksbehandler,
             feilutbetaltePerioder = varselbrevBehov.feilutbetaltePerioder,
+            hjemlerForTilbakekreving = BrevFormatterer.lagForhåndsvarselHjemmelAvsnitt(varselbrevBehov.hjemlerForTilbakekreving, Språkkode.NB),
         )
 
         return Brevdata(

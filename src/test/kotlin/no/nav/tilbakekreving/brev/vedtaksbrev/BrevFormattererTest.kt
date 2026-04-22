@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.brev.vedtaksbrev
 
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving
+import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import org.junit.jupiter.api.Test
 
 class BrevFormattererTest {
@@ -13,12 +14,13 @@ class BrevFormattererTest {
 
     @Test
     fun `avsnitt for hjemmel for tilbakekreving`() {
-        BrevFormatterer.lagHjemmelAvsnitt(
+        BrevFormatterer.lagVedtakHjemmelAvsnitt(
             listOf(
                 HjemmelForTilbakekreving.BARNETRYGDLOVEN_13,
                 HjemmelForTilbakekreving.FOLKETRYGDLOVEN_22_15,
             ),
-        ) shouldBe "Vedtaket er gjort etter barnetrygdloven § 13 samt folketrygdloven § 22-15"
+            Språkkode.NB,
+        ) shouldBe "Vedtaket er gjort etter barnetrygdloven § 13 og folketrygdloven § 22-15."
     }
 
     @Test

@@ -4,6 +4,7 @@ import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.api.v2.EksternFagsakDto
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
+import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving
 import no.nav.tilbakekreving.entities.EksternFagsakEntity
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
@@ -80,6 +81,11 @@ class EksternFagsak(
             ytelseEntity = ytelse.tilEntity(),
             behandlinger = behandlinger.tilEntity(id),
         )
+    }
+
+    fun forhåndsvarselHjemlerForTilbakekreving() = buildList {
+        addAll(ytelse.hjemlerForTilbakekreving())
+        addAll(HjemmelForTilbakekreving.standardForhåndsvarselHjemler(beregnerRenter = true))
     }
 
     internal fun brevmeta() = ytelse.brevmeta()

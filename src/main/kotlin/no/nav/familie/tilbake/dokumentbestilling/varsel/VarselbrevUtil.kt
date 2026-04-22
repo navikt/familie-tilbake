@@ -17,6 +17,7 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
+import no.nav.tilbakekreving.brev.vedtaksbrev.BrevFormatterer
 import no.nav.tilbakekreving.kontrakter.FeilutbetaltePerioderDto
 import no.nav.tilbakekreving.kontrakter.ForhåndsvisVarselbrevRequest
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
@@ -48,7 +49,8 @@ class VarselbrevUtil(
         request: ForhåndsvisVarselbrevRequest,
         personinfo: Personinfo,
     ): Varselbrevsdokument {
-        val tittel = getTittelForVarselbrev(Ytelsestype.forDTO(request.ytelsestype).navn[request.språkkode]!!, false)
+        val ytelsestype = Ytelsestype.forDTO(request.ytelsestype)
+        val tittel = getTittelForVarselbrev(ytelsestype.navn[request.språkkode]!!, false)
         val vergenavn = BrevmottagerUtil.getVergenavn(request.verge, adresseinfo)
         val ansvarligSaksbehandler =
             eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(
@@ -84,6 +86,7 @@ class VarselbrevUtil(
             fristdatoForTilbakemelding = Constants.brukersSvarfrist(),
             varseltekstFraSaksbehandler = request.varseltekst,
             feilutbetaltePerioder = mapFeilutbetaltePerioder(request.feilutbetaltePerioderDto),
+            hjemlerForTilbakekreving = BrevFormatterer.lagForhåndsvarselHjemmelAvsnitt(VarselbrevService.hjemlerForTilbakekreving(ytelsestype), metadata.språkkode),
         )
     }
 
@@ -140,6 +143,7 @@ class VarselbrevUtil(
             erKorrigert = varsel != null,
             varsletDato = varsel?.sporbar?.opprettetTid?.toLocalDate(),
             varsletBeløp = varsel?.varselbeløp,
+            hjemlerForTilbakekreving = BrevFormatterer.lagForhåndsvarselHjemmelAvsnitt(VarselbrevService.hjemlerForTilbakekreving(Ytelsestype.forDTO(metadata.ytelsestype)), metadata.språkkode),
         )
 
     private fun sammenstillInfoFraSimuleringForVedlegg(

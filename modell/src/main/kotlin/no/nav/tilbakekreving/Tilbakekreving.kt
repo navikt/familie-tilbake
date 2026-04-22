@@ -302,6 +302,7 @@ class Tilbakekreving internal constructor(
             eksternFagsak = eksternFagsak,
             brukerinfo = bruker!!.hentBrukerinfo(),
             varselbrev = brevHistorikk.sisteVarselbrev()!!,
+            hjemlerForTilbakekreving = eksternFagsak.forhåndsvarselHjemlerForTilbakekreving(),
         )
     }
 
@@ -546,6 +547,7 @@ class Tilbakekreving internal constructor(
             forhåndsvarselinfo = behandling.hentForhåndsvarselinfo(),
             eksternFagsakId = eksternFagsak.eksternId,
             ytelseType = eksternFagsak.ytelse.tilYtelseDTO(),
+            hjemlerForTilbakekreving = eksternFagsak.forhåndsvarselHjemlerForTilbakekreving(),
         )
     }
 

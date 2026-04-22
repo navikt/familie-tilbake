@@ -9,6 +9,7 @@ import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler.Compani
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving
 import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving.Companion.formatter
+import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.AvsnittDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatVurderingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PakrevdBegrunnelseDto
@@ -46,8 +47,18 @@ object BrevFormatterer {
         else -> "Du må ikke betale tilbake ${info.ytelse.ubestemtEntall}"
     }
 
-    fun lagHjemmelAvsnitt(hjemlerForTilbakekreving: List<HjemmelForTilbakekreving>): String {
-        return "Vedtaket er gjort etter ${hjemlerForTilbakekreving.formatter()}"
+    fun lagVedtakHjemmelAvsnitt(
+        hjemlerForTilbakekreving: List<HjemmelForTilbakekreving>,
+        språkkode: Språkkode,
+    ): String {
+        return "Vedtaket er gjort etter ${hjemlerForTilbakekreving.formatter(språkkode)}."
+    }
+
+    fun lagForhåndsvarselHjemmelAvsnitt(
+        hjemlerForTilbakekreving: List<HjemmelForTilbakekreving>,
+        språkkode: Språkkode,
+    ): String {
+        return "Dette går fram av ${hjemlerForTilbakekreving.formatter(språkkode)}."
     }
 
     fun norskDato(date: LocalDate): String = dateFormatter.format(date)
