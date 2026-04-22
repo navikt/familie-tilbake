@@ -32,6 +32,12 @@ import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostResponse
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
+import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselUnntakDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UpdateUttalelsesfristDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseVurderingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
 import no.nav.tilbakekreving.pdf.Dokumentvariant
 import no.nav.tilbakekreving.pdf.PdfGenerator
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
@@ -131,6 +137,57 @@ class ForhåndsvarselService(
             }
             else -> throw IllegalArgumentException("Ukjent verdi for uttalelseVurdering: ${brukeruttalelse.harBrukerUttaltSeg} ")
         }
+    }
+
+    fun nyLagreUttalelse(tilbakekreving: Tilbakekreving, uttalelseDto: UttalelseDto, behandler: Behandler) {
+        when (uttalelseDto.harBrukerUttaltSeg) {
+            UttalelseVurderingDto.JA_ETTER_FORHÅNDSVARSEL, UttalelseVurderingDto.UNNTAK_ALLEREDE_UTTALT_SEG -> {
+                tilbakekreving.nyLagreUttalelse(
+                    uttalelseVurdering = UttalelseVurdering.valueOf(uttalelseDto.harBrukerUttaltSeg.name),
+                    uttalelseInfo = UttalelseInfo(
+                        id = UUID.randomUUID(),
+                        uttalelsesdato = requireNotNull(uttalelseDto.uttalelsesdato) { "Det kreves uttalelsesdato når brukeren har uttalet seg. uttalelsesdato var null" },
+                        hvorBrukerenUttalteSeg = requireNotNull(uttalelseDto.hvorBrukerenUttalteSeg) {
+                            "Det kreves hvorBrukerenUttalteSeg når brukeren har uttalet seg. hvorBrukerenUttalteSeg var null"
+                        },
+                        uttalelseBeskrivelse = requireNotNull(uttalelseDto.beskrivelse) {
+                            "Det kreves beskrivelse når brukeren har uttalet seg. beskrivelse var null"
+                        },
+                    ),
+                    kommentar = null,
+                    behandler = behandler,
+                )
+            }
+            UttalelseVurderingDto.NEI_ETTER_FORHÅNDSVARSEL, UttalelseVurderingDto.UNNTAK_INGEN_UTTALELSE -> {
+                tilbakekreving.nyLagreUttalelse(
+                    uttalelseVurdering = UttalelseVurdering.valueOf(uttalelseDto.harBrukerUttaltSeg.name),
+                    uttalelseInfo = null,
+                    kommentar = requireNotNull(uttalelseDto.beskrivelse) {
+                        "Det kreves kommentar/beskrivelse når brukeren ikke uttalte seg. beskrivelse var null"
+                    },
+                    behandler = behandler,
+                )
+            }
+            UttalelseVurderingDto.IKKE_VURDERT -> throw IllegalStateException(
+                "Burde ikke være i denne tilstanden. IKKE_VURDERT er enum til frontend.",
+            )
+        }
+    }
+
+    fun nyUtsettUttalelsesfrist(
+        tilbakekreving: Tilbakekreving,
+        utsettFristDto: UpdateUttalelsesfristDto,
+        behandler: Behandler,
+    ): UttalelsesfristDto {
+        return tilbakekreving.nyUtsettUttalelsesfrist(utsettFristDto, behandler)
+    }
+
+    fun nyLagreForhåndsvarselUnntak(tilbakekreving: Tilbakekreving, unntakDto: ForhaandsvarselUnntakDto, behandler: Behandler) {
+        tilbakekreving.nyLagreForhåndsvarselUnntak(
+            begrunnelseForUnntak = BegrunnelseForUnntak.valueOf(unntakDto.begrunnelseForUnntak.name),
+            beskrivelse = unntakDto.beskrivelse,
+            behandler = behandler,
+        )
     }
 
     fun hentForhåndsvarselinfo(tilbakekreving: Tilbakekreving): ForhåndsvarselDto {
@@ -327,5 +384,9 @@ class ForhåndsvarselService(
 
     private fun hentVarselbrevTittel(varselbrevBehov: VarselbrevJournalføringBehov): String {
         return "$TITTEL_VARSEL_TILBAKEBETALING ${varselbrevBehov.ytelse.hentYtelsesnavn(Språkkode.NB)}"
+    }
+
+    fun nyHentForhåndsvarselinfo(tilbakekreving: Tilbakekreving): ForhaandsvarselResponseDto {
+        return tilbakekreving.nyHentForhåndsvarselFrontendDto()
     }
 }

@@ -58,9 +58,13 @@ import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselinfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.LogginnslagDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UpdateUttalelsesfristDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.saksbehandler.Behandler
@@ -307,6 +311,12 @@ class Tilbakekreving internal constructor(
     }
 
     fun trengerVarselbrev(varseltekstFraSaksbehandler: String) {
+        brevHistorikk.lagre(behandlingHistorikk.nåværende().entry.opprettVarselbrev(varseltekstFraSaksbehandler, features))
+        byttTilstand(SendVarselbrev)
+    }
+
+    fun sendVarselbrev(varseltekstFraSaksbehandler: String) {
+        behandlingHistorikk.nåværende().entry.nullstillForhåndsvarselUnntakOgUttalelse()
         brevHistorikk.lagre(behandlingHistorikk.nåværende().entry.opprettVarselbrev(varseltekstFraSaksbehandler, features))
         byttTilstand(SendVarselbrev)
     }
@@ -579,6 +589,17 @@ class Tilbakekreving internal constructor(
         )
     }
 
+    fun nyHentForhåndsvarselFrontendDto(): ForhaandsvarselResponseDto {
+        val behandling = behandlingHistorikk.nåværende().entry
+        val forhåndsvarselinfo = brevHistorikk.sisteVarselbrev()?.let {
+            ForhaandsvarselinfoDto(
+                tekstFraSaksbehandler = it.tekstFraSaksbehandler,
+                varselbrevSendtTid = it.sendtTid,
+            )
+        }
+        return behandling.nyForhåndsvarselTilFrontend(forhåndsvarselinfo)
+    }
+
     fun tilFeilutbetalingFrontendDto(): FaktaOmFeilutbetalingDto {
         return behandlingHistorikk.nåværende().entry.nyFaktastegFrontendDto(
             varselbrev = brevHistorikk.sisteVarselbrev(),
@@ -652,6 +673,41 @@ class Tilbakekreving internal constructor(
             behandlerIdent = behandler.ident,
             brevRef = brevRef,
         )
+    }
+
+    fun nyLagreUttalelse(
+        uttalelseVurdering: UttalelseVurdering,
+        uttalelseInfo: UttalelseInfo?,
+        kommentar: String?,
+        behandler: Behandler,
+    ) {
+        behandlingHistorikk.nåværende().entry.nyLagreUttalelse(
+            uttalelseVurdering = uttalelseVurdering,
+            uttalelseInfo = uttalelseInfo,
+            kommentar = kommentar,
+            behandler = behandler,
+            behandlingslogg = behandlingslogg,
+        )
+    }
+
+    fun nyLagreForhåndsvarselUnntak(
+        begrunnelseForUnntak: BegrunnelseForUnntak,
+        beskrivelse: String,
+        behandler: Behandler,
+    ) {
+        behandlingHistorikk.nåværende().entry.nyLagreForhåndsvarselUnntak(
+            begrunnelseForUnntak = begrunnelseForUnntak,
+            beskrivelse = beskrivelse,
+            behandler = behandler,
+            behandlingslogg = behandlingslogg,
+        )
+    }
+
+    fun nyUtsettUttalelsesfrist(utsettFristDto: UpdateUttalelsesfristDto, behandler: Behandler): UttalelsesfristDto {
+        requireNotNull(brevHistorikk.sisteVarselbrev()) {
+            "Kan ikke utsette frist når forhåndsvarsel ikke er sendt"
+        }
+        return behandlingHistorikk.nåværende().entry.nyUtsettUttalelsesfrist(utsettFristDto, behandler, behandlingslogg)
     }
 
     companion object {
