@@ -302,7 +302,7 @@ class Tilbakekreving internal constructor(
             eksternFagsak = eksternFagsak,
             brukerinfo = bruker!!.hentBrukerinfo(),
             varselbrev = brevHistorikk.sisteVarselbrev()!!,
-            hjemlerForTilbakekreving = eksternFagsak.forhåndsvarselHjemlerForTilbakekreving(),
+            varselbrevInfo = hentVarselbrevInfo(),
         )
     }
 
