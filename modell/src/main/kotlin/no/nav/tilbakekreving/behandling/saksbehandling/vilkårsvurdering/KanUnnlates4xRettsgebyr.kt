@@ -23,6 +23,8 @@ sealed interface KanUnnlates4xRettsgebyr {
 
     fun tilFrontendDTO(): SkalUnnlates
 
+    fun særligeGrunner(): ReduksjonSærligeGrunner? = null
+
     data object Unnlates : KanUnnlates4xRettsgebyr {
         override fun reduksjon(): Reduksjon = Reduksjon.IngenTilbakekreving()
 
@@ -40,7 +42,7 @@ sealed interface KanUnnlates4xRettsgebyr {
     }
 
     class SkalIkkeUnnlates(
-        val reduksjonSærligeGrunner: ReduksjonSærligeGrunner,
+        private val reduksjonSærligeGrunner: ReduksjonSærligeGrunner,
     ) : KanUnnlates4xRettsgebyr {
         override fun reduksjon(): Reduksjon = reduksjonSærligeGrunner.skalReduseres.reduksjon()
 
@@ -57,10 +59,14 @@ sealed interface KanUnnlates4xRettsgebyr {
         override fun skalTilbakekreves(): Boolean = true
 
         override fun tilFrontendDTO(): SkalUnnlates = SkalUnnlates.TILBAKEKREVES
+
+        override fun særligeGrunner(): ReduksjonSærligeGrunner {
+            return reduksjonSærligeGrunner
+        }
     }
 
     class ErOver4xRettsgebyr(
-        val reduksjonSærligeGrunner: ReduksjonSærligeGrunner,
+        private val reduksjonSærligeGrunner: ReduksjonSærligeGrunner,
     ) : KanUnnlates4xRettsgebyr {
         override fun reduksjon(): Reduksjon {
             return reduksjonSærligeGrunner.skalReduseres.reduksjon()
@@ -77,6 +83,10 @@ sealed interface KanUnnlates4xRettsgebyr {
         override fun skalTilbakekreves(): Boolean = true
 
         override fun tilFrontendDTO(): SkalUnnlates = SkalUnnlates.OVER_4_RETTSGEBYR
+
+        override fun særligeGrunner(): ReduksjonSærligeGrunner {
+            return reduksjonSærligeGrunner
+        }
     }
 
     companion object {
