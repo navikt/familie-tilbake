@@ -19,6 +19,7 @@ import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
+import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering
 import java.time.LocalDateTime
 import java.util.UUID
@@ -127,14 +128,17 @@ class Vilkårsvurderingsteg(
     fun vurdertePerioderForBrev(
         meldingerTilSaksbehandler: Set<MeldingTilSaksbehandler>,
     ): List<BegrunnetPeriode> {
-        return vurderinger.map {
-            BegrunnetPeriode(
-                id = it.id,
-                periode = it.periode,
-                påkrevdeVurderinger = it.vurdering.påkrevdeVurderinger(),
-                meldingerTilSaksbehandler = meldingerTilSaksbehandler,
+        val samletPeriode = vurderinger.minOf { it.periode.fom } til vurderinger.maxOf { it.periode.tom }
+        return vurderinger.firstOrNull()?.let {
+            listOf(
+                BegrunnetPeriode(
+                    id = it.id,
+                    periode = samletPeriode,
+                    påkrevdeVurderinger = it.vurdering.påkrevdeVurderinger(),
+                    meldingerTilSaksbehandler = meldingerTilSaksbehandler,
+                ),
             )
-        }
+        } ?: emptyList()
     }
 
     class Vilkårsvurderingsperiode(
