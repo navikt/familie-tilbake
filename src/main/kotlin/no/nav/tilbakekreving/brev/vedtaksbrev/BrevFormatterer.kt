@@ -71,7 +71,7 @@ object BrevFormatterer {
 
     fun VilkårsvurderingBegrunnelse.tilDto(
         meldingerTilSaksbehandler: List<MeldingTilSaksbehandler> = emptyList(),
-        underavsnitt: List<RentekstElementDto> = listOf(RentekstElementDto("")),
+        underavsnitt: List<RentekstElementDto> = listOf(RentekstElementDto(standardtekst)),
     ): PakrevdBegrunnelseDto {
         return PakrevdBegrunnelseDto(
             tittel = tittel,

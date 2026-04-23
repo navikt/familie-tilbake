@@ -261,6 +261,27 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
         }
     }
 
+    @Test
+    fun `under 4 rettsgebyr - tilbakekreves - har standardtekst i første vedtaksbrev-info`() {
+        val behandlingId = lagBehandlingId()
+        val periodeId = UUID.randomUUID()
+        val info = vedtaksbrevInfo(periodeId, VilkårsvurderingBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR)
+
+        nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, info).should {
+            it.avsnitt[0].tittel shouldBe "Dette er grunnen til at du har fått for mye utbetalt"
+            it.avsnitt[0].underavsnitt shouldBe listOf(
+                RentekstElementDto(""),
+                PakrevdBegrunnelseDto(
+                    begrunnelseType = VilkårsvurderingBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR.name,
+                    forklaring = VilkårsvurderingBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR.forklaring,
+                    tittel = VilkårsvurderingBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR.tittel,
+                    underavsnitt = listOf(RentekstElementDto("Nav kan la være å kreve tilbake hvis det feilutbetalte beløpet er lavere enn fire ganger rettsgebyret. Dette gjelder ikke hvis du har handlet forsettlig eller grovt uaktsomt. Se folketrygdloven § 22-15 sjette avsnitt.")),
+                    meldingerTilSaksbehandler = emptyList(),
+                ),
+            )
+        }
+    }
+
     private fun lagBehandlingId(): UUID {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
