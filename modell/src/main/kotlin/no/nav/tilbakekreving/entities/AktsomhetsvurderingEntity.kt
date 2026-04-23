@@ -27,14 +27,14 @@ data class AktsomhetsvurderingEntity(
             VurderingType.IKKE_FORÅRSAKET_AV_BRUKER_BURDE_FORSTÅTT -> {
                 NivåAvForståelse.BurdeForstått(
                     begrunnelse = requireNotNull(begrunnelse) { "begrunnesle kreves i FORSTOD_ELLER_BURDE_FORSTÅTT " },
-                    aktsomhet = requireNotNull(aktsomhet) { "aktsomhet kreves i FORSTOD_ELLER_BURDE_FORSTÅTT " }.tilAktsomhet(),
+                    aktsomhet = requireNotNull(aktsomhet) { "aktsomhet kreves i FORSTOD_ELLER_BURDE_FORSTÅTT " }.tilAktsomhet() ?: return ForårsaketAvBruker.IkkeVurdert,
                 )
             }
 
             VurderingType.IKKE_FORÅRSAKET_AV_BRUKER_FORSTOD -> {
                 NivåAvForståelse.Forstod(
                     begrunnelse = requireNotNull(begrunnelse) { "begrunnesle kreves i FORSTOD_ELLER_BURDE_FORSTÅTT " },
-                    aktsomhet = requireNotNull(aktsomhet) { "aktsomhet kreves i FORSTOD_ELLER_BURDE_FORSTÅTT " }.tilAktsomhet(),
+                    aktsomhet = requireNotNull(aktsomhet) { "aktsomhet kreves i FORSTOD_ELLER_BURDE_FORSTÅTT " }.tilAktsomhet() ?: return ForårsaketAvBruker.IkkeVurdert,
                 )
             }
 

@@ -15,7 +15,7 @@ data class VurdertAktsomhetEntity(
     val særligGrunner: SærligeGrunnerEntity?,
     val kanUnnlates: KanUnnlates?,
 ) {
-    fun tilAktsomhet(): NivåAvForståelse.Aktsomhet {
+    fun tilAktsomhet(): NivåAvForståelse.Aktsomhet? {
         return when (aktsomhetType) {
             AktsomhetType.SIMPEL_UAKTSOMHET -> {
                 NivåAvForståelse.Aktsomhet.Uaktsomhet(
@@ -23,7 +23,7 @@ data class VurdertAktsomhetEntity(
                     kanUnnlates4XRettsgebyr = when (kanUnnlates) {
                         KanUnnlates.UNNLATES -> KanUnnlates4xRettsgebyr.Unnlates
                         KanUnnlates.OVER_4_RETTSGEBYR -> KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(
-                            requireNotNull(særligGrunner) { "SærligGrunner kreves for Uaktsomhet" }.fraEntity(),
+                            særligGrunner?.fraEntity() ?: return null,
                         )
                         KanUnnlates.SKAL_IKKE_UNNLATES -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
                             requireNotNull(særligGrunner) { "SærligGrunner kreves for Uaktsomhet" }.fraEntity(),
