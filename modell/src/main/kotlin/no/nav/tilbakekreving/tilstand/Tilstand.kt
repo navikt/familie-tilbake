@@ -27,7 +27,7 @@ internal sealed interface Tilstand {
     val tilbakekrevingTilstand: TilbakekrevingTilstand
     val kanEndresAvSaksbehandler: Boolean get() = false
 
-    fun behandlingsstatus(behandling: Behandling): Behandlingsstatus = Behandlingsstatus.OPPRETTET
+    fun behandlingsstatus(behandling: Behandling): Behandlingsstatus
 
     fun entering(tilbakekreving: Tilbakekreving)
 
