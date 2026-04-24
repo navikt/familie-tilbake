@@ -2,18 +2,16 @@ package no.nav.tilbakekreving.entities
 
 import no.nav.tilbakekreving.behandling.Forhåndsvarsel
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
-import java.time.LocalDate
 
 data class ForhåndsvarselEntity(
     val brukeruttalelseEntity: BrukeruttalelseEntity?,
     val forhåndsvarselUnntakEntity: ForhåndsvarselUnntakEntity?,
-    val fristUtsettelseEntity: FristUtsettelseEntity?,
+    val uttalelsesfristEntity: UttalelsesfristEntity?,
 ) {
-    fun fraEntity(opprinneligFrist: LocalDate?): Forhåndsvarsel = Forhåndsvarsel(
+    fun fraEntity(): Forhåndsvarsel = Forhåndsvarsel(
         brukeruttalelse = midlertidigMapping(forhåndsvarselUnntakEntity, brukeruttalelseEntity)?.fraEntity(),
         forhåndsvarselUnntak = forhåndsvarselUnntakEntity?.fraEntity(),
-        utsattFrist = fristUtsettelseEntity?.fraEntity(),
-        opprinneligFrist = opprinneligFrist,
+        uttalelsesfrist = uttalelsesfristEntity?.fraEntity(),
     )
 
     // Fjernes etter prodsatt og migrering kjørt

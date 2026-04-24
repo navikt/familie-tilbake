@@ -9,16 +9,14 @@ import java.util.UUID
 class ForhåndsvarselTest {
     @Test
     fun `skal gi melding til saksbehandler dersom bruker har uttalt seg på forhåndsvarsel`() {
-        val forhåndsvarsel = Forhåndsvarsel.opprett(LocalDate.now().minusDays(1))
+        val forhåndsvarsel = Forhåndsvarsel.opprett()
         forhåndsvarsel.lagreUttalelse(
             uttalelseVurdering = UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL,
-            uttalelseInfo = listOf(
-                UttalelseInfo(
-                    id = UUID.randomUUID(),
-                    uttalelsesdato = LocalDate.now(),
-                    hvorBrukerenUttalteSeg = "Reddit",
-                    uttalelseBeskrivelse = "Typisk reddit kommentar",
-                ),
+            uttalelseInfo = UttalelseInfo(
+                id = UUID.randomUUID(),
+                uttalelsesdato = LocalDate.now(),
+                hvorBrukerenUttalteSeg = "Reddit",
+                uttalelseBeskrivelse = "Typisk reddit kommentar",
             ),
             kommentar = "Vet ærlig talt ikke hva hen prater om.",
         )
@@ -28,7 +26,7 @@ class ForhåndsvarselTest {
 
     @Test
     fun `underkjenning blir lagret`() {
-        val forhåndsvarsel = Forhåndsvarsel.opprett(null)
+        val forhåndsvarsel = Forhåndsvarsel.opprett()
 
         forhåndsvarsel.lagreForhåndsvarselUnntak(
             begrunnelseForUnntak = BegrunnelseForUnntak.ALLEREDE_UTTALET_SEG,
@@ -36,7 +34,7 @@ class ForhåndsvarselTest {
         )
         forhåndsvarsel.lagreUttalelse(
             UttalelseVurdering.UNNTAK_ALLEREDE_UTTALT_SEG,
-            uttalelseInfo = emptyList(),
+            uttalelseInfo = null,
             kommentar = "",
         )
         forhåndsvarsel.underkjennSteget()

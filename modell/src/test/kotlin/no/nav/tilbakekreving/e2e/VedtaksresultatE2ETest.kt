@@ -43,7 +43,7 @@ class VedtaksresultatE2ETest {
 
         tilbakekreving.håndter(behandler, faktastegVurdering())
         tilbakekreving.trengerVarselbrev("Tekst fra saksbehandler")
-        tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, listOf(), null)
+        tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, null, null)
 
         tilbakekreving.håndter(behandler, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
         tilbakekreving.håndter(behandler, 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().uaktsomt())
@@ -78,7 +78,7 @@ class VedtaksresultatE2ETest {
 
         tilbakekreving.håndter(behandler, faktastegVurdering())
         tilbakekreving.trengerVarselbrev("Tekst fra saksbehandler")
-        tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, listOf(), null)
+        tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, null, null)
 
         tilbakekreving.håndter(behandler, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
         tilbakekreving.håndter(

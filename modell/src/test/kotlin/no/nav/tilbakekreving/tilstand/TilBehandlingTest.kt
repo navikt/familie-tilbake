@@ -216,7 +216,7 @@ class TilBehandlingTest {
         tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, faktastegVurdering())
         tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(
             uttalelseVurdering = UttalelseVurdering.UNNTAK_ALLEREDE_UTTALT_SEG,
-            uttalelseInfo = emptyList(),
+            uttalelseInfo = null,
             kommentar = "Trenger ikke forhåndsvarsel i test lol",
         )
         tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
@@ -238,7 +238,7 @@ class TilBehandlingTest {
         opprettTilbakekrevingHendelse: OpprettTilbakekrevingHendelse,
         behandler: Behandler,
     ) = tilbakekrevingTilBehandling(oppsamler, opprettTilbakekrevingHendelse).apply {
-        behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, listOf(), "")
+        behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, null, "")
         håndter(
             behandler,
             faktastegVurdering(),

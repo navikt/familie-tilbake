@@ -5,6 +5,7 @@ import io.kotest.inspectors.forOne
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
 import no.nav.familie.tilbake.api.DokumentController
 import no.nav.tilbakekreving.Testdata
@@ -45,7 +46,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
     fun cleanup() {
         jdbcTemplate.update("DELETE FROM tilbakekreving_uttalelse_informasjon")
         jdbcTemplate.update("DELETE FROM tilbakekreving_forhåndsvarsel_unntak")
-        jdbcTemplate.update("DELETE FROM tilbakekreving_utsett_uttalelse")
+        jdbcTemplate.update("DELETE FROM tilbakekreving_uttalelsesfrist")
         jdbcTemplate.update("DELETE FROM tilbakekreving_brukeruttalelse")
     }
 
@@ -150,7 +151,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             .hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
             .shouldNotBeNull().hentForhåndsvarselFrontendDto()
         forhåndsvarsel.forhåndsvarselUnntak shouldBe null
-        forhåndsvarsel.utsettUttalelseFrist shouldBe null
+        forhåndsvarsel.utsettUttalelseFrist shouldNotBe null
 
         val brukeruttalelse = forhåndsvarsel.brukeruttalelse.shouldNotBeNull()
 
@@ -318,30 +319,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
                 forventetAntallDetaljer = 1,
                 forventetKommentar = null,
             ),
-            // 2)Har bruker uttalet seg:  JA, to uttalelser
-            GyldigBrukeruttalelseCase(
-                navn = "JA – to uttalelser (Tlf + Modia)",
-                input = BrukeruttalelseDto(
-                    harBrukerUttaltSeg = HarBrukerUttaltSeg.JA_ETTER_FORHÅNDSVARSEL,
-                    uttalelsesdetaljer = listOf(
-                        Uttalelsesdetaljer(
-                            hvorBrukerenUttalteSeg = "Tlf",
-                            uttalelsesdato = LocalDate.of(2025, 9, 15),
-                            uttalelseBeskrivelse = "Bruker har sagt ...",
-                        ),
-                        Uttalelsesdetaljer(
-                            hvorBrukerenUttalteSeg = "Modia",
-                            uttalelsesdato = LocalDate.of(2025, 9, 17),
-                            uttalelseBeskrivelse = "Bruker har skrevet ...",
-                        ),
-                    ),
-                    kommentar = null,
-                ),
-                forventetHarBrukerUttaltSeg = HarBrukerUttaltSeg.JA_ETTER_FORHÅNDSVARSEL,
-                forventetAntallDetaljer = 2,
-                forventetKommentar = null,
-            ),
-            // 3) Har bruker uttalet seg:NEI
+            // 2) Har bruker uttalet seg:NEI
             GyldigBrukeruttalelseCase(
                 navn = "NEI – med kommentar",
                 input = BrukeruttalelseDto(

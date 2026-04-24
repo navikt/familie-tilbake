@@ -12,7 +12,7 @@ import java.util.UUID
 class Brukeruttalelse(
     private val id: UUID,
     private val uttalelseVurdering: UttalelseVurdering,
-    private val uttalelseInfo: List<UttalelseInfo>,
+    private val uttalelseInfo: UttalelseInfo?,
     private val kommentar: String?,
     private var trengerNyVurdering: Boolean,
 ) {
@@ -25,14 +25,14 @@ class Brukeruttalelse(
     fun tilFrontendDto(): BrukeruttalelseDto {
         return BrukeruttalelseDto(
             harBrukerUttaltSeg = HarBrukerUttaltSeg.valueOf(uttalelseVurdering.name),
-            uttalelsesdetaljer = uttalelseInfo.let { info ->
-                info.map {
+            uttalelsesdetaljer = uttalelseInfo?.let { info ->
+                listOf(
                     Uttalelsesdetaljer(
-                        uttalelsesdato = it.uttalelsesdato,
-                        hvorBrukerenUttalteSeg = it.hvorBrukerenUttalteSeg,
-                        uttalelseBeskrivelse = it.uttalelseBeskrivelse,
-                    )
-                }
+                        uttalelsesdato = info.uttalelsesdato,
+                        hvorBrukerenUttalteSeg = info.hvorBrukerenUttalteSeg,
+                        uttalelseBeskrivelse = info.uttalelseBeskrivelse,
+                    ),
+                )
             },
             kommentar = kommentar,
         )
@@ -42,7 +42,7 @@ class Brukeruttalelse(
         id = id,
         uttalelseVurdering = uttalelseVurdering,
         behandlingRef = behandlingRef,
-        uttalelseInfoEntity = uttalelseInfo.map {
+        uttalelseInfoEntity = uttalelseInfo?.let {
             UttalelseInfoEntity(
                 id = UUID.randomUUID(),
                 brukeruttalelseRef = id,

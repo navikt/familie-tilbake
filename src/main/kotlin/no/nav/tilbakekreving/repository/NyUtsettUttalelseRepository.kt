@@ -1,6 +1,6 @@
 package no.nav.tilbakekreving.repository
 
-import no.nav.tilbakekreving.entities.FristUtsettelseEntity
+import no.nav.tilbakekreving.entities.UttalelsesfristEntity
 import no.nav.tilbakekreving.entity.FristUtsettelseEntityMapper
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.query
@@ -11,18 +11,18 @@ import java.util.UUID
 class NyUtsettUttalelseRepository(
     private val jdbcTemplate: JdbcTemplate,
 ) {
-    fun hentUtsettUttalelseFrist(behandlingId: UUID): FristUtsettelseEntity? {
+    fun hentUtsettUttalelseFrist(behandlingId: UUID): UttalelsesfristEntity? {
         return jdbcTemplate.query(
-            "SELECT * FROM tilbakekreving_utsett_uttalelse WHERE behandling_ref=?",
+            "SELECT * FROM tilbakekreving_uttalelsesfrist WHERE behandling_ref=?",
             behandlingId,
         ) { resultSet, _ ->
             FristUtsettelseEntityMapper.map(resultSet)
         }.singleOrNull()
     }
 
-    fun lagre(fristUtsettelseEntity: FristUtsettelseEntity?, behandlingId: UUID) {
-        jdbcTemplate.update("DELETE FROM tilbakekreving_utsett_uttalelse WHERE behandling_ref = ?", behandlingId)
-        fristUtsettelseEntity?.let { fristUtsettelse ->
+    fun lagre(uttalelsesfristEntity: UttalelsesfristEntity?, behandlingId: UUID) {
+        jdbcTemplate.update("DELETE FROM tilbakekreving_uttalelsesfrist WHERE behandling_ref = ?", behandlingId)
+        uttalelsesfristEntity?.let { fristUtsettelse ->
             FristUtsettelseEntityMapper.upsertQuery(jdbcTemplate, fristUtsettelse)
         }
     }

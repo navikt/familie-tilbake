@@ -1,6 +1,5 @@
 package no.nav.tilbakekreving.e2e.brev
 
-import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -180,7 +179,7 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
             forhåndsvarselUnntak.shouldBeNull()
             brukeruttalelse.shouldNotBeNull {
                 harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.NEI_ETTER_FORHÅNDSVARSEL
-                uttalelsesdetaljer.shouldBeEmpty()
+                uttalelsesdetaljer.shouldBeNull()
                 kommentar shouldBe "har ikke uttalet seg"
             }
         }

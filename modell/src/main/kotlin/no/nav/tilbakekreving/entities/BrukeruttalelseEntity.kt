@@ -10,14 +10,14 @@ data class BrukeruttalelseEntity(
     val id: UUID,
     val behandlingRef: UUID,
     val uttalelseVurdering: UttalelseVurdering,
-    val uttalelseInfoEntity: List<UttalelseInfoEntity>,
+    val uttalelseInfoEntity: UttalelseInfoEntity?,
     val kommentar: String?,
     val trengerNyVurdering: Boolean,
 ) {
     fun fraEntity(): Brukeruttalelse = Brukeruttalelse(
         id = id,
         uttalelseVurdering = uttalelseVurdering,
-        uttalelseInfo = uttalelseInfoEntity.map { it.fraEntity() },
+        uttalelseInfo = uttalelseInfoEntity?.fraEntity(),
         kommentar = kommentar,
         trengerNyVurdering = trengerNyVurdering,
     )
