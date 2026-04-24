@@ -23,21 +23,21 @@ class NyUttalelseRepository(
         }.singleOrNull()
     }
 
-    private fun hentUttalelseInfo(brukeruttalelseRef: UUID): List<UttalelseInfoEntity> {
+    private fun hentUttalelseInfo(brukeruttalelseRef: UUID): UttalelseInfoEntity? {
         return jdbcTemplate.query(
             "SELECT * FROM tilbakekreving_uttalelse_informasjon WHERE brukeruttalelse_ref=?",
             brukeruttalelseRef,
         ) { resultSet, _ ->
             BrukerUttalelseEntityMapper.UttalelseInfo.map(resultSet)
-        }
+        }.singleOrNull()
     }
 
     fun lagre(brukerUttaleserEntity: BrukeruttalelseEntity?, behandlingId: UUID) {
         jdbcTemplate.update("DELETE FROM tilbakekreving_brukeruttalelse WHERE behandling_ref=?;", behandlingId)
         brukerUttaleserEntity?.let { uttalelse ->
             BrukerUttalelseEntityMapper.insertQuery(jdbcTemplate, uttalelse)
-            uttalelse.uttalelseInfoEntity.forEach {
-                BrukerUttalelseEntityMapper.UttalelseInfo.insertQuery(jdbcTemplate, it)
+            uttalelse.uttalelseInfoEntity?.let { uttalelseInfo ->
+                BrukerUttalelseEntityMapper.UttalelseInfo.insertQuery(jdbcTemplate, uttalelseInfo)
             }
         }
     }

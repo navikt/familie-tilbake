@@ -15,13 +15,12 @@ import java.util.UUID
 class Forhåndsvarsel(
     private var brukeruttalelse: Brukeruttalelse?,
     private var forhåndsvarselUnntak: ForhåndsvarselUnntak?,
-    private var utsattFrist: UtsettFrist?,
-    private var opprinneligFrist: LocalDate?,
+    private var uttalelsesfrist: Uttalelsesfrist?,
 ) : Saksbehandlingsteg {
     override val type: Behandlingssteg = Behandlingssteg.FORHÅNDSVARSEL
 
     override fun erFullstendig(): Boolean {
-        val gjeldendeFrist = utsattFrist?.hentFrist() ?: opprinneligFrist
+        val gjeldendeFrist = uttalelsesfrist?.hentFrist()
         return brukeruttalelse != null ||
             forhåndsvarselUnntak != null ||
             gjeldendeFrist?.isBefore(LocalDate.now()) == true
@@ -42,7 +41,7 @@ class Forhåndsvarsel(
         return ForhåndsvarselEntity(
             brukeruttalelseEntity = brukeruttalelse?.tilEntity(behandlingRef),
             forhåndsvarselUnntakEntity = forhåndsvarselUnntak?.tilEntity(behandlingRef),
-            fristUtsettelseEntity = utsattFrist?.tilEntity(behandlingRef),
+            uttalelsesfristEntity = uttalelsesfrist?.tilEntity(behandlingRef),
         )
     }
 
@@ -53,7 +52,7 @@ class Forhåndsvarsel(
 
     fun lagreUttalelse(
         uttalelseVurdering: UttalelseVurdering,
-        uttalelseInfo: List<UttalelseInfo>,
+        uttalelseInfo: UttalelseInfo?,
         kommentar: String?,
     ) {
         brukeruttalelse = Brukeruttalelse(
@@ -65,12 +64,17 @@ class Forhåndsvarsel(
         )
     }
 
-    fun lagreFristUtsettelse(nyFrist: LocalDate, begrunnelse: String) {
-        utsattFrist = UtsettFrist(
+    fun lagreOpprinneligFrist(opprinneligFrist: LocalDate) {
+        uttalelsesfrist = Uttalelsesfrist(
             id = UUID.randomUUID(),
-            nyFrist = nyFrist,
-            begrunnelse = begrunnelse,
+            opprinneligFrist = opprinneligFrist,
+            nyFrist = null,
+            begrunnelse = null,
         )
+    }
+
+    fun lagreFristUtsettelse(nyFrist: LocalDate, begrunnelse: String) {
+        uttalelsesfrist!!.utsettFrist(nyFrist, begrunnelse)
     }
 
     fun lagreForhåndsvarselUnntak(
@@ -93,7 +97,7 @@ class Forhåndsvarsel(
     }
 
     fun utsettUttalelseFristTilFrontendDto(): FristUtsettelseDto? {
-        return utsattFrist?.tilFrontendDto()
+        return uttalelsesfrist?.tilFrontendDto()
     }
 
     fun forhåndsvarselUnntakTilFrontendDto(): ForhåndsvarselUnntakDto? {
@@ -105,12 +109,11 @@ class Forhåndsvarsel(
     }
 
     companion object {
-        fun opprett(fristForUttalelse: LocalDate?): Forhåndsvarsel {
+        fun opprett(): Forhåndsvarsel {
             return Forhåndsvarsel(
                 brukeruttalelse = null,
                 forhåndsvarselUnntak = null,
-                utsattFrist = null,
-                opprinneligFrist = fristForUttalelse,
+                uttalelsesfrist = null,
             )
         }
     }

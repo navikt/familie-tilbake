@@ -138,14 +138,12 @@ open class TilbakekrevingE2EBase : E2EBase() {
         tilbakekrevingService.hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
             val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
             if (uttalelse == null) {
-                behandling.lagreUttalelse(UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL, emptyList(), "")
+                behandling.lagreUttalelse(UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL, null, "")
             } else {
                 behandling.lagreUttalelse(
                     UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL,
-                    listOf(
-                        UttalelseInfo(UUID.randomUUID(), LocalDate.now(), "Reddit", uttalelse),
-                    ),
-                    "",
+                    UttalelseInfo(UUID.randomUUID(), LocalDate.now(), "Reddit", uttalelse),
+                    null,
                 )
             }
         }

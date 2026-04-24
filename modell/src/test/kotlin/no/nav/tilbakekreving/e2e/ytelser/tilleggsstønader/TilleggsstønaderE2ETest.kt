@@ -67,7 +67,7 @@ class TilleggsstønaderE2ETest {
             ),
         )
         tilbakekreving.håndter(brukerinfoHendelse())
-        tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, listOf(), "")
+        tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, null, "")
         val faktastegDto = tilbakekreving.faktastegFrontendDto()
         faktastegDto.feilutbetaltePerioder shouldBe listOf(
             FeilutbetalingsperiodeDto(

@@ -42,7 +42,7 @@ class BehandlingTest {
     @Test
     fun `sett behandling på vent`() {
         val behandling = behandling()
-        behandling.lagreUttalelse(UttalelseVurdering.JA, listOf(), null)
+        behandling.lagreUttalelse(UttalelseVurdering.JA, null, null)
         behandling.settPåVent(Venteårsak.MANGLER_STØTTE, LocalDate.MAX, "Begrunnelse")
 
         val faktasteg = faktastegVurdering(periode)
@@ -125,7 +125,7 @@ class BehandlingTest {
         val kravgrunnlag = kravgrunnlag()
         val behandling = behandling(kravgrunnlag)
         behandling.apply {
-            lagreUttalelse(UttalelseVurdering.JA, listOf(), null)
+            lagreUttalelse(UttalelseVurdering.JA, null, null)
         }
 
         val faktasteg = faktastegVurdering(periode)
@@ -145,7 +145,7 @@ class BehandlingTest {
     fun `flytt behandling tilbake til fakta - nullstiller vilkårsvurderingen`() {
         val behandling = behandling()
         behandling.apply {
-            lagreUttalelse(UttalelseVurdering.JA, listOf(), null)
+            lagreUttalelse(UttalelseVurdering.JA, null, null)
         }
 
         val faktasteg = faktastegVurdering(periode)

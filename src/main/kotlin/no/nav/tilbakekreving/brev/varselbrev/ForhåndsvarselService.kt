@@ -106,10 +106,10 @@ class ForhåndsvarselService(
                     require(it.isNotEmpty()) {
                         "Det kreves uttalelsedetaljer når brukeren har uttalet seg. uttalelsedetaljer var tom"
                     }
-                }
+                }[0]
                 behandling.lagreUttalelse(
                     uttalelseVurdering = UttalelseVurdering.valueOf(brukeruttalelse.harBrukerUttaltSeg.name),
-                    uttalelseInfo = uttalelsedetaljer.map { UttalelseInfo(UUID.randomUUID(), it.uttalelsesdato, it.hvorBrukerenUttalteSeg, it.uttalelseBeskrivelse) },
+                    uttalelseInfo = UttalelseInfo(UUID.randomUUID(), uttalelsedetaljer.uttalelsesdato, uttalelsedetaljer.hvorBrukerenUttalteSeg, uttalelsedetaljer.uttalelseBeskrivelse),
                     kommentar = null,
                 )
             }
@@ -122,7 +122,7 @@ class ForhåndsvarselService(
 
                 behandling.lagreUttalelse(
                     uttalelseVurdering = UttalelseVurdering.valueOf(brukeruttalelse.harBrukerUttaltSeg.name),
-                    uttalelseInfo = listOf(),
+                    uttalelseInfo = null,
                     kommentar = kommentar,
                 )
             }
@@ -142,7 +142,7 @@ class ForhåndsvarselService(
             "Kan ikke utsette frist når forhåndsvarsel ikke er sendt"
         }
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
-        behandling.lagreFristUtsettelse(fristUtsettelseDto.nyFrist, fristUtsettelseDto.begrunnelse)
+        behandling.lagreFristUtsettelse(fristUtsettelseDto.nyFrist!!, fristUtsettelseDto.begrunnelse!!)
     }
 
     fun håndterForhåndsvarselUnntak(

@@ -1,36 +1,43 @@
 package no.nav.tilbakekreving.entity
 
-import no.nav.tilbakekreving.entities.FristUtsettelseEntity
+import no.nav.tilbakekreving.entities.UttalelsesfristEntity
 import java.sql.ResultSet
 import java.util.UUID
 
-object FristUtsettelseEntityMapper : Entity<FristUtsettelseEntity, UUID, UUID>(
-    "tilbakekreving_utsett_uttalelse",
-    FristUtsettelseEntity::id,
+object FristUtsettelseEntityMapper : Entity<UttalelsesfristEntity, UUID, UUID>(
+    "tilbakekreving_uttalelsesfrist",
+    UttalelsesfristEntity::id,
     FieldConverter.UUIDConverter.required(),
 ) {
     val behandlingRef = field(
         "behandling_ref",
-        FristUtsettelseEntity::behandlingRef,
+        UttalelsesfristEntity::behandlingRef,
         FieldConverter.UUIDConverter.required(),
+    )
+
+    val opprinneligFrist = field(
+        "opprinnelig_frist",
+        UttalelsesfristEntity::opprinneligFrist,
+        FieldConverter.LocalDateConverter.required(),
     )
 
     val nyFrist = field(
         "ny_frist",
-        FristUtsettelseEntity::nyFrist,
-        FieldConverter.LocalDateConverter.required(),
+        UttalelsesfristEntity::nyFrist,
+        FieldConverter.LocalDateConverter,
     )
 
     val begrunnelse = field(
         "begrunnelse",
-        FristUtsettelseEntity::begrunnelse,
-        FieldConverter.StringConverter.required(),
+        UttalelsesfristEntity::begrunnelse,
+        FieldConverter.StringConverter,
     )
 
-    fun map(resultSet: ResultSet): FristUtsettelseEntity {
-        return FristUtsettelseEntity(
+    fun map(resultSet: ResultSet): UttalelsesfristEntity {
+        return UttalelsesfristEntity(
             id = resultSet[id],
             behandlingRef = resultSet[behandlingRef],
+            opprinneligFrist = resultSet[opprinneligFrist],
             nyFrist = resultSet[nyFrist],
             begrunnelse = resultSet[begrunnelse],
         )

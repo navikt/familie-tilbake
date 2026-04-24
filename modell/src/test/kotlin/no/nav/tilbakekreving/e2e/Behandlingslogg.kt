@@ -63,7 +63,7 @@ class Behandlingslogg {
             ),
         )
         tilbakekreving.håndter(brukerinfoHendelse())
-        tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, listOf(), "")
+        tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, null, "")
 
         tilbakekreving.håndter(behandler, faktastegVurdering(1.januar(2021) til 31.januar(2021)))
         tilbakekreving.håndter(behandler, faktastegVurdering(1.februar(2021) til 28.februar(2021)))

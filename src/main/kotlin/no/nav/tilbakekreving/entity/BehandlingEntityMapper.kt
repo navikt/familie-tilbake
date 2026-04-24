@@ -11,9 +11,9 @@ import no.nav.tilbakekreving.entities.ForeldelsesstegEntity
 import no.nav.tilbakekreving.entities.ForeslåVedtakStegEntity
 import no.nav.tilbakekreving.entities.ForhåndsvarselEntity
 import no.nav.tilbakekreving.entities.ForhåndsvarselUnntakEntity
-import no.nav.tilbakekreving.entities.FristUtsettelseEntity
 import no.nav.tilbakekreving.entities.HistorikkReferanseEntity
 import no.nav.tilbakekreving.entities.PåVentEntity
+import no.nav.tilbakekreving.entities.UttalelsesfristEntity
 import no.nav.tilbakekreving.entities.VilkårsvurderingstegEntity
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
@@ -97,7 +97,7 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
         påVent: PåVentEntity?,
         brukeruttalelseEntity: BrukeruttalelseEntity?,
         forhåndsvarselUnntak: ForhåndsvarselUnntakEntity?,
-        fristUtsettelse: FristUtsettelseEntity?,
+        fristUtsettelse: UttalelsesfristEntity?,
     ): BehandlingEntity {
         return BehandlingEntity(
             id = resultSet[id],

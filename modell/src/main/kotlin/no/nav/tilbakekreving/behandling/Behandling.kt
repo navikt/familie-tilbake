@@ -622,7 +622,7 @@ class Behandling internal constructor(
 
     fun lagreUttalelse(
         uttalelseVurdering: UttalelseVurdering,
-        uttalelseInfo: List<UttalelseInfo>,
+        uttalelseInfo: UttalelseInfo?,
         kommentar: String?,
     ) {
         forhåndsvarsel.lagreUttalelse(
@@ -774,12 +774,16 @@ class Behandling internal constructor(
     fun opprettVarselbrev(
         varseltekstFraSaksbehandler: String,
         features: FeatureToggles,
-    ): Varselbrev = Varselbrev.opprett(
-        ansvarligSaksbehandlerIdent = ansvarligSaksbehandler.ident,
-        kravgrunnlag = kravgrunnlag,
-        varseltekstFraSaksbehandler = varseltekstFraSaksbehandler,
-        features = features,
-    )
+    ): Varselbrev {
+        val varselbrev = Varselbrev.opprett(
+            ansvarligSaksbehandlerIdent = ansvarligSaksbehandler.ident,
+            kravgrunnlag = kravgrunnlag,
+            varseltekstFraSaksbehandler = varseltekstFraSaksbehandler,
+            features = features,
+        )
+        forhåndsvarsel.lagreOpprinneligFrist(varselbrev.fristForUttalelse)
+        return varselbrev
+    }
 
     internal fun hentVedtaksbrevInfo(bruker: Bruker, ytelse: Ytelse, tilbakekrevingId: String): VedtaksbrevInfo {
         val resultat = lagBeregning().oppsummer()
@@ -841,7 +845,7 @@ class Behandling internal constructor(
                 foreslåVedtakSteg = ForeslåVedtakSteg.opprett(),
                 fatteVedtakSteg = FatteVedtakSteg.opprett(),
                 påVent = null,
-                forhåndsvarsel = Forhåndsvarsel.opprett(brevHistorikk.sisteVarselbrev()?.fristForUttalelse),
+                forhåndsvarsel = Forhåndsvarsel.opprett(),
             ).also {
                 it.utførSideeffekt(tilstand, behandlingObservatør, bigQueryService, ytelsesNavn)
             }

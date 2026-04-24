@@ -81,7 +81,7 @@ class IverksettVedtakTest {
             håndter(kravgrunnlag())
             håndter(fagsysteminfoHendelse())
             håndter(brukerinfoHendelse())
-            behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, listOf(), "")
+            behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, null, "")
             håndter(
                 Behandler.Saksbehandler("Ansvarlig saksbehandler"),
                 faktastegVurdering(),
