@@ -3,6 +3,6 @@ openApiGenerate {
 }
 
 dependencies {
-    compileOnly("org.springframework.boot:spring-boot-starter-web:4.0.5")
+    compileOnly("org.springframework.boot:spring-boot-starter-web:4.0.6")
     api(project(":kontrakter-frontend:dtoer"))
 }
