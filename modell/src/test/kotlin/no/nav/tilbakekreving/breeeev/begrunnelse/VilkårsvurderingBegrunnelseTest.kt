@@ -75,10 +75,7 @@ class VilkårsvurderingBegrunnelseTest {
                 begrunnelse(
                     name = "forårsaket av bruker, uaktsomt, unnlates",
                     vurdering = forårsaketAvBruker().uaktsomt(unnlates = skalUnnlates()),
-                    forventedeBegrunnelser = setOf(
-                        VilkårsvurderingBegrunnelse.INGEN_TILBAKEKREVING,
-                        VilkårsvurderingBegrunnelse.UNNLATES_4_RETTSGEBYR,
-                    ),
+                    forventedeBegrunnelser = setOf(VilkårsvurderingBegrunnelse.UNNLATES_4_RETTSGEBYR),
                 ),
                 begrunnelse(
                     name = "forårsaket av bruker, grovt uaktsomt, ingen reduksjon",
@@ -151,10 +148,7 @@ class VilkårsvurderingBegrunnelseTest {
                             unnlates = skalUnnlates(),
                         ),
                     ),
-                    forventedeBegrunnelser = setOf(
-                        VilkårsvurderingBegrunnelse.INGEN_TILBAKEKREVING,
-                        VilkårsvurderingBegrunnelse.UNNLATES_4_RETTSGEBYR,
-                    ),
+                    forventedeBegrunnelser = setOf(VilkårsvurderingBegrunnelse.UNNLATES_4_RETTSGEBYR),
                 ),
             )
         }

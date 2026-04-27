@@ -72,7 +72,7 @@ class BehandlingVedtaksbrevTest {
                 Arguments.argumentSet(
                     "Forårsaket av bruker, uaktsomt, unnlates",
                     forårsaketAvBruker().uaktsomt(unnlates = skalUnnlates()),
-                    setOf(VilkårsvurderingBegrunnelse.INGEN_TILBAKEKREVING, VilkårsvurderingBegrunnelse.UNNLATES_4_RETTSGEBYR),
+                    setOf(VilkårsvurderingBegrunnelse.UNNLATES_4_RETTSGEBYR),
                 ),
                 Arguments.argumentSet(
                     "Forårsaket av bruker, grovt uaktsomt",

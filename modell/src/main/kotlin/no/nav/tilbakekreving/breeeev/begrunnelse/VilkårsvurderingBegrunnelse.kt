@@ -22,8 +22,9 @@ enum class VilkårsvurderingBegrunnelse(
         forklaring = Forklaringstekster.GOD_TRO_BELØP_IKKE_I_BEHOLD,
     ),
     UNNLATES_4_RETTSGEBYR(
-        tittel = "Placeholder - skal unnlates - 4 rettsgebyr",
-        forklaring = "",
+        tittel = "Hvorfor må du ikke betale tilbake?",
+        forklaring = Forklaringstekster.UNNLATES_UNDER_4_RETTSGEBYR,
+        standardtekst = "Nav kan la være å kreve tilbake hvis det feilutbetalte beløpet er lavere enn fire ganger rettsgebyret. Dette gjelder ikke hvis du har handlet forsettlig eller grovt uaktsomt. Se folketrygdloven § 22-15 sjette avsnitt.",
     ),
     SKAL_IKKE_UNNLATES_4_RETTSGEBYR(
         tittel = "Hvorfor må du betale tilbake selv om beløpet er under fire ganger rettsgebyret?",
