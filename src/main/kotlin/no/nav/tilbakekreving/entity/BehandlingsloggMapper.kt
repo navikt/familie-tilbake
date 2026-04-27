@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.entity
 
 import no.nav.tilbakekreving.behandlingslogg.Behandlingsloggstype
 import no.nav.tilbakekreving.behandlingslogg.Rolle
+import no.nav.tilbakekreving.entities.HistorikkReferanseEntity
 import no.nav.tilbakekreving.entities.LoggInnlagEntity
 import java.sql.ResultSet
 import java.util.UUID
@@ -47,6 +48,12 @@ object BehandlingsloggMapper : Entity<LoggInnlagEntity, UUID, UUID>(
         FieldConverter.LocalDateTimeConverter.required(),
     )
 
+    val brevRef = field(
+        "brev_ref",
+        { it.brevRef?.id },
+        FieldConverter.UUIDConverter,
+    )
+
     fun map(
         resultSet: ResultSet,
     ): LoggInnlagEntity {
@@ -58,6 +65,7 @@ object BehandlingsloggMapper : Entity<LoggInnlagEntity, UUID, UUID>(
             behandlerIdent = resultSet[behandlerIdent],
             opprettetTid = resultSet[opprettetTid],
             behandlingsloggstype = resultSet[behandlingsloggstype],
+            brevRef = resultSet[brevRef]?.let { HistorikkReferanseEntity(it) },
         )
     }
 }

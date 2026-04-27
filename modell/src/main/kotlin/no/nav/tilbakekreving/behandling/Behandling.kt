@@ -46,6 +46,7 @@ import no.nav.tilbakekreving.breeeev.Signatur
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.breeeev.standardtekster.Bunntekst
 import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving
+import no.nav.tilbakekreving.brev.Brev
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.brev.VarselbrevInfo
@@ -296,11 +297,13 @@ class Behandling internal constructor(
         journalpostId: String,
         ytelse: Ytelse,
         brevId: UUID,
+        fagsakId: String,
     ) {
         bebehovObservatør.håndter(
             VarselbrevDistribusjonBehov(
                 behandlingId = id,
                 journalpostId = journalpostId,
+                fagsakId = fagsakId,
                 ytelse = ytelse,
                 brevId = brevId,
                 behandlerIdent = ansvarligSaksbehandler.ident,
@@ -311,13 +314,17 @@ class Behandling internal constructor(
     fun trengerVedtaksbrevDistribusjon(
         bebehovObservatør: BehovObservatør,
         journalpostId: String,
+        brevId: UUID,
         fagsystem: FagsystemDTO,
+        fagsakId: String,
     ) {
         bebehovObservatør.håndter(
             VedtaksbrevDistribusjonBehov(
                 behandlingId = id,
+                brevId = brevId,
                 journalpostId = journalpostId,
                 fagsystem = fagsystem,
+                fagsakId = fagsakId,
             ),
         )
     }
@@ -413,6 +420,7 @@ class Behandling internal constructor(
                 behandlingsloggstype = Behandlingsloggstype.FAKTA_VURDERT,
                 rolle = Rolle.SAKSBEHANDLER,
                 behandler = behandler,
+                brevRef = null,
             ),
         )
     }
@@ -440,6 +448,7 @@ class Behandling internal constructor(
                 behandlingsloggstype = Behandlingsloggstype.FAKTA_VURDERT,
                 rolle = Rolle.SAKSBEHANDLER,
                 behandler = behandler,
+                brevRef = null,
             ),
         )
     }
@@ -459,6 +468,7 @@ class Behandling internal constructor(
                 behandlingsloggstype = Behandlingsloggstype.VILKÅRSVURDERING_VURDERT,
                 rolle = Rolle.SAKSBEHANDLER,
                 behandler = behandler,
+                brevRef = null,
             ),
         )
     }
@@ -478,6 +488,7 @@ class Behandling internal constructor(
                 behandlingsloggstype = Behandlingsloggstype.FORELDELSE_VURDERT,
                 rolle = Rolle.SAKSBEHANDLER,
                 behandler = behandler,
+                brevRef = null,
             ),
         )
     }
@@ -509,6 +520,7 @@ class Behandling internal constructor(
                 behandlingsloggstype = Behandlingsloggstype.FORESLÅ_VEDTAK_VURDERT,
                 rolle = Rolle.SAKSBEHANDLER,
                 behandler = behandler,
+                brevRef = null,
             ),
         )
     }
@@ -534,6 +546,7 @@ class Behandling internal constructor(
                     behandlingsloggstype = Behandlingsloggstype.VEDTAK_FATTET,
                     rolle = Rolle.BESLUTTER,
                     behandler = beslutter,
+                    brevRef = null,
                 ),
             )
         }
@@ -544,6 +557,7 @@ class Behandling internal constructor(
                     behandlingsloggstype = Behandlingsloggstype.BEHANDLING_SENDT_TILBAKE_TIL_SAKSBEHANDLER,
                     rolle = Rolle.BESLUTTER,
                     behandler = beslutter,
+                    brevRef = null,
                 ),
             )
         }
@@ -638,6 +652,7 @@ class Behandling internal constructor(
                 behandlingsloggstype = Behandlingsloggstype.BRUKER_UTTALELSE,
                 rolle = Rolle.SAKSBEHANDLER,
                 behandler = behandler,
+                brevRef = null,
             ),
         )
     }
@@ -653,6 +668,7 @@ class Behandling internal constructor(
                 behandlingsloggstype = Behandlingsloggstype.UTSETT_UTTALELSESFRIST,
                 rolle = Rolle.SAKSBEHANDLER,
                 behandler = behandler,
+                brevRef = null,
             ),
         )
     }
@@ -696,6 +712,7 @@ class Behandling internal constructor(
                 behandlingsloggstype = Behandlingsloggstype.UNNTAK_FOR_UTTALELSE,
                 rolle = Rolle.SAKSBEHANDLER,
                 behandler = behandler,
+                brevRef = null,
             ),
         )
     }
@@ -748,6 +765,7 @@ class Behandling internal constructor(
                 behandlingsloggstype = Behandlingsloggstype.BEHANDLING_NULLSTILLT,
                 rolle = Rolle.SAKSBEHANDLER,
                 behandler = behandler,
+                brevRef = null,
             ),
         )
     }
@@ -760,6 +778,7 @@ class Behandling internal constructor(
                 behandlingsloggstype = Behandlingsloggstype.TREKK_TILBAKE_FRA_GODKJENNING,
                 rolle = Rolle.SAKSBEHANDLER,
                 behandler = behandler,
+                brevRef = null,
             ),
         )
     }
@@ -832,7 +851,12 @@ class Behandling internal constructor(
         )
     }
 
-    fun opprettLoggInnslag(behandlingsloggstype: Behandlingsloggstype, rolle: Rolle, behandler: Behandler): LoggInnslag {
+    fun opprettLoggInnslag(
+        behandlingsloggstype: Behandlingsloggstype,
+        rolle: Rolle,
+        behandler: Behandler,
+        brevRef: HistorikkReferanse<UUID, Brev>?,
+    ): LoggInnslag {
         return LoggInnslag(
             id = UUID.randomUUID(),
             behandlingId = id,
@@ -840,6 +864,7 @@ class Behandling internal constructor(
             behandlingsloggstype = behandlingsloggstype,
             rolle = rolle,
             behandlerIdent = behandler.ident,
+            brevRef = brevRef,
         )
     }
 

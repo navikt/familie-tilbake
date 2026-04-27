@@ -19,6 +19,6 @@ class DokarkivClientStub() : DokarkivClient {
         dokuemntkategori: DokumentKlasse,
         behandlingId: UUID,
     ): OpprettJournalpostResponse {
-        return OpprettJournalpostResponse(journalpostId = "-1", null, null, listOf(DokumentInfo("-2")))
+        return OpprettJournalpostResponse(journalpostId = "-1", null, null, listOf(DokumentInfo(dokumentInfoId = "-2")))
     }
 }

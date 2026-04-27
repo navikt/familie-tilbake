@@ -9,6 +9,7 @@ import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
+import no.nav.tilbakekreving.behov.VedtaksbrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.VedtaksbrevJournalføringBehov
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.brukerinfoHendelse
@@ -129,8 +130,8 @@ class EndringObservatørTest {
 
         tilbakekreving.håndter(ANSVARLIG_BESLUTTER, godkjenning())
         tilbakekreving.håndter(iverksettelse())
-        tilbakekreving.håndter(journalføring((behovOppsamler.behovListe.last() as VedtaksbrevJournalføringBehov).brevId))
-        tilbakekreving.håndter(distribusjon())
+        tilbakekreving.håndter(journalføring((behovOppsamler.behovListe.last() as VedtaksbrevJournalføringBehov).brevId, tilbakekreving.eksternFagsak.eksternId))
+        tilbakekreving.håndter(distribusjon((behovOppsamler.behovListe.last() as VedtaksbrevDistribusjonBehov).brevId, tilbakekreving.eksternFagsak.eksternId))
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.status } shouldBe listOf(
             ForenkletBehandlingsstatus.OPPRETTET,
             ForenkletBehandlingsstatus.TIL_BEHANDLING,
@@ -173,8 +174,8 @@ class EndringObservatørTest {
 
         tilbakekreving.håndter(ANSVARLIG_BESLUTTER, godkjenning())
         tilbakekreving.håndter(iverksettelse())
-        tilbakekreving.håndter(journalføring(tilbakekreving.brevHistorikk.nåværende().entry.id))
-        tilbakekreving.håndter(distribusjon())
+        tilbakekreving.håndter(journalføring((behovOppsamler.behovListe.last() as VedtaksbrevJournalføringBehov).brevId, fagsakId = tilbakekreving.eksternFagsak.eksternId))
+        tilbakekreving.håndter(distribusjon((behovOppsamler.behovListe.last() as VedtaksbrevDistribusjonBehov).brevId, fagsakId = tilbakekreving.eksternFagsak.eksternId))
 
         endringObservatør.behandlingEndretEventsFor(fagsakId).last().forrigeStatus shouldBe ForenkletBehandlingsstatus.TIL_GODKJENNING
         endringObservatør.behandlingEndretEventsFor(fagsakId).last().status shouldBe ForenkletBehandlingsstatus.AVSLUTTET

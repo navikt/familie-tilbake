@@ -47,7 +47,9 @@ class SendVarselbrevTest {
                 varselbrevId = varselbrev.first().varselbrev.id,
                 behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id,
                 journalpostId = "1234",
+                dokumentInfoId = "321",
                 behandlerIdent = "4321",
+                fagsakId = tilbakekreving.eksternFagsak.eksternId,
             ),
         )
         tilbakekreving.tilstand shouldBe DistribuerVarselbrev
@@ -56,6 +58,8 @@ class SendVarselbrevTest {
             VarselbrevDistribueringHendelse(
                 behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id,
                 behandlerIdent = "4321",
+                brevId = varselbrev.first().varselbrev.id,
+                fagsakId = tilbakekreving.eksternFagsak.eksternId,
             ),
         )
         tilbakekreving.tilstand shouldBe TilBehandling
@@ -89,7 +93,9 @@ class SendVarselbrevTest {
                 varselbrevId = varselbrevBehov.first().brevId,
                 behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id,
                 journalpostId = "1234",
+                dokumentInfoId = "321",
                 behandlerIdent = "4321",
+                fagsakId = tilbakekreving.eksternFagsak.eksternId,
             ),
         )
         tilbakekreving.tilstand shouldBe DistribuerVarselbrev
@@ -98,6 +104,8 @@ class SendVarselbrevTest {
             VarselbrevDistribueringHendelse(
                 behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id,
                 behandlerIdent = "4321",
+                brevId = varselbrevBehov.first().brevId,
+                fagsakId = tilbakekreving.eksternFagsak.eksternId,
             ),
         )
         tilbakekreving.tilstand shouldBe TilBehandling

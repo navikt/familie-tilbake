@@ -227,12 +227,23 @@ class TilbakekrevingService(
                         logContext = SecureLog.Context.fra(tilbakekreving),
                     )
                 }
+
+                if (journalpostResponse.dokumenter.isNullOrEmpty()) {
+                    throw Feil(
+                        message = "Response fra journalføring av varselbrev til behandlingId ${behov.behandlingId} mangler dokumenter. Dokumenter er enten null eller tom. ${journalpostResponse.melding}",
+                        frontendFeilmelding = "Response fra journalføring av varselbrev til behandlingId ${behov.behandlingId} mangler dokumenter. Dokumenter er enten null eller tom. ${journalpostResponse.melding}",
+                        logContext = SecureLog.Context.fra(tilbakekreving),
+                    )
+                }
+
                 tilbakekreving.håndter(
                     VarselbrevJournalføringHendelse(
                         varselbrevId = behov.brevId,
                         behandlingId = behov.behandlingId,
                         journalpostId = journalpostResponse.journalpostId,
+                        dokumentInfoId = journalpostResponse.dokumenter[0].dokumentInfoId!!,
                         behandlerIdent = behov.varselbrev.ansvarligSaksbehandlerIdent,
+                        fagsakId = behov.eksternFagsakId,
                     ),
                 )
             }
@@ -250,6 +261,8 @@ class TilbakekrevingService(
                 tilbakekreving.håndter(
                     VarselbrevDistribueringHendelse(
                         behandlingId = behov.behandlingId,
+                        brevId = behov.brevId,
+                        fagsakId = behov.fagsakId,
                         behandlerIdent = behov.behandlerIdent,
                     ),
                 )
@@ -291,18 +304,34 @@ class TilbakekrevingService(
                         logContext = SecureLog.Context.fra(tilbakekreving),
                     )
                 }
+                if (journalpost.dokumenter.isNullOrEmpty()) {
+                    throw Feil(
+                        message = "Response fra journalføring av vedtaksbrev til behandlingId ${behov.behandlingId} mangler dokumenter. Dokumenter er enten null eller tom. ${journalpost.melding}",
+                        frontendFeilmelding = "Response fra journalføring av vedtaksbrev til behandlingId ${behov.behandlingId} mangler dokumenter. Dokumenter er enten null eller tom. ${journalpost.melding}",
+                        logContext = SecureLog.Context.fra(tilbakekreving),
+                    )
+                }
+
                 tilbakekreving.håndter(
                     JournalføringHendelse(
                         brevId = behov.brevId,
                         behandlingId = behov.behandlingId,
                         journalpostId = journalpost.journalpostId,
+                        fagsakId = behov.fagsakId,
+                        dokumentInfoId = journalpost.dokumenter[0].dokumentInfoId!!,
                     ),
                 )
             }
 
             is VedtaksbrevDistribusjonBehov -> {
-                val bestillingId = vedtaksbrevService.distribuereVedtaksbrev(behov, logContext)
-                tilbakekreving.håndter(DistribusjonHendelse(bestillingId, behov.behandlingId))
+                vedtaksbrevService.distribuereVedtaksbrev(behov, logContext)
+                tilbakekreving.håndter(
+                    DistribusjonHendelse(
+                        behandlingId = behov.behandlingId,
+                        brevId = behov.brevId,
+                        fagsakId = behov.fagsakId,
+                    ),
+                )
             }
         }
     }

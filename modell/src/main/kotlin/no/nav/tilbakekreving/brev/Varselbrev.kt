@@ -16,6 +16,7 @@ import java.util.UUID
 data class Varselbrev(
     override val id: UUID,
     override var journalpostId: String?,
+    override var dokumentInfoId: String?,
     override var sendtTid: LocalDate,
     val ansvarligSaksbehandlerIdent: String,
     val kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
@@ -26,8 +27,9 @@ data class Varselbrev(
         return kravgrunnlag.entry.feilutbetaltBeløpForAllePerioder().toLong()
     }
 
-    override fun brevSendt(journalpostId: String) {
+    override fun brevSendt(journalpostId: String, dokumentInfoId: String) {
         this.journalpostId = journalpostId
+        this.dokumentInfoId = dokumentInfoId
     }
 
     companion object {
@@ -46,6 +48,7 @@ data class Varselbrev(
             return Varselbrev(
                 id = UUID.randomUUID(),
                 journalpostId = null,
+                dokumentInfoId = null,
                 sendtTid = sendtTid,
                 ansvarligSaksbehandlerIdent = ansvarligSaksbehandlerIdent,
                 kravgrunnlag = kravgrunnlag,
@@ -65,6 +68,7 @@ data class Varselbrev(
                 brevRef = id,
                 kravgrunnlagRef = kravgrunnlag.tilEntity(),
                 journalpostId = journalpostId,
+                dokumentInfoId = dokumentInfoId,
                 sendtTid = sendtTid,
                 ansvarligSaksbehandlerIdent = ansvarligSaksbehandlerIdent,
                 fristForUttalelse = fristForUttalelse,

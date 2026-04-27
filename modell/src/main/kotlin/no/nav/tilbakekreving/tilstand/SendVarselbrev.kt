@@ -27,7 +27,10 @@ object SendVarselbrev : Tilstand {
         tilbakekreving: Tilbakekreving,
         varselbrevJournalføringHendelse: VarselbrevJournalføringHendelse,
     ) {
-        tilbakekreving.brevHistorikk.entry(varselbrevJournalføringHendelse.varselbrevId).brevSendt(journalpostId = varselbrevJournalføringHendelse.journalpostId)
+        tilbakekreving.brevHistorikk.entry(varselbrevJournalføringHendelse.varselbrevId).brevSendt(
+            journalpostId = varselbrevJournalføringHendelse.journalpostId,
+            dokumentInfoId = varselbrevJournalføringHendelse.dokumentInfoId,
+        )
         tilbakekreving.byttTilstand(DistribuerVarselbrev)
     }
 

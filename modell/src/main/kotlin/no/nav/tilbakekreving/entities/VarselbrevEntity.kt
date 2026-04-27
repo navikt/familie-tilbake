@@ -12,6 +12,7 @@ data class VarselbrevEntity(
     val brevRef: UUID,
     val kravgrunnlagRef: HistorikkReferanseEntity<UUID>,
     val journalpostId: String?,
+    val dokumentInfoId: String?,
     val sendtTid: LocalDate,
     val ansvarligSaksbehandlerIdent: String,
     val fristForUttalelse: LocalDate?,
@@ -22,6 +23,7 @@ data class VarselbrevEntity(
         return Varselbrev(
             id = id,
             journalpostId = journalpostId,
+            dokumentInfoId = dokumentInfoId,
             sendtTid = sendtTid,
             ansvarligSaksbehandlerIdent = ansvarligSaksbehandlerIdent,
             kravgrunnlag = kravgrunnlagHistorikk.finn(kravgrunnlagRef.id, sporing),
