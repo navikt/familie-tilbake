@@ -800,6 +800,7 @@ class Behandling internal constructor(
                 ytelse.hjemlerForTilbakekreving() +
                 foreldelsesteg.hjemlerForTilbakekreving() +
                 vilkårsvurderingsteg.hjemlerForTilbakekreving(),
+            beregnerSkatt = ytelse.beregnerSkatt,
         )
     }
 

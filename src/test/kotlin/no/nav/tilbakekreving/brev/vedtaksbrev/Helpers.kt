@@ -54,4 +54,5 @@ fun vedtaksbrevInfo(
         ),
     ),
     hjemlerForTilbakekreving = listOf(HjemmelForTilbakekreving.FOLKETRYGDLOVEN_22_15),
+    beregnerSkatt = true,
 )

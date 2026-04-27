@@ -16,4 +16,5 @@ data class VedtaksbrevInfo(
     val tilbakekrevingId: String,
     val beregningsresultat: List<BeregningsresultatsperiodeDto>,
     val hjemlerForTilbakekreving: List<HjemmelForTilbakekreving>,
+    val beregnerSkatt: Boolean,
 )
