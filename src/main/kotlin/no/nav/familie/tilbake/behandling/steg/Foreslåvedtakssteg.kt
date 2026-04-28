@@ -64,8 +64,16 @@ class Foreslåvedtakssteg(
         behandlingsstegDto: BehandlingsstegDto,
         logContext: SecureLog.Context,
     ) {
+        val nåværendeSteg = behandlingskontrollService.finnAktivtSteg(behandlingId)
+        if (nåværendeSteg != null && nåværendeSteg != Behandlingssteg.FORESLÅ_VEDTAK) {
+            throw Feil(
+                message = "Du har gjort en endring i tidligere steg som gjør at ${nåværendeSteg.kortNavn} må vurderes på nytt.",
+                logContext = logContext,
+                httpStatus = HttpStatus.BAD_REQUEST,
+            )
+        }
         log.medContext(logContext) {
-            info("Behandling $behandlingId er på $Behandlingssteg.FORESLÅ_VEDTAK} steg")
+            info("Behandling {} er på {} steg", behandlingId, Behandlingssteg.FORESLÅ_VEDTAK)
         }
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         validerAtDetFinnesOppgave(behandling, logContext)

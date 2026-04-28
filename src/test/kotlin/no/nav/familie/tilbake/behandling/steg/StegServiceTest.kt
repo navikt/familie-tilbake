@@ -25,6 +25,7 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.common.ContextService
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
@@ -975,6 +976,36 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         stegService
             .kanAnsvarligSaksbehandlerOppdateres(behandling.id, behandlingsstegDto)
             .shouldBeTrue()
+    }
+
+    @Test
+    fun `kan ikke sende til beslutter dersom tidligere steg er satt tilbake til klar`() {
+        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id, perioder = setOf(Testdata.lagKravgrunnlagsperiode(periode = (fom til tom).toMånedsperiode()))))
+        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
+
+        stegService.håndterSteg(behandling.id, lagBehandlingsstegFaktaDto(), SecureLog.Context.tom())
+
+        behandlingskontrollService.finnAktivStegstilstand(behandling.id)?.behandlingssteg shouldBe Behandlingssteg.VILKÅRSVURDERING
+
+        shouldThrow<Feil> {
+            stegService.håndterSteg(
+                behandling.id,
+                BehandlingsstegForeslåVedtaksstegDto(
+                    fritekstavsnitt = FritekstavsnittDto(
+                        perioderMedTekst = listOf(
+                            PeriodeMedTekstDto(
+                                periode = fom til tom,
+                                faktaAvsnitt = "avsnitt",
+                            ),
+                        ),
+                    ),
+                ),
+                SecureLog.Context.tom(),
+            )
+        }.message shouldBe "Du har gjort en endring i tidligere steg som gjør at vilkår må vurderes på nytt."
     }
 
     private fun lagBehandlingsstegstilstand(
