@@ -56,7 +56,8 @@ class ApiExceptionHandler {
             error("En håndtert feil har oppstått: {}", feil.melding, feil)
         }
         val status = when (feil) {
-            is ModellFeil.UgyldigOperasjonException, is ModellFeil.UtenforScopeException -> HttpStatus.INTERNAL_SERVER_ERROR
+            is ModellFeil.UgyldigOperasjonException -> HttpStatus.INTERNAL_SERVER_ERROR
+            is ModellFeil.UtenforScopeException -> HttpStatus.METHOD_NOT_ALLOWED
             is ModellFeil.IngenTilgangException -> HttpStatus.FORBIDDEN
         }
         return ResponseEntity.status(status).body(ErrorDto(feil.melding))
