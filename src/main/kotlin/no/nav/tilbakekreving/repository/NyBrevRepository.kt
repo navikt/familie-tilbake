@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.repository
 
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.entities.BrevEntity
 import no.nav.tilbakekreving.entities.Brevtype
 import no.nav.tilbakekreving.entities.VarselbrevEntity
@@ -17,22 +18,22 @@ import kotlin.collections.singleOrNull
 class NyBrevRepository(
     private val jdbcTemplate: JdbcTemplate,
 ) {
-    fun hentBrev(tilbakekrevingId: String): List<BrevEntity> {
+    fun hentBrev(tilbakekrevingId: String, logContext: SecureLog.Context): List<BrevEntity> {
         return jdbcTemplate.query(
             "SELECT * FROM tilbakekreving_brev WHERE tilbakekreving_ref = ?",
             FieldConverter.NumericId.convert(tilbakekrevingId),
         ) { resultSet, _ ->
             val id = resultSet[BrevEntityMapper.id]
-            BrevEntityMapper.map(resultSet, hentVarselbrev(id), hentVedtaksbrev(id))
+            BrevEntityMapper.map(resultSet, hentVarselbrev(id, logContext), hentVedtaksbrev(id))
         }
     }
 
-    fun hentVarselbrev(brevId: UUID): VarselbrevEntity? {
+    fun hentVarselbrev(brevId: UUID, logContext: SecureLog.Context): VarselbrevEntity? {
         return jdbcTemplate.query(
             "SELECT * FROM tilbakekreving_varselbrev WHERE brev_ref = ?",
             brevId,
         ) { resultSet, _ ->
-            BrevEntityMapper.VarselbrevEntityMapper.map(resultSet)
+            BrevEntityMapper.VarselbrevEntityMapper.map(resultSet, logContext)
         }.singleOrNull()
     }
 
