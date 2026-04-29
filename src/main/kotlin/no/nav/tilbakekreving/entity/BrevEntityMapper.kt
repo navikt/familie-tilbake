@@ -1,8 +1,5 @@
 package no.nav.tilbakekreving.entity
 
-import no.nav.familie.tilbake.kontrakter.objectMapper
-import no.nav.familie.tilbake.log.SecureLog
-import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.tilbakekreving.entities.BrevEntity
 import no.nav.tilbakekreving.entities.Brevtype
 import no.nav.tilbakekreving.entities.HistorikkReferanseEntity
@@ -16,7 +13,6 @@ object BrevEntityMapper : Entity<BrevEntity, UUID, UUID>(
     BrevEntity::id,
     FieldConverter.UUIDConverter.required(),
 ) {
-    private val log = TracedLogger.getLogger<BrevEntityMapper>()
     val tilbakekrevingRef = field(
         "tilbakekreving_ref",
         { it.tilbakekrevingRef!! },
@@ -87,47 +83,19 @@ object BrevEntityMapper : Entity<BrevEntity, UUID, UUID>(
         val tekstFraSaksbehandler = field(
             "tekst_fra_saksbehandler",
             VarselbrevEntity::tekstFraSaksbehandler,
-            FieldConverter.StringConverter,
+            FieldConverter.StringConverter.required(),
         )
 
-        fun map(resultSet: ResultSet, logContext: SecureLog.Context): VarselbrevEntity? {
-            val tekstFraSaksbehandlerValue = resultSet[tekstFraSaksbehandler]
-            val journalpostIdValue = resultSet[journalpostId]
-
-            if (tekstFraSaksbehandlerValue == null) {
-                SecureLog.medContext(logContext) {
-                    info(
-                        "Fant ugyldig varselbrev {}",
-                        objectMapper.writeValueAsString(
-                            VarselbrevEntity(
-                                id = resultSet[id],
-                                brevRef = resultSet[brevRef],
-                                kravgrunnlagRef = HistorikkReferanseEntity(resultSet[kravgrunnlagRef]),
-                                journalpostId = journalpostIdValue,
-                                sendtTid = resultSet[sendtTid],
-                                ansvarligSaksbehandlerIdent = resultSet[ansvarligSaksbehandlerIdent],
-                                fristForUttalelse = resultSet[fristForUttalelse],
-                                tekstFraSaksbehandler = tekstFraSaksbehandlerValue ?: "Mangler",
-                            ),
-                        ),
-                    )
-                }
-                if (journalpostIdValue == "12345" || journalpostIdValue == null) {
-                    log.medContext(logContext) {
-                        info("Migrerer bort varselbrev som ikke er sendt")
-                    }
-                    return null
-                }
-            }
+        fun map(resultSet: ResultSet): VarselbrevEntity {
             return VarselbrevEntity(
                 id = resultSet[id],
                 brevRef = resultSet[brevRef],
                 kravgrunnlagRef = HistorikkReferanseEntity(resultSet[kravgrunnlagRef]),
-                journalpostId = journalpostIdValue,
+                journalpostId = resultSet[journalpostId],
                 sendtTid = resultSet[sendtTid],
                 ansvarligSaksbehandlerIdent = resultSet[ansvarligSaksbehandlerIdent],
                 fristForUttalelse = resultSet[fristForUttalelse],
-                tekstFraSaksbehandler = tekstFraSaksbehandlerValue!!,
+                tekstFraSaksbehandler = resultSet[tekstFraSaksbehandler],
             )
         }
     }
