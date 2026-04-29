@@ -112,7 +112,7 @@ object BrevEntityMapper : Entity<BrevEntity, UUID, UUID>(
                         ),
                     )
                 }
-                if (journalpostIdValue == null) {
+                if (journalpostIdValue == "12345") {
                     log.medContext(logContext) {
                         info("Migrerer bort varselbrev som ikke er sendt")
                     }
