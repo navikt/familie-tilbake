@@ -230,7 +230,7 @@ class TilBehandlingTest {
         val exception = shouldThrow<ModellFeil.UgyldigOperasjonException> {
             tilbakekreving.håndter(ANSVARLIG_BESLUTTER, fatteVedtakVurdering())
         }
-        exception.melding shouldBe "Forventet ikke totrinn vurdering i AVSLUTTET"
+        exception.melding shouldBe "Forventet ikke totrinn vurdering i JOURNALFØR_VEDTAK"
     }
 
     private fun tilbakekrevingTilGodkjenning(
