@@ -94,10 +94,10 @@ object BrevEntityMapper : Entity<BrevEntity, UUID, UUID>(
             val tekstFraSaksbehandlerValue = resultSet[tekstFraSaksbehandler]
             val journalpostIdValue = resultSet[journalpostId]
 
-            if (tekstFraSaksbehandlerValue == null && journalpostIdValue == null) {
+            if (tekstFraSaksbehandlerValue == null) {
                 SecureLog.medContext(logContext) {
                     info(
-                        "Fjerner ugyldig varselbrev {}",
+                        "Fant ugyldig varselbrev {}",
                         objectMapper.writeValueAsString(
                             VarselbrevEntity(
                                 id = resultSet[id],
@@ -112,10 +112,12 @@ object BrevEntityMapper : Entity<BrevEntity, UUID, UUID>(
                         ),
                     )
                 }
-                log.medContext(logContext) {
-                    info("Migrerer bort varselbrev som ikke er sendt")
+                if (journalpostIdValue == null) {
+                    log.medContext(logContext) {
+                        info("Migrerer bort varselbrev som ikke er sendt")
+                    }
+                    return null
                 }
-                return null
             }
             return VarselbrevEntity(
                 id = resultSet[id],
