@@ -16,9 +16,6 @@ tilbakekreving:
           - ${rolle.teamfamilie.forvalter}
         beslutter:
           - ${rolle.teamfamilie.forvalter}
-  toggles:
-    ny-modell:
-      Vedtaksbrev: true
   bigQuery:
     prosjektId: dummy
     dataset: dummy

@@ -44,7 +44,6 @@ tilbakekreving:
     - LOCAL_TILLEGGSSTONADER.KRAVGRUNNLAG
   toggles:
     varselbrev-enabled: true
-    Vedtaksbrev: true
   tilgangsstyring:
     ts:
       grupper:
