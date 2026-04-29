@@ -15,6 +15,7 @@ object JournalførVedtak : Tilstand {
     override fun behandlingsstatus(behandling: Behandling): Behandlingsstatus = Behandlingsstatus.JOURNALFØR_VEDTAK
 
     override fun entering(tilbakekreving: Tilbakekreving) {
+        tilbakekreving.opprettVedtaksbrev()
         tilbakekreving.trengerVedtaksbrevJournalføring()
     }
 
