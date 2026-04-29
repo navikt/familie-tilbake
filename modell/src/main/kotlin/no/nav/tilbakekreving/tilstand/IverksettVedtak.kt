@@ -28,7 +28,6 @@ object IverksettVedtak : Tilstand {
         tilbakekreving: Tilbakekreving,
         iverksettelseHendelse: IverksettelseHendelse,
     ) {
-        tilbakekreving.opprettVedtaksbrev()
         tilbakekreving.byttTilstand(JournalførVedtak)
     }
 }

@@ -20,6 +20,9 @@ object Avsluttet : Tilstand {
     }
 
     override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse) {
+        if (tilbakekreving.id == "0000007902" && tilbakekreving.brevHistorikk.sisteVedtaksbrev() == null) {
+            tilbakekreving.byttTilstand(JournalførVedtak)
+        }
         tilbakekreving.oppdaterPåminnelsestidspunkt()
     }
 }

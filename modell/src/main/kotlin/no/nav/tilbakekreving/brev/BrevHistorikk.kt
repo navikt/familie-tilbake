@@ -37,6 +37,8 @@ class BrevHistorikk(
         return historikk.filterIsInstance<Varselbrev>().lastOrNull()
     }
 
+    fun sisteVedtaksbrev(): Vedtaksbrev? = historikk.filterIsInstance<Vedtaksbrev>().lastOrNull()
+
     fun tilEntity(tilbakekrevingId: String): List<BrevEntity> {
         return historikk.map { it.tilEntity(tilbakekrevingId) }
     }
