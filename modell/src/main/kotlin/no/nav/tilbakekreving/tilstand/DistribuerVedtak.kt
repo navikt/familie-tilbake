@@ -1,7 +1,6 @@
 package no.nav.tilbakekreving.tilstand
 
 import no.nav.tilbakekreving.Tilbakekreving
-import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
@@ -20,11 +19,7 @@ object DistribuerVedtak : Tilstand {
     }
 
     override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse) {
-        if (tilbakekreving.features[Toggle.Vedtaksbrev]) {
-            tilbakekreving.trengerVedtaksbrevDistribusjon()
-        } else {
-            tilbakekreving.byttTilstand(Avsluttet)
-        }
+        tilbakekreving.trengerVedtaksbrevDistribusjon()
     }
 
     override fun håndter(

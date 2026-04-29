@@ -3,7 +3,6 @@ package no.nav.tilbakekreving.e2e
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
 import no.nav.tilbakekreving.Tilbakekreving
-import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
@@ -44,7 +43,7 @@ class FrontendE2ETest {
             opprettTilbakekrevingHendelse,
             BigQueryServiceStub(),
             EndringObservatørOppsamler(),
-            features = defaultFeatures(Toggle.Vedtaksbrev to true),
+            features = defaultFeatures(),
         )
 
         tilbakekreving.håndter(kravgrunnlag())

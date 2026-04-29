@@ -5,14 +5,12 @@ import no.nav.tilbakekreving.ANSVARLIG_BESLUTTER
 import no.nav.tilbakekreving.ANSVARLIG_SAKSBEHANDLER
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
 import no.nav.tilbakekreving.Tilbakekreving
-import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.behov.VedtaksbrevJournalføringBehov
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
-import no.nav.tilbakekreving.brev.Vedtaksbrev
 import no.nav.tilbakekreving.brukerinfoHendelse
 import no.nav.tilbakekreving.defaultFeatures
 import no.nav.tilbakekreving.distribusjon
@@ -47,7 +45,7 @@ class EndringObservatørTest {
                 ytelse = Ytelse.Tilleggsstønad,
             ),
         )
-        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), BehovObservatørOppsamler(), opprettTilbakekrevingHendelse, bigQueryService, endringObservatør, features = defaultFeatures(Toggle.Vedtaksbrev to true))
+        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), BehovObservatørOppsamler(), opprettTilbakekrevingHendelse, bigQueryService, endringObservatør, features = defaultFeatures())
         tilbakekreving.håndter(kravgrunnlag())
         tilbakekreving.håndter(fagsysteminfoHendelse())
         tilbakekreving.håndter(brukerinfoHendelse())
@@ -73,7 +71,7 @@ class EndringObservatørTest {
                 ytelse = Ytelse.Tilleggsstønad,
             ),
         )
-        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), BehovObservatørOppsamler(), opprettTilbakekrevingHendelse, bigQueryService, endringObservatør, features = defaultFeatures(Toggle.Vedtaksbrev to true))
+        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), BehovObservatørOppsamler(), opprettTilbakekrevingHendelse, bigQueryService, endringObservatør, features = defaultFeatures())
         tilbakekreving.håndter(kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(1.januar(2021) til 1.januar(2021)))))
         tilbakekreving.håndter(
             fagsysteminfoHendelse(
@@ -111,7 +109,7 @@ class EndringObservatørTest {
                 ytelse = Ytelse.Tilleggsstønad,
             ),
         )
-        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), behovOppsamler, opprettTilbakekrevingHendelse, bigQueryService, endringObservatør, features = defaultFeatures(Toggle.Vedtaksbrev to true))
+        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), behovOppsamler, opprettTilbakekrevingHendelse, bigQueryService, endringObservatør, features = defaultFeatures())
         tilbakekreving.håndter(kravgrunnlag())
         tilbakekreving.håndter(fagsysteminfoHendelse())
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.status } shouldBe listOf(
@@ -151,7 +149,7 @@ class EndringObservatørTest {
                 ytelse = Ytelse.Tilleggsstønad,
             ),
         )
-        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), behovOppsamler, opprettTilbakekrevingHendelse, bigQueryService, endringObservatør, features = defaultFeatures(Toggle.Vedtaksbrev to true))
+        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), behovOppsamler, opprettTilbakekrevingHendelse, bigQueryService, endringObservatør, features = defaultFeatures())
         tilbakekreving.håndter(kravgrunnlag())
         tilbakekreving.håndter(fagsysteminfoHendelse())
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.status } shouldBe listOf(
@@ -191,7 +189,7 @@ class EndringObservatørTest {
                 ytelse = Ytelse.Tilleggsstønad,
             ),
         )
-        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), behovOppsamler, opprettTilbakekrevingHendelse, bigQueryService, endringObservatør, features = defaultFeatures(Toggle.Vedtaksbrev to true))
+        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), behovOppsamler, opprettTilbakekrevingHendelse, bigQueryService, endringObservatør, features = defaultFeatures())
         tilbakekreving.håndter(kravgrunnlag())
         tilbakekreving.håndter(fagsysteminfoHendelse())
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.status } shouldBe listOf(
