@@ -11,10 +11,13 @@ import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
 import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
+import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.BehandlingHistorikk
 import no.nav.tilbakekreving.behandling.BehandlingObservatør
 import no.nav.tilbakekreving.behandling.Enhet
+import no.nav.tilbakekreving.behandling.UttalelseInfo
+import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
@@ -65,6 +68,7 @@ import no.nav.tilbakekreving.tilstand.SendVarselbrev
 import no.nav.tilbakekreving.tilstand.Start
 import no.nav.tilbakekreving.tilstand.Tilstand
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -578,6 +582,50 @@ class Tilbakekreving internal constructor(
 
     fun hentBehandlingslogg(): List<LogginnslagDto> {
         return behandlingslogg.tilFrontend()
+    }
+
+    fun lagreUttalelse(
+        uttalelseVurdering: UttalelseVurdering,
+        uttalelseInfo: UttalelseInfo?,
+        kommentar: String?,
+        behandler: Behandler,
+    ) {
+        behandlingHistorikk.nåværende().entry.lagreUttalelse(
+            uttalelseVurdering = uttalelseVurdering,
+            uttalelseInfo = uttalelseInfo,
+            kommentar = kommentar,
+            behandlingslogg = behandlingslogg,
+            behandler = behandler,
+        )
+    }
+
+    fun lagreFristUtsettelse(
+        nyFrist: LocalDate,
+        begrunnelse: String,
+        behandler: Behandler,
+    ) {
+        requireNotNull(brevHistorikk.sisteVarselbrev()) {
+            "Kan ikke utsette frist når forhåndsvarsel ikke er sendt"
+        }
+        behandlingHistorikk.nåværende().entry.lagreFristUtsettelse(
+            nyFrist = nyFrist,
+            begrunnelse = begrunnelse,
+            behandlingslogg = behandlingslogg,
+            behandler = behandler,
+        )
+    }
+
+    fun lagreForhåndsvarselUnntak(
+        begrunnelseForUnntak: BegrunnelseForUnntak,
+        beskrivelse: String,
+        behandler: Behandler,
+    ) {
+        behandlingHistorikk.nåværende().entry.lagreForhåndsvarselUnntak(
+            begrunnelseForUnntak = begrunnelseForUnntak,
+            beskrivelse = beskrivelse,
+            behandler = behandler,
+            behandlingslogg = behandlingslogg,
+        )
     }
 
     fun opprettLoggInnslag(behandlingsloggstype: Behandlingsloggstype, rolle: Rolle, behandler: Behandler, behandlingId: UUID?): LoggInnslag {

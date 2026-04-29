@@ -145,7 +145,9 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
         )
         dokumentController.bestillBrev(bestillBrevDto)
 
-        dokumentController.lagreBrukeruttalelse(behandling.id, case.input)
+        somSaksbehandler("Z999999") {
+            dokumentController.lagreBrukeruttalelse(behandling.id, case.input)
+        }
 
         val forhåndsvarsel = tilbakekrevingService
             .hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
@@ -173,7 +175,9 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
         dokumentController.bestillBrev(bestillBrevDto)
 
         shouldThrow<Exception> {
-            dokumentController.lagreBrukeruttalelse(behandling.id, case.input)
+            somSaksbehandler("Z999999") {
+                dokumentController.lagreBrukeruttalelse(behandling.id, case.input)
+            }
         }.message shouldBe case.forventetFeilmelding
     }
 
@@ -183,7 +187,9 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
         val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
 
-        dokumentController.forhåndsvarselUnntak(behandling.id, case.input)
+        somSaksbehandler("Z999999") {
+            dokumentController.forhåndsvarselUnntak(behandling.id, case.input)
+        }
         val forhåndsvarsel = tilbakekrevingService
             .hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
             .shouldNotBeNull().hentForhåndsvarselFrontendDto()
@@ -211,7 +217,9 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             LocalDate.of(2025, 11, 15),
             "Advokat vil ha mer tid",
         )
-        dokumentController.utsettUttalelseFrist(behandling.id, førsteFrist)
+        somSaksbehandler("Z999999") {
+            dokumentController.utsettUttalelseFrist(behandling.id, førsteFrist)
+        }
 
         val etterFørsteUtsettelse = tilbakekrevingService
             .hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
@@ -225,7 +233,9 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             LocalDate.of(2025, 11, 25),
             "Advokat vil ha enda mer tid",
         )
-        dokumentController.utsettUttalelseFrist(behandling.id, andreFrist)
+        somSaksbehandler("Z999999") {
+            dokumentController.utsettUttalelseFrist(behandling.id, andreFrist)
+        }
 
         val etterAndreUtsettelse = tilbakekrevingService
             .hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)

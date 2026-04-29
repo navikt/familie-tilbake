@@ -76,28 +76,29 @@ class IverksettVedtakTest {
         endringOppsamler: EndringObservatørOppsamler = EndringObservatørOppsamler(),
     ): Tilbakekreving {
         val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), oppsamler, opprettTilbakekrevingHendelse, bigQueryService, endringOppsamler, features = defaultFeatures())
+        val behandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
         tilbakekreving.apply {
             håndter(kravgrunnlag())
             håndter(fagsysteminfoHendelse())
             håndter(brukerinfoHendelse())
-            behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, null, "")
+            lagreUttalelse(UttalelseVurdering.JA, null, "", behandler)
             håndter(
-                Behandler.Saksbehandler("Ansvarlig saksbehandler"),
+                behandler,
                 faktastegVurdering(),
             )
             håndter(
-                Behandler.Saksbehandler("Ansvarlig saksbehandler"),
+                behandler,
                 periode = 1.januar(2021) til 31.januar(2021),
                 vurdering = Foreldelsesteg.Vurdering.IkkeForeldet(
                     "Siste utbetaling er innenfor 3 år",
                 ),
             )
             håndter(
-                Behandler.Saksbehandler("Ansvarlig saksbehandler"),
+                behandler,
                 periode = 1.januar(2021) til 31.januar(2021),
                 vurdering = forårsaketAvNav().burdeForstått(aktsomhet = uaktsomt(skalIkkeUnnlates(), ingenReduksjon())),
             )
-            håndterForeslåVedtak(Behandler.Saksbehandler("Ansvarlig saksbehandler"))
+            håndterForeslåVedtak(behandler)
         }
         return tilbakekreving
     }

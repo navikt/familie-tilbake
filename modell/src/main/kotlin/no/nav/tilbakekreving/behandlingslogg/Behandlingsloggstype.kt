@@ -134,4 +134,22 @@ enum class Behandlingsloggstype(
         type = Historikkinnslagstype.HENDELSE,
         steg = null,
     ),
+    UTSETT_UTTALELSESFRIST(
+        tittel = "Frist for uttalelse er utsatt",
+        tekst = null,
+        type = Historikkinnslagstype.HENDELSE,
+        steg = null,
+    ),
+    BRUKER_UTTALELSE(
+        tittel = "Bruker uttalelse er registrert",
+        tekst = null,
+        type = Historikkinnslagstype.HENDELSE,
+        steg = null,
+    ),
+    UNNTAK_FOR_UTTALELSE(
+        tittel = "Unntak for uttalelse er registrert",
+        tekst = null,
+        type = Historikkinnslagstype.HENDELSE,
+        steg = null,
+    ),
 }

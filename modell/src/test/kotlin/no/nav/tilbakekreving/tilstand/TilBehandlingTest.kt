@@ -214,10 +214,11 @@ class TilBehandlingTest {
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
         val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingHendelse, ANSVARLIG_SAKSBEHANDLER)
         tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, faktastegVurdering())
-        tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(
+        tilbakekreving.lagreUttalelse(
             uttalelseVurdering = UttalelseVurdering.UNNTAK_ALLEREDE_UTTALT_SEG,
             uttalelseInfo = null,
             kommentar = "Trenger ikke forhåndsvarsel i test lol",
+            Behandler.Saksbehandler("Ansvarlig saksbehandler"),
         )
         tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
         tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar(2021) til 31.januar(2021), forårsaketAvNav().burdeForstått())
@@ -238,7 +239,7 @@ class TilBehandlingTest {
         opprettTilbakekrevingHendelse: OpprettTilbakekrevingHendelse,
         behandler: Behandler,
     ) = tilbakekrevingTilBehandling(oppsamler, opprettTilbakekrevingHendelse).apply {
-        behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, null, "")
+        lagreUttalelse(UttalelseVurdering.JA, null, "", Behandler.Saksbehandler("Ansvarlig saksbehandler"))
         håndter(
             behandler,
             faktastegVurdering(),

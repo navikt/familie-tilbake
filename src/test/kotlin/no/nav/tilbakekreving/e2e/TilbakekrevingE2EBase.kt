@@ -136,14 +136,14 @@ open class TilbakekrevingE2EBase : E2EBase() {
     ) {
         val tilbakekrevingId = tilbakekrevingService.hentTilbakekreving(behandlingId)!!.id
         tilbakekrevingService.hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
-            val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
             if (uttalelse == null) {
-                behandling.lagreUttalelse(UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL, null, "")
+                tilbakekreving.lagreUttalelse(UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL, null, "", Behandler.Saksbehandler("22222222"))
             } else {
-                behandling.lagreUttalelse(
+                tilbakekreving.lagreUttalelse(
                     UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL,
                     UttalelseInfo(UUID.randomUUID(), LocalDate.now(), "Reddit", uttalelse),
                     null,
+                    Behandler.Saksbehandler("22222222"),
                 )
             }
         }

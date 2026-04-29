@@ -42,7 +42,7 @@ class BehandlingTest {
     @Test
     fun `sett behandling på vent`() {
         val behandling = behandling()
-        behandling.lagreUttalelse(UttalelseVurdering.JA, null, null)
+        behandling.lagreUttalelse(UttalelseVurdering.JA, null, null, behandlingslogg, ansvarligSaksbehandler)
         behandling.settPåVent(Venteårsak.MANGLER_STØTTE, LocalDate.MAX, "Begrunnelse")
 
         val faktasteg = faktastegVurdering(periode)
@@ -125,7 +125,7 @@ class BehandlingTest {
         val kravgrunnlag = kravgrunnlag()
         val behandling = behandling(kravgrunnlag)
         behandling.apply {
-            lagreUttalelse(UttalelseVurdering.JA, null, null)
+            lagreUttalelse(UttalelseVurdering.JA, null, null, behandlingslogg, ansvarligSaksbehandler)
         }
 
         val faktasteg = faktastegVurdering(periode)
@@ -145,7 +145,7 @@ class BehandlingTest {
     fun `flytt behandling tilbake til fakta - nullstiller vilkårsvurderingen`() {
         val behandling = behandling()
         behandling.apply {
-            lagreUttalelse(UttalelseVurdering.JA, null, null)
+            lagreUttalelse(UttalelseVurdering.JA, null, null, behandlingslogg, ansvarligSaksbehandler)
         }
 
         val faktasteg = faktastegVurdering(periode)
@@ -168,7 +168,12 @@ class BehandlingTest {
     fun `vedtak kan endres etter alle tilbakeførte vurderinger er gjennomgått`() {
         val behandling = behandling()
         behandling.håndter(ansvarligSaksbehandler, faktastegVurdering(), behandlingObservatør, behandlingslogg)
-        behandling.lagreForhåndsvarselUnntak(BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG, "Trenger ikke forhåndsvarsel i test lol")
+        behandling.lagreForhåndsvarselUnntak(
+            BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
+            "Trenger ikke forhåndsvarsel i test lol",
+            ansvarligSaksbehandler,
+            behandlingslogg,
+        )
         behandling.håndter(ansvarligSaksbehandler, periode, foreldelseVurdering(), behandlingObservatør, behandlingslogg)
         behandling.håndter(ansvarligSaksbehandler, periode, forårsaketAvNav().godTro(), behandlingObservatør, behandlingslogg)
         behandling.tilFrontendDto(TilBehandling, ansvarligSaksbehandler, true).kanEndres shouldBe true
@@ -204,7 +209,12 @@ class BehandlingTest {
     fun `andre saksbehandlere skal kunne gjøre vurderinger på vedtak som er underkjent`() {
         val behandling = behandling()
         behandling.håndter(ansvarligSaksbehandler, faktastegVurdering(), behandlingObservatør, behandlingslogg)
-        behandling.lagreForhåndsvarselUnntak(BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG, "Trenger ikke forhåndsvarsel i test lol")
+        behandling.lagreForhåndsvarselUnntak(
+            BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
+            "Trenger ikke forhåndsvarsel i test lol",
+            ansvarligSaksbehandler,
+            behandlingslogg,
+        )
         behandling.håndter(ansvarligSaksbehandler, periode, foreldelseVurdering(), behandlingObservatør, behandlingslogg)
         behandling.håndter(ansvarligSaksbehandler, periode, forårsaketAvNav().godTro(), behandlingObservatør, behandlingslogg)
         behandling.tilFrontendDto(TilBehandling, ansvarligSaksbehandler, true).kanEndres shouldBe true
@@ -226,7 +236,12 @@ class BehandlingTest {
     fun `behandling sendt til godkjenning etter underkjenning skal ikke beholde vurdering`() {
         val behandling = behandling()
         behandling.håndter(ansvarligSaksbehandler, faktastegVurdering(), behandlingObservatør, behandlingslogg)
-        behandling.lagreForhåndsvarselUnntak(BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG, "Trenger ikke forhåndsvarsel i test lol")
+        behandling.lagreForhåndsvarselUnntak(
+            BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
+            "Trenger ikke forhåndsvarsel i test lol",
+            ansvarligSaksbehandler,
+            behandlingslogg,
+        )
         behandling.håndter(ansvarligSaksbehandler, periode, foreldelseVurdering(), behandlingObservatør, behandlingslogg)
         behandling.håndter(ansvarligSaksbehandler, periode, forårsaketAvNav().godTro(), behandlingObservatør, behandlingslogg)
         behandling.tilFrontendDto(TilBehandling, ansvarligSaksbehandler, true).kanEndres shouldBe true
@@ -281,7 +296,12 @@ class BehandlingTest {
     fun `kan ikke sende tilbake til beslutter om en av vurderingene ikke er fullstendige`() {
         val behandling = behandling()
         behandling.håndter(ansvarligSaksbehandler, faktastegVurdering(), behandlingObservatør, behandlingslogg)
-        behandling.lagreForhåndsvarselUnntak(BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG, "Trenger ikke forhåndsvarsel i test lol")
+        behandling.lagreForhåndsvarselUnntak(
+            BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
+            "Trenger ikke forhåndsvarsel i test lol",
+            ansvarligSaksbehandler,
+            behandlingslogg,
+        )
         behandling.håndter(ansvarligSaksbehandler, periode, foreldelseVurdering(), behandlingObservatør, behandlingslogg)
         behandling.håndter(ansvarligSaksbehandler, periode, forårsaketAvNav().godTro(), behandlingObservatør, behandlingslogg)
         behandling.håndterForeslåVedtak(ansvarligSaksbehandler, behandlingObservatør, behandlingslogg)
@@ -305,7 +325,12 @@ class BehandlingTest {
     fun `kan ikke sende tilbake til beslutter om en av vurderingene ikke er fullstendige - flere steg`() {
         val behandling = behandling()
         behandling.håndter(ansvarligSaksbehandler, faktastegVurdering(), behandlingObservatør, behandlingslogg)
-        behandling.lagreForhåndsvarselUnntak(BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG, "Trenger ikke forhåndsvarsel i test lol")
+        behandling.lagreForhåndsvarselUnntak(
+            BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
+            "Trenger ikke forhåndsvarsel i test lol",
+            ansvarligSaksbehandler,
+            behandlingslogg,
+        )
         behandling.håndter(ansvarligSaksbehandler, periode, foreldelseVurdering(), behandlingObservatør, behandlingslogg)
         behandling.håndter(ansvarligSaksbehandler, periode, forårsaketAvNav().godTro(), behandlingObservatør, behandlingslogg)
         behandling.håndterForeslåVedtak(ansvarligSaksbehandler, behandlingObservatør, behandlingslogg)

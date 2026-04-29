@@ -18,7 +18,7 @@ class ForhåndsvarselTest {
                 hvorBrukerenUttalteSeg = "Reddit",
                 uttalelseBeskrivelse = "Typisk reddit kommentar",
             ),
-            kommentar = "Vet ærlig talt ikke hva hen prater om.",
+            kommentar = null,
         )
 
         forhåndsvarsel.meldingerTilSaksbehandler() shouldBe setOf(MeldingTilSaksbehandler.BEGRUNN_BRUKERS_UTTALELSE)
@@ -34,8 +34,13 @@ class ForhåndsvarselTest {
         )
         forhåndsvarsel.lagreUttalelse(
             UttalelseVurdering.UNNTAK_ALLEREDE_UTTALT_SEG,
-            uttalelseInfo = null,
-            kommentar = "",
+            uttalelseInfo = UttalelseInfo(
+                id = UUID.randomUUID(),
+                uttalelsesdato = LocalDate.now(),
+                hvorBrukerenUttalteSeg = "Reddit",
+                uttalelseBeskrivelse = "Typisk reddit kommentar",
+            ),
+            kommentar = null,
         )
         forhåndsvarsel.underkjennSteget()
 
