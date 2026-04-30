@@ -44,7 +44,9 @@ class DistribuerVedtaTest {
             JournalføringHendelse(
                 brevId = brevId,
                 journalpostId = "123",
+                dokumentInfoId = "321",
                 behandlingId = UUID.randomUUID(),
+                fagsakId = tilbakekreving.eksternFagsak.eksternId,
             ),
         )
         tilbakekreving.tilstand shouldBe DistribuerVedtak
@@ -57,10 +59,13 @@ class DistribuerVedtaTest {
         val tilbakekreving = tilbakekrevingKlarTilJournalføring(opprettTilbakekrevingEvent, oppsamler)
         val brevId = (oppsamler.behovListe.last() as VedtaksbrevJournalføringBehov).brevId
         tilbakekreving.håndter(
-            journalføring(brevId),
+            journalføring(brevId, tilbakekreving.eksternFagsak.eksternId),
         )
         tilbakekreving.håndter(
-            distribusjon(),
+            distribusjon(
+                brevId = brevId,
+                fagsakId = tilbakekreving.eksternFagsak.eksternId,
+            ),
         )
         tilbakekreving.tilstand shouldBe Avsluttet
     }
@@ -72,7 +77,10 @@ class DistribuerVedtaTest {
         val tilbakekreving = tilbakekrevingKlarTilJournalføring(opprettTilbakekrevingEvent, oppsamler)
         val brevId = (oppsamler.behovListe.last() as VedtaksbrevJournalføringBehov).brevId
         tilbakekreving.håndter(
-            journalføring(brevId),
+            journalføring(
+                brevId,
+                fagsakId = tilbakekreving.eksternFagsak.eksternId,
+            ),
         )
 
         tilbakekreving.håndter(Påminnelse(LocalDateTime.now()))

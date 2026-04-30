@@ -9,10 +9,12 @@ import java.util.UUID
 data class Vedtaksbrev(
     override val id: UUID,
     override var journalpostId: String?,
+    override var dokumentInfoId: String?,
     override var sendtTid: LocalDate,
 ) : Brev {
-    override fun brevSendt(journalpostId: String) {
+    override fun brevSendt(journalpostId: String, dokumentInfoId: String) {
         this.journalpostId = journalpostId
+        this.dokumentInfoId = dokumentInfoId
     }
 
     override fun tilEntity(tilbakekrevingId: String): BrevEntity {
@@ -22,9 +24,10 @@ data class Vedtaksbrev(
             brevtype = Brevtype.VEDTAKSBREV,
             varselbrevEntity = null,
             vedtaksbrevEntity = VedtaksbrevEntity(
-                id = UUID.randomUUID(),
+                id = id,
                 brevRef = id,
                 journalpostId = journalpostId,
+                dokumentInfoId = dokumentInfoId,
                 sendtTid = sendtTid,
             ),
         )
@@ -35,6 +38,7 @@ data class Vedtaksbrev(
             return Vedtaksbrev(
                 id = UUID.randomUUID(),
                 journalpostId = null,
+                dokumentInfoId = null,
                 sendtTid = LocalDate.now(),
             )
         }

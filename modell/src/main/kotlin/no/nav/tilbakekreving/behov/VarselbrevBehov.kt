@@ -28,6 +28,7 @@ data class VarselbrevJournalføringBehov(
 data class VarselbrevDistribusjonBehov(
     val brevId: UUID,
     val behandlingId: UUID,
+    val fagsakId: String,
     val journalpostId: String,
     val ytelse: Ytelse,
     val behandlerIdent: String,

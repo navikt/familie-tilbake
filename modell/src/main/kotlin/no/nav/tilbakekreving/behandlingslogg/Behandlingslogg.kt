@@ -46,6 +46,8 @@ data class Behandlingslogg(
                 tekst = it.behandlingsloggstype.tekst,
                 steg = it.behandlingsloggstype.steg.toString(),
                 opprettetTid = it.opprettetTid.atOffset(ZoneOffset.UTC),
+                journalpostId = it.brevRef?.entry?.journalpostId,
+                dokumentInfoId = it.brevRef?.entry?.dokumentInfoId,
             )
         }
     }

@@ -7,9 +7,10 @@ import java.util.UUID
 
 sealed interface Brev : Historikk.HistorikkInnslag<UUID> {
     var journalpostId: String?
+    var dokumentInfoId: String?
     var sendtTid: LocalDate
 
-    fun brevSendt(journalpostId: String)
+    fun brevSendt(journalpostId: String, dokumentInfoId: String)
 
     fun tilEntity(tilbakekrevingId: String): BrevEntity
 }

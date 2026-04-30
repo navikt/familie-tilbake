@@ -27,7 +27,10 @@ object JournalførVedtak : Tilstand {
         tilbakekreving: Tilbakekreving,
         journalføringHendelse: JournalføringHendelse,
     ) {
-        tilbakekreving.brevHistorikk.entry(journalføringHendelse.brevId).brevSendt(journalføringHendelse.journalpostId)
+        tilbakekreving.brevHistorikk.entry(journalføringHendelse.brevId).brevSendt(
+            journalpostId = journalføringHendelse.journalpostId,
+            dokumentInfoId = journalføringHendelse.dokumentInfoId,
+        )
         tilbakekreving.byttTilstand(DistribuerVedtak)
     }
 }

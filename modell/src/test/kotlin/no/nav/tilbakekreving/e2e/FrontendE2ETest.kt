@@ -6,6 +6,7 @@ import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
+import no.nav.tilbakekreving.behov.VedtaksbrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.VedtaksbrevJournalføringBehov
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.brukerinfoHendelse
@@ -60,7 +61,9 @@ class FrontendE2ETest {
                 varselbrevId = varselbrevId,
                 behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id,
                 journalpostId = "1234",
+                dokumentInfoId = "321",
                 behandlerIdent = behandler.ident,
+                fagsakId = tilbakekreving.eksternFagsak.eksternId,
             ),
         )
 
@@ -68,6 +71,8 @@ class FrontendE2ETest {
             VarselbrevDistribueringHendelse(
                 behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id,
                 behandlerIdent = behandler.ident,
+                brevId = varselbrevId,
+                fagsakId = tilbakekreving.eksternFagsak.eksternId,
             ),
         )
         tilbakekreving.lagreUttalelse(UttalelseVurdering.JA, null, null, behandler)
@@ -94,11 +99,19 @@ class FrontendE2ETest {
             JournalføringHendelse(
                 brevId = (behovOppsamler.behovListe.last() as VedtaksbrevJournalføringBehov).brevId,
                 journalpostId = "123",
+                dokumentInfoId = "321",
                 behandlingId = UUID.randomUUID(),
+                fagsakId = tilbakekreving.eksternFagsak.eksternId,
             ),
         )
         tilbakekreving.frontendDtoForBehandling(behandler, true).status shouldBe Behandlingsstatus.DISTRIUBER_VEDTAK
-        tilbakekreving.håndter(DistribusjonHendelse(bestillingsId = "1234", behandlingId = UUID.randomUUID()))
+        tilbakekreving.håndter(
+            DistribusjonHendelse(
+                behandlingId = UUID.randomUUID(),
+                brevId = (behovOppsamler.behovListe.last() as VedtaksbrevDistribusjonBehov).brevId,
+                fagsakId = tilbakekreving.eksternFagsak.eksternId,
+            ),
+        )
         tilbakekreving.frontendDtoForBehandling(behandler, true).status shouldBe Behandlingsstatus.AVSLUTTET
     }
 }

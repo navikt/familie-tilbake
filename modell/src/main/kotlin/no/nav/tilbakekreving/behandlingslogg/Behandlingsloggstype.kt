@@ -116,8 +116,8 @@ enum class Behandlingsloggstype(
         type = Historikkinnslagstype.HENDELSE,
         steg = null,
     ),
-    DOKUMENT_JOURNALFØRT(
-        tittel = "Dokument journalført",
+    VEDTAKSBREV_JOURNALFØRT(
+        tittel = "Vedtksbrev journalført",
         tekst = null,
         type = Historikkinnslagstype.HENDELSE,
         steg = null,

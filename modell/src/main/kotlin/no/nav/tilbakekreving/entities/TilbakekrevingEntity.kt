@@ -66,7 +66,7 @@ data class TilbakekrevingEntity(
 
         val behandlingslogg = Behandlingslogg(
             historikk = loggInnlagEntities.map {
-                it.fraEntity()
+                it.fraEntity(brevHistorikk, eksternFagsak.eksternId)
             }.toMutableList(),
         )
 

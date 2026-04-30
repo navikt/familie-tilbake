@@ -36,7 +36,7 @@ class JournalførVedtakTest {
     private val bigQueryService = BigQueryServiceStub()
 
     @Test
-    fun `vedtaksbrev opprettes tilbakekreving skall være i journalføring tilstand når iverksettelse er håndtert`() {
+    fun `tilbakekreving skal være i journalføring tilstand og vedtaksbrev opprettes når iverksettelse er håndtert`() {
         val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
         val tilbakekreving = tilbakekrevingKlarTilJournalføring(opprettTilbakekrevingEvent, oppsamler)
@@ -48,6 +48,7 @@ class JournalførVedtakTest {
             Vedtaksbrev(
                 id = oppsamler.behovListe.filterIsInstance<VedtaksbrevJournalføringBehov>().first().brevId,
                 journalpostId = null,
+                dokumentInfoId = null,
                 sendtTid = LocalDate.now(),
             ),
         )
@@ -86,7 +87,7 @@ class JournalførVedtakTest {
         )
         val brevId = (oppsamler.behovListe.last() as VedtaksbrevJournalføringBehov).brevId
         tilbakekreving.håndter(
-            journalføring(brevId),
+            journalføring(brevId, tilbakekreving.eksternFagsak.eksternId),
         )
         tilbakekreving.tilstand shouldBe DistribuerVedtak
     }

@@ -241,11 +241,13 @@ fun iverksettelse(): IverksettelseHendelse {
     )
 }
 
-fun journalføring(brevId: UUID): JournalføringHendelse =
+fun journalføring(brevId: UUID, fagsakId: String): JournalføringHendelse =
     JournalføringHendelse(
         brevId = brevId,
         journalpostId = "123",
+        dokumentInfoId = "321",
         behandlingId = UUID.randomUUID(),
+        fagsakId = fagsakId,
     )
 
-fun distribusjon(): DistribusjonHendelse = DistribusjonHendelse(bestillingsId = "123", behandlingId = UUID.randomUUID())
+fun distribusjon(brevId: UUID, fagsakId: String): DistribusjonHendelse = DistribusjonHendelse(behandlingId = UUID.randomUUID(), brevId = brevId, fagsakId = fagsakId)
