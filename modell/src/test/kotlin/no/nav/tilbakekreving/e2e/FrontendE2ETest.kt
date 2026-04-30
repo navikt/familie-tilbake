@@ -70,7 +70,7 @@ class FrontendE2ETest {
                 behandlerIdent = behandler.ident,
             ),
         )
-        tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, null, null)
+        tilbakekreving.lagreUttalelse(UttalelseVurdering.JA, null, null, behandler)
 
         tilbakekreving.håndter(behandler, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
         tilbakekreving.håndter(behandler, 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())

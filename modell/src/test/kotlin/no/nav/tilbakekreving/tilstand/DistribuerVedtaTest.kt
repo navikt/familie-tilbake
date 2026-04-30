@@ -88,26 +88,27 @@ class DistribuerVedtaTest {
         endringOppsamler: EndringObservatørOppsamler = EndringObservatørOppsamler(),
     ): Tilbakekreving {
         val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), oppsamler, opprettTilbakekrevingHendelse, bigQueryService, endringOppsamler, features = defaultFeatures())
+        val behandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
         tilbakekreving.apply {
             håndter(kravgrunnlag())
             håndter(fagsysteminfoHendelse())
             håndter(brukerinfoHendelse())
-            behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, null, "")
+            lagreUttalelse(UttalelseVurdering.JA, null, "", behandler)
             håndter(
-                Behandler.Saksbehandler("Ansvarlig saksbehandler"),
+                behandler,
                 faktastegVurdering(),
             )
             håndter(
-                Behandler.Saksbehandler("Ansvarlig saksbehandler"),
+                behandler,
                 periode = 1.januar(2021) til 31.januar(2021),
                 foreldelseVurdering(),
             )
             håndter(
-                Behandler.Saksbehandler("Ansvarlig saksbehandler"),
+                behandler,
                 periode = 1.januar(2021) til 31.januar(2021),
                 vurdering = forårsaketAvBruker().uaktsomt(),
             )
-            håndterForeslåVedtak(Behandler.Saksbehandler("Ansvarlig saksbehandler"))
+            håndterForeslåVedtak(behandler)
             tilbakekreving.håndter(
                 beslutter = Behandler.Saksbehandler("Z999999"),
                 vurderinger = godkjenning(),

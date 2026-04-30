@@ -624,18 +624,36 @@ class Behandling internal constructor(
         uttalelseVurdering: UttalelseVurdering,
         uttalelseInfo: UttalelseInfo?,
         kommentar: String?,
+        behandlingslogg: Behandlingslogg,
+        behandler: Behandler,
     ) {
         forhåndsvarsel.lagreUttalelse(
             uttalelseVurdering = uttalelseVurdering,
             uttalelseInfo = uttalelseInfo,
             kommentar = kommentar,
         )
+
+        behandlingslogg.lagre(
+            opprettLoggInnslag(
+                behandlingsloggstype = Behandlingsloggstype.BRUKER_UTTALELSE,
+                rolle = Rolle.SAKSBEHANDLER,
+                behandler = behandler,
+            ),
+        )
     }
 
-    fun lagreFristUtsettelse(nyFrist: LocalDate, begrunnelse: String) {
+    fun lagreFristUtsettelse(nyFrist: LocalDate, begrunnelse: String, behandlingslogg: Behandlingslogg, behandler: Behandler) {
         forhåndsvarsel.lagreFristUtsettelse(
             nyFrist = nyFrist,
             begrunnelse = begrunnelse,
+        )
+
+        behandlingslogg.lagre(
+            opprettLoggInnslag(
+                behandlingsloggstype = Behandlingsloggstype.UTSETT_UTTALELSESFRIST,
+                rolle = Rolle.SAKSBEHANDLER,
+                behandler = behandler,
+            ),
         )
     }
 
@@ -665,10 +683,20 @@ class Behandling internal constructor(
     fun lagreForhåndsvarselUnntak(
         begrunnelseForUnntak: BegrunnelseForUnntak,
         beskrivelse: String,
+        behandler: Behandler,
+        behandlingslogg: Behandlingslogg,
     ) {
         forhåndsvarsel.lagreForhåndsvarselUnntak(
             begrunnelseForUnntak = begrunnelseForUnntak,
             beskrivelse = beskrivelse,
+        )
+
+        behandlingslogg.lagre(
+            opprettLoggInnslag(
+                behandlingsloggstype = Behandlingsloggstype.UNNTAK_FOR_UTTALELSE,
+                rolle = Rolle.SAKSBEHANDLER,
+                behandler = behandler,
+            ),
         )
     }
 

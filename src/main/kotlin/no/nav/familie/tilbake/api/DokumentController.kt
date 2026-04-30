@@ -3,11 +3,13 @@ package no.nav.familie.tilbake.api
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
 import no.nav.familie.tilbake.behandling.LagreUtkastVedtaksbrevService
+import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.dokumentbestilling.DokumentbehandlingService
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.HenleggelsesbrevService
 import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevService
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevService
 import no.nav.familie.tilbake.kontrakter.Ressurs
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
@@ -189,6 +191,8 @@ class DokumentController(
     ): Ressurs<Nothing?> {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
         if (tilbakekreving != null) {
+            val logContext = SecureLog.Context.fra(tilbakekreving)
+            val saksbehandler = ContextService.hentBehandler(logContext)
             tilgangskontrollService.validerTilgangTilbakekreving(
                 tilbakekreving = tilbakekreving,
                 behandlingId = behandlingId,
@@ -197,7 +201,7 @@ class DokumentController(
                 handling = "Utsette frist på uttalelsen",
             )
             tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving ->
-                forhåndsvarselService.utsettUttalelseFrist(tilbakekreving, dto)
+                forhåndsvarselService.utsettUttalelseFrist(saksbehandler, tilbakekreving, dto)
             }
             return Ressurs.success(null)
         }
@@ -216,6 +220,8 @@ class DokumentController(
     ): Ressurs<Nothing?> {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
         if (tilbakekreving != null) {
+            val logContext = SecureLog.Context.fra(tilbakekreving)
+            val saksbehandler = ContextService.hentBehandler(logContext)
             tilgangskontrollService.validerTilgangTilbakekreving(
                 tilbakekreving = tilbakekreving,
                 behandlingId = behandlingId,
@@ -224,7 +230,7 @@ class DokumentController(
                 handling = "Sender ikke forhåndsvarsel",
             )
             tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving ->
-                forhåndsvarselService.håndterForhåndsvarselUnntak(tilbakekreving, dto)
+                forhåndsvarselService.håndterForhåndsvarselUnntak(tilbakekreving, dto, saksbehandler)
             }
             return Ressurs.success(null)
         }
@@ -324,6 +330,8 @@ class DokumentController(
         @RequestBody brukeruttalelse: BrukeruttalelseDto,
     ): Ressurs<Nothing?> {
         val håndtert = tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving ->
+            val logContext = SecureLog.Context.fra(tilbakekreving)
+            val saksbehandler = ContextService.hentBehandler(logContext)
             tilgangskontrollService.validerTilgangTilbakekreving(
                 tilbakekreving = tilbakekreving,
                 behandlingId = behandlingId,
@@ -331,7 +339,7 @@ class DokumentController(
                 auditLoggerEvent = AuditLoggerEvent.CREATE,
                 handling = "Lagrer brukers uttalelse",
             )
-            forhåndsvarselService.lagreUttalelse(tilbakekreving, brukeruttalelse)
+            forhåndsvarselService.lagreUttalelse(tilbakekreving, brukeruttalelse, saksbehandler)
             true
         }
         if (håndtert == true) {

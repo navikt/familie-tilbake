@@ -116,13 +116,13 @@ class EndringObservatørTest {
             ForenkletBehandlingsstatus.OPPRETTET,
         )
         tilbakekreving.håndter(brukerinfoHendelse())
-        tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, null, "")
+        tilbakekreving.lagreUttalelse(UttalelseVurdering.JA, null, "", ANSVARLIG_SAKSBEHANDLER)
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.status } shouldBe listOf(
             ForenkletBehandlingsstatus.OPPRETTET,
             ForenkletBehandlingsstatus.TIL_BEHANDLING,
         )
         tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, faktastegVurdering())
-        tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, null, "")
+        tilbakekreving.lagreUttalelse(UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, null, "", ANSVARLIG_SAKSBEHANDLER)
         tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
         tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
         tilbakekreving.håndterForeslåVedtak(ANSVARLIG_SAKSBEHANDLER)
@@ -156,13 +156,14 @@ class EndringObservatørTest {
             ForenkletBehandlingsstatus.OPPRETTET,
         )
         tilbakekreving.håndter(brukerinfoHendelse())
-        tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, null, "")
+        tilbakekreving.lagreUttalelse(UttalelseVurdering.JA, null, "", ANSVARLIG_SAKSBEHANDLER)
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.status } shouldBe listOf(
             ForenkletBehandlingsstatus.OPPRETTET,
             ForenkletBehandlingsstatus.TIL_BEHANDLING,
         )
+
         tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, faktastegVurdering())
-        tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, null, "")
+        tilbakekreving.lagreUttalelse(UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, null, "", ANSVARLIG_SAKSBEHANDLER)
         tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
         tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
         tilbakekreving.håndterForeslåVedtak(ANSVARLIG_SAKSBEHANDLER)
@@ -196,13 +197,13 @@ class EndringObservatørTest {
             ForenkletBehandlingsstatus.OPPRETTET,
         )
         tilbakekreving.håndter(brukerinfoHendelse())
-        tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, null, "")
+        tilbakekreving.lagreUttalelse(UttalelseVurdering.JA, null, "", ANSVARLIG_SAKSBEHANDLER)
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.status } shouldBe listOf(
             ForenkletBehandlingsstatus.OPPRETTET,
             ForenkletBehandlingsstatus.TIL_BEHANDLING,
         )
         tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, faktastegVurdering())
-        tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, null, "")
+        tilbakekreving.lagreUttalelse(UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, null, "", ANSVARLIG_SAKSBEHANDLER)
         tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
         tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
         tilbakekreving.håndterForeslåVedtak(ANSVARLIG_SAKSBEHANDLER)

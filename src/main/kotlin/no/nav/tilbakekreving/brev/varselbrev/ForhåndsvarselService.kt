@@ -43,6 +43,7 @@ import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.DokprodTilHtml
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.DokumentKlasse
 import no.nav.tilbakekreving.pdf.dokumentbestilling.varsel.TekstformatererVarselbrev
 import no.nav.tilbakekreving.pdf.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
+import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.UUID
@@ -96,7 +97,7 @@ class ForhåndsvarselService(
         tilbakekreving.trengerVarselbrev(bestillBrevDto.fritekst)
     }
 
-    fun lagreUttalelse(tilbakekreving: Tilbakekreving, brukeruttalelse: BrukeruttalelseDto) {
+    fun lagreUttalelse(tilbakekreving: Tilbakekreving, brukeruttalelse: BrukeruttalelseDto, behandler: Behandler) {
         val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
         when (brukeruttalelse.harBrukerUttaltSeg) {
             HarBrukerUttaltSeg.JA_ETTER_FORHÅNDSVARSEL, HarBrukerUttaltSeg.UNNTAK_ALLEREDE_UTTALT_SEG -> {
@@ -107,10 +108,11 @@ class ForhåndsvarselService(
                         "Det kreves uttalelsedetaljer når brukeren har uttalet seg. uttalelsedetaljer var tom"
                     }
                 }[0]
-                behandling.lagreUttalelse(
+                tilbakekreving.lagreUttalelse(
                     uttalelseVurdering = UttalelseVurdering.valueOf(brukeruttalelse.harBrukerUttaltSeg.name),
                     uttalelseInfo = UttalelseInfo(UUID.randomUUID(), uttalelsedetaljer.uttalelsesdato, uttalelsedetaljer.hvorBrukerenUttalteSeg, uttalelsedetaljer.uttalelseBeskrivelse),
                     kommentar = null,
+                    behandler = behandler,
                 )
             }
             HarBrukerUttaltSeg.NEI_ETTER_FORHÅNDSVARSEL, HarBrukerUttaltSeg.UNNTAK_INGEN_UTTALELSE -> {
@@ -120,10 +122,11 @@ class ForhåndsvarselService(
                     require(it.isNotBlank()) { "Det kreves en kommentar når brukeren ikke uttaler seg. Kommentar var tom" }
                 }
 
-                behandling.lagreUttalelse(
+                tilbakekreving.lagreUttalelse(
                     uttalelseVurdering = UttalelseVurdering.valueOf(brukeruttalelse.harBrukerUttaltSeg.name),
                     uttalelseInfo = null,
                     kommentar = kommentar,
+                    behandler = behandler,
                 )
             }
             else -> throw IllegalArgumentException("Ukjent verdi for uttalelseVurdering: ${brukeruttalelse.harBrukerUttaltSeg} ")
@@ -135,28 +138,29 @@ class ForhåndsvarselService(
     }
 
     fun utsettUttalelseFrist(
+        behandler: Behandler,
         tilbakekreving: Tilbakekreving,
         fristUtsettelseDto: FristUtsettelseDto,
     ) {
         requireNotNull(tilbakekreving.brevHistorikk.sisteVarselbrev()) {
             "Kan ikke utsette frist når forhåndsvarsel ikke er sendt"
         }
-        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
-        behandling.lagreFristUtsettelse(fristUtsettelseDto.nyFrist!!, fristUtsettelseDto.begrunnelse!!)
+        tilbakekreving.lagreFristUtsettelse(fristUtsettelseDto.nyFrist!!, fristUtsettelseDto.begrunnelse!!, behandler = behandler)
     }
 
     fun håndterForhåndsvarselUnntak(
         tilbakekreving: Tilbakekreving,
         forhåndsvarselUnntakDto: ForhåndsvarselUnntakDto,
+        behandler: Behandler,
     ) {
-        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
-        behandling.lagreForhåndsvarselUnntak(
+        tilbakekreving.lagreForhåndsvarselUnntak(
             begrunnelseForUnntak = when (forhåndsvarselUnntakDto.begrunnelseForUnntak) {
                 VarslingsUnntak.IKKE_PRAKTISK_MULIG -> BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG
                 VarslingsUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING -> BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING
                 VarslingsUnntak.ÅPENBART_UNØDVENDIG -> BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG
             },
             beskrivelse = forhåndsvarselUnntakDto.beskrivelse,
+            behandler = behandler,
         )
     }
 

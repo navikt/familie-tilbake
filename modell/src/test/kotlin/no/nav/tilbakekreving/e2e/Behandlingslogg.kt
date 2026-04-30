@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.e2e
 
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldNotHaveSize
+import no.nav.tilbakekreving.ANSVARLIG_SAKSBEHANDLER
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
@@ -63,7 +64,7 @@ class Behandlingslogg {
             ),
         )
         tilbakekreving.håndter(brukerinfoHendelse())
-        tilbakekreving.behandlingHistorikk.nåværende().entry.lagreUttalelse(UttalelseVurdering.JA, null, "")
+        tilbakekreving.lagreUttalelse(UttalelseVurdering.JA, null, "", ANSVARLIG_SAKSBEHANDLER)
 
         tilbakekreving.håndter(behandler, faktastegVurdering(1.januar(2021) til 31.januar(2021)))
         tilbakekreving.håndter(behandler, faktastegVurdering(1.februar(2021) til 28.februar(2021)))
