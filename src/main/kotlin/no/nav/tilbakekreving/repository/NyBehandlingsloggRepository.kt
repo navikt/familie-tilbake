@@ -21,7 +21,9 @@ class NyBehandlingsloggRepository(
     }
 
     fun lagre(behandlingslogg: List<LoggInnlagEntity>) {
-        jdbcTemplate.update("DELETE FROM tilbakekreving_behandlingslogg WHERE tilbakekreving_ref=?;", behandlingslogg[0].tilbakekrevingRef)
+        if (behandlingslogg.isNotEmpty()) {
+            jdbcTemplate.update("DELETE FROM tilbakekreving_behandlingslogg WHERE tilbakekreving_ref=?;", behandlingslogg[0].tilbakekrevingRef)
+        }
         for (behandlingslogg in behandlingslogg) {
             BehandlingsloggMapper.insertQuery(jdbcTemplate, behandlingslogg)
         }
