@@ -6,6 +6,16 @@ import no.tilbakekreving.integrasjoner.entraProxy.kontrakter.Saksbehandler
 
 class EntraProxyClientStub : EntraProxyClient {
     override fun hentSaksbehandler(id: String): Saksbehandler {
+        if (id == "beslutter") {
+            return Saksbehandler(
+                navIdent = "beslutter",
+                visningNavn = "",
+                fornavn = "Ham",
+                etternavn = "Burger",
+                epost = "",
+                enhet = Enhet(enhetnummer = "0335"),
+            )
+        }
         return Saksbehandler(
             navIdent = "bb1234",
             visningNavn = "",
