@@ -45,6 +45,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDa
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDataUpdateDto
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.DokumentKlasse
+import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.tilbakekreving.integrasjoner.pdfGen.PdfGenClient
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -60,11 +61,13 @@ class NyVedtaksbrevService(
     private val dokdistClient: DokdistClient,
     private val pdfGenClient: PdfGenClient,
 ) {
-    fun hentVedtaksbrevData(behandlingId: UUID, vedtaksbrevInfo: VedtaksbrevInfo): VedtaksbrevDataDto {
+    fun hentVedtaksbrevData(behandlingId: UUID, vedtaksbrevInfo: VedtaksbrevInfo, beslutter: Behandler): VedtaksbrevDataDto {
+        val beslutter = beslutter.takeIf { it.ident != vedtaksbrevInfo.signatur.ansvarligSaksbehandlerIdent }
+
         val signatur = SignaturDto(
-            vedtaksbrevInfo.signatur.ansvarligEnhet,
-            eksterneDataForBrevService.hentSaksbehandlernavn(vedtaksbrevInfo.signatur.ansvarligSaksbehandlerIdent),
-            vedtaksbrevInfo.signatur.ansvarligBeslutterIdent?.let(eksterneDataForBrevService::hentSaksbehandlernavn),
+            enhetNavn = vedtaksbrevInfo.signatur.ansvarligEnhet,
+            ansvarligSaksbehandler = eksterneDataForBrevService.hentSaksbehandlernavn(vedtaksbrevInfo.signatur.ansvarligSaksbehandlerIdent),
+            besluttendeSaksbehandler = beslutter?.let { eksterneDataForBrevService.hentSaksbehandlernavn(it.ident) },
         )
 
         val (sistOppdatert, lagredeData) = vedtaksbrevDataRepository.hentVedtaksbrevData(behandlingId) ?: return VedtaksbrevDataDto(
@@ -222,7 +225,7 @@ class NyVedtaksbrevService(
             forsøkFerdigstill = true,
             hoveddokumentvarianter = listOf(
                 Dokument(
-                    dokument = pdfGenClient.hentPdfForVedtak(hentVedtaksbrevData(behov.behandlingId, behov.vedtaksbrevInfo)),
+                    dokument = pdfGenClient.hentPdfForVedtak(hentVedtaksbrevData(behov.behandlingId, behov.vedtaksbrevInfo, behov.beslutter)),
                     filtype = Filtype.PDFA,
                     filnavn = "vedtak.pdf",
                     tittel = lagTittel(behov),

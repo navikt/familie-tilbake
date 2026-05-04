@@ -288,6 +288,7 @@ class Behandling internal constructor(
                 journalførendeEnhet = enhet!!.kode,
                 vedtaksbrevInfo = hentVedtaksbrevInfo(bruker, ytelse, tilbakekrevingId),
                 vedtaksresultat = hentVedtaksresultat()!!,
+                beslutter = fatteVedtakSteg.ansvarligBeslutter!!,
             ),
         )
     }
