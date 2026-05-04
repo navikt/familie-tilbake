@@ -5,9 +5,9 @@ import java.net.URI
 
 val springDocVersion = "3.0.3"
 val testcontainersVersion = "1.21.4"
-val tokenValidationVersion = "6.0.5"
+val tokenValidationVersion = "6.0.6"
 val flywayVersion = "11.3.4"
-val ktorVersion = "3.4.2"
+val ktorVersion = "3.4.3"
 ext["ktorVersion"] = ktorVersion
 
 group = "no.nav"
@@ -15,9 +15,9 @@ description = "familie-tilbake"
 java.sourceCompatibility = JavaVersion.VERSION_25
 
 plugins {
-    kotlin("jvm") version "2.3.20"
-    id("org.springframework.boot") version "4.0.5"
-    id("org.jetbrains.kotlin.plugin.spring") version "2.3.20"
+    kotlin("jvm") version "2.3.21"
+    id("org.springframework.boot") version "4.0.6"
+    id("org.jetbrains.kotlin.plugin.spring") version "2.3.21"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
 }
 
@@ -216,11 +216,11 @@ dependencies {
     api(project(":kontrakter-frontend:api"))
     api(project(":modell"))
     api(project(":pdf"))
-    api("no.nav.familie:prosessering-core:2.20260331095424_89d92d2") {
+    api("no.nav.familie:prosessering-core:2.20260420122910_8bfca04") {
         // La spring boot håndtere flyway versjon selv om den er eldre enn den som er inkludert i prosessering-core
         exclude("org.flywaydb")
     }
-    api("no.nav.familie.tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon:1.0_20250905124051_0f48699")
+    api("no.nav.familie.tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon:1.0_20260420152829_07d4d71")
     api("no.nav.tjenestespesifikasjoner:avstemming-v1-tjenestespesifikasjon:2648.7dd4e44")
 
     api("no.nav.security:token-client-core:$tokenValidationVersion")
