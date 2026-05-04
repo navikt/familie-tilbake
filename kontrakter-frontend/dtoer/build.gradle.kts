@@ -1,5 +1,5 @@
 openApiGenerate {
-    ignoreFileOverride = "$projectDir/.openapi-generator-ignore"
+    ignoreFileOverride = projectDir.resolve(".openapi-generator-ignore")
     globalProperties.put("models", "")
 }
 
