@@ -60,7 +60,7 @@ class ApiExceptionHandler {
             is ModellFeil.UtenforScopeException -> HttpStatus.METHOD_NOT_ALLOWED
             is ModellFeil.IngenTilgangException -> HttpStatus.FORBIDDEN
         }
-        return ResponseEntity.status(status).body(ErrorDto(feil.melding))
+        return ResponseEntity.status(status).body(ErrorDto(feil.tittel, feil.melding))
     }
 
     @ExceptionHandler(ForbiddenError::class)
