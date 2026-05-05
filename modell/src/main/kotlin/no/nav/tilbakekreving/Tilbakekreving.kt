@@ -24,12 +24,12 @@ import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
 import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
 import no.nav.tilbakekreving.behandlingslogg.Behandlingsloggstype
+import no.nav.tilbakekreving.behandlingslogg.EkstraInfo
 import no.nav.tilbakekreving.behandlingslogg.LoggInnslag
 import no.nav.tilbakekreving.behandlingslogg.Rolle
 import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
-import no.nav.tilbakekreving.brev.Brev
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.brev.VarselbrevInfo
 import no.nav.tilbakekreving.brev.Vedtaksbrev
@@ -105,15 +105,13 @@ class Tilbakekreving internal constructor(
 
     fun håndter(opprettTilbakekrevingEvent: OpprettTilbakekrevingHendelse) {
         tilstand.håndter(this, opprettTilbakekrevingEvent)
-        behandlingslogg.lagre(
-            opprettLoggInnslag(
-                behandlingsloggstype = Behandlingsloggstype.TILBAKEKREVING_OPPRETTET,
-                rolle = Rolle.VEDTAKSLØSNING,
-                behandler = Behandler.Vedtaksløsning,
-                behandlingId = null,
-                brevRef = null,
-            ),
+        val loggInnslag = opprettLoggInnslag(
+            behandlingsloggstype = Behandlingsloggstype.TILBAKEKREVING_OPPRETTET,
+            rolle = Rolle.VEDTAKSLØSNING,
+            behandler = Behandler.Vedtaksløsning,
+            behandlingId = null,
         )
+        behandlingslogg.lagre(loggInnslag.copy(ekstraInfo = loggInnslag.ekstraInfo))
     }
 
     fun håndter(kravgrunnlag: KravgrunnlagHendelse) {
@@ -124,7 +122,6 @@ class Tilbakekreving internal constructor(
                 rolle = Rolle.VEDTAKSLØSNING,
                 behandler = Behandler.Vedtaksløsning,
                 behandlingId = null,
-                brevRef = null,
             ),
         )
     }
@@ -137,7 +134,6 @@ class Tilbakekreving internal constructor(
                 rolle = Rolle.VEDTAKSLØSNING,
                 behandler = Behandler.Vedtaksløsning,
                 behandlingId = null,
-                brevRef = null,
             ),
         )
     }
@@ -150,7 +146,6 @@ class Tilbakekreving internal constructor(
                 rolle = Rolle.VEDTAKSLØSNING,
                 behandler = Behandler.Vedtaksløsning,
                 behandlingId = null,
-                brevRef = null,
             ),
         )
     }
@@ -161,10 +156,11 @@ class Tilbakekreving internal constructor(
         behandlingslogg.lagre(
             opprettLoggInnslag(
                 behandlingsloggstype = Behandlingsloggstype.VARSELBREV_JOURNALFØRT,
-                rolle = Rolle.SAKSBEHANDLER,
-                behandler = Behandler.Saksbehandler(hendelse.behandlerIdent),
-                behandlingId = hendelse.behandlingId,
-                brevRef = brevHistorikk.finn(hendelse.varselbrevId, Sporing(hendelse.fagsakId, hendelse.behandlingId.toString())),
+                rolle = Rolle.VEDTAKSLØSNING,
+                behandler = Behandler.Vedtaksløsning,
+                behandlingId = behandling.id,
+                EkstraInfo.JOURNALPOST_ID to hendelse.journalpostId,
+                EkstraInfo.DOKUMENTINFO_ID to hendelse.dokumentInfoId,
             ),
         )
         behandling.utførSideeffekt(tilstand, this, bigQueryService, eksternFagsak.ytelse.hentYtelsesnavn(Språkkode.NB))
@@ -175,11 +171,12 @@ class Tilbakekreving internal constructor(
         val behandling = behandlingHistorikk.nåværende().entry
         behandlingslogg.lagre(
             opprettLoggInnslag(
-                behandlingsloggstype = Behandlingsloggstype.VARSELBREV_SENDT,
-                rolle = Rolle.SAKSBEHANDLER,
-                behandler = Behandler.Saksbehandler(hendelse.behandlerIdent),
-                behandlingId = hendelse.behandlingId,
-                brevRef = brevHistorikk.finn(hendelse.brevId, Sporing(hendelse.fagsakId, hendelse.behandlingId.toString())),
+                behandlingsloggstype = Behandlingsloggstype.FORHÅNDSVARSEL_SENDT,
+                rolle = Rolle.VEDTAKSLØSNING,
+                behandler = Behandler.Vedtaksløsning,
+                behandlingId = behandling.id,
+                EkstraInfo.JOURNALPOST_ID to hendelse.journalpostId,
+                EkstraInfo.DOKUMENTINFO_ID to hendelse.dokumentInfoId,
             ),
         )
         behandling.utførSideeffekt(tilstand, this, bigQueryService, eksternFagsak.ytelse.hentYtelsesnavn(Språkkode.NB))
@@ -187,15 +184,6 @@ class Tilbakekreving internal constructor(
 
     fun håndter(iverksettelseHendelse: IverksettelseHendelse) {
         tilstand.håndter(this, iverksettelseHendelse)
-        behandlingslogg.lagre(
-            opprettLoggInnslag(
-                behandlingsloggstype = Behandlingsloggstype.BEHANDLING_AVSLUTTET,
-                rolle = Rolle.VEDTAKSLØSNING,
-                behandler = Behandler.Vedtaksløsning,
-                behandlingId = iverksettelseHendelse.behandlingId,
-                brevRef = null,
-            ),
-        )
     }
 
     fun håndter(hendelse: JournalføringHendelse) {
@@ -206,7 +194,8 @@ class Tilbakekreving internal constructor(
                 rolle = Rolle.VEDTAKSLØSNING,
                 behandler = Behandler.Vedtaksløsning,
                 behandlingId = hendelse.behandlingId,
-                brevRef = brevHistorikk.finn(hendelse.brevId, Sporing(hendelse.fagsakId, hendelse.behandlingId.toString())),
+                EkstraInfo.JOURNALPOST_ID to hendelse.journalpostId,
+                EkstraInfo.DOKUMENTINFO_ID to hendelse.dokumentInfoId,
             ),
         )
     }
@@ -219,7 +208,8 @@ class Tilbakekreving internal constructor(
                 rolle = Rolle.VEDTAKSLØSNING,
                 behandler = Behandler.Vedtaksløsning,
                 behandlingId = hendelse.behandlingId,
-                brevRef = brevHistorikk.finn(hendelse.brevId, Sporing(hendelse.fagsakId, hendelse.behandlingId.toString())),
+                EkstraInfo.JOURNALPOST_ID to hendelse.journalpostId,
+                EkstraInfo.DOKUMENTINFO_ID to hendelse.dokumentInfoId,
             ),
         )
     }
@@ -286,9 +276,8 @@ class Tilbakekreving internal constructor(
             opprettLoggInnslag(
                 behandlingsloggstype = Behandlingsloggstype.BEHANDLING_OPPRETTET,
                 rolle = Rolle.VEDTAKSLØSNING,
-                behandler = behandler,
+                behandler = Behandler.Vedtaksløsning,
                 behandlingId = behandlingId,
-                brevRef = null,
             ),
         )
         sendStatusendring(null, ForenkletBehandlingsstatus.OPPRETTET)
@@ -366,6 +355,7 @@ class Tilbakekreving internal constructor(
             ytelse = eksternFagsak.ytelse,
             brevId = brevHistorikk.sisteVarselbrev()!!.id,
             fagsakId = eksternFagsak.eksternId,
+            dokumentInfoId = brevHistorikk.sisteVarselbrev()!!.dokumentInfoId!!,
         )
     }
 
@@ -376,6 +366,7 @@ class Tilbakekreving internal constructor(
             brevId = brevHistorikk.nåværende().entry.id,
             fagsystem = eksternFagsak.ytelse.tilFagsystemDTO(),
             fagsakId = eksternFagsak.eksternId,
+            dokumentInfoId = brevHistorikk.nåværende().entry.dokumentInfoId!!,
         )
     }
 
@@ -662,7 +653,25 @@ class Tilbakekreving internal constructor(
         )
     }
 
-    fun opprettLoggInnslag(behandlingsloggstype: Behandlingsloggstype, rolle: Rolle, behandler: Behandler, behandlingId: UUID?, brevRef: HistorikkReferanse<UUID, Brev>?): LoggInnslag {
+    fun loggAvsluttning() {
+        val behandling = behandlingHistorikk.nåværende().entry
+        behandlingslogg.lagre(
+            opprettLoggInnslag(
+                behandlingsloggstype = Behandlingsloggstype.BEHANDLING_AVSLUTTET,
+                rolle = Rolle.VEDTAKSLØSNING,
+                behandler = Behandler.Vedtaksløsning,
+                behandlingId = behandling.id,
+            ),
+        )
+    }
+
+    fun opprettLoggInnslag(
+        behandlingsloggstype: Behandlingsloggstype,
+        rolle: Rolle,
+        behandler: Behandler,
+        behandlingId: UUID?,
+        vararg ekstraInfo: Pair<EkstraInfo, Any>,
+    ): LoggInnslag {
         return LoggInnslag(
             id = UUID.randomUUID(),
             behandlingId = behandlingId,
@@ -670,7 +679,7 @@ class Tilbakekreving internal constructor(
             opprettetTid = LocalDateTime.now(),
             rolle = rolle,
             behandlerIdent = behandler.ident,
-            brevRef = brevRef,
+            ekstraInfo = mapOf(*ekstraInfo),
         )
     }
 

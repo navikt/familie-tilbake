@@ -7,4 +7,6 @@ data class VarselbrevDistribueringHendelse(
     val brevId: UUID,
     val behandlerIdent: String,
     val fagsakId: String,
+    val journalpostId: String,
+    val dokumentInfoId: String,
 )

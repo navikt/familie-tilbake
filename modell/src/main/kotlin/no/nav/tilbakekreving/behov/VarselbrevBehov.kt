@@ -32,4 +32,5 @@ data class VarselbrevDistribusjonBehov(
     val journalpostId: String,
     val ytelse: Ytelse,
     val behandlerIdent: String,
+    val dokumentInfoId: String,
 ) : Behov

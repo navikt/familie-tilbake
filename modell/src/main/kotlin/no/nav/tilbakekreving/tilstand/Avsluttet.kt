@@ -15,6 +15,7 @@ object Avsluttet : Tilstand {
     override fun behandlingsstatus(behandling: Behandling): Behandlingsstatus = Behandlingsstatus.AVSLUTTET
 
     override fun entering(tilbakekreving: Tilbakekreving) {
+        tilbakekreving.loggAvsluttning()
         tilbakekreving.utførSideeffekt()
         tilbakekreving.sendStatusendring(ForenkletBehandlingsstatus.TIL_GODKJENNING, ForenkletBehandlingsstatus.AVSLUTTET)
     }

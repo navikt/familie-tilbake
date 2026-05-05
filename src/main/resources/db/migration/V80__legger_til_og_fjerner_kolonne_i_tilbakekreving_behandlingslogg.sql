@@ -1,0 +1,5 @@
+ALTER TABLE tilbakekreving_behandlingslogg ADD COLUMN ekstra_info json;
+
+ALTER TABLE tilbakekreving_behandlingslogg DROP COLUMN brev_ref;
+ALTER TABLE tilbakekreving_behandlingslogg DROP COLUMN ny_frist_for_uttalelse;
+ALTER TABLE tilbakekreving_behandlingslogg DROP COLUMN begrunnelse_for_utsatt_frist;

@@ -9,6 +9,7 @@ import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
+import no.nav.tilbakekreving.behandlingslogg.EkstraInfo
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.brukerinfoHendelse
@@ -28,6 +29,7 @@ import no.nav.tilbakekreving.test.februar
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.test.skalUnnlates
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.util.UUID
 
 class Behandlingslogg {
@@ -87,8 +89,11 @@ class Behandlingslogg {
                 behandlerIdent = behandler.ident,
                 brevId = tilbakekreving.brevHistorikk.sisteVarselbrev()!!.id,
                 fagsakId = tilbakekreving.eksternFagsak.eksternId,
+                journalpostId = "123",
+                dokumentInfoId = "321",
             ),
         )
+        tilbakekreving.lagreFristUtsettelse(LocalDate.of(2027, 1, 1), "Begrunnelse", ANSVARLIG_SAKSBEHANDLER)
         tilbakekreving.lagreUttalelse(UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL, null, "ingen uttalelse", ANSVARLIG_SAKSBEHANDLER)
 
         tilbakekreving.håndter(behandler, faktastegVurdering(1.januar(2021) til 31.januar(2021)))
@@ -101,7 +106,7 @@ class Behandlingslogg {
             forårsaketAvBruker().uaktsomt(unnlates = skalUnnlates()),
         )
 
-        tilbakekreving.hentBehandlingslogg().shouldNotHaveSize(0)
+        val behandlingslogg = tilbakekreving.hentBehandlingslogg().shouldNotHaveSize(0)
         tilbakekreving.hentBehandlingslogg().map { it.tittel } shouldContainAll listOf(
             "Kravgrunnlag mottatt",
             "Tilbakekreving opprettet",
@@ -109,13 +114,19 @@ class Behandlingslogg {
             "Fagsysteminfo oppdatert",
             "Brukerinfo oppdatert",
             "Fakta vurdert",
-            "Varselbrev sendt",
+            "Forhåndsvarsel sendt",
             "Varselbrev journalført",
             "Foreldelse vurdert",
             "Vilkår vurdert",
         )
-        val varsel = tilbakekreving.hentBehandlingslogg().filter { it.tittel == "Varselbrev sendt" }.shouldHaveSize(1)
-        varsel[0].journalpostId shouldBe "123"
-        varsel[0].dokumentInfoId shouldBe "321"
+        val forhåndsvarsel = tilbakekreving.hentBehandlingslogg().filter { it.tittel == "Forhåndsvarsel sendt" }.shouldHaveSize(1)
+
+        val forhåndsvarselEkstraInfo = forhåndsvarsel[0].ekstraInfo as Map<*, *>
+        forhåndsvarselEkstraInfo[EkstraInfo.JOURNALPOST_ID] shouldBe "123"
+        forhåndsvarselEkstraInfo[EkstraInfo.DOKUMENTINFO_ID] shouldBe "321"
+
+        val utsettUttalelse = tilbakekreving.hentBehandlingslogg().filter { it.tittel.contains("Ny frist for uttalelse") }.shouldHaveSize(1)
+        utsettUttalelse[0].tittel shouldBe "Ny frist for uttalelse: 2027-01-01"
+        utsettUttalelse[0].tekst shouldBe "Begrunnelse"
     }
 }

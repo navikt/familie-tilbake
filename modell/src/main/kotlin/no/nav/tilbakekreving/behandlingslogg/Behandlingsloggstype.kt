@@ -2,6 +2,8 @@ package no.nav.tilbakekreving.behandlingslogg
 
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.historikk.Historikkinnslagstype
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 enum class Behandlingsloggstype(
     val tittel: String,
@@ -98,8 +100,15 @@ enum class Behandlingsloggstype(
     ),
 
     // Brev type
+    @Deprecated("Deprecated ettersom FORHÅNDSVARSEL_SENDT er laget")
     VARSELBREV_SENDT(
         tittel = "Varselbrev sendt",
+        tekst = "Varselbrev tilbakekreving",
+        type = Historikkinnslagstype.BREV,
+        steg = null,
+    ),
+    FORHÅNDSVARSEL_SENDT(
+        tittel = "Forhåndsvarsel sendt",
         tekst = "Varselbrev tilbakekreving",
         type = Historikkinnslagstype.BREV,
         steg = null,
@@ -135,11 +144,20 @@ enum class Behandlingsloggstype(
         steg = null,
     ),
     UTSETT_UTTALELSESFRIST(
-        tittel = "Frist for uttalelse er utsatt",
+        tittel = "Ny frist for uttalelse",
         tekst = null,
         type = Historikkinnslagstype.HENDELSE,
         steg = null,
-    ),
+    ) {
+        override fun hentTittel(ekstraInfo: Map<EkstraInfo, Any>): String {
+            val nyFrist = (ekstraInfo[EkstraInfo.NY_FRIST_FOR_UTTALELSE] as LocalDate).toString()
+            return "$tittel: ${nyFrist.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))}"
+        }
+
+        override fun hentTekst(ekstraInfo: Map<EkstraInfo, Any>): String {
+            return ekstraInfo[EkstraInfo.BEGRUNNELSE_FOR_UTSATT_FRIST] as String
+        }
+    },
     BRUKER_UTTALELSE(
         tittel = "Bruker uttalelse er registrert",
         tekst = null,
@@ -152,4 +170,21 @@ enum class Behandlingsloggstype(
         type = Historikkinnslagstype.HENDELSE,
         steg = null,
     ),
+    ;
+
+    open fun hentTittel(ekstraInfo: Map<EkstraInfo, Any>): String {
+        return tittel
+    }
+
+    open fun hentTekst(ekstraInfo: Map<EkstraInfo, Any>): String? {
+        return tekst
+    }
+}
+
+enum class EkstraInfo() {
+    BREV_REF,
+    NY_FRIST_FOR_UTTALELSE,
+    BEGRUNNELSE_FOR_UTSATT_FRIST,
+    JOURNALPOST_ID,
+    DOKUMENTINFO_ID,
 }

@@ -2,7 +2,6 @@ package no.nav.tilbakekreving.entity
 
 import no.nav.tilbakekreving.behandlingslogg.Behandlingsloggstype
 import no.nav.tilbakekreving.behandlingslogg.Rolle
-import no.nav.tilbakekreving.entities.HistorikkReferanseEntity
 import no.nav.tilbakekreving.entities.LoggInnlagEntity
 import java.sql.ResultSet
 import java.util.UUID
@@ -48,15 +47,19 @@ object BehandlingsloggMapper : Entity<LoggInnlagEntity, UUID, UUID>(
         FieldConverter.LocalDateTimeConverter.required(),
     )
 
-    val brevRef = field(
-        "brev_ref",
-        { it.brevRef?.id },
-        FieldConverter.UUIDConverter,
+    val ekstraInfo = field(
+        "ekstra_info",
+        { it.ekstraInfo },
+        FieldConverter.MapToJsonStringConverter,
     )
 
     fun map(
         resultSet: ResultSet,
     ): LoggInnlagEntity {
+        val behandlingsloggstype = when (val type = resultSet[behandlingsloggstype]) {
+            Behandlingsloggstype.VARSELBREV_SENDT -> Behandlingsloggstype.FORHÅNDSVARSEL_SENDT
+            else -> type
+        }
         return LoggInnlagEntity(
             id = resultSet[BrevEntityMapper.id],
             tilbakekrevingRef = resultSet[tilbakekrevingRef],
@@ -64,8 +67,8 @@ object BehandlingsloggMapper : Entity<LoggInnlagEntity, UUID, UUID>(
             rolle = resultSet[rolle],
             behandlerIdent = resultSet[behandlerIdent],
             opprettetTid = resultSet[opprettetTid],
-            behandlingsloggstype = resultSet[behandlingsloggstype],
-            brevRef = resultSet[brevRef]?.let { HistorikkReferanseEntity(it) },
+            behandlingsloggstype = behandlingsloggstype,
+            ekstraInfo = resultSet[ekstraInfo],
         )
     }
 }

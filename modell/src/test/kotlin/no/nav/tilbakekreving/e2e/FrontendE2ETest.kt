@@ -73,6 +73,8 @@ class FrontendE2ETest {
                 behandlerIdent = behandler.ident,
                 brevId = varselbrevId,
                 fagsakId = tilbakekreving.eksternFagsak.eksternId,
+                journalpostId = "1234",
+                dokumentInfoId = "321",
             ),
         )
         tilbakekreving.lagreUttalelse(UttalelseVurdering.JA, null, null, behandler)
@@ -110,6 +112,8 @@ class FrontendE2ETest {
                 behandlingId = UUID.randomUUID(),
                 brevId = (behovOppsamler.behovListe.last() as VedtaksbrevDistribusjonBehov).brevId,
                 fagsakId = tilbakekreving.eksternFagsak.eksternId,
+                journalpostId = "123",
+                dokumentInfoId = "321",
             ),
         )
         tilbakekreving.frontendDtoForBehandling(behandler, true).status shouldBe Behandlingsstatus.AVSLUTTET

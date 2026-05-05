@@ -37,17 +37,17 @@ data class Behandlingslogg(
 
     fun tilFrontend(): List<LogginnslagDto> {
         return historikk.map {
+            val ekstraInfo = it.ekstraInfo
             LogginnslagDto(
                 behandlingId = it.behandlingId.toString(),
                 type = it.behandlingsloggstype.type.toString(),
                 aktør = it.rolle.toString(),
                 aktørIdent = it.behandlerIdent,
-                tittel = it.behandlingsloggstype.tittel,
-                tekst = it.behandlingsloggstype.tekst,
+                tittel = it.behandlingsloggstype.hentTittel(ekstraInfo),
+                tekst = it.behandlingsloggstype.hentTekst(ekstraInfo),
                 steg = it.behandlingsloggstype.steg.toString(),
                 opprettetTid = it.opprettetTid.atOffset(ZoneOffset.UTC),
-                journalpostId = it.brevRef?.entry?.journalpostId,
-                dokumentInfoId = it.brevRef?.entry?.dokumentInfoId,
+                ekstraInfo = ekstraInfo,
             )
         }
     }

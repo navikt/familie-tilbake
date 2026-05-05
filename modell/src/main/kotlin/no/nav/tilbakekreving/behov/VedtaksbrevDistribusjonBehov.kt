@@ -9,4 +9,5 @@ class VedtaksbrevDistribusjonBehov(
     val fagsakId: String,
     val journalpostId: String,
     val fagsystem: FagsystemDTO,
+    val dokumentInfoId: String,
 ) : Behov

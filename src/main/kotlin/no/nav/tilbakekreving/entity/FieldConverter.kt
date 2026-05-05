@@ -1,5 +1,7 @@
 package no.nav.tilbakekreving.entity
 
+import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.readValue
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.sql.Date
@@ -214,6 +216,21 @@ interface FieldConverter<T, DbPrimitive> {
             } else {
                 preparedStatement.setInt(index, value)
             }
+        }
+    }
+
+    object MapToJsonStringConverter : FieldConverter<Map<String, Any>?, String?> {
+        override fun convert(value: Map<String, Any>?): String? {
+            return jacksonObjectMapper().writeValueAsString(value)
+        }
+
+        override fun convert(resultSet: ResultSet, column: String): Map<String, Any>? {
+            if (resultSet.getString(column) == null) return null
+            return jacksonObjectMapper().readValue(resultSet.getString(column))
+        }
+
+        override fun setColumn(index: Int, preparedStatement: PreparedStatement, value: Map<String, Any>?) {
+            preparedStatement.setString(index, convert(value))
         }
     }
 
