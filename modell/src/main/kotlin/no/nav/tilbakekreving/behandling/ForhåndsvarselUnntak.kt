@@ -3,6 +3,8 @@ package no.nav.tilbakekreving.behandling
 import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselUnntakDto
 import no.nav.tilbakekreving.api.v1.dto.VarslingsUnntak
 import no.nav.tilbakekreving.entities.ForhåndsvarselUnntakEntity
+import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselUnntakDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VarslingsUnntakDto
 import java.util.UUID
 
 data class ForhåndsvarselUnntak(
@@ -21,6 +23,18 @@ data class ForhåndsvarselUnntak(
         begrunnelseForUnntak = VarslingsUnntak.valueOf(begrunnelseForUnntak.name),
         beskrivelse = beskrivelse,
     )
+
+    internal fun nyTilFrontendDto(): ForhaandsvarselUnntakDto {
+        return ForhaandsvarselUnntakDto(
+            begrunnelseForUnntak = when (begrunnelseForUnntak) {
+                BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG -> VarslingsUnntakDto.IKKE_PRAKTISK_MULIG
+                BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING -> VarslingsUnntakDto.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING
+                BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG -> VarslingsUnntakDto.ÅPENBART_UNØDVENDIG
+                BegrunnelseForUnntak.ALLEREDE_UTTALET_SEG -> VarslingsUnntakDto.ALLEREDE_UTTALET_SEG
+            },
+            beskrivelse = beskrivelse,
+        )
+    }
 
     fun tilEntity(behandlingRef: UUID): ForhåndsvarselUnntakEntity = ForhåndsvarselUnntakEntity(
         id = id,

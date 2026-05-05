@@ -9,6 +9,13 @@ import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.entities.ForhåndsvarselEntity
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselErSendtDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselinfoDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.IkkeVurdertDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseVurderingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
 import java.time.LocalDate
 import java.util.UUID
 
@@ -73,8 +80,9 @@ class Forhåndsvarsel(
         )
     }
 
-    fun lagreFristUtsettelse(nyFrist: LocalDate, begrunnelse: String) {
+    fun lagreFristUtsettelse(nyFrist: LocalDate, begrunnelse: String): UttalelsesfristDto {
         uttalelsesfrist!!.utsettFrist(nyFrist, begrunnelse)
+        return uttalelsesfrist!!.nyTilFrontendDto()
     }
 
     fun lagreForhåndsvarselUnntak(
@@ -106,6 +114,30 @@ class Forhåndsvarsel(
 
     override fun meldingerTilSaksbehandler(): Set<MeldingTilSaksbehandler> {
         return brukeruttalelse?.meldingerTilSaksbehandler() ?: emptySet()
+    }
+
+    fun nyForhåndsvarselTilFrontend(forhåndsvarselinfo: ForhaandsvarselinfoDto?): ForhaandsvarselResponseDto {
+        if (uttalelsesfrist != null) {
+            return ForhaandsvarselResponseDto(
+                forhaandsvarselsteg = ForhaandsvarselErSendtDto(
+                    forhåndsvarselinfo = forhåndsvarselinfo!!,
+                    uttalelsesfrist = uttalelsesfrist!!.nyTilFrontendDto(),
+                ),
+                brukeruttalelse = brukeruttalelse?.nyTilFrontendDto()
+                    ?: UttalelseDto(harBrukerUttaltSeg = UttalelseVurderingDto.IKKE_VURDERT),
+            )
+        }
+        if (forhåndsvarselUnntak != null) {
+            return ForhaandsvarselResponseDto(
+                forhaandsvarselsteg = forhåndsvarselUnntak!!.nyTilFrontendDto(),
+                brukeruttalelse = brukeruttalelse?.nyTilFrontendDto(),
+            )
+        }
+
+        return ForhaandsvarselResponseDto(
+            forhaandsvarselsteg = IkkeVurdertDto,
+            brukeruttalelse = brukeruttalelse?.nyTilFrontendDto(),
+        )
     }
 
     companion object {

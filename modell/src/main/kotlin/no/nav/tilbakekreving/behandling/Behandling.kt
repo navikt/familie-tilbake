@@ -70,8 +70,11 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatu
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselinfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
@@ -658,8 +661,8 @@ class Behandling internal constructor(
         )
     }
 
-    fun lagreFristUtsettelse(nyFrist: LocalDate, begrunnelse: String, behandlingslogg: Behandlingslogg, behandler: Behandler) {
-        forhåndsvarsel.lagreFristUtsettelse(
+    fun lagreFristUtsettelse(nyFrist: LocalDate, begrunnelse: String, behandlingslogg: Behandlingslogg, behandler: Behandler): UttalelsesfristDto {
+        val uttalelsesfrist = forhåndsvarsel.lagreFristUtsettelse(
             nyFrist = nyFrist,
             begrunnelse = begrunnelse,
         )
@@ -672,6 +675,7 @@ class Behandling internal constructor(
                 brevRef = null,
             ),
         )
+        return uttalelsesfrist
     }
 
     fun brukeruttaleserTilFrontendDto(): BrukeruttalelseDto? {
@@ -867,6 +871,10 @@ class Behandling internal constructor(
             behandlerIdent = behandler.ident,
             brevRef = brevRef,
         )
+    }
+
+    fun nyForhåndsvarselTilFrontend(forhåndsvarselinfo: ForhaandsvarselinfoDto?): ForhaandsvarselResponseDto {
+        return forhåndsvarsel.nyForhåndsvarselTilFrontend(forhåndsvarselinfo)
     }
 
     companion object {
