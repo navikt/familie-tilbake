@@ -14,7 +14,7 @@ data class BrevEntity(
     fun fraEntity(kravgrunnlagHistorikk: KravgrunnlagHistorikk): Brev? {
         return when (brevtype) {
             Brevtype.VARSELBREV, Brevtype.VARSEL_BREV -> {
-                varselbrevEntity!!.fraEntity(
+                varselbrevEntity?.fraEntity(
                     id,
                     kravgrunnlagHistorikk,
                 )
