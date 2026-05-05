@@ -63,7 +63,6 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselinfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.LogginnslagDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.UpdateUttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
@@ -638,11 +637,11 @@ class Tilbakekreving internal constructor(
         nyFrist: LocalDate,
         begrunnelse: String,
         behandler: Behandler,
-    ) {
+    ): UttalelsesfristDto {
         requireNotNull(brevHistorikk.sisteVarselbrev()) {
             "Kan ikke utsette frist når forhåndsvarsel ikke er sendt"
         }
-        behandlingHistorikk.nåværende().entry.lagreFristUtsettelse(
+        return behandlingHistorikk.nåværende().entry.lagreFristUtsettelse(
             nyFrist = nyFrist,
             begrunnelse = begrunnelse,
             behandlingslogg = behandlingslogg,
@@ -673,41 +672,6 @@ class Tilbakekreving internal constructor(
             behandlerIdent = behandler.ident,
             brevRef = brevRef,
         )
-    }
-
-    fun nyLagreUttalelse(
-        uttalelseVurdering: UttalelseVurdering,
-        uttalelseInfo: UttalelseInfo?,
-        kommentar: String?,
-        behandler: Behandler,
-    ) {
-        behandlingHistorikk.nåværende().entry.nyLagreUttalelse(
-            uttalelseVurdering = uttalelseVurdering,
-            uttalelseInfo = uttalelseInfo,
-            kommentar = kommentar,
-            behandler = behandler,
-            behandlingslogg = behandlingslogg,
-        )
-    }
-
-    fun nyLagreForhåndsvarselUnntak(
-        begrunnelseForUnntak: BegrunnelseForUnntak,
-        beskrivelse: String,
-        behandler: Behandler,
-    ) {
-        behandlingHistorikk.nåværende().entry.nyLagreForhåndsvarselUnntak(
-            begrunnelseForUnntak = begrunnelseForUnntak,
-            beskrivelse = beskrivelse,
-            behandler = behandler,
-            behandlingslogg = behandlingslogg,
-        )
-    }
-
-    fun nyUtsettUttalelsesfrist(utsettFristDto: UpdateUttalelsesfristDto, behandler: Behandler): UttalelsesfristDto {
-        requireNotNull(brevHistorikk.sisteVarselbrev()) {
-            "Kan ikke utsette frist når forhåndsvarsel ikke er sendt"
-        }
-        return behandlingHistorikk.nåværende().entry.nyUtsettUttalelsesfrist(utsettFristDto, behandler, behandlingslogg)
     }
 
     companion object {

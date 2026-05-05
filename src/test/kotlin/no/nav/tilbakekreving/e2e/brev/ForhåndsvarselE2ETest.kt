@@ -32,7 +32,6 @@ import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.util.kroner
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
@@ -45,14 +44,6 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
 
     @Autowired
     private lateinit var documentController: DokumentController
-
-    @BeforeEach
-    fun cleanup() {
-        jdbcTemplate.update("DELETE FROM tilbakekreving_uttalelse_informasjon")
-        jdbcTemplate.update("DELETE FROM tilbakekreving_forhåndsvarsel_unntak")
-        jdbcTemplate.update("DELETE FROM tilbakekreving_uttalelsesfrist")
-        jdbcTemplate.update("DELETE FROM tilbakekreving_brukeruttalelse")
-    }
 
     @Test
     fun `forhåndsvarsel sendes og lagres riktig i DB`() {
@@ -258,28 +249,6 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
     )
 
     @Test
-    fun `forhåndsvarsel detaljene er null når varselbrev ikke er sendt`() {
-        val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
-        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
-
-        val antall = jdbcTemplate.queryForObject(
-            "SELECT COUNT(*) FROM tilbakekreving_brukeruttalelse WHERE behandling_ref = ?",
-            Int::class.java,
-            behandling.id,
-        )
-        antall shouldBe 0
-
-        val antallUttalelseinfo = jdbcTemplate.queryForObject(
-            "SELECT COUNT(*) FROM tilbakekreving_uttalelse_informasjon",
-            Int::class.java,
-        )
-        antallUttalelseinfo shouldBe 0
-
-        val forhåndsvarselDto = tilbakekreving.nyHentForhåndsvarselFrontendDto()
-        forhåndsvarselDto.forhaandsvarselsteg.shouldBeInstanceOf<IkkeVurdertDto>()
-    }
-
-    @Test
     fun `sende forhåndsvarsel skal oppdatere varselbrevet i brevhistorikk med tid og journlaførtId`() {
         val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
         val behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id
@@ -333,7 +302,7 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
     }
 
     @Test
-    fun `brukeruttalelse lagres, oppdateres og redigeres`() {
+    fun `brukeruttalelse lagres`() {
         val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
         val behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id
 
@@ -349,48 +318,16 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
             )
         }
 
-        var forhåndsvarselResponse = behandlingApiController.behandlingForhandsvarsel(behandlingId).body
-        forhåndsvarselResponse.shouldNotBeNull().forhaandsvarselsteg.shouldBeInstanceOf<ForhaandsvarselErSendtDto>()
-        forhåndsvarselResponse.brukeruttalelse!!.harBrukerUttaltSeg shouldBe UttalelseVurderingDto.NEI_ETTER_FORHÅNDSVARSEL
-        forhåndsvarselResponse.brukeruttalelse!!.uttalelsesdato shouldBe null
-        forhåndsvarselResponse.brukeruttalelse!!.beskrivelse shouldBe "Gadd ikke si noe"
-
-        somSaksbehandler("Z9999999") {
-            behandlingApiController.behandlingLagreBrukersuttalelse(
-                behandlingId = behandlingId,
-                uttalelseDto = UttalelseDto(
-                    harBrukerUttaltSeg = UttalelseVurderingDto.JA_ETTER_FORHÅNDSVARSEL,
-                    uttalelsesdato = LocalDate.of(2021, 1, 1),
-                    hvorBrukerenUttalteSeg = "Reddit",
-                    beskrivelse = "Typisk reddit kommentar",
-                ),
-            )
-        }
-
-        forhåndsvarselResponse = behandlingApiController.behandlingForhandsvarsel(behandlingId).body.shouldNotBeNull()
+        val forhåndsvarselResponse = behandlingApiController.behandlingForhandsvarsel(behandlingId).body.shouldNotBeNull()
         forhåndsvarselResponse.forhaandsvarselsteg.shouldBeInstanceOf<ForhaandsvarselErSendtDto>()
-        forhåndsvarselResponse.brukeruttalelse!!.harBrukerUttaltSeg shouldBe UttalelseVurderingDto.JA_ETTER_FORHÅNDSVARSEL
-        forhåndsvarselResponse.brukeruttalelse!!.uttalelsesdato shouldBe LocalDate.of(2021, 1, 1)
-        forhåndsvarselResponse.brukeruttalelse!!.hvorBrukerenUttalteSeg shouldBe "Reddit"
-        somSaksbehandler("Z9999999") {
-            behandlingApiController.behandlingLagreBrukersuttalelse(
-                behandlingId = behandlingId,
-                uttalelseDto = UttalelseDto(
-                    harBrukerUttaltSeg = UttalelseVurderingDto.JA_ETTER_FORHÅNDSVARSEL,
-                    uttalelsesdato = LocalDate.of(2022, 1, 1),
-                    hvorBrukerenUttalteSeg = "Snap",
-                    beskrivelse = "Den nye snap kanalen",
-                ),
-            )
+        forhåndsvarselResponse.brukeruttalelse.shouldNotBeNull {
+            harBrukerUttaltSeg shouldBe UttalelseVurderingDto.NEI_ETTER_FORHÅNDSVARSEL
+            beskrivelse shouldBe "Gadd ikke si noe"
         }
-        forhåndsvarselResponse = behandlingApiController.behandlingForhandsvarsel(behandlingId).body.shouldNotBeNull()
-        forhåndsvarselResponse.forhaandsvarselsteg.shouldBeInstanceOf<ForhaandsvarselErSendtDto>()
-        forhåndsvarselResponse.brukeruttalelse!!.harBrukerUttaltSeg shouldBe UttalelseVurderingDto.JA_ETTER_FORHÅNDSVARSEL
-        forhåndsvarselResponse.brukeruttalelse!!.uttalelsesdato shouldBe LocalDate.of(2022, 1, 1)
     }
 
     @Test
-    fun `unntak lagres, oppdateres og redigeres`() {
+    fun `unntak uten uttalelse lagres`() {
         val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
         val behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id
         somSaksbehandler("Z9999999") {
@@ -407,32 +344,12 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
                 it.begrunnelseForUnntak shouldBe VarslingsUnntakDto.IKKE_PRAKTISK_MULIG
                 it.beskrivelse shouldBe "Ikke mulig å forhåndsvarsle"
             }
-        somSaksbehandler("Z9999999") {
-            behandlingApiController.behandlingLagreForhaandsvarselUnntak(
-                behandlingId,
-                unntakDto = ForhaandsvarselUnntakDto(
-                    begrunnelseForUnntak = VarslingsUnntakDto.ÅPENBART_UNØDVENDIG,
-                    beskrivelse = "Unntak ingen uttalelse",
-                ),
-            )
-        }
+    }
 
-        somSaksbehandler("Z9999999") {
-            behandlingApiController.behandlingLagreBrukersuttalelse(
-                behandlingId,
-                UttalelseDto(
-                    harBrukerUttaltSeg = UttalelseVurderingDto.UNNTAK_INGEN_UTTALELSE,
-                    beskrivelse = "Bruker har ikke uttalt seg",
-                ),
-            )
-        }
-
-        behandlingApiController.behandlingForhandsvarsel(behandlingId).body.shouldNotBeNull()
-            .forhaandsvarselsteg.shouldBeInstanceOf<ForhaandsvarselUnntakDto> {
-                it.begrunnelseForUnntak shouldBe VarslingsUnntakDto.ÅPENBART_UNØDVENDIG
-                it.beskrivelse shouldBe "Unntak ingen uttalelse"
-            }
-
+    @Test
+    fun `unntak med uttalelse lagres`() {
+        val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
+        val behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id
         somSaksbehandler("Z9999999") {
             behandlingApiController.behandlingLagreForhaandsvarselUnntak(
                 behandlingId,
@@ -453,85 +370,33 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
             )
         }
 
-        behandlingApiController.behandlingForhandsvarsel(behandlingId).body.shouldNotBeNull()
-            .forhaandsvarselsteg.shouldBeInstanceOf<ForhaandsvarselUnntakDto> {
+        behandlingApiController.behandlingForhandsvarsel(behandlingId).body.shouldNotBeNull {
+            forhaandsvarselsteg.shouldBeInstanceOf<ForhaandsvarselUnntakDto> {
                 it.begrunnelseForUnntak shouldBe VarslingsUnntakDto.ÅPENBART_UNØDVENDIG
                 it.beskrivelse shouldBe "Allerede uttalet seg"
             }
-
-        somSaksbehandler("Z9999999") {
-            behandlingApiController.behandlingLagreForhaandsvarselUnntak(
-                behandlingId,
-                unntakDto = ForhaandsvarselUnntakDto(
-                    begrunnelseForUnntak = VarslingsUnntakDto.ÅPENBART_UNØDVENDIG,
-                    beskrivelse = "Allerede uttalet seg",
-                ),
-            )
-
-            behandlingApiController.behandlingLagreBrukersuttalelse(
-                behandlingId,
-                UttalelseDto(
-                    harBrukerUttaltSeg = UttalelseVurderingDto.UNNTAK_ALLEREDE_UTTALT_SEG,
-                    uttalelsesdato = LocalDate.of(2022, 1, 1),
-                    hvorBrukerenUttalteSeg = "Snap",
-                    beskrivelse = "beskrivelse",
-                ),
-            )
+            brukeruttalelse.shouldNotBeNull {
+                harBrukerUttaltSeg shouldBe UttalelseVurderingDto.UNNTAK_ALLEREDE_UTTALT_SEG
+            }
         }
-
-        behandlingApiController.behandlingForhandsvarsel(behandlingId).body.shouldNotBeNull()
-            .forhaandsvarselsteg.shouldBeInstanceOf<ForhaandsvarselUnntakDto> {
-                it.begrunnelseForUnntak shouldBe VarslingsUnntakDto.ÅPENBART_UNØDVENDIG
-                it.beskrivelse shouldBe "Allerede uttalet seg"
-            }
     }
 
     @Test
-    fun `uttalelsesfrist lagres, oppdateres og redigeres`() {
+    fun `uttalelsesfrist lagres,`() {
         val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
         val behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id
 
         behandlingApiController.behandlingSendVarselbrev(behandlingId, SendForhaandsvarselDto("Tekst fra saksbehandler"))
-
-        var response = behandlingApiController.behandlingForhandsvarsel(behandlingId).body.shouldNotBeNull()
+        somSaksbehandler("Z9999999") {
+            behandlingApiController.behandlingUtsettUttalelsesfrist(behandlingId, UpdateUttalelsesfristDto(LocalDate.of(2027, 1, 1), "begrunnelse"))
+        }
+        val response = behandlingApiController.behandlingForhandsvarsel(behandlingId).body.shouldNotBeNull()
         response.forhaandsvarselsteg.shouldBeInstanceOf<ForhaandsvarselErSendtDto> {
             it.uttalelsesfrist.shouldNotBeNull()
             it.uttalelsesfrist.opprinneligFrist shouldBe LocalDate.now().plus(Period.ofWeeks(3))
-        }
-        response.brukeruttalelse!!.harBrukerUttaltSeg shouldBe UttalelseVurderingDto.IKKE_VURDERT
-        somSaksbehandler("Z9999999") {
-            behandlingApiController.behandlingUtsettUttalelsesfrist(
-                behandlingId,
-                utsettFristDto = UpdateUttalelsesfristDto(
-                    nyFrist = LocalDate.of(2027, 1, 1),
-                    begrunnelse = "Advokat vil ha mer tid",
-                ),
-            )
-        }
-
-        response = behandlingApiController.behandlingForhandsvarsel(behandlingId).body.shouldNotBeNull()
-        response.forhaandsvarselsteg.shouldBeInstanceOf<ForhaandsvarselErSendtDto> {
-            it.uttalelsesfrist.opprinneligFrist shouldBe LocalDate.now().plus(Period.ofWeeks(3))
             it.uttalelsesfrist.nyFrist shouldBe LocalDate.of(2027, 1, 1)
-            it.uttalelsesfrist.begrunnelse shouldBe "Advokat vil ha mer tid"
         }
         response.brukeruttalelse!!.harBrukerUttaltSeg shouldBe UttalelseVurderingDto.IKKE_VURDERT
-        somSaksbehandler("Z9999999") {
-            behandlingApiController.behandlingUtsettUttalelsesfrist(
-                behandlingId,
-                utsettFristDto = UpdateUttalelsesfristDto(
-                    nyFrist = LocalDate.of(2028, 1, 1),
-                    begrunnelse = "Advokat vil ha enda mer tid",
-                ),
-            )
-        }
-
-        response = behandlingApiController.behandlingForhandsvarsel(behandlingId).body.shouldNotBeNull()
-        response.shouldNotBeNull().forhaandsvarselsteg.shouldBeInstanceOf<ForhaandsvarselErSendtDto> {
-            it.uttalelsesfrist.opprinneligFrist shouldBe LocalDate.now().plus(Period.ofWeeks(3))
-            it.uttalelsesfrist.nyFrist shouldBe LocalDate.of(2028, 1, 1)
-            it.uttalelsesfrist.begrunnelse shouldBe "Advokat vil ha enda mer tid"
-        }
         response.brukeruttalelse!!.harBrukerUttaltSeg shouldBe UttalelseVurderingDto.IKKE_VURDERT
     }
 

@@ -74,7 +74,6 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseD
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselinfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.UpdateUttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -662,8 +661,8 @@ class Behandling internal constructor(
         )
     }
 
-    fun lagreFristUtsettelse(nyFrist: LocalDate, begrunnelse: String, behandlingslogg: Behandlingslogg, behandler: Behandler) {
-        forhåndsvarsel.lagreFristUtsettelse(
+    fun lagreFristUtsettelse(nyFrist: LocalDate, begrunnelse: String, behandlingslogg: Behandlingslogg, behandler: Behandler): UttalelsesfristDto {
+        val uttalelsesfrist = forhåndsvarsel.lagreFristUtsettelse(
             nyFrist = nyFrist,
             begrunnelse = begrunnelse,
         )
@@ -676,6 +675,7 @@ class Behandling internal constructor(
                 brevRef = null,
             ),
         )
+        return uttalelsesfrist
     }
 
     fun brukeruttaleserTilFrontendDto(): BrukeruttalelseDto? {
@@ -684,47 +684,6 @@ class Behandling internal constructor(
 
     fun utsettUttalelseFristTilFrontendDto(): FristUtsettelseDto? {
         return forhåndsvarsel.utsettUttalelseFristTilFrontendDto()
-    }
-
-    internal fun nyLagreUttalelse(
-        uttalelseVurdering: UttalelseVurdering,
-        uttalelseInfo: UttalelseInfo?,
-        kommentar: String?,
-        behandler: Behandler,
-        behandlingslogg: Behandlingslogg,
-    ) {
-        forhåndsvarsel.lagreUttalelse(
-            uttalelseVurdering = uttalelseVurdering,
-            uttalelseInfo = uttalelseInfo,
-            kommentar = kommentar,
-        )
-
-        behandlingslogg.lagre(
-            opprettLoggInnslag(
-                behandlingsloggstype = Behandlingsloggstype.BRUKER_UTTALELSE,
-                rolle = Rolle.SAKSBEHANDLER,
-                behandler = behandler,
-                brevRef = null,
-            ),
-        )
-    }
-
-    internal fun nyUtsettUttalelsesfrist(
-        utsettFrist: UpdateUttalelsesfristDto,
-        behandler: Behandler,
-        behandlingslogg: Behandlingslogg,
-    ): UttalelsesfristDto {
-        val uttalelsesfrist = forhåndsvarsel.lagreFristUtsettelse(utsettFrist.nyFrist!!, utsettFrist.begrunnelse!!)
-
-        behandlingslogg.lagre(
-            opprettLoggInnslag(
-                behandlingsloggstype = Behandlingsloggstype.UTSETT_UTTALELSESFRIST,
-                rolle = Rolle.SAKSBEHANDLER,
-                behandler = behandler,
-                brevRef = null,
-            ),
-        )
-        return uttalelsesfrist
     }
 
     internal fun vurdertePerioderForBrev(): List<BegrunnetPeriode> {
@@ -743,27 +702,6 @@ class Behandling internal constructor(
     }
 
     fun lagreForhåndsvarselUnntak(
-        begrunnelseForUnntak: BegrunnelseForUnntak,
-        beskrivelse: String,
-        behandler: Behandler,
-        behandlingslogg: Behandlingslogg,
-    ) {
-        forhåndsvarsel.lagreForhåndsvarselUnntak(
-            begrunnelseForUnntak = begrunnelseForUnntak,
-            beskrivelse = beskrivelse,
-        )
-
-        behandlingslogg.lagre(
-            opprettLoggInnslag(
-                behandlingsloggstype = Behandlingsloggstype.UNNTAK_FOR_UTTALELSE,
-                rolle = Rolle.SAKSBEHANDLER,
-                behandler = behandler,
-                brevRef = null,
-            ),
-        )
-    }
-
-    internal fun nyLagreForhåndsvarselUnntak(
         begrunnelseForUnntak: BegrunnelseForUnntak,
         beskrivelse: String,
         behandler: Behandler,

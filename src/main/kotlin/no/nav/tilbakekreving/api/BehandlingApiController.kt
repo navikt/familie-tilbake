@@ -177,7 +177,7 @@ class BehandlingApiController(
             tilbakekreving = tilbakekreving,
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-            auditLoggerEvent = AuditLoggerEvent.UPDATE,
+            auditLoggerEvent = AuditLoggerEvent.ACCESS,
             handling = "Henter informasjon for forhåndsvarsel",
         )
         return ResponseEntity.ok(forhåndsvarselService.nyHentForhåndsvarselinfo(tilbakekreving))
@@ -192,7 +192,7 @@ class BehandlingApiController(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
             auditLoggerEvent = AuditLoggerEvent.UPDATE,
-            handling = "Henter informasjon for forhåndsvarsel",
+            handling = "Sender forhåndsvarsel brev",
         )
         return tilbakekrevingService.hentTilbakekreving(behandlingId) {
             ResponseEntity.ok(it.sendVarselbrev(sendForhaandsvarselDto.tekstFraSaksbehandler))
@@ -209,7 +209,7 @@ class BehandlingApiController(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
             auditLoggerEvent = AuditLoggerEvent.UPDATE,
-            handling = "Henter informasjon for forhåndsvarsel",
+            handling = "Lagrer brukeruttalelse",
         )
         return tilbakekrevingService.hentTilbakekreving(behandlingId) {
             ResponseEntity.ok(forhåndsvarselService.nyLagreUttalelse(it, uttalelseDto, saksbehandler))
@@ -226,7 +226,7 @@ class BehandlingApiController(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
             auditLoggerEvent = AuditLoggerEvent.UPDATE,
-            handling = "Henter informasjon for forhåndsvarsel",
+            handling = "Utsetter uttalelsesfrist",
         )
         return tilbakekrevingService.hentTilbakekreving(behandlingId) {
             ResponseEntity.ok(forhåndsvarselService.nyUtsettUttalelsesfrist(it, utsettFristDto, saksbehandler))
@@ -243,7 +243,7 @@ class BehandlingApiController(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
             auditLoggerEvent = AuditLoggerEvent.UPDATE,
-            handling = "Henter informasjon for forhåndsvarsel",
+            handling = "Lagrer unntak for forhåndsvarsel",
         )
 
         return tilbakekrevingService.hentTilbakekreving(behandlingId) {

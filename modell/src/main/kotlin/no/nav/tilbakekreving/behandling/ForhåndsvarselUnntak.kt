@@ -26,7 +26,12 @@ data class ForhåndsvarselUnntak(
 
     internal fun nyTilFrontendDto(): ForhaandsvarselUnntakDto {
         return ForhaandsvarselUnntakDto(
-            begrunnelseForUnntak = VarslingsUnntakDto.valueOf(begrunnelseForUnntak.name),
+            begrunnelseForUnntak = when (begrunnelseForUnntak) {
+                BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG -> VarslingsUnntakDto.IKKE_PRAKTISK_MULIG
+                BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING -> VarslingsUnntakDto.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING
+                BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG -> VarslingsUnntakDto.ÅPENBART_UNØDVENDIG
+                BegrunnelseForUnntak.ALLEREDE_UTTALET_SEG -> VarslingsUnntakDto.ALLEREDE_UTTALET_SEG
+            },
             beskrivelse = beskrivelse,
         )
     }
