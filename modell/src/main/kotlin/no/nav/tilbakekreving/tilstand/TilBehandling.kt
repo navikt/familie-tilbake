@@ -6,7 +6,6 @@ import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
-import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
@@ -36,9 +35,6 @@ object TilBehandling : Tilstand {
         if (tilbakekreving.eksternFagsak.behandlinger.nåværende().entry is EksternFagsakRevurdering.Ukjent) {
             tilbakekreving.trengerFagsysteminfo()
         }
-        if (tilbakekreving.eksternFagsak.ytelse == Ytelse.Tiltakspenger) {
-            tilbakekreving.trengerFagsysteminfo()
-        }
         tilbakekreving.sendStatusendring(ForenkletBehandlingsstatus.OPPRETTET, ForenkletBehandlingsstatus.TIL_BEHANDLING)
     }
 
@@ -48,7 +44,6 @@ object TilBehandling : Tilstand {
 
     override fun håndter(tilbakekreving: Tilbakekreving, fagsysteminfo: FagsysteminfoHendelse) {
         tilbakekreving.oppdaterFagsysteminfo(fagsysteminfo)
-        tilbakekreving.utførSideeffekt()
     }
 
     override fun håndter(tilbakekreving: Tilbakekreving, behandling: Behandling, beslutter: Behandler, vurderinger: List<Pair<Behandlingssteg, FatteVedtakSteg.Vurdering>>) {
