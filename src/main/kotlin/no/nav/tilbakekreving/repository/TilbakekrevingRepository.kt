@@ -2,7 +2,6 @@ package no.nav.tilbakekreving.repository
 
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.Timer
-import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.entities.TilbakekrevingEntity
 import no.nav.tilbakekreving.entity.Entity.Companion.get
 import no.nav.tilbakekreving.entity.FieldConverter
@@ -12,7 +11,6 @@ import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.RowMapper
-import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -49,15 +47,12 @@ class TilbakekrevingRepository(
         resultSet: ResultSet,
     ): TilbakekrevingEntity {
         val id = resultSet[TilbakekrevingEntityMapper.id]
-        val behandlingId = jdbcTemplate.query("SELECT id FROM tilbakekreving_behandling WHERE tilbakekreving_id=? ORDER BY opprettet DESC", id) { rs, _ ->
-            rs.getString("id")
-        }.firstOrNull()
         return TilbakekrevingEntityMapper.map(
             resultSet = resultSet,
             eksternFagsak = eksternFagsakRepository.hentEksternFagsak(id),
             behandlingHistorikk = behandlingRepository.hentBehandlinger(id),
             kravgrunnlagHistorikk = kravgrunnlagRepository.hentKravgrunnlag(id),
-            brevHistorikk = brevRepository.hentBrev(id, SecureLog.Context.medBehandling(null, behandlingId)),
+            brevHistorikk = brevRepository.hentBrev(id),
             bruker = brukerRepository.hentBruker(id),
             behandlingsloggEntity = behandlingsloggRepository.hentBehandlingslogg(id),
         )
