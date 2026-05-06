@@ -46,9 +46,9 @@ class NyBrevRepository(
         }.singleOrNull()
     }
 
-    fun lagre(brevListe: List<BrevEntity>) {
+    fun lagre(brevListe: List<BrevEntity>, tilbakekrevingId: String) {
+        jdbcTemplate.update("DELETE FROM tilbakekreving_brev WHERE tilbakekreving_ref=?;", tilbakekrevingId)
         for (brev in brevListe) {
-            jdbcTemplate.update("DELETE FROM tilbakekreving_brev WHERE tilbakekreving_ref=?;", brev.tilbakekrevingRef)
             BrevEntityMapper.upsertQuery(jdbcTemplate, brev)
             when (brev.brevtype) {
                 Brevtype.VARSELBREV -> {
