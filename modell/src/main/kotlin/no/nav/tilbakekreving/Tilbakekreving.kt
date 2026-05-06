@@ -58,8 +58,8 @@ import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselinfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.LogginnslagDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
@@ -591,7 +591,7 @@ class Tilbakekreving internal constructor(
     fun nyHentForhåndsvarselFrontendDto(): ForhaandsvarselResponseDto {
         val behandling = behandlingHistorikk.nåværende().entry
         val forhåndsvarselinfo = brevHistorikk.sisteVarselbrev()?.let {
-            ForhaandsvarselinfoDto(
+            ForhaandsvarselInfoDto(
                 tekstFraSaksbehandler = it.tekstFraSaksbehandler,
                 varselbrevSendtTid = it.sendtTid,
             )

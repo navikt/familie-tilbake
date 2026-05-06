@@ -24,6 +24,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
     JsonSubTypes.Type(value = ForhaandsvarselErSendtDto::class, name = "sendt"),
     JsonSubTypes.Type(value = ForhaandsvarselUnntakDto::class, name = "unntak"),
 )
-sealed interface ForhaandsvarselstegDto
+sealed interface ForhaandsvarselStegDto
 
-object IkkeVurdertDto : ForhaandsvarselstegDto
+object IkkeVurdertDto : ForhaandsvarselStegDto

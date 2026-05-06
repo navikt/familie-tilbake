@@ -27,7 +27,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.SendForhaandsvarselDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UpdateUttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseVurderingDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.VarslingsUnntakDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VarslingsunntakDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.test.januar
@@ -269,7 +269,7 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
 
         val forhåndsvarselResponse = behandlingApiController.behandlingForhandsvarsel(behandlingId).body
 
-        forhåndsvarselResponse!!.forhaandsvarselsteg.shouldBeInstanceOf<IkkeVurdertDto>()
+        forhåndsvarselResponse!!.forhaandsvarselSteg.shouldBeInstanceOf<IkkeVurdertDto>()
     }
 
     @Test
@@ -280,8 +280,8 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
         behandlingApiController.behandlingSendVarselbrev(behandlingId, SendForhaandsvarselDto("Tekst fra saksbehandler"))
 
         val forhåndsvarselResponse = behandlingApiController.behandlingForhandsvarsel(behandlingId).body
-        forhåndsvarselResponse.shouldNotBeNull().forhaandsvarselsteg.shouldBeInstanceOf<ForhaandsvarselErSendtDto> {
-            it.forhåndsvarselinfo.tekstFraSaksbehandler shouldBe "Tekst fra saksbehandler"
+        forhåndsvarselResponse.shouldNotBeNull().forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselErSendtDto> {
+            it.forhåndsvarselInfo.tekstFraSaksbehandler shouldBe "Tekst fra saksbehandler"
         }
     }
 
@@ -293,7 +293,7 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
         behandlingApiController.behandlingSendVarselbrev(behandlingId, SendForhaandsvarselDto("Tekst fra saksbehandler"))
 
         val forhåndsvarselResponse = behandlingApiController.behandlingForhandsvarsel(behandlingId).body
-        forhåndsvarselResponse.shouldNotBeNull().forhaandsvarselsteg.shouldBeInstanceOf<ForhaandsvarselErSendtDto> {
+        forhåndsvarselResponse.shouldNotBeNull().forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselErSendtDto> {
             it.uttalelsesfrist.opprinneligFrist shouldBe LocalDate.now().plus(Period.ofWeeks(3))
             it.uttalelsesfrist.nyFrist shouldBe null
             it.uttalelsesfrist.begrunnelse shouldBe null
@@ -319,7 +319,7 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
         }
 
         val forhåndsvarselResponse = behandlingApiController.behandlingForhandsvarsel(behandlingId).body.shouldNotBeNull()
-        forhåndsvarselResponse.forhaandsvarselsteg.shouldBeInstanceOf<ForhaandsvarselErSendtDto>()
+        forhåndsvarselResponse.forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselErSendtDto>()
         forhåndsvarselResponse.brukeruttalelse.shouldNotBeNull {
             harBrukerUttaltSeg shouldBe UttalelseVurderingDto.NEI_ETTER_FORHÅNDSVARSEL
             beskrivelse shouldBe "Gadd ikke si noe"
@@ -334,14 +334,14 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
             behandlingApiController.behandlingLagreForhaandsvarselUnntak(
                 behandlingId,
                 unntakDto = ForhaandsvarselUnntakDto(
-                    begrunnelseForUnntak = VarslingsUnntakDto.IKKE_PRAKTISK_MULIG,
+                    begrunnelseForUnntak = VarslingsunntakDto.IKKE_PRAKTISK_MULIG,
                     beskrivelse = "Ikke mulig å forhåndsvarsle",
                 ),
             )
         }
         behandlingApiController.behandlingForhandsvarsel(behandlingId).body.shouldNotBeNull()
-            .forhaandsvarselsteg.shouldBeInstanceOf<ForhaandsvarselUnntakDto> {
-                it.begrunnelseForUnntak shouldBe VarslingsUnntakDto.IKKE_PRAKTISK_MULIG
+            .forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselUnntakDto> {
+                it.begrunnelseForUnntak shouldBe VarslingsunntakDto.IKKE_PRAKTISK_MULIG
                 it.beskrivelse shouldBe "Ikke mulig å forhåndsvarsle"
             }
     }
@@ -354,7 +354,7 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
             behandlingApiController.behandlingLagreForhaandsvarselUnntak(
                 behandlingId,
                 unntakDto = ForhaandsvarselUnntakDto(
-                    begrunnelseForUnntak = VarslingsUnntakDto.ÅPENBART_UNØDVENDIG,
+                    begrunnelseForUnntak = VarslingsunntakDto.ÅPENBART_UNØDVENDIG,
                     beskrivelse = "Allerede uttalet seg",
                 ),
             )
@@ -371,8 +371,8 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
         }
 
         behandlingApiController.behandlingForhandsvarsel(behandlingId).body.shouldNotBeNull {
-            forhaandsvarselsteg.shouldBeInstanceOf<ForhaandsvarselUnntakDto> {
-                it.begrunnelseForUnntak shouldBe VarslingsUnntakDto.ÅPENBART_UNØDVENDIG
+            forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselUnntakDto> {
+                it.begrunnelseForUnntak shouldBe VarslingsunntakDto.ÅPENBART_UNØDVENDIG
                 it.beskrivelse shouldBe "Allerede uttalet seg"
             }
             brukeruttalelse.shouldNotBeNull {
@@ -391,7 +391,7 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
             behandlingApiController.behandlingUtsettUttalelsesfrist(behandlingId, UpdateUttalelsesfristDto(LocalDate.of(2027, 1, 1), "begrunnelse"))
         }
         val response = behandlingApiController.behandlingForhandsvarsel(behandlingId).body.shouldNotBeNull()
-        response.forhaandsvarselsteg.shouldBeInstanceOf<ForhaandsvarselErSendtDto> {
+        response.forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselErSendtDto> {
             it.uttalelsesfrist.shouldNotBeNull()
             it.uttalelsesfrist.opprinneligFrist shouldBe LocalDate.now().plus(Period.ofWeeks(3))
             it.uttalelsesfrist.nyFrist shouldBe LocalDate.of(2027, 1, 1)
