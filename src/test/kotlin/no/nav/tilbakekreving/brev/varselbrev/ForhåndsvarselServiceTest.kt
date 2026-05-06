@@ -64,7 +64,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
         }
         tekster.data.avsnitter.forOne {
             it.title shouldBe "Dette har skjedd"
-            it.body shouldContain "og endringen har ført til at du har fått utbetalt for mye."
+            it.body shouldBe ""
         }
         tekster.data.avsnitter.forOne {
             it.title shouldBe "Dette legger vi vekt på i vurderingen vår"

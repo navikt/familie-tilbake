@@ -47,6 +47,7 @@ class TekstformatererVarselbrevTest {
             revurderingsvedtaksdato = LocalDate.of(2019, 12, 18),
             brevmetadata = metadata,
             hjemlerForTilbakekreving = "Dette går fram av $lovverk.",
+            nyModell = false,
         )
     }
 

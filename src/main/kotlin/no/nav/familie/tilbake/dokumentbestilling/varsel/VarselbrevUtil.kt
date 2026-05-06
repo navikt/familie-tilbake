@@ -87,6 +87,7 @@ class VarselbrevUtil(
             varseltekstFraSaksbehandler = request.varseltekst,
             feilutbetaltePerioder = mapFeilutbetaltePerioder(request.feilutbetaltePerioderDto),
             hjemlerForTilbakekreving = BrevFormatterer.lagForhåndsvarselHjemmelAvsnitt(VarselbrevService.hjemlerForTilbakekreving(ytelsestype), metadata.språkkode),
+            nyModell = false,
         )
     }
 
@@ -144,6 +145,7 @@ class VarselbrevUtil(
             varsletDato = varsel?.sporbar?.opprettetTid?.toLocalDate(),
             varsletBeløp = varsel?.varselbeløp,
             hjemlerForTilbakekreving = BrevFormatterer.lagForhåndsvarselHjemmelAvsnitt(VarselbrevService.hjemlerForTilbakekreving(Ytelsestype.forDTO(metadata.ytelsestype)), metadata.språkkode),
+            nyModell = false,
         )
 
     private fun sammenstillInfoFraSimuleringForVedlegg(

@@ -134,6 +134,7 @@ class VarselbrevService(
             varseltekstFraSaksbehandler = varsel?.varseltekst,
             feilutbetaltePerioder = mapFeilutbetaltePerioder(varsel),
             hjemlerForTilbakekreving = BrevFormatterer.lagForhåndsvarselHjemmelAvsnitt(hjemlerForTilbakekreving(fagsak.ytelsestype), metadata.språkkode),
+            nyModell = false,
         )
     }
 
