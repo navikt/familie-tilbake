@@ -18,6 +18,7 @@ data class Varselbrevsdokument(
     val varsletBeløp: Long? = null,
     val erKorrigert: Boolean = false,
     val hjemlerForTilbakekreving: String,
+    val nyModell: Boolean,
 ) : BaseDokument(
         brevmetadata.ytelsestype,
         brevmetadata.språkkode,

@@ -258,6 +258,7 @@ class ForhåndsvarselService(
             varsletBeløp = varselbrevInfo.forhåndsvarselinfo.beløp,
             varsletDato = LocalDate.now(),
             hjemlerForTilbakekreving = BrevFormatterer.lagForhåndsvarselHjemmelAvsnitt(varselbrevInfo.hjemlerForTilbakekreving, Språkkode.NB),
+            nyModell = true,
         )
     }
 
@@ -318,6 +319,7 @@ class ForhåndsvarselService(
             varseltekstFraSaksbehandler = varselbrevBehov.varseltekstFraSaksbehandler,
             feilutbetaltePerioder = varselbrevBehov.feilutbetaltePerioder,
             hjemlerForTilbakekreving = BrevFormatterer.lagForhåndsvarselHjemmelAvsnitt(varselbrevBehov.hjemlerForTilbakekreving, Språkkode.NB),
+            nyModell = true,
         )
 
         return Brevdata(

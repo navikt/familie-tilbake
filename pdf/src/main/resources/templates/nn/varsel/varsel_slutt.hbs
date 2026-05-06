@@ -8,7 +8,9 @@ Før vi avgjer om {{#or gjelderDødsfall institusjon}}pengane skal betalast{{els
 Dersom {{#or gjelderDødsfall institusjon}}det må betalast{{else}}du må betale{{/or}} tilbake, reduserer vi beløpet med trekt skatt.
 {{/if}}
 _Dette har skjedd
+{{#unless nyModell}}
 {{#or gjelderDødsfall institusjon}}{{{storForbokstav ytelsesnavnBestemt}}}{{else}}{{{storForbokstav ytelsesnavnEiendomsform}}}{{/or}} blei endra {{{dato revurderingsvedtaksdato}}}, og endringa har ført til at {{#if gjelderDødsfall}}det er{{else}}{{> duEllerinstitusjonen}} har fått{{/if}} utbetalt for mykje.
+{{/unless}}
 {{#if varseltekstFraSaksbehandler}}
 
 {{{varseltekstFraSaksbehandler}}}
