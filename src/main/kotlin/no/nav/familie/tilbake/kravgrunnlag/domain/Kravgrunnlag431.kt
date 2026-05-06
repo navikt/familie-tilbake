@@ -157,6 +157,7 @@ enum class Klassekode(
     BATR("Barnetrygd"),
     BATRSMA("Småbarnstillegg"),
     BATRFIN("Barnetrygd-Finnmarkstillegg"),
+    BATRSVAL("Barnetrygd-Svalbardstillegg"),
     BAUTV_OP("Utvidet-Barnetrygd", "BAUTV-OP"),
     BAOREUMS("Barnetrygd-EU-Norge-Infotrygd"),
     BAOROSMS("Barnetrygd-Infotrygd"),
