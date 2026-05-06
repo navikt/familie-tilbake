@@ -10,8 +10,8 @@ import no.nav.tilbakekreving.entities.ForhåndsvarselEntity
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselErSendtDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselinfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.IkkeVurdertDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseVurderingDto
@@ -116,11 +116,11 @@ class Forhåndsvarsel(
         return brukeruttalelse?.meldingerTilSaksbehandler() ?: emptySet()
     }
 
-    fun nyForhåndsvarselTilFrontend(forhåndsvarselinfo: ForhaandsvarselinfoDto?): ForhaandsvarselResponseDto {
+    fun nyForhåndsvarselTilFrontend(forhåndsvarselinfo: ForhaandsvarselInfoDto?): ForhaandsvarselResponseDto {
         if (uttalelsesfrist != null) {
             return ForhaandsvarselResponseDto(
-                forhaandsvarselsteg = ForhaandsvarselErSendtDto(
-                    forhåndsvarselinfo = forhåndsvarselinfo!!,
+                forhaandsvarselSteg = ForhaandsvarselErSendtDto(
+                    forhåndsvarselInfo = forhåndsvarselinfo!!,
                     uttalelsesfrist = uttalelsesfrist!!.nyTilFrontendDto(),
                 ),
                 brukeruttalelse = brukeruttalelse?.nyTilFrontendDto()
@@ -129,13 +129,13 @@ class Forhåndsvarsel(
         }
         if (forhåndsvarselUnntak != null) {
             return ForhaandsvarselResponseDto(
-                forhaandsvarselsteg = forhåndsvarselUnntak!!.nyTilFrontendDto(),
+                forhaandsvarselSteg = forhåndsvarselUnntak!!.nyTilFrontendDto(),
                 brukeruttalelse = brukeruttalelse?.nyTilFrontendDto(),
             )
         }
 
         return ForhaandsvarselResponseDto(
-            forhaandsvarselsteg = IkkeVurdertDto,
+            forhaandsvarselSteg = IkkeVurdertDto,
             brukeruttalelse = brukeruttalelse?.nyTilFrontendDto(),
         )
     }

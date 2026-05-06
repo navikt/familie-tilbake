@@ -70,8 +70,8 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatu
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselinfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
@@ -873,7 +873,7 @@ class Behandling internal constructor(
         )
     }
 
-    fun nyForhåndsvarselTilFrontend(forhåndsvarselinfo: ForhaandsvarselinfoDto?): ForhaandsvarselResponseDto {
+    fun nyForhåndsvarselTilFrontend(forhåndsvarselinfo: ForhaandsvarselInfoDto?): ForhaandsvarselResponseDto {
         return forhåndsvarsel.nyForhåndsvarselTilFrontend(forhåndsvarselinfo)
     }
 

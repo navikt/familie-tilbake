@@ -38,7 +38,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.UpdateUttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseVurderingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.VarslingsUnntakDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VarslingsunntakDto
 import no.nav.tilbakekreving.pdf.Dokumentvariant
 import no.nav.tilbakekreving.pdf.PdfGenerator
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
@@ -193,10 +193,10 @@ class ForhåndsvarselService(
     fun nyLagreForhåndsvarselUnntak(tilbakekreving: Tilbakekreving, unntakDto: ForhaandsvarselUnntakDto, behandler: Behandler) {
         tilbakekreving.lagreForhåndsvarselUnntak(
             begrunnelseForUnntak = when (unntakDto.begrunnelseForUnntak) {
-                VarslingsUnntakDto.IKKE_PRAKTISK_MULIG -> BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG
-                VarslingsUnntakDto.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING -> BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING
-                VarslingsUnntakDto.ÅPENBART_UNØDVENDIG -> BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG
-                VarslingsUnntakDto.ALLEREDE_UTTALET_SEG -> BegrunnelseForUnntak.ALLEREDE_UTTALET_SEG
+                VarslingsunntakDto.IKKE_PRAKTISK_MULIG -> BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG
+                VarslingsunntakDto.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING -> BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING
+                VarslingsunntakDto.ÅPENBART_UNØDVENDIG -> BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG
+                VarslingsunntakDto.ALLEREDE_UTTALET_SEG -> BegrunnelseForUnntak.ALLEREDE_UTTALET_SEG
             },
             beskrivelse = unntakDto.beskrivelse,
             behandler = behandler,
