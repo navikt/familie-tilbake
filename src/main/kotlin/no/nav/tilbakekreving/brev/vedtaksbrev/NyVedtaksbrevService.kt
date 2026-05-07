@@ -88,6 +88,8 @@ class NyVedtaksbrevService(
             oppsummeringstabell = OppsummeringsdataDto(
                 beregnerSkatt = vedtaksbrevInfo.beregnerSkatt,
                 perioder = mapOppsummeringsperioder(vedtaksbrevInfo.beregningsresultat),
+                sumFeilutbetaltBeløp = BrevFormatterer.beløpString(vedtaksbrevInfo.beregningsresultat.sumOf { it.feilutbetaltBeløp }),
+                sumTilbakekrevesBeløpEtterSkatt = BrevFormatterer.beløpString(vedtaksbrevInfo.beregningsresultat.sumOf { it.tilbakekrevesBeløpEtterSkatt }),
             ),
         )
 
@@ -106,6 +108,8 @@ class NyVedtaksbrevService(
             oppsummeringstabell = OppsummeringsdataDto(
                 beregnerSkatt = vedtaksbrevInfo.beregnerSkatt,
                 perioder = mapOppsummeringsperioder(vedtaksbrevInfo.beregningsresultat),
+                sumFeilutbetaltBeløp = BrevFormatterer.beløpString(vedtaksbrevInfo.beregningsresultat.sumOf { it.feilutbetaltBeløp }),
+                sumTilbakekrevesBeløpEtterSkatt = BrevFormatterer.beløpString(vedtaksbrevInfo.beregningsresultat.sumOf { it.tilbakekrevesBeløpEtterSkatt }),
             ),
         )
     }
