@@ -10,9 +10,9 @@ import java.time.OffsetDateTime
     property = "hendelsestype",
 )
 @JsonSubTypes(
-    JsonSubTypes.Type(value = BehandlingEndret::class, name = "behandling_endret"),
+    JsonSubTypes.Type(value = BehandlingEndretEventDto::class, name = "behandling_endret"),
 )
-sealed interface Hendelse {
+sealed interface HendelseEventDto {
     val versjon: Int
     val eksternFagsakId: String
     val hendelseOpprettet: OffsetDateTime

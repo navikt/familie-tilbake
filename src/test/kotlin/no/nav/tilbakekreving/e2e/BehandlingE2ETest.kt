@@ -15,14 +15,15 @@ import no.nav.tilbakekreving.api.v1.dto.GodTroDto
 import no.nav.tilbakekreving.api.v1.dto.SkalUnnlates
 import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.api.v2.PeriodeDto
-import no.nav.tilbakekreving.api.v2.fagsystem.BehandlingEndretHendelse
-import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
 import no.nav.tilbakekreving.api.v2.fagsystem.svar.FagsysteminfoSvarHendelse
 import no.nav.tilbakekreving.e2e.ytelser.TilleggsstønaderE2ETest.Companion.TILLEGGSSTØNADER_KØ_NAVN
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
+import no.nav.tilbakekreving.fagsystem.events.BehandlingEndretEventDto
+import no.nav.tilbakekreving.fagsystem.events.BehandlingsstatusEventDto
+import no.nav.tilbakekreving.fagsystem.events.PeriodeEventDto
 import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub
-import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub.Companion.finnKafkamelding
+import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub.Companion.finnHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
@@ -414,7 +415,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
 
         tilbakekrevVedtak(behandlingId, listOf(1.januar(2021) til 31.januar(2021)))
 
-        val event = kafkaProducer.finnKafkamelding(fagsystemId, BehandlingEndretHendelse.METADATA)
+        val event = kafkaProducer.finnHendelse<BehandlingEndretEventDto>(fagsystemId)
             .lastOrNull()
             .shouldNotBeNull()
 
@@ -424,9 +425,9 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         event.tilbakekreving.behandlingId shouldBe behandlingId
         event.tilbakekreving.sakOpprettet.toLocalDate() shouldBe LocalDate.now()
         event.tilbakekreving.varselSendt shouldBe null
-        event.tilbakekreving.behandlingsstatus shouldBe ForenkletBehandlingsstatus.AVSLUTTET
+        event.tilbakekreving.behandlingsstatus shouldBe BehandlingsstatusEventDto.AVSLUTTET
         event.tilbakekreving.totaltFeilutbetaltBeløp shouldBe 2000.0.kroner
-        event.tilbakekreving.fullstendigPeriode shouldBe PeriodeDto(1.januar(2021), 31.januar(2021))
+        event.tilbakekreving.fullstendigPeriode shouldBe PeriodeEventDto(1.januar(2021), 31.januar(2021))
         event.tilbakekreving.saksbehandlingURL shouldBe "https://tilbakekreving.intern.nav.no/fagsystem/TS/fagsak/$fagsystemId/behandling/$behandlingId"
     }
 

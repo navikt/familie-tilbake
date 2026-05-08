@@ -10,6 +10,7 @@ import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.tilbakekreving.api.v2.fagsystem.EventMetadata
 import no.nav.tilbakekreving.api.v2.fagsystem.Kafkamelding
 import no.nav.tilbakekreving.fagsystem.Ytelse
+import no.nav.tilbakekreving.fagsystem.events.HendelseEventDto
 import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandlingRequest
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.context.annotation.Profile
@@ -44,6 +45,13 @@ interface KafkaProducer {
     fun <K : Kafkamelding> sendKafkaEvent(
         kafkamelding: K,
         metadata: EventMetadata<K>,
+        vedtakGjelderId: String,
+        ytelse: Ytelse,
+        logContext: SecureLog.Context,
+    )
+
+    fun sendHendelseEvent(
+        hendelse: HendelseEventDto,
         vedtakGjelderId: String,
         ytelse: Ytelse,
         logContext: SecureLog.Context,
@@ -161,6 +169,18 @@ class DefaultKafkaProducer(
 
         kafkaTemplate.send(ytelse.kafkaTopic, vedtakGjelderId, objectMapper.writeValueAsString(json)).get()
     }
+
+    override fun sendHendelseEvent(
+        hendelse: HendelseEventDto,
+        vedtakGjelderId: String,
+        ytelse: Ytelse,
+        logContext: SecureLog.Context,
+    ) {
+        log.medContext(logContext) {
+            info("Sender hendelse til {}", ytelse.kafkaTopic)
+        }
+        kafkaTemplate.send(ytelse.kafkaTopic, vedtakGjelderId, objectMapper.writeValueAsString(hendelse)).get()
+    }
 }
 
 @Service
@@ -214,6 +234,17 @@ class E2EKafkaProducer : KafkaProducer {
     ) {
         log.medContext(logContext) {
             info("Ville sendt event med innhold '{}'", objectMapper.writeValueAsString(kafkamelding))
+        }
+    }
+
+    override fun sendHendelseEvent(
+        hendelse: HendelseEventDto,
+        vedtakGjelderId: String,
+        ytelse: Ytelse,
+        logContext: SecureLog.Context,
+    ) {
+        log.medContext(logContext) {
+            info("Ville sendt hendelse med innhold '{}'", objectMapper.writeValueAsString(hendelse))
         }
     }
 

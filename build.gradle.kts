@@ -213,6 +213,7 @@ dependencies {
     api(project(":integrasjoner"))
     api(project(":kontrakter-ekstern"))
     api(project(":kontrakter-intern"))
+    api(project(":kontrakter-fagsystem"))
     api(project(":kontrakter-frontend:api"))
     api(project(":modell"))
     api(project(":pdf"))

@@ -8,12 +8,14 @@ import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.Vedtaksoppsummer
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
-import no.nav.tilbakekreving.api.v2.PeriodeDto
-import no.nav.tilbakekreving.api.v2.fagsystem.BehandlingEndretHendelse
 import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.config.Toggles
 import no.nav.tilbakekreving.fagsystem.Ytelse
+import no.nav.tilbakekreving.fagsystem.events.BehandlingEndretEventDto
+import no.nav.tilbakekreving.fagsystem.events.BehandlingsstatusEventDto
+import no.nav.tilbakekreving.fagsystem.events.PeriodeEventDto
+import no.nav.tilbakekreving.fagsystem.events.TilbakekrevingEventDto
 import no.nav.tilbakekreving.kontrakter.Periode
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
@@ -28,6 +30,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
+import java.time.ZoneId
 import java.util.UUID
 
 @Service
@@ -106,28 +109,35 @@ class EndringObservatørService(
                 info("URL til behandling er: {}", hentSaksbehandlingURL(applicationProperties.frontendUrl))
             }
         }
-        kafkaProducer.sendKafkaEvent(
-            BehandlingEndretHendelse(
+        kafkaProducer.sendHendelseEvent(
+            BehandlingEndretEventDto(
                 eksternFagsakId = eksternFagsakId,
-                hendelseOpprettet = LocalDateTime.now(),
+                hendelseOpprettet = OffsetDateTime.now(),
                 eksternBehandlingId = eksternBehandlingId,
-                tilbakekreving = BehandlingEndretHendelse.Tilbakekreving(
+                tilbakekreving = TilbakekrevingEventDto(
                     behandlingId = behandlingId,
-                    sakOpprettet = sakOpprettet,
+                    sakOpprettet = sakOpprettet.atZone(ZoneId.systemDefault()).toOffsetDateTime(),
                     varselSendt = varselSendt,
-                    behandlingsstatus = behandlingsstatus,
-                    forrigeBehandlingsstatus = forrigeBehandlingsstatus,
+                    behandlingsstatus = behandlingsstatus.tilEventDto(),
+                    forrigeBehandlingsstatus = forrigeBehandlingsstatus?.tilEventDto(),
                     totaltFeilutbetaltBeløp = totaltFeilutbetaltBeløp,
                     saksbehandlingURL = hentSaksbehandlingURL(applicationProperties.frontendUrl),
-                    fullstendigPeriode = PeriodeDto(fullstendigPeriode.fom, fullstendigPeriode.tom),
+                    fullstendigPeriode = PeriodeEventDto(fullstendigPeriode.fom, fullstendigPeriode.tom),
                 ),
             ),
-            BehandlingEndretHendelse.METADATA,
             vedtakGjelderId,
             ytelse,
             logContext,
         )
     }
+
+    private fun ForenkletBehandlingsstatus.tilEventDto(): BehandlingsstatusEventDto =
+        when (this) {
+            ForenkletBehandlingsstatus.OPPRETTET -> BehandlingsstatusEventDto.OPPRETTET
+            ForenkletBehandlingsstatus.TIL_BEHANDLING -> BehandlingsstatusEventDto.TIL_BEHANDLING
+            ForenkletBehandlingsstatus.TIL_GODKJENNING -> BehandlingsstatusEventDto.TIL_GODKJENNING
+            ForenkletBehandlingsstatus.AVSLUTTET -> BehandlingsstatusEventDto.AVSLUTTET
+        }
 
     override fun vedtakFattet(
         behandlingId: UUID,
