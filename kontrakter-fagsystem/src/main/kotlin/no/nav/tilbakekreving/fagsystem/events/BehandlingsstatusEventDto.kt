@@ -1,6 +1,6 @@
 package no.nav.tilbakekreving.fagsystem.events
 
-enum class Behandlingsstatus {
+enum class BehandlingsstatusEventDto {
     OPPRETTET,
     TIL_BEHANDLING,
     TIL_GODKJENNING,

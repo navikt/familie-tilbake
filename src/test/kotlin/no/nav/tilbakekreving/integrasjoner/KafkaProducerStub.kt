@@ -9,10 +9,12 @@ import no.nav.tilbakekreving.api.v2.fagsystem.EventMetadata
 import no.nav.tilbakekreving.api.v2.fagsystem.Kafkamelding
 import no.nav.tilbakekreving.api.v2.fagsystem.behov.FagsysteminfoBehovHendelse
 import no.nav.tilbakekreving.fagsystem.Ytelse
+import no.nav.tilbakekreving.fagsystem.events.HendelseEventDto
 import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandlingRequest
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Service
 import java.util.UUID
+import kotlin.reflect.KClass
 
 @Service
 @Primary
@@ -20,9 +22,11 @@ class KafkaProducerStub() : KafkaProducer {
     private val saksdata = mutableMapOf<UUID, MutableList<Behandlingstilstand>>()
     private val vedtak = mutableMapOf<UUID, MutableList<Vedtaksoppsummering>>()
     private val kafkameldinger = mutableMapOf<String, MutableList<Pair<EventMetadata<*>, Kafkamelding>>>()
+    private val hendelser = mutableMapOf<String, MutableList<HendelseEventDto>>()
 
     private val fagsystemInfoSvarHandlers = mutableMapOf<String, () -> Unit>()
     private val handlerFor = mutableMapOf<HandkerKey, () -> Unit>()
+    private val hendelseHandlerFor = mutableMapOf<HendelseHandlerKey, () -> Unit>()
 
     override fun <K : Kafkamelding> sendKafkaEvent(
         kafkamelding: K,
@@ -52,11 +56,23 @@ class KafkaProducerStub() : KafkaProducer {
 
     override fun sendHentFagsystemsbehandlingRequest(requestId: UUID, request: HentFagsystemsbehandlingRequest, logContext: SecureLog.Context) {}
 
+    override fun sendHendelseEvent(
+        hendelse: HendelseEventDto,
+        vedtakGjelderId: String,
+        ytelse: Ytelse,
+        logContext: SecureLog.Context,
+    ) {
+        hendelseHandlerFor[HendelseHandlerKey(hendelse::class, hendelse.eksternFagsakId)]?.let { handler -> handler() }
+        hendelser.computeIfAbsent(hendelse.eksternFagsakId) { mutableListOf() }.add(hendelse)
+    }
+
     fun finnSaksdata(behandlingId: UUID): List<Behandlingstilstand> = saksdata[behandlingId] ?: emptyList()
 
     fun finnVedtaksoppsummering(behandlingId: UUID): List<Vedtaksoppsummering> = vedtak[behandlingId] ?: emptyList()
 
     fun finnKafkamelding(eksternFagsakId: String): List<Pair<EventMetadata<*>, Kafkamelding>> = kafkameldinger[eksternFagsakId] ?: emptyList()
+
+    fun finnHendelser(eksternFagsakId: String): List<HendelseEventDto> = hendelser[eksternFagsakId] ?: emptyList()
 
     fun settFagsysteminfoSvar(eksternFagsakId: String, handler: () -> Unit) {
         fagsystemInfoSvarHandlers[eksternFagsakId] = handler
@@ -66,6 +82,10 @@ class KafkaProducerStub() : KafkaProducer {
         handlerFor[HandkerKey(metadata, fagsystemId)] = callback
     }
 
+    fun vedHendelse(key: HendelseHandlerKey, callback: () -> Unit) {
+        hendelseHandlerFor[key] = callback
+    }
+
     companion object {
         inline fun <reified T : Kafkamelding> KafkaProducerStub.finnKafkamelding(eksternFagsakId: String, type: EventMetadata<T>): List<T> {
             return finnKafkamelding(eksternFagsakId)
@@ -73,10 +93,23 @@ class KafkaProducerStub() : KafkaProducer {
                 .map { (_, value) -> value }
                 .map { it.shouldBeInstanceOf() }
         }
+
+        inline fun <reified T : HendelseEventDto> KafkaProducerStub.finnHendelse(eksternFagsakId: String): List<T> {
+            return finnHendelser(eksternFagsakId).filterIsInstance<T>()
+        }
+
+        inline fun <reified T : HendelseEventDto> KafkaProducerStub.vedHendelse(fagsystemId: String, noinline callback: () -> Unit) {
+            vedHendelse(HendelseHandlerKey(T::class, fagsystemId), callback)
+        }
     }
 
     data class HandkerKey(
         val metadata: EventMetadata<*>,
+        val eksternFagsakId: String,
+    )
+
+    data class HendelseHandlerKey(
+        val type: KClass<out HendelseEventDto>,
         val eksternFagsakId: String,
     )
 }

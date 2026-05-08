@@ -7,15 +7,16 @@ import io.kotest.matchers.comparables.shouldBeGreaterThan
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Testdata
-import no.nav.tilbakekreving.api.v2.fagsystem.BehandlingEndretHendelse
-import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
 import no.nav.tilbakekreving.e2e.ytelser.TilleggsstønaderE2ETest.Companion.TILLEGGSSTØNADER_KØ_NAVN
 import no.nav.tilbakekreving.entity.FieldConverter
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
+import no.nav.tilbakekreving.fagsystem.events.BehandlingEndretEventDto
+import no.nav.tilbakekreving.fagsystem.events.BehandlingsstatusEventDto
 import no.nav.tilbakekreving.hendelser.PåminnelseMediator
 import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub
-import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub.Companion.finnKafkamelding
+import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub.Companion.finnHendelse
+import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub.Companion.vedHendelse
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
@@ -155,9 +156,9 @@ class PåminnelseE2ETest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
         val tilbakekrevingId = tilbakekreving(behandlingId).id
 
-        kafkaProducer.finnKafkamelding(fagsystemId, BehandlingEndretHendelse.METADATA)
+        kafkaProducer.finnHendelse<BehandlingEndretEventDto>(fagsystemId)
             .forExactly(1) {
-                it.tilbakekreving.behandlingsstatus shouldBe ForenkletBehandlingsstatus.TIL_BEHANDLING
+                it.tilbakekreving.behandlingsstatus shouldBe BehandlingsstatusEventDto.TIL_BEHANDLING
             }
 
         jdbcTemplate.update(
@@ -169,9 +170,9 @@ class PåminnelseE2ETest : TilbakekrevingE2EBase() {
         påminnelseMediator.påminnSaker()
         påminnelseMediator.påminnSaker()
 
-        kafkaProducer.finnKafkamelding(fagsystemId, BehandlingEndretHendelse.METADATA)
+        kafkaProducer.finnHendelse<BehandlingEndretEventDto>(fagsystemId)
             .forExactly(2) {
-                it.tilbakekreving.behandlingsstatus shouldBe ForenkletBehandlingsstatus.TIL_BEHANDLING
+                it.tilbakekreving.behandlingsstatus shouldBe BehandlingsstatusEventDto.TIL_BEHANDLING
             }
     }
 
@@ -193,12 +194,12 @@ class PåminnelseE2ETest : TilbakekrevingE2EBase() {
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId2))
 
         kafkaProducer
-            .finnKafkamelding(fagsystemId1, BehandlingEndretHendelse.METADATA)
-            .filter { it.tilbakekreving.behandlingsstatus == ForenkletBehandlingsstatus.TIL_BEHANDLING }
+            .finnHendelse<BehandlingEndretEventDto>(fagsystemId1)
+            .filter { it.tilbakekreving.behandlingsstatus == BehandlingsstatusEventDto.TIL_BEHANDLING }
             .shouldHaveSize(1)
         kafkaProducer
-            .finnKafkamelding(fagsystemId2, BehandlingEndretHendelse.METADATA)
-            .filter { it.tilbakekreving.behandlingsstatus == ForenkletBehandlingsstatus.TIL_BEHANDLING }
+            .finnHendelse<BehandlingEndretEventDto>(fagsystemId2)
+            .filter { it.tilbakekreving.behandlingsstatus == BehandlingsstatusEventDto.TIL_BEHANDLING }
             .shouldHaveSize(1)
 
         jdbcTemplate.update(
@@ -208,16 +209,16 @@ class PåminnelseE2ETest : TilbakekrevingE2EBase() {
             tilbakekreving(FagsystemDTO.TS, fagsystemId2).shouldNotBeNull().id,
         )
 
-        kafkaProducer.vedMelding(BehandlingEndretHendelse.METADATA, fagsystemId1) { error("Tvungen feil ved test") }
+        kafkaProducer.vedHendelse<BehandlingEndretEventDto>(fagsystemId1) { error("Tvungen feil ved test") }
         påminnelseMediator.påminnSaker()
 
         kafkaProducer
-            .finnKafkamelding(fagsystemId1, BehandlingEndretHendelse.METADATA)
-            .filter { it.tilbakekreving.behandlingsstatus == ForenkletBehandlingsstatus.TIL_BEHANDLING }
+            .finnHendelse<BehandlingEndretEventDto>(fagsystemId1)
+            .filter { it.tilbakekreving.behandlingsstatus == BehandlingsstatusEventDto.TIL_BEHANDLING }
             .shouldHaveSize(1)
         kafkaProducer
-            .finnKafkamelding(fagsystemId2, BehandlingEndretHendelse.METADATA)
-            .filter { it.tilbakekreving.behandlingsstatus == ForenkletBehandlingsstatus.TIL_BEHANDLING }
+            .finnHendelse<BehandlingEndretEventDto>(fagsystemId2)
+            .filter { it.tilbakekreving.behandlingsstatus == BehandlingsstatusEventDto.TIL_BEHANDLING }
             .shouldHaveSize(2)
     }
 }
