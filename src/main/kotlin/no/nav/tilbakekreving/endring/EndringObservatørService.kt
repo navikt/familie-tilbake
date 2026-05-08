@@ -99,6 +99,9 @@ class EndringObservatørService(
         totaltFeilutbetaltBeløp: BigDecimal,
         hentSaksbehandlingURL: (String) -> String,
         fullstendigPeriode: Datoperiode,
+        tilbakekrevdBeløp: BigDecimal?,
+        vedtaksresultat: Vedtaksresultat?,
+        renteprosent: BigDecimal?,
     ) {
         val logContext = SecureLog.Context.utenBehandling(eksternFagsakId)
         if (behandlingsstatus == ForenkletBehandlingsstatus.OPPRETTET) {
@@ -120,6 +123,9 @@ class EndringObservatørService(
                     totaltFeilutbetaltBeløp = totaltFeilutbetaltBeløp,
                     saksbehandlingURL = hentSaksbehandlingURL(applicationProperties.frontendUrl),
                     fullstendigPeriode = PeriodeDto(fullstendigPeriode.fom, fullstendigPeriode.tom),
+                    tilbakekrevdBeløp = tilbakekrevdBeløp,
+                    vedtaksresultat = vedtaksresultat?.name,
+                    renteprosent = renteprosent,
                 ),
             ),
             BehandlingEndretHendelse.METADATA,

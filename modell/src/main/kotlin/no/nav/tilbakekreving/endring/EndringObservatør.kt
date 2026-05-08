@@ -43,6 +43,9 @@ interface EndringObservatør {
         totaltFeilutbetaltBeløp: BigDecimal,
         hentSaksbehandlingURL: (String) -> String,
         fullstendigPeriode: Datoperiode,
+        tilbakekrevdBeløp: BigDecimal?,
+        vedtaksresultat: Vedtaksresultat?,
+        renteprosent: BigDecimal?,
     )
 
     fun vedtakFattet(

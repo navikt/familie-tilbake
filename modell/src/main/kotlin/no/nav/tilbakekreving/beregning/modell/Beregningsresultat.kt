@@ -19,6 +19,7 @@ class Beregningsresultat(
     private val totaltSkattetrekk = beregningsresultatsperioder.sumOf { it.skattebeløp }
     val totaltTilbakekrevesBeløpMedRenterUtenSkatt: BigDecimal = totaltTilbakekrevesMedRenter.subtract(totaltSkattetrekk)
     val totaltFeilutbetaltBeløp = beregningsresultatsperioder.sumOf { it.feilutbetaltBeløp }
+    val renteprosent = beregningsresultatsperioder.firstNotNullOfOrNull { it.renteprosent }
 
     override fun toString(): String {
         val perioder = beregningsresultatsperioder.joinToString("\n")

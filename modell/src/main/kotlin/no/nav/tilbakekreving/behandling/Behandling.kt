@@ -755,6 +755,14 @@ class Behandling internal constructor(
         return kravgrunnlag.entry.feilutbetaltBeløpForAllePerioder()
     }
 
+    fun tilbakekrevdBeløp(): BigDecimal? {
+        return lagBeregning().oppsummer().totaltTilbakekrevesMedRenter
+    }
+
+    fun hentRentesats(): BigDecimal? {
+        return lagBeregning().oppsummer().renteprosent
+    }
+
     fun fullstendigPeriode(): Datoperiode {
         val kravgrunnlagPerioder = kravgrunnlag.entry.datoperioder(eksternFagsakRevurdering.entry)
         return kravgrunnlagPerioder.minOf { it.fom } til kravgrunnlagPerioder.maxOf { it.tom }

@@ -564,6 +564,9 @@ class Tilbakekreving internal constructor(
             totaltFeilutbetaltBeløp = behandling.totaltFeilutbetaltBeløp(),
             hentSaksbehandlingURL = ::hentTilbakekrevingUrl,
             fullstendigPeriode = behandling.fullstendigPeriode(),
+            tilbakekrevdBeløp = behandling.tilbakekrevdBeløp(),
+            vedtaksresultat = behandling.hentVedtaksresultat(),
+            renteprosent = behandling.hentRentesats(),
         )
     }
 

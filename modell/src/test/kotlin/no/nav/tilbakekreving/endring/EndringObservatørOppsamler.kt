@@ -57,6 +57,9 @@ class EndringObservatørOppsamler : EndringObservatør {
         totaltFeilutbetaltBeløp: BigDecimal,
         hentSaksbehandlingURL: (String) -> String,
         fullstendigPeriode: Datoperiode,
+        tilbakekrevdBeløp: BigDecimal?,
+        vedtaksresultat: Vedtaksresultat?,
+        renteprosent: BigDecimal?,
     ) {
         behandlingEndretEvents
             .computeIfAbsent(eksternFagsakId) { mutableListOf() }

@@ -23,6 +23,9 @@ data class BehandlingEndretHendelse(
         val totaltFeilutbetaltBeløp: BigDecimal,
         val saksbehandlingURL: String,
         val fullstendigPeriode: PeriodeDto,
+        val tilbakekrevdBeløp: BigDecimal?,
+        val vedtaksresultat: String?,
+        val renteprosent: BigDecimal?,
     )
 
     companion object {
