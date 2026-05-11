@@ -20,7 +20,7 @@ data class Varselbrev(
     override var sendtTid: LocalDate,
     val ansvarligSaksbehandlerIdent: String,
     val kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
-    var fristForUttalelse: LocalDate,
+    val fristForUttalelse: LocalDate,
     var tekstFraSaksbehandler: String,
 ) : Brev, FrontendDto<VarselbrevDto> {
     fun hentVarsletBeløp(): Long {

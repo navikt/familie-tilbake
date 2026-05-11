@@ -826,8 +826,11 @@ class Behandling internal constructor(
             varseltekstFraSaksbehandler = varseltekstFraSaksbehandler,
             features = features,
         )
-        forhåndsvarsel.lagreOpprinneligFrist(varselbrev.fristForUttalelse)
         return varselbrev
+    }
+
+    fun lagreOpprinneligFrist(fristForUttalelse: LocalDate) {
+        forhåndsvarsel.lagreOpprinneligFrist(fristForUttalelse)
     }
 
     internal fun hentVedtaksbrevInfo(bruker: Bruker, ytelse: Ytelse, tilbakekrevingId: String): VedtaksbrevInfo {

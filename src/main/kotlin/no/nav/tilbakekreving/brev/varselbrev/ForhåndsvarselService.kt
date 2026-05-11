@@ -1,6 +1,5 @@
 package no.nav.tilbakekreving.brev.varselbrev
 
-import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
@@ -253,10 +252,10 @@ class ForhåndsvarselService(
             brevmetadata = brevmetadata,
             beløp = varselbrevInfo.forhåndsvarselinfo.beløp,
             revurderingsvedtaksdato = varselbrevInfo.forhåndsvarselinfo.revurderingsvedtaksdato,
-            fristdatoForTilbakemelding = Constants.brukersSvarfrist(),
+            fristdatoForTilbakemelding = varselbrevInfo.opprinneligUttalelsesfrist,
             feilutbetaltePerioder = varselbrevInfo.forhåndsvarselinfo.feilutbetaltePerioder,
             varsletBeløp = varselbrevInfo.forhåndsvarselinfo.beløp,
-            varsletDato = LocalDate.now(),
+            varsletDato = varselbrevInfo.varsletDato,
             hjemlerForTilbakekreving = BrevFormatterer.lagForhåndsvarselHjemmelAvsnitt(varselbrevInfo.hjemlerForTilbakekreving, Språkkode.NB),
             nyModell = true,
         )
