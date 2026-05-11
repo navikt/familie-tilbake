@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.endring
 
 import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
+import no.nav.tilbakekreving.behandling.saksbehandling.Venter
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
@@ -38,6 +39,7 @@ interface EndringObservatør {
         eksternBehandlingId: String?,
         sakOpprettet: LocalDateTime,
         varselSendt: LocalDate?,
+        venter: Venter?,
         behandlingsstatus: ForenkletBehandlingsstatus,
         forrigeBehandlingsstatus: ForenkletBehandlingsstatus?,
         totaltFeilutbetaltBeløp: BigDecimal,

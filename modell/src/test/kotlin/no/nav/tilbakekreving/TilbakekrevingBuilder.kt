@@ -4,18 +4,25 @@ import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import java.util.EnumMap
 import java.util.UUID
 
 private val bigQueryService = BigQueryServiceStub()
 
 fun defaultFeatures(
-    vararg overrides: Pair<Toggle, Boolean>,
+    featureOverrides: Array<Pair<Toggle, Boolean>> = emptyArray(),
+    fagsystemToggleOverrides: Array<Pair<FagsystemToggle, Boolean>> = emptyArray(),
 ): FeatureToggles = FeatureToggles(
-    EnumMap(
-        mutableMapOf(
-            Toggle.SendAutomatiskVarselbrev to false,
-        ).apply { putAll(overrides) },
+    overrides = EnumMap<Toggle, Boolean>(Toggle::class.java).apply {
+        putAll(featureOverrides)
+    },
+    fagsystemToggle = EnumMap<FagsystemDTO, EnumMap<FagsystemToggle, Boolean>>(
+        FagsystemDTO.entries.associateWith {
+            EnumMap<FagsystemToggle, Boolean>(FagsystemToggle::class.java).apply {
+                putAll(fagsystemToggleOverrides.toMap())
+            }
+        },
     ),
 )
 

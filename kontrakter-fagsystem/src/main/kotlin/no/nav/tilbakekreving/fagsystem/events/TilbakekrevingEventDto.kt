@@ -9,6 +9,7 @@ import java.util.UUID
 data class TilbakekrevingEventDto(
     val behandlingId: UUID,
     val sakOpprettet: OffsetDateTime,
+    val venter: VenterEventDto?,
     val varselSendt: LocalDate?,
     val behandlingsstatus: BehandlingsstatusEventDto,
     val forrigeBehandlingsstatus: BehandlingsstatusEventDto?,

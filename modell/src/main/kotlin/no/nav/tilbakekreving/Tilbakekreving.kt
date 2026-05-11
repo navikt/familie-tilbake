@@ -21,6 +21,7 @@ import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
+import no.nav.tilbakekreving.behandling.saksbehandling.Venter
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
 import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
 import no.nav.tilbakekreving.behandlingslogg.Behandlingsloggstype
@@ -523,7 +524,7 @@ class Tilbakekreving internal constructor(
         eksternBehandlingId: String,
         vedtaksresultat: Vedtaksresultat?,
         behandlingstatus: Behandlingsstatus,
-        venterPåBruker: Boolean,
+        venter: Venter?,
         ansvarligSaksbehandler: String,
         ansvarligBeslutter: String?,
         totaltFeilutbetaltBeløp: BigDecimal?,
@@ -539,7 +540,7 @@ class Tilbakekreving internal constructor(
             tilstand = tilstand.tilbakekrevingTilstand,
             behandlingstatus = behandlingstatus,
             vedtaksresultat = vedtaksresultat,
-            venterPåBruker = venterPåBruker,
+            venterPåBruker = venter != null,
             ansvarligEnhet = ansvarligEnhet,
             ansvarligSaksbehandler = ansvarligSaksbehandler,
             ansvarligBeslutter = ansvarligBeslutter,
@@ -558,6 +559,7 @@ class Tilbakekreving internal constructor(
             eksternBehandlingId = eksternFagsak.behandlinger.nåværende().entry.behandlingId(),
             sakOpprettet = opprettet,
             varselSendt = brevHistorikk.sisteVarselbrev()?.sendtTid,
+            venter = behandling.venter(),
             behandlingsstatus = behandlingsstatus,
             forrigeBehandlingsstatus = forrigeBehandlingsstatus,
             totaltFeilutbetaltBeløp = behandling.totaltFeilutbetaltBeløp(),

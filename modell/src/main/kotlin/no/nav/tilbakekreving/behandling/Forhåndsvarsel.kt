@@ -4,6 +4,7 @@ import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
 import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselUnntakDto
 import no.nav.tilbakekreving.api.v1.dto.FristUtsettelseDto
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg
+import no.nav.tilbakekreving.behandling.saksbehandling.Venter
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.entities.ForhåndsvarselEntity
@@ -43,6 +44,15 @@ class Forhåndsvarsel(
     }
 
     override fun nullstill(kravgrunnlag: KravgrunnlagHendelse, eksternFagsakRevurdering: EksternFagsakRevurdering) {}
+
+    override fun venter(): Venter? {
+        return uttalelsesfrist?.gjeldendeFrist()?.let {
+            Venter(
+                grunn = Venter.Grunn.BRUKERUTTALELSE,
+                frist = it,
+            )
+        }
+    }
 
     fun tilEntity(behandlingRef: UUID): ForhåndsvarselEntity {
         return ForhåndsvarselEntity(

@@ -27,7 +27,16 @@ class SendVarselbrevTest {
     fun `tilbakekreving tilstand endres til SendVarselbrev når forhåndsvarsel skal sendes`() {
         val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
-        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), oppsamler, opprettTilbakekrevingEvent, bigQueryService, EndringObservatørOppsamler(), features = defaultFeatures(Toggle.SendAutomatiskVarselbrev to false))
+        val tilbakekreving = Tilbakekreving.opprett(
+            id = UUID.randomUUID().toString(),
+            behovObservatør = oppsamler,
+            opprettTilbakekrevingEvent = opprettTilbakekrevingEvent,
+            bigQueryService = bigQueryService,
+            endringObservatør = EndringObservatørOppsamler(),
+            features = defaultFeatures(
+                featureOverrides = arrayOf(Toggle.SendAutomatiskVarselbrev to false),
+            ),
+        )
         val bruker = brukerinfoHendelse()
         val kravgrunnlag = kravgrunnlag()
         val fagsak = fagsysteminfoHendelse()
@@ -71,7 +80,18 @@ class SendVarselbrevTest {
     fun `tilbakekreving i SendVarselbrev tilstand sender journalføringBehov på nytt`() {
         val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
-        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), oppsamler, opprettTilbakekrevingEvent, bigQueryService, EndringObservatørOppsamler(), features = defaultFeatures(Toggle.SendAutomatiskVarselbrev to false))
+        val tilbakekreving = Tilbakekreving.opprett(
+            id = UUID.randomUUID().toString(),
+            behovObservatør = oppsamler,
+            opprettTilbakekrevingEvent = opprettTilbakekrevingEvent,
+            bigQueryService = bigQueryService,
+            endringObservatør = EndringObservatørOppsamler(),
+            features = defaultFeatures(
+                featureOverrides = arrayOf(
+                    Toggle.SendAutomatiskVarselbrev to false,
+                ),
+            ),
+        )
         val bruker = brukerinfoHendelse()
         val kravgrunnlag = kravgrunnlag()
         val fagsak = fagsysteminfoHendelse()

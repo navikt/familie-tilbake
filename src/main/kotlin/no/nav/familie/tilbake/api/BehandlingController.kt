@@ -230,8 +230,7 @@ class BehandlingController(
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
                 handling = "Setter saksbehandler behandling på vent eller utvider fristen",
             )
-            tilbakekrevingService.settPåVent(tilbakekreving.id, behandlingPåVentDto.venteårsak, behandlingPåVentDto.tidsfrist, behandlingPåVentDto.begrunnelse)
-            return Ressurs.success("OK")
+            throw ModellFeil.UtenforScopeException(UtenforScope.PåVent, tilbakekreving.sporingsinformasjon())
         }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
@@ -260,7 +259,7 @@ class BehandlingController(
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
                 handling = "Saksbehandler tar behandling av vent etter å motta brukerrespons eller dokumentasjon",
             )
-            tilbakekrevingService.taAvVent(tilbakekreving.id)
+            throw ModellFeil.UtenforScopeException(UtenforScope.PåVent, tilbakekreving.sporingsinformasjon())
             return Ressurs.success("OK")
         }
         tilgangskontrollService.validerTilgangBehandlingID(

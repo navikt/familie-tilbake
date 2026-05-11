@@ -12,7 +12,6 @@ import no.nav.tilbakekreving.entities.ForeslåVedtakStegEntity
 import no.nav.tilbakekreving.entities.ForhåndsvarselEntity
 import no.nav.tilbakekreving.entities.ForhåndsvarselUnntakEntity
 import no.nav.tilbakekreving.entities.HistorikkReferanseEntity
-import no.nav.tilbakekreving.entities.PåVentEntity
 import no.nav.tilbakekreving.entities.UttalelsesfristEntity
 import no.nav.tilbakekreving.entities.VilkårsvurderingstegEntity
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
@@ -94,7 +93,6 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
         vilkårsvurdering: VilkårsvurderingstegEntity,
         foreslåVedtak: ForeslåVedtakStegEntity,
         fatteVedtak: FatteVedtakStegEntity,
-        påVent: PåVentEntity?,
         brukeruttalelseEntity: BrukeruttalelseEntity?,
         forhåndsvarselUnntak: ForhåndsvarselUnntakEntity?,
         fristUtsettelse: UttalelsesfristEntity?,
@@ -117,7 +115,6 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
             vilkårsvurderingstegEntity = vilkårsvurdering,
             foreslåVedtakStegEntity = foreslåVedtak,
             fatteVedtakStegEntity = fatteVedtak,
-            påVentEntity = påVent,
             forhåndsvarselEntity = ForhåndsvarselEntity(
                 brukeruttalelseEntity,
                 forhåndsvarselUnntak,

@@ -21,4 +21,8 @@ enum class UtenforScope(val tittel: String, val feilmelding: String) {
         tittel = "Mangler funksjonalitet",
         feilmelding = "Revurdering er ikke støttet",
     ),
+    PåVent(
+        tittel = "Mangler funksjonalitet",
+        feilmelding = "Kan ikke sette behandling på vent",
+    ),
 }

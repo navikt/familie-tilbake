@@ -416,7 +416,7 @@ internal class NyTilgangskontrollServiceTest : OppslagSpringRunnerTest() {
             behovObservatør = mockk(relaxed = true),
             bigQueryService = bigQueryService,
             endringObservatør = EndringObservatørOppsamler(),
-            features = FeatureToggles(EnumMap(Toggle::class.java)),
+            features = FeatureToggles(EnumMap(Toggle::class.java), EnumMap(FagsystemDTO::class.java)),
         )
     }
 }

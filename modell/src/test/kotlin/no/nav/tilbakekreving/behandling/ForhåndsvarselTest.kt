@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.behandling
 
 import io.kotest.matchers.shouldBe
+import no.nav.tilbakekreving.behandling.saksbehandling.Venter
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -47,5 +48,25 @@ class ForhåndsvarselTest {
         val forhåndsvarselEntity = forhåndsvarsel.tilEntity(UUID.randomUUID())
         forhåndsvarselEntity.forhåndsvarselUnntakEntity?.trengerNyVurdering shouldBe true
         forhåndsvarselEntity.brukeruttalelseEntity?.trengerNyVurdering shouldBe true
+    }
+
+    @Test
+    fun `utsettelse av uttalse, fristen er utgått`() {
+        val forhåndsvarsel = Forhåndsvarsel.opprett()
+        forhåndsvarsel.lagreOpprinneligFrist(LocalDate.now().minusDays(1))
+
+        forhåndsvarsel.venter() shouldBe null
+    }
+
+    @Test
+    fun `utsettelse av uttalse, fristen er i fremtiden`() {
+        val uttalelsesfrist = LocalDate.now().plusDays(1)
+        val forhåndsvarsel = Forhåndsvarsel.opprett()
+        forhåndsvarsel.lagreOpprinneligFrist(uttalelsesfrist)
+
+        forhåndsvarsel.venter() shouldBe Venter(
+            grunn = Venter.Grunn.BRUKERUTTALELSE,
+            frist = uttalelsesfrist,
+        )
     }
 }

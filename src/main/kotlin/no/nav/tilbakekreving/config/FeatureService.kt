@@ -9,5 +9,6 @@ class FeatureService(
 ) {
     val modellFeatures = FeatureToggles(
         applicationProperties.toggles.nyModell,
+        applicationProperties.toggles.fagsystem,
     )
 }

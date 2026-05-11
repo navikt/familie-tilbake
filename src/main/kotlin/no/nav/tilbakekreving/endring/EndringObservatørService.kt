@@ -9,6 +9,7 @@ import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
+import no.nav.tilbakekreving.behandling.saksbehandling.Venter
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.config.Toggles
 import no.nav.tilbakekreving.fagsystem.Ytelse
@@ -16,6 +17,8 @@ import no.nav.tilbakekreving.fagsystem.events.BehandlingEndretEventDto
 import no.nav.tilbakekreving.fagsystem.events.BehandlingsstatusEventDto
 import no.nav.tilbakekreving.fagsystem.events.PeriodeEventDto
 import no.nav.tilbakekreving.fagsystem.events.TilbakekrevingEventDto
+import no.nav.tilbakekreving.fagsystem.events.VentegrunnEventDto
+import no.nav.tilbakekreving.fagsystem.events.VenterEventDto
 import no.nav.tilbakekreving.kontrakter.Periode
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
@@ -97,6 +100,7 @@ class EndringObservatørService(
         eksternBehandlingId: String?,
         sakOpprettet: LocalDateTime,
         varselSendt: LocalDate?,
+        venter: Venter?,
         behandlingsstatus: ForenkletBehandlingsstatus,
         forrigeBehandlingsstatus: ForenkletBehandlingsstatus?,
         totaltFeilutbetaltBeløp: BigDecimal,
@@ -117,6 +121,14 @@ class EndringObservatørService(
                 tilbakekreving = TilbakekrevingEventDto(
                     behandlingId = behandlingId,
                     sakOpprettet = sakOpprettet.atZone(ZoneId.systemDefault()).toOffsetDateTime(),
+                    venter = venter?.let {
+                        VenterEventDto(
+                            grunn = when (it.grunn) {
+                                Venter.Grunn.BRUKERUTTALELSE -> VentegrunnEventDto.AVVENTER_BRUKERUTTALELSE
+                            },
+                            gjennoptas = it.frist,
+                        )
+                    },
                     varselSendt = varselSendt,
                     behandlingsstatus = behandlingsstatus.tilEventDto(),
                     forrigeBehandlingsstatus = forrigeBehandlingsstatus?.tilEventDto(),

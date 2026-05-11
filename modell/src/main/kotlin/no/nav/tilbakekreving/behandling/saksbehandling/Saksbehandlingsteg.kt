@@ -28,6 +28,8 @@ internal interface Saksbehandlingsteg {
         eksternFagsakRevurdering: EksternFagsakRevurdering,
     )
 
+    fun venter(): Venter? = null
+
     companion object {
         fun Saksbehandlingsteg?.behandlingsstegstatus(
             alleSynligeSteg: List<Saksbehandlingsteg>,

@@ -44,7 +44,6 @@ import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
-import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.brev.Dokumentmalstype
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
@@ -58,7 +57,6 @@ import no.nav.tilbakekreving.repository.TilbakekrevingRepository
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -443,22 +441,6 @@ class TilbakekrevingService(
                 }
             },
         )
-    }
-
-    fun settPåVent(tilbakekrevingId: String, venteårsak: Venteårsak, tidsfrist: LocalDate, begrunnelse: String?) {
-        hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
-            tilbakekreving.behandlingHistorikk.nåværende().entry.settPåVent(
-                årsak = venteårsak,
-                utløpsdato = tidsfrist,
-                begrunnelse = begrunnelse,
-            )
-        }
-    }
-
-    fun taAvVent(tilbakekrevingId: String) {
-        hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
-            tilbakekreving.behandlingHistorikk.nåværende().entry.taAvVent()
-        }
     }
 
     fun flyttBehandlingTilFakta(tilbakekrevingId: String, saksbehandler: Behandler) {

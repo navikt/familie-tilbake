@@ -27,6 +27,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.ForeslåVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg.Companion.behandlingsstegstatus
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg.Companion.klarTilVisning
+import no.nav.tilbakekreving.behandling.saksbehandling.Venter
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
@@ -67,7 +68,6 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
-import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselInfoDto
@@ -104,7 +104,6 @@ class Behandling internal constructor(
     private val vilkårsvurderingsteg: Vilkårsvurderingsteg,
     private val foreslåVedtakSteg: ForeslåVedtakSteg,
     private val fatteVedtakSteg: FatteVedtakSteg,
-    private var påVent: PåVent?,
     private val forhåndsvarsel: Forhåndsvarsel,
 ) : Historikk.HistorikkInnslag<UUID> {
     internal fun nyFaktastegFrontendDto(varselbrev: Varselbrev?): FaktaOmFeilutbetalingDto = faktasteg.nyTilFrontendDto(kravgrunnlag.entry, eksternFagsakRevurdering.entry, varselbrev)
@@ -175,7 +174,6 @@ class Behandling internal constructor(
             vilkårsvurderingstegEntity = vilkårsvurderingsteg.tilEntity(id),
             foreslåVedtakStegEntity = foreslåVedtakSteg.tilEntity(id),
             fatteVedtakStegEntity = fatteVedtakSteg.tilEntity(id),
-            påVentEntity = påVent?.tilEntity(id),
             forhåndsvarselEntity = forhåndsvarsel.tilEntity(id),
         )
     }
@@ -337,6 +335,8 @@ class Behandling internal constructor(
         )
     }
 
+    fun venter(): Venter? = steg().firstNotNullOfOrNull { it.venter() }
+
     private fun skalBesluttes(): Boolean {
         return steg()
             .takeWhile { it.type != Behandlingssteg.FATTE_VEDTAK }
@@ -371,7 +371,7 @@ class Behandling internal constructor(
             },
             ansvarligSaksbehandler = ansvarligSaksbehandler.ident,
             ansvarligBeslutter = fatteVedtakSteg.ansvarligBeslutter?.ident,
-            erBehandlingPåVent = påVent != null,
+            erBehandlingPåVent = venter() != null,
             kanHenleggeBehandling = false,
             kanRevurderingOpprettes = true,
             harVerge = false,
@@ -578,33 +578,10 @@ class Behandling internal constructor(
         enhet = Enhet.forKode(enhetKode)
     }
 
-    fun settPåVent(
-        årsak: Venteårsak,
-        utløpsdato: LocalDate,
-        begrunnelse: String?,
-    ) {
-        påVent = PåVent(
-            id = UUID.randomUUID(),
-            årsak = årsak,
-            utløpsdato = utløpsdato,
-            begrunnelse = begrunnelse,
-        )
-    }
-
-    fun taAvVent() {
-        påVent = null
-    }
-
     private fun validerBehandlingstatus(håndtertSteg: String, steg: Saksbehandlingsteg) {
         if (!steg().klarTilVisning().contains(steg)) {
             throw ModellFeil.UgyldigOperasjonException(
                 "Behandlingen er i ${steg().klarTilVisning().last().type} og kan ikke behandle vurdering for ${steg.type}",
-                sporingsinformasjon(),
-            )
-        }
-        if (påVent != null) {
-            throw ModellFeil.UgyldigOperasjonException(
-                "Behandling er satt på vent. Kan ikke håndtere $håndtertSteg.",
                 sporingsinformasjon(),
             )
         }
@@ -727,7 +704,7 @@ class Behandling internal constructor(
             eksternBehandlingId = eksternFagsakRevurdering.entry.eksternId,
             vedtaksresultat = hentVedtaksresultat(),
             behandlingstatus = tilstand.behandlingsstatus(this),
-            venterPåBruker = påVent?.avventerBruker() ?: false,
+            venter = venter(),
             ansvarligSaksbehandler = ansvarligSaksbehandler.ident,
             ansvarligBeslutter = fatteVedtakSteg.ansvarligBeslutter?.ident,
             totaltFeilutbetaltBeløp = kravgrunnlag.entry.feilutbetaltBeløpForAllePerioder(),
@@ -903,7 +880,6 @@ class Behandling internal constructor(
                 vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(eksternFagsakRevurdering.entry, kravgrunnlag.entry),
                 foreslåVedtakSteg = ForeslåVedtakSteg.opprett(),
                 fatteVedtakSteg = FatteVedtakSteg.opprett(),
-                påVent = null,
                 forhåndsvarsel = Forhåndsvarsel.opprett(),
             ).also {
                 it.utførSideeffekt(tilstand, behandlingObservatør, bigQueryService, ytelsesNavn)

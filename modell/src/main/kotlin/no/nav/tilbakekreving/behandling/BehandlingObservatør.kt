@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.behandling
 
+import no.nav.tilbakekreving.behandling.saksbehandling.Venter
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
@@ -12,7 +13,7 @@ interface BehandlingObservatør {
         eksternBehandlingId: String,
         vedtaksresultat: Vedtaksresultat?,
         behandlingstatus: Behandlingsstatus,
-        venterPåBruker: Boolean,
+        venter: Venter?,
         ansvarligSaksbehandler: String,
         ansvarligBeslutter: String?,
         totaltFeilutbetaltBeløp: BigDecimal?,

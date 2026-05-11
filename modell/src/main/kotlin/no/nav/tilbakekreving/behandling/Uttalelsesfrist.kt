@@ -16,6 +16,8 @@ class Uttalelsesfrist(
         return nyFrist ?: opprinneligFrist
     }
 
+    fun gjeldendeFrist(): LocalDate? = hentFrist().takeIf { it >= LocalDate.now() }
+
     fun tilFrontendDto(): FristUtsettelseDto {
         return FristUtsettelseDto(
             nyFrist = nyFrist,

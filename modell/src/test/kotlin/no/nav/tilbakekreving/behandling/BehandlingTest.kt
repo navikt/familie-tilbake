@@ -1,7 +1,6 @@
 package no.nav.tilbakekreving.behandling
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvNav
@@ -20,7 +19,6 @@ import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.foreldelseVurdering
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
-import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
@@ -29,7 +27,6 @@ import no.nav.tilbakekreving.test.forsettelig
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.tilstand.TilBehandling
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 class BehandlingTest {
@@ -38,63 +35,6 @@ class BehandlingTest {
     val ansvarligBeslutter = Behandler.Saksbehandler("Ansvarlig beslutter")
     val behandlingslogg = Behandlingslogg(listOf<LoggInnslag>().toMutableList())
     val periode = 1.januar(2021) til 31.januar(2021)
-
-    @Test
-    fun `sett behandling på vent`() {
-        val behandling = behandling()
-        behandling.lagreUttalelse(UttalelseVurdering.JA, null, null, behandlingslogg, ansvarligSaksbehandler)
-        behandling.settPåVent(Venteårsak.MANGLER_STØTTE, LocalDate.MAX, "Begrunnelse")
-
-        val faktasteg = faktastegVurdering(periode)
-        shouldThrowWithMessage<ModellFeil.UgyldigOperasjonException>("Behandling er satt på vent. Kan ikke håndtere fakta.") {
-            behandling.håndter(ansvarligSaksbehandler, faktasteg, behandlingObservatør, behandlingslogg)
-        }
-
-        behandling.taAvVent()
-        behandling.håndter(ansvarligSaksbehandler, faktasteg, behandlingObservatør, behandlingslogg)
-
-        val foreldelse = Foreldelsesteg.Vurdering.IkkeForeldet("Begrunnelse")
-        behandling.settPåVent(Venteårsak.MANGLER_STØTTE, LocalDate.MAX, "Begrunnelse")
-        shouldThrowWithMessage<ModellFeil.UgyldigOperasjonException>("Behandling er satt på vent. Kan ikke håndtere foreldelse.") {
-            behandling.håndter(ansvarligSaksbehandler, periode, foreldelse, behandlingObservatør, behandlingslogg)
-        }
-
-        behandling.taAvVent()
-        behandling.håndter(ansvarligSaksbehandler, periode, foreldelse, behandlingObservatør, behandlingslogg)
-
-        val vilkårsvurdering = forårsaketAvNav().burdeForstått(aktsomhet = forsettelig())
-        behandling.settPåVent(Venteårsak.MANGLER_STØTTE, LocalDate.MAX, "Begrunnelse")
-        shouldThrowWithMessage<ModellFeil.UgyldigOperasjonException>("Behandling er satt på vent. Kan ikke håndtere vilkårsvurdering.") {
-            behandling.håndter(ansvarligSaksbehandler, periode, vilkårsvurdering, behandlingObservatør, behandlingslogg)
-        }
-
-        behandling.taAvVent()
-        behandling.håndter(ansvarligSaksbehandler, periode, vilkårsvurdering, behandlingObservatør, behandlingslogg)
-
-        behandling.settPåVent(Venteårsak.MANGLER_STØTTE, LocalDate.MAX, "Begrunnelse")
-        shouldThrowWithMessage<ModellFeil.UgyldigOperasjonException>("Behandling er satt på vent. Kan ikke håndtere vedtaksforslag.") {
-            behandling.håndterForeslåVedtak(
-                ansvarligSaksbehandler,
-                behandlingObservatør,
-                behandlingslogg,
-            )
-        }
-
-        behandling.taAvVent()
-        behandling.håndterForeslåVedtak(
-            ansvarligSaksbehandler,
-            behandlingObservatør,
-            behandlingslogg,
-        )
-
-        behandling.settPåVent(Venteårsak.MANGLER_STØTTE, LocalDate.MAX, "Begrunnelse")
-        shouldThrowWithMessage<ModellFeil.UgyldigOperasjonException>("Behandling er satt på vent. Kan ikke håndtere behandlingsutfall.") {
-            behandling.håndter(ansvarligBeslutter, listOf(Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent), behandlingObservatør, behandlingslogg)
-        }
-
-        behandling.taAvVent()
-        behandling.håndter(ansvarligBeslutter, listOf(Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent), behandlingObservatør, behandlingslogg)
-    }
 
     @Test
     fun `flytt behandling tilbake til fakta - nullstiller fakta`() {
