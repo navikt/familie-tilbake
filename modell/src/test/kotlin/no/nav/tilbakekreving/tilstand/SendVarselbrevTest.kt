@@ -60,6 +60,8 @@ class SendVarselbrevTest {
                 behandlerIdent = "4321",
                 brevId = varselbrev.first().varselbrev.id,
                 fagsakId = tilbakekreving.eksternFagsak.eksternId,
+                journalpostId = "1234",
+                dokumentInfoId = "321",
             ),
         )
         tilbakekreving.tilstand shouldBe TilBehandling
@@ -106,6 +108,8 @@ class SendVarselbrevTest {
                 behandlerIdent = "4321",
                 brevId = varselbrevBehov.first().brevId,
                 fagsakId = tilbakekreving.eksternFagsak.eksternId,
+                journalpostId = "1234",
+                dokumentInfoId = "321",
             ),
         )
         tilbakekreving.tilstand shouldBe TilBehandling

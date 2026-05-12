@@ -1,0 +1,2 @@
+ALTER TABLE tilbakekreving_behandlingslogg ADD COLUMN ny_frist_for_uttalelse DATE;
+ALTER TABLE tilbakekreving_behandlingslogg ADD COLUMN begrunnelse_for_utsatt_frist TEXT;

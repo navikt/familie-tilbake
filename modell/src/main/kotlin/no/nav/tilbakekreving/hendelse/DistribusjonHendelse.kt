@@ -6,4 +6,6 @@ data class DistribusjonHendelse(
     val behandlingId: UUID,
     val brevId: UUID,
     val fagsakId: String,
+    val journalpostId: String,
+    val dokumentInfoId: String,
 )

@@ -78,4 +78,6 @@ fun Historikkinnslag.tilDto() =
         journalpostId = journalpostId,
         dokumentId = dokumentId,
         opprettetTid = opprettetTid,
+        nyFrist = null,
+        begrunnelseForUtsattFrist = null,
     )

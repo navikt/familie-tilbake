@@ -250,4 +250,10 @@ fun journalføring(brevId: UUID, fagsakId: String): JournalføringHendelse =
         fagsakId = fagsakId,
     )
 
-fun distribusjon(brevId: UUID, fagsakId: String): DistribusjonHendelse = DistribusjonHendelse(behandlingId = UUID.randomUUID(), brevId = brevId, fagsakId = fagsakId)
+fun distribusjon(brevId: UUID, fagsakId: String): DistribusjonHendelse = DistribusjonHendelse(
+    behandlingId = UUID.randomUUID(),
+    brevId = brevId,
+    fagsakId = fagsakId,
+    journalpostId = "123",
+    dokumentInfoId = "321",
+)

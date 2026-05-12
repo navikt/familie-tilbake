@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.api.v1.dto
 
 import no.nav.tilbakekreving.kontrakter.historikk.Historikkinnslagstype
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class HistorikkinnslagDto(
@@ -14,6 +15,8 @@ data class HistorikkinnslagDto(
     val journalpostId: String? = null,
     val dokumentId: String? = null,
     val opprettetTid: LocalDateTime,
+    val nyFrist: LocalDate?,
+    val begrunnelseForUtsattFrist: String?,
 ) {
     enum class AktørDto {
         SAKSBEHANDLER,

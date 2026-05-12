@@ -264,6 +264,8 @@ class TilbakekrevingService(
                         brevId = behov.brevId,
                         fagsakId = behov.fagsakId,
                         behandlerIdent = behov.behandlerIdent,
+                        journalpostId = behov.journalpostId,
+                        dokumentInfoId = behov.dokumentInfoId,
                     ),
                 )
             }
@@ -330,6 +332,8 @@ class TilbakekrevingService(
                         behandlingId = behov.behandlingId,
                         brevId = behov.brevId,
                         fagsakId = behov.fagsakId,
+                        journalpostId = behov.journalpostId,
+                        dokumentInfoId = behov.dokumentInfoId,
                     ),
                 )
             }

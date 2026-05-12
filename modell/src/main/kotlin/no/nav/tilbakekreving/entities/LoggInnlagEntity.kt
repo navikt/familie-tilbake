@@ -1,10 +1,9 @@
 package no.nav.tilbakekreving.entities
 
 import no.nav.tilbakekreving.behandlingslogg.Behandlingsloggstype
+import no.nav.tilbakekreving.behandlingslogg.EkstraInfo
 import no.nav.tilbakekreving.behandlingslogg.LoggInnslag
 import no.nav.tilbakekreving.behandlingslogg.Rolle
-import no.nav.tilbakekreving.brev.BrevHistorikk
-import no.nav.tilbakekreving.feil.Sporing
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -16,9 +15,9 @@ data class LoggInnlagEntity(
     val rolle: Rolle,
     val behandlerIdent: String,
     val behandlingsloggstype: Behandlingsloggstype,
-    val brevRef: HistorikkReferanseEntity<UUID>?,
+    val ekstraInfo: Map<String, Any>?,
 ) {
-    fun fraEntity(brevHistorikk: BrevHistorikk, fagsakId: String): LoggInnslag =
+    fun fraEntity(): LoggInnslag =
         LoggInnslag(
             id = id,
             behandlingId = behandlingId,
@@ -26,6 +25,8 @@ data class LoggInnlagEntity(
             behandlingsloggstype = behandlingsloggstype,
             rolle = rolle,
             behandlerIdent = behandlerIdent,
-            brevRef = brevRef?.let { brevHistorikk.finn(brevRef.id, Sporing(fagsakId, id.toString())) },
+            ekstraInfo = ekstraInfo?.mapKeys { (key, _) ->
+                EkstraInfo.valueOf(key)
+            } ?: emptyMap(),
         )
 }

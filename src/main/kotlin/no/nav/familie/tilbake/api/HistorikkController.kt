@@ -9,6 +9,7 @@ import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.api.v1.dto.HistorikkinnslagDto
+import no.nav.tilbakekreving.behandlingslogg.EkstraInfo
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.kontrakter.historikk.Historikkinnslagstype
 import org.springframework.http.MediaType
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
 import java.util.UUID
 
 @RestController
@@ -50,6 +52,7 @@ class HistorikkController(
                 tilbakekrevingService
                     .hentHistorikk(tilbakekreving)
                     .map { innslag ->
+                        val ekstraInfo = innslag.ekstraInfo as Map<*, *>
                         HistorikkinnslagDto(
                             behandlingId = innslag.behandlingId,
                             type = Historikkinnslagstype.valueOf(innslag.type),
@@ -58,9 +61,11 @@ class HistorikkController(
                             tittel = innslag.tittel,
                             tekst = innslag.tekst,
                             steg = innslag.steg,
-                            journalpostId = null,
-                            dokumentId = null,
+                            journalpostId = ekstraInfo[EkstraInfo.JOURNALPOST_ID.name] as String?,
+                            dokumentId = ekstraInfo[EkstraInfo.DOKUMENTINFO_ID.name] as String?,
                             opprettetTid = innslag.opprettetTid.toLocalDateTime(),
+                            nyFrist = ekstraInfo[EkstraInfo.NY_FRIST_FOR_UTTALELSE.name] as LocalDate?,
+                            begrunnelseForUtsattFrist = ekstraInfo[EkstraInfo.BEGRUNNELSE_FOR_UTSATT_FRIST.name] as String?,
                         )
                     },
             )
