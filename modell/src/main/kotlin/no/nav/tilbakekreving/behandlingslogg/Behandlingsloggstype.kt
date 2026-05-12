@@ -2,7 +2,6 @@ package no.nav.tilbakekreving.behandlingslogg
 
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.historikk.Historikkinnslagstype
-import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 enum class Behandlingsloggstype(
@@ -150,7 +149,7 @@ enum class Behandlingsloggstype(
         steg = null,
     ) {
         override fun hentTittel(ekstraInfo: Map<EkstraInfo, Any>): String {
-            val nyFrist = (ekstraInfo[EkstraInfo.NY_FRIST_FOR_UTTALELSE] as LocalDate).toString()
+            val nyFrist = ekstraInfo[EkstraInfo.NY_FRIST_FOR_UTTALELSE].toString()
             return "$tittel: ${nyFrist.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))}"
         }
 
@@ -182,7 +181,6 @@ enum class Behandlingsloggstype(
 }
 
 enum class EkstraInfo() {
-    BREV_REF,
     NY_FRIST_FOR_UTTALELSE,
     BEGRUNNELSE_FOR_UTSATT_FRIST,
     JOURNALPOST_ID,
