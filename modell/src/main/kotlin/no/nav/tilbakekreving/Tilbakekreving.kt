@@ -299,13 +299,19 @@ class Tilbakekreving internal constructor(
     }
 
     fun trengerVarselbrev(varseltekstFraSaksbehandler: String) {
-        brevHistorikk.lagre(behandlingHistorikk.nåværende().entry.opprettVarselbrev(varseltekstFraSaksbehandler, features))
+        val behandling = behandlingHistorikk.nåværende().entry
+        val varselbrev = behandling.opprettVarselbrev(varseltekstFraSaksbehandler, features)
+        brevHistorikk.lagre(varselbrev)
+        behandling.lagreOpprinneligFrist(varselbrev.fristForUttalelse)
         byttTilstand(SendVarselbrev)
     }
 
     fun sendVarselbrev(varseltekstFraSaksbehandler: String) {
-        behandlingHistorikk.nåværende().entry.nullstillForhåndsvarselUnntakOgUttalelse()
-        brevHistorikk.lagre(behandlingHistorikk.nåværende().entry.opprettVarselbrev(varseltekstFraSaksbehandler, features))
+        val behandling = behandlingHistorikk.nåværende().entry
+        val varselbrev = behandling.opprettVarselbrev(varseltekstFraSaksbehandler, features)
+        behandling.nullstillForhåndsvarselUnntakOgUttalelse()
+        brevHistorikk.lagre(varselbrev)
+        behandling.lagreOpprinneligFrist(varselbrev.fristForUttalelse)
         byttTilstand(SendVarselbrev)
     }
 
@@ -560,12 +566,15 @@ class Tilbakekreving internal constructor(
 
     fun hentVarselbrevInfo(): VarselbrevInfo {
         val behandling = behandlingHistorikk.nåværende().entry
+        val varselbrev = behandling.opprettVarselbrev("", features)
         return VarselbrevInfo(
             brukerinfo = bruker!!.hentBrukerinfo(),
             forhåndsvarselinfo = behandling.hentForhåndsvarselinfo(),
             eksternFagsakId = eksternFagsak.eksternId,
             ytelseType = eksternFagsak.ytelse.tilYtelseDTO(),
             hjemlerForTilbakekreving = eksternFagsak.forhåndsvarselHjemlerForTilbakekreving(),
+            varsletDato = varselbrev.sendtTid,
+            opprinneligUttalelsesfrist = varselbrev.fristForUttalelse,
         )
     }
 
