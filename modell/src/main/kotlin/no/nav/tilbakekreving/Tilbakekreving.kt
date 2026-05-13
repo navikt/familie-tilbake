@@ -57,6 +57,8 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentInfoDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentTypeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
@@ -689,6 +691,17 @@ class Tilbakekreving internal constructor(
             rolle = rolle,
             behandlerIdent = behandler.ident,
             ekstraInfo = mapOf(*ekstraInfo),
+        )
+    }
+
+    fun hentDokumentInfo(dokumentType: DokumentTypeDto): DokumentInfoDto {
+        val dokument = when (dokumentType) {
+            DokumentTypeDto.VEDTAKSBREV -> brevHistorikk.sisteVedtaksbrev()
+            DokumentTypeDto.VARSELBREV -> brevHistorikk.sisteVarselbrev()
+        }
+        return DokumentInfoDto(
+            journalpostId = dokument?.journalpostId,
+            dokumentId = dokument?.dokumentInfoId,
         )
     }
 

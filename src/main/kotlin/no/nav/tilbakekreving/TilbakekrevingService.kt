@@ -49,6 +49,8 @@ import no.nav.tilbakekreving.kontrakter.brev.Dokumentmalstype
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
+import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentInfoDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentTypeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.LogginnslagDto
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
@@ -534,5 +536,9 @@ class TilbakekrevingService(
 
     fun hentHistorikk(tilbakekreving: Tilbakekreving): List<LogginnslagDto> {
         return tilbakekreving.hentBehandlingslogg()
+    }
+
+    fun hentDokumentInfo(tilbakekreving: Tilbakekreving, dokumentType: DokumentTypeDto): DokumentInfoDto {
+        return tilbakekreving.hentDokumentInfo(dokumentType)
     }
 }
