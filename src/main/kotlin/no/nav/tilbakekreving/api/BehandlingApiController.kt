@@ -10,8 +10,11 @@ import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.brev.varselbrev.ForhåndsvarselService
 import no.nav.tilbakekreving.brev.vedtaksbrev.NyVedtaksbrevService
+import no.nav.tilbakekreving.dokumentHåndtering.saf.SafService
 import no.nav.tilbakekreving.kontrakter.frontend.apis.BehandlingApi
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentInfoDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentTypeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselUnntakDto
@@ -36,6 +39,7 @@ class BehandlingApiController(
     private val tilgangskontrollService: TilgangskontrollService,
     private val nyVedtaksbrevService: NyVedtaksbrevService,
     private val forhåndsvarselService: ForhåndsvarselService,
+    private val safService: SafService,
 ) : BehandlingApi {
     override fun behandlingFakta(behandlingId: String): ResponseEntity<FaktaOmFeilutbetalingDto> {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(UUID.fromString(behandlingId))
@@ -251,5 +255,38 @@ class BehandlingApiController(
                 forhåndsvarselService.nyLagreForhåndsvarselUnntak(it, unntakDto, saksbehandler),
             )
         } ?: ResponseEntity.notFound().build()
+    }
+
+    override fun behandlingHentDokumentInfo(behandlingId: UUID, dokumentType: DokumentTypeDto): ResponseEntity<DokumentInfoDto> {
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+            ?: return ResponseEntity.notFound().build()
+        tilgangskontrollService.validerTilgangTilbakekreving(
+            tilbakekreving = tilbakekreving,
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.ACCESS,
+            handling = "Henter informasjon om fattet vedtaksbrevet",
+        )
+        return ResponseEntity.ok(tilbakekrevingService.hentDokumentInfo(tilbakekreving, dokumentType))
+    }
+
+    override fun behandlingHentDokument(behandlingId: UUID, journalpostId: String, dokumentInfoId: String): ResponseEntity<Any> {
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+            ?: return ResponseEntity.notFound().build()
+        tilgangskontrollService.validerTilgangTilbakekreving(
+            tilbakekreving = tilbakekreving,
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+            auditLoggerEvent = AuditLoggerEvent.ACCESS,
+            handling = "Henter informasjon om fattet vedtaksbrevet",
+        )
+        return ResponseEntity.ok(
+            safService.hentDokument(
+                behandlingId = behandlingId,
+                journalpostId = journalpostId,
+                dokumentInfoId = dokumentInfoId,
+                tilbakekreving.eksternFagsak.eksternId,
+            ),
+        )
     }
 }
