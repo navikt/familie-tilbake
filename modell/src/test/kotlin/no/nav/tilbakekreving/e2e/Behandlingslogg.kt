@@ -75,20 +75,14 @@ class Behandlingslogg {
         tilbakekreving.håndter(
             hendelse = VarselbrevJournalføringHendelse(
                 varselbrevId = tilbakekreving.brevHistorikk.sisteVarselbrev()!!.id,
-                behandlingId = behandlingId,
                 journalpostId = "123",
                 dokumentInfoId = "321",
-                behandlerIdent = behandler.ident,
-                fagsakId = tilbakekreving.eksternFagsak.eksternId,
             ),
         )
 
         tilbakekreving.håndter(
             hendelse = VarselbrevDistribueringHendelse(
-                behandlingId = behandlingId,
-                behandlerIdent = behandler.ident,
                 brevId = tilbakekreving.brevHistorikk.sisteVarselbrev()!!.id,
-                fagsakId = tilbakekreving.eksternFagsak.eksternId,
                 journalpostId = "123",
                 dokumentInfoId = "321",
             ),

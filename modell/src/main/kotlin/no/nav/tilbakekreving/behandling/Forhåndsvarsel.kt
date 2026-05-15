@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.behandling
 import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
 import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselUnntakDto
 import no.nav.tilbakekreving.api.v1.dto.FristUtsettelseDto
+import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Venter
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
@@ -26,6 +27,12 @@ class Forhåndsvarsel(
     private var uttalelsesfrist: Uttalelsesfrist?,
 ) : Saksbehandlingsteg {
     override val type: Behandlingssteg = Behandlingssteg.FORHÅNDSVARSEL
+
+    override val behandlingsstatus: BehandlingsstatusModell get() = if (forhåndsvarselUnntak == null && uttalelsesfrist == null) {
+        BehandlingsstatusModell.TIL_FORHÅNDSVARSEL
+    } else {
+        BehandlingsstatusModell.TIL_BEHANDLING
+    }
 
     override fun erFullstendig(): Boolean {
         val gjeldendeFrist = uttalelsesfrist?.hentFrist()

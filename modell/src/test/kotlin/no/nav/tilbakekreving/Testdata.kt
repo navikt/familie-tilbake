@@ -4,13 +4,11 @@ import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.api.v2.BrukerDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.Behandling
-import no.nav.tilbakekreving.behandling.BehandlingObservatørOppsamler
 import no.nav.tilbakekreving.behandling.Enhet
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
-import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.fagsystem.Ytelse
@@ -32,7 +30,6 @@ import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.test.januar
-import no.nav.tilbakekreving.tilstand.TilBehandling
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
@@ -177,10 +174,6 @@ fun behandling(
         eksternFagsakRevurdering = eksternFagsakBehandlingReferanse,
         kravgrunnlag = kravgrunnlagReferanse,
         brevHistorikk = BrevHistorikk(mutableListOf()),
-        behandlingObservatør = BehandlingObservatørOppsamler(),
-        tilstand = TilBehandling,
-        bigQueryService = BigQueryServiceStub(),
-        ytelsesNavn = Ytelse.Tilleggsstønad.hentYtelsesnavn(Språkkode.NB),
     )
 }
 

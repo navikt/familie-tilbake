@@ -17,7 +17,7 @@ fun defaultFeatures(
     overrides = EnumMap<Toggle, Boolean>(Toggle::class.java).apply {
         putAll(featureOverrides)
     },
-    fagsystemToggle = EnumMap<FagsystemDTO, EnumMap<FagsystemToggle, Boolean>>(
+    fagsystemToggles = EnumMap<FagsystemDTO, EnumMap<FagsystemToggle, Boolean>>(
         FagsystemDTO.entries.associateWith {
             EnumMap<FagsystemToggle, Boolean>(FagsystemToggle::class.java).apply {
                 putAll(fagsystemToggleOverrides.toMap())

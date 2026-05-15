@@ -1,8 +1,8 @@
 package no.nav.tilbakekreving.tilstand
 
 import no.nav.tilbakekreving.Tilbakekreving
-import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
 import no.nav.tilbakekreving.behandling.Behandling
+import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
@@ -10,7 +10,6 @@ import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
-import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.saksbehandler.Behandler
@@ -21,21 +20,19 @@ object TilBehandling : Tilstand {
     override val tilbakekrevingTilstand: TilbakekrevingTilstand = TilbakekrevingTilstand.TIL_BEHANDLING
     override val kanEndresAvSaksbehandler: Boolean = true
 
-    override fun behandlingsstatus(behandling: Behandling): Behandlingsstatus {
+    override fun behandlingsstatus(behandling: Behandling): BehandlingsstatusModell {
         return behandling.steg().firstOrNull { !it.erKlar() }
             ?.behandlingsstatus
-            ?: Behandlingsstatus.UTREDES
+            ?: BehandlingsstatusModell.TIL_BEHANDLING
     }
 
-    override fun entering(tilbakekreving: Tilbakekreving) {
-        tilbakekreving.sendStatusendring(ForenkletBehandlingsstatus.OPPRETTET, ForenkletBehandlingsstatus.TIL_BEHANDLING)
-    }
+    override fun entering(tilbakekreving: Tilbakekreving) {}
 
     override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse) {
         if (tilbakekreving.eksternFagsak.behandlinger.nåværende().entry is EksternFagsakRevurdering.Ukjent) {
             tilbakekreving.trengerFagsysteminfo()
         }
-        tilbakekreving.sendStatusendring(ForenkletBehandlingsstatus.OPPRETTET, ForenkletBehandlingsstatus.TIL_BEHANDLING)
+        tilbakekreving.behandlingHistorikk.nåværende().entry.resendBehandlingsstatus(this, tilbakekreving)
     }
 
     override fun håndterNullstilling(nåværendeBehandling: Behandling, sporing: Sporing, behandlingslogg: Behandlingslogg, behandler: Behandler) {
@@ -50,9 +47,6 @@ object TilBehandling : Tilstand {
         behandling.håndter(beslutter, vurderinger, tilbakekreving, tilbakekreving.behandlingslogg)
         if (behandling.kanUtbetales()) {
             tilbakekreving.byttTilstand(IverksettVedtak)
-        }
-        if (behandling.underkjentVedtak()) {
-            tilbakekreving.sendStatusendring(ForenkletBehandlingsstatus.TIL_GODKJENNING, ForenkletBehandlingsstatus.TIL_BEHANDLING)
         }
     }
 

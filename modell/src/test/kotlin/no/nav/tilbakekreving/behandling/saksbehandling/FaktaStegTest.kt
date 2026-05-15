@@ -37,7 +37,7 @@ class FaktaStegTest {
         val faktasteg = Faktasteg.opprett(
             eksternFagsakRevurdering = eksternFagsakRevurdering,
             kravgrunnlag = kravgrunnlag,
-            BrevHistorikk(historikk = mutableListOf()),
+            brevHistorikk = BrevHistorikk(historikk = mutableListOf()),
         )
         val årsak = "Dette er årsaken til tilbakekrevingen"
         val uttalelse = "Ja hvorfor ikke"

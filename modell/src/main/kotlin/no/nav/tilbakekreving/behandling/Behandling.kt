@@ -20,6 +20,7 @@ import no.nav.tilbakekreving.api.v1.dto.TotrinnsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
+import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
@@ -69,6 +70,7 @@ import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
+import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
@@ -105,6 +107,7 @@ class Behandling internal constructor(
     private val foreslåVedtakSteg: ForeslåVedtakSteg,
     private val fatteVedtakSteg: FatteVedtakSteg,
     private val forhåndsvarsel: Forhåndsvarsel,
+    private var forrigeBehandlingsstatus: BehandlingsstatusModell,
 ) : Historikk.HistorikkInnslag<UUID> {
     internal fun nyFaktastegFrontendDto(varselbrev: Varselbrev?): FaktaOmFeilutbetalingDto = faktasteg.nyTilFrontendDto(kravgrunnlag.entry, eksternFagsakRevurdering.entry, varselbrev)
 
@@ -175,6 +178,7 @@ class Behandling internal constructor(
             foreslåVedtakStegEntity = foreslåVedtakSteg.tilEntity(id),
             fatteVedtakStegEntity = fatteVedtakSteg.tilEntity(id),
             forhåndsvarselEntity = forhåndsvarsel.tilEntity(id),
+            forrigeBehandlingsstatus = forrigeBehandlingsstatus,
         )
     }
 
@@ -356,7 +360,7 @@ class Behandling internal constructor(
             behandlingId = id,
             erBehandlingHenlagt = false,
             type = type,
-            status = tilstand.behandlingsstatus(this),
+            status = tilstand.behandlingsstatus(this).gammelFrontendDTO,
             opprettetDato = opprettet.toLocalDate(),
             avsluttetDato = null,
             endretTidspunkt = sistEndret,
@@ -410,7 +414,7 @@ class Behandling internal constructor(
             behandlingId = id,
             eksternBrukId = id,
             type = type,
-            status = tilstand.behandlingsstatus(this),
+            status = tilstand.behandlingsstatus(this).gammelFrontendDTO,
         )
     }
 
@@ -698,21 +702,61 @@ class Behandling internal constructor(
         return forhåndsvarsel.forhåndsvarselUnntakTilFrontendDto()
     }
 
-    internal fun utførSideeffekt(tilstand: Tilstand, observatør: BehandlingObservatør, bigQueryService: BigQueryService, ytelsesNavn: String) {
+    internal fun utførEndring(
+        tilstand: () -> Tilstand,
+        observatør: BehandlingObservatør,
+        bigQueryService: BigQueryService,
+        ytelse: Ytelse,
+        callback: Behandling.() -> Unit,
+    ) {
+        val statusFør = tilstand().behandlingsstatus(this)
+        callback()
+        val statusEtter = tilstand().behandlingsstatus(this)
+        oppdaterBehandlingsstatus(tilstand, ytelse, forrigeBehandlingsstatus, statusEtter, observatør, bigQueryService)
+        if (statusFør != statusEtter || statusFør != forrigeBehandlingsstatus) {
+            forrigeBehandlingsstatus = statusEtter
+        }
+    }
+
+    internal fun resendBehandlingsstatus(
+        tilstand: Tilstand,
+        observatør: BehandlingObservatør,
+    ) {
+        sendBehandlingsstatus({ tilstand }, forrigeBehandlingsstatus, tilstand.behandlingsstatus(this), observatør)
+    }
+
+    private fun sendBehandlingsstatus(
+        tilstand: () -> Tilstand,
+        forrigeBehandlingsstatus: BehandlingsstatusModell?,
+        behandlingsstatus: BehandlingsstatusModell,
+        observatør: BehandlingObservatør,
+    ) {
         observatør.behandlingOppdatert(
             behandlingId = id,
             eksternBehandlingId = eksternFagsakRevurdering.entry.eksternId,
             vedtaksresultat = hentVedtaksresultat(),
-            behandlingstatus = tilstand.behandlingsstatus(this),
+            forrigeBehandlingsstatus = forrigeBehandlingsstatus,
+            behandlingsstatus = behandlingsstatus,
             venter = venter(),
-            ansvarligSaksbehandler = ansvarligSaksbehandler.ident,
+            ansvarligSaksbehandler = ansvarligSaksbehandler,
             ansvarligBeslutter = fatteVedtakSteg.ansvarligBeslutter?.ident,
             totaltFeilutbetaltBeløp = kravgrunnlag.entry.feilutbetaltBeløpForAllePerioder(),
             totalFeilutbetaltPeriode = fullstendigPeriode(),
             ansvarligEnhet = enhet?.kode,
         )
+    }
+
+    private fun oppdaterBehandlingsstatus(
+        tilstand: () -> Tilstand,
+        ytelse: Ytelse,
+        forrigeBehandlingsstatus: BehandlingsstatusModell?,
+        behandlingsstatus: BehandlingsstatusModell,
+        observatør: BehandlingObservatør,
+        bigQueryService: BigQueryService,
+    ) {
+        sendBehandlingsstatus(tilstand, forrigeBehandlingsstatus, behandlingsstatus, observatør)
         bigQueryService.oppdaterBehandling(
-            bigqueryData(tilstand, ytelsesNavn),
+            bigqueryData(tilstand(), ytelse.hentYtelsesnavn(Språkkode.NB)),
         )
     }
 
@@ -859,10 +903,6 @@ class Behandling internal constructor(
             eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
             kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
             brevHistorikk: BrevHistorikk,
-            behandlingObservatør: BehandlingObservatør,
-            tilstand: Tilstand,
-            bigQueryService: BigQueryService,
-            ytelsesNavn: String,
         ): Behandling {
             val opprettet = LocalDateTime.now()
             return Behandling(
@@ -876,14 +916,17 @@ class Behandling internal constructor(
                 eksternFagsakRevurdering = eksternFagsakRevurdering,
                 kravgrunnlag = kravgrunnlag,
                 foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakRevurdering.entry, kravgrunnlag.entry),
-                faktasteg = Faktasteg.opprett(eksternFagsakRevurdering.entry, kravgrunnlag.entry, brevHistorikk),
+                faktasteg = Faktasteg.opprett(
+                    eksternFagsakRevurdering = eksternFagsakRevurdering.entry,
+                    kravgrunnlag = kravgrunnlag.entry,
+                    brevHistorikk = brevHistorikk,
+                ),
                 vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(eksternFagsakRevurdering.entry, kravgrunnlag.entry),
                 foreslåVedtakSteg = ForeslåVedtakSteg.opprett(),
                 fatteVedtakSteg = FatteVedtakSteg.opprett(),
                 forhåndsvarsel = Forhåndsvarsel.opprett(),
-            ).also {
-                it.utførSideeffekt(tilstand, behandlingObservatør, bigQueryService, ytelsesNavn)
-            }
+                forrigeBehandlingsstatus = BehandlingsstatusModell.OPPRETTET,
+            )
         }
     }
 }

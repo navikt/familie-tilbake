@@ -1,22 +1,18 @@
 package no.nav.tilbakekreving.endring
 
-import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
-import no.nav.tilbakekreving.behandling.saksbehandling.Venter
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.math.BigDecimal
-import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.util.UUID
 
 class EndringObservatørOppsamler : EndringObservatør {
     private val statusoppdateringer = mutableMapOf<UUID, MutableList<Statusoppdatering>>()
     private val vedtakFattet = mutableMapOf<UUID, MutableList<FattetVedtak>>()
-    private val behandlingEndretEvents = mutableMapOf<String, MutableList<BehandlingEndret>>()
+    private val behandlingEndretEvents = mutableMapOf<String, MutableList<EndringObservatør.BehandlingEndret>>()
 
     override fun behandlingsstatusOppdatert(
         behandlingId: UUID,
@@ -40,29 +36,18 @@ class EndringObservatørOppsamler : EndringObservatør {
                 Statusoppdatering(
                     ansvarligSaksbehandler = ansvarligSaksbehandler,
                     vedtaksresultat = vedtaksresultat,
+                    behandlingstatus = behandlingstatus,
                     totalFeilutbetaltPeriode = totalFeilutbetaltPeriode,
                 ),
             )
     }
 
     override fun behandlingEndret(
-        behandlingId: UUID,
-        vedtakGjelderId: String,
-        eksternFagsakId: String,
-        ytelse: Ytelse,
-        eksternBehandlingId: String?,
-        sakOpprettet: LocalDateTime,
-        varselSendt: LocalDate?,
-        venter: Venter?,
-        behandlingsstatus: ForenkletBehandlingsstatus,
-        forrigeBehandlingsstatus: ForenkletBehandlingsstatus?,
-        totaltFeilutbetaltBeløp: BigDecimal,
-        hentSaksbehandlingURL: (String) -> String,
-        fullstendigPeriode: Datoperiode,
+        behandlingEndret: EndringObservatør.BehandlingEndret,
     ) {
         behandlingEndretEvents
-            .computeIfAbsent(eksternFagsakId) { mutableListOf() }
-            .add(BehandlingEndret(forrigeStatus = forrigeBehandlingsstatus, status = behandlingsstatus))
+            .computeIfAbsent(behandlingEndret.eksternFagsakId) { mutableListOf() }
+            .add(behandlingEndret)
     }
 
     override fun vedtakFattet(
@@ -86,7 +71,7 @@ class EndringObservatørOppsamler : EndringObservatør {
             )
     }
 
-    fun behandlingEndretEventsFor(fagsakId: String): List<BehandlingEndret> = behandlingEndretEvents[fagsakId] ?: emptyList()
+    fun behandlingEndretEventsFor(fagsakId: String): List<EndringObservatør.BehandlingEndret> = behandlingEndretEvents[fagsakId] ?: emptyList()
 
     fun statusoppdateringerFor(behandlingId: UUID): List<Statusoppdatering> = statusoppdateringer[behandlingId] ?: emptyList()
 
@@ -95,15 +80,11 @@ class EndringObservatørOppsamler : EndringObservatør {
     data class Statusoppdatering(
         private val ansvarligSaksbehandler: String?,
         private val vedtaksresultat: Vedtaksresultat?,
+        private val behandlingstatus: Behandlingsstatus,
         private val totalFeilutbetaltPeriode: Datoperiode?,
     )
 
     data class FattetVedtak(
         val vurderteUtbetalinger: List<VurdertUtbetaling>,
-    )
-
-    data class BehandlingEndret(
-        val forrigeStatus: ForenkletBehandlingsstatus?,
-        val status: ForenkletBehandlingsstatus,
     )
 }

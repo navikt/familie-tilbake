@@ -39,6 +39,8 @@ class Faktasteg(
 ) : Saksbehandlingsteg {
     override val type: Behandlingssteg = Behandlingssteg.FAKTA
 
+    override val behandlingsstatus: BehandlingsstatusModell get() = BehandlingsstatusModell.TIL_FORHÅNDSVARSEL
+
     override fun erFullstendig(): Boolean {
         return vurdering.erFullstendig()
     }

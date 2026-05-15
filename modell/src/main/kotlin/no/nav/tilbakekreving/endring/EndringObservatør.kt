@@ -31,21 +31,7 @@ interface EndringObservatør {
         totalFeilutbetaltPeriode: Datoperiode?,
     )
 
-    fun behandlingEndret(
-        behandlingId: UUID,
-        vedtakGjelderId: String,
-        eksternFagsakId: String,
-        ytelse: Ytelse,
-        eksternBehandlingId: String?,
-        sakOpprettet: LocalDateTime,
-        varselSendt: LocalDate?,
-        venter: Venter?,
-        behandlingsstatus: ForenkletBehandlingsstatus,
-        forrigeBehandlingsstatus: ForenkletBehandlingsstatus?,
-        totaltFeilutbetaltBeløp: BigDecimal,
-        hentSaksbehandlingURL: (String) -> String,
-        fullstendigPeriode: Datoperiode,
-    )
+    fun behandlingEndret(behandlingEndret: BehandlingEndret)
 
     fun vedtakFattet(
         behandlingId: UUID,
@@ -59,5 +45,21 @@ interface EndringObservatør {
         ansvarligSaksbehandler: String,
         ansvarligBeslutter: String,
         vurderteUtbetalinger: List<VurdertUtbetaling>,
+    )
+
+    class BehandlingEndret internal constructor(
+        val behandlingId: UUID,
+        val vedtakGjelderId: String,
+        val eksternFagsakId: String,
+        val ytelse: Ytelse,
+        val eksternBehandlingId: String?,
+        val sakOpprettet: LocalDateTime,
+        val varselSendt: LocalDate?,
+        val venter: Venter?,
+        val behandlingsstatus: ForenkletBehandlingsstatus,
+        val forrigeBehandlingsstatus: ForenkletBehandlingsstatus?,
+        val totaltFeilutbetaltBeløp: BigDecimal,
+        val hentSaksbehandlingURL: (String) -> String,
+        val fullstendigPeriode: Datoperiode,
     )
 }

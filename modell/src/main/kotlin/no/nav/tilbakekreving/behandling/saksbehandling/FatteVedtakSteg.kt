@@ -10,7 +10,6 @@ import no.nav.tilbakekreving.entities.VurdertStegType
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
-import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import java.util.UUID
@@ -31,7 +30,7 @@ class FatteVedtakSteg internal constructor(
 
     override fun underkjennSteget() {}
 
-    override val behandlingsstatus: Behandlingsstatus = Behandlingsstatus.FATTER_VEDTAK
+    override val behandlingsstatus: BehandlingsstatusModell get() = BehandlingsstatusModell.FATTER_VEDTAK
 
     override fun nullstill(
         kravgrunnlag: KravgrunnlagHendelse,

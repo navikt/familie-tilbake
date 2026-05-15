@@ -54,21 +54,15 @@ class SendVarselbrevTest {
         tilbakekreving.håndter(
             VarselbrevJournalføringHendelse(
                 varselbrevId = varselbrev.first().varselbrev.id,
-                behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id,
                 journalpostId = "1234",
                 dokumentInfoId = "321",
-                behandlerIdent = "4321",
-                fagsakId = tilbakekreving.eksternFagsak.eksternId,
             ),
         )
         tilbakekreving.tilstand shouldBe DistribuerVarselbrev
 
         tilbakekreving.håndter(
             VarselbrevDistribueringHendelse(
-                behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id,
-                behandlerIdent = "4321",
                 brevId = varselbrev.first().varselbrev.id,
-                fagsakId = tilbakekreving.eksternFagsak.eksternId,
                 journalpostId = "1234",
                 dokumentInfoId = "321",
             ),
@@ -113,21 +107,15 @@ class SendVarselbrevTest {
         tilbakekreving.håndter(
             VarselbrevJournalføringHendelse(
                 varselbrevId = varselbrevBehov.first().brevId,
-                behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id,
                 journalpostId = "1234",
                 dokumentInfoId = "321",
-                behandlerIdent = "4321",
-                fagsakId = tilbakekreving.eksternFagsak.eksternId,
             ),
         )
         tilbakekreving.tilstand shouldBe DistribuerVarselbrev
 
         tilbakekreving.håndter(
             VarselbrevDistribueringHendelse(
-                behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id,
-                behandlerIdent = "4321",
                 brevId = varselbrevBehov.first().brevId,
-                fagsakId = tilbakekreving.eksternFagsak.eksternId,
                 journalpostId = "1234",
                 dokumentInfoId = "321",
             ),

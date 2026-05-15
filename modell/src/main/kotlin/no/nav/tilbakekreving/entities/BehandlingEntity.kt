@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.entities
 
 import no.nav.tilbakekreving.behandling.Behandling
+import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
 import no.nav.tilbakekreving.feil.Sporing
@@ -27,6 +28,7 @@ data class BehandlingEntity(
     val foreslåVedtakStegEntity: ForeslåVedtakStegEntity,
     val fatteVedtakStegEntity: FatteVedtakStegEntity,
     val forhåndsvarselEntity: ForhåndsvarselEntity,
+    val forrigeBehandlingsstatus: BehandlingsstatusModell,
 ) {
     fun fraEntity(
         eksternFagsakBehandlingHistorikk: EksternFagsakBehandlingHistorikk,
@@ -52,6 +54,7 @@ data class BehandlingEntity(
             foreslåVedtakSteg = foreslåVedtakStegEntity.fraEntity(),
             fatteVedtakSteg = fatteVedtakStegEntity.fraEntity(),
             forhåndsvarsel = forhåndsvarselEntity.fraEntity(),
+            forrigeBehandlingsstatus = forrigeBehandlingsstatus,
         )
     }
 }

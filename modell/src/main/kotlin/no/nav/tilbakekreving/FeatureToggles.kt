@@ -1,13 +1,16 @@
 package no.nav.tilbakekreving
 
+import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import java.util.EnumMap
 
 class FeatureToggles(
     private val overrides: EnumMap<Toggle, Boolean>,
-    private val fagsystemToggle: EnumMap<FagsystemDTO, EnumMap<FagsystemToggle, Boolean>>,
+    private val fagsystemToggles: EnumMap<FagsystemDTO, EnumMap<FagsystemToggle, Boolean>>,
 ) {
     operator fun get(toggle: Toggle): Boolean = overrides[toggle] ?: toggle.default
+
+    operator fun get(ytelse: Ytelse, fagsystemToggle: FagsystemToggle): Boolean = fagsystemToggles[ytelse.tilFagsystemDTO()]?.get(fagsystemToggle) ?: fagsystemToggle.default
 }
 
 enum class Toggle(val default: Boolean) {

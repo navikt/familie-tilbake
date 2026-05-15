@@ -3,13 +3,12 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
-import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 
 internal interface Saksbehandlingsteg {
     val type: Behandlingssteg
-    val behandlingsstatus: Behandlingsstatus get() = Behandlingsstatus.UTREDES
+    val behandlingsstatus: BehandlingsstatusModell get() = BehandlingsstatusModell.TIL_BEHANDLING
 
     fun meldingerTilSaksbehandler(): Set<MeldingTilSaksbehandler> = emptySet()
 

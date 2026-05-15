@@ -4,17 +4,14 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.behandling.Behandling
-import no.nav.tilbakekreving.behandling.BehandlingObservatørOppsamler
 import no.nav.tilbakekreving.behandling.Enhet
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.behov.IverksettelseBehov
-import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
-import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.saksbehandler.Behandler
@@ -55,10 +52,6 @@ class BehandlingEntityTest {
             eksternFagsakRevurdering = revurderingInnslag,
             kravgrunnlag = kravgrunnlag,
             brevHistorikk = brevHistorikk,
-            behandlingObservatør = BehandlingObservatørOppsamler(),
-            tilstand = TilBehandling,
-            bigQueryService = BigQueryServiceStub(),
-            ytelsesNavn = Ytelse.Tilleggsstønad.hentYtelsesnavn(Språkkode.NB),
         )
 
         val behandlingEtterLagring = behandlingFørLagring

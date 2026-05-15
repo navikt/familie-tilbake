@@ -59,20 +59,14 @@ class FrontendE2ETest {
         tilbakekreving.håndter(
             VarselbrevJournalføringHendelse(
                 varselbrevId = varselbrevId,
-                behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id,
                 journalpostId = "1234",
                 dokumentInfoId = "321",
-                behandlerIdent = behandler.ident,
-                fagsakId = tilbakekreving.eksternFagsak.eksternId,
             ),
         )
 
         tilbakekreving.håndter(
             VarselbrevDistribueringHendelse(
-                behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id,
-                behandlerIdent = behandler.ident,
                 brevId = varselbrevId,
-                fagsakId = tilbakekreving.eksternFagsak.eksternId,
                 journalpostId = "1234",
                 dokumentInfoId = "321",
             ),

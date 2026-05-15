@@ -30,8 +30,6 @@ import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
-import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.util.UUID
@@ -92,36 +90,22 @@ class EndringObservatørService(
         )
     }
 
-    override fun behandlingEndret(
-        behandlingId: UUID,
-        vedtakGjelderId: String,
-        eksternFagsakId: String,
-        ytelse: Ytelse,
-        eksternBehandlingId: String?,
-        sakOpprettet: LocalDateTime,
-        varselSendt: LocalDate?,
-        venter: Venter?,
-        behandlingsstatus: ForenkletBehandlingsstatus,
-        forrigeBehandlingsstatus: ForenkletBehandlingsstatus?,
-        totaltFeilutbetaltBeløp: BigDecimal,
-        hentSaksbehandlingURL: (String) -> String,
-        fullstendigPeriode: Datoperiode,
-    ) {
-        val logContext = SecureLog.Context.utenBehandling(eksternFagsakId)
-        if (behandlingsstatus == ForenkletBehandlingsstatus.OPPRETTET) {
+    override fun behandlingEndret(behandlingEndret: EndringObservatør.BehandlingEndret) {
+        val logContext = SecureLog.Context.utenBehandling(behandlingEndret.eksternFagsakId)
+        if (behandlingEndret.behandlingsstatus == ForenkletBehandlingsstatus.OPPRETTET) {
             log.medContext(logContext) {
-                info("URL til behandling er: {}", hentSaksbehandlingURL(applicationProperties.frontendUrl))
+                info("URL til behandling er: {}", behandlingEndret.hentSaksbehandlingURL(applicationProperties.frontendUrl))
             }
         }
         kafkaProducer.sendHendelseEvent(
             BehandlingEndretEventDto(
-                eksternFagsakId = eksternFagsakId,
+                eksternFagsakId = behandlingEndret.eksternFagsakId,
                 hendelseOpprettet = OffsetDateTime.now(),
-                eksternBehandlingId = eksternBehandlingId,
+                eksternBehandlingId = behandlingEndret.eksternBehandlingId,
                 tilbakekreving = TilbakekrevingEventDto(
-                    behandlingId = behandlingId,
-                    sakOpprettet = sakOpprettet.atZone(ZoneId.systemDefault()).toOffsetDateTime(),
-                    venter = venter?.let {
+                    behandlingId = behandlingEndret.behandlingId,
+                    sakOpprettet = behandlingEndret.sakOpprettet.atZone(ZoneId.systemDefault()).toOffsetDateTime(),
+                    venter = behandlingEndret.venter?.let {
                         VenterEventDto(
                             grunn = when (it.grunn) {
                                 Venter.Grunn.BRUKERUTTALELSE -> VentegrunnEventDto.AVVENTER_BRUKERUTTALELSE
@@ -129,16 +113,16 @@ class EndringObservatørService(
                             gjennoptas = it.frist,
                         )
                     },
-                    varselSendt = varselSendt,
-                    behandlingsstatus = behandlingsstatus.tilEventDto(),
-                    forrigeBehandlingsstatus = forrigeBehandlingsstatus?.tilEventDto(),
-                    totaltFeilutbetaltBeløp = totaltFeilutbetaltBeløp,
-                    saksbehandlingURL = hentSaksbehandlingURL(applicationProperties.frontendUrl),
-                    fullstendigPeriode = PeriodeEventDto(fullstendigPeriode.fom, fullstendigPeriode.tom),
+                    varselSendt = behandlingEndret.varselSendt,
+                    behandlingsstatus = behandlingEndret.behandlingsstatus.tilEventDto(),
+                    forrigeBehandlingsstatus = behandlingEndret.forrigeBehandlingsstatus?.tilEventDto(),
+                    totaltFeilutbetaltBeløp = behandlingEndret.totaltFeilutbetaltBeløp,
+                    saksbehandlingURL = behandlingEndret.hentSaksbehandlingURL(applicationProperties.frontendUrl),
+                    fullstendigPeriode = PeriodeEventDto(behandlingEndret.fullstendigPeriode.fom, behandlingEndret.fullstendigPeriode.tom),
                 ),
             ),
-            vedtakGjelderId,
-            ytelse,
+            behandlingEndret.vedtakGjelderId,
+            behandlingEndret.ytelse,
             logContext,
         )
     }
@@ -147,6 +131,8 @@ class EndringObservatørService(
         when (this) {
             ForenkletBehandlingsstatus.OPPRETTET -> BehandlingsstatusEventDto.OPPRETTET
             ForenkletBehandlingsstatus.TIL_BEHANDLING -> BehandlingsstatusEventDto.TIL_BEHANDLING
+            ForenkletBehandlingsstatus.VENTER -> BehandlingsstatusEventDto.VENTER
+            ForenkletBehandlingsstatus.TIL_FORHÅNDSVARSEL -> BehandlingsstatusEventDto.TIL_FORHÅNDSVARSEL
             ForenkletBehandlingsstatus.TIL_GODKJENNING -> BehandlingsstatusEventDto.TIL_GODKJENNING
             ForenkletBehandlingsstatus.AVSLUTTET -> BehandlingsstatusEventDto.AVSLUTTET
         }

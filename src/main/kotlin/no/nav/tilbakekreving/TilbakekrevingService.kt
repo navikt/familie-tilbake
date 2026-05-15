@@ -239,11 +239,8 @@ class TilbakekrevingService(
                 tilbakekreving.håndter(
                     VarselbrevJournalføringHendelse(
                         varselbrevId = behov.brevId,
-                        behandlingId = behov.behandlingId,
                         journalpostId = journalpostResponse.journalpostId,
                         dokumentInfoId = journalpostResponse.dokumenter[0].dokumentInfoId!!,
-                        behandlerIdent = behov.varselbrev.ansvarligSaksbehandlerIdent,
-                        fagsakId = behov.eksternFagsakId,
                     ),
                 )
             }
@@ -260,10 +257,7 @@ class TilbakekrevingService(
                 )
                 tilbakekreving.håndter(
                     VarselbrevDistribueringHendelse(
-                        behandlingId = behov.behandlingId,
                         brevId = behov.brevId,
-                        fagsakId = behov.fagsakId,
-                        behandlerIdent = behov.behandlerIdent,
                         journalpostId = behov.journalpostId,
                         dokumentInfoId = behov.dokumentInfoId,
                     ),

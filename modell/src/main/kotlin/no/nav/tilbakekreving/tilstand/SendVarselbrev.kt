@@ -2,10 +2,10 @@ package no.nav.tilbakekreving.tilstand
 
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.Behandling
+import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
-import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.time.Duration
 
@@ -13,7 +13,7 @@ object SendVarselbrev : Tilstand {
     override val tidTilPåminnelse: Duration? = Duration.ofHours(1)
     override val tilbakekrevingTilstand: TilbakekrevingTilstand = TilbakekrevingTilstand.SEND_VARSELBREV
 
-    override fun behandlingsstatus(behandling: Behandling): Behandlingsstatus = Behandlingsstatus.UTREDES
+    override fun behandlingsstatus(behandling: Behandling): BehandlingsstatusModell = BehandlingsstatusModell.TIL_FORHÅNDSVARSEL
 
     override fun entering(tilbakekreving: Tilbakekreving) {
         tilbakekreving.trengerVarselbrevJournalføring()

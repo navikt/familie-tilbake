@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.entity
 
+import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.entities.BehandlerEntity
 import no.nav.tilbakekreving.entities.BehandlerType
 import no.nav.tilbakekreving.entities.BehandlingEntity
@@ -86,6 +87,12 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
         converter = FieldConverter.StringConverter,
     )
 
+    val forrigeBehandlingsstatus = field(
+        column = "forrige_behandlingsstatus",
+        getter = { it.forrigeBehandlingsstatus },
+        converter = FieldConverter.EnumConverter.of<BehandlingsstatusModell>().required(),
+    )
+
     fun map(
         resultSet: ResultSet,
         foreldelsessteg: ForeldelsesstegEntity,
@@ -120,6 +127,7 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
                 forhåndsvarselUnntak,
                 fristUtsettelse,
             ),
+            forrigeBehandlingsstatus = resultSet[forrigeBehandlingsstatus],
         )
     }
 }

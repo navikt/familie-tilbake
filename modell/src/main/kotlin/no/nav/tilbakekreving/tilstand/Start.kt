@@ -3,9 +3,9 @@ package no.nav.tilbakekreving.tilstand
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.Behandling
+import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
-import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.time.Duration
 
@@ -13,7 +13,7 @@ object Start : Tilstand {
     override val tidTilPåminnelse: Duration? = Duration.ofHours(1)
     override val tilbakekrevingTilstand: TilbakekrevingTilstand = TilbakekrevingTilstand.START
 
-    override fun behandlingsstatus(behandling: Behandling): Behandlingsstatus = Behandlingsstatus.OPPRETTET
+    override fun behandlingsstatus(behandling: Behandling): BehandlingsstatusModell = BehandlingsstatusModell.OPPRETTET
 
     override fun entering(tilbakekreving: Tilbakekreving) {}
 
