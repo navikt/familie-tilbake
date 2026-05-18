@@ -5,9 +5,9 @@ import java.net.URI
 
 val springDocVersion = "3.0.3"
 val testcontainersVersion = "1.21.4"
-val tokenValidationVersion = "6.0.6"
+val tokenValidationVersion = "6.0.7"
 val flywayVersion = "11.3.4"
-val ktorVersion = "3.4.3"
+val ktorVersion = "3.5.0"
 ext["ktorVersion"] = ktorVersion
 
 group = "no.nav"
@@ -181,7 +181,7 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson-jvm:$ktorVersion")
-    implementation("com.google.cloud:google-cloud-bigquery:2.65.0")
+    implementation("com.google.cloud:google-cloud-bigquery:2.66.0")
     implementation("org.apache.httpcomponents.client5:httpclient5")
     implementation("org.apache.httpcomponents.core5:httpcore5")
     implementation("org.apache.httpcomponents.core5:httpcore5-h2")
@@ -198,7 +198,7 @@ dependencies {
     api("com.fasterxml.jackson.core:jackson-databind")
     api("com.fasterxml.jackson.module:jackson-module-kotlin")
 
-    api("com.ibm.mq:com.ibm.mq.jakarta.client:9.4.5.0")
+    api("com.ibm.mq:com.ibm.mq.jakarta.client:9.4.5.1")
     api("jakarta.jms:jakarta.jms-api")
     api("org.apache.activemq:activemq-jms-pool")
     api("org.springframework:spring-jms")
@@ -217,7 +217,7 @@ dependencies {
     api(project(":kontrakter-frontend:api"))
     api(project(":modell"))
     api(project(":pdf"))
-    api("no.nav.familie:prosessering-core:2.20260420122910_8bfca04") {
+    api("no.nav.familie:prosessering-core:2.20260511102627_928cb38") {
         // La spring boot håndtere flyway versjon selv om den er eldre enn den som er inkludert i prosessering-core
         exclude("org.flywaydb")
     }

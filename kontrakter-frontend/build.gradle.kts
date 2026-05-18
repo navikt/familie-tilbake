@@ -52,7 +52,7 @@ subprojects {
     }
 
     dependencies {
-        compileOnly("io.swagger.core.v3:swagger-annotations:2.2.49")
+        compileOnly("io.swagger.core.v3:swagger-annotations:2.2.50")
         compileOnly("jakarta.validation:jakarta.validation-api:3.1.1")
     }
 }
