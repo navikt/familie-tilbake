@@ -111,7 +111,7 @@ class Behandling internal constructor(
 ) : Historikk.HistorikkInnslag<UUID> {
     internal fun nyFaktastegFrontendDto(varselbrev: Varselbrev?): FaktaOmFeilutbetalingDto = faktasteg.nyTilFrontendDto(kravgrunnlag.entry, eksternFagsakRevurdering.entry, varselbrev)
 
-    private fun bigqueryData(tilstand: Tilstand, ytelse: String): BigQueryBehandlingDataDto {
+    private fun bigqueryData(behandlingsstatus: BehandlingsstatusModell, ytelse: String): BigQueryBehandlingDataDto {
         return BigQueryBehandlingDataDto(
             behandlingId = id.toString(),
             opprettetDato = opprettet,
@@ -121,7 +121,7 @@ class Behandling internal constructor(
             beløp = totaltFeilutbetaltBeløp().toLong(),
             enhetNavn = enhet?.navn,
             enhetKode = enhet?.kode,
-            status = tilstand.behandlingsstatus(this).name,
+            status = behandlingsstatus.gammelFrontendDTO.name,
             resultat = hentVedtaksresultat()?.name,
         )
     }
@@ -712,23 +712,15 @@ class Behandling internal constructor(
         val statusFør = tilstand().behandlingsstatus(this)
         callback()
         val statusEtter = tilstand().behandlingsstatus(this)
-        oppdaterBehandlingsstatus(tilstand, ytelse, forrigeBehandlingsstatus, statusEtter, observatør, bigQueryService)
+        sendBehandlingsstatus(tilstand(), observatør)
+        bigQueryService.oppdaterBehandling(bigqueryData(statusEtter, ytelse.hentYtelsesnavn(Språkkode.NB)))
         if (statusFør != statusEtter || statusFør != forrigeBehandlingsstatus) {
             forrigeBehandlingsstatus = statusEtter
         }
     }
 
-    internal fun resendBehandlingsstatus(
+    internal fun sendBehandlingsstatus(
         tilstand: Tilstand,
-        observatør: BehandlingObservatør,
-    ) {
-        sendBehandlingsstatus({ tilstand }, forrigeBehandlingsstatus, tilstand.behandlingsstatus(this), observatør)
-    }
-
-    private fun sendBehandlingsstatus(
-        tilstand: () -> Tilstand,
-        forrigeBehandlingsstatus: BehandlingsstatusModell?,
-        behandlingsstatus: BehandlingsstatusModell,
         observatør: BehandlingObservatør,
     ) {
         observatør.behandlingOppdatert(
@@ -736,27 +728,13 @@ class Behandling internal constructor(
             eksternBehandlingId = eksternFagsakRevurdering.entry.eksternId,
             vedtaksresultat = hentVedtaksresultat(),
             forrigeBehandlingsstatus = forrigeBehandlingsstatus,
-            behandlingsstatus = behandlingsstatus,
+            behandlingsstatus = tilstand.behandlingsstatus(this),
             venter = venter(),
             ansvarligSaksbehandler = ansvarligSaksbehandler,
             ansvarligBeslutter = fatteVedtakSteg.ansvarligBeslutter?.ident,
             totaltFeilutbetaltBeløp = kravgrunnlag.entry.feilutbetaltBeløpForAllePerioder(),
             totalFeilutbetaltPeriode = fullstendigPeriode(),
             ansvarligEnhet = enhet?.kode,
-        )
-    }
-
-    private fun oppdaterBehandlingsstatus(
-        tilstand: () -> Tilstand,
-        ytelse: Ytelse,
-        forrigeBehandlingsstatus: BehandlingsstatusModell?,
-        behandlingsstatus: BehandlingsstatusModell,
-        observatør: BehandlingObservatør,
-        bigQueryService: BigQueryService,
-    ) {
-        sendBehandlingsstatus(tilstand, forrigeBehandlingsstatus, behandlingsstatus, observatør)
-        bigQueryService.oppdaterBehandling(
-            bigqueryData(tilstand(), ytelse.hentYtelsesnavn(Språkkode.NB)),
         )
     }
 
