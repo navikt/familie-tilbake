@@ -50,7 +50,7 @@ class TilbakekrevingRepository(
         return TilbakekrevingEntityMapper.map(
             resultSet = resultSet,
             eksternFagsak = eksternFagsakRepository.hentEksternFagsak(id),
-            behandlingHistorikk = behandlingRepository.hentBehandlinger(id),
+            behandlingHistorikk = behandlingRepository.hentBehandlinger(id, resultSet[TilbakekrevingEntityMapper.nåværendeTilstand]),
             kravgrunnlagHistorikk = kravgrunnlagRepository.hentKravgrunnlag(id),
             brevHistorikk = brevRepository.hentBrev(id),
             bruker = brukerRepository.hentBruker(id),

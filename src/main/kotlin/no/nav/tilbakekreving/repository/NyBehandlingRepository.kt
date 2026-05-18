@@ -4,6 +4,7 @@ import no.nav.tilbakekreving.entities.BehandlingEntity
 import no.nav.tilbakekreving.entity.BehandlingEntityMapper
 import no.nav.tilbakekreving.entity.Entity.Companion.get
 import no.nav.tilbakekreving.entity.FieldConverter
+import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Repository
@@ -22,6 +23,7 @@ class NyBehandlingRepository(
 ) {
     fun hentBehandlinger(
         tilbakekrevingId: String,
+        tilstand: TilbakekrevingTilstand,
     ): List<BehandlingEntity> {
         return jdbcTemplate.query(
             "SELECT * FROM tilbakekreving_behandling WHERE tilbakekreving_id = ?",
@@ -38,6 +40,7 @@ class NyBehandlingRepository(
                 brukeruttalelseEntity = uttalelseRepository.hentBrukerUttalelsen(behandlingId),
                 forhåndsvarselUnntak = forhåndsvarselUnntakRepository.hentForhåndsvarselUnntak(behandlingId),
                 fristUtsettelse = utsettUttalelseRepository.hentUtsettUttalelseFrist(behandlingId),
+                tilstand = tilstand,
             )
         }
     }
