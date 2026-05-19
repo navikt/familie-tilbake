@@ -25,7 +25,7 @@ tilbakekreving:
       FjernUttalelsesfrist: true
     fagsystem:
       TP:
-        ForhåndsvarselBehandlingsstatuser: true
+        ForhaandsvarselBehandlingsstatuser: true
   tilgangsstyring:
     grupper:
       ts:

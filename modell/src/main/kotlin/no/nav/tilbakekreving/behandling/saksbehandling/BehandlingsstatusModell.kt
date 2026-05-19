@@ -21,7 +21,7 @@ enum class BehandlingsstatusModell(
         gammelFrontendDTO = Behandlingsstatus.UTREDES,
     ) {
         override fun forenkletStatus(ytelse: Ytelse, features: FeatureToggles): ForenkletBehandlingsstatus {
-            return when (features[ytelse, FagsystemToggle.ForhåndsvarselBehandlingsstatuser]) {
+            return when (features[ytelse, FagsystemToggle.ForhaandsvarselBehandlingsstatuser]) {
                 true -> ForenkletBehandlingsstatus.TIL_FORHÅNDSVARSEL
                 false -> ForenkletBehandlingsstatus.TIL_BEHANDLING
             }
