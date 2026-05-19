@@ -17,7 +17,6 @@ import no.nav.tilbakekreving.entities.UttalelsesfristEntity
 import no.nav.tilbakekreving.entities.VilkårsvurderingstegEntity
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
-import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.sql.ResultSet
 import java.util.UUID
 
@@ -91,11 +90,10 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
     val forrigeBehandlingsstatus = field(
         column = "forrige_behandlingsstatus",
         getter = { it.forrigeBehandlingsstatus },
-        converter = FieldConverter.EnumConverter.of<BehandlingsstatusModell>(),
+        converter = FieldConverter.EnumConverter.of<BehandlingsstatusModell>().required(),
     )
 
     fun map(
-        tilstand: TilbakekrevingTilstand,
         resultSet: ResultSet,
         foreldelsessteg: ForeldelsesstegEntity,
         faktasteg: FaktastegEntity,
@@ -129,24 +127,7 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
                 forhåndsvarselUnntak,
                 fristUtsettelse,
             ),
-            forrigeBehandlingsstatus = resultSet[forrigeBehandlingsstatus] ?: when (tilstand) {
-                TilbakekrevingTilstand.START,
-                TilbakekrevingTilstand.AVVENTER_KRAVGRUNNLAG,
-                TilbakekrevingTilstand.AVVENTER_FAGSYSTEMINFO,
-                TilbakekrevingTilstand.AVVENTER_BRUKERINFO,
-                -> BehandlingsstatusModell.OPPRETTET
-
-                TilbakekrevingTilstand.SEND_VARSELBREV,
-                TilbakekrevingTilstand.DISTRIUBER_VARSELBREV,
-                TilbakekrevingTilstand.TIL_BEHANDLING,
-                -> BehandlingsstatusModell.TIL_BEHANDLING
-
-                TilbakekrevingTilstand.IVERKSETT_VEDTAK -> BehandlingsstatusModell.FATTER_VEDTAK
-                TilbakekrevingTilstand.JOURNALFØR_VEDTAK,
-                TilbakekrevingTilstand.DISTRIUBER_VEDTAK,
-                TilbakekrevingTilstand.AVSLUTTET,
-                -> BehandlingsstatusModell.AVSLUTTET
-            },
+            forrigeBehandlingsstatus = resultSet[forrigeBehandlingsstatus],
         )
     }
 }
