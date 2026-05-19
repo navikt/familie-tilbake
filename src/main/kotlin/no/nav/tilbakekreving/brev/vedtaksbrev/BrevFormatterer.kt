@@ -89,5 +89,7 @@ object BrevFormatterer {
             BeregningsresultatVurderingDto.Uaktsomhet -> "Uaktsomhet"
             BeregningsresultatVurderingDto.GrovUaktsomhet -> "Grov uaktsomhet"
             BeregningsresultatVurderingDto.Forsett -> "Forsett"
+            BeregningsresultatVurderingDto.BurdeForstått -> "Burde forstått"
+            BeregningsresultatVurderingDto.Forstod -> "Forstod"
         }
 }

@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvNav
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.medBeløp
@@ -71,7 +72,7 @@ class BeregningTest {
             listOf(
                 Beregningsresultatsperiode(
                     periode = 1.januar(2021) til 31.januar(2021),
-                    vurdering = Aktsomhet.FORSETT,
+                    vurdering = NivåAvForståelse.Type.Forstod,
                     feilutbetaltBeløp = 1500.kroner,
                     andelAvBeløp = 100.prosent,
                     renteprosent = null,
@@ -321,7 +322,7 @@ class BeregningTest {
             listOf(
                 Beregningsresultatsperiode(
                     periode = 1.januar(2021) til 28.februar(2021),
-                    vurdering = Aktsomhet.SIMPEL_UAKTSOMHET,
+                    vurdering = NivåAvForståelse.Type.BurdeForstått,
                     feilutbetaltBeløp = 2998.kroner,
                     andelAvBeløp = 50.prosent,
                     renteprosent = null,
@@ -467,7 +468,7 @@ class BeregningTest {
             listOf(
                 Beregningsresultatsperiode(
                     periode = 1.januar(2021) til 28.februar(2021),
-                    vurdering = Aktsomhet.SIMPEL_UAKTSOMHET,
+                    vurdering = NivåAvForståelse.Type.BurdeForstått,
                     feilutbetaltBeløp = 3510.kroner,
                     andelAvBeløp = 50.prosent,
                     renteprosent = null,
@@ -537,7 +538,7 @@ class BeregningTest {
             listOf(
                 Beregningsresultatsperiode(
                     periode = 1.januar(2021) til 31.januar(2021),
-                    vurdering = Aktsomhet.FORSETT,
+                    vurdering = NivåAvForståelse.Type.Forstod,
                     feilutbetaltBeløp = 1755.kroner,
                     andelAvBeløp = 100.prosent,
                     renteprosent = null,
@@ -552,7 +553,7 @@ class BeregningTest {
                 ),
                 Beregningsresultatsperiode(
                     periode = 1.februar(2021) til 28.februar(2021),
-                    vurdering = Aktsomhet.FORSETT,
+                    vurdering = NivåAvForståelse.Type.Forstod,
                     feilutbetaltBeløp = 1755.kroner,
                     andelAvBeløp = 100.prosent,
                     renteprosent = null,
@@ -678,7 +679,7 @@ class BeregningTest {
             beregningsresultatsperioder = listOf(
                 Beregningsresultatsperiode(
                     periode = 1.januar(2021) til 31.januar(2021),
-                    vurdering = Aktsomhet.SIMPEL_UAKTSOMHET,
+                    vurdering = NivåAvForståelse.Type.BurdeForstått,
                     feilutbetaltBeløp = 1500.kroner,
                     andelAvBeløp = 50.prosent,
                     renteprosent = null,

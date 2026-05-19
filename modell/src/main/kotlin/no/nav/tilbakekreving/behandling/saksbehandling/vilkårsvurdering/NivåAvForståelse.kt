@@ -25,11 +25,11 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
         val aktsomhet: Aktsomhet,
         override val begrunnelse: String,
     ) : NivåAvForståelse {
-        override fun vurderingstype(): Vurdering = aktsomhet.vurderingstype()
+        override fun vurderingstype(): Vurdering = aktsomhet.nivåAvForståelse()
 
         override fun reduksjon(): Reduksjon = aktsomhet.reduksjon()
 
-        override fun renter(): Boolean = aktsomhet.renter()
+        override fun renter(): Boolean = false
 
         override fun tilFrontendDto(): VurdertVilkårsvurderingsresultatDto? {
             return VurdertVilkårsvurderingsresultatDto(
@@ -68,7 +68,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
         val aktsomhet: Aktsomhet,
         override val begrunnelse: String,
     ) : NivåAvForståelse {
-        override fun vurderingstype(): Vurdering = aktsomhet.vurderingstype()
+        override fun vurderingstype(): Vurdering = aktsomhet.nivåAvForståelse()
 
         override fun reduksjon(): Reduksjon = aktsomhet.reduksjon()
 
@@ -199,6 +199,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
     sealed interface Aktsomhet {
         fun vurderingstype(): AktsomhetDTO
 
+        fun nivåAvForståelse(): NivåAvForståelse.Type
+
         val begrunnelse: String
 
         fun reduksjon(): Reduksjon
@@ -219,6 +221,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             override val begrunnelse: String,
         ) : Aktsomhet {
             override fun vurderingstype(): AktsomhetDTO = AktsomhetDTO.FORSETT
+
+            override fun nivåAvForståelse(): Type = Type.Forstod
 
             override fun reduksjon(): Reduksjon = Reduksjon.FullstendigTilbakekreving()
 
@@ -273,6 +277,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
 
             override fun vurderingstype(): AktsomhetDTO = AktsomhetDTO.GROV_UAKTSOMHET
 
+            override fun nivåAvForståelse(): Type = Type.MåForstått
+
             override fun tilFrontendDto(): VurdertAktsomhetDto {
                 return VurdertAktsomhetDto(
                     aktsomhet = vurderingstype(),
@@ -319,6 +325,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             override fun renter(): Boolean = false
 
             override fun vurderingstype(): AktsomhetDTO = AktsomhetDTO.SIMPEL_UAKTSOMHET
+
+            override fun nivåAvForståelse(): Type = Type.BurdeForstått
 
             override fun oppsummerSærligeGrunnerVurdering(): VurdertUtbetaling.SærligeGrunner? {
                 return kanUnnlates4XRettsgebyr.særligeGrunner()?.oppsummerVurdering()
@@ -368,6 +376,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
 
             override fun vurderingstype(): AktsomhetDTO = AktsomhetDTO.SIMPEL_UAKTSOMHET
 
+            override fun nivåAvForståelse(): Type = Type.BurdeForstått
+
             override fun oppsummerSærligeGrunnerVurdering(): VurdertUtbetaling.SærligeGrunner? {
                 return kanUnnlates4XRettsgebyr.særligeGrunner()?.oppsummerVurdering()
             }
@@ -405,5 +415,11 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 )
             }
         }
+    }
+
+    enum class Type(override val navn: String) : Vurdering {
+        Forstod("Forstod"),
+        MåForstått("Må ha forstått"),
+        BurdeForstått("Burde forstå"),
     }
 }

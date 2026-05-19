@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.beregning.modell
 
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatVurderingDto
@@ -34,8 +35,8 @@ class Beregningsresultat(
 
     fun tilFrontendDto(): BeregningsresultatDto {
         return BeregningsresultatDto(
-            beregningsresultatsperioder = beregningsresultatsperioder.mapNotNull { periode ->
-                val vurdering = periode.vurdering?.tilBeregningsresultatVurderingDto() ?: return@mapNotNull null
+            beregningsresultatsperioder = beregningsresultatsperioder.map { periode ->
+                val vurdering = periode.vurdering!!.tilBeregningsresultatVurderingDto()
                 BeregningsresultatsperiodeDto(
                     fom = periode.periode.fom,
                     tom = periode.periode.tom,
@@ -52,13 +53,15 @@ class Beregningsresultat(
     }
 }
 
-private fun no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering.tilBeregningsresultatVurderingDto(): BeregningsresultatVurderingDto? {
+private fun no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering.tilBeregningsresultatVurderingDto(): BeregningsresultatVurderingDto {
     return when (this) {
         Aktsomhet.FORSETT -> BeregningsresultatVurderingDto.Forsett
         Aktsomhet.GROV_UAKTSOMHET -> BeregningsresultatVurderingDto.GrovUaktsomhet
         Aktsomhet.SIMPEL_UAKTSOMHET -> BeregningsresultatVurderingDto.Uaktsomhet
         AnnenVurdering.GOD_TRO -> BeregningsresultatVurderingDto.GodTro
-        else -> null
+        NivåAvForståelse.Type.BurdeForstått, NivåAvForståelse.Type.MåForstått -> BeregningsresultatVurderingDto.BurdeForstått
+        NivåAvForståelse.Type.Forstod -> BeregningsresultatVurderingDto.Forstod
+        else -> error("Har ingen mapping fra vurdering til beregningsresultat for $this")
     }
 }
 
