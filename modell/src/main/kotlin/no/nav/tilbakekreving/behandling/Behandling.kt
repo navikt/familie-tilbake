@@ -375,7 +375,7 @@ class Behandling internal constructor(
             },
             ansvarligSaksbehandler = ansvarligSaksbehandler.ident,
             ansvarligBeslutter = fatteVedtakSteg.ansvarligBeslutter?.ident,
-            erBehandlingPåVent = venter() != null,
+            erBehandlingPåVent = false,
             kanHenleggeBehandling = false,
             kanRevurderingOpprettes = true,
             harVerge = false,
