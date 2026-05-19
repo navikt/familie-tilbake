@@ -60,7 +60,9 @@ tilbakekreving:
     - QA.P_TILBAKEKREVING.KRAVGRUNNLAG
     - QA.P_TILTAKSPENGER.KRAVGRUNNLAG
   toggles:
-    tilgangsmaskinen-enabled: true
+    fagsystem:
+      TP:
+        ForhåndsvarselBehandlingsstatuser: true
   tilgangsmaskinen:
     scope: api://prod-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
   tilgangsstyring:

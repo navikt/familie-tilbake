@@ -260,7 +260,7 @@ class EndringObservatørTest {
             endringObservatør = endringObservatør,
             features = defaultFeatures(
                 fagsystemToggleOverrides = arrayOf(
-                    FagsystemToggle.FORHÅNDSVARSEL_BEHANDLNGSSTATUSER to true,
+                    FagsystemToggle.ForhåndsvarselBehandlingsstatuser to true,
                 ),
             ),
         )

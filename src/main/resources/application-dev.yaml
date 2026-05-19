@@ -19,11 +19,13 @@ tilbakekreving:
     - Q1_TILBAKEKREVING.KRAVGRUNNLAG
     - Q1_TILTAKSPENGER.KRAVGRUNNLAG
   toggles:
-    tilgangsmaskinen-enabled: true
     ny-modell:
       SendAutomatiskVarselbrev: false
       Arkivering: false
       FjernUttalelsesfrist: true
+    fagsystem:
+      TP:
+        ForhåndsvarselBehandlingsstatuser: true
   tilgangsstyring:
     grupper:
       ts:
