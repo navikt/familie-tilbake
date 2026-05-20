@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
 import io.kotest.matchers.shouldBe
+import no.nav.tilbakekreving.KlokkeStub
 import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.eksternFagsakBehandling
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -101,7 +102,7 @@ class ForeldelsestegTest {
         )
         val foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakBehandling(), kravgrunnlag)
 
-        foreldelsesteg.automatiskVurder(kravgrunnlag, dagensDato = fom.plusMonths(30))
+        foreldelsesteg.automatiskVurder(kravgrunnlag, klokke = KlokkeStub(fom.plusMonths(30)))
 
         foreldelsesteg.erFullstendig(SystemKlokke) shouldBe true
         foreldelsesteg.erPeriodeForeldet(fom til 31.januar(2024)) shouldBe false
@@ -116,7 +117,7 @@ class ForeldelsestegTest {
         )
         val foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakBehandling(), kravgrunnlag)
 
-        foreldelsesteg.automatiskVurder(kravgrunnlag, dagensDato = fom.plusMonths(30).plusDays(1))
+        foreldelsesteg.automatiskVurder(kravgrunnlag, klokke = KlokkeStub(fom.plusMonths(30).plusDays(1)))
 
         foreldelsesteg.erFullstendig(SystemKlokke) shouldBe false
     }
@@ -127,13 +128,30 @@ class ForeldelsestegTest {
         val periode = fom til 31.januar(2024)
         val kravgrunnlag = kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(periode)))
         val foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakBehandling(), kravgrunnlag)
-        val dagensDato = fom.plusMonths(10)
+        val klokke = KlokkeStub(fom.plusMonths(10))
 
-        foreldelsesteg.automatiskVurder(kravgrunnlag, dagensDato = dagensDato)
+        foreldelsesteg.automatiskVurder(kravgrunnlag, klokke = klokke)
         foreldelsesteg.vurderForeldelse(periode, Foreldelsesteg.Vurdering.Foreldet("Begrunnelse"))
 
-        foreldelsesteg.automatiskVurder(kravgrunnlag, dagensDato = dagensDato)
+        foreldelsesteg.automatiskVurder(kravgrunnlag, klokke = klokke)
 
         foreldelsesteg.erPeriodeForeldet(periode) shouldBe true
+    }
+
+    @Test
+    fun `setter tilbake til IkkeVurdert dersom behandlingen ikke lenger treffer reglene for automatisering`() {
+        val fom = 1.januar(2024)
+        val periode = fom til 31.januar(2024)
+        val kravgrunnlag = kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(periode)))
+        val foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakBehandling(), kravgrunnlag)
+        val klokke = KlokkeStub(fom.plusMonths(10))
+
+        foreldelsesteg.automatiskVurder(kravgrunnlag, klokke = klokke)
+        foreldelsesteg.erFullstendig(klokke) shouldBe true
+
+        klokke.settTid(fom.plusMonths(30).plusDays(1))
+        foreldelsesteg.automatiskVurder(kravgrunnlag, klokke = klokke)
+
+        foreldelsesteg.erFullstendig(klokke) shouldBe false
     }
 }

@@ -32,7 +32,7 @@ object TilBehandling : Tilstand {
         if (tilbakekreving.eksternFagsak.behandlinger.nåværende().entry is EksternFagsakRevurdering.Ukjent) {
             tilbakekreving.trengerFagsysteminfo()
         }
-        tilbakekreving.behandlingHistorikk.nåværende().entry.sendBehandlingsstatus(this, tilbakekreving)
+        tilbakekreving.behandlingHistorikk.nåværende().entry.håndterPåminnelse(this, tilbakekreving)
     }
 
     override fun håndterNullstilling(nåværendeBehandling: Behandling, sporing: Sporing, behandlingslogg: Behandlingslogg, behandler: Behandler) {

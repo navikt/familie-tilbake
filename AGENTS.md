@@ -82,6 +82,7 @@ Ktlint kjøres på alle pull requests i CI. **Alltid kjør `ktlintCheck` eller `
 - **Integrasjonstest:** Testcontainers (PostgreSQL, ActiveMQ) + WireMock
 - Integrasjonstester arver fra `OppslagSpringRunnerTest` som setter opp Spring-kontekst med testcontainers
 - Testdata og builders finnes i `:testdata`-modulen
+- Aldri endre eksisterende tester uten å spørre om tilbakemelding
 
 ## Databasemigrasjoner
 

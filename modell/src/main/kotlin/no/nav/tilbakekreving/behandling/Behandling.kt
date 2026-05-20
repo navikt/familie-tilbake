@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.behandling
 import no.nav.tilbakekreving.FeatureToggles
 import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.Klokke
+import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.UtenforScope
 import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.aktør.Bruker
@@ -713,12 +714,29 @@ class Behandling internal constructor(
     ) {
         val statusFør = tilstand().behandlingsstatus(this)
         callback()
+        oppdaterAutomatiskeBehandlinger()
         val statusEtter = tilstand().behandlingsstatus(this)
         sendBehandlingsstatus(tilstand(), observatør)
         bigQueryService.oppdaterBehandling(bigqueryData(statusEtter, ytelse.hentYtelsesnavn(Språkkode.NB)))
         if (statusFør != statusEtter || statusFør != forrigeBehandlingsstatus) {
             forrigeBehandlingsstatus = statusEtter
         }
+    }
+
+    private fun oppdaterAutomatiskeBehandlinger() {
+        if (!foreslåVedtakSteg.erFullstendig(klokke)) {
+            steg().forEach {
+                it.automatiskVurder(
+                    kravgrunnlag = kravgrunnlag.entry,
+                    klokke = klokke,
+                )
+            }
+        }
+    }
+
+    internal fun håndterPåminnelse(tilstand: Tilstand, tilbakekreving: Tilbakekreving) {
+        oppdaterAutomatiskeBehandlinger()
+        sendBehandlingsstatus(tilstand, tilbakekreving)
     }
 
     internal fun sendBehandlingsstatus(

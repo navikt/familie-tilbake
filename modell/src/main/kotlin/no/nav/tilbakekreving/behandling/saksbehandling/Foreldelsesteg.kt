@@ -40,14 +40,18 @@ class Foreldelsesteg(
 
     override fun automatiskVurder(
         kravgrunnlag: KravgrunnlagHendelse,
-        dagensDato: LocalDate,
+        klokke: Klokke,
     ) {
         val førstePeriodeFom = kravgrunnlag.perioder().minOf { it.periode().fom }
-        if (!dagensDato.isAfter(førstePeriodeFom.plusMonths(30))) {
-            vurdertePerioder
-                .filter { it.vurdering.kanOverstyresAutomatisk() }
-                .forEach { it.vurderForeldelse(Vurdering.AutomatiskIkkeForeldet) }
-        }
+        vurdertePerioder
+            .filter { it.vurdering.kanOverstyresAutomatisk() }
+            .forEach {
+                if (klokke.dagensDato() <= førstePeriodeFom.plusMonths(30)) {
+                    it.vurderForeldelse(Vurdering.AutomatiskIkkeForeldet)
+                } else {
+                    it.vurderForeldelse(Vurdering.IkkeVurdert)
+                }
+            }
     }
 
     internal fun vurderForeldelse(
