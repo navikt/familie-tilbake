@@ -111,6 +111,7 @@ class EndringObservatørService(
                                 Venter.Grunn.BRUKERUTTALELSE -> VentegrunnEventDto.AVVENTER_BRUKERUTTALELSE
                             },
                             gjennoptas = it.frist,
+                            gjenopptas = it.frist,
                         )
                     },
                     varselSendt = behandlingEndret.varselSendt,
