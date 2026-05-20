@@ -5,6 +5,7 @@ import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
+import java.time.LocalDate
 
 internal interface Saksbehandlingsteg {
     val type: Behandlingssteg
@@ -26,6 +27,11 @@ internal interface Saksbehandlingsteg {
         kravgrunnlag: KravgrunnlagHendelse,
         eksternFagsakRevurdering: EksternFagsakRevurdering,
     )
+
+    fun automatiskVurder(
+        kravgrunnlag: KravgrunnlagHendelse,
+        dagensDato: LocalDate,
+    ) {}
 
     fun venter(): Venter? = null
 

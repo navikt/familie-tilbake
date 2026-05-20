@@ -37,6 +37,18 @@ class Foreldelsesteg(
         vurdertePerioder = tomVurdering(eksternFagsakRevurdering, kravgrunnlag)
     }
 
+    override fun automatiskVurder(
+        kravgrunnlag: KravgrunnlagHendelse,
+        dagensDato: LocalDate,
+    ) {
+        val førstePeriodeFom = kravgrunnlag.perioder().minOf { it.periode().fom }
+        if (!dagensDato.isAfter(førstePeriodeFom.plusMonths(30))) {
+            vurdertePerioder
+                .filter { it.vurdering.kanOverstyresAutomatisk() }
+                .forEach { it.vurderForeldelse(Vurdering.AutomatiskIkkeForeldet) }
+        }
+    }
+
     internal fun vurderForeldelse(
         periode: Datoperiode,
         vurdering: Vurdering,
@@ -55,7 +67,7 @@ class Foreldelsesteg(
     }
 
     fun erPeriodeForeldet(periode: Datoperiode): Boolean {
-        return vurdertePerioder.single { it.periode.inneholder(periode) }.vurdering !is Vurdering.IkkeForeldet
+        return vurdertePerioder.single { it.periode.inneholder(periode) }.vurdering.erForeldet()
     }
 
     fun hjemlerForTilbakekreving() = vurdertePerioder.flatMap { it.vurdering.hjemlerForTilbakekreving() }.distinct()
@@ -81,6 +93,7 @@ class Foreldelsesteg(
                     foreldelsesvurderingstype =
                         when (it.vurdering) {
                             is Vurdering.IkkeForeldet -> Foreldelsesvurderingstype.IKKE_FORELDET
+                            is Vurdering.AutomatiskIkkeForeldet -> Foreldelsesvurderingstype.IKKE_FORELDET
                             is Vurdering.Foreldet -> Foreldelsesvurderingstype.FORELDET
                             is Vurdering.IkkeVurdert -> Foreldelsesvurderingstype.IKKE_VURDERT
                             is Vurdering.Tilleggsfrist -> Foreldelsesvurderingstype.TILLEGGSFRIST
@@ -139,7 +152,15 @@ class Foreldelsesteg(
 
         fun hjemlerForTilbakekreving(): List<HjemmelForTilbakekreving>
 
+        fun kanOverstyresAutomatisk(): Boolean
+
+        fun erForeldet(): Boolean
+
         class IkkeForeldet(override val begrunnelse: String) : Vurdering {
+            override fun kanOverstyresAutomatisk() = false
+
+            override fun erForeldet() = false
+
             override fun tilEntity(): ForeldelsesvurderingEntity {
                 return ForeldelsesvurderingEntity(
                     type = ForeldelsesvurderingType.IKKE_FORELDET,
@@ -153,6 +174,10 @@ class Foreldelsesteg(
         }
 
         object IkkeVurdert : Vurdering {
+            override fun kanOverstyresAutomatisk() = true
+
+            override fun erForeldet() = false
+
             override fun tilEntity(): ForeldelsesvurderingEntity {
                 return ForeldelsesvurderingEntity(
                     type = ForeldelsesvurderingType.IKKE_VURDERT,
@@ -165,7 +190,28 @@ class Foreldelsesteg(
             override fun hjemlerForTilbakekreving(): List<HjemmelForTilbakekreving> = emptyList()
         }
 
+        object AutomatiskIkkeForeldet : Vurdering {
+            override fun kanOverstyresAutomatisk() = true
+
+            override fun erForeldet() = false
+
+            override fun tilEntity(): ForeldelsesvurderingEntity {
+                return ForeldelsesvurderingEntity(
+                    type = ForeldelsesvurderingType.AUTOMATISK_IKKE_FORELDET,
+                    begrunnelse = null,
+                    frist = null,
+                    oppdaget = null,
+                )
+            }
+
+            override fun hjemlerForTilbakekreving(): List<HjemmelForTilbakekreving> = emptyList()
+        }
+
         class Tilleggsfrist(override val frist: LocalDate, val oppdaget: LocalDate) : Vurdering {
+            override fun kanOverstyresAutomatisk() = false
+
+            override fun erForeldet() = false
+
             override fun tilEntity(): ForeldelsesvurderingEntity {
                 return ForeldelsesvurderingEntity(
                     type = ForeldelsesvurderingType.TILLEGGSFRIST,
@@ -183,6 +229,10 @@ class Foreldelsesteg(
         }
 
         class Foreldet(override val begrunnelse: String) : Vurdering {
+            override fun kanOverstyresAutomatisk() = false
+
+            override fun erForeldet() = true
+
             override fun tilEntity(): ForeldelsesvurderingEntity {
                 return ForeldelsesvurderingEntity(
                     type = ForeldelsesvurderingType.FORELDET,

@@ -88,4 +88,51 @@ class ForeldelsestegTest {
 
         forelgelse.tilEntity(UUID.randomUUID()).trengerNyVurdering shouldBe true
     }
+
+    @Test
+    fun `vurderer alle perioder automatisk innenfor 30 måneder`() {
+        val fom = 1.januar(2024)
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(fom til 31.januar(2024)),
+                kravgrunnlagPeriode(1.februar(2024) til 28.februar(2024)),
+            ),
+        )
+        val foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakBehandling(), kravgrunnlag)
+
+        foreldelsesteg.automatiskVurder(kravgrunnlag, dagensDato = fom.plusMonths(30))
+
+        foreldelsesteg.erFullstendig() shouldBe true
+        foreldelsesteg.erPeriodeForeldet(fom til 31.januar(2024)) shouldBe false
+        foreldelsesteg.erPeriodeForeldet(1.februar(2024) til 28.februar(2024)) shouldBe false
+    }
+
+    @Test
+    fun `vurderes ikke automatisk når perioden er eldre enn 30 måneder`() {
+        val fom = 1.januar(2024)
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(kravgrunnlagPeriode(fom til 31.januar(2024))),
+        )
+        val foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakBehandling(), kravgrunnlag)
+
+        foreldelsesteg.automatiskVurder(kravgrunnlag, dagensDato = fom.plusMonths(30).plusDays(1))
+
+        foreldelsesteg.erFullstendig() shouldBe false
+    }
+
+    @Test
+    fun `manuell behandling hvor periode er satt til foreldet beholdes etter ny automatisk vurdering`() {
+        val fom = 1.januar(2024)
+        val periode = fom til 31.januar(2024)
+        val kravgrunnlag = kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(periode)))
+        val foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakBehandling(), kravgrunnlag)
+        val dagensDato = fom.plusMonths(10)
+
+        foreldelsesteg.automatiskVurder(kravgrunnlag, dagensDato = dagensDato)
+        foreldelsesteg.vurderForeldelse(periode, Foreldelsesteg.Vurdering.Foreldet("Begrunnelse"))
+
+        foreldelsesteg.automatiskVurder(kravgrunnlag, dagensDato = dagensDato)
+
+        foreldelsesteg.erPeriodeForeldet(periode) shouldBe true
+    }
 }

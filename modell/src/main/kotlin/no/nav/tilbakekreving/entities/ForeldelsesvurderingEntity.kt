@@ -24,6 +24,7 @@ data class ForeldelsesvurderingEntity(
                 Vurdering.Foreldet(requireNotNull(begrunnelse) { "Begrunnelse kreves for FORELDET" })
             }
             ForeldelsesvurderingType.IKKE_VURDERT -> Vurdering.IkkeVurdert
+            ForeldelsesvurderingType.AUTOMATISK_IKKE_FORELDET -> Vurdering.AutomatiskIkkeForeldet
         }
     }
 }
@@ -33,4 +34,5 @@ enum class ForeldelsesvurderingType {
     TILLEGGSFRIST,
     FORELDET,
     IKKE_VURDERT,
+    AUTOMATISK_IKKE_FORELDET,
 }
