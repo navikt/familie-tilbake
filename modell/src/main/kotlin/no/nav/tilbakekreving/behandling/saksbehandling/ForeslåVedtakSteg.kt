@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
+import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.entities.ForeslåVedtakStegEntity
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
@@ -13,7 +14,7 @@ class ForeslåVedtakSteg(
 ) : Saksbehandlingsteg {
     override val type = Behandlingssteg.FORESLÅ_VEDTAK
 
-    override fun erFullstendig(): Boolean = vurdert
+    override fun erFullstendig(klokke: Klokke): Boolean = vurdert
 
     override fun erUnderkjent(): Boolean {
         return underkjent

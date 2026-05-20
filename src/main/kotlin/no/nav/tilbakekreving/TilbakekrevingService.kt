@@ -90,7 +90,8 @@ class TilbakekrevingService(
             opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse,
             bigQueryService = bigQueryService,
             endringObservatør = endringObservatørService,
-            features = featureService.modellFeatures,
+            featureService.modellFeatures,
+            SystemKlokke,
         )
 
         håndter(tilbakekreving)
@@ -110,7 +111,7 @@ class TilbakekrevingService(
         eksternFagsakId: String,
     ): Tilbakekreving? {
         val tilbakekreving = tilbakekrevingRepository.hentTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.EksternFagsakId(eksternFagsakId, fagsystem))
-            ?.fraEntity(Observatør(), bigQueryService, endringObservatørService, features = featureService.modellFeatures)
+            ?.fraEntity(Observatør(), bigQueryService, endringObservatørService, featureService.modellFeatures, SystemKlokke)
             ?: return null
 
         val logContext = SecureLog.Context.fra(tilbakekreving)
@@ -121,7 +122,7 @@ class TilbakekrevingService(
     fun hentTilbakekreving(behandlingId: UUID): Tilbakekreving? {
         val tilbakekreving = tilbakekrevingRepository.hentTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.BehandlingId(behandlingId)) ?: return null
         kravgrunnlagBufferRepository.validerKravgrunnlagInnenforScope(tilbakekreving.eksternFagsak.eksternId, tilbakekreving.behandlingHistorikkEntities.lastOrNull()?.id?.toString())
-        return tilbakekreving.fraEntity(Observatør(), bigQueryService, endringObservatørService, features = featureService.modellFeatures)
+        return tilbakekreving.fraEntity(Observatør(), bigQueryService, endringObservatørService, featureService.modellFeatures, SystemKlokke)
     }
 
     fun <T : Any> hentOgLagreTilbakekreving(
@@ -133,7 +134,7 @@ class TilbakekrevingService(
         lateinit var logContext: SecureLog.Context
         tilbakekrevingRepository.hentOgLagreResultat(strategy) {
             kravgrunnlagBufferRepository.validerKravgrunnlagInnenforScope(it.eksternFagsak.eksternId, it.behandlingHistorikkEntities.lastOrNull()?.id?.toString())
-            val tilbakekreving = it.fraEntity(observatør, bigQueryService, endringObservatørService, features = featureService.modellFeatures)
+            val tilbakekreving = it.fraEntity(observatør, bigQueryService, endringObservatørService, featureService.modellFeatures, SystemKlokke)
             logContext = SecureLog.Context.fra(tilbakekreving)
             result = callback(tilbakekreving)
 
@@ -151,7 +152,7 @@ class TilbakekrevingService(
         logContext: SecureLog.Context,
     ) {
         tilbakekrevingRepository.hentOgLagreResultat(strategy) {
-            val tilbakekreving = it.fraEntity(observatør, bigQueryService, endringObservatørService, features = featureService.modellFeatures)
+            val tilbakekreving = it.fraEntity(observatør, bigQueryService, endringObservatørService, featureService.modellFeatures, SystemKlokke)
             while (observatør.harUbesvarteBehov()) {
                 try {
                     håndterBehov(tilbakekreving, observatør.nesteBehov(), SecureLog.Context.fra(tilbakekreving))

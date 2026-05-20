@@ -4,6 +4,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvNav
+import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.api.v1.dto.SkalUnnlates
 import no.nav.tilbakekreving.api.v1.dto.VurdertAktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsperiodeDto
@@ -47,7 +48,7 @@ class VilkårsvurderingstegTest {
             forårsaketAvNav().godTro(beløpIBehold = null),
         )
 
-        vilkårsvurderingsteg.erFullstendig() shouldBe false
+        vilkårsvurderingsteg.erFullstendig(SystemKlokke) shouldBe false
     }
 
     @Test
@@ -68,14 +69,14 @@ class VilkårsvurderingstegTest {
             1.januar(2021) til 31.januar(2021),
             forårsaketAvNav().godTro(beløpIBehold = null),
         )
-        vilkårsvurderingsteg.erFullstendig() shouldBe false
+        vilkårsvurderingsteg.erFullstendig(SystemKlokke) shouldBe false
 
         vilkårsvurderingsteg.vurder(
             1.februar(2021) til 28.februar(2021),
             forårsaketAvNav().godTro(beløpIBehold = null),
         )
 
-        vilkårsvurderingsteg.erFullstendig() shouldBe true
+        vilkårsvurderingsteg.erFullstendig(SystemKlokke) shouldBe true
     }
 
     @Test
@@ -145,7 +146,7 @@ class VilkårsvurderingstegTest {
             forårsaketAvBruker().uaktsomt(skalUnnlates()),
         )
 
-        vilkårsvurderingsteg.tilFrontendDto(kravgrunnlag, revurdering, foreldelsesteg).perioder.single() shouldBe VurdertVilkårsvurderingsperiodeDto(
+        vilkårsvurderingsteg.tilFrontendDto(kravgrunnlag, revurdering, foreldelsesteg, SystemKlokke).perioder.single() shouldBe VurdertVilkårsvurderingsperiodeDto(
             periode = 1.januar(2021) til 31.januar(2021),
             feilutbetaltBeløp = 2000.kroner,
             hendelsestype = Hendelsestype.ANNET,
@@ -212,7 +213,7 @@ class VilkårsvurderingstegTest {
             eksternFagsakRevurdering = revurdering,
             kravgrunnlagHendelse = kravgrunnlag,
         )
-        vilkårsvurderingsteg.tilFrontendDto(kravgrunnlag, revurdering, foreldelsesteg).kanUnnlates4xRettsgebyr shouldBe true
+        vilkårsvurderingsteg.tilFrontendDto(kravgrunnlag, revurdering, foreldelsesteg, SystemKlokke).kanUnnlates4xRettsgebyr shouldBe true
     }
 
     @Test
@@ -243,6 +244,6 @@ class VilkårsvurderingstegTest {
             eksternFagsakRevurdering = revurdering,
             kravgrunnlagHendelse = kravgrunnlag,
         )
-        vilkårsvurderingsteg.tilFrontendDto(kravgrunnlag, revurdering, foreldelsesteg).kanUnnlates4xRettsgebyr shouldBe false
+        vilkårsvurderingsteg.tilFrontendDto(kravgrunnlag, revurdering, foreldelsesteg, SystemKlokke).kanUnnlates4xRettsgebyr shouldBe false
     }
 }

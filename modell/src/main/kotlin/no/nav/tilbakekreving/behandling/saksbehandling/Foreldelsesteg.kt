@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
+import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelsesperiodeDto
 import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving
@@ -23,7 +24,7 @@ class Foreldelsesteg(
 ) : Saksbehandlingsteg {
     override val type: Behandlingssteg = Behandlingssteg.FORELDELSE
 
-    override fun erFullstendig(): Boolean = vurdertePerioder.all { it.vurdering != Vurdering.IkkeVurdert }
+    override fun erFullstendig(klokke: Klokke): Boolean = vurdertePerioder.all { it.vurdering != Vurdering.IkkeVurdert }
 
     override fun erUnderkjent(): Boolean {
         return underkjent

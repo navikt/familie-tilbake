@@ -96,7 +96,8 @@ Flyway-migrasjoner ligger under `src/main/resources/db/migration/`. Nye migrasjo
 - Domenelogikk skal kun ligge i `modell`-modulen
 - Spring boot skal abstraheres bort så tidlig som mulig
 - All logging skal følge NAV's strukturerte loggformat (logstash-logback-encoder)
-- Logging skal aldri bruke kotlin string templating, det skal håndteres av logback 
+- Logging skal aldri bruke kotlin string templating, det skal håndteres av logback
+- Bruk `Klokke`-interfacet (`no.nav.tilbakekreving.Klokke`) i stedet for `LocalDate.now()` / `LocalDateTime.now()` i modellen. `SystemKlokke` er produksjonsimplementasjonen. I tester brukes `KlokkeStub` (med fast tid) for tidssensitive tester, og `SystemKlokke` for tester som ikke er tidssensitive.
 
 ## CI/CD
 

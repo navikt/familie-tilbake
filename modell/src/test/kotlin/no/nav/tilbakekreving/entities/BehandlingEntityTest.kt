@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.entities
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.Enhet
@@ -52,11 +53,12 @@ class BehandlingEntityTest {
             eksternFagsakRevurdering = revurderingInnslag,
             kravgrunnlag = kravgrunnlag,
             brevHistorikk = brevHistorikk,
+            klokke = SystemKlokke,
         )
 
         val behandlingEtterLagring = behandlingFørLagring
             .tilEntity("not_needed")
-            .fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
+            .fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk, SystemKlokke)
         behandlingEtterLagring.tilFrontendDto(TilBehandling, behandler, true) shouldBe behandlingFørLagring.tilFrontendDto(TilBehandling, behandler, true)
 
         val observatør = BehovObservatørOppsamler()

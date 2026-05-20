@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.behandling
 
+import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.api.v1.dto.FristUtsettelseDto
 import no.nav.tilbakekreving.entities.UttalelsesfristEntity
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
@@ -16,7 +17,7 @@ class Uttalelsesfrist(
         return nyFrist ?: opprinneligFrist
     }
 
-    fun gjeldendeFrist(): LocalDate? = hentFrist().takeIf { it >= LocalDate.now() }
+    fun gjeldendeFrist(klokke: Klokke): LocalDate? = hentFrist().takeIf { it >= klokke.dagensDato() }
 
     fun tilFrontendDto(): FristUtsettelseDto {
         return FristUtsettelseDto(

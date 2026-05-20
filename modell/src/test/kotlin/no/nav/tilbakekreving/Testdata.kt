@@ -163,6 +163,7 @@ fun eksternFagsakBehandling(
 fun behandling(
     kravgrunnlag: KravgrunnlagHendelse = kravgrunnlag(),
     eksternFagsakBehandling: EksternFagsakRevurdering = eksternFagsakBehandling(),
+    klokke: Klokke = SystemKlokke,
 ): Behandling {
     val kravgrunnlagReferanse = HistorikkStub.fakeReferanse(kravgrunnlag)
     val eksternFagsakBehandlingReferanse = HistorikkStub.fakeReferanse(eksternFagsakBehandling)
@@ -174,6 +175,7 @@ fun behandling(
         eksternFagsakRevurdering = eksternFagsakBehandlingReferanse,
         kravgrunnlag = kravgrunnlagReferanse,
         brevHistorikk = BrevHistorikk(mutableListOf()),
+        klokke = klokke,
     )
 }
 

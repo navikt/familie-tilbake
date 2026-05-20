@@ -6,6 +6,7 @@ import io.kotest.matchers.shouldNotBe
 import no.nav.tilbakekreving.ANSVARLIG_BESLUTTER
 import no.nav.tilbakekreving.ANSVARLIG_SAKSBEHANDLER
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvNav
+import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.assertions.skalHaSteg
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
@@ -54,9 +55,9 @@ class TilBehandlingTest {
             ),
         )
 
-        tilbakekreving.behandlingHistorikk.nåværende().entry.foreldelsesteg.erFullstendig() shouldBe true
+        tilbakekreving.behandlingHistorikk.nåværende().entry.foreldelsesteg.erFullstendig(SystemKlokke) shouldBe true
         tilbakekreving.håndterNullstilling(ANSVARLIG_SAKSBEHANDLER)
-        tilbakekreving.behandlingHistorikk.nåværende().entry.foreldelsesteg.erFullstendig() shouldBe false
+        tilbakekreving.behandlingHistorikk.nåværende().entry.foreldelsesteg.erFullstendig(SystemKlokke) shouldBe false
     }
 
     @Test

@@ -18,6 +18,7 @@ import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.FagsystemUtil
 import no.nav.tilbakekreving.Observatør
 import no.nav.tilbakekreving.Rettsgebyr
+import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.bigquery.BigQueryService
@@ -337,7 +338,7 @@ class ForvaltningController(
     fun migrerAlleSaker() {
         tilbakekrevingRepository.hentAlleTilbakekrevinger()?.forEach { entity ->
             tilbakekrevingRepository.hentOgLagreResultat(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(entity.id)) {
-                val tilbakekreving = it.fraEntity(Observatør(), bigQueryService, endringObservatør, features = featureService.modellFeatures)
+                val tilbakekreving = it.fraEntity(Observatør(), bigQueryService, endringObservatør, features = featureService.modellFeatures, SystemKlokke)
                 logger.medContext(SecureLog.Context.fra(tilbakekreving)) {
                     info("Migrerer sak {}", tilbakekreving.hentTilbakekrevingUrl(applicationProperties.frontendUrl))
                 }
@@ -350,7 +351,7 @@ class ForvaltningController(
     @GetMapping("/alle-over-4-rettsgebyr")
     fun alleSakerOver4Rettsgebyr(): Ressurs<List<String>> {
         val urler = tilbakekrevingRepository
-            .hentAlleTilbakekrevinger()?.map { it.fraEntity(Observatør(), bigQueryService, endringObservatør, features = featureService.modellFeatures) }
+            .hentAlleTilbakekrevinger()?.map { it.fraEntity(Observatør(), bigQueryService, endringObservatør, features = featureService.modellFeatures, SystemKlokke) }
             ?.filter { it.behandlingHistorikk.nåværende().entry.totaltFeilutbetaltBeløp() >= (Rettsgebyr.rettsgebyr * 4).toBigDecimal() }
             ?.map { it.hentTilbakekrevingUrl(applicationProperties.frontendUrl) }
             ?: emptyList()

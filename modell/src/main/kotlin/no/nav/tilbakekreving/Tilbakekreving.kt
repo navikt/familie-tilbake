@@ -3,6 +3,7 @@ package no.nav.tilbakekreving
 import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
 import io.ktor.http.path
+import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.aktør.Bruker
 import no.nav.tilbakekreving.aktør.Bruker.Companion.tilNullableFrontendDto
@@ -95,6 +96,7 @@ class Tilbakekreving internal constructor(
     val bigQueryService: BigQueryService,
     val features: FeatureToggles,
     val behandlingslogg: Behandlingslogg,
+    val klokke: Klokke,
 ) : FrontendDto<FagsakDto>, BehandlingObservatør {
     internal fun byttTilstand(nyTilstand: Tilstand) {
         tilstand = nyTilstand
@@ -103,7 +105,7 @@ class Tilbakekreving internal constructor(
     }
 
     fun oppdaterPåminnelsestidspunkt() {
-        nestePåminnelse = tilstand.tidTilPåminnelse?.let(LocalDateTime.now()::plus)
+        nestePåminnelse = tilstand.tidTilPåminnelse?.let(klokke.nå()::plus)
     }
 
     fun håndter(opprettTilbakekrevingEvent: OpprettTilbakekrevingHendelse) {
@@ -272,6 +274,7 @@ class Tilbakekreving internal constructor(
             eksternFagsakRevurdering = eksternFagsakRevurdering,
             kravgrunnlag = kravgrunnlagHistorikk.nåværende(),
             brevHistorikk = brevHistorikk,
+            klokke = klokke,
         )
         behandling.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse) {
             behandlingHistorikk.lagre(behandling)
@@ -342,7 +345,7 @@ class Tilbakekreving internal constructor(
     }
 
     fun opprettVedtaksbrev() {
-        brevHistorikk.lagre(Vedtaksbrev.opprett())
+        brevHistorikk.lagre(Vedtaksbrev.opprett(klokke))
     }
 
     fun trengerVedtaksbrevJournalføring() {
@@ -684,7 +687,7 @@ class Tilbakekreving internal constructor(
             id = UUID.randomUUID(),
             behandlingId = behandlingId,
             behandlingsloggstype = behandlingsloggstype,
-            opprettetTid = LocalDateTime.now(),
+            opprettetTid = klokke.nå(),
             rolle = rolle,
             behandlerIdent = behandler.ident,
             ekstraInfo = mapOf(*ekstraInfo),
@@ -710,11 +713,13 @@ class Tilbakekreving internal constructor(
             bigQueryService: BigQueryService,
             endringObservatør: EndringObservatør,
             features: FeatureToggles,
+            klokke: Klokke = SystemKlokke,
         ): Tilbakekreving {
+            val nå = klokke.nå()
             val tilbakekreving = Tilbakekreving(
                 id = id,
-                opprettet = LocalDateTime.now(),
-                nestePåminnelse = LocalDateTime.now().plus(Start.tidTilPåminnelse),
+                opprettet = nå,
+                nestePåminnelse = nå.plus(Start.tidTilPåminnelse),
                 opprettelsesvalg = opprettTilbakekrevingEvent.opprettelsesvalg,
                 eksternFagsak = EksternFagsak(
                     id = UUID.randomUUID(),
@@ -732,6 +737,7 @@ class Tilbakekreving internal constructor(
                 endringObservatør = endringObservatør,
                 features = features,
                 behandlingslogg = Behandlingslogg(mutableListOf()),
+                klokke = klokke,
             )
             tilbakekreving.håndter(opprettTilbakekrevingEvent)
             return tilbakekreving

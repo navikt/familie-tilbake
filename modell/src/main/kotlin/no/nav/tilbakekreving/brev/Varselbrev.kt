@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.brev
 
 import no.nav.tilbakekreving.FeatureToggles
 import no.nav.tilbakekreving.FrontendDto
+import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.api.v1.dto.VarselbrevDto
 import no.nav.tilbakekreving.entities.BrevEntity
@@ -38,8 +39,9 @@ data class Varselbrev(
             kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
             varseltekstFraSaksbehandler: String,
             features: FeatureToggles,
+            klokke: Klokke,
         ): Varselbrev {
-            val sendtTid = LocalDate.now()
+            val sendtTid = klokke.dagensDato()
             val frist = if (features[Toggle.FjernUttalelsesfrist]) {
                 Period.ZERO
             } else {

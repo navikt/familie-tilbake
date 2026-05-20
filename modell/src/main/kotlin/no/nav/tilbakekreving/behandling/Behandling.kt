@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.behandling
 
 import no.nav.tilbakekreving.FeatureToggles
 import no.nav.tilbakekreving.FrontendDto
+import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.UtenforScope
 import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.aktør.Bruker
@@ -108,8 +109,9 @@ class Behandling internal constructor(
     private val fatteVedtakSteg: FatteVedtakSteg,
     private val forhåndsvarsel: Forhåndsvarsel,
     private var forrigeBehandlingsstatus: BehandlingsstatusModell,
+    internal val klokke: Klokke,
 ) : Historikk.HistorikkInnslag<UUID> {
-    internal fun nyFaktastegFrontendDto(varselbrev: Varselbrev?): FaktaOmFeilutbetalingDto = faktasteg.nyTilFrontendDto(kravgrunnlag.entry, eksternFagsakRevurdering.entry, varselbrev)
+    internal fun nyFaktastegFrontendDto(varselbrev: Varselbrev?): FaktaOmFeilutbetalingDto = faktasteg.nyTilFrontendDto(kravgrunnlag.entry, eksternFagsakRevurdering.entry, varselbrev, klokke)
 
     private fun bigqueryData(behandlingsstatus: BehandlingsstatusModell, ytelse: String): BigQueryBehandlingDataDto {
         return BigQueryBehandlingDataDto(
@@ -129,7 +131,7 @@ class Behandling internal constructor(
     fun nullstillForhåndsvarselUnntakOgUttalelse() = forhåndsvarsel.nullstillUnntakOgUttalelse()
 
     fun fåttNyttKravgrunnlag(oppdatertKravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>) {
-        if (!faktasteg.erKlar()) {
+        if (!faktasteg.erKlar(klokke)) {
             kravgrunnlag = oppdatertKravgrunnlag
         } else {
             throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagStatusIkkeStøttetEtterBehandlingenErPåbegynt, sporingsinformasjon())
@@ -154,7 +156,7 @@ class Behandling internal constructor(
         }
     val vilkårsvurderingsstegDto: FrontendDto<VurdertVilkårsvurderingDto>
         get() = FrontendDto {
-            vilkårsvurderingsteg.tilFrontendDto(kravgrunnlag.entry, eksternFagsakRevurdering.entry, foreldelsesteg)
+            vilkårsvurderingsteg.tilFrontendDto(kravgrunnlag.entry, eksternFagsakRevurdering.entry, foreldelsesteg, klokke)
         }
     val fatteVedtakStegDto: FrontendDto<TotrinnsvurderingDto> get() = fatteVedtakSteg
 
@@ -339,12 +341,12 @@ class Behandling internal constructor(
         )
     }
 
-    fun venter(): Venter? = steg().firstNotNullOfOrNull { it.venter() }
+    fun venter(): Venter? = steg().firstNotNullOfOrNull { it.venter(klokke) }
 
     private fun skalBesluttes(): Boolean {
         return steg()
             .takeWhile { it.type != Behandlingssteg.FATTE_VEDTAK }
-            .all { it.erFullstendig() }
+            .all { it.erFullstendig(klokke) }
     }
 
     private fun kanEndres(behandler: Behandler, saksbehandlerKanBeslutte: Boolean): Boolean {
@@ -389,10 +391,10 @@ class Behandling internal constructor(
                         Behandlingsstegstatus.AUTOUTFØRT,
                     ),
                 ),
-                steg().klarTilVisning().map {
+                steg().klarTilVisning(klokke).map {
                     BehandlingsstegsinfoDto(
                         it.type,
-                        it.behandlingsstegstatus(steg().klarTilVisning()),
+                        it.behandlingsstegstatus(steg().klarTilVisning(klokke), klokke),
                     )
                 },
             ).flatten(),
@@ -508,7 +510,7 @@ class Behandling internal constructor(
     ) {
         val tidligereManglendeSteg = steg()
             .takeWhile { it.type != Behandlingssteg.FORESLÅ_VEDTAK }
-            .filter { !it.erKlar() }
+            .filter { !it.erKlar(klokke) }
         if (tidligereManglendeSteg.isNotEmpty()) {
             val stegtyper = tidligereManglendeSteg
                 .map { it.type }
@@ -583,15 +585,15 @@ class Behandling internal constructor(
     }
 
     private fun validerBehandlingstatus(håndtertSteg: String, steg: Saksbehandlingsteg) {
-        if (!steg().klarTilVisning().contains(steg)) {
+        if (!steg().klarTilVisning(klokke).contains(steg)) {
             throw ModellFeil.UgyldigOperasjonException(
-                "Behandlingen er i ${steg().klarTilVisning().last().type} og kan ikke behandle vurdering for ${steg.type}",
+                "Behandlingen er i ${steg().klarTilVisning(klokke).last().type} og kan ikke behandle vurdering for ${steg.type}",
                 sporingsinformasjon(),
             )
         }
     }
 
-    fun kanUtbetales(): Boolean = fatteVedtakSteg.erFullstendig() && !fatteVedtakSteg.erVedtakUnderkjent()
+    fun kanUtbetales(): Boolean = fatteVedtakSteg.erFullstendig(klokke) && !fatteVedtakSteg.erVedtakUnderkjent()
 
     fun underkjentVedtak(): Boolean {
         return fatteVedtakSteg.erVedtakUnderkjent()
@@ -674,7 +676,7 @@ class Behandling internal constructor(
     )
 
     fun oppdaterBehandler(ansvarligSaksbehandler: Behandler) {
-        this.sistEndret = LocalDateTime.now()
+        this.sistEndret = klokke.nå()
         this.ansvarligSaksbehandler = ansvarligSaksbehandler
     }
 
@@ -739,7 +741,7 @@ class Behandling internal constructor(
     }
 
     fun hentVedtaksresultat(): Vedtaksresultat? {
-        if (fatteVedtakSteg.erFullstendig()) {
+        if (fatteVedtakSteg.erFullstendig(klokke)) {
             return lagBeregning().oppsummer().vedtaksresultat
         }
         return null
@@ -824,6 +826,7 @@ class Behandling internal constructor(
             kravgrunnlag = kravgrunnlag,
             varseltekstFraSaksbehandler = varseltekstFraSaksbehandler,
             features = features,
+            klokke = klokke,
         )
         return varselbrev
     }
@@ -859,7 +862,7 @@ class Behandling internal constructor(
     ): LoggInnslag {
         return LoggInnslag(
             id = UUID.randomUUID(),
-            opprettetTid = LocalDateTime.now(),
+            opprettetTid = klokke.nå(),
             behandlingsloggstype = behandlingsloggstype,
             rolle = rolle,
             behandlerIdent = behandler.ident,
@@ -881,8 +884,9 @@ class Behandling internal constructor(
             eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
             kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
             brevHistorikk: BrevHistorikk,
+            klokke: Klokke,
         ): Behandling {
-            val opprettet = LocalDateTime.now()
+            val opprettet = klokke.nå()
             return Behandling(
                 id = id,
                 type = type,
@@ -904,6 +908,7 @@ class Behandling internal constructor(
                 fatteVedtakSteg = FatteVedtakSteg.opprett(),
                 forhåndsvarsel = Forhåndsvarsel.opprett(),
                 forrigeBehandlingsstatus = BehandlingsstatusModell.OPPRETTET,
+                klokke = klokke,
             )
         }
     }

@@ -21,7 +21,7 @@ object TilBehandling : Tilstand {
     override val kanEndresAvSaksbehandler: Boolean = true
 
     override fun behandlingsstatus(behandling: Behandling): BehandlingsstatusModell {
-        return behandling.steg().firstOrNull { !it.erKlar() }
+        return behandling.steg().firstOrNull { !it.erKlar(behandling.klokke) }
             ?.behandlingsstatus
             ?: BehandlingsstatusModell.TIL_BEHANDLING
     }

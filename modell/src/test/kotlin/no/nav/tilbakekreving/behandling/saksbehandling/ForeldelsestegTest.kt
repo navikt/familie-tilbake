@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
 import io.kotest.matchers.shouldBe
+import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.eksternFagsakBehandling
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
@@ -30,7 +31,7 @@ class ForeldelsestegTest {
             Foreldelsesteg.Vurdering.IkkeForeldet("Starten av utbetalingsperioden er innenfor foreldelsesfristen"),
         )
 
-        foreldelsesteg.erFullstendig() shouldBe false
+        foreldelsesteg.erFullstendig(SystemKlokke) shouldBe false
     }
 
     @Test
@@ -56,7 +57,7 @@ class ForeldelsestegTest {
             Foreldelsesteg.Vurdering.IkkeForeldet("Starten av utbetalingsperioden er innenfor foreldelsesfristen"),
         )
 
-        foreldelsesteg.erFullstendig() shouldBe true
+        foreldelsesteg.erFullstendig(SystemKlokke) shouldBe true
     }
 
     @Test
@@ -102,7 +103,7 @@ class ForeldelsestegTest {
 
         foreldelsesteg.automatiskVurder(kravgrunnlag, dagensDato = fom.plusMonths(30))
 
-        foreldelsesteg.erFullstendig() shouldBe true
+        foreldelsesteg.erFullstendig(SystemKlokke) shouldBe true
         foreldelsesteg.erPeriodeForeldet(fom til 31.januar(2024)) shouldBe false
         foreldelsesteg.erPeriodeForeldet(1.februar(2024) til 28.februar(2024)) shouldBe false
     }
@@ -117,7 +118,7 @@ class ForeldelsestegTest {
 
         foreldelsesteg.automatiskVurder(kravgrunnlag, dagensDato = fom.plusMonths(30).plusDays(1))
 
-        foreldelsesteg.erFullstendig() shouldBe false
+        foreldelsesteg.erFullstendig(SystemKlokke) shouldBe false
     }
 
     @Test

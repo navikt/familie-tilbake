@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
+import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
 import no.nav.tilbakekreving.api.v1.dto.FeilutbetalingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurderingAvBrukersUttalelseDto
@@ -41,7 +42,7 @@ class Faktasteg(
 
     override val behandlingsstatus: BehandlingsstatusModell get() = BehandlingsstatusModell.TIL_FORHÅNDSVARSEL
 
-    override fun erFullstendig(): Boolean {
+    override fun erFullstendig(klokke: Klokke): Boolean {
         return vurdering.erFullstendig()
     }
 
@@ -80,7 +81,7 @@ class Faktasteg(
         underkjent = false
     }
 
-    fun nyTilFrontendDto(kravgrunnlag: KravgrunnlagHendelse, revurdering: EksternFagsakRevurdering, varselbrev: Varselbrev?): FaktaOmFeilutbetalingDto {
+    fun nyTilFrontendDto(kravgrunnlag: KravgrunnlagHendelse, revurdering: EksternFagsakRevurdering, varselbrev: Varselbrev?, klokke: Klokke): FaktaOmFeilutbetalingDto {
         val beløpTilbakekreves = kravgrunnlag.feilutbetaltBeløpForAllePerioder().toInt()
         return FaktaOmFeilutbetalingDto(
             perioder = vurdering.perioder.map {
@@ -102,7 +103,7 @@ class Faktasteg(
             ),
             vurdering = vurdering.tilFrontendDto(),
             tidligereVarsletBeløp = varselbrev?.hentVarsletBeløp()?.toInt()?.takeIf { it != beløpTilbakekreves },
-            ferdigvurdert = erKlar(),
+            ferdigvurdert = erKlar(klokke),
         )
     }
 

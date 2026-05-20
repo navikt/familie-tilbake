@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
 import io.kotest.matchers.shouldBe
+import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.api.v1.dto.FeilutbetalingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurderingAvBrukersUttalelseDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
@@ -90,7 +91,7 @@ class FaktaStegTest {
             ),
             brevHistorikk = BrevHistorikk(historikk = mutableListOf()),
         )
-        faktasteg.erFullstendig() shouldBe false
+        faktasteg.erFullstendig(SystemKlokke) shouldBe false
 
         faktasteg.vurder(
             vurdering = Faktasteg.Vurdering(
@@ -113,7 +114,7 @@ class FaktaStegTest {
             ),
         )
 
-        faktasteg.erFullstendig() shouldBe true
+        faktasteg.erFullstendig(SystemKlokke) shouldBe true
     }
 
     @Test
@@ -136,6 +137,7 @@ class FaktaStegTest {
             kravgrunnlag = kravgrunnlag,
             revurdering = revurdering,
             varselbrev = null,
+            klokke = SystemKlokke,
         ).perioder
 
         perioder.single().rettsligGrunnlag shouldBe listOf(
@@ -163,6 +165,7 @@ class FaktaStegTest {
             kravgrunnlag = kravgrunnlag,
             revurdering = revurdering,
             varselbrev = null,
+            klokke = SystemKlokke,
         ).perioder.single().rettsligGrunnlag shouldBe listOf(
             RettsligGrunnlagDto(
                 bestemmelse = Hendelsestype.VILKÅR_SØKER.name,
@@ -190,6 +193,7 @@ class FaktaStegTest {
             kravgrunnlag = kravgrunnlag,
             revurdering = revurdering,
             varselbrev = null,
+            klokke = SystemKlokke,
         ).vurdering.oppdaget shouldBe OppdagetDto(
             dato = null,
             av = OppdagetDto.Av.IKKE_VURDERT,
@@ -209,6 +213,7 @@ class FaktaStegTest {
             kravgrunnlag = kravgrunnlag,
             revurdering = revurdering,
             varselbrev = null,
+            klokke = SystemKlokke,
         ).vurdering.oppdaget shouldBe OppdagetDto(
             dato = oppdagetDato,
             av = OppdagetDto.Av.NAV,

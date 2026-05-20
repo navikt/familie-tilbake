@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
 import no.nav.tilbakekreving.FrontendDto
+import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.api.v1.dto.Totrinnsstegsinfo
 import no.nav.tilbakekreving.api.v1.dto.TotrinnsvurderingDto
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
@@ -22,7 +23,7 @@ class FatteVedtakSteg internal constructor(
     override val type: Behandlingssteg = Behandlingssteg.FATTE_VEDTAK
     val ansvarligBeslutter: Behandler? get() = _ansvarligBeslutter
 
-    override fun erFullstendig(): Boolean = vurderteSteg.all { it.erFerdigvurdert() }
+    override fun erFullstendig(klokke: Klokke): Boolean = vurderteSteg.all { it.erFerdigvurdert() }
 
     override fun erUnderkjent(): Boolean {
         return false

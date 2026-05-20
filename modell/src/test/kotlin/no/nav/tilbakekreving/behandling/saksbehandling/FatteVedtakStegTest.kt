@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
@@ -25,7 +26,7 @@ class FatteVedtakStegTest {
         )
 
         fatteVedtakSteg.behandlingsstatus shouldBe BehandlingsstatusModell.FATTER_VEDTAK
-        fatteVedtakSteg.erFullstendig() shouldBe false
+        fatteVedtakSteg.erFullstendig(SystemKlokke) shouldBe false
     }
 
     @Test
@@ -67,7 +68,7 @@ class FatteVedtakStegTest {
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
 
-        fatteVedtakSteg.erFullstendig() shouldBe true
+        fatteVedtakSteg.erFullstendig(SystemKlokke) shouldBe true
     }
 
     @Test
@@ -140,7 +141,7 @@ class FatteVedtakStegTest {
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
 
-        fatteVedtakSteg.erFullstendig() shouldBe true
+        fatteVedtakSteg.erFullstendig(SystemKlokke) shouldBe true
         fatteVedtakSteg.erVedtakUnderkjent() shouldBe true
     }
 
@@ -184,7 +185,7 @@ class FatteVedtakStegTest {
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
 
-        fatteVedtakSteg.erFullstendig() shouldBe true
+        fatteVedtakSteg.erFullstendig(SystemKlokke) shouldBe true
         fatteVedtakSteg.erVedtakUnderkjent() shouldBe true
     }
 }

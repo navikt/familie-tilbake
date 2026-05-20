@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.entities
 
 import no.nav.tilbakekreving.FeatureToggles
+import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.BehandlingHistorikk
@@ -43,6 +44,7 @@ data class TilbakekrevingEntity(
         bigQueryService: BigQueryService,
         endringObservatør: EndringObservatør,
         features: FeatureToggles,
+        klokke: Klokke,
     ): Tilbakekreving {
         val kravgrunnlagHistorikk = KravgrunnlagHistorikk(
             historikk = kravgrunnlagHistorikkEntities.map { it.fraEntity() }.toMutableList(),
@@ -60,6 +62,7 @@ data class TilbakekrevingEntity(
                     eksternFagsakBehandlingHistorikk = eksternFagsakBehandlingHistorikk,
                     kravgrunnlagHistorikk = kravgrunnlagHistorikk,
                     brevHistorikk = brevHistorikk,
+                    klokke = klokke,
                 )
             }.toMutableList(),
         )
@@ -94,6 +97,7 @@ data class TilbakekrevingEntity(
             endringObservatør = endringObservatør,
             features = features,
             behandlingslogg = behandlingslogg,
+            klokke = klokke,
         )
 
         return tilbakekreving

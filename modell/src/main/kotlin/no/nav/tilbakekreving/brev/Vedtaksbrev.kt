@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.brev
 
+import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.entities.BrevEntity
 import no.nav.tilbakekreving.entities.Brevtype
 import no.nav.tilbakekreving.entities.VedtaksbrevEntity
@@ -34,12 +35,12 @@ data class Vedtaksbrev(
     }
 
     companion object {
-        fun opprett(): Vedtaksbrev {
+        fun opprett(klokke: Klokke): Vedtaksbrev {
             return Vedtaksbrev(
                 id = UUID.randomUUID(),
                 journalpostId = null,
                 dokumentInfoId = null,
-                sendtTid = LocalDate.now(),
+                sendtTid = klokke.dagensDato(),
             )
         }
     }

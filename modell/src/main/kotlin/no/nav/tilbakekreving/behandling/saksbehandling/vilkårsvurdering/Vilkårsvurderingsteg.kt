@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering
 
+import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.Rettsgebyr
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsperiodeDto
@@ -21,7 +22,6 @@ import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering
-import java.time.LocalDateTime
 import java.util.UUID
 
 class Vilkårsvurderingsteg(
@@ -31,7 +31,7 @@ class Vilkårsvurderingsteg(
 ) : Saksbehandlingsteg, VilkårsvurderingAdapter {
     override val type: Behandlingssteg = Behandlingssteg.VILKÅRSVURDERING
 
-    override fun erFullstendig(): Boolean = vurderinger.none { it.vurdering is ForårsaketAvBruker.IkkeVurdert }
+    override fun erFullstendig(klokke: Klokke): Boolean = vurderinger.none { it.vurdering is ForårsaketAvBruker.IkkeVurdert }
 
     override fun erUnderkjent(): Boolean {
         return underkjent
@@ -103,6 +103,7 @@ class Vilkårsvurderingsteg(
         kravgrunnlag: KravgrunnlagHendelse,
         revurdering: EksternFagsakRevurdering,
         foreldelsesteg: Foreldelsesteg,
+        klokke: Klokke,
     ): VurdertVilkårsvurderingDto {
         return VurdertVilkårsvurderingDto(
             perioder = vurderinger.map {
@@ -121,7 +122,7 @@ class Vilkårsvurderingsteg(
             // Vi gir heller saksbehandler mulighet til å si at beløpet er under/over 4x rettsgebyr til vi klarer å finne datoen vi skal velge rettsgebyr for
             kanUnnlates4xRettsgebyr = KanUnnlates4xRettsgebyr.kanUnnlates(revurdering.vedtaksdato, kravgrunnlag.feilutbetaltBeløpForAllePerioder()),
             rettsgebyr = Rettsgebyr.rettsgebyr, // Todo burde bruke rettsgebyret som var gjeldene ved utbetalingen. Oppdateres etter avklaring med jurist.
-            opprettetTid = LocalDateTime.now(),
+            opprettetTid = klokke.nå(),
         )
     }
 

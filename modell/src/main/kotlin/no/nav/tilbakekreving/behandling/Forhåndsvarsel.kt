@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.behandling
 
+import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
 import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselUnntakDto
 import no.nav.tilbakekreving.api.v1.dto.FristUtsettelseDto
@@ -34,11 +35,11 @@ class Forhåndsvarsel(
         BehandlingsstatusModell.TIL_BEHANDLING
     }
 
-    override fun erFullstendig(): Boolean {
+    override fun erFullstendig(klokke: Klokke): Boolean {
         val gjeldendeFrist = uttalelsesfrist?.hentFrist()
         return brukeruttalelse != null ||
             forhåndsvarselUnntak != null ||
-            gjeldendeFrist?.isBefore(LocalDate.now()) == true
+            gjeldendeFrist?.isBefore(klokke.dagensDato()) == true
     }
 
     override fun erUnderkjent(): Boolean {
@@ -52,8 +53,8 @@ class Forhåndsvarsel(
 
     override fun nullstill(kravgrunnlag: KravgrunnlagHendelse, eksternFagsakRevurdering: EksternFagsakRevurdering) {}
 
-    override fun venter(): Venter? {
-        return uttalelsesfrist?.gjeldendeFrist()?.let {
+    override fun venter(klokke: Klokke): Venter? {
+        return uttalelsesfrist?.gjeldendeFrist(klokke)?.let {
             Venter(
                 grunn = Venter.Grunn.BRUKERUTTALELSE,
                 frist = it,

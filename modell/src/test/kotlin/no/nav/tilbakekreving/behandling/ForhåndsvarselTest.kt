@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.behandling
 
 import io.kotest.matchers.shouldBe
+import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.behandling.saksbehandling.Venter
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
 import org.junit.jupiter.api.Test
@@ -55,7 +56,7 @@ class ForhåndsvarselTest {
         val forhåndsvarsel = Forhåndsvarsel.opprett()
         forhåndsvarsel.lagreOpprinneligFrist(LocalDate.now().minusDays(1))
 
-        forhåndsvarsel.venter() shouldBe null
+        forhåndsvarsel.venter(SystemKlokke) shouldBe null
     }
 
     @Test
@@ -64,7 +65,7 @@ class ForhåndsvarselTest {
         val forhåndsvarsel = Forhåndsvarsel.opprett()
         forhåndsvarsel.lagreOpprinneligFrist(uttalelsesfrist)
 
-        forhåndsvarsel.venter() shouldBe Venter(
+        forhåndsvarsel.venter(SystemKlokke) shouldBe Venter(
             grunn = Venter.Grunn.BRUKERUTTALELSE,
             frist = uttalelsesfrist,
         )
