@@ -3,6 +3,10 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelsesperiodeDto
+import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
+import no.nav.tilbakekreving.behandlingslogg.Behandlingsloggstype
+import no.nav.tilbakekreving.behandlingslogg.LoggInnslag
+import no.nav.tilbakekreving.behandlingslogg.Rolle
 import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
@@ -28,6 +32,8 @@ class Foreldelsesteg(
 
     override fun erFullstendig(klokke: Klokke): Boolean = vurdertePerioder.all { it.vurdering != Vurdering.IkkeVurdert }
 
+    private fun erAutomatiskVurdert(): Boolean = vurdertePerioder.any { it.vurdering is Vurdering.AutomatiskIkkeForeldet }
+
     override fun erUnderkjent(): Boolean {
         return underkjent
     }
@@ -43,23 +49,43 @@ class Foreldelsesteg(
     override fun automatiskVurder(
         kravgrunnlag: KravgrunnlagHendelse,
         klokke: Klokke,
+        behandlingslogg: Behandlingslogg,
+        behandlingId: UUID,
     ) {
         val førsteUtbetalingFom = kravgrunnlag.perioder().minOf { it.periode().fom }
+        val vurderingsdato = klokke.dagensDato()
+        val kanVæreForeldet = vurderingsdato > førsteUtbetalingFom.plusMonths(30)
+        if (kanVæreForeldet && !erAutomatiskVurdert()) return
+
         vurdertePerioder
             .filter { it.vurdering.kanOverstyresAutomatisk() }
             .forEach {
-                val vurderingsdato = klokke.dagensDato()
-                if (vurderingsdato <= førsteUtbetalingFom.plusMonths(30)) {
+                if (kanVæreForeldet) {
+                    it.vurderForeldelse(Vurdering.IkkeVurdert)
+                } else {
                     it.vurderForeldelse(
                         Vurdering.AutomatiskIkkeForeldet.opprett(
                             førsteUtbetalingFom = førsteUtbetalingFom,
                             vurderingsdato = vurderingsdato,
                         ),
                     )
-                } else {
-                    it.vurderForeldelse(Vurdering.IkkeVurdert)
                 }
             }
+        behandlingslogg.lagre(
+            LoggInnslag.opprett(
+                id = UUID.randomUUID(),
+                behandlingId = behandlingId,
+                opprettetTid = klokke.nå(),
+                behandlingsloggstype = if (erAutomatiskVurdert()) {
+                    Behandlingsloggstype.AUTOMATISK_FORELDELSE_VURDERT
+                } else {
+                    Behandlingsloggstype.AUTOMATISK_FORELDELSE_FJERNET
+                },
+                rolle = Rolle.VEDTAKSLØSNING,
+                behandlerIdent = "VL",
+                ekstraInfo = emptyMap(),
+            ),
+        )
     }
 
     internal fun vurderForeldelse(

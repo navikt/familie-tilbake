@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.KlokkeStub
 import no.nav.tilbakekreving.SystemKlokke
+import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
 import no.nav.tilbakekreving.eksternFagsakBehandling
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
@@ -103,7 +104,7 @@ class ForeldelsestegTest {
         )
         val foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakBehandling(), kravgrunnlag)
 
-        foreldelsesteg.automatiskVurder(kravgrunnlag, klokke = KlokkeStub(fom.plusMonths(30)))
+        foreldelsesteg.automatiskVurder(kravgrunnlag, klokke = KlokkeStub(fom.plusMonths(30)), Behandlingslogg(mutableListOf()), UUID.randomUUID())
 
         foreldelsesteg.erFullstendig(SystemKlokke) shouldBe true
         foreldelsesteg.erPeriodeForeldet(fom til 31.januar(2024)) shouldBe false
@@ -118,7 +119,7 @@ class ForeldelsestegTest {
         )
         val foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakBehandling(), kravgrunnlag)
 
-        foreldelsesteg.automatiskVurder(kravgrunnlag, klokke = KlokkeStub(fom.plusMonths(30).plusDays(1)))
+        foreldelsesteg.automatiskVurder(kravgrunnlag, klokke = KlokkeStub(fom.plusMonths(30).plusDays(1)), Behandlingslogg(mutableListOf()), UUID.randomUUID())
 
         foreldelsesteg.erFullstendig(SystemKlokke) shouldBe false
     }
@@ -131,10 +132,10 @@ class ForeldelsestegTest {
         val foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakBehandling(), kravgrunnlag)
         val klokke = KlokkeStub(fom.plusMonths(10))
 
-        foreldelsesteg.automatiskVurder(kravgrunnlag, klokke = klokke)
+        foreldelsesteg.automatiskVurder(kravgrunnlag, klokke = klokke, Behandlingslogg(mutableListOf()), UUID.randomUUID())
         foreldelsesteg.vurderForeldelse(periode, Foreldelsesteg.Vurdering.Foreldet("Begrunnelse"))
 
-        foreldelsesteg.automatiskVurder(kravgrunnlag, klokke = klokke)
+        foreldelsesteg.automatiskVurder(kravgrunnlag, klokke = klokke, Behandlingslogg(mutableListOf()), UUID.randomUUID())
 
         foreldelsesteg.erPeriodeForeldet(periode) shouldBe true
     }
@@ -148,7 +149,7 @@ class ForeldelsestegTest {
         val foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakBehandling(), kravgrunnlag)
         val vurderingsdato = 11.november(2024)
 
-        foreldelsesteg.automatiskVurder(kravgrunnlag, klokke = KlokkeStub(vurderingsdato))
+        foreldelsesteg.automatiskVurder(kravgrunnlag, klokke = KlokkeStub(vurderingsdato), Behandlingslogg(mutableListOf()), UUID.randomUUID())
 
         val begrunnelse = foreldelsesteg.tilFrontendDto(kravgrunnlag).foreldetPerioder.single().begrunnelse
         begrunnelse shouldBe """
@@ -172,11 +173,11 @@ class ForeldelsestegTest {
         val foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakBehandling(), kravgrunnlag)
         val klokke = KlokkeStub(fom.plusMonths(10).withDayOfMonth(11))
 
-        foreldelsesteg.automatiskVurder(kravgrunnlag, klokke = klokke)
+        foreldelsesteg.automatiskVurder(kravgrunnlag, klokke = klokke, Behandlingslogg(mutableListOf()), UUID.randomUUID())
         foreldelsesteg.erFullstendig(klokke) shouldBe true
 
         klokke.settTid(fom.plusMonths(30).plusDays(1))
-        foreldelsesteg.automatiskVurder(kravgrunnlag, klokke = klokke)
+        foreldelsesteg.automatiskVurder(kravgrunnlag, klokke = klokke, Behandlingslogg(mutableListOf()), UUID.randomUUID())
 
         foreldelsesteg.erFullstendig(klokke) shouldBe false
     }

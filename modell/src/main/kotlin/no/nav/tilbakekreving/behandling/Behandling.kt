@@ -710,11 +710,12 @@ class Behandling internal constructor(
         observatør: BehandlingObservatør,
         bigQueryService: BigQueryService,
         ytelse: Ytelse,
+        behandlingslogg: Behandlingslogg,
         callback: Behandling.() -> Unit,
     ) {
         val statusFør = tilstand().behandlingsstatus(this)
         callback()
-        oppdaterAutomatiskeBehandlinger()
+        oppdaterAutomatiskeBehandlinger(behandlingslogg)
         val statusEtter = tilstand().behandlingsstatus(this)
         sendBehandlingsstatus(tilstand(), observatør)
         bigQueryService.oppdaterBehandling(bigqueryData(statusEtter, ytelse.hentYtelsesnavn(Språkkode.NB)))
@@ -723,19 +724,21 @@ class Behandling internal constructor(
         }
     }
 
-    private fun oppdaterAutomatiskeBehandlinger() {
+    private fun oppdaterAutomatiskeBehandlinger(behandlingslogg: Behandlingslogg) {
         if (!foreslåVedtakSteg.erFullstendig(klokke)) {
             steg().forEach {
                 it.automatiskVurder(
                     kravgrunnlag = kravgrunnlag.entry,
                     klokke = klokke,
+                    behandlingslogg = behandlingslogg,
+                    behandlingId = id,
                 )
             }
         }
     }
 
     internal fun håndterPåminnelse(tilstand: Tilstand, tilbakekreving: Tilbakekreving) {
-        oppdaterAutomatiskeBehandlinger()
+        oppdaterAutomatiskeBehandlinger(tilbakekreving.behandlingslogg)
         sendBehandlingsstatus(tilstand, tilbakekreving)
     }
 
@@ -878,7 +881,7 @@ class Behandling internal constructor(
         behandler: Behandler,
         vararg ekstraInfo: Pair<EkstraInfo, Any>,
     ): LoggInnslag {
-        return LoggInnslag(
+        return LoggInnslag.opprett(
             id = UUID.randomUUID(),
             opprettetTid = klokke.nå(),
             behandlingsloggstype = behandlingsloggstype,

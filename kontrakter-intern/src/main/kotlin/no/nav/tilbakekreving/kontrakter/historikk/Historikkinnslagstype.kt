@@ -6,4 +6,6 @@ enum class Historikkinnslagstype {
     SKJERMLENKE,
 
     BREV,
+
+    AUTOMATISK_VURDERING,
 }

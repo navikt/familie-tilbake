@@ -6,6 +6,7 @@ import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.frontend.models.LogginnslagDto
+import no.nav.tilbakekreving.kontrakter.historikk.Historikkinnslagstype
 import java.time.ZoneOffset
 import java.util.UUID
 
@@ -13,6 +14,13 @@ data class Behandlingslogg(
     private val historikk: MutableList<LoggInnslag>,
 ) : Historikk<UUID, LoggInnslag> {
     override fun lagre(innslag: LoggInnslag): HistorikkReferanse<UUID, LoggInnslag> {
+        if (innslag.behandlingsloggstype.type == Historikkinnslagstype.AUTOMATISK_VURDERING) {
+            val eksisterende = historikk.lastOrNull { it.behandlingsloggstype == innslag.behandlingsloggstype }
+            if (eksisterende != null) {
+                eksisterende.sistOppdatert = innslag.opprettetTid
+                return HistorikkReferanse(this, eksisterende.id)
+            }
+        }
         historikk.add(innslag)
         return HistorikkReferanse(this, innslag.id)
     }

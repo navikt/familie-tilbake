@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.e2e
 
 import io.kotest.inspectors.forAll
+import io.kotest.inspectors.forOne
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.KlokkeStub
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
@@ -24,6 +25,7 @@ import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.test.januar
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 import java.util.UUID
 
 class AutomatiskForeldelseE2ETest {
@@ -129,6 +131,66 @@ class AutomatiskForeldelseE2ETest {
 
         foreldelsePerioderFor(tilbakekreving)
             .forAll { it.foreldelsesvurderingstype shouldBe Foreldelsesvurderingstype.IKKE_FORELDET }
+    }
+
+    @Test
+    fun `behandlingshistorikk får logginnslag når foreldelse vurderes automatisk`() {
+        val fom = 1.januar(2025)
+        val periode = fom til 31.januar(2025)
+        val klokke = KlokkeStub(fom.plusMonths(10))
+
+        val tilbakekreving = opprettTilbakekrevingMedKravgrunnlag(periode, klokke)
+        tilbakekreving.håndter(behandler, faktastegVurdering(periode))
+
+        tilbakekreving.hentBehandlingslogg()
+            .forOne { it.tittel shouldBe "Foreldelse automatisk vurdert" }
+    }
+
+    @Test
+    fun `behandlingshistorikk får bare et logginnslag når foreldelse vurderes automatisk og blir påminnet`() {
+        val fom = 1.januar(2025)
+        val periode = fom til 31.januar(2025)
+        val klokke = KlokkeStub(fom.plusMonths(10))
+
+        val tilbakekreving = opprettTilbakekrevingMedKravgrunnlag(periode, klokke)
+        tilbakekreving.håndter(behandler, faktastegVurdering(periode))
+        tilbakekreving.håndter(Påminnelse(LocalDateTime.now()))
+
+        tilbakekreving.hentBehandlingslogg()
+            .forOne { it.tittel shouldBe "Foreldelse automatisk vurdert" }
+    }
+
+    @Test
+    fun `behandlingshistorikk får logginnslag når automatisk foreldelse tilbakestilles`() {
+        val fom = 1.januar(2025)
+        val periode = fom til 31.januar(2025)
+        val klokke = KlokkeStub(fom.plusMonths(10))
+
+        val tilbakekreving = opprettTilbakekrevingMedKravgrunnlag(periode, klokke)
+        tilbakekreving.håndter(behandler, faktastegVurdering(periode))
+
+        klokke.settTid(fom.plusMonths(31))
+        tilbakekreving.håndter(Påminnelse(klokke.nå()))
+
+        tilbakekreving.hentBehandlingslogg()
+            .forOne { it.tittel shouldBe "Automatisk vurdering av foreldelse er fjernet" }
+    }
+
+    @Test
+    fun `behandlingshistorikk får bare et logginnslag når automatisk foreldelse tilbakestilles og blir påminnet`() {
+        val fom = 1.januar(2025)
+        val periode = fom til 31.januar(2025)
+        val klokke = KlokkeStub(fom.plusMonths(10))
+
+        val tilbakekreving = opprettTilbakekrevingMedKravgrunnlag(periode, klokke)
+        tilbakekreving.håndter(behandler, faktastegVurdering(periode))
+
+        klokke.settTid(fom.plusMonths(31))
+        tilbakekreving.håndter(Påminnelse(klokke.nå()))
+        tilbakekreving.håndter(Påminnelse(klokke.nå()))
+
+        tilbakekreving.hentBehandlingslogg()
+            .forOne { it.tittel shouldBe "Automatisk vurdering av foreldelse er fjernet" }
     }
 
     private fun opprettTilbakekrevingMedKravgrunnlag(periode: Datoperiode, klokke: KlokkeStub): Tilbakekreving {

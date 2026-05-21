@@ -110,13 +110,14 @@ class Tilbakekreving internal constructor(
 
     fun håndter(opprettTilbakekrevingEvent: OpprettTilbakekrevingHendelse) {
         tilstand.håndter(this, opprettTilbakekrevingEvent)
-        val loggInnslag = opprettLoggInnslag(
-            behandlingsloggstype = Behandlingsloggstype.TILBAKEKREVING_OPPRETTET,
-            rolle = Rolle.VEDTAKSLØSNING,
-            behandler = Behandler.Vedtaksløsning,
-            behandlingId = null,
+        behandlingslogg.lagre(
+            opprettLoggInnslag(
+                behandlingsloggstype = Behandlingsloggstype.TILBAKEKREVING_OPPRETTET,
+                rolle = Rolle.VEDTAKSLØSNING,
+                behandler = Behandler.Vedtaksløsning,
+                behandlingId = null,
+            ),
         )
-        behandlingslogg.lagre(loggInnslag.copy(ekstraInfo = loggInnslag.ekstraInfo))
     }
 
     fun håndter(kravgrunnlag: KravgrunnlagHendelse) {
@@ -145,7 +146,7 @@ class Tilbakekreving internal constructor(
 
     fun håndter(brukerinfo: BrukerinfoHendelse) {
         tilstand.håndter(this@Tilbakekreving, brukerinfo)
-        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse) {
+        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
             behandlingslogg.lagre(
                 opprettLoggInnslag(
                     behandlingsloggstype = Behandlingsloggstype.BRUKERINFO_OPPDATERT,
@@ -173,7 +174,7 @@ class Tilbakekreving internal constructor(
 
     fun håndter(hendelse: VarselbrevDistribueringHendelse) {
         tilstand.håndter(this, hendelse)
-        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse) {
+        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
             behandlingslogg.lagre(
                 opprettLoggInnslag(
                     behandlingsloggstype = Behandlingsloggstype.FORHÅNDSVARSEL_SENDT,
@@ -208,7 +209,7 @@ class Tilbakekreving internal constructor(
     fun håndter(hendelse: DistribusjonHendelse) {
         tilstand.håndter(this, hendelse)
 
-        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse) {
+        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
             behandlingslogg.lagre(
                 opprettLoggInnslag(
                     behandlingsloggstype = Behandlingsloggstype.VEDTAKSBREV_SENDT,
@@ -228,7 +229,7 @@ class Tilbakekreving internal constructor(
     }
 
     internal fun hånterEndretKravgrunnlag(kravgrunnlagHendelse: KravgrunnlagHendelse) {
-        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse) {
+        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
             kravgrunnlagHistorikk.lagre(kravgrunnlagHendelse)
             fåttNyttKravgrunnlag(kravgrunnlagHistorikk.nåværende())
         }
@@ -276,7 +277,7 @@ class Tilbakekreving internal constructor(
             brevHistorikk = brevHistorikk,
             klokke = klokke,
         )
-        behandling.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse) {
+        behandling.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
             behandlingHistorikk.lagre(behandling)
             behandlingslogg.lagre(
                 opprettLoggInnslag(
@@ -313,7 +314,7 @@ class Tilbakekreving internal constructor(
     }
 
     fun sendVarselbrev(varseltekstFraSaksbehandler: String) {
-        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse) {
+        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
             val varselbrev = opprettVarselbrev(varseltekstFraSaksbehandler, features)
             nullstillForhåndsvarselUnntakOgUttalelse()
             brevHistorikk.lagre(varselbrev)
@@ -432,7 +433,7 @@ class Tilbakekreving internal constructor(
         beslutter: Behandler,
         vurderinger: List<Pair<Behandlingssteg, FatteVedtakSteg.Vurdering>>,
     ) {
-        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse) {
+        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
             tilstand.håndter(this@Tilbakekreving, this, beslutter, vurderinger)
         }
     }
@@ -441,7 +442,7 @@ class Tilbakekreving internal constructor(
         behandler: Behandler,
         vurdering: Faktasteg.Vurdering,
     ) {
-        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse) {
+        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
             håndter(behandler, vurdering, this@Tilbakekreving, behandlingslogg)
         }
     }
@@ -453,7 +454,7 @@ class Tilbakekreving internal constructor(
         årsak: String?,
         perioder: List<OppdaterFaktaPeriodeDto>?,
     ) {
-        behandlingHistorikk.finn(behandlingId, sporingsinformasjon()).entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse) {
+        behandlingHistorikk.finn(behandlingId, sporingsinformasjon()).entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
             håndter(behandler, oppdaget, årsak, perioder, behandlingslogg)
         }
     }
@@ -463,7 +464,7 @@ class Tilbakekreving internal constructor(
         periode: Datoperiode,
         vurdering: Foreldelsesteg.Vurdering,
     ) {
-        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse) {
+        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
             håndter(behandler, periode, vurdering, this@Tilbakekreving, behandlingslogg)
         }
     }
@@ -473,7 +474,7 @@ class Tilbakekreving internal constructor(
         periode: Datoperiode,
         vurdering: ForårsaketAvBruker,
     ) {
-        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse) {
+        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
             håndter(behandler, periode, vurdering, this@Tilbakekreving, behandlingslogg)
         }
     }
@@ -481,7 +482,7 @@ class Tilbakekreving internal constructor(
     fun håndterForeslåVedtak(
         behandler: Behandler,
     ) {
-        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse) {
+        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
             håndterForeslåVedtak(behandler, this@Tilbakekreving, behandlingslogg)
         }
     }
@@ -625,7 +626,7 @@ class Tilbakekreving internal constructor(
         kommentar: String?,
         behandler: Behandler,
     ) {
-        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse) {
+        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
             lagreUttalelse(
                 uttalelseVurdering = uttalelseVurdering,
                 uttalelseInfo = uttalelseInfo,
@@ -683,7 +684,7 @@ class Tilbakekreving internal constructor(
         behandlingId: UUID?,
         vararg ekstraInfo: Pair<EkstraInfo, Any>,
     ): LoggInnslag {
-        return LoggInnslag(
+        return LoggInnslag.opprett(
             id = UUID.randomUUID(),
             behandlingId = behandlingId,
             behandlingsloggstype = behandlingsloggstype,

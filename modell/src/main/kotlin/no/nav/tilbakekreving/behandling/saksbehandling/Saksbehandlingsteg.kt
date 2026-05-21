@@ -1,11 +1,13 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
 import no.nav.tilbakekreving.Klokke
+import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
+import java.util.UUID
 
 internal interface Saksbehandlingsteg {
     val type: Behandlingssteg
@@ -31,6 +33,8 @@ internal interface Saksbehandlingsteg {
     fun automatiskVurder(
         kravgrunnlag: KravgrunnlagHendelse,
         klokke: Klokke,
+        behandlingslogg: Behandlingslogg = Behandlingslogg(mutableListOf()),
+        behandlingId: UUID,
     ) {}
 
     fun venter(klokke: Klokke): Venter? = null

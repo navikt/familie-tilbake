@@ -9,6 +9,7 @@ data class LoggInnslag(
     override val id: UUID,
     val behandlingId: UUID?,
     val opprettetTid: LocalDateTime,
+    var sistOppdatert: LocalDateTime?,
     val behandlingsloggstype: Behandlingsloggstype,
     val rolle: Rolle,
     val behandlerIdent: String,
@@ -22,8 +23,30 @@ data class LoggInnslag(
         rolle = rolle,
         behandlerIdent = behandlerIdent,
         opprettetTid = opprettetTid,
+        sistOppdatert = sistOppdatert,
         ekstraInfo = ekstraInfo.mapKeys { it.key.name },
     )
+
+    companion object {
+        fun opprett(
+            id: UUID,
+            behandlingId: UUID?,
+            opprettetTid: LocalDateTime,
+            behandlingsloggstype: Behandlingsloggstype,
+            rolle: Rolle,
+            behandlerIdent: String,
+            ekstraInfo: Map<EkstraInfo, Any>,
+        ): LoggInnslag = LoggInnslag(
+            id = id,
+            behandlingId = behandlingId,
+            opprettetTid = opprettetTid,
+            sistOppdatert = null,
+            behandlingsloggstype = behandlingsloggstype,
+            rolle = rolle,
+            behandlerIdent = behandlerIdent,
+            ekstraInfo = ekstraInfo,
+        )
+    }
 }
 
 enum class Rolle {

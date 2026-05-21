@@ -169,6 +169,18 @@ enum class Behandlingsloggstype(
         type = Historikkinnslagstype.HENDELSE,
         steg = null,
     ),
+    AUTOMATISK_FORELDELSE_VURDERT(
+        tittel = "Foreldelse automatisk vurdert",
+        tekst = null,
+        type = Historikkinnslagstype.AUTOMATISK_VURDERING,
+        steg = null,
+    ),
+    AUTOMATISK_FORELDELSE_FJERNET(
+        tittel = "Automatisk vurdering av foreldelse er fjernet",
+        tekst = null,
+        type = Historikkinnslagstype.AUTOMATISK_VURDERING,
+        steg = null,
+    ),
     ;
 
     open fun hentTittel(ekstraInfo: Map<EkstraInfo, Any>): String {
