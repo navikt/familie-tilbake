@@ -234,7 +234,9 @@ class Foreldelsesteg(
                             appendLine()
                             appendLine("Perioden er automatisk vurdert fordi det er mer enn 6 måneder til foreldelse inntreffer.")
                             appendLine()
-                            appendLine("Ved den automatiske vurderingen av foreldelse er det tatt utgangspunkt ${førsteUtbetalingFom.format(SAKSBEHANDLER_FORMAT)}, som er den første dagen i feilutbetalingsperioden. Merk at foreldelse skal vurderes fra utbetalingstidspunktet, og at første dag i feilutbetalingsperioden har blitt valgt på grunn av automatiseringshensyn.")
+                            appendLine("Ved den automatiske vurderingen av foreldelse er det tatt utgangspunkt i ${førsteUtbetalingFom.format(SAKSBEHANDLER_FORMAT)}, som er den første dagen i feilutbetalingsperioden.")
+                            appendLine()
+                            appendLine("Merk at foreldelse skal vurderes fra utbetalingstidspunktet, og at første dag i feilutbetalingsperioden har blitt valgt på grunn av automatiseringshensyn.")
                             appendLine()
                             append("Automatisk vurdering av foreldelse ble gjort ${vurderingsdato.format(SAKSBEHANDLER_FORMAT)}, som er den datoen saken ble sendt til beslutter")
                         },

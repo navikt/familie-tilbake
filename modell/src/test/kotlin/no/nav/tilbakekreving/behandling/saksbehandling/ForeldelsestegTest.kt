@@ -156,7 +156,9 @@ class ForeldelsestegTest {
 
             Perioden er automatisk vurdert fordi det er mer enn 6 måneder til foreldelse inntreffer.
 
-            Ved den automatiske vurderingen av foreldelse er det tatt utgangspunkt 1. januar 2024, som er den første dagen i feilutbetalingsperioden. Merk at foreldelse skal vurderes fra utbetalingstidspunktet, og at første dag i feilutbetalingsperioden har blitt valgt på grunn av automatiseringshensyn.
+            Ved den automatiske vurderingen av foreldelse er det tatt utgangspunkt i 1. januar 2024, som er den første dagen i feilutbetalingsperioden.
+
+            Merk at foreldelse skal vurderes fra utbetalingstidspunktet, og at første dag i feilutbetalingsperioden har blitt valgt på grunn av automatiseringshensyn.
 
             Automatisk vurdering av foreldelse ble gjort 11. november 2024, som er den datoen saken ble sendt til beslutter
         """.trimIndent()
