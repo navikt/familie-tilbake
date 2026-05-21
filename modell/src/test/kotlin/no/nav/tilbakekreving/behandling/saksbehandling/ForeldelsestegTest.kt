@@ -9,6 +9,7 @@ import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
 import no.nav.tilbakekreving.test.februar
 import no.nav.tilbakekreving.test.januar
+import no.nav.tilbakekreving.test.november
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
@@ -139,12 +140,35 @@ class ForeldelsestegTest {
     }
 
     @Test
+    fun `automatisk vurdering begrunnelsetekst får en begrunnelse for vurderingen`() {
+        val fom = 1.januar(2024)
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(kravgrunnlagPeriode(fom til 31.januar(2024))),
+        )
+        val foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakBehandling(), kravgrunnlag)
+        val vurderingsdato = 11.november(2024)
+
+        foreldelsesteg.automatiskVurder(kravgrunnlag, klokke = KlokkeStub(vurderingsdato))
+
+        val begrunnelse = foreldelsesteg.tilFrontendDto(kravgrunnlag).foreldetPerioder.single().begrunnelse
+        begrunnelse shouldBe """
+            Ingen perioder er foreldet fordi det er mindre enn tre år siden første feilutbetaling fant sted. Dette følger av foreldelsesloven §§ 2 og 3.
+
+            Perioden er automatisk vurdert fordi det er mer enn 6 måneder til foreldelse inntreffer.
+
+            Ved den automatiske vurderingen av foreldelse er det tatt utgangspunkt 1. januar 2024, som er den første dagen i feilutbetalingsperioden. Merk at foreldelse skal vurderes fra utbetalingstidspunktet, og at første dag i feilutbetalingsperioden har blitt valgt på grunn av automatiseringshensyn.
+
+            Automatisk vurdering av foreldelse ble gjort 11. november 2024, som er den datoen saken ble sendt til beslutter
+        """.trimIndent()
+    }
+
+    @Test
     fun `setter tilbake til IkkeVurdert dersom behandlingen ikke lenger treffer reglene for automatisering`() {
         val fom = 1.januar(2024)
         val periode = fom til 31.januar(2024)
         val kravgrunnlag = kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(periode)))
         val foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakBehandling(), kravgrunnlag)
-        val klokke = KlokkeStub(fom.plusMonths(10))
+        val klokke = KlokkeStub(fom.plusMonths(10).withDayOfMonth(11))
 
         foreldelsesteg.automatiskVurder(kravgrunnlag, klokke = klokke)
         foreldelsesteg.erFullstendig(klokke) shouldBe true

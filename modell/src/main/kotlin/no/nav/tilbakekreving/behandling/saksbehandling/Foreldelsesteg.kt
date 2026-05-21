@@ -15,6 +15,8 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import java.util.UUID
 
 class Foreldelsesteg(
@@ -42,12 +44,18 @@ class Foreldelsesteg(
         kravgrunnlag: KravgrunnlagHendelse,
         klokke: Klokke,
     ) {
-        val førstePeriodeFom = kravgrunnlag.perioder().minOf { it.periode().fom }
+        val førsteUtbetalingFom = kravgrunnlag.perioder().minOf { it.periode().fom }
         vurdertePerioder
             .filter { it.vurdering.kanOverstyresAutomatisk() }
             .forEach {
-                if (klokke.dagensDato() <= førstePeriodeFom.plusMonths(30)) {
-                    it.vurderForeldelse(Vurdering.AutomatiskIkkeForeldet)
+                val vurderingsdato = klokke.dagensDato()
+                if (vurderingsdato <= førsteUtbetalingFom.plusMonths(30)) {
+                    it.vurderForeldelse(
+                        Vurdering.AutomatiskIkkeForeldet.opprett(
+                            førsteUtbetalingFom = førsteUtbetalingFom,
+                            vurderingsdato = vurderingsdato,
+                        ),
+                    )
                 } else {
                     it.vurderForeldelse(Vurdering.IkkeVurdert)
                 }
@@ -195,7 +203,9 @@ class Foreldelsesteg(
             override fun hjemlerForTilbakekreving(): List<HjemmelForTilbakekreving> = emptyList()
         }
 
-        object AutomatiskIkkeForeldet : Vurdering {
+        class AutomatiskIkkeForeldet(
+            override val begrunnelse: String,
+        ) : Vurdering {
             override fun kanOverstyresAutomatisk() = true
 
             override fun erForeldet() = false
@@ -203,13 +213,34 @@ class Foreldelsesteg(
             override fun tilEntity(): ForeldelsesvurderingEntity {
                 return ForeldelsesvurderingEntity(
                     type = ForeldelsesvurderingType.AUTOMATISK_IKKE_FORELDET,
-                    begrunnelse = null,
+                    begrunnelse = begrunnelse,
                     frist = null,
                     oppdaget = null,
                 )
             }
 
             override fun hjemlerForTilbakekreving(): List<HjemmelForTilbakekreving> = emptyList()
+
+            companion object {
+                private val SAKSBEHANDLER_FORMAT = DateTimeFormatter.ofPattern("d. MMMM yyyy", Locale.of("nb"))
+
+                fun opprett(
+                    førsteUtbetalingFom: LocalDate,
+                    vurderingsdato: LocalDate,
+                ): AutomatiskIkkeForeldet {
+                    return AutomatiskIkkeForeldet(
+                        begrunnelse = buildString {
+                            appendLine("Ingen perioder er foreldet fordi det er mindre enn tre år siden første feilutbetaling fant sted. Dette følger av foreldelsesloven §§ 2 og 3.")
+                            appendLine()
+                            appendLine("Perioden er automatisk vurdert fordi det er mer enn 6 måneder til foreldelse inntreffer.")
+                            appendLine()
+                            appendLine("Ved den automatiske vurderingen av foreldelse er det tatt utgangspunkt ${førsteUtbetalingFom.format(SAKSBEHANDLER_FORMAT)}, som er den første dagen i feilutbetalingsperioden. Merk at foreldelse skal vurderes fra utbetalingstidspunktet, og at første dag i feilutbetalingsperioden har blitt valgt på grunn av automatiseringshensyn.")
+                            appendLine()
+                            append("Automatisk vurdering av foreldelse ble gjort ${vurderingsdato.format(SAKSBEHANDLER_FORMAT)}, som er den datoen saken ble sendt til beslutter")
+                        },
+                    )
+                }
+            }
         }
 
         class Tilleggsfrist(override val frist: LocalDate, val oppdaget: LocalDate) : Vurdering {

@@ -24,7 +24,9 @@ data class ForeldelsesvurderingEntity(
                 Vurdering.Foreldet(requireNotNull(begrunnelse) { "Begrunnelse kreves for FORELDET" })
             }
             ForeldelsesvurderingType.IKKE_VURDERT -> Vurdering.IkkeVurdert
-            ForeldelsesvurderingType.AUTOMATISK_IKKE_FORELDET -> Vurdering.AutomatiskIkkeForeldet
+            ForeldelsesvurderingType.AUTOMATISK_IKKE_FORELDET -> Vurdering.AutomatiskIkkeForeldet(
+                begrunnelse = requireNotNull(begrunnelse) { "Begrunnelse kreves for AUTOMATISK_IKKE_FORELDET" },
+            )
         }
     }
 }
