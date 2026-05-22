@@ -10,6 +10,7 @@ import jakarta.jms.ConnectionFactory
 import jakarta.jms.JMSException
 import kotlinx.coroutines.runBlocking
 import no.nav.familie.tilbake.api.BehandlingController
+import no.nav.familie.tilbake.api.VilkårsvurderingController
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.config.OppdragClientMock
 import no.nav.familie.tilbake.config.PdlClientMock
@@ -74,6 +75,9 @@ open class TilbakekrevingE2EBase : E2EBase() {
 
     @Autowired
     protected lateinit var behandlingApiController: BehandlingApiController
+
+    @Autowired
+    protected lateinit var vilkårsvurderingController: VilkårsvurderingController
 
     @AfterEach
     fun reset() {

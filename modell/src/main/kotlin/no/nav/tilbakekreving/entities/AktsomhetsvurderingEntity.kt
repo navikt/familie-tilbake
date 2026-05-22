@@ -13,8 +13,9 @@ data class AktsomhetsvurderingEntity(
     val beløpIBehold: GodTroEntity?,
     val aktsomhet: VurdertAktsomhetEntity?,
     val feilaktigEllerMangelfull: FeilaktigEllerMangelfullType?,
+    val forrigePeriodeId: UUID?,
 ) {
-    fun fraEntity(): ForårsaketAvBruker {
+    fun fraEntity(kopiertVurdering: ForårsaketAvBruker?): ForårsaketAvBruker {
         return when (vurderingType) {
             VurderingType.IKKE_FORÅRSAKET_AV_BRUKER_GOD_TRO -> {
                 NivåAvForståelse.GodTro(
@@ -70,6 +71,7 @@ data class AktsomhetsvurderingEntity(
             }
 
             VurderingType.IKKE_VURDERT -> ForårsaketAvBruker.IkkeVurdert
+            VurderingType.KOPIERT_VURDERING -> kopiertVurdering ?: error("Kopiert vurdering krever en original vurdering")
         }
     }
 }
@@ -99,6 +101,7 @@ enum class VurderingType {
     IKKE_FORÅRSAKET_AV_BRUKER_BURDE_FORSTÅTT,
     IKKE_FORÅRSAKET_AV_BRUKER_GOD_TRO,
     FORÅRSAKET_AV_BRUKER,
+    KOPIERT_VURDERING,
 }
 
 enum class FeilaktigEllerMangelfullType(val fraEntity: Skyldgrad.FeilaktigEllerMangelfull) {

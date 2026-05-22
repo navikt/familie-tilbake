@@ -60,6 +60,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 begrunnelse = begrunnelse,
                 aktsomhet = aktsomhet.tilEntity(periodeRef),
                 feilaktigEllerMangelfull = null,
+                forrigePeriodeId = null,
             )
         }
     }
@@ -103,6 +104,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 begrunnelse = begrunnelse,
                 aktsomhet = aktsomhet.tilEntity(periodeRef),
                 feilaktigEllerMangelfull = null,
+                forrigePeriodeId = null,
             )
         }
     }
@@ -149,6 +151,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 beløpIBehold = beløpIBehold.tilEntity(periodeRef, begrunnelseForGodTro),
                 aktsomhet = null,
                 feilaktigEllerMangelfull = null,
+                forrigePeriodeId = null,
             )
         }
 
@@ -199,7 +202,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
     sealed interface Aktsomhet {
         fun vurderingstype(): AktsomhetDTO
 
-        fun nivåAvForståelse(): NivåAvForståelse.Type
+        fun nivåAvForståelse(): Type
 
         val begrunnelse: String
 

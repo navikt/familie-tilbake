@@ -32,26 +32,6 @@ import java.util.UUID
 
 class VilkårsvurderingstegTest {
     @Test
-    fun `vilkårsvurdering på en av to perioder`() {
-        val kravgrunnlag = kravgrunnlag(
-            perioder = listOf(
-                kravgrunnlagPeriode(1.januar(2021) til 31.januar(2021)),
-                kravgrunnlagPeriode(1.februar(2021) til 28.februar(2021)),
-            ),
-        )
-        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
-            eksternFagsakBehandling(),
-            kravgrunnlag,
-        )
-        vilkårsvurderingsteg.vurder(
-            1.januar(2021) til 31.januar(2021),
-            forårsaketAvNav().godTro(beløpIBehold = null),
-        )
-
-        vilkårsvurderingsteg.erFullstendig(SystemKlokke) shouldBe false
-    }
-
-    @Test
     fun `vilkårsvurdering på begge perioder`() {
         val kravgrunnlag = kravgrunnlag(
             perioder =
@@ -66,16 +46,9 @@ class VilkårsvurderingstegTest {
                 kravgrunnlagHendelse = kravgrunnlag,
             )
         vilkårsvurderingsteg.vurder(
-            1.januar(2021) til 31.januar(2021),
+            1.januar(2021) til 28.februar(2021),
             forårsaketAvNav().godTro(beløpIBehold = null),
         )
-        vilkårsvurderingsteg.erFullstendig(SystemKlokke) shouldBe false
-
-        vilkårsvurderingsteg.vurder(
-            1.februar(2021) til 28.februar(2021),
-            forårsaketAvNav().godTro(beløpIBehold = null),
-        )
-
         vilkårsvurderingsteg.erFullstendig(SystemKlokke) shouldBe true
     }
 
@@ -96,7 +69,6 @@ class VilkårsvurderingstegTest {
             1.januar(2021) til 31.januar(2021),
             forårsaketAvNav().burdeForstått(uaktsomt(skalIkkeUnnlates(), 50.prosentReduksjon)),
         )
-
         vilkårsvurderingsteg.perioder().first().reduksjon().shouldBeInstanceOf<Reduksjon.Prosentdel>()
     }
 

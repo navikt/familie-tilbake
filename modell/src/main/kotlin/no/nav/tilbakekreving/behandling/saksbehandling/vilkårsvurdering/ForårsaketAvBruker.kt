@@ -10,6 +10,8 @@ import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering
 import java.util.UUID
 
 interface ForårsaketAvBruker {
+    fun underliggendeVurdering(): ForårsaketAvBruker = this
+
     val begrunnelse: String?
 
     fun renter(): Boolean
@@ -57,6 +59,27 @@ interface ForårsaketAvBruker {
                 beløpIBehold = null,
                 aktsomhet = null,
                 feilaktigEllerMangelfull = null,
+                forrigePeriodeId = null,
+            )
+        }
+    }
+
+    class KopiertVurdering(
+        private val originalVurdering: ForårsaketAvBruker,
+        val forrigePeriodeId: UUID?,
+    ) : ForårsaketAvBruker by originalVurdering {
+        override fun underliggendeVurdering(): ForårsaketAvBruker {
+            return originalVurdering
+        }
+
+        override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
+            return AktsomhetsvurderingEntity(
+                vurderingType = VurderingType.KOPIERT_VURDERING,
+                begrunnelse = null,
+                beløpIBehold = null,
+                aktsomhet = null,
+                feilaktigEllerMangelfull = null,
+                forrigePeriodeId = forrigePeriodeId,
             )
         }
     }

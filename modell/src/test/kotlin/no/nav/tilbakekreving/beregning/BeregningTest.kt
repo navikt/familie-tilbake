@@ -846,7 +846,8 @@ class BeregningTest {
         vararg perioder: Vilkårsvurderingsteg.Vilkårsvurderingsperiode,
     ) = object : VilkårsvurderingAdapter {
         override fun perioder(): Set<VilkårsvurdertPeriodeAdapter> {
-            return perioder.toSet()
+            return perioder
+                .toSet()
         }
     }
 

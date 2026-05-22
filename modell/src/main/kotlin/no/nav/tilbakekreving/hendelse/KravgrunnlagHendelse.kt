@@ -53,6 +53,13 @@ class KravgrunnlagHendelse(
         perioder.single { kgPeriode -> kgPeriode.gjelderFor(periode) }
             .feilutbetaltYtelsesbeløp()
 
+    fun totaltBeløpForSlåttSammenPerioder(periode: Datoperiode): BigDecimal {
+        val overlappendePerioder = perioder.filter {
+            it.periode.fom <= periode.tom && it.periode.tom >= periode.fom
+        }
+        return overlappendePerioder.sumOf { it.feilutbetaltYtelsesbeløp() }
+    }
+
     fun datoperioder(eksternFagsakRevurdering: EksternFagsakRevurdering) = perioder.map { eksternFagsakRevurdering.utvidPeriode(it.periode) }
 
     fun feilutbetaltBeløpForAllePerioder() = perioder.sumOf { it.feilutbetaltYtelsesbeløp() }

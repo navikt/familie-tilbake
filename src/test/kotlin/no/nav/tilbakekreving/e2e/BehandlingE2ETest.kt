@@ -42,6 +42,9 @@ import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.saksbehandlerContext
 import no.nav.tilbakekreving.test.februar
 import no.nav.tilbakekreving.test.januar
+import no.nav.tilbakekreving.test.juli
+import no.nav.tilbakekreving.test.mai
+import no.nav.tilbakekreving.test.mars
 import no.nav.tilbakekreving.util.kroner
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -269,6 +272,9 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
         }
+        somSaksbehandler(ansvarligSaksbehandler) {
+            vilkårsvurderingController.hentVurdertVilkårsvurdering(behandlingId).data!!.perioder.size shouldBe 1
+        }
 
         utførSteg(
             ident = ansvarligSaksbehandler,
@@ -285,7 +291,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
             stegData = BehandlingsstegVilkårsvurderingDto(
                 vilkårsvurderingsperioder = listOf(
                     VilkårsvurderingsperiodeDto(
-                        periode = 1.januar(2021) til 1.januar(2021),
+                        periode = 1.januar(2021) til 1.februar(2021),
                         vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
                         begrunnelse = "Jepp1",
                         godTroDto = GodTroDto(
@@ -298,19 +304,70 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
             ),
         )
 
+        val tilbakekreving = tilbakekreving(behandlingId)
+        val vilkårsvurderingFrontendDto = tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext())
+        vilkårsvurderingFrontendDto.perioder.size shouldBe 1
+        vilkårsvurderingFrontendDto.perioder.first().begrunnelse shouldBe "Jepp1"
+        vilkårsvurderingFrontendDto.perioder.first().vilkårsvurderingsresultatInfo?.godTro?.begrunnelse shouldBe "Japp1"
+    }
+
+    @Test
+    fun `slår sammen flere perioder`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        sendKravgrunnlagOgAvventLesing(
+            queueName = TILLEGGSSTØNADER_KØ_NAVN,
+            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+                perioder = listOf(
+                    KravgrunnlagGenerator.standardPeriode(1.januar(2021) til 1.januar(2021)),
+                    KravgrunnlagGenerator.standardPeriode(15.mars(2021) til 15.mars(2021)),
+                    KravgrunnlagGenerator.standardPeriode(21.mai(2021) til 21.mai(2021)),
+                    KravgrunnlagGenerator.standardPeriode(14.juli(2021) til 14.juli(2021)),
+                ),
+            ),
+        )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
+
+        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        lagreUttalelse(behandlingId)
+
+        somSaksbehandler(ansvarligSaksbehandler) {
+            behandlingApiController.behandlingOppdaterFakta(
+                behandlingId = behandlingId.toString(),
+                oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
+            )
+        }
+        somSaksbehandler(ansvarligSaksbehandler) {
+            vilkårsvurderingController.hentVurdertVilkårsvurdering(behandlingId).data shouldNotBeNull {
+                perioder.size shouldBe 1
+                perioder.first().periode shouldBe (1.januar(2021) til 14.juli(2021))
+            }
+        }
+
+        utførSteg(
+            ident = ansvarligSaksbehandler,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(
+                1.januar(2021) til 1.januar(2021),
+                15.mars(2021) til 15.mars(2021),
+                21.mai(2021) til 21.mai(2021),
+                14.juli(2021) til 14.juli(2021),
+            ),
+        )
+
         utførSteg(
             ident = ansvarligSaksbehandler,
             behandlingId = behandlingId,
             stegData = BehandlingsstegVilkårsvurderingDto(
                 vilkårsvurderingsperioder = listOf(
                     VilkårsvurderingsperiodeDto(
-                        periode = 1.februar(2021) til 1.februar(2021),
+                        periode = 1.januar(2021) til 14.juli(2021),
                         vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
-                        begrunnelse = "Jepp2",
+                        begrunnelse = "Jepp1",
                         godTroDto = GodTroDto(
                             beløpErIBehold = false,
                             beløpTilbakekreves = null,
-                            begrunnelse = "Japp2",
+                            begrunnelse = "Japp1",
                         ),
                     ),
                 ),
@@ -319,11 +376,10 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
 
         val tilbakekreving = tilbakekreving(behandlingId)
         val vilkårsvurderingFrontendDto = tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext())
-        vilkårsvurderingFrontendDto.perioder.size shouldBe 2
-        vilkårsvurderingFrontendDto.perioder[0].begrunnelse shouldBe "Jepp1"
-        vilkårsvurderingFrontendDto.perioder[0].vilkårsvurderingsresultatInfo?.godTro?.begrunnelse shouldBe "Japp1"
-        vilkårsvurderingFrontendDto.perioder[1].begrunnelse shouldBe "Jepp2"
-        vilkårsvurderingFrontendDto.perioder[1].vilkårsvurderingsresultatInfo?.godTro?.begrunnelse shouldBe "Japp2"
+        vilkårsvurderingFrontendDto.perioder.size shouldBe 1
+        vilkårsvurderingFrontendDto.perioder.first().begrunnelse shouldBe "Jepp1"
+        vilkårsvurderingFrontendDto.perioder.first().vilkårsvurderingsresultatInfo?.godTro?.begrunnelse shouldBe "Japp1"
+        vilkårsvurderingFrontendDto.perioder.first().feilutbetaltBeløp shouldBe 8000.0.kroner
     }
 
     @ParameterizedTest

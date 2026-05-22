@@ -61,8 +61,28 @@ class Vilkårsvurderingsteg(
         periode: Datoperiode,
         vurdering: ForårsaketAvBruker,
     ) {
-        val id = finnIdForPeriode(periode)
-        vurder(id, vurdering)
+        val overlappendePerioder = vurderinger
+            .filter { it.periode.fom <= periode.tom && it.periode.tom >= periode.fom }
+            .sortedBy { it.periode.fom }
+
+        if (overlappendePerioder.isEmpty()) return
+
+        val førstePeriode = overlappendePerioder.first()
+        vurder(førstePeriode.id, vurdering)
+
+        var forrigePeriodeId = førstePeriode.id
+        var forrigeVurdering: ForårsaketAvBruker = vurdering
+
+        overlappendePerioder.drop(1).forEach { periodeSomSkalOppdateres ->
+            val kopiert = ForårsaketAvBruker.KopiertVurdering(
+                originalVurdering = forrigeVurdering,
+                forrigePeriodeId = forrigePeriodeId,
+            )
+            vurder(periodeSomSkalOppdateres.id, kopiert)
+
+            forrigePeriodeId = periodeSomSkalOppdateres.id
+            forrigeVurdering = kopiert
+        }
     }
 
     internal fun vurder(
@@ -81,6 +101,10 @@ class Vilkårsvurderingsteg(
 
     private fun finnPeriode(periode: Datoperiode): Vilkårsvurderingsperiode {
         val id = finnIdForPeriode(periode)
+        return vurderinger.single { it.id == id }
+    }
+
+    internal fun finnPeriodeMedId(id: UUID): Vilkårsvurderingsperiode {
         return vurderinger.single { it.id == id }
     }
 
@@ -106,18 +130,7 @@ class Vilkårsvurderingsteg(
         klokke: Klokke,
     ): VurdertVilkårsvurderingDto {
         return VurdertVilkårsvurderingDto(
-            perioder = vurderinger.map {
-                VurdertVilkårsvurderingsperiodeDto(
-                    periode = it.periode,
-                    feilutbetaltBeløp = kravgrunnlag.totaltBeløpFor(it.periode),
-                    hendelsestype = Hendelsestype.ANNET,
-                    reduserteBeløper = listOf(),
-                    aktiviteter = listOf(),
-                    begrunnelse = it.vurdering.begrunnelse,
-                    foreldet = foreldelsesteg.erPeriodeForeldet(it.periode),
-                    vilkårsvurderingsresultatInfo = it.vurdering.tilFrontendDto(),
-                )
-            },
+            perioder = slåSammenPerioder(kravgrunnlag, foreldelsesteg),
             // Datoen revurdering ble vedtatt er ikke riktig her, men fører til det høyeste rettsgebyret som kan være relevant.
             // Vi gir heller saksbehandler mulighet til å si at beløpet er under/over 4x rettsgebyr til vi klarer å finne datoen vi skal velge rettsgebyr for
             kanUnnlates4xRettsgebyr = KanUnnlates4xRettsgebyr.kanUnnlates(revurdering.vedtaksdato, kravgrunnlag.feilutbetaltBeløpForAllePerioder()),
@@ -125,6 +138,42 @@ class Vilkårsvurderingsteg(
             opprettetTid = klokke.nå(),
         )
     }
+
+    private fun slåSammenPerioder(
+        kravgrunnlag: KravgrunnlagHendelse,
+        foreldelsesteg: Foreldelsesteg,
+    ): List<VurdertVilkårsvurderingsperiodeDto> {
+        val sammenslåttePerioder = vurderinger
+            .groupBy { it.vurdering.underliggendeVurdering() }
+            .map { (_, gruppe) ->
+                val første = gruppe.minBy { it.periode.fom }
+                val siste = gruppe.maxBy { it.periode.tom }
+                lagSammenslåttPeriode(første, siste)
+            }
+
+        return sammenslåttePerioder.map { periode ->
+            VurdertVilkårsvurderingsperiodeDto(
+                periode = periode.periode,
+                feilutbetaltBeløp = kravgrunnlag.totaltBeløpForSlåttSammenPerioder(periode.periode),
+                hendelsestype = Hendelsestype.ANNET,
+                reduserteBeløper = listOf(),
+                aktiviteter = listOf(),
+                begrunnelse = periode.vurdering.begrunnelse,
+                foreldet = foreldelsesteg.erSammenslåttPeriodeForeldet(periode.periode),
+                vilkårsvurderingsresultatInfo = periode.vurdering.tilFrontendDto(),
+            )
+        }
+    }
+
+    private fun lagSammenslåttPeriode(
+        første: Vilkårsvurderingsperiode,
+        siste: Vilkårsvurderingsperiode,
+    ) = Vilkårsvurderingsperiode(
+        id = første.id,
+        periode = Datoperiode(første.periode.fom, siste.periode.tom),
+        begrunnelseForTilbakekreving = første.begrunnelseForTilbakekreving,
+        _vurdering = første.vurdering,
+    )
 
     fun vurdertePerioderForBrev(
         meldingerTilSaksbehandler: Set<MeldingTilSaksbehandler>,
@@ -175,12 +224,23 @@ class Vilkårsvurderingsteg(
         companion object {
             fun opprett(
                 periode: Datoperiode,
+                forrigePeriode: Vilkårsvurderingsperiode?,
             ): Vilkårsvurderingsperiode {
+                val id = UUID.randomUUID()
                 return Vilkårsvurderingsperiode(
-                    id = UUID.randomUUID(),
+                    id = id,
                     periode = periode,
-                    begrunnelseForTilbakekreving = null,
-                    _vurdering = ForårsaketAvBruker.IkkeVurdert,
+                    _vurdering = when (forrigePeriode) {
+                        null -> {
+                            ForårsaketAvBruker.IkkeVurdert
+                        }
+                        else -> {
+                            ForårsaketAvBruker.KopiertVurdering(
+                                originalVurdering = forrigePeriode.vurdering.underliggendeVurdering(),
+                                forrigePeriodeId = forrigePeriode.id,
+                            )
+                        }
+                    },
                 )
             }
         }
@@ -202,9 +262,18 @@ class Vilkårsvurderingsteg(
             eksternFagsakRevurdering: EksternFagsakRevurdering,
             kravgrunnlagHendelse: KravgrunnlagHendelse,
         ): List<Vilkårsvurderingsperiode> {
-            return kravgrunnlagHendelse.datoperioder(eksternFagsakRevurdering).map {
-                Vilkårsvurderingsperiode.opprett(eksternFagsakRevurdering.utvidPeriode(it))
+            val perioder = mutableListOf<Vilkårsvurderingsperiode>()
+            kravgrunnlagHendelse.datoperioder(eksternFagsakRevurdering).forEach { periode ->
+                val utvidetPeriode = eksternFagsakRevurdering.utvidPeriode(periode)
+                val vurderingTilForrigePeriode = perioder.lastOrNull()
+                perioder.add(
+                    Vilkårsvurderingsperiode.opprett(
+                        periode = utvidetPeriode,
+                        forrigePeriode = vurderingTilForrigePeriode,
+                    ),
+                )
             }
+            return perioder
         }
     }
 }
