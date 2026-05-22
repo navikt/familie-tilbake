@@ -24,6 +24,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselErSendtDt
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselUnntakDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.IkkeVurdertDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SendForhaandsvarselDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UnntakDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UpdateUttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseVurderingDto
@@ -333,7 +334,7 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
         somSaksbehandler("Z9999999") {
             behandlingApiController.behandlingLagreForhaandsvarselUnntak(
                 behandlingId,
-                unntakDto = ForhaandsvarselUnntakDto(
+                unntakDto = UnntakDto(
                     begrunnelseForUnntak = VarslingsunntakDto.IKKE_PRAKTISK_MULIG,
                     beskrivelse = "Ikke mulig å forhåndsvarsle",
                 ),
@@ -353,7 +354,7 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
         somSaksbehandler("Z9999999") {
             behandlingApiController.behandlingLagreForhaandsvarselUnntak(
                 behandlingId,
-                unntakDto = ForhaandsvarselUnntakDto(
+                unntakDto = UnntakDto(
                     begrunnelseForUnntak = VarslingsunntakDto.ÅPENBART_UNØDVENDIG,
                     beskrivelse = "Allerede uttalet seg",
                 ),
