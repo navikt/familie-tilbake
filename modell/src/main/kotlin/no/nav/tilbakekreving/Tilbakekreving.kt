@@ -57,7 +57,6 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
-import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentTypeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
@@ -259,14 +258,12 @@ class Tilbakekreving internal constructor(
         return behandlingHistorikk.finn(behandlingId, Sporing(id, behandlingId.toString())).entry
     }
 
-    fun håndterNullstilling(behandler: Behandler) {
-        val nåværendeBehandling = behandlingHistorikk.nåværende().entry
-        tilstand.håndterNullstilling(nåværendeBehandling, sporingsinformasjon(), behandlingslogg, behandler)
+    fun håndterNullstilling(behandlingId: UUID, behandler: Behandler) {
+        tilstand.håndterNullstilling(hentBehandling(behandlingId), sporingsinformasjon(), behandlingslogg, behandler)
     }
 
-    fun håndterTrekkTilbakeFraGodkjenning(behandler: Behandler) {
-        val nåværendeBehandling = behandlingHistorikk.nåværende().entry
-        tilstand.håndterTrekkTilbakeFraGodkjenning(nåværendeBehandling, sporingsinformasjon(), behandlingslogg, behandler)
+    fun håndterTrekkTilbakeFraGodkjenning(behandlingId: UUID, behandler: Behandler) {
+        tilstand.håndterTrekkTilbakeFraGodkjenning(hentBehandling(behandlingId), sporingsinformasjon(), behandlingslogg, behandler)
     }
 
     fun opprettBehandling(
@@ -316,16 +313,16 @@ class Tilbakekreving internal constructor(
         byttTilstand(AvventerBrukerinfo)
     }
 
-    fun trengerVarselbrev(varseltekstFraSaksbehandler: String) {
-        val behandling = behandlingHistorikk.nåværende().entry
+    fun trengerVarselbrev(behandlingId: UUID, varseltekstFraSaksbehandler: String) {
+        val behandling = hentBehandling(behandlingId)
         val varselbrev = behandling.opprettVarselbrev(varseltekstFraSaksbehandler, features)
         brevHistorikk.lagre(varselbrev)
         behandling.lagreOpprinneligFrist(varselbrev.fristForUttalelse)
         byttTilstand(SendVarselbrev)
     }
 
-    fun sendVarselbrev(varseltekstFraSaksbehandler: String) {
-        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
+    fun sendVarselbrev(behandlingId: UUID, varseltekstFraSaksbehandler: String) {
+        hentBehandling(behandlingId).utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
             val varselbrev = opprettVarselbrev(varseltekstFraSaksbehandler, features)
             nullstillForhåndsvarselUnntakOgUttalelse()
             brevHistorikk.lagre(varselbrev)
@@ -335,12 +332,13 @@ class Tilbakekreving internal constructor(
     }
 
     fun trengerVarselbrevJournalføring() {
-        behandlingHistorikk.nåværende().entry.trengerVarselbrevJournalføring(
+        val behandling = behandlingHistorikk.nåværende().entry
+        behandling.trengerVarselbrevJournalføring(
             behovObservatør = behovObservatør,
             eksternFagsak = eksternFagsak,
             brukerinfo = bruker!!.hentBrukerinfo(),
             varselbrev = brevHistorikk.sisteVarselbrev()!!,
-            varselbrevInfo = hentVarselbrevInfo(),
+            varselbrevInfo = hentVarselbrevInfo(behandling.id),
         )
     }
 
@@ -436,22 +434,24 @@ class Tilbakekreving internal constructor(
         )
     }
 
-    fun faktastegFrontendDto(): FaktaFeilutbetalingDto = behandlingHistorikk.nåværende().entry.faktastegFrontendDto(opprettelsesvalg, opprettet)
+    fun faktastegFrontendDto(behandlingId: UUID): FaktaFeilutbetalingDto = hentBehandling(behandlingId).faktastegFrontendDto(opprettelsesvalg, opprettet)
 
     fun håndter(
+        behandlingId: UUID,
         beslutter: Behandler,
         vurderinger: List<Pair<Behandlingssteg, FatteVedtakSteg.Vurdering>>,
     ) {
-        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
+        hentBehandling(behandlingId).utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
             tilstand.håndter(this@Tilbakekreving, this, beslutter, vurderinger)
         }
     }
 
     fun håndter(
+        behandlingId: UUID,
         behandler: Behandler,
         vurdering: Faktasteg.Vurdering,
     ) {
-        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
+        hentBehandling(behandlingId).utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
             håndter(behandler, vurdering, this@Tilbakekreving, behandlingslogg)
         }
     }
@@ -469,29 +469,32 @@ class Tilbakekreving internal constructor(
     }
 
     fun håndter(
+        behandlingId: UUID,
         behandler: Behandler,
         periode: Datoperiode,
         vurdering: Foreldelsesteg.Vurdering,
     ) {
-        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
+        hentBehandling(behandlingId).utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
             håndter(behandler, periode, vurdering, this@Tilbakekreving, behandlingslogg)
         }
     }
 
     fun håndter(
+        behandlingId: UUID,
         behandler: Behandler,
         periode: Datoperiode,
         vurdering: ForårsaketAvBruker,
     ) {
-        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
+        hentBehandling(behandlingId).utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
             håndter(behandler, periode, vurdering, this@Tilbakekreving, behandlingslogg)
         }
     }
 
     fun håndterForeslåVedtak(
+        behandlingId: UUID,
         behandler: Behandler,
     ) {
-        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
+        hentBehandling(behandlingId).utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
             håndterForeslåVedtak(behandler, this@Tilbakekreving, behandlingslogg)
         }
     }
@@ -583,8 +586,8 @@ class Tilbakekreving internal constructor(
         }
     }
 
-    fun hentVarselbrevInfo(): VarselbrevInfo {
-        val behandling = behandlingHistorikk.nåværende().entry
+    fun hentVarselbrevInfo(behandlingId: UUID): VarselbrevInfo {
+        val behandling = hentBehandling(behandlingId)
         val varselbrev = behandling.opprettVarselbrev("", features)
         return VarselbrevInfo(
             brukerinfo = bruker!!.hentBrukerinfo(),
@@ -597,8 +600,8 @@ class Tilbakekreving internal constructor(
         )
     }
 
-    fun hentForhåndsvarselFrontendDto(): ForhåndsvarselDto {
-        val behandling = behandlingHistorikk.nåværende().entry
+    fun hentForhåndsvarselFrontendDto(behandlingId: UUID): ForhåndsvarselDto {
+        val behandling = hentBehandling(behandlingId)
         return ForhåndsvarselDto(
             varselbrevDto = brevHistorikk.sisteVarselbrev()?.tilFrontendDto(),
             brukeruttalelse = behandling.brukeruttaleserTilFrontendDto(),
@@ -607,8 +610,8 @@ class Tilbakekreving internal constructor(
         )
     }
 
-    fun nyHentForhåndsvarselFrontendDto(): ForhaandsvarselResponseDto {
-        val behandling = behandlingHistorikk.nåværende().entry
+    fun nyHentForhåndsvarselFrontendDto(behandlingId: UUID): ForhaandsvarselResponseDto {
+        val behandling = hentBehandling(behandlingId)
         val forhåndsvarselinfo = brevHistorikk.sisteVarselbrev()?.let {
             ForhaandsvarselInfoDto(
                 tekstFraSaksbehandler = it.tekstFraSaksbehandler,
@@ -618,14 +621,10 @@ class Tilbakekreving internal constructor(
         return behandling.nyForhåndsvarselTilFrontend(forhåndsvarselinfo)
     }
 
-    fun tilFeilutbetalingFrontendDto(): FaktaOmFeilutbetalingDto {
-        return behandlingHistorikk.nåværende().entry.nyFaktastegFrontendDto(
+    fun tilFeilutbetalingFrontendDto(behandlingId: UUID): FaktaOmFeilutbetalingDto {
+        return hentBehandling(behandlingId).nyFaktastegFrontendDto(
             varselbrev = brevHistorikk.sisteVarselbrev(),
         )
-    }
-
-    fun hentVedtaksresultatForFrontend(): BeregningsresultatDto {
-        return behandlingHistorikk.nåværende().entry.hentVedtaksresultatForFrontend()
     }
 
     fun hentBehandlingslogg(): List<LogginnslagDto> {
@@ -633,12 +632,13 @@ class Tilbakekreving internal constructor(
     }
 
     fun lagreUttalelse(
+        behandlingId: UUID,
         uttalelseVurdering: UttalelseVurdering,
         uttalelseInfo: UttalelseInfo?,
         kommentar: String?,
         behandler: Behandler,
     ) {
-        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
+        hentBehandling(behandlingId).utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
             lagreUttalelse(
                 uttalelseVurdering = uttalelseVurdering,
                 uttalelseInfo = uttalelseInfo,
@@ -650,6 +650,7 @@ class Tilbakekreving internal constructor(
     }
 
     fun lagreFristUtsettelse(
+        behandlingId: UUID,
         nyFrist: LocalDate,
         begrunnelse: String,
         behandler: Behandler,
@@ -657,7 +658,7 @@ class Tilbakekreving internal constructor(
         requireNotNull(brevHistorikk.sisteVarselbrev()) {
             "Kan ikke utsette frist når forhåndsvarsel ikke er sendt"
         }
-        return behandlingHistorikk.nåværende().entry.lagreFristUtsettelse(
+        return hentBehandling(behandlingId).lagreFristUtsettelse(
             nyFrist = nyFrist,
             begrunnelse = begrunnelse,
             behandlingslogg = behandlingslogg,
@@ -666,11 +667,12 @@ class Tilbakekreving internal constructor(
     }
 
     fun lagreForhåndsvarselUnntak(
+        behandlingId: UUID,
         begrunnelseForUnntak: BegrunnelseForUnntak,
         beskrivelse: String,
         behandler: Behandler,
     ) {
-        behandlingHistorikk.nåværende().entry.lagreForhåndsvarselUnntak(
+        hentBehandling(behandlingId).lagreForhåndsvarselUnntak(
             begrunnelseForUnntak = begrunnelseForUnntak,
             beskrivelse = beskrivelse,
             behandler = behandler,

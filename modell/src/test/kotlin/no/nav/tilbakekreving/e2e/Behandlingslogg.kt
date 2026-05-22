@@ -22,6 +22,7 @@ import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
+import no.nav.tilbakekreving.nåværendeBehandlingId
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.test.februar
@@ -69,7 +70,7 @@ class Behandlingslogg {
             ),
         )
         tilbakekreving.håndter(brukerinfoHendelse())
-        tilbakekreving.trengerVarselbrev("tekst fra saksbehandler")
+        tilbakekreving.trengerVarselbrev(tilbakekreving.nåværendeBehandlingId(), "tekst fra saksbehandler")
         tilbakekreving.håndter(
             hendelse = VarselbrevJournalføringHendelse(
                 varselbrevId = tilbakekreving.brevHistorikk.sisteVarselbrev()!!.id,
@@ -85,14 +86,15 @@ class Behandlingslogg {
                 dokumentInfoId = "321",
             ),
         )
-        tilbakekreving.lagreFristUtsettelse(LocalDate.of(2027, 1, 1), "Begrunnelse", ANSVARLIG_SAKSBEHANDLER)
-        tilbakekreving.lagreUttalelse(UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL, null, "ingen uttalelse", ANSVARLIG_SAKSBEHANDLER)
+        tilbakekreving.lagreFristUtsettelse(tilbakekreving.nåværendeBehandlingId(), LocalDate.of(2027, 1, 1), "Begrunnelse", ANSVARLIG_SAKSBEHANDLER)
+        tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL, null, "ingen uttalelse", ANSVARLIG_SAKSBEHANDLER)
 
-        tilbakekreving.håndter(behandler, faktastegVurdering(1.januar(2021) til 31.januar(2021)))
-        tilbakekreving.håndter(behandler, faktastegVurdering(1.februar(2021) til 28.februar(2021)))
-        tilbakekreving.håndter(behandler, 1.januar(2021) til 31.januar(2021), Foreldelsesteg.Vurdering.IkkeForeldet(""))
-        tilbakekreving.håndter(behandler, 1.februar(2021) til 28.februar(2021), Foreldelsesteg.Vurdering.IkkeForeldet(""))
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, faktastegVurdering(1.januar(2021) til 31.januar(2021)))
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, faktastegVurdering(1.februar(2021) til 28.februar(2021)))
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, 1.januar(2021) til 31.januar(2021), Foreldelsesteg.Vurdering.IkkeForeldet(""))
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, 1.februar(2021) til 28.februar(2021), Foreldelsesteg.Vurdering.IkkeForeldet(""))
         tilbakekreving.håndter(
+            tilbakekreving.nåværendeBehandlingId(),
             behandler,
             1.januar(2021) til 31.januar(2021),
             forårsaketAvBruker().uaktsomt(unnlates = skalUnnlates()),

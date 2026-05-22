@@ -136,9 +136,10 @@ open class TilbakekrevingE2EBase : E2EBase() {
         val tilbakekrevingId = tilbakekrevingService.hentTilbakekreving(behandlingId)!!.id
         tilbakekrevingService.hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
             if (uttalelse == null) {
-                tilbakekreving.lagreUttalelse(UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL, null, "", Behandler.Saksbehandler("22222222"))
+                tilbakekreving.lagreUttalelse(behandlingId, UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL, null, "", Behandler.Saksbehandler("22222222"))
             } else {
                 tilbakekreving.lagreUttalelse(
+                    behandlingId,
                     UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL,
                     UttalelseInfo(UUID.randomUUID(), LocalDate.now(), "Reddit", uttalelse),
                     null,
@@ -158,7 +159,7 @@ open class TilbakekrevingE2EBase : E2EBase() {
 
     fun allePeriodeIder(behandlingId: UUID): List<UUID> = tilbakekreving(behandlingId)
         .shouldNotBeNull()
-        .tilFeilutbetalingFrontendDto()
+        .tilFeilutbetalingFrontendDto(behandlingId)
         .perioder
         .map(FaktaPeriodeDto::id)
         .map(UUID::fromString)

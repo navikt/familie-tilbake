@@ -57,7 +57,7 @@ class EndringObservatørTest {
         tilbakekreving.håndter(kravgrunnlag())
         tilbakekreving.håndter(fagsysteminfoHendelse())
         tilbakekreving.håndter(brukerinfoHendelse())
-        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, faktastegVurdering())
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), ANSVARLIG_SAKSBEHANDLER, faktastegVurdering())
         endringObservatør.statusoppdateringerFor(tilbakekreving.nåværendeBehandlingId()) shouldBe listOf(
             EndringObservatørOppsamler.Statusoppdatering(
                 ansvarligSaksbehandler = Behandler.Vedtaksløsning.ident,
@@ -94,7 +94,7 @@ class EndringObservatørTest {
             ),
         )
         tilbakekreving.håndter(brukerinfoHendelse())
-        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, faktastegVurdering())
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), ANSVARLIG_SAKSBEHANDLER, faktastegVurdering())
         endringObservatør.statusoppdateringerFor(tilbakekreving.nåværendeBehandlingId()) shouldBe listOf(
             EndringObservatørOppsamler.Statusoppdatering(
                 ansvarligSaksbehandler = Behandler.Vedtaksløsning.ident,
@@ -128,19 +128,19 @@ class EndringObservatørTest {
             ForenkletBehandlingsstatus.OPPRETTET,
         )
         tilbakekreving.håndter(brukerinfoHendelse())
-        tilbakekreving.lagreUttalelse(UttalelseVurdering.JA, null, "", ANSVARLIG_SAKSBEHANDLER)
+        tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.JA, null, "", ANSVARLIG_SAKSBEHANDLER)
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.behandlingsstatus } shouldBe listOf(
             ForenkletBehandlingsstatus.OPPRETTET,
             ForenkletBehandlingsstatus.TIL_BEHANDLING,
             ForenkletBehandlingsstatus.TIL_BEHANDLING,
         )
-        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, faktastegVurdering())
-        tilbakekreving.lagreUttalelse(UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, null, "", ANSVARLIG_SAKSBEHANDLER)
-        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
-        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
-        tilbakekreving.håndterForeslåVedtak(ANSVARLIG_SAKSBEHANDLER)
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), ANSVARLIG_SAKSBEHANDLER, faktastegVurdering())
+        tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, null, "", ANSVARLIG_SAKSBEHANDLER)
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), ANSVARLIG_SAKSBEHANDLER, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), ANSVARLIG_SAKSBEHANDLER, 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
+        tilbakekreving.håndterForeslåVedtak(tilbakekreving.nåværendeBehandlingId(), ANSVARLIG_SAKSBEHANDLER)
 
-        tilbakekreving.håndter(ANSVARLIG_BESLUTTER, godkjenning())
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), ANSVARLIG_BESLUTTER, godkjenning())
         tilbakekreving.håndter(iverksettelse())
         tilbakekreving.håndter(journalføring((behovOppsamler.behovListe.last() as VedtaksbrevJournalføringBehov).brevId, tilbakekreving.eksternFagsak.eksternId))
         tilbakekreving.håndter(distribusjon((behovOppsamler.behovListe.last() as VedtaksbrevDistribusjonBehov).brevId, tilbakekreving.eksternFagsak.eksternId))
@@ -174,23 +174,23 @@ class EndringObservatørTest {
             ForenkletBehandlingsstatus.OPPRETTET,
         )
         tilbakekreving.håndter(brukerinfoHendelse())
-        tilbakekreving.lagreUttalelse(UttalelseVurdering.JA, null, "", ANSVARLIG_SAKSBEHANDLER)
+        tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.JA, null, "", ANSVARLIG_SAKSBEHANDLER)
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.behandlingsstatus } shouldBe listOf(
             ForenkletBehandlingsstatus.OPPRETTET,
             ForenkletBehandlingsstatus.TIL_BEHANDLING,
             ForenkletBehandlingsstatus.TIL_BEHANDLING,
         )
 
-        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, faktastegVurdering())
-        tilbakekreving.lagreUttalelse(UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, null, "", ANSVARLIG_SAKSBEHANDLER)
-        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
-        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
-        tilbakekreving.håndterForeslåVedtak(ANSVARLIG_SAKSBEHANDLER)
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), ANSVARLIG_SAKSBEHANDLER, faktastegVurdering())
+        tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, null, "", ANSVARLIG_SAKSBEHANDLER)
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), ANSVARLIG_SAKSBEHANDLER, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), ANSVARLIG_SAKSBEHANDLER, 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
+        tilbakekreving.håndterForeslåVedtak(tilbakekreving.nåværendeBehandlingId(), ANSVARLIG_SAKSBEHANDLER)
 
         endringObservatør.behandlingEndretEventsFor(fagsakId).last().forrigeBehandlingsstatus shouldBe ForenkletBehandlingsstatus.TIL_BEHANDLING
         endringObservatør.behandlingEndretEventsFor(fagsakId).last().behandlingsstatus shouldBe ForenkletBehandlingsstatus.TIL_GODKJENNING
 
-        tilbakekreving.håndter(ANSVARLIG_BESLUTTER, godkjenning())
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), ANSVARLIG_BESLUTTER, godkjenning())
         tilbakekreving.håndter(iverksettelse())
         tilbakekreving.håndter(journalføring((behovOppsamler.behovListe.last() as VedtaksbrevJournalføringBehov).brevId, fagsakId = tilbakekreving.eksternFagsak.eksternId))
         tilbakekreving.håndter(distribusjon((behovOppsamler.behovListe.last() as VedtaksbrevDistribusjonBehov).brevId, fagsakId = tilbakekreving.eksternFagsak.eksternId))
@@ -216,19 +216,20 @@ class EndringObservatørTest {
             ForenkletBehandlingsstatus.OPPRETTET,
         )
         tilbakekreving.håndter(brukerinfoHendelse())
-        tilbakekreving.lagreUttalelse(UttalelseVurdering.JA, null, "", ANSVARLIG_SAKSBEHANDLER)
+        tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.JA, null, "", ANSVARLIG_SAKSBEHANDLER)
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.behandlingsstatus } shouldBe listOf(
             ForenkletBehandlingsstatus.OPPRETTET,
             ForenkletBehandlingsstatus.TIL_BEHANDLING,
             ForenkletBehandlingsstatus.TIL_BEHANDLING,
         )
-        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, faktastegVurdering())
-        tilbakekreving.lagreUttalelse(UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, null, "", ANSVARLIG_SAKSBEHANDLER)
-        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
-        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
-        tilbakekreving.håndterForeslåVedtak(ANSVARLIG_SAKSBEHANDLER)
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), ANSVARLIG_SAKSBEHANDLER, faktastegVurdering())
+        tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, null, "", ANSVARLIG_SAKSBEHANDLER)
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), ANSVARLIG_SAKSBEHANDLER, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), ANSVARLIG_SAKSBEHANDLER, 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
+        tilbakekreving.håndterForeslåVedtak(tilbakekreving.nåværendeBehandlingId(), ANSVARLIG_SAKSBEHANDLER)
 
         tilbakekreving.håndter(
+            tilbakekreving.nåværendeBehandlingId(),
             ANSVARLIG_BESLUTTER,
             listOf(
                 Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Underkjent("Ikke godkjent"),
@@ -279,7 +280,7 @@ class EndringObservatørTest {
             it.forrigeBehandlingsstatus shouldBe ForenkletBehandlingsstatus.OPPRETTET
         }
 
-        tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, faktastegVurdering())
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), ANSVARLIG_SAKSBEHANDLER, faktastegVurdering())
 
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.behandlingsstatus } shouldBe listOf(
             ForenkletBehandlingsstatus.OPPRETTET,
@@ -290,7 +291,7 @@ class EndringObservatørTest {
             it.forrigeBehandlingsstatus shouldBe ForenkletBehandlingsstatus.TIL_FORHÅNDSVARSEL
         }
 
-        tilbakekreving.sendVarselbrev("Sample text")
+        tilbakekreving.sendVarselbrev(tilbakekreving.nåværendeBehandlingId(), "Sample text")
         tilbakekreving.håndter(behovOppsamler.journalføringEventFor())
         tilbakekreving.håndter(behovOppsamler.distribuerHendelseFor())
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.behandlingsstatus } shouldBe listOf(

@@ -39,16 +39,16 @@ familie-tilbake/           # Rotprosjekt – Spring Boot-applikasjonen
 ### Vanlige kommandoer
 
 ```bash
-# Full bygg inkludert tester
-./gradlew build
+# Full bygg inkludert tester (kjør alltid ktlintFormat først)
+./gradlew ktlintFormat && ./gradlew build
 
 # Bygg uten tester (raskere)
-./gradlew build -xtest
+./gradlew ktlintFormat && ./gradlew build -xtest
 
 # Kjør alle tester
 ./gradlew test
 
-# Kjør tester for ett submodul
+# Kjør tester for en submodul
 ./gradlew :modell:test
 ```
 

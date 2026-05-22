@@ -24,6 +24,7 @@ import no.nav.tilbakekreving.iverksettelse
 import no.nav.tilbakekreving.journalføring
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
+import no.nav.tilbakekreving.nåværendeBehandlingId
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.test.januar
@@ -101,23 +102,27 @@ class DistribuerVedtaTest {
             håndter(kravgrunnlag())
             håndter(fagsysteminfoHendelse())
             håndter(brukerinfoHendelse())
-            lagreUttalelse(UttalelseVurdering.JA, null, "", behandler)
+            lagreUttalelse(nåværendeBehandlingId(), UttalelseVurdering.JA, null, "", behandler)
             håndter(
+                nåværendeBehandlingId(),
                 behandler,
                 faktastegVurdering(),
             )
             håndter(
+                nåværendeBehandlingId(),
                 behandler,
                 periode = 1.januar(2021) til 31.januar(2021),
                 foreldelseVurdering(),
             )
             håndter(
+                nåværendeBehandlingId(),
                 behandler,
                 periode = 1.januar(2021) til 31.januar(2021),
                 vurdering = forårsaketAvBruker().uaktsomt(),
             )
-            håndterForeslåVedtak(behandler)
+            håndterForeslåVedtak(nåværendeBehandlingId(), behandler)
             tilbakekreving.håndter(
+                behandlingId = nåværendeBehandlingId(),
                 beslutter = Behandler.Saksbehandler("Z999999"),
                 vurderinger = godkjenning(),
             )

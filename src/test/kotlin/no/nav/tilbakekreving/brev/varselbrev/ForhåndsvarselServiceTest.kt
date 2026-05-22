@@ -104,7 +104,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
         )
         antallUttalelseinfo shouldBe 0
 
-        val forhåndsvarselDto = tilbakekreving.hentForhåndsvarselFrontendDto()
+        val forhåndsvarselDto = tilbakekreving.hentForhåndsvarselFrontendDto(tilbakekreving.nåværendeBehandlingId())
 
         forhåndsvarselDto.varselbrevDto shouldBe null
         forhåndsvarselDto.brukeruttalelse shouldBe null
@@ -148,7 +148,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
 
         val forhåndsvarsel = tilbakekrevingService
             .hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
-            .shouldNotBeNull().hentForhåndsvarselFrontendDto()
+            .shouldNotBeNull().hentForhåndsvarselFrontendDto(tilbakekreving.nåværendeBehandlingId())
         forhåndsvarsel.forhåndsvarselUnntak shouldBe null
         forhåndsvarsel.utsettUttalelseFrist shouldNotBe null
 
@@ -187,7 +187,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
         }
         val forhåndsvarsel = tilbakekrevingService
             .hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
-            .shouldNotBeNull().hentForhåndsvarselFrontendDto()
+            .shouldNotBeNull().hentForhåndsvarselFrontendDto(tilbakekreving.nåværendeBehandlingId())
         forhåndsvarsel.brukeruttalelse shouldBe null
         forhåndsvarsel.utsettUttalelseFrist shouldBe null
 
@@ -217,7 +217,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
 
         val etterFørsteUtsettelse = tilbakekrevingService
             .hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
-            .shouldNotBeNull().hentForhåndsvarselFrontendDto()
+            .shouldNotBeNull().hentForhåndsvarselFrontendDto(tilbakekreving.nåværendeBehandlingId())
 
         etterFørsteUtsettelse.utsettUttalelseFrist.shouldNotBeNull {
             nyFrist shouldBe LocalDate.of(2025, 11, 15)
@@ -233,7 +233,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
 
         val etterAndreUtsettelse = tilbakekrevingService
             .hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
-            .shouldNotBeNull().hentForhåndsvarselFrontendDto()
+            .shouldNotBeNull().hentForhåndsvarselFrontendDto(tilbakekreving.nåværendeBehandlingId())
         etterAndreUtsettelse.utsettUttalelseFrist.shouldNotBeNull {
             nyFrist shouldBe LocalDate.of(2025, 11, 25)
         }

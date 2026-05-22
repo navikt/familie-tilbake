@@ -54,8 +54,8 @@ class FrontendE2ETest {
 
         tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), behandler, true).status shouldBe Behandlingsstatus.UTREDES
 
-        tilbakekreving.håndter(behandler, faktastegVurdering())
-        tilbakekreving.trengerVarselbrev("Tekst fra saksbehandler")
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, faktastegVurdering())
+        tilbakekreving.trengerVarselbrev(tilbakekreving.nåværendeBehandlingId(), "Tekst fra saksbehandler")
         val varselbrevId = behovOppsamler.behovListe.filterIsInstance<VarselbrevJournalføringBehov>().first().varselbrev.id
         tilbakekreving.håndter(
             VarselbrevJournalføringHendelse(
@@ -72,16 +72,16 @@ class FrontendE2ETest {
                 dokumentInfoId = "321",
             ),
         )
-        tilbakekreving.lagreUttalelse(UttalelseVurdering.JA, null, null, behandler)
+        tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.JA, null, null, behandler)
 
-        tilbakekreving.håndter(behandler, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
-        tilbakekreving.håndter(behandler, 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
         tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), behandler, true).status shouldBe Behandlingsstatus.UTREDES
 
-        tilbakekreving.håndterForeslåVedtak(behandler)
+        tilbakekreving.håndterForeslåVedtak(tilbakekreving.nåværendeBehandlingId(), behandler)
         tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), behandler, true).status shouldBe Behandlingsstatus.FATTER_VEDTAK
 
-        tilbakekreving.håndter(beslutter, godkjenning())
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), beslutter, godkjenning())
         tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), behandler, true).status shouldBe Behandlingsstatus.IVERKSETTER_VEDTAK
 
         tilbakekreving.håndter(

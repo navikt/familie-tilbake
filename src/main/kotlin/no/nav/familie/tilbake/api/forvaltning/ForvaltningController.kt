@@ -157,7 +157,7 @@ class ForvaltningController(
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
                 handling = "Flytter behandling tilbake til Fakta",
             )
-            tilbakekrevingService.flyttBehandlingTilFakta(tilbakekreving.id, saksbehandler)
+            tilbakekrevingService.flyttBehandlingTilFakta(behandlingId, tilbakekreving.id, saksbehandler)
             return Ressurs.success("OK")
         }
 

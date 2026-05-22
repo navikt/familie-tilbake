@@ -187,7 +187,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
             )
         }
 
-        tilbakekreving(behandlingId).faktastegFrontendDto().feilutbetaltePerioder.size shouldBe 1
+        tilbakekreving(behandlingId).faktastegFrontendDto(behandlingId).feilutbetaltePerioder.size shouldBe 1
     }
 
     @Test
@@ -525,7 +525,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
             )
         }
 
-        val periodeId = tilbakekrevingService.hentTilbakekreving(behandlingId).shouldNotBeNull().tilFeilutbetalingFrontendDto().perioder.single().id
+        val periodeId = tilbakekrevingService.hentTilbakekreving(behandlingId).shouldNotBeNull().tilFeilutbetalingFrontendDto(behandlingId).perioder.single().id
         val faktaPerioder = listOf(
             OppdaterFaktaPeriodeDto(
                 id = periodeId,
@@ -571,7 +571,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, årsakTilFeilutbetaling = "original"))
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
 
-        val periodeId = tilbakekrevingService.hentTilbakekreving(behandlingId).shouldNotBeNull().tilFeilutbetalingFrontendDto().perioder.single().id
+        val periodeId = tilbakekrevingService.hentTilbakekreving(behandlingId).shouldNotBeNull().tilFeilutbetalingFrontendDto(behandlingId).perioder.single().id
         val faktaPerioder = listOf(
             OppdaterFaktaPeriodeDto(
                 id = periodeId,

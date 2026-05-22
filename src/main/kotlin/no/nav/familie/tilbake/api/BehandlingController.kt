@@ -182,7 +182,7 @@ class BehandlingController(
                 handling = "Utfører behandlingens aktiv steg og fortsetter den til neste steg",
             )
 
-            tilbakekrevingService.utførSteg(saksbehandler, tilbakekreving.id, behandlingsstegDto, logContext)
+            tilbakekrevingService.utførSteg(behandlingId, saksbehandler, tilbakekreving.id, behandlingsstegDto, logContext)
             return Ressurs.success("OK")
         }
         tilgangskontrollService.validerTilgangBehandlingID(
@@ -332,7 +332,7 @@ class BehandlingController(
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
                 handling = "Saksbehandler angrer på send til beslutter og tar behandling tilbake til saksbehandler",
             )
-            tilbakekrevingService.trekkTilbakeFraGodkjenning(tilbakekreving.id, saksbehandler)
+            tilbakekrevingService.trekkTilbakeFraGodkjenning(behandlingId, tilbakekreving.id, saksbehandler)
             return Ressurs.success("OK")
         }
         tilgangskontrollService.validerTilgangBehandlingID(
@@ -364,7 +364,7 @@ class BehandlingController(
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
                 handling = "Flytter behandling tilbake til Fakta",
             )
-            tilbakekrevingService.flyttBehandlingTilFakta(tilbakekreving.id, saksbehandler)
+            tilbakekrevingService.flyttBehandlingTilFakta(behandlingId, tilbakekreving.id, saksbehandler)
             return Ressurs.success("OK")
         }
         tilgangskontrollService.validerTilgangBehandlingID(

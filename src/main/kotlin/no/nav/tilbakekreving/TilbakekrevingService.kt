@@ -335,6 +335,7 @@ class TilbakekrevingService(
     }
 
     fun utførSteg(
+        behandlingId: UUID,
         behandler: Behandler,
         tilbakekrevingId: String,
         behandlingsstegDto: BehandlingsstegDto,
@@ -342,22 +343,24 @@ class TilbakekrevingService(
     ) {
         return hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
             when (behandlingsstegDto) {
-                is BehandlingsstegForeldelseDto -> behandleForeldelse(tilbakekreving, behandlingsstegDto, behandler)
-                is BehandlingsstegVilkårsvurderingDto -> behandleVilkårsvurdering(tilbakekreving, behandlingsstegDto, behandler)
-                is BehandlingsstegFaktaDto -> behandleFakta(tilbakekreving, behandlingsstegDto, behandler)
-                is BehandlingsstegForeslåVedtaksstegDto -> behandleForeslåVedtak(tilbakekreving, behandlingsstegDto, behandler)
-                is BehandlingsstegFatteVedtaksstegDto -> behandleFatteVedtak(tilbakekreving, behandlingsstegDto, behandler)
+                is BehandlingsstegForeldelseDto -> behandleForeldelse(behandlingId, tilbakekreving, behandlingsstegDto, behandler)
+                is BehandlingsstegVilkårsvurderingDto -> behandleVilkårsvurdering(behandlingId, tilbakekreving, behandlingsstegDto, behandler)
+                is BehandlingsstegFaktaDto -> behandleFakta(behandlingId, tilbakekreving, behandlingsstegDto, behandler)
+                is BehandlingsstegForeslåVedtaksstegDto -> behandleForeslåVedtak(behandlingId, tilbakekreving, behandlingsstegDto, behandler)
+                is BehandlingsstegFatteVedtaksstegDto -> behandleFatteVedtak(behandlingId, tilbakekreving, behandlingsstegDto, behandler)
                 else -> throw Feil("Vurdering for ${behandlingsstegDto.getSteg()} er ikke implementert i ny modell enda.", logContext = logContext)
             }
         }
     }
 
     private fun behandleFakta(
+        behandlingId: UUID,
         tilbakekreving: Tilbakekreving,
         fakta: BehandlingsstegFaktaDto,
         behandler: Behandler,
     ) {
         tilbakekreving.håndter(
+            behandlingId,
             behandler,
             vurdering = Faktasteg.Vurdering(
                 perioder = fakta.feilutbetaltePerioder.map {
@@ -381,12 +384,14 @@ class TilbakekrevingService(
     }
 
     private fun behandleVilkårsvurdering(
+        behandlingId: UUID,
         tilbakekreving: Tilbakekreving,
         vurdering: BehandlingsstegVilkårsvurderingDto,
         behandler: Behandler,
     ) {
         vurdering.vilkårsvurderingsperioder.forEach { periode ->
             tilbakekreving.håndter(
+                behandlingId,
                 behandler,
                 periode.periode,
                 VilkårsvurderingMapperV2.tilVurdering(periode),
@@ -395,12 +400,14 @@ class TilbakekrevingService(
     }
 
     private fun behandleForeldelse(
+        behandlingId: UUID,
         tilbakekreving: Tilbakekreving,
         vurdering: BehandlingsstegForeldelseDto,
         behandler: Behandler,
     ) {
         vurdering.foreldetPerioder.forEach { periode ->
             tilbakekreving.håndter(
+                behandlingId,
                 behandler,
                 periode.periode,
                 when (periode.foreldelsesvurderingstype) {
@@ -414,19 +421,22 @@ class TilbakekrevingService(
     }
 
     private fun behandleForeslåVedtak(
+        behandlingId: UUID,
         tilbakekreving: Tilbakekreving,
         vurdering: BehandlingsstegForeslåVedtaksstegDto,
         behandler: Behandler,
     ) {
-        tilbakekreving.håndterForeslåVedtak(behandler)
+        tilbakekreving.håndterForeslåVedtak(behandlingId, behandler)
     }
 
     private fun behandleFatteVedtak(
+        behandlingId: UUID,
         tilbakekreving: Tilbakekreving,
         vurdering: BehandlingsstegFatteVedtaksstegDto,
         beslutter: Behandler,
     ) {
         tilbakekreving.håndter(
+            behandlingId = behandlingId,
             beslutter = beslutter,
             vurderinger = vurdering.totrinnsvurderinger.map { stegVurdering ->
                 stegVurdering.behandlingssteg to when (stegVurdering.godkjent) {
@@ -437,15 +447,15 @@ class TilbakekrevingService(
         )
     }
 
-    fun flyttBehandlingTilFakta(tilbakekrevingId: String, saksbehandler: Behandler) {
+    fun flyttBehandlingTilFakta(behandlingId: UUID, tilbakekrevingId: String, saksbehandler: Behandler) {
         hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
-            tilbakekreving.håndterNullstilling(saksbehandler)
+            tilbakekreving.håndterNullstilling(behandlingId, saksbehandler)
         }
     }
 
-    fun trekkTilbakeFraGodkjenning(tilbakekrevingId: String, saksbehandler: Behandler) {
+    fun trekkTilbakeFraGodkjenning(behandlingId: UUID, tilbakekrevingId: String, saksbehandler: Behandler) {
         hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
-            tilbakekreving.håndterTrekkTilbakeFraGodkjenning(saksbehandler)
+            tilbakekreving.håndterTrekkTilbakeFraGodkjenning(behandlingId, saksbehandler)
         }
     }
 

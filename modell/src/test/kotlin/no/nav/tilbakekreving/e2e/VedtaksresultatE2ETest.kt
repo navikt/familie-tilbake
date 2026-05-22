@@ -18,6 +18,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatVurder
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksresultatDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
+import no.nav.tilbakekreving.nåværendeBehandlingId
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.test.forsettelig
@@ -43,14 +44,14 @@ class VedtaksresultatE2ETest {
         tilbakekreving.håndter(fagsysteminfoHendelse())
         tilbakekreving.håndter(brukerinfoHendelse())
 
-        tilbakekreving.håndter(behandler, faktastegVurdering())
-        tilbakekreving.trengerVarselbrev("Tekst fra saksbehandler")
-        tilbakekreving.lagreUttalelse(UttalelseVurdering.JA, null, null, behandler)
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, faktastegVurdering())
+        tilbakekreving.trengerVarselbrev(tilbakekreving.nåværendeBehandlingId(), "Tekst fra saksbehandler")
+        tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.JA, null, null, behandler)
 
-        tilbakekreving.håndter(behandler, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
-        tilbakekreving.håndter(behandler, 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().uaktsomt())
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().uaktsomt())
 
-        val resultat = tilbakekreving.hentVedtaksresultatForFrontend()
+        val resultat = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId()).hentVedtaksresultatForFrontend()
 
         resultat.vedtaksresultat shouldBe VedtaksresultatDto.FullTilbakebetaling
         resultat.beregningsresultatsperioder shouldHaveSize 1
@@ -78,18 +79,19 @@ class VedtaksresultatE2ETest {
         tilbakekreving.håndter(fagsysteminfoHendelse())
         tilbakekreving.håndter(brukerinfoHendelse())
 
-        tilbakekreving.håndter(behandler, faktastegVurdering())
-        tilbakekreving.trengerVarselbrev("Tekst fra saksbehandler")
-        tilbakekreving.lagreUttalelse(UttalelseVurdering.JA, null, null, behandler)
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, faktastegVurdering())
+        tilbakekreving.trengerVarselbrev(tilbakekreving.nåværendeBehandlingId(), "Tekst fra saksbehandler")
+        tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.JA, null, null, behandler)
 
-        tilbakekreving.håndter(behandler, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
         tilbakekreving.håndter(
+            tilbakekreving.nåværendeBehandlingId(),
             behandler,
             1.januar(2021) til 31.januar(2021),
             forårsaketAvBruker().uaktsomt(unnlates = skalUnnlates()),
         )
 
-        val resultat = tilbakekreving.hentVedtaksresultatForFrontend()
+        val resultat = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId()).hentVedtaksresultatForFrontend()
 
         resultat.vedtaksresultat shouldBe VedtaksresultatDto.IngenTilbakebetaling
         resultat.beregningsresultatsperioder.first().tilbakekrevingsbeløp shouldBe 0
@@ -111,14 +113,14 @@ class VedtaksresultatE2ETest {
         tilbakekreving.håndter(fagsysteminfoHendelse())
         tilbakekreving.håndter(brukerinfoHendelse())
 
-        tilbakekreving.håndter(behandler, faktastegVurdering())
-        tilbakekreving.trengerVarselbrev("Tekst fra saksbehandler")
-        tilbakekreving.lagreUttalelse(UttalelseVurdering.JA, null, null, behandler)
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, faktastegVurdering())
+        tilbakekreving.trengerVarselbrev(tilbakekreving.nåværendeBehandlingId(), "Tekst fra saksbehandler")
+        tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.JA, null, null, behandler)
 
-        tilbakekreving.håndter(behandler, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
-        tilbakekreving.håndter(behandler, 1.januar(2021) til 31.januar(2021), forårsaketAvNav().burdeForstått())
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, 1.januar(2021) til 31.januar(2021), forårsaketAvNav().burdeForstått())
 
-        val resultat = tilbakekreving.hentVedtaksresultatForFrontend()
+        val resultat = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId()).hentVedtaksresultatForFrontend()
 
         resultat.vedtaksresultat shouldBe VedtaksresultatDto.FullTilbakebetaling
         resultat.beregningsresultatsperioder shouldHaveSize 1
@@ -146,14 +148,14 @@ class VedtaksresultatE2ETest {
         tilbakekreving.håndter(fagsysteminfoHendelse())
         tilbakekreving.håndter(brukerinfoHendelse())
 
-        tilbakekreving.håndter(behandler, faktastegVurdering())
-        tilbakekreving.trengerVarselbrev("Tekst fra saksbehandler")
-        tilbakekreving.lagreUttalelse(UttalelseVurdering.JA, null, null, behandler)
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, faktastegVurdering())
+        tilbakekreving.trengerVarselbrev(tilbakekreving.nåværendeBehandlingId(), "Tekst fra saksbehandler")
+        tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.JA, null, null, behandler)
 
-        tilbakekreving.håndter(behandler, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
-        tilbakekreving.håndter(behandler, 1.januar(2021) til 31.januar(2021), forårsaketAvNav().forstod(aktsomhet = forsettelig()))
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, 1.januar(2021) til 31.januar(2021), forårsaketAvNav().forstod(aktsomhet = forsettelig()))
 
-        val resultat = tilbakekreving.hentVedtaksresultatForFrontend()
+        val resultat = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId()).hentVedtaksresultatForFrontend()
 
         resultat.vedtaksresultat shouldBe VedtaksresultatDto.FullTilbakebetaling
         resultat.beregningsresultatsperioder shouldHaveSize 1

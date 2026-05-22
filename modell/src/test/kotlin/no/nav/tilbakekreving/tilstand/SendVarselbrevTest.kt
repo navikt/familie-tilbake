@@ -15,6 +15,7 @@ import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.kravgrunnlag
+import no.nav.tilbakekreving.nåværendeBehandlingId
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -45,7 +46,7 @@ class SendVarselbrevTest {
         tilbakekreving.håndter(bruker)
         tilbakekreving.tilstand shouldBe TilBehandling
 
-        tilbakekreving.trengerVarselbrev("tekst fra saksbehandler")
+        tilbakekreving.trengerVarselbrev(tilbakekreving.nåværendeBehandlingId(), "tekst fra saksbehandler")
         tilbakekreving.tilstand shouldBe SendVarselbrev
 
         oppsamler.behovListe.size shouldBe 3
@@ -94,7 +95,7 @@ class SendVarselbrevTest {
         tilbakekreving.håndter(bruker)
         tilbakekreving.tilstand shouldBe TilBehandling
 
-        tilbakekreving.trengerVarselbrev("tekst fra saksbehandler")
+        tilbakekreving.trengerVarselbrev(tilbakekreving.nåværendeBehandlingId(), "tekst fra saksbehandler")
         tilbakekreving.tilstand shouldBe SendVarselbrev
 
         tilbakekreving.håndter(Påminnelse(LocalDateTime.now()))

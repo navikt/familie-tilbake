@@ -152,7 +152,7 @@ class DokumentController(
                 auditLoggerEvent = AuditLoggerEvent.ACCESS,
                 handling = "Henter vilkårsvurdering for en gitt behandling",
             )
-            return Ressurs.success(forhåndsvarselService.hentForhåndsvarselinfo(tilbakekreving))
+            return Ressurs.success(forhåndsvarselService.hentForhåndsvarselinfo(behandlingId, tilbakekreving))
         }
         return Ressurs.failure("Fant ingen tilbakekreving til behandlingId $behandlingId")
     }
@@ -174,7 +174,7 @@ class DokumentController(
                 auditLoggerEvent = AuditLoggerEvent.ACCESS,
                 handling = "Henter varselbrevtekst",
             )
-            return Ressurs.success(forhåndsvarselService.hentVarselbrevTekster(tilbakekreving))
+            return Ressurs.success(forhåndsvarselService.hentVarselbrevTekster(behandlingId, tilbakekreving))
         }
         return Ressurs.failure("Fant ingen tilbakekreving til behandlingId $behandlingId")
     }
@@ -201,7 +201,7 @@ class DokumentController(
                 handling = "Utsette frist på uttalelsen",
             )
             tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving ->
-                forhåndsvarselService.utsettUttalelseFrist(saksbehandler, tilbakekreving, dto)
+                forhåndsvarselService.utsettUttalelseFrist(behandlingId, saksbehandler, tilbakekreving, dto)
             }
             return Ressurs.success(null)
         }
@@ -230,7 +230,7 @@ class DokumentController(
                 handling = "Sender ikke forhåndsvarsel",
             )
             tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving ->
-                forhåndsvarselService.håndterForhåndsvarselUnntak(tilbakekreving, dto, saksbehandler)
+                forhåndsvarselService.håndterForhåndsvarselUnntak(behandlingId, tilbakekreving, dto, saksbehandler)
             }
             return Ressurs.success(null)
         }
@@ -339,7 +339,7 @@ class DokumentController(
                 auditLoggerEvent = AuditLoggerEvent.CREATE,
                 handling = "Lagrer brukers uttalelse",
             )
-            forhåndsvarselService.lagreUttalelse(tilbakekreving, brukeruttalelse, saksbehandler)
+            forhåndsvarselService.lagreUttalelse(tilbakekreving, behandlingId, brukeruttalelse, saksbehandler)
             true
         }
         if (håndtert == true) {

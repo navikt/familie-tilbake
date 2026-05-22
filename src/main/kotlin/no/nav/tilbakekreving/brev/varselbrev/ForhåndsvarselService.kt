@@ -65,10 +65,11 @@ class ForhåndsvarselService(
 ) {
     private val logger = TracedLogger.getLogger<ForhåndsvarselService>()
 
-    fun hentVarselbrevTekster(tilbakekreving: Tilbakekreving): Varselbrevtekst {
-        val brevmetadata = opprettMetadata(tilbakekreving.hentVarselbrevInfo())
+    fun hentVarselbrevTekster(behandlingId: UUID, tilbakekreving: Tilbakekreving): Varselbrevtekst {
+        val varselbrevInfo = tilbakekreving.hentVarselbrevInfo(behandlingId)
+        val brevmetadata = opprettMetadata(varselbrevInfo)
         val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(brevmetadata, false)
-        val brevbody = TekstformatererVarselbrev.lagFritekst(opprettVarselbrevsdokument(tilbakekreving.hentVarselbrevInfo(), brevmetadata), false)
+        val brevbody = TekstformatererVarselbrev.lagFritekst(opprettVarselbrevsdokument(varselbrevInfo, brevmetadata), false)
 
         val varselbrevAvsnitter = VarselbrevParser.parse(brevbody)
         val varselbrevtekst = Varselbrevtekst(overskrift = overskrift, avsnitter = varselbrevAvsnitter)
@@ -79,7 +80,7 @@ class ForhåndsvarselService(
         tilbakekreving: Tilbakekreving,
         bestillBrevDto: BestillBrevDto,
     ): ByteArray {
-        val varselbrevInfo = tilbakekreving.hentVarselbrevInfo()
+        val varselbrevInfo = tilbakekreving.hentVarselbrevInfo(bestillBrevDto.behandlingId)
         val varselbrevsdokument = opprettVarselbrevsdokument(
             varselbrevInfo = varselbrevInfo,
             brevmetadata = opprettMetadata(varselbrevInfo),
@@ -100,10 +101,10 @@ class ForhåndsvarselService(
         tilbakekreving: Tilbakekreving,
         bestillBrevDto: BestillBrevDto,
     ) {
-        tilbakekreving.trengerVarselbrev(bestillBrevDto.fritekst)
+        tilbakekreving.trengerVarselbrev(bestillBrevDto.behandlingId, bestillBrevDto.fritekst)
     }
 
-    fun lagreUttalelse(tilbakekreving: Tilbakekreving, brukeruttalelse: BrukeruttalelseDto, behandler: Behandler) {
+    fun lagreUttalelse(tilbakekreving: Tilbakekreving, behandlingId: UUID, brukeruttalelse: BrukeruttalelseDto, behandler: Behandler) {
         when (brukeruttalelse.harBrukerUttaltSeg) {
             HarBrukerUttaltSeg.JA_ETTER_FORHÅNDSVARSEL, HarBrukerUttaltSeg.UNNTAK_ALLEREDE_UTTALT_SEG -> {
                 val uttalelsedetaljer = requireNotNull(brukeruttalelse.uttalelsesdetaljer) {
@@ -114,6 +115,7 @@ class ForhåndsvarselService(
                     }
                 }[0]
                 tilbakekreving.lagreUttalelse(
+                    behandlingId = behandlingId,
                     uttalelseVurdering = UttalelseVurdering.valueOf(brukeruttalelse.harBrukerUttaltSeg.name),
                     uttalelseInfo = UttalelseInfo(UUID.randomUUID(), uttalelsedetaljer.uttalelsesdato, uttalelsedetaljer.hvorBrukerenUttalteSeg, uttalelsedetaljer.uttalelseBeskrivelse),
                     kommentar = null,
@@ -128,6 +130,7 @@ class ForhåndsvarselService(
                 }
 
                 tilbakekreving.lagreUttalelse(
+                    behandlingId = behandlingId,
                     uttalelseVurdering = UttalelseVurdering.valueOf(brukeruttalelse.harBrukerUttaltSeg.name),
                     uttalelseInfo = null,
                     kommentar = kommentar,
@@ -138,7 +141,7 @@ class ForhåndsvarselService(
         }
     }
 
-    fun nyLagreUttalelse(tilbakekreving: Tilbakekreving, uttalelseDto: UttalelseDto, behandler: Behandler) {
+    fun nyLagreUttalelse(behandlingId: UUID, tilbakekreving: Tilbakekreving, uttalelseDto: UttalelseDto, behandler: Behandler) {
         val uttalelseVurdering = when (uttalelseDto.harBrukerUttaltSeg) {
             UttalelseVurderingDto.JA_ETTER_FORHÅNDSVARSEL -> UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL
             UttalelseVurderingDto.NEI_ETTER_FORHÅNDSVARSEL -> UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL
@@ -152,6 +155,7 @@ class ForhåndsvarselService(
         when (uttalelseVurdering) {
             UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, UttalelseVurdering.UNNTAK_ALLEREDE_UTTALT_SEG, UttalelseVurdering.JA -> {
                 tilbakekreving.lagreUttalelse(
+                    behandlingId = behandlingId,
                     uttalelseVurdering = uttalelseVurdering,
                     uttalelseInfo = UttalelseInfo(
                         id = UUID.randomUUID(),
@@ -169,6 +173,7 @@ class ForhåndsvarselService(
             }
             UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL, UttalelseVurdering.UNNTAK_INGEN_UTTALELSE, UttalelseVurdering.NEI -> {
                 tilbakekreving.lagreUttalelse(
+                    behandlingId = behandlingId,
                     uttalelseVurdering = uttalelseVurdering,
                     uttalelseInfo = null,
                     kommentar = requireNotNull(uttalelseDto.beskrivelse) {
@@ -181,15 +186,17 @@ class ForhåndsvarselService(
     }
 
     fun nyUtsettUttalelsesfrist(
+        behandlingId: UUID,
         tilbakekreving: Tilbakekreving,
         utsettFristDto: UpdateUttalelsesfristDto,
         behandler: Behandler,
     ): UttalelsesfristDto {
-        return tilbakekreving.lagreFristUtsettelse(utsettFristDto.nyFrist!!, utsettFristDto.begrunnelse!!, behandler)
+        return tilbakekreving.lagreFristUtsettelse(behandlingId, utsettFristDto.nyFrist!!, utsettFristDto.begrunnelse!!, behandler)
     }
 
-    fun nyLagreForhåndsvarselUnntak(tilbakekreving: Tilbakekreving, unntakDto: UnntakDto, behandler: Behandler) {
+    fun nyLagreForhåndsvarselUnntak(behandlingId: UUID, tilbakekreving: Tilbakekreving, unntakDto: UnntakDto, behandler: Behandler) {
         tilbakekreving.lagreForhåndsvarselUnntak(
+            behandlingId = behandlingId,
             begrunnelseForUnntak = when (unntakDto.begrunnelseForUnntak) {
                 VarslingsunntakDto.IKKE_PRAKTISK_MULIG -> BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG
                 VarslingsunntakDto.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING -> BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING
@@ -201,11 +208,12 @@ class ForhåndsvarselService(
         )
     }
 
-    fun hentForhåndsvarselinfo(tilbakekreving: Tilbakekreving): ForhåndsvarselDto {
-        return tilbakekreving.hentForhåndsvarselFrontendDto()
+    fun hentForhåndsvarselinfo(behandlingId: UUID, tilbakekreving: Tilbakekreving): ForhåndsvarselDto {
+        return tilbakekreving.hentForhåndsvarselFrontendDto(behandlingId)
     }
 
     fun utsettUttalelseFrist(
+        behandlingId: UUID,
         behandler: Behandler,
         tilbakekreving: Tilbakekreving,
         fristUtsettelseDto: FristUtsettelseDto,
@@ -213,15 +221,17 @@ class ForhåndsvarselService(
         requireNotNull(tilbakekreving.brevHistorikk.sisteVarselbrev()) {
             "Kan ikke utsette frist når forhåndsvarsel ikke er sendt"
         }
-        tilbakekreving.lagreFristUtsettelse(fristUtsettelseDto.nyFrist!!, fristUtsettelseDto.begrunnelse!!, behandler = behandler)
+        tilbakekreving.lagreFristUtsettelse(behandlingId, fristUtsettelseDto.nyFrist!!, fristUtsettelseDto.begrunnelse!!, behandler)
     }
 
     fun håndterForhåndsvarselUnntak(
+        behandlingId: UUID,
         tilbakekreving: Tilbakekreving,
         forhåndsvarselUnntakDto: ForhåndsvarselUnntakDto,
         behandler: Behandler,
     ) {
         tilbakekreving.lagreForhåndsvarselUnntak(
+            behandlingId = behandlingId,
             begrunnelseForUnntak = when (forhåndsvarselUnntakDto.begrunnelseForUnntak) {
                 VarslingsUnntak.IKKE_PRAKTISK_MULIG -> BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG
                 VarslingsUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING -> BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING
@@ -399,7 +409,7 @@ class ForhåndsvarselService(
         return "$TITTEL_VARSEL_TILBAKEBETALING ${varselbrevBehov.ytelse.hentYtelsesnavn(Språkkode.NB)}"
     }
 
-    fun nyHentForhåndsvarselinfo(tilbakekreving: Tilbakekreving): ForhaandsvarselResponseDto {
-        return tilbakekreving.nyHentForhåndsvarselFrontendDto()
+    fun nyHentForhåndsvarselinfo(behandlingId: UUID, tilbakekreving: Tilbakekreving): ForhaandsvarselResponseDto {
+        return tilbakekreving.nyHentForhåndsvarselFrontendDto(behandlingId)
     }
 }

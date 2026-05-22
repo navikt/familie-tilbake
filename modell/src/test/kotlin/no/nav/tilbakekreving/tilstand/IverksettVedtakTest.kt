@@ -43,6 +43,7 @@ class IverksettVedtakTest {
         val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingEvent, oppsamler)
 
         tilbakekreving.håndter(
+            behandlingId = tilbakekreving.nåværendeBehandlingId(),
             beslutter = Behandler.Saksbehandler("Z999999"),
             vurderinger = listOf(
                 Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
@@ -61,6 +62,7 @@ class IverksettVedtakTest {
         val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
         val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingEvent, oppsamler)
         tilbakekreving.håndter(
+            behandlingId = tilbakekreving.nåværendeBehandlingId(),
             beslutter = Behandler.Saksbehandler("Z999999"),
             vurderinger = listOf(
                 Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
@@ -82,12 +84,14 @@ class IverksettVedtakTest {
             håndter(kravgrunnlag())
             håndter(fagsysteminfoHendelse())
             håndter(brukerinfoHendelse())
-            lagreUttalelse(UttalelseVurdering.JA, null, "", behandler)
+            lagreUttalelse(nåværendeBehandlingId(), UttalelseVurdering.JA, null, "", behandler)
             håndter(
+                nåværendeBehandlingId(),
                 behandler,
                 faktastegVurdering(),
             )
             håndter(
+                nåværendeBehandlingId(),
                 behandler,
                 periode = 1.januar(2021) til 31.januar(2021),
                 vurdering = Foreldelsesteg.Vurdering.IkkeForeldet(
@@ -95,11 +99,12 @@ class IverksettVedtakTest {
                 ),
             )
             håndter(
+                nåværendeBehandlingId(),
                 behandler,
                 periode = 1.januar(2021) til 31.januar(2021),
                 vurdering = forårsaketAvNav().burdeForstått(aktsomhet = uaktsomt(skalIkkeUnnlates(), ingenReduksjon())),
             )
-            håndterForeslåVedtak(behandler)
+            håndterForeslåVedtak(nåværendeBehandlingId(), behandler)
         }
         return tilbakekreving
     }
@@ -111,6 +116,7 @@ class IverksettVedtakTest {
         val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingEvent, oppsamler)
 
         tilbakekreving.håndter(
+            tilbakekreving.nåværendeBehandlingId(),
             Behandler.Saksbehandler("Z999999"),
             listOf(
                 Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
@@ -137,6 +143,7 @@ class IverksettVedtakTest {
         val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
         val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingEvent, oppsamler)
         tilbakekreving.håndter(
+            tilbakekreving.nåværendeBehandlingId(),
             Behandler.Saksbehandler("Z999999"),
             listOf(
                 Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
@@ -171,6 +178,7 @@ class IverksettVedtakTest {
         endringObservatørOppsamler.vedtakFattetFor(tilbakekreving.nåværendeBehandlingId()).size shouldBe 0
 
         tilbakekreving.håndter(
+            tilbakekreving.nåværendeBehandlingId(),
             Behandler.Saksbehandler("Z999999"),
             listOf(
                 Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
