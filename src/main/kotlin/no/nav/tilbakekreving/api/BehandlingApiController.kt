@@ -17,10 +17,10 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentTypeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselUnntakDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.LogginnslagDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SendForhaandsvarselDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UnntakDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UpdateUttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
@@ -237,7 +237,7 @@ class BehandlingApiController(
         } ?: ResponseEntity.notFound().build()
     }
 
-    override fun behandlingLagreForhaandsvarselUnntak(behandlingId: UUID, unntakDto: ForhaandsvarselUnntakDto): ResponseEntity<Unit> {
+    override fun behandlingLagreForhaandsvarselUnntak(behandlingId: UUID, unntakDto: UnntakDto): ResponseEntity<Unit> {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
             ?: return ResponseEntity.notFound().build()
         val logContext = SecureLog.Context.fra(tilbakekreving)

@@ -32,7 +32,7 @@ import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostRes
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselUnntakDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UnntakDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UpdateUttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseVurderingDto
@@ -189,7 +189,7 @@ class ForhåndsvarselService(
         return tilbakekreving.lagreFristUtsettelse(utsettFristDto.nyFrist!!, utsettFristDto.begrunnelse!!, behandler)
     }
 
-    fun nyLagreForhåndsvarselUnntak(tilbakekreving: Tilbakekreving, unntakDto: ForhaandsvarselUnntakDto, behandler: Behandler) {
+    fun nyLagreForhåndsvarselUnntak(tilbakekreving: Tilbakekreving, unntakDto: UnntakDto, behandler: Behandler) {
         tilbakekreving.lagreForhåndsvarselUnntak(
             begrunnelseForUnntak = when (unntakDto.begrunnelseForUnntak) {
                 VarslingsunntakDto.IKKE_PRAKTISK_MULIG -> BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG
