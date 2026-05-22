@@ -39,6 +39,11 @@ internal interface Saksbehandlingsteg {
 
     fun venter(klokke: Klokke): Venter? = null
 
+    fun status(klokke: Klokke): Behandlingsstegstatus = when {
+        this.erFullstendig(klokke) -> Behandlingsstegstatus.UTFØRT
+        else -> Behandlingsstegstatus.KLAR
+    }
+
     companion object {
         fun Saksbehandlingsteg?.behandlingsstegstatus(
             alleSynligeSteg: List<Saksbehandlingsteg>,
@@ -51,8 +56,7 @@ internal interface Saksbehandlingsteg {
                 this == null -> Behandlingsstegstatus.VENTER
                 this.erUnderkjent() -> Behandlingsstegstatus.TILBAKEFØRT
                 tidligereStegManglerBehandling -> Behandlingsstegstatus.VENTER
-                this.erFullstendig(klokke) -> Behandlingsstegstatus.UTFØRT
-                else -> Behandlingsstegstatus.KLAR
+                else -> this.status(klokke)
             }
         }
 

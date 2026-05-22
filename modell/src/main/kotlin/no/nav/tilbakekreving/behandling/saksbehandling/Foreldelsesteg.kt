@@ -16,6 +16,7 @@ import no.nav.tilbakekreving.entities.ForeldelsesvurderingEntity
 import no.nav.tilbakekreving.entities.ForeldelsesvurderingType
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import java.time.LocalDate
@@ -33,6 +34,11 @@ class Foreldelsesteg(
     override fun erFullstendig(klokke: Klokke): Boolean = vurdertePerioder.all { it.vurdering != Vurdering.IkkeVurdert }
 
     private fun erAutomatiskVurdert(): Boolean = vurdertePerioder.any { it.vurdering is Vurdering.AutomatiskIkkeForeldet }
+
+    override fun status(klokke: Klokke): Behandlingsstegstatus {
+        if (erAutomatiskVurdert()) return Behandlingsstegstatus.AUTOUTFØRT
+        return super.status(klokke)
+    }
 
     override fun erUnderkjent(): Boolean {
         return underkjent
