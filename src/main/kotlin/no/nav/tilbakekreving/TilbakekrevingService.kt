@@ -7,7 +7,6 @@ import no.nav.familie.tilbake.integration.pdl.PdlClient
 import no.nav.familie.tilbake.integration.pdl.internal.PdlKjønnType
 import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstidspunkt
 import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstype
-import no.nav.familie.tilbake.kontrakter.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
@@ -453,7 +452,7 @@ class TilbakekrevingService(
     fun hentBehandlingsinfo(
         tilbakekreving: Tilbakekreving,
     ): List<Behandlingsinfo> {
-        val behandlingsinformasjon = tilbakekreving.behandlingHistorikk.nåværende().entry.hentBehandlingsinformasjon()
+        val behandlingsinformasjon = tilbakekreving.hentBehandlingsinformasjon()
         return listOf(
             Behandlingsinfo(
                 eksternKravgrunnlagId = null,
@@ -467,40 +466,13 @@ class TilbakekrevingService(
         )
     }
 
-    private fun validerBrevmottaker(tilbakekreving: Tilbakekreving) {
-        val behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id
-
-        val personIdenter = listOfNotNull(tilbakekreving.bruker!!.aktør.ident)
-        if (personIdenter.isEmpty()) return
-        val strengtFortroligePersonIdenter =
-            pdlClient.hentAdressebeskyttelseBolk(personIdenter, tilbakekreving.hentFagsysteminfo().tilFagsystemDTO(), SecureLog.Context.fra(tilbakekreving))
-                .filter { (_, person) ->
-                    person.adressebeskyttelse.any { adressebeskyttelse ->
-                        adressebeskyttelse.gradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG ||
-                            adressebeskyttelse.gradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND
-                    }
-                }.map { it.key }
-
-        if (strengtFortroligePersonIdenter.isNotEmpty()) {
-            val melding =
-                "Behandlingen (id: $behandlingId) inneholder person med strengt fortrolig adressebeskyttelse og kan ikke kombineres med manuelle brevmottakere."
-            val frontendFeilmelding =
-                "Behandlingen inneholder person med strengt fortrolig adressebeskyttelse og kan ikke kombineres med manuelle brevmottakere."
-            throw Feil(
-                message = melding,
-                frontendFeilmelding = frontendFeilmelding,
-                logContext = SecureLog.Context.fra(tilbakekreving),
-            )
-        }
-    }
-
     fun bestillBrev(
         tilbakekreving: Tilbakekreving,
         bestillBrevDto: BestillBrevDto,
     ) {
         when (bestillBrevDto.brevmalkode) {
             Dokumentmalstype.VARSEL -> {
-                tilbakekreving.behandlingHistorikk.nåværende().entry.nullstillForhåndsvarselUnntakOgUttalelse()
+                tilbakekreving.hentBehandling(bestillBrevDto.behandlingId).nullstillForhåndsvarselUnntakOgUttalelse()
                 forhåndsvarselService.bestillVarselbrev(tilbakekreving, bestillBrevDto)
             }
             else -> throw Feil(

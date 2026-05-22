@@ -66,7 +66,7 @@ class Under4xRettsgebyrTest : TilbakekrevingE2EBase() {
             stegData = BehandlingsstegGenerator.lagVilkårsvurderingUnder4xRettsgebyrIngenTilbakekreving(vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT),
         )
 
-        val behandlingResultat = tilbakekreving(behandlingId).behandlingHistorikk.nåværende().entry.beregnForFrontend()
+        val behandlingResultat = behandling(behandlingId).beregnForFrontend()
 
         behandlingResultat.beregningsresultatsperioder.firstOrNull()?.tilbakekrevingsbeløp shouldBe BigDecimal.ZERO
         behandlingResultat.vedtaksresultat shouldBe Vedtaksresultat.INGEN_TILBAKEBETALING
@@ -99,7 +99,7 @@ class Under4xRettsgebyrTest : TilbakekrevingE2EBase() {
             stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(),
         )
 
-        val behandlingFørVilkårsvurdering = tilbakekreving(behandlingId).behandlingHistorikk.nåværende().entry.beregnForFrontend()
+        val behandlingFørVilkårsvurdering = behandling(behandlingId).beregnForFrontend()
 
         utførSteg(
             ident = ansvarligSaksbehandler.ident,
@@ -107,7 +107,7 @@ class Under4xRettsgebyrTest : TilbakekrevingE2EBase() {
             stegData = BehandlingsstegGenerator.lagVilkårsvurderingUnder4xRettsgebyrFullTilbakekreving(vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER),
         )
 
-        val behandlingEtterVilkårsvurdering = tilbakekreving(behandlingId).behandlingHistorikk.nåværende().entry.beregnForFrontend()
+        val behandlingEtterVilkårsvurdering = behandling(behandlingId).beregnForFrontend()
 
         behandlingEtterVilkårsvurdering.beregningsresultatsperioder.firstOrNull()?.tilbakekrevingsbeløp shouldBe behandlingFørVilkårsvurdering.beregningsresultatsperioder.firstOrNull()?.tilbakekrevingsbeløp
         behandlingEtterVilkårsvurdering.vedtaksresultat shouldBe Vedtaksresultat.FULL_TILBAKEBETALING
@@ -155,7 +155,7 @@ class Under4xRettsgebyrTest : TilbakekrevingE2EBase() {
             ),
         )
 
-        val vilkårsvurderingDto = tilbakekreving(behandlingId).behandlingHistorikk.nåværende().entry.vilkårsvurderingsstegDto.tilFrontendDto()
+        val vilkårsvurderingDto = behandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto()
         vilkårsvurderingDto.perioder.single().vilkårsvurderingsresultatInfo?.aktsomhet?.unnlates4Rettsgebyr shouldBe SkalUnnlates.OVER_4_RETTSGEBYR
     }
 
@@ -214,7 +214,7 @@ class Under4xRettsgebyrTest : TilbakekrevingE2EBase() {
             ),
         )
 
-        val vilkårsvurderingDto = tilbakekreving(behandlingId).behandlingHistorikk.nåværende().entry.vilkårsvurderingsstegDto.tilFrontendDto()
+        val vilkårsvurderingDto = behandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto()
         vilkårsvurderingDto.perioder.single().vilkårsvurderingsresultatInfo?.aktsomhet?.unnlates4Rettsgebyr shouldBe SkalUnnlates.OVER_4_RETTSGEBYR
         vilkårsvurderingDto.perioder.single().vilkårsvurderingsresultatInfo?.aktsomhet?.særligeGrunnerTilReduksjon shouldBe true
         vilkårsvurderingDto.perioder.single().vilkårsvurderingsresultatInfo?.aktsomhet?.andelTilbakekreves shouldBe 50.prosent
@@ -262,7 +262,7 @@ class Under4xRettsgebyrTest : TilbakekrevingE2EBase() {
             ),
         )
 
-        val vilkårsvurderingDto = tilbakekreving(behandlingId).behandlingHistorikk.nåværende().entry.vilkårsvurderingsstegDto.tilFrontendDto()
+        val vilkårsvurderingDto = behandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto()
         vilkårsvurderingDto.perioder.single().vilkårsvurderingsresultatInfo?.aktsomhet?.unnlates4Rettsgebyr shouldBe SkalUnnlates.OVER_4_RETTSGEBYR
         vilkårsvurderingDto.perioder.single().vilkårsvurderingsresultatInfo?.aktsomhet?.særligeGrunnerTilReduksjon shouldBe true
         vilkårsvurderingDto.perioder.single().vilkårsvurderingsresultatInfo?.aktsomhet?.andelTilbakekreves shouldBe 50.prosent

@@ -126,8 +126,7 @@ open class TilbakekrevingE2EBase : E2EBase() {
         fagsystemId: String,
         fagsystem: FagsystemDTO,
     ): UUID? {
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(fagsystem, fagsystemId) ?: return null
-        return tilbakekreving.frontendDtoForBehandling(Behandler.Saksbehandler("A123456"), true).behandlingId
+        return tilbakekrevingService.hentTilbakekreving(fagsystem, fagsystemId)?.nåværendeBehandlingId()
     }
 
     fun lagreUttalelse(
@@ -154,7 +153,7 @@ open class TilbakekrevingE2EBase : E2EBase() {
     fun tilbakekreving(fagsystem: FagsystemDTO, fagsystemId: String): Tilbakekreving? = tilbakekrevingService.hentTilbakekreving(fagsystem, fagsystemId)
 
     fun behandling(behandlingId: UUID): Behandling {
-        return tilbakekreving(behandlingId).behandlingHistorikk.nåværende().entry
+        return tilbakekreving(behandlingId).hentBehandling(behandlingId)
     }
 
     fun allePeriodeIder(behandlingId: UUID): List<UUID> = tilbakekreving(behandlingId)
@@ -252,5 +251,9 @@ open class TilbakekrevingE2EBase : E2EBase() {
         return jdbcTemplate.query("SELECT count(1) AS antall FROM kravgrunnlag_buffer WHERE lest=false AND utenfor_scope=false;") { rs, _ ->
             rs.getInt("antall")
         }.single()
+    }
+
+    companion object {
+        fun Tilbakekreving.nåværendeBehandlingId() = hentBehandlingsinformasjon().behandlingId
     }
 }

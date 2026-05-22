@@ -25,5 +25,5 @@ sealed class ModellFeil(
 
 data class Sporing(
     val fagsakId: String,
-    val behandlingId: String,
+    val behandlingId: String?,
 )

@@ -21,6 +21,7 @@ import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
+import no.nav.tilbakekreving.nåværendeBehandlingId
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.test.januar
@@ -210,6 +211,6 @@ class AutomatiskForeldelseE2ETest {
     }
 
     private fun foreldelsePerioderFor(tilbakekreving: Tilbakekreving) =
-        tilbakekreving.behandlingHistorikk.nåværende().entry
+        tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId())
             .foreldelsestegDto.tilFrontendDto().foreldetPerioder
 }

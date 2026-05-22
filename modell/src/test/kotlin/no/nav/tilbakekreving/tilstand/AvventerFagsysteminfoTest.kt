@@ -12,6 +12,7 @@ import no.nav.tilbakekreving.defaultFeatures
 import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.fagsysteminfoHendelse
 import no.nav.tilbakekreving.kravgrunnlag
+import no.nav.tilbakekreving.nåværendeBehandlingId
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -55,7 +56,7 @@ class AvventerFagsysteminfoTest {
 
         tilbakekreving.håndter(fagsysteminfoHendelse(behandlendeEnhet = "0425"))
 
-        val enhet = tilbakekreving.behandlingHistorikk.nåværende().entry.hentBehandlingsinformasjon().enhet
+        val enhet = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId()).hentBehandlingsinformasjon().enhet
         enhet?.kode shouldBe "0425"
         enhet?.navn shouldBe "Nav Solør"
     }

@@ -24,6 +24,7 @@ import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
+import no.nav.tilbakekreving.nåværendeBehandlingId
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.test.januar
@@ -51,7 +52,7 @@ class FrontendE2ETest {
         tilbakekreving.håndter(fagsysteminfoHendelse())
         tilbakekreving.håndter(brukerinfoHendelse())
 
-        tilbakekreving.frontendDtoForBehandling(behandler, true).status shouldBe Behandlingsstatus.UTREDES
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), behandler, true).status shouldBe Behandlingsstatus.UTREDES
 
         tilbakekreving.håndter(behandler, faktastegVurdering())
         tilbakekreving.trengerVarselbrev("Tekst fra saksbehandler")
@@ -75,13 +76,13 @@ class FrontendE2ETest {
 
         tilbakekreving.håndter(behandler, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
         tilbakekreving.håndter(behandler, 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
-        tilbakekreving.frontendDtoForBehandling(behandler, true).status shouldBe Behandlingsstatus.UTREDES
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), behandler, true).status shouldBe Behandlingsstatus.UTREDES
 
         tilbakekreving.håndterForeslåVedtak(behandler)
-        tilbakekreving.frontendDtoForBehandling(behandler, true).status shouldBe Behandlingsstatus.FATTER_VEDTAK
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), behandler, true).status shouldBe Behandlingsstatus.FATTER_VEDTAK
 
         tilbakekreving.håndter(beslutter, godkjenning())
-        tilbakekreving.frontendDtoForBehandling(behandler, true).status shouldBe Behandlingsstatus.IVERKSETTER_VEDTAK
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), behandler, true).status shouldBe Behandlingsstatus.IVERKSETTER_VEDTAK
 
         tilbakekreving.håndter(
             IverksettelseHendelse(
@@ -90,7 +91,7 @@ class FrontendE2ETest {
                 behandlingId = UUID.randomUUID(),
             ),
         )
-        tilbakekreving.frontendDtoForBehandling(behandler, true).status shouldBe Behandlingsstatus.JOURNALFØR_VEDTAK
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), behandler, true).status shouldBe Behandlingsstatus.JOURNALFØR_VEDTAK
         tilbakekreving.håndter(
             JournalføringHendelse(
                 brevId = (behovOppsamler.behovListe.last() as VedtaksbrevJournalføringBehov).brevId,
@@ -100,7 +101,7 @@ class FrontendE2ETest {
                 fagsakId = tilbakekreving.eksternFagsak.eksternId,
             ),
         )
-        tilbakekreving.frontendDtoForBehandling(behandler, true).status shouldBe Behandlingsstatus.DISTRIUBER_VEDTAK
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), behandler, true).status shouldBe Behandlingsstatus.DISTRIUBER_VEDTAK
         tilbakekreving.håndter(
             DistribusjonHendelse(
                 behandlingId = UUID.randomUUID(),
@@ -110,6 +111,6 @@ class FrontendE2ETest {
                 dokumentInfoId = "321",
             ),
         )
-        tilbakekreving.frontendDtoForBehandling(behandler, true).status shouldBe Behandlingsstatus.AVSLUTTET
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), behandler, true).status shouldBe Behandlingsstatus.AVSLUTTET
     }
 }

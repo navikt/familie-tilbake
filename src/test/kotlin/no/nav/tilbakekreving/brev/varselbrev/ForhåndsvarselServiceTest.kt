@@ -53,7 +53,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
     @Test
     fun `henter tekster til varselbrev når det skal sendes forhåndsvarsel`() {
         val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
-        val tekster = dokumentController.hentForhåndsvarselTekst(tilbakekreving.behandlingHistorikk.nåværende().entry.id)
+        val tekster = dokumentController.hentForhåndsvarselTekst(tilbakekreving.nåværendeBehandlingId())
 
         tekster.data.shouldNotBeNull()
         tekster.data.avsnitter.shouldNotBeEmpty()
@@ -91,12 +91,10 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
     @Test
     fun `forhåndsvarsel detaljene er null når varselbrev ikke er sendt`() {
         val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
-        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
-
         val antall = jdbcTemplate.queryForObject(
             "SELECT COUNT(*) FROM tilbakekreving_brukeruttalelse WHERE behandling_ref = ?",
             Int::class.java,
-            behandling.id,
+            tilbakekreving.nåværendeBehandlingId(),
         )
         antall shouldBe 0
 
@@ -116,9 +114,8 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
     @Test
     fun `sende forhåndsvarsel skal oppdatere varselbrevet i brevhistorikk med tid og journlaførtId`() {
         val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
-        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
         val bestillBrevDto = BestillBrevDto(
-            behandlingId = behandling.id,
+            behandlingId = tilbakekreving.nåværendeBehandlingId(),
             brevmalkode = Dokumentmalstype.VARSEL,
             fritekst = "Tekst fra saksbehandler",
         )
@@ -137,17 +134,16 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
     @MethodSource("uttalelseGyldigeCases")
     fun `gyldige brukeruttalelser lagres riktig`(case: GyldigBrukeruttalelseCase) {
         val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
-        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
 
         val bestillBrevDto = BestillBrevDto(
-            behandlingId = behandling.id,
+            behandlingId = tilbakekreving.nåværendeBehandlingId(),
             brevmalkode = Dokumentmalstype.VARSEL,
             fritekst = "Tekst fra saksbehandler",
         )
         dokumentController.bestillBrev(bestillBrevDto)
 
         somSaksbehandler("Z999999") {
-            dokumentController.lagreBrukeruttalelse(behandling.id, case.input)
+            dokumentController.lagreBrukeruttalelse(tilbakekreving.nåværendeBehandlingId(), case.input)
         }
 
         val forhåndsvarsel = tilbakekrevingService
@@ -167,9 +163,8 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
     @MethodSource("uttalelseUgyldigeCases")
     fun `ugyldige brukeruttalelser gir valideringsfeil`(case: UgyldigBrukeruttalelseCase) {
         val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
-        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
         val bestillBrevDto = BestillBrevDto(
-            behandlingId = behandling.id,
+            behandlingId = tilbakekreving.nåværendeBehandlingId(),
             brevmalkode = Dokumentmalstype.VARSEL,
             fritekst = "Tekst fra saksbehandler",
         )
@@ -177,7 +172,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
 
         shouldThrow<Exception> {
             somSaksbehandler("Z999999") {
-                dokumentController.lagreBrukeruttalelse(behandling.id, case.input)
+                dokumentController.lagreBrukeruttalelse(tilbakekreving.nåværendeBehandlingId(), case.input)
             }
         }.message shouldBe case.forventetFeilmelding
     }
@@ -186,10 +181,9 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
     @MethodSource("forhåndsvarseUnntakCases")
     fun `forhåndsvarsel unntak lagres og hentes riktig`(case: ForhåndsvarselUnntakCase) {
         val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
-        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
 
         somSaksbehandler("Z999999") {
-            dokumentController.forhåndsvarselUnntak(behandling.id, case.input)
+            dokumentController.forhåndsvarselUnntak(tilbakekreving.nåværendeBehandlingId(), case.input)
         }
         val forhåndsvarsel = tilbakekrevingService
             .hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
@@ -206,9 +200,8 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
     @Test
     fun `utsettelse av frist lagres og hentes riktig`() {
         val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
-        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
         val bestillBrevDto = BestillBrevDto(
-            behandlingId = behandling.id,
+            behandlingId = tilbakekreving.nåværendeBehandlingId(),
             brevmalkode = Dokumentmalstype.VARSEL,
             fritekst = "Tekst fra saksbehandler",
         )
@@ -219,7 +212,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             "Advokat vil ha mer tid",
         )
         somSaksbehandler("Z999999") {
-            dokumentController.utsettUttalelseFrist(behandling.id, førsteFrist)
+            dokumentController.utsettUttalelseFrist(tilbakekreving.nåværendeBehandlingId(), førsteFrist)
         }
 
         val etterFørsteUtsettelse = tilbakekrevingService
@@ -235,7 +228,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             "Advokat vil ha enda mer tid",
         )
         somSaksbehandler("Z999999") {
-            dokumentController.utsettUttalelseFrist(behandling.id, andreFrist)
+            dokumentController.utsettUttalelseFrist(tilbakekreving.nåværendeBehandlingId(), andreFrist)
         }
 
         val etterAndreUtsettelse = tilbakekrevingService

@@ -252,3 +252,5 @@ fun distribusjon(brevId: UUID, fagsakId: String): DistribusjonHendelse = Distrib
     journalpostId = "123",
     dokumentInfoId = "321",
 )
+
+fun Tilbakekreving.nåværendeBehandlingId() = hentBehandlingsinformasjon().behandlingId

@@ -293,6 +293,6 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
 
-        return tilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull().behandlingHistorikk.nåværende().entry.id
+        return tilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull().nåværendeBehandlingId()
     }
 }

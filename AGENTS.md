@@ -62,7 +62,7 @@ familie-tilbake/           # Rotprosjekt – Spring Boot-applikasjonen
 ./gradlew ktlintFormat
 ```
 
-Ktlint kjøres på alle pull requests i CI. **Alltid kjør `ktlintCheck` eller `ktlintFormat` før du committer endringer.**
+Ktlint kjøres på alle pull requests i CI. **Alltid kjør `ktlintFormat` før du committer endringer – aldri `ktlintCheck` alene.**
 
 ## Kodestilregler
 

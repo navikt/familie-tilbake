@@ -22,6 +22,7 @@ import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
+import no.nav.tilbakekreving.nåværendeBehandlingId
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.test.februar
@@ -88,7 +89,7 @@ class TilleggsstønaderE2ETest {
         tilbakekreving.håndter(behandler, faktastegVurdering(1.januar(2021) til 31.januar(2021)))
         tilbakekreving.håndter(behandler, faktastegVurdering(1.februar(2021) til 28.februar(2021)))
 
-        val foreldelsesstegDto = tilbakekreving.behandlingHistorikk.nåværende().entry.foreldelsestegDto.tilFrontendDto()
+        val foreldelsesstegDto = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId()).foreldelsestegDto.tilFrontendDto()
         foreldelsesstegDto.foreldetPerioder shouldBe listOf(
             VurdertForeldelsesperiodeDto(
                 periode = 1.januar(2021) til 31.januar(2021),
@@ -111,7 +112,7 @@ class TilleggsstønaderE2ETest {
         tilbakekreving.håndter(behandler, 1.januar(2021) til 31.januar(2021), Foreldelsesteg.Vurdering.IkkeForeldet(""))
         tilbakekreving.håndter(behandler, 1.februar(2021) til 28.februar(2021), Foreldelsesteg.Vurdering.IkkeForeldet(""))
 
-        val vilkårsvurderingsstegDto = tilbakekreving.behandlingHistorikk.nåværende().entry.vilkårsvurderingsstegDto.tilFrontendDto()
+        val vilkårsvurderingsstegDto = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId()).vilkårsvurderingsstegDto.tilFrontendDto()
         vilkårsvurderingsstegDto.perioder shouldBe listOf(
             VurdertVilkårsvurderingsperiodeDto(
                 periode = 1.januar(2021) til 31.januar(2021),

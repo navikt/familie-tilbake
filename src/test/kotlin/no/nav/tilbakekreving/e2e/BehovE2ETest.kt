@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.e2e
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.api.v2.MottakerDto
@@ -100,6 +101,10 @@ class BehovE2ETest : TilbakekrevingE2EBase() {
             ),
         )
 
-        tilbakekreving(FagsystemDTO.TS, fagsystemId)?.frontendDtoForBehandling(Behandler.Vedtaksløsning, false)?.enhetskode shouldBe "0425"
+        tilbakekreving(FagsystemDTO.TS, fagsystemId)?.frontendDtoForBehandling(
+            behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull(),
+            behandler = Behandler.Vedtaksløsning,
+            kanBeslutte = false,
+        )?.enhetskode shouldBe "0425"
     }
 }

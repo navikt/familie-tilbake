@@ -237,7 +237,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         )
 
         val tilbakekreving = tilbakekreving(behandlingId)
-        val vilkårsvurderingFrontendDto = tilbakekreving.behandlingHistorikk.nåværende().entry.vilkårsvurderingsstegDto.tilFrontendDto()
+        val vilkårsvurderingFrontendDto = tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto()
         vilkårsvurderingFrontendDto.perioder.size shouldBe 1
         vilkårsvurderingFrontendDto.perioder.single().begrunnelse shouldBe "Jepp"
         vilkårsvurderingFrontendDto.perioder.single().vilkårsvurderingsresultatInfo?.godTro?.begrunnelse shouldBe "Japp"
@@ -316,7 +316,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         )
 
         val tilbakekreving = tilbakekreving(behandlingId)
-        val vilkårsvurderingFrontendDto = tilbakekreving.behandlingHistorikk.nåværende().entry.vilkårsvurderingsstegDto.tilFrontendDto()
+        val vilkårsvurderingFrontendDto = tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto()
         vilkårsvurderingFrontendDto.perioder.size shouldBe 2
         vilkårsvurderingFrontendDto.perioder[0].begrunnelse shouldBe "Jepp1"
         vilkårsvurderingFrontendDto.perioder[0].vilkårsvurderingsresultatInfo?.godTro?.begrunnelse shouldBe "Japp1"
@@ -378,7 +378,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         )
 
         val tilbakekreving = tilbakekreving(behandlingId)
-        val vilkårsvurderingFrontendDto = tilbakekreving.behandlingHistorikk.nåværende().entry.vilkårsvurderingsstegDto.tilFrontendDto()
+        val vilkårsvurderingFrontendDto = tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto()
         vilkårsvurderingFrontendDto.perioder.size shouldBe 1
         vilkårsvurderingFrontendDto.perioder.single().begrunnelse shouldBe "Jepp"
         vilkårsvurderingFrontendDto.perioder.single().vilkårsvurderingsresultatInfo?.aktsomhet?.begrunnelse shouldBe "Japp"

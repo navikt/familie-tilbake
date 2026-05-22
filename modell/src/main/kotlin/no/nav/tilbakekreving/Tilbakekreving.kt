@@ -15,6 +15,7 @@ import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.BehandlingHistorikk
 import no.nav.tilbakekreving.behandling.BehandlingObservatør
+import no.nav.tilbakekreving.behandling.Behandlingsinformasjon
 import no.nav.tilbakekreving.behandling.Enhet
 import no.nav.tilbakekreving.behandling.UttalelseInfo
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
@@ -40,7 +41,6 @@ import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.endring.EndringObservatør
 import no.nav.tilbakekreving.entities.TilbakekrevingEntity
-import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
@@ -83,7 +83,7 @@ import java.util.UUID
 class Tilbakekreving internal constructor(
     val id: String,
     val eksternFagsak: EksternFagsak,
-    val behandlingHistorikk: BehandlingHistorikk,
+    private val behandlingHistorikk: BehandlingHistorikk,
     val kravgrunnlagHistorikk: KravgrunnlagHistorikk,
     val brevHistorikk: BrevHistorikk,
     val opprettet: LocalDateTime,
@@ -244,8 +244,19 @@ class Tilbakekreving internal constructor(
         }
     }
 
-    fun sporingsinformasjon(): Sporing {
-        return Sporing(eksternFagsak.eksternId, behandlingHistorikk.nåværende().entry.id.toString())
+    fun sporingsinformasjon(behandlingId: UUID? = null): Sporing {
+        return Sporing(
+            eksternFagsak.eksternId,
+            behandlingId?.toString() ?: if (behandlingHistorikk.harBehandling()) {
+                behandlingHistorikk.nåværende().entry.id.toString()
+            } else {
+                null
+            },
+        )
+    }
+
+    fun hentBehandling(behandlingId: UUID): Behandling {
+        return behandlingHistorikk.finn(behandlingId, Sporing(id, behandlingId.toString())).entry
     }
 
     fun håndterNullstilling(behandler: Behandler) {
@@ -403,9 +414,7 @@ class Tilbakekreving internal constructor(
         )
     }
 
-    fun hentFagsysteminfo(): Ytelse {
-        return eksternFagsak.ytelse
-    }
+    fun hentBehandlingsinformasjon(): Behandlingsinformasjon = behandlingHistorikk.nåværende().entry.hentBehandlingsinformasjon()
 
     fun hentVedtaksbrevInfo(behandlingId: UUID): VedtaksbrevInfo {
         return behandlingHistorikk.entry(behandlingId).hentVedtaksbrevInfo(
@@ -487,12 +496,15 @@ class Tilbakekreving internal constructor(
         }
     }
 
+    fun påminnNåværendePeriode() {
+        behandlingHistorikk.nåværende().entry.håndterPåminnelse(tilstand, this)
+    }
+
     fun frontendDtoForBehandling(
+        behandlingId: UUID,
         behandler: Behandler,
         kanBeslutte: Boolean,
-    ) = behandlingHistorikk.nåværende().entry.tilFrontendDto(tilstand, behandler, kanBeslutte)
-
-    fun frontendDtoForBehandlingsoppsummering() = behandlingHistorikk.tilOppsummeringDto(tilstand)
+    ) = behandlingHistorikk.finn(behandlingId, sporingsinformasjon(behandlingId)).entry.tilFrontendDto(tilstand, behandler, kanBeslutte)
 
     fun tilEntity(): TilbakekrevingEntity {
         return TilbakekrevingEntity(

@@ -17,7 +17,6 @@ import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.FagsystemUtil
 import no.nav.tilbakekreving.Observatør
-import no.nav.tilbakekreving.Rettsgebyr
 import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.TilbakekrevingService
@@ -201,10 +200,9 @@ class ForvaltningController(
     ): Ressurs<List<Behandlingsinfo>> {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype), eksternFagsakId)
         if (tilbakekreving != null) {
-            val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
             tilgangskontrollService.validerTilgangTilbakekreving(
                 tilbakekreving = tilbakekreving,
-                behandlingId = behandling.id,
+                behandlingId = null,
                 minimumBehandlerrolle = Behandlerrolle.FORVALTER,
                 auditLoggerEvent = AuditLoggerEvent.NONE,
                 handling = "Henter forvaltningsinformasjon",
@@ -345,17 +343,6 @@ class ForvaltningController(
                 tilbakekreving.tilEntity()
             }
         }
-    }
-
-    @Operation(summary = "Finner saker over 4 rettsgebyr")
-    @GetMapping("/alle-over-4-rettsgebyr")
-    fun alleSakerOver4Rettsgebyr(): Ressurs<List<String>> {
-        val urler = tilbakekrevingRepository
-            .hentAlleTilbakekrevinger()?.map { it.fraEntity(Observatør(), bigQueryService, endringObservatør, features = featureService.modellFeatures, SystemKlokke) }
-            ?.filter { it.behandlingHistorikk.nåværende().entry.totaltFeilutbetaltBeløp() >= (Rettsgebyr.rettsgebyr * 4).toBigDecimal() }
-            ?.map { it.hentTilbakekrevingUrl(applicationProperties.frontendUrl) }
-            ?: emptyList()
-        return Ressurs.success(urler)
     }
 
     @Operation(summary = "Kjør en påminnelse for alle saker i tilstand selv om de ikke er ")

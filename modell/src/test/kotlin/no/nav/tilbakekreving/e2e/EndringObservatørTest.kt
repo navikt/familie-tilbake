@@ -34,6 +34,7 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
+import no.nav.tilbakekreving.nåværendeBehandlingId
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.test.januar
@@ -57,7 +58,7 @@ class EndringObservatørTest {
         tilbakekreving.håndter(fagsysteminfoHendelse())
         tilbakekreving.håndter(brukerinfoHendelse())
         tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, faktastegVurdering())
-        endringObservatør.statusoppdateringerFor(tilbakekreving.behandlingHistorikk.nåværende().entry.id) shouldBe listOf(
+        endringObservatør.statusoppdateringerFor(tilbakekreving.nåværendeBehandlingId()) shouldBe listOf(
             EndringObservatørOppsamler.Statusoppdatering(
                 ansvarligSaksbehandler = Behandler.Vedtaksløsning.ident,
                 vedtaksresultat = null,
@@ -94,7 +95,7 @@ class EndringObservatørTest {
         )
         tilbakekreving.håndter(brukerinfoHendelse())
         tilbakekreving.håndter(ANSVARLIG_SAKSBEHANDLER, faktastegVurdering())
-        endringObservatør.statusoppdateringerFor(tilbakekreving.behandlingHistorikk.nåværende().entry.id) shouldBe listOf(
+        endringObservatør.statusoppdateringerFor(tilbakekreving.nåværendeBehandlingId()) shouldBe listOf(
             EndringObservatørOppsamler.Statusoppdatering(
                 ansvarligSaksbehandler = Behandler.Vedtaksløsning.ident,
                 vedtaksresultat = null,

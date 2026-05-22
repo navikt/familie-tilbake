@@ -22,6 +22,7 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kravgrunnlag
+import no.nav.tilbakekreving.nåværendeBehandlingId
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.test.ingenReduksjon
@@ -167,7 +168,7 @@ class IverksettVedtakTest {
             endringOppsamler = endringObservatørOppsamler,
         )
 
-        endringObservatørOppsamler.vedtakFattetFor(tilbakekreving.behandlingHistorikk.nåværende().entry.id).size shouldBe 0
+        endringObservatørOppsamler.vedtakFattetFor(tilbakekreving.nåværendeBehandlingId()).size shouldBe 0
 
         tilbakekreving.håndter(
             Behandler.Saksbehandler("Z999999"),
@@ -180,7 +181,7 @@ class IverksettVedtakTest {
             ),
         )
 
-        val vedtakFattet = endringObservatørOppsamler.vedtakFattetFor(tilbakekreving.behandlingHistorikk.nåværende().entry.id)
+        val vedtakFattet = endringObservatørOppsamler.vedtakFattetFor(tilbakekreving.nåværendeBehandlingId())
         vedtakFattet.size shouldBe 1
         val vedtak = vedtakFattet.single()
         vedtak.vurderteUtbetalinger.size shouldBe 1

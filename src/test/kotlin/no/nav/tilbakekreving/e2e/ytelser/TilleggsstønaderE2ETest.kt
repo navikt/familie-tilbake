@@ -270,13 +270,13 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagForeslåVedtakVurdering(),
         )
-        tilbakekreving(behandlingId).frontendDtoForBehandling(Behandler.Saksbehandler("Z999999"), true).status shouldBe Behandlingsstatus.FATTER_VEDTAK
+        tilbakekreving(behandlingId).frontendDtoForBehandling(behandlingId, Behandler.Saksbehandler("Z999999"), true).status shouldBe Behandlingsstatus.FATTER_VEDTAK
         utførSteg(
             ident = "Z111111",
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagIkkeGodkjennVedtakVurdering(),
         )
-        tilbakekreving(behandlingId).frontendDtoForBehandling(Behandler.Saksbehandler("Z999999"), true).status shouldBe Behandlingsstatus.UTREDES
+        tilbakekreving(behandlingId).frontendDtoForBehandling(behandlingId, Behandler.Saksbehandler("Z999999"), true).status shouldBe Behandlingsstatus.UTREDES
 
         lagreUttalelse(behandlingId)
 
@@ -306,7 +306,7 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagGodkjennVedtakVurdering(),
         )
-        tilbakekreving(behandlingId).frontendDtoForBehandling(Behandler.Saksbehandler("Z999999"), true).status shouldBe Behandlingsstatus.AVSLUTTET
+        tilbakekreving(behandlingId).frontendDtoForBehandling(behandlingId, Behandler.Saksbehandler("Z999999"), true).status shouldBe Behandlingsstatus.AVSLUTTET
     }
 
     companion object {

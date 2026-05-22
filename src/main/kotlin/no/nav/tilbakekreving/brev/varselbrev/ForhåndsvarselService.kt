@@ -104,7 +104,6 @@ class ForhåndsvarselService(
     }
 
     fun lagreUttalelse(tilbakekreving: Tilbakekreving, brukeruttalelse: BrukeruttalelseDto, behandler: Behandler) {
-        val behandling = tilbakekreving.behandlingHistorikk.nåværende().entry
         when (brukeruttalelse.harBrukerUttaltSeg) {
             HarBrukerUttaltSeg.JA_ETTER_FORHÅNDSVARSEL, HarBrukerUttaltSeg.UNNTAK_ALLEREDE_UTTALT_SEG -> {
                 val uttalelsedetaljer = requireNotNull(brukeruttalelse.uttalelsesdetaljer) {

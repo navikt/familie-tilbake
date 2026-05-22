@@ -9,7 +9,6 @@ import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelseDto
-import no.nav.tilbakekreving.feil.Sporing
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -45,10 +44,7 @@ class ForeldelseController(
                 handling = "Henter vilkårsvurdering for en gitt behandling",
             )
             return Ressurs.success(
-                tilbakekreving.behandlingHistorikk.finn(
-                    behandlingId,
-                    Sporing(tilbakekreving.id, behandlingId.toString()),
-                ).entry.foreldelsestegDto.tilFrontendDto(),
+                tilbakekreving.hentBehandling(behandlingId).foreldelsestegDto.tilFrontendDto(),
             )
         }
         tilgangskontrollService.validerTilgangBehandlingID(

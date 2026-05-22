@@ -2,7 +2,6 @@ package no.nav.tilbakekreving.e2e
 
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.collections.shouldNotHaveSize
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.ANSVARLIG_SAKSBEHANDLER
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
@@ -70,7 +69,6 @@ class Behandlingslogg {
             ),
         )
         tilbakekreving.håndter(brukerinfoHendelse())
-        val behandlingId = tilbakekreving.behandlingHistorikk.nåværende().entry.id
         tilbakekreving.trengerVarselbrev("tekst fra saksbehandler")
         tilbakekreving.håndter(
             hendelse = VarselbrevJournalføringHendelse(
@@ -100,7 +98,6 @@ class Behandlingslogg {
             forårsaketAvBruker().uaktsomt(unnlates = skalUnnlates()),
         )
 
-        val behandlingslogg = tilbakekreving.hentBehandlingslogg().shouldNotHaveSize(0)
         tilbakekreving.hentBehandlingslogg().map { it.tittel } shouldContainAll listOf(
             "Kravgrunnlag mottatt",
             "Tilbakekreving opprettet",

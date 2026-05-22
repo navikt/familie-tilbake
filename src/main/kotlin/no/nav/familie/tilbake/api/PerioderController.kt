@@ -49,7 +49,7 @@ class PerioderController(
                 auditLoggerEvent = AuditLoggerEvent.ACCESS,
                 handling = "Sjekker om perioder er like - unntatt dato og beløp",
             )
-            return Ressurs.success(tilbakekreving.behandlingHistorikk.nåværende().entry.harLikePerioder())
+            return Ressurs.success(tilbakekreving.hentBehandling(behandlingId).harLikePerioder())
         }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
@@ -80,7 +80,7 @@ class PerioderController(
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
                 handling = "Sjekker om perioder er sammenslått",
             )
-            return Ressurs.success(tilbakekreving.behandlingHistorikk.nåværende().entry.harLikePerioder())
+            return Ressurs.success(tilbakekreving.hentBehandling(behandlingId).harLikePerioder())
         }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,

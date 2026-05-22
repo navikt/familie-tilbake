@@ -70,13 +70,13 @@ class TilBehandlingTest : TilbakekrevingE2EBase() {
         )
 
         val tilbakekreving = tilbakekreving(behandlingId)
-        tilbakekreving.behandlingHistorikk.nåværende().entry.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).feilutbetaltePerioder.map { it.periode } shouldBe listOf(
+        tilbakekreving.hentBehandling(behandlingId).faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).feilutbetaltePerioder.map { it.periode } shouldBe listOf(
             1.januar(2021) til 31.januar(2021),
         )
-        tilbakekreving.behandlingHistorikk.nåværende().entry.foreldelsestegDto.tilFrontendDto().foreldetPerioder.map { it.periode } shouldBe listOf(
+        tilbakekreving.hentBehandling(behandlingId).foreldelsestegDto.tilFrontendDto().foreldetPerioder.map { it.periode } shouldBe listOf(
             1.januar(2021) til 31.januar(2021),
         )
-        tilbakekreving.behandlingHistorikk.nåværende().entry.vilkårsvurderingsstegDto.tilFrontendDto().perioder.map { it.periode } shouldBe listOf(
+        tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto().perioder.map { it.periode } shouldBe listOf(
             1.januar(2021) til 31.januar(2021),
         )
     }
@@ -125,13 +125,13 @@ class TilBehandlingTest : TilbakekrevingE2EBase() {
         }
 
         val tilbakekreving = tilbakekreving(behandlingId)
-        tilbakekreving.behandlingHistorikk.nåværende().entry.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).feilutbetaltePerioder.map { it.periode } shouldBe listOf(
+        tilbakekreving.hentBehandling(behandlingId).faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).feilutbetaltePerioder.map { it.periode } shouldBe listOf(
             1.januar(2021) til 31.januar(2021),
         )
-        tilbakekreving.behandlingHistorikk.nåværende().entry.foreldelsestegDto.tilFrontendDto().foreldetPerioder.map { it.periode } shouldBe listOf(
+        tilbakekreving.hentBehandling(behandlingId).foreldelsestegDto.tilFrontendDto().foreldetPerioder.map { it.periode } shouldBe listOf(
             1.januar(2021) til 31.januar(2021),
         )
-        tilbakekreving.behandlingHistorikk.nåværende().entry.vilkårsvurderingsstegDto.tilFrontendDto().perioder.map { it.periode } shouldBe listOf(
+        tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto().perioder.map { it.periode } shouldBe listOf(
             1.januar(2021) til 31.januar(2021),
         )
     }
