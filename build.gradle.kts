@@ -5,7 +5,7 @@ import java.net.URI
 
 val springDocVersion = "3.0.3"
 val testcontainersVersion = "1.21.4"
-val tokenValidationVersion = "6.0.7"
+val tokenValidationVersion = "6.0.8"
 val flywayVersion = "11.3.4"
 val ktorVersion = "3.5.0"
 ext["ktorVersion"] = ktorVersion
@@ -56,7 +56,7 @@ subprojects {
     }
 
     dependencies {
-        testImplementation("org.junit.jupiter:junit-jupiter:6.0.3")
+        testImplementation("org.junit.jupiter:junit-jupiter:6.1.0")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
         testImplementation("io.kotest:kotest-assertions-core:6.1.11")
     }
@@ -234,7 +234,7 @@ dependencies {
     api("io.micrometer:micrometer-registry-prometheus")
     api("net.logstash.logback:logstash-logback-encoder:9.0")
 
-    api("io.getunleash:unleash-client-java:12.2.1")
+    api("io.getunleash:unleash-client-java:12.2.2")
     api("org.messaginghub:pooled-jms:3.2.2")
     api("org.flywaydb:flyway-core")
     api("org.flywaydb:flyway-gcp-bigquery")
@@ -243,7 +243,7 @@ dependencies {
 
     testImplementation(project(":testdata"))
 
-    testImplementation("org.junit.jupiter:junit-jupiter:6.0.3")
+    testImplementation("org.junit.jupiter:junit-jupiter:6.1.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     testImplementation("io.mockk:mockk-jvm:1.14.9")
