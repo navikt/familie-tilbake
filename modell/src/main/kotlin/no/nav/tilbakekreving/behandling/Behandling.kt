@@ -14,10 +14,7 @@ import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegsinfoDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.BigQueryBehandlingDataDto
-import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
-import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselUnntakDto
-import no.nav.tilbakekreving.api.v1.dto.FristUtsettelseDto
 import no.nav.tilbakekreving.api.v1.dto.TotrinnsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingDto
@@ -74,7 +71,6 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatu
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
@@ -103,7 +99,7 @@ class Behandling internal constructor(
     private var ansvarligSaksbehandler: Behandler,
     private var eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
     private var kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
-    val foreldelsesteg: Foreldelsesteg,
+    internal val foreldelsesteg: Foreldelsesteg,
     private val faktasteg: Faktasteg,
     private val vilkårsvurderingsteg: Vilkårsvurderingsteg,
     private val foreslåVedtakSteg: ForeslåVedtakSteg,
@@ -111,7 +107,7 @@ class Behandling internal constructor(
     private val forhåndsvarsel: Forhåndsvarsel,
     private var forrigeBehandlingsstatus: BehandlingsstatusModell,
     internal val klokke: Klokke,
-) : Historikk.HistorikkInnslag<UUID> {
+) : Historikk.HistorikkInnslag<UUID>, BehandlingSkriveoperasjoner {
     internal fun nyFaktastegFrontendDto(varselbrev: Varselbrev?): FaktaOmFeilutbetalingDto = faktasteg.nyTilFrontendDto(kravgrunnlag.entry, eksternFagsakRevurdering.entry, varselbrev, klokke)
 
     private fun bigqueryData(behandlingsstatus: BehandlingsstatusModell, ytelse: String): BigQueryBehandlingDataDto {
@@ -129,9 +125,9 @@ class Behandling internal constructor(
         )
     }
 
-    fun nullstillForhåndsvarselUnntakOgUttalelse() = forhåndsvarsel.nullstillUnntakOgUttalelse()
+    override fun nullstillForhåndsvarselUnntakOgUttalelse() = forhåndsvarsel.nullstillUnntakOgUttalelse()
 
-    fun fåttNyttKravgrunnlag(oppdatertKravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>) {
+    internal fun oppdaterKravgrunnlag(oppdatertKravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>) {
         if (!faktasteg.erKlar(klokke)) {
             kravgrunnlag = oppdatertKravgrunnlag
         } else {
@@ -139,7 +135,7 @@ class Behandling internal constructor(
         }
     }
 
-    fun faktastegFrontendDto(
+    override fun faktastegFrontendDto(
         opprettelsesvalg: Opprettelsesvalg,
         tilbakekrevingOpprettet: LocalDateTime,
     ): FaktaFeilutbetalingDto {
@@ -151,19 +147,15 @@ class Behandling internal constructor(
         )
     }
 
-    val foreldelsestegDto: FrontendDto<VurdertForeldelseDto>
-        get() = FrontendDto {
-            foreldelsesteg.tilFrontendDto(kravgrunnlag.entry)
-        }
-    val vilkårsvurderingsstegDto: FrontendDto<VurdertVilkårsvurderingDto>
-        get() = FrontendDto {
-            vilkårsvurderingsteg.tilFrontendDto(kravgrunnlag.entry, eksternFagsakRevurdering.entry, foreldelsesteg, klokke)
-        }
-    val fatteVedtakStegDto: FrontendDto<TotrinnsvurderingDto> get() = fatteVedtakSteg
+    override val foreldelsestegDto: FrontendDto<VurdertForeldelseDto>
+        get() = FrontendDto { foreldelsesteg.tilFrontendDto(kravgrunnlag.entry) }
+    override val vilkårsvurderingsstegDto: FrontendDto<VurdertVilkårsvurderingDto>
+        get() = FrontendDto { vilkårsvurderingsteg.tilFrontendDto(kravgrunnlag.entry, eksternFagsakRevurdering.entry, foreldelsesteg, klokke) }
+    override val fatteVedtakStegDto: FrontendDto<TotrinnsvurderingDto> get() = fatteVedtakSteg
 
-    fun harLikePerioder(): Boolean = vilkårsvurderingsteg.harLikePerioder()
+    override fun harLikePerioder(): Boolean = vilkårsvurderingsteg.harLikePerioder()
 
-    fun tilEntity(tilbakekrevingId: String): BehandlingEntity {
+    internal fun tilEntity(tilbakekrevingId: String): BehandlingEntity {
         return BehandlingEntity(
             id = id,
             tilbakekrevingId = tilbakekrevingId,
@@ -185,11 +177,11 @@ class Behandling internal constructor(
         )
     }
 
-    fun sporingsinformasjon(): Sporing {
+    private fun sporingsinformasjon(): Sporing {
         return Sporing(eksternFagsakRevurdering.entry.eksternId, id.toString())
     }
 
-    internal fun steg(): List<Saksbehandlingsteg> = listOf(
+    private fun steg(): List<Saksbehandlingsteg> = listOf(
         faktasteg,
         forhåndsvarsel,
         foreldelsesteg,
@@ -209,7 +201,7 @@ class Behandling internal constructor(
         )
     }
 
-    fun beregnForFrontend(): BeregningsresultatDto {
+    override fun beregnForFrontend(): BeregningsresultatDto {
         val beregning = lagBeregning().oppsummer()
         return BeregningsresultatDto(
             beregning.beregningsresultatsperioder.map {
@@ -228,37 +220,28 @@ class Behandling internal constructor(
         )
     }
 
-    fun hentVedtaksresultatForFrontend(): FrontendBeregningsresultatDto {
+    override fun hentVedtaksresultatForFrontend(): FrontendBeregningsresultatDto {
         return lagBeregning().oppsummer().tilFrontendDto()
     }
 
-    fun trengerVarselbrevJournalføring(
+    internal fun trengerVarselbrevJournalføring(
         behovObservatør: BehovObservatør,
         eksternFagsak: EksternFagsak,
         brukerinfo: Brukerinfo,
-        varselbrev: Varselbrev,
         varselbrevInfo: VarselbrevInfo,
     ) {
         behovObservatør.håndter(
             VarselbrevJournalføringBehov(
-                brevId = varselbrev.id,
                 brukerinfo = brukerinfo,
                 behandlingId = id,
-                varselbrev = varselbrev,
-                revurderingsvedtaksdato = varselbrevInfo.forhåndsvarselinfo.revurderingsvedtaksdato,
-                varseltekstFraSaksbehandler = varselbrev.tekstFraSaksbehandler,
-                eksternFagsakId = varselbrevInfo.eksternFagsakId,
+                info = varselbrevInfo,
                 ytelse = eksternFagsak.ytelse,
-                behandlendeEnhet = varselbrevInfo.forhåndsvarselinfo.behandlendeEnhet,
-                feilutbetaltBeløp = varselbrevInfo.forhåndsvarselinfo.beløp,
-                feilutbetaltePerioder = varselbrevInfo.forhåndsvarselinfo.feilutbetaltePerioder,
                 gjelderDødsfall = brukerinfo.dødsdato != null,
-                hjemlerForTilbakekreving = varselbrevInfo.hjemlerForTilbakekreving,
             ),
         )
     }
 
-    fun trengerIverksettelse(
+    internal fun trengerIverksettelse(
         behovObservatør: BehovObservatør,
         ytelse: Ytelse,
         aktør: Aktør,
@@ -278,7 +261,7 @@ class Behandling internal constructor(
         )
     }
 
-    fun trengerVedtaksbrevJournalføring(
+    internal fun trengerVedtaksbrevJournalføring(
         behovObservatør: BehovObservatør,
         brevId: UUID,
         ytelse: Ytelse,
@@ -301,54 +284,46 @@ class Behandling internal constructor(
         )
     }
 
-    fun trengerVarselbrevDistribusjon(
-        bebehovObservatør: BehovObservatør,
+    internal fun lagVarselbrevDistribusjonBehov(
         journalpostId: String,
         ytelse: Ytelse,
         brevId: UUID,
         fagsakId: String,
         dokumentInfoId: String,
-    ) {
-        bebehovObservatør.håndter(
-            VarselbrevDistribusjonBehov(
-                behandlingId = id,
-                journalpostId = journalpostId,
-                fagsakId = fagsakId,
-                ytelse = ytelse,
-                brevId = brevId,
-                behandlerIdent = ansvarligSaksbehandler.ident,
-                dokumentInfoId = dokumentInfoId,
-            ),
-        )
-    }
+    ) = VarselbrevDistribusjonBehov(
+        behandlingId = id,
+        journalpostId = journalpostId,
+        fagsakId = fagsakId,
+        ytelse = ytelse,
+        brevId = brevId,
+        behandlerIdent = ansvarligSaksbehandler.ident,
+        dokumentInfoId = dokumentInfoId,
+    )
 
-    fun trengerVedtaksbrevDistribusjon(
-        bebehovObservatør: BehovObservatør,
+    internal fun lagVedtaksbrevDistribusjonBehov(
         journalpostId: String,
         dokumentInfoId: String,
         brevId: UUID,
         fagsystem: FagsystemDTO,
         fagsakId: String,
-    ) {
-        bebehovObservatør.håndter(
-            VedtaksbrevDistribusjonBehov(
-                behandlingId = id,
-                brevId = brevId,
-                journalpostId = journalpostId,
-                fagsystem = fagsystem,
-                fagsakId = fagsakId,
-                dokumentInfoId = dokumentInfoId,
-            ),
-        )
-    }
+    ) = VedtaksbrevDistribusjonBehov(
+        behandlingId = id,
+        brevId = brevId,
+        journalpostId = journalpostId,
+        fagsystem = fagsystem,
+        fagsakId = fagsakId,
+        dokumentInfoId = dokumentInfoId,
+    )
 
-    fun venter(): Venter? = steg().firstNotNullOfOrNull { it.venter(klokke) }
+    internal fun venter(): Venter? = steg().firstNotNullOfOrNull { it.venter(klokke) }
 
     private fun skalBesluttes(): Boolean {
         return steg()
             .takeWhile { it.type != Behandlingssteg.FATTE_VEDTAK }
             .all { it.erFullstendig(klokke) }
     }
+
+    internal fun førsteUfullstendigeSteg() = steg().firstOrNull { !it.erKlar(klokke) }
 
     private fun kanEndres(behandler: Behandler, saksbehandlerKanBeslutte: Boolean): Boolean {
         return when {
@@ -424,10 +399,9 @@ class Behandling internal constructor(
     internal fun håndter(
         behandler: Behandler,
         vurdering: Faktasteg.Vurdering,
-        observatør: BehandlingObservatør,
         behandlingslogg: Behandlingslogg,
     ) {
-        validerBehandlingstatus(håndtertSteg = "fakta", faktasteg)
+        validerBehandlingstatus(faktasteg)
         faktasteg.vurder(vurdering)
         oppdaterBehandler(behandler)
         behandlingslogg.lagre(
@@ -446,7 +420,7 @@ class Behandling internal constructor(
         perioder: List<OppdaterFaktaPeriodeDto>?,
         behandlingslogg: Behandlingslogg,
     ) {
-        validerBehandlingstatus(håndtertSteg = "fakta", faktasteg)
+        validerBehandlingstatus(faktasteg)
         if (oppdaget != null) {
             faktasteg.vurder(oppdaget)
         }
@@ -470,10 +444,9 @@ class Behandling internal constructor(
         behandler: Behandler,
         periode: Datoperiode,
         vurdering: ForårsaketAvBruker,
-        observatør: BehandlingObservatør,
         behandlingslogg: Behandlingslogg,
     ) {
-        validerBehandlingstatus("vilkårsvurdering", vilkårsvurderingsteg)
+        validerBehandlingstatus(vilkårsvurderingsteg)
         vilkårsvurderingsteg.vurder(periode, vurdering)
         oppdaterBehandler(behandler)
         behandlingslogg.lagre(
@@ -489,10 +462,9 @@ class Behandling internal constructor(
         behandler: Behandler,
         periode: Datoperiode,
         vurdering: Foreldelsesteg.Vurdering,
-        observatør: BehandlingObservatør,
         behandlingslogg: Behandlingslogg,
     ) {
-        validerBehandlingstatus("foreldelse", foreldelsesteg)
+        validerBehandlingstatus(foreldelsesteg)
         foreldelsesteg.vurderForeldelse(periode, vurdering)
         oppdaterBehandler(behandler)
         behandlingslogg.lagre(
@@ -506,7 +478,6 @@ class Behandling internal constructor(
 
     internal fun håndterForeslåVedtak(
         behandler: Behandler,
-        observatør: BehandlingObservatør,
         behandlingslogg: Behandlingslogg,
     ) {
         val tidligereManglendeSteg = steg()
@@ -523,7 +494,7 @@ class Behandling internal constructor(
             )
         }
         fatteVedtakSteg.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry)
-        validerBehandlingstatus("vedtaksforslag", foreslåVedtakSteg)
+        validerBehandlingstatus(foreslåVedtakSteg)
         foreslåVedtakSteg.håndter()
         oppdaterBehandler(behandler)
         behandlingslogg.lagre(
@@ -538,10 +509,9 @@ class Behandling internal constructor(
     internal fun håndter(
         beslutter: Behandler,
         vurderinger: List<Pair<Behandlingssteg, FatteVedtakSteg.Vurdering>>,
-        observatør: BehandlingObservatør,
         behandlingslogg: Behandlingslogg,
     ) {
-        validerBehandlingstatus("behandlingsutfall", fatteVedtakSteg)
+        validerBehandlingstatus(fatteVedtakSteg)
         for ((behandlingssteg, vurdering) in vurderinger) {
             fatteVedtakSteg.håndter(beslutter, ansvarligSaksbehandler, behandlingssteg, vurdering, sporingsinformasjon())
             if (vurdering is FatteVedtakSteg.Vurdering.Underkjent) {
@@ -559,7 +529,7 @@ class Behandling internal constructor(
                 ),
             )
         }
-        if (underkjentVedtak()) {
+        if (fatteVedtakSteg.erVedtakUnderkjent()) {
             foreslåVedtakSteg.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry)
             behandlingslogg.lagre(
                 opprettLoggInnslag(
@@ -585,7 +555,7 @@ class Behandling internal constructor(
         enhet = Enhet.forKode(enhetKode)
     }
 
-    private fun validerBehandlingstatus(håndtertSteg: String, steg: Saksbehandlingsteg) {
+    private fun validerBehandlingstatus(steg: Saksbehandlingsteg) {
         if (!steg().klarTilVisning(klokke).contains(steg)) {
             throw ModellFeil.UgyldigOperasjonException(
                 "Behandlingen er i ${steg().klarTilVisning(klokke).last().type} og kan ikke behandle vurdering for ${steg.type}",
@@ -594,13 +564,9 @@ class Behandling internal constructor(
         }
     }
 
-    fun kanUtbetales(): Boolean = fatteVedtakSteg.erFullstendig(klokke) && !fatteVedtakSteg.erVedtakUnderkjent()
+    internal fun kanUtbetales(): Boolean = fatteVedtakSteg.erFullstendig(klokke) && !fatteVedtakSteg.erVedtakUnderkjent()
 
-    fun underkjentVedtak(): Boolean {
-        return fatteVedtakSteg.erVedtakUnderkjent()
-    }
-
-    fun hentBehandlingsinformasjon(): Behandlingsinformasjon {
+    internal fun hentBehandlingsinformasjon(): Behandlingsinformasjon {
         return Behandlingsinformasjon(
             kravgrunnlagReferanse = kravgrunnlag.entry.referanse,
             opprettetTid = opprettet,
@@ -611,7 +577,7 @@ class Behandling internal constructor(
         )
     }
 
-    fun hentForhåndsvarselinfo(): Forhåndsvarselinfo = Forhåndsvarselinfo(
+    internal fun hentForhåndsvarselinfo(): Forhåndsvarselinfo = Forhåndsvarselinfo(
         behandlendeEnhet = enhet,
         ansvarligSaksbehandler = ansvarligSaksbehandler,
         beløp = totaltFeilutbetaltBeløp().toLong(),
@@ -619,7 +585,7 @@ class Behandling internal constructor(
         revurderingsvedtaksdato = eksternFagsakRevurdering.entry.vedtaksdato,
     )
 
-    fun lagreUttalelse(
+    internal fun lagreUttalelse(
         uttalelseVurdering: UttalelseVurdering,
         uttalelseInfo: UttalelseInfo?,
         kommentar: String?,
@@ -641,7 +607,7 @@ class Behandling internal constructor(
         )
     }
 
-    fun lagreFristUtsettelse(nyFrist: LocalDate, begrunnelse: String, behandlingslogg: Behandlingslogg, behandler: Behandler): UttalelsesfristDto {
+    internal fun lagreFristUtsettelse(nyFrist: LocalDate, begrunnelse: String, behandlingslogg: Behandlingslogg, behandler: Behandler): UttalelsesfristDto {
         val uttalelsesfrist = forhåndsvarsel.lagreFristUtsettelse(
             nyFrist = nyFrist,
             begrunnelse = begrunnelse,
@@ -658,13 +624,7 @@ class Behandling internal constructor(
         return uttalelsesfrist
     }
 
-    fun brukeruttaleserTilFrontendDto(): BrukeruttalelseDto? {
-        return forhåndsvarsel.brukeruttaleserTilFrontendDto()
-    }
-
-    fun utsettUttalelseFristTilFrontendDto(): FristUtsettelseDto? {
-        return forhåndsvarsel.utsettUttalelseFristTilFrontendDto()
-    }
+    internal fun forhåndsvarselFrontendDto(varselbrev: Varselbrev?) = forhåndsvarsel.tilFrontendDto(varselbrev)
 
     internal fun vurdertePerioderForBrev(): List<BegrunnetPeriode> {
         return vilkårsvurderingsteg.vurdertePerioderForBrev(steg().flatMap { it.meldingerTilSaksbehandler() }.toSet())
@@ -676,12 +636,12 @@ class Behandling internal constructor(
         ansvarligEnhet = enhet!!.navn,
     )
 
-    fun oppdaterBehandler(ansvarligSaksbehandler: Behandler) {
+    private fun oppdaterBehandler(ansvarligSaksbehandler: Behandler) {
         this.sistEndret = klokke.nå()
         this.ansvarligSaksbehandler = ansvarligSaksbehandler
     }
 
-    fun lagreForhåndsvarselUnntak(
+    internal fun lagreForhåndsvarselUnntak(
         begrunnelseForUnntak: BegrunnelseForUnntak,
         beskrivelse: String,
         behandler: Behandler,
@@ -699,10 +659,6 @@ class Behandling internal constructor(
                 behandler = behandler,
             ),
         )
-    }
-
-    fun forhåndsvarselUnntakTilFrontendDto(): ForhåndsvarselUnntakDto? {
-        return forhåndsvarsel.forhåndsvarselUnntakTilFrontendDto()
     }
 
     internal fun utførEndring(
@@ -742,7 +698,7 @@ class Behandling internal constructor(
         sendBehandlingsstatus(tilstand, tilbakekreving)
     }
 
-    internal fun sendBehandlingsstatus(
+    private fun sendBehandlingsstatus(
         tilstand: Tilstand,
         observatør: BehandlingObservatør,
     ) {
@@ -761,23 +717,23 @@ class Behandling internal constructor(
         )
     }
 
-    fun hentVedtaksresultat(): Vedtaksresultat? {
+    private fun hentVedtaksresultat(): Vedtaksresultat? {
         if (fatteVedtakSteg.erFullstendig(klokke)) {
             return lagBeregning().oppsummer().vedtaksresultat
         }
         return null
     }
 
-    fun totaltFeilutbetaltBeløp(): BigDecimal {
+    private fun totaltFeilutbetaltBeløp(): BigDecimal {
         return kravgrunnlag.entry.feilutbetaltBeløpForAllePerioder()
     }
 
-    fun fullstendigPeriode(): Datoperiode {
+    private fun fullstendigPeriode(): Datoperiode {
         val kravgrunnlagPerioder = kravgrunnlag.entry.datoperioder(eksternFagsakRevurdering.entry)
         return kravgrunnlagPerioder.minOf { it.fom } til kravgrunnlagPerioder.maxOf { it.tom }
     }
 
-    fun flyttTilbakeTilFakta(behandlingslogg: Behandlingslogg, behandler: Behandler) {
+    internal fun flyttTilbakeTilFakta(behandlingslogg: Behandlingslogg, behandler: Behandler) {
         steg().forEach {
             it.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry)
         }
@@ -791,7 +747,7 @@ class Behandling internal constructor(
         )
     }
 
-    fun trekkTilbakeFraGodkjenning(behandlingslogg: Behandlingslogg, behandler: Behandler) {
+    internal fun trekkTilbakeFraGodkjenning(behandlingslogg: Behandlingslogg, behandler: Behandler) {
         foreslåVedtakSteg.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry)
         oppdaterBehandler(behandler)
         behandlingslogg.lagre(
@@ -803,7 +759,7 @@ class Behandling internal constructor(
         )
     }
 
-    fun sendVedtakIverksatt(
+    internal fun sendVedtakIverksatt(
         forrigeBehandlingId: UUID?,
         eksternFagsystemId: String,
         ytelse: Ytelse,
@@ -838,7 +794,7 @@ class Behandling internal constructor(
         )
     }
 
-    fun opprettVarselbrev(
+    internal fun opprettVarselbrev(
         varseltekstFraSaksbehandler: String,
         features: FeatureToggles,
     ): Varselbrev {
@@ -852,7 +808,7 @@ class Behandling internal constructor(
         return varselbrev
     }
 
-    fun lagreOpprinneligFrist(fristForUttalelse: LocalDate) {
+    internal fun lagreOpprinneligFrist(fristForUttalelse: LocalDate) {
         forhåndsvarsel.lagreOpprinneligFrist(fristForUttalelse)
     }
 
@@ -875,7 +831,7 @@ class Behandling internal constructor(
         )
     }
 
-    fun opprettLoggInnslag(
+    private fun opprettLoggInnslag(
         behandlingsloggstype: Behandlingsloggstype,
         rolle: Rolle,
         behandler: Behandler,
@@ -892,8 +848,8 @@ class Behandling internal constructor(
         )
     }
 
-    fun nyForhåndsvarselTilFrontend(forhåndsvarselinfo: ForhaandsvarselInfoDto?): ForhaandsvarselResponseDto {
-        return forhåndsvarsel.nyForhåndsvarselTilFrontend(forhåndsvarselinfo)
+    internal fun nyForhåndsvarselTilFrontend(varselbrev: Varselbrev?): ForhaandsvarselResponseDto {
+        return forhåndsvarsel.nyForhåndsvarselTilFrontend(varselbrev)
     }
 
     companion object {

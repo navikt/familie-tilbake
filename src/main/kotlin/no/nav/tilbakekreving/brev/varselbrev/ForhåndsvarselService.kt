@@ -101,7 +101,7 @@ class ForhåndsvarselService(
         tilbakekreving: Tilbakekreving,
         bestillBrevDto: BestillBrevDto,
     ) {
-        tilbakekreving.trengerVarselbrev(bestillBrevDto.behandlingId, bestillBrevDto.fritekst)
+        tilbakekreving.sendVarselbrev(bestillBrevDto.behandlingId, bestillBrevDto.fritekst)
     }
 
     fun lagreUttalelse(tilbakekreving: Tilbakekreving, behandlingId: UUID, brukeruttalelse: BrukeruttalelseDto, behandler: Behandler) {
@@ -274,7 +274,7 @@ class ForhåndsvarselService(
         varselbrevBehov: VarselbrevJournalføringBehov,
         logContext: SecureLog.Context,
     ): OpprettJournalpostResponse {
-        val fristForUttalelse = varselbrevBehov.varselbrev.fristForUttalelse
+        val fristForUttalelse = varselbrevBehov.info.opprinneligUttalelsesfrist
         val brevdata = hentBrevdata(varselbrevBehov, fristForUttalelse, logContext)
         val dokument = Dokument(
             dokument = hentPdf(brevdata, logContext),
@@ -289,8 +289,8 @@ class ForhåndsvarselService(
                 fnr = varselbrevBehov.brukerinfo.ident,
                 forsøkFerdigstill = true,
                 hoveddokumentvarianter = listOf(dokument),
-                fagsakId = varselbrevBehov.eksternFagsakId,
-                journalførendeEnhet = varselbrevBehov.behandlendeEnhet!!.kode,
+                fagsakId = varselbrevBehov.info.eksternFagsakId,
+                journalførendeEnhet = varselbrevBehov.info.forhåndsvarselinfo.behandlendeEnhet!!.kode,
                 avsenderMottaker = AvsenderMottaker(
                     id = varselbrevBehov.brukerinfo.ident,
                     idType = AvsenderMottakerIdType.FNR,
@@ -321,12 +321,12 @@ class ForhåndsvarselService(
         val brevmetadata = hentBrevMetadata(varselbrevBehov)
         val varselbrevsdokument = Varselbrevsdokument(
             brevmetadata = brevmetadata,
-            beløp = varselbrevBehov.feilutbetaltBeløp,
-            revurderingsvedtaksdato = varselbrevBehov.revurderingsvedtaksdato,
+            beløp = varselbrevBehov.info.forhåndsvarselinfo.beløp,
+            revurderingsvedtaksdato = varselbrevBehov.info.forhåndsvarselinfo.revurderingsvedtaksdato,
             fristdatoForTilbakemelding = fristForUttalelse,
-            varseltekstFraSaksbehandler = varselbrevBehov.varseltekstFraSaksbehandler,
-            feilutbetaltePerioder = varselbrevBehov.feilutbetaltePerioder,
-            hjemlerForTilbakekreving = BrevFormatterer.lagForhåndsvarselHjemmelAvsnitt(varselbrevBehov.hjemlerForTilbakekreving, Språkkode.NB),
+            varseltekstFraSaksbehandler = varselbrevBehov.info.tekstFraSaksbehandler,
+            feilutbetaltePerioder = varselbrevBehov.info.forhåndsvarselinfo.feilutbetaltePerioder,
+            hjemlerForTilbakekreving = BrevFormatterer.lagForhåndsvarselHjemmelAvsnitt(varselbrevBehov.info.hjemlerForTilbakekreving, Språkkode.NB),
             nyModell = true,
         )
 
@@ -336,7 +336,7 @@ class ForhåndsvarselService(
             tittel = brevmetadata.tittel,
             overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(brevmetadata, false),
             brevtekst = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false),
-            vedleggHtml = hentVedlegg(varselbrevsdokument, varselbrevBehov.eksternFagsakId, logContext),
+            vedleggHtml = hentVedlegg(varselbrevsdokument, varselbrevBehov.info.eksternFagsakId, logContext),
         )
     }
 
@@ -346,9 +346,9 @@ class ForhåndsvarselService(
             sakspartsnavn = varselbrevBehov.brukerinfo.navn,
             tittel = hentVarselbrevTittel(varselbrevBehov),
             mottageradresse = Adresseinfo(varselbrevBehov.brukerinfo.ident, varselbrevBehov.brukerinfo.navn),
-            behandlendeEnhetsNavn = requireNotNull(varselbrevBehov.behandlendeEnhet) { "Enhetsnavn kreves for journalføring" }.navn,
-            ansvarligSaksbehandler = eksterneDataForBrevService.hentSaksbehandlernavn(varselbrevBehov.varselbrev.ansvarligSaksbehandlerIdent),
-            saksnummer = varselbrevBehov.eksternFagsakId,
+            behandlendeEnhetsNavn = requireNotNull(varselbrevBehov.info.forhåndsvarselinfo.behandlendeEnhet) { "Enhetsnavn kreves for journalføring" }.navn,
+            ansvarligSaksbehandler = eksterneDataForBrevService.hentSaksbehandlernavn(varselbrevBehov.info.forhåndsvarselinfo.ansvarligSaksbehandler.ident),
+            saksnummer = varselbrevBehov.info.eksternFagsakId,
             språkkode = varselbrevBehov.brukerinfo.språkkode,
             ytelsestype = varselbrevBehov.ytelse.tilYtelseDTO(),
             gjelderDødsfall = varselbrevBehov.gjelderDødsfall,

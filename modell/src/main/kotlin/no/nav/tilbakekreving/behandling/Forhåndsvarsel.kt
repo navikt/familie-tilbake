@@ -1,19 +1,17 @@
 package no.nav.tilbakekreving.behandling
 
 import no.nav.tilbakekreving.Klokke
-import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
-import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselUnntakDto
-import no.nav.tilbakekreving.api.v1.dto.FristUtsettelseDto
+import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselDto
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Venter
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
+import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.entities.ForhåndsvarselEntity
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselErSendtDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.IkkeVurdertDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseDto
@@ -118,41 +116,33 @@ class Forhåndsvarsel(
         )
     }
 
-    fun brukeruttaleserTilFrontendDto(): BrukeruttalelseDto? {
-        return brukeruttalelse?.tilFrontendDto()
-    }
-
-    fun utsettUttalelseFristTilFrontendDto(): FristUtsettelseDto? {
-        return uttalelsesfrist?.tilFrontendDto()
-    }
-
-    fun forhåndsvarselUnntakTilFrontendDto(): ForhåndsvarselUnntakDto? {
-        return forhåndsvarselUnntak?.tilFrontendDto()
-    }
+    fun tilFrontendDto(varselbrev: Varselbrev?) = ForhåndsvarselDto(
+        varselbrevDto = varselbrev?.tilFrontendDto(),
+        brukeruttalelse = brukeruttalelse?.tilFrontendDto(),
+        forhåndsvarselUnntak = forhåndsvarselUnntak?.tilFrontendDto(),
+        utsettUttalelseFrist = uttalelsesfrist?.tilFrontendDto(),
+    )
 
     override fun meldingerTilSaksbehandler(): Set<MeldingTilSaksbehandler> {
         return brukeruttalelse?.meldingerTilSaksbehandler() ?: emptySet()
     }
 
-    fun nyForhåndsvarselTilFrontend(forhåndsvarselinfo: ForhaandsvarselInfoDto?): ForhaandsvarselResponseDto {
-        if (uttalelsesfrist != null) {
-            return ForhaandsvarselResponseDto(
-                forhaandsvarselSteg = ForhaandsvarselErSendtDto(
-                    forhåndsvarselInfo = forhåndsvarselinfo!!,
-                    uttalelsesfrist = uttalelsesfrist!!.nyTilFrontendDto(),
-                ),
-                brukeruttalelse = brukeruttalelse?.nyTilFrontendDto()
-                    ?: UttalelseDto(harBrukerUttaltSeg = UttalelseVurderingDto.IKKE_VURDERT),
-            )
-        }
-        if (forhåndsvarselUnntak != null) {
-            return ForhaandsvarselResponseDto(
-                forhaandsvarselSteg = forhåndsvarselUnntak!!.nyTilFrontendDto(),
-                brukeruttalelse = brukeruttalelse?.nyTilFrontendDto(),
-            )
-        }
+    fun nyForhåndsvarselTilFrontend(varselbrev: Varselbrev?): ForhaandsvarselResponseDto = when {
+        uttalelsesfrist != null -> ForhaandsvarselResponseDto(
+            forhaandsvarselSteg = ForhaandsvarselErSendtDto(
+                forhåndsvarselInfo = varselbrev!!.tilForhåndsvarselDto(),
+                uttalelsesfrist = uttalelsesfrist!!.nyTilFrontendDto(),
+            ),
+            brukeruttalelse = brukeruttalelse?.nyTilFrontendDto()
+                ?: UttalelseDto(harBrukerUttaltSeg = UttalelseVurderingDto.IKKE_VURDERT),
+        )
 
-        return ForhaandsvarselResponseDto(
+        forhåndsvarselUnntak != null -> ForhaandsvarselResponseDto(
+            forhaandsvarselSteg = forhåndsvarselUnntak!!.nyTilFrontendDto(),
+            brukeruttalelse = brukeruttalelse?.nyTilFrontendDto(),
+        )
+
+        else -> ForhaandsvarselResponseDto(
             forhaandsvarselSteg = IkkeVurdertDto,
             brukeruttalelse = brukeruttalelse?.nyTilFrontendDto(),
         )

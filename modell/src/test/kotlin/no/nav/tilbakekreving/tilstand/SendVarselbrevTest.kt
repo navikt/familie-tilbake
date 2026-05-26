@@ -46,7 +46,7 @@ class SendVarselbrevTest {
         tilbakekreving.håndter(bruker)
         tilbakekreving.tilstand shouldBe TilBehandling
 
-        tilbakekreving.trengerVarselbrev(tilbakekreving.nåværendeBehandlingId(), "tekst fra saksbehandler")
+        tilbakekreving.sendVarselbrev(tilbakekreving.nåværendeBehandlingId(), "tekst fra saksbehandler")
         tilbakekreving.tilstand shouldBe SendVarselbrev
 
         oppsamler.behovListe.size shouldBe 3
@@ -54,7 +54,7 @@ class SendVarselbrevTest {
         val varselbrev = oppsamler.behovListe.filterIsInstance<VarselbrevJournalføringBehov>().shouldHaveSize(1)
         tilbakekreving.håndter(
             VarselbrevJournalføringHendelse(
-                varselbrevId = varselbrev.first().varselbrev.id,
+                varselbrevId = varselbrev.first().info.id,
                 journalpostId = "1234",
                 dokumentInfoId = "321",
             ),
@@ -63,7 +63,7 @@ class SendVarselbrevTest {
 
         tilbakekreving.håndter(
             VarselbrevDistribueringHendelse(
-                brevId = varselbrev.first().varselbrev.id,
+                brevId = varselbrev.first().info.id,
                 journalpostId = "1234",
                 dokumentInfoId = "321",
             ),
@@ -95,7 +95,7 @@ class SendVarselbrevTest {
         tilbakekreving.håndter(bruker)
         tilbakekreving.tilstand shouldBe TilBehandling
 
-        tilbakekreving.trengerVarselbrev(tilbakekreving.nåværendeBehandlingId(), "tekst fra saksbehandler")
+        tilbakekreving.sendVarselbrev(tilbakekreving.nåværendeBehandlingId(), "tekst fra saksbehandler")
         tilbakekreving.tilstand shouldBe SendVarselbrev
 
         tilbakekreving.håndter(Påminnelse(LocalDateTime.now()))
@@ -103,11 +103,11 @@ class SendVarselbrevTest {
         val varselbrevBehov = oppsamler.behovListe.filterIsInstance<VarselbrevJournalføringBehov>()
 
         varselbrevBehov.shouldHaveSize(2)
-        varselbrevBehov.map { it.brevId }.distinct().shouldHaveSize(1)
+        varselbrevBehov.map { it.info.id }.distinct().shouldHaveSize(1)
 
         tilbakekreving.håndter(
             VarselbrevJournalføringHendelse(
-                varselbrevId = varselbrevBehov.first().brevId,
+                varselbrevId = varselbrevBehov.first().info.id,
                 journalpostId = "1234",
                 dokumentInfoId = "321",
             ),
@@ -116,7 +116,7 @@ class SendVarselbrevTest {
 
         tilbakekreving.håndter(
             VarselbrevDistribueringHendelse(
-                brevId = varselbrevBehov.first().brevId,
+                brevId = varselbrevBehov.first().info.id,
                 journalpostId = "1234",
                 dokumentInfoId = "321",
             ),

@@ -61,7 +61,7 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
 
         tilbakekrevingFørForhåndsvarsel.brevHistorikk.sisteVarselbrev().shouldBeNull()
         tilbakekrevingEtterForhåndsvarsel.brevHistorikk.sisteVarselbrev().shouldNotBeNull {
-            tekstFraSaksbehandler shouldBe "Tekst fra saksbehandler"
+            tilForhåndsvarselDto().tekstFraSaksbehandler shouldBe "Tekst fra saksbehandler"
         }
     }
 
@@ -258,7 +258,7 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
         val tilbakekrevingEtterVarselbrev = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
         tilbakekrevingEtterVarselbrev!!.brevHistorikk.sisteVarselbrev() shouldNotBeNull {
             journalpostId shouldBe "-1"
-            tekstFraSaksbehandler shouldBe "Tekst fra saksbehandler"
+            tilForhåndsvarselDto().tekstFraSaksbehandler shouldBe "Tekst fra saksbehandler"
         }
     }
 

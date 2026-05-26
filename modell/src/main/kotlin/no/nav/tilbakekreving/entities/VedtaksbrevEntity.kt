@@ -6,7 +6,6 @@ import java.util.UUID
 
 data class VedtaksbrevEntity(
     val id: UUID,
-    val brevRef: UUID,
     val journalpostId: String?,
     val dokumentInfoId: String?,
     val sendtTid: LocalDate,

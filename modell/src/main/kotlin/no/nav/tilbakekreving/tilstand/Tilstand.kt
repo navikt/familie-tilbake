@@ -84,7 +84,7 @@ internal sealed interface Tilstand {
         beslutter: Behandler,
         vurderinger: List<Pair<Behandlingssteg, FatteVedtakSteg.Vurdering>>,
     ) {
-        throw ModellFeil.UgyldigOperasjonException("Forventet ikke totrinn vurdering i $tilbakekrevingTilstand", behandling.sporingsinformasjon())
+        throw ModellFeil.UgyldigOperasjonException("Forventet ikke totrinn vurdering i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
     }
 
     fun håndter(

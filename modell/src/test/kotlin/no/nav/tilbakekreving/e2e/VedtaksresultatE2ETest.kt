@@ -45,7 +45,7 @@ class VedtaksresultatE2ETest {
         tilbakekreving.håndter(brukerinfoHendelse())
 
         tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, faktastegVurdering())
-        tilbakekreving.trengerVarselbrev(tilbakekreving.nåværendeBehandlingId(), "Tekst fra saksbehandler")
+        tilbakekreving.sendVarselbrev(tilbakekreving.nåværendeBehandlingId(), "Tekst fra saksbehandler")
         tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.JA, null, null, behandler)
 
         tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
@@ -80,7 +80,7 @@ class VedtaksresultatE2ETest {
         tilbakekreving.håndter(brukerinfoHendelse())
 
         tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, faktastegVurdering())
-        tilbakekreving.trengerVarselbrev(tilbakekreving.nåværendeBehandlingId(), "Tekst fra saksbehandler")
+        tilbakekreving.sendVarselbrev(tilbakekreving.nåværendeBehandlingId(), "Tekst fra saksbehandler")
         tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.JA, null, null, behandler)
 
         tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
@@ -114,7 +114,7 @@ class VedtaksresultatE2ETest {
         tilbakekreving.håndter(brukerinfoHendelse())
 
         tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, faktastegVurdering())
-        tilbakekreving.trengerVarselbrev(tilbakekreving.nåværendeBehandlingId(), "Tekst fra saksbehandler")
+        tilbakekreving.sendVarselbrev(tilbakekreving.nåværendeBehandlingId(), "Tekst fra saksbehandler")
         tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.JA, null, null, behandler)
 
         tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
@@ -149,7 +149,7 @@ class VedtaksresultatE2ETest {
         tilbakekreving.håndter(brukerinfoHendelse())
 
         tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, faktastegVurdering())
-        tilbakekreving.trengerVarselbrev(tilbakekreving.nåværendeBehandlingId(), "Tekst fra saksbehandler")
+        tilbakekreving.sendVarselbrev(tilbakekreving.nåværendeBehandlingId(), "Tekst fra saksbehandler")
         tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.JA, null, null, behandler)
 
         tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())

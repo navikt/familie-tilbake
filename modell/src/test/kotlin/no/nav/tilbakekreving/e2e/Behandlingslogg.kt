@@ -70,7 +70,7 @@ class Behandlingslogg {
             ),
         )
         tilbakekreving.håndter(brukerinfoHendelse())
-        tilbakekreving.trengerVarselbrev(tilbakekreving.nåværendeBehandlingId(), "tekst fra saksbehandler")
+        tilbakekreving.sendVarselbrev(tilbakekreving.nåværendeBehandlingId(), "tekst fra saksbehandler")
         tilbakekreving.håndter(
             hendelse = VarselbrevJournalføringHendelse(
                 varselbrevId = tilbakekreving.brevHistorikk.sisteVarselbrev()!!.id,

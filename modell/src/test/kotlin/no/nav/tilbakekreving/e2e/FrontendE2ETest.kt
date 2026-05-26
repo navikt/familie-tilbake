@@ -55,8 +55,8 @@ class FrontendE2ETest {
         tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), behandler, true).status shouldBe Behandlingsstatus.UTREDES
 
         tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, faktastegVurdering())
-        tilbakekreving.trengerVarselbrev(tilbakekreving.nåværendeBehandlingId(), "Tekst fra saksbehandler")
-        val varselbrevId = behovOppsamler.behovListe.filterIsInstance<VarselbrevJournalføringBehov>().first().varselbrev.id
+        tilbakekreving.sendVarselbrev(tilbakekreving.nåværendeBehandlingId(), "Tekst fra saksbehandler")
+        val varselbrevId = behovOppsamler.behovListe.filterIsInstance<VarselbrevJournalføringBehov>().first().info.id
         tilbakekreving.håndter(
             VarselbrevJournalføringHendelse(
                 varselbrevId = varselbrevId,

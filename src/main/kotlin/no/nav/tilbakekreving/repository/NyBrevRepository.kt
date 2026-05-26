@@ -29,7 +29,7 @@ class NyBrevRepository(
 
     fun hentVarselbrev(brevId: UUID): VarselbrevEntity? {
         return jdbcTemplate.query(
-            "SELECT * FROM tilbakekreving_varselbrev WHERE brev_ref = ?",
+            "SELECT * FROM tilbakekreving_varselbrev WHERE id = ?",
             brevId,
         ) { resultSet, _ ->
             BrevEntityMapper.VarselbrevEntityMapper.map(resultSet)
@@ -38,7 +38,7 @@ class NyBrevRepository(
 
     fun hentVedtaksbrev(brevId: UUID): VedtaksbrevEntity? {
         return jdbcTemplate.query(
-            "SELECT * FROM tilbakekreving_vedtaksbrev WHERE brev_ref = ?",
+            "SELECT * FROM tilbakekreving_vedtaksbrev WHERE id = ?",
             brevId,
         ) { resultSet, _ ->
             BrevEntityMapper.VedtaksbrevEntityMapper.map(resultSet)

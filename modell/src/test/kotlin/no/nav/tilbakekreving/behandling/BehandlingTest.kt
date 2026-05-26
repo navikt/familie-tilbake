@@ -30,7 +30,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
 class BehandlingTest {
-    val behandlingObservatør = BehandlingObservatørOppsamler()
     val ansvarligSaksbehandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
     val ansvarligBeslutter = Behandler.Saksbehandler("Ansvarlig beslutter")
     val behandlingslogg = Behandlingslogg(listOf<LoggInnslag>().toMutableList())
@@ -44,7 +43,7 @@ class BehandlingTest {
         behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).vurderingAvBrukersUttalelse.harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.IKKE_VURDERT
 
         val faktasteg = faktastegVurdering(periode)
-        behandling.håndter(ansvarligSaksbehandler, faktasteg, behandlingObservatør, behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, faktasteg, behandlingslogg)
 
         behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).vurderingAvBrukersUttalelse.beskrivelse shouldBe null
         behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).vurderingAvBrukersUttalelse.harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.NEI
@@ -69,10 +68,10 @@ class BehandlingTest {
         }
 
         val faktasteg = faktastegVurdering(periode)
-        behandling.håndter(ansvarligSaksbehandler, faktasteg, behandlingObservatør, behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, faktasteg, behandlingslogg)
 
         val foreldelse = Foreldelsesteg.Vurdering.Foreldet("Begrunnelse")
-        behandling.håndter(ansvarligSaksbehandler, periode, foreldelse, behandlingObservatør, behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, periode, foreldelse, behandlingslogg)
 
         behandling.foreldelsesteg.tilFrontendDto(kravgrunnlag).foreldetPerioder.first().begrunnelse shouldBe "Begrunnelse"
 
@@ -89,13 +88,13 @@ class BehandlingTest {
         }
 
         val faktasteg = faktastegVurdering(periode)
-        behandling.håndter(ansvarligSaksbehandler, faktasteg, behandlingObservatør, behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, faktasteg, behandlingslogg)
 
         val foreldelse = Foreldelsesteg.Vurdering.Foreldet("Begrunnelse")
-        behandling.håndter(ansvarligSaksbehandler, periode, foreldelse, behandlingObservatør, behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, periode, foreldelse, behandlingslogg)
 
         val vilkårsvurdering = forårsaketAvNav().burdeForstått(aktsomhet = forsettelig())
-        behandling.håndter(ansvarligSaksbehandler, periode, vilkårsvurdering, behandlingObservatør, behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, periode, vilkårsvurdering, behandlingslogg)
 
         behandling.vilkårsvurderingsstegDto.tilFrontendDto().perioder.first().begrunnelse.shouldNotBeNull()
 
@@ -107,39 +106,37 @@ class BehandlingTest {
     @Test
     fun `vedtak kan endres etter alle tilbakeførte vurderinger er gjennomgått`() {
         val behandling = behandling()
-        behandling.håndter(ansvarligSaksbehandler, faktastegVurdering(), behandlingObservatør, behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, faktastegVurdering(), behandlingslogg)
         behandling.lagreForhåndsvarselUnntak(
             BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
             "Trenger ikke forhåndsvarsel i test lol",
             ansvarligSaksbehandler,
             behandlingslogg,
         )
-        behandling.håndter(ansvarligSaksbehandler, periode, foreldelseVurdering(), behandlingObservatør, behandlingslogg)
-        behandling.håndter(ansvarligSaksbehandler, periode, forårsaketAvNav().godTro(), behandlingObservatør, behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, periode, foreldelseVurdering(), behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, periode, forårsaketAvNav().godTro(), behandlingslogg)
         behandling.tilFrontendDto(TilBehandling, ansvarligSaksbehandler, true).kanEndres shouldBe true
 
-        behandling.håndterForeslåVedtak(ansvarligSaksbehandler, behandlingObservatør, behandlingslogg)
+        behandling.håndterForeslåVedtak(ansvarligSaksbehandler, behandlingslogg)
 
         behandling.håndter(
             beslutter = ansvarligBeslutter,
             vurderinger = fatteVedtakVurdering(
                 Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Underkjent("Må vurderes på nytt"),
             ),
-            observatør = behandlingObservatør,
             behandlingslogg = behandlingslogg,
         )
         behandling.tilFrontendDto(TilBehandling, ansvarligSaksbehandler, true).kanEndres shouldBe true
 
-        behandling.håndter(ansvarligSaksbehandler, faktastegVurdering(), behandlingObservatør, behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, faktastegVurdering(), behandlingslogg)
         behandling.tilFrontendDto(TilBehandling, ansvarligSaksbehandler, true).kanEndres shouldBe true
 
-        behandling.håndterForeslåVedtak(ansvarligSaksbehandler, behandlingObservatør, behandlingslogg)
+        behandling.håndterForeslåVedtak(ansvarligSaksbehandler, behandlingslogg)
         behandling.tilFrontendDto(TilBehandling, ansvarligSaksbehandler, true).kanEndres shouldBe false
 
         behandling.håndter(
             beslutter = ansvarligBeslutter,
             vurderinger = fatteVedtakVurdering(),
-            observatør = behandlingObservatør,
             behandlingslogg = behandlingslogg,
         )
         behandling.tilFrontendDto(TilBehandling, ansvarligSaksbehandler, true).kanEndres shouldBe false
@@ -148,25 +145,24 @@ class BehandlingTest {
     @Test
     fun `andre saksbehandlere skal kunne gjøre vurderinger på vedtak som er underkjent`() {
         val behandling = behandling()
-        behandling.håndter(ansvarligSaksbehandler, faktastegVurdering(), behandlingObservatør, behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, faktastegVurdering(), behandlingslogg)
         behandling.lagreForhåndsvarselUnntak(
             BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
             "Trenger ikke forhåndsvarsel i test lol",
             ansvarligSaksbehandler,
             behandlingslogg,
         )
-        behandling.håndter(ansvarligSaksbehandler, periode, foreldelseVurdering(), behandlingObservatør, behandlingslogg)
-        behandling.håndter(ansvarligSaksbehandler, periode, forårsaketAvNav().godTro(), behandlingObservatør, behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, periode, foreldelseVurdering(), behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, periode, forårsaketAvNav().godTro(), behandlingslogg)
         behandling.tilFrontendDto(TilBehandling, ansvarligSaksbehandler, true).kanEndres shouldBe true
 
-        behandling.håndterForeslåVedtak(ansvarligSaksbehandler, behandlingObservatør, behandlingslogg)
+        behandling.håndterForeslåVedtak(ansvarligSaksbehandler, behandlingslogg)
 
         behandling.håndter(
             beslutter = ansvarligBeslutter,
             vurderinger = fatteVedtakVurdering(
                 Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Underkjent("Må vurderes på nytt"),
             ),
-            observatør = behandlingObservatør,
             behandlingslogg = behandlingslogg,
         )
         behandling.tilFrontendDto(TilBehandling, Behandler.Saksbehandler("Z222222"), true).kanEndres shouldBe true
@@ -175,30 +171,29 @@ class BehandlingTest {
     @Test
     fun `behandling sendt til godkjenning etter underkjenning skal ikke beholde vurdering`() {
         val behandling = behandling()
-        behandling.håndter(ansvarligSaksbehandler, faktastegVurdering(), behandlingObservatør, behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, faktastegVurdering(), behandlingslogg)
         behandling.lagreForhåndsvarselUnntak(
             BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
             "Trenger ikke forhåndsvarsel i test lol",
             ansvarligSaksbehandler,
             behandlingslogg,
         )
-        behandling.håndter(ansvarligSaksbehandler, periode, foreldelseVurdering(), behandlingObservatør, behandlingslogg)
-        behandling.håndter(ansvarligSaksbehandler, periode, forårsaketAvNav().godTro(), behandlingObservatør, behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, periode, foreldelseVurdering(), behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, periode, forårsaketAvNav().godTro(), behandlingslogg)
         behandling.tilFrontendDto(TilBehandling, ansvarligSaksbehandler, true).kanEndres shouldBe true
 
-        behandling.håndterForeslåVedtak(ansvarligSaksbehandler, behandlingObservatør, behandlingslogg)
+        behandling.håndterForeslåVedtak(ansvarligSaksbehandler, behandlingslogg)
 
         behandling.håndter(
             beslutter = ansvarligBeslutter,
             vurderinger = fatteVedtakVurdering(
                 Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Underkjent("Må vurderes på nytt"),
             ),
-            observatør = behandlingObservatør,
             behandlingslogg = behandlingslogg,
         )
 
-        behandling.håndter(ansvarligSaksbehandler, faktastegVurdering(), behandlingObservatør, behandlingslogg)
-        behandling.håndterForeslåVedtak(ansvarligSaksbehandler, behandlingObservatør, behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, faktastegVurdering(), behandlingslogg)
+        behandling.håndterForeslåVedtak(ansvarligSaksbehandler, behandlingslogg)
         val frontendDto = behandling.tilFrontendDto(TilBehandling, ansvarligSaksbehandler, true)
 
         val fatteVedtakSteg = frontendDto.behandlingsstegsinfo.skalHaSteg(Behandlingssteg.FATTE_VEDTAK)
@@ -235,28 +230,27 @@ class BehandlingTest {
     @Test
     fun `kan ikke sende tilbake til beslutter om en av vurderingene ikke er fullstendige`() {
         val behandling = behandling()
-        behandling.håndter(ansvarligSaksbehandler, faktastegVurdering(), behandlingObservatør, behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, faktastegVurdering(), behandlingslogg)
         behandling.lagreForhåndsvarselUnntak(
             BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
             "Trenger ikke forhåndsvarsel i test lol",
             ansvarligSaksbehandler,
             behandlingslogg,
         )
-        behandling.håndter(ansvarligSaksbehandler, periode, foreldelseVurdering(), behandlingObservatør, behandlingslogg)
-        behandling.håndter(ansvarligSaksbehandler, periode, forårsaketAvNav().godTro(), behandlingObservatør, behandlingslogg)
-        behandling.håndterForeslåVedtak(ansvarligSaksbehandler, behandlingObservatør, behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, periode, foreldelseVurdering(), behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, periode, forårsaketAvNav().godTro(), behandlingslogg)
+        behandling.håndterForeslåVedtak(ansvarligSaksbehandler, behandlingslogg)
 
         behandling.håndter(
             beslutter = ansvarligBeslutter,
             vurderinger = fatteVedtakVurdering(
                 Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Underkjent("Må vurderes på nytt"),
             ),
-            observatør = behandlingObservatør,
             behandlingslogg = behandlingslogg,
         )
 
         val exception = shouldThrow<ModellFeil.UgyldigOperasjonException> {
-            behandling.håndterForeslåVedtak(ansvarligSaksbehandler, behandlingObservatør, behandlingslogg)
+            behandling.håndterForeslåVedtak(ansvarligSaksbehandler, behandlingslogg)
         }
         exception.message shouldBe "Du må gjøre en ny vurdering av fakta før du kan sende vedtaket til godkjenning hos beslutter"
     }
@@ -264,16 +258,16 @@ class BehandlingTest {
     @Test
     fun `kan ikke sende tilbake til beslutter om en av vurderingene ikke er fullstendige - flere steg`() {
         val behandling = behandling()
-        behandling.håndter(ansvarligSaksbehandler, faktastegVurdering(), behandlingObservatør, behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, faktastegVurdering(), behandlingslogg)
         behandling.lagreForhåndsvarselUnntak(
             BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
             "Trenger ikke forhåndsvarsel i test lol",
             ansvarligSaksbehandler,
             behandlingslogg,
         )
-        behandling.håndter(ansvarligSaksbehandler, periode, foreldelseVurdering(), behandlingObservatør, behandlingslogg)
-        behandling.håndter(ansvarligSaksbehandler, periode, forårsaketAvNav().godTro(), behandlingObservatør, behandlingslogg)
-        behandling.håndterForeslåVedtak(ansvarligSaksbehandler, behandlingObservatør, behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, periode, foreldelseVurdering(), behandlingslogg)
+        behandling.håndter(ansvarligSaksbehandler, periode, forårsaketAvNav().godTro(), behandlingslogg)
+        behandling.håndterForeslåVedtak(ansvarligSaksbehandler, behandlingslogg)
 
         behandling.håndter(
             beslutter = ansvarligBeslutter,
@@ -282,12 +276,11 @@ class BehandlingTest {
                 Behandlingssteg.FORELDELSE to FatteVedtakSteg.Vurdering.Underkjent("Må vurderes på nytt"),
                 Behandlingssteg.VILKÅRSVURDERING to FatteVedtakSteg.Vurdering.Underkjent("Må vurderes på nytt"),
             ),
-            observatør = behandlingObservatør,
             behandlingslogg = behandlingslogg,
         )
 
         val exception = shouldThrow<ModellFeil.UgyldigOperasjonException> {
-            behandling.håndterForeslåVedtak(ansvarligSaksbehandler, behandlingObservatør, behandlingslogg)
+            behandling.håndterForeslåVedtak(ansvarligSaksbehandler, behandlingslogg)
         }
         exception.message shouldBe "Du må gjøre en ny vurdering av fakta, foreldelse og vilkår før du kan sende vedtaket til godkjenning hos beslutter"
     }

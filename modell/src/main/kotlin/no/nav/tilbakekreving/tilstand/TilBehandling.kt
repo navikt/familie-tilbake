@@ -21,7 +21,7 @@ object TilBehandling : Tilstand {
     override val kanEndresAvSaksbehandler: Boolean = true
 
     override fun behandlingsstatus(behandling: Behandling): BehandlingsstatusModell {
-        return behandling.steg().firstOrNull { !it.erKlar(behandling.klokke) }
+        return behandling.førsteUfullstendigeSteg()
             ?.behandlingsstatus
             ?: BehandlingsstatusModell.TIL_BEHANDLING
     }
@@ -44,7 +44,7 @@ object TilBehandling : Tilstand {
     }
 
     override fun håndter(tilbakekreving: Tilbakekreving, behandling: Behandling, beslutter: Behandler, vurderinger: List<Pair<Behandlingssteg, FatteVedtakSteg.Vurdering>>) {
-        behandling.håndter(beslutter, vurderinger, tilbakekreving, tilbakekreving.behandlingslogg)
+        behandling.håndter(beslutter, vurderinger, tilbakekreving.behandlingslogg)
         if (behandling.kanUtbetales()) {
             tilbakekreving.byttTilstand(IverksettVedtak)
         }

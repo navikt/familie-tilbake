@@ -3,7 +3,6 @@ package no.nav.tilbakekreving
 import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
 import io.ktor.http.path
-import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.aktør.Bruker
 import no.nav.tilbakekreving.aktør.Bruker.Companion.tilNullableFrontendDto
@@ -60,7 +59,6 @@ import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentTypeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.LogginnslagDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
@@ -230,7 +228,7 @@ class Tilbakekreving internal constructor(
     internal fun hånterEndretKravgrunnlag(kravgrunnlagHendelse: KravgrunnlagHendelse) {
         behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
             kravgrunnlagHistorikk.lagre(kravgrunnlagHendelse)
-            fåttNyttKravgrunnlag(kravgrunnlagHistorikk.nåværende())
+            oppdaterKravgrunnlag(kravgrunnlagHistorikk.nåværende())
         }
     }
 
@@ -313,14 +311,6 @@ class Tilbakekreving internal constructor(
         byttTilstand(AvventerBrukerinfo)
     }
 
-    fun trengerVarselbrev(behandlingId: UUID, varseltekstFraSaksbehandler: String) {
-        val behandling = hentBehandling(behandlingId)
-        val varselbrev = behandling.opprettVarselbrev(varseltekstFraSaksbehandler, features)
-        brevHistorikk.lagre(varselbrev)
-        behandling.lagreOpprinneligFrist(varselbrev.fristForUttalelse)
-        byttTilstand(SendVarselbrev)
-    }
-
     fun sendVarselbrev(behandlingId: UUID, varseltekstFraSaksbehandler: String) {
         hentBehandling(behandlingId).utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
             val varselbrev = opprettVarselbrev(varseltekstFraSaksbehandler, features)
@@ -337,8 +327,7 @@ class Tilbakekreving internal constructor(
             behovObservatør = behovObservatør,
             eksternFagsak = eksternFagsak,
             brukerinfo = bruker!!.hentBrukerinfo(),
-            varselbrev = brevHistorikk.sisteVarselbrev()!!,
-            varselbrevInfo = hentVarselbrevInfo(behandling.id),
+            varselbrevInfo = brevHistorikk.sisteVarselbrev()!!.tilVarselbrevInfo(bruker!!, behandling.hentForhåndsvarselinfo(), eksternFagsak),
         )
     }
 
@@ -370,26 +359,26 @@ class Tilbakekreving internal constructor(
     }
 
     fun trengerVarselbrevDistribusjon() {
-        val behandling = behandlingHistorikk.nåværende().entry
-
-        behandling.trengerVarselbrevDistribusjon(
-            behovObservatør,
-            journalpostId = brevHistorikk.sisteVarselbrev()!!.journalpostId!!,
-            ytelse = eksternFagsak.ytelse,
-            brevId = brevHistorikk.sisteVarselbrev()!!.id,
-            fagsakId = eksternFagsak.eksternId,
-            dokumentInfoId = brevHistorikk.sisteVarselbrev()!!.dokumentInfoId!!,
+        behovObservatør.håndter(
+            behandlingHistorikk.nåværende().entry.lagVarselbrevDistribusjonBehov(
+                journalpostId = brevHistorikk.sisteVarselbrev()!!.journalpostId!!,
+                ytelse = eksternFagsak.ytelse,
+                brevId = brevHistorikk.sisteVarselbrev()!!.id,
+                fagsakId = eksternFagsak.eksternId,
+                dokumentInfoId = brevHistorikk.sisteVarselbrev()!!.dokumentInfoId!!,
+            ),
         )
     }
 
     fun trengerVedtaksbrevDistribusjon() {
-        behandlingHistorikk.nåværende().entry.trengerVedtaksbrevDistribusjon(
-            behovObservatør,
-            journalpostId = brevHistorikk.nåværende().entry.journalpostId!!,
-            brevId = brevHistorikk.nåværende().entry.id,
-            fagsystem = eksternFagsak.ytelse.tilFagsystemDTO(),
-            fagsakId = eksternFagsak.eksternId,
-            dokumentInfoId = brevHistorikk.nåværende().entry.dokumentInfoId!!,
+        behovObservatør.håndter(
+            behandlingHistorikk.nåværende().entry.lagVedtaksbrevDistribusjonBehov(
+                journalpostId = brevHistorikk.nåværende().entry.journalpostId!!,
+                brevId = brevHistorikk.nåværende().entry.id,
+                fagsystem = eksternFagsak.ytelse.tilFagsystemDTO(),
+                fagsakId = eksternFagsak.eksternId,
+                dokumentInfoId = brevHistorikk.nåværende().entry.dokumentInfoId!!,
+            ),
         )
     }
 
@@ -452,7 +441,7 @@ class Tilbakekreving internal constructor(
         vurdering: Faktasteg.Vurdering,
     ) {
         hentBehandling(behandlingId).utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
-            håndter(behandler, vurdering, this@Tilbakekreving, behandlingslogg)
+            håndter(behandler, vurdering, behandlingslogg)
         }
     }
 
@@ -475,7 +464,7 @@ class Tilbakekreving internal constructor(
         vurdering: Foreldelsesteg.Vurdering,
     ) {
         hentBehandling(behandlingId).utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
-            håndter(behandler, periode, vurdering, this@Tilbakekreving, behandlingslogg)
+            håndter(behandler, periode, vurdering, behandlingslogg)
         }
     }
 
@@ -486,7 +475,7 @@ class Tilbakekreving internal constructor(
         vurdering: ForårsaketAvBruker,
     ) {
         hentBehandling(behandlingId).utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
-            håndter(behandler, periode, vurdering, this@Tilbakekreving, behandlingslogg)
+            håndter(behandler, periode, vurdering, behandlingslogg)
         }
     }
 
@@ -495,7 +484,7 @@ class Tilbakekreving internal constructor(
         behandler: Behandler,
     ) {
         hentBehandling(behandlingId).utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
-            håndterForeslåVedtak(behandler, this@Tilbakekreving, behandlingslogg)
+            håndterForeslåVedtak(behandler, behandlingslogg)
         }
     }
 
@@ -589,36 +578,15 @@ class Tilbakekreving internal constructor(
     fun hentVarselbrevInfo(behandlingId: UUID): VarselbrevInfo {
         val behandling = hentBehandling(behandlingId)
         val varselbrev = behandling.opprettVarselbrev("", features)
-        return VarselbrevInfo(
-            brukerinfo = bruker!!.hentBrukerinfo(),
-            forhåndsvarselinfo = behandling.hentForhåndsvarselinfo(),
-            eksternFagsakId = eksternFagsak.eksternId,
-            ytelseType = eksternFagsak.ytelse.tilYtelseDTO(),
-            hjemlerForTilbakekreving = eksternFagsak.forhåndsvarselHjemlerForTilbakekreving(),
-            varsletDato = varselbrev.sendtTid,
-            opprinneligUttalelsesfrist = varselbrev.fristForUttalelse,
-        )
+        return varselbrev.tilVarselbrevInfo(bruker!!, behandling.hentForhåndsvarselinfo(), eksternFagsak)
     }
 
     fun hentForhåndsvarselFrontendDto(behandlingId: UUID): ForhåndsvarselDto {
-        val behandling = hentBehandling(behandlingId)
-        return ForhåndsvarselDto(
-            varselbrevDto = brevHistorikk.sisteVarselbrev()?.tilFrontendDto(),
-            brukeruttalelse = behandling.brukeruttaleserTilFrontendDto(),
-            forhåndsvarselUnntak = behandling.forhåndsvarselUnntakTilFrontendDto(),
-            utsettUttalelseFrist = behandling.utsettUttalelseFristTilFrontendDto(),
-        )
+        return hentBehandling(behandlingId).forhåndsvarselFrontendDto(brevHistorikk.sisteVarselbrev())
     }
 
     fun nyHentForhåndsvarselFrontendDto(behandlingId: UUID): ForhaandsvarselResponseDto {
-        val behandling = hentBehandling(behandlingId)
-        val forhåndsvarselinfo = brevHistorikk.sisteVarselbrev()?.let {
-            ForhaandsvarselInfoDto(
-                tekstFraSaksbehandler = it.tekstFraSaksbehandler,
-                varselbrevSendtTid = it.sendtTid,
-            )
-        }
-        return behandling.nyForhåndsvarselTilFrontend(forhåndsvarselinfo)
+        return hentBehandling(behandlingId).nyForhåndsvarselTilFrontend(brevHistorikk.sisteVarselbrev())
     }
 
     fun tilFeilutbetalingFrontendDto(behandlingId: UUID): FaktaOmFeilutbetalingDto {

@@ -26,7 +26,6 @@ data class Vedtaksbrev(
             varselbrevEntity = null,
             vedtaksbrevEntity = VedtaksbrevEntity(
                 id = id,
-                brevRef = id,
                 journalpostId = journalpostId,
                 dokumentInfoId = dokumentInfoId,
                 sendtTid = sendtTid,

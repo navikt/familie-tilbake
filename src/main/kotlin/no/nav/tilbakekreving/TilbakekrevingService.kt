@@ -238,7 +238,7 @@ class TilbakekrevingService(
 
                 tilbakekreving.håndter(
                     VarselbrevJournalføringHendelse(
-                        varselbrevId = behov.brevId,
+                        varselbrevId = behov.info.id,
                         journalpostId = journalpostResponse.journalpostId,
                         dokumentInfoId = journalpostResponse.dokumenter[0].dokumentInfoId!!,
                     ),

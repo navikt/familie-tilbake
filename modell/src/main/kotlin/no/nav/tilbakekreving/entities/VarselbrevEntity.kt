@@ -9,7 +9,6 @@ import java.util.UUID
 
 data class VarselbrevEntity(
     val id: UUID,
-    val brevRef: UUID,
     val kravgrunnlagRef: HistorikkReferanseEntity<UUID>,
     val journalpostId: String?,
     val dokumentInfoId: String?,

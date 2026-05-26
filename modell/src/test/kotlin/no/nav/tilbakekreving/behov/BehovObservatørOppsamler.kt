@@ -46,7 +46,7 @@ class BehovObservatørOppsamler() : BehovObservatør {
         return VarselbrevJournalføringHendelse(
             journalpostId = "",
             dokumentInfoId = "",
-            varselbrevId = (behovListe.last() as VarselbrevJournalføringBehov).brevId,
+            varselbrevId = (behovListe.last() as VarselbrevJournalføringBehov).info.id,
         )
     }
 

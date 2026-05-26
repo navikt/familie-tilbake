@@ -44,12 +44,6 @@ object BrevEntityMapper : Entity<BrevEntity, UUID, UUID>(
         VarselbrevEntity::id,
         FieldConverter.UUIDConverter.required(),
     ) {
-        val brevRef = field(
-            "brev_ref",
-            VarselbrevEntity::brevRef,
-            FieldConverter.UUIDConverter.required(),
-        )
-
         val kravgrunnlagRef = field(
             "kravgrunnlag_ref",
             { it.kravgrunnlagRef.id },
@@ -95,7 +89,6 @@ object BrevEntityMapper : Entity<BrevEntity, UUID, UUID>(
         fun map(resultSet: ResultSet): VarselbrevEntity {
             return VarselbrevEntity(
                 id = resultSet[id],
-                brevRef = resultSet[brevRef],
                 kravgrunnlagRef = HistorikkReferanseEntity(resultSet[kravgrunnlagRef]),
                 journalpostId = resultSet[journalpostId],
                 dokumentInfoId = resultSet[VedtaksbrevEntityMapper.dokumentInfoId],
@@ -112,11 +105,6 @@ object BrevEntityMapper : Entity<BrevEntity, UUID, UUID>(
         VedtaksbrevEntity::id,
         FieldConverter.UUIDConverter.required(),
     ) {
-        val brevRef = field(
-            "brev_ref",
-            VedtaksbrevEntity::brevRef,
-            FieldConverter.UUIDConverter.required(),
-        )
         val sendtTid = field(
             "sendt_tid",
             VedtaksbrevEntity::sendtTid,
@@ -137,7 +125,6 @@ object BrevEntityMapper : Entity<BrevEntity, UUID, UUID>(
         fun map(resultSet: ResultSet): VedtaksbrevEntity {
             return VedtaksbrevEntity(
                 id = resultSet[id],
-                brevRef = resultSet[brevRef],
                 journalpostId = resultSet[journalpostId],
                 dokumentInfoId = resultSet[dokumentInfoId],
                 sendtTid = resultSet[sendtTid]!!,
