@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 
 import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.Klokke
+import no.nav.tilbakekreving.LesContext
 import no.nav.tilbakekreving.api.v1.dto.Totrinnsstegsinfo
 import no.nav.tilbakekreving.api.v1.dto.TotrinnsvurderingDto
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
@@ -55,8 +56,8 @@ class FatteVedtakSteg internal constructor(
             .oppdaterVurdering(vurdering)
     }
 
-    override fun tilFrontendDto(): TotrinnsvurderingDto {
-        return TotrinnsvurderingDto(vurderteSteg.map(VurdertSteg::tilFrontendDto))
+    override fun tilFrontendDto(lesContext: LesContext): TotrinnsvurderingDto {
+        return TotrinnsvurderingDto(vurderteSteg.map { it.tilFrontendDto(lesContext) })
     }
 
     fun tilEntity(behandlingRef: UUID): FatteVedtakStegEntity {
@@ -99,7 +100,7 @@ class FatteVedtakSteg internal constructor(
 
         fun hentSteg(): Behandlingssteg = steg
 
-        override fun tilFrontendDto(): Totrinnsstegsinfo {
+        override fun tilFrontendDto(lesContext: LesContext): Totrinnsstegsinfo {
             return Totrinnsstegsinfo(
                 behandlingssteg = steg,
                 godkjent = when (vurdering) {

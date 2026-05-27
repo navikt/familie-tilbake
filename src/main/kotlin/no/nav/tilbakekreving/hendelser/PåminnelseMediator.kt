@@ -9,6 +9,7 @@ import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
+import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -27,17 +28,17 @@ class PåminnelseMediator(
     fun påminnSaker() {
         val tilbakekrevinger = tilbakekrevingRepository.hentTilbakekrevinger(TilbakekrevingRepository.FindTilbakekrevingStrategy.TrengerPåminnelse)
         for (tilbakekrevingEntity in tilbakekrevinger) {
-            var context = SecureLog.Context.tom()
+            var logContext = SecureLog.Context.tom()
             try {
-                tilbakekrevinService.hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingEntity.id)) { tilbakekreving ->
-                    context = SecureLog.Context.fra(tilbakekreving)
-                    logger.medContext(context) {
+                tilbakekrevinService.hentOgLagreTilbakekreving(Behandler.Vedtaksløsning, TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingEntity.id)) { tilbakekreving, context ->
+                    logContext = SecureLog.Context.fra(tilbakekreving)
+                    logger.medContext(logContext) {
                         info("Sender påminnelse")
                     }
-                    tilbakekreving.håndter(Påminnelse(LocalDateTime.now()))
+                    tilbakekreving.håndter(Påminnelse(LocalDateTime.now()), context)
                 }
             } catch (e: Exception) {
-                logger.medContext(context) {
+                logger.medContext(logContext) {
                     error("Feilet under påminnelse av sak med {}", keyValue("tilbakekrevingId", tilbakekrevingEntity.id), e)
                 }
             }

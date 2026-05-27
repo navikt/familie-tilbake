@@ -1,5 +1,4 @@
 package no.nav.tilbakekreving.e2e.ytelser.tilleggsstønader
-
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.FeilutbetalingsperiodeDto
@@ -7,12 +6,8 @@ import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelsesperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
-import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
-import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.brukerinfoHendelse
-import no.nav.tilbakekreving.defaultFeatures
-import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.fagsysteminfoHendelse
 import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
@@ -25,6 +20,8 @@ import no.nav.tilbakekreving.kravgrunnlagPeriode
 import no.nav.tilbakekreving.nåværendeBehandlingId
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.saksbehandlerContext
+import no.nav.tilbakekreving.systemContext
 import no.nav.tilbakekreving.test.februar
 import no.nav.tilbakekreving.test.januar
 import org.junit.jupiter.api.Test
@@ -37,12 +34,9 @@ class TilleggsstønaderE2ETest {
         val behandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
 
         val tilbakekreving = Tilbakekreving.opprett(
-            UUID.randomUUID().toString(),
-            BehovObservatørOppsamler(),
-            opprettTilbakekrevingHendelse,
-            BigQueryServiceStub(),
-            EndringObservatørOppsamler(),
-            features = defaultFeatures(),
+            id = UUID.randomUUID().toString(),
+            opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse,
+            sideeffektContext = systemContext(),
         )
 
         tilbakekreving.håndter(
@@ -52,6 +46,7 @@ class TilleggsstønaderE2ETest {
                     kravgrunnlagPeriode(1.februar(2021) til 1.februar(2021)),
                 ),
             ),
+            systemContext(),
         )
         tilbakekreving.håndter(
             fagsysteminfoHendelse(
@@ -66,9 +61,10 @@ class TilleggsstønaderE2ETest {
                     ),
                 ),
             ),
+            systemContext(),
         )
-        tilbakekreving.håndter(brukerinfoHendelse())
-        tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.JA, null, "", behandler)
+        tilbakekreving.håndter(brukerinfoHendelse(), systemContext())
+        tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.JA, null, "", saksbehandlerContext())
         val faktastegDto = tilbakekreving.faktastegFrontendDto(tilbakekreving.nåværendeBehandlingId())
         faktastegDto.feilutbetaltePerioder shouldBe listOf(
             FeilutbetalingsperiodeDto(
@@ -86,10 +82,10 @@ class TilleggsstønaderE2ETest {
         )
         faktastegDto.totalFeilutbetaltPeriode shouldBe (1.januar(2021) til 28.februar(2021))
 
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, faktastegVurdering(1.januar(2021) til 31.januar(2021)))
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, faktastegVurdering(1.februar(2021) til 28.februar(2021)))
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), faktastegVurdering(1.januar(2021) til 31.januar(2021)))
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), faktastegVurdering(1.februar(2021) til 28.februar(2021)))
 
-        val foreldelsesstegDto = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId()).foreldelsestegDto.tilFrontendDto()
+        val foreldelsesstegDto = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId()).foreldelsestegDto.tilFrontendDto(saksbehandlerContext())
         foreldelsesstegDto.foreldetPerioder shouldBe listOf(
             VurdertForeldelsesperiodeDto(
                 periode = 1.januar(2021) til 31.januar(2021),
@@ -109,10 +105,10 @@ class TilleggsstønaderE2ETest {
             ),
         )
 
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, 1.januar(2021) til 31.januar(2021), Foreldelsesteg.Vurdering.IkkeForeldet(""))
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, 1.februar(2021) til 28.februar(2021), Foreldelsesteg.Vurdering.IkkeForeldet(""))
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), 1.januar(2021) til 31.januar(2021), Foreldelsesteg.Vurdering.IkkeForeldet(""))
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), 1.februar(2021) til 28.februar(2021), Foreldelsesteg.Vurdering.IkkeForeldet(""))
 
-        val vilkårsvurderingsstegDto = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId()).vilkårsvurderingsstegDto.tilFrontendDto()
+        val vilkårsvurderingsstegDto = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId()).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext())
         vilkårsvurderingsstegDto.perioder shouldBe listOf(
             VurdertVilkårsvurderingsperiodeDto(
                 periode = 1.januar(2021) til 31.januar(2021),
@@ -142,12 +138,9 @@ class TilleggsstønaderE2ETest {
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
 
         val tilbakekreving = Tilbakekreving.opprett(
-            UUID.randomUUID().toString(),
-            BehovObservatørOppsamler(),
-            opprettTilbakekrevingHendelse,
-            BigQueryServiceStub(),
-            EndringObservatørOppsamler(),
-            features = defaultFeatures(),
+            id = UUID.randomUUID().toString(),
+            opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse,
+            sideeffektContext = systemContext(),
         )
 
         tilbakekreving.håndter(
@@ -157,6 +150,7 @@ class TilleggsstønaderE2ETest {
                     kravgrunnlagPeriode(1.februar(2021) til 1.februar(2021)),
                 ),
             ),
+            systemContext(),
         )
         tilbakekreving.håndter(
             fagsysteminfoHendelse(
@@ -171,8 +165,9 @@ class TilleggsstønaderE2ETest {
                     ),
                 ),
             ),
+            systemContext(),
         )
-        tilbakekreving.håndter(brukerinfoHendelse())
+        tilbakekreving.håndter(brukerinfoHendelse(), systemContext())
 
         val faktastegDto = tilbakekreving.faktastegFrontendDto(tilbakekreving.nåværendeBehandlingId())
         faktastegDto.feilutbetaltePerioder shouldBe listOf(

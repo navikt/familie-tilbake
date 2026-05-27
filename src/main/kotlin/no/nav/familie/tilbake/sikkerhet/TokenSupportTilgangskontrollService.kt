@@ -19,6 +19,7 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.tilbakekreving.FagsystemUtil
+import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.auth.Authentication
 import no.nav.tilbakekreving.config.ApplicationProperties
@@ -54,9 +55,9 @@ class TokenSupportTilgangskontrollService(
         handling: String,
     ): Behandlerrolle {
         val saksbehandler = ContextService.hentSaksbehandler(SecureLog.Context.tom())
-        val fagsystem = tilbakekreving.tilFrontendDto().fagsystem
+        val fagsystem = tilbakekreving.tilFrontendDto(SystemKlokke).fagsystem
         val logContext = SecureLog.Context.medBehandling(tilbakekreving.eksternFagsak.eksternId, behandlingId?.toString())
-        val dto = tilbakekreving.tilFrontendDto()
+        val dto = tilbakekreving.tilFrontendDto(SystemKlokke)
         return validate(
             fagsystem = fagsystem,
             minimumBehandlerrolle = minimumBehandlerrolle,

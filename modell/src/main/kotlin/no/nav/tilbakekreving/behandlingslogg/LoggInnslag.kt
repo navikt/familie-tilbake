@@ -29,7 +29,6 @@ data class LoggInnslag(
 
     companion object {
         fun opprett(
-            id: UUID,
             behandlingId: UUID?,
             opprettetTid: LocalDateTime,
             behandlingsloggstype: Behandlingsloggstype,
@@ -37,7 +36,7 @@ data class LoggInnslag(
             behandlerIdent: String,
             ekstraInfo: Map<EkstraInfo, Any>,
         ): LoggInnslag = LoggInnslag(
-            id = id,
+            id = UUID.randomUUID(),
             behandlingId = behandlingId,
             opprettetTid = opprettetTid,
             sistOppdatert = null,

@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.behandling
 
+import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.behandling.saksbehandling.Venter
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
@@ -10,6 +11,7 @@ import java.util.UUID
 
 interface BehandlingObservatør {
     fun behandlingOppdatert(
+        sideeffektContext: SideeffektContext,
         behandlingId: UUID,
         eksternBehandlingId: String,
         vedtaksresultat: Vedtaksresultat?,

@@ -4,6 +4,7 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
+import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 
@@ -19,13 +20,13 @@ class KravgrunnlagMediator(
             val kravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(entity.kravgrunnlag)
             val kravgrunnlagHendelse = KravgrunnlagMapper.tilKravgrunnlagHendelse(kravgrunnlag, applicationProperties.kravgrunnlagMapping)
             if (kravgrunnlagHendelse.skalOppretteNySak()) {
-                tilbakekrevingService.opprettTilbakekreving(KravgrunnlagMapper.tilOpprettTilbakekrevingHendelse(kravgrunnlag)) { tilbakekreving ->
-                    tilbakekreving.håndter(kravgrunnlagHendelse)
+                tilbakekrevingService.opprettTilbakekreving(KravgrunnlagMapper.tilOpprettTilbakekrevingHendelse(kravgrunnlag)) { tilbakekreving, sideeffektContext ->
+                    tilbakekreving.håndter(kravgrunnlagHendelse, sideeffektContext)
                 }
             } else {
                 val fagsystem = KravgrunnlagMapper.ytelseFor(kravgrunnlag).tilFagsystemDTO()
-                tilbakekrevingService.hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.EksternFagsakId(kravgrunnlag.fagsystemId, fagsystem)) { tilbakekreving ->
-                    tilbakekreving.håndter(kravgrunnlagHendelse)
+                tilbakekrevingService.hentOgLagreTilbakekreving(Behandler.Vedtaksløsning, TilbakekrevingRepository.FindTilbakekrevingStrategy.EksternFagsakId(kravgrunnlag.fagsystemId, fagsystem)) { tilbakekreving, context ->
+                    tilbakekreving.håndter(kravgrunnlagHendelse, context)
                 }
             }
         }

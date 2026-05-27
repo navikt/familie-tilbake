@@ -1,5 +1,4 @@
 package no.nav.familie.tilbake.sikkerhet
-
 import io.jsonwebtoken.Jwts
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
@@ -26,11 +25,11 @@ import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.config.ApplicationProperties
-import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.systemContext
 import no.tilbakekreving.integrasjoner.persontilgang.Persontilgang
 import no.tilbakekreving.integrasjoner.persontilgang.PersontilgangService
 import org.junit.jupiter.api.AfterEach
@@ -413,10 +412,10 @@ internal class NyTilgangskontrollServiceTest : OppslagSpringRunnerTest() {
                     ytelse,
                 ),
             ),
-            behovObservatør = mockk(relaxed = true),
-            bigQueryService = bigQueryService,
-            endringObservatør = EndringObservatørOppsamler(),
-            features = FeatureToggles(EnumMap(Toggle::class.java), EnumMap(FagsystemDTO::class.java)),
+            sideeffektContext = systemContext(
+                behovObservatør = mockk(relaxed = true),
+                features = FeatureToggles(EnumMap(Toggle::class.java), EnumMap(FagsystemDTO::class.java)),
+            ),
         )
     }
 }

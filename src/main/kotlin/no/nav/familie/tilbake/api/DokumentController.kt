@@ -65,8 +65,8 @@ class DokumentController(
                 auditLoggerEvent = AuditLoggerEvent.CREATE,
                 handling = "Sender brev",
             )
-            tilbakekrevingService.hentTilbakekreving(bestillBrevDto.behandlingId) { tilbakekreving ->
-                tilbakekrevingService.bestillBrev(tilbakekreving, bestillBrevDto)
+            tilbakekrevingService.hentTilbakekreving(bestillBrevDto.behandlingId) { tilbakekreving, context ->
+                tilbakekrevingService.bestillBrev(tilbakekreving, bestillBrevDto, context)
             }
             return Ressurs.success(null)
         }
@@ -98,7 +98,7 @@ class DokumentController(
                 auditLoggerEvent = AuditLoggerEvent.ACCESS,
                 handling = "Forhåndsviser brev",
             )
-            return Ressurs.success(forhåndsvarselService.forhåndsvisVarselbrev(tilbakekreving, bestillBrevDto))
+            return Ressurs.success(forhåndsvarselService.forhåndsvisVarselbrev(tilbakekrevingService.lesecontext(), tilbakekreving, bestillBrevDto))
         }
 
         tilgangskontrollService.validerTilgangBehandlingID(
@@ -174,7 +174,7 @@ class DokumentController(
                 auditLoggerEvent = AuditLoggerEvent.ACCESS,
                 handling = "Henter varselbrevtekst",
             )
-            return Ressurs.success(forhåndsvarselService.hentVarselbrevTekster(behandlingId, tilbakekreving))
+            return Ressurs.success(forhåndsvarselService.hentVarselbrevTekster(tilbakekrevingService.lesecontext(), behandlingId, tilbakekreving))
         }
         return Ressurs.failure("Fant ingen tilbakekreving til behandlingId $behandlingId")
     }
@@ -200,8 +200,8 @@ class DokumentController(
                 auditLoggerEvent = AuditLoggerEvent.ACCESS,
                 handling = "Utsette frist på uttalelsen",
             )
-            tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving ->
-                forhåndsvarselService.utsettUttalelseFrist(behandlingId, saksbehandler, tilbakekreving, dto)
+            tilbakekrevingService.hentTilbakekreving(behandlingId, saksbehandler) { tilbakekreving, context ->
+                forhåndsvarselService.utsettUttalelseFrist(behandlingId, tilbakekreving, dto, context)
             }
             return Ressurs.success(null)
         }
@@ -221,7 +221,6 @@ class DokumentController(
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
         if (tilbakekreving != null) {
             val logContext = SecureLog.Context.fra(tilbakekreving)
-            val saksbehandler = ContextService.hentBehandler(logContext)
             tilgangskontrollService.validerTilgangTilbakekreving(
                 tilbakekreving = tilbakekreving,
                 behandlingId = behandlingId,
@@ -229,8 +228,8 @@ class DokumentController(
                 auditLoggerEvent = AuditLoggerEvent.ACCESS,
                 handling = "Sender ikke forhåndsvarsel",
             )
-            tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving ->
-                forhåndsvarselService.håndterForhåndsvarselUnntak(behandlingId, tilbakekreving, dto, saksbehandler)
+            tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving, context ->
+                forhåndsvarselService.håndterForhåndsvarselUnntak(behandlingId, tilbakekreving, dto, context)
             }
             return Ressurs.success(null)
         }
@@ -329,9 +328,7 @@ class DokumentController(
         @PathVariable behandlingId: UUID,
         @RequestBody brukeruttalelse: BrukeruttalelseDto,
     ): Ressurs<Nothing?> {
-        val håndtert = tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving ->
-            val logContext = SecureLog.Context.fra(tilbakekreving)
-            val saksbehandler = ContextService.hentBehandler(logContext)
+        val håndtert = tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving, context ->
             tilgangskontrollService.validerTilgangTilbakekreving(
                 tilbakekreving = tilbakekreving,
                 behandlingId = behandlingId,
@@ -339,7 +336,7 @@ class DokumentController(
                 auditLoggerEvent = AuditLoggerEvent.CREATE,
                 handling = "Lagrer brukers uttalelse",
             )
-            forhåndsvarselService.lagreUttalelse(tilbakekreving, behandlingId, brukeruttalelse, saksbehandler)
+            forhåndsvarselService.lagreUttalelse(tilbakekreving, behandlingId, brukeruttalelse, context)
             true
         }
         if (håndtert == true) {

@@ -24,13 +24,9 @@ import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Venter
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
-import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
 import no.nav.tilbakekreving.behandlingslogg.Behandlingsloggstype
 import no.nav.tilbakekreving.behandlingslogg.EkstraInfo
 import no.nav.tilbakekreving.behandlingslogg.LoggInnslag
-import no.nav.tilbakekreving.behandlingslogg.Rolle
-import no.nav.tilbakekreving.behov.BehovObservatør
-import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.brev.VarselbrevInfo
@@ -60,7 +56,6 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentTypeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.LogginnslagDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
@@ -86,156 +81,118 @@ class Tilbakekreving internal constructor(
     val opprettet: LocalDateTime,
     private var nestePåminnelse: LocalDateTime?,
     val opprettelsesvalg: Opprettelsesvalg,
-    private val behovObservatør: BehovObservatør,
-    private val endringObservatør: EndringObservatør,
     var bruker: Bruker? = null,
     internal var tilstand: Tilstand,
-    val bigQueryService: BigQueryService,
-    val features: FeatureToggles,
-    val behandlingslogg: Behandlingslogg,
-    val klokke: Klokke,
-) : FrontendDto<FagsakDto>, BehandlingObservatør {
-    internal fun byttTilstand(nyTilstand: Tilstand) {
+) : BehandlingObservatør {
+    internal fun byttTilstand(nyTilstand: Tilstand, sideeffektContext: SideeffektContext) {
         tilstand = nyTilstand
-        oppdaterPåminnelsestidspunkt()
-        tilstand.entering(this)
+        oppdaterPåminnelsestidspunkt(sideeffektContext.klokke)
+        tilstand.entering(this, sideeffektContext)
     }
 
-    fun oppdaterPåminnelsestidspunkt() {
+    fun oppdaterPåminnelsestidspunkt(klokke: Klokke) {
         nestePåminnelse = tilstand.tidTilPåminnelse?.let(klokke.nå()::plus)
     }
 
-    fun håndter(opprettTilbakekrevingEvent: OpprettTilbakekrevingHendelse) {
-        tilstand.håndter(this, opprettTilbakekrevingEvent)
-        behandlingslogg.lagre(
-            opprettLoggInnslag(
-                behandlingsloggstype = Behandlingsloggstype.TILBAKEKREVING_OPPRETTET,
-                rolle = Rolle.VEDTAKSLØSNING,
-                behandler = Behandler.Vedtaksløsning,
-                behandlingId = null,
-            ),
+    fun håndter(opprettTilbakekrevingEvent: OpprettTilbakekrevingHendelse, sideeffektContext: SideeffektContext) {
+        tilstand.håndter(this, opprettTilbakekrevingEvent, sideeffektContext)
+        sideeffektContext.logg(
+            behandlingsloggstype = Behandlingsloggstype.TILBAKEKREVING_OPPRETTET,
+            behandlingId = null,
         )
     }
 
-    fun håndter(kravgrunnlag: KravgrunnlagHendelse) {
-        tilstand.håndter(this, kravgrunnlag)
-        behandlingslogg.lagre(
-            opprettLoggInnslag(
-                behandlingsloggstype = Behandlingsloggstype.KRAVGRUNNLAG_MOTTATT,
-                rolle = Rolle.VEDTAKSLØSNING,
-                behandler = Behandler.Vedtaksløsning,
-                behandlingId = null,
-            ),
+    fun håndter(kravgrunnlag: KravgrunnlagHendelse, sideeffektContext: SideeffektContext) {
+        tilstand.håndter(this, kravgrunnlag, sideeffektContext)
+        sideeffektContext.logg(
+            behandlingsloggstype = Behandlingsloggstype.KRAVGRUNNLAG_MOTTATT,
+            behandlingId = null,
         )
     }
 
-    fun håndter(fagsysteminfo: FagsysteminfoHendelse) {
-        tilstand.håndter(this, fagsysteminfo)
-        behandlingslogg.lagre(
-            opprettLoggInnslag(
-                behandlingsloggstype = Behandlingsloggstype.FAGSYSTEMINFO_OPPDATERT,
-                rolle = Rolle.VEDTAKSLØSNING,
-                behandler = Behandler.Vedtaksløsning,
-                behandlingId = null,
-            ),
+    fun håndter(fagsysteminfo: FagsysteminfoHendelse, sideeffektContext: SideeffektContext) {
+        tilstand.håndter(this, fagsysteminfo, sideeffektContext)
+        sideeffektContext.logg(
+            behandlingsloggstype = Behandlingsloggstype.FAGSYSTEMINFO_OPPDATERT,
+            behandlingId = null,
         )
     }
 
-    fun håndter(brukerinfo: BrukerinfoHendelse) {
-        tilstand.håndter(this@Tilbakekreving, brukerinfo)
-        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
-            behandlingslogg.lagre(
-                opprettLoggInnslag(
-                    behandlingsloggstype = Behandlingsloggstype.BRUKERINFO_OPPDATERT,
-                    rolle = Rolle.VEDTAKSLØSNING,
-                    behandler = Behandler.Vedtaksløsning,
-                    behandlingId = null,
-                ),
+    fun håndter(brukerinfo: BrukerinfoHendelse, sideeffektContext: SideeffektContext) {
+        tilstand.håndter(this@Tilbakekreving, brukerinfo, sideeffektContext)
+        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
+            sideeffektContext.logg(
+                behandlingsloggstype = Behandlingsloggstype.BRUKERINFO_OPPDATERT,
+                behandlingId = null,
             )
         }
     }
 
-    fun håndter(hendelse: VarselbrevJournalføringHendelse) {
-        tilstand.håndter(this, hendelse)
-        behandlingslogg.lagre(
-            opprettLoggInnslag(
-                behandlingsloggstype = Behandlingsloggstype.VARSELBREV_JOURNALFØRT,
-                rolle = Rolle.VEDTAKSLØSNING,
-                behandler = Behandler.Vedtaksløsning,
-                behandlingId = behandlingHistorikk.nåværende().entry.id,
+    fun håndter(hendelse: VarselbrevJournalføringHendelse, sideeffektContext: SideeffektContext) {
+        tilstand.håndter(this, hendelse, sideeffektContext)
+        sideeffektContext.logg(
+            behandlingsloggstype = Behandlingsloggstype.VARSELBREV_JOURNALFØRT,
+            behandlingId = behandlingHistorikk.nåværende().entry.id,
+            EkstraInfo.JOURNALPOST_ID to hendelse.journalpostId,
+            EkstraInfo.DOKUMENTINFO_ID to hendelse.dokumentInfoId,
+        )
+    }
+
+    fun håndter(hendelse: VarselbrevDistribueringHendelse, sideeffektContext: SideeffektContext) {
+        tilstand.håndter(this, hendelse, sideeffektContext)
+        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
+            sideeffektContext.logg(
+                behandlingsloggstype = Behandlingsloggstype.FORHÅNDSVARSEL_SENDT,
+                behandlingId = id,
                 EkstraInfo.JOURNALPOST_ID to hendelse.journalpostId,
                 EkstraInfo.DOKUMENTINFO_ID to hendelse.dokumentInfoId,
-            ),
-        )
-    }
-
-    fun håndter(hendelse: VarselbrevDistribueringHendelse) {
-        tilstand.håndter(this, hendelse)
-        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
-            behandlingslogg.lagre(
-                opprettLoggInnslag(
-                    behandlingsloggstype = Behandlingsloggstype.FORHÅNDSVARSEL_SENDT,
-                    rolle = Rolle.VEDTAKSLØSNING,
-                    behandler = Behandler.Vedtaksløsning,
-                    behandlingId = id,
-                    EkstraInfo.JOURNALPOST_ID to hendelse.journalpostId,
-                    EkstraInfo.DOKUMENTINFO_ID to hendelse.dokumentInfoId,
-                ),
             )
         }
     }
 
-    fun håndter(iverksettelseHendelse: IverksettelseHendelse) {
-        tilstand.håndter(this, iverksettelseHendelse)
+    fun håndter(iverksettelseHendelse: IverksettelseHendelse, sideeffektContext: SideeffektContext) {
+        tilstand.håndter(this, iverksettelseHendelse, sideeffektContext)
     }
 
-    fun håndter(hendelse: JournalføringHendelse) {
-        tilstand.håndter(this, hendelse)
-        behandlingslogg.lagre(
-            opprettLoggInnslag(
-                behandlingsloggstype = Behandlingsloggstype.VEDTAKSBREV_JOURNALFØRT,
-                rolle = Rolle.VEDTAKSLØSNING,
-                behandler = Behandler.Vedtaksløsning,
-                behandlingId = hendelse.behandlingId,
+    fun håndter(hendelse: JournalføringHendelse, sideeffektContext: SideeffektContext) {
+        tilstand.håndter(this, hendelse, sideeffektContext)
+        sideeffektContext.logg(
+            behandlingsloggstype = Behandlingsloggstype.VEDTAKSBREV_JOURNALFØRT,
+            behandlingId = hendelse.behandlingId,
+            EkstraInfo.JOURNALPOST_ID to hendelse.journalpostId,
+            EkstraInfo.DOKUMENTINFO_ID to hendelse.dokumentInfoId,
+        )
+    }
+
+    fun håndter(hendelse: DistribusjonHendelse, sideeffektContext: SideeffektContext) {
+        tilstand.håndter(this, hendelse, sideeffektContext)
+
+        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
+            sideeffektContext.logg(
+                behandlingsloggstype = Behandlingsloggstype.VEDTAKSBREV_SENDT,
+                behandlingId = id,
                 EkstraInfo.JOURNALPOST_ID to hendelse.journalpostId,
                 EkstraInfo.DOKUMENTINFO_ID to hendelse.dokumentInfoId,
-            ),
-        )
-    }
-
-    fun håndter(hendelse: DistribusjonHendelse) {
-        tilstand.håndter(this, hendelse)
-
-        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
-            behandlingslogg.lagre(
-                opprettLoggInnslag(
-                    behandlingsloggstype = Behandlingsloggstype.VEDTAKSBREV_SENDT,
-                    rolle = Rolle.VEDTAKSLØSNING,
-                    behandler = Behandler.Vedtaksløsning,
-                    behandlingId = id,
-                    EkstraInfo.JOURNALPOST_ID to hendelse.journalpostId,
-                    EkstraInfo.DOKUMENTINFO_ID to hendelse.dokumentInfoId,
-                ),
             )
         }
     }
 
-    fun håndter(påminnelse: Påminnelse) {
-        tilstand.håndter(this, påminnelse)
-        oppdaterPåminnelsestidspunkt()
+    fun håndter(påminnelse: Påminnelse, sideeffektContext: SideeffektContext) {
+        tilstand.håndter(this, påminnelse, sideeffektContext)
+        oppdaterPåminnelsestidspunkt(sideeffektContext.klokke)
     }
 
-    internal fun hånterEndretKravgrunnlag(kravgrunnlagHendelse: KravgrunnlagHendelse) {
-        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
+    internal fun hånterEndretKravgrunnlag(kravgrunnlagHendelse: KravgrunnlagHendelse, sideeffektContext: SideeffektContext) {
+        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
             kravgrunnlagHistorikk.lagre(kravgrunnlagHendelse)
-            oppdaterKravgrunnlag(kravgrunnlagHistorikk.nåværende())
+            oppdaterKravgrunnlag(kravgrunnlagHistorikk.nåværende(), sideeffektContext.klokke)
         }
     }
 
-    fun oppdaterFagsysteminfo(fagsysteminfo: FagsysteminfoHendelse) {
+    fun oppdaterFagsysteminfo(fagsysteminfo: FagsysteminfoHendelse, sideeffektContext: SideeffektContext) {
         val eksternFagsak = eksternFagsak.lagre(fagsysteminfo)
         val behandling = behandlingHistorikk.nåværende().entry
-        behandling.oppdaterEksternFagsak(eksternFagsak, behandlingslogg)
+        behandling.oppdaterEksternFagsak(eksternFagsak, sideeffektContext)
         if (fagsysteminfo.behandlendeEnhet != null) {
             behandling.oppdaterBehandlendeEnhet(fagsysteminfo.behandlendeEnhet)
         }
@@ -256,17 +213,17 @@ class Tilbakekreving internal constructor(
         return behandlingHistorikk.finn(behandlingId, Sporing(id, behandlingId.toString())).entry
     }
 
-    fun håndterNullstilling(behandlingId: UUID, behandler: Behandler) {
-        tilstand.håndterNullstilling(hentBehandling(behandlingId), sporingsinformasjon(), behandlingslogg, behandler)
+    fun håndterNullstilling(behandlingId: UUID, sideeffektContext: SideeffektContext) {
+        tilstand.håndterNullstilling(hentBehandling(behandlingId), sporingsinformasjon(), sideeffektContext)
     }
 
-    fun håndterTrekkTilbakeFraGodkjenning(behandlingId: UUID, behandler: Behandler) {
-        tilstand.håndterTrekkTilbakeFraGodkjenning(hentBehandling(behandlingId), sporingsinformasjon(), behandlingslogg, behandler)
+    fun håndterTrekkTilbakeFraGodkjenning(behandlingId: UUID, sideeffektContext: SideeffektContext) {
+        tilstand.håndterTrekkTilbakeFraGodkjenning(hentBehandling(behandlingId), sporingsinformasjon(), sideeffektContext)
     }
 
     fun opprettBehandling(
         eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
-        behandler: Behandler,
+        sideeffektContext: SideeffektContext,
         behandlendeEnhet: String?,
     ) {
         if (bruker == null) {
@@ -277,21 +234,17 @@ class Tilbakekreving internal constructor(
             id = behandlingId,
             type = Behandlingstype.TILBAKEKREVING,
             enhet = behandlendeEnhet?.let(Enhet::forKode),
-            ansvarligSaksbehandler = behandler,
+            ansvarligSaksbehandler = sideeffektContext.behandler,
             eksternFagsakRevurdering = eksternFagsakRevurdering,
             kravgrunnlag = kravgrunnlagHistorikk.nåværende(),
             brevHistorikk = brevHistorikk,
-            klokke = klokke,
+            klokke = sideeffektContext.klokke,
         )
-        behandling.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
+        behandling.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
             behandlingHistorikk.lagre(behandling)
-            behandlingslogg.lagre(
-                opprettLoggInnslag(
-                    behandlingsloggstype = Behandlingsloggstype.BEHANDLING_OPPRETTET,
-                    rolle = Rolle.VEDTAKSLØSNING,
-                    behandler = Behandler.Vedtaksløsning,
-                    behandlingId = behandlingId,
-                ),
+            sideeffektContext.logg(
+                behandlingsloggstype = Behandlingsloggstype.BEHANDLING_OPPRETTET,
+                behandlingId = behandlingId,
             )
         }
     }
@@ -302,54 +255,54 @@ class Tilbakekreving internal constructor(
         )
     }
 
-    fun opprettBehandlingUtenIntegrasjon() {
+    fun opprettBehandlingUtenIntegrasjon(sideeffektContext: SideeffektContext) {
         val kravgrunnlag = kravgrunnlagHistorikk.nåværende().entry
         // Å bruke kravgrunnlagreferanse er nok ikke alltid riktig her, men de fleste fagsystem bruker behandlingsid som referanse i kravgrunnlaget.
         val eksternBehandling = eksternFagsak.lagreTomBehandling(kravgrunnlag.fagsystemVedtaksdato, kravgrunnlag.referanse)
-        opprettBehandling(eksternBehandling, Behandler.Vedtaksløsning, null)
+        opprettBehandling(eksternBehandling, sideeffektContext, null)
         opprettBruker(kravgrunnlag.vedtakGjelder)
-        byttTilstand(AvventerBrukerinfo)
+        byttTilstand(AvventerBrukerinfo, sideeffektContext)
     }
 
-    fun sendVarselbrev(behandlingId: UUID, varseltekstFraSaksbehandler: String) {
-        hentBehandling(behandlingId).utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
-            val varselbrev = opprettVarselbrev(varseltekstFraSaksbehandler, features)
+    fun sendVarselbrev(behandlingId: UUID, varseltekstFraSaksbehandler: String, sideeffektContext: SideeffektContext) {
+        hentBehandling(behandlingId).utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
+            val varselbrev = opprettVarselbrev(varseltekstFraSaksbehandler, sideeffektContext)
             nullstillForhåndsvarselUnntakOgUttalelse()
             brevHistorikk.lagre(varselbrev)
             lagreOpprinneligFrist(varselbrev.fristForUttalelse)
-            byttTilstand(SendVarselbrev)
+            byttTilstand(SendVarselbrev, sideeffektContext)
         }
     }
 
-    fun trengerVarselbrevJournalføring() {
+    fun trengerVarselbrevJournalføring(sideeffektContext: SideeffektContext) {
         val behandling = behandlingHistorikk.nåværende().entry
         behandling.trengerVarselbrevJournalføring(
-            behovObservatør = behovObservatør,
+            sideeffektContext = sideeffektContext,
             eksternFagsak = eksternFagsak,
             brukerinfo = bruker!!.hentBrukerinfo(),
             varselbrevInfo = brevHistorikk.sisteVarselbrev()!!.tilVarselbrevInfo(bruker!!, behandling.hentForhåndsvarselinfo(), eksternFagsak),
         )
     }
 
-    fun trengerBrukerinfo() {
-        bruker!!.trengerBrukerinfo(behovObservatør, eksternFagsak.ytelse)
+    fun trengerBrukerinfo(sideeffektContext: SideeffektContext) {
+        sideeffektContext.behovObservatør.håndter(bruker!!.brukerinfoBehov(eksternFagsak.ytelse))
     }
 
-    fun trengerIverksettelse() {
+    fun trengerIverksettelse(sideeffektContext: SideeffektContext) {
         behandlingHistorikk.nåværende().entry.trengerIverksettelse(
-            behovObservatør,
+            sideeffektContext = sideeffektContext,
             ytelse = eksternFagsak.ytelse,
             aktør = requireNotNull(bruker) { "Aktør kreves for Iverksettelse." }.aktør,
         )
     }
 
-    fun opprettVedtaksbrev() {
+    fun opprettVedtaksbrev(klokke: Klokke) {
         brevHistorikk.lagre(Vedtaksbrev.opprett(klokke))
     }
 
-    fun trengerVedtaksbrevJournalføring() {
+    fun trengerVedtaksbrevJournalføring(sideeffektContext: SideeffektContext) {
         behandlingHistorikk.nåværende().entry.trengerVedtaksbrevJournalføring(
-            behovObservatør = behovObservatør,
+            sideeffektContext = sideeffektContext,
             brevId = brevHistorikk.nåværende().entry.id,
             ytelse = eksternFagsak.ytelse,
             bruker = requireNotNull(bruker) { "Bruker kreves for journalføring av vedtaksbrev." },
@@ -358,8 +311,8 @@ class Tilbakekreving internal constructor(
         )
     }
 
-    fun trengerVarselbrevDistribusjon() {
-        behovObservatør.håndter(
+    fun trengerVarselbrevDistribusjon(sideeffektContext: SideeffektContext) {
+        sideeffektContext.behovObservatør.håndter(
             behandlingHistorikk.nåværende().entry.lagVarselbrevDistribusjonBehov(
                 journalpostId = brevHistorikk.sisteVarselbrev()!!.journalpostId!!,
                 ytelse = eksternFagsak.ytelse,
@@ -370,8 +323,8 @@ class Tilbakekreving internal constructor(
         )
     }
 
-    fun trengerVedtaksbrevDistribusjon() {
-        behovObservatør.håndter(
+    fun trengerVedtaksbrevDistribusjon(sideeffektContext: SideeffektContext) {
+        sideeffektContext.behovObservatør.håndter(
             behandlingHistorikk.nåværende().entry.lagVedtaksbrevDistribusjonBehov(
                 journalpostId = brevHistorikk.nåværende().entry.journalpostId!!,
                 brevId = brevHistorikk.nåværende().entry.id,
@@ -382,15 +335,17 @@ class Tilbakekreving internal constructor(
         )
     }
 
-    fun trengerFagsysteminfo() {
+    fun trengerFagsysteminfo(sideeffektContext: SideeffektContext) {
         val kravgrunnlag = kravgrunnlagHistorikk.nåværende().entry
-        eksternFagsak.trengerFagsysteminfo(
-            eksternBehandlingId = kravgrunnlag.referanse,
-            vedtakGjelderId = kravgrunnlag.vedtakGjelder.ident,
+        sideeffektContext.behovObservatør.håndter(
+            eksternFagsak.fagsysteminfoBehov(
+                eksternBehandlingId = kravgrunnlag.referanse,
+                vedtakGjelderId = kravgrunnlag.vedtakGjelder.ident,
+            ),
         )
     }
 
-    fun sendVedtakIverksatt() {
+    fun sendVedtakIverksatt(endringObservatør: EndringObservatør) {
         val nåværendeBehandling = behandlingHistorikk.nåværende().entry
         nåværendeBehandling.sendVedtakIverksatt(
             forrigeBehandlingId = behandlingHistorikk.forrige()?.entry?.id,
@@ -411,7 +366,7 @@ class Tilbakekreving internal constructor(
         )
     }
 
-    override fun tilFrontendDto(): FagsakDto {
+    fun tilFrontendDto(klokke: Klokke): FagsakDto {
         val eksternFagsakDto = eksternFagsak.tilFrontendDto()
         return FagsakDto(
             eksternFagsakId = eksternFagsakDto.eksternId,
@@ -419,7 +374,7 @@ class Tilbakekreving internal constructor(
             fagsystem = eksternFagsakDto.fagsystem,
             språkkode = bruker?.språkkode ?: Språkkode.NB,
             bruker = bruker.tilNullableFrontendDto(),
-            behandlinger = behandlingHistorikk.tilOppsummeringDto(tilstand),
+            behandlinger = behandlingHistorikk.tilOppsummeringDto(tilstand, klokke),
         )
     }
 
@@ -427,76 +382,76 @@ class Tilbakekreving internal constructor(
 
     fun håndter(
         behandlingId: UUID,
-        beslutter: Behandler,
+        sideeffektContext: SideeffektContext,
         vurderinger: List<Pair<Behandlingssteg, FatteVedtakSteg.Vurdering>>,
     ) {
-        hentBehandling(behandlingId).utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
-            tilstand.håndter(this@Tilbakekreving, this, beslutter, vurderinger)
+        hentBehandling(behandlingId).utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
+            tilstand.håndter(this@Tilbakekreving, this, vurderinger, sideeffektContext)
         }
     }
 
     fun håndter(
         behandlingId: UUID,
-        behandler: Behandler,
+        sideeffektContext: SideeffektContext,
         vurdering: Faktasteg.Vurdering,
     ) {
-        hentBehandling(behandlingId).utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
-            håndter(behandler, vurdering, behandlingslogg)
+        hentBehandling(behandlingId).utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
+            håndter(sideeffektContext, vurdering)
         }
     }
 
     fun vurderFakta(
         behandlingId: UUID,
-        behandler: Behandler,
+        sideeffektContext: SideeffektContext,
         oppdaget: OppdagetDto?,
         årsak: String?,
         perioder: List<OppdaterFaktaPeriodeDto>?,
     ) {
-        behandlingHistorikk.finn(behandlingId, sporingsinformasjon()).entry.utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
-            håndter(behandler, oppdaget, årsak, perioder, behandlingslogg)
+        behandlingHistorikk.finn(behandlingId, sporingsinformasjon()).entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
+            håndter(sideeffektContext, oppdaget, årsak, perioder)
         }
     }
 
     fun håndter(
         behandlingId: UUID,
-        behandler: Behandler,
+        sideeffektContext: SideeffektContext,
         periode: Datoperiode,
         vurdering: Foreldelsesteg.Vurdering,
     ) {
-        hentBehandling(behandlingId).utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
-            håndter(behandler, periode, vurdering, behandlingslogg)
+        hentBehandling(behandlingId).utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
+            håndter(sideeffektContext, periode, vurdering)
         }
     }
 
     fun håndter(
         behandlingId: UUID,
-        behandler: Behandler,
+        sideeffektContext: SideeffektContext,
         periode: Datoperiode,
         vurdering: ForårsaketAvBruker,
     ) {
-        hentBehandling(behandlingId).utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
-            håndter(behandler, periode, vurdering, behandlingslogg)
+        hentBehandling(behandlingId).utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
+            håndter(sideeffektContext, periode, vurdering)
         }
     }
 
     fun håndterForeslåVedtak(
         behandlingId: UUID,
-        behandler: Behandler,
+        sideeffektContext: SideeffektContext,
     ) {
-        hentBehandling(behandlingId).utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
-            håndterForeslåVedtak(behandler, behandlingslogg)
+        hentBehandling(behandlingId).utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
+            håndterForeslåVedtak(sideeffektContext)
         }
     }
 
-    fun påminnNåværendePeriode() {
-        behandlingHistorikk.nåværende().entry.håndterPåminnelse(tilstand, this)
+    fun påminnNåværendePeriode(sideeffektContext: SideeffektContext) {
+        behandlingHistorikk.nåværende().entry.håndterPåminnelse(tilstand, sideeffektContext, this)
     }
 
     fun frontendDtoForBehandling(
         behandlingId: UUID,
-        behandler: Behandler,
+        sideeffektContext: LesContext,
         kanBeslutte: Boolean,
-    ) = behandlingHistorikk.finn(behandlingId, sporingsinformasjon(behandlingId)).entry.tilFrontendDto(tilstand, behandler, kanBeslutte)
+    ) = behandlingHistorikk.finn(behandlingId, sporingsinformasjon(behandlingId)).entry.tilFrontendDto(tilstand, sideeffektContext, kanBeslutte)
 
     fun tilEntity(): TilbakekrevingEntity {
         return TilbakekrevingEntity(
@@ -510,7 +465,6 @@ class Tilbakekreving internal constructor(
             opprettelsesvalg = this.opprettelsesvalg,
             nestePåminnelse = nestePåminnelse,
             bruker = this.bruker?.tilEntity(id),
-            loggInnlagEntities = behandlingslogg.tilEntity(id),
         )
     }
 
@@ -524,6 +478,7 @@ class Tilbakekreving internal constructor(
     }
 
     override fun behandlingOppdatert(
+        sideeffektContext: SideeffektContext,
         behandlingId: UUID,
         eksternBehandlingId: String,
         vedtaksresultat: Vedtaksresultat?,
@@ -537,7 +492,7 @@ class Tilbakekreving internal constructor(
         ansvarligEnhet: String?,
     ) {
         if (tilstand != TilBehandling || ansvarligSaksbehandler != Behandler.Vedtaksløsning) {
-            endringObservatør.behandlingsstatusOppdatert(
+            sideeffektContext.endringObservatør.behandlingsstatusOppdatert(
                 behandlingId = behandlingId,
                 forrigeBehandlingId = behandlingHistorikk.forrige()?.entry?.id,
                 eksternFagsystemId = eksternFagsak.eksternId,
@@ -555,7 +510,7 @@ class Tilbakekreving internal constructor(
             )
         }
         if (behandlingsstatus.relevantForFagsystem) {
-            endringObservatør.behandlingEndret(
+            sideeffektContext.endringObservatør.behandlingEndret(
                 EndringObservatør.BehandlingEndret(
                     behandlingId = behandlingId,
                     vedtakGjelderId = bruker?.aktør?.ident ?: "Ukjent",
@@ -565,8 +520,8 @@ class Tilbakekreving internal constructor(
                     sakOpprettet = opprettet,
                     varselSendt = brevHistorikk.sisteVarselbrev()?.sendtTid,
                     venter = venter,
-                    behandlingsstatus = behandlingsstatus.forenkletStatus(eksternFagsak.ytelse, features),
-                    forrigeBehandlingsstatus = forrigeBehandlingsstatus?.forenkletStatus(eksternFagsak.ytelse, features),
+                    behandlingsstatus = behandlingsstatus.forenkletStatus(eksternFagsak.ytelse, sideeffektContext.features),
+                    forrigeBehandlingsstatus = forrigeBehandlingsstatus?.forenkletStatus(eksternFagsak.ytelse, sideeffektContext.features),
                     totaltFeilutbetaltBeløp = totaltFeilutbetaltBeløp,
                     hentSaksbehandlingURL = ::hentTilbakekrevingUrl,
                     fullstendigPeriode = totalFeilutbetaltPeriode,
@@ -575,9 +530,9 @@ class Tilbakekreving internal constructor(
         }
     }
 
-    fun hentVarselbrevInfo(behandlingId: UUID): VarselbrevInfo {
+    fun hentVarselbrevInfo(behandlingId: UUID, lesContext: LesContext): VarselbrevInfo {
         val behandling = hentBehandling(behandlingId)
-        val varselbrev = behandling.opprettVarselbrev("", features)
+        val varselbrev = behandling.opprettVarselbrev("", lesContext)
         return varselbrev.tilVarselbrevInfo(bruker!!, behandling.hentForhåndsvarselinfo(), eksternFagsak)
     }
 
@@ -589,14 +544,11 @@ class Tilbakekreving internal constructor(
         return hentBehandling(behandlingId).nyForhåndsvarselTilFrontend(brevHistorikk.sisteVarselbrev())
     }
 
-    fun tilFeilutbetalingFrontendDto(behandlingId: UUID): FaktaOmFeilutbetalingDto {
+    fun tilFeilutbetalingFrontendDto(behandlingId: UUID, klokke: Klokke): FaktaOmFeilutbetalingDto {
         return hentBehandling(behandlingId).nyFaktastegFrontendDto(
             varselbrev = brevHistorikk.sisteVarselbrev(),
+            klokke = klokke,
         )
-    }
-
-    fun hentBehandlingslogg(): List<LogginnslagDto> {
-        return behandlingslogg.tilFrontend()
     }
 
     fun lagreUttalelse(
@@ -604,15 +556,14 @@ class Tilbakekreving internal constructor(
         uttalelseVurdering: UttalelseVurdering,
         uttalelseInfo: UttalelseInfo?,
         kommentar: String?,
-        behandler: Behandler,
+        sideeffektContext: SideeffektContext,
     ) {
-        hentBehandling(behandlingId).utførEndring(::tilstand, this, bigQueryService, eksternFagsak.ytelse, behandlingslogg) {
+        hentBehandling(behandlingId).utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
             lagreUttalelse(
                 uttalelseVurdering = uttalelseVurdering,
                 uttalelseInfo = uttalelseInfo,
                 kommentar = kommentar,
-                behandlingslogg = behandlingslogg,
-                behandler = behandler,
+                sideeffektContext = sideeffektContext,
             )
         }
     }
@@ -621,7 +572,7 @@ class Tilbakekreving internal constructor(
         behandlingId: UUID,
         nyFrist: LocalDate,
         begrunnelse: String,
-        behandler: Behandler,
+        sideeffektContext: SideeffektContext,
     ): UttalelsesfristDto {
         requireNotNull(brevHistorikk.sisteVarselbrev()) {
             "Kan ikke utsette frist når forhåndsvarsel ikke er sendt"
@@ -629,8 +580,7 @@ class Tilbakekreving internal constructor(
         return hentBehandling(behandlingId).lagreFristUtsettelse(
             nyFrist = nyFrist,
             begrunnelse = begrunnelse,
-            behandlingslogg = behandlingslogg,
-            behandler = behandler,
+            sideeffektContext = sideeffektContext,
         )
     }
 
@@ -638,42 +588,36 @@ class Tilbakekreving internal constructor(
         behandlingId: UUID,
         begrunnelseForUnntak: BegrunnelseForUnntak,
         beskrivelse: String,
-        behandler: Behandler,
+        sideeffektContext: SideeffektContext,
     ) {
         hentBehandling(behandlingId).lagreForhåndsvarselUnntak(
             begrunnelseForUnntak = begrunnelseForUnntak,
             beskrivelse = beskrivelse,
-            behandler = behandler,
-            behandlingslogg = behandlingslogg,
+            sideeffektContext = sideeffektContext,
         )
     }
 
-    fun loggAvsluttning() {
-        behandlingslogg.lagre(
-            opprettLoggInnslag(
-                behandlingsloggstype = Behandlingsloggstype.BEHANDLING_AVSLUTTET,
-                rolle = Rolle.VEDTAKSLØSNING,
-                behandler = Behandler.Vedtaksløsning,
-                behandlingId = behandlingHistorikk.nåværende().entry.id,
-            ),
+    fun loggAvsluttning(sideeffektContext: SideeffektContext) {
+        sideeffektContext.logg(
+            behandlingsloggstype = Behandlingsloggstype.BEHANDLING_AVSLUTTET,
+            behandlingId = behandlingHistorikk.nåværende().entry.id,
         )
     }
 
-    fun opprettLoggInnslag(
+    fun SideeffektContext.logg(
         behandlingsloggstype: Behandlingsloggstype,
-        rolle: Rolle,
-        behandler: Behandler,
         behandlingId: UUID?,
         vararg ekstraInfo: Pair<EkstraInfo, Any>,
-    ): LoggInnslag {
-        return LoggInnslag.opprett(
-            id = UUID.randomUUID(),
-            behandlingId = behandlingId,
-            behandlingsloggstype = behandlingsloggstype,
-            opprettetTid = klokke.nå(),
-            rolle = rolle,
-            behandlerIdent = behandler.ident,
-            ekstraInfo = mapOf(*ekstraInfo),
+    ) {
+        behandlingslogg.lagre(
+            LoggInnslag.opprett(
+                behandlingId = behandlingId,
+                behandlingsloggstype = behandlingsloggstype,
+                opprettetTid = klokke.nå(),
+                rolle = behandler.rolle,
+                behandlerIdent = behandler.ident,
+                ekstraInfo = mapOf(*ekstraInfo),
+            ),
         )
     }
 
@@ -691,14 +635,10 @@ class Tilbakekreving internal constructor(
     companion object {
         fun opprett(
             id: String,
-            behovObservatør: BehovObservatør,
             opprettTilbakekrevingEvent: OpprettTilbakekrevingHendelse,
-            bigQueryService: BigQueryService,
-            endringObservatør: EndringObservatør,
-            features: FeatureToggles,
-            klokke: Klokke = SystemKlokke,
+            sideeffektContext: SideeffektContext,
         ): Tilbakekreving {
-            val nå = klokke.nå()
+            val nå = sideeffektContext.klokke.nå()
             val tilbakekreving = Tilbakekreving(
                 id = id,
                 opprettet = nå,
@@ -708,21 +648,14 @@ class Tilbakekreving internal constructor(
                     id = UUID.randomUUID(),
                     eksternId = opprettTilbakekrevingEvent.eksternFagsak.eksternId,
                     ytelse = opprettTilbakekrevingEvent.eksternFagsak.ytelse,
-                    behovObservatør = behovObservatør,
                     behandlinger = EksternFagsakBehandlingHistorikk(mutableListOf()),
                 ),
-                behovObservatør = behovObservatør,
                 behandlingHistorikk = BehandlingHistorikk(mutableListOf()),
                 kravgrunnlagHistorikk = KravgrunnlagHistorikk(mutableListOf()),
                 brevHistorikk = BrevHistorikk(mutableListOf()),
                 tilstand = Start,
-                bigQueryService = bigQueryService,
-                endringObservatør = endringObservatør,
-                features = features,
-                behandlingslogg = Behandlingslogg(mutableListOf()),
-                klokke = klokke,
             )
-            tilbakekreving.håndter(opprettTilbakekrevingEvent)
+            tilbakekreving.håndter(opprettTilbakekrevingEvent, sideeffektContext)
             return tilbakekreving
         }
     }

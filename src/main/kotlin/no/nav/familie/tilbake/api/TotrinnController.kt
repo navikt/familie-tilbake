@@ -44,7 +44,7 @@ class TotrinnController(
                 handling = "Henter totrinnsvurderinger for en gitt behandling",
             )
             return Ressurs.success(
-                tilbakekreving.hentBehandling(behandlingId).fatteVedtakStegDto.tilFrontendDto(),
+                tilbakekreving.hentBehandling(behandlingId).fatteVedtakStegDto.tilFrontendDto(tilbakekrevingService.lesecontext()),
             )
         }
         tilgangskontrollService.validerTilgangBehandlingID(

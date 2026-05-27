@@ -33,7 +33,7 @@ internal interface Saksbehandlingsteg {
     fun automatiskVurder(
         kravgrunnlag: KravgrunnlagHendelse,
         klokke: Klokke,
-        behandlingslogg: Behandlingslogg = Behandlingslogg(mutableListOf()),
+        behandlingslogg: Behandlingslogg,
         behandlingId: UUID,
     ) {}
 

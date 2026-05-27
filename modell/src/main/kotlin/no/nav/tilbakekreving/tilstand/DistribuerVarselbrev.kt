@@ -1,5 +1,7 @@
 package no.nav.tilbakekreving.tilstand
 
+import no.nav.tilbakekreving.Klokke
+import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
@@ -12,20 +14,21 @@ object DistribuerVarselbrev : Tilstand {
     override val tidTilPåminnelse: Duration? = Duration.ofHours(1)
     override val tilbakekrevingTilstand: TilbakekrevingTilstand = TilbakekrevingTilstand.DISTRIUBER_VARSELBREV
 
-    override fun behandlingsstatus(behandling: Behandling): BehandlingsstatusModell = BehandlingsstatusModell.TIL_BEHANDLING
+    override fun behandlingsstatus(behandling: Behandling, klokke: Klokke): BehandlingsstatusModell = BehandlingsstatusModell.TIL_BEHANDLING
 
-    override fun entering(tilbakekreving: Tilbakekreving) {
-        tilbakekreving.trengerVarselbrevDistribusjon()
+    override fun entering(tilbakekreving: Tilbakekreving, sideeffektContext: SideeffektContext) {
+        tilbakekreving.trengerVarselbrevDistribusjon(sideeffektContext)
     }
 
-    override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse) {
-        tilbakekreving.trengerVarselbrevDistribusjon()
+    override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse, sideeffektContext: SideeffektContext) {
+        tilbakekreving.trengerVarselbrevDistribusjon(sideeffektContext)
     }
 
     override fun håndter(
         tilbakekreving: Tilbakekreving,
-        varselbrevJournalføringHendelse: VarselbrevDistribueringHendelse,
+        varselbrevDistribueringHendelse: VarselbrevDistribueringHendelse,
+        sideeffektContext: SideeffektContext,
     ) {
-        tilbakekreving.byttTilstand(TilBehandling)
+        tilbakekreving.byttTilstand(TilBehandling, sideeffektContext)
     }
 }

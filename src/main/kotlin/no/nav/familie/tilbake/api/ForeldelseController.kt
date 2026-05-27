@@ -44,7 +44,7 @@ class ForeldelseController(
                 handling = "Henter vilkårsvurdering for en gitt behandling",
             )
             return Ressurs.success(
-                tilbakekreving.hentBehandling(behandlingId).foreldelsestegDto.tilFrontendDto(),
+                tilbakekreving.hentBehandling(behandlingId).foreldelsestegDto.tilFrontendDto(tilbakekrevingService.lesecontext()),
             )
         }
         tilgangskontrollService.validerTilgangBehandlingID(

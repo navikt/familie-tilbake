@@ -32,6 +32,8 @@ import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagMediator
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
+import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.systemContext
 import no.nav.tilbakekreving.test.april
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.test.mai
@@ -171,8 +173,8 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
                         Ytelse.Tilleggsstønad,
                     ),
                 ),
-            ) {
-                it.håndter(
+            ) { tilbakekreving, _ ->
+                tilbakekreving.håndter(
                     KravgrunnlagHendelse(
                         id = UUID.randomUUID(),
                         vedtakId = KravgrunnlagGenerator.nextPaddedId(6).toBigInteger(),
@@ -187,6 +189,7 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
                         referanse = "referanse",
                         perioder = listOf(kravgrunnlagPeriode()),
                     ),
+                    systemContext(),
                 )
             }
         }
@@ -213,7 +216,7 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
 
         shouldThrow<ModellFeil.UtenforScopeException> {
             // Henting for skriving
-            tilbakekrevingService.hentTilbakekreving(behandlingId) {}
+            tilbakekrevingService.hentTilbakekreving(behandlingId, Behandler.Vedtaksløsning) { _, _ -> }
         }
     }
 

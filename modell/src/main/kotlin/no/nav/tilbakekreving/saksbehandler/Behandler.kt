@@ -1,14 +1,18 @@
 package no.nav.tilbakekreving.saksbehandler
 
+import no.nav.tilbakekreving.behandlingslogg.Rolle
 import no.nav.tilbakekreving.entities.BehandlerEntity
 import no.nav.tilbakekreving.entities.BehandlerType
 
 sealed interface Behandler {
     val ident: String
+    val rolle: Rolle
 
     fun tilEntity(): BehandlerEntity
 
     class Saksbehandler(override val ident: String) : Behandler {
+        override val rolle: Rolle = Rolle.SAKSBEHANDLER
+
         override fun equals(other: Any?): Boolean {
             return ident == (other as? Saksbehandler)?.ident
         }
@@ -21,6 +25,7 @@ sealed interface Behandler {
     }
 
     data object Vedtaksløsning : Behandler {
+        override val rolle: Rolle = Rolle.BESLUTTER
         override val ident: String = "VL"
 
         override fun tilEntity(): BehandlerEntity {

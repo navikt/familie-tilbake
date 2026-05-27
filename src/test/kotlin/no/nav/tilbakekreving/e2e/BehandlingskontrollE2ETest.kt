@@ -1,5 +1,4 @@
 package no.nav.tilbakekreving.e2e
-
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.kontrakter.Ressurs
@@ -11,6 +10,7 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.saksbehandlerContext
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -32,7 +32,7 @@ class BehandlingskontrollE2ETest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
         val ansvarligSaksbehandler = Behandler.Saksbehandler("Z999999")
 
-        val dtoFørUtførtFakta = tilbakekreving(behandlingId).frontendDtoForBehandling(behandlingId, ansvarligSaksbehandler, true)
+        val dtoFørUtførtFakta = tilbakekreving(behandlingId).frontendDtoForBehandling(behandlingId, saksbehandlerContext(), true)
         dtoFørUtførtFakta.behandlingsstegsinfo.find { it.behandlingssteg == Behandlingssteg.FAKTA }
             .shouldNotBeNull()
             .behandlingsstegstatus shouldBe Behandlingsstegstatus.KLAR
@@ -44,7 +44,7 @@ class BehandlingskontrollE2ETest : TilbakekrevingE2EBase() {
             )
         }
 
-        val dtoEtterUtførtFakta = tilbakekreving(behandlingId).frontendDtoForBehandling(behandlingId, ansvarligSaksbehandler, true)
+        val dtoEtterUtførtFakta = tilbakekreving(behandlingId).frontendDtoForBehandling(behandlingId, saksbehandlerContext(), true)
         dtoEtterUtførtFakta.behandlingsstegsinfo.find { it.behandlingssteg == Behandlingssteg.FAKTA }
             .shouldNotBeNull()
             .behandlingsstegstatus shouldBe Behandlingsstegstatus.UTFØRT
@@ -53,7 +53,7 @@ class BehandlingskontrollE2ETest : TilbakekrevingE2EBase() {
             behandlingController.flyttBehandlingTilFakta(behandlingId) shouldBe Ressurs.success("OK")
         }
 
-        val dtoEtterTilbakeTilFakta = tilbakekreving(behandlingId).frontendDtoForBehandling(behandlingId, ansvarligSaksbehandler, true)
+        val dtoEtterTilbakeTilFakta = tilbakekreving(behandlingId).frontendDtoForBehandling(behandlingId, saksbehandlerContext(), true)
         dtoEtterTilbakeTilFakta.behandlingsstegsinfo.find { it.behandlingssteg == Behandlingssteg.FAKTA }
             .shouldNotBeNull()
             .behandlingsstegstatus shouldBe Behandlingsstegstatus.KLAR

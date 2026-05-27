@@ -7,6 +7,7 @@ import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.brev.varselbrev.ForhåndsvarselService
 import no.nav.tilbakekreving.brev.vedtaksbrev.NyVedtaksbrevService
@@ -52,7 +53,7 @@ class BehandlingApiController(
             auditLoggerEvent = AuditLoggerEvent.ACCESS,
             handling = "Henter fakta om feilutbetalingen",
         )
-        return ResponseEntity.ok(tilbakekreving.tilFeilutbetalingFrontendDto(UUID.fromString(behandlingId)))
+        return ResponseEntity.ok(tilbakekreving.tilFeilutbetalingFrontendDto(UUID.fromString(behandlingId), SystemKlokke))
     }
 
     @Validated
@@ -70,16 +71,15 @@ class BehandlingApiController(
             auditLoggerEvent = AuditLoggerEvent.UPDATE,
             handling = "Oppdaterer fakta om feilutbetalingen",
         )
-        return tilbakekrevingService.hentTilbakekreving(UUID.fromString(behandlingId)) {
-            val logContext = SecureLog.Context.fra(tilbakekreving)
-            it.vurderFakta(
+        return tilbakekrevingService.hentTilbakekreving(UUID.fromString(behandlingId)) { tilbakekreving, context ->
+            tilbakekreving.vurderFakta(
                 behandlingId = UUID.fromString(behandlingId),
-                behandler = ContextService.hentBehandler(logContext),
+                sideeffektContext = context,
                 oppdaget = oppdaterFaktaOmFeilutbetalingDto.vurdering?.oppdaget,
                 årsak = oppdaterFaktaOmFeilutbetalingDto.vurdering?.årsak,
                 perioder = oppdaterFaktaOmFeilutbetalingDto.perioder,
             )
-            ResponseEntity.ok(it.tilFeilutbetalingFrontendDto(UUID.fromString(behandlingId)))
+            ResponseEntity.ok(tilbakekreving.tilFeilutbetalingFrontendDto(UUID.fromString(behandlingId), SystemKlokke))
         } ?: ResponseEntity.notFound().build()
     }
 
@@ -116,9 +116,8 @@ class BehandlingApiController(
             auditLoggerEvent = AuditLoggerEvent.UPDATE,
             handling = "Foreslår vedtak",
         )
-        return tilbakekrevingService.hentTilbakekreving(behandlingId) {
-            val logContext = SecureLog.Context.fra(it)
-            it.håndterForeslåVedtak(behandlingId, ContextService.hentBehandler(logContext))
+        return tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving, context ->
+            tilbakekreving.håndterForeslåVedtak(behandlingId, context)
             ResponseEntity.ok(Unit)
         } ?: ResponseEntity.notFound().build()
     }
@@ -170,7 +169,7 @@ class BehandlingApiController(
             auditLoggerEvent = AuditLoggerEvent.ACCESS,
             handling = "Henter informasjon for bruk i brev",
         )
-        return ResponseEntity.ok(tilbakekrevingService.hentHistorikk(tilbakekreving))
+        return ResponseEntity.ok(tilbakekrevingService.hentHistorikk(tilbakekreving.id))
     }
 
     override fun behandlingForhandsvarsel(behandlingId: UUID): ResponseEntity<ForhaandsvarselResponseDto> {
@@ -198,16 +197,14 @@ class BehandlingApiController(
             auditLoggerEvent = AuditLoggerEvent.UPDATE,
             handling = "Sender forhåndsvarsel brev",
         )
-        return tilbakekrevingService.hentTilbakekreving(behandlingId) {
-            ResponseEntity.ok(it.sendVarselbrev(behandlingId, sendForhaandsvarselDto.tekstFraSaksbehandler))
+        return tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving, context ->
+            ResponseEntity.ok(tilbakekreving.sendVarselbrev(behandlingId, sendForhaandsvarselDto.tekstFraSaksbehandler, context))
         } ?: ResponseEntity.notFound().build()
     }
 
     override fun behandlingLagreBrukersuttalelse(behandlingId: UUID, uttalelseDto: UttalelseDto): ResponseEntity<Unit> {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
             ?: return ResponseEntity.notFound().build()
-        val logContext = SecureLog.Context.fra(tilbakekreving)
-        val saksbehandler = ContextService.hentBehandler(logContext)
         tilgangskontrollService.validerTilgangTilbakekreving(
             tilbakekreving = tilbakekreving,
             behandlingId = behandlingId,
@@ -215,16 +212,14 @@ class BehandlingApiController(
             auditLoggerEvent = AuditLoggerEvent.UPDATE,
             handling = "Lagrer brukeruttalelse",
         )
-        return tilbakekrevingService.hentTilbakekreving(behandlingId) {
-            ResponseEntity.ok(forhåndsvarselService.nyLagreUttalelse(behandlingId, it, uttalelseDto, saksbehandler))
+        return tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving, context ->
+            ResponseEntity.ok(forhåndsvarselService.nyLagreUttalelse(behandlingId, tilbakekreving, uttalelseDto, context))
         } ?: ResponseEntity.notFound().build()
     }
 
-    override fun behandlingUtsettUttalelsesfrist(behandlingId: UUID, utsettFristDto: UpdateUttalelsesfristDto): ResponseEntity<UttalelsesfristDto> {
+    override fun behandlingUtsettUttalelsesfrist(behandlingId: UUID, updateUttalelsesfristDto: UpdateUttalelsesfristDto): ResponseEntity<UttalelsesfristDto> {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
             ?: return ResponseEntity.notFound().build()
-        val logContext = SecureLog.Context.fra(tilbakekreving)
-        val saksbehandler = ContextService.hentBehandler(logContext)
         tilgangskontrollService.validerTilgangTilbakekreving(
             tilbakekreving = tilbakekreving,
             behandlingId = behandlingId,
@@ -232,16 +227,14 @@ class BehandlingApiController(
             auditLoggerEvent = AuditLoggerEvent.UPDATE,
             handling = "Utsetter uttalelsesfrist",
         )
-        return tilbakekrevingService.hentTilbakekreving(behandlingId) {
-            ResponseEntity.ok(forhåndsvarselService.nyUtsettUttalelsesfrist(behandlingId, it, utsettFristDto, saksbehandler))
+        return tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving, context ->
+            ResponseEntity.ok(forhåndsvarselService.nyUtsettUttalelsesfrist(behandlingId, tilbakekreving, updateUttalelsesfristDto, context))
         } ?: ResponseEntity.notFound().build()
     }
 
     override fun behandlingLagreForhaandsvarselUnntak(behandlingId: UUID, unntakDto: UnntakDto): ResponseEntity<Unit> {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
             ?: return ResponseEntity.notFound().build()
-        val logContext = SecureLog.Context.fra(tilbakekreving)
-        val saksbehandler = ContextService.hentBehandler(logContext)
         tilgangskontrollService.validerTilgangTilbakekreving(
             tilbakekreving = tilbakekreving,
             behandlingId = behandlingId,
@@ -250,9 +243,9 @@ class BehandlingApiController(
             handling = "Lagrer unntak for forhåndsvarsel",
         )
 
-        return tilbakekrevingService.hentTilbakekreving(behandlingId) {
+        return tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving, context ->
             ResponseEntity.ok(
-                forhåndsvarselService.nyLagreForhåndsvarselUnntak(behandlingId, it, unntakDto, saksbehandler),
+                forhåndsvarselService.nyLagreForhåndsvarselUnntak(behandlingId, tilbakekreving, unntakDto, context),
             )
         } ?: ResponseEntity.notFound().build()
     }

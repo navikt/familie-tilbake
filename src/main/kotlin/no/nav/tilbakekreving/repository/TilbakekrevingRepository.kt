@@ -2,6 +2,8 @@ package no.nav.tilbakekreving.repository
 
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.Timer
+import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
+import no.nav.tilbakekreving.entities.LoggInnlagEntity
 import no.nav.tilbakekreving.entities.TilbakekrevingEntity
 import no.nav.tilbakekreving.entity.Entity.Companion.get
 import no.nav.tilbakekreving.entity.FieldConverter
@@ -54,7 +56,6 @@ class TilbakekrevingRepository(
             kravgrunnlagHistorikk = kravgrunnlagRepository.hentKravgrunnlag(id),
             brevHistorikk = brevRepository.hentBrev(id),
             bruker = brukerRepository.hentBruker(id),
-            behandlingsloggEntity = behandlingsloggRepository.hentBehandlingslogg(id),
         )
     }
 
@@ -76,15 +77,21 @@ class TilbakekrevingRepository(
         }
     }
 
+    fun hentBehandlingslogg(tilbakekrevingId: String): Behandlingslogg {
+        val entities = behandlingsloggRepository.hentBehandlingslogg(tilbakekrevingId)
+        return Behandlingslogg(entities.map(LoggInnlagEntity::fraEntity).toMutableList())
+    }
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun opprett(
         tilbakekrevingEntity: TilbakekrevingEntity,
+        behandlingslogg: Behandlingslogg,
     ): String {
         TilbakekrevingEntityMapper.insertQuery(
             jdbcTemplate,
             tilbakekrevingEntity,
         )
-        lagreUnderobjekter(tilbakekrevingEntity)
+        lagreUnderobjekter(tilbakekrevingEntity, behandlingslogg)
 
         return tilbakekrevingEntity.id
     }
@@ -99,26 +106,27 @@ class TilbakekrevingRepository(
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun hentOgLagreResultat(
         strategy: FindTilbakekrevingStrategy,
-        callback: (TilbakekrevingEntity) -> TilbakekrevingEntity,
+        callback: (TilbakekrevingEntity, Behandlingslogg) -> TilbakekrevingEntity,
     ) {
         modelWriteTimer.record<Unit> {
             val entity = hentForOppdatering(strategy) ?: return@record
-            val oppdatertEntity = callback(entity)
+            val behandlingslogg = hentBehandlingslogg(entity.id)
+            val oppdatertEntity = callback(entity, behandlingslogg)
             TilbakekrevingEntityMapper.updateQuery(
                 jdbcTemplate,
                 oppdatertEntity,
             )
-            lagreUnderobjekter(oppdatertEntity)
+            lagreUnderobjekter(oppdatertEntity, behandlingslogg)
         }
     }
 
-    private fun lagreUnderobjekter(entity: TilbakekrevingEntity) {
+    private fun lagreUnderobjekter(entity: TilbakekrevingEntity, behandlingslogg: Behandlingslogg) {
         eksternFagsakRepository.lagre(entity.eksternFagsak)
         kravgrunnlagRepository.lagre(entity.kravgrunnlagHistorikkEntities)
         behandlingRepository.lagreBehandlinger(entity.behandlingHistorikkEntities)
         brevRepository.lagre(entity.brevHistorikkEntities, entity.id)
         entity.bruker?.let { brukerRepository.lagre(it) }
-        behandlingsloggRepository.lagre(entity.loggInnlagEntities, entity.id)
+        behandlingsloggRepository.lagre(behandlingslogg.tilEntity(entity.id), entity.id)
     }
 
     fun antallSakerPerTilstand(): List<ForenkletTilstandStatistikk> {

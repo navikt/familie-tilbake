@@ -1,5 +1,4 @@
 package no.nav.tilbakekreving.e2e
-
 import io.kotest.assertions.nondeterministic.eventually
 import io.kotest.assertions.nondeterministic.eventuallyConfig
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -18,8 +17,10 @@ import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.InnloggetBrukertilgang
 import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
+import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.TilbakekrevingService
+import no.nav.tilbakekreving.ansvarligSaksbehandler
 import no.nav.tilbakekreving.api.BehandlingApiController
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
@@ -34,7 +35,6 @@ import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagMediator
 import no.nav.tilbakekreving.repository.NyBehandlingRepository
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
-import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
@@ -134,16 +134,16 @@ open class TilbakekrevingE2EBase : E2EBase() {
         uttalelse: String? = "",
     ) {
         val tilbakekrevingId = tilbakekrevingService.hentTilbakekreving(behandlingId)!!.id
-        tilbakekrevingService.hentOgLagreTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving ->
+        tilbakekrevingService.hentOgLagreTilbakekreving(ansvarligSaksbehandler, TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving, context ->
             if (uttalelse == null) {
-                tilbakekreving.lagreUttalelse(behandlingId, UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL, null, "", Behandler.Saksbehandler("22222222"))
+                tilbakekreving.lagreUttalelse(behandlingId, UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL, null, "", context)
             } else {
                 tilbakekreving.lagreUttalelse(
                     behandlingId,
                     UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL,
                     UttalelseInfo(UUID.randomUUID(), LocalDate.now(), "Reddit", uttalelse),
                     null,
-                    Behandler.Saksbehandler("22222222"),
+                    context,
                 )
             }
         }
@@ -159,7 +159,7 @@ open class TilbakekrevingE2EBase : E2EBase() {
 
     fun allePeriodeIder(behandlingId: UUID): List<UUID> = tilbakekreving(behandlingId)
         .shouldNotBeNull()
-        .tilFeilutbetalingFrontendDto(behandlingId)
+        .tilFeilutbetalingFrontendDto(behandlingId, SystemKlokke)
         .perioder
         .map(FaktaPeriodeDto::id)
         .map(UUID::fromString)

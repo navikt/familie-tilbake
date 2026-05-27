@@ -13,6 +13,7 @@ import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.saksbehandlerContext
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -62,6 +63,6 @@ class ForeslåVedtakTest : TilbakekrevingE2EBase() {
             response.statusCode shouldBe HttpStatus.OK
         }
 
-        tilbakekreving(behandlingId).tilFrontendDto().behandlinger.single().status shouldBe Behandlingsstatus.FATTER_VEDTAK
+        tilbakekreving(behandlingId).tilFrontendDto(saksbehandlerContext().klokke).behandlinger.single().status shouldBe Behandlingsstatus.FATTER_VEDTAK
     }
 }

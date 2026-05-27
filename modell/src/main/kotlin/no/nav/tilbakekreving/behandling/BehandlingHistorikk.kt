@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.behandling
 
+import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsoppsummeringDto
 import no.nav.tilbakekreving.entities.BehandlingEntity
 import no.nav.tilbakekreving.feil.ModellFeil
@@ -31,8 +32,8 @@ class BehandlingHistorikk(
         return HistorikkReferanse(this, innslag.id)
     }
 
-    internal fun tilOppsummeringDto(tilstand: Tilstand): List<BehandlingsoppsummeringDto> {
-        return historikk.map { it.tilOppsummeringDto(tilstand) }
+    internal fun tilOppsummeringDto(tilstand: Tilstand, klokke: Klokke): List<BehandlingsoppsummeringDto> {
+        return historikk.map { it.tilOppsummeringDto(tilstand, klokke) }
     }
 
     override fun nåværende(): HistorikkReferanse<UUID, Behandling> {

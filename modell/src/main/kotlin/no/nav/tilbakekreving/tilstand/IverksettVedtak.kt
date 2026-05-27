@@ -1,5 +1,7 @@
 package no.nav.tilbakekreving.tilstand
 
+import no.nav.tilbakekreving.Klokke
+import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
@@ -12,22 +14,23 @@ object IverksettVedtak : Tilstand {
     override val tidTilPåminnelse: Duration? = Duration.ofHours(1)
     override val tilbakekrevingTilstand: TilbakekrevingTilstand = TilbakekrevingTilstand.IVERKSETT_VEDTAK
 
-    override fun behandlingsstatus(behandling: Behandling): BehandlingsstatusModell = BehandlingsstatusModell.IVERKSETTER_VEDTAK
+    override fun behandlingsstatus(behandling: Behandling, klokke: Klokke): BehandlingsstatusModell = BehandlingsstatusModell.IVERKSETTER_VEDTAK
 
-    override fun entering(tilbakekreving: Tilbakekreving) {
-        tilbakekreving.trengerIverksettelse()
-        tilbakekreving.sendVedtakIverksatt()
+    override fun entering(tilbakekreving: Tilbakekreving, sideeffektContext: SideeffektContext) {
+        tilbakekreving.trengerIverksettelse(sideeffektContext)
+        tilbakekreving.sendVedtakIverksatt(sideeffektContext.endringObservatør)
     }
 
-    override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse) {
-        tilbakekreving.trengerIverksettelse()
-        tilbakekreving.sendVedtakIverksatt()
+    override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse, sideeffektContext: SideeffektContext) {
+        tilbakekreving.trengerIverksettelse(sideeffektContext)
+        tilbakekreving.sendVedtakIverksatt(sideeffektContext.endringObservatør)
     }
 
     override fun håndter(
         tilbakekreving: Tilbakekreving,
         iverksettelseHendelse: IverksettelseHendelse,
+        sideeffektContext: SideeffektContext,
     ) {
-        tilbakekreving.byttTilstand(JournalførVedtak)
+        tilbakekreving.byttTilstand(JournalførVedtak, sideeffektContext)
     }
 }

@@ -1,5 +1,7 @@
 package no.nav.tilbakekreving.tilstand
 
+import no.nav.tilbakekreving.Klokke
+import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
@@ -12,17 +14,18 @@ object AvventerKravgrunnlag : Tilstand {
     override val tidTilPåminnelse: Duration? = Duration.ofDays(1)
     override val tilbakekrevingTilstand: TilbakekrevingTilstand = TilbakekrevingTilstand.AVVENTER_KRAVGRUNNLAG
 
-    override fun behandlingsstatus(behandling: Behandling): BehandlingsstatusModell = BehandlingsstatusModell.OPPRETTET
+    override fun behandlingsstatus(behandling: Behandling, klokke: Klokke): BehandlingsstatusModell = BehandlingsstatusModell.OPPRETTET
 
-    override fun entering(tilbakekreving: Tilbakekreving) {}
+    override fun entering(tilbakekreving: Tilbakekreving, sideeffektContext: SideeffektContext) {}
 
-    override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse) {}
+    override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse, sideeffektContext: SideeffektContext) {}
 
     override fun håndter(
         tilbakekreving: Tilbakekreving,
         kravgrunnlag: KravgrunnlagHendelse,
+        sideeffektContext: SideeffektContext,
     ) {
         tilbakekreving.kravgrunnlagHistorikk.lagre(kravgrunnlag)
-        tilbakekreving.byttTilstand(AvventerFagsysteminfo)
+        tilbakekreving.byttTilstand(AvventerFagsysteminfo, sideeffektContext)
     }
 }

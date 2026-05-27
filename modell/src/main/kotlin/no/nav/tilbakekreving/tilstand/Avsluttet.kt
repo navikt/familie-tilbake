@@ -1,5 +1,7 @@
 package no.nav.tilbakekreving.tilstand
 
+import no.nav.tilbakekreving.Klokke
+import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
@@ -11,13 +13,13 @@ object Avsluttet : Tilstand {
     override val tidTilPåminnelse: Duration? = null
     override val tilbakekrevingTilstand: TilbakekrevingTilstand = TilbakekrevingTilstand.AVSLUTTET
 
-    override fun behandlingsstatus(behandling: Behandling): BehandlingsstatusModell = BehandlingsstatusModell.AVSLUTTET
+    override fun behandlingsstatus(behandling: Behandling, klokke: Klokke): BehandlingsstatusModell = BehandlingsstatusModell.AVSLUTTET
 
-    override fun entering(tilbakekreving: Tilbakekreving) {
-        tilbakekreving.loggAvsluttning()
+    override fun entering(tilbakekreving: Tilbakekreving, sideeffektContext: SideeffektContext) {
+        tilbakekreving.loggAvsluttning(sideeffektContext)
     }
 
-    override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse) {
-        tilbakekreving.oppdaterPåminnelsestidspunkt()
+    override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse, sideeffektContext: SideeffektContext) {
+        tilbakekreving.oppdaterPåminnelsestidspunkt(sideeffektContext.klokke)
     }
 }

@@ -1,5 +1,5 @@
 package no.nav.tilbakekreving
 
 fun interface FrontendDto<Dto> {
-    fun tilFrontendDto(): Dto
+    fun tilFrontendDto(lesContext: LesContext): Dto
 }

@@ -16,9 +16,6 @@ import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.FagsystemUtil
-import no.nav.tilbakekreving.Observatør
-import no.nav.tilbakekreving.SystemKlokke
-import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.config.ApplicationProperties
@@ -335,8 +332,8 @@ class ForvaltningController(
     @PostMapping("/migrer-alle-saker")
     fun migrerAlleSaker() {
         tilbakekrevingRepository.hentAlleTilbakekrevinger()?.forEach { entity ->
-            tilbakekrevingRepository.hentOgLagreResultat(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(entity.id)) {
-                val tilbakekreving = it.fraEntity(Observatør(), bigQueryService, endringObservatør, features = featureService.modellFeatures, SystemKlokke)
+            tilbakekrevingRepository.hentOgLagreResultat(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(entity.id)) { it, _ ->
+                val tilbakekreving = it.fraEntity()
                 logger.medContext(SecureLog.Context.fra(tilbakekreving)) {
                     info("Migrerer sak {}", tilbakekreving.hentTilbakekrevingUrl(applicationProperties.frontendUrl))
                 }
@@ -365,7 +362,9 @@ class ForvaltningController(
                 auditLoggerEvent = AuditLoggerEvent.UPDATE,
                 handling = "Hent oppdatert fagsysteminfo",
             )
-            tilbakekrevingService.hentTilbakekreving(behandlingId, Tilbakekreving::trengerFagsysteminfo)
+            tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekrevingTilLagring, context ->
+                tilbakekrevingTilLagring.trengerFagsysteminfo(context)
+            }
         }
     }
 }

@@ -1,5 +1,4 @@
 package no.nav.tilbakekreving.tilstand
-
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
@@ -7,10 +6,9 @@ import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.behov.VedtaksbrevJournalføringBehov
-import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
+import no.nav.tilbakekreving.beslutterContext
 import no.nav.tilbakekreving.brev.Vedtaksbrev
 import no.nav.tilbakekreving.brukerinfoHendelse
-import no.nav.tilbakekreving.defaultFeatures
 import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.fagsysteminfoHendelse
 import no.nav.tilbakekreving.faktastegVurdering
@@ -25,7 +23,8 @@ import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.nåværendeBehandlingId
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
-import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.saksbehandlerContext
+import no.nav.tilbakekreving.systemContext
 import no.nav.tilbakekreving.test.januar
 import org.junit.jupiter.api.Test
 import java.math.BigInteger
@@ -34,8 +33,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class JournalførVedtakTest {
-    private val bigQueryService = BigQueryServiceStub()
-
     @Test
     fun `tilbakekreving skal være i journalføring tilstand og vedtaksbrev opprettes når iverksettelse er håndtert`() {
         val oppsamler = BehovObservatørOppsamler()
@@ -43,6 +40,7 @@ class JournalførVedtakTest {
         val tilbakekreving = tilbakekrevingKlarTilJournalføring(opprettTilbakekrevingEvent, oppsamler)
         tilbakekreving.håndter(
             iverksettelse(),
+            systemContext(behovObservatør = oppsamler),
         )
         val brev = tilbakekreving.brevHistorikk.nåværende().entry
         brev.shouldBe(
@@ -65,9 +63,10 @@ class JournalførVedtakTest {
         val tilbakekreving = tilbakekrevingKlarTilJournalføring(opprettTilbakekrevingEvent, oppsamler)
         tilbakekreving.håndter(
             iverksettelse(),
+            systemContext(behovObservatør = oppsamler),
         )
 
-        tilbakekreving.håndter(Påminnelse(LocalDateTime.now()))
+        tilbakekreving.håndter(Påminnelse(LocalDateTime.now()), systemContext(behovObservatør = oppsamler))
         val vedtaksbrevBehov = oppsamler.behovListe.filterIsInstance<VedtaksbrevJournalføringBehov>()
 
         vedtaksbrevBehov.shouldHaveSize(2)
@@ -85,10 +84,12 @@ class JournalførVedtakTest {
                 vedtakId = BigInteger("1234"),
                 behandlingId = UUID.randomUUID(),
             ),
+            systemContext(behovObservatør = oppsamler),
         )
         val brevId = (oppsamler.behovListe.last() as VedtaksbrevJournalføringBehov).brevId
         tilbakekreving.håndter(
             journalføring(brevId, tilbakekreving.eksternFagsak.eksternId),
+            systemContext(),
         )
         tilbakekreving.tilstand shouldBe DistribuerVedtak
     }
@@ -98,34 +99,37 @@ class JournalførVedtakTest {
         oppsamler: BehovObservatørOppsamler,
         endringOppsamler: EndringObservatørOppsamler = EndringObservatørOppsamler(),
     ): Tilbakekreving {
-        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), oppsamler, opprettTilbakekrevingHendelse, bigQueryService, endringOppsamler, features = defaultFeatures())
-        val behandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
+        val tilbakekreving = Tilbakekreving.opprett(
+            id = UUID.randomUUID().toString(),
+            opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse,
+            sideeffektContext = systemContext(endringOppsamler, behovObservatør = oppsamler),
+        )
         tilbakekreving.apply {
-            håndter(kravgrunnlag())
-            håndter(fagsysteminfoHendelse())
-            håndter(brukerinfoHendelse())
-            lagreUttalelse(nåværendeBehandlingId(), UttalelseVurdering.JA, null, "", behandler)
+            håndter(kravgrunnlag(), systemContext(endringOppsamler))
+            håndter(fagsysteminfoHendelse(), systemContext(endringOppsamler))
+            håndter(brukerinfoHendelse(), systemContext(endringOppsamler))
+            lagreUttalelse(nåværendeBehandlingId(), UttalelseVurdering.JA, null, "", saksbehandlerContext(endringOppsamler))
             håndter(
                 nåværendeBehandlingId(),
-                behandler,
+                saksbehandlerContext(endringOppsamler),
                 faktastegVurdering(),
             )
             håndter(
                 nåværendeBehandlingId(),
-                behandler,
+                saksbehandlerContext(endringOppsamler),
                 periode = 1.januar(2021) til 31.januar(2021),
                 foreldelseVurdering(),
             )
             håndter(
                 nåværendeBehandlingId(),
-                behandler,
+                saksbehandlerContext(endringOppsamler),
                 periode = 1.januar(2021) til 31.januar(2021),
                 vurdering = forårsaketAvBruker().uaktsomt(),
             )
-            håndterForeslåVedtak(nåværendeBehandlingId(), behandler)
+            håndterForeslåVedtak(nåværendeBehandlingId(), saksbehandlerContext(endringOppsamler))
             tilbakekreving.håndter(
                 behandlingId = nåværendeBehandlingId(),
-                beslutter = Behandler.Saksbehandler("Z999999"),
+                sideeffektContext = beslutterContext(endringOppsamler),
                 vurderinger = godkjenning(),
             )
         }

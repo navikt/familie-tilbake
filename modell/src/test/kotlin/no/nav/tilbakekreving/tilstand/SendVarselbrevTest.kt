@@ -1,15 +1,12 @@
 package no.nav.tilbakekreving.tilstand
-
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
-import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.brukerinfoHendelse
 import no.nav.tilbakekreving.defaultFeatures
-import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.fagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
@@ -17,36 +14,40 @@ import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.nåværendeBehandlingId
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
+import no.nav.tilbakekreving.saksbehandlerContext
+import no.nav.tilbakekreving.systemContext
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.UUID
 
 class SendVarselbrevTest {
-    private val bigQueryService = BigQueryServiceStub()
-
     @Test
     fun `tilbakekreving tilstand endres til SendVarselbrev når forhåndsvarsel skal sendes`() {
         val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
         val tilbakekreving = Tilbakekreving.opprett(
             id = UUID.randomUUID().toString(),
-            behovObservatør = oppsamler,
             opprettTilbakekrevingEvent = opprettTilbakekrevingEvent,
-            bigQueryService = bigQueryService,
-            endringObservatør = EndringObservatørOppsamler(),
-            features = defaultFeatures(
-                featureOverrides = arrayOf(Toggle.SendAutomatiskVarselbrev to false),
+            sideeffektContext = systemContext(
+                behovObservatør = oppsamler,
+                features = defaultFeatures(
+                    featureOverrides = arrayOf(Toggle.SendAutomatiskVarselbrev to false),
+                ),
             ),
         )
         val bruker = brukerinfoHendelse()
         val kravgrunnlag = kravgrunnlag()
         val fagsak = fagsysteminfoHendelse()
-        tilbakekreving.håndter(kravgrunnlag)
-        tilbakekreving.håndter(fagsak)
-        tilbakekreving.håndter(bruker)
+        tilbakekreving.håndter(kravgrunnlag, systemContext(behovObservatør = oppsamler))
+        tilbakekreving.håndter(fagsak, systemContext(behovObservatør = oppsamler))
+        tilbakekreving.håndter(bruker, systemContext(behovObservatør = oppsamler))
         tilbakekreving.tilstand shouldBe TilBehandling
 
-        tilbakekreving.sendVarselbrev(tilbakekreving.nåværendeBehandlingId(), "tekst fra saksbehandler")
+        tilbakekreving.sendVarselbrev(
+            tilbakekreving.nåværendeBehandlingId(),
+            "tekst fra saksbehandler",
+            saksbehandlerContext(behovObservatør = oppsamler),
+        )
         tilbakekreving.tilstand shouldBe SendVarselbrev
 
         oppsamler.behovListe.size shouldBe 3
@@ -58,6 +59,7 @@ class SendVarselbrevTest {
                 journalpostId = "1234",
                 dokumentInfoId = "321",
             ),
+            systemContext(),
         )
         tilbakekreving.tilstand shouldBe DistribuerVarselbrev
 
@@ -67,6 +69,7 @@ class SendVarselbrevTest {
                 journalpostId = "1234",
                 dokumentInfoId = "321",
             ),
+            systemContext(),
         )
         tilbakekreving.tilstand shouldBe TilBehandling
     }
@@ -77,28 +80,28 @@ class SendVarselbrevTest {
         val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
         val tilbakekreving = Tilbakekreving.opprett(
             id = UUID.randomUUID().toString(),
-            behovObservatør = oppsamler,
             opprettTilbakekrevingEvent = opprettTilbakekrevingEvent,
-            bigQueryService = bigQueryService,
-            endringObservatør = EndringObservatørOppsamler(),
-            features = defaultFeatures(
-                featureOverrides = arrayOf(
-                    Toggle.SendAutomatiskVarselbrev to false,
+            sideeffektContext = systemContext(
+                behovObservatør = oppsamler,
+                features = defaultFeatures(
+                    featureOverrides = arrayOf(
+                        Toggle.SendAutomatiskVarselbrev to false,
+                    ),
                 ),
             ),
         )
         val bruker = brukerinfoHendelse()
         val kravgrunnlag = kravgrunnlag()
         val fagsak = fagsysteminfoHendelse()
-        tilbakekreving.håndter(kravgrunnlag)
-        tilbakekreving.håndter(fagsak)
-        tilbakekreving.håndter(bruker)
+        tilbakekreving.håndter(kravgrunnlag, systemContext(behovObservatør = oppsamler))
+        tilbakekreving.håndter(fagsak, systemContext(behovObservatør = oppsamler))
+        tilbakekreving.håndter(bruker, systemContext(behovObservatør = oppsamler))
         tilbakekreving.tilstand shouldBe TilBehandling
 
-        tilbakekreving.sendVarselbrev(tilbakekreving.nåværendeBehandlingId(), "tekst fra saksbehandler")
+        tilbakekreving.sendVarselbrev(tilbakekreving.nåværendeBehandlingId(), "tekst fra saksbehandler", saksbehandlerContext(behovObservatør = oppsamler))
         tilbakekreving.tilstand shouldBe SendVarselbrev
 
-        tilbakekreving.håndter(Påminnelse(LocalDateTime.now()))
+        tilbakekreving.håndter(Påminnelse(LocalDateTime.now()), systemContext(behovObservatør = oppsamler))
 
         val varselbrevBehov = oppsamler.behovListe.filterIsInstance<VarselbrevJournalføringBehov>()
 
@@ -111,6 +114,7 @@ class SendVarselbrevTest {
                 journalpostId = "1234",
                 dokumentInfoId = "321",
             ),
+            systemContext(),
         )
         tilbakekreving.tilstand shouldBe DistribuerVarselbrev
 
@@ -120,6 +124,7 @@ class SendVarselbrevTest {
                 journalpostId = "1234",
                 dokumentInfoId = "321",
             ),
+            systemContext(),
         )
         tilbakekreving.tilstand shouldBe TilBehandling
     }

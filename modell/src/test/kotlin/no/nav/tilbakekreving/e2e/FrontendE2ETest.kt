@@ -1,5 +1,4 @@
 package no.nav.tilbakekreving.e2e
-
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
 import no.nav.tilbakekreving.Tilbakekreving
@@ -8,10 +7,8 @@ import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
 import no.nav.tilbakekreving.behov.VedtaksbrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.VedtaksbrevJournalføringBehov
-import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
+import no.nav.tilbakekreving.beslutterContext
 import no.nav.tilbakekreving.brukerinfoHendelse
-import no.nav.tilbakekreving.defaultFeatures
-import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.fagsysteminfoHendelse
 import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.foreldelseVurdering
@@ -26,7 +23,8 @@ import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.nåværendeBehandlingId
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
-import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.saksbehandlerContext
+import no.nav.tilbakekreving.systemContext
 import no.nav.tilbakekreving.test.januar
 import org.junit.jupiter.api.Test
 import java.math.BigInteger
@@ -36,26 +34,25 @@ class FrontendE2ETest {
     @Test
     fun `status på behandling er basert på steg og tilstand`() {
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
-        val behandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
-        val beslutter = Behandler.Saksbehandler("Ansvarlig beslutter")
         val behovOppsamler = BehovObservatørOppsamler()
         val tilbakekreving = Tilbakekreving.opprett(
-            UUID.randomUUID().toString(),
-            behovOppsamler,
-            opprettTilbakekrevingHendelse,
-            BigQueryServiceStub(),
-            EndringObservatørOppsamler(),
-            features = defaultFeatures(),
+            id = UUID.randomUUID().toString(),
+            opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse,
+            sideeffektContext = systemContext(behovObservatør = behovOppsamler),
         )
 
-        tilbakekreving.håndter(kravgrunnlag())
-        tilbakekreving.håndter(fagsysteminfoHendelse())
-        tilbakekreving.håndter(brukerinfoHendelse())
+        tilbakekreving.håndter(kravgrunnlag(), systemContext())
+        tilbakekreving.håndter(fagsysteminfoHendelse(), systemContext())
+        tilbakekreving.håndter(brukerinfoHendelse(), systemContext())
 
-        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), behandler, true).status shouldBe Behandlingsstatus.UTREDES
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true).status shouldBe Behandlingsstatus.UTREDES
 
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, faktastegVurdering())
-        tilbakekreving.sendVarselbrev(tilbakekreving.nåværendeBehandlingId(), "Tekst fra saksbehandler")
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), faktastegVurdering())
+        tilbakekreving.sendVarselbrev(
+            tilbakekreving.nåværendeBehandlingId(),
+            "Tekst fra saksbehandler",
+            saksbehandlerContext(behovObservatør = behovOppsamler),
+        )
         val varselbrevId = behovOppsamler.behovListe.filterIsInstance<VarselbrevJournalføringBehov>().first().info.id
         tilbakekreving.håndter(
             VarselbrevJournalføringHendelse(
@@ -63,6 +60,7 @@ class FrontendE2ETest {
                 journalpostId = "1234",
                 dokumentInfoId = "321",
             ),
+            systemContext(),
         )
 
         tilbakekreving.håndter(
@@ -71,18 +69,19 @@ class FrontendE2ETest {
                 journalpostId = "1234",
                 dokumentInfoId = "321",
             ),
+            systemContext(),
         )
-        tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.JA, null, null, behandler)
+        tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.JA, null, null, saksbehandlerContext())
 
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
-        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), behandler, true).status shouldBe Behandlingsstatus.UTREDES
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true).status shouldBe Behandlingsstatus.UTREDES
 
-        tilbakekreving.håndterForeslåVedtak(tilbakekreving.nåværendeBehandlingId(), behandler)
-        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), behandler, true).status shouldBe Behandlingsstatus.FATTER_VEDTAK
+        tilbakekreving.håndterForeslåVedtak(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext())
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true).status shouldBe Behandlingsstatus.FATTER_VEDTAK
 
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), beslutter, godkjenning())
-        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), behandler, true).status shouldBe Behandlingsstatus.IVERKSETTER_VEDTAK
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), beslutterContext(), godkjenning())
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true).status shouldBe Behandlingsstatus.IVERKSETTER_VEDTAK
 
         tilbakekreving.håndter(
             IverksettelseHendelse(
@@ -90,8 +89,9 @@ class FrontendE2ETest {
                 vedtakId = BigInteger.ZERO,
                 behandlingId = UUID.randomUUID(),
             ),
+            systemContext(behovObservatør = behovOppsamler),
         )
-        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), behandler, true).status shouldBe Behandlingsstatus.JOURNALFØR_VEDTAK
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true).status shouldBe Behandlingsstatus.JOURNALFØR_VEDTAK
         tilbakekreving.håndter(
             JournalføringHendelse(
                 brevId = (behovOppsamler.behovListe.last() as VedtaksbrevJournalføringBehov).brevId,
@@ -100,8 +100,9 @@ class FrontendE2ETest {
                 behandlingId = UUID.randomUUID(),
                 fagsakId = tilbakekreving.eksternFagsak.eksternId,
             ),
+            systemContext(behovObservatør = behovOppsamler),
         )
-        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), behandler, true).status shouldBe Behandlingsstatus.DISTRIUBER_VEDTAK
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true).status shouldBe Behandlingsstatus.DISTRIUBER_VEDTAK
         tilbakekreving.håndter(
             DistribusjonHendelse(
                 behandlingId = UUID.randomUUID(),
@@ -110,7 +111,8 @@ class FrontendE2ETest {
                 journalpostId = "123",
                 dokumentInfoId = "321",
             ),
+            systemContext(),
         )
-        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), behandler, true).status shouldBe Behandlingsstatus.AVSLUTTET
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true).status shouldBe Behandlingsstatus.AVSLUTTET
     }
 }

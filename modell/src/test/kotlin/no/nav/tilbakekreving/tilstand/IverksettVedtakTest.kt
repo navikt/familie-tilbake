@@ -1,5 +1,4 @@
 package no.nav.tilbakekreving.tilstand
-
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvNav
@@ -7,10 +6,8 @@ import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
-import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
-import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
+import no.nav.tilbakekreving.beslutterContext
 import no.nav.tilbakekreving.brukerinfoHendelse
-import no.nav.tilbakekreving.defaultFeatures
 import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.endring.VurdertUtbetaling
 import no.nav.tilbakekreving.fagsysteminfoHendelse
@@ -24,7 +21,8 @@ import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.nåværendeBehandlingId
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
-import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.saksbehandlerContext
+import no.nav.tilbakekreving.systemContext
 import no.nav.tilbakekreving.test.ingenReduksjon
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.test.skalIkkeUnnlates
@@ -34,17 +32,14 @@ import java.math.BigInteger
 import java.util.UUID
 
 class IverksettVedtakTest {
-    private val bigQueryService = BigQueryServiceStub()
-
     @Test
     fun `iverksett vedtak`() {
-        val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
-        val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingEvent, oppsamler)
+        val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingEvent)
 
         tilbakekreving.håndter(
             behandlingId = tilbakekreving.nåværendeBehandlingId(),
-            beslutter = Behandler.Saksbehandler("Z999999"),
+            sideeffektContext = beslutterContext(),
             vurderinger = listOf(
                 Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
                 Behandlingssteg.FORHÅNDSVARSEL to FatteVedtakSteg.Vurdering.Godkjent,
@@ -58,12 +53,11 @@ class IverksettVedtakTest {
 
     @Test
     fun `iverksetter ikke vedtak før alle behandlingsstegene er fullført`() {
-        val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
-        val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingEvent, oppsamler)
+        val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingEvent)
         tilbakekreving.håndter(
             behandlingId = tilbakekreving.nåværendeBehandlingId(),
-            beslutter = Behandler.Saksbehandler("Z999999"),
+            sideeffektContext = beslutterContext(),
             vurderinger = listOf(
                 Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
                 Behandlingssteg.FORELDELSE to FatteVedtakSteg.Vurdering.Godkjent,
@@ -75,24 +69,26 @@ class IverksettVedtakTest {
 
     private fun tilbakekrevingTilGodkjenning(
         opprettTilbakekrevingHendelse: OpprettTilbakekrevingHendelse,
-        oppsamler: BehovObservatørOppsamler,
         endringOppsamler: EndringObservatørOppsamler = EndringObservatørOppsamler(),
     ): Tilbakekreving {
-        val tilbakekreving = Tilbakekreving.opprett(UUID.randomUUID().toString(), oppsamler, opprettTilbakekrevingHendelse, bigQueryService, endringOppsamler, features = defaultFeatures())
-        val behandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
+        val tilbakekreving = Tilbakekreving.opprett(
+            id = UUID.randomUUID().toString(),
+            opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse,
+            sideeffektContext = systemContext(endringOppsamler),
+        )
         tilbakekreving.apply {
-            håndter(kravgrunnlag())
-            håndter(fagsysteminfoHendelse())
-            håndter(brukerinfoHendelse())
-            lagreUttalelse(nåværendeBehandlingId(), UttalelseVurdering.JA, null, "", behandler)
+            håndter(kravgrunnlag(), systemContext(endringOppsamler))
+            håndter(fagsysteminfoHendelse(), systemContext(endringOppsamler))
+            håndter(brukerinfoHendelse(), systemContext(endringOppsamler))
+            lagreUttalelse(nåværendeBehandlingId(), UttalelseVurdering.JA, null, "", saksbehandlerContext(endringOppsamler))
             håndter(
                 nåværendeBehandlingId(),
-                behandler,
+                saksbehandlerContext(endringOppsamler),
                 faktastegVurdering(),
             )
             håndter(
                 nåværendeBehandlingId(),
-                behandler,
+                saksbehandlerContext(endringOppsamler),
                 periode = 1.januar(2021) til 31.januar(2021),
                 vurdering = Foreldelsesteg.Vurdering.IkkeForeldet(
                     "Siste utbetaling er innenfor 3 år",
@@ -100,24 +96,23 @@ class IverksettVedtakTest {
             )
             håndter(
                 nåværendeBehandlingId(),
-                behandler,
+                saksbehandlerContext(endringOppsamler),
                 periode = 1.januar(2021) til 31.januar(2021),
                 vurdering = forårsaketAvNav().burdeForstått(aktsomhet = uaktsomt(skalIkkeUnnlates(), ingenReduksjon())),
             )
-            håndterForeslåVedtak(nåværendeBehandlingId(), behandler)
+            håndterForeslåVedtak(nåværendeBehandlingId(), saksbehandlerContext(endringOppsamler))
         }
         return tilbakekreving
     }
 
     @Test
     fun `tilbakekrevingen er JournalførVedtak når vedtak er iverksatt`() {
-        val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
-        val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingEvent, oppsamler)
+        val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingEvent)
 
         tilbakekreving.håndter(
             tilbakekreving.nåværendeBehandlingId(),
-            Behandler.Saksbehandler("Z999999"),
+            beslutterContext(),
             listOf(
                 Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
                 Behandlingssteg.FORHÅNDSVARSEL to FatteVedtakSteg.Vurdering.Godkjent,
@@ -133,18 +128,18 @@ class IverksettVedtakTest {
                 vedtakId = BigInteger("1234"),
                 behandlingId = UUID.randomUUID(),
             ),
+            systemContext(),
         )
         tilbakekreving.tilstand shouldBe JournalførVedtak
     }
 
     @Test
     fun `tilbakekrevingen kan ikke avsluttes når behandlingen er ikke fullført`() {
-        val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
-        val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingEvent, oppsamler)
+        val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingEvent)
         tilbakekreving.håndter(
             tilbakekreving.nåværendeBehandlingId(),
-            Behandler.Saksbehandler("Z999999"),
+            beslutterContext(),
             listOf(
                 Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
                 Behandlingssteg.FORESLÅ_VEDTAK to FatteVedtakSteg.Vurdering.Godkjent,
@@ -158,6 +153,7 @@ class IverksettVedtakTest {
                     vedtakId = BigInteger("1234"),
                     behandlingId = UUID.randomUUID(),
                 ),
+                systemContext(),
             )
         }
 
@@ -171,7 +167,6 @@ class IverksettVedtakTest {
         val endringObservatørOppsamler = EndringObservatørOppsamler()
         val tilbakekreving = tilbakekrevingTilGodkjenning(
             opprettTilbakekrevingHendelse = opprettTilbakekrevingEvent,
-            oppsamler = BehovObservatørOppsamler(),
             endringOppsamler = endringObservatørOppsamler,
         )
 
@@ -179,7 +174,7 @@ class IverksettVedtakTest {
 
         tilbakekreving.håndter(
             tilbakekreving.nåværendeBehandlingId(),
-            Behandler.Saksbehandler("Z999999"),
+            beslutterContext(endringObservatørOppsamler),
             listOf(
                 Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
                 Behandlingssteg.FORHÅNDSVARSEL to FatteVedtakSteg.Vurdering.Godkjent,

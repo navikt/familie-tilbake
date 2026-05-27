@@ -73,7 +73,6 @@ class Foreldelsesteg(
             }
         behandlingslogg.lagre(
             LoggInnslag.opprett(
-                id = UUID.randomUUID(),
                 behandlingId = behandlingId,
                 opprettetTid = klokke.nå(),
                 behandlingsloggstype = if (erAutomatiskVurdert()) {

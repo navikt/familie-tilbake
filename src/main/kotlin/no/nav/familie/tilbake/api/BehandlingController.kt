@@ -25,7 +25,6 @@ import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.tilbakekreving.api.v1.dto.ByttEnhetDto
 import no.nav.tilbakekreving.api.v1.dto.HenleggelsesbrevFritekstDto
 import no.nav.tilbakekreving.api.v1.dto.OpprettRevurderingDto
-import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kontrakter.OpprettManueltTilbakekrevingRequest
@@ -54,7 +53,6 @@ class BehandlingController(
     private val behandlingskontrollService: BehandlingskontrollService,
     private val tilgangService: TilgangService,
     private val tilgangskontrollService: TilgangskontrollService,
-    private val applicationProperties: ApplicationProperties,
     private val tilbakekrevingService: TilbakekrevingService,
 ) {
     @Operation(summary = "Opprett tilbakekrevingsbehandling automatisk, kan kalles av fagsystem, batch")
@@ -143,7 +141,13 @@ class BehandlingController(
                 handling = "Henter tilbakekrevingsbehandling",
             )
             val behandler = ContextService.hentBehandler(SecureLog.Context.fra(tilbakekreving))
-            return Ressurs.success(tilbakekreving.frontendDtoForBehandling(behandlingId, behandler, rolle == Behandlerrolle.BESLUTTER))
+            return Ressurs.success(
+                tilbakekreving.frontendDtoForBehandling(
+                    behandlingId,
+                    tilbakekrevingService.lesecontext(behandler),
+                    rolle == Behandlerrolle.BESLUTTER,
+                ),
+            )
         }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,

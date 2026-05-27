@@ -13,6 +13,8 @@ import no.nav.familie.tilbake.kontrakter.journalpost.AvsenderMottakerIdType
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.log.callId
+import no.nav.tilbakekreving.LesContext
+import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.BestillBrevDto
 import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
@@ -27,9 +29,9 @@ import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
 import no.nav.tilbakekreving.brev.VarselbrevInfo
 import no.nav.tilbakekreving.brev.vedtaksbrev.BrevFormatterer
+import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostResponse
-import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UnntakDto
@@ -49,7 +51,6 @@ import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.DokprodTilHtml
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.DokumentKlasse
 import no.nav.tilbakekreving.pdf.dokumentbestilling.varsel.TekstformatererVarselbrev
 import no.nav.tilbakekreving.pdf.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
-import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.UUID
@@ -59,14 +60,14 @@ class ForhåndsvarselService(
     private val pdfBrevService: PdfBrevService,
     private val varselbrevUtil: VarselbrevUtil,
     private val dokarkivClient: DokarkivClient,
-    private val dokdistClient: DokdistClient,
     private val eksterneDataForBrevService: EksterneDataForBrevService,
+    private val featureService: FeatureService,
     private val pdfFactory: () -> PdfGenerator = { PdfGenerator() },
 ) {
     private val logger = TracedLogger.getLogger<ForhåndsvarselService>()
 
-    fun hentVarselbrevTekster(behandlingId: UUID, tilbakekreving: Tilbakekreving): Varselbrevtekst {
-        val varselbrevInfo = tilbakekreving.hentVarselbrevInfo(behandlingId)
+    fun hentVarselbrevTekster(context: LesContext, behandlingId: UUID, tilbakekreving: Tilbakekreving): Varselbrevtekst {
+        val varselbrevInfo = tilbakekreving.hentVarselbrevInfo(behandlingId, context)
         val brevmetadata = opprettMetadata(varselbrevInfo)
         val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(brevmetadata, false)
         val brevbody = TekstformatererVarselbrev.lagFritekst(opprettVarselbrevsdokument(varselbrevInfo, brevmetadata), false)
@@ -77,10 +78,11 @@ class ForhåndsvarselService(
     }
 
     fun forhåndsvisVarselbrev(
+        context: LesContext,
         tilbakekreving: Tilbakekreving,
         bestillBrevDto: BestillBrevDto,
     ): ByteArray {
-        val varselbrevInfo = tilbakekreving.hentVarselbrevInfo(bestillBrevDto.behandlingId)
+        val varselbrevInfo = tilbakekreving.hentVarselbrevInfo(bestillBrevDto.behandlingId, context)
         val varselbrevsdokument = opprettVarselbrevsdokument(
             varselbrevInfo = varselbrevInfo,
             brevmetadata = opprettMetadata(varselbrevInfo),
@@ -100,11 +102,17 @@ class ForhåndsvarselService(
     fun bestillVarselbrev(
         tilbakekreving: Tilbakekreving,
         bestillBrevDto: BestillBrevDto,
+        sideeffektContext: SideeffektContext,
     ) {
-        tilbakekreving.sendVarselbrev(bestillBrevDto.behandlingId, bestillBrevDto.fritekst)
+        tilbakekreving.sendVarselbrev(bestillBrevDto.behandlingId, bestillBrevDto.fritekst, sideeffektContext)
     }
 
-    fun lagreUttalelse(tilbakekreving: Tilbakekreving, behandlingId: UUID, brukeruttalelse: BrukeruttalelseDto, behandler: Behandler) {
+    fun lagreUttalelse(
+        tilbakekreving: Tilbakekreving,
+        behandlingId: UUID,
+        brukeruttalelse: BrukeruttalelseDto,
+        sideeffektContext: SideeffektContext,
+    ) {
         when (brukeruttalelse.harBrukerUttaltSeg) {
             HarBrukerUttaltSeg.JA_ETTER_FORHÅNDSVARSEL, HarBrukerUttaltSeg.UNNTAK_ALLEREDE_UTTALT_SEG -> {
                 val uttalelsedetaljer = requireNotNull(brukeruttalelse.uttalelsesdetaljer) {
@@ -119,7 +127,7 @@ class ForhåndsvarselService(
                     uttalelseVurdering = UttalelseVurdering.valueOf(brukeruttalelse.harBrukerUttaltSeg.name),
                     uttalelseInfo = UttalelseInfo(UUID.randomUUID(), uttalelsedetaljer.uttalelsesdato, uttalelsedetaljer.hvorBrukerenUttalteSeg, uttalelsedetaljer.uttalelseBeskrivelse),
                     kommentar = null,
-                    behandler = behandler,
+                    sideeffektContext = sideeffektContext,
                 )
             }
             HarBrukerUttaltSeg.NEI_ETTER_FORHÅNDSVARSEL, HarBrukerUttaltSeg.UNNTAK_INGEN_UTTALELSE -> {
@@ -134,14 +142,14 @@ class ForhåndsvarselService(
                     uttalelseVurdering = UttalelseVurdering.valueOf(brukeruttalelse.harBrukerUttaltSeg.name),
                     uttalelseInfo = null,
                     kommentar = kommentar,
-                    behandler = behandler,
+                    sideeffektContext = sideeffektContext,
                 )
             }
             else -> throw IllegalArgumentException("Ukjent verdi for uttalelseVurdering: ${brukeruttalelse.harBrukerUttaltSeg} ")
         }
     }
 
-    fun nyLagreUttalelse(behandlingId: UUID, tilbakekreving: Tilbakekreving, uttalelseDto: UttalelseDto, behandler: Behandler) {
+    fun nyLagreUttalelse(behandlingId: UUID, tilbakekreving: Tilbakekreving, uttalelseDto: UttalelseDto, sideeffektContext: SideeffektContext) {
         val uttalelseVurdering = when (uttalelseDto.harBrukerUttaltSeg) {
             UttalelseVurderingDto.JA_ETTER_FORHÅNDSVARSEL -> UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL
             UttalelseVurderingDto.NEI_ETTER_FORHÅNDSVARSEL -> UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL
@@ -168,7 +176,7 @@ class ForhåndsvarselService(
                         },
                     ),
                     kommentar = null,
-                    behandler = behandler,
+                    sideeffektContext = sideeffektContext,
                 )
             }
             UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL, UttalelseVurdering.UNNTAK_INGEN_UTTALELSE, UttalelseVurdering.NEI -> {
@@ -179,7 +187,7 @@ class ForhåndsvarselService(
                     kommentar = requireNotNull(uttalelseDto.beskrivelse) {
                         "Det kreves kommentar/beskrivelse når brukeren ikke uttalte seg. beskrivelse var null"
                     },
-                    behandler = behandler,
+                    sideeffektContext = sideeffektContext,
                 )
             }
         }
@@ -189,12 +197,12 @@ class ForhåndsvarselService(
         behandlingId: UUID,
         tilbakekreving: Tilbakekreving,
         utsettFristDto: UpdateUttalelsesfristDto,
-        behandler: Behandler,
+        sideeffektContext: SideeffektContext,
     ): UttalelsesfristDto {
-        return tilbakekreving.lagreFristUtsettelse(behandlingId, utsettFristDto.nyFrist!!, utsettFristDto.begrunnelse!!, behandler)
+        return tilbakekreving.lagreFristUtsettelse(behandlingId, utsettFristDto.nyFrist!!, utsettFristDto.begrunnelse!!, sideeffektContext)
     }
 
-    fun nyLagreForhåndsvarselUnntak(behandlingId: UUID, tilbakekreving: Tilbakekreving, unntakDto: UnntakDto, behandler: Behandler) {
+    fun nyLagreForhåndsvarselUnntak(behandlingId: UUID, tilbakekreving: Tilbakekreving, unntakDto: UnntakDto, sideeffektContext: SideeffektContext) {
         tilbakekreving.lagreForhåndsvarselUnntak(
             behandlingId = behandlingId,
             begrunnelseForUnntak = when (unntakDto.begrunnelseForUnntak) {
@@ -204,7 +212,7 @@ class ForhåndsvarselService(
                 VarslingsunntakDto.ALLEREDE_UTTALET_SEG -> BegrunnelseForUnntak.ALLEREDE_UTTALET_SEG
             },
             beskrivelse = unntakDto.beskrivelse,
-            behandler = behandler,
+            sideeffektContext = sideeffektContext,
         )
     }
 
@@ -214,21 +222,21 @@ class ForhåndsvarselService(
 
     fun utsettUttalelseFrist(
         behandlingId: UUID,
-        behandler: Behandler,
         tilbakekreving: Tilbakekreving,
         fristUtsettelseDto: FristUtsettelseDto,
+        sideeffektContext: SideeffektContext,
     ) {
         requireNotNull(tilbakekreving.brevHistorikk.sisteVarselbrev()) {
             "Kan ikke utsette frist når forhåndsvarsel ikke er sendt"
         }
-        tilbakekreving.lagreFristUtsettelse(behandlingId, fristUtsettelseDto.nyFrist!!, fristUtsettelseDto.begrunnelse!!, behandler)
+        tilbakekreving.lagreFristUtsettelse(behandlingId, fristUtsettelseDto.nyFrist!!, fristUtsettelseDto.begrunnelse!!, sideeffektContext)
     }
 
     fun håndterForhåndsvarselUnntak(
         behandlingId: UUID,
         tilbakekreving: Tilbakekreving,
         forhåndsvarselUnntakDto: ForhåndsvarselUnntakDto,
-        behandler: Behandler,
+        sideeffektContext: SideeffektContext,
     ) {
         tilbakekreving.lagreForhåndsvarselUnntak(
             behandlingId = behandlingId,
@@ -238,7 +246,7 @@ class ForhåndsvarselService(
                 VarslingsUnntak.ÅPENBART_UNØDVENDIG -> BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG
             },
             beskrivelse = forhåndsvarselUnntakDto.beskrivelse,
-            behandler = behandler,
+            sideeffektContext = sideeffektContext,
         )
     }
 

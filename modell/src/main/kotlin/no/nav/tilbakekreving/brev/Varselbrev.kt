@@ -1,7 +1,6 @@
 package no.nav.tilbakekreving.brev
 
 import no.nav.tilbakekreving.FeatureToggles
-import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.aktør.Bruker
@@ -27,7 +26,7 @@ data class Varselbrev(
     private val kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
     val fristForUttalelse: LocalDate,
     private var tekstFraSaksbehandler: String,
-) : Brev, FrontendDto<VarselbrevDto> {
+) : Brev {
     fun hentVarsletBeløp(): Long {
         return kravgrunnlag.entry.feilutbetaltBeløpForAllePerioder().toLong()
     }
@@ -83,7 +82,7 @@ data class Varselbrev(
         )
     }
 
-    override fun tilFrontendDto(): VarselbrevDto {
+    fun tilFrontendDto(): VarselbrevDto {
         return VarselbrevDto(varselbrevSendtTid = sendtTid, opprinneligFristForUttalelse = fristForUttalelse, tekstFraSaksbehandler = tekstFraSaksbehandler)
     }
 

@@ -44,7 +44,7 @@ class VilkårsvurderingController(
                 handling = "Henter vilkårsvurdering for en gitt behandling",
             )
             return Ressurs.success(
-                tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(),
+                tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(tilbakekrevingService.lesecontext()),
             )
         }
 

@@ -1,17 +1,15 @@
 package no.nav.tilbakekreving.tilstand
-
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import no.nav.tilbakekreving.ANSVARLIG_BESLUTTER
-import no.nav.tilbakekreving.ANSVARLIG_SAKSBEHANDLER
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvNav
+import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.assertions.skalHaSteg
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
-import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
+import no.nav.tilbakekreving.beslutterContext
 import no.nav.tilbakekreving.brukerinfoHendelse
 import no.nav.tilbakekreving.eksternFagsak
 import no.nav.tilbakekreving.fagsystem.Ytelse
@@ -33,7 +31,8 @@ import no.nav.tilbakekreving.kravgrunnlagPeriode
 import no.nav.tilbakekreving.nåværendeBehandlingId
 import no.nav.tilbakekreving.opprettTilbakekreving
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
-import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.saksbehandlerContext
+import no.nav.tilbakekreving.systemContext
 import no.nav.tilbakekreving.test.ingenReduksjon
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.test.skalIkkeUnnlates
@@ -44,13 +43,12 @@ import org.junit.jupiter.api.Test
 class TilBehandlingTest {
     @Test
     fun `behandling kan nullstilles når den er i TilBehandling tilstand`() {
-        val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
-        val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingHendelse, Behandler.Saksbehandler("Ansvarlig saksbehandler"))
+        val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingHendelse, saksbehandlerContext())
 
         tilbakekreving.håndter(
             tilbakekreving.nåværendeBehandlingId(),
-            Behandler.Saksbehandler("Z999999"),
+            beslutterContext(),
             listOf(
                 Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
                 Behandlingssteg.FORELDELSE to FatteVedtakSteg.Vurdering.Godkjent,
@@ -58,19 +56,18 @@ class TilBehandlingTest {
         )
 
         tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId()).foreldelsesteg.erFullstendig(SystemKlokke) shouldBe true
-        tilbakekreving.håndterNullstilling(tilbakekreving.nåværendeBehandlingId(), ANSVARLIG_SAKSBEHANDLER)
+        tilbakekreving.håndterNullstilling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext())
         tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId()).foreldelsesteg.erFullstendig(SystemKlokke) shouldBe false
     }
 
     @Test
     fun `behandling kan ikke nullstilles når den ikke er i TilBehandling tilstand`() {
-        val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
-        val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingHendelse, Behandler.Saksbehandler("Ansvarlig saksbehandler"))
+        val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingHendelse, saksbehandlerContext())
 
         tilbakekreving.håndter(
             tilbakekreving.nåværendeBehandlingId(),
-            Behandler.Saksbehandler("Z999999"),
+            beslutterContext(),
             listOf(
                 Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
                 Behandlingssteg.FORHÅNDSVARSEL to FatteVedtakSteg.Vurdering.Godkjent,
@@ -83,71 +80,64 @@ class TilBehandlingTest {
         tilbakekreving.tilstand shouldNotBe TilBehandling
 
         val exception = shouldThrow<ModellFeil.UgyldigOperasjonException> {
-            tilbakekreving.håndterNullstilling(tilbakekreving.nåværendeBehandlingId(), ANSVARLIG_SAKSBEHANDLER)
+            tilbakekreving.håndterNullstilling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext())
         }
         exception.message shouldBe "Kan ikke flytte tilbake til fakta i ${tilbakekreving.tilstand.tilbakekrevingTilstand}"
     }
 
     @Test
     fun `behandling kan endres for beslutter etter vedtak er foreslått`() {
-        val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
-        val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingHendelse, Behandler.Saksbehandler("Ansvarlig saksbehandler"))
+        val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingHendelse, saksbehandlerContext())
 
-        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), Behandler.Saksbehandler("Ansvarlig beslutter"), true).kanEndres shouldBe true
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), beslutterContext(), true).kanEndres shouldBe true
     }
 
     @Test
     fun `behandling kan ikke endres for annen saksbehandler etter vedtak er foreslått`() {
-        val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
-        val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingHendelse, Behandler.Saksbehandler("Ansvarlig saksbehandler"))
+        val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingHendelse, saksbehandlerContext())
 
-        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), Behandler.Saksbehandler("Annen saksbehandler"), false).kanEndres shouldBe false
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), false).kanEndres shouldBe false
     }
 
     @Test
     fun `behandling kan ikke endres etter foreslått vedtak for samme saksbehandler`() {
-        val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
-        val behandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
-        val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingHendelse, behandler)
+        val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingHendelse, saksbehandlerContext())
 
-        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), behandler, true).kanEndres shouldBe false
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true).kanEndres shouldBe false
     }
 
     @Test
     fun `sistEndret oppdateres ved saksbehandling`() {
-        val behandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
-        val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
-        val tilbakekreving = tilbakekrevingTilBehandling(oppsamler, opprettTilbakekrevingHendelse)
+        val tilbakekreving = tilbakekrevingTilBehandling(opprettTilbakekrevingHendelse)
 
-        val gammeltEndringstidspunkt = tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), behandler, true).endretTidspunkt
+        val gammeltEndringstidspunkt = tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true).endretTidspunkt
 
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), behandler, faktastegVurdering())
-        val nyttEndringstidspunkt = tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), behandler, true).endretTidspunkt
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), faktastegVurdering())
+        val nyttEndringstidspunkt = tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true).endretTidspunkt
         nyttEndringstidspunkt shouldNotBe gammeltEndringstidspunkt
     }
 
     @Test
     fun `svar på behov for fagsysteminfo etter sak har gått til behandling`() {
-        val behandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
-        val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse(
             eksternFagsak = eksternFagsak(ytelse = Ytelse.Tilleggsstønad),
         )
 
-        val tilbakekreving = opprettTilbakekreving(oppsamler, opprettTilbakekrevingHendelse)
+        val tilbakekreving = opprettTilbakekreving(opprettTilbakekrevingHendelse)
         tilbakekreving.håndter(
             kravgrunnlag(
                 perioder = listOf(
                     kravgrunnlagPeriode(1.januar(2021) til 1.januar(2021)),
                 ),
             ),
+            systemContext(),
         )
-        tilbakekreving.håndter(fagsysteminfoHendelse())
-        tilbakekreving.håndter(brukerinfoHendelse())
+        tilbakekreving.håndter(fagsysteminfoHendelse(), systemContext())
+        tilbakekreving.håndter(brukerinfoHendelse(), systemContext())
 
         tilbakekreving.tilstand shouldBe TilBehandling
 
@@ -160,11 +150,12 @@ class TilBehandlingTest {
                     ),
                 ),
             ),
+            systemContext(),
         )
 
         val perioder = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId())
             .vilkårsvurderingsstegDto
-            .tilFrontendDto()
+            .tilFrontendDto(saksbehandlerContext())
             .perioder
             .map { it.periode }
 
@@ -173,28 +164,26 @@ class TilBehandlingTest {
 
     @Test
     fun `tilbakekreving trekkes tilbake fra godkjenning`() {
-        val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
-        val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingHendelse, ANSVARLIG_SAKSBEHANDLER)
-        tilbakekreving.håndterTrekkTilbakeFraGodkjenning(tilbakekreving.nåværendeBehandlingId(), ANSVARLIG_SAKSBEHANDLER)
+        val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingHendelse, saksbehandlerContext())
+        tilbakekreving.håndterTrekkTilbakeFraGodkjenning(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext())
         val exception = shouldThrow<ModellFeil> {
-            tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), ANSVARLIG_BESLUTTER, godkjenning())
+            tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), beslutterContext(), godkjenning())
         }
         exception.message shouldBe "Behandlingen er i FORESLÅ_VEDTAK og kan ikke behandle vurdering for FATTE_VEDTAK"
     }
 
     @Test
     fun `beslutter underkjenner vedtak og status endres til utredes for tilbakekreving, og riktig status for behandlingsstegene`() {
-        val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
-        val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingHendelse, ANSVARLIG_SAKSBEHANDLER)
+        val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingHendelse, saksbehandlerContext())
 
-        val tilbakekrevingDtoFør = tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), ANSVARLIG_BESLUTTER, true)
+        val tilbakekrevingDtoFør = tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true)
         tilbakekrevingDtoFør.status shouldBe Behandlingsstatus.FATTER_VEDTAK
 
         tilbakekreving.håndter(
             tilbakekreving.nåværendeBehandlingId(),
-            ANSVARLIG_BESLUTTER,
+            beslutterContext(),
             listOf(
                 Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Underkjent("Fakta må vurderes på nytt"),
                 Behandlingssteg.FORHÅNDSVARSEL to FatteVedtakSteg.Vurdering.Godkjent,
@@ -204,7 +193,7 @@ class TilBehandlingTest {
             ),
         )
 
-        val tilbakekrevingDtoEtter = tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), ANSVARLIG_SAKSBEHANDLER, false)
+        val tilbakekrevingDtoEtter = tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), false)
         tilbakekrevingDtoEtter.status shouldBe Behandlingsstatus.UTREDES
         tilbakekrevingDtoEtter.behandlingsstegsinfo.skalHaSteg(Behandlingssteg.FAKTA).behandlingsstegstatus shouldBe Behandlingsstegstatus.TILBAKEFØRT
         tilbakekrevingDtoEtter.behandlingsstegsinfo.skalHaSteg(Behandlingssteg.FORESLÅ_VEDTAK).behandlingsstegstatus shouldBe Behandlingsstegstatus.VENTER
@@ -213,45 +202,43 @@ class TilBehandlingTest {
 
     @Test
     fun `kan ikke behandles utenfor TilBehandling`() {
-        val oppsamler = BehovObservatørOppsamler()
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
-        val tilbakekreving = tilbakekrevingTilGodkjenning(oppsamler, opprettTilbakekrevingHendelse, ANSVARLIG_SAKSBEHANDLER)
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), ANSVARLIG_SAKSBEHANDLER, faktastegVurdering())
+        val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingHendelse, saksbehandlerContext())
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), faktastegVurdering())
         tilbakekreving.lagreUttalelse(
             behandlingId = tilbakekreving.nåværendeBehandlingId(),
             uttalelseVurdering = UttalelseVurdering.UNNTAK_ALLEREDE_UTTALT_SEG,
             uttalelseInfo = null,
             kommentar = "Trenger ikke forhåndsvarsel i test lol",
-            Behandler.Saksbehandler("Ansvarlig saksbehandler"),
+            sideeffektContext = saksbehandlerContext(),
         )
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), ANSVARLIG_SAKSBEHANDLER, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), ANSVARLIG_SAKSBEHANDLER, 1.januar(2021) til 31.januar(2021), forårsaketAvNav().burdeForstått())
-        tilbakekreving.håndterForeslåVedtak(tilbakekreving.nåværendeBehandlingId(), ANSVARLIG_SAKSBEHANDLER)
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), ANSVARLIG_BESLUTTER, fatteVedtakVurdering())
-        tilbakekreving.håndter(iverksettelse())
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), 1.januar(2021) til 31.januar(2021), forårsaketAvNav().burdeForstått())
+        tilbakekreving.håndterForeslåVedtak(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext())
+        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), beslutterContext(), fatteVedtakVurdering())
+        tilbakekreving.håndter(iverksettelse(), systemContext())
 
-        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), Behandler.Saksbehandler("Z222222"), true).kanEndres shouldBe false
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true).kanEndres shouldBe false
 
         val exception = shouldThrow<ModellFeil.UgyldigOperasjonException> {
-            tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), ANSVARLIG_BESLUTTER, fatteVedtakVurdering())
+            tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), beslutterContext(), fatteVedtakVurdering())
         }
         exception.melding shouldBe "Forventet ikke totrinn vurdering i JOURNALFØR_VEDTAK"
     }
 
     private fun tilbakekrevingTilGodkjenning(
-        oppsamler: BehovObservatørOppsamler,
         opprettTilbakekrevingHendelse: OpprettTilbakekrevingHendelse,
-        behandler: Behandler,
-    ) = tilbakekrevingTilBehandling(oppsamler, opprettTilbakekrevingHendelse).apply {
-        lagreUttalelse(nåværendeBehandlingId(), UttalelseVurdering.JA, null, "", Behandler.Saksbehandler("Ansvarlig saksbehandler"))
+        context: SideeffektContext,
+    ) = tilbakekrevingTilBehandling(opprettTilbakekrevingHendelse).apply {
+        lagreUttalelse(nåværendeBehandlingId(), UttalelseVurdering.JA, null, "", context)
         håndter(
             nåværendeBehandlingId(),
-            behandler,
+            context,
             faktastegVurdering(),
         )
         håndter(
             nåværendeBehandlingId(),
-            Behandler.Saksbehandler("Ansvarlig saksbehandler"),
+            context,
             periode = 1.januar(2021) til 31.januar(2021),
             vurdering = Foreldelsesteg.Vurdering.IkkeForeldet(
                 "Siste utbetaling er innenfor 3 år",
@@ -259,10 +246,10 @@ class TilBehandlingTest {
         )
         håndter(
             nåværendeBehandlingId(),
-            Behandler.Saksbehandler("Ansvarlig saksbehandler"),
+            context,
             periode = 1.januar(2021) til 31.januar(2021),
             vurdering = forårsaketAvNav().burdeForstått(aktsomhet = uaktsomt(skalIkkeUnnlates(), ingenReduksjon())),
         )
-        håndterForeslåVedtak(nåværendeBehandlingId(), Behandler.Saksbehandler("Ansvarlig saksbehandler"))
+        håndterForeslåVedtak(nåværendeBehandlingId(), context)
     }
 }

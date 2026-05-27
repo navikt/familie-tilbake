@@ -1,10 +1,11 @@
 package no.nav.tilbakekreving.tilstand
 
+import no.nav.tilbakekreving.Klokke
+import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
-import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
@@ -12,7 +13,6 @@ import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
-import no.nav.tilbakekreving.saksbehandler.Behandler
 import java.time.Duration
 
 object TilBehandling : Tilstand {
@@ -20,45 +20,51 @@ object TilBehandling : Tilstand {
     override val tilbakekrevingTilstand: TilbakekrevingTilstand = TilbakekrevingTilstand.TIL_BEHANDLING
     override val kanEndresAvSaksbehandler: Boolean = true
 
-    override fun behandlingsstatus(behandling: Behandling): BehandlingsstatusModell {
-        return behandling.førsteUfullstendigeSteg()
+    override fun behandlingsstatus(behandling: Behandling, klokke: Klokke): BehandlingsstatusModell {
+        return behandling.førsteUfullstendigeSteg(klokke)
             ?.behandlingsstatus
             ?: BehandlingsstatusModell.TIL_BEHANDLING
     }
 
-    override fun entering(tilbakekreving: Tilbakekreving) {}
+    override fun entering(tilbakekreving: Tilbakekreving, sideeffektContext: SideeffektContext) {}
 
-    override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse) {
+    override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse, sideeffektContext: SideeffektContext) {
         if (tilbakekreving.eksternFagsak.behandlinger.nåværende().entry is EksternFagsakRevurdering.Ukjent) {
-            tilbakekreving.trengerFagsysteminfo()
+            tilbakekreving.trengerFagsysteminfo(sideeffektContext)
         }
-        tilbakekreving.påminnNåværendePeriode()
+        tilbakekreving.påminnNåværendePeriode(sideeffektContext)
     }
 
-    override fun håndterNullstilling(nåværendeBehandling: Behandling, sporing: Sporing, behandlingslogg: Behandlingslogg, behandler: Behandler) {
-        nåværendeBehandling.flyttTilbakeTilFakta(behandlingslogg, behandler)
+    override fun håndterNullstilling(nåværendeBehandling: Behandling, sporing: Sporing, sideeffektContext: SideeffektContext) {
+        nåværendeBehandling.flyttTilbakeTilFakta(sideeffektContext)
     }
 
-    override fun håndter(tilbakekreving: Tilbakekreving, fagsysteminfo: FagsysteminfoHendelse) {
-        tilbakekreving.oppdaterFagsysteminfo(fagsysteminfo)
+    override fun håndter(tilbakekreving: Tilbakekreving, fagsysteminfo: FagsysteminfoHendelse, sideeffektContext: SideeffektContext) {
+        tilbakekreving.oppdaterFagsysteminfo(fagsysteminfo, sideeffektContext)
     }
 
-    override fun håndter(tilbakekreving: Tilbakekreving, behandling: Behandling, beslutter: Behandler, vurderinger: List<Pair<Behandlingssteg, FatteVedtakSteg.Vurdering>>) {
-        behandling.håndter(beslutter, vurderinger, tilbakekreving.behandlingslogg)
-        if (behandling.kanUtbetales()) {
-            tilbakekreving.byttTilstand(IverksettVedtak)
+    override fun håndter(
+        tilbakekreving: Tilbakekreving,
+        behandling: Behandling,
+        vurderinger: List<Pair<Behandlingssteg, FatteVedtakSteg.Vurdering>>,
+        sideeffektContext: SideeffektContext,
+    ) {
+        behandling.håndter(sideeffektContext, vurderinger)
+        if (behandling.kanUtbetales(sideeffektContext.klokke)) {
+            tilbakekreving.byttTilstand(IverksettVedtak, sideeffektContext)
         }
     }
 
-    override fun håndterTrekkTilbakeFraGodkjenning(behandling: Behandling, sporing: Sporing, behandlingslogg: Behandlingslogg, behandler: Behandler) {
-        behandling.trekkTilbakeFraGodkjenning(behandlingslogg, behandler)
+    override fun håndterTrekkTilbakeFraGodkjenning(behandling: Behandling, sporing: Sporing, sideeffektContext: SideeffektContext) {
+        behandling.trekkTilbakeFraGodkjenning(sideeffektContext)
     }
 
     override fun håndter(
         tilbakekreving: Tilbakekreving,
         kravgrunnlag: KravgrunnlagHendelse,
+        sideeffektContext: SideeffektContext,
     ) {
-        tilbakekreving.hånterEndretKravgrunnlag(kravgrunnlag)
-        tilbakekreving.trengerFagsysteminfo()
+        tilbakekreving.hånterEndretKravgrunnlag(kravgrunnlag, sideeffektContext)
+        tilbakekreving.trengerFagsysteminfo(sideeffektContext)
     }
 }

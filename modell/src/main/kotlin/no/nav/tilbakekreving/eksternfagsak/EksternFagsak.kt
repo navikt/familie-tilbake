@@ -1,8 +1,6 @@
 package no.nav.tilbakekreving.eksternfagsak
 
-import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.api.v2.EksternFagsakDto
-import no.nav.tilbakekreving.behov.BehovObservatør
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
 import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving
 import no.nav.tilbakekreving.entities.EksternFagsakEntity
@@ -17,9 +15,8 @@ class EksternFagsak(
     val eksternId: String,
     internal val ytelse: Ytelse,
     val behandlinger: EksternFagsakBehandlingHistorikk,
-    private val behovObservatør: BehovObservatør,
-) : FrontendDto<EksternFagsakDto> {
-    override fun tilFrontendDto(): EksternFagsakDto {
+) {
+    fun tilFrontendDto(): EksternFagsakDto {
         return EksternFagsakDto(
             eksternId = eksternId,
             ytelsestype = ytelse.tilYtelseDTO(),
@@ -59,17 +56,15 @@ class EksternFagsak(
         )
     }
 
-    fun trengerFagsysteminfo(
+    fun fagsysteminfoBehov(
         eksternBehandlingId: String,
         vedtakGjelderId: String,
-    ) {
-        behovObservatør.håndter(
-            FagsysteminfoBehov(
-                eksternFagsakId = eksternId,
-                eksternBehandlingId = eksternBehandlingId,
-                vedtakGjelderId = vedtakGjelderId,
-                ytelse = ytelse,
-            ),
+    ): FagsysteminfoBehov {
+        return FagsysteminfoBehov(
+            eksternFagsakId = eksternId,
+            eksternBehandlingId = eksternBehandlingId,
+            vedtakGjelderId = vedtakGjelderId,
+            ytelse = ytelse,
         )
     }
 

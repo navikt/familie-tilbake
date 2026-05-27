@@ -1,14 +1,9 @@
 package no.nav.tilbakekreving
 
-import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
-import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
-import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import java.util.EnumMap
 import java.util.UUID
-
-private val bigQueryService = BigQueryServiceStub()
 
 fun defaultFeatures(
     featureOverrides: Array<Pair<Toggle, Boolean>> = emptyArray(),
@@ -27,28 +22,24 @@ fun defaultFeatures(
 )
 
 fun opprettTilbakekreving(
-    oppsamler: BehovObservatørOppsamler,
     opprettTilbakekrevingHendelse: OpprettTilbakekrevingHendelse,
-    features: FeatureToggles = defaultFeatures(),
+    context: SideeffektContext = systemContext(),
 ) = Tilbakekreving
     .opprett(
         id = UUID.randomUUID().toString(),
-        behovObservatør = oppsamler,
         opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse,
-        bigQueryService = bigQueryService,
-        endringObservatør = EndringObservatørOppsamler(),
-        features = features,
+        sideeffektContext = context,
     )
 
 fun tilbakekrevingTilBehandling(
-    oppsamler: BehovObservatørOppsamler,
     opprettTilbakekrevingHendelse: OpprettTilbakekrevingHendelse,
+    context: SideeffektContext = systemContext(),
 ): Tilbakekreving {
-    val tilbakekreving = opprettTilbakekreving(oppsamler, opprettTilbakekrevingHendelse)
+    val tilbakekreving = opprettTilbakekreving(opprettTilbakekrevingHendelse, context)
     tilbakekreving.apply {
-        håndter(kravgrunnlag())
-        håndter(fagsysteminfoHendelse())
-        håndter(brukerinfoHendelse())
+        håndter(kravgrunnlag(), context)
+        håndter(fagsysteminfoHendelse(), context)
+        håndter(brukerinfoHendelse(), context)
     }
     return tilbakekreving
 }

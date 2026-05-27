@@ -10,6 +10,7 @@ import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.saksbehandlerContext
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
@@ -39,7 +40,7 @@ class AutomatiskSaksbehandlingE2ETest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
         val periode = tilbakekreving(behandlingId)
             .hentBehandling(behandlingId)
-            .foreldelsestegDto.tilFrontendDto()
+            .foreldelsestegDto.tilFrontendDto(saksbehandlerContext())
             .foreldetPerioder.single()
 
         periode.foreldelsesvurderingstype shouldBe Foreldelsesvurderingstype.IKKE_FORELDET

@@ -73,6 +73,7 @@ Ktlint kjøres på alle pull requests i CI. **Alltid kjør `ktlintFormat` før d
 - Foretrekk å skrive testkode i `modell`-modulen
 - Logikk skal implementeres i `modell`-modulen
 - rot-modulen skal kun inneholde kode som kobler modellen mot eksterne systemer
+- Bruk aldri default-verdier i konstruktører, med unntak av entity-klasser i tilfeller det er nødvendig for bakoverkompatibilitet ved databaselesing
 
 ## Testkonvensjoner
 

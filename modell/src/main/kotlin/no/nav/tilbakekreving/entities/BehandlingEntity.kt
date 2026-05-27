@@ -1,6 +1,5 @@
 package no.nav.tilbakekreving.entities
 
-import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.brev.BrevHistorikk
@@ -35,7 +34,6 @@ data class BehandlingEntity(
         eksternFagsakBehandlingHistorikk: EksternFagsakBehandlingHistorikk,
         kravgrunnlagHistorikk: KravgrunnlagHistorikk,
         brevHistorikk: BrevHistorikk,
-        klokke: Klokke,
     ): Behandling {
         val sporing = Sporing("Ukjent", id.toString())
         val eksternFagsak = eksternFagsakBehandlingHistorikk.finn(eksternFagsakBehandlingRef.id, sporing)
@@ -57,7 +55,6 @@ data class BehandlingEntity(
             fatteVedtakSteg = fatteVedtakStegEntity.fraEntity(),
             forhåndsvarsel = forhåndsvarselEntity.fraEntity(),
             forrigeBehandlingsstatus = forrigeBehandlingsstatus,
-            klokke = klokke,
         )
     }
 }

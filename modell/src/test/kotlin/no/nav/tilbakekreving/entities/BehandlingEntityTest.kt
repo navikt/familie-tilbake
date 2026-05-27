@@ -1,3 +1,4 @@
+
 package no.nav.tilbakekreving.entities
 
 import io.kotest.matchers.shouldBe
@@ -15,7 +16,9 @@ import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
+import no.nav.tilbakekreving.lesContext
 import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.systemContext
 import no.nav.tilbakekreving.tilstand.TilBehandling
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -58,11 +61,11 @@ class BehandlingEntityTest {
 
         val behandlingEtterLagring = behandlingFørLagring
             .tilEntity("not_needed")
-            .fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk, SystemKlokke)
-        behandlingEtterLagring.tilFrontendDto(TilBehandling, behandler, true) shouldBe behandlingFørLagring.tilFrontendDto(TilBehandling, behandler, true)
+            .fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
+        behandlingEtterLagring.tilFrontendDto(TilBehandling, systemContext(), true) shouldBe behandlingFørLagring.tilFrontendDto(TilBehandling, lesContext(), true)
 
         val observatør = BehovObservatørOppsamler()
-        behandlingEtterLagring.trengerIverksettelse(observatør, Ytelse.Tilleggsstønad, Aktør.Person("20046912345"))
+        behandlingEtterLagring.trengerIverksettelse(systemContext(behovObservatør = observatør), Ytelse.Tilleggsstønad, Aktør.Person("20046912345"))
 
         val behov = observatør.behovListe.single().shouldBeInstanceOf<IverksettelseBehov>()
         behov.kravgrunnlagId shouldBe kravgrunnlag.entry.kravgrunnlagId

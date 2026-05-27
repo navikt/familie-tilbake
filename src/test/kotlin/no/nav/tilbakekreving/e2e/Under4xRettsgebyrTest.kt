@@ -19,6 +19,7 @@ import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.saksbehandlerContext
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.test.over4Rettsgebyr
 import no.nav.tilbakekreving.test.prosentReduksjon
@@ -155,7 +156,7 @@ class Under4xRettsgebyrTest : TilbakekrevingE2EBase() {
             ),
         )
 
-        val vilkårsvurderingDto = behandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto()
+        val vilkårsvurderingDto = behandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext())
         vilkårsvurderingDto.perioder.single().vilkårsvurderingsresultatInfo?.aktsomhet?.unnlates4Rettsgebyr shouldBe SkalUnnlates.OVER_4_RETTSGEBYR
     }
 
@@ -214,7 +215,7 @@ class Under4xRettsgebyrTest : TilbakekrevingE2EBase() {
             ),
         )
 
-        val vilkårsvurderingDto = behandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto()
+        val vilkårsvurderingDto = behandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext())
         vilkårsvurderingDto.perioder.single().vilkårsvurderingsresultatInfo?.aktsomhet?.unnlates4Rettsgebyr shouldBe SkalUnnlates.OVER_4_RETTSGEBYR
         vilkårsvurderingDto.perioder.single().vilkårsvurderingsresultatInfo?.aktsomhet?.særligeGrunnerTilReduksjon shouldBe true
         vilkårsvurderingDto.perioder.single().vilkårsvurderingsresultatInfo?.aktsomhet?.andelTilbakekreves shouldBe 50.prosent
@@ -262,7 +263,7 @@ class Under4xRettsgebyrTest : TilbakekrevingE2EBase() {
             ),
         )
 
-        val vilkårsvurderingDto = behandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto()
+        val vilkårsvurderingDto = behandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext())
         vilkårsvurderingDto.perioder.single().vilkårsvurderingsresultatInfo?.aktsomhet?.unnlates4Rettsgebyr shouldBe SkalUnnlates.OVER_4_RETTSGEBYR
         vilkårsvurderingDto.perioder.single().vilkårsvurderingsresultatInfo?.aktsomhet?.særligeGrunnerTilReduksjon shouldBe true
         vilkårsvurderingDto.perioder.single().vilkårsvurderingsresultatInfo?.aktsomhet?.andelTilbakekreves shouldBe 50.prosent

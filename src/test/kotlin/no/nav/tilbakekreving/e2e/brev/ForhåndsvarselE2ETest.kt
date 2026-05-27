@@ -254,7 +254,9 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
         val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
         tilbakekreving.brevHistorikk.sisteVarselbrev() shouldBe null
 
-        behandlingApiController.behandlingSendVarselbrev(tilbakekreving.nåværendeBehandlingId(), SendForhaandsvarselDto("Tekst fra saksbehandler"))
+        somSaksbehandler("Z9999999") {
+            behandlingApiController.behandlingSendVarselbrev(tilbakekreving.nåværendeBehandlingId(), SendForhaandsvarselDto("Tekst fra saksbehandler"))
+        }
         val tilbakekrevingEtterVarselbrev = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
         tilbakekrevingEtterVarselbrev!!.brevHistorikk.sisteVarselbrev() shouldNotBeNull {
             journalpostId shouldBe "-1"
@@ -275,7 +277,9 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
     fun `forhåndsvarsel response er ForhaandsvarselErSendtDto når forhåndsvarsel er sendt`() {
         val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
 
-        behandlingApiController.behandlingSendVarselbrev(tilbakekreving.nåværendeBehandlingId(), SendForhaandsvarselDto("Tekst fra saksbehandler"))
+        somSaksbehandler("Z9999999") {
+            behandlingApiController.behandlingSendVarselbrev(tilbakekreving.nåværendeBehandlingId(), SendForhaandsvarselDto("Tekst fra saksbehandler"))
+        }
 
         val forhåndsvarselResponse = behandlingApiController.behandlingForhandsvarsel(tilbakekreving.nåværendeBehandlingId()).body
         forhåndsvarselResponse.shouldNotBeNull().forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselErSendtDto> {
@@ -287,7 +291,9 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
     fun `brukeruttalelse er IKKE_STARTET når forhåndsvarsel er sendt men uttalelse ikke er behandlet`() {
         val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
 
-        behandlingApiController.behandlingSendVarselbrev(tilbakekreving.nåværendeBehandlingId(), SendForhaandsvarselDto("Tekst fra saksbehandler"))
+        somSaksbehandler("Z9999999") {
+            behandlingApiController.behandlingSendVarselbrev(tilbakekreving.nåværendeBehandlingId(), SendForhaandsvarselDto("Tekst fra saksbehandler"))
+        }
 
         val forhåndsvarselResponse = behandlingApiController.behandlingForhandsvarsel(tilbakekreving.nåværendeBehandlingId()).body
         forhåndsvarselResponse.shouldNotBeNull().forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselErSendtDto> {
@@ -302,7 +308,9 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
     fun `brukeruttalelse lagres`() {
         val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
 
-        behandlingApiController.behandlingSendVarselbrev(tilbakekreving.nåværendeBehandlingId(), SendForhaandsvarselDto("Tekst fra saksbehandler"))
+        somSaksbehandler("Z9999999") {
+            behandlingApiController.behandlingSendVarselbrev(tilbakekreving.nåværendeBehandlingId(), SendForhaandsvarselDto("Tekst fra saksbehandler"))
+        }
 
         somSaksbehandler("Z9999999") {
             behandlingApiController.behandlingLagreBrukersuttalelse(
@@ -381,7 +389,9 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
     fun `uttalelsesfrist lagres,`() {
         val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
 
-        behandlingApiController.behandlingSendVarselbrev(tilbakekreving.nåværendeBehandlingId(), SendForhaandsvarselDto("Tekst fra saksbehandler"))
+        somSaksbehandler("Z9999999") {
+            behandlingApiController.behandlingSendVarselbrev(tilbakekreving.nåværendeBehandlingId(), SendForhaandsvarselDto("Tekst fra saksbehandler"))
+        }
         somSaksbehandler("Z9999999") {
             behandlingApiController.behandlingUtsettUttalelsesfrist(tilbakekreving.nåværendeBehandlingId(), UpdateUttalelsesfristDto(LocalDate.of(2027, 1, 1), "begrunnelse"))
         }

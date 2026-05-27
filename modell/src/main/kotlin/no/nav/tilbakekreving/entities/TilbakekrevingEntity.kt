@@ -1,16 +1,10 @@
 package no.nav.tilbakekreving.entities
 
-import no.nav.tilbakekreving.FeatureToggles
-import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.BehandlingHistorikk
-import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
-import no.nav.tilbakekreving.behov.BehovObservatør
-import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
-import no.nav.tilbakekreving.endring.EndringObservatør
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.tilstand.Avsluttet
@@ -37,15 +31,8 @@ data class TilbakekrevingEntity(
     val nestePåminnelse: LocalDateTime?,
     val opprettelsesvalg: Opprettelsesvalg,
     val bruker: BrukerEntity?,
-    val loggInnlagEntities: List<LoggInnlagEntity>,
 ) {
-    fun fraEntity(
-        behovObservatør: BehovObservatør,
-        bigQueryService: BigQueryService,
-        endringObservatør: EndringObservatør,
-        features: FeatureToggles,
-        klokke: Klokke,
-    ): Tilbakekreving {
+    fun fraEntity(): Tilbakekreving {
         val kravgrunnlagHistorikk = KravgrunnlagHistorikk(
             historikk = kravgrunnlagHistorikkEntities.map { it.fraEntity() }.toMutableList(),
         )
@@ -62,16 +49,13 @@ data class TilbakekrevingEntity(
                     eksternFagsakBehandlingHistorikk = eksternFagsakBehandlingHistorikk,
                     kravgrunnlagHistorikk = kravgrunnlagHistorikk,
                     brevHistorikk = brevHistorikk,
-                    klokke = klokke,
                 )
             }.toMutableList(),
         )
 
-        val behandlingslogg = Behandlingslogg(loggInnlagEntities.map(LoggInnlagEntity::fraEntity).toMutableList())
-
         val tilbakekreving = Tilbakekreving(
             id = id,
-            eksternFagsak = eksternFagsak.fraEntity(behovObservatør),
+            eksternFagsak = eksternFagsak.fraEntity(),
             behandlingHistorikk = behandlingHistorikk,
             kravgrunnlagHistorikk = kravgrunnlagHistorikk,
             brevHistorikk = brevHistorikk,
@@ -79,7 +63,6 @@ data class TilbakekrevingEntity(
             opprettelsesvalg = opprettelsesvalg,
             nestePåminnelse = nestePåminnelse,
             bruker = bruker?.fraEntity(),
-            behovObservatør = behovObservatør,
             tilstand = when (nåværendeTilstand) {
                 TilbakekrevingTilstand.START -> Start
                 TilbakekrevingTilstand.AVVENTER_KRAVGRUNNLAG -> AvventerKravgrunnlag
@@ -93,11 +76,6 @@ data class TilbakekrevingEntity(
                 TilbakekrevingTilstand.DISTRIUBER_VEDTAK -> DistribuerVedtak
                 TilbakekrevingTilstand.AVSLUTTET -> Avsluttet
             },
-            bigQueryService = bigQueryService,
-            endringObservatør = endringObservatør,
-            features = features,
-            behandlingslogg = behandlingslogg,
-            klokke = klokke,
         )
 
         return tilbakekreving

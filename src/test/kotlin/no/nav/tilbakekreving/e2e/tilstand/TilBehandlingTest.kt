@@ -19,6 +19,7 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.saksbehandlerContext
 import no.nav.tilbakekreving.test.januar
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -43,7 +44,7 @@ class TilBehandlingTest : TilbakekrevingE2EBase() {
 
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
 
-        tilbakekreving(behandlingId).tilFrontendDto().behandlinger.single().status shouldBe Behandlingsstatus.UTREDES
+        tilbakekreving(behandlingId).tilFrontendDto(saksbehandlerContext().klokke).behandlinger.single().status shouldBe Behandlingsstatus.UTREDES
         fagsystemIntegrasjonService.håndter(
             Ytelse.Tilleggsstønad,
             FagsysteminfoSvarHendelse(
@@ -73,10 +74,10 @@ class TilBehandlingTest : TilbakekrevingE2EBase() {
         tilbakekreving.hentBehandling(behandlingId).faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).feilutbetaltePerioder.map { it.periode } shouldBe listOf(
             1.januar(2021) til 31.januar(2021),
         )
-        tilbakekreving.hentBehandling(behandlingId).foreldelsestegDto.tilFrontendDto().foreldetPerioder.map { it.periode } shouldBe listOf(
+        tilbakekreving.hentBehandling(behandlingId).foreldelsestegDto.tilFrontendDto(saksbehandlerContext()).foreldetPerioder.map { it.periode } shouldBe listOf(
             1.januar(2021) til 31.januar(2021),
         )
-        tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto().perioder.map { it.periode } shouldBe listOf(
+        tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext()).perioder.map { it.periode } shouldBe listOf(
             1.januar(2021) til 31.januar(2021),
         )
     }
@@ -94,7 +95,7 @@ class TilBehandlingTest : TilbakekrevingE2EBase() {
 
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
 
-        tilbakekreving(behandlingId).tilFrontendDto().behandlinger.single().status shouldBe Behandlingsstatus.UTREDES
+        tilbakekreving(behandlingId).tilFrontendDto(saksbehandlerContext().klokke).behandlinger.single().status shouldBe Behandlingsstatus.UTREDES
         fagsystemIntegrasjonService.håndter(
             Ytelse.Tilleggsstønad,
             FagsysteminfoSvarHendelse(
@@ -128,10 +129,10 @@ class TilBehandlingTest : TilbakekrevingE2EBase() {
         tilbakekreving.hentBehandling(behandlingId).faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).feilutbetaltePerioder.map { it.periode } shouldBe listOf(
             1.januar(2021) til 31.januar(2021),
         )
-        tilbakekreving.hentBehandling(behandlingId).foreldelsestegDto.tilFrontendDto().foreldetPerioder.map { it.periode } shouldBe listOf(
+        tilbakekreving.hentBehandling(behandlingId).foreldelsestegDto.tilFrontendDto(saksbehandlerContext()).foreldetPerioder.map { it.periode } shouldBe listOf(
             1.januar(2021) til 31.januar(2021),
         )
-        tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto().perioder.map { it.periode } shouldBe listOf(
+        tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext()).perioder.map { it.periode } shouldBe listOf(
             1.januar(2021) til 31.januar(2021),
         )
     }

@@ -12,7 +12,9 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatDto as
 
 interface BehandlingLeseoperasjoner {
     val foreldelsestegDto: FrontendDto<VurdertForeldelseDto>
+
     val vilkårsvurderingsstegDto: FrontendDto<VurdertVilkårsvurderingDto>
+
     val fatteVedtakStegDto: FrontendDto<TotrinnsvurderingDto>
 
     fun faktastegFrontendDto(

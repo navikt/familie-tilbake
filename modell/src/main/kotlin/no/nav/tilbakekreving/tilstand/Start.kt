@@ -1,5 +1,7 @@
 package no.nav.tilbakekreving.tilstand
 
+import no.nav.tilbakekreving.Klokke
+import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.Behandling
@@ -13,18 +15,19 @@ object Start : Tilstand {
     override val tidTilPåminnelse: Duration? = Duration.ofHours(1)
     override val tilbakekrevingTilstand: TilbakekrevingTilstand = TilbakekrevingTilstand.START
 
-    override fun behandlingsstatus(behandling: Behandling): BehandlingsstatusModell = BehandlingsstatusModell.OPPRETTET
+    override fun behandlingsstatus(behandling: Behandling, klokke: Klokke): BehandlingsstatusModell = BehandlingsstatusModell.OPPRETTET
 
-    override fun entering(tilbakekreving: Tilbakekreving) {}
+    override fun entering(tilbakekreving: Tilbakekreving, sideeffektContext: SideeffektContext) {}
 
-    override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse) {}
+    override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse, sideeffektContext: SideeffektContext) {}
 
     override fun håndter(
         tilbakekreving: Tilbakekreving,
         hendelse: OpprettTilbakekrevingHendelse,
+        sideeffektContext: SideeffektContext,
     ) {
         when (hendelse.opprettelsesvalg) {
-            Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL -> tilbakekreving.byttTilstand(AvventerKravgrunnlag)
+            Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL -> tilbakekreving.byttTilstand(AvventerKravgrunnlag, sideeffektContext)
         }
     }
 }

@@ -1,5 +1,4 @@
 package no.nav.tilbakekreving.e2e.ytelser
-
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.inspectors.forOne
 import io.kotest.inspectors.forSingle
@@ -26,7 +25,7 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
-import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.saksbehandlerContext
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.util.kroner
 import org.junit.jupiter.api.Test
@@ -77,7 +76,7 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
 
         val frontendDto = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId)
             .shouldNotBeNull()
-            .tilFrontendDto()
+            .tilFrontendDto(saksbehandlerContext().klokke)
         frontendDto.behandlinger shouldHaveSize 1
         frontendDto.behandlinger.single().status shouldBe Behandlingsstatus.UTREDES
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
@@ -106,7 +105,7 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
             stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(1.januar(2021) til 1.januar(2021)),
         )
 
-        behandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto().perioder[0].foreldet shouldBe false
+        behandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext()).perioder[0].foreldet shouldBe false
 
         tilbakekreving(behandlingId) kanBehandle Behandlingssteg.VILKÅRSVURDERING
         tilbakekreving(behandlingId) avventerBehandling Behandlingssteg.FORESLÅ_VEDTAK
@@ -270,13 +269,13 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagForeslåVedtakVurdering(),
         )
-        tilbakekreving(behandlingId).frontendDtoForBehandling(behandlingId, Behandler.Saksbehandler("Z999999"), true).status shouldBe Behandlingsstatus.FATTER_VEDTAK
+        tilbakekreving(behandlingId).frontendDtoForBehandling(behandlingId, saksbehandlerContext(), true).status shouldBe Behandlingsstatus.FATTER_VEDTAK
         utførSteg(
             ident = "Z111111",
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagIkkeGodkjennVedtakVurdering(),
         )
-        tilbakekreving(behandlingId).frontendDtoForBehandling(behandlingId, Behandler.Saksbehandler("Z999999"), true).status shouldBe Behandlingsstatus.UTREDES
+        tilbakekreving(behandlingId).frontendDtoForBehandling(behandlingId, saksbehandlerContext(), true).status shouldBe Behandlingsstatus.UTREDES
 
         lagreUttalelse(behandlingId)
 
@@ -306,7 +305,7 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagGodkjennVedtakVurdering(),
         )
-        tilbakekreving(behandlingId).frontendDtoForBehandling(behandlingId, Behandler.Saksbehandler("Z999999"), true).status shouldBe Behandlingsstatus.AVSLUTTET
+        tilbakekreving(behandlingId).frontendDtoForBehandling(behandlingId, saksbehandlerContext(), true).status shouldBe Behandlingsstatus.AVSLUTTET
     }
 
     companion object {

@@ -7,6 +7,7 @@ import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.SærligeGrunner
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.UtvidetVilkårsresultat
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.VedtakPeriode
 import no.nav.familie.tilbake.kontrakter.Ressurs
+import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.api.v1.dto.AktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
@@ -38,6 +39,7 @@ import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.saksbehandlerContext
 import no.nav.tilbakekreving.test.februar
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.util.kroner
@@ -237,7 +239,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         )
 
         val tilbakekreving = tilbakekreving(behandlingId)
-        val vilkårsvurderingFrontendDto = tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto()
+        val vilkårsvurderingFrontendDto = tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext())
         vilkårsvurderingFrontendDto.perioder.size shouldBe 1
         vilkårsvurderingFrontendDto.perioder.single().begrunnelse shouldBe "Jepp"
         vilkårsvurderingFrontendDto.perioder.single().vilkårsvurderingsresultatInfo?.godTro?.begrunnelse shouldBe "Japp"
@@ -316,7 +318,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         )
 
         val tilbakekreving = tilbakekreving(behandlingId)
-        val vilkårsvurderingFrontendDto = tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto()
+        val vilkårsvurderingFrontendDto = tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext())
         vilkårsvurderingFrontendDto.perioder.size shouldBe 2
         vilkårsvurderingFrontendDto.perioder[0].begrunnelse shouldBe "Jepp1"
         vilkårsvurderingFrontendDto.perioder[0].vilkårsvurderingsresultatInfo?.godTro?.begrunnelse shouldBe "Japp1"
@@ -378,7 +380,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         )
 
         val tilbakekreving = tilbakekreving(behandlingId)
-        val vilkårsvurderingFrontendDto = tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto()
+        val vilkårsvurderingFrontendDto = tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext())
         vilkårsvurderingFrontendDto.perioder.size shouldBe 1
         vilkårsvurderingFrontendDto.perioder.single().begrunnelse shouldBe "Jepp"
         vilkårsvurderingFrontendDto.perioder.single().vilkårsvurderingsresultatInfo?.aktsomhet?.begrunnelse shouldBe "Japp"
@@ -525,7 +527,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
             )
         }
 
-        val periodeId = tilbakekrevingService.hentTilbakekreving(behandlingId).shouldNotBeNull().tilFeilutbetalingFrontendDto(behandlingId).perioder.single().id
+        val periodeId = tilbakekrevingService.hentTilbakekreving(behandlingId).shouldNotBeNull().tilFeilutbetalingFrontendDto(behandlingId, SystemKlokke).perioder.single().id
         val faktaPerioder = listOf(
             OppdaterFaktaPeriodeDto(
                 id = periodeId,
@@ -571,7 +573,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, årsakTilFeilutbetaling = "original"))
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
 
-        val periodeId = tilbakekrevingService.hentTilbakekreving(behandlingId).shouldNotBeNull().tilFeilutbetalingFrontendDto(behandlingId).perioder.single().id
+        val periodeId = tilbakekrevingService.hentTilbakekreving(behandlingId).shouldNotBeNull().tilFeilutbetalingFrontendDto(behandlingId, SystemKlokke).perioder.single().id
         val faktaPerioder = listOf(
             OppdaterFaktaPeriodeDto(
                 id = periodeId,

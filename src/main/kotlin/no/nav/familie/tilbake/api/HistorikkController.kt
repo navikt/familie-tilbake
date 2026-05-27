@@ -10,7 +10,6 @@ import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.api.v1.dto.HistorikkinnslagDto
 import no.nav.tilbakekreving.behandlingslogg.EkstraInfo
-import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.kontrakter.historikk.Historikkinnslagstype
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
@@ -28,7 +27,6 @@ import java.util.UUID
 class HistorikkController(
     private val historikkService: HistorikkService,
     private val tilgangskontrollService: TilgangskontrollService,
-    private val applicationProperties: ApplicationProperties,
     private val tilbakekrevingService: TilbakekrevingService,
 ) {
     @GetMapping(
@@ -50,7 +48,7 @@ class HistorikkController(
             // Mapper til gammel Dto inntil frontend er klar til å bruke ny endepunkt.
             return Ressurs.success(
                 tilbakekrevingService
-                    .hentHistorikk(tilbakekreving)
+                    .hentHistorikk(tilbakekreving.id)
                     .map { innslag ->
                         val ekstraInfo = innslag.ekstraInfo as Map<*, *>
                         HistorikkinnslagDto(
