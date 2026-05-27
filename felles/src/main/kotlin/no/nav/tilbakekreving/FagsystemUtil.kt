@@ -15,5 +15,6 @@ object FagsystemUtil {
             YtelsestypeDTO.ARBEIDSAVKLARINGSPENGER -> FagsystemDTO.AAP
             YtelsestypeDTO.INFOTRYGD -> FagsystemDTO.IT01
             YtelsestypeDTO.TILTAKSPENGER -> FagsystemDTO.TP
+            YtelsestypeDTO.DAGPENGER -> FagsystemDTO.DP
         }
 }
