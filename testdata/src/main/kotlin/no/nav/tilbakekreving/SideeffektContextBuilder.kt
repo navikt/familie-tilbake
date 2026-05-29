@@ -6,10 +6,28 @@ import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.endring.EndringObservatør
 import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.saksbehandler.Behandler
+import java.util.EnumMap
 
-private val ansvarligSaksbehandler = Behandler.Saksbehandler("Z999999")
-private val ansvarligBeslutter = Behandler.Saksbehandler("Z111111")
+val ansvarligSaksbehandler = Behandler.Saksbehandler("Z999999")
+val ansvarligBeslutter = Behandler.Saksbehandler("Z111111")
+
+fun defaultFeatures(
+    featureOverrides: Array<Pair<Toggle, Boolean>> = emptyArray(),
+    fagsystemToggleOverrides: Array<Pair<FagsystemToggle, Boolean>> = emptyArray(),
+): FeatureToggles = FeatureToggles(
+    overrides = EnumMap<Toggle, Boolean>(Toggle::class.java).apply {
+        putAll(featureOverrides)
+    },
+    fagsystemToggles = EnumMap<FagsystemDTO, EnumMap<FagsystemToggle, Boolean>>(
+        FagsystemDTO.entries.associateWith {
+            EnumMap<FagsystemToggle, Boolean>(FagsystemToggle::class.java).apply {
+                putAll(fagsystemToggleOverrides.toMap())
+            }
+        },
+    ),
+)
 
 fun saksbehandlerContext(
     endringObservatør: EndringObservatør = EndringObservatørOppsamler(),
@@ -44,4 +62,6 @@ fun systemContext(
     behandlingslogg: Behandlingslogg = Behandlingslogg(mutableListOf()),
 ) = SideeffektContext(Behandler.Vedtaksløsning, endringObservatør, behovObservatør, BigQueryServiceStub(), features, klokke, behandlingslogg)
 
-fun lesContext() = LesContext(ansvarligSaksbehandler, defaultFeatures(), SystemKlokke)
+fun lesContext(
+    klokke: Klokke = SystemKlokke,
+) = LesContext(ansvarligSaksbehandler, defaultFeatures(), klokke)
