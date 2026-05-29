@@ -140,11 +140,10 @@ class BehandlingController(
                 auditLoggerEvent = AuditLoggerEvent.ACCESS,
                 handling = "Henter tilbakekrevingsbehandling",
             )
-            val behandler = ContextService.hentBehandler(SecureLog.Context.fra(tilbakekreving))
             return Ressurs.success(
                 tilbakekreving.frontendDtoForBehandling(
                     behandlingId,
-                    tilbakekrevingService.lesecontext(behandler),
+                    tilbakekrevingService.lesecontext(),
                     rolle == Behandlerrolle.BESLUTTER,
                 ),
             )

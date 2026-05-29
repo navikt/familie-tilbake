@@ -50,13 +50,15 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
     fun `forhåndsvarsel sendes og lagres riktig i DB`() {
         val behandlingId = hentBehandlingId()
         val tilbakekrevingFørForhåndsvarsel = tilbakekreving(behandlingId)
-        documentController.bestillBrev(
-            BestillBrevDto(
-                behandlingId = behandlingId,
-                brevmalkode = Dokumentmalstype.VARSEL,
-                fritekst = "Tekst fra saksbehandler",
-            ),
-        )
+        somSaksbehandler("Z999999") {
+            documentController.bestillBrev(
+                BestillBrevDto(
+                    behandlingId = behandlingId,
+                    brevmalkode = Dokumentmalstype.VARSEL,
+                    fritekst = "Tekst fra saksbehandler",
+                ),
+            )
+        }
         val tilbakekrevingEtterForhåndsvarsel = tilbakekreving(behandlingId)
 
         tilbakekrevingFørForhåndsvarsel.brevHistorikk.sisteVarselbrev().shouldBeNull()
@@ -174,7 +176,9 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
             }
         }
 
-        documentController.bestillBrev(BestillBrevDto(behandlingId, Dokumentmalstype.VARSEL, "TEST"))
+        somSaksbehandler("Z999999") {
+            documentController.bestillBrev(BestillBrevDto(behandlingId, Dokumentmalstype.VARSEL, "TEST"))
+        }
         somSaksbehandler("Z999999") {
             documentController.lagreBrukeruttalelse(behandlingId, hentBrukerUttalelseDto(HarBrukerUttaltSeg.JA_ETTER_FORHÅNDSVARSEL, LocalDate.of(2025, 12, 2)))
         }

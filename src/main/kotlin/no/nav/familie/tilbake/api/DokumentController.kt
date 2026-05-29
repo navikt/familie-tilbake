@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.api
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
 import no.nav.familie.tilbake.behandling.LagreUtkastVedtaksbrevService
-import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.dokumentbestilling.DokumentbehandlingService
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.HenleggelsesbrevService
 import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevService
@@ -191,8 +190,6 @@ class DokumentController(
     ): Ressurs<Nothing?> {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
         if (tilbakekreving != null) {
-            val logContext = SecureLog.Context.fra(tilbakekreving)
-            val saksbehandler = ContextService.hentBehandler(logContext)
             tilgangskontrollService.validerTilgangTilbakekreving(
                 tilbakekreving = tilbakekreving,
                 behandlingId = behandlingId,
@@ -200,7 +197,7 @@ class DokumentController(
                 auditLoggerEvent = AuditLoggerEvent.ACCESS,
                 handling = "Utsette frist på uttalelsen",
             )
-            tilbakekrevingService.hentTilbakekreving(behandlingId, saksbehandler) { tilbakekreving, context ->
+            tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving, context ->
                 forhåndsvarselService.utsettUttalelseFrist(behandlingId, tilbakekreving, dto, context)
             }
             return Ressurs.success(null)

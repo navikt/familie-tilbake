@@ -53,7 +53,9 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
     @Test
     fun `henter tekster til varselbrev når det skal sendes forhåndsvarsel`() {
         val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
-        val tekster = dokumentController.hentForhåndsvarselTekst(tilbakekreving.nåværendeBehandlingId())
+        val tekster = somSaksbehandler("Z999999") {
+            dokumentController.hentForhåndsvarselTekst(tilbakekreving.nåværendeBehandlingId())
+        }
 
         tekster.data.shouldNotBeNull()
         tekster.data.avsnitter.shouldNotBeEmpty()
@@ -121,7 +123,9 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
         )
 
         tilbakekreving.brevHistorikk.sisteVarselbrev() shouldBe null
-        dokumentController.bestillBrev(bestillBrevDto)
+        somSaksbehandler("Z999999") {
+            dokumentController.bestillBrev(bestillBrevDto)
+        }
 
         val tilbakekrevingEtterVarselbrev = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
         tilbakekrevingEtterVarselbrev!!.brevHistorikk.sisteVarselbrev() shouldNotBeNull {
@@ -140,7 +144,9 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             brevmalkode = Dokumentmalstype.VARSEL,
             fritekst = "Tekst fra saksbehandler",
         )
-        dokumentController.bestillBrev(bestillBrevDto)
+        somSaksbehandler("Z999999") {
+            dokumentController.bestillBrev(bestillBrevDto)
+        }
 
         somSaksbehandler("Z999999") {
             dokumentController.lagreBrukeruttalelse(tilbakekreving.nåværendeBehandlingId(), case.input)
@@ -168,7 +174,9 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             brevmalkode = Dokumentmalstype.VARSEL,
             fritekst = "Tekst fra saksbehandler",
         )
-        dokumentController.bestillBrev(bestillBrevDto)
+        somSaksbehandler("Z999999") {
+            dokumentController.bestillBrev(bestillBrevDto)
+        }
 
         shouldThrow<Exception> {
             somSaksbehandler("Z999999") {
@@ -205,7 +213,9 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             brevmalkode = Dokumentmalstype.VARSEL,
             fritekst = "Tekst fra saksbehandler",
         )
-        dokumentController.bestillBrev(bestillBrevDto)
+        somSaksbehandler("Z999999") {
+            dokumentController.bestillBrev(bestillBrevDto)
+        }
 
         val førsteFrist = FristUtsettelseDto(
             LocalDate.of(2025, 11, 15),
