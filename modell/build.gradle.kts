@@ -4,6 +4,6 @@ dependencies {
     api(project(":kontrakter-frontend:dtoer"))
     testImplementation(project(":testdata"))
     api(project(":felles"))
-    api("com.fasterxml.jackson.core:jackson-databind:2.21.3")
+    api("com.fasterxml.jackson.core:jackson-databind:2.22.0")
     implementation("io.ktor:ktor-http:3.5.0")
 }

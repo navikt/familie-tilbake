@@ -9,5 +9,5 @@ repositories {
 }
 
 dependencies {
-    api("com.fasterxml.jackson.core:jackson-annotations:2.21")
+    api("com.fasterxml.jackson.core:jackson-annotations:2.22")
 }

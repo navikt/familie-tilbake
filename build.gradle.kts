@@ -246,7 +246,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:6.1.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    testImplementation("io.mockk:mockk-jvm:1.14.9")
+    testImplementation("io.mockk:mockk-jvm:1.14.11")
     testImplementation("io.kotest:kotest-assertions-core-jvm:6.1.11")
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
 
