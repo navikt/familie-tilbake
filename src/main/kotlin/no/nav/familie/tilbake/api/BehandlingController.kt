@@ -18,6 +18,7 @@ import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.UtenforScope
+import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
 import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingPåVentDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
@@ -145,6 +146,7 @@ class BehandlingController(
                     behandlingId,
                     tilbakekrevingService.lesecontext(),
                     rolle == Behandlerrolle.BESLUTTER,
+                    { rolle.tilBehandlerRolle() },
                 ),
             )
         }
@@ -416,4 +418,12 @@ class BehandlingController(
         behandling: BehandlingDto,
         logContext: SecureLog.Context,
     ): Boolean = ContextService.hentSaksbehandler(logContext) == behandling.ansvarligSaksbehandler
+
+    private fun Behandlerrolle.tilBehandlerRolle(): BehandlerRolle =
+        when (this) {
+            Behandlerrolle.VEILEDER -> BehandlerRolle.VEILEDER
+            Behandlerrolle.SAKSBEHANDLER -> BehandlerRolle.SAKSBEHANDLER
+            Behandlerrolle.BESLUTTER -> BehandlerRolle.BESLUTTER
+            else -> BehandlerRolle.INGEN
+        }
 }

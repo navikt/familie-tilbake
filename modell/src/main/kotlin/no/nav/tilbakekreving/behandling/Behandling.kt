@@ -8,6 +8,7 @@ import no.nav.tilbakekreving.UtenforScope
 import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.aktør.Bruker
 import no.nav.tilbakekreving.aktør.Brukerinfo
+import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
 import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsoppsummeringDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegsinfoDto
@@ -331,7 +332,7 @@ class Behandling internal constructor(
         }
     }
 
-    internal fun tilFrontendDto(tilstand: Tilstand, lesContext: LesContext, kanBeslutte: Boolean): BehandlingDto {
+    internal fun tilFrontendDto(tilstand: Tilstand, lesContext: LesContext, kanBeslutte: Boolean, behandlerRolle: BehandlerRolle): BehandlingDto {
         return BehandlingDto(
             eksternBrukId = id,
             behandlingId = id,
@@ -383,7 +384,16 @@ class Behandling internal constructor(
             begrunnelseForTilbakekreving = eksternFagsakRevurdering.entry.årsakTilFeilutbetaling,
             saksbehandlingstype = Saksbehandlingstype.ORDINÆR,
             erNyModell = true,
+            innloggetSaksbehandlerRolle = utledInnloggetBrukerRolle(lesContext, behandlerRolle),
         )
+    }
+
+    private fun utledInnloggetBrukerRolle(lesContext: LesContext, behandlerRolle: BehandlerRolle): BehandlerRolle {
+        return when {
+            ansvarligSaksbehandler == lesContext.behandler -> BehandlerRolle.SAKSBEHANDLER
+            behandlerRolle == BehandlerRolle.BESLUTTER && !skalBesluttes(lesContext.klokke) -> BehandlerRolle.SAKSBEHANDLER
+            else -> behandlerRolle
+        }
     }
 
     internal fun tilOppsummeringDto(tilstand: Tilstand, klokke: Klokke): BehandlingsoppsummeringDto {

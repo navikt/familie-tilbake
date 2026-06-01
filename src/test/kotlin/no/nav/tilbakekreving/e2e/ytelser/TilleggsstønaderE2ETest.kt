@@ -9,6 +9,7 @@ import no.nav.familie.tilbake.config.PdlClientMock
 import no.nav.familie.tilbake.kravgrunnlag.domain.KodeAksjon
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.UtenforScope
+import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
 import no.nav.tilbakekreving.api.v1.dto.OpprettRevurderingDto
 import no.nav.tilbakekreving.e2e.BehandlingsstegGenerator
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
@@ -269,13 +270,13 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagForeslåVedtakVurdering(),
         )
-        tilbakekreving(behandlingId).frontendDtoForBehandling(behandlingId, saksbehandlerContext(), true).status shouldBe Behandlingsstatus.FATTER_VEDTAK
+        tilbakekreving(behandlingId).frontendDtoForBehandling(behandlingId, saksbehandlerContext(), true, { BehandlerRolle.BESLUTTER }).status shouldBe Behandlingsstatus.FATTER_VEDTAK
         utførSteg(
             ident = "Z111111",
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagIkkeGodkjennVedtakVurdering(),
         )
-        tilbakekreving(behandlingId).frontendDtoForBehandling(behandlingId, saksbehandlerContext(), true).status shouldBe Behandlingsstatus.UTREDES
+        tilbakekreving(behandlingId).frontendDtoForBehandling(behandlingId, saksbehandlerContext(), true, { BehandlerRolle.BESLUTTER }).status shouldBe Behandlingsstatus.UTREDES
 
         lagreUttalelse(behandlingId)
 
@@ -305,7 +306,7 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagGodkjennVedtakVurdering(),
         )
-        tilbakekreving(behandlingId).frontendDtoForBehandling(behandlingId, saksbehandlerContext(), true).status shouldBe Behandlingsstatus.AVSLUTTET
+        tilbakekreving(behandlingId).frontendDtoForBehandling(behandlingId, saksbehandlerContext(), true, { BehandlerRolle.BESLUTTER }).status shouldBe Behandlingsstatus.AVSLUTTET
     }
 
     companion object {

@@ -17,6 +17,7 @@ import no.nav.familie.tilbake.kontrakter.klage.FagsystemType
 import no.nav.familie.tilbake.kontrakter.klage.FagsystemVedtak
 import no.nav.familie.tilbake.kontrakter.saksbehandler.Saksbehandler
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
 import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegsinfoDto
 import no.nav.tilbakekreving.kontrakter.Behandlingsresultatstype.DELVIS_TILBAKEBETALING
@@ -89,6 +90,7 @@ object BehandlingMapper {
         eksternFagsakId: String,
         manuelleBrevmottakere: List<ManuellBrevmottaker>,
         støtterManuelleBrevmottakere: Boolean,
+        innloggetSaksbehandlerRolle: BehandlerRolle,
     ): BehandlingDto {
         val resultat: Behandlingsresultat? =
             behandling.resultater.maxByOrNull {
@@ -127,6 +129,7 @@ object BehandlingMapper {
             begrunnelseForTilbakekreving = behandling.begrunnelseForTilbakekreving,
             saksbehandlingstype = behandling.saksbehandlingstype,
             erNyModell = false,
+            innloggetSaksbehandlerRolle = innloggetSaksbehandlerRolle,
         )
     }
 

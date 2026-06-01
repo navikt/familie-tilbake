@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.e2e
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
 import no.nav.tilbakekreving.Tilbakekreving
+import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
@@ -45,7 +46,7 @@ class FrontendE2ETest {
         tilbakekreving.håndter(fagsysteminfoHendelse(), systemContext())
         tilbakekreving.håndter(brukerinfoHendelse(), systemContext())
 
-        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true).status shouldBe Behandlingsstatus.UTREDES
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true, { BehandlerRolle.BESLUTTER }).status shouldBe Behandlingsstatus.UTREDES
 
         tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), faktastegVurdering())
         tilbakekreving.sendVarselbrev(
@@ -75,13 +76,13 @@ class FrontendE2ETest {
 
         tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
         tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
-        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true).status shouldBe Behandlingsstatus.UTREDES
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true, { BehandlerRolle.BESLUTTER }).status shouldBe Behandlingsstatus.UTREDES
 
         tilbakekreving.håndterForeslåVedtak(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext())
-        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true).status shouldBe Behandlingsstatus.FATTER_VEDTAK
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true, { BehandlerRolle.BESLUTTER }).status shouldBe Behandlingsstatus.FATTER_VEDTAK
 
         tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), beslutterContext(), godkjenning())
-        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true).status shouldBe Behandlingsstatus.IVERKSETTER_VEDTAK
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true, { BehandlerRolle.BESLUTTER }).status shouldBe Behandlingsstatus.IVERKSETTER_VEDTAK
 
         tilbakekreving.håndter(
             IverksettelseHendelse(
@@ -91,7 +92,7 @@ class FrontendE2ETest {
             ),
             systemContext(behovObservatør = behovOppsamler),
         )
-        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true).status shouldBe Behandlingsstatus.JOURNALFØR_VEDTAK
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true, { BehandlerRolle.BESLUTTER }).status shouldBe Behandlingsstatus.JOURNALFØR_VEDTAK
         tilbakekreving.håndter(
             JournalføringHendelse(
                 brevId = (behovOppsamler.behovListe.last() as VedtaksbrevJournalføringBehov).brevId,
@@ -102,7 +103,7 @@ class FrontendE2ETest {
             ),
             systemContext(behovObservatør = behovOppsamler),
         )
-        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true).status shouldBe Behandlingsstatus.DISTRIUBER_VEDTAK
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true, { BehandlerRolle.BESLUTTER }).status shouldBe Behandlingsstatus.DISTRIUBER_VEDTAK
         tilbakekreving.håndter(
             DistribusjonHendelse(
                 behandlingId = UUID.randomUUID(),
@@ -113,6 +114,6 @@ class FrontendE2ETest {
             ),
             systemContext(),
         )
-        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true).status shouldBe Behandlingsstatus.AVSLUTTET
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true, { BehandlerRolle.BESLUTTER }).status shouldBe Behandlingsstatus.AVSLUTTET
     }
 }

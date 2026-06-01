@@ -44,6 +44,7 @@ data class BehandlingDto(
     val begrunnelseForTilbakekreving: String?,
     val saksbehandlingstype: Saksbehandlingstype,
     val erNyModell: Boolean,
+    val innloggetSaksbehandlerRolle: BehandlerRolle,
 )
 
 data class BehandlingsstegsinfoDto(

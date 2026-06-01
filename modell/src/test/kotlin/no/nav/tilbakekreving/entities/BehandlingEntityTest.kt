@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.aktør.Aktør
+import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.Enhet
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
@@ -62,7 +63,7 @@ class BehandlingEntityTest {
         val behandlingEtterLagring = behandlingFørLagring
             .tilEntity("not_needed")
             .fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
-        behandlingEtterLagring.tilFrontendDto(TilBehandling, systemContext(), true) shouldBe behandlingFørLagring.tilFrontendDto(TilBehandling, lesContext(), true)
+        behandlingEtterLagring.tilFrontendDto(TilBehandling, systemContext(), true, BehandlerRolle.BESLUTTER) shouldBe behandlingFørLagring.tilFrontendDto(TilBehandling, lesContext(), true, BehandlerRolle.BESLUTTER)
 
         val observatør = BehovObservatørOppsamler()
         behandlingEtterLagring.trengerIverksettelse(systemContext(behovObservatør = observatør), Ytelse.Tilleggsstønad, Aktør.Person("20046912345"))
