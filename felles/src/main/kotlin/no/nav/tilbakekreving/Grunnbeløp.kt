@@ -31,6 +31,12 @@ private val grunnbeløpsperioder: List<Grunnbeløp> =
     listOf(
         Grunnbeløp(
             // Setter ikke MAX for å unngå at grunnbeløpet ikke er oppdatert for neste periode
+            periode = Månedsperiode("2026-05" to "2027-04"),
+            grunnbeløp = 136_549.toBigDecimal(),
+            perMnd = 11_379.toBigDecimal(),
+            gjennomsnittPerÅr = 134_419.toBigDecimal(),
+        ),
+        Grunnbeløp(
             periode = Månedsperiode("2025-05" to "2026-04"),
             grunnbeløp = 130_160.toBigDecimal(),
             perMnd = 10_847.toBigDecimal(),
