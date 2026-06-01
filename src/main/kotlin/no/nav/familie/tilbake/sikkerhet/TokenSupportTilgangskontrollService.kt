@@ -12,7 +12,6 @@ import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.exceptionhandler.ForbiddenError
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
-import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.log.SecureLog
@@ -24,6 +23,7 @@ import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.auth.Authentication
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.tilbakekreving.integrasjoner.CallContext
 import no.tilbakekreving.integrasjoner.feil.UnexpectedResponseException
 import no.tilbakekreving.integrasjoner.persontilgang.Persontilgang
@@ -41,7 +41,6 @@ class TokenSupportTilgangskontrollService(
     private val kravgrunnlagRepository: KravgrunnlagRepository,
     private val auditLogger: AuditLogger,
     private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
-    private val integrasjonerClient: IntegrasjonerClient,
     private val persontilgangService: PersontilgangService,
     private val tokenValidationContextHolder: TokenValidationContextHolder,
 ) : TilgangskontrollService {
@@ -49,23 +48,20 @@ class TokenSupportTilgangskontrollService(
 
     override fun validerTilgangTilbakekreving(
         tilbakekreving: Tilbakekreving,
-        behandlingId: UUID?,
-        minimumBehandlerrolle: Behandlerrolle,
-        auditLoggerEvent: AuditLoggerEvent,
-        handling: String,
+        valideringContext: ValideringContext,
+        behandler: Behandler,
     ): Behandlerrolle {
-        val saksbehandler = ContextService.hentSaksbehandler(SecureLog.Context.tom())
+        val logContext = SecureLog.Context.fra(tilbakekreving)
         val fagsystem = tilbakekreving.tilFrontendDto(SystemKlokke).fagsystem
-        val logContext = SecureLog.Context.medBehandling(tilbakekreving.eksternFagsak.eksternId, behandlingId?.toString())
         val dto = tilbakekreving.tilFrontendDto(SystemKlokke)
         return validate(
             fagsystem = fagsystem,
-            minimumBehandlerrolle = minimumBehandlerrolle,
+            minimumBehandlerrolle = valideringContext.minimumBehandlerrolle,
             ident = dto.bruker.personIdent,
             eksternFagsakId = dto.eksternFagsakId,
-            handling = handling,
-            saksbehandler = saksbehandler,
-            auditLoggerEvent = auditLoggerEvent,
+            handling = valideringContext.handling,
+            saksbehandler = behandler.ident,
+            auditLoggerEvent = valideringContext.auditLoggerEvent,
             authentication = ContextService.hentInnloggetBruker(),
             logContext = logContext,
         )

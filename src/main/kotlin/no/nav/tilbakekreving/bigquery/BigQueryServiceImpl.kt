@@ -8,7 +8,6 @@ import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.tilbakekreving.api.v1.dto.BigQueryBehandlingDataDto
 import no.nav.tilbakekreving.config.ApplicationProperties
 import org.springframework.context.annotation.Profile
-import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.time.format.DateTimeFormatter
@@ -16,7 +15,6 @@ import java.time.format.DateTimeFormatter
 @Service
 @Profile("dev", "prod")
 class BigQueryServiceImpl(
-    private val environment: Environment,
     private val applicationProperties: ApplicationProperties,
     private val bigQuery: BigQuery,
 ) : BigQueryService {

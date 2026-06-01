@@ -3,7 +3,7 @@ package no.nav.tilbakekreving.kravgrunnlag
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.config.ApplicationProperties
-import no.nav.tilbakekreving.repository.TilbakekrevingRepository
+import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -25,8 +25,8 @@ class KravgrunnlagMediator(
                 }
             } else {
                 val fagsystem = KravgrunnlagMapper.ytelseFor(kravgrunnlag).tilFagsystemDTO()
-                tilbakekrevingService.hentOgLagreTilbakekreving(Behandler.Vedtaksløsning, TilbakekrevingRepository.FindTilbakekrevingStrategy.EksternFagsakId(kravgrunnlag.fagsystemId, fagsystem)) { tilbakekreving, context ->
-                    tilbakekreving.håndter(kravgrunnlagHendelse, context)
+                tilbakekrevingService.hentOgLagreTilbakekreving(TilbakekrevingFilter.fagsak(kravgrunnlag.fagsystemId, fagsystem)) { tilbakekreving, context ->
+                    tilbakekreving.håndter(kravgrunnlagHendelse, context(Behandler.Vedtaksløsning))
                 }
             }
         }

@@ -74,7 +74,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
 
-        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId)
 
         somSaksbehandler(ansvarligSaksbehandler) {
@@ -183,7 +183,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
 
-        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
         somSaksbehandler(ansvarligSaksbehandler) {
             behandlingApiController.behandlingOppdaterFakta(
@@ -206,7 +206,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
 
-        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId)
 
         somSaksbehandler(ansvarligSaksbehandler) {
@@ -263,7 +263,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
 
-        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId)
 
         somSaksbehandler(ansvarligSaksbehandler) {
@@ -394,7 +394,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
 
-        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId)
 
         somSaksbehandler(ansvarligSaksbehandler) {
@@ -468,7 +468,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
             ),
         )
 
-        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId)
 
         tilbakekrevVedtak(behandlingId, listOf(1.januar(2021) til 31.januar(2021)))
@@ -499,7 +499,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
             ),
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
-        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
         val oppdagetDato = LocalDate.now()
         somSaksbehandler("Z999999") {
@@ -540,7 +540,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
             ),
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
-        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
         somSaksbehandler("Z999999") {
             behandlingApiController.behandlingOppdaterFakta(
@@ -570,7 +570,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
             ),
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
-        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
         somSaksbehandler("Z999999") {
             behandlingApiController.behandlingFakta(
@@ -583,7 +583,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
             )
         }
 
-        val periodeId = tilbakekrevingService.hentTilbakekreving(behandlingId).shouldNotBeNull().tilFeilutbetalingFrontendDto(behandlingId, SystemKlokke).perioder.single().id
+        val periodeId = tilbakekreving(behandlingId).shouldNotBeNull().tilFeilutbetalingFrontendDto(behandlingId, SystemKlokke).perioder.single().id
         val faktaPerioder = listOf(
             OppdaterFaktaPeriodeDto(
                 id = periodeId,
@@ -627,9 +627,9 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
             ),
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, årsakTilFeilutbetaling = "original"))
-        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
-        val periodeId = tilbakekrevingService.hentTilbakekreving(behandlingId).shouldNotBeNull().tilFeilutbetalingFrontendDto(behandlingId, SystemKlokke).perioder.single().id
+        val periodeId = tilbakekreving(behandlingId).shouldNotBeNull().tilFeilutbetalingFrontendDto(behandlingId, SystemKlokke).perioder.single().id
         val faktaPerioder = listOf(
             OppdaterFaktaPeriodeDto(
                 id = periodeId,
@@ -695,7 +695,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
 
-        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId)
 
         somSaksbehandler(ansvarligSaksbehandler) {

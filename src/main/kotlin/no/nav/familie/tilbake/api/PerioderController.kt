@@ -10,9 +10,11 @@ import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
+import no.nav.familie.tilbake.sikkerhet.ValideringContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.kontrakter.ytelse.Tema
+import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -40,15 +42,8 @@ class PerioderController(
     fun erPerioderLike(
         @PathVariable behandlingId: UUID,
     ): Ressurs<Boolean> {
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.HentPerioder)
         if (tilbakekreving != null) {
-            tilgangskontrollService.validerTilgangTilbakekreving(
-                tilbakekreving = tilbakekreving,
-                behandlingId = behandlingId,
-                minimumBehandlerrolle = Behandlerrolle.VEILEDER,
-                auditLoggerEvent = AuditLoggerEvent.ACCESS,
-                handling = "Sjekker om perioder er like - unntatt dato og beløp",
-            )
             return Ressurs.success(tilbakekreving.hentBehandling(behandlingId).harLikePerioder())
         }
         tilgangskontrollService.validerTilgangBehandlingID(
@@ -71,15 +66,8 @@ class PerioderController(
     fun erPerioderSammenslått(
         @PathVariable behandlingId: UUID,
     ): Ressurs<Boolean> {
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.SjekkPerioderSammenslått)
         if (tilbakekreving != null) {
-            tilgangskontrollService.validerTilgangTilbakekreving(
-                tilbakekreving = tilbakekreving,
-                behandlingId = behandlingId,
-                minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-                auditLoggerEvent = AuditLoggerEvent.UPDATE,
-                handling = "Sjekker om perioder er sammenslått",
-            )
             return Ressurs.success(tilbakekreving.hentBehandling(behandlingId).harLikePerioder())
         }
         tilgangskontrollService.validerTilgangBehandlingID(

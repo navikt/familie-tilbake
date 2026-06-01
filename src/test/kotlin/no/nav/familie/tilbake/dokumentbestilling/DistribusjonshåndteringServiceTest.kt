@@ -83,8 +83,6 @@ class DistribusjonshåndteringServiceTest {
         SendHenleggelsesbrevTask(
             henleggelsesbrevService = henleggelsesbrevService,
             behandlingRepository = behandlingRepository,
-            fagsakRepository = fagsakRepository,
-            featureToggleService = featureToggleService,
         )
 
     private val fagsak = Testdata.fagsak()

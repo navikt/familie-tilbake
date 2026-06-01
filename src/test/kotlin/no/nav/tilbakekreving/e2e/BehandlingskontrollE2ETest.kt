@@ -30,7 +30,7 @@ class BehandlingskontrollE2ETest : TilbakekrevingE2EBase() {
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
 
-        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         val ansvarligSaksbehandler = Behandler.Saksbehandler("Z999999")
 
         val dtoFørUtførtFakta = tilbakekreving(behandlingId).frontendDtoForBehandling(behandlingId, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER)

@@ -15,6 +15,7 @@ import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangService
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
+import no.nav.familie.tilbake.sikkerhet.ValideringContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.UtenforScope
@@ -31,6 +32,7 @@ import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kontrakter.OpprettManueltTilbakekrevingRequest
 import no.nav.tilbakekreving.kontrakter.OpprettTilbakekrevingRequest
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
+import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
@@ -108,7 +110,7 @@ class BehandlingController(
         @Valid @RequestBody
         opprettRevurderingDto: OpprettRevurderingDto,
     ): Ressurs<String> {
-        if (tilbakekrevingService.hentTilbakekreving(opprettRevurderingDto.originalBehandlingId) != null) {
+        if (tilbakekrevingService.hentTilbakekreving(TilbakekrevingFilter.behandling(opprettRevurderingDto.originalBehandlingId)) != null) {
             throw ModellFeil.UtenforScopeException(
                 UtenforScope.Revurdering,
                 Sporing("Ukjent", opprettRevurderingDto.originalBehandlingId.toString()),
@@ -132,15 +134,9 @@ class BehandlingController(
     fun hentBehandling(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<BehandlingDto> {
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.HentBehandling)
         if (tilbakekreving != null) {
-            val rolle = tilgangskontrollService.validerTilgangTilbakekreving(
-                tilbakekreving = tilbakekreving,
-                behandlingId = behandlingId,
-                minimumBehandlerrolle = Behandlerrolle.VEILEDER,
-                auditLoggerEvent = AuditLoggerEvent.ACCESS,
-                handling = "Henter tilbakekrevingsbehandling",
-            )
+            val rolle = tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving, ValideringContext.HentBehandling, ContextService.hentBehandler(SecureLog.Context.fra(tilbakekreving)))
             return Ressurs.success(
                 tilbakekreving.frontendDtoForBehandling(
                     behandlingId,
@@ -169,26 +165,18 @@ class BehandlingController(
         @Valid @RequestBody
         behandlingsstegDto: BehandlingsstegDto,
     ): Ressurs<String> {
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
-        if (tilbakekreving != null) {
-            val logContext = SecureLog.Context.fra(tilbakekreving)
-            val saksbehandler = ContextService.hentBehandler(logContext)
-
-            tilgangskontrollService.validerTilgangTilbakekreving(
-                tilbakekreving = tilbakekreving,
-                behandlingId = behandlingId,
-                minimumBehandlerrolle =
-                    if (behandlingsstegDto is BehandlingsstegFatteVedtaksstegDto) {
-                        Behandlerrolle.BESLUTTER
-                    } else {
-                        Behandlerrolle.SAKSBEHANDLER
-                    },
-                auditLoggerEvent = AuditLoggerEvent.UPDATE,
-                handling = "Utfører behandlingens aktiv steg og fortsetter den til neste steg",
-            )
-
-            tilbakekrevingService.utførSteg(behandlingId, saksbehandler, tilbakekreving.id, behandlingsstegDto, logContext)
-            return Ressurs.success("OK")
+        val nyModell = tilbakekrevingService.endreTilbakekreving(
+            filter = TilbakekrevingFilter.behandling(behandlingId),
+            valideringContext = when (behandlingsstegDto) {
+                is BehandlingsstegFatteVedtaksstegDto -> ValideringContext.FatteVedtak
+                else -> ValideringContext.UtførSteg
+            },
+        ) { tilbakekreving, context ->
+            tilbakekrevingService.utførSteg(tilbakekreving, context, behandlingId, behandlingsstegDto)
+            Ressurs.success("OK")
+        }
+        if (nyModell != null) {
+            return nyModell
         }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
@@ -226,15 +214,8 @@ class BehandlingController(
         @Valid @RequestBody
         behandlingPåVentDto: BehandlingPåVentDto,
     ): Ressurs<String> {
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(TilbakekrevingFilter.behandling(behandlingId))
         if (tilbakekreving != null) {
-            tilgangskontrollService.validerTilgangTilbakekreving(
-                tilbakekreving = tilbakekreving,
-                behandlingId = behandlingId,
-                minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-                auditLoggerEvent = AuditLoggerEvent.UPDATE,
-                handling = "Setter saksbehandler behandling på vent eller utvider fristen",
-            )
             throw ModellFeil.UtenforScopeException(UtenforScope.PåVent, tilbakekreving.sporingsinformasjon())
         }
         tilgangskontrollService.validerTilgangBehandlingID(
@@ -255,17 +236,9 @@ class BehandlingController(
     fun taBehandlingAvVent(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<String> {
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(TilbakekrevingFilter.behandling(behandlingId))
         if (tilbakekreving != null) {
-            tilgangskontrollService.validerTilgangTilbakekreving(
-                tilbakekreving = tilbakekreving,
-                behandlingId = behandlingId,
-                minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-                auditLoggerEvent = AuditLoggerEvent.UPDATE,
-                handling = "Saksbehandler tar behandling av vent etter å motta brukerrespons eller dokumentasjon",
-            )
             throw ModellFeil.UtenforScopeException(UtenforScope.PåVent, tilbakekreving.sporingsinformasjon())
-            return Ressurs.success("OK")
         }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
@@ -326,19 +299,12 @@ class BehandlingController(
     fun angreSendTilBeslutter(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<String> {
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
-        if (tilbakekreving != null) {
-            val logContext = SecureLog.Context.fra(tilbakekreving)
-            val saksbehandler = ContextService.hentBehandler(logContext)
-            tilgangskontrollService.validerTilgangTilbakekreving(
-                tilbakekreving = tilbakekreving,
-                behandlingId = behandlingId,
-                minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-                auditLoggerEvent = AuditLoggerEvent.UPDATE,
-                handling = "Saksbehandler angrer på send til beslutter og tar behandling tilbake til saksbehandler",
-            )
-            tilbakekrevingService.trekkTilbakeFraGodkjenning(behandlingId, tilbakekreving.id, saksbehandler)
-            return Ressurs.success("OK")
+        val response = tilbakekrevingService.endreTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.TrekkTilbakeFraGodkjenning) { tilbakekreving, context ->
+            tilbakekreving.håndterTrekkTilbakeFraGodkjenning(behandlingId, context)
+            Ressurs.success("OK")
+        }
+        if (response != null) {
+            return response
         }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
@@ -358,19 +324,12 @@ class BehandlingController(
     fun flyttBehandlingTilFakta(
         @PathVariable behandlingId: UUID,
     ): Ressurs<String> {
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
-        if (tilbakekreving != null) {
-            val logContext = SecureLog.Context.fra(tilbakekreving)
-            val saksbehandler = ContextService.hentBehandler(logContext)
-            tilgangskontrollService.validerTilgangTilbakekreving(
-                tilbakekreving = tilbakekreving,
-                behandlingId = behandlingId,
-                minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-                auditLoggerEvent = AuditLoggerEvent.UPDATE,
-                handling = "Flytter behandling tilbake til Fakta",
-            )
-            tilbakekrevingService.flyttBehandlingTilFakta(behandlingId, tilbakekreving.id, saksbehandler)
-            return Ressurs.success("OK")
+        val response = tilbakekrevingService.endreTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.FlyttBehandlingTilFakta) { tilbakekreving, context ->
+            tilbakekreving.håndterNullstilling(behandlingId, context)
+            Ressurs.success("OK")
+        }
+        if (response != null) {
+            return response
         }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,

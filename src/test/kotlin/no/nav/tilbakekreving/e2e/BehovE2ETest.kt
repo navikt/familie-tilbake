@@ -102,7 +102,7 @@ class BehovE2ETest : TilbakekrevingE2EBase() {
         )
 
         tilbakekreving(FagsystemDTO.TS, fagsystemId)?.frontendDtoForBehandling(
-            behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull(),
+            behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull(),
             sideeffektContext = systemContext(),
             kanBeslutte = false,
             behandlerRolle = BehandlerRolle.BESLUTTER,

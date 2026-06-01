@@ -8,17 +8,13 @@ import no.nav.tilbakekreving.entities.TilbakekrevingEntity
 import no.nav.tilbakekreving.entity.Entity.Companion.get
 import no.nav.tilbakekreving.entity.FieldConverter
 import no.nav.tilbakekreving.entity.TilbakekrevingEntityMapper
-import no.nav.tilbakekreving.fagsystem.Ytelsestype
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
-import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.jdbc.core.RowMapper
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.sql.ResultSet
 import java.time.LocalDateTime
-import java.util.UUID
 
 @Repository
 class TilbakekrevingRepository(
@@ -59,13 +55,13 @@ class TilbakekrevingRepository(
         )
     }
 
-    fun hentTilbakekreving(strategy: FindTilbakekrevingStrategy): TilbakekrevingEntity? {
+    fun hentTilbakekreving(strategy: TilbakekrevingFilter): TilbakekrevingEntity? {
         return modelReadTimer.record<TilbakekrevingEntity?> {
             hentTilbakekrevinger(strategy).firstOrNull()
         }
     }
 
-    fun hentTilbakekrevinger(strategy: FindTilbakekrevingStrategy): List<TilbakekrevingEntity> {
+    fun hentTilbakekrevinger(strategy: TilbakekrevingFilter): List<TilbakekrevingEntity> {
         return strategy.select(jdbcTemplate) { resultSet, index ->
             hentTilbakekrevingEntity(resultSet)
         }
@@ -97,7 +93,7 @@ class TilbakekrevingRepository(
     }
 
     // Denne er inline så den blir inlinet i transactions
-    private inline fun hentForOppdatering(strategy: FindTilbakekrevingStrategy): TilbakekrevingEntity? {
+    private inline fun hentForOppdatering(strategy: TilbakekrevingFilter): TilbakekrevingEntity? {
         return strategy.selectForUpdate(jdbcTemplate) { rs, _ ->
             hentTilbakekrevingEntity(rs)
         }.toList().firstOrNull()
@@ -105,7 +101,7 @@ class TilbakekrevingRepository(
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun hentOgLagreResultat(
-        strategy: FindTilbakekrevingStrategy,
+        strategy: TilbakekrevingFilter,
         callback: (TilbakekrevingEntity, Behandlingslogg) -> TilbakekrevingEntity,
     ) {
         modelWriteTimer.record<Unit> {
@@ -145,88 +141,6 @@ class TilbakekrevingRepository(
             FieldConverter.LocalDateTimeConverter.convert(LocalDateTime.now()),
             FieldConverter.EnumConverter.of<TilbakekrevingTilstand>().convert(tilstand),
         )
-    }
-
-    sealed interface FindTilbakekrevingStrategy {
-        fun select(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity>
-
-        fun selectForUpdate(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity>
-
-        class BehandlingId(val id: UUID) : FindTilbakekrevingStrategy {
-            override fun select(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
-                return jdbcTemplate.query("SELECT * FROM tilbakekreving JOIN tilbakekreving_behandling tb ON tilbakekreving.id=tb.tilbakekreving_id WHERE tb.id=? FOR UPDATE;", mapper, id)
-            }
-
-            override fun selectForUpdate(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
-                return jdbcTemplate.query("SELECT * FROM tilbakekreving JOIN tilbakekreving_behandling tb ON tilbakekreving.id=tb.tilbakekreving_id WHERE tb.id=? FOR UPDATE;", mapper, id)
-            }
-        }
-
-        class EksternFagsakId(private val fagsakId: String, private val fagsystem: FagsystemDTO) : FindTilbakekrevingStrategy {
-            private fun ytelse() = when (fagsystem) {
-                FagsystemDTO.EF -> Ytelsestype.OVERGANGSSTØNAD
-                FagsystemDTO.KONT -> Ytelsestype.KONTANTSTØTTE
-                FagsystemDTO.IT01 -> Ytelsestype.INFOTRYGD
-                FagsystemDTO.BA -> Ytelsestype.BARNETRYGD
-                FagsystemDTO.TS -> Ytelsestype.TILLEGGSSTØNAD
-                FagsystemDTO.AAP -> Ytelsestype.ARBEIDSAVKLARINGSPENGER
-                FagsystemDTO.TP -> Ytelsestype.TILTAKSPENGER
-            }.name
-
-            override fun select(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
-                return jdbcTemplate.query(
-                    "SELECT * FROM tilbakekreving JOIN tilbakekreving_ekstern_fagsak ef ON tilbakekreving.id=ef.tilbakekreving_ref WHERE ef.ekstern_id=? AND ef.ytelse=?;",
-                    mapper,
-                    fagsakId,
-                    ytelse(),
-                )
-            }
-
-            override fun selectForUpdate(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
-                return jdbcTemplate.query(
-                    "SELECT * FROM tilbakekreving JOIN tilbakekreving_ekstern_fagsak ef ON tilbakekreving.id=ef.tilbakekreving_ref WHERE ef.ekstern_id=? AND ef.ytelse=? FOR UPDATE;",
-                    mapper,
-                    fagsakId,
-                    ytelse(),
-                )
-            }
-        }
-
-        class TilbakekrevingId(val id: String) : FindTilbakekrevingStrategy {
-            override fun select(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
-                return jdbcTemplate.query(
-                    "SELECT * FROM tilbakekreving WHERE id=?;",
-                    mapper,
-                    FieldConverter.NumericId.convert(id),
-                )
-            }
-
-            override fun selectForUpdate(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
-                return jdbcTemplate.query(
-                    "SELECT * FROM tilbakekreving WHERE id=? FOR UPDATE;",
-                    mapper,
-                    FieldConverter.NumericId.convert(id),
-                )
-            }
-        }
-
-        object TrengerPåminnelse : FindTilbakekrevingStrategy {
-            override fun select(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
-                return jdbcTemplate.query(
-                    "SELECT * FROM tilbakekreving WHERE neste_påminnelse IS NOT NULL AND neste_påminnelse < ?;",
-                    mapper,
-                    FieldConverter.LocalDateTimeConverter.convert(LocalDateTime.now()),
-                )
-            }
-
-            override fun selectForUpdate(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
-                return jdbcTemplate.query(
-                    "SELECT * FROM tilbakekreving WHERE neste_påminnelse IS NOT NULL AND neste_påminnelse < ? FOR UPDATE;",
-                    mapper,
-                    FieldConverter.LocalDateTimeConverter.convert(LocalDateTime.now()),
-                )
-            }
-        }
     }
 
     data class ForenkletTilstandStatistikk(

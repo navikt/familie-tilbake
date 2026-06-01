@@ -8,6 +8,7 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.hendelse.Påminnelse
+import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.springframework.scheduling.annotation.Scheduled
@@ -26,16 +27,16 @@ class PåminnelseMediator(
 
     @Scheduled(fixedRate = 10, timeUnit = TimeUnit.MINUTES)
     fun påminnSaker() {
-        val tilbakekrevinger = tilbakekrevingRepository.hentTilbakekrevinger(TilbakekrevingRepository.FindTilbakekrevingStrategy.TrengerPåminnelse)
+        val tilbakekrevinger = tilbakekrevingRepository.hentTilbakekrevinger(TilbakekrevingFilter.trengerPåminnelse())
         for (tilbakekrevingEntity in tilbakekrevinger) {
             var logContext = SecureLog.Context.tom()
             try {
-                tilbakekrevinService.hentOgLagreTilbakekreving(Behandler.Vedtaksløsning, TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingEntity.id)) { tilbakekreving, context ->
+                tilbakekrevinService.hentOgLagreTilbakekreving(TilbakekrevingFilter.tilbakekreving(tilbakekrevingEntity.id)) { tilbakekreving, context ->
                     logContext = SecureLog.Context.fra(tilbakekreving)
                     logger.medContext(logContext) {
                         info("Sender påminnelse")
                     }
-                    tilbakekreving.håndter(Påminnelse(LocalDateTime.now()), context)
+                    tilbakekreving.håndter(Påminnelse(LocalDateTime.now()), context(Behandler.Vedtaksløsning))
                 }
             } catch (e: Exception) {
                 logger.medContext(logContext) {

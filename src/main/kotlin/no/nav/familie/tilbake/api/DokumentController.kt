@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.api
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
 import no.nav.familie.tilbake.behandling.LagreUtkastVedtaksbrevService
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.dokumentbestilling.DokumentbehandlingService
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.HenleggelsesbrevService
 import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevService
@@ -12,6 +13,7 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
+import no.nav.familie.tilbake.sikkerhet.ValideringContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.api.v1.dto.BestillBrevDto
@@ -22,11 +24,16 @@ import no.nav.tilbakekreving.api.v1.dto.ForhåndsvisningHenleggelsesbrevDto
 import no.nav.tilbakekreving.api.v1.dto.FristUtsettelseDto
 import no.nav.tilbakekreving.api.v1.dto.FritekstavsnittDto
 import no.nav.tilbakekreving.api.v1.dto.HentForhåndvisningVedtaksbrevPdfDto
+import no.nav.tilbakekreving.api.v1.dto.VarslingsUnntak
+import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
 import no.nav.tilbakekreving.brev.varselbrev.ForhåndsvarselService
 import no.nav.tilbakekreving.brev.varselbrev.Varselbrevtekst
+import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.kontrakter.ForhåndsvisVarselbrevRequest
 import no.nav.tilbakekreving.kontrakter.brev.Dokumentmalstype
 import no.nav.tilbakekreving.pdf.dokumentbestilling.vedtak.Avsnitt
+import no.nav.tilbakekreving.repository.TilbakekrevingFilter
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -55,19 +62,23 @@ class DokumentController(
         @RequestBody @Valid
         bestillBrevDto: BestillBrevDto,
     ): Ressurs<Nothing?> {
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(bestillBrevDto.behandlingId)
-        if (tilbakekreving != null) {
-            tilgangskontrollService.validerTilgangTilbakekreving(
-                tilbakekreving = tilbakekreving,
-                behandlingId = bestillBrevDto.behandlingId,
-                minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-                auditLoggerEvent = AuditLoggerEvent.CREATE,
-                handling = "Sender brev",
-            )
-            tilbakekrevingService.hentTilbakekreving(bestillBrevDto.behandlingId) { tilbakekreving, context ->
-                tilbakekrevingService.bestillBrev(tilbakekreving, bestillBrevDto, context)
+        val responseNyModell = tilbakekrevingService.endreTilbakekreving(TilbakekrevingFilter.behandling(bestillBrevDto.behandlingId), ValideringContext.BestillBrev) { tilbakekreving, context ->
+            when (bestillBrevDto.brevmalkode) {
+                Dokumentmalstype.VARSEL -> {
+                    tilbakekreving.hentBehandling(bestillBrevDto.behandlingId).nullstillForhåndsvarselUnntakOgUttalelse()
+                    forhåndsvarselService.bestillVarselbrev(tilbakekreving, bestillBrevDto, context)
+                }
+
+                else -> throw Feil(
+                    message = "Håndtering av ${bestillBrevDto.brevmalkode} støttes ikke enda",
+                    httpStatus = HttpStatus.BAD_REQUEST,
+                    logContext = SecureLog.Context.fra(tilbakekreving),
+                )
             }
-            return Ressurs.success(null)
+            Ressurs.success(null)
+        }
+        if (responseNyModell != null) {
+            return responseNyModell
         }
 
         tilgangskontrollService.validerTilgangBehandlingID(
@@ -88,15 +99,8 @@ class DokumentController(
         @RequestBody @Valid
         bestillBrevDto: BestillBrevDto,
     ): Ressurs<ByteArray> {
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.behandling(bestillBrevDto.behandlingId), ValideringContext.ForhåndsvisBrev)
         if (tilbakekreving != null) {
-            tilgangskontrollService.validerTilgangTilbakekreving(
-                tilbakekreving = tilbakekreving,
-                behandlingId = bestillBrevDto.behandlingId,
-                minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-                auditLoggerEvent = AuditLoggerEvent.ACCESS,
-                handling = "Forhåndsviser brev",
-            )
             return Ressurs.success(forhåndsvarselService.forhåndsvisVarselbrev(tilbakekrevingService.lesecontext(), tilbakekreving, bestillBrevDto))
         }
 
@@ -142,18 +146,9 @@ class DokumentController(
     fun hentForhåndsvarselinfo(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<ForhåndsvarselDto> {
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
-        if (tilbakekreving != null) {
-            tilgangskontrollService.validerTilgangTilbakekreving(
-                tilbakekreving = tilbakekreving,
-                behandlingId = behandlingId,
-                minimumBehandlerrolle = Behandlerrolle.VEILEDER,
-                auditLoggerEvent = AuditLoggerEvent.ACCESS,
-                handling = "Henter vilkårsvurdering for en gitt behandling",
-            )
-            return Ressurs.success(forhåndsvarselService.hentForhåndsvarselinfo(behandlingId, tilbakekreving))
-        }
-        return Ressurs.failure("Fant ingen tilbakekreving til behandlingId $behandlingId")
+        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.HentForhåndsvarselinformasjon)
+            ?: return Ressurs.failure("Fant ingen tilbakekreving til behandlingId $behandlingId")
+        return Ressurs.success(forhåndsvarselService.hentForhåndsvarselinfo(behandlingId, tilbakekreving))
     }
 
     @Operation(summary = "Henter varselbrevtekst")
@@ -164,15 +159,8 @@ class DokumentController(
     fun hentForhåndsvarselTekst(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<Varselbrevtekst> {
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.HentForhåndsvarselTekster)
         if (tilbakekreving != null) {
-            tilgangskontrollService.validerTilgangTilbakekreving(
-                tilbakekreving = tilbakekreving,
-                behandlingId = behandlingId,
-                minimumBehandlerrolle = Behandlerrolle.VEILEDER,
-                auditLoggerEvent = AuditLoggerEvent.ACCESS,
-                handling = "Henter varselbrevtekst",
-            )
             return Ressurs.success(forhåndsvarselService.hentVarselbrevTekster(tilbakekrevingService.lesecontext(), behandlingId, tilbakekreving))
         }
         return Ressurs.failure("Fant ingen tilbakekreving til behandlingId $behandlingId")
@@ -188,21 +176,10 @@ class DokumentController(
         @Valid @RequestBody
         dto: FristUtsettelseDto,
     ): Ressurs<Nothing?> {
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
-        if (tilbakekreving != null) {
-            tilgangskontrollService.validerTilgangTilbakekreving(
-                tilbakekreving = tilbakekreving,
-                behandlingId = behandlingId,
-                minimumBehandlerrolle = Behandlerrolle.VEILEDER,
-                auditLoggerEvent = AuditLoggerEvent.ACCESS,
-                handling = "Utsette frist på uttalelsen",
-            )
-            tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving, context ->
-                forhåndsvarselService.utsettUttalelseFrist(behandlingId, tilbakekreving, dto, context)
-            }
-            return Ressurs.success(null)
-        }
-        return Ressurs.failure("Fant ingen tilbakekreving til behandlingId $behandlingId")
+        return tilbakekrevingService.endreTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.RegistrerUtsattFrist) { tilbakekreving, context ->
+            tilbakekreving.lagreFristUtsettelse(behandlingId, dto.nyFrist!!, dto.begrunnelse!!, context)
+            Ressurs.success(null)
+        } ?: Ressurs.failure("Fant ingen tilbakekreving til behandlingId $behandlingId")
     }
 
     @Operation(summary = "Skal ikke sendes forhåndsvarsel")
@@ -215,22 +192,19 @@ class DokumentController(
         @Valid @RequestBody
         dto: ForhåndsvarselUnntakDto,
     ): Ressurs<Nothing?> {
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
-        if (tilbakekreving != null) {
-            val logContext = SecureLog.Context.fra(tilbakekreving)
-            tilgangskontrollService.validerTilgangTilbakekreving(
-                tilbakekreving = tilbakekreving,
+        return tilbakekrevingService.endreTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.RegistrerForhåndsvarselUnntak) { tilbakekreving, context ->
+            tilbakekreving.lagreForhåndsvarselUnntak(
                 behandlingId = behandlingId,
-                minimumBehandlerrolle = Behandlerrolle.VEILEDER,
-                auditLoggerEvent = AuditLoggerEvent.ACCESS,
-                handling = "Sender ikke forhåndsvarsel",
+                begrunnelseForUnntak = when (dto.begrunnelseForUnntak) {
+                    VarslingsUnntak.IKKE_PRAKTISK_MULIG -> BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG
+                    VarslingsUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING -> BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING
+                    VarslingsUnntak.ÅPENBART_UNØDVENDIG -> BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG
+                },
+                beskrivelse = dto.beskrivelse,
+                sideeffektContext = context,
             )
-            tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving, context ->
-                forhåndsvarselService.håndterForhåndsvarselUnntak(behandlingId, tilbakekreving, dto, context)
-            }
-            return Ressurs.success(null)
-        }
-        return Ressurs.failure("Fant ingen tilbakekreving til behandlingId $behandlingId")
+            Ressurs.success(null)
+        } ?: Ressurs.failure("Fant ingen tilbakekreving til behandlingId $behandlingId")
     }
 
     @Operation(summary = "Forhåndsvis henleggelsesbrev")
@@ -277,16 +251,9 @@ class DokumentController(
     fun hentVedtaksbrevtekst(
         @PathVariable behandlingId: UUID,
     ): Ressurs<List<Avsnitt>> {
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.HentVedtaksbrevTekster)
         if (tilbakekreving != null) {
-            tilgangskontrollService.validerTilgangTilbakekreving(
-                tilbakekreving = tilbakekreving,
-                behandlingId = behandlingId,
-                minimumBehandlerrolle = Behandlerrolle.VEILEDER,
-                auditLoggerEvent = AuditLoggerEvent.ACCESS,
-                handling = "Henter vedtaksbrevtekst",
-            )
-            return Ressurs.success(emptyList())
+            throw ModellFeil.UgyldigOperasjonException("Kan ikke hente vedtaksbrev-tekst for ny modell", tilbakekreving.sporingsinformasjon(behandlingId))
         }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
@@ -325,20 +292,9 @@ class DokumentController(
         @PathVariable behandlingId: UUID,
         @RequestBody brukeruttalelse: BrukeruttalelseDto,
     ): Ressurs<Nothing?> {
-        val håndtert = tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekreving, context ->
-            tilgangskontrollService.validerTilgangTilbakekreving(
-                tilbakekreving = tilbakekreving,
-                behandlingId = behandlingId,
-                minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-                auditLoggerEvent = AuditLoggerEvent.CREATE,
-                handling = "Lagrer brukers uttalelse",
-            )
+        return tilbakekrevingService.endreTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.RegistrerBrukeruttalelse) { tilbakekreving, context ->
             forhåndsvarselService.lagreUttalelse(tilbakekreving, behandlingId, brukeruttalelse, context)
-            true
-        }
-        if (håndtert == true) {
-            return Ressurs.success(null)
-        }
-        return Ressurs.failure("Fant ingen tilbakekreving til behandlingId $behandlingId")
+            Ressurs.success(null)
+        } ?: Ressurs.failure("Fant ingen tilbakekreving til behandlingId $behandlingId")
     }
 }

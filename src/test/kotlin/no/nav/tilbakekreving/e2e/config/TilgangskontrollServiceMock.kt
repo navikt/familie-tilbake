@@ -5,8 +5,10 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
+import no.nav.familie.tilbake.sikkerhet.ValideringContext
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
@@ -17,7 +19,7 @@ import java.util.UUID
 @Primary
 @Service
 class TilgangskontrollServiceMock : TilgangskontrollService {
-    override fun validerTilgangTilbakekreving(tilbakekreving: Tilbakekreving, behandlingId: UUID?, minimumBehandlerrolle: Behandlerrolle, auditLoggerEvent: AuditLoggerEvent, handling: String): Behandlerrolle {
+    override fun validerTilgangTilbakekreving(tilbakekreving: Tilbakekreving, valideringContext: ValideringContext, behandler: Behandler): Behandlerrolle {
         return Behandlerrolle.SYSTEM
     }
 

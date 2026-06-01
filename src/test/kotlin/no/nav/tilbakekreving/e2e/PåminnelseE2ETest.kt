@@ -20,6 +20,7 @@ import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub.Companion.vedHendel
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
 import no.nav.tilbakekreving.test.januar
 import org.junit.jupiter.api.Test
@@ -50,7 +51,7 @@ class PåminnelseE2ETest : TilbakekrevingE2EBase() {
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
 
-        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         val tilbakekrevingId = tilbakekreving(behandlingId).id
 
         pdlClient.hentPersoninfoHits.forExactly(1) {
@@ -102,7 +103,7 @@ class PåminnelseE2ETest : TilbakekrevingE2EBase() {
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
 
-        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId)
 
         somSaksbehandler("Z999999") {
@@ -138,7 +139,7 @@ class PåminnelseE2ETest : TilbakekrevingE2EBase() {
 
         val tilbakekreving = tilbakekreving(behandlingId)
         tilbakekreving.tilEntity().nåværendeTilstand shouldBe TilbakekrevingTilstand.AVSLUTTET
-        tilbakekrevingRepository.hentTilbakekrevinger(TilbakekrevingRepository.FindTilbakekrevingStrategy.TrengerPåminnelse)
+        tilbakekrevingRepository.hentTilbakekrevinger(TilbakekrevingFilter.trengerPåminnelse())
             .forNone {
                 it.id shouldBe tilbakekreving.id
             }
@@ -153,7 +154,7 @@ class PåminnelseE2ETest : TilbakekrevingE2EBase() {
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
 
-        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         val tilbakekrevingId = tilbakekreving(behandlingId).id
 
         kafkaProducer.finnHendelse<BehandlingEndretEventDto>(fagsystemId)

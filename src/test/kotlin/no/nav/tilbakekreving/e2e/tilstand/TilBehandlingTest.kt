@@ -42,7 +42,7 @@ class TilBehandlingTest : TilbakekrevingE2EBase() {
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
 
-        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
         tilbakekreving(behandlingId).tilFrontendDto(saksbehandlerContext().klokke).behandlinger.single().status shouldBe Behandlingsstatus.UTREDES
         fagsystemIntegrasjonService.håndter(
@@ -93,7 +93,7 @@ class TilBehandlingTest : TilbakekrevingE2EBase() {
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
 
-        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
         tilbakekreving(behandlingId).tilFrontendDto(saksbehandlerContext().klokke).behandlinger.single().status shouldBe Behandlingsstatus.UTREDES
         fagsystemIntegrasjonService.håndter(
@@ -149,7 +149,7 @@ class TilBehandlingTest : TilbakekrevingE2EBase() {
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
 
-        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId)
 
         somSaksbehandler(behandlerIdent) {

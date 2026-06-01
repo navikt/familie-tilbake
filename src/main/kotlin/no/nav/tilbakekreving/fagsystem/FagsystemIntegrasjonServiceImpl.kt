@@ -5,6 +5,7 @@ import no.nav.tilbakekreving.api.v2.fagsystem.svar.FagsysteminfoSvarHendelse
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.kontrakter.periode.til
+import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.springframework.stereotype.Service
 
@@ -13,10 +14,8 @@ class FagsystemIntegrasjonServiceImpl(
     private val tilbakekrevingService: TilbakekrevingService,
 ) : FagsystemIntegrasjonService {
     override fun håndter(ytelse: Ytelse, fagsysteminfo: FagsysteminfoSvarHendelse) {
-        tilbakekrevingService.hentTilbakekreving(
-            behandler = Behandler.Vedtaksløsning,
-            fagsystem = ytelse.tilFagsystemDTO(),
-            eksternFagsakId = fagsysteminfo.eksternFagsakId,
+        tilbakekrevingService.hentOgLagreTilbakekreving(
+            filter = TilbakekrevingFilter.fagsak(fagsysteminfo.eksternFagsakId, ytelse.tilFagsystemDTO()),
         ) { tilbakekreving, context ->
             tilbakekreving.håndter(
                 FagsysteminfoHendelse(
@@ -41,7 +40,7 @@ class FagsystemIntegrasjonServiceImpl(
                     },
                     behandlendeEnhet = fagsysteminfo.behandlendeEnhet,
                 ),
-                context,
+                context(Behandler.Vedtaksløsning),
             )
         }
     }

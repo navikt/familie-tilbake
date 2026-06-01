@@ -10,13 +10,14 @@ import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstidspunkt
 import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstype
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
+import no.nav.familie.tilbake.sikkerhet.ValideringContext
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFaktaDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeslåVedtaksstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
-import no.nav.tilbakekreving.api.v1.dto.BestillBrevDto
 import no.nav.tilbakekreving.api.v2.fagsystem.behov.FagsysteminfoBehovHendelse
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
@@ -43,18 +44,16 @@ import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
-import no.nav.tilbakekreving.kontrakter.brev.Dokumentmalstype
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentTypeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.LogginnslagDto
-import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
+import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
 import no.nav.tilbakekreving.saksbehandler.Behandler
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.UUID
@@ -72,6 +71,7 @@ class TilbakekrevingService(
     private val featureService: FeatureService,
     private val forhåndsvarselService: ForhåndsvarselService,
     private val vedtaksbrevService: NyVedtaksbrevService,
+    private val tilgangskontrollService: TilgangskontrollService,
 ) {
     private val logger = TracedLogger.getLogger<TilbakekrevingService>()
 
@@ -113,54 +113,70 @@ class TilbakekrevingService(
 
         logger.medContext(logContext) { info("Lagrer tilbakekreving") }
 
-        utførSideeffekter(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId), observatør, logContext)
+        utførSideeffekter(TilbakekrevingFilter.tilbakekreving(tilbakekrevingId), observatør, logContext)
 
         logger.medContext(logContext) { info("Tilbakekreving ferdig opprettet") }
     }
 
-    fun hentTilbakekreving(
-        fagsystem: FagsystemDTO,
-        eksternFagsakId: String,
+    fun lesTilbakekreving(
+        filter: TilbakekrevingFilter,
+        valideringContext: ValideringContext,
     ): Tilbakekreving? {
-        val tilbakekreving = tilbakekrevingRepository.hentTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.EksternFagsakId(eksternFagsakId, fagsystem))
-            ?.fraEntity()
-            ?: return null
-
-        val logContext = SecureLog.Context.fra(tilbakekreving)
-        kravgrunnlagBufferRepository.validerKravgrunnlagInnenforScope(eksternFagsakId, logContext.behandlingId)
+        val tilbakekreving = hentTilbakekreving(filter) ?: return null
+        val behandler = ContextService.hentBehandler(filter.logContext())
+        tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving, valideringContext, behandler)
         return tilbakekreving
     }
 
-    fun hentTilbakekreving(behandlingId: UUID): Tilbakekreving? {
-        val tilbakekreving = tilbakekrevingRepository.hentTilbakekreving(TilbakekrevingRepository.FindTilbakekrevingStrategy.BehandlingId(behandlingId)) ?: return null
-        kravgrunnlagBufferRepository.validerKravgrunnlagInnenforScope(tilbakekreving.eksternFagsak.eksternId, tilbakekreving.behandlingHistorikkEntities.lastOrNull()?.id?.toString())
-        return tilbakekreving.fraEntity()
+    fun hentTilbakekreving(filter: TilbakekrevingFilter): Tilbakekreving? {
+        val tilbakekreving = tilbakekrevingRepository.hentTilbakekreving(filter)?.fraEntity() ?: return null
+
+        val logContext = SecureLog.Context.fra(tilbakekreving)
+        kravgrunnlagBufferRepository.validerKravgrunnlagInnenforScope(tilbakekreving.eksternFagsak.eksternId, logContext.behandlingId)
+        return tilbakekreving
     }
 
-    fun <T : Any> hentOgLagreTilbakekreving(
-        behandler: Behandler,
-        strategy: TilbakekrevingRepository.FindTilbakekrevingStrategy,
+    fun <T> endreTilbakekreving(
+        filter: TilbakekrevingFilter,
+        valideringContext: ValideringContext,
         callback: (Tilbakekreving, SideeffektContext) -> T,
-    ): T {
-        lateinit var result: T
+    ): T? {
+        return hentOgLagreTilbakekreving(filter) { tilbakekreving, sideeffektContext ->
+            val behandler = ContextService.hentBehandler(filter.logContext())
+            tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving, valideringContext, behandler)
+            callback(tilbakekreving, sideeffektContext(behandler))
+        }
+    }
+
+    fun <T> hentOgLagreTilbakekreving(
+        filter: TilbakekrevingFilter,
+        callback: (Tilbakekreving, (Behandler) -> SideeffektContext) -> T,
+    ): T? {
+        var result: T? = null
         val observatør = Observatør()
         lateinit var logContext: SecureLog.Context
-        tilbakekrevingRepository.hentOgLagreResultat(strategy) { it, behandlingslogg ->
+        tilbakekrevingRepository.hentOgLagreResultat(filter) { it, behandlingslogg ->
             kravgrunnlagBufferRepository.validerKravgrunnlagInnenforScope(it.eksternFagsak.eksternId, it.behandlingHistorikkEntities.lastOrNull()?.id?.toString())
             val tilbakekreving = it.fraEntity()
             logContext = SecureLog.Context.fra(tilbakekreving)
-            result = callback(tilbakekreving, sideeffektContext(behandler, observatør, behandlingslogg))
+            result = callback(tilbakekreving) { behandler ->
+                sideeffektContext(behandler, observatør, behandlingslogg)
+            }
 
             tilbakekreving.tilEntity()
         }
 
-        utførSideeffekter(strategy, observatør, logContext)
+        if (result == null) {
+            return null
+        }
+
+        utførSideeffekter(filter, observatør, logContext)
 
         return result
     }
 
     private fun utførSideeffekter(
-        strategy: TilbakekrevingRepository.FindTilbakekrevingStrategy,
+        strategy: TilbakekrevingFilter,
         observatør: Observatør,
         logContext: SecureLog.Context,
     ) {
@@ -180,31 +196,6 @@ class TilbakekrevingService(
             }
             tilbakekreving.tilEntity()
         }
-    }
-
-    fun <T : Any> hentTilbakekreving(
-        behandler: Behandler,
-        fagsystem: FagsystemDTO,
-        eksternFagsakId: String,
-        håndter: (Tilbakekreving, SideeffektContext) -> T,
-    ): T? {
-        return hentOgLagreTilbakekreving(
-            behandler = behandler,
-            strategy = TilbakekrevingRepository.FindTilbakekrevingStrategy.EksternFagsakId(eksternFagsakId, fagsystem),
-            callback = håndter,
-        )
-    }
-
-    fun <T : Any> hentTilbakekreving(
-        behandlingId: UUID,
-        behandler: Behandler = ContextService.hentBehandler(SecureLog.Context.medBehandling(null, behandlingId.toString())),
-        håndter: (Tilbakekreving, SideeffektContext) -> T,
-    ): T? {
-        return hentOgLagreTilbakekreving(
-            behandler = behandler,
-            strategy = TilbakekrevingRepository.FindTilbakekrevingStrategy.BehandlingId(behandlingId),
-            callback = håndter,
-        )
     }
 
     private fun håndterBehov(
@@ -361,21 +352,19 @@ class TilbakekrevingService(
     }
 
     fun utførSteg(
+        tilbakekreving: Tilbakekreving,
+        context: SideeffektContext,
         behandlingId: UUID,
-        behandler: Behandler,
-        tilbakekrevingId: String,
         behandlingsstegDto: BehandlingsstegDto,
-        logContext: SecureLog.Context,
     ) {
-        return hentOgLagreTilbakekreving(behandler, TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving, context ->
-            when (behandlingsstegDto) {
-                is BehandlingsstegForeldelseDto -> behandleForeldelse(behandlingId, tilbakekreving, behandlingsstegDto, context)
-                is BehandlingsstegVilkårsvurderingDto -> behandleVilkårsvurdering(behandlingId, tilbakekreving, behandlingsstegDto, context)
-                is BehandlingsstegFaktaDto -> behandleFakta(behandlingId, tilbakekreving, behandlingsstegDto, context)
-                is BehandlingsstegForeslåVedtaksstegDto -> behandleForeslåVedtak(behandlingId, tilbakekreving, context)
-                is BehandlingsstegFatteVedtaksstegDto -> behandleFatteVedtak(behandlingId, tilbakekreving, behandlingsstegDto, context)
-                else -> throw Feil("Vurdering for ${behandlingsstegDto.getSteg()} er ikke implementert i ny modell enda.", logContext = logContext)
-            }
+        val logContext = SecureLog.Context.fra(tilbakekreving)
+        return when (behandlingsstegDto) {
+            is BehandlingsstegForeldelseDto -> behandleForeldelse(behandlingId, tilbakekreving, behandlingsstegDto, context)
+            is BehandlingsstegVilkårsvurderingDto -> behandleVilkårsvurdering(behandlingId, tilbakekreving, behandlingsstegDto, context)
+            is BehandlingsstegFaktaDto -> behandleFakta(behandlingId, tilbakekreving, behandlingsstegDto, context)
+            is BehandlingsstegForeslåVedtaksstegDto -> behandleForeslåVedtak(behandlingId, tilbakekreving, context)
+            is BehandlingsstegFatteVedtaksstegDto -> behandleFatteVedtak(behandlingId, tilbakekreving, behandlingsstegDto, context)
+            else -> throw Feil("Vurdering for ${behandlingsstegDto.getSteg()} er ikke implementert i ny modell enda.", logContext = logContext)
         }
     }
 
@@ -472,18 +461,6 @@ class TilbakekrevingService(
         )
     }
 
-    fun flyttBehandlingTilFakta(behandlingId: UUID, tilbakekrevingId: String, saksbehandler: Behandler) {
-        hentOgLagreTilbakekreving(saksbehandler, TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving, context ->
-            tilbakekreving.håndterNullstilling(behandlingId, context)
-        }
-    }
-
-    fun trekkTilbakeFraGodkjenning(behandlingId: UUID, tilbakekrevingId: String, saksbehandler: Behandler) {
-        hentOgLagreTilbakekreving(saksbehandler, TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving, context ->
-            tilbakekreving.håndterTrekkTilbakeFraGodkjenning(behandlingId, context)
-        }
-    }
-
     fun hentBehandlingsinfo(
         tilbakekreving: Tilbakekreving,
     ): List<Behandlingsinfo> {
@@ -499,24 +476,6 @@ class TilbakekrevingService(
                 behandlingstatus = null,
             ),
         )
-    }
-
-    fun bestillBrev(
-        tilbakekreving: Tilbakekreving,
-        bestillBrevDto: BestillBrevDto,
-        sideeffektContext: SideeffektContext,
-    ) {
-        when (bestillBrevDto.brevmalkode) {
-            Dokumentmalstype.VARSEL -> {
-                tilbakekreving.hentBehandling(bestillBrevDto.behandlingId).nullstillForhåndsvarselUnntakOgUttalelse()
-                forhåndsvarselService.bestillVarselbrev(tilbakekreving, bestillBrevDto, sideeffektContext)
-            }
-            else -> throw Feil(
-                message = "Håndtering av ${bestillBrevDto.brevmalkode} støttes ikke enda",
-                httpStatus = HttpStatus.BAD_REQUEST,
-                logContext = SecureLog.Context.utenBehandling(tilbakekreving.eksternFagsak.eksternId),
-            )
-        }
     }
 
     fun hentHistorikk(tilbakekrevingId: String): List<LogginnslagDto> {

@@ -32,7 +32,6 @@ import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagMediator
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
-import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.systemContext
 import no.nav.tilbakekreving.test.april
 import no.nav.tilbakekreving.test.januar
@@ -100,7 +99,7 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
             ),
         )
 
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId)
+        val tilbakekreving = tilbakekreving(FagsystemDTO.TS, fagsystemId)
         tilbakekreving.shouldNotBeNull()
     }
 
@@ -202,21 +201,21 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(QUEUE_NAME, KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId))
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
-        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
         sendKravgrunnlagOgAvventLesing(QUEUE_NAME, KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId, kravStatusKode = "ANNU"))
 
         shouldThrow<ModellFeil.UtenforScopeException> {
-            tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId)
+            tilbakekreving(FagsystemDTO.TS, fagsystemId)
         }
 
         shouldThrow<ModellFeil.UtenforScopeException> {
-            tilbakekrevingService.hentTilbakekreving(behandlingId)
+            tilbakekreving(behandlingId)
         }
 
         shouldThrow<ModellFeil.UtenforScopeException> {
             // Henting for skriving
-            tilbakekrevingService.hentTilbakekreving(behandlingId, Behandler.Vedtaksløsning) { _, _ -> }
+            tilbakekreving(behandlingId)
         }
     }
 
@@ -245,7 +244,7 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
             ),
         )
 
-        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId)
 
         somSaksbehandler("Z999999") {

@@ -37,7 +37,7 @@ class AutomatiskSaksbehandlingE2ETest : TilbakekrevingE2EBase() {
             Testdata.fagsysteminfoSvar(fagsystemId = fagsystemId, utvidPerioder = emptyList()),
         )
 
-        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         val periode = tilbakekreving(behandlingId)
             .hentBehandling(behandlingId)
             .foreldelsestegDto.tilFrontendDto(saksbehandlerContext())

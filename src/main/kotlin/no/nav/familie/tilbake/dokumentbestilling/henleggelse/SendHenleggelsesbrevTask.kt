@@ -5,10 +5,8 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
-import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.kontrakter.objectMapper
 import org.springframework.stereotype.Component
@@ -26,8 +24,6 @@ import java.util.UUID
 class SendHenleggelsesbrevTask(
     private val henleggelsesbrevService: HenleggelsesbrevService,
     private val behandlingRepository: BehandlingRepository,
-    private val fagsakRepository: FagsakRepository,
-    private val featureToggleService: FeatureToggleService,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val taskdata: SendBrevTaskdata = objectMapper.readValue(task.payload)

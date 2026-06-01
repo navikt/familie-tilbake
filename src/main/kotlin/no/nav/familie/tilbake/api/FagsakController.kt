@@ -9,6 +9,7 @@ import no.nav.familie.tilbake.kontrakter.klage.FagsystemVedtak
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
+import no.nav.familie.tilbake.sikkerhet.ValideringContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.TilbakekrevingService
@@ -17,6 +18,7 @@ import no.nav.tilbakekreving.kontrakter.Behandling
 import no.nav.tilbakekreving.kontrakter.FinnesBehandlingResponse
 import no.nav.tilbakekreving.kontrakter.KanBehandlingOpprettesManueltRespons
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -42,15 +44,8 @@ class FagsakController(
         @PathVariable fagsystem: FagsystemDTO,
         @PathVariable eksternFagsakId: String,
     ): Ressurs<FagsakDto> {
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(fagsystem, eksternFagsakId)
+        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.fagsak(eksternFagsakId, fagsystem), ValideringContext.HentFagsak)
         if (tilbakekreving != null) {
-            tilgangskontrollService.validerTilgangTilbakekreving(
-                tilbakekreving = tilbakekreving,
-                behandlingId = null,
-                minimumBehandlerrolle = Behandlerrolle.VEILEDER,
-                auditLoggerEvent = AuditLoggerEvent.ACCESS,
-                handling = "Henter fagsak informasjon med bruker og behandlinger",
-            )
             return Ressurs.success(tilbakekreving.tilFrontendDto(SystemKlokke))
         }
         tilgangskontrollService.validerTilgangFagsystemOgFagsakId(

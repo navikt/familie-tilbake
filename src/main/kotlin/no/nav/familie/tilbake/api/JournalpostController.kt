@@ -7,9 +7,11 @@ import no.nav.familie.tilbake.kontrakter.journalpost.Journalpost
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
+import no.nav.familie.tilbake.sikkerhet.ValideringContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.dokumentHåndtering.saf.SafService
+import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -34,15 +36,8 @@ class JournalpostController(
         @PathVariable journalpostId: String,
         @PathVariable dokumentInfoId: String,
     ): Ressurs<ByteArray> {
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.HentJournalpost)
         if (tilbakekreving != null) {
-            tilgangskontrollService.validerTilgangTilbakekreving(
-                tilbakekreving = tilbakekreving,
-                behandlingId = behandlingId,
-                minimumBehandlerrolle = Behandlerrolle.VEILEDER,
-                auditLoggerEvent = AuditLoggerEvent.ACCESS,
-                handling = "Henter vilkårsvurdering for en gitt behandling",
-            )
             return Ressurs.success(
                 safService.hentDokument(
                     behandlingId = behandlingId,
@@ -67,15 +62,8 @@ class JournalpostController(
     fun hentJournalposter(
         @PathVariable behandlingId: UUID,
     ): Ressurs<List<Journalpost>> {
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
+        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.HentJournalposter)
         if (tilbakekreving != null) {
-            tilgangskontrollService.validerTilgangTilbakekreving(
-                tilbakekreving = tilbakekreving,
-                behandlingId = behandlingId,
-                minimumBehandlerrolle = Behandlerrolle.VEILEDER,
-                auditLoggerEvent = AuditLoggerEvent.ACCESS,
-                handling = "Henter vilkårsvurdering for en gitt behandling",
-            )
             return Ressurs.success(safService.hentJournalposter(tilbakekreving, null, null))
         }
         tilgangskontrollService.validerTilgangBehandlingID(

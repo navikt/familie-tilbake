@@ -63,7 +63,7 @@ class VedtaksbrevE2ETest : TilbakekrevingE2EBase() {
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
 
-        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId)
 
         somSaksbehandler(ansvarligSaksbehandler) {
@@ -93,7 +93,7 @@ class VedtaksbrevE2ETest : TilbakekrevingE2EBase() {
             stegData = BehandlingsstegGenerator.lagGodkjennVedtakVurdering(),
         )
 
-        tilbakekrevingService.hentTilbakekreving(behandlingId).shouldNotBeNull {
+        tilbakekreving(behandlingId).shouldNotBeNull {
             brevHistorikk.nåværende().entry.shouldBeInstanceOf<Vedtaksbrev>()
         }
     }
@@ -124,7 +124,7 @@ class VedtaksbrevE2ETest : TilbakekrevingE2EBase() {
             ),
         )
 
-        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId, uttalelse = "Jeg svindlet NAV")
 
         somSaksbehandler(ansvarligSaksbehandler) {
@@ -153,12 +153,12 @@ class VedtaksbrevE2ETest : TilbakekrevingE2EBase() {
             actual.underavsnitt shouldContainExactly expected.underavsnitt
         }
 
-        behandlingApiController.behandlingOppdaterVedtaksbrev(
-            behandlingId = behandlingId,
-            vedtaksbrevRedigerbareDataUpdateDto = objectMapper.convertValue<VedtaksbrevRedigerbareDataUpdateDto>(avsnittFørOppdatering),
-        )
-
         val avsnittEtterOppdatering = somSaksbehandler(ansvarligSaksbehandler) {
+            behandlingApiController.behandlingOppdaterVedtaksbrev(
+                behandlingId = behandlingId,
+                vedtaksbrevRedigerbareDataUpdateDto = objectMapper.convertValue<VedtaksbrevRedigerbareDataUpdateDto>(avsnittFørOppdatering),
+            )
+
             behandlingApiController.behandlingHentVedtaksbrev(behandlingId.toString()).body.shouldNotBeNull()
         }
         avsnittEtterOppdatering.shouldBeEqualToIgnoringFields(
@@ -195,7 +195,7 @@ class VedtaksbrevE2ETest : TilbakekrevingE2EBase() {
             ),
         )
 
-        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId, uttalelse = "Jeg svindlet NAV")
 
         somSaksbehandler(ansvarligSaksbehandler) {
@@ -249,7 +249,7 @@ class VedtaksbrevE2ETest : TilbakekrevingE2EBase() {
             fagsysteminfo = Testdata.fagsysteminfoSvar(fagsystemId = fagsystemId),
         )
 
-        val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.AAP).shouldNotBeNull()
+        val behandlingId = behandlingIdFor(FagsystemDTO.AAP, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId, uttalelse = "Jeg svindlet NAV")
 
         somSaksbehandler(ansvarligSaksbehandler) {

@@ -127,7 +127,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             dokumentController.bestillBrev(bestillBrevDto)
         }
 
-        val tilbakekrevingEtterVarselbrev = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
+        val tilbakekrevingEtterVarselbrev = tilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
         tilbakekrevingEtterVarselbrev!!.brevHistorikk.sisteVarselbrev() shouldNotBeNull {
             journalpostId shouldBe "-1"
             dokumentInfoId shouldBe "-2"
@@ -152,8 +152,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             dokumentController.lagreBrukeruttalelse(tilbakekreving.nåværendeBehandlingId(), case.input)
         }
 
-        val forhåndsvarsel = tilbakekrevingService
-            .hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
+        val forhåndsvarsel = tilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
             .shouldNotBeNull().hentForhåndsvarselFrontendDto(tilbakekreving.nåværendeBehandlingId())
         forhåndsvarsel.forhåndsvarselUnntak shouldBe null
         forhåndsvarsel.utsettUttalelseFrist shouldNotBe null
@@ -193,8 +192,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
         somSaksbehandler("Z999999") {
             dokumentController.forhåndsvarselUnntak(tilbakekreving.nåværendeBehandlingId(), case.input)
         }
-        val forhåndsvarsel = tilbakekrevingService
-            .hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
+        val forhåndsvarsel = tilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
             .shouldNotBeNull().hentForhåndsvarselFrontendDto(tilbakekreving.nåværendeBehandlingId())
         forhåndsvarsel.brukeruttalelse shouldBe null
         forhåndsvarsel.utsettUttalelseFrist shouldBe null
@@ -225,8 +223,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             dokumentController.utsettUttalelseFrist(tilbakekreving.nåværendeBehandlingId(), førsteFrist)
         }
 
-        val etterFørsteUtsettelse = tilbakekrevingService
-            .hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
+        val etterFørsteUtsettelse = tilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
             .shouldNotBeNull().hentForhåndsvarselFrontendDto(tilbakekreving.nåværendeBehandlingId())
 
         etterFørsteUtsettelse.utsettUttalelseFrist.shouldNotBeNull {
@@ -241,8 +238,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             dokumentController.utsettUttalelseFrist(tilbakekreving.nåværendeBehandlingId(), andreFrist)
         }
 
-        val etterAndreUtsettelse = tilbakekrevingService
-            .hentTilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
+        val etterAndreUtsettelse = tilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
             .shouldNotBeNull().hentForhåndsvarselFrontendDto(tilbakekreving.nåværendeBehandlingId())
         etterAndreUtsettelse.utsettUttalelseFrist.shouldNotBeNull {
             nyFrist shouldBe LocalDate.of(2025, 11, 25)
@@ -278,7 +274,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             ),
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
-        return tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+        return tilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
     }
 
     companion object {

@@ -35,7 +35,7 @@ import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagMediator
 import no.nav.tilbakekreving.repository.NyBehandlingRepository
-import no.nav.tilbakekreving.repository.TilbakekrevingRepository
+import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
@@ -127,35 +127,37 @@ open class TilbakekrevingE2EBase : E2EBase() {
     }
 
     fun behandlingIdFor(
-        fagsystemId: String,
         fagsystem: FagsystemDTO,
+        fagsystemId: String,
     ): UUID? {
-        return tilbakekrevingService.hentTilbakekreving(fagsystem, fagsystemId)?.nåværendeBehandlingId()
+        return tilbakekreving(fagsystem, fagsystemId)?.nåværendeBehandlingId()
     }
 
     fun lagreUttalelse(
         behandlingId: UUID,
         uttalelse: String? = "",
     ) {
-        val tilbakekrevingId = tilbakekrevingService.hentTilbakekreving(behandlingId)!!.id
-        tilbakekrevingService.hentOgLagreTilbakekreving(ansvarligSaksbehandler, TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(tilbakekrevingId)) { tilbakekreving, context ->
+        val tilbakekrevingId = tilbakekreving(behandlingId).id
+        tilbakekrevingService.hentOgLagreTilbakekreving(TilbakekrevingFilter.tilbakekreving(tilbakekrevingId)) { tilbakekreving, context ->
             if (uttalelse == null) {
-                tilbakekreving.lagreUttalelse(behandlingId, UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL, null, "", context)
+                tilbakekreving.lagreUttalelse(behandlingId, UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL, null, "", context(ansvarligSaksbehandler))
             } else {
                 tilbakekreving.lagreUttalelse(
                     behandlingId,
                     UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL,
                     UttalelseInfo(UUID.randomUUID(), LocalDate.now(), "Reddit", uttalelse),
                     null,
-                    context,
+                    context(ansvarligSaksbehandler),
                 )
             }
         }
     }
 
-    fun tilbakekreving(behandlingId: UUID): Tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId).shouldNotBeNull()
+    fun tilbakekreving(behandlingId: UUID): Tilbakekreving =
+        tilbakekrevingService.hentTilbakekreving(TilbakekrevingFilter.behandling(behandlingId)).shouldNotBeNull()
 
-    fun tilbakekreving(fagsystem: FagsystemDTO, fagsystemId: String): Tilbakekreving? = tilbakekrevingService.hentTilbakekreving(fagsystem, fagsystemId)
+    fun tilbakekreving(fagsystem: FagsystemDTO, fagsystemId: String): Tilbakekreving? =
+        tilbakekrevingService.hentTilbakekreving(TilbakekrevingFilter.fagsak(fagsystemId, fagsystem))
 
     fun behandling(behandlingId: UUID): Behandling {
         return tilbakekreving(behandlingId).hentBehandling(behandlingId)

@@ -68,7 +68,7 @@ class ForvaltningTest : TilbakekrevingE2EBase() {
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
 
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemDTO.TS, fagsystemId)
+        val tilbakekreving = tilbakekreving(FagsystemDTO.TS, fagsystemId)
         val kravgrunnlag = tilbakekreving?.kravgrunnlagHistorikk?.nåværende()?.entry
 
         val behandlingInfo = tilbakekrevingService.hentBehandlingsinfo(tilbakekreving!!)

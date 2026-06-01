@@ -4,16 +4,15 @@ import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.saksbehandler.Behandler
 import java.math.BigInteger
 import java.util.UUID
 
 interface TilgangskontrollService {
     fun validerTilgangTilbakekreving(
         tilbakekreving: Tilbakekreving,
-        behandlingId: UUID?,
-        minimumBehandlerrolle: Behandlerrolle,
-        auditLoggerEvent: AuditLoggerEvent,
-        handling: String,
+        valideringContext: ValideringContext,
+        behandler: Behandler,
     ): Behandlerrolle
 
     fun validerTilgangBehandlingID(

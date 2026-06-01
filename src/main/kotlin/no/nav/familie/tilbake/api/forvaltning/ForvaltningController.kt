@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.api.forvaltning
 import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.familie.tilbake.behandling.Ytelsestype
-import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
 import no.nav.familie.tilbake.kontrakter.Ressurs
@@ -14,17 +13,16 @@ import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
+import no.nav.familie.tilbake.sikkerhet.ValideringContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.FagsystemUtil
 import no.nav.tilbakekreving.TilbakekrevingService
-import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.config.ApplicationProperties
-import no.nav.tilbakekreving.config.FeatureService
-import no.nav.tilbakekreving.endring.EndringObservatør
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
+import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
@@ -56,9 +54,6 @@ class ForvaltningController(
     private val tilbakekrevingService: TilbakekrevingService,
     private val applicationProperties: ApplicationProperties,
     private val tilbakekrevingRepository: TilbakekrevingRepository,
-    private val bigQueryService: BigQueryService,
-    private val endringObservatør: EndringObservatør,
-    private val featureService: FeatureService,
 ) {
     private val logger = TracedLogger.getLogger<ForvaltningController>()
 
@@ -143,19 +138,12 @@ class ForvaltningController(
     fun flyttBehandlingTilFakta(
         @PathVariable behandlingId: UUID,
     ): Ressurs<String> {
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
-        if (tilbakekreving != null) {
-            val logContext = SecureLog.Context.fra(tilbakekreving)
-            val saksbehandler = ContextService.hentBehandler(logContext)
-            tilgangskontrollService.validerTilgangTilbakekreving(
-                tilbakekreving = tilbakekreving,
-                behandlingId = behandlingId,
-                minimumBehandlerrolle = Behandlerrolle.FORVALTER,
-                auditLoggerEvent = AuditLoggerEvent.UPDATE,
-                handling = "Flytter behandling tilbake til Fakta",
-            )
-            tilbakekrevingService.flyttBehandlingTilFakta(behandlingId, tilbakekreving.id, saksbehandler)
-            return Ressurs.success("OK")
+        val response = tilbakekrevingService.endreTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.ForvaltningFlyttTilFakta) { tilbakekreving, context ->
+            tilbakekreving.håndterNullstilling(behandlingId, context)
+            Ressurs.success("OK")
+        }
+        if (response != null) {
+            return response
         }
 
         tilgangskontrollService.validerTilgangBehandlingID(
@@ -195,15 +183,8 @@ class ForvaltningController(
         @PathVariable ytelsestype: YtelsestypeDTO,
         @PathVariable eksternFagsakId: String,
     ): Ressurs<List<Behandlingsinfo>> {
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype), eksternFagsakId)
+        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.fagsak(eksternFagsakId, FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype)), ValideringContext.HentForvaltningsinfo)
         if (tilbakekreving != null) {
-            tilgangskontrollService.validerTilgangTilbakekreving(
-                tilbakekreving = tilbakekreving,
-                behandlingId = null,
-                minimumBehandlerrolle = Behandlerrolle.FORVALTER,
-                auditLoggerEvent = AuditLoggerEvent.NONE,
-                handling = "Henter forvaltningsinformasjon",
-            )
             return Ressurs.success(tilbakekrevingService.hentBehandlingsinfo(tilbakekreving))
         }
         tilgangskontrollService.validerTilgangYtelsetypeOgFagsakId(
@@ -332,7 +313,7 @@ class ForvaltningController(
     @PostMapping("/migrer-alle-saker")
     fun migrerAlleSaker() {
         tilbakekrevingRepository.hentAlleTilbakekrevinger()?.forEach { entity ->
-            tilbakekrevingRepository.hentOgLagreResultat(TilbakekrevingRepository.FindTilbakekrevingStrategy.TilbakekrevingId(entity.id)) { it, _ ->
+            tilbakekrevingRepository.hentOgLagreResultat(TilbakekrevingFilter.tilbakekreving(entity.id)) { it, _ ->
                 val tilbakekreving = it.fraEntity()
                 logger.medContext(SecureLog.Context.fra(tilbakekreving)) {
                     info("Migrerer sak {}", tilbakekreving.hentTilbakekrevingUrl(applicationProperties.frontendUrl))
@@ -353,18 +334,8 @@ class ForvaltningController(
     fun oppdaterFagsysteminfo(
         @PathVariable behandlingId: UUID,
     ) {
-        val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
-        if (tilbakekreving != null) {
-            tilgangskontrollService.validerTilgangTilbakekreving(
-                tilbakekreving = tilbakekreving,
-                behandlingId = behandlingId,
-                minimumBehandlerrolle = Behandlerrolle.FORVALTER,
-                auditLoggerEvent = AuditLoggerEvent.UPDATE,
-                handling = "Hent oppdatert fagsysteminfo",
-            )
-            tilbakekrevingService.hentTilbakekreving(behandlingId) { tilbakekrevingTilLagring, context ->
-                tilbakekrevingTilLagring.trengerFagsysteminfo(context)
-            }
+        tilbakekrevingService.endreTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.ForvaltningOppdaterFagsysteminfo) { tilbakekreving, context ->
+            tilbakekreving.trengerFagsysteminfo(context)
         }
     }
 }

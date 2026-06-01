@@ -19,17 +19,13 @@ import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.BestillBrevDto
 import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
 import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselDto
-import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselUnntakDto
-import no.nav.tilbakekreving.api.v1.dto.FristUtsettelseDto
 import no.nav.tilbakekreving.api.v1.dto.HarBrukerUttaltSeg
-import no.nav.tilbakekreving.api.v1.dto.VarslingsUnntak
 import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
 import no.nav.tilbakekreving.behandling.UttalelseInfo
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
 import no.nav.tilbakekreving.brev.VarselbrevInfo
 import no.nav.tilbakekreving.brev.vedtaksbrev.BrevFormatterer
-import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostResponse
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
@@ -61,7 +57,6 @@ class ForhåndsvarselService(
     private val varselbrevUtil: VarselbrevUtil,
     private val dokarkivClient: DokarkivClient,
     private val eksterneDataForBrevService: EksterneDataForBrevService,
-    private val featureService: FeatureService,
     private val pdfFactory: () -> PdfGenerator = { PdfGenerator() },
 ) {
     private val logger = TracedLogger.getLogger<ForhåndsvarselService>()
@@ -218,36 +213,6 @@ class ForhåndsvarselService(
 
     fun hentForhåndsvarselinfo(behandlingId: UUID, tilbakekreving: Tilbakekreving): ForhåndsvarselDto {
         return tilbakekreving.hentForhåndsvarselFrontendDto(behandlingId)
-    }
-
-    fun utsettUttalelseFrist(
-        behandlingId: UUID,
-        tilbakekreving: Tilbakekreving,
-        fristUtsettelseDto: FristUtsettelseDto,
-        sideeffektContext: SideeffektContext,
-    ) {
-        requireNotNull(tilbakekreving.brevHistorikk.sisteVarselbrev()) {
-            "Kan ikke utsette frist når forhåndsvarsel ikke er sendt"
-        }
-        tilbakekreving.lagreFristUtsettelse(behandlingId, fristUtsettelseDto.nyFrist!!, fristUtsettelseDto.begrunnelse!!, sideeffektContext)
-    }
-
-    fun håndterForhåndsvarselUnntak(
-        behandlingId: UUID,
-        tilbakekreving: Tilbakekreving,
-        forhåndsvarselUnntakDto: ForhåndsvarselUnntakDto,
-        sideeffektContext: SideeffektContext,
-    ) {
-        tilbakekreving.lagreForhåndsvarselUnntak(
-            behandlingId = behandlingId,
-            begrunnelseForUnntak = when (forhåndsvarselUnntakDto.begrunnelseForUnntak) {
-                VarslingsUnntak.IKKE_PRAKTISK_MULIG -> BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG
-                VarslingsUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING -> BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING
-                VarslingsUnntak.ÅPENBART_UNØDVENDIG -> BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG
-            },
-            beskrivelse = forhåndsvarselUnntakDto.beskrivelse,
-            sideeffektContext = sideeffektContext,
-        )
     }
 
     private fun opprettMetadata(varselbrevInfo: VarselbrevInfo): Brevmetadata {
