@@ -1,22 +1,15 @@
 package no.nav.tilbakekreving.behandling
 
 import io.kotest.matchers.shouldBe
-import no.nav.tilbakekreving.ANSVARLIG_BESLUTTER
-import no.nav.tilbakekreving.ANSVARLIG_SAKSBEHANDLER
-import no.nav.tilbakekreving.LesContext
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvNav
 import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
 import no.nav.tilbakekreving.behandlerContext
 import no.nav.tilbakekreving.behandling
-import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
-import no.nav.tilbakekreving.behandlingslogg.LoggInnslag
 import no.nav.tilbakekreving.beslutterContext
-import no.nav.tilbakekreving.defaultFeatures
 import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.fatteVedtakVurdering
 import no.nav.tilbakekreving.foreldelseVurdering
 import no.nav.tilbakekreving.kontrakter.periode.til
-import no.nav.tilbakekreving.lesContext
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.saksbehandlerContext
 import no.nav.tilbakekreving.test.forsettelig
