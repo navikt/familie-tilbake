@@ -108,6 +108,13 @@ class Foreldelsesteg(
         return vurdertePerioder.single { it.periode.inneholder(periode) }.vurdering.erForeldet()
     }
 
+    fun erSammenslåttPeriodeForeldet(periode: Datoperiode): Boolean {
+        val overlappendePerioder = vurdertePerioder.filter {
+            it.periode.overlapper(periode)
+        }
+        return overlappendePerioder.all { erPeriodeForeldet(it.periode) }
+    }
+
     fun hjemlerForTilbakekreving() = vurdertePerioder.flatMap { it.vurdering.hjemlerForTilbakekreving() }.distinct()
 
     private fun finnIdFor(periode: Datoperiode): UUID {

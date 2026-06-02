@@ -10,9 +10,15 @@ data class VilkårsvurderingstegEntity(
     val trengerNyVurdering: Boolean,
 ) {
     fun fraEntity(): Vilkårsvurderingsteg {
+        val vurderingerForId = buildMap {
+            vurderinger.forEach { vurdering ->
+                put(vurdering.id, vurdering.vurdering.fraEntity(this))
+            }
+        }
+
         return Vilkårsvurderingsteg(
             id = id,
-            vurderinger = vurderinger.map { it.fraEntity() },
+            vurderinger = vurderinger.map { it.fraEntity(vurderingerForId[it.id]!!) },
             underkjent = trengerNyVurdering,
         )
     }

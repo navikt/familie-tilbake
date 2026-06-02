@@ -13,8 +13,9 @@ data class AktsomhetsvurderingEntity(
     val beløpIBehold: GodTroEntity?,
     val aktsomhet: VurdertAktsomhetEntity?,
     val feilaktigEllerMangelfull: FeilaktigEllerMangelfullType?,
+    val forrigePeriodeId: UUID?,
 ) {
-    fun fraEntity(): ForårsaketAvBruker {
+    fun fraEntity(vurderinger: Map<UUID, ForårsaketAvBruker>): ForårsaketAvBruker {
         return when (vurderingType) {
             VurderingType.IKKE_FORÅRSAKET_AV_BRUKER_GOD_TRO -> {
                 NivåAvForståelse.GodTro(
@@ -70,6 +71,10 @@ data class AktsomhetsvurderingEntity(
             }
 
             VurderingType.IKKE_VURDERT -> ForårsaketAvBruker.IkkeVurdert
+            VurderingType.KOPIERT_VURDERING -> ForårsaketAvBruker.KopiertVurdering(
+                forrigeVurdering = requireNotNull(vurderinger[forrigePeriodeId]) { "Fant ikke vurdering å kopiere fra med id $forrigePeriodeId" },
+                forrigePeriodeId = forrigePeriodeId,
+            )
         }
     }
 }
@@ -99,6 +104,7 @@ enum class VurderingType {
     IKKE_FORÅRSAKET_AV_BRUKER_BURDE_FORSTÅTT,
     IKKE_FORÅRSAKET_AV_BRUKER_GOD_TRO,
     FORÅRSAKET_AV_BRUKER,
+    KOPIERT_VURDERING,
 }
 
 enum class FeilaktigEllerMangelfullType(val fraEntity: Skyldgrad.FeilaktigEllerMangelfull) {

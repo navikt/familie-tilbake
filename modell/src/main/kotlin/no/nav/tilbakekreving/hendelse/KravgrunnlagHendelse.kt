@@ -50,8 +50,9 @@ class KravgrunnlagHendelse(
     fun skalOppretteNySak() = kravstatuskode == Kravstatuskode.NY
 
     fun totaltBeløpFor(periode: Datoperiode): BigDecimal =
-        perioder.single { kgPeriode -> kgPeriode.gjelderFor(periode) }
-            .feilutbetaltYtelsesbeløp()
+        perioder.filter { kgPeriode ->
+            kgPeriode.gjelderFor(periode)
+        }.sumOf { it.feilutbetaltYtelsesbeløp() }
 
     fun datoperioder(eksternFagsakRevurdering: EksternFagsakRevurdering) = perioder.map { eksternFagsakRevurdering.utvidPeriode(it.periode) }
 

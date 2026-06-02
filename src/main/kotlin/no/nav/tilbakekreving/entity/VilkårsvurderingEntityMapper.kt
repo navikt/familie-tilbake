@@ -82,6 +82,12 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
             FieldConverter.EnumConverter.of<FeilaktigEllerMangelfullType>(),
         )
 
+        val forrigePeriodeId = field(
+            "forrige_periode_id",
+            { it.vurdering.forrigePeriodeId },
+            FieldConverter.UUIDConverter,
+        )
+
         fun map(
             resultSet: ResultSet,
             godTro: GodTroEntity?,
@@ -98,6 +104,7 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
                     beløpIBehold = godTro,
                     aktsomhet = aktsomhet,
                     feilaktigEllerMangelfull = resultSet[feilaktigEllerMangelfull],
+                    forrigePeriodeId = resultSet[forrigePeriodeId],
                 ),
             )
         }

@@ -111,18 +111,8 @@ class TilleggsstønaderE2ETest {
         val vilkårsvurderingsstegDto = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId()).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext())
         vilkårsvurderingsstegDto.perioder shouldBe listOf(
             VurdertVilkårsvurderingsperiodeDto(
-                periode = 1.januar(2021) til 31.januar(2021),
-                feilutbetaltBeløp = 2000.kroner,
-                hendelsestype = Hendelsestype.ANNET,
-                reduserteBeløper = emptyList(),
-                aktiviteter = emptyList(),
-                vilkårsvurderingsresultatInfo = null,
-                begrunnelse = null,
-                foreldet = false,
-            ),
-            VurdertVilkårsvurderingsperiodeDto(
-                periode = 1.februar(2021) til 28.februar(2021),
-                feilutbetaltBeløp = 2000.kroner,
+                periode = 1.januar(2021) til 28.februar(2021),
+                feilutbetaltBeløp = 4000.kroner,
                 hendelsestype = Hendelsestype.ANNET,
                 reduserteBeløper = emptyList(),
                 aktiviteter = emptyList(),
