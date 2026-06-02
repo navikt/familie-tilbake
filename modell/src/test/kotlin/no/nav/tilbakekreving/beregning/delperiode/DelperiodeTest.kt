@@ -25,25 +25,6 @@ import java.math.BigDecimal
 import java.util.UUID
 
 class DelperiodeTest {
-    val eksternFagsakRevurdering = eksternFagsakBehandling(
-        utvidPerioder = listOf(
-            EksternFagsakRevurdering.UtvidetPeriode(
-                UUID.randomUUID(),
-                2.februar(2025) til 1.april(2025),
-                1.januar(2025) til 27.mars(2025),
-            ),
-        ),
-    )
-    val kravgrunnlagHendelse = kravgrunnlag(
-        perioder = listOf(
-            kravgrunnlagPeriode(2.februar(2025) til 13.februar(2025)),
-            kravgrunnlagPeriode(16.februar(2025) til 27.februar(2025)),
-            kravgrunnlagPeriode(2.mars(2025) til 13.mars(2025)),
-            kravgrunnlagPeriode(16.mars(2025) til 27.mars(2025)),
-        ),
-    )
-    val foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakRevurdering, kravgrunnlagHendelse)
-
     @Test
     fun `slår sammen foreldet perioder`() {
         val foreldelsesperiode = 1.januar(2021) til 31.mars(2021)
@@ -79,7 +60,39 @@ class DelperiodeTest {
 
     @Test
     fun `slår sammen vilkårsvurdering perioder ved opprettelse`() {
-        val vilkårsvurderingsteg = opprettVilkårsvurderingsteg()
+        val eksternFagsakRevurdering = eksternFagsakBehandling(
+            utvidPerioder = listOf(
+                EksternFagsakRevurdering.UtvidetPeriode(
+                    UUID.randomUUID(),
+                    2.februar(2025) til 1.april(2025),
+                    1.januar(2025) til 27.mars(2025),
+                ),
+            ),
+        )
+        val kravgrunnlagHendelse = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(2.februar(2025) til 13.februar(2025)),
+                kravgrunnlagPeriode(16.februar(2025) til 27.februar(2025)),
+                kravgrunnlagPeriode(2.mars(2025) til 13.mars(2025)),
+                kravgrunnlagPeriode(16.mars(2025) til 27.mars(2025)),
+            ),
+        )
+        val foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakRevurdering, kravgrunnlagHendelse)
+
+        kravgrunnlagHendelse.perioder().forEach {
+            foreldelsesteg.vurderForeldelse(
+                it.periode(),
+                Foreldelsesteg.Vurdering.IkkeForeldet(
+                    begrunnelse = "Ikke forelget",
+                ),
+            )
+        }
+
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakRevurdering,
+            kravgrunnlagHendelse,
+        )
+
         val frontendDto = vilkårsvurderingsteg.tilFrontendDto(
             kravgrunnlag = kravgrunnlagHendelse,
             revurdering = eksternFagsakRevurdering,
@@ -90,22 +103,6 @@ class DelperiodeTest {
         frontendDto.perioder.first().periode.fom shouldBe 2.februar(2025)
         frontendDto.perioder.first().periode.tom shouldBe 27.mars(2025)
         frontendDto.perioder.first().feilutbetaltBeløp shouldBe 8000.kroner
-    }
-
-    private fun opprettVilkårsvurderingsteg(): Vilkårsvurderingsteg {
-        kravgrunnlagHendelse.perioder().forEach {
-            foreldelsesteg.vurderForeldelse(
-                it.periode(),
-                Foreldelsesteg.Vurdering.IkkeForeldet(
-                    begrunnelse = "Ikke forelget",
-                ),
-            )
-        }
-
-        return Vilkårsvurderingsteg.opprett(
-            eksternFagsakRevurdering,
-            kravgrunnlagHendelse,
-        )
     }
 
     class KravgrunnlagPeriode(private val periode: Datoperiode) : KravgrunnlagPeriodeAdapter {

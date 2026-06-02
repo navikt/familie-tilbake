@@ -27,10 +27,32 @@ import no.nav.tilbakekreving.test.skalIkkeUnnlates
 import no.nav.tilbakekreving.test.skalUnnlates
 import no.nav.tilbakekreving.test.uaktsomt
 import no.nav.tilbakekreving.ytelsesbeløp
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class VilkårsvurderingstegTest {
+    @Test
+    @Disabled
+    fun `vilkårsvurdering på en av to perioder`() {
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(1.januar(2021) til 31.januar(2021)),
+                kravgrunnlagPeriode(1.februar(2021) til 28.februar(2021)),
+            ),
+        )
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakBehandling(),
+            kravgrunnlag,
+        )
+        vilkårsvurderingsteg.vurder(
+            1.januar(2021) til 31.januar(2021),
+            forårsaketAvNav().godTro(beløpIBehold = null),
+        )
+
+        vilkårsvurderingsteg.erFullstendig(SystemKlokke) shouldBe false
+    }
+
     @Test
     fun `vilkårsvurdering på begge perioder`() {
         val kravgrunnlag = kravgrunnlag(

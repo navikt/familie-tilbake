@@ -130,7 +130,7 @@ class Vilkårsvurderingsteg(
         return sammenslåttePerioder.map { periode ->
             VurdertVilkårsvurderingsperiodeDto(
                 periode = periode.periode,
-                feilutbetaltBeløp = kravgrunnlag.totaltBeløpForSlåttSammenPerioder(periode.periode),
+                feilutbetaltBeløp = kravgrunnlag.totaltBeløpFor(periode.periode),
                 hendelsestype = Hendelsestype.ANNET,
                 reduserteBeløper = listOf(),
                 aktiviteter = listOf(),

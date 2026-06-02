@@ -110,7 +110,7 @@ class Foreldelsesteg(
 
     fun erSammenslåttPeriodeForeldet(periode: Datoperiode): Boolean {
         val overlappendePerioder = vurdertePerioder.filter {
-            it.periode.fom <= periode.tom && it.periode.tom >= periode.fom
+            it.periode.overlapper(periode)
         }
         return overlappendePerioder.all { erPeriodeForeldet(it.periode) }
     }
