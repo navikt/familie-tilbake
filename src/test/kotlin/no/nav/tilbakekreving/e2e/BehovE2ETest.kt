@@ -105,7 +105,7 @@ class BehovE2ETest : TilbakekrevingE2EBase() {
             behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull(),
             sideeffektContext = systemContext(),
             kanBeslutte = false,
-            hentBehandlerRolle = { BehandlerRolle.BESLUTTER },
+            behandlerRolle = BehandlerRolle.BESLUTTER,
         )?.enhetskode shouldBe "0425"
     }
 }

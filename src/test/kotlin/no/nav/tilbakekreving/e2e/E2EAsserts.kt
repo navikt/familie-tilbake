@@ -10,7 +10,7 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatu
 import no.nav.tilbakekreving.saksbehandlerContext
 
 infix fun Tilbakekreving.kanBehandle(behandlingssteg: Behandlingssteg) {
-    val steg = frontendDtoForBehandling(nåværendeBehandlingId(), saksbehandlerContext(), true, { BehandlerRolle.BESLUTTER }).behandlingsstegsinfo.singleOrNull {
+    val steg = frontendDtoForBehandling(nåværendeBehandlingId(), saksbehandlerContext(), true, BehandlerRolle.BESLUTTER).behandlingsstegsinfo.singleOrNull {
         it.behandlingssteg == behandlingssteg
     }.shouldNotBeNull()
 
@@ -18,7 +18,7 @@ infix fun Tilbakekreving.kanBehandle(behandlingssteg: Behandlingssteg) {
 }
 
 infix fun Tilbakekreving.avventerBehandling(behandlingssteg: Behandlingssteg) {
-    frontendDtoForBehandling(nåværendeBehandlingId(), saksbehandlerContext(), true, { BehandlerRolle.BESLUTTER }).behandlingsstegsinfo.forNone {
+    frontendDtoForBehandling(nåværendeBehandlingId(), saksbehandlerContext(), true, BehandlerRolle.BESLUTTER).behandlingsstegsinfo.forNone {
         it.behandlingssteg shouldBe behandlingssteg
     }
 }

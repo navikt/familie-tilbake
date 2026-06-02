@@ -91,7 +91,7 @@ class TilBehandlingTest {
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
         val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingHendelse, saksbehandlerContext())
 
-        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), beslutterContext(), true, { BehandlerRolle.BESLUTTER }).kanEndres shouldBe true
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), beslutterContext(), true, BehandlerRolle.BESLUTTER).kanEndres shouldBe true
     }
 
     @Test
@@ -99,7 +99,7 @@ class TilBehandlingTest {
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
         val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingHendelse, saksbehandlerContext())
 
-        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), false, { BehandlerRolle.SAKSBEHANDLER }).kanEndres shouldBe false
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), false, BehandlerRolle.SAKSBEHANDLER).kanEndres shouldBe false
     }
 
     @Test
@@ -107,7 +107,7 @@ class TilBehandlingTest {
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
         val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingHendelse, saksbehandlerContext())
 
-        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true, { BehandlerRolle.SAKSBEHANDLER }).kanEndres shouldBe false
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true, BehandlerRolle.SAKSBEHANDLER).kanEndres shouldBe false
     }
 
     @Test
@@ -115,10 +115,10 @@ class TilBehandlingTest {
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
         val tilbakekreving = tilbakekrevingTilBehandling(opprettTilbakekrevingHendelse)
 
-        val gammeltEndringstidspunkt = tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true, { BehandlerRolle.SAKSBEHANDLER }).endretTidspunkt
+        val gammeltEndringstidspunkt = tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true, BehandlerRolle.SAKSBEHANDLER).endretTidspunkt
 
         tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), faktastegVurdering())
-        val nyttEndringstidspunkt = tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true, { BehandlerRolle.SAKSBEHANDLER }).endretTidspunkt
+        val nyttEndringstidspunkt = tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true, BehandlerRolle.SAKSBEHANDLER).endretTidspunkt
         nyttEndringstidspunkt shouldNotBe gammeltEndringstidspunkt
     }
 
@@ -179,7 +179,7 @@ class TilBehandlingTest {
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
         val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingHendelse, saksbehandlerContext())
 
-        val tilbakekrevingDtoFør = tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true, { BehandlerRolle.SAKSBEHANDLER })
+        val tilbakekrevingDtoFør = tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true, BehandlerRolle.SAKSBEHANDLER)
         tilbakekrevingDtoFør.status shouldBe Behandlingsstatus.FATTER_VEDTAK
 
         tilbakekreving.håndter(
@@ -194,7 +194,7 @@ class TilBehandlingTest {
             ),
         )
 
-        val tilbakekrevingDtoEtter = tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), false, { BehandlerRolle.SAKSBEHANDLER })
+        val tilbakekrevingDtoEtter = tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), false, BehandlerRolle.SAKSBEHANDLER)
         tilbakekrevingDtoEtter.status shouldBe Behandlingsstatus.UTREDES
         tilbakekrevingDtoEtter.behandlingsstegsinfo.skalHaSteg(Behandlingssteg.FAKTA).behandlingsstegstatus shouldBe Behandlingsstegstatus.TILBAKEFØRT
         tilbakekrevingDtoEtter.behandlingsstegsinfo.skalHaSteg(Behandlingssteg.FORESLÅ_VEDTAK).behandlingsstegstatus shouldBe Behandlingsstegstatus.VENTER
@@ -219,7 +219,7 @@ class TilBehandlingTest {
         tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), beslutterContext(), fatteVedtakVurdering())
         tilbakekreving.håndter(iverksettelse(), systemContext())
 
-        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true, { BehandlerRolle.SAKSBEHANDLER }).kanEndres shouldBe false
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true, BehandlerRolle.SAKSBEHANDLER).kanEndres shouldBe false
 
         val exception = shouldThrow<ModellFeil.UgyldigOperasjonException> {
             tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), beslutterContext(), fatteVedtakVurdering())

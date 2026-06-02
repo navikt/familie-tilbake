@@ -452,8 +452,8 @@ class Tilbakekreving internal constructor(
         behandlingId: UUID,
         sideeffektContext: LesContext,
         kanBeslutte: Boolean,
-        hentBehandlerRolle: () -> BehandlerRolle,
-    ) = behandlingHistorikk.finn(behandlingId, sporingsinformasjon(behandlingId)).entry.tilFrontendDto(tilstand, sideeffektContext, kanBeslutte, hentBehandlerRolle())
+        behandlerRolle: BehandlerRolle,
+    ) = behandlingHistorikk.finn(behandlingId, sporingsinformasjon(behandlingId)).entry.tilFrontendDto(tilstand, sideeffektContext, kanBeslutte, behandlerRolle)
 
     fun tilEntity(): TilbakekrevingEntity {
         return TilbakekrevingEntity(

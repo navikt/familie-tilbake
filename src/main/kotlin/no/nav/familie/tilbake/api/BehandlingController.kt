@@ -146,7 +146,7 @@ class BehandlingController(
                     behandlingId,
                     tilbakekrevingService.lesecontext(),
                     rolle == Behandlerrolle.BESLUTTER,
-                    { rolle.tilBehandlerRolle() },
+                    rolle.tilBehandlerRolle(),
                 ),
             )
         }

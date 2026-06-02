@@ -33,7 +33,7 @@ class BehandlingskontrollE2ETest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull()
         val ansvarligSaksbehandler = Behandler.Saksbehandler("Z999999")
 
-        val dtoFørUtførtFakta = tilbakekreving(behandlingId).frontendDtoForBehandling(behandlingId, saksbehandlerContext(), true, { BehandlerRolle.BESLUTTER })
+        val dtoFørUtførtFakta = tilbakekreving(behandlingId).frontendDtoForBehandling(behandlingId, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER)
         dtoFørUtførtFakta.behandlingsstegsinfo.find { it.behandlingssteg == Behandlingssteg.FAKTA }
             .shouldNotBeNull()
             .behandlingsstegstatus shouldBe Behandlingsstegstatus.KLAR
@@ -45,7 +45,7 @@ class BehandlingskontrollE2ETest : TilbakekrevingE2EBase() {
             )
         }
 
-        val dtoEtterUtførtFakta = tilbakekreving(behandlingId).frontendDtoForBehandling(behandlingId, saksbehandlerContext(), true, { BehandlerRolle.BESLUTTER })
+        val dtoEtterUtførtFakta = tilbakekreving(behandlingId).frontendDtoForBehandling(behandlingId, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER)
         dtoEtterUtførtFakta.behandlingsstegsinfo.find { it.behandlingssteg == Behandlingssteg.FAKTA }
             .shouldNotBeNull()
             .behandlingsstegstatus shouldBe Behandlingsstegstatus.UTFØRT
@@ -54,7 +54,7 @@ class BehandlingskontrollE2ETest : TilbakekrevingE2EBase() {
             behandlingController.flyttBehandlingTilFakta(behandlingId) shouldBe Ressurs.success("OK")
         }
 
-        val dtoEtterTilbakeTilFakta = tilbakekreving(behandlingId).frontendDtoForBehandling(behandlingId, saksbehandlerContext(), true, { BehandlerRolle.BESLUTTER })
+        val dtoEtterTilbakeTilFakta = tilbakekreving(behandlingId).frontendDtoForBehandling(behandlingId, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER)
         dtoEtterTilbakeTilFakta.behandlingsstegsinfo.find { it.behandlingssteg == Behandlingssteg.FAKTA }
             .shouldNotBeNull()
             .behandlingsstegstatus shouldBe Behandlingsstegstatus.KLAR
