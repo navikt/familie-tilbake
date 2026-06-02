@@ -36,7 +36,7 @@ class BehandlingRolleTest {
 
         val dto = behandling.tilFrontendDto(tilstand = TilBehandling, lesContext = lesContext, kanBeslutte = false, behandlerRolle = BehandlerRolle.VEILEDER)
 
-        dto.innloggetSaksbehandlerRolle shouldBe BehandlerRolle.VEILEDER
+        dto.innloggetRolle shouldBe BehandlerRolle.VEILEDER
     }
 
     @Test
@@ -46,7 +46,7 @@ class BehandlingRolleTest {
 
         val dto = behandling.tilFrontendDto(tilstand = TilBehandling, lesContext, kanBeslutte = true, behandlerRolle = BehandlerRolle.BESLUTTER)
 
-        dto.innloggetSaksbehandlerRolle shouldBe BehandlerRolle.SAKSBEHANDLER
+        dto.innloggetRolle shouldBe BehandlerRolle.SAKSBEHANDLER
     }
 
     @Test
@@ -57,7 +57,7 @@ class BehandlingRolleTest {
 
         val dto = behandling.tilFrontendDto(tilstand = TilBehandling, lesContext, kanBeslutte = true, behandlerRolle = BehandlerRolle.BESLUTTER)
 
-        dto.innloggetSaksbehandlerRolle shouldBe BehandlerRolle.BESLUTTER
+        dto.innloggetRolle shouldBe BehandlerRolle.BESLUTTER
     }
 
     @Test
@@ -67,7 +67,7 @@ class BehandlingRolleTest {
 
         val dto = behandling.tilFrontendDto(tilstand = TilBehandling, lesContext, kanBeslutte = true, behandlerRolle = BehandlerRolle.BESLUTTER)
 
-        dto.innloggetSaksbehandlerRolle shouldBe BehandlerRolle.SAKSBEHANDLER
+        dto.innloggetRolle shouldBe BehandlerRolle.SAKSBEHANDLER
     }
 
     @Test
@@ -78,7 +78,7 @@ class BehandlingRolleTest {
 
         val dto = behandling.tilFrontendDto(tilstand = Avsluttet, lesContext, kanBeslutte = true, behandlerRolle = BehandlerRolle.BESLUTTER)
 
-        dto.innloggetSaksbehandlerRolle shouldBe BehandlerRolle.BESLUTTER
+        dto.innloggetRolle shouldBe BehandlerRolle.BESLUTTER
     }
 
     private fun behandlingKlarTilBeslutning(): Behandling {

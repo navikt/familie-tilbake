@@ -384,7 +384,7 @@ class Behandling internal constructor(
             begrunnelseForTilbakekreving = eksternFagsakRevurdering.entry.årsakTilFeilutbetaling,
             saksbehandlingstype = Saksbehandlingstype.ORDINÆR,
             erNyModell = true,
-            innloggetSaksbehandlerRolle = utledInnloggetBrukerRolle(lesContext, behandlerRolle),
+            innloggetRolle = utledInnloggetBrukerRolle(lesContext, behandlerRolle),
         )
     }
 
