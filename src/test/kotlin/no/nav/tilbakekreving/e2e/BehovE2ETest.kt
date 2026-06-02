@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.e2e
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Testdata
+import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
 import no.nav.tilbakekreving.api.v2.MottakerDto
 import no.nav.tilbakekreving.api.v2.PeriodeDto
 import no.nav.tilbakekreving.api.v2.fagsystem.behov.FagsysteminfoBehovHendelse
@@ -104,6 +105,7 @@ class BehovE2ETest : TilbakekrevingE2EBase() {
             behandlingId = behandlingIdFor(fagsystemId, FagsystemDTO.TS).shouldNotBeNull(),
             sideeffektContext = systemContext(),
             kanBeslutte = false,
+            behandlerRolle = BehandlerRolle.BESLUTTER,
         )?.enhetskode shouldBe "0425"
     }
 }

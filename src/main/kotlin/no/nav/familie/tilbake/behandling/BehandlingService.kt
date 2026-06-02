@@ -42,6 +42,7 @@ import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangService
 import no.nav.tilbakekreving.FagsystemUtil
 import no.nav.tilbakekreving.Toggle
+import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
 import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingPåVentDto
 import no.nav.tilbakekreving.api.v1.dto.ByttEnhetDto
@@ -260,6 +261,7 @@ class BehandlingService(
             fagsak.eksternFagsakId,
             manuelleBrevmottakere,
             støtterManuelleBrevmottakere,
+            behandlerrolle.tilBehandlerRolle(),
         )
     }
 
@@ -862,4 +864,12 @@ class BehandlingService(
             fagsak: Fagsak,
         ): Boolean = fagsak.institusjon == null && !behandling.harVerge
     }
+
+    private fun Behandlerrolle.tilBehandlerRolle(): BehandlerRolle =
+        when (this) {
+            Behandlerrolle.VEILEDER -> BehandlerRolle.VEILEDER
+            Behandlerrolle.SAKSBEHANDLER -> BehandlerRolle.SAKSBEHANDLER
+            Behandlerrolle.BESLUTTER -> BehandlerRolle.BESLUTTER
+            else -> BehandlerRolle.INGEN
+        }
 }

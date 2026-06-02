@@ -6,6 +6,7 @@ import io.ktor.http.path
 import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.aktør.Bruker
 import no.nav.tilbakekreving.aktør.Bruker.Companion.tilNullableFrontendDto
+import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
 import no.nav.tilbakekreving.api.v1.dto.FagsakDto
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
 import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselDto
@@ -451,7 +452,8 @@ class Tilbakekreving internal constructor(
         behandlingId: UUID,
         sideeffektContext: LesContext,
         kanBeslutte: Boolean,
-    ) = behandlingHistorikk.finn(behandlingId, sporingsinformasjon(behandlingId)).entry.tilFrontendDto(tilstand, sideeffektContext, kanBeslutte)
+        behandlerRolle: BehandlerRolle,
+    ) = behandlingHistorikk.finn(behandlingId, sporingsinformasjon(behandlingId)).entry.tilFrontendDto(tilstand, sideeffektContext, kanBeslutte, behandlerRolle)
 
     fun tilEntity(): TilbakekrevingEntity {
         return TilbakekrevingEntity(

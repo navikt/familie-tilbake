@@ -17,6 +17,7 @@ import no.nav.familie.tilbake.kontrakter.klage.FagsystemType
 import no.nav.familie.tilbake.kontrakter.klage.FagsystemVedtak
 import no.nav.familie.tilbake.kontrakter.saksbehandler.Saksbehandler
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
 import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegsinfoDto
 import no.nav.tilbakekreving.kontrakter.Behandlingsresultatstype.DELVIS_TILBAKEBETALING
@@ -89,6 +90,7 @@ object BehandlingMapper {
         eksternFagsakId: String,
         manuelleBrevmottakere: List<ManuellBrevmottaker>,
         støtterManuelleBrevmottakere: Boolean,
+        innloggetSaksbehandlerRolle: BehandlerRolle,
     ): BehandlingDto {
         val resultat: Behandlingsresultat? =
             behandling.resultater.maxByOrNull {
@@ -127,6 +129,7 @@ object BehandlingMapper {
             begrunnelseForTilbakekreving = behandling.begrunnelseForTilbakekreving,
             saksbehandlingstype = behandling.saksbehandlingstype,
             erNyModell = false,
+            innloggetRolle = innloggetSaksbehandlerRolle,
         )
     }
 
@@ -218,34 +221,69 @@ object BehandlingMapper {
 
     private fun mapStatus(behandling: Behandling): no.nav.tilbakekreving.kontrakter.Behandlingsstatus =
         when (behandling.status) {
-            Behandlingsstatus.AVSLUTTET -> no.nav.tilbakekreving.kontrakter.Behandlingsstatus.AVSLUTTET
-            Behandlingsstatus.UTREDES -> no.nav.tilbakekreving.kontrakter.Behandlingsstatus.UTREDES
-            Behandlingsstatus.FATTER_VEDTAK -> no.nav.tilbakekreving.kontrakter.Behandlingsstatus.FATTER_VEDTAK
-            Behandlingsstatus.IVERKSETTER_VEDTAK, Behandlingsstatus.JOURNALFØR_VEDTAK ->
+            Behandlingsstatus.AVSLUTTET -> {
+                no.nav.tilbakekreving.kontrakter.Behandlingsstatus.AVSLUTTET
+            }
+
+            Behandlingsstatus.UTREDES -> {
+                no.nav.tilbakekreving.kontrakter.Behandlingsstatus.UTREDES
+            }
+
+            Behandlingsstatus.FATTER_VEDTAK -> {
+                no.nav.tilbakekreving.kontrakter.Behandlingsstatus.FATTER_VEDTAK
+            }
+
+            Behandlingsstatus.IVERKSETTER_VEDTAK, Behandlingsstatus.JOURNALFØR_VEDTAK -> {
                 no.nav.tilbakekreving.kontrakter.Behandlingsstatus.IVERKSETTER_VEDTAK
-            Behandlingsstatus.OPPRETTET -> no.nav.tilbakekreving.kontrakter.Behandlingsstatus.OPPRETTET
+            }
+
+            Behandlingsstatus.OPPRETTET -> {
+                no.nav.tilbakekreving.kontrakter.Behandlingsstatus.OPPRETTET
+            }
+
             Behandlingsstatus.DISTRIUBER_VEDTAK,
-            -> throw IllegalArgumentException("DISTRIUBER_VEDTAK er til ny modell!")
+            -> {
+                throw IllegalArgumentException("DISTRIUBER_VEDTAK er til ny modell!")
+            }
         }
 
     private fun mapÅrsak(behandling: Behandling): no.nav.tilbakekreving.kontrakter.Behandlingsårsakstype? {
         if (behandling.årsaker.isEmpty()) return null
         return when (behandling.årsaker.firstOrNull()?.type) {
-            Behandlingsårsakstype.REVURDERING_KLAGE_KA -> REVURDERING_KLAGE_KA
-            Behandlingsårsakstype.REVURDERING_KLAGE_NFP -> REVURDERING_KLAGE_NFP
-            Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR -> REVURDERING_OPPLYSNINGER_OM_VILKÅR
-            Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_FORELDELSE -> REVURDERING_OPPLYSNINGER_OM_FORELDELSE
-            Behandlingsårsakstype.REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT ->
+            Behandlingsårsakstype.REVURDERING_KLAGE_KA -> {
+                REVURDERING_KLAGE_KA
+            }
+
+            Behandlingsårsakstype.REVURDERING_KLAGE_NFP -> {
+                REVURDERING_KLAGE_NFP
+            }
+
+            Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR -> {
+                REVURDERING_OPPLYSNINGER_OM_VILKÅR
+            }
+
+            Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_FORELDELSE -> {
+                REVURDERING_OPPLYSNINGER_OM_FORELDELSE
+            }
+
+            Behandlingsårsakstype.REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT -> {
                 REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT
-            else -> null
+            }
+
+            else -> {
+                null
+            }
         }
     }
 
     private fun mapResultat(resultat: Behandlingsresultat?): no.nav.tilbakekreving.kontrakter.Behandlingsresultatstype? =
         when (resultat?.type) {
             Behandlingsresultatstype.DELVIS_TILBAKEBETALING -> DELVIS_TILBAKEBETALING
+
             Behandlingsresultatstype.FULL_TILBAKEBETALING -> FULL_TILBAKEBETALING
+
             Behandlingsresultatstype.INGEN_TILBAKEBETALING -> INGEN_TILBAKEBETALING
+
             Behandlingsresultatstype.HENLAGT,
             Behandlingsresultatstype.HENLAGT_FEILOPPRETTET,
             Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_MED_BREV,
@@ -254,6 +292,7 @@ object BehandlingMapper {
             Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
             Behandlingsresultatstype.HENLAGT_MANGLENDE_KRAVGRUNNLAG,
             -> HENLAGT
+
             Behandlingsresultatstype.IKKE_FASTSATT,
             null,
             -> null
