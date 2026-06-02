@@ -1,6 +1,5 @@
 package no.nav.tilbakekreving
 
-import no.nav.familie.tilbake.api.forvaltning.Behandlingsinfo
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
@@ -13,13 +12,11 @@ import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.familie.tilbake.sikkerhet.ValideringContext
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
-import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFaktaDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeslåVedtaksstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v2.fagsystem.behov.FagsysteminfoBehovHendelse
-import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
@@ -45,10 +42,7 @@ import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
-import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
-import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentInfoDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentTypeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.LogginnslagDto
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
@@ -361,41 +355,10 @@ class TilbakekrevingService(
         return when (behandlingsstegDto) {
             is BehandlingsstegForeldelseDto -> behandleForeldelse(behandlingId, tilbakekreving, behandlingsstegDto, context)
             is BehandlingsstegVilkårsvurderingDto -> behandleVilkårsvurdering(behandlingId, tilbakekreving, behandlingsstegDto, context)
-            is BehandlingsstegFaktaDto -> behandleFakta(behandlingId, tilbakekreving, behandlingsstegDto, context)
             is BehandlingsstegForeslåVedtaksstegDto -> behandleForeslåVedtak(behandlingId, tilbakekreving, context)
             is BehandlingsstegFatteVedtaksstegDto -> behandleFatteVedtak(behandlingId, tilbakekreving, behandlingsstegDto, context)
             else -> throw Feil("Vurdering for ${behandlingsstegDto.getSteg()} er ikke implementert i ny modell enda.", logContext = logContext)
         }
-    }
-
-    private fun behandleFakta(
-        behandlingId: UUID,
-        tilbakekreving: Tilbakekreving,
-        fakta: BehandlingsstegFaktaDto,
-        sideeffektContext: SideeffektContext,
-    ) {
-        tilbakekreving.håndter(
-            behandlingId,
-            sideeffektContext,
-            vurdering = Faktasteg.Vurdering(
-                perioder = fakta.feilutbetaltePerioder.map {
-                    Faktasteg.FaktaPeriode(
-                        id = UUID.randomUUID(),
-                        periode = it.periode,
-                        rettsligGrunnlag = it.hendelsestype,
-                        rettsligGrunnlagUnderkategori = it.hendelsesundertype,
-                    )
-                },
-                årsakTilFeilutbetaling = fakta.begrunnelse,
-                uttalelse = when (fakta.vurderingAvBrukersUttalelse?.harBrukerUttaltSeg) {
-                    HarBrukerUttaltSeg.JA -> Faktasteg.Uttalelse.Ja(fakta.vurderingAvBrukersUttalelse!!.beskrivelse!!)
-                    HarBrukerUttaltSeg.NEI -> Faktasteg.Uttalelse.Nei
-                    HarBrukerUttaltSeg.IKKE_AKTUELT -> Faktasteg.Uttalelse.IkkeAktuelt
-                    HarBrukerUttaltSeg.IKKE_VURDERT, null -> Faktasteg.Uttalelse.IkkeVurdert
-                },
-                oppdaget = Faktasteg.Vurdering.Oppdaget.IkkeVurdert,
-            ),
-        )
     }
 
     private fun behandleVilkårsvurdering(
@@ -461,28 +424,7 @@ class TilbakekrevingService(
         )
     }
 
-    fun hentBehandlingsinfo(
-        tilbakekreving: Tilbakekreving,
-    ): List<Behandlingsinfo> {
-        val behandlingsinformasjon = tilbakekreving.hentBehandlingsinformasjon()
-        return listOf(
-            Behandlingsinfo(
-                eksternKravgrunnlagId = null,
-                kravgrunnlagId = null,
-                kravgrunnlagKravstatuskode = null,
-                eksternId = behandlingsinformasjon.kravgrunnlagReferanse,
-                opprettetTid = behandlingsinformasjon.opprettetTid,
-                behandlingId = behandlingsinformasjon.behandlingId,
-                behandlingstatus = null,
-            ),
-        )
-    }
-
     fun hentHistorikk(tilbakekrevingId: String): List<LogginnslagDto> {
         return tilbakekrevingRepository.hentBehandlingslogg(tilbakekrevingId).tilFrontend()
-    }
-
-    fun hentDokumentInfo(tilbakekreving: Tilbakekreving, dokumentType: DokumentTypeDto): DokumentInfoDto {
-        return tilbakekreving.hentDokumentInfo(dokumentType)
     }
 }

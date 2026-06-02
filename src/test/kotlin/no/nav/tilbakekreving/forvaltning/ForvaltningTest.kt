@@ -1,6 +1,8 @@
 package no.nav.tilbakekreving.forvaltning
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import no.nav.familie.tilbake.api.forvaltning.ForvaltningController
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.e2e.KravgrunnlagE2ETest.Companion.QUEUE_NAME
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
@@ -13,6 +15,7 @@ import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.test.april
 import no.nav.tilbakekreving.test.mai
 import no.nav.tilbakekreving.test.mars
@@ -24,6 +27,9 @@ import java.util.UUID
 class ForvaltningTest : TilbakekrevingE2EBase() {
     @Autowired
     private lateinit var fagsystemIntegrasjonService: FagsystemIntegrasjonService
+
+    @Autowired
+    private lateinit var forvaltningController: ForvaltningController
 
     @Test
     fun `hentBehandlingsinfo skal hente info basert på eksternFagsakId og ytelsestype for tilleggsstønader`() {
@@ -68,10 +74,12 @@ class ForvaltningTest : TilbakekrevingE2EBase() {
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
 
-        val tilbakekreving = tilbakekreving(FagsystemDTO.TS, fagsystemId)
-        val kravgrunnlag = tilbakekreving?.kravgrunnlagHistorikk?.nåværende()?.entry
+        val tilbakekreving = tilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+        val kravgrunnlag = tilbakekreving.kravgrunnlagHistorikk.nåværende().entry
 
-        val behandlingInfo = tilbakekrevingService.hentBehandlingsinfo(tilbakekreving!!)
+        val behandlingInfo = somSaksbehandler("Z999999") {
+            forvaltningController.hentForvaltningsinfo(YtelsestypeDTO.TILLEGGSSTØNAD, fagsystemId).data.shouldNotBeNull()
+        }
 
         behandlingInfo.first().behandlingId.shouldBe(tilbakekreving.nåværendeBehandlingId())
         behandlingInfo.first().eksternId.shouldBe(kravgrunnlag?.referanse)

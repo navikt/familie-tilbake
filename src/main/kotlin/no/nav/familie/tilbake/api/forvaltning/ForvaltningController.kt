@@ -185,7 +185,21 @@ class ForvaltningController(
     ): Ressurs<List<Behandlingsinfo>> {
         val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.fagsak(eksternFagsakId, FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype)), ValideringContext.HentForvaltningsinfo)
         if (tilbakekreving != null) {
-            return Ressurs.success(tilbakekrevingService.hentBehandlingsinfo(tilbakekreving))
+            return Ressurs.success(
+                listOf(
+                    tilbakekreving.hentBehandlingsinformasjon().let {
+                        Behandlingsinfo(
+                            eksternKravgrunnlagId = null,
+                            kravgrunnlagId = null,
+                            kravgrunnlagKravstatuskode = null,
+                            eksternId = it.kravgrunnlagReferanse,
+                            opprettetTid = it.opprettetTid,
+                            behandlingId = it.behandlingId,
+                            behandlingstatus = null,
+                        )
+                    },
+                ),
+            )
         }
         tilgangskontrollService.validerTilgangYtelsetypeOgFagsakId(
             ytelsestype = Ytelsestype.forDTO(ytelsestype),

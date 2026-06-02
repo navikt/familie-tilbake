@@ -66,7 +66,7 @@ class DokumentController(
             when (bestillBrevDto.brevmalkode) {
                 Dokumentmalstype.VARSEL -> {
                     tilbakekreving.hentBehandling(bestillBrevDto.behandlingId).nullstillForhåndsvarselUnntakOgUttalelse()
-                    forhåndsvarselService.bestillVarselbrev(tilbakekreving, bestillBrevDto, context)
+                    tilbakekreving.sendVarselbrev(bestillBrevDto.behandlingId, bestillBrevDto.fritekst, context)
                 }
 
                 else -> throw Feil(
@@ -148,7 +148,7 @@ class DokumentController(
     ): Ressurs<ForhåndsvarselDto> {
         val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.HentForhåndsvarselinformasjon)
             ?: return Ressurs.failure("Fant ingen tilbakekreving til behandlingId $behandlingId")
-        return Ressurs.success(forhåndsvarselService.hentForhåndsvarselinfo(behandlingId, tilbakekreving))
+        return Ressurs.success(tilbakekreving.hentForhåndsvarselFrontendDto(behandlingId))
     }
 
     @Operation(summary = "Henter varselbrevtekst")

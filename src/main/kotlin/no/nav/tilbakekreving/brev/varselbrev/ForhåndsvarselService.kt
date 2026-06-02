@@ -18,9 +18,7 @@ import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.BestillBrevDto
 import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
-import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselDto
 import no.nav.tilbakekreving.api.v1.dto.HarBrukerUttaltSeg
-import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
 import no.nav.tilbakekreving.behandling.UttalelseInfo
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
@@ -29,13 +27,8 @@ import no.nav.tilbakekreving.brev.vedtaksbrev.BrevFormatterer
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostResponse
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
-import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.UnntakDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.UpdateUttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseVurderingDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.VarslingsunntakDto
 import no.nav.tilbakekreving.pdf.Dokumentvariant
 import no.nav.tilbakekreving.pdf.PdfGenerator
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
@@ -92,14 +85,6 @@ class ForhåndsvarselService(
                 vedleggHtml = varselbrevUtil.lagVedlegg(varselbrevsdokument, bestillBrevDto.behandlingId),
             ),
         )
-    }
-
-    fun bestillVarselbrev(
-        tilbakekreving: Tilbakekreving,
-        bestillBrevDto: BestillBrevDto,
-        sideeffektContext: SideeffektContext,
-    ) {
-        tilbakekreving.sendVarselbrev(bestillBrevDto.behandlingId, bestillBrevDto.fritekst, sideeffektContext)
     }
 
     fun lagreUttalelse(
@@ -186,33 +171,6 @@ class ForhåndsvarselService(
                 )
             }
         }
-    }
-
-    fun nyUtsettUttalelsesfrist(
-        behandlingId: UUID,
-        tilbakekreving: Tilbakekreving,
-        utsettFristDto: UpdateUttalelsesfristDto,
-        sideeffektContext: SideeffektContext,
-    ): UttalelsesfristDto {
-        return tilbakekreving.lagreFristUtsettelse(behandlingId, utsettFristDto.nyFrist!!, utsettFristDto.begrunnelse!!, sideeffektContext)
-    }
-
-    fun nyLagreForhåndsvarselUnntak(behandlingId: UUID, tilbakekreving: Tilbakekreving, unntakDto: UnntakDto, sideeffektContext: SideeffektContext) {
-        tilbakekreving.lagreForhåndsvarselUnntak(
-            behandlingId = behandlingId,
-            begrunnelseForUnntak = when (unntakDto.begrunnelseForUnntak) {
-                VarslingsunntakDto.IKKE_PRAKTISK_MULIG -> BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG
-                VarslingsunntakDto.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING -> BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING
-                VarslingsunntakDto.ÅPENBART_UNØDVENDIG -> BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG
-                VarslingsunntakDto.ALLEREDE_UTTALET_SEG -> BegrunnelseForUnntak.ALLEREDE_UTTALET_SEG
-            },
-            beskrivelse = unntakDto.beskrivelse,
-            sideeffektContext = sideeffektContext,
-        )
-    }
-
-    fun hentForhåndsvarselinfo(behandlingId: UUID, tilbakekreving: Tilbakekreving): ForhåndsvarselDto {
-        return tilbakekreving.hentForhåndsvarselFrontendDto(behandlingId)
     }
 
     private fun opprettMetadata(varselbrevInfo: VarselbrevInfo): Brevmetadata {
@@ -380,9 +338,5 @@ class ForhåndsvarselService(
 
     private fun hentVarselbrevTittel(varselbrevBehov: VarselbrevJournalføringBehov): String {
         return "$TITTEL_VARSEL_TILBAKEBETALING ${varselbrevBehov.ytelse.hentYtelsesnavn(Språkkode.NB)}"
-    }
-
-    fun nyHentForhåndsvarselinfo(behandlingId: UUID, tilbakekreving: Tilbakekreving): ForhaandsvarselResponseDto {
-        return tilbakekreving.nyHentForhåndsvarselFrontendDto(behandlingId)
     }
 }

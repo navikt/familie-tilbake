@@ -7,6 +7,7 @@ import no.nav.familie.tilbake.sikkerhet.ValideringContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.TilbakekrevingService
+import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
 import no.nav.tilbakekreving.brev.varselbrev.ForhåndsvarselService
 import no.nav.tilbakekreving.brev.vedtaksbrev.NyVedtaksbrevService
 import no.nav.tilbakekreving.dokumentHåndtering.saf.SafService
@@ -23,6 +24,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.UnntakDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UpdateUttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VarslingsunntakDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevDataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDataUpdateDto
@@ -134,7 +136,7 @@ class BehandlingApiController(
             valideringContext = ValideringContext.HentForhåndsvarsel,
         ) ?: return ResponseEntity.notFound().build()
 
-        return ResponseEntity.ok(forhåndsvarselService.nyHentForhåndsvarselinfo(behandlingId, tilbakekreving))
+        return ResponseEntity.ok(tilbakekreving.nyHentForhåndsvarselFrontendDto(behandlingId))
     }
 
     override fun behandlingSendVarselbrev(behandlingId: UUID, sendForhaandsvarselDto: SendForhaandsvarselDto): ResponseEntity<Unit> {
@@ -160,7 +162,7 @@ class BehandlingApiController(
             filter = TilbakekrevingFilter.behandling(behandlingId),
             valideringContext = ValideringContext.UtsettUttalelsesfrist,
         ) { tilbakekreving, context ->
-            ResponseEntity.ok(forhåndsvarselService.nyUtsettUttalelsesfrist(behandlingId, tilbakekreving, updateUttalelsesfristDto, context))
+            ResponseEntity.ok(tilbakekreving.lagreFristUtsettelse(behandlingId, updateUttalelsesfristDto.nyFrist!!, updateUttalelsesfristDto.begrunnelse!!, context))
         } ?: ResponseEntity.notFound().build()
     }
 
@@ -170,7 +172,17 @@ class BehandlingApiController(
             valideringContext = ValideringContext.LagreForhåndsvarselUnntak,
         ) { tilbakekreving, context ->
             ResponseEntity.ok(
-                forhåndsvarselService.nyLagreForhåndsvarselUnntak(behandlingId, tilbakekreving, unntakDto, context),
+                tilbakekreving.lagreForhåndsvarselUnntak(
+                    behandlingId = behandlingId,
+                    begrunnelseForUnntak = when (unntakDto.begrunnelseForUnntak) {
+                        VarslingsunntakDto.IKKE_PRAKTISK_MULIG -> BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG
+                        VarslingsunntakDto.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING -> BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING
+                        VarslingsunntakDto.ÅPENBART_UNØDVENDIG -> BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG
+                        VarslingsunntakDto.ALLEREDE_UTTALET_SEG -> BegrunnelseForUnntak.ALLEREDE_UTTALET_SEG
+                    },
+                    beskrivelse = unntakDto.beskrivelse,
+                    sideeffektContext = context,
+                ),
             )
         } ?: ResponseEntity.notFound().build()
     }
@@ -181,7 +193,7 @@ class BehandlingApiController(
             valideringContext = ValideringContext.HentDokumentInfo,
         ) ?: return ResponseEntity.notFound().build()
 
-        return ResponseEntity.ok(tilbakekrevingService.hentDokumentInfo(tilbakekreving, dokumentType))
+        return ResponseEntity.ok(tilbakekreving.hentDokumentInfo(dokumentType))
     }
 
     override fun behandlingHentDokument(behandlingId: UUID, journalpostId: String, dokumentInfoId: String): ResponseEntity<Any> {
