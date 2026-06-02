@@ -36,7 +36,7 @@ class TotrinnController(
     fun hentTotrinnsvurderinger(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<TotrinnsvurderingDto> {
-        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.HentTotrinn)
+        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.HentBeslutterVurdering)
         if (tilbakekreving != null) {
             return Ressurs.success(
                 tilbakekreving.hentBehandling(behandlingId).fatteVedtakStegDto.tilFrontendDto(tilbakekrevingService.lesecontext()),

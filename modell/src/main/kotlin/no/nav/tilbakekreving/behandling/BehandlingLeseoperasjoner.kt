@@ -22,8 +22,6 @@ interface BehandlingLeseoperasjoner {
         tilbakekrevingOpprettet: LocalDateTime,
     ): FaktaFeilutbetalingDto
 
-    fun harLikePerioder(): Boolean
-
     fun beregnForFrontend(): BeregningsresultatDto
 
     fun hentVedtaksresultatForFrontend(): FrontendBeregningsresultatDto

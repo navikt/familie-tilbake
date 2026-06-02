@@ -42,9 +42,9 @@ class PerioderController(
     fun erPerioderLike(
         @PathVariable behandlingId: UUID,
     ): Ressurs<Boolean> {
-        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.HentPerioder)
+        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.SjekkPeriodeLikhet)
         if (tilbakekreving != null) {
-            return Ressurs.success(tilbakekreving.hentBehandling(behandlingId).harLikePerioder())
+            return Ressurs.success(false)
         }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
@@ -68,7 +68,7 @@ class PerioderController(
     ): Ressurs<Boolean> {
         val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.SjekkPerioderSammenslått)
         if (tilbakekreving != null) {
-            return Ressurs.success(tilbakekreving.hentBehandling(behandlingId).harLikePerioder())
+            return Ressurs.success(false)
         }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,

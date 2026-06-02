@@ -153,8 +153,6 @@ class Behandling internal constructor(
 
     override val fatteVedtakStegDto: FrontendDto<TotrinnsvurderingDto> get() = fatteVedtakSteg
 
-    override fun harLikePerioder(): Boolean = vilkårsvurderingsteg.harLikePerioder()
-
     internal fun tilEntity(tilbakekrevingId: String): BehandlingEntity {
         return BehandlingEntity(
             id = id,

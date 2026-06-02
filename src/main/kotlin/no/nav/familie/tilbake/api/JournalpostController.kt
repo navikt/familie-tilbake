@@ -62,7 +62,7 @@ class JournalpostController(
     fun hentJournalposter(
         @PathVariable behandlingId: UUID,
     ): Ressurs<List<Journalpost>> {
-        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.HentJournalposter)
+        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.ListJournalposter)
         if (tilbakekreving != null) {
             return Ressurs.success(safService.hentJournalposter(tilbakekreving, null, null))
         }

@@ -18,7 +18,7 @@ enum class ValideringContext(
     TrekkTilbakeFraGodkjenning(
         minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
         auditLoggerEvent = AuditLoggerEvent.UPDATE,
-        handling = "Saksbehandler angrer på send til beslutter og tar behandling tilbake til saksbehandler",
+        handling = "Trekker tilbake fra godkjenning",
     ),
     OppdaterFakta(
         minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
@@ -38,7 +38,7 @@ enum class ValideringContext(
     UtførSteg(
         minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
         auditLoggerEvent = AuditLoggerEvent.UPDATE,
-        handling = "Utfører behandlingens aktiv steg og fortsetter den til neste steg",
+        handling = "Gjør endring i steg",
     ),
     BeregnFeilutbetaling(
         minimumBehandlerrolle = Behandlerrolle.VEILEDER,
@@ -68,7 +68,7 @@ enum class ValideringContext(
     RegistrerForhåndsvarselUnntak(
         minimumBehandlerrolle = Behandlerrolle.VEILEDER,
         auditLoggerEvent = AuditLoggerEvent.ACCESS,
-        handling = "Sender ikke forhåndsvarsel",
+        handling = "Registrert unntak for forhåndsvarsel",
     ),
     RegistrerBrukeruttalelse(
         minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
@@ -83,27 +83,27 @@ enum class ValideringContext(
     HentForeldelse(
         minimumBehandlerrolle = Behandlerrolle.VEILEDER,
         auditLoggerEvent = AuditLoggerEvent.ACCESS,
-        handling = "Henter foreldelsesinformasjon for en gitt behandling",
+        handling = "Henter foreldelsesinformasjon",
     ),
     HentHistorikk(
         minimumBehandlerrolle = Behandlerrolle.VEILEDER,
         auditLoggerEvent = AuditLoggerEvent.ACCESS,
         handling = "Henter historikkinnslag",
     ),
-    HentPerioder(
+    SjekkPeriodeLikhet(
         minimumBehandlerrolle = Behandlerrolle.VEILEDER,
         auditLoggerEvent = AuditLoggerEvent.ACCESS,
         handling = "Henter periodeinformasjon",
     ),
-    HentTotrinn(
+    HentBeslutterVurdering(
         minimumBehandlerrolle = Behandlerrolle.VEILEDER,
         auditLoggerEvent = AuditLoggerEvent.ACCESS,
-        handling = "Henter totrinnsvurderinger for en gitt behandling",
+        handling = "Henter totrinnsvurderinger",
     ),
     HentVilkårsvurdering(
         minimumBehandlerrolle = Behandlerrolle.VEILEDER,
         auditLoggerEvent = AuditLoggerEvent.ACCESS,
-        handling = "Henter vilkårsvurdering for en gitt behandling",
+        handling = "Henter vilkårsvurdering",
     ),
     HentJournalpost(
         minimumBehandlerrolle = Behandlerrolle.VEILEDER,
@@ -148,7 +148,7 @@ enum class ValideringContext(
     UtsettUttalelsesfrist(
         minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
         auditLoggerEvent = AuditLoggerEvent.UPDATE,
-        handling = "Utsetter uttalelsesfrist",
+        handling = "Utsetter frist for uttalelse",
     ),
     LagreForhåndsvarselUnntak(
         minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
@@ -175,10 +175,10 @@ enum class ValideringContext(
         auditLoggerEvent = AuditLoggerEvent.ACCESS,
         handling = "Henter forhåndsvarselinformasjon",
     ),
-    HentJournalposter(
+    ListJournalposter(
         minimumBehandlerrolle = Behandlerrolle.VEILEDER,
         auditLoggerEvent = AuditLoggerEvent.ACCESS,
-        handling = "Henter journalposter",
+        handling = "Lister journalposter",
     ),
     SjekkPerioderSammenslått(
         minimumBehandlerrolle = Behandlerrolle.VEILEDER,

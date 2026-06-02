@@ -84,9 +84,6 @@ class Vilkårsvurderingsteg(
         return vurderinger.single { it.id == id }
     }
 
-    // TODO: Trenger først muligheten til å referere til tidligere vilkårsvurdert periode for å finne ut
-    fun harLikePerioder() = false
-
     fun oppsummer(periode: Datoperiode) = finnPeriode(periode).vurdering.oppsummerVurdering()
 
     fun hjemlerForTilbakekreving(): List<HjemmelForTilbakekreving> = if (vurderinger.any { it.renter() }) {
