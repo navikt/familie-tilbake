@@ -269,10 +269,7 @@ class VedtaksbrevE2ETest : TilbakekrevingE2EBase() {
         håndterVilkårsvurdering(
             ident = ansvarligSaksbehandler,
             behandlingId = behandlingId,
-            vurderinger = arrayOf(
-                forårsaketAvNav().burdeForstått().copy(periode = 1.januar(2021) til 14.januar(2021)),
-                forårsaketAvNav().burdeForstått().copy(periode = 15.januar(2021) til 28.januar(2021)),
-            ),
+            vurderinger = arrayOf(forårsaketAvNav().burdeForstått().copy(periode = 1.januar(2021) til 28.januar(2021))),
         )
         somSaksbehandler(ansvarligSaksbehandler) {
             behandlingApiController.behandlingHentVedtaksbrev(behandlingId.toString()).body.shouldNotBeNull().avsnitt.size shouldBe 1

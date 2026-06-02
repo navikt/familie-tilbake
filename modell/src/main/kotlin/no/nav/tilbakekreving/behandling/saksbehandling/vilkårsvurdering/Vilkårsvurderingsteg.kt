@@ -61,28 +61,8 @@ class Vilkårsvurderingsteg(
         periode: Datoperiode,
         vurdering: ForårsaketAvBruker,
     ) {
-        val overlappendePerioder = vurderinger
-            .filter { it.periode.fom <= periode.tom && it.periode.tom >= periode.fom }
-            .sortedBy { it.periode.fom }
-
-        if (overlappendePerioder.isEmpty()) return
-
-        val førstePeriode = overlappendePerioder.first()
-        vurder(førstePeriode.id, vurdering)
-
-        var forrigePeriodeId = førstePeriode.id
-        var forrigeVurdering: ForårsaketAvBruker = vurdering
-
-        overlappendePerioder.drop(1).forEach { periodeSomSkalOppdateres ->
-            val kopiert = ForårsaketAvBruker.KopiertVurdering(
-                originalVurdering = forrigeVurdering,
-                forrigePeriodeId = forrigePeriodeId,
-            )
-            vurder(periodeSomSkalOppdateres.id, kopiert)
-
-            forrigePeriodeId = periodeSomSkalOppdateres.id
-            forrigeVurdering = kopiert
-        }
+        val funnetVurdering = vurderinger.single { it.vurdering !is ForårsaketAvBruker.KopiertVurdering && it.periode.overlapper(periode) }.id
+        vurder(funnetVurdering, vurdering)
     }
 
     internal fun vurder(
@@ -101,10 +81,6 @@ class Vilkårsvurderingsteg(
 
     private fun finnPeriode(periode: Datoperiode): Vilkårsvurderingsperiode {
         val id = finnIdForPeriode(periode)
-        return vurderinger.single { it.id == id }
-    }
-
-    internal fun finnPeriodeMedId(id: UUID): Vilkårsvurderingsperiode {
         return vurderinger.single { it.id == id }
     }
 
@@ -231,15 +207,11 @@ class Vilkårsvurderingsteg(
                     id = id,
                     periode = periode,
                     _vurdering = when (forrigePeriode) {
-                        null -> {
-                            ForårsaketAvBruker.IkkeVurdert
-                        }
-                        else -> {
-                            ForårsaketAvBruker.KopiertVurdering(
-                                originalVurdering = forrigePeriode.vurdering.underliggendeVurdering(),
-                                forrigePeriodeId = forrigePeriode.id,
-                            )
-                        }
+                        null -> ForårsaketAvBruker.IkkeVurdert
+                        else -> ForårsaketAvBruker.KopiertVurdering(
+                            forrigeVurdering = forrigePeriode.vurdering,
+                            forrigePeriodeId = forrigePeriode.id,
+                        )
                     },
                 )
             }

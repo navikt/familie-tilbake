@@ -65,11 +65,11 @@ interface ForårsaketAvBruker {
     }
 
     class KopiertVurdering(
-        private val originalVurdering: ForårsaketAvBruker,
+        private val forrigeVurdering: ForårsaketAvBruker,
         val forrigePeriodeId: UUID?,
-    ) : ForårsaketAvBruker by originalVurdering {
+    ) : ForårsaketAvBruker by forrigeVurdering {
         override fun underliggendeVurdering(): ForårsaketAvBruker {
-            return originalVurdering
+            return forrigeVurdering.underliggendeVurdering()
         }
 
         override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {

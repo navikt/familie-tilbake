@@ -11,12 +11,12 @@ data class VilkårsvurderingsperiodeEntity(
     val begrunnelseForTilbakekreving: String?,
     val vurdering: AktsomhetsvurderingEntity,
 ) {
-    fun fraEntity(kopiertVurdering: ForårsaketAvBruker): Vilkårsvurderingsperiode {
+    fun fraEntity(vurdering: ForårsaketAvBruker): Vilkårsvurderingsperiode {
         return Vilkårsvurderingsperiode(
             id = id,
             periode = periode.fraEntity(),
             begrunnelseForTilbakekreving = begrunnelseForTilbakekreving,
-            _vurdering = kopiertVurdering,
+            _vurdering = vurdering,
         )
     }
 }
