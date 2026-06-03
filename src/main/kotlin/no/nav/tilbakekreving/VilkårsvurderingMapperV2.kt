@@ -108,6 +108,6 @@ object VilkårsvurderingMapperV2 {
                     begrunnelseForGodTro = periode.godTroDto!!.begrunnelse,
                 )
 
-            Vilkårsvurderingsresultat.UDEFINERT -> ForårsaketAvBruker.IkkeVurdert
+            Vilkårsvurderingsresultat.UDEFINERT -> ForårsaketAvBruker.IkkeVurdert()
         }
 }

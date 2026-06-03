@@ -32,6 +32,7 @@ import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.validation.annotation.Validated
+import java.time.LocalDate
 import java.util.UUID
 
 @Component
@@ -145,6 +146,15 @@ class BehandlingApiController(
             valideringContext = ValideringContext.SendVarselbrev,
         ) { tilbakekreving, context ->
             ResponseEntity.ok(tilbakekreving.sendVarselbrev(behandlingId, sendForhaandsvarselDto.tekstFraSaksbehandler, context))
+        } ?: ResponseEntity.notFound().build()
+    }
+
+    override fun behandlingSplittPeriode(behandlingId: UUID, splittFra: LocalDate): ResponseEntity<Unit> {
+        return tilbakekrevingService.endreTilbakekreving(
+            filter = TilbakekrevingFilter.behandling(behandlingId),
+            valideringContext = ValideringContext.SplitteVilkårsvurderingsperiode,
+        ) { tilbakekreving, context ->
+            ResponseEntity.ok(tilbakekreving.splitteVilkårsvurderingsperioder(behandlingId, context, splittFra))
         } ?: ResponseEntity.notFound().build()
     }
 

@@ -105,6 +105,58 @@ class DelperiodeTest {
         frontendDto.perioder.first().feilutbetaltBeløp shouldBe 8000.kroner
     }
 
+    @Test
+    fun `dele vilkårsvurdering perioder`() {
+        val eksternFagsakRevurdering = eksternFagsakBehandling(
+            utvidPerioder = listOf(
+                EksternFagsakRevurdering.UtvidetPeriode(
+                    UUID.randomUUID(),
+                    2.februar(2025) til 1.april(2025),
+                    1.januar(2025) til 27.mars(2025),
+                ),
+            ),
+        )
+        val kravgrunnlagHendelse = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(2.februar(2025) til 13.februar(2025)),
+                kravgrunnlagPeriode(16.februar(2025) til 27.februar(2025)),
+                kravgrunnlagPeriode(2.mars(2025) til 13.mars(2025)),
+                kravgrunnlagPeriode(16.mars(2025) til 27.mars(2025)),
+            ),
+        )
+        val foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakRevurdering, kravgrunnlagHendelse)
+
+        kravgrunnlagHendelse.perioder().forEach {
+            foreldelsesteg.vurderForeldelse(
+                it.periode(),
+                Foreldelsesteg.Vurdering.IkkeForeldet(
+                    begrunnelse = "Ikke forelget",
+                ),
+            )
+        }
+
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakRevurdering,
+            kravgrunnlagHendelse,
+        )
+
+        vilkårsvurderingsteg.splitteVilkårsvurderingsperioder(16.februar(2025))
+
+        val frontendDto = vilkårsvurderingsteg.tilFrontendDto(
+            kravgrunnlag = kravgrunnlagHendelse,
+            revurdering = eksternFagsakRevurdering,
+            foreldelsesteg = foreldelsesteg,
+            klokke = SystemKlokke,
+        )
+        frontendDto.perioder.shouldHaveSize(2)
+        frontendDto.perioder.first().periode.fom shouldBe 2.februar(2025)
+        frontendDto.perioder.first().periode.tom shouldBe 13.februar(2025)
+        frontendDto.perioder.first().feilutbetaltBeløp shouldBe 2000.kroner
+        frontendDto.perioder[1].periode.fom shouldBe 16.februar(2025)
+        frontendDto.perioder[1].periode.tom shouldBe 27.mars(2025)
+        frontendDto.perioder[1].feilutbetaltBeløp shouldBe 6000.kroner
+    }
+
     class KravgrunnlagPeriode(private val periode: Datoperiode) : KravgrunnlagPeriodeAdapter {
         override fun periode(): Datoperiode = periode
 

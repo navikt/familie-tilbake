@@ -4,6 +4,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Forårs
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Skyldgrad
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg.Vilkårsvurderingsperiode
 import java.math.BigDecimal
 import java.util.UUID
 
@@ -15,7 +16,7 @@ data class AktsomhetsvurderingEntity(
     val feilaktigEllerMangelfull: FeilaktigEllerMangelfullType?,
     val forrigePeriodeId: UUID?,
 ) {
-    fun fraEntity(vurderinger: Map<UUID, ForårsaketAvBruker>): ForårsaketAvBruker {
+    fun fraEntity(vurderinger: Map<UUID, Vilkårsvurderingsperiode>): ForårsaketAvBruker {
         return when (vurderingType) {
             VurderingType.IKKE_FORÅRSAKET_AV_BRUKER_GOD_TRO -> {
                 NivåAvForståelse.GodTro(
@@ -70,7 +71,7 @@ data class AktsomhetsvurderingEntity(
                 }
             }
 
-            VurderingType.IKKE_VURDERT -> ForårsaketAvBruker.IkkeVurdert
+            VurderingType.IKKE_VURDERT -> ForårsaketAvBruker.IkkeVurdert()
             VurderingType.KOPIERT_VURDERING -> ForårsaketAvBruker.KopiertVurdering(
                 forrigeVurdering = requireNotNull(vurderinger[forrigePeriodeId]) { "Fant ikke vurdering å kopiere fra med id $forrigePeriodeId" },
                 forrigePeriodeId = forrigePeriodeId,

@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering
 
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsresultatDto
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg.Vilkårsvurderingsperiode
 import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.endring.VurdertUtbetaling
@@ -32,7 +33,7 @@ interface ForårsaketAvBruker {
 
     sealed interface Nei : ForårsaketAvBruker
 
-    data object IkkeVurdert : ForårsaketAvBruker, Vurdering {
+    class IkkeVurdert : ForårsaketAvBruker, Vurdering {
         override val begrunnelse: String? = null
 
         override fun vurderingstype(): Vurdering = this
@@ -65,11 +66,11 @@ interface ForårsaketAvBruker {
     }
 
     class KopiertVurdering(
-        private val forrigeVurdering: ForårsaketAvBruker,
+        private val forrigeVurdering: Vilkårsvurderingsperiode,
         val forrigePeriodeId: UUID?,
-    ) : ForårsaketAvBruker by forrigeVurdering {
+    ) : ForårsaketAvBruker by forrigeVurdering.vurdering {
         override fun underliggendeVurdering(): ForårsaketAvBruker {
-            return forrigeVurdering.underliggendeVurdering()
+            return forrigeVurdering.vurdering.underliggendeVurdering()
         }
 
         override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
