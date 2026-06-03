@@ -15,9 +15,9 @@ description = "familie-tilbake"
 java.sourceCompatibility = JavaVersion.VERSION_25
 
 plugins {
-    kotlin("jvm") version "2.3.21"
+    kotlin("jvm") version "2.4.0"
     id("org.springframework.boot") version "4.0.6"
-    id("org.jetbrains.kotlin.plugin.spring") version "2.3.21"
+    id("org.jetbrains.kotlin.plugin.spring") version "2.4.0"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
 }
 
@@ -246,7 +246,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:6.1.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    testImplementation("io.mockk:mockk-jvm:1.14.9")
+    testImplementation("io.mockk:mockk-jvm:1.14.11")
     testImplementation("io.kotest:kotest-assertions-core-jvm:6.1.11")
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
 
