@@ -35,7 +35,9 @@ class AutomatiskForeldelseE2ETest {
         val klokke = KlokkeStub(fom.plusMonths(10))
 
         val tilbakekreving = opprettTilbakekrevingMedKravgrunnlag(periode, klokke)
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), faktastegVurdering(periode))
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
+            håndter(saksbehandlerContext(), faktastegVurdering(periode))
+        }
 
         foreldelsePerioderFor(tilbakekreving)
             .forAll { it.foreldelsesvurderingstype shouldBe Foreldelsesvurderingstype.IKKE_FORELDET }
@@ -48,7 +50,9 @@ class AutomatiskForeldelseE2ETest {
         val klokke = KlokkeStub(fom.plusMonths(31))
 
         val tilbakekreving = opprettTilbakekrevingMedKravgrunnlag(periode, klokke)
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(klokke = klokke), faktastegVurdering(periode))
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(klokke = klokke)) {
+            håndter(saksbehandlerContext(klokke = klokke), faktastegVurdering(periode))
+        }
 
         foreldelsePerioderFor(tilbakekreving)
             .forAll { it.foreldelsesvurderingstype shouldBe Foreldelsesvurderingstype.IKKE_VURDERT }
@@ -61,13 +65,15 @@ class AutomatiskForeldelseE2ETest {
         val klokke = KlokkeStub(fom.plusMonths(10))
 
         val tilbakekreving = opprettTilbakekrevingMedKravgrunnlag(periode, klokke)
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), faktastegVurdering(periode))
-        tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.JA, null, null, saksbehandlerContext())
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), periode, forårsaketAvBruker().uaktsomt())
-        tilbakekreving.håndterForeslåVedtak(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext())
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
+            håndter(saksbehandlerContext(), faktastegVurdering(periode))
+            lagreUttalelse(UttalelseVurdering.JA, null, null, saksbehandlerContext())
+            håndter(saksbehandlerContext(), periode, forårsaketAvBruker().uaktsomt())
+            håndterForeslåVedtak(saksbehandlerContext())
 
-        klokke.settTid(fom.plusMonths(31))
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), beslutterContext(), godkjenning())
+            klokke.settTid(fom.plusMonths(31))
+            håndter(beslutterContext(), godkjenning())
+        }
 
         foreldelsePerioderFor(tilbakekreving)
             .forAll { it.foreldelsesvurderingstype shouldBe Foreldelsesvurderingstype.IKKE_FORELDET }
@@ -80,7 +86,10 @@ class AutomatiskForeldelseE2ETest {
         val klokke = KlokkeStub(fom.plusMonths(10))
 
         val tilbakekreving = opprettTilbakekrevingMedKravgrunnlag(periode, klokke)
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(klokke = klokke), faktastegVurdering(periode))
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
+            håndter(saksbehandlerContext(klokke = klokke), faktastegVurdering(periode))
+        }
+
         foreldelsePerioderFor(tilbakekreving)
             .forAll { it.foreldelsesvurderingstype shouldBe Foreldelsesvurderingstype.IKKE_FORELDET }
 
@@ -98,10 +107,12 @@ class AutomatiskForeldelseE2ETest {
         val klokke = KlokkeStub(fom.plusMonths(10))
 
         val tilbakekreving = opprettTilbakekrevingMedKravgrunnlag(periode, klokke)
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), faktastegVurdering(periode))
-        tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.JA, null, null, saksbehandlerContext())
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), periode, forårsaketAvBruker().uaktsomt())
-        tilbakekreving.håndterForeslåVedtak(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext())
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
+            håndter(saksbehandlerContext(), faktastegVurdering(periode))
+            lagreUttalelse(UttalelseVurdering.JA, null, null, saksbehandlerContext())
+            håndter(saksbehandlerContext(), periode, forårsaketAvBruker().uaktsomt())
+            håndterForeslåVedtak(saksbehandlerContext())
+        }
 
         klokke.settTid(fom.plusMonths(31))
         tilbakekreving.håndter(Påminnelse(klokke.nå()), systemContext())
@@ -117,13 +128,15 @@ class AutomatiskForeldelseE2ETest {
         val klokke = KlokkeStub(fom.plusMonths(10))
 
         val tilbakekreving = opprettTilbakekrevingMedKravgrunnlag(periode, klokke)
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), faktastegVurdering(periode))
-        tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.JA, null, null, saksbehandlerContext())
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), periode, forårsaketAvBruker().uaktsomt())
-        tilbakekreving.håndterForeslåVedtak(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext())
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
+            håndter(saksbehandlerContext(), faktastegVurdering(periode))
+            lagreUttalelse(UttalelseVurdering.JA, null, null, saksbehandlerContext())
+            håndter(saksbehandlerContext(), periode, forårsaketAvBruker().uaktsomt())
+            håndterForeslåVedtak(saksbehandlerContext())
 
-        klokke.settTid(fom.plusMonths(31))
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), beslutterContext(), godkjenning())
+            klokke.settTid(fom.plusMonths(31))
+            håndter(beslutterContext(), godkjenning())
+        }
 
         foreldelsePerioderFor(tilbakekreving)
             .forAll { it.foreldelsesvurderingstype shouldBe Foreldelsesvurderingstype.IKKE_FORELDET }
@@ -137,7 +150,9 @@ class AutomatiskForeldelseE2ETest {
         val behandlingslogg = Behandlingslogg(mutableListOf())
 
         val tilbakekreving = opprettTilbakekrevingMedKravgrunnlag(periode, klokke)
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(klokke = klokke, behandlingslogg = behandlingslogg), faktastegVurdering(periode))
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(behandlingslogg = behandlingslogg)) {
+            håndter(saksbehandlerContext(klokke = klokke, behandlingslogg = behandlingslogg), faktastegVurdering(periode))
+        }
 
         behandlingslogg.tilFrontend()
             .forOne { it.tittel shouldBe "Foreldelse automatisk vurdert" }
@@ -151,7 +166,9 @@ class AutomatiskForeldelseE2ETest {
         val behandlingslogg = Behandlingslogg(mutableListOf())
 
         val tilbakekreving = opprettTilbakekrevingMedKravgrunnlag(periode, klokke)
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(behandlingslogg = behandlingslogg), faktastegVurdering(periode))
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
+            håndter(saksbehandlerContext(behandlingslogg = behandlingslogg), faktastegVurdering(periode))
+        }
         tilbakekreving.håndter(Påminnelse(LocalDateTime.now()), systemContext(behandlingslogg = behandlingslogg))
 
         behandlingslogg.tilFrontend()
@@ -166,7 +183,9 @@ class AutomatiskForeldelseE2ETest {
         val behandlingslogg = Behandlingslogg(mutableListOf())
 
         val tilbakekreving = opprettTilbakekrevingMedKravgrunnlag(periode, klokke)
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(klokke = klokke, behandlingslogg = behandlingslogg), faktastegVurdering(periode))
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
+            håndter(saksbehandlerContext(klokke = klokke, behandlingslogg = behandlingslogg), faktastegVurdering(periode))
+        }
 
         klokke.settTid(fom.plusMonths(31))
         tilbakekreving.håndter(Påminnelse(klokke.nå()), systemContext(klokke = klokke, behandlingslogg = behandlingslogg))
@@ -183,7 +202,9 @@ class AutomatiskForeldelseE2ETest {
         val behandlingslogg = Behandlingslogg(mutableListOf())
 
         val tilbakekreving = opprettTilbakekrevingMedKravgrunnlag(periode, klokke)
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(klokke = klokke, behandlingslogg = behandlingslogg), faktastegVurdering(periode))
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
+            håndter(saksbehandlerContext(klokke = klokke, behandlingslogg = behandlingslogg), faktastegVurdering(periode))
+        }
 
         klokke.settTid(fom.plusMonths(31))
         tilbakekreving.håndter(Påminnelse(klokke.nå()), systemContext(klokke = klokke, behandlingslogg = behandlingslogg))

@@ -48,7 +48,9 @@ class FrontendE2ETest {
 
         tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true, BehandlerRolle.BESLUTTER).status shouldBe Behandlingsstatus.UTREDES
 
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), faktastegVurdering())
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
+            håndter(saksbehandlerContext(), faktastegVurdering())
+        }
         tilbakekreving.sendVarselbrev(
             tilbakekreving.nåværendeBehandlingId(),
             "Tekst fra saksbehandler",
@@ -72,16 +74,21 @@ class FrontendE2ETest {
             ),
             systemContext(),
         )
-        tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.JA, null, null, saksbehandlerContext())
-
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
+            lagreUttalelse(UttalelseVurdering.JA, null, null, saksbehandlerContext())
+            håndter(saksbehandlerContext(), 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
+            håndter(saksbehandlerContext(), 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
+        }
         tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true, BehandlerRolle.BESLUTTER).status shouldBe Behandlingsstatus.UTREDES
 
-        tilbakekreving.håndterForeslåVedtak(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext())
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
+            håndterForeslåVedtak(saksbehandlerContext())
+        }
         tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true, BehandlerRolle.BESLUTTER).status shouldBe Behandlingsstatus.FATTER_VEDTAK
 
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), beslutterContext(), godkjenning())
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), beslutterContext()) {
+            håndter(beslutterContext(), godkjenning())
+        }
         tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true, BehandlerRolle.BESLUTTER).status shouldBe Behandlingsstatus.IVERKSETTER_VEDTAK
 
         tilbakekreving.håndter(

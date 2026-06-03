@@ -139,16 +139,17 @@ open class TilbakekrevingE2EBase : E2EBase() {
     ) {
         val tilbakekrevingId = tilbakekreving(behandlingId).id
         tilbakekrevingService.hentOgLagreTilbakekreving(TilbakekrevingFilter.tilbakekreving(tilbakekrevingId)) { tilbakekreving, context ->
-            if (uttalelse == null) {
-                tilbakekreving.lagreUttalelse(behandlingId, UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL, null, "", context(ansvarligSaksbehandler))
-            } else {
-                tilbakekreving.lagreUttalelse(
-                    behandlingId,
-                    UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL,
-                    UttalelseInfo(UUID.randomUUID(), LocalDate.now(), "Reddit", uttalelse),
-                    null,
-                    context(ansvarligSaksbehandler),
-                )
+            tilbakekreving.gjørSaksbehandling(behandlingId, context(ansvarligSaksbehandler)) {
+                if (uttalelse == null) {
+                    lagreUttalelse(UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL, null, "", context(ansvarligSaksbehandler))
+                } else {
+                    lagreUttalelse(
+                        UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL,
+                        UttalelseInfo(UUID.randomUUID(), LocalDate.now(), "Reddit", uttalelse),
+                        null,
+                        context(ansvarligSaksbehandler),
+                    )
+                }
             }
         }
     }

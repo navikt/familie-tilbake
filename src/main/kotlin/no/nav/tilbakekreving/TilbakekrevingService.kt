@@ -349,79 +349,42 @@ class TilbakekrevingService(
         tilbakekreving: Tilbakekreving,
         context: SideeffektContext,
         behandlingId: UUID,
-        behandlingsstegDto: BehandlingsstegDto,
+        dto: BehandlingsstegDto,
     ) {
         val logContext = SecureLog.Context.fra(tilbakekreving)
-        return when (behandlingsstegDto) {
-            is BehandlingsstegForeldelseDto -> behandleForeldelse(behandlingId, tilbakekreving, behandlingsstegDto, context)
-            is BehandlingsstegVilkårsvurderingDto -> behandleVilkårsvurdering(behandlingId, tilbakekreving, behandlingsstegDto, context)
-            is BehandlingsstegForeslåVedtaksstegDto -> behandleForeslåVedtak(behandlingId, tilbakekreving, context)
-            is BehandlingsstegFatteVedtaksstegDto -> behandleFatteVedtak(behandlingId, tilbakekreving, behandlingsstegDto, context)
-            else -> throw Feil("Vurdering for ${behandlingsstegDto.getSteg()} er ikke implementert i ny modell enda.", logContext = logContext)
-        }
-    }
-
-    private fun behandleVilkårsvurdering(
-        behandlingId: UUID,
-        tilbakekreving: Tilbakekreving,
-        vurdering: BehandlingsstegVilkårsvurderingDto,
-        sideeffektContext: SideeffektContext,
-    ) {
-        vurdering.vilkårsvurderingsperioder.forEach { periode ->
-            tilbakekreving.håndter(
-                behandlingId,
-                sideeffektContext,
-                periode.periode,
-                VilkårsvurderingMapperV2.tilVurdering(periode),
-            )
-        }
-    }
-
-    private fun behandleForeldelse(
-        behandlingId: UUID,
-        tilbakekreving: Tilbakekreving,
-        vurdering: BehandlingsstegForeldelseDto,
-        sideeffektContext: SideeffektContext,
-    ) {
-        vurdering.foreldetPerioder.forEach { periode ->
-            tilbakekreving.håndter(
-                behandlingId,
-                sideeffektContext,
-                periode.periode,
-                when (periode.foreldelsesvurderingstype) {
-                    Foreldelsesvurderingstype.IKKE_VURDERT -> Foreldelsesteg.Vurdering.IkkeVurdert
-                    Foreldelsesvurderingstype.FORELDET -> Foreldelsesteg.Vurdering.Foreldet(periode.begrunnelse)
-                    Foreldelsesvurderingstype.IKKE_FORELDET -> Foreldelsesteg.Vurdering.IkkeForeldet(periode.begrunnelse)
-                    Foreldelsesvurderingstype.TILLEGGSFRIST -> Foreldelsesteg.Vurdering.Tilleggsfrist(periode.foreldelsesfrist!!, periode.oppdagelsesdato!!)
-                },
-            )
-        }
-    }
-
-    private fun behandleForeslåVedtak(
-        behandlingId: UUID,
-        tilbakekreving: Tilbakekreving,
-        sideeffektContext: SideeffektContext,
-    ) {
-        tilbakekreving.håndterForeslåVedtak(behandlingId, sideeffektContext)
-    }
-
-    private fun behandleFatteVedtak(
-        behandlingId: UUID,
-        tilbakekreving: Tilbakekreving,
-        vurdering: BehandlingsstegFatteVedtaksstegDto,
-        sideeffektContext: SideeffektContext,
-    ) {
-        tilbakekreving.håndter(
-            behandlingId = behandlingId,
-            sideeffektContext = sideeffektContext,
-            vurderinger = vurdering.totrinnsvurderinger.map { stegVurdering ->
-                stegVurdering.behandlingssteg to when (stegVurdering.godkjent) {
-                    true -> FatteVedtakSteg.Vurdering.Godkjent
-                    else -> FatteVedtakSteg.Vurdering.Underkjent(stegVurdering.begrunnelse!!)
+        tilbakekreving.gjørSaksbehandling(behandlingId, context) {
+            when (dto) {
+                is BehandlingsstegForeldelseDto -> dto.foreldetPerioder.forEach { periode ->
+                    håndter(
+                        context,
+                        periode.periode,
+                        when (periode.foreldelsesvurderingstype) {
+                            Foreldelsesvurderingstype.IKKE_VURDERT -> Foreldelsesteg.Vurdering.IkkeVurdert
+                            Foreldelsesvurderingstype.FORELDET -> Foreldelsesteg.Vurdering.Foreldet(periode.begrunnelse)
+                            Foreldelsesvurderingstype.IKKE_FORELDET -> Foreldelsesteg.Vurdering.IkkeForeldet(periode.begrunnelse)
+                            Foreldelsesvurderingstype.TILLEGGSFRIST -> Foreldelsesteg.Vurdering.Tilleggsfrist(periode.foreldelsesfrist!!, periode.oppdagelsesdato!!)
+                        },
+                    )
                 }
-            },
-        )
+
+                is BehandlingsstegVilkårsvurderingDto -> dto.vilkårsvurderingsperioder.forEach { periode ->
+                    håndter(context, periode.periode, VilkårsvurderingMapperV2.tilVurdering(periode))
+                }
+
+                is BehandlingsstegForeslåVedtaksstegDto -> håndterForeslåVedtak(context)
+                is BehandlingsstegFatteVedtaksstegDto -> håndter(
+                    sideeffektContext = context,
+                    vurderinger = dto.totrinnsvurderinger.map { stegVurdering ->
+                        stegVurdering.behandlingssteg to when (stegVurdering.godkjent) {
+                            true -> FatteVedtakSteg.Vurdering.Godkjent
+                            else -> FatteVedtakSteg.Vurdering.Underkjent(stegVurdering.begrunnelse!!)
+                        }
+                    },
+                )
+
+                else -> throw Feil("Vurdering for ${dto.getSteg()} er ikke implementert i ny modell enda.", logContext = logContext)
+            }
+        }
     }
 
     fun hentHistorikk(tilbakekrevingId: String): List<LogginnslagDto> {

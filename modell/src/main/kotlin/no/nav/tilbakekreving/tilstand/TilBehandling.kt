@@ -5,13 +5,10 @@ import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
-import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
-import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
-import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.time.Duration
 
@@ -35,28 +32,23 @@ object TilBehandling : Tilstand {
         tilbakekreving.påminnNåværendePeriode(sideeffektContext)
     }
 
-    override fun håndterNullstilling(nåværendeBehandling: Behandling, sporing: Sporing, sideeffektContext: SideeffektContext) {
-        nåværendeBehandling.flyttTilbakeTilFakta(sideeffektContext)
-    }
-
     override fun håndter(tilbakekreving: Tilbakekreving, fagsysteminfo: FagsysteminfoHendelse, sideeffektContext: SideeffektContext) {
         tilbakekreving.oppdaterFagsysteminfo(fagsysteminfo, sideeffektContext)
     }
 
-    override fun håndter(
+    override fun <T> gjørSaksbehandling(
         tilbakekreving: Tilbakekreving,
         behandling: Behandling,
-        vurderinger: List<Pair<Behandlingssteg, FatteVedtakSteg.Vurdering>>,
         sideeffektContext: SideeffektContext,
-    ) {
-        behandling.håndter(sideeffektContext, vurderinger)
-        if (behandling.kanUtbetales(sideeffektContext.klokke)) {
-            tilbakekreving.byttTilstand(IverksettVedtak, sideeffektContext)
+        callback: (Behandling) -> T,
+    ): T {
+        return behandling.utførEndring(tilbakekreving::tilstand, sideeffektContext, tilbakekreving, tilbakekreving.eksternFagsak.ytelse) {
+            callback(this).also {
+                if (behandling.kanUtbetales(sideeffektContext.klokke)) {
+                    tilbakekreving.byttTilstand(IverksettVedtak, sideeffektContext)
+                }
+            }
         }
-    }
-
-    override fun håndterTrekkTilbakeFraGodkjenning(behandling: Behandling, sporing: Sporing, sideeffektContext: SideeffektContext) {
-        behandling.trekkTilbakeFraGodkjenning(sideeffektContext)
     }
 
     override fun håndter(

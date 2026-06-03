@@ -139,7 +139,9 @@ class ForvaltningController(
         @PathVariable behandlingId: UUID,
     ): Ressurs<String> {
         val response = tilbakekrevingService.endreTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.ForvaltningFlyttTilFakta) { tilbakekreving, context ->
-            tilbakekreving.håndterNullstilling(behandlingId, context)
+            tilbakekreving.gjørSaksbehandling(behandlingId, context) {
+                flyttTilbakeTilFakta(context)
+            }
             Ressurs.success("OK")
         }
         if (response != null) {

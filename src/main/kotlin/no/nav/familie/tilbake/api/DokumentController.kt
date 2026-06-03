@@ -177,7 +177,9 @@ class DokumentController(
         dto: FristUtsettelseDto,
     ): Ressurs<Nothing?> {
         return tilbakekrevingService.endreTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.RegistrerUtsattFrist) { tilbakekreving, context ->
-            tilbakekreving.lagreFristUtsettelse(behandlingId, dto.nyFrist!!, dto.begrunnelse!!, context)
+            tilbakekreving.gjørSaksbehandling(behandlingId, context) {
+                lagreFristUtsettelse(dto.nyFrist!!, dto.begrunnelse!!, context)
+            }
             Ressurs.success(null)
         } ?: Ressurs.failure("Fant ingen tilbakekreving til behandlingId $behandlingId")
     }
@@ -193,16 +195,17 @@ class DokumentController(
         dto: ForhåndsvarselUnntakDto,
     ): Ressurs<Nothing?> {
         return tilbakekrevingService.endreTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.RegistrerForhåndsvarselUnntak) { tilbakekreving, context ->
-            tilbakekreving.lagreForhåndsvarselUnntak(
-                behandlingId = behandlingId,
-                begrunnelseForUnntak = when (dto.begrunnelseForUnntak) {
-                    VarslingsUnntak.IKKE_PRAKTISK_MULIG -> BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG
-                    VarslingsUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING -> BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING
-                    VarslingsUnntak.ÅPENBART_UNØDVENDIG -> BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG
-                },
-                beskrivelse = dto.beskrivelse,
-                sideeffektContext = context,
-            )
+            tilbakekreving.gjørSaksbehandling(behandlingId, context) {
+                lagreForhåndsvarselUnntak(
+                    begrunnelseForUnntak = when (dto.begrunnelseForUnntak) {
+                        VarslingsUnntak.IKKE_PRAKTISK_MULIG -> BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG
+                        VarslingsUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING -> BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING
+                        VarslingsUnntak.ÅPENBART_UNØDVENDIG -> BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG
+                    },
+                    beskrivelse = dto.beskrivelse,
+                    sideeffektContext = context,
+                )
+            }
             Ressurs.success(null)
         } ?: Ressurs.failure("Fant ingen tilbakekreving til behandlingId $behandlingId")
     }

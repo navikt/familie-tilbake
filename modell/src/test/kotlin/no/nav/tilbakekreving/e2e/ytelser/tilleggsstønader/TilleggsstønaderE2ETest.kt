@@ -64,7 +64,9 @@ class TilleggsstønaderE2ETest {
             systemContext(),
         )
         tilbakekreving.håndter(brukerinfoHendelse(), systemContext())
-        tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.JA, null, "", saksbehandlerContext())
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
+            lagreUttalelse(UttalelseVurdering.JA, null, "", saksbehandlerContext())
+        }
         val faktastegDto = tilbakekreving.faktastegFrontendDto(tilbakekreving.nåværendeBehandlingId())
         faktastegDto.feilutbetaltePerioder shouldBe listOf(
             FeilutbetalingsperiodeDto(
@@ -82,8 +84,10 @@ class TilleggsstønaderE2ETest {
         )
         faktastegDto.totalFeilutbetaltPeriode shouldBe (1.januar(2021) til 28.februar(2021))
 
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), faktastegVurdering(1.januar(2021) til 31.januar(2021)))
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), faktastegVurdering(1.februar(2021) til 28.februar(2021)))
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
+            håndter(saksbehandlerContext(), faktastegVurdering(1.januar(2021) til 31.januar(2021)))
+            håndter(saksbehandlerContext(), faktastegVurdering(1.februar(2021) til 28.februar(2021)))
+        }
 
         val foreldelsesstegDto = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId()).foreldelsestegDto.tilFrontendDto(saksbehandlerContext())
         foreldelsesstegDto.foreldetPerioder shouldBe listOf(
@@ -105,8 +109,10 @@ class TilleggsstønaderE2ETest {
             ),
         )
 
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), 1.januar(2021) til 31.januar(2021), Foreldelsesteg.Vurdering.IkkeForeldet(""))
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), 1.februar(2021) til 28.februar(2021), Foreldelsesteg.Vurdering.IkkeForeldet(""))
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
+            håndter(saksbehandlerContext(), 1.januar(2021) til 31.januar(2021), Foreldelsesteg.Vurdering.IkkeForeldet(""))
+            håndter(saksbehandlerContext(), 1.februar(2021) til 28.februar(2021), Foreldelsesteg.Vurdering.IkkeForeldet(""))
+        }
 
         val vilkårsvurderingsstegDto = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId()).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext())
         vilkårsvurderingsstegDto.perioder shouldBe listOf(

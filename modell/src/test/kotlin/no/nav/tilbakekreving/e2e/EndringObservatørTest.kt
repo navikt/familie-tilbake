@@ -60,7 +60,9 @@ class EndringObservatørTest {
         tilbakekreving.håndter(kravgrunnlag(), systemContext())
         tilbakekreving.håndter(fagsysteminfoHendelse(), systemContext(endringObservatør))
         tilbakekreving.håndter(brukerinfoHendelse(), systemContext(endringObservatør))
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør), faktastegVurdering())
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør)) {
+            håndter(saksbehandlerContext(), faktastegVurdering())
+        }
         endringObservatør.statusoppdateringerFor(tilbakekreving.nåværendeBehandlingId()) shouldBe listOf(
             EndringObservatørOppsamler.Statusoppdatering(
                 ansvarligSaksbehandler = Behandler.Vedtaksløsning.ident,
@@ -102,7 +104,9 @@ class EndringObservatørTest {
             systemContext(endringObservatør),
         )
         tilbakekreving.håndter(brukerinfoHendelse(), systemContext(endringObservatør))
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør), faktastegVurdering())
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør)) {
+            håndter(saksbehandlerContext(endringObservatør), faktastegVurdering())
+        }
         endringObservatør.statusoppdateringerFor(tilbakekreving.nåværendeBehandlingId()) shouldBe listOf(
             EndringObservatørOppsamler.Statusoppdatering(
                 ansvarligSaksbehandler = Behandler.Vedtaksløsning.ident,
@@ -140,19 +144,33 @@ class EndringObservatørTest {
             ForenkletBehandlingsstatus.OPPRETTET,
         )
         tilbakekreving.håndter(brukerinfoHendelse(), systemContext(endringObservatør))
-        tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.JA, null, "", saksbehandlerContext(endringObservatør))
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør)) {
+            lagreUttalelse(UttalelseVurdering.JA, null, "", saksbehandlerContext(endringObservatør))
+        }
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.behandlingsstatus } shouldBe listOf(
             ForenkletBehandlingsstatus.OPPRETTET,
             ForenkletBehandlingsstatus.TIL_BEHANDLING,
             ForenkletBehandlingsstatus.TIL_BEHANDLING,
         )
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør), faktastegVurdering())
-        tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, null, "", saksbehandlerContext(endringObservatør))
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør), 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør), 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
-        tilbakekreving.håndterForeslåVedtak(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør))
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør)) {
+            håndter(saksbehandlerContext(endringObservatør), faktastegVurdering())
+        }
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør)) {
+            lagreUttalelse(UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, null, "", saksbehandlerContext(endringObservatør))
+        }
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør)) {
+            håndter(saksbehandlerContext(endringObservatør), 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
+        }
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør)) {
+            håndter(saksbehandlerContext(endringObservatør), 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
+        }
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør)) {
+            håndterForeslåVedtak(saksbehandlerContext(endringObservatør))
+        }
 
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), beslutterContext(endringObservatør), godkjenning())
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), beslutterContext(endringObservatør)) {
+            håndter(beslutterContext(endringObservatør), godkjenning())
+        }
         tilbakekreving.håndter(iverksettelse(), systemContext(endringObservatør, behovObservatør = behovOppsamler))
         tilbakekreving.håndter(journalføring((behovOppsamler.behovListe.last() as VedtaksbrevJournalføringBehov).brevId, tilbakekreving.eksternFagsak.eksternId), systemContext(endringObservatør, behovObservatør = behovOppsamler))
         tilbakekreving.håndter(distribusjon((behovOppsamler.behovListe.last() as VedtaksbrevDistribusjonBehov).brevId, tilbakekreving.eksternFagsak.eksternId), systemContext(endringObservatør, behovObservatør = behovOppsamler))
@@ -190,23 +208,31 @@ class EndringObservatørTest {
             ForenkletBehandlingsstatus.OPPRETTET,
         )
         tilbakekreving.håndter(brukerinfoHendelse(), systemContext(endringObservatør))
-        tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.JA, null, "", saksbehandlerContext(endringObservatør))
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør)) {
+            lagreUttalelse(UttalelseVurdering.JA, null, "", saksbehandlerContext(endringObservatør))
+        }
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.behandlingsstatus } shouldBe listOf(
             ForenkletBehandlingsstatus.OPPRETTET,
             ForenkletBehandlingsstatus.TIL_BEHANDLING,
             ForenkletBehandlingsstatus.TIL_BEHANDLING,
         )
 
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør), faktastegVurdering())
-        tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, null, "", saksbehandlerContext(endringObservatør))
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør), 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør), 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
-        tilbakekreving.håndterForeslåVedtak(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør))
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør)) {
+            håndter(saksbehandlerContext(endringObservatør), faktastegVurdering())
+        }
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør)) {
+            lagreUttalelse(UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, null, "", saksbehandlerContext(endringObservatør))
+            håndter(saksbehandlerContext(endringObservatør), 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
+            håndter(saksbehandlerContext(endringObservatør), 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
+            håndterForeslåVedtak(saksbehandlerContext(endringObservatør))
+        }
 
         endringObservatør.behandlingEndretEventsFor(fagsakId).last().forrigeBehandlingsstatus shouldBe ForenkletBehandlingsstatus.TIL_BEHANDLING
         endringObservatør.behandlingEndretEventsFor(fagsakId).last().behandlingsstatus shouldBe ForenkletBehandlingsstatus.TIL_GODKJENNING
 
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), beslutterContext(endringObservatør), godkjenning())
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), beslutterContext(endringObservatør)) {
+            håndter(beslutterContext(endringObservatør), godkjenning())
+        }
         tilbakekreving.håndter(iverksettelse(), systemContext(endringObservatør, behovObservatør = behovOppsamler))
         tilbakekreving.håndter(journalføring((behovOppsamler.behovListe.last() as VedtaksbrevJournalføringBehov).brevId, fagsakId = tilbakekreving.eksternFagsak.eksternId), systemContext(endringObservatør, behovObservatør = behovOppsamler))
         tilbakekreving.håndter(distribusjon((behovOppsamler.behovListe.last() as VedtaksbrevDistribusjonBehov).brevId, fagsakId = tilbakekreving.eksternFagsak.eksternId), systemContext(endringObservatør, behovObservatør = behovOppsamler))
@@ -236,29 +262,39 @@ class EndringObservatørTest {
             ForenkletBehandlingsstatus.OPPRETTET,
         )
         tilbakekreving.håndter(brukerinfoHendelse(), systemContext(endringObservatør))
-        tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.JA, null, "", saksbehandlerContext(endringObservatør))
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør)) {
+            lagreUttalelse(UttalelseVurdering.JA, null, "", saksbehandlerContext(endringObservatør))
+        }
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.behandlingsstatus } shouldBe listOf(
             ForenkletBehandlingsstatus.OPPRETTET,
             ForenkletBehandlingsstatus.TIL_BEHANDLING,
             ForenkletBehandlingsstatus.TIL_BEHANDLING,
         )
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør), faktastegVurdering())
-        tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, null, "", saksbehandlerContext(endringObservatør))
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør), 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør), 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
-        tilbakekreving.håndterForeslåVedtak(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør))
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør)) {
+            håndter(saksbehandlerContext(endringObservatør), faktastegVurdering())
+        }
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør)) {
+            lagreUttalelse(UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, null, "", saksbehandlerContext(endringObservatør))
+            håndter(saksbehandlerContext(endringObservatør), 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
+            håndter(saksbehandlerContext(endringObservatør), 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
+            håndterForeslåVedtak(saksbehandlerContext(endringObservatør))
+        }
 
-        tilbakekreving.håndter(
+        tilbakekreving.gjørSaksbehandling(
             tilbakekreving.nåværendeBehandlingId(),
             beslutterContext(endringObservatør),
-            listOf(
-                Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Underkjent("Ikke godkjent"),
-                Behandlingssteg.FORHÅNDSVARSEL to FatteVedtakSteg.Vurdering.Underkjent("Ikke godkjent"),
-                Behandlingssteg.FORELDELSE to FatteVedtakSteg.Vurdering.Underkjent("Ikke godkjent"),
-                Behandlingssteg.VILKÅRSVURDERING to FatteVedtakSteg.Vurdering.Underkjent("Ikke godkjent"),
-                Behandlingssteg.FORESLÅ_VEDTAK to FatteVedtakSteg.Vurdering.Underkjent("Ikke godkjent"),
-            ),
-        )
+        ) {
+            håndter(
+                beslutterContext(endringObservatør),
+                listOf(
+                    Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Underkjent("Ikke godkjent"),
+                    Behandlingssteg.FORHÅNDSVARSEL to FatteVedtakSteg.Vurdering.Underkjent("Ikke godkjent"),
+                    Behandlingssteg.FORELDELSE to FatteVedtakSteg.Vurdering.Underkjent("Ikke godkjent"),
+                    Behandlingssteg.VILKÅRSVURDERING to FatteVedtakSteg.Vurdering.Underkjent("Ikke godkjent"),
+                    Behandlingssteg.FORESLÅ_VEDTAK to FatteVedtakSteg.Vurdering.Underkjent("Ikke godkjent"),
+                ),
+            )
+        }
 
         endringObservatør.behandlingEndretEventsFor(fagsakId).last().forrigeBehandlingsstatus shouldBe ForenkletBehandlingsstatus.TIL_GODKJENNING
         endringObservatør.behandlingEndretEventsFor(fagsakId).last().behandlingsstatus shouldBe ForenkletBehandlingsstatus.TIL_BEHANDLING
@@ -302,11 +338,12 @@ class EndringObservatørTest {
             it.forrigeBehandlingsstatus shouldBe ForenkletBehandlingsstatus.OPPRETTET
         }
 
-        tilbakekreving.håndter(
+        tilbakekreving.gjørSaksbehandling(
             tilbakekreving.nåværendeBehandlingId(),
             saksbehandlerContext(endringObservatør, features = features),
-            faktastegVurdering(),
-        )
+        ) {
+            håndter(saksbehandlerContext(endringObservatør, features = features), faktastegVurdering())
+        }
 
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.behandlingsstatus } shouldBe listOf(
             ForenkletBehandlingsstatus.OPPRETTET,

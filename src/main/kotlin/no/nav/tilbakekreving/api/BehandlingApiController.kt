@@ -62,13 +62,14 @@ class BehandlingApiController(
             filter = TilbakekrevingFilter.behandling(UUID.fromString(behandlingId)),
             valideringContext = ValideringContext.OppdaterFakta,
         ) { tilbakekreving, context ->
-            tilbakekreving.vurderFakta(
-                behandlingId = UUID.fromString(behandlingId),
-                sideeffektContext = context,
-                oppdaget = oppdaterFaktaOmFeilutbetalingDto.vurdering?.oppdaget,
-                årsak = oppdaterFaktaOmFeilutbetalingDto.vurdering?.årsak,
-                perioder = oppdaterFaktaOmFeilutbetalingDto.perioder,
-            )
+            tilbakekreving.gjørSaksbehandling(UUID.fromString(behandlingId), context) {
+                håndter(
+                    context,
+                    oppdaget = oppdaterFaktaOmFeilutbetalingDto.vurdering?.oppdaget,
+                    årsak = oppdaterFaktaOmFeilutbetalingDto.vurdering?.årsak,
+                    perioder = oppdaterFaktaOmFeilutbetalingDto.perioder,
+                )
+            }
             ResponseEntity.ok(tilbakekreving.tilFeilutbetalingFrontendDto(UUID.fromString(behandlingId), SystemKlokke))
         } ?: ResponseEntity.notFound().build()
     }
@@ -94,7 +95,9 @@ class BehandlingApiController(
             filter = TilbakekrevingFilter.behandling(behandlingId),
             valideringContext = ValideringContext.ForeslåVedtak,
         ) { tilbakekreving, context ->
-            tilbakekreving.håndterForeslåVedtak(behandlingId, context)
+            tilbakekreving.gjørSaksbehandling(behandlingId, context) {
+                håndterForeslåVedtak(context)
+            }
             ResponseEntity.ok(Unit)
         } ?: ResponseEntity.notFound().build()
     }
@@ -182,7 +185,11 @@ class BehandlingApiController(
             filter = TilbakekrevingFilter.behandling(behandlingId),
             valideringContext = ValideringContext.UtsettUttalelsesfrist,
         ) { tilbakekreving, context ->
-            ResponseEntity.ok(tilbakekreving.lagreFristUtsettelse(behandlingId, updateUttalelsesfristDto.nyFrist!!, updateUttalelsesfristDto.begrunnelse!!, context))
+            ResponseEntity.ok(
+                tilbakekreving.gjørSaksbehandling(behandlingId, context) {
+                    lagreFristUtsettelse(updateUttalelsesfristDto.nyFrist!!, updateUttalelsesfristDto.begrunnelse!!, context)
+                },
+            )
         } ?: ResponseEntity.notFound().build()
     }
 
@@ -192,17 +199,18 @@ class BehandlingApiController(
             valideringContext = ValideringContext.LagreForhåndsvarselUnntak,
         ) { tilbakekreving, context ->
             ResponseEntity.ok(
-                tilbakekreving.lagreForhåndsvarselUnntak(
-                    behandlingId = behandlingId,
-                    begrunnelseForUnntak = when (unntakDto.begrunnelseForUnntak) {
-                        VarslingsunntakDto.IKKE_PRAKTISK_MULIG -> BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG
-                        VarslingsunntakDto.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING -> BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING
-                        VarslingsunntakDto.ÅPENBART_UNØDVENDIG -> BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG
-                        VarslingsunntakDto.ALLEREDE_UTTALET_SEG -> BegrunnelseForUnntak.ALLEREDE_UTTALET_SEG
-                    },
-                    beskrivelse = unntakDto.beskrivelse,
-                    sideeffektContext = context,
-                ),
+                tilbakekreving.gjørSaksbehandling(behandlingId, context) {
+                    lagreForhåndsvarselUnntak(
+                        begrunnelseForUnntak = when (unntakDto.begrunnelseForUnntak) {
+                            VarslingsunntakDto.IKKE_PRAKTISK_MULIG -> BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG
+                            VarslingsunntakDto.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING -> BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING
+                            VarslingsunntakDto.ÅPENBART_UNØDVENDIG -> BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG
+                            VarslingsunntakDto.ALLEREDE_UTTALET_SEG -> BegrunnelseForUnntak.ALLEREDE_UTTALET_SEG
+                        },
+                        beskrivelse = unntakDto.beskrivelse,
+                        sideeffektContext = context,
+                    )
+                },
             )
         } ?: ResponseEntity.notFound().build()
     }

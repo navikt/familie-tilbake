@@ -82,19 +82,15 @@ class Behandlingslogg {
             ),
             sideeffektContext = systemContext(behandlingslogg = behandlingslogg),
         )
-        tilbakekreving.lagreFristUtsettelse(tilbakekreving.nåværendeBehandlingId(), LocalDate.of(2027, 1, 1), "Begrunnelse", saksbehandlerContext(behandlingslogg = behandlingslogg))
-        tilbakekreving.lagreUttalelse(tilbakekreving.nåværendeBehandlingId(), UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL, null, "ingen uttalelse", saksbehandlerContext(behandlingslogg = behandlingslogg))
-
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(behandlingslogg = behandlingslogg), faktastegVurdering(1.januar(2021) til 31.januar(2021)))
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(behandlingslogg = behandlingslogg), faktastegVurdering(1.februar(2021) til 28.februar(2021)))
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(behandlingslogg = behandlingslogg), 1.januar(2021) til 31.januar(2021), Foreldelsesteg.Vurdering.IkkeForeldet(""))
-        tilbakekreving.håndter(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(behandlingslogg = behandlingslogg), 1.februar(2021) til 28.februar(2021), Foreldelsesteg.Vurdering.IkkeForeldet(""))
-        tilbakekreving.håndter(
-            tilbakekreving.nåværendeBehandlingId(),
-            saksbehandlerContext(behandlingslogg = behandlingslogg),
-            1.januar(2021) til 31.januar(2021),
-            forårsaketAvBruker().uaktsomt(unnlates = skalUnnlates()),
-        )
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(behandlingslogg = behandlingslogg)) {
+            lagreFristUtsettelse(LocalDate.of(2027, 1, 1), "Begrunnelse", saksbehandlerContext(behandlingslogg = behandlingslogg))
+            lagreUttalelse(UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL, null, "ingen uttalelse", saksbehandlerContext(behandlingslogg = behandlingslogg))
+            håndter(saksbehandlerContext(behandlingslogg = behandlingslogg), faktastegVurdering(1.januar(2021) til 31.januar(2021)))
+            håndter(saksbehandlerContext(behandlingslogg = behandlingslogg), faktastegVurdering(1.februar(2021) til 28.februar(2021)))
+            håndter(saksbehandlerContext(behandlingslogg = behandlingslogg), 1.januar(2021) til 31.januar(2021), Foreldelsesteg.Vurdering.IkkeForeldet(""))
+            håndter(saksbehandlerContext(behandlingslogg = behandlingslogg), 1.februar(2021) til 28.februar(2021), Foreldelsesteg.Vurdering.IkkeForeldet(""))
+            håndter(saksbehandlerContext(behandlingslogg = behandlingslogg), 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().uaktsomt(unnlates = skalUnnlates()))
+        }
 
         behandlingslogg.tilFrontend().map { it.tittel } shouldContainAll listOf(
             "Kravgrunnlag mottatt",

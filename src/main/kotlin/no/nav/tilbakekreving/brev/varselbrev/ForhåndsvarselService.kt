@@ -102,13 +102,14 @@ class ForhåndsvarselService(
                         "Det kreves uttalelsedetaljer når brukeren har uttalet seg. uttalelsedetaljer var tom"
                     }
                 }[0]
-                tilbakekreving.lagreUttalelse(
-                    behandlingId = behandlingId,
-                    uttalelseVurdering = UttalelseVurdering.valueOf(brukeruttalelse.harBrukerUttaltSeg.name),
-                    uttalelseInfo = UttalelseInfo(UUID.randomUUID(), uttalelsedetaljer.uttalelsesdato, uttalelsedetaljer.hvorBrukerenUttalteSeg, uttalelsedetaljer.uttalelseBeskrivelse),
-                    kommentar = null,
-                    sideeffektContext = sideeffektContext,
-                )
+                tilbakekreving.gjørSaksbehandling(behandlingId, sideeffektContext) {
+                    lagreUttalelse(
+                        uttalelseVurdering = UttalelseVurdering.valueOf(brukeruttalelse.harBrukerUttaltSeg.name),
+                        uttalelseInfo = UttalelseInfo(UUID.randomUUID(), uttalelsedetaljer.uttalelsesdato, uttalelsedetaljer.hvorBrukerenUttalteSeg, uttalelsedetaljer.uttalelseBeskrivelse),
+                        kommentar = null,
+                        sideeffektContext = sideeffektContext,
+                    )
+                }
             }
             HarBrukerUttaltSeg.NEI_ETTER_FORHÅNDSVARSEL, HarBrukerUttaltSeg.UNNTAK_INGEN_UTTALELSE -> {
                 val kommentar = requireNotNull(brukeruttalelse.kommentar) {
@@ -117,13 +118,14 @@ class ForhåndsvarselService(
                     require(it.isNotBlank()) { "Det kreves en kommentar når brukeren ikke uttaler seg. Kommentar var tom" }
                 }
 
-                tilbakekreving.lagreUttalelse(
-                    behandlingId = behandlingId,
-                    uttalelseVurdering = UttalelseVurdering.valueOf(brukeruttalelse.harBrukerUttaltSeg.name),
-                    uttalelseInfo = null,
-                    kommentar = kommentar,
-                    sideeffektContext = sideeffektContext,
-                )
+                tilbakekreving.gjørSaksbehandling(behandlingId, sideeffektContext) {
+                    lagreUttalelse(
+                        uttalelseVurdering = UttalelseVurdering.valueOf(brukeruttalelse.harBrukerUttaltSeg.name),
+                        uttalelseInfo = null,
+                        kommentar = kommentar,
+                        sideeffektContext = sideeffektContext,
+                    )
+                }
             }
             else -> throw IllegalArgumentException("Ukjent verdi for uttalelseVurdering: ${brukeruttalelse.harBrukerUttaltSeg} ")
         }
@@ -142,33 +144,35 @@ class ForhåndsvarselService(
 
         when (uttalelseVurdering) {
             UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, UttalelseVurdering.UNNTAK_ALLEREDE_UTTALT_SEG, UttalelseVurdering.JA -> {
-                tilbakekreving.lagreUttalelse(
-                    behandlingId = behandlingId,
-                    uttalelseVurdering = uttalelseVurdering,
-                    uttalelseInfo = UttalelseInfo(
-                        id = UUID.randomUUID(),
-                        uttalelsesdato = requireNotNull(uttalelseDto.uttalelsesdato) { "Det kreves uttalelsesdato når brukeren har uttalet seg. uttalelsesdato var null" },
-                        hvorBrukerenUttalteSeg = requireNotNull(uttalelseDto.hvorBrukerenUttalteSeg) {
-                            "Det kreves hvorBrukerenUttalteSeg når brukeren har uttalet seg. hvorBrukerenUttalteSeg var null"
-                        },
-                        uttalelseBeskrivelse = requireNotNull(uttalelseDto.beskrivelse) {
-                            "Det kreves beskrivelse når brukeren har uttalet seg. beskrivelse var null"
-                        },
-                    ),
-                    kommentar = null,
-                    sideeffektContext = sideeffektContext,
-                )
+                tilbakekreving.gjørSaksbehandling(behandlingId, sideeffektContext) {
+                    lagreUttalelse(
+                        uttalelseVurdering = uttalelseVurdering,
+                        uttalelseInfo = UttalelseInfo(
+                            id = UUID.randomUUID(),
+                            uttalelsesdato = requireNotNull(uttalelseDto.uttalelsesdato) { "Det kreves uttalelsesdato når brukeren har uttalet seg. uttalelsesdato var null" },
+                            hvorBrukerenUttalteSeg = requireNotNull(uttalelseDto.hvorBrukerenUttalteSeg) {
+                                "Det kreves hvorBrukerenUttalteSeg når brukeren har uttalet seg. hvorBrukerenUttalteSeg var null"
+                            },
+                            uttalelseBeskrivelse = requireNotNull(uttalelseDto.beskrivelse) {
+                                "Det kreves beskrivelse når brukeren har uttalet seg. beskrivelse var null"
+                            },
+                        ),
+                        kommentar = null,
+                        sideeffektContext = sideeffektContext,
+                    )
+                }
             }
             UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL, UttalelseVurdering.UNNTAK_INGEN_UTTALELSE, UttalelseVurdering.NEI -> {
-                tilbakekreving.lagreUttalelse(
-                    behandlingId = behandlingId,
-                    uttalelseVurdering = uttalelseVurdering,
-                    uttalelseInfo = null,
-                    kommentar = requireNotNull(uttalelseDto.beskrivelse) {
-                        "Det kreves kommentar/beskrivelse når brukeren ikke uttalte seg. beskrivelse var null"
-                    },
-                    sideeffektContext = sideeffektContext,
-                )
+                tilbakekreving.gjørSaksbehandling(behandlingId, sideeffektContext) {
+                    lagreUttalelse(
+                        uttalelseVurdering = uttalelseVurdering,
+                        uttalelseInfo = null,
+                        kommentar = requireNotNull(uttalelseDto.beskrivelse) {
+                            "Det kreves kommentar/beskrivelse når brukeren ikke uttalte seg. beskrivelse var null"
+                        },
+                        sideeffektContext = sideeffektContext,
+                    )
+                }
             }
         }
     }

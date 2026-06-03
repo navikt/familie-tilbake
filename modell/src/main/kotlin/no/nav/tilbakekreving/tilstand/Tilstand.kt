@@ -5,9 +5,7 @@ import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
-import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.feil.ModellFeil
-import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
@@ -18,7 +16,6 @@ import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
-import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.time.Duration
 
@@ -87,15 +84,6 @@ internal sealed interface Tilstand {
 
     fun håndter(
         tilbakekreving: Tilbakekreving,
-        behandling: Behandling,
-        vurderinger: List<Pair<Behandlingssteg, FatteVedtakSteg.Vurdering>>,
-        sideeffektContext: SideeffektContext,
-    ) {
-        throw ModellFeil.UgyldigOperasjonException("Forventet ikke totrinn vurdering i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
-    }
-
-    fun håndter(
-        tilbakekreving: Tilbakekreving,
         iverksettelseHendelse: IverksettelseHendelse,
         sideeffektContext: SideeffektContext,
     ) {
@@ -118,11 +106,12 @@ internal sealed interface Tilstand {
         throw ModellFeil.UgyldigOperasjonException("Forventet ikke DistribusjonHendelse i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
     }
 
-    fun håndterNullstilling(nåværendeBehandling: Behandling, sporing: Sporing, sideeffektContext: SideeffektContext) {
-        throw ModellFeil.UgyldigOperasjonException("Kan ikke flytte tilbake til fakta i $tilbakekrevingTilstand", sporing)
-    }
-
-    fun håndterTrekkTilbakeFraGodkjenning(behandling: Behandling, sporing: Sporing, sideeffektContext: SideeffektContext) {
-        throw ModellFeil.UgyldigOperasjonException("Kan ikke trekke tilbake fra godkjenning $tilbakekrevingTilstand", sporing)
+    fun <T> gjørSaksbehandling(
+        tilbakekreving: Tilbakekreving,
+        behandling: Behandling,
+        sideeffektContext: SideeffektContext,
+        callback: (Behandling) -> T,
+    ): T {
+        throw ModellFeil.UgyldigOperasjonException("Kan ikke utføre saksbehandling i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon(behandling.id))
     }
 }

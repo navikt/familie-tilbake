@@ -33,6 +33,7 @@ import no.nav.tilbakekreving.kontrakter.OpprettManueltTilbakekrevingRequest
 import no.nav.tilbakekreving.kontrakter.OpprettTilbakekrevingRequest
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
+import no.nav.tilbakekreving.repository.TilbakekrevingFilter.Companion.behandling
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
@@ -110,7 +111,7 @@ class BehandlingController(
         @Valid @RequestBody
         opprettRevurderingDto: OpprettRevurderingDto,
     ): Ressurs<String> {
-        if (tilbakekrevingService.hentTilbakekreving(TilbakekrevingFilter.behandling(opprettRevurderingDto.originalBehandlingId)) != null) {
+        if (tilbakekrevingService.hentTilbakekreving(behandling(opprettRevurderingDto.originalBehandlingId)) != null) {
             throw ModellFeil.UtenforScopeException(
                 UtenforScope.Revurdering,
                 Sporing("Ukjent", opprettRevurderingDto.originalBehandlingId.toString()),
@@ -300,7 +301,9 @@ class BehandlingController(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<String> {
         val response = tilbakekrevingService.endreTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.TrekkTilbakeFraGodkjenning) { tilbakekreving, context ->
-            tilbakekreving.håndterTrekkTilbakeFraGodkjenning(behandlingId, context)
+            tilbakekreving.gjørSaksbehandling(behandlingId, context) {
+                trekkTilbakeFraGodkjenning(context)
+            }
             Ressurs.success("OK")
         }
         if (response != null) {
@@ -324,8 +327,10 @@ class BehandlingController(
     fun flyttBehandlingTilFakta(
         @PathVariable behandlingId: UUID,
     ): Ressurs<String> {
-        val response = tilbakekrevingService.endreTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.FlyttBehandlingTilFakta) { tilbakekreving, context ->
-            tilbakekreving.håndterNullstilling(behandlingId, context)
+        val response = tilbakekrevingService.endreTilbakekreving(behandling(behandlingId), ValideringContext.FlyttBehandlingTilFakta) { tilbakekreving, context ->
+            tilbakekreving.gjørSaksbehandling(behandlingId, context) {
+                flyttTilbakeTilFakta(context)
+            }
             Ressurs.success("OK")
         }
         if (response != null) {

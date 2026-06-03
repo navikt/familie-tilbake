@@ -106,30 +106,16 @@ class DistribuerVedtaTest {
             håndter(kravgrunnlag(), systemContext(endringOppsamler))
             håndter(fagsysteminfoHendelse(), systemContext(endringOppsamler))
             håndter(brukerinfoHendelse(), systemContext(endringOppsamler))
-            lagreUttalelse(nåværendeBehandlingId(), UttalelseVurdering.JA, null, "", saksbehandlerContext(endringOppsamler))
-            håndter(
-                nåværendeBehandlingId(),
-                saksbehandlerContext(endringOppsamler),
-                faktastegVurdering(),
-            )
-            håndter(
-                nåværendeBehandlingId(),
-                saksbehandlerContext(endringOppsamler),
-                periode = 1.januar(2021) til 31.januar(2021),
-                foreldelseVurdering(),
-            )
-            håndter(
-                nåværendeBehandlingId(),
-                saksbehandlerContext(endringOppsamler),
-                periode = 1.januar(2021) til 31.januar(2021),
-                vurdering = forårsaketAvBruker().uaktsomt(),
-            )
-            håndterForeslåVedtak(nåværendeBehandlingId(), saksbehandlerContext(endringOppsamler))
-            tilbakekreving.håndter(
-                behandlingId = nåværendeBehandlingId(),
-                sideeffektContext = beslutterContext(endringOppsamler),
-                vurderinger = godkjenning(),
-            )
+            gjørSaksbehandling(nåværendeBehandlingId(), saksbehandlerContext(endringOppsamler)) {
+                lagreUttalelse(UttalelseVurdering.JA, null, "", saksbehandlerContext(endringOppsamler))
+                håndter(saksbehandlerContext(endringOppsamler), faktastegVurdering())
+                håndter(saksbehandlerContext(endringOppsamler), periode = 1.januar(2021) til 31.januar(2021), vurdering = foreldelseVurdering())
+                håndter(saksbehandlerContext(endringOppsamler), periode = 1.januar(2021) til 31.januar(2021), vurdering = forårsaketAvBruker().uaktsomt())
+                håndterForeslåVedtak(saksbehandlerContext(endringOppsamler))
+            }
+            gjørSaksbehandling(nåværendeBehandlingId(), beslutterContext(endringOppsamler)) {
+                håndter(beslutterContext(endringOppsamler), godkjenning())
+            }
             tilbakekreving.håndter(
                 iverksettelse(),
                 systemContext(endringOppsamler, behovObservatør = oppsamler),

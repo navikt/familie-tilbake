@@ -16,7 +16,6 @@ import no.nav.tilbakekreving.beslutterContext
 import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.fatteVedtakVurdering
 import no.nav.tilbakekreving.feil.ModellFeil
-import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.foreldelseVurdering
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
@@ -52,7 +51,7 @@ class BehandlingTest {
             .shouldNotBeNull()
             .behandlingsstegstatus shouldBe Behandlingsstegstatus.UTFØRT
 
-        TilBehandling.håndterNullstilling(behandling, Sporing("fefe", "fe"), saksbehandlerContext())
+        behandling.flyttTilbakeTilFakta(saksbehandlerContext())
 
         behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).vurderingAvBrukersUttalelse.beskrivelse shouldBe null
         behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).vurderingAvBrukersUttalelse.harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.IKKE_VURDERT

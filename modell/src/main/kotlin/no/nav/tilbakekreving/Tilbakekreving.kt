@@ -11,20 +11,13 @@ import no.nav.tilbakekreving.api.v1.dto.FagsakDto
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
 import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
-import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.BehandlingHistorikk
 import no.nav.tilbakekreving.behandling.BehandlingObservatør
 import no.nav.tilbakekreving.behandling.Behandlingsinformasjon
 import no.nav.tilbakekreving.behandling.Enhet
-import no.nav.tilbakekreving.behandling.UttalelseInfo
-import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
-import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
-import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
-import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Venter
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
 import no.nav.tilbakekreving.behandlingslogg.Behandlingsloggstype
 import no.nav.tilbakekreving.behandlingslogg.EkstraInfo
 import no.nav.tilbakekreving.behandlingslogg.LoggInnslag
@@ -50,17 +43,13 @@ import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
-import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentTypeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.saksbehandler.Behandler
@@ -184,6 +173,10 @@ class Tilbakekreving internal constructor(
         oppdaterPåminnelsestidspunkt(sideeffektContext.klokke)
     }
 
+    fun <T> gjørSaksbehandling(behandlingId: UUID, sideeffektContext: SideeffektContext, callback: Behandling.() -> T): T {
+        return tilstand.gjørSaksbehandling(this, hentBehandling(behandlingId), sideeffektContext, callback)
+    }
+
     internal fun hånterEndretKravgrunnlag(kravgrunnlagHendelse: KravgrunnlagHendelse, sideeffektContext: SideeffektContext) {
         behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
             kravgrunnlagHistorikk.lagre(kravgrunnlagHendelse)
@@ -213,14 +206,6 @@ class Tilbakekreving internal constructor(
 
     fun hentBehandling(behandlingId: UUID): Behandling {
         return behandlingHistorikk.finn(behandlingId, Sporing(id, behandlingId.toString())).entry
-    }
-
-    fun håndterNullstilling(behandlingId: UUID, sideeffektContext: SideeffektContext) {
-        tilstand.håndterNullstilling(hentBehandling(behandlingId), sporingsinformasjon(), sideeffektContext)
-    }
-
-    fun håndterTrekkTilbakeFraGodkjenning(behandlingId: UUID, sideeffektContext: SideeffektContext) {
-        tilstand.håndterTrekkTilbakeFraGodkjenning(hentBehandling(behandlingId), sporingsinformasjon(), sideeffektContext)
     }
 
     fun opprettBehandling(
@@ -382,69 +367,6 @@ class Tilbakekreving internal constructor(
 
     fun faktastegFrontendDto(behandlingId: UUID): FaktaFeilutbetalingDto = hentBehandling(behandlingId).faktastegFrontendDto(opprettelsesvalg, opprettet)
 
-    fun håndter(
-        behandlingId: UUID,
-        sideeffektContext: SideeffektContext,
-        vurderinger: List<Pair<Behandlingssteg, FatteVedtakSteg.Vurdering>>,
-    ) {
-        hentBehandling(behandlingId).utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
-            tilstand.håndter(this@Tilbakekreving, this, vurderinger, sideeffektContext)
-        }
-    }
-
-    fun håndter(
-        behandlingId: UUID,
-        sideeffektContext: SideeffektContext,
-        vurdering: Faktasteg.Vurdering,
-    ) {
-        hentBehandling(behandlingId).utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
-            håndter(sideeffektContext, vurdering)
-        }
-    }
-
-    fun vurderFakta(
-        behandlingId: UUID,
-        sideeffektContext: SideeffektContext,
-        oppdaget: OppdagetDto?,
-        årsak: String?,
-        perioder: List<OppdaterFaktaPeriodeDto>?,
-    ) {
-        behandlingHistorikk.finn(behandlingId, sporingsinformasjon()).entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
-            håndter(sideeffektContext, oppdaget, årsak, perioder)
-        }
-    }
-
-    fun håndter(
-        behandlingId: UUID,
-        sideeffektContext: SideeffektContext,
-        periode: Datoperiode,
-        vurdering: Foreldelsesteg.Vurdering,
-    ) {
-        hentBehandling(behandlingId).utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
-            håndter(sideeffektContext, periode, vurdering)
-        }
-    }
-
-    fun håndter(
-        behandlingId: UUID,
-        sideeffektContext: SideeffektContext,
-        periode: Datoperiode,
-        vurdering: ForårsaketAvBruker,
-    ) {
-        hentBehandling(behandlingId).utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
-            håndter(sideeffektContext, periode, vurdering)
-        }
-    }
-
-    fun håndterForeslåVedtak(
-        behandlingId: UUID,
-        sideeffektContext: SideeffektContext,
-    ) {
-        hentBehandling(behandlingId).utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
-            håndterForeslåVedtak(sideeffektContext)
-        }
-    }
-
     fun påminnNåværendePeriode(sideeffektContext: SideeffektContext) {
         behandlingHistorikk.nåværende().entry.håndterPåminnelse(tilstand, sideeffektContext, this)
     }
@@ -564,52 +486,6 @@ class Tilbakekreving internal constructor(
         return hentBehandling(behandlingId).nyFaktastegFrontendDto(
             varselbrev = brevHistorikk.sisteVarselbrev(),
             klokke = klokke,
-        )
-    }
-
-    fun lagreUttalelse(
-        behandlingId: UUID,
-        uttalelseVurdering: UttalelseVurdering,
-        uttalelseInfo: UttalelseInfo?,
-        kommentar: String?,
-        sideeffektContext: SideeffektContext,
-    ) {
-        hentBehandling(behandlingId).utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
-            lagreUttalelse(
-                uttalelseVurdering = uttalelseVurdering,
-                uttalelseInfo = uttalelseInfo,
-                kommentar = kommentar,
-                sideeffektContext = sideeffektContext,
-            )
-        }
-    }
-
-    fun lagreFristUtsettelse(
-        behandlingId: UUID,
-        nyFrist: LocalDate,
-        begrunnelse: String,
-        sideeffektContext: SideeffektContext,
-    ): UttalelsesfristDto {
-        requireNotNull(brevHistorikk.sisteVarselbrev()) {
-            "Kan ikke utsette frist når forhåndsvarsel ikke er sendt"
-        }
-        return hentBehandling(behandlingId).lagreFristUtsettelse(
-            nyFrist = nyFrist,
-            begrunnelse = begrunnelse,
-            sideeffektContext = sideeffektContext,
-        )
-    }
-
-    fun lagreForhåndsvarselUnntak(
-        behandlingId: UUID,
-        begrunnelseForUnntak: BegrunnelseForUnntak,
-        beskrivelse: String,
-        sideeffektContext: SideeffektContext,
-    ) {
-        hentBehandling(behandlingId).lagreForhåndsvarselUnntak(
-            begrunnelseForUnntak = begrunnelseForUnntak,
-            beskrivelse = beskrivelse,
-            sideeffektContext = sideeffektContext,
         )
     }
 
