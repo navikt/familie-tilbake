@@ -510,6 +510,10 @@ class Behandling internal constructor(
         }
     }
 
+    internal fun splitteVilkårsvurderingsperioder(splittFra: LocalDate) {
+        vilkårsvurderingsteg.splitteVilkårsvurderingsperioder(splittFra)
+    }
+
     internal fun oppdaterEksternFagsak(
         eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
         sideeffektContext: SideeffektContext,

@@ -210,4 +210,9 @@ enum class ValideringContext(
         auditLoggerEvent = AuditLoggerEvent.CREATE,
         handling = "Lagrer brukers uttalelse",
     ),
+    SplitteVilkårsvurderingsperiode(
+        minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+        auditLoggerEvent = AuditLoggerEvent.UPDATE,
+        handling = "Splitter vilkårsvurderingsperioder",
+    ),
 }

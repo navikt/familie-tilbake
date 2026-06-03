@@ -22,6 +22,7 @@ import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering
+import java.time.LocalDate
 import java.util.UUID
 
 class Vilkårsvurderingsteg(
@@ -148,6 +149,11 @@ class Vilkårsvurderingsteg(
         _vurdering = første.vurdering,
     )
 
+    fun splitteVilkårsvurderingsperioder(splittFra: LocalDate) {
+        val funnetPerioden = vurderinger.single { it.periode.fom == splittFra }.id
+        vurder(funnetPerioden, ForårsaketAvBruker.IkkeVurdert())
+    }
+
     fun vurdertePerioderForBrev(
         meldingerTilSaksbehandler: Set<MeldingTilSaksbehandler>,
     ): List<BegrunnetPeriode> {
@@ -204,9 +210,9 @@ class Vilkårsvurderingsteg(
                     id = id,
                     periode = periode,
                     _vurdering = when (forrigePeriode) {
-                        null -> ForårsaketAvBruker.IkkeVurdert
+                        null -> ForårsaketAvBruker.IkkeVurdert()
                         else -> ForårsaketAvBruker.KopiertVurdering(
-                            forrigeVurdering = forrigePeriode.vurdering,
+                            forrigeVurdering = forrigePeriode,
                             forrigePeriodeId = forrigePeriode.id,
                         )
                     },

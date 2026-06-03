@@ -479,6 +479,16 @@ class Tilbakekreving internal constructor(
         }.buildString()
     }
 
+    fun splitteVilkårsvurderingsperioder(
+        behandlingId: UUID,
+        sideeffektContext: SideeffektContext,
+        splittFra: LocalDate,
+    ) {
+        hentBehandling(behandlingId).utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
+            splitteVilkårsvurderingsperioder(splittFra)
+        }
+    }
+
     override fun behandlingOppdatert(
         sideeffektContext: SideeffektContext,
         behandlingId: UUID,

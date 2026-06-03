@@ -1,6 +1,5 @@
 package no.nav.tilbakekreving.entities
 
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg.Vilkårsvurderingsperiode
 import java.util.UUID
 
@@ -11,12 +10,12 @@ data class VilkårsvurderingsperiodeEntity(
     val begrunnelseForTilbakekreving: String?,
     val vurdering: AktsomhetsvurderingEntity,
 ) {
-    fun fraEntity(vurdering: ForårsaketAvBruker): Vilkårsvurderingsperiode {
+    fun fraEntity(vurderinger: Map<UUID, Vilkårsvurderingsperiode>): Vilkårsvurderingsperiode {
         return Vilkårsvurderingsperiode(
             id = id,
             periode = periode.fraEntity(),
             begrunnelseForTilbakekreving = begrunnelseForTilbakekreving,
-            _vurdering = vurdering,
+            _vurdering = vurdering.fraEntity(vurderinger),
         )
     }
 }
