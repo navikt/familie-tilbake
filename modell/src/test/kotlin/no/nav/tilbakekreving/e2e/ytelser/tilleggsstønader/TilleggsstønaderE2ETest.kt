@@ -66,50 +66,43 @@ class TilleggsstønaderE2ETest {
         tilbakekreving.håndter(brukerinfoHendelse(), systemContext())
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
             lagreUttalelse(UttalelseVurdering.JA, null, "")
-        }
-        val faktastegDto = tilbakekreving.faktastegFrontendDto(tilbakekreving.nåværendeBehandlingId())
-        faktastegDto.feilutbetaltePerioder shouldBe listOf(
-            FeilutbetalingsperiodeDto(
-                periode = 1.januar(2021) til 31.januar(2021),
-                feilutbetaltBeløp = 2000.kroner,
-                hendelsestype = Hendelsestype.ANNET,
-                hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
-            ),
-            FeilutbetalingsperiodeDto(
-                periode = 1.februar(2021) til 28.februar(2021),
-                feilutbetaltBeløp = 2000.kroner,
-                hendelsestype = Hendelsestype.ANNET,
-                hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
-            ),
-        )
-        faktastegDto.totalFeilutbetaltPeriode shouldBe (1.januar(2021) til 28.februar(2021))
-
-        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
+            val faktastegDto = tilbakekreving.faktastegFrontendDto(tilbakekreving.nåværendeBehandlingId())
+            faktastegDto.feilutbetaltePerioder shouldBe listOf(
+                FeilutbetalingsperiodeDto(
+                    periode = 1.januar(2021) til 31.januar(2021),
+                    feilutbetaltBeløp = 2000.kroner,
+                    hendelsestype = Hendelsestype.ANNET,
+                    hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
+                ),
+                FeilutbetalingsperiodeDto(
+                    periode = 1.februar(2021) til 28.februar(2021),
+                    feilutbetaltBeløp = 2000.kroner,
+                    hendelsestype = Hendelsestype.ANNET,
+                    hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
+                ),
+            )
+            faktastegDto.totalFeilutbetaltPeriode shouldBe (1.januar(2021) til 28.februar(2021))
             vurderFakta(faktastegVurdering(1.januar(2021) til 31.januar(2021)))
             vurderFakta(faktastegVurdering(1.februar(2021) til 28.februar(2021)))
-        }
-
-        val foreldelsesstegDto = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId()).foreldelsestegDto.tilFrontendDto(saksbehandlerContext())
-        foreldelsesstegDto.foreldetPerioder shouldBe listOf(
-            VurdertForeldelsesperiodeDto(
-                periode = 1.januar(2021) til 31.januar(2021),
-                feilutbetaltBeløp = 2000.kroner,
-                begrunnelse = null,
-                foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_VURDERT,
-                foreldelsesfrist = null,
-                oppdagelsesdato = null,
-            ),
-            VurdertForeldelsesperiodeDto(
-                periode = 1.februar(2021) til 28.februar(2021),
-                feilutbetaltBeløp = 2000.kroner,
-                begrunnelse = null,
-                foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_VURDERT,
-                foreldelsesfrist = null,
-                oppdagelsesdato = null,
-            ),
-        )
-
-        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
+            val foreldelsesstegDto = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId()).foreldelsestegDto.tilFrontendDto(saksbehandlerContext())
+            foreldelsesstegDto.foreldetPerioder shouldBe listOf(
+                VurdertForeldelsesperiodeDto(
+                    periode = 1.januar(2021) til 31.januar(2021),
+                    feilutbetaltBeløp = 2000.kroner,
+                    begrunnelse = null,
+                    foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_VURDERT,
+                    foreldelsesfrist = null,
+                    oppdagelsesdato = null,
+                ),
+                VurdertForeldelsesperiodeDto(
+                    periode = 1.februar(2021) til 28.februar(2021),
+                    feilutbetaltBeløp = 2000.kroner,
+                    begrunnelse = null,
+                    foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_VURDERT,
+                    foreldelsesfrist = null,
+                    oppdagelsesdato = null,
+                ),
+            )
             vurderForeldelse(1.januar(2021) til 31.januar(2021), Foreldelsesteg.Vurdering.IkkeForeldet(""))
             vurderForeldelse(1.februar(2021) til 28.februar(2021), Foreldelsesteg.Vurdering.IkkeForeldet(""))
         }

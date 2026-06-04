@@ -78,10 +78,7 @@ class FrontendE2ETest {
             lagreUttalelse(UttalelseVurdering.JA, null, null)
             vurderForeldelse(1.januar(2021) til 31.januar(2021), foreldelseVurdering())
             vurderVilkår(1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
-        }
-        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true, BehandlerRolle.BESLUTTER).status shouldBe Behandlingsstatus.UTREDES
-
-        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
+            tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true, BehandlerRolle.BESLUTTER).status shouldBe Behandlingsstatus.UTREDES
             foreslåVedtak()
         }
         tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true, BehandlerRolle.BESLUTTER).status shouldBe Behandlingsstatus.FATTER_VEDTAK

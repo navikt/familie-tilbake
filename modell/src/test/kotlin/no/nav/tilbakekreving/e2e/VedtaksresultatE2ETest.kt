@@ -36,8 +36,7 @@ class VedtaksresultatE2ETest {
         tilbakekreving.håndter(fagsysteminfoHendelse(), systemContext())
         tilbakekreving.håndter(brukerinfoHendelse(), systemContext())
 
-        val saksbehandlerContext = saksbehandlerContext()
-        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext) {
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
             vurderFakta(faktastegVurdering())
             lagreForhåndsvarselUnntak(BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING, "")
             vurderForeldelse(1.januar(2021) til 31.januar(2021), foreldelseVurdering())
@@ -68,8 +67,7 @@ class VedtaksresultatE2ETest {
         tilbakekreving.håndter(fagsysteminfoHendelse(), systemContext())
         tilbakekreving.håndter(brukerinfoHendelse(), systemContext())
 
-        val saksbehandlerContext = saksbehandlerContext()
-        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext) {
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
             vurderFakta(faktastegVurdering())
             lagreForhåndsvarselUnntak(BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING, "")
             vurderForeldelse(1.januar(2021) til 31.januar(2021), foreldelseVurdering())
@@ -94,8 +92,7 @@ class VedtaksresultatE2ETest {
         tilbakekreving.håndter(fagsysteminfoHendelse(), systemContext())
         tilbakekreving.håndter(brukerinfoHendelse(), systemContext())
 
-        val saksbehandlerContext = saksbehandlerContext()
-        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext) {
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
             vurderFakta(faktastegVurdering())
             lagreForhåndsvarselUnntak(BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING, "")
             vurderForeldelse(1.januar(2021) til 31.januar(2021), foreldelseVurdering())
@@ -126,8 +123,7 @@ class VedtaksresultatE2ETest {
         tilbakekreving.håndter(fagsysteminfoHendelse(), systemContext())
         tilbakekreving.håndter(brukerinfoHendelse(), systemContext())
 
-        val saksbehandlerContext = saksbehandlerContext()
-        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext) {
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
             vurderFakta(faktastegVurdering())
             lagreForhåndsvarselUnntak(BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING, "")
             vurderForeldelse(1.januar(2021) til 31.januar(2021), foreldelseVurdering())

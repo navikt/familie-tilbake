@@ -217,15 +217,11 @@ class TilBehandlingTest {
         val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingHendelse, saksbehandlerContext())
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
             vurderFakta(faktastegVurdering())
-        }
-        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
             lagreUttalelse(
                 uttalelseVurdering = UttalelseVurdering.UNNTAK_ALLEREDE_UTTALT_SEG,
                 uttalelseInfo = null,
                 kommentar = "Trenger ikke forhåndsvarsel i test lol",
             )
-        }
-        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
             vurderForeldelse(1.januar(2021) til 31.januar(2021), foreldelseVurdering())
             vurderVilkår(1.januar(2021) til 31.januar(2021), forårsaketAvNav().burdeForstått())
             foreslåVedtak()

@@ -71,16 +71,16 @@ class BehandlingRolleTest {
 
     private fun behandlingKlarTilBeslutning(): Behandling {
         val behandling = behandling()
-        behandling.medSaksbehandling(saksbehandlerContext()) { vurderFakta(faktastegVurdering()) }
         behandling.medSaksbehandling(saksbehandlerContext()) {
+            vurderFakta(faktastegVurdering())
             lagreForhåndsvarselUnntak(
                 BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
                 beskrivelse = "Trenger ikke forhåndsvarsel i test",
             )
+            vurderForeldelse(periode, foreldelseVurdering())
+            vurderVilkår(periode, forårsaketAvNav().burdeForstått(aktsomhet = forsettelig()))
+            foreslåVedtak()
         }
-        behandling.medSaksbehandling(saksbehandlerContext()) { vurderForeldelse(periode, foreldelseVurdering()) }
-        behandling.medSaksbehandling(saksbehandlerContext()) { vurderVilkår(periode, forårsaketAvNav().burdeForstått(aktsomhet = forsettelig())) }
-        behandling.medSaksbehandling(saksbehandlerContext()) { foreslåVedtak() }
         return behandling
     }
 }
