@@ -140,7 +140,7 @@ class ForvaltningController(
     ): Ressurs<String> {
         val response = tilbakekrevingService.endreTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.ForvaltningFlyttTilFakta) { tilbakekreving, context ->
             tilbakekreving.gjørSaksbehandling(behandlingId, context) {
-                flyttTilbakeTilFakta(context)
+                flyttTilbakeTilFakta()
             }
             Ressurs.success("OK")
         }

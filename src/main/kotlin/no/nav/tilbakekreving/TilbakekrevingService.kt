@@ -355,8 +355,7 @@ class TilbakekrevingService(
         tilbakekreving.gjørSaksbehandling(behandlingId, context) {
             when (dto) {
                 is BehandlingsstegForeldelseDto -> dto.foreldetPerioder.forEach { periode ->
-                    håndter(
-                        context,
+                    vurderForeldelse(
                         periode.periode,
                         when (periode.foreldelsesvurderingstype) {
                             Foreldelsesvurderingstype.IKKE_VURDERT -> Foreldelsesteg.Vurdering.IkkeVurdert
@@ -368,12 +367,11 @@ class TilbakekrevingService(
                 }
 
                 is BehandlingsstegVilkårsvurderingDto -> dto.vilkårsvurderingsperioder.forEach { periode ->
-                    håndter(context, periode.periode, VilkårsvurderingMapperV2.tilVurdering(periode))
+                    vurderVilkår(periode.periode, VilkårsvurderingMapperV2.tilVurdering(periode))
                 }
 
-                is BehandlingsstegForeslåVedtaksstegDto -> håndterForeslåVedtak(context)
-                is BehandlingsstegFatteVedtaksstegDto -> håndter(
-                    sideeffektContext = context,
+                is BehandlingsstegForeslåVedtaksstegDto -> foreslåVedtak()
+                is BehandlingsstegFatteVedtaksstegDto -> fatteVedtak(
                     vurderinger = dto.totrinnsvurderinger.map { stegVurdering ->
                         stegVurdering.behandlingssteg to when (stegVurdering.godkjent) {
                             true -> FatteVedtakSteg.Vurdering.Godkjent

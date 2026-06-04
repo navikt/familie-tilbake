@@ -141,13 +141,12 @@ open class TilbakekrevingE2EBase : E2EBase() {
         tilbakekrevingService.hentOgLagreTilbakekreving(TilbakekrevingFilter.tilbakekreving(tilbakekrevingId)) { tilbakekreving, context ->
             tilbakekreving.gjørSaksbehandling(behandlingId, context(ansvarligSaksbehandler)) {
                 if (uttalelse == null) {
-                    lagreUttalelse(UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL, null, "", context(ansvarligSaksbehandler))
+                    lagreUttalelse(UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL, null, "")
                 } else {
                     lagreUttalelse(
                         UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL,
                         UttalelseInfo(UUID.randomUUID(), LocalDate.now(), "Reddit", uttalelse),
                         null,
-                        context(ansvarligSaksbehandler),
                     )
                 }
             }

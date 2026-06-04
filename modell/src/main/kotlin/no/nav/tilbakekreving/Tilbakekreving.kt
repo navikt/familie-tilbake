@@ -49,7 +49,6 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentTypeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.saksbehandler.Behandler
@@ -59,7 +58,6 @@ import no.nav.tilbakekreving.tilstand.Start
 import no.nav.tilbakekreving.tilstand.TilBehandling
 import no.nav.tilbakekreving.tilstand.Tilstand
 import java.math.BigDecimal
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -173,7 +171,7 @@ class Tilbakekreving internal constructor(
         oppdaterPåminnelsestidspunkt(sideeffektContext.klokke)
     }
 
-    fun <T> gjørSaksbehandling(behandlingId: UUID, sideeffektContext: SideeffektContext, callback: Behandling.() -> T): T {
+    fun <T> gjørSaksbehandling(behandlingId: UUID, sideeffektContext: SideeffektContext, callback: Behandling.Saksbehandling.() -> T): T {
         return tilstand.gjørSaksbehandling(this, hentBehandling(behandlingId), sideeffektContext, callback)
     }
 
@@ -401,19 +399,6 @@ class Tilbakekreving internal constructor(
             }
         }.buildString()
     }
-
-    fun splitteVilkårsvurderingsperioder(
-        behandlingId: UUID,
-        sideeffektContext: SideeffektContext,
-        splittFra: LocalDate,
-    ) {
-        hentBehandling(behandlingId).utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
-            splitteVilkårsvurderingsperioder(splittFra)
-        }
-    }
-
-    fun hentVilkårsvurderingsperioder(behandlingId: UUID): List<PeriodeDto> =
-        hentBehandling(behandlingId).hentVilkårsvurderingsperioder()
 
     override fun behandlingOppdatert(
         sideeffektContext: SideeffektContext,

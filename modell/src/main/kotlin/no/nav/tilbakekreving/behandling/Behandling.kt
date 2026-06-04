@@ -404,118 +404,7 @@ class Behandling internal constructor(
         )
     }
 
-    fun håndter(
-        sideeffektContext: SideeffektContext,
-        vurdering: Faktasteg.Vurdering,
-    ) {
-        validerBehandlingstatus(faktasteg, sideeffektContext.klokke)
-        faktasteg.vurder(vurdering)
-        oppdaterBehandler(sideeffektContext)
-
-        sideeffektContext.logg(Behandlingsloggstype.FAKTA_VURDERT)
-    }
-
-    fun håndter(
-        sideeffektContext: SideeffektContext,
-        oppdaget: OppdagetDto?,
-        årsak: String?,
-        perioder: List<OppdaterFaktaPeriodeDto>?,
-    ) {
-        validerBehandlingstatus(faktasteg, sideeffektContext.klokke)
-        if (oppdaget != null) {
-            faktasteg.vurder(oppdaget)
-        }
-        if (årsak != null) {
-            faktasteg.vurder(årsak)
-        }
-        if (perioder != null) {
-            faktasteg.vurder(perioder)
-        }
-        oppdaterBehandler(sideeffektContext)
-
-        sideeffektContext.logg(Behandlingsloggstype.FAKTA_VURDERT)
-    }
-
-    fun håndter(
-        sideeffektContext: SideeffektContext,
-        periode: Datoperiode,
-        vurdering: ForårsaketAvBruker,
-    ) {
-        validerBehandlingstatus(vilkårsvurderingsteg, sideeffektContext.klokke)
-        vilkårsvurderingsteg.vurder(periode, vurdering)
-        oppdaterBehandler(sideeffektContext)
-
-        sideeffektContext.logg(Behandlingsloggstype.VILKÅRSVURDERING_VURDERT)
-    }
-
-    fun håndter(
-        sideeffektContext: SideeffektContext,
-        periode: Datoperiode,
-        vurdering: Foreldelsesteg.Vurdering,
-    ) {
-        validerBehandlingstatus(foreldelsesteg, sideeffektContext.klokke)
-        foreldelsesteg.vurderForeldelse(periode, vurdering)
-        oppdaterBehandler(sideeffektContext)
-
-        sideeffektContext.logg(Behandlingsloggstype.FORELDELSE_VURDERT)
-    }
-
-    fun håndterForeslåVedtak(sideeffektContext: SideeffektContext) {
-        val tidligereManglendeSteg = steg()
-            .takeWhile { it.type != Behandlingssteg.FORESLÅ_VEDTAK }
-            .filter { !it.erKlar(sideeffektContext.klokke) }
-        if (tidligereManglendeSteg.isNotEmpty()) {
-            val stegtyper = tidligereManglendeSteg
-                .map { it.type }
-                .map { it.kortNavn }
-                .slåSammen()
-            throw ModellFeil.UgyldigOperasjonException(
-                "Du må gjøre en ny vurdering av $stegtyper før du kan sende vedtaket til godkjenning hos beslutter",
-                sporing = sporingsinformasjon(),
-            )
-        }
-        fatteVedtakSteg.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry)
-        validerBehandlingstatus(foreslåVedtakSteg, sideeffektContext.klokke)
-        foreslåVedtakSteg.håndter()
-        oppdaterBehandler(sideeffektContext)
-
-        sideeffektContext.logg(Behandlingsloggstype.FORESLÅ_VEDTAK_VURDERT)
-    }
-
-    fun håndter(
-        sideeffektContext: SideeffektContext,
-        vurderinger: List<Pair<Behandlingssteg, FatteVedtakSteg.Vurdering>>,
-    ) {
-        validerBehandlingstatus(fatteVedtakSteg, sideeffektContext.klokke)
-        for ((behandlingssteg, vurdering) in vurderinger) {
-            fatteVedtakSteg.håndter(sideeffektContext.behandler, ansvarligSaksbehandler, behandlingssteg, vurdering, sporingsinformasjon())
-            if (vurdering is FatteVedtakSteg.Vurdering.Underkjent) {
-                steg()
-                    .filter { it.type == behandlingssteg }
-                    .forEach { it.underkjennSteget() }
-            }
-        }
-        if (kanUtbetales(sideeffektContext.klokke)) {
-            sideeffektContext.logg(
-                behandlingsloggstype = Behandlingsloggstype.VEDTAK_FATTET,
-                rolle = Rolle.BESLUTTER,
-            )
-        }
-        if (fatteVedtakSteg.erVedtakUnderkjent()) {
-            foreslåVedtakSteg.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry)
-
-            sideeffektContext.logg(
-                behandlingsloggstype = Behandlingsloggstype.BEHANDLING_SENDT_TILBAKE_TIL_SAKSBEHANDLER,
-                rolle = Rolle.BESLUTTER,
-            )
-        }
-    }
-
-    internal fun splitteVilkårsvurderingsperioder(splittFra: LocalDate) {
-        vilkårsvurderingsteg.splitteVilkårsvurderingsperioder(splittFra)
-    }
-
-    internal fun hentVilkårsvurderingsperioder(): List<PeriodeDto> {
+    fun hentVilkårsvurderingsperioder(): List<PeriodeDto> {
         return vilkårsvurderingsteg.hentVilkårsvurderingsperioder()
     }
 
@@ -525,7 +414,7 @@ class Behandling internal constructor(
     ) {
         if (sistEndret == opprettet) {
             this.eksternFagsakRevurdering = eksternFagsakRevurdering
-            flyttTilbakeTilFakta(sideeffektContext)
+            medSaksbehandling(sideeffektContext) { flyttTilbakeTilFakta() }
         }
     }
 
@@ -563,35 +452,6 @@ class Behandling internal constructor(
         revurderingsvedtaksdato = eksternFagsakRevurdering.entry.vedtaksdato,
     )
 
-    fun lagreUttalelse(
-        uttalelseVurdering: UttalelseVurdering,
-        uttalelseInfo: UttalelseInfo?,
-        kommentar: String?,
-        sideeffektContext: SideeffektContext,
-    ) {
-        forhåndsvarsel.lagreUttalelse(
-            uttalelseVurdering = uttalelseVurdering,
-            uttalelseInfo = uttalelseInfo,
-            kommentar = kommentar,
-        )
-
-        sideeffektContext.logg(Behandlingsloggstype.BRUKER_UTTALELSE)
-    }
-
-    fun lagreFristUtsettelse(nyFrist: LocalDate, begrunnelse: String, sideeffektContext: SideeffektContext): UttalelsesfristDto {
-        val uttalelsesfrist = forhåndsvarsel.lagreFristUtsettelse(
-            nyFrist = nyFrist,
-            begrunnelse = begrunnelse,
-        )
-
-        sideeffektContext.logg(
-            behandlingsloggstype = Behandlingsloggstype.UTSETT_UTTALELSESFRIST,
-            EkstraInfo.BEGRUNNELSE_FOR_UTSATT_FRIST to begrunnelse,
-            EkstraInfo.NY_FRIST_FOR_UTTALELSE to nyFrist,
-        )
-        return uttalelsesfrist
-    }
-
     internal fun forhåndsvarselFrontendDto(varselbrev: Varselbrev?) = forhåndsvarsel.tilFrontendDto(varselbrev)
 
     internal fun vurdertePerioderForBrev(): List<BegrunnetPeriode> {
@@ -607,19 +467,6 @@ class Behandling internal constructor(
     private fun oppdaterBehandler(sideeffektContext: SideeffektContext) {
         this.sistEndret = sideeffektContext.klokke.nå()
         this.ansvarligSaksbehandler = sideeffektContext.behandler
-    }
-
-    fun lagreForhåndsvarselUnntak(
-        begrunnelseForUnntak: BegrunnelseForUnntak,
-        beskrivelse: String,
-        sideeffektContext: SideeffektContext,
-    ) {
-        forhåndsvarsel.lagreForhåndsvarselUnntak(
-            begrunnelseForUnntak = begrunnelseForUnntak,
-            beskrivelse = beskrivelse,
-        )
-
-        sideeffektContext.logg(Behandlingsloggstype.UNNTAK_FOR_UTTALELSE)
     }
 
     internal fun <T> utførEndring(
@@ -696,21 +543,169 @@ class Behandling internal constructor(
         return kravgrunnlagPerioder.minOf { it.fom } til kravgrunnlagPerioder.maxOf { it.tom }
     }
 
-    fun flyttTilbakeTilFakta(sideeffektContext: SideeffektContext) {
-        steg().forEach {
-            it.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry)
+    inner class Saksbehandling internal constructor(
+        private val context: SideeffektContext,
+    ) {
+        fun vurderFakta(vurdering: Faktasteg.Vurdering) {
+            validerBehandlingstatus(faktasteg, context.klokke)
+            faktasteg.vurder(vurdering)
+            oppdaterBehandler(context)
+
+            context.logg(Behandlingsloggstype.FAKTA_VURDERT)
         }
-        oppdaterBehandler(sideeffektContext)
 
-        sideeffektContext.logg(Behandlingsloggstype.BEHANDLING_NULLSTILLT)
+        fun oppdaterFakta(
+            oppdaget: OppdagetDto?,
+            årsak: String?,
+            perioder: List<OppdaterFaktaPeriodeDto>?,
+        ) {
+            validerBehandlingstatus(faktasteg, context.klokke)
+            if (oppdaget != null) {
+                faktasteg.vurder(oppdaget)
+            }
+            if (årsak != null) {
+                faktasteg.vurder(årsak)
+            }
+            if (perioder != null) {
+                faktasteg.vurder(perioder)
+            }
+            oppdaterBehandler(context)
+
+            context.logg(Behandlingsloggstype.FAKTA_VURDERT)
+        }
+
+        fun vurderVilkår(
+            periode: Datoperiode,
+            vurdering: ForårsaketAvBruker,
+        ) {
+            validerBehandlingstatus(vilkårsvurderingsteg, context.klokke)
+            vilkårsvurderingsteg.vurder(periode, vurdering)
+            oppdaterBehandler(context)
+
+            context.logg(Behandlingsloggstype.VILKÅRSVURDERING_VURDERT)
+        }
+
+        fun splittVilkårsvurdering(splittFra: LocalDate) {
+            vilkårsvurderingsteg.splittVilkårsvurdering(splittFra)
+        }
+
+        fun vurderForeldelse(
+            periode: Datoperiode,
+            vurdering: Foreldelsesteg.Vurdering,
+        ) {
+            validerBehandlingstatus(foreldelsesteg, context.klokke)
+            foreldelsesteg.vurderForeldelse(periode, vurdering)
+            oppdaterBehandler(context)
+
+            context.logg(Behandlingsloggstype.FORELDELSE_VURDERT)
+        }
+
+        fun foreslåVedtak() {
+            val tidligereManglendeSteg = steg()
+                .takeWhile { it.type != Behandlingssteg.FORESLÅ_VEDTAK }
+                .filter { !it.erKlar(context.klokke) }
+            if (tidligereManglendeSteg.isNotEmpty()) {
+                val stegtyper = tidligereManglendeSteg
+                    .map { it.type }
+                    .map { it.kortNavn }
+                    .slåSammen()
+                throw ModellFeil.UgyldigOperasjonException(
+                    "Du må gjøre en ny vurdering av $stegtyper før du kan sende vedtaket til godkjenning hos beslutter",
+                    sporing = sporingsinformasjon(),
+                )
+            }
+            fatteVedtakSteg.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry)
+            validerBehandlingstatus(foreslåVedtakSteg, context.klokke)
+            foreslåVedtakSteg.håndter()
+            oppdaterBehandler(context)
+
+            context.logg(Behandlingsloggstype.FORESLÅ_VEDTAK_VURDERT)
+        }
+
+        fun fatteVedtak(vurderinger: List<Pair<Behandlingssteg, FatteVedtakSteg.Vurdering>>) {
+            validerBehandlingstatus(fatteVedtakSteg, context.klokke)
+            for ((behandlingssteg, vurdering) in vurderinger) {
+                fatteVedtakSteg.håndter(context.behandler, ansvarligSaksbehandler, behandlingssteg, vurdering, sporingsinformasjon())
+                if (vurdering is FatteVedtakSteg.Vurdering.Underkjent) {
+                    steg()
+                        .filter { it.type == behandlingssteg }
+                        .forEach { it.underkjennSteget() }
+                }
+            }
+            if (kanUtbetales(context.klokke)) {
+                context.logg(
+                    behandlingsloggstype = Behandlingsloggstype.VEDTAK_FATTET,
+                    rolle = Rolle.BESLUTTER,
+                )
+            } else if (fatteVedtakSteg.erVedtakUnderkjent()) {
+                foreslåVedtakSteg.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry)
+
+                context.logg(
+                    behandlingsloggstype = Behandlingsloggstype.BEHANDLING_SENDT_TILBAKE_TIL_SAKSBEHANDLER,
+                    rolle = Rolle.BESLUTTER,
+                )
+            }
+        }
+
+        fun lagreUttalelse(
+            uttalelseVurdering: UttalelseVurdering,
+            uttalelseInfo: UttalelseInfo?,
+            kommentar: String?,
+        ) {
+            forhåndsvarsel.lagreUttalelse(
+                uttalelseVurdering = uttalelseVurdering,
+                uttalelseInfo = uttalelseInfo,
+                kommentar = kommentar,
+            )
+
+            context.logg(Behandlingsloggstype.BRUKER_UTTALELSE)
+        }
+
+        fun lagreFristUtsettelse(nyFrist: LocalDate, begrunnelse: String): UttalelsesfristDto {
+            val uttalelsesfrist = forhåndsvarsel.lagreFristUtsettelse(
+                nyFrist = nyFrist,
+                begrunnelse = begrunnelse,
+            )
+
+            context.logg(
+                behandlingsloggstype = Behandlingsloggstype.UTSETT_UTTALELSESFRIST,
+                EkstraInfo.BEGRUNNELSE_FOR_UTSATT_FRIST to begrunnelse,
+                EkstraInfo.NY_FRIST_FOR_UTTALELSE to nyFrist,
+            )
+            return uttalelsesfrist
+        }
+
+        fun lagreForhåndsvarselUnntak(
+            begrunnelseForUnntak: BegrunnelseForUnntak,
+            beskrivelse: String,
+        ) {
+            forhåndsvarsel.lagreForhåndsvarselUnntak(
+                begrunnelseForUnntak = begrunnelseForUnntak,
+                beskrivelse = beskrivelse,
+            )
+
+            context.logg(Behandlingsloggstype.UNNTAK_FOR_UTTALELSE)
+        }
+
+        fun flyttTilbakeTilFakta() {
+            steg().forEach {
+                it.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry)
+            }
+            oppdaterBehandler(context)
+
+            context.logg(Behandlingsloggstype.BEHANDLING_NULLSTILLT)
+        }
+
+        fun trekkTilbakeFraGodkjenning() {
+            foreslåVedtakSteg.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry)
+            oppdaterBehandler(context)
+
+            context.logg(Behandlingsloggstype.TREKK_TILBAKE_FRA_GODKJENNING)
+        }
     }
 
-    fun trekkTilbakeFraGodkjenning(sideeffektContext: SideeffektContext) {
-        foreslåVedtakSteg.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry)
-        oppdaterBehandler(sideeffektContext)
-
-        sideeffektContext.logg(Behandlingsloggstype.TREKK_TILBAKE_FRA_GODKJENNING)
-    }
+    internal fun <T> medSaksbehandling(context: SideeffektContext, block: Saksbehandling.() -> T): T =
+        Saksbehandling(context).block()
 
     internal fun sendVedtakIverksatt(
         forrigeBehandlingId: UUID?,

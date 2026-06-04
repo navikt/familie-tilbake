@@ -140,7 +140,7 @@ class DelperiodeTest {
             kravgrunnlagHendelse,
         )
 
-        vilkårsvurderingsteg.splitteVilkårsvurderingsperioder(16.februar(2025))
+        vilkårsvurderingsteg.splittVilkårsvurdering(16.februar(2025))
 
         val frontendDto = vilkårsvurderingsteg.tilFrontendDto(
             kravgrunnlag = kravgrunnlagHendelse,

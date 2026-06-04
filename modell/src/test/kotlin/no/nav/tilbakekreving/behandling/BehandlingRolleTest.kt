@@ -62,7 +62,7 @@ class BehandlingRolleTest {
     @Test
     fun `beslutter-rolle vises for ansvarlig beslutter på avsluttet behandling`() {
         val behandling = behandlingKlarTilBeslutning()
-        behandling.håndter(beslutterContext(), fatteVedtakVurdering())
+        behandling.medSaksbehandling(beslutterContext()) { fatteVedtak(fatteVedtakVurdering()) }
 
         val dto = behandling.tilFrontendDto(tilstand = Avsluttet, beslutterContext(), kanBeslutte = true, behandlerRolle = BehandlerRolle.BESLUTTER)
 
@@ -71,15 +71,16 @@ class BehandlingRolleTest {
 
     private fun behandlingKlarTilBeslutning(): Behandling {
         val behandling = behandling()
-        behandling.håndter(saksbehandlerContext(), faktastegVurdering())
-        behandling.lagreForhåndsvarselUnntak(
-            BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
-            beskrivelse = "Trenger ikke forhåndsvarsel i test",
-            saksbehandlerContext(),
-        )
-        behandling.håndter(saksbehandlerContext(), periode, foreldelseVurdering())
-        behandling.håndter(saksbehandlerContext(), periode, forårsaketAvNav().burdeForstått(aktsomhet = forsettelig()))
-        behandling.håndterForeslåVedtak(saksbehandlerContext())
+        behandling.medSaksbehandling(saksbehandlerContext()) { vurderFakta(faktastegVurdering()) }
+        behandling.medSaksbehandling(saksbehandlerContext()) {
+            lagreForhåndsvarselUnntak(
+                BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
+                beskrivelse = "Trenger ikke forhåndsvarsel i test",
+            )
+        }
+        behandling.medSaksbehandling(saksbehandlerContext()) { vurderForeldelse(periode, foreldelseVurdering()) }
+        behandling.medSaksbehandling(saksbehandlerContext()) { vurderVilkår(periode, forårsaketAvNav().burdeForstått(aktsomhet = forsettelig())) }
+        behandling.medSaksbehandling(saksbehandlerContext()) { foreslåVedtak() }
         return behandling
     }
 }

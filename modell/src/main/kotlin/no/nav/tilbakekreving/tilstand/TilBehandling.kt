@@ -40,10 +40,10 @@ object TilBehandling : Tilstand {
         tilbakekreving: Tilbakekreving,
         behandling: Behandling,
         sideeffektContext: SideeffektContext,
-        callback: (Behandling) -> T,
+        callback: Behandling.Saksbehandling.() -> T,
     ): T {
         return behandling.utførEndring(tilbakekreving::tilstand, sideeffektContext, tilbakekreving, tilbakekreving.eksternFagsak.ytelse) {
-            callback(this).also {
+            medSaksbehandling(sideeffektContext, callback).also {
                 if (behandling.kanUtbetales(sideeffektContext.klokke)) {
                     tilbakekreving.byttTilstand(IverksettVedtak, sideeffektContext)
                 }

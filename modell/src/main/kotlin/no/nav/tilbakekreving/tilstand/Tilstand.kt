@@ -110,7 +110,7 @@ internal sealed interface Tilstand {
         tilbakekreving: Tilbakekreving,
         behandling: Behandling,
         sideeffektContext: SideeffektContext,
-        callback: (Behandling) -> T,
+        callback: Behandling.Saksbehandling.() -> T,
     ): T {
         throw ModellFeil.UgyldigOperasjonException("Kan ikke utføre saksbehandling i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon(behandling.id))
     }

@@ -302,7 +302,7 @@ class BehandlingController(
     ): Ressurs<String> {
         val response = tilbakekrevingService.endreTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.TrekkTilbakeFraGodkjenning) { tilbakekreving, context ->
             tilbakekreving.gjørSaksbehandling(behandlingId, context) {
-                trekkTilbakeFraGodkjenning(context)
+                trekkTilbakeFraGodkjenning()
             }
             Ressurs.success("OK")
         }
@@ -329,7 +329,7 @@ class BehandlingController(
     ): Ressurs<String> {
         val response = tilbakekrevingService.endreTilbakekreving(behandling(behandlingId), ValideringContext.FlyttBehandlingTilFakta) { tilbakekreving, context ->
             tilbakekreving.gjørSaksbehandling(behandlingId, context) {
-                flyttTilbakeTilFakta(context)
+                flyttTilbakeTilFakta()
             }
             Ressurs.success("OK")
         }

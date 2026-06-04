@@ -178,7 +178,7 @@ class DokumentController(
     ): Ressurs<Nothing?> {
         return tilbakekrevingService.endreTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.RegistrerUtsattFrist) { tilbakekreving, context ->
             tilbakekreving.gjørSaksbehandling(behandlingId, context) {
-                lagreFristUtsettelse(dto.nyFrist!!, dto.begrunnelse!!, context)
+                lagreFristUtsettelse(dto.nyFrist!!, dto.begrunnelse!!)
             }
             Ressurs.success(null)
         } ?: Ressurs.failure("Fant ingen tilbakekreving til behandlingId $behandlingId")
@@ -203,7 +203,6 @@ class DokumentController(
                         VarslingsUnntak.ÅPENBART_UNØDVENDIG -> BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG
                     },
                     beskrivelse = dto.beskrivelse,
-                    sideeffektContext = context,
                 )
             }
             Ressurs.success(null)

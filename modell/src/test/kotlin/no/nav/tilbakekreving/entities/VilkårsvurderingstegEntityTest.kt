@@ -24,7 +24,7 @@ class VilkårsvurderingstegEntityTest {
             ),
         )
 
-        vilkårsvurderingFør.splitteVilkårsvurderingsperioder(15.januar(2021))
+        vilkårsvurderingFør.splittVilkårsvurdering(15.januar(2021))
 
         val entity = vilkårsvurderingFør.tilEntity(behandlingId).let {
             // Simuler at periodene endrer rekkefølge i DB

@@ -83,13 +83,13 @@ class Behandlingslogg {
             sideeffektContext = systemContext(behandlingslogg = behandlingslogg),
         )
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(behandlingslogg = behandlingslogg)) {
-            lagreFristUtsettelse(LocalDate.of(2027, 1, 1), "Begrunnelse", saksbehandlerContext(behandlingslogg = behandlingslogg))
-            lagreUttalelse(UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL, null, "ingen uttalelse", saksbehandlerContext(behandlingslogg = behandlingslogg))
-            håndter(saksbehandlerContext(behandlingslogg = behandlingslogg), faktastegVurdering(1.januar(2021) til 31.januar(2021)))
-            håndter(saksbehandlerContext(behandlingslogg = behandlingslogg), faktastegVurdering(1.februar(2021) til 28.februar(2021)))
-            håndter(saksbehandlerContext(behandlingslogg = behandlingslogg), 1.januar(2021) til 31.januar(2021), Foreldelsesteg.Vurdering.IkkeForeldet(""))
-            håndter(saksbehandlerContext(behandlingslogg = behandlingslogg), 1.februar(2021) til 28.februar(2021), Foreldelsesteg.Vurdering.IkkeForeldet(""))
-            håndter(saksbehandlerContext(behandlingslogg = behandlingslogg), 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().uaktsomt(unnlates = skalUnnlates()))
+            lagreFristUtsettelse(LocalDate.of(2027, 1, 1), "Begrunnelse")
+            lagreUttalelse(UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL, null, "ingen uttalelse")
+            vurderFakta(faktastegVurdering(1.januar(2021) til 31.januar(2021)))
+            vurderFakta(faktastegVurdering(1.februar(2021) til 28.februar(2021)))
+            vurderForeldelse(1.januar(2021) til 31.januar(2021), Foreldelsesteg.Vurdering.IkkeForeldet(""))
+            vurderForeldelse(1.februar(2021) til 28.februar(2021), Foreldelsesteg.Vurdering.IkkeForeldet(""))
+            vurderVilkår(1.januar(2021) til 31.januar(2021), forårsaketAvBruker().uaktsomt(unnlates = skalUnnlates()))
         }
 
         behandlingslogg.tilFrontend().map { it.tittel } shouldContainAll listOf(

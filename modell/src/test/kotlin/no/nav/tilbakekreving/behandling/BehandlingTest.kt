@@ -41,7 +41,7 @@ class BehandlingTest {
         behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).vurderingAvBrukersUttalelse.harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.IKKE_VURDERT
 
         val faktasteg = faktastegVurdering(periode)
-        behandling.håndter(saksbehandlerContext(), faktasteg)
+        behandling.medSaksbehandling(saksbehandlerContext()) { vurderFakta(faktasteg) }
 
         behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).vurderingAvBrukersUttalelse.beskrivelse shouldBe null
         behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).vurderingAvBrukersUttalelse.harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.NEI
@@ -51,7 +51,7 @@ class BehandlingTest {
             .shouldNotBeNull()
             .behandlingsstegstatus shouldBe Behandlingsstegstatus.UTFØRT
 
-        behandling.flyttTilbakeTilFakta(saksbehandlerContext())
+        behandling.medSaksbehandling(saksbehandlerContext()) { flyttTilbakeTilFakta() }
 
         behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).vurderingAvBrukersUttalelse.beskrivelse shouldBe null
         behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).vurderingAvBrukersUttalelse.harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.IKKE_VURDERT
@@ -62,18 +62,18 @@ class BehandlingTest {
         val kravgrunnlag = kravgrunnlag()
         val behandling = behandling(kravgrunnlag)
         behandling.apply {
-            lagreUttalelse(UttalelseVurdering.JA, null, null, saksbehandlerContext())
+            behandling.medSaksbehandling(saksbehandlerContext()) { lagreUttalelse(UttalelseVurdering.JA, null, null) }
         }
 
         val faktasteg = faktastegVurdering(periode)
-        behandling.håndter(saksbehandlerContext(), faktasteg)
+        behandling.medSaksbehandling(saksbehandlerContext()) { vurderFakta(faktasteg) }
 
         val foreldelse = Foreldelsesteg.Vurdering.Foreldet("Begrunnelse")
-        behandling.håndter(saksbehandlerContext(), periode, foreldelse)
+        behandling.medSaksbehandling(saksbehandlerContext()) { vurderForeldelse(periode, foreldelse) }
 
         behandling.foreldelsesteg.tilFrontendDto(kravgrunnlag).foreldetPerioder.first().begrunnelse shouldBe "Begrunnelse"
 
-        behandling.flyttTilbakeTilFakta(saksbehandlerContext())
+        behandling.medSaksbehandling(saksbehandlerContext()) { flyttTilbakeTilFakta() }
 
         behandling.foreldelsesteg.tilFrontendDto(kravgrunnlag).foreldetPerioder.first().begrunnelse shouldBe null
     }
@@ -82,21 +82,21 @@ class BehandlingTest {
     fun `flytt behandling tilbake til fakta - nullstiller vilkårsvurderingen`() {
         val behandling = behandling()
         behandling.apply {
-            lagreUttalelse(UttalelseVurdering.JA, null, null, saksbehandlerContext())
+            behandling.medSaksbehandling(saksbehandlerContext()) { lagreUttalelse(UttalelseVurdering.JA, null, null) }
         }
 
         val faktasteg = faktastegVurdering(periode)
-        behandling.håndter(saksbehandlerContext(), faktasteg)
+        behandling.medSaksbehandling(saksbehandlerContext()) { vurderFakta(faktasteg) }
 
         val foreldelse = Foreldelsesteg.Vurdering.Foreldet("Begrunnelse")
-        behandling.håndter(saksbehandlerContext(), periode, foreldelse)
+        behandling.medSaksbehandling(saksbehandlerContext()) { vurderForeldelse(periode, foreldelse) }
 
         val vilkårsvurdering = forårsaketAvNav().burdeForstått(aktsomhet = forsettelig())
-        behandling.håndter(saksbehandlerContext(), periode, vilkårsvurdering)
+        behandling.medSaksbehandling(saksbehandlerContext()) { vurderVilkår(periode, vilkårsvurdering) }
 
         behandling.vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext()).perioder.first().begrunnelse.shouldNotBeNull()
 
-        behandling.flyttTilbakeTilFakta(saksbehandlerContext())
+        behandling.medSaksbehandling(saksbehandlerContext()) { flyttTilbakeTilFakta() }
 
         behandling.vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext()).perioder.first().begrunnelse shouldBe null
     }
@@ -104,87 +104,90 @@ class BehandlingTest {
     @Test
     fun `vedtak kan endres etter alle tilbakeførte vurderinger er gjennomgått`() {
         val behandling = behandling()
-        behandling.håndter(saksbehandlerContext(), faktastegVurdering())
-        behandling.lagreForhåndsvarselUnntak(
-            BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
-            "Trenger ikke forhåndsvarsel i test lol",
-            saksbehandlerContext(),
-        )
-        behandling.håndter(saksbehandlerContext(), periode, foreldelseVurdering())
-        behandling.håndter(saksbehandlerContext(), periode, forårsaketAvNav().godTro())
+        behandling.medSaksbehandling(saksbehandlerContext()) { vurderFakta(faktastegVurdering()) }
+        behandling.medSaksbehandling(saksbehandlerContext()) {
+            lagreForhåndsvarselUnntak(
+                BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
+                "Trenger ikke forhåndsvarsel i test lol",
+            )
+        }
+        behandling.medSaksbehandling(saksbehandlerContext()) { vurderForeldelse(periode, foreldelseVurdering()) }
+        behandling.medSaksbehandling(saksbehandlerContext()) { vurderVilkår(periode, forårsaketAvNav().godTro()) }
         behandling.tilFrontendDto(TilBehandling, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER).kanEndres shouldBe true
 
-        behandling.håndterForeslåVedtak(saksbehandlerContext())
+        behandling.medSaksbehandling(saksbehandlerContext()) { foreslåVedtak() }
 
-        behandling.håndter(
-            sideeffektContext = beslutterContext(),
-            vurderinger = fatteVedtakVurdering(
-                Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Underkjent("Må vurderes på nytt"),
-            ),
-        )
+        behandling.medSaksbehandling(beslutterContext()) {
+            fatteVedtak(
+                fatteVedtakVurdering(
+                    Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Underkjent("Må vurderes på nytt"),
+                ),
+            )
+        }
         behandling.tilFrontendDto(TilBehandling, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER).kanEndres shouldBe true
 
-        behandling.håndter(saksbehandlerContext(), faktastegVurdering())
+        behandling.medSaksbehandling(saksbehandlerContext()) { vurderFakta(faktastegVurdering()) }
         behandling.tilFrontendDto(TilBehandling, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER).kanEndres shouldBe true
 
-        behandling.håndterForeslåVedtak(saksbehandlerContext())
+        behandling.medSaksbehandling(saksbehandlerContext()) { foreslåVedtak() }
         behandling.tilFrontendDto(TilBehandling, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER).kanEndres shouldBe false
 
-        behandling.håndter(
-            sideeffektContext = beslutterContext(),
-            vurderinger = fatteVedtakVurdering(),
-        )
+        behandling.medSaksbehandling(beslutterContext()) { fatteVedtak(fatteVedtakVurdering()) }
         behandling.tilFrontendDto(TilBehandling, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER).kanEndres shouldBe false
     }
 
     @Test
     fun `andre saksbehandlere skal kunne gjøre vurderinger på vedtak som er underkjent`() {
         val behandling = behandling()
-        behandling.håndter(saksbehandlerContext(), faktastegVurdering())
-        behandling.lagreForhåndsvarselUnntak(
-            BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
-            "Trenger ikke forhåndsvarsel i test lol",
-            saksbehandlerContext(),
-        )
-        behandling.håndter(saksbehandlerContext(), periode, foreldelseVurdering())
-        behandling.håndter(saksbehandlerContext(), periode, forårsaketAvNav().godTro())
+        behandling.medSaksbehandling(saksbehandlerContext()) { vurderFakta(faktastegVurdering()) }
+        behandling.medSaksbehandling(saksbehandlerContext()) {
+            lagreForhåndsvarselUnntak(
+                BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
+                "Trenger ikke forhåndsvarsel i test lol",
+            )
+        }
+        behandling.medSaksbehandling(saksbehandlerContext()) { vurderForeldelse(periode, foreldelseVurdering()) }
+        behandling.medSaksbehandling(saksbehandlerContext()) { vurderVilkår(periode, forårsaketAvNav().godTro()) }
         behandling.tilFrontendDto(TilBehandling, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER).kanEndres shouldBe true
 
-        behandling.håndterForeslåVedtak(saksbehandlerContext())
+        behandling.medSaksbehandling(saksbehandlerContext()) { foreslåVedtak() }
 
-        behandling.håndter(
-            sideeffektContext = beslutterContext(),
-            vurderinger = fatteVedtakVurdering(
-                Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Underkjent("Må vurderes på nytt"),
-            ),
-        )
+        behandling.medSaksbehandling(beslutterContext()) {
+            fatteVedtak(
+                fatteVedtakVurdering(
+                    Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Underkjent("Må vurderes på nytt"),
+                ),
+            )
+        }
         behandling.tilFrontendDto(TilBehandling, behandlerContext(Behandler.Saksbehandler("Z222222")), true, BehandlerRolle.BESLUTTER).kanEndres shouldBe true
     }
 
     @Test
     fun `behandling sendt til godkjenning etter underkjenning skal ikke beholde vurdering`() {
         val behandling = behandling()
-        behandling.håndter(saksbehandlerContext(), faktastegVurdering())
-        behandling.lagreForhåndsvarselUnntak(
-            BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
-            "Trenger ikke forhåndsvarsel i test lol",
-            saksbehandlerContext(),
-        )
-        behandling.håndter(saksbehandlerContext(), periode, foreldelseVurdering())
-        behandling.håndter(saksbehandlerContext(), periode, forårsaketAvNav().godTro())
+        behandling.medSaksbehandling(saksbehandlerContext()) { vurderFakta(faktastegVurdering()) }
+        behandling.medSaksbehandling(saksbehandlerContext()) {
+            lagreForhåndsvarselUnntak(
+                BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
+                "Trenger ikke forhåndsvarsel i test lol",
+            )
+        }
+        behandling.medSaksbehandling(saksbehandlerContext()) { vurderForeldelse(periode, foreldelseVurdering()) }
+        behandling.medSaksbehandling(saksbehandlerContext()) { vurderVilkår(periode, forårsaketAvNav().godTro()) }
         behandling.tilFrontendDto(TilBehandling, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER).kanEndres shouldBe true
 
-        behandling.håndterForeslåVedtak(saksbehandlerContext())
+        behandling.medSaksbehandling(saksbehandlerContext()) { foreslåVedtak() }
 
-        behandling.håndter(
-            sideeffektContext = beslutterContext(),
-            vurderinger = fatteVedtakVurdering(
-                Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Underkjent("Må vurderes på nytt"),
-            ),
-        )
+        behandling.medSaksbehandling(beslutterContext()) {
+            fatteVedtak(
+                fatteVedtakVurdering(
+                    Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Underkjent("Må vurderes på nytt"),
+                ),
+            )
+        }
 
-        behandling.håndter(saksbehandlerContext(), faktastegVurdering())
-        behandling.håndterForeslåVedtak(saksbehandlerContext())
+        behandling.medSaksbehandling(saksbehandlerContext()) { vurderFakta(faktastegVurdering()) }
+        behandling.medSaksbehandling(saksbehandlerContext()) { foreslåVedtak() }
         val frontendDto = behandling.tilFrontendDto(TilBehandling, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER)
 
         val fatteVedtakSteg = frontendDto.behandlingsstegsinfo.skalHaSteg(Behandlingssteg.FATTE_VEDTAK)
@@ -221,25 +224,27 @@ class BehandlingTest {
     @Test
     fun `kan ikke sende tilbake til beslutter om en av vurderingene ikke er fullstendige`() {
         val behandling = behandling()
-        behandling.håndter(saksbehandlerContext(), faktastegVurdering())
-        behandling.lagreForhåndsvarselUnntak(
-            BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
-            "Trenger ikke forhåndsvarsel i test lol",
-            saksbehandlerContext(),
-        )
-        behandling.håndter(saksbehandlerContext(), periode, foreldelseVurdering())
-        behandling.håndter(saksbehandlerContext(), periode, forårsaketAvNav().godTro())
-        behandling.håndterForeslåVedtak(saksbehandlerContext())
+        behandling.medSaksbehandling(saksbehandlerContext()) { vurderFakta(faktastegVurdering()) }
+        behandling.medSaksbehandling(saksbehandlerContext()) {
+            lagreForhåndsvarselUnntak(
+                BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
+                "Trenger ikke forhåndsvarsel i test lol",
+            )
+        }
+        behandling.medSaksbehandling(saksbehandlerContext()) { vurderForeldelse(periode, foreldelseVurdering()) }
+        behandling.medSaksbehandling(saksbehandlerContext()) { vurderVilkår(periode, forårsaketAvNav().godTro()) }
+        behandling.medSaksbehandling(saksbehandlerContext()) { foreslåVedtak() }
 
-        behandling.håndter(
-            sideeffektContext = beslutterContext(),
-            vurderinger = fatteVedtakVurdering(
-                Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Underkjent("Må vurderes på nytt"),
-            ),
-        )
+        behandling.medSaksbehandling(beslutterContext()) {
+            fatteVedtak(
+                fatteVedtakVurdering(
+                    Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Underkjent("Må vurderes på nytt"),
+                ),
+            )
+        }
 
         val exception = shouldThrow<ModellFeil.UgyldigOperasjonException> {
-            behandling.håndterForeslåVedtak(saksbehandlerContext())
+            behandling.medSaksbehandling(saksbehandlerContext()) { foreslåVedtak() }
         }
         exception.message shouldBe "Du må gjøre en ny vurdering av fakta før du kan sende vedtaket til godkjenning hos beslutter"
     }
@@ -247,27 +252,29 @@ class BehandlingTest {
     @Test
     fun `kan ikke sende tilbake til beslutter om en av vurderingene ikke er fullstendige - flere steg`() {
         val behandling = behandling()
-        behandling.håndter(saksbehandlerContext(), faktastegVurdering())
-        behandling.lagreForhåndsvarselUnntak(
-            BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
-            "Trenger ikke forhåndsvarsel i test lol",
-            saksbehandlerContext(),
-        )
-        behandling.håndter(saksbehandlerContext(), periode, foreldelseVurdering())
-        behandling.håndter(saksbehandlerContext(), periode, forårsaketAvNav().godTro())
-        behandling.håndterForeslåVedtak(saksbehandlerContext())
+        behandling.medSaksbehandling(saksbehandlerContext()) { vurderFakta(faktastegVurdering()) }
+        behandling.medSaksbehandling(saksbehandlerContext()) {
+            lagreForhåndsvarselUnntak(
+                BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
+                "Trenger ikke forhåndsvarsel i test lol",
+            )
+        }
+        behandling.medSaksbehandling(saksbehandlerContext()) { vurderForeldelse(periode, foreldelseVurdering()) }
+        behandling.medSaksbehandling(saksbehandlerContext()) { vurderVilkår(periode, forårsaketAvNav().godTro()) }
+        behandling.medSaksbehandling(saksbehandlerContext()) { foreslåVedtak() }
 
-        behandling.håndter(
-            sideeffektContext = beslutterContext(),
-            vurderinger = fatteVedtakVurdering(
-                Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Underkjent("Må vurderes på nytt"),
-                Behandlingssteg.FORELDELSE to FatteVedtakSteg.Vurdering.Underkjent("Må vurderes på nytt"),
-                Behandlingssteg.VILKÅRSVURDERING to FatteVedtakSteg.Vurdering.Underkjent("Må vurderes på nytt"),
-            ),
-        )
+        behandling.medSaksbehandling(beslutterContext()) {
+            fatteVedtak(
+                fatteVedtakVurdering(
+                    Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Underkjent("Må vurderes på nytt"),
+                    Behandlingssteg.FORELDELSE to FatteVedtakSteg.Vurdering.Underkjent("Må vurderes på nytt"),
+                    Behandlingssteg.VILKÅRSVURDERING to FatteVedtakSteg.Vurdering.Underkjent("Må vurderes på nytt"),
+                ),
+            )
+        }
 
         val exception = shouldThrow<ModellFeil.UgyldigOperasjonException> {
-            behandling.håndterForeslåVedtak(saksbehandlerContext())
+            behandling.medSaksbehandling(saksbehandlerContext()) { foreslåVedtak() }
         }
         exception.message shouldBe "Du må gjøre en ny vurdering av fakta, foreldelse og vilkår før du kan sende vedtaket til godkjenning hos beslutter"
     }

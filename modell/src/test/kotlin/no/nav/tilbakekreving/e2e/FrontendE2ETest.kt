@@ -49,7 +49,7 @@ class FrontendE2ETest {
         tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true, BehandlerRolle.BESLUTTER).status shouldBe Behandlingsstatus.UTREDES
 
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
-            håndter(saksbehandlerContext(), faktastegVurdering())
+            vurderFakta(faktastegVurdering())
         }
         tilbakekreving.sendVarselbrev(
             tilbakekreving.nåværendeBehandlingId(),
@@ -75,19 +75,19 @@ class FrontendE2ETest {
             systemContext(),
         )
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
-            lagreUttalelse(UttalelseVurdering.JA, null, null, saksbehandlerContext())
-            håndter(saksbehandlerContext(), 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
-            håndter(saksbehandlerContext(), 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
+            lagreUttalelse(UttalelseVurdering.JA, null, null)
+            vurderForeldelse(1.januar(2021) til 31.januar(2021), foreldelseVurdering())
+            vurderVilkår(1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
         }
         tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true, BehandlerRolle.BESLUTTER).status shouldBe Behandlingsstatus.UTREDES
 
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
-            håndterForeslåVedtak(saksbehandlerContext())
+            foreslåVedtak()
         }
         tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true, BehandlerRolle.BESLUTTER).status shouldBe Behandlingsstatus.FATTER_VEDTAK
 
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), beslutterContext()) {
-            håndter(beslutterContext(), godkjenning())
+            fatteVedtak(godkjenning())
         }
         tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true, BehandlerRolle.BESLUTTER).status shouldBe Behandlingsstatus.IVERKSETTER_VEDTAK
 

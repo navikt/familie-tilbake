@@ -432,7 +432,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         }
 
         val tilbakekreving = tilbakekreving(behandlingId)
-        tilbakekreving.hentVilkårsvurderingsperioder(behandlingId) shouldNotBeNull {
+        tilbakekreving.hentBehandling(behandlingId).hentVilkårsvurderingsperioder() shouldNotBeNull {
             size shouldBe 4
             this[0] shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(1.januar(2021), 1.januar(2021))
             this[1] shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(15.mars(2021), 15.mars(2021))

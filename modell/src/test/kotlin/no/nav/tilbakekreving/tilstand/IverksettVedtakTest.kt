@@ -1,11 +1,11 @@
 package no.nav.tilbakekreving.tilstand
+
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvNav
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
-import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.beslutterContext
 import no.nav.tilbakekreving.brukerinfoHendelse
 import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
@@ -13,6 +13,7 @@ import no.nav.tilbakekreving.endring.VurdertUtbetaling
 import no.nav.tilbakekreving.fagsysteminfoHendelse
 import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.feil.ModellFeil
+import no.nav.tilbakekreving.foreldelseVurdering
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
@@ -41,8 +42,7 @@ class IverksettVedtakTest {
             behandlingId = tilbakekreving.nåværendeBehandlingId(),
             sideeffektContext = beslutterContext(),
         ) {
-            håndter(
-                beslutterContext(),
+            fatteVedtak(
                 listOf(
                     Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
                     Behandlingssteg.FORHÅNDSVARSEL to FatteVedtakSteg.Vurdering.Godkjent,
@@ -63,8 +63,7 @@ class IverksettVedtakTest {
             behandlingId = tilbakekreving.nåværendeBehandlingId(),
             sideeffektContext = beslutterContext(),
         ) {
-            håndter(
-                beslutterContext(),
+            fatteVedtak(
                 listOf(
                     Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
                     Behandlingssteg.FORELDELSE to FatteVedtakSteg.Vurdering.Godkjent,
@@ -89,21 +88,14 @@ class IverksettVedtakTest {
             håndter(fagsysteminfoHendelse(), systemContext(endringOppsamler))
             håndter(brukerinfoHendelse(), systemContext(endringOppsamler))
             gjørSaksbehandling(nåværendeBehandlingId(), saksbehandlerContext(endringOppsamler)) {
-                lagreUttalelse(UttalelseVurdering.JA, null, "", saksbehandlerContext(endringOppsamler))
-                håndter(saksbehandlerContext(endringOppsamler), faktastegVurdering())
-                håndter(
-                    saksbehandlerContext(endringOppsamler),
-                    periode = 1.januar(2021) til 31.januar(2021),
-                    vurdering = Foreldelsesteg.Vurdering.IkkeForeldet(
-                        "Siste utbetaling er innenfor 3 år",
-                    ),
-                )
-                håndter(
-                    saksbehandlerContext(endringOppsamler),
+                lagreUttalelse(UttalelseVurdering.JA, null, "")
+                vurderFakta(faktastegVurdering())
+                vurderForeldelse(1.januar(2021) til 31.januar(2021), foreldelseVurdering())
+                vurderVilkår(
                     periode = 1.januar(2021) til 31.januar(2021),
                     vurdering = forårsaketAvNav().burdeForstått(aktsomhet = uaktsomt(skalIkkeUnnlates(), ingenReduksjon())),
                 )
-                håndterForeslåVedtak(saksbehandlerContext(endringOppsamler))
+                foreslåVedtak()
             }
         }
         return tilbakekreving
@@ -115,8 +107,7 @@ class IverksettVedtakTest {
         val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingEvent)
 
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), beslutterContext()) {
-            håndter(
-                beslutterContext(),
+            fatteVedtak(
                 listOf(
                     Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
                     Behandlingssteg.FORHÅNDSVARSEL to FatteVedtakSteg.Vurdering.Godkjent,
@@ -143,8 +134,7 @@ class IverksettVedtakTest {
         val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
         val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingEvent)
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), beslutterContext()) {
-            håndter(
-                beslutterContext(),
+            fatteVedtak(
                 listOf(
                     Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
                     Behandlingssteg.FORESLÅ_VEDTAK to FatteVedtakSteg.Vurdering.Godkjent,
@@ -179,8 +169,7 @@ class IverksettVedtakTest {
         endringObservatørOppsamler.vedtakFattetFor(tilbakekreving.nåværendeBehandlingId()).size shouldBe 0
 
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), beslutterContext(endringObservatørOppsamler)) {
-            håndter(
-                beslutterContext(endringObservatørOppsamler),
+            fatteVedtak(
                 listOf(
                     Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
                     Behandlingssteg.FORHÅNDSVARSEL to FatteVedtakSteg.Vurdering.Godkjent,

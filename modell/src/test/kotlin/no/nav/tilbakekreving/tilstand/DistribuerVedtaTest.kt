@@ -107,14 +107,14 @@ class DistribuerVedtaTest {
             håndter(fagsysteminfoHendelse(), systemContext(endringOppsamler))
             håndter(brukerinfoHendelse(), systemContext(endringOppsamler))
             gjørSaksbehandling(nåværendeBehandlingId(), saksbehandlerContext(endringOppsamler)) {
-                lagreUttalelse(UttalelseVurdering.JA, null, "", saksbehandlerContext(endringOppsamler))
-                håndter(saksbehandlerContext(endringOppsamler), faktastegVurdering())
-                håndter(saksbehandlerContext(endringOppsamler), periode = 1.januar(2021) til 31.januar(2021), vurdering = foreldelseVurdering())
-                håndter(saksbehandlerContext(endringOppsamler), periode = 1.januar(2021) til 31.januar(2021), vurdering = forårsaketAvBruker().uaktsomt())
-                håndterForeslåVedtak(saksbehandlerContext(endringOppsamler))
+                lagreUttalelse(UttalelseVurdering.JA, null, "")
+                vurderFakta(faktastegVurdering())
+                vurderForeldelse(periode = 1.januar(2021) til 31.januar(2021), vurdering = foreldelseVurdering())
+                vurderVilkår(periode = 1.januar(2021) til 31.januar(2021), vurdering = forårsaketAvBruker().uaktsomt())
+                foreslåVedtak()
             }
             gjørSaksbehandling(nåværendeBehandlingId(), beslutterContext(endringOppsamler)) {
-                håndter(beslutterContext(endringOppsamler), godkjenning())
+                fatteVedtak(godkjenning())
             }
             tilbakekreving.håndter(
                 iverksettelse(),

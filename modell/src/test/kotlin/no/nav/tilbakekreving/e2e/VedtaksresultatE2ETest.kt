@@ -38,10 +38,10 @@ class VedtaksresultatE2ETest {
 
         val saksbehandlerContext = saksbehandlerContext()
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext) {
-            håndter(saksbehandlerContext, faktastegVurdering())
-            lagreForhåndsvarselUnntak(BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING, "", saksbehandlerContext)
-            håndter(saksbehandlerContext, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
-            håndter(saksbehandlerContext, 1.januar(2021) til 31.januar(2021), forårsaketAvBruker().uaktsomt())
+            vurderFakta(faktastegVurdering())
+            lagreForhåndsvarselUnntak(BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING, "")
+            vurderForeldelse(1.januar(2021) til 31.januar(2021), foreldelseVurdering())
+            vurderVilkår(1.januar(2021) til 31.januar(2021), forårsaketAvBruker().uaktsomt())
         }
 
         val resultat = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId()).hentVedtaksresultatForFrontend()
@@ -70,14 +70,10 @@ class VedtaksresultatE2ETest {
 
         val saksbehandlerContext = saksbehandlerContext()
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext) {
-            håndter(saksbehandlerContext, faktastegVurdering())
-            lagreForhåndsvarselUnntak(BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING, "", saksbehandlerContext)
-            håndter(saksbehandlerContext, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
-            håndter(
-                saksbehandlerContext,
-                1.januar(2021) til 31.januar(2021),
-                forårsaketAvBruker().uaktsomt(unnlates = skalUnnlates()),
-            )
+            vurderFakta(faktastegVurdering())
+            lagreForhåndsvarselUnntak(BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING, "")
+            vurderForeldelse(1.januar(2021) til 31.januar(2021), foreldelseVurdering())
+            vurderVilkår(1.januar(2021) til 31.januar(2021), forårsaketAvBruker().uaktsomt(unnlates = skalUnnlates()))
         }
 
         val resultat = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId()).hentVedtaksresultatForFrontend()
@@ -100,10 +96,10 @@ class VedtaksresultatE2ETest {
 
         val saksbehandlerContext = saksbehandlerContext()
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext) {
-            håndter(saksbehandlerContext, faktastegVurdering())
-            lagreForhåndsvarselUnntak(BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING, "", saksbehandlerContext)
-            håndter(saksbehandlerContext, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
-            håndter(saksbehandlerContext, 1.januar(2021) til 31.januar(2021), forårsaketAvNav().burdeForstått())
+            vurderFakta(faktastegVurdering())
+            lagreForhåndsvarselUnntak(BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING, "")
+            vurderForeldelse(1.januar(2021) til 31.januar(2021), foreldelseVurdering())
+            vurderVilkår(1.januar(2021) til 31.januar(2021), forårsaketAvNav().burdeForstått())
         }
 
         val resultat = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId()).hentVedtaksresultatForFrontend()
@@ -132,10 +128,10 @@ class VedtaksresultatE2ETest {
 
         val saksbehandlerContext = saksbehandlerContext()
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext) {
-            håndter(saksbehandlerContext, faktastegVurdering())
-            lagreForhåndsvarselUnntak(BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING, "", saksbehandlerContext)
-            håndter(saksbehandlerContext, 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
-            håndter(saksbehandlerContext, 1.januar(2021) til 31.januar(2021), forårsaketAvNav().forstod(aktsomhet = forsettelig()))
+            vurderFakta(faktastegVurdering())
+            lagreForhåndsvarselUnntak(BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING, "")
+            vurderForeldelse(1.januar(2021) til 31.januar(2021), foreldelseVurdering())
+            vurderVilkår(1.januar(2021) til 31.januar(2021), forårsaketAvNav().forstod(aktsomhet = forsettelig()))
         }
 
         val resultat = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId()).hentVedtaksresultatForFrontend()

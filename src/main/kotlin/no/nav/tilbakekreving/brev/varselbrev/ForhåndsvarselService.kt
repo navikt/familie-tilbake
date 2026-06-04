@@ -107,7 +107,6 @@ class ForhåndsvarselService(
                         uttalelseVurdering = UttalelseVurdering.valueOf(brukeruttalelse.harBrukerUttaltSeg.name),
                         uttalelseInfo = UttalelseInfo(UUID.randomUUID(), uttalelsedetaljer.uttalelsesdato, uttalelsedetaljer.hvorBrukerenUttalteSeg, uttalelsedetaljer.uttalelseBeskrivelse),
                         kommentar = null,
-                        sideeffektContext = sideeffektContext,
                     )
                 }
             }
@@ -123,7 +122,6 @@ class ForhåndsvarselService(
                         uttalelseVurdering = UttalelseVurdering.valueOf(brukeruttalelse.harBrukerUttaltSeg.name),
                         uttalelseInfo = null,
                         kommentar = kommentar,
-                        sideeffektContext = sideeffektContext,
                     )
                 }
             }
@@ -158,7 +156,6 @@ class ForhåndsvarselService(
                             },
                         ),
                         kommentar = null,
-                        sideeffektContext = sideeffektContext,
                     )
                 }
             }
@@ -170,7 +167,6 @@ class ForhåndsvarselService(
                         kommentar = requireNotNull(uttalelseDto.beskrivelse) {
                             "Det kreves kommentar/beskrivelse når brukeren ikke uttalte seg. beskrivelse var null"
                         },
-                        sideeffektContext = sideeffektContext,
                     )
                 }
             }

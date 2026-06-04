@@ -1,4 +1,5 @@
 package no.nav.tilbakekreving.tilstand
+
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -9,7 +10,6 @@ import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
 import no.nav.tilbakekreving.assertions.skalHaSteg
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
-import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.beslutterContext
 import no.nav.tilbakekreving.brukerinfoHendelse
 import no.nav.tilbakekreving.eksternFagsak
@@ -48,8 +48,7 @@ class TilBehandlingTest {
         val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingHendelse, saksbehandlerContext())
 
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), beslutterContext()) {
-            håndter(
-                beslutterContext(),
+            fatteVedtak(
                 listOf(
                     Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
                     Behandlingssteg.FORELDELSE to FatteVedtakSteg.Vurdering.Godkjent,
@@ -59,7 +58,7 @@ class TilBehandlingTest {
 
         tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId()).foreldelsesteg.erFullstendig(SystemKlokke) shouldBe true
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
-            flyttTilbakeTilFakta(saksbehandlerContext())
+            flyttTilbakeTilFakta()
         }
         tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId()).foreldelsesteg.erFullstendig(SystemKlokke) shouldBe false
     }
@@ -70,8 +69,7 @@ class TilBehandlingTest {
         val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingHendelse, saksbehandlerContext())
 
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), beslutterContext()) {
-            håndter(
-                beslutterContext(),
+            fatteVedtak(
                 listOf(
                     Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
                     Behandlingssteg.FORHÅNDSVARSEL to FatteVedtakSteg.Vurdering.Godkjent,
@@ -86,7 +84,7 @@ class TilBehandlingTest {
 
         val exception = shouldThrow<ModellFeil.UgyldigOperasjonException> {
             tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
-                flyttTilbakeTilFakta(saksbehandlerContext())
+                flyttTilbakeTilFakta()
             }
         }
         exception.message shouldBe "Kan ikke utføre saksbehandling i ${tilbakekreving.tilstand.tilbakekrevingTilstand}"
@@ -124,7 +122,7 @@ class TilBehandlingTest {
         val gammeltEndringstidspunkt = tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true, BehandlerRolle.SAKSBEHANDLER).endretTidspunkt
 
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
-            håndter(saksbehandlerContext(), faktastegVurdering())
+            vurderFakta(faktastegVurdering())
         }
         val nyttEndringstidspunkt = tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true, BehandlerRolle.SAKSBEHANDLER).endretTidspunkt
         nyttEndringstidspunkt shouldNotBe gammeltEndringstidspunkt
@@ -176,11 +174,11 @@ class TilBehandlingTest {
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
         val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingHendelse, saksbehandlerContext())
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
-            trekkTilbakeFraGodkjenning(saksbehandlerContext())
+            trekkTilbakeFraGodkjenning()
         }
         val exception = shouldThrow<ModellFeil> {
             tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), beslutterContext()) {
-                håndter(beslutterContext(), godkjenning())
+                fatteVedtak(godkjenning())
             }
         }
         exception.message shouldBe "Behandlingen er i FORESLÅ_VEDTAK og kan ikke behandle vurdering for FATTE_VEDTAK"
@@ -195,8 +193,7 @@ class TilBehandlingTest {
         tilbakekrevingDtoFør.status shouldBe Behandlingsstatus.FATTER_VEDTAK
 
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), beslutterContext()) {
-            håndter(
-                beslutterContext(),
+            fatteVedtak(
                 listOf(
                     Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Underkjent("Fakta må vurderes på nytt"),
                     Behandlingssteg.FORHÅNDSVARSEL to FatteVedtakSteg.Vurdering.Godkjent,
@@ -219,23 +216,22 @@ class TilBehandlingTest {
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
         val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingHendelse, saksbehandlerContext())
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
-            håndter(saksbehandlerContext(), faktastegVurdering())
+            vurderFakta(faktastegVurdering())
         }
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
             lagreUttalelse(
                 uttalelseVurdering = UttalelseVurdering.UNNTAK_ALLEREDE_UTTALT_SEG,
                 uttalelseInfo = null,
                 kommentar = "Trenger ikke forhåndsvarsel i test lol",
-                sideeffektContext = saksbehandlerContext(),
             )
         }
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
-            håndter(saksbehandlerContext(), 1.januar(2021) til 31.januar(2021), foreldelseVurdering())
-            håndter(saksbehandlerContext(), 1.januar(2021) til 31.januar(2021), forårsaketAvNav().burdeForstått())
-            håndterForeslåVedtak(saksbehandlerContext())
+            vurderForeldelse(1.januar(2021) til 31.januar(2021), foreldelseVurdering())
+            vurderVilkår(1.januar(2021) til 31.januar(2021), forårsaketAvNav().burdeForstått())
+            foreslåVedtak()
         }
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), beslutterContext()) {
-            håndter(beslutterContext(), fatteVedtakVurdering())
+            fatteVedtak(fatteVedtakVurdering())
         }
         tilbakekreving.håndter(iverksettelse(), systemContext())
 
@@ -243,7 +239,7 @@ class TilBehandlingTest {
 
         val exception = shouldThrow<ModellFeil.UgyldigOperasjonException> {
             tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), beslutterContext()) {
-                håndter(beslutterContext(), fatteVedtakVurdering())
+                fatteVedtak(fatteVedtakVurdering())
             }
         }
         exception.melding shouldBe "Kan ikke utføre saksbehandling i JOURNALFØR_VEDTAK"
@@ -254,21 +250,14 @@ class TilBehandlingTest {
         context: SideeffektContext,
     ) = tilbakekrevingTilBehandling(opprettTilbakekrevingHendelse).apply {
         gjørSaksbehandling(nåværendeBehandlingId(), context) {
-            lagreUttalelse(UttalelseVurdering.JA, null, "", context)
-            håndter(context, faktastegVurdering())
-            håndter(
-                context,
-                periode = 1.januar(2021) til 31.januar(2021),
-                vurdering = Foreldelsesteg.Vurdering.IkkeForeldet(
-                    "Siste utbetaling er innenfor 3 år",
-                ),
-            )
-            håndter(
-                context,
+            lagreUttalelse(UttalelseVurdering.JA, null, "")
+            vurderFakta(faktastegVurdering())
+            vurderForeldelse(1.januar(2021) til 31.januar(2021), foreldelseVurdering())
+            vurderVilkår(
                 periode = 1.januar(2021) til 31.januar(2021),
                 vurdering = forårsaketAvNav().burdeForstått(aktsomhet = uaktsomt(skalIkkeUnnlates(), ingenReduksjon())),
             )
-            håndterForeslåVedtak(context)
+            foreslåVedtak()
         }
     }
 }

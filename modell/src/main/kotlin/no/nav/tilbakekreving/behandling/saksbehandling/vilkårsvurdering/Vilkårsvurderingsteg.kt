@@ -151,7 +151,7 @@ class Vilkårsvurderingsteg(
         _vurdering = første.vurdering,
     )
 
-    fun splitteVilkårsvurderingsperioder(splittFra: LocalDate) {
+    fun splittVilkårsvurdering(splittFra: LocalDate) {
         val funnetPerioden = vurderinger.single { it.periode.fom == splittFra }.id
         vurder(funnetPerioden, ForårsaketAvBruker.IkkeVurdert())
     }

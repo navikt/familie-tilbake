@@ -63,8 +63,7 @@ class BehandlingApiController(
             valideringContext = ValideringContext.OppdaterFakta,
         ) { tilbakekreving, context ->
             tilbakekreving.gjørSaksbehandling(UUID.fromString(behandlingId), context) {
-                håndter(
-                    context,
+                oppdaterFakta(
                     oppdaget = oppdaterFaktaOmFeilutbetalingDto.vurdering?.oppdaget,
                     årsak = oppdaterFaktaOmFeilutbetalingDto.vurdering?.årsak,
                     perioder = oppdaterFaktaOmFeilutbetalingDto.perioder,
@@ -96,7 +95,7 @@ class BehandlingApiController(
             valideringContext = ValideringContext.ForeslåVedtak,
         ) { tilbakekreving, context ->
             tilbakekreving.gjørSaksbehandling(behandlingId, context) {
-                håndterForeslåVedtak(context)
+                foreslåVedtak()
             }
             ResponseEntity.ok(Unit)
         } ?: ResponseEntity.notFound().build()
@@ -158,7 +157,11 @@ class BehandlingApiController(
             filter = TilbakekrevingFilter.behandling(behandlingId),
             valideringContext = ValideringContext.SplitteVilkårsvurderingsperiode,
         ) { tilbakekreving, context ->
-            ResponseEntity.ok(tilbakekreving.splitteVilkårsvurderingsperioder(behandlingId, context, splittPeriode.splittFra))
+            ResponseEntity.ok(
+                tilbakekreving.gjørSaksbehandling(behandlingId, context) {
+                    splittVilkårsvurdering(splittPeriode.splittFra)
+                },
+            )
         } ?: ResponseEntity.notFound().build()
     }
 
@@ -168,7 +171,7 @@ class BehandlingApiController(
             valideringContext = ValideringContext.Vilkårsvurderingsperioder,
         ) ?: return ResponseEntity.notFound().build()
 
-        return ResponseEntity.ok(tilbakekreving.hentVilkårsvurderingsperioder(behandlingId))
+        return ResponseEntity.ok(tilbakekreving.hentBehandling(behandlingId).hentVilkårsvurderingsperioder())
     }
 
     override fun behandlingLagreBrukersuttalelse(behandlingId: UUID, uttalelseDto: UttalelseDto): ResponseEntity<Unit> {
@@ -187,7 +190,7 @@ class BehandlingApiController(
         ) { tilbakekreving, context ->
             ResponseEntity.ok(
                 tilbakekreving.gjørSaksbehandling(behandlingId, context) {
-                    lagreFristUtsettelse(updateUttalelsesfristDto.nyFrist!!, updateUttalelsesfristDto.begrunnelse!!, context)
+                    lagreFristUtsettelse(updateUttalelsesfristDto.nyFrist!!, updateUttalelsesfristDto.begrunnelse!!)
                 },
             )
         } ?: ResponseEntity.notFound().build()
@@ -208,7 +211,6 @@ class BehandlingApiController(
                             VarslingsunntakDto.ALLEREDE_UTTALET_SEG -> BegrunnelseForUnntak.ALLEREDE_UTTALET_SEG
                         },
                         beskrivelse = unntakDto.beskrivelse,
-                        sideeffektContext = context,
                     )
                 },
             )
