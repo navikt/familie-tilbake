@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
@@ -239,5 +240,25 @@ class VilkårsvurderingstegTest {
             kravgrunnlagHendelse = kravgrunnlag,
         )
         vilkårsvurderingsteg.tilFrontendDto(kravgrunnlag, revurdering, foreldelsesteg, SystemKlokke).kanUnnlates4xRettsgebyr shouldBe false
+    }
+
+    @Test
+    fun `henter alle vilkårsvurderingsperiodene`() {
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(1.januar(2021) til 31.januar(2021)),
+                kravgrunnlagPeriode(1.februar(2021) til 28.februar(2021)),
+            ),
+        )
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakBehandling(),
+            kravgrunnlag,
+        )
+
+        vilkårsvurderingsteg.hentVilkårsvurderingsperioder() shouldNotBeNull {
+            size shouldBe 2
+            this[0] shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(1.januar(2021), 31.januar(2021))
+            this[1] shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(1.februar(2021), 28.februar(2021))
+        }
     }
 }
