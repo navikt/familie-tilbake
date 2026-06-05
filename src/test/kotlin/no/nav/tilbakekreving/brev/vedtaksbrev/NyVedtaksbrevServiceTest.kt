@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.brev.vedtaksbrev
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.breeeev.begrunnelse.Forklaringstekster
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
@@ -44,7 +45,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
     @Test
     fun `det finnes ingen lagrede felter i vedtaksbrev`() {
         val vedtaksbrevInfo = vedtaksbrevInfo(UUID.randomUUID())
-        nyVedtaksbrevService.hentVedtaksbrevData(lagBehandlingId(), vedtaksbrevInfo, Behandler.Saksbehandler("beslutter")).should {
+        nyVedtaksbrevService.hentVedtaksbrevData(SecureLog.Context.tom(), lagBehandlingId(), vedtaksbrevInfo, Behandler.Saksbehandler("beslutter")).should {
             it.hovedavsnitt shouldBe HovedavsnittDto(
                 tittel = "Du må betale tilbake arbeidsavklaringspenger",
                 forklaring = Forklaringstekster.HOVEDAVSNITT,
@@ -99,7 +100,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
             vedtaksbrevInfo,
         )
 
-        nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, vedtaksbrevInfo, Behandler.Saksbehandler("beslutter")).should {
+        nyVedtaksbrevService.hentVedtaksbrevData(SecureLog.Context.tom(), behandlingId, vedtaksbrevInfo, Behandler.Saksbehandler("beslutter")).should {
             it.hovedavsnitt shouldBe HovedavsnittDto(
                 tittel = "Du må betale tilbake arbeidsavklaringspenger",
                 forklaring = Forklaringstekster.HOVEDAVSNITT,
@@ -159,7 +160,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
         )
 
         val midlertidigVedtaksbrevInfo = vedtaksbrevInfo(periodeId, VilkårsvurderingBegrunnelse.REDUSERT_SÆRLIGE_GRUNNER)
-        nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, midlertidigVedtaksbrevInfo, Behandler.Saksbehandler("beslutter")).should {
+        nyVedtaksbrevService.hentVedtaksbrevData(SecureLog.Context.tom(), behandlingId, midlertidigVedtaksbrevInfo, Behandler.Saksbehandler("beslutter")).should {
             it.avsnitt[0].tittel shouldBe "Dette er grunnen til at du har fått for mye utbetalt"
             it.avsnitt[0].underavsnitt shouldBe listOf(
                 RentekstElementDto("Det var jo litt uaktsomt..."),
@@ -231,7 +232,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
             info = midlertidigVedtaksbrevInfo,
         )
 
-        nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, midlertidigVedtaksbrevInfo, Behandler.Saksbehandler("beslutter")).should {
+        nyVedtaksbrevService.hentVedtaksbrevData(SecureLog.Context.tom(), behandlingId, midlertidigVedtaksbrevInfo, Behandler.Saksbehandler("beslutter")).should {
             it.avsnitt[0].tittel shouldBe "Dette er grunnen til at du har fått for mye utbetalt"
             it.avsnitt[0].underavsnitt shouldBe listOf(
                 RentekstElementDto("Det var jo litt uaktsomt..."),
@@ -246,7 +247,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
             )
         }
 
-        nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, originalVedtaksbrevInfo, Behandler.Saksbehandler("beslutter")).should {
+        nyVedtaksbrevService.hentVedtaksbrevData(SecureLog.Context.tom(), behandlingId, originalVedtaksbrevInfo, Behandler.Saksbehandler("beslutter")).should {
             it.avsnitt[0].tittel shouldBe "Dette er grunnen til at du har fått for mye utbetalt"
             it.avsnitt[0].underavsnitt shouldBe listOf(
                 RentekstElementDto("Det var jo litt uaktsomt..."),
@@ -268,7 +269,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
         val periodeId = UUID.randomUUID()
         val info = vedtaksbrevInfo(periodeId, VilkårsvurderingBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR)
 
-        nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, info, Behandler.Saksbehandler("beslutter")).should {
+        nyVedtaksbrevService.hentVedtaksbrevData(SecureLog.Context.tom(), behandlingId, info, Behandler.Saksbehandler("beslutter")).should {
             it.avsnitt[0].tittel shouldBe "Dette er grunnen til at du har fått for mye utbetalt"
             it.avsnitt[0].underavsnitt shouldBe listOf(
                 RentekstElementDto(""),

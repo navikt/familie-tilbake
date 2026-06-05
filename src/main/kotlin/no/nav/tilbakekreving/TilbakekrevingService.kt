@@ -301,7 +301,7 @@ class TilbakekrevingService(
             }
 
             is VedtaksbrevJournalføringBehov -> {
-                val journalpost = vedtaksbrevService.journalførVedtaksbrev(behov)
+                val journalpost = vedtaksbrevService.journalførVedtaksbrev(logContext, behov)
                 if (journalpost.journalpostId == null) {
                     throw Feil(
                         message = "journalføring av vedtaksbrev til behandlingId ${behov.behandlingId} misslykket med denne meldingen: ${journalpost.melding}",

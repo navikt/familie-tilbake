@@ -82,6 +82,7 @@ class BehandlingApiController(
 
         return ResponseEntity.ok(
             nyVedtaksbrevService.hentVedtaksbrevData(
+                SecureLog.Context.fra(tilbakekreving),
                 UUID.fromString(behandlingId),
                 tilbakekreving.hentVedtaksbrevInfo(UUID.fromString(behandlingId)),
                 beslutter,

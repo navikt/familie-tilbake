@@ -10,6 +10,7 @@ import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstidspunkt
 import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstype
 import no.nav.familie.tilbake.kontrakter.journalpost.AvsenderMottakerIdType
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.log.callId
 import no.nav.tilbakekreving.behov.VedtaksbrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.VedtaksbrevJournalføringBehov
@@ -61,7 +62,14 @@ class NyVedtaksbrevService(
     private val dokdistClient: DokdistClient,
     private val pdfGenClient: PdfGenClient,
 ) {
-    fun hentVedtaksbrevData(behandlingId: UUID, vedtaksbrevInfo: VedtaksbrevInfo, beslutter: Behandler): VedtaksbrevDataDto {
+    private val logger = TracedLogger.getLogger<NyVedtaksbrevService>()
+
+    fun hentVedtaksbrevData(
+        logContext: SecureLog.Context,
+        behandlingId: UUID,
+        vedtaksbrevInfo: VedtaksbrevInfo,
+        beslutter: Behandler,
+    ): VedtaksbrevDataDto {
         val beslutter = beslutter.takeIf { it.ident != vedtaksbrevInfo.signatur.ansvarligSaksbehandlerIdent }
 
         val signatur = SignaturDto(
@@ -92,6 +100,23 @@ class NyVedtaksbrevService(
                 sumTilbakekrevesBeløpEtterSkatt = BrevFormatterer.beløpString(vedtaksbrevInfo.beregningsresultat.sumOf { it.tilbakekrevesBeløpEtterSkatt }),
             ),
         )
+
+        logger.medContext(logContext) {
+            val perioderIderIBrev = vedtaksbrevInfo.perioder.map(BegrunnetPeriode::id)
+            val perioderIderIDB = lagredeData.avsnitt.map(VedtaksbrevDataRepository.PeriodeavsnittEntity::id)
+            val avsnittUtenPeriode = lagredeData.avsnitt.filter { it.id !in perioderIderIBrev }
+            val avsnittUtenDB = vedtaksbrevInfo.perioder.filter { it.id !in perioderIderIDB }
+            if (avsnittUtenPeriode.isNotEmpty()) {
+                avsnittUtenPeriode.forEach { avsnitt ->
+                    info("Fant avsnitt for periode i databasen som ikke lenger eksisterer {}, id={}, eksisterende perioder {}", avsnitt.påkrevdBegrunnelser, avsnitt.id, perioderIderIBrev)
+                }
+            }
+            if (avsnittUtenDB.isNotEmpty()) {
+                avsnittUtenDB.forEach { avsnitt ->
+                    info("Fant avsnitt for periode i modellen som ikke eksisterer i database {} med id {}, perioder i db {}", avsnitt.påkrevdeVurderinger, avsnitt.id, perioderIderIDB)
+                }
+            }
+        }
 
         return VedtaksbrevDataDto(
             hovedavsnitt = mapHovedavsnitt(lagredeData.hovedavsnitt, vedtaksbrevInfo),
@@ -222,6 +247,7 @@ class NyVedtaksbrevService(
     }
 
     fun journalførVedtaksbrev(
+        logContext: SecureLog.Context,
         behov: VedtaksbrevJournalføringBehov,
     ): OpprettJournalpostResponse {
         val arkiverDokumentRequest = ArkiverDokumentRequest(
@@ -229,7 +255,7 @@ class NyVedtaksbrevService(
             forsøkFerdigstill = true,
             hoveddokumentvarianter = listOf(
                 Dokument(
-                    dokument = pdfGenClient.hentPdfForVedtak(hentVedtaksbrevData(behov.behandlingId, behov.vedtaksbrevInfo, behov.beslutter)),
+                    dokument = pdfGenClient.hentPdfForVedtak(hentVedtaksbrevData(logContext, behov.behandlingId, behov.vedtaksbrevInfo, behov.beslutter)),
                     filtype = Filtype.PDFA,
                     filnavn = "vedtak.pdf",
                     tittel = lagTittel(behov),
