@@ -23,6 +23,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID
 
@@ -163,6 +164,7 @@ class Vilkårsvurderingsteg(
         meldingerTilSaksbehandler: Set<MeldingTilSaksbehandler>,
     ): List<BegrunnetPeriode> {
         val samletPeriode = vurderinger.minOf { it.periode.fom } til vurderinger.maxOf { it.periode.tom }
+        LoggerFactory.getLogger("vilkårsvurdering").info("Tilgjengelige periode id-er {}", vurderinger.map { "${it.id}=${it.periode.fom}-${it.periode.tom}" })
         return vurderinger.firstOrNull()?.let {
             listOf(
                 BegrunnetPeriode(
