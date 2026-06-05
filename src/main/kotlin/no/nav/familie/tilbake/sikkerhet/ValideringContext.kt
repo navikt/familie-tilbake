@@ -220,4 +220,9 @@ enum class ValideringContext(
         auditLoggerEvent = AuditLoggerEvent.UPDATE,
         handling = "Henter vilkårsvurderingsperioder",
     ),
+    HentBehandlingIdForBurdeForstått(
+        minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+        auditLoggerEvent = AuditLoggerEvent.NONE,
+        handling = "Henter behandlingId for burde-forstått",
+    ),
 }

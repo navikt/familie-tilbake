@@ -211,6 +211,24 @@ class ForvaltningController(
         return Ressurs.success(forvaltningService.hentForvaltningsinfo(Ytelsestype.forDTO(ytelsestype), eksternFagsakId))
     }
 
+    @Operation(summary = "Hent behandlingId")
+    @GetMapping(
+        path = ["/ytelsestype/{ytelsestype}/fagsak/{eksternFagsakId}/bf"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun hentBehandlingId(
+        @PathVariable ytelsestype: YtelsestypeDTO,
+        @PathVariable eksternFagsakId: String,
+    ): Ressurs<String> {
+        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.fagsak(eksternFagsakId, FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype)), ValideringContext.HentBehandlingIdForBurdeForstått)
+        if (tilbakekreving != null) {
+            return Ressurs.success(
+                tilbakekreving.hentBehandlingsinformasjon().behandlingId.toString(),
+            )
+        }
+        return Ressurs.failure("Fant ingen behandling for ytelsestype $ytelsestype og fagsak $eksternFagsakId")
+    }
+
     @Operation(summary = "Hent ikke arkiverte kravgrunnlag")
     @GetMapping(
         path = ["/ytelsestype/{ytelsestype}/fagsak/{eksternFagsakId}/ikke-arkivert-kravgrunnlag"],
