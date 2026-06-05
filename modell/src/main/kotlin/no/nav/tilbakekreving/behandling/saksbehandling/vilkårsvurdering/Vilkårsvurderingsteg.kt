@@ -19,6 +19,7 @@ import no.nav.tilbakekreving.entities.VilkårsvurderingstegEntity
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
+import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering
@@ -152,6 +153,10 @@ class Vilkårsvurderingsteg(
     fun splitteVilkårsvurderingsperioder(splittFra: LocalDate) {
         val funnetPerioden = vurderinger.single { it.periode.fom == splittFra }.id
         vurder(funnetPerioden, ForårsaketAvBruker.IkkeVurdert())
+    }
+
+    internal fun hentVilkårsvurderingsperioder(): List<PeriodeDto> {
+        return vurderinger.map { PeriodeDto(it.periode.fom, it.periode.tom) }
     }
 
     fun vurdertePerioderForBrev(

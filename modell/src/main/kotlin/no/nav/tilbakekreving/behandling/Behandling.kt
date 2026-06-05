@@ -72,6 +72,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -512,6 +513,10 @@ class Behandling internal constructor(
 
     internal fun splitteVilkårsvurderingsperioder(splittFra: LocalDate) {
         vilkårsvurderingsteg.splitteVilkårsvurderingsperioder(splittFra)
+    }
+
+    internal fun hentVilkårsvurderingsperioder(): List<PeriodeDto> {
+        return vilkårsvurderingsteg.hentVilkårsvurderingsperioder()
     }
 
     internal fun oppdaterEksternFagsak(

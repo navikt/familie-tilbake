@@ -59,6 +59,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
@@ -488,6 +489,9 @@ class Tilbakekreving internal constructor(
             splitteVilkårsvurderingsperioder(splittFra)
         }
     }
+
+    fun hentVilkårsvurderingsperioder(behandlingId: UUID): List<PeriodeDto> =
+        hentBehandling(behandlingId).hentVilkårsvurderingsperioder()
 
     override fun behandlingOppdatert(
         sideeffektContext: SideeffektContext,
