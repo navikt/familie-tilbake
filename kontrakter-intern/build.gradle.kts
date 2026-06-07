@@ -11,6 +11,6 @@ repositories {
 
 dependencies {
     api("jakarta.validation:jakarta.validation-api:3.1.1")
-    api("com.fasterxml.jackson.core:jackson-annotations:2.21")
+    api("com.fasterxml.jackson.core:jackson-annotations:2.22")
     api(project("::kontrakter-felles"))
 }
