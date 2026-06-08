@@ -18,7 +18,7 @@ data class VilkårsvurderingstegEntity(
 
         return Vilkårsvurderingsteg(
             id = id,
-            vurderinger = vurdertePerioder.values.toList(),
+            vurderinger = vurdertePerioder.values.toList().sortedBy { it.periode.fom },
             underkjent = trengerNyVurdering,
         )
     }
