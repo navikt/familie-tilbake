@@ -63,6 +63,8 @@ tilbakekreving:
     fagsystem:
       TP:
         ForhaandsvarselBehandlingsstatuser: true
+      AAP:
+        ForhaandsvarselBehandlingsstatuser: true
   tilgangsmaskinen:
     scope: api://prod-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
   tilgangsstyring:

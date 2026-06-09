@@ -26,6 +26,8 @@ tilbakekreving:
     fagsystem:
       TP:
         ForhaandsvarselBehandlingsstatuser: true
+      AAP:
+        ForhaandsvarselBehandlingsstatuser: true
   tilgangsstyring:
     grupper:
       ts:
