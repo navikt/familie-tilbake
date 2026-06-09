@@ -10,6 +10,7 @@ import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstidspunkt
 import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstype
 import no.nav.familie.tilbake.kontrakter.journalpost.AvsenderMottakerIdType
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.log.callId
 import no.nav.tilbakekreving.behov.VedtaksbrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.VedtaksbrevJournalføringBehov
@@ -61,6 +62,8 @@ class NyVedtaksbrevService(
     private val dokdistClient: DokdistClient,
     private val pdfGenClient: PdfGenClient,
 ) {
+    private val log = TracedLogger.getLogger<NyVedtaksbrevService>()
+
     fun hentVedtaksbrevData(behandlingId: UUID, vedtaksbrevInfo: VedtaksbrevInfo, beslutter: Behandler): VedtaksbrevDataDto {
         val beslutter = beslutter.takeIf { it.ident != vedtaksbrevInfo.signatur.ansvarligSaksbehandlerIdent }
 
@@ -92,6 +95,14 @@ class NyVedtaksbrevService(
                 sumTilbakekrevesBeløpEtterSkatt = BrevFormatterer.beløpString(vedtaksbrevInfo.beregningsresultat.sumOf { it.tilbakekrevesBeløpEtterSkatt }),
             ),
         )
+
+        val lagredeIder = lagredeData.avsnitt.map { it.id }
+        val behandlingIder = vedtaksbrevInfo.perioder.map { it.id }
+        if (lagredeIder != behandlingIder) {
+            log.medContext(SecureLog.Context.medBehandling(null, behandlingId.toString())) {
+                info("Behandling krever avsnitt for {}, det finnes lagrede avsnitt for {}", behandlingId, lagredeIder)
+            }
+        }
 
         return VedtaksbrevDataDto(
             hovedavsnitt = mapHovedavsnitt(lagredeData.hovedavsnitt, vedtaksbrevInfo),
