@@ -34,6 +34,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.RettsligGrunnlagDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.SplittPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VurderingDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
@@ -427,7 +428,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         )
 
         somSaksbehandler(ansvarligSaksbehandler) {
-            behandlingApiController.behandlingSplittPeriode(behandlingId, 21.mai(2021))
+            behandlingApiController.behandlingSplittPeriode(behandlingId, SplittPeriodeDto(21.mai(2021)))
         }
 
         val tilbakekreving = tilbakekreving(behandlingId)
