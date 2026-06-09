@@ -31,6 +31,8 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevDataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDataUpdateDto
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
+import org.springframework.core.io.ByteArrayResource
+import org.springframework.core.io.Resource
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.validation.annotation.Validated
@@ -226,18 +228,20 @@ class BehandlingApiController(
         return ResponseEntity.ok(tilbakekreving.hentDokumentInfo(dokumentType))
     }
 
-    override fun behandlingHentDokument(behandlingId: UUID, journalpostId: String, dokumentInfoId: String): ResponseEntity<Any> {
+    override fun behandlingHentDokument(behandlingId: UUID, journalpostId: String, dokumentInfoId: String): ResponseEntity<Resource> {
         val tilbakekreving = tilbakekrevingService.lesTilbakekreving(
             filter = TilbakekrevingFilter.behandling(behandlingId),
             valideringContext = ValideringContext.HentDokument,
         ) ?: return ResponseEntity.notFound().build()
 
         return ResponseEntity.ok(
-            safService.hentDokument(
-                behandlingId = behandlingId,
-                journalpostId = journalpostId,
-                dokumentInfoId = dokumentInfoId,
-                tilbakekreving.eksternFagsak.eksternId,
+            ByteArrayResource(
+                safService.hentDokument(
+                    behandlingId = behandlingId,
+                    journalpostId = journalpostId,
+                    dokumentInfoId = dokumentInfoId,
+                    tilbakekreving.eksternFagsak.eksternId,
+                ),
             ),
         )
     }
