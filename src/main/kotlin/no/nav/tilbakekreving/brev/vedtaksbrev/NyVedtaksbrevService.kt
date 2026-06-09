@@ -187,11 +187,10 @@ class NyVedtaksbrevService(
     ): AvsnittDto {
         val lagretAvsnitt = avsnitt
             .firstOrNull { lagretAvsnitt -> lagretAvsnitt.id == periode.id }
-            ?: avsnitt.singleOrNull()
             ?: return BrevFormatterer.lagAvsnitt(periode)
         return AvsnittDto(
             forklaring = Forklaringstekster.PERIODE_AVSNITT,
-            id = periode.id,
+            id = lagretAvsnitt.id,
             meldingerTilSaksbehandler = periode.meldingerTilSaksbehandler
                 .forPeriodeavsnitt()
                 .map { it.melding },
