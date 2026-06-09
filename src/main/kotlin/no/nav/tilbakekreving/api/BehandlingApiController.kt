@@ -21,6 +21,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.LogginnslagDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SendForhaandsvarselDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.SplittPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UnntakDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UpdateUttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseDto
@@ -33,7 +34,6 @@ import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.validation.annotation.Validated
-import java.time.LocalDate
 import java.util.UUID
 
 @Component
@@ -150,12 +150,12 @@ class BehandlingApiController(
         } ?: ResponseEntity.notFound().build()
     }
 
-    override fun behandlingSplittPeriode(behandlingId: UUID, splittFra: LocalDate): ResponseEntity<Unit> {
+    override fun behandlingSplittPeriode(behandlingId: UUID, splittPeriode: SplittPeriodeDto): ResponseEntity<Unit> {
         return tilbakekrevingService.endreTilbakekreving(
             filter = TilbakekrevingFilter.behandling(behandlingId),
             valideringContext = ValideringContext.SplitteVilkårsvurderingsperiode,
         ) { tilbakekreving, context ->
-            ResponseEntity.ok(tilbakekreving.splitteVilkårsvurderingsperioder(behandlingId, context, splittFra))
+            ResponseEntity.ok(tilbakekreving.splitteVilkårsvurderingsperioder(behandlingId, context, splittPeriode.splittFra))
         } ?: ResponseEntity.notFound().build()
     }
 
