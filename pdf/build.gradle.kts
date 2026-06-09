@@ -1,5 +1,5 @@
 val openHtmlToPdfVersion = "1.1.37"
-val veraPdfVersion = "1.30.1"
+val veraPdfVersion = "1.30.2"
 
 dependencies {
     api(project(":kontrakter-felles"))
