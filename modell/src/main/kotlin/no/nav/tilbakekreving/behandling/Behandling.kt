@@ -589,6 +589,9 @@ class Behandling internal constructor(
             vilkårsvurderingsteg.splittVilkårsvurdering(splittFra)
         }
 
+        fun slåSammenMedForrigePeriode(slåSammenDato: LocalDate) =
+            vilkårsvurderingsteg.slåSammenMedForrigePeriode(slåSammenDato)
+
         fun vurderForeldelse(
             periode: Datoperiode,
             vurdering: Foreldelsesteg.Vurdering,
