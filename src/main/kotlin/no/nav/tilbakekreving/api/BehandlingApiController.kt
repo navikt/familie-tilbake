@@ -19,7 +19,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.LogginnslagDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaOmFeilutbetalingDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SendForhaandsvarselDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SplittPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UnntakDto
@@ -167,7 +167,7 @@ class BehandlingApiController(
         } ?: ResponseEntity.notFound().build()
     }
 
-    override fun behandlingVilkaarsvurderingsperioder(behandlingId: UUID): ResponseEntity<List<PeriodeDto>> {
+    override fun behandlingVilkaarsvurderingsperioder(behandlingId: UUID): ResponseEntity<List<PeriodeInfoDto>> {
         val tilbakekreving = tilbakekrevingService.lesTilbakekreving(
             filter = TilbakekrevingFilter.behandling(behandlingId),
             valideringContext = ValideringContext.Vilkårsvurderingsperioder,

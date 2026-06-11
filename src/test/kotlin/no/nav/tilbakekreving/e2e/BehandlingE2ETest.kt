@@ -434,10 +434,10 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         val tilbakekreving = tilbakekreving(behandlingId)
         tilbakekreving.hentBehandling(behandlingId).hentVilkårsvurderingsperioder() shouldNotBeNull {
             size shouldBe 4
-            this[0] shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(1.januar(2021), 1.januar(2021))
-            this[1] shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(15.mars(2021), 15.mars(2021))
-            this[2] shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(21.mai(2021), 21.mai(2021))
-            this[3] shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(14.juli(2021), 14.juli(2021))
+            this[0].periode shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(1.januar(2021), 1.januar(2021))
+            this[1].periode shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(15.mars(2021), 15.mars(2021))
+            this[2].periode shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(21.mai(2021), 21.mai(2021))
+            this[3].periode shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(14.juli(2021), 14.juli(2021))
         }
         val vilkårsvurderingFrontendDto = tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext())
         vilkårsvurderingFrontendDto.perioder.size shouldBe 2

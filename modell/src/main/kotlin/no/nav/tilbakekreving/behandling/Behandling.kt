@@ -72,7 +72,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -404,7 +404,7 @@ class Behandling internal constructor(
         )
     }
 
-    fun hentVilkårsvurderingsperioder(): List<PeriodeDto> {
+    fun hentVilkårsvurderingsperioder(): List<PeriodeInfoDto> {
         return vilkårsvurderingsteg.hentVilkårsvurderingsperioder()
     }
 

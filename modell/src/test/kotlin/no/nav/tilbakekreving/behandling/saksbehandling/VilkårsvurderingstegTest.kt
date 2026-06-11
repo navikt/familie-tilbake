@@ -257,8 +257,8 @@ class VilkårsvurderingstegTest {
 
         vilkårsvurderingsteg.hentVilkårsvurderingsperioder() shouldNotBeNull {
             size shouldBe 2
-            this[0] shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(1.januar(2021), 31.januar(2021))
-            this[1] shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(1.februar(2021), 28.februar(2021))
+            this[0].periode shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(1.januar(2021), 31.januar(2021))
+            this[1].periode shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(1.februar(2021), 28.februar(2021))
         }
     }
 }
