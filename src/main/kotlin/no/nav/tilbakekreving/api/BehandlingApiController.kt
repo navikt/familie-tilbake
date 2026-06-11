@@ -167,6 +167,15 @@ class BehandlingApiController(
         } ?: ResponseEntity.notFound().build()
     }
 
+    override fun behandlingSlaaSammenMedForrigePeriode(behandlingId: UUID, targetDato: LocalDate): ResponseEntity<Unit> {
+        return tilbakekrevingService.endreTilbakekreving(
+            filter = TilbakekrevingFilter.behandling(behandlingId),
+            valideringContext = ValideringContext.SlåSammenVilkårsvurderingsperiode,
+        ) { tilbakekreving, context ->
+            ResponseEntity.ok(tilbakekreving.slåSammenMedForrigePeriode(behandlingId, context, targetDato))
+        } ?: ResponseEntity.notFound().build()
+    }
+
     override fun behandlingVilkaarsvurderingsperioder(behandlingId: UUID): ResponseEntity<List<PeriodeDto>> {
         val tilbakekreving = tilbakekrevingService.lesTilbakekreving(
             filter = TilbakekrevingFilter.behandling(behandlingId),

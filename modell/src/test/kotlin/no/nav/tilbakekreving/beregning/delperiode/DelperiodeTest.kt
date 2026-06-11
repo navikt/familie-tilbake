@@ -4,6 +4,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.prosent
@@ -14,6 +15,7 @@ import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
 import no.nav.tilbakekreving.test.april
@@ -155,6 +157,132 @@ class DelperiodeTest {
         frontendDto.perioder[1].periode.fom shouldBe 16.februar(2025)
         frontendDto.perioder[1].periode.tom shouldBe 27.mars(2025)
         frontendDto.perioder[1].feilutbetaltBeløp shouldBe 6000.kroner
+    }
+
+    @Test
+    fun `slå sammen vilkårsvurdering perioder etter splitting`() {
+        val eksternFagsakRevurdering = eksternFagsakBehandling(
+            utvidPerioder = listOf(
+                EksternFagsakRevurdering.UtvidetPeriode(
+                    UUID.randomUUID(),
+                    2.februar(2025) til 1.april(2025),
+                    1.januar(2025) til 27.mars(2025),
+                ),
+            ),
+        )
+        val kravgrunnlagHendelse = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(2.februar(2025) til 13.februar(2025)),
+                kravgrunnlagPeriode(16.februar(2025) til 27.februar(2025)),
+                kravgrunnlagPeriode(2.mars(2025) til 13.mars(2025)),
+                kravgrunnlagPeriode(16.mars(2025) til 27.mars(2025)),
+            ),
+        )
+        val foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakRevurdering, kravgrunnlagHendelse)
+
+        kravgrunnlagHendelse.perioder().forEach {
+            foreldelsesteg.vurderForeldelse(
+                it.periode(),
+                Foreldelsesteg.Vurdering.IkkeForeldet(
+                    begrunnelse = "Ikke forelget",
+                ),
+            )
+        }
+
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakRevurdering,
+            kravgrunnlagHendelse,
+        )
+
+        vilkårsvurderingsteg.splitteVilkårsvurderingsperioder(16.februar(2025))
+
+        vilkårsvurderingsteg.slåSammenMedForrigePeriode(16.februar(2025))
+
+        val frontendDto = vilkårsvurderingsteg.tilFrontendDto(
+            kravgrunnlag = kravgrunnlagHendelse,
+            revurdering = eksternFagsakRevurdering,
+            foreldelsesteg = foreldelsesteg,
+            klokke = SystemKlokke,
+        )
+        frontendDto.perioder.shouldHaveSize(1)
+        frontendDto.perioder.first().periode.fom shouldBe 2.februar(2025)
+        frontendDto.perioder.first().periode.tom shouldBe 27.mars(2025)
+        frontendDto.perioder.first().feilutbetaltBeløp shouldBe 8000.kroner
+    }
+
+    @Test
+    fun `slå sammen vilkårsvurdering perioder etter at vurdering er gjort på splittet perioder`() {
+        val eksternFagsakRevurdering = eksternFagsakBehandling(
+            utvidPerioder = listOf(
+                EksternFagsakRevurdering.UtvidetPeriode(
+                    UUID.randomUUID(),
+                    2.februar(2025) til 1.april(2025),
+                    1.januar(2025) til 27.mars(2025),
+                ),
+            ),
+        )
+        val kravgrunnlagHendelse = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(2.februar(2025) til 13.februar(2025)),
+                kravgrunnlagPeriode(16.februar(2025) til 27.februar(2025)),
+                kravgrunnlagPeriode(2.mars(2025) til 13.mars(2025)),
+                kravgrunnlagPeriode(16.mars(2025) til 27.mars(2025)),
+            ),
+        )
+        val foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakRevurdering, kravgrunnlagHendelse)
+
+        kravgrunnlagHendelse.perioder().forEach {
+            foreldelsesteg.vurderForeldelse(
+                it.periode(),
+                Foreldelsesteg.Vurdering.IkkeForeldet(
+                    begrunnelse = "Ikke forelget",
+                ),
+            )
+        }
+
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakRevurdering,
+            kravgrunnlagHendelse,
+        )
+
+        vilkårsvurderingsteg.splitteVilkårsvurderingsperioder(2.mars(2025))
+
+        vilkårsvurderingsteg.vurder(
+            periode = 2.februar(2025) til 27.februar(2025),
+            vurdering = NivåAvForståelse.GodTro(
+                begrunnelse = "God tro",
+                beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.Nei,
+                begrunnelseForGodTro = "begrunnelse for god tro",
+            ),
+        )
+
+        vilkårsvurderingsteg.vurder(
+            periode = 2.mars(2025) til 27.mars(2025),
+            vurdering = NivåAvForståelse.Forstod(
+                aktsomhet = NivåAvForståelse.Aktsomhet.Forsett("begrunnelse for forsett"),
+                begrunnelse = "Begrunnelse",
+            ),
+        )
+
+        vilkårsvurderingsteg.splitteVilkårsvurderingsperioder(16.mars(2025))
+
+        vilkårsvurderingsteg.slåSammenMedForrigePeriode(2.mars(2025))
+
+        val frontendDto = vilkårsvurderingsteg.tilFrontendDto(
+            kravgrunnlag = kravgrunnlagHendelse,
+            revurdering = eksternFagsakRevurdering,
+            foreldelsesteg = foreldelsesteg,
+            klokke = SystemKlokke,
+        )
+        frontendDto.perioder.shouldHaveSize(2)
+        frontendDto.perioder.first().periode.fom shouldBe 2.februar(2025)
+        frontendDto.perioder.first().periode.tom shouldBe 13.mars(2025)
+        frontendDto.perioder.first().feilutbetaltBeløp shouldBe 6000.kroner
+        frontendDto.perioder.first().vilkårsvurderingsresultatInfo?.vilkårsvurderingsresultat shouldBe Vilkårsvurderingsresultat.GOD_TRO
+        frontendDto.perioder[1].periode.fom shouldBe 16.mars(2025)
+        frontendDto.perioder[1].periode.tom shouldBe 27.mars(2025)
+        frontendDto.perioder[1].feilutbetaltBeløp shouldBe 2000.kroner
+        frontendDto.perioder[1].vilkårsvurderingsresultatInfo?.vilkårsvurderingsresultat shouldBe null
     }
 
     class KravgrunnlagPeriode(private val periode: Datoperiode) : KravgrunnlagPeriodeAdapter {

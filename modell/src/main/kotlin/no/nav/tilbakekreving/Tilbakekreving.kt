@@ -49,6 +49,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentTypeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.saksbehandler.Behandler
@@ -58,6 +59,7 @@ import no.nav.tilbakekreving.tilstand.Start
 import no.nav.tilbakekreving.tilstand.TilBehandling
 import no.nav.tilbakekreving.tilstand.Tilstand
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -399,6 +401,19 @@ class Tilbakekreving internal constructor(
             }
         }.buildString()
     }
+
+    fun slåSammenMedForrigePeriode(
+        behandlingId: UUID,
+        sideeffektContext: SideeffektContext,
+        slåSammenDato: LocalDate,
+    ) {
+        hentBehandling(behandlingId).utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
+            slåSammenMedForrigePeriode(slåSammenDato)
+        }
+    }
+
+    fun hentVilkårsvurderingsperioder(behandlingId: UUID): List<PeriodeDto> =
+        hentBehandling(behandlingId).hentVilkårsvurderingsperioder()
 
     override fun behandlingOppdatert(
         sideeffektContext: SideeffektContext,

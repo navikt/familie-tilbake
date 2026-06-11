@@ -156,6 +156,12 @@ class Vilkårsvurderingsteg(
         vurder(funnetPerioden, ForårsaketAvBruker.IkkeVurdert())
     }
 
+    fun slåSammenMedForrigePeriode(slåSammenDato: LocalDate) {
+        val funnetPerioden = vurderinger.single { it.periode.fom == slåSammenDato }
+        val forrigePeriode = vurderinger.last { it.periode.fom < slåSammenDato }
+        vurder(funnetPerioden.id, forrigePeriode.vurdering)
+    }
+
     internal fun hentVilkårsvurderingsperioder(): List<PeriodeDto> {
         return vurderinger.map { PeriodeDto(it.periode.fom, it.periode.tom) }
     }

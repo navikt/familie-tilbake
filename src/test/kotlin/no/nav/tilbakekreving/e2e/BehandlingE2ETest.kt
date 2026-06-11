@@ -449,6 +449,114 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         vilkårsvurderingFrontendDto.perioder[1].feilutbetaltBeløp shouldBe 4000.0.kroner
     }
 
+    @Test
+    fun `slå sammen vilkårsvurderingsperioder etter splitting`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        sendKravgrunnlagOgAvventLesing(
+            queueName = TILLEGGSSTØNADER_KØ_NAVN,
+            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+                perioder = listOf(
+                    KravgrunnlagGenerator.standardPeriode(1.januar(2021) til 1.januar(2021)),
+                    KravgrunnlagGenerator.standardPeriode(15.mars(2021) til 15.mars(2021)),
+                    KravgrunnlagGenerator.standardPeriode(21.mai(2021) til 21.mai(2021)),
+                    KravgrunnlagGenerator.standardPeriode(14.juli(2021) til 14.juli(2021)),
+                ),
+            ),
+        )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
+
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+        lagreUttalelse(behandlingId)
+
+        somSaksbehandler(ansvarligSaksbehandler) {
+            behandlingApiController.behandlingOppdaterFakta(
+                behandlingId = behandlingId.toString(),
+                oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
+            )
+        }
+
+        utførSteg(
+            ident = ansvarligSaksbehandler,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(
+                1.januar(2021) til 1.januar(2021),
+                15.mars(2021) til 15.mars(2021),
+                21.mai(2021) til 21.mai(2021),
+                14.juli(2021) til 14.juli(2021),
+            ),
+        )
+
+        somSaksbehandler(ansvarligSaksbehandler) {
+            behandlingApiController.behandlingSplittPeriode(behandlingId, 21.mai(2021))
+        }
+
+        utførSteg(
+            ident = ansvarligSaksbehandler,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegVilkårsvurderingDto(
+                vilkårsvurderingsperioder = listOf(
+                    VilkårsvurderingsperiodeDto(
+                        periode = 1.januar(2021) til 15.mars(2021),
+                        vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
+                        begrunnelse = "Jepp1",
+                        godTroDto = GodTroDto(
+                            beløpErIBehold = false,
+                            beløpTilbakekreves = null,
+                            begrunnelse = "Japp1",
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        utførSteg(
+            ident = ansvarligSaksbehandler,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegVilkårsvurderingDto(
+                vilkårsvurderingsperioder = listOf(
+                    VilkårsvurderingsperiodeDto(
+                        periode = 21.mai(2021) til 14.juli(2021),
+                        vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
+                        begrunnelse = "Jepp2",
+                        aktsomhetDto = AktsomhetDto(
+                            aktsomhet = Aktsomhet.FORSETT,
+                            begrunnelse = "begrunnelse",
+                            unnlates4Rettsgebyr = SkalUnnlates.OVER_4_RETTSGEBYR,
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        somSaksbehandler(ansvarligSaksbehandler) {
+            behandlingApiController.behandlingSplittPeriode(behandlingId, 14.juli(2021))
+        }
+
+        somSaksbehandler(ansvarligSaksbehandler) {
+            behandlingApiController.behandlingSlaaSammenMedForrigePeriode(behandlingId, 21.mai(2021))
+        }
+
+        val tilbakekreving = tilbakekreving(behandlingId)
+        tilbakekreving.hentVilkårsvurderingsperioder(behandlingId) shouldNotBeNull {
+            size shouldBe 4
+            this[0] shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(1.januar(2021), 1.januar(2021))
+            this[1] shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(15.mars(2021), 15.mars(2021))
+            this[2] shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(21.mai(2021), 21.mai(2021))
+            this[3] shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(14.juli(2021), 14.juli(2021))
+        }
+        val vilkårsvurderingFrontendDto = tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext())
+        vilkårsvurderingFrontendDto.perioder.size shouldBe 2
+        vilkårsvurderingFrontendDto.perioder.first().periode.fom shouldBe 1.januar(2021)
+        vilkårsvurderingFrontendDto.perioder.first().periode.tom shouldBe 21.mai(2021)
+        vilkårsvurderingFrontendDto.perioder.first().feilutbetaltBeløp shouldBe 6000.0.kroner
+        vilkårsvurderingFrontendDto.perioder.first().vilkårsvurderingsresultatInfo!!.vilkårsvurderingsresultat shouldBe Vilkårsvurderingsresultat.GOD_TRO
+        vilkårsvurderingFrontendDto.perioder[1].periode.fom shouldBe 14.juli(2021)
+        vilkårsvurderingFrontendDto.perioder[1].periode.tom shouldBe 14.juli(2021)
+        vilkårsvurderingFrontendDto.perioder[1].feilutbetaltBeløp shouldBe 2000.0.kroner
+        vilkårsvurderingFrontendDto.perioder[1].vilkårsvurderingsresultatInfo shouldBe null
+    }
+
     @ParameterizedTest
     @ValueSource(strings = ["SIMPEL_UAKTSOMHET", "GROV_UAKTSOMHET", "FORSETT"])
     fun `begrunnelse for aktsomhet forårsaket av bruker`(aktsomhet: Aktsomhet) {

@@ -404,7 +404,117 @@ class Behandling internal constructor(
         )
     }
 
-    fun hentVilkårsvurderingsperioder(): List<PeriodeDto> {
+    internal fun håndter(
+        sideeffektContext: SideeffektContext,
+        vurdering: Faktasteg.Vurdering,
+    ) {
+        validerBehandlingstatus(faktasteg, sideeffektContext.klokke)
+        faktasteg.vurder(vurdering)
+        oppdaterBehandler(sideeffektContext)
+
+        sideeffektContext.logg(Behandlingsloggstype.FAKTA_VURDERT)
+    }
+
+    internal fun håndter(
+        sideeffektContext: SideeffektContext,
+        oppdaget: OppdagetDto?,
+        årsak: String?,
+        perioder: List<OppdaterFaktaPeriodeDto>?,
+    ) {
+        validerBehandlingstatus(faktasteg, sideeffektContext.klokke)
+        if (oppdaget != null) {
+            faktasteg.vurder(oppdaget)
+        }
+        if (årsak != null) {
+            faktasteg.vurder(årsak)
+        }
+        if (perioder != null) {
+            faktasteg.vurder(perioder)
+        }
+        oppdaterBehandler(sideeffektContext)
+
+        sideeffektContext.logg(Behandlingsloggstype.FAKTA_VURDERT)
+    }
+
+    internal fun håndter(
+        sideeffektContext: SideeffektContext,
+        periode: Datoperiode,
+        vurdering: ForårsaketAvBruker,
+    ) {
+        validerBehandlingstatus(vilkårsvurderingsteg, sideeffektContext.klokke)
+        vilkårsvurderingsteg.vurder(periode, vurdering)
+        oppdaterBehandler(sideeffektContext)
+
+        sideeffektContext.logg(Behandlingsloggstype.VILKÅRSVURDERING_VURDERT)
+    }
+
+    internal fun håndter(
+        sideeffektContext: SideeffektContext,
+        periode: Datoperiode,
+        vurdering: Foreldelsesteg.Vurdering,
+    ) {
+        validerBehandlingstatus(foreldelsesteg, sideeffektContext.klokke)
+        foreldelsesteg.vurderForeldelse(periode, vurdering)
+        oppdaterBehandler(sideeffektContext)
+
+        sideeffektContext.logg(Behandlingsloggstype.FORELDELSE_VURDERT)
+    }
+
+    internal fun håndterForeslåVedtak(sideeffektContext: SideeffektContext) {
+        val tidligereManglendeSteg = steg()
+            .takeWhile { it.type != Behandlingssteg.FORESLÅ_VEDTAK }
+            .filter { !it.erKlar(sideeffektContext.klokke) }
+        if (tidligereManglendeSteg.isNotEmpty()) {
+            val stegtyper = tidligereManglendeSteg
+                .map { it.type }
+                .map { it.kortNavn }
+                .slåSammen()
+            throw ModellFeil.UgyldigOperasjonException(
+                "Du må gjøre en ny vurdering av $stegtyper før du kan sende vedtaket til godkjenning hos beslutter",
+                sporing = sporingsinformasjon(),
+            )
+        }
+        fatteVedtakSteg.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry)
+        validerBehandlingstatus(foreslåVedtakSteg, sideeffektContext.klokke)
+        foreslåVedtakSteg.håndter()
+        oppdaterBehandler(sideeffektContext)
+
+        sideeffektContext.logg(Behandlingsloggstype.FORESLÅ_VEDTAK_VURDERT)
+    }
+
+    internal fun håndter(
+        sideeffektContext: SideeffektContext,
+        vurderinger: List<Pair<Behandlingssteg, FatteVedtakSteg.Vurdering>>,
+    ) {
+        validerBehandlingstatus(fatteVedtakSteg, sideeffektContext.klokke)
+        for ((behandlingssteg, vurdering) in vurderinger) {
+            fatteVedtakSteg.håndter(sideeffektContext.behandler, ansvarligSaksbehandler, behandlingssteg, vurdering, sporingsinformasjon())
+            if (vurdering is FatteVedtakSteg.Vurdering.Underkjent) {
+                steg()
+                    .filter { it.type == behandlingssteg }
+                    .forEach { it.underkjennSteget() }
+            }
+        }
+        if (kanUtbetales(sideeffektContext.klokke)) {
+            sideeffektContext.logg(
+                behandlingsloggstype = Behandlingsloggstype.VEDTAK_FATTET,
+                rolle = Rolle.BESLUTTER,
+            )
+        }
+        if (fatteVedtakSteg.erVedtakUnderkjent()) {
+            foreslåVedtakSteg.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry)
+
+            sideeffektContext.logg(
+                behandlingsloggstype = Behandlingsloggstype.BEHANDLING_SENDT_TILBAKE_TIL_SAKSBEHANDLER,
+                rolle = Rolle.BESLUTTER,
+            )
+        }
+    }
+
+    internal fun slåSammenMedForrigePeriode(slåSammenDato: LocalDate) =
+        vilkårsvurderingsteg.slåSammenMedForrigePeriode(slåSammenDato)
+
+    internal fun hentVilkårsvurderingsperioder(): List<PeriodeDto> {
         return vilkårsvurderingsteg.hentVilkårsvurderingsperioder()
     }
 
