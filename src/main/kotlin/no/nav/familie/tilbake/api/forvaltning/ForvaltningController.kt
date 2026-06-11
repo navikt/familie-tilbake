@@ -18,13 +18,16 @@ import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.FagsystemUtil
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.config.ApplicationProperties
+import no.nav.tilbakekreving.entities.TilbakekrevingEntity
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
+import no.nav.tilbakekreving.repository.TilbakekrevingFilter.Companion.tilbakekreving
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -353,6 +356,15 @@ class ForvaltningController(
         tilbakekrevingService.endreTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.ForvaltningOppdaterFagsysteminfo) { tilbakekreving, context ->
             tilbakekreving.trengerFagsysteminfo(context)
         }
+    }
+
+    @Operation(summary = "Henter hele JSON-objektet for en sak")
+    @PostMapping("/dump/{behandlingId}")
+    fun dumpFagsak(
+        @PathVariable behandlingId: UUID,
+    ): ResponseEntity<TilbakekrevingEntity> {
+        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.ForvaltningDumpFagsak)
+        return ResponseEntity.ofNullable(tilbakekreving?.tilEntity())
     }
 }
 

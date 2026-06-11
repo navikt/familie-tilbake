@@ -125,6 +125,11 @@ enum class ValideringContext(
         auditLoggerEvent = AuditLoggerEvent.UPDATE,
         handling = "Oppdaterer fagsysteminfo",
     ),
+    ForvaltningDumpFagsak(
+        minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+        auditLoggerEvent = AuditLoggerEvent.ACCESS,
+        handling = "Dumper en sak som JSON objekt",
+    ),
     HentVedtaksbrevData(
         minimumBehandlerrolle = Behandlerrolle.VEILEDER,
         auditLoggerEvent = AuditLoggerEvent.ACCESS,
