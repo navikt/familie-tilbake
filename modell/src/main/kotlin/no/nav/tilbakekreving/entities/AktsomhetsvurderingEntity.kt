@@ -9,6 +9,7 @@ import java.util.UUID
 
 data class AktsomhetsvurderingEntity(
     val vurderingType: VurderingType,
+    val mottakersForståelse: Forståelsesgrad?,
     val begrunnelse: String?,
     val beløpIBehold: GodTroEntity?,
     val aktsomhet: VurdertAktsomhetEntity?,
@@ -29,6 +30,7 @@ data class AktsomhetsvurderingEntity(
 
             VurderingType.IKKE_FORÅRSAKET_AV_BRUKER_BURDE_FORSTÅTT -> {
                 NivåAvForståelse.BurdeForstått(
+                    grad = requireNotNull(mottakersForståelse) { "mottakersForståelse kreves i BURDE_FORSTÅTT" }.fraEntity,
                     begrunnelse = requireNotNull(begrunnelse) { "begrunnesle kreves i FORSTOD_ELLER_BURDE_FORSTÅTT " },
                     kanUnnlates4XRettsgebyr = requireNotNull(kanUnnlates) { "forårsaket av bruker trenger vurdering om beløp kan unnlates" }.fraEntity(særligGrunner),
                 )
@@ -101,6 +103,11 @@ enum class VurderingType {
     IKKE_FORÅRSAKET_AV_BRUKER_GOD_TRO,
     FORÅRSAKET_AV_BRUKER,
     KOPIERT_VURDERING,
+}
+
+enum class Forståelsesgrad(val fraEntity: NivåAvForståelse.Grad) {
+    BURDE_FORSTÅTT(NivåAvForståelse.Grad.BURDE_FORSTÅTT),
+    MÅTTE_FORSTÅ(NivåAvForståelse.Grad.MÅTTE_FORSTÅ),
 }
 
 enum class FeilaktigEllerMangelfullType(val fraEntity: Skyldgrad.FeilaktigEllerMangelfull) {

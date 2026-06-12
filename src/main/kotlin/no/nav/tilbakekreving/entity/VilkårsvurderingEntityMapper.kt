@@ -5,6 +5,7 @@ import no.nav.tilbakekreving.entities.AktsomhetsvurderingEntity
 import no.nav.tilbakekreving.entities.BeholdType
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.FeilaktigEllerMangelfullType
+import no.nav.tilbakekreving.entities.Forståelsesgrad
 import no.nav.tilbakekreving.entities.GodTroEntity
 import no.nav.tilbakekreving.entities.KanUnnlates
 import no.nav.tilbakekreving.entities.SkalReduseresEntity
@@ -95,6 +96,12 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
             FieldConverter.EnumConverter.of<KanUnnlates>(),
         )
 
+        val mottakersForståelse = field(
+            "mottakers_forståelse",
+            { it.vurdering.mottakersForståelse },
+            FieldConverter.EnumConverter.of<Forståelsesgrad>(),
+        )
+
         fun map(
             resultSet: ResultSet,
             godTro: GodTroEntity?,
@@ -108,6 +115,7 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
                 begrunnelseForTilbakekreving = resultSet[vilkårForTilbakekreving],
                 vurdering = AktsomhetsvurderingEntity(
                     vurderingType = resultSet[vurderingType],
+                    mottakersForståelse = resultSet[mottakersForståelse],
                     begrunnelse = resultSet[vilkårForTilbakekreving],
                     beløpIBehold = godTro,
                     aktsomhet = aktsomhet,

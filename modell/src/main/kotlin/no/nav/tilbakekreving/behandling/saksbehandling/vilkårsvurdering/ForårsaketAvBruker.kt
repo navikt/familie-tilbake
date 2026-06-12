@@ -56,6 +56,7 @@ interface ForårsaketAvBruker {
         override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
             return AktsomhetsvurderingEntity(
                 vurderingType = VurderingType.IKKE_VURDERT,
+                mottakersForståelse = null,
                 begrunnelse = null,
                 beløpIBehold = null,
                 aktsomhet = null,
@@ -78,6 +79,7 @@ interface ForårsaketAvBruker {
         override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
             return AktsomhetsvurderingEntity(
                 vurderingType = VurderingType.KOPIERT_VURDERING,
+                mottakersForståelse = null,
                 begrunnelse = null,
                 beløpIBehold = null,
                 aktsomhet = null,

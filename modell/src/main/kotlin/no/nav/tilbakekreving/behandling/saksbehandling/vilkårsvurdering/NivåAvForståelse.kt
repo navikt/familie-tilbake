@@ -9,6 +9,7 @@ import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.endring.VurdertUtbetaling
 import no.nav.tilbakekreving.entities.AktsomhetsvurderingEntity
 import no.nav.tilbakekreving.entities.BeholdType
+import no.nav.tilbakekreving.entities.Forståelsesgrad
 import no.nav.tilbakekreving.entities.GodTroEntity
 import no.nav.tilbakekreving.entities.VurderingType
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
@@ -62,6 +63,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
         override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
             return AktsomhetsvurderingEntity(
                 vurderingType = VurderingType.IKKE_FORÅRSAKET_AV_BRUKER_FORSTOD,
+                mottakersForståelse = null,
                 beløpIBehold = null,
                 begrunnelse = begrunnelse,
                 aktsomhet = null,
@@ -74,10 +76,14 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
     }
 
     class BurdeForstått(
+        val grad: Grad,
         private val kanUnnlates4XRettsgebyr: KanUnnlates4xRettsgebyr,
         override val begrunnelse: String,
     ) : NivåAvForståelse {
-        override fun vurderingstype(): Vurdering = Type.BurdeForstått
+        override fun vurderingstype(): Vurdering = when (grad) {
+            Grad.BURDE_FORSTÅTT -> Type.BurdeForstått
+            Grad.MÅTTE_FORSTÅ -> Type.MåForstått
+        }
 
         override fun reduksjon(): Reduksjon = kanUnnlates4XRettsgebyr.reduksjon()
 
@@ -88,7 +94,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
                 godTro = null,
                 aktsomhet = VurdertAktsomhetDto(
-                    aktsomhet = AktsomhetDTO.SIMPEL_UAKTSOMHET,
+                    aktsomhet = grad.aktsomhet,
                     ileggRenter = false,
                     andelTilbakekreves = kanUnnlates4XRettsgebyr.reduksjon().andel,
                     beløpTilbakekreves = null,
@@ -105,7 +111,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
         override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
             return VurdertUtbetaling.Vilkårsvurdering(
                 aktsomhetFørUtbetaling = null,
-                aktsomhetEtterUtbetaling = AktsomhetDTO.SIMPEL_UAKTSOMHET,
+                aktsomhetEtterUtbetaling = grad.aktsomhet,
                 forårsaketAvBruker = VurdertUtbetaling.ForårsaketAvBruker.IKKE_FORÅRSAKET_AV_BRUKER,
                 særligeGrunner = kanUnnlates4XRettsgebyr.særligeGrunner()?.oppsummerVurdering(),
                 beløpUnnlatesUnder4Rettsgebyr = kanUnnlates4XRettsgebyr.oppsummering(),
@@ -117,6 +123,10 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
         override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
             return AktsomhetsvurderingEntity(
                 vurderingType = VurderingType.IKKE_FORÅRSAKET_AV_BRUKER_BURDE_FORSTÅTT,
+                mottakersForståelse = when (grad) {
+                    Grad.BURDE_FORSTÅTT -> Forståelsesgrad.BURDE_FORSTÅTT
+                    Grad.MÅTTE_FORSTÅ -> Forståelsesgrad.MÅTTE_FORSTÅ
+                },
                 beløpIBehold = null,
                 begrunnelse = begrunnelse,
                 aktsomhet = null,
@@ -166,6 +176,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
         override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
             return AktsomhetsvurderingEntity(
                 vurderingType = VurderingType.IKKE_FORÅRSAKET_AV_BRUKER_GOD_TRO,
+                mottakersForståelse = null,
                 begrunnelse = begrunnelse,
                 beløpIBehold = beløpIBehold.tilEntity(periodeRef, begrunnelseForGodTro),
                 aktsomhet = null,
@@ -217,6 +228,11 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 }
             }
         }
+    }
+
+    enum class Grad(val aktsomhet: AktsomhetDTO) {
+        BURDE_FORSTÅTT(AktsomhetDTO.SIMPEL_UAKTSOMHET),
+        MÅTTE_FORSTÅ(AktsomhetDTO.GROV_UAKTSOMHET),
     }
 
     enum class Type(override val navn: String) : Vurdering {

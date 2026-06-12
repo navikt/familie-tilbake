@@ -68,6 +68,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
         override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
             return AktsomhetsvurderingEntity(
                 vurderingType = VurderingType.FORÅRSAKET_AV_BRUKER,
+                mottakersForståelse = null,
                 begrunnelse = begrunnelse,
                 beløpIBehold = null,
                 aktsomhet = VurdertAktsomhetEntity(
@@ -132,6 +133,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
         override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
             return AktsomhetsvurderingEntity(
                 vurderingType = VurderingType.FORÅRSAKET_AV_BRUKER,
+                mottakersForståelse = null,
                 begrunnelse = begrunnelse,
                 beløpIBehold = null,
                 aktsomhet = VurdertAktsomhetEntity(
@@ -195,6 +197,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
         override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
             return AktsomhetsvurderingEntity(
                 vurderingType = VurderingType.FORÅRSAKET_AV_BRUKER,
+                mottakersForståelse = null,
                 begrunnelse = begrunnelse,
                 beløpIBehold = null,
                 aktsomhet = VurdertAktsomhetEntity(

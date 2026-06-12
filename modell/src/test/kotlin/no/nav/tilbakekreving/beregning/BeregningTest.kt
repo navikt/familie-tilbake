@@ -26,7 +26,7 @@ import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
 import no.nav.tilbakekreving.test.februar
-import no.nav.tilbakekreving.test.forsettelig
+import no.nav.tilbakekreving.test.grovtUaktsomt
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.test.mars
 import no.nav.tilbakekreving.test.prosentReduksjon
@@ -44,7 +44,7 @@ class BeregningTest {
             vilkårsvurdering = vurdering(
                 (1.januar(2021) til 31.januar(2021))
                     .medVurdering(
-                        forårsaketAvNav().burdeForstått(aktsomhet = forsettelig()),
+                        forårsaketAvNav().forstod(),
                     ),
             ),
             foreldetPerioder = emptyList(),
@@ -493,10 +493,10 @@ class BeregningTest {
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
                 (1.februar(2021) til 28.februar(2021)).medVurdering(
-                    forårsaketAvNav().burdeForstått(aktsomhet = forsettelig()),
+                    forårsaketAvNav().forstod(),
                 ),
                 (1.januar(2021) til 31.januar(2021)).medVurdering(
-                    forårsaketAvNav().burdeForstått(aktsomhet = forsettelig()),
+                    forårsaketAvNav().forstod(),
                 ),
             ),
             foreldetPerioder = emptyList(),
