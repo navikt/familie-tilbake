@@ -73,6 +73,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseD
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeInfoDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.SammenslaaingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -589,8 +590,8 @@ class Behandling internal constructor(
             vilkårsvurderingsteg.splittVilkårsvurdering(splittFra)
         }
 
-        fun slåSammenMedForrigePeriode(slåSammenDato: LocalDate) =
-            vilkårsvurderingsteg.slåSammenMedForrigePeriode(slåSammenDato)
+        fun slåSammenPerioder(sammenslaaingDto: SammenslaaingDto) =
+            vilkårsvurderingsteg.kopierVurderingerForSammenslåing(sammenslaaingDto)
 
         fun vurderForeldelse(
             periode: Datoperiode,

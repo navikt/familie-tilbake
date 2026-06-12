@@ -34,7 +34,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.RettsligGrunnlagDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.SlaaSammenPeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.SammenslaaingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SplittPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VurderingDto
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -533,19 +533,28 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         somSaksbehandler(ansvarligSaksbehandler) {
             behandlingApiController.behandlingSplittPeriode(behandlingId, SplittPeriodeDto(14.juli(2021)))
         }
+        val perioder = somSaksbehandler(ansvarligSaksbehandler) {
+            behandlingApiController.behandlingVilkaarsvurderingsperioder(behandlingId).body!!
+        }
 
         somSaksbehandler(ansvarligSaksbehandler) {
-            behandlingApiController.behandlingSlaaSammenMedForrigePeriode(behandlingId, SlaaSammenPeriodeDto(21.mai(2021)))
+            behandlingApiController.behandlingSlaaSammenPerioder(
+                behandlingId,
+                SammenslaaingDto(
+                    vilkårsvurderingId = perioder[2].periodeId,
+                    slåsSammenMedId = perioder[1].periodeId,
+                ),
+            )
         }
 
         val tilbakekreving = tilbakekreving(behandlingId)
 
         tilbakekreving.hentBehandling(behandlingId).hentVilkårsvurderingsperioder() shouldNotBeNull {
             size shouldBe 4
-            this[0] shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(1.januar(2021), 1.januar(2021))
-            this[1] shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(15.mars(2021), 15.mars(2021))
-            this[2] shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(21.mai(2021), 21.mai(2021))
-            this[3] shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(14.juli(2021), 14.juli(2021))
+            this[0].periode shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(1.januar(2021), 1.januar(2021))
+            this[1].periode shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(15.mars(2021), 15.mars(2021))
+            this[2].periode shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(21.mai(2021), 21.mai(2021))
+            this[3].periode shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(14.juli(2021), 14.juli(2021))
         }
 
         val vilkårsvurderingFrontendDto = tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext())

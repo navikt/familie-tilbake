@@ -21,6 +21,7 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeInfoDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.SammenslaaingDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering
@@ -85,6 +86,10 @@ class Vilkårsvurderingsteg(
 
     private fun finnPeriode(periode: Datoperiode): Vilkårsvurderingsperiode {
         val id = finnIdForPeriode(periode)
+        return vurderinger.single { it.id == id }
+    }
+
+    private fun finnPeriodeMedId(id: UUID): Vilkårsvurderingsperiode {
         return vurderinger.single { it.id == id }
     }
 
@@ -166,10 +171,10 @@ class Vilkårsvurderingsteg(
         }
     }
 
-    fun slåSammenMedForrigePeriode(slåSammenDato: LocalDate) {
-        val funnetPerioden = vurderinger.single { it.periode.fom == slåSammenDato }
-        val forrigePeriode = vurderinger.last { it.periode.fom < slåSammenDato }
-        vurder(funnetPerioden.id, forrigePeriode.vurdering)
+    fun kopierVurderingerForSammenslåing(sammenslaaingDto: SammenslaaingDto) {
+        val periodeSomSlåssSammen = finnPeriodeMedId(sammenslaaingDto.vilkårsvurderingId)
+        val kopierFraVurdering = finnPeriodeMedId(sammenslaaingDto.slåsSammenMedId)
+        periodeSomSlåssSammen.kopierVurdering(kopierFraVurdering)
     }
 
     fun vurdertePerioderForBrev(
@@ -199,6 +204,10 @@ class Vilkårsvurderingsteg(
 
         fun vurder(vurdering: ForårsaketAvBruker) {
             _vurdering = vurdering
+        }
+
+        fun kopierVurdering(kopierFra: Vilkårsvurderingsperiode) {
+            _vurdering = kopierFra.vurdering
         }
 
         override fun periode(): Datoperiode = periode
