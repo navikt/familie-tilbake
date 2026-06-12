@@ -9,7 +9,7 @@ import java.util.UUID
 
 data class AktsomhetsvurderingEntity(
     val vurderingType: VurderingType,
-    val mottakersForståelse: Forståelsesgrad?,
+    val mottakersForståelse: MottakersForståelseEntity?,
     val begrunnelse: String?,
     val beløpIBehold: GodTroEntity?,
     val aktsomhet: VurdertAktsomhetEntity?,
@@ -29,8 +29,14 @@ data class AktsomhetsvurderingEntity(
             }
 
             VurderingType.IKKE_FORÅRSAKET_AV_BRUKER_BURDE_FORSTÅTT -> {
+                val mottakersForståelse = requireNotNull(mottakersForståelse) { "mottakersForståelse kreves i BURDE_FORSTÅTT" }
                 NivåAvForståelse.BurdeForstått(
-                    grad = requireNotNull(mottakersForståelse) { "mottakersForståelse kreves i BURDE_FORSTÅTT" }.fraEntity,
+                    grad = when (mottakersForståelse.mottakersForståelse) {
+                        Forståelsesgrad.BURDE_FORSTÅTT -> NivåAvForståelse.Grad.BURDE_FORSTÅTT
+                        Forståelsesgrad.MÅTTE_FORSTÅ -> NivåAvForståelse.Grad.MÅTTE_FORSTÅ
+                        Forståelsesgrad.FORSTOD -> error("FORSTOD er ikke en gyldig grad for BURDE_FORSTÅTT")
+                    },
+                    begrunnelseMottakersForståelse = mottakersForståelse.begrunnelse,
                     begrunnelse = requireNotNull(begrunnelse) { "begrunnesle kreves i FORSTOD_ELLER_BURDE_FORSTÅTT " },
                     kanUnnlates4XRettsgebyr = requireNotNull(kanUnnlates) { "forårsaket av bruker trenger vurdering om beløp kan unnlates" }.fraEntity(særligGrunner),
                 )
@@ -38,6 +44,7 @@ data class AktsomhetsvurderingEntity(
 
             VurderingType.IKKE_FORÅRSAKET_AV_BRUKER_FORSTOD -> {
                 NivåAvForståelse.Forstod(
+                    begrunnelseMottakersForståelse = requireNotNull(mottakersForståelse) { "mottakersForståelse kreves i FORSTOD" }.begrunnelse,
                     begrunnelse = requireNotNull(begrunnelse) { "begrunnesle kreves i FORSTOD_ELLER_BURDE_FORSTÅTT " },
                 )
             }
@@ -105,10 +112,17 @@ enum class VurderingType {
     KOPIERT_VURDERING,
 }
 
-enum class Forståelsesgrad(val fraEntity: NivåAvForståelse.Grad) {
-    BURDE_FORSTÅTT(NivåAvForståelse.Grad.BURDE_FORSTÅTT),
-    MÅTTE_FORSTÅ(NivåAvForståelse.Grad.MÅTTE_FORSTÅ),
+enum class Forståelsesgrad {
+    FORSTOD,
+    BURDE_FORSTÅTT,
+    MÅTTE_FORSTÅ,
 }
+
+data class MottakersForståelseEntity(
+    val periodeRef: UUID,
+    val mottakersForståelse: Forståelsesgrad,
+    val begrunnelse: String,
+)
 
 enum class FeilaktigEllerMangelfullType(val fraEntity: Skyldgrad.FeilaktigEllerMangelfull) {
     FEILAKTIG(Skyldgrad.FeilaktigEllerMangelfull.FEILAKTIG),

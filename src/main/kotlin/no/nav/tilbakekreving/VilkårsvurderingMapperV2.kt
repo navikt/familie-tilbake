@@ -67,17 +67,20 @@ object VilkårsvurderingMapperV2 {
             Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT -> periode.aktsomhetDto!!.let { aktsomhet ->
                 when (aktsomhet.aktsomhet) {
                     Aktsomhet.FORSETT -> NivåAvForståelse.Forstod(
-                        begrunnelse = aktsomhet.begrunnelse,
+                        begrunnelseMottakersForståelse = aktsomhet.begrunnelse,
+                        begrunnelse = periode.begrunnelse,
                     )
 
                     Aktsomhet.GROV_UAKTSOMHET -> NivåAvForståelse.BurdeForstått(
                         grad = NivåAvForståelse.Grad.MÅTTE_FORSTÅ,
+                        begrunnelseMottakersForståelse = aktsomhet.begrunnelse,
                         kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(periode.særligeGrunner()),
                         begrunnelse = periode.begrunnelse,
                     )
 
                     Aktsomhet.SIMPEL_UAKTSOMHET -> NivåAvForståelse.BurdeForstått(
                         grad = NivåAvForståelse.Grad.BURDE_FORSTÅTT,
+                        begrunnelseMottakersForståelse = aktsomhet.begrunnelse,
                         kanUnnlates4XRettsgebyr = when (aktsomhet.unnlates4Rettsgebyr) {
                             SkalUnnlates.UNNLATES -> KanUnnlates4xRettsgebyr.Unnlates
                             SkalUnnlates.TILBAKEKREVES -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(periode.særligeGrunner())

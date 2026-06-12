@@ -11,6 +11,7 @@ import no.nav.tilbakekreving.entities.AktsomhetsvurderingEntity
 import no.nav.tilbakekreving.entities.BeholdType
 import no.nav.tilbakekreving.entities.Forståelsesgrad
 import no.nav.tilbakekreving.entities.GodTroEntity
+import no.nav.tilbakekreving.entities.MottakersForståelseEntity
 import no.nav.tilbakekreving.entities.VurderingType
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
@@ -21,6 +22,7 @@ import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet as Aktsomhet
 
 interface NivåAvForståelse : ForårsaketAvBruker.Nei {
     class Forstod(
+        val begrunnelseMottakersForståelse: String,
         override val begrunnelse: String,
     ) : NivåAvForståelse {
         override fun vurderingstype(): Vurdering = Type.Forstod
@@ -38,7 +40,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     ileggRenter = false,
                     andelTilbakekreves = reduksjon().andel,
                     beløpTilbakekreves = null,
-                    begrunnelse = begrunnelse,
+                    begrunnelse = begrunnelseMottakersForståelse,
                     særligeGrunner = null,
                     særligeGrunnerTilReduksjon = false,
                     tilbakekrevSmåbeløp = true,
@@ -63,7 +65,11 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
         override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
             return AktsomhetsvurderingEntity(
                 vurderingType = VurderingType.IKKE_FORÅRSAKET_AV_BRUKER_FORSTOD,
-                mottakersForståelse = null,
+                mottakersForståelse = MottakersForståelseEntity(
+                    periodeRef = periodeRef,
+                    mottakersForståelse = Forståelsesgrad.FORSTOD,
+                    begrunnelse = begrunnelseMottakersForståelse,
+                ),
                 beløpIBehold = null,
                 begrunnelse = begrunnelse,
                 aktsomhet = null,
@@ -77,6 +83,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
 
     class BurdeForstått(
         val grad: Grad,
+        val begrunnelseMottakersForståelse: String,
         private val kanUnnlates4XRettsgebyr: KanUnnlates4xRettsgebyr,
         override val begrunnelse: String,
     ) : NivåAvForståelse {
@@ -98,7 +105,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     ileggRenter = false,
                     andelTilbakekreves = kanUnnlates4XRettsgebyr.reduksjon().andel,
                     beløpTilbakekreves = null,
-                    begrunnelse = begrunnelse,
+                    begrunnelse = begrunnelseMottakersForståelse,
                     særligeGrunner = kanUnnlates4XRettsgebyr.særligeGrunner()?.vurderteGrunner(),
                     særligeGrunnerTilReduksjon = kanUnnlates4XRettsgebyr.særligeGrunner()?.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja,
                     tilbakekrevSmåbeløp = kanUnnlates4XRettsgebyr.skalTilbakekreves(),
@@ -123,10 +130,14 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
         override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
             return AktsomhetsvurderingEntity(
                 vurderingType = VurderingType.IKKE_FORÅRSAKET_AV_BRUKER_BURDE_FORSTÅTT,
-                mottakersForståelse = when (grad) {
-                    Grad.BURDE_FORSTÅTT -> Forståelsesgrad.BURDE_FORSTÅTT
-                    Grad.MÅTTE_FORSTÅ -> Forståelsesgrad.MÅTTE_FORSTÅ
-                },
+                mottakersForståelse = MottakersForståelseEntity(
+                    periodeRef = periodeRef,
+                    mottakersForståelse = when (grad) {
+                        Grad.BURDE_FORSTÅTT -> Forståelsesgrad.BURDE_FORSTÅTT
+                        Grad.MÅTTE_FORSTÅ -> Forståelsesgrad.MÅTTE_FORSTÅ
+                    },
+                    begrunnelse = begrunnelseMottakersForståelse,
+                ),
                 beløpIBehold = null,
                 begrunnelse = begrunnelse,
                 aktsomhet = null,

@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.repository
 
 import no.nav.tilbakekreving.entities.GodTroEntity
+import no.nav.tilbakekreving.entities.MottakersForståelseEntity
 import no.nav.tilbakekreving.entities.SærligeGrunnerEntity
 import no.nav.tilbakekreving.entities.VilkårsvurderingsperiodeEntity
 import no.nav.tilbakekreving.entities.VilkårsvurderingstegEntity
@@ -36,6 +37,9 @@ class NyVilkårsvurderingRepository(private val jdbcTemplate: JdbcTemplate) {
             if (periode.vurdering.særligGrunner != null) {
                 lagreSærligeGrunner(periode.vurdering.særligGrunner!!)
             }
+            if (periode.vurdering.mottakersForståelse != null) {
+                lagreMottakersForståelse(periode.vurdering.mottakersForståelse!!)
+            }
             if (periode.vurdering.beløpIBehold != null) {
                 lagreGodTro(periode.vurdering.beløpIBehold!!)
             }
@@ -50,6 +54,7 @@ class NyVilkårsvurderingRepository(private val jdbcTemplate: JdbcTemplate) {
                 hentGodTroVurdering(periodeId),
                 hentAktsomhetvurdering(periodeId),
                 hentSærligeGrunnerVurdering(periodeId),
+                hentMottakersForståelse(periodeId),
             )
         }
     }
@@ -76,6 +81,16 @@ class NyVilkårsvurderingRepository(private val jdbcTemplate: JdbcTemplate) {
 
     private fun lagreSærligeGrunner(særligGrunner: SærligeGrunnerEntity) {
         VilkårsvurderingEntityMapper.SærligeGrunnerMapper.upsertQuery(jdbcTemplate, særligGrunner)
+    }
+
+    private fun lagreMottakersForståelse(mottakersForståelse: MottakersForståelseEntity) {
+        VilkårsvurderingEntityMapper.MottakersForståelseMapper.upsertQuery(jdbcTemplate, mottakersForståelse)
+    }
+
+    private fun hentMottakersForståelse(periodeId: UUID): MottakersForståelseEntity? {
+        return jdbcTemplate.query("SELECT * FROM tilbakekreving_vilkårsvurdering_periode_mottakers_forståelse WHERE id=?;", periodeId) { resultSet, _ ->
+            VilkårsvurderingEntityMapper.MottakersForståelseMapper.map(resultSet)
+        }.singleOrNull()
     }
 
     private fun hentSærligeGrunnerVurdering(periodeId: UUID): SærligeGrunnerEntity? {

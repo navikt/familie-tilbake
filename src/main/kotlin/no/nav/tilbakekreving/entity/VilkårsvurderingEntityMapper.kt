@@ -8,6 +8,7 @@ import no.nav.tilbakekreving.entities.FeilaktigEllerMangelfullType
 import no.nav.tilbakekreving.entities.Forståelsesgrad
 import no.nav.tilbakekreving.entities.GodTroEntity
 import no.nav.tilbakekreving.entities.KanUnnlates
+import no.nav.tilbakekreving.entities.MottakersForståelseEntity
 import no.nav.tilbakekreving.entities.SkalReduseresEntity
 import no.nav.tilbakekreving.entities.SkalReduseresType
 import no.nav.tilbakekreving.entities.SærligGrunnEntity
@@ -96,17 +97,12 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
             FieldConverter.EnumConverter.of<KanUnnlates>(),
         )
 
-        val mottakersForståelse = field(
-            "mottakers_forståelse",
-            { it.vurdering.mottakersForståelse },
-            FieldConverter.EnumConverter.of<Forståelsesgrad>(),
-        )
-
         fun map(
             resultSet: ResultSet,
             godTro: GodTroEntity?,
             aktsomhet: VurdertAktsomhetEntity?,
             særligeGrunner: SærligeGrunnerEntity?,
+            mottakersForståelse: MottakersForståelseEntity?,
         ): VilkårsvurderingsperiodeEntity {
             return VilkårsvurderingsperiodeEntity(
                 id = resultSet[id],
@@ -115,7 +111,7 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
                 begrunnelseForTilbakekreving = resultSet[vilkårForTilbakekreving],
                 vurdering = AktsomhetsvurderingEntity(
                     vurderingType = resultSet[vurderingType],
-                    mottakersForståelse = resultSet[mottakersForståelse],
+                    mottakersForståelse = mottakersForståelse,
                     begrunnelse = resultSet[vilkårForTilbakekreving],
                     beløpIBehold = godTro,
                     aktsomhet = aktsomhet,
@@ -186,6 +182,34 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
                 aktsomhetType = resultSet[aktsomhetType],
                 begrunnelse = resultSet[begrunnelse],
                 skalIleggesRenter = null,
+            )
+        }
+    }
+
+    object MottakersForståelseMapper : Entity<MottakersForståelseEntity, UUID, UUID>(
+        "tilbakekreving_vilkårsvurdering_periode_mottakers_forståelse",
+        MottakersForståelseEntity::periodeRef,
+        FieldConverter.UUIDConverter.required(),
+    ) {
+        val mottakersForståelse = field(
+            "mottakers_forståelse",
+            MottakersForståelseEntity::mottakersForståelse,
+            FieldConverter.EnumConverter.of<Forståelsesgrad>().required(),
+        )
+
+        val begrunnelse = field(
+            "begrunnelse",
+            MottakersForståelseEntity::begrunnelse,
+            FieldConverter.StringConverter.required(),
+        )
+
+        fun map(
+            resultSet: ResultSet,
+        ): MottakersForståelseEntity {
+            return MottakersForståelseEntity(
+                periodeRef = resultSet[id],
+                mottakersForståelse = resultSet[mottakersForståelse],
+                begrunnelse = resultSet[begrunnelse],
             )
         }
     }

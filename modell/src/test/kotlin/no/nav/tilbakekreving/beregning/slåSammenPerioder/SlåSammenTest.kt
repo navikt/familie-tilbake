@@ -112,8 +112,8 @@ class SlåSammenTest {
         vilkårsvurderingsteg.vurder(
             periode = 2.mars(2025) til 27.mars(2025),
             vurdering = NivåAvForståelse.Forstod(
-                aktsomhet = NivåAvForståelse.Aktsomhet.Forsett("begrunnelse for forsett"),
                 begrunnelse = "Begrunnelse",
+                begrunnelseMottakersForståelse = "Begrunnelse",
             ),
         )
 

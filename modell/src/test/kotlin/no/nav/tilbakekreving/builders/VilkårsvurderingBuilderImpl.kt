@@ -26,13 +26,14 @@ object VilkårsvurderingBuilderImpl : VilkårsvurderingProvider<ForårsaketAvBru
     override fun build(vurdering: ForårsaketAvNavBuilder.BurdeForstått<ForårsaketAvBruker.Nei>): ForårsaketAvBruker.Nei {
         return NivåAvForståelse.BurdeForstått(
             grad = NivåAvForståelse.Grad.BURDE_FORSTÅTT,
+            begrunnelseMottakersForståelse = "",
             kanUnnlates4XRettsgebyr = vurdering.aktsomhet.build(this),
             begrunnelse = "",
         )
     }
 
     override fun build(vurdering: ForårsaketAvNavBuilder.Forstod<ForårsaketAvBruker.Nei>): ForårsaketAvBruker.Nei {
-        return NivåAvForståelse.Forstod(begrunnelse = "")
+        return NivåAvForståelse.Forstod(begrunnelseMottakersForståelse = "", begrunnelse = "")
     }
 
     override fun build(vurdering: ForårsaketAvBrukerBuilder.Uaktsomt<ForårsaketAvBruker.Ja>): ForårsaketAvBruker.Ja {
