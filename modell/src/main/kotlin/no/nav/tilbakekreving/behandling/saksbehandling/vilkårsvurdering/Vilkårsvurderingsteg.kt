@@ -16,6 +16,8 @@ import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.VilkårsvurderingsperiodeEntity
 import no.nav.tilbakekreving.entities.VilkårsvurderingstegEntity
+import no.nav.tilbakekreving.feil.ModellFeil
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
@@ -28,6 +30,7 @@ import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID
+import kotlin.math.abs
 
 class Vilkårsvurderingsteg(
     private val id: UUID,
@@ -171,10 +174,30 @@ class Vilkårsvurderingsteg(
         }
     }
 
-    fun kopierVurderingerForSammenslåing(sammenslaaingDto: SammenslaaingDto) {
-        val periodeSomSlåssSammen = finnPeriodeMedId(sammenslaaingDto.vilkårsvurderingId)
-        val kopierFraVurdering = finnPeriodeMedId(sammenslaaingDto.slåsSammenMedId)
-        periodeSomSlåssSammen.kopierVurdering(kopierFraVurdering)
+    fun kopierVurderingerForSammenslåing(sammenslaaingDto: SammenslaaingDto, sporing: Sporing) {
+        validerPeriodeneErInntilHverandre(
+            sammenslaaingDto.vilkårsvurderingId,
+            sammenslaaingDto.slåesSammenMedId,
+            sporing,
+        )
+        val periodeSomSlåesSammen = finnPeriodeMedId(sammenslaaingDto.vilkårsvurderingId)
+        val kopierFraVurdering = finnPeriodeMedId(sammenslaaingDto.slåesSammenMedId)
+        periodeSomSlåesSammen.kopierVurdering(kopierFraVurdering)
+    }
+
+    private fun validerPeriodeneErInntilHverandre(
+        førstePeriodeId: UUID,
+        andrePeriodeId: UUID,
+        sporing: Sporing,
+    ) {
+        val førstePeriodeIndeks = vurderinger.indexOfFirst { it.id == førstePeriodeId }
+        val andrePeriodeIndeks = vurderinger.indexOfFirst { it.id == andrePeriodeId }
+        if (abs(førstePeriodeIndeks - andrePeriodeIndeks) != 1) {
+            throw ModellFeil.UgyldigOperasjonException(
+                melding = "Kun perioder som er inntil hverandre kan slås sammen. Periode med id ${vurderinger[førstePeriodeIndeks].id} og periode med id ${vurderinger[andrePeriodeIndeks].id} er ikke inntil hverandre.",
+                sporing = sporing,
+            )
+        }
     }
 
     fun vurdertePerioderForBrev(
@@ -207,7 +230,10 @@ class Vilkårsvurderingsteg(
         }
 
         fun kopierVurdering(kopierFra: Vilkårsvurderingsperiode) {
-            _vurdering = kopierFra.vurdering
+            _vurdering = ForårsaketAvBruker.KopiertVurdering(
+                forrigeVurdering = kopierFra,
+                forrigePeriodeId = kopierFra.id,
+            )
         }
 
         override fun periode(): Datoperiode = periode

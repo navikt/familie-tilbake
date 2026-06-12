@@ -184,7 +184,7 @@ class BehandlingApiController(
         ) { tilbakekreving, context ->
             ResponseEntity.ok(
                 tilbakekreving.gjørSaksbehandling(behandlingId, context) {
-                    slåSammenPerioder(sammenslåingDto)
+                    slåSammenPerioder(sammenslåingDto, tilbakekreving.sporingsinformasjon(behandlingId))
                 },
             )
         } ?: ResponseEntity.notFound().build()

@@ -487,69 +487,16 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
                 14.juli(2021) til 14.juli(2021),
             ),
         )
-
+        tilbakekreving(behandlingId).hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext()).perioder.size shouldBe 1
         somSaksbehandler(ansvarligSaksbehandler) {
             behandlingApiController.behandlingSplittPeriode(behandlingId, SplittPeriodeDto(21.mai(2021)))
         }
 
-        utførSteg(
-            ident = ansvarligSaksbehandler,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegVilkårsvurderingDto(
-                vilkårsvurderingsperioder = listOf(
-                    VilkårsvurderingsperiodeDto(
-                        periode = 1.januar(2021) til 15.mars(2021),
-                        vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
-                        begrunnelse = "Jepp1",
-                        godTroDto = GodTroDto(
-                            beløpErIBehold = false,
-                            beløpTilbakekreves = null,
-                            begrunnelse = "Japp1",
-                        ),
-                    ),
-                ),
-            ),
-        )
+        tilbakekreving(behandlingId).hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext()).perioder.size shouldBe 2
 
-        utførSteg(
-            ident = ansvarligSaksbehandler,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegVilkårsvurderingDto(
-                vilkårsvurderingsperioder = listOf(
-                    VilkårsvurderingsperiodeDto(
-                        periode = 21.mai(2021) til 14.juli(2021),
-                        vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
-                        begrunnelse = "Jepp2",
-                        aktsomhetDto = AktsomhetDto(
-                            aktsomhet = Aktsomhet.FORSETT,
-                            begrunnelse = "begrunnelse",
-                            unnlates4Rettsgebyr = SkalUnnlates.OVER_4_RETTSGEBYR,
-                        ),
-                    ),
-                ),
-            ),
-        )
-
-        somSaksbehandler(ansvarligSaksbehandler) {
-            behandlingApiController.behandlingSplittPeriode(behandlingId, SplittPeriodeDto(14.juli(2021)))
-        }
         val perioder = somSaksbehandler(ansvarligSaksbehandler) {
             behandlingApiController.behandlingVilkaarsvurderingsperioder(behandlingId).body!!
-        }
-
-        somSaksbehandler(ansvarligSaksbehandler) {
-            behandlingApiController.behandlingSlaaSammenPerioder(
-                behandlingId,
-                SammenslaaingDto(
-                    vilkårsvurderingId = perioder[2].periodeId,
-                    slåsSammenMedId = perioder[1].periodeId,
-                ),
-            )
-        }
-
-        val tilbakekreving = tilbakekreving(behandlingId)
-
-        tilbakekreving.hentBehandling(behandlingId).hentVilkårsvurderingsperioder() shouldNotBeNull {
+        } shouldNotBeNull {
             size shouldBe 4
             this[0].periode shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(1.januar(2021), 1.januar(2021))
             this[1].periode shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(15.mars(2021), 15.mars(2021))
@@ -557,16 +504,20 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
             this[3].periode shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(14.juli(2021), 14.juli(2021))
         }
 
-        val vilkårsvurderingFrontendDto = tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext())
-        vilkårsvurderingFrontendDto.perioder.size shouldBe 2
+        somSaksbehandler(ansvarligSaksbehandler) {
+            behandlingApiController.behandlingSlaaSammenPerioder(
+                behandlingId,
+                SammenslaaingDto(
+                    vilkårsvurderingId = perioder[2].periodeId,
+                    slåesSammenMedId = perioder[1].periodeId,
+                ),
+            )
+        }
+        val vilkårsvurderingFrontendDto = tilbakekreving(behandlingId).hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext())
+        vilkårsvurderingFrontendDto.perioder.size shouldBe 1
         vilkårsvurderingFrontendDto.perioder.first().periode.fom shouldBe 1.januar(2021)
-        vilkårsvurderingFrontendDto.perioder.first().periode.tom shouldBe 21.mai(2021)
-        vilkårsvurderingFrontendDto.perioder.first().feilutbetaltBeløp shouldBe 6000.0.kroner
-        vilkårsvurderingFrontendDto.perioder.first().vilkårsvurderingsresultatInfo!!.vilkårsvurderingsresultat shouldBe Vilkårsvurderingsresultat.GOD_TRO
-        vilkårsvurderingFrontendDto.perioder[1].periode.fom shouldBe 14.juli(2021)
-        vilkårsvurderingFrontendDto.perioder[1].periode.tom shouldBe 14.juli(2021)
-        vilkårsvurderingFrontendDto.perioder[1].feilutbetaltBeløp shouldBe 2000.0.kroner
-        vilkårsvurderingFrontendDto.perioder[1].vilkårsvurderingsresultatInfo shouldBe null
+        vilkårsvurderingFrontendDto.perioder.first().periode.tom shouldBe 14.juli(2021)
+        vilkårsvurderingFrontendDto.perioder.first().feilutbetaltBeløp shouldBe 8000.0.kroner
     }
 
     @ParameterizedTest

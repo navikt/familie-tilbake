@@ -590,8 +590,11 @@ class Behandling internal constructor(
             vilkårsvurderingsteg.splittVilkårsvurdering(splittFra)
         }
 
-        fun slåSammenPerioder(sammenslaaingDto: SammenslaaingDto) =
-            vilkårsvurderingsteg.kopierVurderingerForSammenslåing(sammenslaaingDto)
+        fun slåSammenPerioder(sammenslaaingDto: SammenslaaingDto, sporing: Sporing) =
+            vilkårsvurderingsteg.kopierVurderingerForSammenslåing(
+                sammenslaaingDto = sammenslaaingDto,
+                sporing,
+            )
 
         fun vurderForeldelse(
             periode: Datoperiode,
