@@ -1,7 +1,6 @@
 package no.nav.tilbakekreving.entities
 
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Skyldgrad
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg.Vilkårsvurderingsperiode
@@ -13,6 +12,8 @@ data class AktsomhetsvurderingEntity(
     val begrunnelse: String?,
     val beløpIBehold: GodTroEntity?,
     val aktsomhet: VurdertAktsomhetEntity?,
+    val kanUnnlates: KanUnnlates?,
+    val særligGrunner: SærligeGrunnerEntity?,
     val feilaktigEllerMangelfull: FeilaktigEllerMangelfullType?,
     val forrigePeriodeId: UUID?,
 ) {
@@ -29,14 +30,13 @@ data class AktsomhetsvurderingEntity(
             VurderingType.IKKE_FORÅRSAKET_AV_BRUKER_BURDE_FORSTÅTT -> {
                 NivåAvForståelse.BurdeForstått(
                     begrunnelse = requireNotNull(begrunnelse) { "begrunnesle kreves i FORSTOD_ELLER_BURDE_FORSTÅTT " },
-                    aktsomhet = requireNotNull(aktsomhet) { "aktsomhet kreves i FORSTOD_ELLER_BURDE_FORSTÅTT " }.tilAktsomhet(),
+                    kanUnnlates4XRettsgebyr = requireNotNull(kanUnnlates) { "forårsaket av bruker trenger vurdering om beløp kan unnlates" }.fraEntity(særligGrunner),
                 )
             }
 
             VurderingType.IKKE_FORÅRSAKET_AV_BRUKER_FORSTOD -> {
                 NivåAvForståelse.Forstod(
                     begrunnelse = requireNotNull(begrunnelse) { "begrunnesle kreves i FORSTOD_ELLER_BURDE_FORSTÅTT " },
-                    aktsomhet = requireNotNull(aktsomhet) { "aktsomhet kreves i FORSTOD_ELLER_BURDE_FORSTÅTT " }.tilAktsomhet(),
                 )
             }
 
@@ -48,18 +48,13 @@ data class AktsomhetsvurderingEntity(
                             begrunnelse = requireNotNull(begrunnelse) { "Begrunnelse kreves for uaktsomt" },
                             begrunnelseAktsomhet = aktsomhet.begrunnelse,
                             feilaktigeEllerMangelfulleOpplysninger = requireNotNull(feilaktigEllerMangelfull) { "Feilaktige eller mangelfulle opplysninger kreves for uaktsomt" }.fraEntity,
-                            kanUnnlates4XRettsgebyr = when (aktsomhet.kanUnnlates) {
-                                KanUnnlates.UNNLATES -> KanUnnlates4xRettsgebyr.Unnlates
-                                KanUnnlates.SKAL_IKKE_UNNLATES -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(aktsomhet.særligGrunner!!.fraEntity())
-                                KanUnnlates.OVER_4_RETTSGEBYR -> KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(aktsomhet.særligGrunner!!.fraEntity())
-                                null -> error("Uaktsomhet må avklare om det kan unnlates eller ikke.")
-                            },
+                            kanUnnlates4XRettsgebyr = requireNotNull(kanUnnlates) { "forårsaket av bruker trenger vurdering om beløp kan unnlates" }.fraEntity(særligGrunner),
                         )
                     }
                     AktsomhetType.GROV_UAKTSOMHET -> Skyldgrad.GrovUaktsomhet(
                         begrunnelse = requireNotNull(begrunnelse) { "Særlige grunner kreves for grov uaktsomhet" },
                         begrunnelseAktsomhet = aktsomhet.begrunnelse,
-                        reduksjonSærligeGrunner = requireNotNull(aktsomhet.særligGrunner).fraEntity(),
+                        reduksjonSærligeGrunner = requireNotNull(særligGrunner) { "Særlige grunner kreves for grov uaktsomhet" }.fraEntity(),
                         feilaktigeEllerMangelfulleOpplysninger = requireNotNull(feilaktigEllerMangelfull) { "Feilaktige eller mangelfulle opplysninger kreves for grov uaktsomhet" }.fraEntity,
                     )
                     AktsomhetType.FORSETT -> Skyldgrad.Forsett(

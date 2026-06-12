@@ -15,6 +15,6 @@ class ForårsaketAvNavBuilders<BuiltForårsaketAvNav>(private val provider: Vilk
     ) = ForårsaketAvNavBuilder.BurdeForstått<BuiltForårsaketAvNav>(aktsomhet).build(provider)
 
     fun forstod(
-        aktsomhet: AktsomhetBuilder = grovtUaktsomt(),
+        aktsomhet: AktsomhetBuilder = forsettelig(),
     ) = ForårsaketAvNavBuilder.Forstod<BuiltForårsaketAvNav>(aktsomhet).build(provider)
 }

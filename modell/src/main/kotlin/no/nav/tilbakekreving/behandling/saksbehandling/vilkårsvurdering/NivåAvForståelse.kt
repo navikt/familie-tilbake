@@ -7,12 +7,10 @@ import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsresultatDto
 import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.endring.VurdertUtbetaling
-import no.nav.tilbakekreving.entities.AktsomhetType
 import no.nav.tilbakekreving.entities.AktsomhetsvurderingEntity
 import no.nav.tilbakekreving.entities.BeholdType
 import no.nav.tilbakekreving.entities.GodTroEntity
 import no.nav.tilbakekreving.entities.VurderingType
-import no.nav.tilbakekreving.entities.VurdertAktsomhetEntity
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering
@@ -22,56 +20,11 @@ import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet as Aktsomhet
 
 interface NivåAvForståelse : ForårsaketAvBruker.Nei {
     class Forstod(
-        val aktsomhet: Aktsomhet,
         override val begrunnelse: String,
     ) : NivåAvForståelse {
-        override fun vurderingstype(): Vurdering = aktsomhet.nivåAvForståelse()
+        override fun vurderingstype(): Vurdering = Type.Forstod
 
-        override fun reduksjon(): Reduksjon = aktsomhet.reduksjon()
-
-        override fun renter(): Boolean = false
-
-        override fun tilFrontendDto(): VurdertVilkårsvurderingsresultatDto? {
-            return VurdertVilkårsvurderingsresultatDto(
-                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
-                godTro = null,
-                aktsomhet = aktsomhet.tilFrontendDto(),
-            )
-        }
-
-        override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
-            return VurdertUtbetaling.Vilkårsvurdering(
-                aktsomhetFørUtbetaling = null,
-                aktsomhetEtterUtbetaling = aktsomhet.vurderingstype(),
-                forårsaketAvBruker = VurdertUtbetaling.ForårsaketAvBruker.IKKE_FORÅRSAKET_AV_BRUKER,
-                særligeGrunner = aktsomhet.oppsummerSærligeGrunnerVurdering(),
-                beløpUnnlatesUnder4Rettsgebyr = VurdertUtbetaling.JaNeiVurdering.Nei,
-            )
-        }
-
-        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> {
-            return aktsomhet.påkrevdeVurderinger()
-        }
-
-        override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
-            return AktsomhetsvurderingEntity(
-                vurderingType = VurderingType.IKKE_FORÅRSAKET_AV_BRUKER_FORSTOD,
-                beløpIBehold = null,
-                begrunnelse = begrunnelse,
-                aktsomhet = aktsomhet.tilEntity(periodeRef),
-                feilaktigEllerMangelfull = null,
-                forrigePeriodeId = null,
-            )
-        }
-    }
-
-    class BurdeForstått(
-        val aktsomhet: Aktsomhet,
-        override val begrunnelse: String,
-    ) : NivåAvForståelse {
-        override fun vurderingstype(): Vurdering = aktsomhet.nivåAvForståelse()
-
-        override fun reduksjon(): Reduksjon = aktsomhet.reduksjon()
+        override fun reduksjon(): Reduksjon = Reduksjon.FullstendigTilbakekreving()
 
         override fun renter(): Boolean = false
 
@@ -79,30 +32,96 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             return VurdertVilkårsvurderingsresultatDto(
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
                 godTro = null,
-                aktsomhet = aktsomhet.tilFrontendDto(),
+                aktsomhet = VurdertAktsomhetDto(
+                    aktsomhet = AktsomhetDTO.FORSETT,
+                    ileggRenter = false,
+                    andelTilbakekreves = reduksjon().andel,
+                    beløpTilbakekreves = null,
+                    begrunnelse = begrunnelse,
+                    særligeGrunner = null,
+                    særligeGrunnerTilReduksjon = false,
+                    tilbakekrevSmåbeløp = true,
+                    unnlates4Rettsgebyr = SkalUnnlates.TILBAKEKREVES,
+                    særligeGrunnerBegrunnelse = null,
+                ),
             )
         }
 
         override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
             return VurdertUtbetaling.Vilkårsvurdering(
                 aktsomhetFørUtbetaling = null,
-                aktsomhetEtterUtbetaling = aktsomhet.vurderingstype(),
+                aktsomhetEtterUtbetaling = AktsomhetDTO.FORSETT,
                 forårsaketAvBruker = VurdertUtbetaling.ForårsaketAvBruker.IKKE_FORÅRSAKET_AV_BRUKER,
-                særligeGrunner = aktsomhet.oppsummerSærligeGrunnerVurdering(),
-                beløpUnnlatesUnder4Rettsgebyr = aktsomhet.oppsummer4RettsgebyrVurdering(),
+                særligeGrunner = null,
+                beløpUnnlatesUnder4Rettsgebyr = VurdertUtbetaling.JaNeiVurdering.Nei,
             )
         }
 
-        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> {
-            return aktsomhet.påkrevdeVurderinger()
+        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES)
+
+        override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
+            return AktsomhetsvurderingEntity(
+                vurderingType = VurderingType.IKKE_FORÅRSAKET_AV_BRUKER_FORSTOD,
+                beløpIBehold = null,
+                begrunnelse = begrunnelse,
+                aktsomhet = null,
+                kanUnnlates = null,
+                særligGrunner = null,
+                feilaktigEllerMangelfull = null,
+                forrigePeriodeId = null,
+            )
         }
+    }
+
+    class BurdeForstått(
+        private val kanUnnlates4XRettsgebyr: KanUnnlates4xRettsgebyr,
+        override val begrunnelse: String,
+    ) : NivåAvForståelse {
+        override fun vurderingstype(): Vurdering = Type.BurdeForstått
+
+        override fun reduksjon(): Reduksjon = kanUnnlates4XRettsgebyr.reduksjon()
+
+        override fun renter(): Boolean = false
+
+        override fun tilFrontendDto(): VurdertVilkårsvurderingsresultatDto {
+            return VurdertVilkårsvurderingsresultatDto(
+                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
+                godTro = null,
+                aktsomhet = VurdertAktsomhetDto(
+                    aktsomhet = AktsomhetDTO.SIMPEL_UAKTSOMHET,
+                    ileggRenter = false,
+                    andelTilbakekreves = kanUnnlates4XRettsgebyr.reduksjon().andel,
+                    beløpTilbakekreves = null,
+                    begrunnelse = begrunnelse,
+                    særligeGrunner = kanUnnlates4XRettsgebyr.særligeGrunner()?.vurderteGrunner(),
+                    særligeGrunnerTilReduksjon = kanUnnlates4XRettsgebyr.særligeGrunner()?.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja,
+                    tilbakekrevSmåbeløp = kanUnnlates4XRettsgebyr.skalTilbakekreves(),
+                    unnlates4Rettsgebyr = kanUnnlates4XRettsgebyr.tilFrontendDTO(),
+                    særligeGrunnerBegrunnelse = kanUnnlates4XRettsgebyr.særligeGrunner()?.begrunnelse,
+                ),
+            )
+        }
+
+        override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
+            return VurdertUtbetaling.Vilkårsvurdering(
+                aktsomhetFørUtbetaling = null,
+                aktsomhetEtterUtbetaling = AktsomhetDTO.SIMPEL_UAKTSOMHET,
+                forårsaketAvBruker = VurdertUtbetaling.ForårsaketAvBruker.IKKE_FORÅRSAKET_AV_BRUKER,
+                særligeGrunner = kanUnnlates4XRettsgebyr.særligeGrunner()?.oppsummerVurdering(),
+                beløpUnnlatesUnder4Rettsgebyr = kanUnnlates4XRettsgebyr.oppsummering(),
+            )
+        }
+
+        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = kanUnnlates4XRettsgebyr.påkrevdeVurderinger()
 
         override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
             return AktsomhetsvurderingEntity(
                 vurderingType = VurderingType.IKKE_FORÅRSAKET_AV_BRUKER_BURDE_FORSTÅTT,
                 beløpIBehold = null,
                 begrunnelse = begrunnelse,
-                aktsomhet = aktsomhet.tilEntity(periodeRef),
+                aktsomhet = null,
+                kanUnnlates = kanUnnlates4XRettsgebyr.tilEntity(),
+                særligGrunner = kanUnnlates4XRettsgebyr.særligeGrunner()?.tilEntity(periodeRef),
                 feilaktigEllerMangelfull = null,
                 forrigePeriodeId = null,
             )
@@ -150,6 +169,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 begrunnelse = begrunnelse,
                 beløpIBehold = beløpIBehold.tilEntity(periodeRef, begrunnelseForGodTro),
                 aktsomhet = null,
+                kanUnnlates = null,
+                særligGrunner = null,
                 feilaktigEllerMangelfull = null,
                 forrigePeriodeId = null,
             )
@@ -194,228 +215,6 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                         beløp = null,
                     )
                 }
-            }
-        }
-    }
-
-    // §22-15 1. ledd 1. punktum (Etter utbetaling)
-    sealed interface Aktsomhet {
-        fun vurderingstype(): AktsomhetDTO
-
-        fun nivåAvForståelse(): Type
-
-        val begrunnelse: String
-
-        fun reduksjon(): Reduksjon
-
-        fun tilFrontendDto(): VurdertAktsomhetDto
-
-        fun tilEntity(periodeRef: UUID): VurdertAktsomhetEntity
-
-        fun renter(): Boolean
-
-        fun oppsummerSærligeGrunnerVurdering(): VurdertUtbetaling.SærligeGrunner?
-
-        fun oppsummer4RettsgebyrVurdering(): VurdertUtbetaling.JaNeiVurdering
-
-        fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse>
-
-        class Forsett(
-            override val begrunnelse: String,
-        ) : Aktsomhet {
-            override fun vurderingstype(): AktsomhetDTO = AktsomhetDTO.FORSETT
-
-            override fun nivåAvForståelse(): Type = Type.Forstod
-
-            override fun reduksjon(): Reduksjon = Reduksjon.FullstendigTilbakekreving()
-
-            override fun renter(): Boolean = true
-
-            override fun tilFrontendDto(): VurdertAktsomhetDto {
-                return VurdertAktsomhetDto(
-                    aktsomhet = vurderingstype(),
-                    ileggRenter = false,
-                    andelTilbakekreves = reduksjon().andel,
-                    beløpTilbakekreves = null,
-                    begrunnelse = begrunnelse,
-                    særligeGrunner = null,
-                    særligeGrunnerTilReduksjon = false,
-                    tilbakekrevSmåbeløp = true,
-                    unnlates4Rettsgebyr = SkalUnnlates.TILBAKEKREVES,
-                    særligeGrunnerBegrunnelse = null,
-                )
-            }
-
-            override fun oppsummerSærligeGrunnerVurdering(): VurdertUtbetaling.SærligeGrunner? {
-                return null
-            }
-
-            override fun oppsummer4RettsgebyrVurdering(): VurdertUtbetaling.JaNeiVurdering {
-                return VurdertUtbetaling.JaNeiVurdering.Nei
-            }
-
-            override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES)
-
-            override fun tilEntity(periodeRef: UUID): VurdertAktsomhetEntity {
-                return VurdertAktsomhetEntity(
-                    periodeRef = periodeRef,
-                    aktsomhetType = AktsomhetType.FORSETT,
-                    begrunnelse = begrunnelse,
-                    skalIleggesRenter = null,
-                    særligGrunner = null,
-                    kanUnnlates = null,
-                )
-            }
-        }
-
-        class GrovUaktsomhet(
-            private val reduksjonSærligeGrunner: ReduksjonSærligeGrunner,
-            override val begrunnelse: String,
-        ) : Aktsomhet {
-            override fun reduksjon(): Reduksjon {
-                return reduksjonSærligeGrunner.skalReduseres.reduksjon()
-            }
-
-            override fun renter(): Boolean = true
-
-            override fun vurderingstype(): AktsomhetDTO = AktsomhetDTO.GROV_UAKTSOMHET
-
-            override fun nivåAvForståelse(): Type = Type.MåForstått
-
-            override fun tilFrontendDto(): VurdertAktsomhetDto {
-                return VurdertAktsomhetDto(
-                    aktsomhet = vurderingstype(),
-                    ileggRenter = false,
-                    andelTilbakekreves = reduksjon().andel,
-                    beløpTilbakekreves = null,
-                    begrunnelse = begrunnelse,
-                    særligeGrunner = reduksjonSærligeGrunner.vurderteGrunner(),
-                    særligeGrunnerTilReduksjon = reduksjonSærligeGrunner.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja,
-                    tilbakekrevSmåbeløp = true,
-                    unnlates4Rettsgebyr = SkalUnnlates.TILBAKEKREVES,
-                    særligeGrunnerBegrunnelse = reduksjonSærligeGrunner.begrunnelse,
-                )
-            }
-
-            override fun oppsummerSærligeGrunnerVurdering(): VurdertUtbetaling.SærligeGrunner? {
-                return reduksjonSærligeGrunner.oppsummerVurdering()
-            }
-
-            override fun oppsummer4RettsgebyrVurdering(): VurdertUtbetaling.JaNeiVurdering {
-                return VurdertUtbetaling.JaNeiVurdering.Nei
-            }
-
-            override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES)
-
-            override fun tilEntity(periodeRef: UUID): VurdertAktsomhetEntity {
-                return VurdertAktsomhetEntity(
-                    periodeRef = periodeRef,
-                    aktsomhetType = AktsomhetType.GROV_UAKTSOMHET,
-                    begrunnelse = begrunnelse,
-                    skalIleggesRenter = null,
-                    særligGrunner = reduksjonSærligeGrunner.tilEntity(periodeRef),
-                    kanUnnlates = null,
-                )
-            }
-        }
-
-        class IkkeUtvistSkyld(
-            private val kanUnnlates4XRettsgebyr: KanUnnlates4xRettsgebyr,
-            override val begrunnelse: String,
-        ) : Aktsomhet {
-            override fun reduksjon(): Reduksjon = kanUnnlates4XRettsgebyr.reduksjon()
-
-            override fun renter(): Boolean = false
-
-            override fun vurderingstype(): AktsomhetDTO = AktsomhetDTO.SIMPEL_UAKTSOMHET
-
-            override fun nivåAvForståelse(): Type = Type.BurdeForstått
-
-            override fun oppsummerSærligeGrunnerVurdering(): VurdertUtbetaling.SærligeGrunner? {
-                return kanUnnlates4XRettsgebyr.særligeGrunner()?.oppsummerVurdering()
-            }
-
-            override fun oppsummer4RettsgebyrVurdering(): VurdertUtbetaling.JaNeiVurdering = when (kanUnnlates4XRettsgebyr) {
-                is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr, is KanUnnlates4xRettsgebyr.SkalIkkeUnnlates -> VurdertUtbetaling.JaNeiVurdering.Nei
-                is KanUnnlates4xRettsgebyr.Unnlates -> VurdertUtbetaling.JaNeiVurdering.Ja
-            }
-
-            override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = kanUnnlates4XRettsgebyr.påkrevdeVurderinger()
-
-            override fun tilFrontendDto(): VurdertAktsomhetDto {
-                return VurdertAktsomhetDto(
-                    aktsomhet = vurderingstype(),
-                    ileggRenter = false,
-                    andelTilbakekreves = reduksjon().andel,
-                    beløpTilbakekreves = null,
-                    unnlates4Rettsgebyr = kanUnnlates4XRettsgebyr.tilFrontendDTO(),
-                    begrunnelse = begrunnelse,
-                    særligeGrunner = kanUnnlates4XRettsgebyr.særligeGrunner()?.vurderteGrunner(),
-                    særligeGrunnerTilReduksjon = kanUnnlates4XRettsgebyr.særligeGrunner()?.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja,
-                    tilbakekrevSmåbeløp = kanUnnlates4XRettsgebyr.skalTilbakekreves(),
-                    særligeGrunnerBegrunnelse = kanUnnlates4XRettsgebyr.særligeGrunner()?.begrunnelse,
-                )
-            }
-
-            override fun tilEntity(periodeRef: UUID): VurdertAktsomhetEntity {
-                return VurdertAktsomhetEntity(
-                    periodeRef = periodeRef,
-                    aktsomhetType = AktsomhetType.IKKE_UTVIST_SKYLD,
-                    begrunnelse = begrunnelse,
-                    skalIleggesRenter = null,
-                    særligGrunner = kanUnnlates4XRettsgebyr.særligeGrunner()?.tilEntity(periodeRef),
-                    kanUnnlates = kanUnnlates4XRettsgebyr.tilEntity(),
-                )
-            }
-        }
-
-        class Uaktsomhet(
-            private val kanUnnlates4XRettsgebyr: KanUnnlates4xRettsgebyr,
-            override val begrunnelse: String,
-        ) : Aktsomhet {
-            override fun reduksjon(): Reduksjon = kanUnnlates4XRettsgebyr.reduksjon()
-
-            override fun renter(): Boolean = false
-
-            override fun vurderingstype(): AktsomhetDTO = AktsomhetDTO.SIMPEL_UAKTSOMHET
-
-            override fun nivåAvForståelse(): Type = Type.BurdeForstått
-
-            override fun oppsummerSærligeGrunnerVurdering(): VurdertUtbetaling.SærligeGrunner? {
-                return kanUnnlates4XRettsgebyr.særligeGrunner()?.oppsummerVurdering()
-            }
-
-            override fun oppsummer4RettsgebyrVurdering(): VurdertUtbetaling.JaNeiVurdering = when (kanUnnlates4XRettsgebyr) {
-                is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr, is KanUnnlates4xRettsgebyr.SkalIkkeUnnlates -> VurdertUtbetaling.JaNeiVurdering.Nei
-                is KanUnnlates4xRettsgebyr.Unnlates -> VurdertUtbetaling.JaNeiVurdering.Ja
-            }
-
-            override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = kanUnnlates4XRettsgebyr.påkrevdeVurderinger()
-
-            override fun tilFrontendDto(): VurdertAktsomhetDto {
-                return VurdertAktsomhetDto(
-                    aktsomhet = vurderingstype(),
-                    ileggRenter = false,
-                    andelTilbakekreves = reduksjon().andel,
-                    beløpTilbakekreves = null,
-                    begrunnelse = begrunnelse,
-                    særligeGrunner = kanUnnlates4XRettsgebyr.særligeGrunner()?.vurderteGrunner(),
-                    særligeGrunnerTilReduksjon = kanUnnlates4XRettsgebyr.særligeGrunner()?.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja,
-                    tilbakekrevSmåbeløp = kanUnnlates4XRettsgebyr.skalTilbakekreves(),
-                    unnlates4Rettsgebyr = kanUnnlates4XRettsgebyr.tilFrontendDTO(),
-                    særligeGrunnerBegrunnelse = kanUnnlates4XRettsgebyr.særligeGrunner()?.begrunnelse,
-                )
-            }
-
-            override fun tilEntity(periodeRef: UUID): VurdertAktsomhetEntity {
-                return VurdertAktsomhetEntity(
-                    periodeRef = periodeRef,
-                    aktsomhetType = AktsomhetType.SIMPEL_UAKTSOMHET,
-                    begrunnelse = begrunnelse,
-                    skalIleggesRenter = null,
-                    særligGrunner = kanUnnlates4XRettsgebyr.særligeGrunner()?.tilEntity(periodeRef),
-                    kanUnnlates = kanUnnlates4XRettsgebyr.tilEntity(),
-                )
             }
         }
     }

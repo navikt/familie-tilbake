@@ -75,9 +75,9 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                     aktsomhetType = AktsomhetType.SIMPEL_UAKTSOMHET,
                     begrunnelse = begrunnelseAktsomhet,
                     skalIleggesRenter = null,
-                    særligGrunner = kanUnnlates4XRettsgebyr.særligeGrunner()?.tilEntity(periodeRef),
-                    kanUnnlates = kanUnnlates4XRettsgebyr.tilEntity(),
                 ),
+                kanUnnlates = kanUnnlates4XRettsgebyr.tilEntity(),
+                særligGrunner = kanUnnlates4XRettsgebyr.særligeGrunner()?.tilEntity(periodeRef),
                 feilaktigEllerMangelfull = feilaktigeEllerMangelfulleOpplysninger.tilEntity(),
                 forrigePeriodeId = null,
             )
@@ -137,11 +137,11 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                 aktsomhet = VurdertAktsomhetEntity(
                     periodeRef = periodeRef,
                     aktsomhetType = AktsomhetType.GROV_UAKTSOMHET,
-                    særligGrunner = reduksjonSærligeGrunner.tilEntity(periodeRef),
                     begrunnelse = begrunnelseAktsomhet,
                     skalIleggesRenter = null,
-                    kanUnnlates = null,
                 ),
+                kanUnnlates = null,
+                særligGrunner = reduksjonSærligeGrunner.tilEntity(periodeRef),
                 feilaktigEllerMangelfull = feilaktigeEllerMangelfulleOpplysninger.tilEntity(),
                 forrigePeriodeId = null,
             )
@@ -202,9 +202,9 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                     aktsomhetType = AktsomhetType.FORSETT,
                     begrunnelse = begrunnelseAktsomhet,
                     skalIleggesRenter = null,
-                    særligGrunner = null,
-                    kanUnnlates = null,
                 ),
+                kanUnnlates = null,
+                særligGrunner = null,
                 feilaktigEllerMangelfull = feilaktigeEllerMangelfulleOpplysninger.tilEntity(),
                 forrigePeriodeId = null,
             )

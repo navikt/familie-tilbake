@@ -74,7 +74,7 @@ object BehandlingsstegGenerator {
                 begrunnelse = "Jepp",
                 godTroDto = null,
                 aktsomhetDto = AktsomhetDto(
-                    aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
+                    aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
                     ileggRenter = false,
                     andelTilbakekreves = null,
                     beløpTilbakekreves = null,

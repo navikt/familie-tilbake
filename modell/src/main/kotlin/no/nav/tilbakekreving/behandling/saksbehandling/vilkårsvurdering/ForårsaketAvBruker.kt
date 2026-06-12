@@ -59,6 +59,8 @@ interface ForårsaketAvBruker {
                 begrunnelse = null,
                 beløpIBehold = null,
                 aktsomhet = null,
+                kanUnnlates = null,
+                særligGrunner = null,
                 feilaktigEllerMangelfull = null,
                 forrigePeriodeId = null,
             )
@@ -79,6 +81,8 @@ interface ForårsaketAvBruker {
                 begrunnelse = null,
                 beløpIBehold = null,
                 aktsomhet = null,
+                kanUnnlates = null,
+                særligGrunner = null,
                 feilaktigEllerMangelfull = null,
                 forrigePeriodeId = forrigePeriodeId,
             )

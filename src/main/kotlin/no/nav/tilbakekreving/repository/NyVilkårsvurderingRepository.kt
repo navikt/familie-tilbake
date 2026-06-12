@@ -33,6 +33,9 @@ class NyVilkårsvurderingRepository(private val jdbcTemplate: JdbcTemplate) {
             if (periode.vurdering.aktsomhet != null) {
                 lagreAktsomhet(periode.vurdering.aktsomhet!!)
             }
+            if (periode.vurdering.særligGrunner != null) {
+                lagreSærligeGrunner(periode.vurdering.særligGrunner!!)
+            }
             if (periode.vurdering.beløpIBehold != null) {
                 lagreGodTro(periode.vurdering.beløpIBehold!!)
             }
@@ -46,6 +49,7 @@ class NyVilkårsvurderingRepository(private val jdbcTemplate: JdbcTemplate) {
                 resultSet,
                 hentGodTroVurdering(periodeId),
                 hentAktsomhetvurdering(periodeId),
+                hentSærligeGrunnerVurdering(periodeId),
             )
         }
     }
@@ -62,18 +66,12 @@ class NyVilkårsvurderingRepository(private val jdbcTemplate: JdbcTemplate) {
 
     private fun hentAktsomhetvurdering(periodeId: UUID): VurdertAktsomhetEntity? {
         return jdbcTemplate.query("SELECT * FROM tilbakekreving_vilkårsvurdering_periode_aktsomhet WHERE id=?;", periodeId) { resultSet, _ ->
-            VilkårsvurderingEntityMapper.AktsomhetMapper.map(
-                resultSet,
-                hentSærligeGrunnerVurdering(periodeId),
-            )
+            VilkårsvurderingEntityMapper.AktsomhetMapper.map(resultSet)
         }.singleOrNull()
     }
 
     private fun lagreAktsomhet(aktsomhet: VurdertAktsomhetEntity) {
         VilkårsvurderingEntityMapper.AktsomhetMapper.upsertQuery(jdbcTemplate, aktsomhet)
-        if (aktsomhet.særligGrunner != null) {
-            lagreSærligeGrunner(aktsomhet.særligGrunner!!)
-        }
     }
 
     private fun lagreSærligeGrunner(særligGrunner: SærligeGrunnerEntity) {

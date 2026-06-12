@@ -165,7 +165,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
                 bruttoTilbakekrevingsbeløp = 2000.kroner,
                 rentebeløp = 0.kroner,
                 harBruktSjetteLedd = false,
-                aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
+                aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
                 særligeGrunner = SærligeGrunner(
                     erSærligeGrunnerTilReduksjon = false,
                     særligeGrunner = emptyList(),

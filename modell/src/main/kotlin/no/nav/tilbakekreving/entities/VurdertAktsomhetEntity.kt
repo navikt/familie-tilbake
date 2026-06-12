@@ -2,7 +2,6 @@ package no.nav.tilbakekreving.entities
 
 import no.nav.tilbakekreving.behandling.saksbehandling.SærligGrunn
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonSærligeGrunner
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 import java.util.UUID
@@ -12,43 +11,7 @@ data class VurdertAktsomhetEntity(
     val aktsomhetType: AktsomhetType,
     val begrunnelse: String,
     val skalIleggesRenter: Boolean?,
-    val særligGrunner: SærligeGrunnerEntity?,
-    val kanUnnlates: KanUnnlates?,
-) {
-    fun tilAktsomhet(): NivåAvForståelse.Aktsomhet {
-        return when (aktsomhetType) {
-            AktsomhetType.SIMPEL_UAKTSOMHET -> {
-                NivåAvForståelse.Aktsomhet.Uaktsomhet(
-                    begrunnelse = begrunnelse,
-                    kanUnnlates4XRettsgebyr = when (kanUnnlates) {
-                        KanUnnlates.UNNLATES -> KanUnnlates4xRettsgebyr.Unnlates
-                        KanUnnlates.OVER_4_RETTSGEBYR -> KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(
-                            requireNotNull(særligGrunner) { "SærligGrunner kreves for Uaktsomhet" }.fraEntity(),
-                        )
-                        KanUnnlates.SKAL_IKKE_UNNLATES -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
-                            requireNotNull(særligGrunner) { "SærligGrunner kreves for Uaktsomhet" }.fraEntity(),
-                        )
-                        null -> error("Uaktsomhet må avklare om det kan unnlates eller ikke.")
-                    },
-                )
-            }
-            AktsomhetType.GROV_UAKTSOMHET -> NivåAvForståelse.Aktsomhet.GrovUaktsomhet(
-                reduksjonSærligeGrunner = requireNotNull(særligGrunner) { "SærligGrunner kreves for GrovUaktsomhet" }.fraEntity(),
-                begrunnelse = begrunnelse,
-            )
-            AktsomhetType.FORSETT -> NivåAvForståelse.Aktsomhet.Forsett(
-                begrunnelse = begrunnelse,
-            )
-
-            AktsomhetType.IKKE_UTVIST_SKYLD -> NivåAvForståelse.Aktsomhet.IkkeUtvistSkyld(
-                kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
-                    requireNotNull(særligGrunner) { "IkkeUtvistSkyld kreves for Uaktsomhet" }.fraEntity(),
-                ),
-                begrunnelse = begrunnelse,
-            )
-        }
-    }
-}
+)
 
 data class SærligeGrunnerEntity(
     val periodeRef: UUID,
@@ -82,6 +45,17 @@ enum class KanUnnlates {
     UNNLATES,
     SKAL_IKKE_UNNLATES,
     OVER_4_RETTSGEBYR,
+    ;
+
+    fun fraEntity(særligeGrunner: SærligeGrunnerEntity?): KanUnnlates4xRettsgebyr = when (this) {
+        UNNLATES -> KanUnnlates4xRettsgebyr.Unnlates
+        SKAL_IKKE_UNNLATES -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
+            requireNotNull(særligeGrunner) { "SærligGrunner kreves for SKAL_IKKE_UNNLATES" }.fraEntity(),
+        )
+        OVER_4_RETTSGEBYR -> KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(
+            requireNotNull(særligeGrunner) { "SærligGrunner kreves for OVER_4_RETTSGEBYR" }.fraEntity(),
+        )
+    }
 }
 
 enum class AktsomhetType {

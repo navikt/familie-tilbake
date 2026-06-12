@@ -34,30 +34,6 @@ object VilkårsvurderingMapperV2 {
         )
     }
 
-    private fun VilkårsvurderingsperiodeDto.aktsomhetsvurdering() =
-        aktsomhetDto!!.let { aktsomhet ->
-            when (aktsomhet.aktsomhet) {
-                Aktsomhet.FORSETT ->
-                    NivåAvForståelse.Aktsomhet.Forsett(begrunnelse = aktsomhet.begrunnelse)
-
-                Aktsomhet.GROV_UAKTSOMHET ->
-                    NivåAvForståelse.Aktsomhet.GrovUaktsomhet(
-                        begrunnelse = aktsomhet.begrunnelse,
-                        reduksjonSærligeGrunner = særligeGrunner(),
-                    )
-
-                Aktsomhet.SIMPEL_UAKTSOMHET ->
-                    NivåAvForståelse.Aktsomhet.Uaktsomhet(
-                        begrunnelse = aktsomhet.begrunnelse,
-                        kanUnnlates4XRettsgebyr = when (aktsomhet.unnlates4Rettsgebyr) {
-                            SkalUnnlates.UNNLATES -> KanUnnlates4xRettsgebyr.Unnlates
-                            SkalUnnlates.TILBAKEKREVES -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(særligeGrunner())
-                            SkalUnnlates.OVER_4_RETTSGEBYR, null -> KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(særligeGrunner())
-                        },
-                    )
-            }
-        }
-
     private fun VilkårsvurderingsperiodeDto.skyldgrad(feilaktigEllerMangelfull: Skyldgrad.FeilaktigEllerMangelfull): Skyldgrad {
         val aktsomhet = aktsomhetDto!!
 
@@ -88,11 +64,27 @@ object VilkårsvurderingMapperV2 {
 
     fun tilVurdering(periode: VilkårsvurderingsperiodeDto) =
         when (periode.vilkårsvurderingsresultat) {
-            Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT ->
-                NivåAvForståelse.BurdeForstått(
-                    begrunnelse = periode.begrunnelse,
-                    aktsomhet = periode.aktsomhetsvurdering(),
-                )
+            Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT -> periode.aktsomhetDto!!.let { aktsomhet ->
+                when (aktsomhet.aktsomhet) {
+                    Aktsomhet.FORSETT -> NivåAvForståelse.Forstod(
+                        begrunnelse = aktsomhet.begrunnelse,
+                    )
+
+                    Aktsomhet.GROV_UAKTSOMHET -> NivåAvForståelse.BurdeForstått(
+                        kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(periode.særligeGrunner()),
+                        begrunnelse = periode.begrunnelse,
+                    )
+
+                    Aktsomhet.SIMPEL_UAKTSOMHET -> NivåAvForståelse.BurdeForstått(
+                        kanUnnlates4XRettsgebyr = when (aktsomhet.unnlates4Rettsgebyr) {
+                            SkalUnnlates.UNNLATES -> KanUnnlates4xRettsgebyr.Unnlates
+                            SkalUnnlates.TILBAKEKREVES -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(periode.særligeGrunner())
+                            SkalUnnlates.OVER_4_RETTSGEBYR, null -> KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(periode.særligeGrunner())
+                        },
+                        begrunnelse = periode.begrunnelse,
+                    )
+                }
+            }
 
             Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER -> periode.skyldgrad(Skyldgrad.FeilaktigEllerMangelfull.FEILAKTIG)
 

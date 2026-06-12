@@ -6,6 +6,7 @@ import no.nav.tilbakekreving.entities.BeholdType
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.FeilaktigEllerMangelfullType
 import no.nav.tilbakekreving.entities.GodTroEntity
+import no.nav.tilbakekreving.entities.KanUnnlates
 import no.nav.tilbakekreving.entities.SkalReduseresEntity
 import no.nav.tilbakekreving.entities.SkalReduseresType
 import no.nav.tilbakekreving.entities.SærligGrunnEntity
@@ -88,10 +89,17 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
             FieldConverter.UUIDConverter,
         )
 
+        val unnlates = field(
+            "unnlates",
+            { it.vurdering.kanUnnlates },
+            FieldConverter.EnumConverter.of<KanUnnlates>(),
+        )
+
         fun map(
             resultSet: ResultSet,
             godTro: GodTroEntity?,
             aktsomhet: VurdertAktsomhetEntity?,
+            særligeGrunner: SærligeGrunnerEntity?,
         ): VilkårsvurderingsperiodeEntity {
             return VilkårsvurderingsperiodeEntity(
                 id = resultSet[id],
@@ -103,6 +111,8 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
                     begrunnelse = resultSet[vilkårForTilbakekreving],
                     beløpIBehold = godTro,
                     aktsomhet = aktsomhet,
+                    kanUnnlates = resultSet[unnlates],
+                    særligGrunner = særligeGrunner,
                     feilaktigEllerMangelfull = resultSet[feilaktigEllerMangelfull],
                     forrigePeriodeId = resultSet[forrigePeriodeId],
                 ),
@@ -160,23 +170,14 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
             FieldConverter.StringConverter.required(),
         )
 
-        val unnlates = field(
-            "unnlates",
-            VurdertAktsomhetEntity::kanUnnlates,
-            FieldConverter.EnumConverter.of(),
-        )
-
         fun map(
             resultSet: ResultSet,
-            særligeGrunner: SærligeGrunnerEntity?,
         ): VurdertAktsomhetEntity {
             return VurdertAktsomhetEntity(
                 periodeRef = resultSet[id],
                 aktsomhetType = resultSet[aktsomhetType],
                 begrunnelse = resultSet[begrunnelse],
                 skalIleggesRenter = null,
-                særligGrunner = særligeGrunner,
-                kanUnnlates = resultSet[unnlates],
             )
         }
     }

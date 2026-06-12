@@ -14,7 +14,7 @@ import no.nav.tilbakekreving.test.vilkårsvurdering.Unnlates
 import no.nav.tilbakekreving.test.vilkårsvurdering.VilkårsvurderingProvider
 import no.nav.tilbakekreving.test.vilkårsvurdering.VilkårsvurderingValgProvider
 
-object VilkårsvurderingBuilderImpl : VilkårsvurderingProvider<ForårsaketAvBruker.Ja, ForårsaketAvBruker.Nei>, VilkårsvurderingValgProvider<KanUnnlates4xRettsgebyr, ReduksjonSærligeGrunner, NivåAvForståelse.Aktsomhet> {
+object VilkårsvurderingBuilderImpl : VilkårsvurderingProvider<ForårsaketAvBruker.Ja, ForårsaketAvBruker.Nei>, VilkårsvurderingValgProvider<KanUnnlates4xRettsgebyr, ReduksjonSærligeGrunner, KanUnnlates4xRettsgebyr> {
     override fun build(vurdering: ForårsaketAvNavBuilder.GodTroBuilder<ForårsaketAvBruker.Nei>): ForårsaketAvBruker.Nei {
         return NivåAvForståelse.GodTro(
             vurdering.beløpIBehold?.let(NivåAvForståelse.GodTro.BeløpIBehold::Ja) ?: NivåAvForståelse.GodTro.BeløpIBehold.Nei,
@@ -25,16 +25,13 @@ object VilkårsvurderingBuilderImpl : VilkårsvurderingProvider<ForårsaketAvBru
 
     override fun build(vurdering: ForårsaketAvNavBuilder.BurdeForstått<ForårsaketAvBruker.Nei>): ForårsaketAvBruker.Nei {
         return NivåAvForståelse.BurdeForstått(
-            aktsomhet = vurdering.aktsomhet.build(this),
+            kanUnnlates4XRettsgebyr = vurdering.aktsomhet.build(this),
             begrunnelse = "",
         )
     }
 
     override fun build(vurdering: ForårsaketAvNavBuilder.Forstod<ForårsaketAvBruker.Nei>): ForårsaketAvBruker.Nei {
-        return NivåAvForståelse.Forstod(
-            aktsomhet = vurdering.aktsomhet.build(this),
-            begrunnelse = "",
-        )
+        return NivåAvForståelse.Forstod(begrunnelse = "")
     }
 
     override fun build(vurdering: ForårsaketAvBrukerBuilder.Uaktsomt<ForårsaketAvBruker.Ja>): ForårsaketAvBruker.Ja {
@@ -82,21 +79,21 @@ object VilkårsvurderingBuilderImpl : VilkårsvurderingProvider<ForårsaketAvBru
         }
     }
 
-    override fun build(aktsomhet: AktsomhetBuilder.Uaktsomt): NivåAvForståelse.Aktsomhet {
-        return NivåAvForståelse.Aktsomhet.Uaktsomhet(
-            kanUnnlates4XRettsgebyr = aktsomhet.unnlates.build(this, aktsomhet.reduksjon),
-            begrunnelse = "",
-        )
+    override fun build(aktsomhet: AktsomhetBuilder.Uaktsomt): KanUnnlates4xRettsgebyr {
+        return aktsomhet.unnlates.build(this, aktsomhet.reduksjon)
     }
 
-    override fun build(aktsomhet: AktsomhetBuilder.GrovtUaktsomt): NivåAvForståelse.Aktsomhet {
-        return NivåAvForståelse.Aktsomhet.GrovUaktsomhet(
-            reduksjonSærligeGrunner = aktsomhet.reduksjon.build(this),
-            begrunnelse = "",
-        )
+    override fun build(aktsomhet: AktsomhetBuilder.GrovtUaktsomt): KanUnnlates4xRettsgebyr {
+        return KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(aktsomhet.reduksjon.build(this))
     }
 
-    override fun build(aktsomhet: AktsomhetBuilder.Forsettelig): NivåAvForståelse.Aktsomhet {
-        return NivåAvForståelse.Aktsomhet.Forsett("")
+    override fun build(aktsomhet: AktsomhetBuilder.Forsettelig): KanUnnlates4xRettsgebyr {
+        return KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
+            ReduksjonSærligeGrunner(
+                begrunnelse = "",
+                grunner = emptySet(),
+                skalReduseres = ReduksjonSærligeGrunner.SkalReduseres.Nei,
+            ),
+        )
     }
 }
