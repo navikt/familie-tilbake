@@ -20,6 +20,7 @@ import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeInfoDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering
@@ -156,8 +157,13 @@ class Vilkårsvurderingsteg(
         vurder(funnetPerioden, ForårsaketAvBruker.IkkeVurdert())
     }
 
-    internal fun hentVilkårsvurderingsperioder(): List<PeriodeDto> {
-        return vurderinger.map { PeriodeDto(it.periode.fom, it.periode.tom) }
+    internal fun hentVilkårsvurderingsperioder(): List<PeriodeInfoDto> {
+        return vurderinger.map {
+            PeriodeInfoDto(
+                periodeId = it.id,
+                periode = PeriodeDto(it.periode.fom, it.periode.tom),
+            )
+        }
     }
 
     fun vurdertePerioderForBrev(
