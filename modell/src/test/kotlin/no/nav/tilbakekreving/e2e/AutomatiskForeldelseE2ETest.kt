@@ -40,7 +40,7 @@ class AutomatiskForeldelseE2ETest {
         }
 
         foreldelsePerioderFor(tilbakekreving)
-            .forAll { it.foreldelsesvurderingstype shouldBe Foreldelsesvurderingstype.IKKE_FORELDET }
+            .forAll { it.foreldelsesvurderingstype shouldBe Foreldelsesvurderingstype.AUTOMATISK_VURDERT_IKKE_FORELDET }
     }
 
     @Test
@@ -78,7 +78,7 @@ class AutomatiskForeldelseE2ETest {
         }
 
         foreldelsePerioderFor(tilbakekreving)
-            .forAll { it.foreldelsesvurderingstype shouldBe Foreldelsesvurderingstype.IKKE_FORELDET }
+            .forAll { it.foreldelsesvurderingstype shouldBe Foreldelsesvurderingstype.AUTOMATISK_VURDERT_IKKE_FORELDET }
     }
 
     @Test
@@ -93,7 +93,7 @@ class AutomatiskForeldelseE2ETest {
         }
 
         foreldelsePerioderFor(tilbakekreving)
-            .forAll { it.foreldelsesvurderingstype shouldBe Foreldelsesvurderingstype.IKKE_FORELDET }
+            .forAll { it.foreldelsesvurderingstype shouldBe Foreldelsesvurderingstype.AUTOMATISK_VURDERT_IKKE_FORELDET }
 
         klokke.settTid(fom.plusMonths(31))
         tilbakekreving.håndter(Påminnelse(klokke.nå()), systemContext(klokke = klokke))
@@ -120,7 +120,7 @@ class AutomatiskForeldelseE2ETest {
         tilbakekreving.håndter(Påminnelse(klokke.nå()), systemContext())
 
         foreldelsePerioderFor(tilbakekreving)
-            .forAll { it.foreldelsesvurderingstype shouldBe Foreldelsesvurderingstype.IKKE_FORELDET }
+            .forAll { it.foreldelsesvurderingstype shouldBe Foreldelsesvurderingstype.AUTOMATISK_VURDERT_IKKE_FORELDET }
     }
 
     @Test
@@ -143,7 +143,7 @@ class AutomatiskForeldelseE2ETest {
         }
 
         foreldelsePerioderFor(tilbakekreving)
-            .forAll { it.foreldelsesvurderingstype shouldBe Foreldelsesvurderingstype.IKKE_FORELDET }
+            .forAll { it.foreldelsesvurderingstype shouldBe Foreldelsesvurderingstype.AUTOMATISK_VURDERT_IKKE_FORELDET }
     }
 
     @Test

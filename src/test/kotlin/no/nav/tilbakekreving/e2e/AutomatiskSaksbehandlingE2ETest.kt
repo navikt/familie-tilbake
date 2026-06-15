@@ -43,7 +43,7 @@ class AutomatiskSaksbehandlingE2ETest : TilbakekrevingE2EBase() {
             .foreldelsestegDto.tilFrontendDto(saksbehandlerContext())
             .foreldetPerioder.single()
 
-        periode.foreldelsesvurderingstype shouldBe Foreldelsesvurderingstype.IKKE_FORELDET
+        periode.foreldelsesvurderingstype shouldBe Foreldelsesvurderingstype.AUTOMATISK_VURDERT_IKKE_FORELDET
 
         periode.begrunnelse shouldStartWith "Ingen perioder er foreldet fordi det er mindre enn tre år siden første feilutbetaling fant sted. Dette følger av foreldelsesloven §§ 2 og 3."
     }

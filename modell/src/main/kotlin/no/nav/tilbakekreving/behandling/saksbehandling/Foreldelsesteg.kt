@@ -138,7 +138,7 @@ class Foreldelsesteg(
                     foreldelsesvurderingstype =
                         when (it.vurdering) {
                             is Vurdering.IkkeForeldet -> Foreldelsesvurderingstype.IKKE_FORELDET
-                            is Vurdering.AutomatiskIkkeForeldet -> Foreldelsesvurderingstype.IKKE_FORELDET
+                            is Vurdering.AutomatiskIkkeForeldet -> Foreldelsesvurderingstype.AUTOMATISK_VURDERT_IKKE_FORELDET
                             is Vurdering.Foreldet -> Foreldelsesvurderingstype.FORELDET
                             is Vurdering.IkkeVurdert -> Foreldelsesvurderingstype.IKKE_VURDERT
                             is Vurdering.Tilleggsfrist -> Foreldelsesvurderingstype.TILLEGGSFRIST

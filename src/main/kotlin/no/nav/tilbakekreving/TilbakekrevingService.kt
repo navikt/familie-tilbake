@@ -361,6 +361,7 @@ class TilbakekrevingService(
                             Foreldelsesvurderingstype.IKKE_VURDERT -> Foreldelsesteg.Vurdering.IkkeVurdert
                             Foreldelsesvurderingstype.FORELDET -> Foreldelsesteg.Vurdering.Foreldet(periode.begrunnelse)
                             Foreldelsesvurderingstype.IKKE_FORELDET -> Foreldelsesteg.Vurdering.IkkeForeldet(periode.begrunnelse)
+                            Foreldelsesvurderingstype.AUTOMATISK_VURDERT_IKKE_FORELDET -> Foreldelsesteg.Vurdering.AutomatiskIkkeForeldet(periode.begrunnelse)
                             Foreldelsesvurderingstype.TILLEGGSFRIST -> Foreldelsesteg.Vurdering.Tilleggsfrist(periode.foreldelsesfrist!!, periode.oppdagelsesdato!!)
                         },
                     )
@@ -371,6 +372,7 @@ class TilbakekrevingService(
                 }
 
                 is BehandlingsstegForeslåVedtaksstegDto -> foreslåVedtak()
+
                 is BehandlingsstegFatteVedtaksstegDto -> fatteVedtak(
                     vurderinger = dto.totrinnsvurderinger.map { stegVurdering ->
                         stegVurdering.behandlingssteg to when (stegVurdering.godkjent) {
