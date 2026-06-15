@@ -52,8 +52,9 @@ class SlåSammenTest {
             eksternFagsakRevurdering,
             kravgrunnlagHendelse,
         )
+        val perioder = vilkårsvurderingsteg.hentVilkårsvurderingsperioder()
 
-        vilkårsvurderingsteg.splittVilkårsvurdering(16.februar(2025))
+        vilkårsvurderingsteg.splittVilkårsvurdering(perioder[1].periodeId)
         vilkårsvurderingsteg.tilFrontendDto(
             kravgrunnlag = kravgrunnlagHendelse,
             revurdering = eksternFagsakRevurdering,
@@ -61,7 +62,6 @@ class SlåSammenTest {
             klokke = SystemKlokke,
         ).perioder.shouldHaveSize(2)
 
-        val perioder = vilkårsvurderingsteg.hentVilkårsvurderingsperioder()
         vilkårsvurderingsteg.kopierVurderingerForSammenslåing(
             SammenslaaingDto(
                 vilkårsvurderingId = perioder[1].periodeId,
@@ -90,8 +90,9 @@ class SlåSammenTest {
             eksternFagsakRevurdering,
             kravgrunnlagHendelse,
         )
+        val perioder = vilkårsvurderingsteg.hentVilkårsvurderingsperioder()
 
-        vilkårsvurderingsteg.splittVilkårsvurdering(2.mars(2025))
+        vilkårsvurderingsteg.splittVilkårsvurdering(perioder[2].periodeId)
         vilkårsvurderingsteg.tilFrontendDto(
             kravgrunnlag = kravgrunnlagHendelse,
             revurdering = eksternFagsakRevurdering,
@@ -116,7 +117,7 @@ class SlåSammenTest {
             ),
         )
 
-        vilkårsvurderingsteg.splittVilkårsvurdering(16.mars(2025))
+        vilkårsvurderingsteg.splittVilkårsvurdering(perioder[3].periodeId)
         vilkårsvurderingsteg.tilFrontendDto(
             kravgrunnlag = kravgrunnlagHendelse,
             revurdering = eksternFagsakRevurdering,
@@ -124,7 +125,6 @@ class SlåSammenTest {
             klokke = SystemKlokke,
         ).perioder.shouldHaveSize(3)
 
-        val perioder = vilkårsvurderingsteg.hentVilkårsvurderingsperioder()
         vilkårsvurderingsteg.kopierVurderingerForSammenslåing(
             SammenslaaingDto(
                 vilkårsvurderingId = perioder[2].periodeId,
@@ -157,16 +157,15 @@ class SlåSammenTest {
             eksternFagsakRevurdering,
             kravgrunnlagHendelse,
         )
+        val perioder = vilkårsvurderingsteg.hentVilkårsvurderingsperioder()
 
-        vilkårsvurderingsteg.splittVilkårsvurdering(2.mars(2025))
+        vilkårsvurderingsteg.splittVilkårsvurdering(perioder[2].periodeId)
         vilkårsvurderingsteg.tilFrontendDto(
             kravgrunnlag = kravgrunnlagHendelse,
             revurdering = eksternFagsakRevurdering,
             foreldelsesteg = foreldelsesteg,
             klokke = SystemKlokke,
         ).perioder.shouldHaveSize(2)
-
-        val perioder = vilkårsvurderingsteg.hentVilkårsvurderingsperioder()
 
         val exception = shouldThrow<ModellFeil.UgyldigOperasjonException> {
             vilkårsvurderingsteg.kopierVurderingerForSammenslåing(

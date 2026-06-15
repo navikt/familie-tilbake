@@ -428,19 +428,19 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
             ),
         )
 
-        somSaksbehandler(ansvarligSaksbehandler) {
-            behandlingApiController.behandlingSplittPeriode(behandlingId, SplittPeriodeDto(21.mai(2021)))
-        }
-
-        val tilbakekreving = tilbakekreving(behandlingId)
-        tilbakekreving.hentBehandling(behandlingId).hentVilkårsvurderingsperioder() shouldNotBeNull {
+        val perioder = tilbakekreving(behandlingId).hentBehandling(behandlingId).hentVilkårsvurderingsperioder() shouldNotBeNull {
             size shouldBe 4
             this[0].periode shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(1.januar(2021), 1.januar(2021))
             this[1].periode shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(15.mars(2021), 15.mars(2021))
             this[2].periode shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(21.mai(2021), 21.mai(2021))
             this[3].periode shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(14.juli(2021), 14.juli(2021))
         }
-        val vilkårsvurderingFrontendDto = tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext())
+
+        somSaksbehandler(ansvarligSaksbehandler) {
+            behandlingApiController.behandlingSplittPeriode(behandlingId, SplittPeriodeDto(perioder[2].periodeId))
+        }
+
+        val vilkårsvurderingFrontendDto = tilbakekreving(behandlingId).hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext())
         vilkårsvurderingFrontendDto.perioder.size shouldBe 2
         vilkårsvurderingFrontendDto.perioder.first().periode.fom shouldBe 1.januar(2021)
         vilkårsvurderingFrontendDto.perioder.first().periode.tom shouldBe 15.mars(2021)
@@ -488,11 +488,6 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
             ),
         )
         tilbakekreving(behandlingId).hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext()).perioder.size shouldBe 1
-        somSaksbehandler(ansvarligSaksbehandler) {
-            behandlingApiController.behandlingSplittPeriode(behandlingId, SplittPeriodeDto(21.mai(2021)))
-        }
-
-        tilbakekreving(behandlingId).hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext()).perioder.size shouldBe 2
 
         val perioder = somSaksbehandler(ansvarligSaksbehandler) {
             behandlingApiController.behandlingVilkaarsvurderingsperioder(behandlingId).body!!
@@ -503,6 +498,12 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
             this[2].periode shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(21.mai(2021), 21.mai(2021))
             this[3].periode shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(14.juli(2021), 14.juli(2021))
         }
+
+        somSaksbehandler(ansvarligSaksbehandler) {
+            behandlingApiController.behandlingSplittPeriode(behandlingId, SplittPeriodeDto(perioder[2].periodeId))
+        }
+
+        tilbakekreving(behandlingId).hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext()).perioder.size shouldBe 2
 
         somSaksbehandler(ansvarligSaksbehandler) {
             behandlingApiController.behandlingSlaaSammenPerioder(

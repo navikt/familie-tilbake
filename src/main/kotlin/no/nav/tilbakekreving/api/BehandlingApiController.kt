@@ -162,7 +162,7 @@ class BehandlingApiController(
         ) { tilbakekreving, context ->
             ResponseEntity.ok(
                 tilbakekreving.gjørSaksbehandling(behandlingId, context) {
-                    splittVilkårsvurdering(splittPeriode.splittFra)
+                    splittVilkårsvurdering(splittPeriode.vilkårsvurderingId)
                 },
             )
         } ?: ResponseEntity.notFound().build()

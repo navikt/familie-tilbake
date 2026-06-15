@@ -586,8 +586,8 @@ class Behandling internal constructor(
             context.logg(Behandlingsloggstype.VILKÅRSVURDERING_VURDERT)
         }
 
-        fun splittVilkårsvurdering(splittFra: LocalDate) {
-            vilkårsvurderingsteg.splittVilkårsvurdering(splittFra)
+        fun splittVilkårsvurdering(vilkårsvurderingId: UUID) {
+            vilkårsvurderingsteg.splittVilkårsvurdering(vilkårsvurderingId)
         }
 
         fun slåSammenPerioder(sammenslaaingDto: SammenslaaingDto, sporing: Sporing) =
