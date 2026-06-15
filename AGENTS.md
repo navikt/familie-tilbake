@@ -36,6 +36,8 @@ familie-tilbake/           # Rotprosjekt – Spring Boot-applikasjonen
 
 ## Bygge- og testkjøring
 
+> **IntelliJ MCP/skills:** Dersom IntelliJ-skillene (intellij-mcp) er tilgjengelige, bruk dem til å bygge, kjøre tester, kjøre inspeksjoner, søke og refaktorere i stedet for å kjøre Gradle direkte. Fall kun tilbake på `./gradlew`-kommandoene under når IntelliJ-skillene ikke er tilgjengelige.
+
 ### Vanlige kommandoer
 
 ```bash
@@ -83,7 +85,7 @@ Ktlint kjøres på alle pull requests i CI. **Alltid kjør `ktlintFormat` før d
 - **Integrasjonstest:** Testcontainers (PostgreSQL, ActiveMQ) + WireMock
 - Integrasjonstester arver fra `OppslagSpringRunnerTest` som setter opp Spring-kontekst med testcontainers
 - Testdata og builders finnes i `:testdata`-modulen
-- Aldri endre eksisterende tester uten å spørre om tilbakemelding
+- Aldri endre asserts i eksisterende tester uten å spørre om tilbakemelding, kun refaktorering.
 
 ## Databasemigrasjoner
 
