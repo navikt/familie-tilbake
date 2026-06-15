@@ -20,6 +20,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseD
 import no.nav.tilbakekreving.kontrakter.frontend.models.LogginnslagDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeInfoDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.SammenslaaingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SendForhaandsvarselDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SplittPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UnntakDto
@@ -174,6 +175,19 @@ class BehandlingApiController(
         ) ?: return ResponseEntity.notFound().build()
 
         return ResponseEntity.ok(tilbakekreving.hentBehandling(behandlingId).hentVilkårsvurderingsperioder())
+    }
+
+    override fun behandlingSlaaSammenPerioder(behandlingId: UUID, sammenslåingDto: SammenslaaingDto): ResponseEntity<Unit> {
+        return tilbakekrevingService.endreTilbakekreving(
+            filter = TilbakekrevingFilter.behandling(behandlingId),
+            valideringContext = ValideringContext.SlåSammenVilkårsvurderingsperiode,
+        ) { tilbakekreving, context ->
+            ResponseEntity.ok(
+                tilbakekreving.gjørSaksbehandling(behandlingId, context) {
+                    slåSammenPerioder(sammenslåingDto, tilbakekreving.sporingsinformasjon(behandlingId))
+                },
+            )
+        } ?: ResponseEntity.notFound().build()
     }
 
     override fun behandlingLagreBrukersuttalelse(behandlingId: UUID, uttalelseDto: UttalelseDto): ResponseEntity<Unit> {
