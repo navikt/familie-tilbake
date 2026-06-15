@@ -28,7 +28,6 @@ import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.util.UUID
 import kotlin.math.abs
 
@@ -160,9 +159,8 @@ class Vilkårsvurderingsteg(
         _vurdering = første.vurdering,
     )
 
-    fun splittVilkårsvurdering(splittFra: LocalDate) {
-        val funnetPerioden = vurderinger.single { it.periode.fom == splittFra }.id
-        vurder(funnetPerioden, ForårsaketAvBruker.IkkeVurdert())
+    fun splittVilkårsvurdering(vilkårsvurderingId: UUID) {
+        vurder(vilkårsvurderingId, ForårsaketAvBruker.IkkeVurdert())
     }
 
     internal fun hentVilkårsvurderingsperioder(): List<PeriodeInfoDto> {
