@@ -1,5 +1,4 @@
 package no.nav.familie.tilbake.sikkerhet
-import io.jsonwebtoken.Jwts
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
@@ -16,15 +15,13 @@ import no.nav.familie.tilbake.common.exceptionhandler.ForbiddenError
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
-import no.nav.security.token.support.core.context.TokenValidationContext
-import no.nav.security.token.support.core.jwt.JwtToken
-import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import no.nav.tilbakekreving.FeatureToggles
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.bigquery.BigQueryServiceStub
 import no.nav.tilbakekreving.config.ApplicationProperties
+import no.nav.tilbakekreving.e2e.ContextServiceHelpers
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
@@ -33,16 +30,10 @@ import no.nav.tilbakekreving.systemContext
 import no.nav.tilbakekreving.test.FellesTestdata.ANSVARLIG_SAKSBEHANDLER
 import no.tilbakekreving.integrasjoner.persontilgang.Persontilgang
 import no.tilbakekreving.integrasjoner.persontilgang.PersontilgangService
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpMethod
-import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.test.context.TestPropertySource
-import org.springframework.web.context.request.RequestContextHolder
-import org.springframework.web.context.request.ServletRequestAttributes
-import java.util.Calendar
 import java.util.EnumMap
 import java.util.Optional
 import java.util.UUID
@@ -99,11 +90,6 @@ internal class NyTilgangskontrollServiceTest : OppslagSpringRunnerTest() {
         )
     }
 
-    @AfterEach
-    fun tearDown() {
-        RequestContextHolder.currentRequestAttributes().removeAttribute(SpringTokenValidationContextHolder::class.java.name, 0)
-    }
-
     @Autowired
     private lateinit var applicationProperties: ApplicationProperties
 
@@ -137,269 +123,221 @@ internal class NyTilgangskontrollServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `sjekkTilgang skal sperre tilgang hvis person er kode 6`() {
         coEvery { persontilgangService.sjekkPersontilgang(any(), "1232") } returns Persontilgang.IkkeTilgang("Kode 6", Persontilgang.IkkeTilgang.AvvisningskodeType.AVVIST_STRENGT_FORTROLIG_ADRESSE)
-        val token = opprettToken("abc", listOf(BARNETRYGD_BESLUTTER_ROLLE))
-        opprettRequestContext(token)
-
-        val exception = shouldThrow<RuntimeException> { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.VEILEDER, AuditLoggerEvent.ACCESS, "test") }
-        exception.message shouldBe "abc har ikke tilgang til person i test"
+        ContextServiceHelpers.somSaksbehandler("abc", listOf(BARNETRYGD_BESLUTTER_ROLLE)) {
+            val exception = shouldThrow<RuntimeException> { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.VEILEDER, AuditLoggerEvent.ACCESS, "test") }
+            exception.message shouldBe "abc har ikke tilgang til person i test"
+        }
     }
 
     @Test
     fun `sjekkTilgang skal ha tilgang for barnetrygd beslutter i barnetrygd hent behandling request`() {
         coEvery { persontilgangService.sjekkPersontilgang(any(), "1232") } returns Persontilgang.Ok
-        val token = opprettToken("abc", listOf(BARNETRYGD_BESLUTTER_ROLLE))
-        opprettRequestContext(token)
-
-        shouldNotThrowAny { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.VEILEDER, AuditLoggerEvent.ACCESS, "test") }
+        ContextServiceHelpers.somSaksbehandler("abc", listOf(BARNETRYGD_BESLUTTER_ROLLE)) {
+            shouldNotThrowAny { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.VEILEDER, AuditLoggerEvent.ACCESS, "test") }
+        }
     }
 
     @Test
     fun `sjekkTilgang skal ikke ha tilgang for enslig beslutter i barnetrygd hent behandling request`() {
         coEvery { persontilgangService.sjekkPersontilgang(any(), "1232") } returns Persontilgang.Ok
-        val token = opprettToken("abc", listOf(ENSLIG_BESLUTTER_ROLLE))
-        opprettRequestContext(token)
-
-        val exception = shouldThrow<RuntimeException> {
-            tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.VEILEDER, AuditLoggerEvent.ACCESS, "test")
+        ContextServiceHelpers.somSaksbehandler("abc", listOf(ENSLIG_BESLUTTER_ROLLE)) {
+            val exception = shouldThrow<RuntimeException> {
+                tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.VEILEDER, AuditLoggerEvent.ACCESS, "test")
+            }
+            exception.message shouldBe "abc har ikke tilgang til test"
         }
-        exception.message shouldBe "abc har ikke tilgang til test"
     }
 
     @Test
     fun `sjekkTilgang skal ikke ha tilgang for barnetrygd veileder i barnetrygd opprett behandling request`() {
         coEvery { persontilgangService.sjekkPersontilgang(any(), "1232") } returns Persontilgang.Ok
-        val token = opprettToken("abc", listOf(BARNETRYGD_VEILEDER_ROLLE))
-        opprettRequestContext(token)
-
-        val exception = shouldThrow<RuntimeException> {
-            tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test")
+        ContextServiceHelpers.somSaksbehandler("abc", listOf(BARNETRYGD_VEILEDER_ROLLE)) {
+            val exception = shouldThrow<RuntimeException> {
+                tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test")
+            }
+            exception.message shouldBe "abc med rolle VEILEDER har ikke tilgang til å test. Krever ${Behandlerrolle.SAKSBEHANDLER}."
         }
-        exception.message shouldBe "abc med rolle VEILEDER har ikke tilgang til å test. Krever ${Behandlerrolle.SAKSBEHANDLER}."
     }
 
     @Test
     fun `sjekkTilgang skal ha tilgang i barnetrygd opprett behandling request når bruker både er beslutter og veileder`() {
         coEvery { persontilgangService.sjekkPersontilgang(any(), any()) } returns Persontilgang.Ok
-        val token = opprettToken("abc", listOf(BARNETRYGD_BESLUTTER_ROLLE, BARNETRYGD_VEILEDER_ROLLE))
-        opprettRequestContext(token)
-
-        shouldNotThrowAny { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test") }
+        ContextServiceHelpers.somSaksbehandler("abc", listOf(BARNETRYGD_BESLUTTER_ROLLE, BARNETRYGD_VEILEDER_ROLLE)) {
+            shouldNotThrowAny { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test") }
+        }
     }
 
     @Test
     fun `sjekkTilgang skal ha tilgang i hent behandling request når saksbehandler har tilgang til enslig og barnetrygd`() {
         coEvery { persontilgangService.sjekkPersontilgang(any(), "1232") } returns Persontilgang.Ok
-        val token = opprettToken("abc", listOf(ENSLIG_SAKSBEHANDLER_ROLLE, BARNETRYGD_SAKSBEHANDLER_ROLLE))
-        opprettRequestContext(token)
-
-        shouldNotThrowAny { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.VEILEDER, AuditLoggerEvent.ACCESS, "test") }
+        ContextServiceHelpers.somSaksbehandler("abc", listOf(ENSLIG_SAKSBEHANDLER_ROLLE, BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            shouldNotThrowAny { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.VEILEDER, AuditLoggerEvent.ACCESS, "test") }
+        }
     }
 
     @Test
     fun `sjekkTilgang skal ha tilgang i hent behandling request når bruker er fagsystem`() {
         coEvery { persontilgangService.sjekkPersontilgang(any(), "1232") } returns Persontilgang.Ok
-        val token = opprettToken(Constants.BRUKER_ID_VEDTAKSLØSNINGEN, listOf())
-        opprettRequestContext(token)
-
-        shouldNotThrowAny { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.VEILEDER, AuditLoggerEvent.ACCESS, "test") }
+        ContextServiceHelpers.somSaksbehandler(Constants.BRUKER_ID_VEDTAKSLØSNINGEN, listOf()) {
+            shouldNotThrowAny { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.VEILEDER, AuditLoggerEvent.ACCESS, "test") }
+        }
     }
 
     @Test
     fun `sjekkTilgang skal ikke ha tilgang i hent behandling request når bruker er ukjent`() {
         coEvery { persontilgangService.sjekkPersontilgang(any(), "1232") } returns Persontilgang.Ok
-        val token = opprettToken("abc", listOf())
-        opprettRequestContext(token)
-
-        val exception = shouldThrow<RuntimeException> {
-            tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.VEILEDER, AuditLoggerEvent.ACCESS, "test")
+        ContextServiceHelpers.somSaksbehandler("abc", listOf()) {
+            val exception = shouldThrow<RuntimeException> {
+                tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.VEILEDER, AuditLoggerEvent.ACCESS, "test")
+            }
+            exception.message shouldBe "Bruker har mangler tilgang til test"
         }
-        exception.message shouldBe "Bruker har mangler tilgang til test"
     }
 
     @Test
     fun `sjekkTilgang skal saksbehandler ha tilgang i Fakta utførBehandlingssteg POST request`() {
         coEvery { persontilgangService.sjekkPersontilgang(any(), "1232") } returns Persontilgang.Ok
-        val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE))
-        opprettRequestContext(token)
-
-        shouldNotThrowAny { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test") }
+        ContextServiceHelpers.somSaksbehandler("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            shouldNotThrowAny { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test") }
+        }
     }
 
     @Test
     fun `sjekkTilgang skal beslutter ha tilgang i Fattevedtak utførBehandlingssteg POST request`() {
         coEvery { persontilgangService.sjekkPersontilgang(any(), "1232") } returns Persontilgang.Ok
-        val token = opprettToken("abc", listOf(BARNETRYGD_BESLUTTER_ROLLE))
-        opprettRequestContext(token)
-
-        shouldNotThrowAny { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test") }
+        ContextServiceHelpers.somSaksbehandler("abc", listOf(BARNETRYGD_BESLUTTER_ROLLE)) {
+            shouldNotThrowAny { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test") }
+        }
     }
 
     @Test
     fun `sjekkTilgang skal forvalter ikke ha tilgang til vanlig tjenester`() {
         coEvery { persontilgangService.sjekkPersontilgang(any(), "1232") } returns Persontilgang.Ok
-        val token = opprettToken("abc", listOf(TEAMFAMILIE_FORVALTER_ROLLE))
-        opprettRequestContext(token)
-
-        val exception = shouldThrow<RuntimeException> { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test") }
-        exception.message shouldBe "abc med rolle FORVALTER har ikke tilgang til å test. Krever ${Behandlerrolle.SAKSBEHANDLER}."
+        ContextServiceHelpers.somSaksbehandler("abc", listOf(TEAMFAMILIE_FORVALTER_ROLLE)) {
+            val exception = shouldThrow<RuntimeException> { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test") }
+            exception.message shouldBe "abc med rolle FORVALTER har ikke tilgang til å test. Krever ${Behandlerrolle.SAKSBEHANDLER}."
+        }
     }
 
     @Test
     fun `sjekkTilgang skal saksbehandler ikke ha tilgang til forvaltningstjenester`() {
         coEvery { persontilgangService.sjekkPersontilgang(any(), "1232") } returns Persontilgang.Ok
-        val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE))
-        opprettRequestContext(token)
-
-        val exception = shouldThrow<RuntimeException> { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
-        exception.message shouldBe "abc uten rolle ${Behandlerrolle.FORVALTER} har ikke tilgang til å kalle forvaltningstjeneste test."
+        ContextServiceHelpers.somSaksbehandler("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            val exception = shouldThrow<RuntimeException> { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
+            exception.message shouldBe "abc uten rolle ${Behandlerrolle.FORVALTER} har ikke tilgang til å kalle forvaltningstjeneste test."
+        }
     }
 
     @Test
     fun `sjekkTilgang skal saksbehandler ha tilgang til forvaltningstjenester hvis saksbehandler har saksbehandler rolle også`() {
         coEvery { persontilgangService.sjekkPersontilgang(any(), "1232") } returns Persontilgang.Ok
-        val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE, TEAMFAMILIE_FORVALTER_ROLLE))
-        opprettRequestContext(token)
-
-        shouldNotThrowAny { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
+        ContextServiceHelpers.somSaksbehandler("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE, TEAMFAMILIE_FORVALTER_ROLLE)) {
+            shouldNotThrowAny { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
+        }
     }
 
     @Test
     fun `sjekkTilgang skal saksbehandler ha tilgang til vanlig tjenester selv om saksbehandler har forvalter rolle også`() {
         coEvery { persontilgangService.sjekkPersontilgang(any(), "1232") } returns Persontilgang.Ok
-        val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE, TEAMFAMILIE_FORVALTER_ROLLE))
-        opprettRequestContext(token)
-
-        shouldNotThrowAny { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test") }
+        ContextServiceHelpers.somSaksbehandler("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE, TEAMFAMILIE_FORVALTER_ROLLE)) {
+            shouldNotThrowAny { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test") }
+        }
     }
 
     @Test
     fun `sjekkTilgang skal forvalter ha tilgang til forvaltningstjenester`() {
         coEvery { persontilgangService.sjekkPersontilgang(any(), "1232") } returns Persontilgang.Ok
-        val token = opprettToken("abc", listOf(TEAMFAMILIE_FORVALTER_ROLLE))
-        opprettRequestContext(token)
-
-        shouldNotThrowAny { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
+        ContextServiceHelpers.somSaksbehandler("abc", listOf(TEAMFAMILIE_FORVALTER_ROLLE)) {
+            shouldNotThrowAny { tilgangskontrollService.validerTilgangBehandlingID(behandling.id, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
+        }
     }
 
     @Test
     fun `sjekkTilgang skal forvalter ha tilgang til forvaltningstjeneste arkiver mottattXml med input som mottattXmlId`() {
-        val token = opprettToken("abc", listOf(TEAMFAMILIE_FORVALTER_ROLLE))
-        opprettRequestContext(token)
-        val økonomiXmlMottatt = Testdata.getøkonomiXmlMottatt()
-        every { mottattXmlRepository.findById(any()) } returns Optional.of(økonomiXmlMottatt)
+        ContextServiceHelpers.somSaksbehandler("abc", listOf(TEAMFAMILIE_FORVALTER_ROLLE)) {
+            val økonomiXmlMottatt = Testdata.getøkonomiXmlMottatt()
+            every { mottattXmlRepository.findById(any()) } returns Optional.of(økonomiXmlMottatt)
 
-        shouldNotThrowAny { tilgangskontrollService.validerTilgangMottattXMLId(økonomiXmlMottatt.id, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
+            shouldNotThrowAny { tilgangskontrollService.validerTilgangMottattXMLId(økonomiXmlMottatt.id, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
+        }
     }
 
     @Test
     fun `sjekkTilgang skal forvalter ha tilgang til forvaltningstjeneste annuler kravgrunnlag med input som eksternKravgrunnlagId`() {
-        val token = opprettToken("abc", listOf(TEAMFAMILIE_FORVALTER_ROLLE))
-        opprettRequestContext(token)
-        val økonomiXmlMottatt = Testdata.getøkonomiXmlMottatt()
-        every { mottattXmlRepository.findByEksternKravgrunnlagId(any()) } returns økonomiXmlMottatt
+        ContextServiceHelpers.somSaksbehandler("abc", listOf(TEAMFAMILIE_FORVALTER_ROLLE)) {
+            val økonomiXmlMottatt = Testdata.getøkonomiXmlMottatt()
+            every { mottattXmlRepository.findByEksternKravgrunnlagId(any()) } returns økonomiXmlMottatt
 
-        shouldNotThrowAny { tilgangskontrollService.validerTilgangKravgrunnlagId(økonomiXmlMottatt.eksternKravgrunnlagId!!, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
+            shouldNotThrowAny { tilgangskontrollService.validerTilgangKravgrunnlagId(økonomiXmlMottatt.eksternKravgrunnlagId!!, Behandlerrolle.FORVALTER, AuditLoggerEvent.ACCESS, "test") }
+        }
     }
 
     @Test
     fun `sjekkTilgang skal finne personer basert på ytelsestype og eksternFagsakId for henteparam`() {
         coEvery { persontilgangService.sjekkPersontilgang(any(), "1232") } returns Persontilgang.Ok
-        val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE))
-        opprettRequestContext(token)
+        ContextServiceHelpers.somSaksbehandler("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            tilgangskontrollService.validerTilgangYtelsetypeOgFagsakId(Ytelsestype.BARNETRYGD, fagsak.eksternFagsakId, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test")
 
-        tilgangskontrollService.validerTilgangYtelsetypeOgFagsakId(Ytelsestype.BARNETRYGD, fagsak.eksternFagsakId, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test")
-
-        coVerify { persontilgangService.sjekkPersontilgang(any(), "1232") }
+            coVerify { persontilgangService.sjekkPersontilgang(any(), "1232") }
+        }
     }
 
     @Test
     fun `sjekkTilgang skal finne personer basert på fagsystem og eksternFagsakId for henteparam`() {
         coEvery { persontilgangService.sjekkPersontilgang(any(), "1232") } returns Persontilgang.Ok
-        val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE))
-        opprettRequestContext(token)
+        ContextServiceHelpers.somSaksbehandler("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            tilgangskontrollService.validerTilgangFagsystemOgFagsakId(FagsystemDTO.BA, fagsak.eksternFagsakId, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test")
 
-        tilgangskontrollService.validerTilgangFagsystemOgFagsakId(FagsystemDTO.BA, fagsak.eksternFagsakId, Behandlerrolle.SAKSBEHANDLER, AuditLoggerEvent.ACCESS, "test")
-
-        coVerify { persontilgangService.sjekkPersontilgang(any(), "1232") }
+            coVerify { persontilgangService.sjekkPersontilgang(any(), "1232") }
+        }
     }
 
     @Test
     fun `validerTilgangTilbakekreving gir tilgang til behandler med kode 6 og 7`() {
         coEvery { persontilgangService.sjekkPersontilgang(any(), any()) } returns Persontilgang.Ok
-        val token = opprettToken("abc", listOf(ENSLIG_SAKSBEHANDLER_ROLLE, BARNETRYGD_SAKSBEHANDLER_ROLLE, TEAMFAMILIE_FORVALTER_ROLLE))
-        opprettRequestContext(token)
-
-        shouldNotThrowAny { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving(Ytelse.Barnetrygd), ValideringContext.HentBehandling, ANSVARLIG_SAKSBEHANDLER) }
+        ContextServiceHelpers.somSaksbehandler("abc", listOf(ENSLIG_SAKSBEHANDLER_ROLLE, BARNETRYGD_SAKSBEHANDLER_ROLLE, TEAMFAMILIE_FORVALTER_ROLLE)) {
+            shouldNotThrowAny { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving(Ytelse.Barnetrygd), ValideringContext.HentBehandling, ANSVARLIG_SAKSBEHANDLER) }
+        }
     }
 
     @Test
     fun `validerTilgangTilbakekreving gir ikke tilgang til behandler uten forvaltningstilgang`() {
         coEvery { persontilgangService.sjekkPersontilgang(any(), any()) } returns Persontilgang.IkkeTilgang("Kode 6", Persontilgang.IkkeTilgang.AvvisningskodeType.AVVIST_STRENGT_FORTROLIG_ADRESSE)
-        val token = opprettToken("abc", listOf(ENSLIG_SAKSBEHANDLER_ROLLE, BARNETRYGD_SAKSBEHANDLER_ROLLE, TEAMFAMILIE_FORVALTER_ROLLE))
-        opprettRequestContext(token)
-
-        shouldThrow<ForbiddenError> { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving(Ytelse.Barnetrygd), ValideringContext.HentBehandling, ANSVARLIG_SAKSBEHANDLER) }
+        ContextServiceHelpers.somSaksbehandler("abc", listOf(ENSLIG_SAKSBEHANDLER_ROLLE, BARNETRYGD_SAKSBEHANDLER_ROLLE, TEAMFAMILIE_FORVALTER_ROLLE)) {
+            shouldThrow<ForbiddenError> { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving(Ytelse.Barnetrygd), ValideringContext.HentBehandling, ANSVARLIG_SAKSBEHANDLER) }
+        }
     }
 
     @Test
     fun `forvalterrolle sammen med veileder burde ikke gi tilgang til hva som helst`() {
         coEvery { persontilgangService.sjekkPersontilgang(any(), any()) } returns Persontilgang.Ok
-        val token = opprettToken("abc", listOf(ENSLIG_VEILEDER_ROLLE, TEAMFAMILIE_FORVALTER_ROLLE))
-        opprettRequestContext(token)
-
-        shouldThrow<ForbiddenError> { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving(Ytelse.Barnetrygd), ValideringContext.OppdaterFakta, ANSVARLIG_SAKSBEHANDLER) }
+        ContextServiceHelpers.somSaksbehandler("abc", listOf(ENSLIG_VEILEDER_ROLLE, TEAMFAMILIE_FORVALTER_ROLLE)) {
+            shouldThrow<ForbiddenError> { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving(Ytelse.Barnetrygd), ValideringContext.OppdaterFakta, ANSVARLIG_SAKSBEHANDLER) }
+        }
     }
 
     @Test
     fun `tilleggsstønader - krever beslutter rolle, men har saksbehandler`() {
         coEvery { persontilgangService.sjekkPersontilgang(any(), any()) } returns Persontilgang.Ok
-        val token = opprettToken("abc", listOf(TILLEGSSTØNADER_SAKSBEHANDLER_ROLLE))
-        opprettRequestContext(token)
-
-        shouldThrow<ForbiddenError> { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving(Ytelse.Tilleggsstønad), ValideringContext.FatteVedtak, ANSVARLIG_SAKSBEHANDLER) }
+        ContextServiceHelpers.somSaksbehandler("abc", listOf(TILLEGSSTØNADER_SAKSBEHANDLER_ROLLE)) {
+            shouldThrow<ForbiddenError> { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving(Ytelse.Tilleggsstønad), ValideringContext.FatteVedtak, ANSVARLIG_SAKSBEHANDLER) }
+        }
     }
 
     @Test
     fun `tilleggsstønader - krever saksbehandler rolle, har tilgang`() {
         coEvery { persontilgangService.sjekkPersontilgang(any(), any()) } returns Persontilgang.Ok
-        val token = opprettToken("abc", listOf(TILLEGSSTØNADER_SAKSBEHANDLER_ROLLE))
-        opprettRequestContext(token)
-
-        shouldNotThrowAny { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving(Ytelse.Tilleggsstønad), ValideringContext.HentBehandling, ANSVARLIG_SAKSBEHANDLER) }
+        ContextServiceHelpers.somSaksbehandler("abc", listOf(TILLEGSSTØNADER_SAKSBEHANDLER_ROLLE)) {
+            shouldNotThrowAny { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving(Ytelse.Tilleggsstønad), ValideringContext.HentBehandling, ANSVARLIG_SAKSBEHANDLER) }
+        }
     }
 
     @Test
     fun `tilleggsstønader - krever beslutter rolle, har tilgang`() {
         coEvery { persontilgangService.sjekkPersontilgang(any(), any()) } returns Persontilgang.Ok
-        val token = opprettToken("abc", listOf(TILLEGSSTØNADER_BESLUTTER_ROLLE))
-        opprettRequestContext(token)
-
-        shouldNotThrowAny { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving(Ytelse.Tilleggsstønad), ValideringContext.FatteVedtak, ANSVARLIG_SAKSBEHANDLER) }
-    }
-
-    private fun opprettToken(
-        behandlerNavn: String,
-        gruppeNavn: List<String>,
-    ): String {
-        val additionalParameters = mapOf("NAVident" to behandlerNavn, "groups" to gruppeNavn, "roles" to emptySet<String>())
-        val calendar = Calendar.getInstance()
-        calendar.add(Calendar.SECOND, 60)
-        return Jwts
-            .builder()
-            .setExpiration(calendar.time)
-            .setIssuer("azuread")
-            .addClaims(additionalParameters)
-            .compact()
-    }
-
-    private fun opprettRequestContext(token: String) {
-        val mockHttpServletRequest = MockHttpServletRequest(HttpMethod.POST.name(), "test")
-
-        RequestContextHolder.setRequestAttributes(ServletRequestAttributes(mockHttpServletRequest))
-        val tokenValidationContext = TokenValidationContext(mapOf("azuread" to JwtToken(token)))
-        RequestContextHolder
-            .currentRequestAttributes()
-            .setAttribute(SpringTokenValidationContextHolder::class.java.name, tokenValidationContext, 0)
+        ContextServiceHelpers.somSaksbehandler("abc", listOf(TILLEGSSTØNADER_BESLUTTER_ROLLE)) {
+            shouldNotThrowAny { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving(Ytelse.Tilleggsstønad), ValideringContext.FatteVedtak, ANSVARLIG_SAKSBEHANDLER) }
+        }
     }
 
     private fun tilbakekreving(ytelse: Ytelse): Tilbakekreving {

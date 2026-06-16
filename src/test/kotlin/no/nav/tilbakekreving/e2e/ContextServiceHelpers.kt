@@ -17,7 +17,8 @@ object ContextServiceHelpers {
 
     fun <T> somSaksbehandler(
         ident: String,
-        callback: () -> T,
+        grupper: List<String> = listOf(E2E_TILGANG_GRUPPE),
+        block: () -> T,
     ): T {
         val tidligereRequestAttributes = RequestContextHolder.getRequestAttributes()
         try {
@@ -26,16 +27,19 @@ object ContextServiceHelpers {
                 .currentRequestAttributes()
                 .setAttribute(
                     SpringTokenValidationContextHolder::class.java.name,
-                    tokenValidationContextFor(ident),
+                    tokenValidationContext(ident, grupper),
                     RequestAttributes.SCOPE_REQUEST,
                 )
-            return callback()
+            return block()
         } finally {
             RequestContextHolder.setRequestAttributes(tidligereRequestAttributes)
         }
     }
 
-    private fun tokenValidationContextFor(ident: String) = TokenValidationContext(
+    fun tokenValidationContext(
+        ident: String,
+        grupper: List<String>,
+    ): TokenValidationContext = TokenValidationContext(
         mapOf(
             "azuread" to JwtToken(
                 Jwts
@@ -45,7 +49,7 @@ object ContextServiceHelpers {
                     .claims(
                         mapOf(
                             "NAVident" to ident,
-                            "groups" to listOf(E2E_TILGANG_GRUPPE),
+                            "groups" to grupper,
                             "roles" to emptyList<String>(),
                         ),
                     )

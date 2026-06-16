@@ -102,6 +102,7 @@ Flyway-migrasjoner ligger under `src/main/resources/db/migration/`. Nye migrasjo
 - All logging skal følge NAV's strukturerte loggformat (logstash-logback-encoder)
 - Logging skal aldri bruke kotlin string templating, det skal håndteres av logback
 - Bruk `Klokke`-interfacet (`no.nav.tilbakekreving.Klokke`) i stedet for `LocalDate.now()` / `LocalDateTime.now()` i modellen. `SystemKlokke` er produksjonsimplementasjonen. I tester brukes `KlokkeStub` (med fast tid) for tidssensitive tester, og `SystemKlokke` for tester som ikke er tidssensitive.
+- Skriv aldri filer utenfor prosjektmappen (f.eks. ikke `/tmp`). Midlertidige filer og skript skal legges under `build/`-mappen og ryddes opp etterpå.
 
 ## CI/CD
 

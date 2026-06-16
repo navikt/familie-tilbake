@@ -168,7 +168,7 @@ open class TilbakekrevingE2EBase : E2EBase() {
     fun <T> somSaksbehandler(
         ident: String,
         callback: () -> T,
-    ): T = ContextServiceHelpers.somSaksbehandler(ident, callback)
+    ): T = ContextServiceHelpers.somSaksbehandler(ident, block = callback)
 
     fun utførSteg(
         behandlingId: UUID,

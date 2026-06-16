@@ -9,9 +9,6 @@ import io.kotest.matchers.collections.shouldHaveSingleElement
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import io.mockk.clearMocks
-import io.mockk.every
-import io.mockk.mockkObject
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
@@ -24,7 +21,6 @@ import no.nav.familie.tilbake.behandling.domain.Iverksettingsstatus
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
-import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
@@ -56,6 +52,7 @@ import no.nav.tilbakekreving.api.v1.dto.GodTroDto
 import no.nav.tilbakekreving.api.v1.dto.PeriodeMedTekstDto
 import no.nav.tilbakekreving.api.v1.dto.VergeDto
 import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
+import no.nav.tilbakekreving.e2e.ContextServiceHelpers
 import no.nav.tilbakekreving.kontrakter.Regelverk
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
@@ -73,7 +70,6 @@ import no.nav.tilbakekreving.kontrakter.verge.Vergetype
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import no.nav.tilbakekreving.test.februar
 import no.nav.tilbakekreving.test.januar
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -134,878 +130,926 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     fun init() {
         fagsak = fagsakRepository.insert(Testdata.fagsak())
         behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id))
-
-        mockkObject(ContextService)
-        every { ContextService.hentSaksbehandler(any()) }.returns("Z0000")
-    }
-
-    @AfterEach
-    fun tearDown() {
-        clearMocks(ContextService)
     }
 
     @Test
     fun `håndterSteg skal utføre grunnlagssteg og fortsette til Fakta steg når behandling ikke har verge og har fått grunnlag`() {
-        val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        behandlingRepository.update(behandling.copy(verger = emptySet()))
+        ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
+            val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+            behandlingRepository.update(behandling.copy(verger = emptySet()))
 
-        lagBehandlingsstegstilstand(
-            Behandlingssteg.GRUNNLAG,
-            Behandlingsstegstatus.VENTER,
-            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
-        )
-        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
+            lagBehandlingsstegstilstand(
+                Behandlingssteg.GRUNNLAG,
+                Behandlingsstegstatus.VENTER,
+                Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
+            )
+            kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
 
-        stegService.håndterSteg(behandling.id, SecureLog.Context.tom())
-        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
-        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
-        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
+            stegService.håndterSteg(behandling.id, SecureLog.Context.tom())
+            val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+            assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
+            assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
+        }
     }
 
     @Test
     fun `håndterSteg skal utføre grunnlagssteg,autoutføre verge steg og fortsette til Fakta steg når behandling har verge`() {
-        lagBehandlingsstegstilstand(
-            Behandlingssteg.GRUNNLAG,
-            Behandlingsstegstatus.VENTER,
-            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
-        )
-        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
+        ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
+            lagBehandlingsstegstilstand(
+                Behandlingssteg.GRUNNLAG,
+                Behandlingsstegstatus.VENTER,
+                Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
+            )
+            kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
 
-        stegService.håndterSteg(behandling.id, SecureLog.Context.tom())
-        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
-        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
-        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VERGE, Behandlingsstegstatus.AUTOUTFØRT)
-        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
+            stegService.håndterSteg(behandling.id, SecureLog.Context.tom())
+            val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+            assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
+            assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VERGE, Behandlingsstegstatus.AUTOUTFØRT)
+            assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
+        }
     }
 
     @Test
     fun `håndterSteg skal ikke utføre faktafeilutbetaling når behandling er avsluttet`() {
-        val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
+        ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
+            val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+            behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
-        val behandlingsstegFaktaDto = lagBehandlingsstegFaktaDto()
+            val behandlingsstegFaktaDto = lagBehandlingsstegFaktaDto()
 
-        val exception = shouldThrow<RuntimeException> { stegService.håndterSteg(behandling.id, behandlingsstegFaktaDto, SecureLog.Context.tom()) }
-        exception.message shouldBe "Behandling med id=${behandling.id} er allerede ferdig behandlet"
+            val exception = shouldThrow<RuntimeException> { stegService.håndterSteg(behandling.id, behandlingsstegFaktaDto, SecureLog.Context.tom()) }
+            exception.message shouldBe "Behandling med id=${behandling.id} er allerede ferdig behandlet"
+        }
     }
 
     @Test
     fun `håndterStegAutomatisk skal ikke utføre automatisk behandling når den følger EØS-regelverket`() {
-        lagBehandlingsstegstilstand(
-            behandlingssteg = Behandlingssteg.FAKTA,
-            behandlingsstegstatus = Behandlingsstegstatus.VENTER,
-        )
+        ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
+            lagBehandlingsstegstilstand(
+                behandlingssteg = Behandlingssteg.FAKTA,
+                behandlingsstegstatus = Behandlingsstegstatus.VENTER,
+            )
 
-        behandlingRepository
-            .findByIdOrThrow(behandling.id)
-            .copy(regelverk = Regelverk.EØS)
-            .also { behandlingRepository.update(it) }
+            behandlingRepository
+                .findByIdOrThrow(behandling.id)
+                .copy(regelverk = Regelverk.EØS)
+                .also { behandlingRepository.update(it) }
 
-        val exception = shouldThrow<RuntimeException> { stegService.håndterStegAutomatisk(behandling.id, SecureLog.Context.tom()) }
-        exception.message shouldBe "Behandling med id=${behandling.id} behandles etter EØS-regelverket, og skal dermed ikke behandles automatisk."
+            val exception = shouldThrow<RuntimeException> { stegService.håndterStegAutomatisk(behandling.id, SecureLog.Context.tom()) }
+            exception.message shouldBe "Behandling med id=${behandling.id} behandles etter EØS-regelverket, og skal dermed ikke behandles automatisk."
+        }
     }
 
     @Test
     fun `håndterSteg skal ikke utføre faktafeilutbetaling når behandling er på vent`() {
-        lagBehandlingsstegstilstand(
-            Behandlingssteg.FAKTA,
-            Behandlingsstegstatus.VENTER,
-            Venteårsak.AVVENTER_DOKUMENTASJON,
-        )
+        ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
+            lagBehandlingsstegstilstand(
+                Behandlingssteg.FAKTA,
+                Behandlingsstegstatus.VENTER,
+                Venteårsak.AVVENTER_DOKUMENTASJON,
+            )
 
-        val behandlingsstegFaktaDto = lagBehandlingsstegFaktaDto()
+            val behandlingsstegFaktaDto = lagBehandlingsstegFaktaDto()
 
-        val exception = shouldThrow<RuntimeException> { stegService.håndterSteg(behandling.id, behandlingsstegFaktaDto, SecureLog.Context.tom()) }
-        exception.message shouldBe "Behandling med id=${behandling.id} er på vent, kan ikke behandle steg FAKTA"
+            val exception = shouldThrow<RuntimeException> { stegService.håndterSteg(behandling.id, behandlingsstegFaktaDto, SecureLog.Context.tom()) }
+            exception.message shouldBe "Behandling med id=${behandling.id} er på vent, kan ikke behandle steg FAKTA"
+        }
     }
 
     @Test
     fun `håndterSteg skal utføre faktafeilutbetalingssteg for behandling`() {
-        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
-        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
+        ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
+            lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
+            kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
 
-        val behandlingsstegFaktaDto = lagBehandlingsstegFaktaDto()
-        stegService.håndterSteg(behandling.id, behandlingsstegFaktaDto, SecureLog.Context.tom())
+            val behandlingsstegFaktaDto = lagBehandlingsstegFaktaDto()
+            stegService.håndterSteg(behandling.id, behandlingsstegFaktaDto, SecureLog.Context.tom())
 
-        val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
-        behandlingsstegstilstander.size shouldBe 3
-        val aktivtBehandlingssteg = behandlingskontrollService.finnAktivStegstilstand(behandlingsstegstilstander)
-        aktivtBehandlingssteg?.behandlingssteg shouldBe Behandlingssteg.VILKÅRSVURDERING
-        aktivtBehandlingssteg?.behandlingsstegsstatus shouldBe Behandlingsstegstatus.KLAR
-        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
-        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
-        assertBehandlingsstatus(Behandlingsstatus.UTREDES)
+            val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+            behandlingsstegstilstander.size shouldBe 3
+            val aktivtBehandlingssteg = behandlingskontrollService.finnAktivStegstilstand(behandlingsstegstilstander)
+            aktivtBehandlingssteg?.behandlingssteg shouldBe Behandlingssteg.VILKÅRSVURDERING
+            aktivtBehandlingssteg?.behandlingsstegsstatus shouldBe Behandlingsstegstatus.KLAR
+            assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+            assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
+            assertBehandlingsstatus(Behandlingsstatus.UTREDES)
 
-        assertFaktadata(behandlingsstegFaktaDto)
+            assertFaktadata(behandlingsstegFaktaDto)
 
-        // historikk
-        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler))
-        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.Vedtaksløsning)
+            // historikk
+            assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler))
+            assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.Vedtaksløsning)
+        }
     }
 
     @Test
     fun `håndterSteg skal utføre faktafeilutbetaling og fortsette til vilkårsvurdering når behandling er på foreslåvedtak`() {
-        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
-        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
+        ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
+            lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
+            kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
 
-        val behandlingsstegFaktaDto = lagBehandlingsstegFaktaDto()
+            val behandlingsstegFaktaDto = lagBehandlingsstegFaktaDto()
 
-        stegService.håndterSteg(behandling.id, behandlingsstegFaktaDto, SecureLog.Context.tom())
+            stegService.håndterSteg(behandling.id, behandlingsstegFaktaDto, SecureLog.Context.tom())
 
-        val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
-        behandlingsstegstilstander.size shouldBe 4
-        val aktivtBehandlingssteg = behandlingskontrollService.finnAktivStegstilstand(behandlingsstegstilstander)
-        aktivtBehandlingssteg?.behandlingssteg shouldBe Behandlingssteg.VILKÅRSVURDERING
-        aktivtBehandlingssteg?.behandlingsstegsstatus shouldBe Behandlingsstegstatus.KLAR
-        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
-        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
-        assertBehandlingssteg(
-            behandlingsstegstilstander,
-            Behandlingssteg.FORESLÅ_VEDTAK,
-            Behandlingsstegstatus.TILBAKEFØRT,
-        )
-        assertBehandlingsstatus(Behandlingsstatus.UTREDES)
+            val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+            behandlingsstegstilstander.size shouldBe 4
+            val aktivtBehandlingssteg = behandlingskontrollService.finnAktivStegstilstand(behandlingsstegstilstander)
+            aktivtBehandlingssteg?.behandlingssteg shouldBe Behandlingssteg.VILKÅRSVURDERING
+            aktivtBehandlingssteg?.behandlingsstegsstatus shouldBe Behandlingsstegstatus.KLAR
+            assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+            assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
+            assertBehandlingssteg(
+                behandlingsstegstilstander,
+                Behandlingssteg.FORESLÅ_VEDTAK,
+                Behandlingsstegstatus.TILBAKEFØRT,
+            )
+            assertBehandlingsstatus(Behandlingsstatus.UTREDES)
 
-        assertFaktadata(behandlingsstegFaktaDto)
+            assertFaktadata(behandlingsstegFaktaDto)
 
-        // historikk
-        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler))
-        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.Vedtaksløsning)
+            // historikk
+            assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler))
+            assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.Vedtaksløsning)
+        }
     }
 
     @Test
     fun `håndterSteg skal utføre faktafeilutbetaling og fortsette til foreldelse når foreldelse ikke er autoutført`() {
-        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
+        ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
+            lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
 
-        var kravgrunnlag431 = Testdata.lagKravgrunnlag(behandling.id)
-        for (grunnlagsperiode in kravgrunnlag431.perioder) {
-            kravgrunnlag431 =
-                kravgrunnlag431.copy(
-                    perioder =
-                        setOf(
-                            grunnlagsperiode.copy(
-                                periode =
-                                    Månedsperiode(
-                                        fom = LocalDate.of(2010, 1, 1),
-                                        tom = LocalDate.of(2010, 1, 31),
-                                    ),
+            var kravgrunnlag431 = Testdata.lagKravgrunnlag(behandling.id)
+            for (grunnlagsperiode in kravgrunnlag431.perioder) {
+                kravgrunnlag431 =
+                    kravgrunnlag431.copy(
+                        perioder =
+                            setOf(
+                                grunnlagsperiode.copy(
+                                    periode =
+                                        Månedsperiode(
+                                            fom = LocalDate.of(2010, 1, 1),
+                                            tom = LocalDate.of(2010, 1, 31),
+                                        ),
+                                ),
                             ),
+                    )
+            }
+            kravgrunnlagRepository.insert(kravgrunnlag431)
+            val faktaFeilutbetaltePerioderDto =
+                FaktaFeilutbetalingsperiodeDto(
+                    periode =
+                        Datoperiode(
+                            LocalDate.of(2010, 1, 1),
+                            LocalDate.of(2010, 1, 31),
                         ),
+                    hendelsestype = Hendelsestype.ANNET,
+                    hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
                 )
+            val behandlingsstegFaktaDto =
+                BehandlingsstegFaktaDto(
+                    feilutbetaltePerioder = listOf(faktaFeilutbetaltePerioderDto),
+                    begrunnelse = "testverdi",
+                )
+
+            stegService.håndterSteg(behandling.id, behandlingsstegFaktaDto, SecureLog.Context.tom())
+
+            val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+            behandlingsstegstilstander.size shouldBe 4
+            val aktivtBehandlingssteg = behandlingskontrollService.finnAktivStegstilstand(behandlingsstegstilstander)
+            aktivtBehandlingssteg?.behandlingssteg shouldBe Behandlingssteg.FORELDELSE
+            aktivtBehandlingssteg?.behandlingsstegsstatus shouldBe Behandlingsstegstatus.KLAR
+            assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+            assertBehandlingssteg(
+                behandlingsstegstilstander,
+                Behandlingssteg.VILKÅRSVURDERING,
+                Behandlingsstegstatus.TILBAKEFØRT,
+            )
+            assertBehandlingssteg(
+                behandlingsstegstilstander,
+                Behandlingssteg.FORESLÅ_VEDTAK,
+                Behandlingsstegstatus.TILBAKEFØRT,
+            )
+            assertBehandlingsstatus(Behandlingsstatus.UTREDES)
+
+            assertFaktadata(behandlingsstegFaktaDto)
+            // historikk
+            assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler))
         }
-        kravgrunnlagRepository.insert(kravgrunnlag431)
-        val faktaFeilutbetaltePerioderDto =
-            FaktaFeilutbetalingsperiodeDto(
-                periode =
-                    Datoperiode(
-                        LocalDate.of(2010, 1, 1),
-                        LocalDate.of(2010, 1, 31),
-                    ),
-                hendelsestype = Hendelsestype.ANNET,
-                hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
-            )
-        val behandlingsstegFaktaDto =
-            BehandlingsstegFaktaDto(
-                feilutbetaltePerioder = listOf(faktaFeilutbetaltePerioderDto),
-                begrunnelse = "testverdi",
-            )
-
-        stegService.håndterSteg(behandling.id, behandlingsstegFaktaDto, SecureLog.Context.tom())
-
-        val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
-        behandlingsstegstilstander.size shouldBe 4
-        val aktivtBehandlingssteg = behandlingskontrollService.finnAktivStegstilstand(behandlingsstegstilstander)
-        aktivtBehandlingssteg?.behandlingssteg shouldBe Behandlingssteg.FORELDELSE
-        aktivtBehandlingssteg?.behandlingsstegsstatus shouldBe Behandlingsstegstatus.KLAR
-        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
-        assertBehandlingssteg(
-            behandlingsstegstilstander,
-            Behandlingssteg.VILKÅRSVURDERING,
-            Behandlingsstegstatus.TILBAKEFØRT,
-        )
-        assertBehandlingssteg(
-            behandlingsstegstilstander,
-            Behandlingssteg.FORESLÅ_VEDTAK,
-            Behandlingsstegstatus.TILBAKEFØRT,
-        )
-        assertBehandlingsstatus(Behandlingsstatus.UTREDES)
-
-        assertFaktadata(behandlingsstegFaktaDto)
-        // historikk
-        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler))
     }
 
     @Test
     fun `håndterSteg skal utføre foreldelse og fortsette til foreslå vedtak når alle perioder er foreldet`() {
-        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.KLAR)
+        ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
+            lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.KLAR)
 
-        var kravgrunnlag431 = Testdata.lagKravgrunnlag(behandling.id)
-        for (grunnlagsperiode in kravgrunnlag431.perioder) {
-            kravgrunnlag431 =
-                kravgrunnlag431.copy(
-                    perioder =
-                        setOf(
-                            grunnlagsperiode.copy(
-                                periode =
-                                    Månedsperiode(
-                                        fom = LocalDate.of(2010, 1, 1),
-                                        tom = LocalDate.of(2010, 1, 31),
-                                    ),
+            var kravgrunnlag431 = Testdata.lagKravgrunnlag(behandling.id)
+            for (grunnlagsperiode in kravgrunnlag431.perioder) {
+                kravgrunnlag431 =
+                    kravgrunnlag431.copy(
+                        perioder =
+                            setOf(
+                                grunnlagsperiode.copy(
+                                    periode =
+                                        Månedsperiode(
+                                            fom = LocalDate.of(2010, 1, 1),
+                                            tom = LocalDate.of(2010, 1, 31),
+                                        ),
+                                ),
                             ),
+                    )
+            }
+            kravgrunnlagRepository.insert(kravgrunnlag431)
+            val behandlingsstegForeldelseDto =
+                BehandlingsstegForeldelseDto(
+                    listOf(
+                        ForeldelsesperiodeDto(
+                            Datoperiode(
+                                LocalDate.of(2010, 1, 1),
+                                LocalDate.of(2010, 1, 31),
+                            ),
+                            "foreldelses begrunnelse",
+                            Foreldelsesvurderingstype.FORELDET,
                         ),
-                )
-        }
-        kravgrunnlagRepository.insert(kravgrunnlag431)
-        val behandlingsstegForeldelseDto =
-            BehandlingsstegForeldelseDto(
-                listOf(
-                    ForeldelsesperiodeDto(
-                        Datoperiode(
-                            LocalDate.of(2010, 1, 1),
-                            LocalDate.of(2010, 1, 31),
-                        ),
-                        "foreldelses begrunnelse",
-                        Foreldelsesvurderingstype.FORELDET,
                     ),
-                ),
+                )
+            stegService.håndterSteg(behandling.id, behandlingsstegForeldelseDto, SecureLog.Context.tom())
+
+            val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+            behandlingsstegstilstander.size shouldBe 4
+            val aktivtBehandlingssteg = behandlingskontrollService.finnAktivStegstilstand(behandlingsstegstilstander)
+            aktivtBehandlingssteg?.behandlingssteg shouldBe Behandlingssteg.FORESLÅ_VEDTAK
+            aktivtBehandlingssteg?.behandlingsstegsstatus shouldBe Behandlingsstegstatus.KLAR
+            assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+            assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.UTFØRT)
+            assertBehandlingssteg(
+                behandlingsstegstilstander,
+                Behandlingssteg.VILKÅRSVURDERING,
+                Behandlingsstegstatus.AUTOUTFØRT,
             )
-        stegService.håndterSteg(behandling.id, behandlingsstegForeldelseDto, SecureLog.Context.tom())
+            assertBehandlingsstatus(Behandlingsstatus.UTREDES)
 
-        val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
-        behandlingsstegstilstander.size shouldBe 4
-        val aktivtBehandlingssteg = behandlingskontrollService.finnAktivStegstilstand(behandlingsstegstilstander)
-        aktivtBehandlingssteg?.behandlingssteg shouldBe Behandlingssteg.FORESLÅ_VEDTAK
-        aktivtBehandlingssteg?.behandlingsstegsstatus shouldBe Behandlingsstegstatus.KLAR
-        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
-        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.UTFØRT)
-        assertBehandlingssteg(
-            behandlingsstegstilstander,
-            Behandlingssteg.VILKÅRSVURDERING,
-            Behandlingsstegstatus.AUTOUTFØRT,
-        )
-        assertBehandlingsstatus(Behandlingsstatus.UTREDES)
+            assertForeldelsesdata(behandlingsstegForeldelseDto.foreldetPerioder[0])
 
-        assertForeldelsesdata(behandlingsstegForeldelseDto.foreldetPerioder[0])
-
-        // historikk
-        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler))
-        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.VILKÅRSVURDERING_VURDERT, Aktør.Vedtaksløsning)
+            // historikk
+            assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler))
+            assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.VILKÅRSVURDERING_VURDERT, Aktør.Vedtaksløsning)
+        }
     }
 
     @Test
     fun `håndterSteg skal utføre foreldelse og fortsette til vilkårsvurdering når minst en periode ikke er foreldet`() {
-        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.KLAR)
+        ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
+            lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.KLAR)
 
-        val førstePeriode = Testdata.lagKravgrunnlagsperiode(februar() til februar()).copy(
-            beløp = setOf(
-                Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
-                Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
-            ),
-        )
-        val andrePeriode = Testdata.lagKravgrunnlagsperiode(februar() til februar()).copy(
-            beløp = setOf(
-                Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
-                Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
-            ),
-        )
-
-        val kravgrunnlag431 = Testdata.lagKravgrunnlag(behandling.id).copy(perioder = setOf(førstePeriode, andrePeriode))
-        kravgrunnlagRepository.insert(kravgrunnlag431)
-        val behandlingsstegForeldelseDto =
-            BehandlingsstegForeldelseDto(
-                listOf(
-                    ForeldelsesperiodeDto(
-                        førstePeriode.periode.toDatoperiode(),
-                        "foreldelses begrunnelse",
-                        Foreldelsesvurderingstype.FORELDET,
-                    ),
-                    ForeldelsesperiodeDto(
-                        andrePeriode.periode.toDatoperiode(),
-                        "foreldelses begrunnelse",
-                        Foreldelsesvurderingstype.IKKE_FORELDET,
-                    ),
+            val førstePeriode = Testdata.lagKravgrunnlagsperiode(februar() til februar()).copy(
+                beløp = setOf(
+                    Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
+                    Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
                 ),
             )
-        stegService.håndterSteg(behandling.id, behandlingsstegForeldelseDto, SecureLog.Context.tom())
+            val andrePeriode = Testdata.lagKravgrunnlagsperiode(februar() til februar()).copy(
+                beløp = setOf(
+                    Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
+                    Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
+                ),
+            )
 
-        val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
-        behandlingsstegstilstander.size shouldBe 3
-        val aktivtBehandlingssteg = behandlingskontrollService.finnAktivStegstilstand(behandlingsstegstilstander)
-        aktivtBehandlingssteg?.behandlingssteg shouldBe Behandlingssteg.VILKÅRSVURDERING
-        aktivtBehandlingssteg?.behandlingsstegsstatus shouldBe Behandlingsstegstatus.KLAR
-        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
-        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.UTFØRT)
-        assertBehandlingsstatus(Behandlingsstatus.UTREDES)
+            val kravgrunnlag431 = Testdata.lagKravgrunnlag(behandling.id).copy(perioder = setOf(førstePeriode, andrePeriode))
+            kravgrunnlagRepository.insert(kravgrunnlag431)
+            val behandlingsstegForeldelseDto =
+                BehandlingsstegForeldelseDto(
+                    listOf(
+                        ForeldelsesperiodeDto(
+                            førstePeriode.periode.toDatoperiode(),
+                            "foreldelses begrunnelse",
+                            Foreldelsesvurderingstype.FORELDET,
+                        ),
+                        ForeldelsesperiodeDto(
+                            andrePeriode.periode.toDatoperiode(),
+                            "foreldelses begrunnelse",
+                            Foreldelsesvurderingstype.IKKE_FORELDET,
+                        ),
+                    ),
+                )
+            stegService.håndterSteg(behandling.id, behandlingsstegForeldelseDto, SecureLog.Context.tom())
 
-        // historikk
-        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler))
+            val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+            behandlingsstegstilstander.size shouldBe 3
+            val aktivtBehandlingssteg = behandlingskontrollService.finnAktivStegstilstand(behandlingsstegstilstander)
+            aktivtBehandlingssteg?.behandlingssteg shouldBe Behandlingssteg.VILKÅRSVURDERING
+            aktivtBehandlingssteg?.behandlingsstegsstatus shouldBe Behandlingsstegstatus.KLAR
+            assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+            assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.UTFØRT)
+            assertBehandlingsstatus(Behandlingsstatus.UTREDES)
+
+            // historikk
+            assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler))
+        }
     }
 
     @Test
     fun `håndterSteg skal utføre foreldelse og fortsette til foreslå vedtak når alle perioder endret til foreldet`() {
-        val fom = LocalDate.of(2010, 1, 1)
-        val tom = LocalDate.of(2010, 1, 31)
+        ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
+            val fom = LocalDate.of(2010, 1, 1)
+            val tom = LocalDate.of(2010, 1, 31)
 
-        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
-        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id, setOf(Testdata.lagKravgrunnlagsperiode(januar(2010) til januar(2010)))))
-        stegService.håndterSteg(behandling.id, lagBehandlingsstegFaktaDto(fom, tom), SecureLog.Context.tom())
+            lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
+            kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id, setOf(Testdata.lagKravgrunnlagsperiode(januar(2010) til januar(2010)))))
+            stegService.håndterSteg(behandling.id, lagBehandlingsstegFaktaDto(fom, tom), SecureLog.Context.tom())
 
-        // foreldelsesteg vurderte som IKKE_FORELDET med første omgang
-        var behandlingsstegForeldelseDto =
-            BehandlingsstegForeldelseDto(
-                listOf(
-                    ForeldelsesperiodeDto(
-                        Datoperiode(
-                            LocalDate.of(2010, 1, 1),
-                            LocalDate.of(2010, 1, 31),
+            // foreldelsesteg vurderte som IKKE_FORELDET med første omgang
+            var behandlingsstegForeldelseDto =
+                BehandlingsstegForeldelseDto(
+                    listOf(
+                        ForeldelsesperiodeDto(
+                            Datoperiode(
+                                LocalDate.of(2010, 1, 1),
+                                LocalDate.of(2010, 1, 31),
+                            ),
+                            "foreldelses begrunnelse",
+                            Foreldelsesvurderingstype.IKKE_FORELDET,
                         ),
-                        "foreldelses begrunnelse",
-                        Foreldelsesvurderingstype.IKKE_FORELDET,
                     ),
-                ),
-            )
-        stegService.håndterSteg(behandling.id, behandlingsstegForeldelseDto, SecureLog.Context.tom())
-        var behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
-        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)
+                )
+            stegService.håndterSteg(behandling.id, behandlingsstegForeldelseDto, SecureLog.Context.tom())
+            var behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+            assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)
 
-        // behandle vilkårsvurderingssteg
-        val behandlingsstegVilkårsvurderingDto =
-            lagBehandlingsstegVilkårsvurderingDto(
-                Datoperiode(
-                    LocalDate.of(2010, 1, 1),
-                    LocalDate.of(2010, 1, 31),
-                ),
+            // behandle vilkårsvurderingssteg
+            val behandlingsstegVilkårsvurderingDto =
+                lagBehandlingsstegVilkårsvurderingDto(
+                    Datoperiode(
+                        LocalDate.of(2010, 1, 1),
+                        LocalDate.of(2010, 1, 31),
+                    ),
+                )
+            stegService.håndterSteg(behandling.id, behandlingsstegVilkårsvurderingDto, SecureLog.Context.tom())
+            behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+            assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
+            assertBehandlingssteg(
+                behandlingsstegstilstander,
+                Behandlingssteg.VILKÅRSVURDERING,
+                Behandlingsstegstatus.UTFØRT,
             )
-        stegService.håndterSteg(behandling.id, behandlingsstegVilkårsvurderingDto, SecureLog.Context.tom())
-        behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
-        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
-        assertBehandlingssteg(
-            behandlingsstegstilstander,
-            Behandlingssteg.VILKÅRSVURDERING,
-            Behandlingsstegstatus.UTFØRT,
-        )
-        assertBehandlingsstatus(Behandlingsstatus.UTREDES)
+            assertBehandlingsstatus(Behandlingsstatus.UTREDES)
 
-        // behandler foreldelse steg på nytt og endrer periode til foreldet
-        behandlingsstegForeldelseDto =
-            BehandlingsstegForeldelseDto(
-                listOf(
-                    ForeldelsesperiodeDto(
-                        Datoperiode(
-                            LocalDate.of(2010, 1, 1),
-                            LocalDate.of(2010, 1, 31),
+            // behandler foreldelse steg på nytt og endrer periode til foreldet
+            behandlingsstegForeldelseDto =
+                BehandlingsstegForeldelseDto(
+                    listOf(
+                        ForeldelsesperiodeDto(
+                            Datoperiode(
+                                LocalDate.of(2010, 1, 1),
+                                LocalDate.of(2010, 1, 31),
+                            ),
+                            "foreldelses begrunnelse",
+                            Foreldelsesvurderingstype.FORELDET,
                         ),
-                        "foreldelses begrunnelse",
-                        Foreldelsesvurderingstype.FORELDET,
                     ),
-                ),
+                )
+            stegService.håndterSteg(behandling.id, behandlingsstegForeldelseDto, SecureLog.Context.tom())
+            behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+            assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
+            assertBehandlingssteg(
+                behandlingsstegstilstander,
+                Behandlingssteg.VILKÅRSVURDERING,
+                Behandlingsstegstatus.AUTOUTFØRT,
             )
-        stegService.håndterSteg(behandling.id, behandlingsstegForeldelseDto, SecureLog.Context.tom())
-        behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
-        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
-        assertBehandlingssteg(
-            behandlingsstegstilstander,
-            Behandlingssteg.VILKÅRSVURDERING,
-            Behandlingsstegstatus.AUTOUTFØRT,
-        )
-        assertBehandlingsstatus(Behandlingsstatus.UTREDES)
+            assertBehandlingsstatus(Behandlingsstatus.UTREDES)
 
-        // deaktiverte tildligere behandlet vilkårsvurdering når alle perioder er foreldet
-        vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeEmpty()
+            // deaktiverte tildligere behandlet vilkårsvurdering når alle perioder er foreldet
+            vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeEmpty()
 
-        // historikk
-        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler), times = 2)
-        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.VILKÅRSVURDERING_VURDERT, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler))
-        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.VILKÅRSVURDERING_VURDERT, Aktør.Vedtaksløsning)
+            // historikk
+            assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler), times = 2)
+            assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.VILKÅRSVURDERING_VURDERT, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler))
+            assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.VILKÅRSVURDERING_VURDERT, Aktør.Vedtaksløsning)
+        }
     }
 
     @Test
     fun `håndterSteg skal utføre foreslå vedtak og forsette til fatte vedtak`() {
-        // behandle fakta steg
-        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
-        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
-        val behandlingsstegFaktaDto = lagBehandlingsstegFaktaDto()
-        stegService.håndterSteg(behandling.id, lagBehandlingsstegFaktaDto(), SecureLog.Context.tom())
-
-        // behandle vilkårsvurderingssteg
-        stegService.håndterSteg(
-            behandling.id,
-            lagBehandlingsstegVilkårsvurderingDto(
-                Datoperiode(
-                    fom,
-                    tom,
-                ),
-            ),
-            SecureLog.Context.tom(),
-        )
-
-        val fritekstavsnitt =
-            FritekstavsnittDto(
-                perioderMedTekst =
-                    listOf(
-                        PeriodeMedTekstDto(
-                            periode = Datoperiode(fom, tom),
-                            faktaAvsnitt = "fakta tekst",
-                        ),
-                    ),
-            )
-        stegService.håndterSteg(behandling.id, BehandlingsstegForeslåVedtaksstegDto(fritekstavsnitt), SecureLog.Context.tom())
-        val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
-        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
-        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
-        assertBehandlingssteg(
-            behandlingsstegstilstander,
-            Behandlingssteg.VILKÅRSVURDERING,
-            Behandlingsstegstatus.UTFØRT,
-        )
-        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
-        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
-        assertBehandlingsstatus(Behandlingsstatus.FATTER_VEDTAK)
-        assertFaktadata(behandlingsstegFaktaDto)
-
-        assertOppgave(FerdigstillOppgaveTask.TYPE)
-        assertOppgave(LagOppgaveTask.TYPE)
-
-        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FORESLÅ_VEDTAK_VURDERT, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler))
-        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.BEHANDLING_SENDT_TIL_BESLUTTER, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler))
-    }
-
-    @Test
-    fun `håndterSteg skal utføre foreslå vedtak på nytt når beslutter underkjente steg og forsette til fatte vedtak`() {
-        // behandle fakta steg
-        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
-        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
-        stegService.håndterSteg(behandling.id, lagBehandlingsstegFaktaDto(), SecureLog.Context.tom())
-
-        // behandle vilkårsvurderingssteg
-        stegService.håndterSteg(
-            behandling.id,
-            lagBehandlingsstegVilkårsvurderingDto(fom til tom),
-            SecureLog.Context.tom(),
-        )
-
-        val fritekstavsnitt = FritekstavsnittDto(
-            perioderMedTekst = listOf(PeriodeMedTekstDto(periode = fom til tom, faktaAvsnitt = "fakta tekst")),
-        )
-        stegService.håndterSteg(behandling.id, BehandlingsstegForeslåVedtaksstegDto(fritekstavsnitt = fritekstavsnitt), SecureLog.Context.tom())
-
-        assertOppgave(FerdigstillOppgaveTask.TYPE)
-        assertOppgave(LagOppgaveTask.TYPE)
-
-        stegService.håndterSteg(behandling.id, BehandlingsstegFatteVedtaksstegDtoTest.ny(godkjent = false), SecureLog.Context.tom())
-
-        assertOppgave(FerdigstillOppgaveTask.TYPE, 2)
-        assertOppgave(LagOppgaveTask.TYPE, 2)
-
-        val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
-        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
-        assertBehandlingssteg(
-            behandlingsstegstilstander,
-            Behandlingssteg.FATTE_VEDTAK,
-            Behandlingsstegstatus.TILBAKEFØRT,
-        )
-
-        stegService.håndterSteg(behandling.id, BehandlingsstegForeslåVedtaksstegDto(fritekstavsnitt = fritekstavsnitt), SecureLog.Context.tom())
-
-        assertOppgave(FerdigstillOppgaveTask.TYPE, 3)
-        assertOppgave(LagOppgaveTask.TYPE, 3)
-
-        assertHistorikkinnslag(
-            TilbakekrevingHistorikkinnslagstype.BEHANDLING_SENDT_TILBAKE_TIL_SAKSBEHANDLER,
-            Aktør.Beslutter("Z0000"),
-        )
-    }
-
-    @Test
-    fun `håndterSteg skal utføre fatte vedtak og forsette til iverksette vedtak når beslutter godkjenner alt`() {
-        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
-
-        vilkårsvurderingRepository.insert(
-            Vilkårsvurdering(
-                behandlingId = behandling.id,
-                perioder = setOf(
-                    Vilkårsvurderingsperiode(
-                        periode = januar(2025) til januar(2025),
-                        begrunnelse = "",
-                        vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
-                        godTro = VilkårsvurderingGodTro(
-                            beløpErIBehold = false,
-                            begrunnelse = "",
-                        ),
-                    ),
-                ),
-            ),
-        )
-
-        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
-
-        stegService.håndterSteg(behandling.id, BehandlingsstegFatteVedtaksstegDtoTest.ny(godkjent = true), SecureLog.Context.tom())
-
-        val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
-        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.IVERKSETT_VEDTAK, Behandlingsstegstatus.KLAR)
-        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.UTFØRT)
-
-        val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        behandling.ansvarligBeslutter shouldBe "Z0000"
-        behandling.status shouldBe Behandlingsstatus.IVERKSETTER_VEDTAK
-
-        val totrinnsvurderinger = totrinnsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
-        totrinnsvurderinger.shouldNotBeEmpty()
-        totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.FAKTA && it.godkjent }.shouldBeTrue()
-        totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.FORELDELSE }.shouldBeFalse()
-        totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.VILKÅRSVURDERING && it.godkjent }.shouldBeTrue()
-        totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.FORESLÅ_VEDTAK && it.godkjent }.shouldBeTrue()
-
-        assertOppgave(FerdigstillOppgaveTask.TYPE)
-        assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET, Aktør.Beslutter(behandling.ansvarligBeslutter!!), tekst = "Resultat: Ikke fastsatt")
-
-        val behandlingsresultat = behandling.sisteResultat
-        behandlingsresultat.shouldNotBeNull()
-        behandlingsresultat.type shouldBe Behandlingsresultatstype.INGEN_TILBAKEBETALING
-        val behandlingsvedtak = behandlingsresultat.behandlingsvedtak
-        behandlingsvedtak.shouldNotBeNull()
-        behandlingsvedtak.iverksettingsstatus shouldBe Iverksettingsstatus.UNDER_IVERKSETTING
-        taskService
-            .finnTasksMedStatus(listOf(Status.UBEHANDLET))
-            .any { it.type == SendØkonomiTilbakekrevingsvedtakTask.TYPE }
-            .shouldBeTrue()
-    }
-
-    @Test
-    fun `håndterSteg skal tilbakeføre fatte vedtak og flytte til foreslå vedtak når beslutter underkjente steg`() {
-        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
-        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
-
-        stegService.håndterSteg(behandling.id, BehandlingsstegFatteVedtaksstegDtoTest.ny(godkjent = false), SecureLog.Context.tom())
-
-        val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
-        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
-        assertBehandlingssteg(
-            behandlingsstegstilstander,
-            Behandlingssteg.FATTE_VEDTAK,
-            Behandlingsstegstatus.TILBAKEFØRT,
-        )
-
-        val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        behandling.ansvarligBeslutter shouldBe null
-        behandling.status shouldBe Behandlingsstatus.UTREDES
-
-        val totrinnsvurderinger = totrinnsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
-        totrinnsvurderinger.shouldNotBeEmpty()
-        totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.FAKTA && !it.godkjent }.shouldBeTrue()
-        totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.FORELDELSE }.shouldBeFalse()
-        totrinnsvurderinger
-            .any { it.behandlingssteg == Behandlingssteg.VILKÅRSVURDERING && !it.godkjent }
-            .shouldBeTrue()
-        totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.FORESLÅ_VEDTAK && !it.godkjent }.shouldBeTrue()
-
-        assertOppgave(FerdigstillOppgaveTask.TYPE)
-        assertOppgave(LagOppgaveTask.TYPE)
-    }
-
-    @Test
-    fun `håndterSteg skal ikke utføre fakta steg når behandling er på fatte vedtak steg`() {
-        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
-
-        stegService.håndterSteg(behandling.id, lagBehandlingsstegFaktaDto(), SecureLog.Context.tom())
-
-        val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
-        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
-
-        totrinnsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeEmpty()
-    }
-
-    @Test
-    fun `håndterSteg skal ikke utføre fatte vedtak steg når beslutter er samme som saksbehandler`() {
-        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
-
-        val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        behandlingRepository.update(
-            behandling.copy(
-                status = Behandlingsstatus.FATTER_VEDTAK,
-                ansvarligSaksbehandler = "Z0000",
-            ),
-        )
-
-        val exception =
-            shouldThrow<RuntimeException> {
-                stegService.håndterSteg(behandling.id, BehandlingsstegFatteVedtaksstegDtoTest.ny(godkjent = true), SecureLog.Context.tom())
-            }
-
-        exception.message shouldBe "ansvarlig beslutter kan ikke være samme som ansvarlig saksbehandler"
-    }
-
-    @Test
-    fun `håndterSteg skal opprette og utføre verge steg når behandling er på foreslå vedtak`() {
-        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
-        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
-
-        vergeService.opprettVergeSteg(behandling.id)
-
-        var behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
-        assertBehandlingssteg(
-            behandlingsstegstilstander,
-            Behandlingssteg.FORESLÅ_VEDTAK,
-            Behandlingsstegstatus.TILBAKEFØRT,
-        )
-        assertBehandlingssteg(
-            behandlingsstegstilstander,
-            Behandlingssteg.VILKÅRSVURDERING,
-            Behandlingsstegstatus.TILBAKEFØRT,
-        )
-        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.TILBAKEFØRT)
-        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.TILBAKEFØRT)
-        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.VERGE, Behandlingsstegstatus.KLAR)
-
-        val vergeData =
-            BehandlingsstegVergeDto(
-                verge =
-                    VergeDto(
-                        ident = "32132132111",
-                        type = Vergetype.VERGE_FOR_BARN,
-                        navn = "testverdi",
-                        begrunnelse = "testverdi",
-                    ),
-            )
-        stegService.håndterSteg(behandling.id, vergeData, SecureLog.Context.tom())
-        behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
-        assertBehandlingssteg(
-            behandlingsstegstilstander,
-            Behandlingssteg.FORESLÅ_VEDTAK,
-            Behandlingsstegstatus.TILBAKEFØRT,
-        )
-        assertBehandlingssteg(
-            behandlingsstegstilstander,
-            Behandlingssteg.VILKÅRSVURDERING,
-            Behandlingsstegstatus.TILBAKEFØRT,
-        )
-        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.TILBAKEFØRT)
-        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
-        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.VERGE, Behandlingsstegstatus.UTFØRT)
-    }
-
-    @Test
-    fun `gjenopptaSteg skal gjenoppta behandling og fortsette til grunnlag når behandling er i varselssteg uten grunnlag`() {
-        lagBehandlingsstegstilstand(
-            Behandlingssteg.VARSEL,
-            Behandlingsstegstatus.VENTER,
-            Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-        )
-
-        stegService.gjenopptaSteg(behandling.id, SecureLog.Context.tom())
-
-        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
-        val aktivtBehandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandling.id)
-        aktivtBehandlingsstegstilstand.shouldNotBeNull()
-        aktivtBehandlingsstegstilstand.behandlingssteg shouldBe Behandlingssteg.GRUNNLAG
-        aktivtBehandlingsstegstilstand.behandlingsstegsstatus shouldBe Behandlingsstegstatus.VENTER
-        assertBehandlingsstatus(Behandlingsstatus.UTREDES)
-        aktivtBehandlingsstegstilstand.venteårsak shouldBe Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
-        aktivtBehandlingsstegstilstand.tidsfrist shouldBe
-            LocalDate
-                .now()
-                .plusWeeks(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.defaultVenteTidIUker)
-        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
-    }
-
-    @Test
-    fun `gjenopptaSteg skal gjenoppta behandling og fortsette til fakta når behandling er i varselssteg med grunnlag`() {
-        lagBehandlingsstegstilstand(
-            Behandlingssteg.VARSEL,
-            Behandlingsstegstatus.VENTER,
-            Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-        )
-
-        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
-
-        stegService.gjenopptaSteg(behandling.id, SecureLog.Context.tom())
-
-        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
-        val aktivtBehandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandling.id)
-        aktivtBehandlingsstegstilstand.shouldNotBeNull()
-        aktivtBehandlingsstegstilstand.behandlingssteg shouldBe Behandlingssteg.FAKTA
-        aktivtBehandlingsstegstilstand.behandlingsstegsstatus shouldBe Behandlingsstegstatus.KLAR
-        assertBehandlingsstatus(Behandlingsstatus.UTREDES)
-
-        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
-        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VERGE, Behandlingsstegstatus.AUTOUTFØRT)
-    }
-
-    @Test
-    fun `gjenopptaSteg skal ikke gjenoppta behandling når behandling er i grunnlagssteg uten grunnlag`() {
-        lagBehandlingsstegstilstand(
-            Behandlingssteg.GRUNNLAG,
-            Behandlingsstegstatus.VENTER,
-            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
-        )
-
-        stegService.gjenopptaSteg(behandling.id, SecureLog.Context.tom())
-
-        val aktivtBehandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandling.id)
-        aktivtBehandlingsstegstilstand.shouldNotBeNull()
-        aktivtBehandlingsstegstilstand.behandlingssteg shouldBe Behandlingssteg.GRUNNLAG
-        aktivtBehandlingsstegstilstand.behandlingsstegsstatus shouldBe Behandlingsstegstatus.VENTER
-        aktivtBehandlingsstegstilstand.venteårsak shouldBe Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
-        aktivtBehandlingsstegstilstand.tidsfrist shouldBe
-            LocalDate
-                .now()
-                .plusWeeks(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.defaultVenteTidIUker)
-    }
-
-    @Test
-    fun `gjenopptaSteg skal gjenoppta behandling når behandling er i grunnlagssteg med grunnlag`() {
-        lagBehandlingsstegstilstand(
-            Behandlingssteg.GRUNNLAG,
-            Behandlingsstegstatus.VENTER,
-            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
-        )
-        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
-
-        stegService.gjenopptaSteg(behandling.id, SecureLog.Context.tom())
-
-        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
-        val aktivtBehandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandling.id)
-        aktivtBehandlingsstegstilstand.shouldNotBeNull()
-        aktivtBehandlingsstegstilstand.behandlingssteg shouldBe Behandlingssteg.FAKTA
-        aktivtBehandlingsstegstilstand.behandlingsstegsstatus shouldBe Behandlingsstegstatus.KLAR
-        assertBehandlingsstatus(Behandlingsstatus.UTREDES)
-        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
-        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VERGE, Behandlingsstegstatus.AUTOUTFØRT)
-    }
-
-    @Test
-    fun `gjenopptaSteg skal gjenoppta behandling når behandling er i vilkårsvurderingssteg`() {
-        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
-        lagBehandlingsstegstilstand(
-            Behandlingssteg.VILKÅRSVURDERING,
-            Behandlingsstegstatus.VENTER,
-            Venteårsak.AVVENTER_DOKUMENTASJON,
-        )
-
-        stegService.gjenopptaSteg(behandling.id, SecureLog.Context.tom())
-
-        val aktivtBehandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandling.id)
-        aktivtBehandlingsstegstilstand.shouldNotBeNull()
-        aktivtBehandlingsstegstilstand.behandlingssteg shouldBe Behandlingssteg.VILKÅRSVURDERING
-        aktivtBehandlingsstegstilstand.behandlingsstegsstatus shouldBe Behandlingsstegstatus.KLAR
-        assertBehandlingsstatus(Behandlingsstatus.UTREDES)
-    }
-
-    @Test
-    fun `kanAnsvarligSaksbehandlerOppdateres skal returnere true når behandling er sendt til beslutter`() {
-        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
-
-        val behandlingsstegDto =
-            BehandlingsstegForeslåVedtaksstegDto(FritekstavsnittDto(perioderMedTekst = emptyList()))
-        stegService
-            .kanAnsvarligSaksbehandlerOppdateres(behandling.id, behandlingsstegDto)
-            .shouldBeTrue()
-    }
-
-    @Test
-    fun `kanAnsvarligSaksbehandlerOppdateres skal returnere false når beslutter underkjenner vedtak`() {
-        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
-
-        val behandlingsstegDto = BehandlingsstegFatteVedtaksstegDtoTest.ny(godkjent = false)
-        stegService
-            .kanAnsvarligSaksbehandlerOppdateres(behandling.id, behandlingsstegDto)
-            .shouldBeFalse()
-    }
-
-    @Test
-    fun `kanAnsvarligSaksbehandlerOppdateres skal returnere false når beslutter godkjenner vedtak`() {
-        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
-
-        val behandlingsstegDto = BehandlingsstegFatteVedtaksstegDtoTest.ny(godkjent = true)
-        stegService
-            .kanAnsvarligSaksbehandlerOppdateres(behandling.id, behandlingsstegDto)
-            .shouldBeFalse()
-    }
-
-    @Test
-    fun `kanAnsvarligSaksbehandlerOppdateres skal returnere true når saksbehandler utfører vilkårsvurderingssteg`() {
-        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)
-
-        val behandlingsstegDto =
-            lagBehandlingsstegVilkårsvurderingDto(
-                Datoperiode(
-                    LocalDate.of(2021, 1, 1),
-                    LocalDate.of(2021, 1, 31),
-                ),
-            )
-        stegService
-            .kanAnsvarligSaksbehandlerOppdateres(behandling.id, behandlingsstegDto)
-            .shouldBeTrue()
-    }
-
-    @Test
-    fun `kan ikke sende til beslutter dersom tidligere steg er satt tilbake til klar`() {
-        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id, perioder = setOf(Testdata.lagKravgrunnlagsperiode(periode = (fom til tom).toMånedsperiode()))))
-        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
-        lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
-
-        stegService.håndterSteg(behandling.id, lagBehandlingsstegFaktaDto(), SecureLog.Context.tom())
-
-        behandlingskontrollService.finnAktivStegstilstand(behandling.id)?.behandlingssteg shouldBe Behandlingssteg.VILKÅRSVURDERING
-
-        shouldThrow<Feil> {
+        ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
+            // behandle fakta steg
+            lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
+            kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
+            val behandlingsstegFaktaDto = lagBehandlingsstegFaktaDto()
+            stegService.håndterSteg(behandling.id, lagBehandlingsstegFaktaDto(), SecureLog.Context.tom())
+
+            // behandle vilkårsvurderingssteg
             stegService.håndterSteg(
                 behandling.id,
-                BehandlingsstegForeslåVedtaksstegDto(
-                    fritekstavsnitt = FritekstavsnittDto(
-                        perioderMedTekst = listOf(
-                            PeriodeMedTekstDto(
-                                periode = fom til tom,
-                                faktaAvsnitt = "avsnitt",
-                            ),
-                        ),
+                lagBehandlingsstegVilkårsvurderingDto(
+                    Datoperiode(
+                        fom,
+                        tom,
                     ),
                 ),
                 SecureLog.Context.tom(),
             )
-        }.message shouldBe "Du har gjort en endring i tidligere steg som gjør at vilkår må vurderes på nytt."
+
+            val fritekstavsnitt =
+                FritekstavsnittDto(
+                    perioderMedTekst =
+                        listOf(
+                            PeriodeMedTekstDto(
+                                periode = Datoperiode(fom, tom),
+                                faktaAvsnitt = "fakta tekst",
+                            ),
+                        ),
+                )
+            stegService.håndterSteg(behandling.id, BehandlingsstegForeslåVedtaksstegDto(fritekstavsnitt), SecureLog.Context.tom())
+            val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+            assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+            assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
+            assertBehandlingssteg(
+                behandlingsstegstilstander,
+                Behandlingssteg.VILKÅRSVURDERING,
+                Behandlingsstegstatus.UTFØRT,
+            )
+            assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
+            assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
+            assertBehandlingsstatus(Behandlingsstatus.FATTER_VEDTAK)
+            assertFaktadata(behandlingsstegFaktaDto)
+
+            assertOppgave(FerdigstillOppgaveTask.TYPE)
+            assertOppgave(LagOppgaveTask.TYPE)
+
+            assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.FORESLÅ_VEDTAK_VURDERT, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler))
+            assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.BEHANDLING_SENDT_TIL_BESLUTTER, Aktør.Saksbehandler(behandling.ansvarligSaksbehandler))
+        }
+    }
+
+    @Test
+    fun `håndterSteg skal utføre foreslå vedtak på nytt når beslutter underkjente steg og forsette til fatte vedtak`() {
+        ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
+            // behandle fakta steg
+            lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
+            kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
+            stegService.håndterSteg(behandling.id, lagBehandlingsstegFaktaDto(), SecureLog.Context.tom())
+
+            // behandle vilkårsvurderingssteg
+            stegService.håndterSteg(
+                behandling.id,
+                lagBehandlingsstegVilkårsvurderingDto(fom til tom),
+                SecureLog.Context.tom(),
+            )
+
+            val fritekstavsnitt = FritekstavsnittDto(
+                perioderMedTekst = listOf(PeriodeMedTekstDto(periode = fom til tom, faktaAvsnitt = "fakta tekst")),
+            )
+            stegService.håndterSteg(behandling.id, BehandlingsstegForeslåVedtaksstegDto(fritekstavsnitt = fritekstavsnitt), SecureLog.Context.tom())
+
+            assertOppgave(FerdigstillOppgaveTask.TYPE)
+            assertOppgave(LagOppgaveTask.TYPE)
+
+            stegService.håndterSteg(behandling.id, BehandlingsstegFatteVedtaksstegDtoTest.ny(godkjent = false), SecureLog.Context.tom())
+
+            assertOppgave(FerdigstillOppgaveTask.TYPE, 2)
+            assertOppgave(LagOppgaveTask.TYPE, 2)
+
+            val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+            assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
+            assertBehandlingssteg(
+                behandlingsstegstilstander,
+                Behandlingssteg.FATTE_VEDTAK,
+                Behandlingsstegstatus.TILBAKEFØRT,
+            )
+
+            stegService.håndterSteg(behandling.id, BehandlingsstegForeslåVedtaksstegDto(fritekstavsnitt = fritekstavsnitt), SecureLog.Context.tom())
+
+            assertOppgave(FerdigstillOppgaveTask.TYPE, 3)
+            assertOppgave(LagOppgaveTask.TYPE, 3)
+
+            assertHistorikkinnslag(
+                TilbakekrevingHistorikkinnslagstype.BEHANDLING_SENDT_TILBAKE_TIL_SAKSBEHANDLER,
+                Aktør.Beslutter("Z0000"),
+            )
+        }
+    }
+
+    @Test
+    fun `håndterSteg skal utføre fatte vedtak og forsette til iverksette vedtak når beslutter godkjenner alt`() {
+        ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
+            kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
+
+            vilkårsvurderingRepository.insert(
+                Vilkårsvurdering(
+                    behandlingId = behandling.id,
+                    perioder = setOf(
+                        Vilkårsvurderingsperiode(
+                            periode = januar(2025) til januar(2025),
+                            begrunnelse = "",
+                            vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
+                            godTro = VilkårsvurderingGodTro(
+                                beløpErIBehold = false,
+                                begrunnelse = "",
+                            ),
+                        ),
+                    ),
+                ),
+            )
+
+            lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
+
+            stegService.håndterSteg(behandling.id, BehandlingsstegFatteVedtaksstegDtoTest.ny(godkjent = true), SecureLog.Context.tom())
+
+            val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+            assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.IVERKSETT_VEDTAK, Behandlingsstegstatus.KLAR)
+            assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.UTFØRT)
+
+            val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+            behandling.ansvarligBeslutter shouldBe "Z0000"
+            behandling.status shouldBe Behandlingsstatus.IVERKSETTER_VEDTAK
+
+            val totrinnsvurderinger = totrinnsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
+            totrinnsvurderinger.shouldNotBeEmpty()
+            totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.FAKTA && it.godkjent }.shouldBeTrue()
+            totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.FORELDELSE }.shouldBeFalse()
+            totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.VILKÅRSVURDERING && it.godkjent }.shouldBeTrue()
+            totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.FORESLÅ_VEDTAK && it.godkjent }.shouldBeTrue()
+
+            assertOppgave(FerdigstillOppgaveTask.TYPE)
+            assertHistorikkinnslag(TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET, Aktør.Beslutter(behandling.ansvarligBeslutter!!), tekst = "Resultat: Ikke fastsatt")
+
+            val behandlingsresultat = behandling.sisteResultat
+            behandlingsresultat.shouldNotBeNull()
+            behandlingsresultat.type shouldBe Behandlingsresultatstype.INGEN_TILBAKEBETALING
+            val behandlingsvedtak = behandlingsresultat.behandlingsvedtak
+            behandlingsvedtak.shouldNotBeNull()
+            behandlingsvedtak.iverksettingsstatus shouldBe Iverksettingsstatus.UNDER_IVERKSETTING
+            taskService
+                .finnTasksMedStatus(listOf(Status.UBEHANDLET))
+                .any { it.type == SendØkonomiTilbakekrevingsvedtakTask.TYPE }
+                .shouldBeTrue()
+        }
+    }
+
+    @Test
+    fun `håndterSteg skal tilbakeføre fatte vedtak og flytte til foreslå vedtak når beslutter underkjente steg`() {
+        ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
+            kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
+            lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
+
+            stegService.håndterSteg(behandling.id, BehandlingsstegFatteVedtaksstegDtoTest.ny(godkjent = false), SecureLog.Context.tom())
+
+            val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+            assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
+            assertBehandlingssteg(
+                behandlingsstegstilstander,
+                Behandlingssteg.FATTE_VEDTAK,
+                Behandlingsstegstatus.TILBAKEFØRT,
+            )
+
+            val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+            behandling.ansvarligBeslutter shouldBe null
+            behandling.status shouldBe Behandlingsstatus.UTREDES
+
+            val totrinnsvurderinger = totrinnsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
+            totrinnsvurderinger.shouldNotBeEmpty()
+            totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.FAKTA && !it.godkjent }.shouldBeTrue()
+            totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.FORELDELSE }.shouldBeFalse()
+            totrinnsvurderinger
+                .any { it.behandlingssteg == Behandlingssteg.VILKÅRSVURDERING && !it.godkjent }
+                .shouldBeTrue()
+            totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.FORESLÅ_VEDTAK && !it.godkjent }.shouldBeTrue()
+
+            assertOppgave(FerdigstillOppgaveTask.TYPE)
+            assertOppgave(LagOppgaveTask.TYPE)
+        }
+    }
+
+    @Test
+    fun `håndterSteg skal ikke utføre fakta steg når behandling er på fatte vedtak steg`() {
+        ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
+            lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
+
+            stegService.håndterSteg(behandling.id, lagBehandlingsstegFaktaDto(), SecureLog.Context.tom())
+
+            val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+            assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
+
+            totrinnsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeEmpty()
+        }
+    }
+
+    @Test
+    fun `håndterSteg skal ikke utføre fatte vedtak steg når beslutter er samme som saksbehandler`() {
+        ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
+            lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
+
+            val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+            behandlingRepository.update(
+                behandling.copy(
+                    status = Behandlingsstatus.FATTER_VEDTAK,
+                    ansvarligSaksbehandler = "Z0000",
+                ),
+            )
+
+            val exception =
+                shouldThrow<RuntimeException> {
+                    stegService.håndterSteg(behandling.id, BehandlingsstegFatteVedtaksstegDtoTest.ny(godkjent = true), SecureLog.Context.tom())
+                }
+
+            exception.message shouldBe "ansvarlig beslutter kan ikke være samme som ansvarlig saksbehandler"
+        }
+    }
+
+    @Test
+    fun `håndterSteg skal opprette og utføre verge steg når behandling er på foreslå vedtak`() {
+        ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
+            kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
+            lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
+
+            vergeService.opprettVergeSteg(behandling.id)
+
+            var behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+            assertBehandlingssteg(
+                behandlingsstegstilstander,
+                Behandlingssteg.FORESLÅ_VEDTAK,
+                Behandlingsstegstatus.TILBAKEFØRT,
+            )
+            assertBehandlingssteg(
+                behandlingsstegstilstander,
+                Behandlingssteg.VILKÅRSVURDERING,
+                Behandlingsstegstatus.TILBAKEFØRT,
+            )
+            assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.TILBAKEFØRT)
+            assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.TILBAKEFØRT)
+            assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.VERGE, Behandlingsstegstatus.KLAR)
+
+            val vergeData =
+                BehandlingsstegVergeDto(
+                    verge =
+                        VergeDto(
+                            ident = "32132132111",
+                            type = Vergetype.VERGE_FOR_BARN,
+                            navn = "testverdi",
+                            begrunnelse = "testverdi",
+                        ),
+                )
+            stegService.håndterSteg(behandling.id, vergeData, SecureLog.Context.tom())
+            behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+            assertBehandlingssteg(
+                behandlingsstegstilstander,
+                Behandlingssteg.FORESLÅ_VEDTAK,
+                Behandlingsstegstatus.TILBAKEFØRT,
+            )
+            assertBehandlingssteg(
+                behandlingsstegstilstander,
+                Behandlingssteg.VILKÅRSVURDERING,
+                Behandlingsstegstatus.TILBAKEFØRT,
+            )
+            assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.TILBAKEFØRT)
+            assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
+            assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.VERGE, Behandlingsstegstatus.UTFØRT)
+        }
+    }
+
+    @Test
+    fun `gjenopptaSteg skal gjenoppta behandling og fortsette til grunnlag når behandling er i varselssteg uten grunnlag`() {
+        ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
+            lagBehandlingsstegstilstand(
+                Behandlingssteg.VARSEL,
+                Behandlingsstegstatus.VENTER,
+                Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
+            )
+
+            stegService.gjenopptaSteg(behandling.id, SecureLog.Context.tom())
+
+            val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+            val aktivtBehandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandling.id)
+            aktivtBehandlingsstegstilstand.shouldNotBeNull()
+            aktivtBehandlingsstegstilstand.behandlingssteg shouldBe Behandlingssteg.GRUNNLAG
+            aktivtBehandlingsstegstilstand.behandlingsstegsstatus shouldBe Behandlingsstegstatus.VENTER
+            assertBehandlingsstatus(Behandlingsstatus.UTREDES)
+            aktivtBehandlingsstegstilstand.venteårsak shouldBe Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
+            aktivtBehandlingsstegstilstand.tidsfrist shouldBe
+                LocalDate
+                    .now()
+                    .plusWeeks(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.defaultVenteTidIUker)
+            assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
+        }
+    }
+
+    @Test
+    fun `gjenopptaSteg skal gjenoppta behandling og fortsette til fakta når behandling er i varselssteg med grunnlag`() {
+        ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
+            lagBehandlingsstegstilstand(
+                Behandlingssteg.VARSEL,
+                Behandlingsstegstatus.VENTER,
+                Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
+            )
+
+            kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
+
+            stegService.gjenopptaSteg(behandling.id, SecureLog.Context.tom())
+
+            val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+            val aktivtBehandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandling.id)
+            aktivtBehandlingsstegstilstand.shouldNotBeNull()
+            aktivtBehandlingsstegstilstand.behandlingssteg shouldBe Behandlingssteg.FAKTA
+            aktivtBehandlingsstegstilstand.behandlingsstegsstatus shouldBe Behandlingsstegstatus.KLAR
+            assertBehandlingsstatus(Behandlingsstatus.UTREDES)
+
+            assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
+            assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VERGE, Behandlingsstegstatus.AUTOUTFØRT)
+        }
+    }
+
+    @Test
+    fun `gjenopptaSteg skal ikke gjenoppta behandling når behandling er i grunnlagssteg uten grunnlag`() {
+        ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
+            lagBehandlingsstegstilstand(
+                Behandlingssteg.GRUNNLAG,
+                Behandlingsstegstatus.VENTER,
+                Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
+            )
+
+            stegService.gjenopptaSteg(behandling.id, SecureLog.Context.tom())
+
+            val aktivtBehandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandling.id)
+            aktivtBehandlingsstegstilstand.shouldNotBeNull()
+            aktivtBehandlingsstegstilstand.behandlingssteg shouldBe Behandlingssteg.GRUNNLAG
+            aktivtBehandlingsstegstilstand.behandlingsstegsstatus shouldBe Behandlingsstegstatus.VENTER
+            aktivtBehandlingsstegstilstand.venteårsak shouldBe Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
+            aktivtBehandlingsstegstilstand.tidsfrist shouldBe
+                LocalDate
+                    .now()
+                    .plusWeeks(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.defaultVenteTidIUker)
+        }
+    }
+
+    @Test
+    fun `gjenopptaSteg skal gjenoppta behandling når behandling er i grunnlagssteg med grunnlag`() {
+        ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
+            lagBehandlingsstegstilstand(
+                Behandlingssteg.GRUNNLAG,
+                Behandlingsstegstatus.VENTER,
+                Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
+            )
+            kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
+
+            stegService.gjenopptaSteg(behandling.id, SecureLog.Context.tom())
+
+            val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+            val aktivtBehandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandling.id)
+            aktivtBehandlingsstegstilstand.shouldNotBeNull()
+            aktivtBehandlingsstegstilstand.behandlingssteg shouldBe Behandlingssteg.FAKTA
+            aktivtBehandlingsstegstilstand.behandlingsstegsstatus shouldBe Behandlingsstegstatus.KLAR
+            assertBehandlingsstatus(Behandlingsstatus.UTREDES)
+            assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
+            assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VERGE, Behandlingsstegstatus.AUTOUTFØRT)
+        }
+    }
+
+    @Test
+    fun `gjenopptaSteg skal gjenoppta behandling når behandling er i vilkårsvurderingssteg`() {
+        ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
+            kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
+            lagBehandlingsstegstilstand(
+                Behandlingssteg.VILKÅRSVURDERING,
+                Behandlingsstegstatus.VENTER,
+                Venteårsak.AVVENTER_DOKUMENTASJON,
+            )
+
+            stegService.gjenopptaSteg(behandling.id, SecureLog.Context.tom())
+
+            val aktivtBehandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandling.id)
+            aktivtBehandlingsstegstilstand.shouldNotBeNull()
+            aktivtBehandlingsstegstilstand.behandlingssteg shouldBe Behandlingssteg.VILKÅRSVURDERING
+            aktivtBehandlingsstegstilstand.behandlingsstegsstatus shouldBe Behandlingsstegstatus.KLAR
+            assertBehandlingsstatus(Behandlingsstatus.UTREDES)
+        }
+    }
+
+    @Test
+    fun `kanAnsvarligSaksbehandlerOppdateres skal returnere true når behandling er sendt til beslutter`() {
+        ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
+            lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
+
+            val behandlingsstegDto =
+                BehandlingsstegForeslåVedtaksstegDto(FritekstavsnittDto(perioderMedTekst = emptyList()))
+            stegService
+                .kanAnsvarligSaksbehandlerOppdateres(behandling.id, behandlingsstegDto)
+                .shouldBeTrue()
+        }
+    }
+
+    @Test
+    fun `kanAnsvarligSaksbehandlerOppdateres skal returnere false når beslutter underkjenner vedtak`() {
+        ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
+            lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
+
+            val behandlingsstegDto = BehandlingsstegFatteVedtaksstegDtoTest.ny(godkjent = false)
+            stegService
+                .kanAnsvarligSaksbehandlerOppdateres(behandling.id, behandlingsstegDto)
+                .shouldBeFalse()
+        }
+    }
+
+    @Test
+    fun `kanAnsvarligSaksbehandlerOppdateres skal returnere false når beslutter godkjenner vedtak`() {
+        ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
+            lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
+
+            val behandlingsstegDto = BehandlingsstegFatteVedtaksstegDtoTest.ny(godkjent = true)
+            stegService
+                .kanAnsvarligSaksbehandlerOppdateres(behandling.id, behandlingsstegDto)
+                .shouldBeFalse()
+        }
+    }
+
+    @Test
+    fun `kanAnsvarligSaksbehandlerOppdateres skal returnere true når saksbehandler utfører vilkårsvurderingssteg`() {
+        ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
+            lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)
+
+            val behandlingsstegDto =
+                lagBehandlingsstegVilkårsvurderingDto(
+                    Datoperiode(
+                        LocalDate.of(2021, 1, 1),
+                        LocalDate.of(2021, 1, 31),
+                    ),
+                )
+            stegService
+                .kanAnsvarligSaksbehandlerOppdateres(behandling.id, behandlingsstegDto)
+                .shouldBeTrue()
+        }
+    }
+
+    @Test
+    fun `kan ikke sende til beslutter dersom tidligere steg er satt tilbake til klar`() {
+        ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
+            kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id, perioder = setOf(Testdata.lagKravgrunnlagsperiode(periode = (fom til tom).toMånedsperiode()))))
+            lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
+
+            stegService.håndterSteg(behandling.id, lagBehandlingsstegFaktaDto(), SecureLog.Context.tom())
+
+            behandlingskontrollService.finnAktivStegstilstand(behandling.id)?.behandlingssteg shouldBe Behandlingssteg.VILKÅRSVURDERING
+
+            shouldThrow<Feil> {
+                stegService.håndterSteg(
+                    behandling.id,
+                    BehandlingsstegForeslåVedtaksstegDto(
+                        fritekstavsnitt = FritekstavsnittDto(
+                            perioderMedTekst = listOf(
+                                PeriodeMedTekstDto(
+                                    periode = fom til tom,
+                                    faktaAvsnitt = "avsnitt",
+                                ),
+                            ),
+                        ),
+                    ),
+                    SecureLog.Context.tom(),
+                )
+            }.message shouldBe "Du har gjort en endring i tidligere steg som gjør at vilkår må vurderes på nytt."
+        }
     }
 
     private fun lagBehandlingsstegstilstand(
