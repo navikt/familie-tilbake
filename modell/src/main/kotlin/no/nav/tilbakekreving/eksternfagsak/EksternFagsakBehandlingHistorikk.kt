@@ -33,6 +33,8 @@ class EksternFagsakBehandlingHistorikk(
         return HistorikkReferanse(this, historikk.last().id)
     }
 
+    fun harBehandling(): Boolean = historikk.isNotEmpty()
+
     fun tilEntity(eksternFagsakRef: UUID): List<EksternFagsakBehandlingEntity> {
         return historikk.map { it.tilEntity(eksternFagsakRef) }
     }

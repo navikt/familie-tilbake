@@ -360,6 +360,7 @@ class Tilbakekreving internal constructor(
             språkkode = bruker?.språkkode ?: Språkkode.NB,
             bruker = bruker.tilNullableFrontendDto(),
             behandlinger = behandlingHistorikk.tilOppsummeringDto(tilstand, klokke),
+            fagsakBehandlingUrl = eksternFagsak.saksbehandlingUrl(),
         )
     }
 

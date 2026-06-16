@@ -41,6 +41,7 @@ class BehandlingEntityTest {
                 årsakTilFeilutbetaling = "abc",
                 vedtaksdato = LocalDate.now(),
                 utvidedePerioder = emptyList(),
+                url = "http://localhost:8080",
             ),
         )
         // Lagre et nytt innslag så vi er sikker på at det riktige plukkes opp, ikke det nyeste

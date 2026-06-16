@@ -43,6 +43,11 @@ object EksternFagsakBehandlingMapper : Entity<EksternFagsakBehandlingEntity, UUI
         EksternFagsakBehandlingEntity::vedtaksdato,
         FieldConverter.LocalDateConverter,
     )
+    val url = field(
+        "url",
+        EksternFagsakBehandlingEntity::url,
+        FieldConverter.StringConverter,
+    )
 
     fun map(resultSet: ResultSet, utvidetPerioder: List<UtvidetPeriodeEntity>): EksternFagsakBehandlingEntity {
         return EksternFagsakBehandlingEntity(
@@ -54,6 +59,7 @@ object EksternFagsakBehandlingMapper : Entity<EksternFagsakBehandlingEntity, UUI
             årsakTilFeilutbetaling = resultSet[årsakTilFeilutbetaling],
             vedtaksdato = resultSet[vedtaksdato],
             utvidedePerioder = utvidetPerioder,
+            url = resultSet[url],
         )
     }
 

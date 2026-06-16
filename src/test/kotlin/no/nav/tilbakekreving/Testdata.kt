@@ -34,6 +34,7 @@ object Testdata {
             årsak = FagsysteminfoSvarHendelse.RevurderingDto.Årsak.NYE_OPPLYSNINGER,
             årsakTilFeilutbetaling = årsakTilFeilutbetaling,
             vedtaksdato = LocalDate.now(),
+            url = "http://localhost:8080",
         ),
         utvidPerioder = utvidPerioder,
         behandlendeEnhet = "0425",

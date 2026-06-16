@@ -13,6 +13,7 @@ data class EksternFagsakBehandlingEntity(
     val årsakTilFeilutbetaling: String?,
     val vedtaksdato: LocalDate?,
     val utvidedePerioder: List<UtvidetPeriodeEntity>?,
+    val url: String?,
 ) {
     fun fraEntity(): EksternFagsakRevurdering {
         return when (type) {
@@ -23,6 +24,7 @@ data class EksternFagsakBehandlingEntity(
                 årsakTilFeilutbetaling = requireNotNull(årsakTilFeilutbetaling) { "årsakTilFeilutbetaling kreves for EksternFagsakBehandling" },
                 vedtaksdato = requireNotNull(vedtaksdato) { "vedtaksdato kreves for EksternFagsakBehandling" },
                 utvidedePerioder = requireNotNull(utvidedePerioder) { "utvidetPerioder kreves for EksternFagsakBehandling" }.map { it.fraEntity() },
+                url = url,
             )
             EksternFagsakBehandlingType.UKJENT -> EksternFagsakRevurdering.Ukjent(id = id, eksternId = eksternId, null)
         }

@@ -30,6 +30,7 @@ class FagsystemIntegrasjonServiceImpl(
                             FagsysteminfoSvarHendelse.RevurderingDto.Årsak.UKJENT -> EksternFagsakRevurdering.Revurderingsårsak.UKJENT
                         },
                         årsakTilFeilutbetaling = fagsysteminfo.revurdering.årsakTilFeilutbetaling,
+                        url = fagsysteminfo.revurdering.url,
                         vedtaksdato = fagsysteminfo.revurdering.vedtaksdato,
                     ),
                     utvidPerioder = fagsysteminfo.utvidPerioder?.map {

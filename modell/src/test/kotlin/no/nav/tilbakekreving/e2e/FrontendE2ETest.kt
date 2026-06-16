@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.e2e
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
+import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
@@ -119,5 +120,26 @@ class FrontendE2ETest {
             systemContext(),
         )
         tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(), true, BehandlerRolle.BESLUTTER).status shouldBe Behandlingsstatus.AVSLUTTET
+    }
+
+    @Test
+    fun `får behandling url fra fagsystem`() {
+        val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
+        val behovOppsamler = BehovObservatørOppsamler()
+        val tilbakekreving = Tilbakekreving.opprett(
+            id = UUID.randomUUID().toString(),
+            opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse,
+            sideeffektContext = systemContext(behovObservatør = behovOppsamler),
+        )
+
+        tilbakekreving.håndter(kravgrunnlag(), systemContext())
+        tilbakekreving.håndter(
+            fagsysteminfoHendelse(
+                url = "http://saksbehandling-url",
+            ),
+            systemContext(),
+        )
+
+        tilbakekreving.tilFrontendDto(SystemKlokke).fagsakBehandlingUrl shouldBe "http://saksbehandling-url"
     }
 }

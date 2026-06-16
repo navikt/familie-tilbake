@@ -32,7 +32,8 @@ class FagsystemKafkaListenerTest {
                             "behandlingId": "654321",
                             "årsak": "NYE_OPPLYSNINGER",
                             "årsakTilFeilutbetaling": "Bruker sluttet på tiltaket",
-                            "vedtaksdato": "2025-01-12"
+                            "vedtaksdato": "2025-01-12",
+                            "url": "http://localhost:8080"
                           },
                           "utvidPerioder": [
                             {
@@ -64,6 +65,7 @@ class FagsystemKafkaListenerTest {
                     årsak = FagsysteminfoSvarHendelse.RevurderingDto.Årsak.NYE_OPPLYSNINGER,
                     årsakTilFeilutbetaling = "Bruker sluttet på tiltaket",
                     vedtaksdato = LocalDate.of(2025, 1, 12),
+                    url = "http://localhost:8080",
                 ),
                 utvidPerioder = listOf(
                     FagsysteminfoSvarHendelse.UtvidetPeriodeDto(

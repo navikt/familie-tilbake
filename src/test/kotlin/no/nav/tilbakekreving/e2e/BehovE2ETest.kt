@@ -90,6 +90,7 @@ class BehovE2ETest : TilbakekrevingE2EBase() {
                     årsak = FagsysteminfoSvarHendelse.RevurderingDto.Årsak.NYE_OPPLYSNINGER,
                     årsakTilFeilutbetaling = "Heisann",
                     vedtaksdato = LocalDate.now(),
+                    url = "http://localhost:8080",
                 ),
                 utvidPerioder = listOf(
                     FagsysteminfoSvarHendelse.UtvidetPeriodeDto(

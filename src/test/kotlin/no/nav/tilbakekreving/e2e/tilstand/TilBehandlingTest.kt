@@ -61,6 +61,7 @@ class TilBehandlingTest : TilbakekrevingE2EBase() {
                     årsak = FagsysteminfoSvarHendelse.RevurderingDto.Årsak.NYE_OPPLYSNINGER,
                     årsakTilFeilutbetaling = "ingen",
                     vedtaksdato = LocalDate.now(),
+                    url = "http://localhost:8080",
                 ),
                 utvidPerioder = listOf(
                     FagsysteminfoSvarHendelse.UtvidetPeriodeDto(
@@ -112,6 +113,7 @@ class TilBehandlingTest : TilbakekrevingE2EBase() {
                     årsak = FagsysteminfoSvarHendelse.RevurderingDto.Årsak.NYE_OPPLYSNINGER,
                     årsakTilFeilutbetaling = "ingen",
                     vedtaksdato = LocalDate.now(),
+                    url = "http://localhost:8080",
                 ),
                 utvidPerioder = listOf(
                     FagsysteminfoSvarHendelse.UtvidetPeriodeDto(

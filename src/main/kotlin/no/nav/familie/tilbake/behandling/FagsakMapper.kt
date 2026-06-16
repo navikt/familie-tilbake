@@ -54,6 +54,7 @@ object FagsakMapper {
             bruker = bruker,
             behandlinger = behandlingListe,
             institusjon = institusjon,
+            fagsakBehandlingUrl = null,
         )
     }
 }

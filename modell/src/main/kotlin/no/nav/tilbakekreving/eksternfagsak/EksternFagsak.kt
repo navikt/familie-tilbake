@@ -39,6 +39,7 @@ class EksternFagsak(
                         vedtaksperiode = it.vedtaksperiode,
                     )
                 } ?: emptyList(),
+                url = fagsysteminfo.revurdering.url,
             ),
         )
     }
@@ -83,7 +84,10 @@ class EksternFagsak(
         addAll(HjemmelForTilbakekreving.standardForhåndsvarselHjemler(beregnerRenter = true))
     }
 
-    internal fun brevmeta() = ytelse.brevmeta()
-
     fun hentYtelse() = ytelse
+
+    fun saksbehandlingUrl(): String? {
+        if (!behandlinger.harBehandling()) return null
+        return behandlinger.nåværende().entry.url
+    }
 }

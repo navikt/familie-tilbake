@@ -15,6 +15,7 @@ sealed class EksternFagsakRevurdering(
     override val id: UUID,
 ) : Historikk.HistorikkInnslag<UUID> {
     internal abstract val eksternId: String
+    internal abstract val url: String?
     abstract val revurderingsårsak: Revurderingsårsak
     abstract val årsakTilFeilutbetaling: String
     abstract val vedtaksdato: LocalDate
@@ -35,6 +36,7 @@ sealed class EksternFagsakRevurdering(
         override val årsakTilFeilutbetaling: String,
         override val vedtaksdato: LocalDate,
         private val utvidedePerioder: List<UtvidetPeriode>,
+        override val url: String?,
     ) : EksternFagsakRevurdering(id) {
         override fun utvidPeriode(periode: Datoperiode): Datoperiode {
             return utvidedePerioder.singleOrNull { it.gjelderFor(periode) }?.utvid() ?: periode
@@ -52,6 +54,7 @@ sealed class EksternFagsakRevurdering(
                 årsakTilFeilutbetaling = årsakTilFeilutbetaling,
                 utvidedePerioder = utvidedePerioder.map { it.tilEntity(id) },
                 vedtaksdato = vedtaksdato,
+                url = url,
             )
         }
 
@@ -91,6 +94,7 @@ sealed class EksternFagsakRevurdering(
         override val revurderingsårsak: Revurderingsårsak = Revurderingsårsak.UKJENT
         override val årsakTilFeilutbetaling: String = "Ukjent - finn i fagsystem"
         override val vedtaksdato: LocalDate = revurderingsdatoFraKravgrunnlag ?: LocalDate.MIN
+        override val url: String? = null
 
         override fun behandlingId(): String? = null
 
@@ -106,6 +110,7 @@ sealed class EksternFagsakRevurdering(
                 årsakTilFeilutbetaling = null,
                 vedtaksdato = null,
                 utvidedePerioder = null,
+                url = null,
             )
         }
 

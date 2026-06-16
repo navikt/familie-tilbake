@@ -21,5 +21,6 @@ data class FagsysteminfoHendelse(
         val årsak: EksternFagsakRevurdering.Revurderingsårsak,
         val årsakTilFeilutbetaling: String?,
         val vedtaksdato: LocalDate,
+        val url: String?,
     )
 }

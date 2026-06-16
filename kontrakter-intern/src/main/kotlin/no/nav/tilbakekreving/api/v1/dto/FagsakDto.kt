@@ -16,6 +16,7 @@ data class FagsakDto(
     val bruker: FrontendBrukerDto,
     val behandlinger: List<BehandlingsoppsummeringDto>,
     val institusjon: InstitusjonDto? = null,
+    val fagsakBehandlingUrl: String?,
 )
 
 data class BehandlingsoppsummeringDto(

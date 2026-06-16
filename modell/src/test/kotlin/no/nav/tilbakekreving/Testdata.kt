@@ -122,6 +122,7 @@ fun feilutbetalteBeløp(ytelsesbeløp: List<KravgrunnlagHendelse.Periode.Beløp>
 fun fagsysteminfoHendelse(
     utvidPerioder: List<FagsysteminfoHendelse.UtvidetPeriode>? = null,
     behandlendeEnhet: String? = "0425",
+    url: String? = "http://localhost:8080",
 ) = FagsysteminfoHendelse(
     aktør = Aktør.Person(bruker().ident),
     revurdering = FagsysteminfoHendelse.Revurdering(
@@ -129,6 +130,7 @@ fun fagsysteminfoHendelse(
         årsak = EksternFagsakRevurdering.Revurderingsårsak.NYE_OPPLYSNINGER,
         årsakTilFeilutbetaling = "",
         vedtaksdato = LocalDate.now(),
+        url = url,
     ),
     utvidPerioder = utvidPerioder,
     behandlendeEnhet = behandlendeEnhet,
@@ -154,6 +156,7 @@ fun eksternFagsakBehandling(
         revurderingsårsak = EksternFagsakRevurdering.Revurderingsårsak.NYE_OPPLYSNINGER,
         vedtaksdato = vedtaksdato,
         utvidedePerioder = utvidPerioder,
+        url = "http://localhost:8080",
     )
 }
 
