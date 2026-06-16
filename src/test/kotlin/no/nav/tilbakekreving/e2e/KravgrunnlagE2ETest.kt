@@ -6,12 +6,14 @@ import io.kotest.inspectors.forOne
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.aktør.Aktør
+import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.api.v2.PeriodeDto
 import no.nav.tilbakekreving.api.v2.fagsystem.behov.FagsysteminfoBehovHendelse
@@ -20,6 +22,7 @@ import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.NyKlassekode
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp.Companion.medFeilutbetaling
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsperiode
+import no.nav.tilbakekreving.e2e.ytelser.TilleggsstønaderE2ETest.Companion.TILLEGGSSTØNADER_KØ_NAVN
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.feil.ModellFeil
@@ -27,11 +30,13 @@ import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub
 import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub.Companion.finnKafkamelding
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagMediator
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
+import no.nav.tilbakekreving.saksbehandlerContext
 import no.nav.tilbakekreving.systemContext
 import no.nav.tilbakekreving.test.april
 import no.nav.tilbakekreving.test.januar
@@ -288,6 +293,94 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
             .single()
 
         fagsystemInfoBehov.kravgrunnlagReferanse shouldBe "q+l/W4fQTy6ymStSpiIq9w=="
+    }
+
+    @Test
+    fun `fagsystem-info behov kommer til riktig sak dersom det er opprettet en ny for samme fagsystemid`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+
+        sendKravgrunnlagOgAvventLesing(
+            queueName = TILLEGGSSTØNADER_KØ_NAVN,
+            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId),
+        )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
+
+        val førsteBehandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+        lagreUttalelse(førsteBehandlingId)
+        tilbakekrevVedtak(førsteBehandlingId, listOf(1.januar(2021) til 31.januar(2021)))
+
+        tilbakekreving(førsteBehandlingId)
+            .frontendDtoForBehandling(førsteBehandlingId, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER)
+            .status shouldBe Behandlingsstatus.AVSLUTTET
+
+        sendKravgrunnlagOgAvventLesing(
+            queueName = TILLEGGSSTØNADER_KØ_NAVN,
+            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId),
+        )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
+
+        val nyBehandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+        nyBehandlingId shouldNotBe førsteBehandlingId
+
+        tilbakekreving(nyBehandlingId)
+            .frontendDtoForBehandling(nyBehandlingId, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER)
+            .status shouldBe Behandlingsstatus.UTREDES
+    }
+
+    @Test
+    fun `det opprettes en korrekt iverksettelse for begge behandlinger for samme fagsystemid`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+
+        sendKravgrunnlagOgAvventLesing(
+            queueName = TILLEGGSSTØNADER_KØ_NAVN,
+            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+                perioder = listOf(KravgrunnlagGenerator.standardPeriode(1.januar(2021) til 1.januar(2021), feilutbetaltBeløp = 2000.kroner)),
+            ),
+        )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
+
+        val førsteBehandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+        lagreUttalelse(førsteBehandlingId)
+        tilbakekrevVedtak(førsteBehandlingId, listOf(1.januar(2021) til 31.januar(2021)))
+
+        tilbakekreving(førsteBehandlingId)
+            .frontendDtoForBehandling(førsteBehandlingId, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER)
+            .status shouldBe Behandlingsstatus.AVSLUTTET
+
+        oppdragClient.shouldHaveIverksettelse(førsteBehandlingId) { vedtak ->
+            vedtak.tilbakekrevingsperiode shouldHaveSize 1
+            vedtak.tilbakekrevingsperiode.single().tilbakekrevingsbelop.forOne { beløp ->
+                beløp.kodeResultat shouldBe "FULL_TILBAKEKREV"
+                beløp.belopTilbakekreves shouldBe 2000.kroner
+            }
+        }
+
+        sendKravgrunnlagOgAvventLesing(
+            queueName = TILLEGGSSTØNADER_KØ_NAVN,
+            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+                perioder = listOf(KravgrunnlagGenerator.standardPeriode(1.januar(2021) til 1.januar(2021), feilutbetaltBeløp = 1000.kroner)),
+            ),
+        )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
+
+        val nyBehandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+        nyBehandlingId shouldNotBe førsteBehandlingId
+        lagreUttalelse(nyBehandlingId)
+        tilbakekrevVedtak(nyBehandlingId, listOf(1.januar(2021) til 31.januar(2021)))
+
+        tilbakekreving(nyBehandlingId)
+            .frontendDtoForBehandling(nyBehandlingId, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER)
+            .status shouldBe Behandlingsstatus.AVSLUTTET
+
+        oppdragClient.shouldHaveIverksettelse(nyBehandlingId) { vedtak ->
+            vedtak.tilbakekrevingsperiode shouldHaveSize 1
+            vedtak.tilbakekrevingsperiode.single().tilbakekrevingsbelop.forOne { beløp ->
+                beløp.kodeResultat shouldBe "FULL_TILBAKEKREV"
+                beløp.belopTilbakekreves shouldBe 1000.kroner
+            }
+        }
     }
 
     fun kravgrunnlagPeriode(
