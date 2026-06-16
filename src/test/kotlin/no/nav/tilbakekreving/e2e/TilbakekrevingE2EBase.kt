@@ -3,21 +3,14 @@ import io.kotest.assertions.nondeterministic.eventually
 import io.kotest.assertions.nondeterministic.eventuallyConfig
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import io.mockk.every
-import io.mockk.mockkObject
-import io.mockk.unmockkObject
 import jakarta.jms.ConnectionFactory
 import jakarta.jms.JMSException
 import kotlinx.coroutines.runBlocking
 import no.nav.familie.tilbake.api.BehandlingController
 import no.nav.familie.tilbake.api.VilkårsvurderingController
-import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.config.OppdragClientMock
 import no.nav.familie.tilbake.config.PdlClientMock
 import no.nav.familie.tilbake.kontrakter.Ressurs
-import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.InnloggetBrukertilgang
-import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
 import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.TilbakekrevingService
@@ -175,16 +168,7 @@ open class TilbakekrevingE2EBase : E2EBase() {
     fun <T> somSaksbehandler(
         ident: String,
         callback: () -> T,
-    ): T {
-        mockkObject(ContextService)
-        every { ContextService.hentPåloggetSaksbehandler(any(), any()) } returns ident
-        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) } returns InnloggetBrukertilgang(
-            Tilgangskontrollsfagsystem.entries.associateWith { Behandlerrolle.BESLUTTER },
-        )
-        val result = callback()
-        unmockkObject(ContextService)
-        return result
-    }
+    ): T = ContextServiceHelpers.somSaksbehandler(ident, callback)
 
     fun utførSteg(
         behandlingId: UUID,

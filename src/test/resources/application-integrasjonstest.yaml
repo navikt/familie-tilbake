@@ -45,14 +45,13 @@ tilbakekreving:
   toggles:
     varselbrev-enabled: true
   tilgangsstyring:
-    ts:
-      grupper:
-        veileder:
-          - ${rolle.teamfamilie.forvalter}
-        saksbehandler:
-          - ${rolle.teamfamilie.forvalter}
-        beslutter:
-          - ${rolle.teamfamilie.forvalter}
+    grupper:
+      aap:
+        beslutter: [ "e2e-tilgang" ]
+      ts:
+        beslutter: [ "e2e-tilgang" ]
+      tp:
+        beslutter: [ "e2e-tilgang" ]
   tilgangsmaskinen:
     scope: api://dev-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
   bigQuery:
