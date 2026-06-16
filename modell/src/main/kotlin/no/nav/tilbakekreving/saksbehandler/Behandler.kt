@@ -25,7 +25,7 @@ sealed interface Behandler {
     }
 
     data object Vedtaksløsning : Behandler {
-        override val rolle: Rolle = Rolle.BESLUTTER
+        override val rolle: Rolle = Rolle.VEDTAKSLØSNING
         override val ident: String = "VL"
 
         override fun tilEntity(): BehandlerEntity {
