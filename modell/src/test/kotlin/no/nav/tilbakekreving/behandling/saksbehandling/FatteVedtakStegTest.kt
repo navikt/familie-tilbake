@@ -6,20 +6,18 @@ import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
-import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.test.FellesTestdata.ANSVARLIG_BESLUTTER
+import no.nav.tilbakekreving.test.FellesTestdata.ANSVARLIG_SAKSBEHANDLER
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class FatteVedtakStegTest {
-    private val ansvarligSaksbehandler = Behandler.Saksbehandler("AnsvarligSaksbehandler")
-    private val ansvarligBeslutter = Behandler.Saksbehandler("AnsvarligBeslutter")
-
     @Test
     fun `delvis vurdering av fatte vedtak steg`() {
         val fatteVedtakSteg = FatteVedtakSteg.opprett()
         fatteVedtakSteg.håndter(
-            ansvarligBeslutter,
-            ansvarligSaksbehandler,
+            ANSVARLIG_BESLUTTER,
+            ANSVARLIG_SAKSBEHANDLER,
             Behandlingssteg.FORELDELSE,
             FatteVedtakSteg.Vurdering.Godkjent,
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
@@ -33,36 +31,36 @@ class FatteVedtakStegTest {
     fun `fullstendig vurdering av fatte vedtak steg`() {
         val fatteVedtakSteg = FatteVedtakSteg.opprett()
         fatteVedtakSteg.håndter(
-            ansvarligBeslutter,
-            ansvarligSaksbehandler,
+            ANSVARLIG_BESLUTTER,
+            ANSVARLIG_SAKSBEHANDLER,
             Behandlingssteg.FAKTA,
             FatteVedtakSteg.Vurdering.Godkjent,
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
         fatteVedtakSteg.håndter(
-            ansvarligBeslutter,
-            ansvarligSaksbehandler,
+            ANSVARLIG_BESLUTTER,
+            ANSVARLIG_SAKSBEHANDLER,
             Behandlingssteg.FORHÅNDSVARSEL,
             FatteVedtakSteg.Vurdering.Godkjent,
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
         fatteVedtakSteg.håndter(
-            ansvarligBeslutter,
-            ansvarligSaksbehandler,
+            ANSVARLIG_BESLUTTER,
+            ANSVARLIG_SAKSBEHANDLER,
             Behandlingssteg.FORELDELSE,
             FatteVedtakSteg.Vurdering.Godkjent,
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
         fatteVedtakSteg.håndter(
-            ansvarligBeslutter,
-            ansvarligSaksbehandler,
+            ANSVARLIG_BESLUTTER,
+            ANSVARLIG_SAKSBEHANDLER,
             Behandlingssteg.VILKÅRSVURDERING,
             FatteVedtakSteg.Vurdering.Godkjent,
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
         fatteVedtakSteg.håndter(
-            ansvarligBeslutter,
-            ansvarligSaksbehandler,
+            ANSVARLIG_BESLUTTER,
+            ANSVARLIG_SAKSBEHANDLER,
             Behandlingssteg.FORESLÅ_VEDTAK,
             FatteVedtakSteg.Vurdering.Godkjent,
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
@@ -77,8 +75,8 @@ class FatteVedtakStegTest {
 
         shouldThrow<NoSuchElementException> {
             fatteVedtakSteg.håndter(
-                ansvarligBeslutter,
-                ansvarligSaksbehandler,
+                ANSVARLIG_BESLUTTER,
+                ANSVARLIG_SAKSBEHANDLER,
                 Behandlingssteg.BREVMOTTAKER,
                 FatteVedtakSteg.Vurdering.Godkjent,
                 Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
@@ -92,8 +90,8 @@ class FatteVedtakStegTest {
 
         shouldThrow<ModellFeil.IngenTilgangException> {
             fatteVedtakSteg.håndter(
-                ansvarligSaksbehandler,
-                ansvarligSaksbehandler,
+                ANSVARLIG_SAKSBEHANDLER,
+                ANSVARLIG_SAKSBEHANDLER,
                 Behandlingssteg.FAKTA,
                 FatteVedtakSteg.Vurdering.Godkjent,
                 Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
@@ -106,36 +104,36 @@ class FatteVedtakStegTest {
         val fatteVedtakSteg = FatteVedtakSteg.opprett()
 
         fatteVedtakSteg.håndter(
-            ansvarligBeslutter,
-            ansvarligSaksbehandler,
+            ANSVARLIG_BESLUTTER,
+            ANSVARLIG_SAKSBEHANDLER,
             Behandlingssteg.FAKTA,
             FatteVedtakSteg.Vurdering.Underkjent("Ikke bra"),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
         fatteVedtakSteg.håndter(
-            ansvarligBeslutter,
-            ansvarligSaksbehandler,
+            ANSVARLIG_BESLUTTER,
+            ANSVARLIG_SAKSBEHANDLER,
             Behandlingssteg.FORHÅNDSVARSEL,
             FatteVedtakSteg.Vurdering.Underkjent("Ikke bra"),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
         fatteVedtakSteg.håndter(
-            ansvarligBeslutter,
-            ansvarligSaksbehandler,
+            ANSVARLIG_BESLUTTER,
+            ANSVARLIG_SAKSBEHANDLER,
             Behandlingssteg.FORELDELSE,
             FatteVedtakSteg.Vurdering.Underkjent("Ikke bra"),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
         fatteVedtakSteg.håndter(
-            ansvarligBeslutter,
-            ansvarligSaksbehandler,
+            ANSVARLIG_BESLUTTER,
+            ANSVARLIG_SAKSBEHANDLER,
             Behandlingssteg.VILKÅRSVURDERING,
             FatteVedtakSteg.Vurdering.Underkjent("Ikke bra"),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
         fatteVedtakSteg.håndter(
-            ansvarligBeslutter,
-            ansvarligSaksbehandler,
+            ANSVARLIG_BESLUTTER,
+            ANSVARLIG_SAKSBEHANDLER,
             Behandlingssteg.FORESLÅ_VEDTAK,
             FatteVedtakSteg.Vurdering.Underkjent("Ikke bra"),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
@@ -150,36 +148,36 @@ class FatteVedtakStegTest {
         val fatteVedtakSteg = FatteVedtakSteg.opprett()
 
         fatteVedtakSteg.håndter(
-            ansvarligBeslutter,
-            ansvarligSaksbehandler,
+            ANSVARLIG_BESLUTTER,
+            ANSVARLIG_SAKSBEHANDLER,
             Behandlingssteg.FAKTA,
             FatteVedtakSteg.Vurdering.Godkjent,
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
         fatteVedtakSteg.håndter(
-            ansvarligBeslutter,
-            ansvarligSaksbehandler,
+            ANSVARLIG_BESLUTTER,
+            ANSVARLIG_SAKSBEHANDLER,
             Behandlingssteg.FORHÅNDSVARSEL,
             FatteVedtakSteg.Vurdering.Godkjent,
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
         fatteVedtakSteg.håndter(
-            ansvarligBeslutter,
-            ansvarligSaksbehandler,
+            ANSVARLIG_BESLUTTER,
+            ANSVARLIG_SAKSBEHANDLER,
             Behandlingssteg.FORELDELSE,
             FatteVedtakSteg.Vurdering.Godkjent,
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
         fatteVedtakSteg.håndter(
-            ansvarligBeslutter,
-            ansvarligSaksbehandler,
+            ANSVARLIG_BESLUTTER,
+            ANSVARLIG_SAKSBEHANDLER,
             Behandlingssteg.VILKÅRSVURDERING,
             FatteVedtakSteg.Vurdering.Underkjent("Ikke bra"),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
         )
         fatteVedtakSteg.håndter(
-            ansvarligBeslutter,
-            ansvarligSaksbehandler,
+            ANSVARLIG_BESLUTTER,
+            ANSVARLIG_SAKSBEHANDLER,
             Behandlingssteg.FORESLÅ_VEDTAK,
             FatteVedtakSteg.Vurdering.Underkjent("Ikke bra"),
             Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),

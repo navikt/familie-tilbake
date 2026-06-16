@@ -29,8 +29,8 @@ import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
-import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.systemContext
+import no.nav.tilbakekreving.test.FellesTestdata.ANSVARLIG_SAKSBEHANDLER
 import no.tilbakekreving.integrasjoner.persontilgang.Persontilgang
 import no.tilbakekreving.integrasjoner.persontilgang.PersontilgangService
 import org.junit.jupiter.api.AfterEach
@@ -329,7 +329,7 @@ internal class NyTilgangskontrollServiceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf(ENSLIG_SAKSBEHANDLER_ROLLE, BARNETRYGD_SAKSBEHANDLER_ROLLE, TEAMFAMILIE_FORVALTER_ROLLE))
         opprettRequestContext(token)
 
-        shouldNotThrowAny { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving(Ytelse.Barnetrygd), ValideringContext.HentBehandling, Behandler.Saksbehandler("Z999999")) }
+        shouldNotThrowAny { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving(Ytelse.Barnetrygd), ValideringContext.HentBehandling, ANSVARLIG_SAKSBEHANDLER) }
     }
 
     @Test
@@ -338,7 +338,7 @@ internal class NyTilgangskontrollServiceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf(ENSLIG_SAKSBEHANDLER_ROLLE, BARNETRYGD_SAKSBEHANDLER_ROLLE, TEAMFAMILIE_FORVALTER_ROLLE))
         opprettRequestContext(token)
 
-        shouldThrow<ForbiddenError> { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving(Ytelse.Barnetrygd), ValideringContext.HentBehandling, Behandler.Saksbehandler("Z999999")) }
+        shouldThrow<ForbiddenError> { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving(Ytelse.Barnetrygd), ValideringContext.HentBehandling, ANSVARLIG_SAKSBEHANDLER) }
     }
 
     @Test
@@ -347,7 +347,7 @@ internal class NyTilgangskontrollServiceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf(ENSLIG_VEILEDER_ROLLE, TEAMFAMILIE_FORVALTER_ROLLE))
         opprettRequestContext(token)
 
-        shouldThrow<ForbiddenError> { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving(Ytelse.Barnetrygd), ValideringContext.OppdaterFakta, Behandler.Saksbehandler("Z999999")) }
+        shouldThrow<ForbiddenError> { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving(Ytelse.Barnetrygd), ValideringContext.OppdaterFakta, ANSVARLIG_SAKSBEHANDLER) }
     }
 
     @Test
@@ -356,7 +356,7 @@ internal class NyTilgangskontrollServiceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf(TILLEGSSTØNADER_SAKSBEHANDLER_ROLLE))
         opprettRequestContext(token)
 
-        shouldThrow<ForbiddenError> { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving(Ytelse.Tilleggsstønad), ValideringContext.FatteVedtak, Behandler.Saksbehandler("Z111111")) }
+        shouldThrow<ForbiddenError> { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving(Ytelse.Tilleggsstønad), ValideringContext.FatteVedtak, ANSVARLIG_SAKSBEHANDLER) }
     }
 
     @Test
@@ -365,7 +365,7 @@ internal class NyTilgangskontrollServiceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf(TILLEGSSTØNADER_SAKSBEHANDLER_ROLLE))
         opprettRequestContext(token)
 
-        shouldNotThrowAny { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving(Ytelse.Tilleggsstønad), ValideringContext.HentBehandling, Behandler.Saksbehandler("Z999999")) }
+        shouldNotThrowAny { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving(Ytelse.Tilleggsstønad), ValideringContext.HentBehandling, ANSVARLIG_SAKSBEHANDLER) }
     }
 
     @Test
@@ -374,7 +374,7 @@ internal class NyTilgangskontrollServiceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf(TILLEGSSTØNADER_BESLUTTER_ROLLE))
         opprettRequestContext(token)
 
-        shouldNotThrowAny { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving(Ytelse.Tilleggsstønad), ValideringContext.FatteVedtak, Behandler.Saksbehandler("Z111111")) }
+        shouldNotThrowAny { tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving(Ytelse.Tilleggsstønad), ValideringContext.FatteVedtak, ANSVARLIG_SAKSBEHANDLER) }
     }
 
     private fun opprettToken(

@@ -27,6 +27,8 @@ import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.saksbehandlerContext
+import no.nav.tilbakekreving.test.FellesTestdata.BESLUTTER_IDENT
+import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.util.kroner
 import org.junit.jupiter.api.Test
@@ -85,7 +87,7 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
         tilbakekreving(behandlingId) kanBehandle Behandlingssteg.FAKTA
         tilbakekreving(behandlingId) avventerBehandling Behandlingssteg.FORHÅNDSVARSEL
 
-        somSaksbehandler("Z999999") {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
@@ -101,7 +103,6 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
         tilbakekreving(behandlingId) avventerBehandling Behandlingssteg.VILKÅRSVURDERING
 
         utførSteg(
-            ident = "Z999999",
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(1.januar(2021) til 1.januar(2021)),
         )
@@ -112,7 +113,6 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
         tilbakekreving(behandlingId) avventerBehandling Behandlingssteg.FORESLÅ_VEDTAK
 
         utførSteg(
-            ident = "Z999999",
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving(1.januar(2021) til 1.januar(2021)),
         )
@@ -120,16 +120,12 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
         tilbakekreving(behandlingId) kanBehandle Behandlingssteg.FORESLÅ_VEDTAK
         tilbakekreving(behandlingId) avventerBehandling Behandlingssteg.FATTE_VEDTAK
 
-        utførSteg(
-            ident = "Z999999",
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagForeslåVedtakVurdering(),
-        )
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagForeslåVedtakVurdering())
         tilbakekreving(behandlingId) kanBehandle Behandlingssteg.FATTE_VEDTAK
         tilbakekreving(behandlingId) avventerBehandling Behandlingssteg.IVERKSETT_VEDTAK
 
         utførSteg(
-            ident = "Z111111",
+            ident = BESLUTTER_IDENT,
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagGodkjennVedtakVurdering(),
         )
@@ -140,7 +136,7 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
             vedtak.datoVedtakFagsystem shouldBe LocalDate.now()
             vedtak.enhetAnsvarlig = ansvarligEnhet
             vedtak.kontrollfelt = "2025-12-24-11.12.13.123456"
-            vedtak.saksbehId = "Z999999"
+            vedtak.saksbehId = SAKSBEHANDLER_IDENT
             vedtak.tilbakekrevingsperiode.forSingle { periode ->
                 periode.periode.fom shouldBe 1.januar(2021)
                 periode.periode.tom shouldBe 1.januar(2021)
@@ -186,29 +182,17 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId)
 
-        somSaksbehandler("Z999999") {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
         }
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagIkkeForeldetVurdering())
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving())
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagForeslåVedtakVurdering())
         utførSteg(
-            ident = "Z999999",
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(),
-        )
-        utførSteg(
-            ident = "Z999999",
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving(),
-        )
-        utførSteg(
-            ident = "Z999999",
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagForeslåVedtakVurdering(),
-        )
-        utførSteg(
-            ident = "Z111111",
+            ident = BESLUTTER_IDENT,
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagGodkjennVedtakVurdering(),
         )
@@ -249,30 +233,18 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId)
 
-        somSaksbehandler("Z999999") {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
         }
-        utførSteg(
-            ident = "Z999999",
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(),
-        )
-        utførSteg(
-            ident = "Z999999",
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving(),
-        )
-        utførSteg(
-            ident = "Z999999",
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagForeslåVedtakVurdering(),
-        )
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagIkkeForeldetVurdering())
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving())
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagForeslåVedtakVurdering())
         tilbakekreving(behandlingId).frontendDtoForBehandling(behandlingId, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER).status shouldBe Behandlingsstatus.FATTER_VEDTAK
         utførSteg(
-            ident = "Z111111",
+            ident = BESLUTTER_IDENT,
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagIkkeGodkjennVedtakVurdering(),
         )
@@ -280,29 +252,17 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
 
         lagreUttalelse(behandlingId)
 
-        somSaksbehandler("Z999999") {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
         }
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagIkkeForeldetVurdering())
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving())
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagForeslåVedtakVurdering())
         utførSteg(
-            ident = "Z999999",
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(),
-        )
-        utførSteg(
-            ident = "Z999999",
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving(),
-        )
-        utførSteg(
-            ident = "Z999999",
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagForeslåVedtakVurdering(),
-        )
-        utførSteg(
-            ident = "Z111111",
+            ident = BESLUTTER_IDENT,
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagGodkjennVedtakVurdering(),
         )

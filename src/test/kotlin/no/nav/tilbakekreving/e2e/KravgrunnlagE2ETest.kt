@@ -38,6 +38,8 @@ import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagMediator
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
 import no.nav.tilbakekreving.saksbehandlerContext
 import no.nav.tilbakekreving.systemContext
+import no.nav.tilbakekreving.test.FellesTestdata.BESLUTTER_IDENT
+import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import no.nav.tilbakekreving.test.april
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.test.mai
@@ -252,17 +254,17 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId)
 
-        somSaksbehandler("Z999999") {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
         }
 
-        utførSteg("Z999999", behandlingId, BehandlingsstegGenerator.lagIkkeForeldetVurdering(1.januar(2021) til 31.januar(2021)))
-        utførSteg("Z999999", behandlingId, BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving(1.januar(2021) til 31.januar(2021)))
-        utførSteg("Z999999", behandlingId, BehandlingsstegGenerator.lagForeslåVedtakVurdering())
-        utførSteg("Z111111", behandlingId, BehandlingsstegGenerator.lagGodkjennVedtakVurdering())
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagIkkeForeldetVurdering(1.januar(2021) til 31.januar(2021)))
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving(1.januar(2021) til 31.januar(2021)))
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagForeslåVedtakVurdering())
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagGodkjennVedtakVurdering(), BESLUTTER_IDENT)
 
         oppdragClient.shouldHaveIverksettelse(behandlingId) { vedtak ->
             vedtak.tilbakekrevingsperiode shouldHaveSize 1

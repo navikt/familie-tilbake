@@ -16,6 +16,7 @@ import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
+import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import no.nav.tilbakekreving.test.april
 import no.nav.tilbakekreving.test.mai
 import no.nav.tilbakekreving.test.mars
@@ -77,7 +78,7 @@ class ForvaltningTest : TilbakekrevingE2EBase() {
         val tilbakekreving = tilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         val kravgrunnlag = tilbakekreving.kravgrunnlagHistorikk.nåværende().entry
 
-        val behandlingInfo = somSaksbehandler("Z999999") {
+        val behandlingInfo = somSaksbehandler(SAKSBEHANDLER_IDENT) {
             forvaltningController.hentForvaltningsinfo(YtelsestypeDTO.TILLEGGSSTØNAD, fagsystemId).data.shouldNotBeNull()
         }
 

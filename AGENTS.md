@@ -36,7 +36,7 @@ familie-tilbake/           # Rotprosjekt – Spring Boot-applikasjonen
 
 ## Bygge- og testkjøring
 
-> **IntelliJ MCP/skills:** Dersom IntelliJ-skillene (intellij-mcp) er tilgjengelige, bruk dem til å bygge, kjøre tester, kjøre inspeksjoner, søke og refaktorere i stedet for å kjøre Gradle direkte. Fall kun tilbake på `./gradlew`-kommandoene under når IntelliJ-skillene ikke er tilgjengelige.
+Dersom intellij-mcp er tilgjengelig, ta de i bruk. Fall kun tilbake på `./gradlew`-kommandoene under når IntelliJ-skillene ikke er tilgjengelige.
 
 ### Vanlige kommandoer
 

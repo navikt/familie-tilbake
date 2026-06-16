@@ -20,7 +20,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.RentekstElementDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SignaturDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDataUpdateDto
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
-import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.test.FellesTestdata.ANSVARLIG_BESLUTTER
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
@@ -44,7 +44,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
     @Test
     fun `det finnes ingen lagrede felter i vedtaksbrev`() {
         val vedtaksbrevInfo = vedtaksbrevInfo(UUID.randomUUID())
-        nyVedtaksbrevService.hentVedtaksbrevData(lagBehandlingId(), vedtaksbrevInfo, Behandler.Saksbehandler("beslutter")).should {
+        nyVedtaksbrevService.hentVedtaksbrevData(lagBehandlingId(), vedtaksbrevInfo, ANSVARLIG_BESLUTTER).should {
             it.hovedavsnitt shouldBe HovedavsnittDto(
                 tittel = "Du må betale tilbake arbeidsavklaringspenger",
                 forklaring = Forklaringstekster.HOVEDAVSNITT,
@@ -99,7 +99,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
             vedtaksbrevInfo,
         )
 
-        nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, vedtaksbrevInfo, Behandler.Saksbehandler("beslutter")).should {
+        nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, vedtaksbrevInfo, ANSVARLIG_BESLUTTER).should {
             it.hovedavsnitt shouldBe HovedavsnittDto(
                 tittel = "Du må betale tilbake arbeidsavklaringspenger",
                 forklaring = Forklaringstekster.HOVEDAVSNITT,
@@ -159,7 +159,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
         )
 
         val midlertidigVedtaksbrevInfo = vedtaksbrevInfo(periodeId, VilkårsvurderingBegrunnelse.REDUSERT_SÆRLIGE_GRUNNER)
-        nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, midlertidigVedtaksbrevInfo, Behandler.Saksbehandler("beslutter")).should {
+        nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, midlertidigVedtaksbrevInfo, ANSVARLIG_BESLUTTER).should {
             it.avsnitt[0].tittel shouldBe "Dette er grunnen til at du har fått for mye utbetalt"
             it.avsnitt[0].underavsnitt shouldBe listOf(
                 RentekstElementDto("Det var jo litt uaktsomt..."),
@@ -231,7 +231,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
             info = midlertidigVedtaksbrevInfo,
         )
 
-        nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, midlertidigVedtaksbrevInfo, Behandler.Saksbehandler("beslutter")).should {
+        nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, midlertidigVedtaksbrevInfo, ANSVARLIG_BESLUTTER).should {
             it.avsnitt[0].tittel shouldBe "Dette er grunnen til at du har fått for mye utbetalt"
             it.avsnitt[0].underavsnitt shouldBe listOf(
                 RentekstElementDto("Det var jo litt uaktsomt..."),
@@ -246,7 +246,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
             )
         }
 
-        nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, originalVedtaksbrevInfo, Behandler.Saksbehandler("beslutter")).should {
+        nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, originalVedtaksbrevInfo, ANSVARLIG_BESLUTTER).should {
             it.avsnitt[0].tittel shouldBe "Dette er grunnen til at du har fått for mye utbetalt"
             it.avsnitt[0].underavsnitt shouldBe listOf(
                 RentekstElementDto("Det var jo litt uaktsomt..."),
@@ -268,7 +268,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
         val periodeId = UUID.randomUUID()
         val info = vedtaksbrevInfo(periodeId, VilkårsvurderingBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR)
 
-        nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, info, Behandler.Saksbehandler("beslutter")).should {
+        nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, info, ANSVARLIG_BESLUTTER).should {
             it.avsnitt[0].tittel shouldBe "Dette er grunnen til at du har fått for mye utbetalt"
             it.avsnitt[0].underavsnitt shouldBe listOf(
                 RentekstElementDto(""),

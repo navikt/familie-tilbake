@@ -20,6 +20,8 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.saksbehandlerContext
+import no.nav.tilbakekreving.test.FellesTestdata.BESLUTTER_IDENT
+import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import no.nav.tilbakekreving.test.januar
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -121,7 +123,7 @@ class TilBehandlingTest : TilbakekrevingE2EBase() {
             ),
         )
 
-        somSaksbehandler("Z111111") {
+        somSaksbehandler(BESLUTTER_IDENT) {
             behandlingController.flyttBehandlingTilFakta(behandlingId).status shouldBe Ressurs.Status.SUKSESS
         }
 
@@ -139,7 +141,6 @@ class TilBehandlingTest : TilbakekrevingE2EBase() {
 
     @Test
     fun `tilbakekreving trekkes tilbake fra godkjenning`() {
-        val behandlerIdent = "Z111111"
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
             queueName = TILLEGGSSTØNADER_KØ_NAVN,
@@ -152,30 +153,18 @@ class TilBehandlingTest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId)
 
-        somSaksbehandler(behandlerIdent) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
         }
 
-        utførSteg(
-            ident = behandlerIdent,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(),
-        )
-        utførSteg(
-            ident = behandlerIdent,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving(),
-        )
-        utførSteg(
-            ident = behandlerIdent,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagForeslåVedtakVurdering(),
-        )
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagIkkeForeldetVurdering())
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving())
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagForeslåVedtakVurdering())
 
-        somSaksbehandler(behandlerIdent) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingController.angreSendTilBeslutter(behandlingId)
         }
         tilbakekreving(behandlingId) kanBehandle Behandlingssteg.FORESLÅ_VEDTAK

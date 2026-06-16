@@ -33,6 +33,8 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevDataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDataUpdateDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.test.FellesTestdata.BESLUTTER_IDENT
+import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import no.nav.tilbakekreving.test.ingenReduksjon
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.test.skalIkkeUnnlates
@@ -47,9 +49,6 @@ import java.util.UUID
 class VedtaksbrevE2ETest : TilbakekrevingE2EBase() {
     @Autowired
     private lateinit var fagsystemIntegrasjonService: FagsystemIntegrasjonService
-
-    private val ansvarligSaksbehandler = "Z999999"
-    private val ansvarligBeslutter = "Z111111"
 
     @Test
     @Disabled
@@ -66,29 +65,17 @@ class VedtaksbrevE2ETest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId)
 
-        somSaksbehandler(ansvarligSaksbehandler) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
         }
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagIkkeForeldetVurdering())
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving())
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagForeslåVedtakVurdering())
         utførSteg(
-            ident = ansvarligSaksbehandler,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(),
-        )
-        utførSteg(
-            ident = ansvarligSaksbehandler,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving(),
-        )
-        utførSteg(
-            ident = ansvarligSaksbehandler,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagForeslåVedtakVurdering(),
-        )
-        utførSteg(
-            ident = ansvarligBeslutter,
+            ident = BESLUTTER_IDENT,
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagGodkjennVedtakVurdering(),
         )
@@ -127,23 +114,22 @@ class VedtaksbrevE2ETest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId, uttalelse = "Jeg svindlet NAV")
 
-        somSaksbehandler(ansvarligSaksbehandler) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
         }
         utførSteg(
-            ident = ansvarligSaksbehandler,
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(1.januar(2021) til 31.januar(2021)),
         )
         håndterVilkårsvurdering(
-            ident = ansvarligSaksbehandler,
+            ident = SAKSBEHANDLER_IDENT,
             behandlingId = behandlingId,
             vurderinger = arrayOf(vurdering),
         )
-        val avsnittFørOppdatering = somSaksbehandler(ansvarligSaksbehandler) {
+        val avsnittFørOppdatering = somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingHentVedtaksbrev(behandlingId.toString()).body.shouldNotBeNull()
         }
         avsnittFørOppdatering.hovedavsnitt shouldBe assertions.hovedavsnitt
@@ -153,7 +139,7 @@ class VedtaksbrevE2ETest : TilbakekrevingE2EBase() {
             actual.underavsnitt shouldContainExactly expected.underavsnitt
         }
 
-        val avsnittEtterOppdatering = somSaksbehandler(ansvarligSaksbehandler) {
+        val avsnittEtterOppdatering = somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterVedtaksbrev(
                 behandlingId = behandlingId,
                 vedtaksbrevRedigerbareDataUpdateDto = objectMapper.convertValue<VedtaksbrevRedigerbareDataUpdateDto>(avsnittFørOppdatering),
@@ -198,33 +184,32 @@ class VedtaksbrevE2ETest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId, uttalelse = "Jeg svindlet NAV")
 
-        somSaksbehandler(ansvarligSaksbehandler) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
         }
         utførSteg(
-            ident = ansvarligSaksbehandler,
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(1.januar(2021) til 31.januar(2021)),
         )
         håndterVilkårsvurdering(
-            ident = ansvarligSaksbehandler,
+            ident = SAKSBEHANDLER_IDENT,
             behandlingId = behandlingId,
             vurderinger = arrayOf(forårsaketAvNav().godTro()),
         )
-        val avsnittFørOppdatering = somSaksbehandler(ansvarligSaksbehandler) {
+        val avsnittFørOppdatering = somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingHentVedtaksbrev(behandlingId.toString()).body.shouldNotBeNull().avsnitt.single()
         }
 
         håndterVilkårsvurdering(
-            ident = ansvarligSaksbehandler,
+            ident = SAKSBEHANDLER_IDENT,
             behandlingId = behandlingId,
             vurderinger = arrayOf(forårsaketAvNav().burdeForstått()),
         )
 
-        val avsnittEtterOppdatering = somSaksbehandler(ansvarligSaksbehandler) {
+        val avsnittEtterOppdatering = somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingHentVedtaksbrev(behandlingId.toString()).body.shouldNotBeNull().avsnitt.single()
         }
 
@@ -252,14 +237,13 @@ class VedtaksbrevE2ETest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(FagsystemDTO.AAP, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId, uttalelse = "Jeg svindlet NAV")
 
-        somSaksbehandler(ansvarligSaksbehandler) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
         }
         utførSteg(
-            ident = ansvarligSaksbehandler,
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(
                 1.januar(2021) til 14.januar(2021),
@@ -267,11 +251,11 @@ class VedtaksbrevE2ETest : TilbakekrevingE2EBase() {
             ),
         )
         håndterVilkårsvurdering(
-            ident = ansvarligSaksbehandler,
+            ident = SAKSBEHANDLER_IDENT,
             behandlingId = behandlingId,
             vurderinger = arrayOf(forårsaketAvNav().burdeForstått().copy(periode = 1.januar(2021) til 28.januar(2021))),
         )
-        somSaksbehandler(ansvarligSaksbehandler) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingHentVedtaksbrev(behandlingId.toString()).body.shouldNotBeNull().avsnitt.size shouldBe 1
         }
     }

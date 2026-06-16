@@ -28,16 +28,13 @@ import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
-import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.test.FellesTestdata
 import no.nav.tilbakekreving.test.januar
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
 import java.util.Random
 import java.util.UUID
-
-val ANSVARLIG_SAKSBEHANDLER = Behandler.Saksbehandler("Z999999")
-val ANSVARLIG_BESLUTTER = Behandler.Saksbehandler("Z111111")
 
 fun eksternFagsak(
     eksternId: String = "101010",
@@ -171,7 +168,7 @@ fun behandling(
         id = UUID.randomUUID(),
         type = Behandlingstype.TILBAKEKREVING,
         enhet = Enhet("", ""),
-        ansvarligSaksbehandler = ANSVARLIG_SAKSBEHANDLER,
+        ansvarligSaksbehandler = FellesTestdata.ANSVARLIG_SAKSBEHANDLER,
         eksternFagsakRevurdering = eksternFagsakBehandlingReferanse,
         kravgrunnlag = kravgrunnlagReferanse,
         brevHistorikk = BrevHistorikk(mutableListOf()),

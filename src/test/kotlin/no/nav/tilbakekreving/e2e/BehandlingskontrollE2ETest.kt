@@ -10,8 +10,8 @@ import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
-import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.saksbehandlerContext
+import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -31,14 +31,13 @@ class BehandlingskontrollE2ETest : TilbakekrevingE2EBase() {
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
 
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
-        val ansvarligSaksbehandler = Behandler.Saksbehandler("Z999999")
 
         val dtoFørUtførtFakta = tilbakekreving(behandlingId).frontendDtoForBehandling(behandlingId, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER)
         dtoFørUtførtFakta.behandlingsstegsinfo.find { it.behandlingssteg == Behandlingssteg.FAKTA }
             .shouldNotBeNull()
             .behandlingsstegstatus shouldBe Behandlingsstegstatus.KLAR
 
-        somSaksbehandler(ansvarligSaksbehandler.ident) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
@@ -50,7 +49,7 @@ class BehandlingskontrollE2ETest : TilbakekrevingE2EBase() {
             .shouldNotBeNull()
             .behandlingsstegstatus shouldBe Behandlingsstegstatus.UTFØRT
 
-        somSaksbehandler(ansvarligSaksbehandler.ident) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingController.flyttBehandlingTilFakta(behandlingId) shouldBe Ressurs.success("OK")
         }
 

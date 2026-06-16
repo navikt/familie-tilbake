@@ -42,6 +42,8 @@ import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.saksbehandlerContext
+import no.nav.tilbakekreving.test.FellesTestdata.BESLUTTER_IDENT
+import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import no.nav.tilbakekreving.test.februar
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.test.juli
@@ -62,9 +64,6 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
     @Autowired
     private lateinit var kafkaProducer: KafkaProducerStub
 
-    private val ansvarligSaksbehandler = "Z999999"
-    private val ansvarligBeslutter = "Z111111"
-
     @Test
     fun `endringer i behandling skal føre til kafka-meldinger til dvh`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
@@ -79,7 +78,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId)
 
-        somSaksbehandler(ansvarligSaksbehandler) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
@@ -94,66 +93,54 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         dvhHendelser[0].ansvarligEnhet shouldBe "0425"
         dvhHendelser[0].behandlingsstatus shouldBe Behandlingsstatus.OPPRETTET
 
-        dvhHendelser[1].ansvarligSaksbehandler shouldBe ansvarligSaksbehandler
+        dvhHendelser[1].ansvarligSaksbehandler shouldBe SAKSBEHANDLER_IDENT
         dvhHendelser[1].ansvarligBeslutter shouldBe null
         dvhHendelser[1].ansvarligEnhet shouldBe "0425"
         dvhHendelser[1].behandlingsstatus shouldBe Behandlingsstatus.UTREDES
 
-        utførSteg(
-            ident = ansvarligSaksbehandler,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(),
-        )
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagIkkeForeldetVurdering())
         dvhHendelser.size shouldBe 3
-        dvhHendelser.last().ansvarligSaksbehandler shouldBe ansvarligSaksbehandler
+        dvhHendelser.last().ansvarligSaksbehandler shouldBe SAKSBEHANDLER_IDENT
         dvhHendelser.last().ansvarligBeslutter shouldBe null
         dvhHendelser.last().ansvarligEnhet shouldBe "0425"
         dvhHendelser.last().behandlingsstatus shouldBe Behandlingsstatus.UTREDES
 
-        utførSteg(
-            ident = ansvarligSaksbehandler,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving(),
-        )
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving())
         dvhHendelser.size shouldBe 4
-        dvhHendelser.last().ansvarligSaksbehandler shouldBe ansvarligSaksbehandler
+        dvhHendelser.last().ansvarligSaksbehandler shouldBe SAKSBEHANDLER_IDENT
         dvhHendelser.last().ansvarligBeslutter shouldBe null
         dvhHendelser.last().ansvarligEnhet shouldBe "0425"
         dvhHendelser.last().behandlingsstatus shouldBe Behandlingsstatus.UTREDES
 
-        utførSteg(
-            ident = ansvarligSaksbehandler,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagForeslåVedtakVurdering(),
-        )
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagForeslåVedtakVurdering())
         dvhHendelser.size shouldBe 5
-        dvhHendelser.last().ansvarligSaksbehandler shouldBe ansvarligSaksbehandler
+        dvhHendelser.last().ansvarligSaksbehandler shouldBe SAKSBEHANDLER_IDENT
         dvhHendelser.last().ansvarligBeslutter shouldBe null
         dvhHendelser.last().ansvarligEnhet shouldBe "0425"
         dvhHendelser.last().behandlingsstatus shouldBe Behandlingsstatus.FATTER_VEDTAK
         kafkaProducer.finnVedtaksoppsummering(behandlingId).size shouldBe 0
 
         utførSteg(
-            ident = ansvarligBeslutter,
+            ident = BESLUTTER_IDENT,
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagGodkjennVedtakVurdering(),
         )
         dvhHendelser.size shouldBe 7
-        dvhHendelser[5].ansvarligSaksbehandler shouldBe ansvarligSaksbehandler
-        dvhHendelser[5].ansvarligBeslutter shouldBe ansvarligBeslutter
+        dvhHendelser[5].ansvarligSaksbehandler shouldBe SAKSBEHANDLER_IDENT
+        dvhHendelser[5].ansvarligBeslutter shouldBe BESLUTTER_IDENT
         dvhHendelser[5].ansvarligEnhet shouldBe "0425"
         dvhHendelser[5].behandlingsstatus shouldBe Behandlingsstatus.IVERKSETTER_VEDTAK
 
-        dvhHendelser[6].ansvarligSaksbehandler shouldBe ansvarligSaksbehandler
-        dvhHendelser[6].ansvarligBeslutter shouldBe ansvarligBeslutter
+        dvhHendelser[6].ansvarligSaksbehandler shouldBe SAKSBEHANDLER_IDENT
+        dvhHendelser[6].ansvarligBeslutter shouldBe BESLUTTER_IDENT
         dvhHendelser[6].ansvarligEnhet shouldBe "0425"
         dvhHendelser[6].behandlingsstatus shouldBe Behandlingsstatus.AVSLUTTET
 
         val vedtaksoppsummeringer = kafkaProducer.finnVedtaksoppsummering(behandlingId)
         vedtaksoppsummeringer.size shouldBe 1
         val vedtaksoppsummering = vedtaksoppsummeringer.single()
-        vedtaksoppsummering.ansvarligSaksbehandler shouldBe ansvarligSaksbehandler
-        vedtaksoppsummering.ansvarligBeslutter shouldBe ansvarligBeslutter
+        vedtaksoppsummering.ansvarligSaksbehandler shouldBe SAKSBEHANDLER_IDENT
+        vedtaksoppsummering.ansvarligBeslutter shouldBe BESLUTTER_IDENT
         vedtaksoppsummering.perioder shouldBe listOf(
             VedtakPeriode(
                 fom = 1.januar(2021),
@@ -187,7 +174,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
 
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
-        somSaksbehandler(ansvarligSaksbehandler) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
@@ -211,21 +198,16 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId)
 
-        somSaksbehandler(ansvarligSaksbehandler) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
         }
 
-        utførSteg(
-            ident = ansvarligSaksbehandler,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(),
-        )
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagIkkeForeldetVurdering())
 
         utførSteg(
-            ident = ansvarligSaksbehandler,
             behandlingId = behandlingId,
             stegData = BehandlingsstegVilkårsvurderingDto(
                 vilkårsvurderingsperioder = listOf(
@@ -268,18 +250,17 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId)
 
-        somSaksbehandler(ansvarligSaksbehandler) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
         }
-        somSaksbehandler(ansvarligSaksbehandler) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             vilkårsvurderingController.hentVurdertVilkårsvurdering(behandlingId).data!!.perioder.size shouldBe 1
         }
 
         utførSteg(
-            ident = ansvarligSaksbehandler,
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(
                 1.januar(2021) til 1.januar(2021),
@@ -288,7 +269,6 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         )
 
         utførSteg(
-            ident = ansvarligSaksbehandler,
             behandlingId = behandlingId,
             stegData = BehandlingsstegVilkårsvurderingDto(
                 vilkårsvurderingsperioder = listOf(
@@ -333,13 +313,13 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId)
 
-        somSaksbehandler(ansvarligSaksbehandler) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
         }
-        somSaksbehandler(ansvarligSaksbehandler) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             vilkårsvurderingController.hentVurdertVilkårsvurdering(behandlingId).data shouldNotBeNull {
                 perioder.size shouldBe 1
                 perioder.first().periode shouldBe (1.januar(2021) til 14.juli(2021))
@@ -347,7 +327,6 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         }
 
         utførSteg(
-            ident = ansvarligSaksbehandler,
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(
                 1.januar(2021) til 1.januar(2021),
@@ -358,7 +337,6 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         )
 
         utførSteg(
-            ident = ansvarligSaksbehandler,
             behandlingId = behandlingId,
             stegData = BehandlingsstegVilkårsvurderingDto(
                 vilkårsvurderingsperioder = listOf(
@@ -404,13 +382,13 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId)
 
-        somSaksbehandler(ansvarligSaksbehandler) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
         }
-        somSaksbehandler(ansvarligSaksbehandler) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             vilkårsvurderingController.hentVurdertVilkårsvurdering(behandlingId).data shouldNotBeNull {
                 perioder.size shouldBe 1
                 perioder.first().periode shouldBe (1.januar(2021) til 14.juli(2021))
@@ -418,7 +396,6 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         }
 
         utførSteg(
-            ident = ansvarligSaksbehandler,
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(
                 1.januar(2021) til 1.januar(2021),
@@ -436,7 +413,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
             this[3].periode shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(14.juli(2021), 14.juli(2021))
         }
 
-        somSaksbehandler(ansvarligSaksbehandler) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingSplittPeriode(behandlingId, SplittPeriodeDto(perioder[2].periodeId))
         }
 
@@ -470,7 +447,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId)
 
-        somSaksbehandler(ansvarligSaksbehandler) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
@@ -478,7 +455,6 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         }
 
         utførSteg(
-            ident = ansvarligSaksbehandler,
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(
                 1.januar(2021) til 1.januar(2021),
@@ -489,7 +465,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         )
         tilbakekreving(behandlingId).hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext()).perioder.size shouldBe 1
 
-        val perioder = somSaksbehandler(ansvarligSaksbehandler) {
+        val perioder = somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingVilkaarsvurderingsperioder(behandlingId).body!!
         } shouldNotBeNull {
             size shouldBe 4
@@ -499,13 +475,13 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
             this[3].periode shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(14.juli(2021), 14.juli(2021))
         }
 
-        somSaksbehandler(ansvarligSaksbehandler) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingSplittPeriode(behandlingId, SplittPeriodeDto(perioder[2].periodeId))
         }
 
         tilbakekreving(behandlingId).hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext()).perioder.size shouldBe 2
 
-        somSaksbehandler(ansvarligSaksbehandler) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingSlaaSammenPerioder(
                 behandlingId,
                 SammenslaaingDto(
@@ -536,21 +512,16 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId)
 
-        somSaksbehandler(ansvarligSaksbehandler) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
         }
 
-        utførSteg(
-            ident = ansvarligSaksbehandler,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(),
-        )
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagIkkeForeldetVurdering())
 
         utførSteg(
-            ident = ansvarligSaksbehandler,
             behandlingId = behandlingId,
             stegData = BehandlingsstegVilkårsvurderingDto(
                 vilkårsvurderingsperioder = listOf(
@@ -641,7 +612,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
         val oppdagetDato = LocalDate.now()
-        somSaksbehandler("Z999999") {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = OppdaterFaktaOmFeilutbetalingDto(
@@ -658,7 +629,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
             ).statusCode shouldBe HttpStatus.OK
         }
 
-        somSaksbehandler("Z999999") {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingFakta(
                 behandlingId = behandlingId.toString(),
             ).body?.vurdering?.oppdaget shouldBe OppdagetDto(
@@ -681,7 +652,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
-        somSaksbehandler("Z999999") {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = OppdaterFaktaOmFeilutbetalingDto(
@@ -692,7 +663,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
             ).statusCode shouldBe HttpStatus.OK
         }
 
-        somSaksbehandler("Z999999") {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingFakta(
                 behandlingId = behandlingId.toString(),
             ).body?.vurdering?.årsak shouldBe "årsak"
@@ -711,7 +682,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
-        somSaksbehandler("Z999999") {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingFakta(
                 behandlingId = behandlingId.toString(),
             ).body?.perioder?.single()?.rettsligGrunnlag shouldBe listOf(
@@ -734,7 +705,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
                 ),
             ),
         )
-        somSaksbehandler("Z999999") {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = OppdaterFaktaOmFeilutbetalingDto(
@@ -743,7 +714,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
             ).statusCode shouldBe HttpStatus.OK
         }
 
-        somSaksbehandler("Z999999") {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingFakta(
                 behandlingId = behandlingId.toString(),
             ).body?.perioder?.single()?.rettsligGrunnlag shouldBe
@@ -781,7 +752,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
             ),
         )
         val oppdagetDato = LocalDate.now()
-        somSaksbehandler("Z999999") {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = OppdaterFaktaOmFeilutbetalingDto(
@@ -798,10 +769,10 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
             ).statusCode shouldBe HttpStatus.OK
         }
 
-        somSaksbehandler("Z999999") {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingController.flyttBehandlingTilFakta(behandlingId).status shouldBe Ressurs.Status.SUKSESS
         }
-        somSaksbehandler("Z999999") {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             val faktaSteg = behandlingApiController.behandlingFakta(
                 behandlingId = behandlingId.toString(),
             ).body
@@ -837,21 +808,16 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId)
 
-        somSaksbehandler(ansvarligSaksbehandler) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
         }
 
-        utførSteg(
-            ident = ansvarligSaksbehandler,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(),
-        )
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagIkkeForeldetVurdering())
 
         utførSteg(
-            ident = ansvarligSaksbehandler,
             behandlingId = behandlingId,
             stegData = BehandlingsstegVilkårsvurderingDto(
                 vilkårsvurderingsperioder = listOf(
@@ -869,19 +835,15 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
             ),
         )
 
-        utførSteg(
-            ident = ansvarligSaksbehandler,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagForeslåVedtakVurdering(),
-        )
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagForeslåVedtakVurdering())
 
         utførSteg(
-            ident = ansvarligBeslutter,
+            ident = BESLUTTER_IDENT,
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagIkkeGodkjennVedtakVurdering(),
         )
 
-        val behandling = somSaksbehandler(ansvarligSaksbehandler) { behandlingController.hentBehandling(behandlingId).data.shouldNotBeNull() }
+        val behandling = somSaksbehandler(SAKSBEHANDLER_IDENT) { behandlingController.hentBehandling(behandlingId).data.shouldNotBeNull() }
         behandling.status shouldBe Behandlingsstatus.UTREDES
         behandling.behandlingsstegsinfo.skalHaSteg(Behandlingssteg.FAKTA).behandlingsstegstatus shouldBe Behandlingsstegstatus.TILBAKEFØRT
         behandling.behandlingsstegsinfo.skalHaSteg(Behandlingssteg.FORHÅNDSVARSEL).behandlingsstegstatus shouldBe Behandlingsstegstatus.TILBAKEFØRT

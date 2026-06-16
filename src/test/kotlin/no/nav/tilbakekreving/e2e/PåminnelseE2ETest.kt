@@ -22,6 +22,8 @@ import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
+import no.nav.tilbakekreving.test.FellesTestdata.BESLUTTER_IDENT
+import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import no.nav.tilbakekreving.test.januar
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -106,7 +108,7 @@ class PåminnelseE2ETest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId)
 
-        somSaksbehandler("Z999999") {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
@@ -114,25 +116,19 @@ class PåminnelseE2ETest : TilbakekrevingE2EBase() {
         }
 
         utførSteg(
-            ident = "Z999999",
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(1.januar(2021) til 1.januar(2021)),
         )
 
         utførSteg(
-            ident = "Z999999",
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving(1.januar(2021) til 1.januar(2021)),
         )
 
-        utførSteg(
-            ident = "Z999999",
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagForeslåVedtakVurdering(),
-        )
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagForeslåVedtakVurdering())
 
         utførSteg(
-            ident = "Z111111",
+            ident = BESLUTTER_IDENT,
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagGodkjennVedtakVurdering(),
         )

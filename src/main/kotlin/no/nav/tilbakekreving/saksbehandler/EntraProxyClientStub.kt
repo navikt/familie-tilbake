@@ -6,7 +6,7 @@ import no.tilbakekreving.integrasjoner.entraProxy.kontrakter.Saksbehandler
 
 class EntraProxyClientStub : EntraProxyClient {
     override fun hentSaksbehandler(id: String): Saksbehandler {
-        if (id == "beslutter") {
+        if (id == "Z111111") {
             return Saksbehandler(
                 navIdent = "beslutter",
                 visningNavn = "",

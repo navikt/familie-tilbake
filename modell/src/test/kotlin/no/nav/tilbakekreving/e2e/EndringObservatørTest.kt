@@ -2,7 +2,6 @@ package no.nav.tilbakekreving.e2e
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
-import no.nav.tilbakekreving.ANSVARLIG_SAKSBEHANDLER
 import no.nav.tilbakekreving.FagsystemToggle
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
 import no.nav.tilbakekreving.Tilbakekreving
@@ -37,6 +36,7 @@ import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.saksbehandlerContext
 import no.nav.tilbakekreving.systemContext
+import no.nav.tilbakekreving.test.FellesTestdata
 import no.nav.tilbakekreving.test.januar
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -71,7 +71,7 @@ class EndringObservatørTest {
                 totalFeilutbetaltPeriode = 1.januar(2021) til 31.januar(2021),
             ),
             EndringObservatørOppsamler.Statusoppdatering(
-                ansvarligSaksbehandler = ANSVARLIG_SAKSBEHANDLER.ident,
+                ansvarligSaksbehandler = FellesTestdata.ANSVARLIG_SAKSBEHANDLER.ident,
                 vedtaksresultat = null,
                 behandlingstatus = Behandlingsstatus.UTREDES,
                 totalFeilutbetaltPeriode = 1.januar(2021) til 31.januar(2021),
@@ -115,7 +115,7 @@ class EndringObservatørTest {
                 totalFeilutbetaltPeriode = 1.januar(2021) til 31.januar(2021),
             ),
             EndringObservatørOppsamler.Statusoppdatering(
-                ansvarligSaksbehandler = ANSVARLIG_SAKSBEHANDLER.ident,
+                ansvarligSaksbehandler = FellesTestdata.ANSVARLIG_SAKSBEHANDLER.ident,
                 vedtaksresultat = null,
                 behandlingstatus = Behandlingsstatus.UTREDES,
                 totalFeilutbetaltPeriode = 1.januar(2021) til 31.januar(2021),

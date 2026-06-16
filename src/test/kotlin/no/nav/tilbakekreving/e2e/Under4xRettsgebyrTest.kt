@@ -18,8 +18,8 @@ import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
-import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.saksbehandlerContext
+import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.test.over4Rettsgebyr
 import no.nav.tilbakekreving.test.prosentReduksjon
@@ -46,23 +46,17 @@ class Under4xRettsgebyrTest : TilbakekrevingE2EBase() {
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId)
-        val ansvarligSaksbehandler = Behandler.Saksbehandler("Z999999")
 
-        somSaksbehandler(ansvarligSaksbehandler.ident) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
         }
 
-        utførSteg(
-            ident = ansvarligSaksbehandler.ident,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(),
-        )
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagIkkeForeldetVurdering())
 
         utførSteg(
-            ident = ansvarligSaksbehandler.ident,
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagVilkårsvurderingUnder4xRettsgebyrIngenTilbakekreving(vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT),
         )
@@ -85,25 +79,19 @@ class Under4xRettsgebyrTest : TilbakekrevingE2EBase() {
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId)
-        val ansvarligSaksbehandler = Behandler.Saksbehandler("Z999999")
 
-        somSaksbehandler(ansvarligSaksbehandler.ident) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
         }
 
-        utførSteg(
-            ident = ansvarligSaksbehandler.ident,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(),
-        )
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagIkkeForeldetVurdering())
 
         val behandlingFørVilkårsvurdering = behandling(behandlingId).beregnForFrontend()
 
         utførSteg(
-            ident = ansvarligSaksbehandler.ident,
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagVilkårsvurderingUnder4xRettsgebyrFullTilbakekreving(vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER),
         )
@@ -116,7 +104,6 @@ class Under4xRettsgebyrTest : TilbakekrevingE2EBase() {
 
     @Test
     fun `beløp over 4 rettsgebyr - blir lagret riktig`() {
-        val ansvarligSaksbehandler = Behandler.Saksbehandler("Z999999")
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
 
         sendKravgrunnlagOgAvventLesing(
@@ -132,21 +119,16 @@ class Under4xRettsgebyrTest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId)
 
-        somSaksbehandler(ansvarligSaksbehandler.ident) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
         }
 
-        utførSteg(
-            ident = ansvarligSaksbehandler.ident,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(),
-        )
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagIkkeForeldetVurdering())
 
         utførSteg(
-            ident = ansvarligSaksbehandler.ident,
             behandlingId = behandlingId,
             stegData = BehandlingsstegVilkårsvurderingDto(
                 listOf(
@@ -162,7 +144,6 @@ class Under4xRettsgebyrTest : TilbakekrevingE2EBase() {
 
     @Test
     fun `beløp over 4 rettsgebyr - forårsaket av bruker uaktsomt - med særlige grunner`() {
-        val ansvarligSaksbehandler = Behandler.Saksbehandler("Z999999")
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
 
         sendKravgrunnlagOgAvventLesing(
@@ -178,21 +159,16 @@ class Under4xRettsgebyrTest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId)
 
-        somSaksbehandler(ansvarligSaksbehandler.ident) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
         }
 
-        utførSteg(
-            ident = ansvarligSaksbehandler.ident,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(),
-        )
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagIkkeForeldetVurdering())
 
         utførSteg(
-            ident = ansvarligSaksbehandler.ident,
             behandlingId = behandlingId,
             stegData = BehandlingsstegVilkårsvurderingDto(
                 listOf(
@@ -223,7 +199,6 @@ class Under4xRettsgebyrTest : TilbakekrevingE2EBase() {
 
     @Test
     fun `beløp over 4 rettsgebyr - forårsaket av nav uaktsomt - med særlige grunner`() {
-        val ansvarligSaksbehandler = Behandler.Saksbehandler("Z999999")
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
 
         sendKravgrunnlagOgAvventLesing(
@@ -239,21 +214,16 @@ class Under4xRettsgebyrTest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId)
 
-        somSaksbehandler(ansvarligSaksbehandler.ident) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
         }
 
-        utførSteg(
-            ident = ansvarligSaksbehandler.ident,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(),
-        )
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagIkkeForeldetVurdering())
 
         utførSteg(
-            ident = ansvarligSaksbehandler.ident,
             behandlingId = behandlingId,
             stegData = BehandlingsstegVilkårsvurderingDto(
                 listOf(

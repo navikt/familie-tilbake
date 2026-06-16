@@ -19,7 +19,6 @@ import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
 import no.nav.tilbakekreving.nåværendeBehandlingId
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
-import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.saksbehandlerContext
 import no.nav.tilbakekreving.systemContext
 import no.nav.tilbakekreving.test.februar
@@ -31,7 +30,6 @@ class TilleggsstønaderE2ETest {
     @Test
     fun `utvidelse av feilutbetalingsperiode`() {
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
-        val behandler = Behandler.Saksbehandler("Ansvarlig saksbehandler")
 
         val tilbakekreving = Tilbakekreving.opprett(
             id = UUID.randomUUID().toString(),

@@ -26,6 +26,7 @@ import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.brev.Dokumentmalstype
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.util.kroner
 import org.junit.jupiter.api.BeforeEach
@@ -53,7 +54,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
     @Test
     fun `henter tekster til varselbrev når det skal sendes forhåndsvarsel`() {
         val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
-        val tekster = somSaksbehandler("Z999999") {
+        val tekster = somSaksbehandler(SAKSBEHANDLER_IDENT) {
             dokumentController.hentForhåndsvarselTekst(tilbakekreving.nåværendeBehandlingId())
         }
 
@@ -123,7 +124,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
         )
 
         tilbakekreving.brevHistorikk.sisteVarselbrev() shouldBe null
-        somSaksbehandler("Z999999") {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             dokumentController.bestillBrev(bestillBrevDto)
         }
 
@@ -144,11 +145,11 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             brevmalkode = Dokumentmalstype.VARSEL,
             fritekst = "Tekst fra saksbehandler",
         )
-        somSaksbehandler("Z999999") {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             dokumentController.bestillBrev(bestillBrevDto)
         }
 
-        somSaksbehandler("Z999999") {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             dokumentController.lagreBrukeruttalelse(tilbakekreving.nåværendeBehandlingId(), case.input)
         }
 
@@ -173,12 +174,12 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             brevmalkode = Dokumentmalstype.VARSEL,
             fritekst = "Tekst fra saksbehandler",
         )
-        somSaksbehandler("Z999999") {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             dokumentController.bestillBrev(bestillBrevDto)
         }
 
         shouldThrow<Exception> {
-            somSaksbehandler("Z999999") {
+            somSaksbehandler(SAKSBEHANDLER_IDENT) {
                 dokumentController.lagreBrukeruttalelse(tilbakekreving.nåværendeBehandlingId(), case.input)
             }
         }.message shouldBe case.forventetFeilmelding
@@ -189,7 +190,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
     fun `forhåndsvarsel unntak lagres og hentes riktig`(case: ForhåndsvarselUnntakCase) {
         val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
 
-        somSaksbehandler("Z999999") {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             dokumentController.forhåndsvarselUnntak(tilbakekreving.nåværendeBehandlingId(), case.input)
         }
         val forhåndsvarsel = tilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
@@ -211,7 +212,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             brevmalkode = Dokumentmalstype.VARSEL,
             fritekst = "Tekst fra saksbehandler",
         )
-        somSaksbehandler("Z999999") {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             dokumentController.bestillBrev(bestillBrevDto)
         }
 
@@ -219,7 +220,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             LocalDate.of(2025, 11, 15),
             "Advokat vil ha mer tid",
         )
-        somSaksbehandler("Z999999") {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             dokumentController.utsettUttalelseFrist(tilbakekreving.nåværendeBehandlingId(), førsteFrist)
         }
 
@@ -234,7 +235,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             LocalDate.of(2025, 11, 25),
             "Advokat vil ha enda mer tid",
         )
-        somSaksbehandler("Z999999") {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             dokumentController.utsettUttalelseFrist(tilbakekreving.nåværendeBehandlingId(), andreFrist)
         }
 

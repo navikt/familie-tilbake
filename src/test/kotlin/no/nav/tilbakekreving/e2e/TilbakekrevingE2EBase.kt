@@ -21,7 +21,6 @@ import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
 import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.TilbakekrevingService
-import no.nav.tilbakekreving.ansvarligSaksbehandler
 import no.nav.tilbakekreving.api.BehandlingApiController
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
@@ -36,6 +35,9 @@ import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagMediator
 import no.nav.tilbakekreving.repository.NyBehandlingRepository
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
+import no.nav.tilbakekreving.test.FellesTestdata
+import no.nav.tilbakekreving.test.FellesTestdata.ANSVARLIG_SAKSBEHANDLER
+import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
@@ -139,7 +141,7 @@ open class TilbakekrevingE2EBase : E2EBase() {
     ) {
         val tilbakekrevingId = tilbakekreving(behandlingId).id
         tilbakekrevingService.hentOgLagreTilbakekreving(TilbakekrevingFilter.tilbakekreving(tilbakekrevingId)) { tilbakekreving, context ->
-            tilbakekreving.gjørSaksbehandling(behandlingId, context(ansvarligSaksbehandler)) {
+            tilbakekreving.gjørSaksbehandling(behandlingId, context(ANSVARLIG_SAKSBEHANDLER)) {
                 if (uttalelse == null) {
                     lagreUttalelse(UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL, null, "")
                 } else {
@@ -185,9 +187,9 @@ open class TilbakekrevingE2EBase : E2EBase() {
     }
 
     fun utførSteg(
-        ident: String,
         behandlingId: UUID,
         stegData: BehandlingsstegDto,
+        ident: String = SAKSBEHANDLER_IDENT,
     ) {
         somSaksbehandler(ident) {
             behandlingController.utførBehandlingssteg(behandlingId, stegData).status shouldBe Ressurs.Status.SUKSESS
@@ -199,16 +201,14 @@ open class TilbakekrevingE2EBase : E2EBase() {
         behandlingId: UUID,
         vararg vurderinger: VilkårsvurderingsperiodeDto,
     ) {
-        utførSteg(ident, behandlingId, BehandlingsstegVilkårsvurderingDto(vurderinger.toList()))
+        utførSteg(behandlingId, BehandlingsstegVilkårsvurderingDto(vurderinger.toList()), ident)
     }
 
     fun tilbakekrevVedtak(
         behandlingId: UUID,
         perioder: List<Datoperiode>,
-        behandlerIdent: String = "Z111111",
-        beslutterIdent: String = "Z999999",
     ) {
-        somSaksbehandler(behandlerIdent) {
+        somSaksbehandler(FellesTestdata.SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId.toString(),
                 BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
@@ -216,26 +216,18 @@ open class TilbakekrevingE2EBase : E2EBase() {
         }
 
         utførSteg(
-            ident = behandlerIdent,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(
+            behandlingId,
+            BehandlingsstegGenerator.lagIkkeForeldetVurdering(
                 *perioder.toTypedArray(),
             ),
         )
         utførSteg(
-            ident = behandlerIdent,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving(
-                *perioder.toTypedArray(),
-            ),
+            behandlingId,
+            BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving(*perioder.toTypedArray()),
         )
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagForeslåVedtakVurdering())
         utførSteg(
-            ident = behandlerIdent,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagForeslåVedtakVurdering(),
-        )
-        utførSteg(
-            ident = beslutterIdent,
+            ident = FellesTestdata.BESLUTTER_IDENT,
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagGodkjennVedtakVurdering(),
         )

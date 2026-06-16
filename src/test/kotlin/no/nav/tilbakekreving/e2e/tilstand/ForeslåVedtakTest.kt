@@ -14,6 +14,7 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.saksbehandlerContext
+import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -21,8 +22,6 @@ import org.springframework.http.HttpStatus
 class ForeslåVedtakTest : TilbakekrevingE2EBase() {
     @Autowired
     private lateinit var fagsystemIntegrasjonService: FagsystemIntegrasjonService
-
-    private val ansvarligSaksbehandler = "Z999999"
 
     @Test
     fun `foreslå vedtak via nytt endepunkt`() {
@@ -38,27 +37,19 @@ class ForeslåVedtakTest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         lagreUttalelse(behandlingId)
 
-        somSaksbehandler(ansvarligSaksbehandler) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
         }
 
-        utførSteg(
-            ident = ansvarligSaksbehandler,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(),
-        )
-        utførSteg(
-            ident = ansvarligSaksbehandler,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving(),
-        )
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagIkkeForeldetVurdering())
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving())
 
         tilbakekreving(behandlingId) kanBehandle Behandlingssteg.FORESLÅ_VEDTAK
 
-        somSaksbehandler(ansvarligSaksbehandler) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             val response = behandlingApiController.behandlingForeslaaVedtak(behandlingId)
             response.statusCode shouldBe HttpStatus.OK
         }

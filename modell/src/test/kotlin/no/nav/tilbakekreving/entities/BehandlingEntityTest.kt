@@ -18,8 +18,8 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.lesContext
-import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.systemContext
+import no.nav.tilbakekreving.test.FellesTestdata.ANSVARLIG_SAKSBEHANDLER
 import no.nav.tilbakekreving.tilstand.TilBehandling
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -48,12 +48,11 @@ class BehandlingEntityTest {
 
         val kravgrunnlag = kravgrunnlagHistorikk.lagre(kravgrunnlag())
         kravgrunnlagHistorikk.lagre(kravgrunnlag())
-        val behandler = Behandler.Saksbehandler("A123456")
         val behandlingFørLagring = Behandling.nyBehandling(
             id = behandlingId,
             type = Behandlingstype.TILBAKEKREVING,
             enhet = Enhet("0425", "NAV Solør"),
-            ansvarligSaksbehandler = behandler,
+            ansvarligSaksbehandler = ANSVARLIG_SAKSBEHANDLER,
             eksternFagsakRevurdering = revurderingInnslag,
             kravgrunnlag = kravgrunnlag,
             brevHistorikk = brevHistorikk,
