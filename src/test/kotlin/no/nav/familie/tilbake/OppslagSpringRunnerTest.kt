@@ -43,11 +43,12 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingSærligG
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
+import no.nav.tilbakekreving.e2e.ContextServiceHelpers.E2E_TILGANG_GRUPPE
+import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.resttestclient.TestRestTemplate
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.context.ApplicationContext
@@ -68,8 +69,6 @@ abstract class OppslagSpringRunnerTest {
     val tømDBEtterHverTest = true
     private val listAppender = initLoggingEventListAppender()
     protected var loggingEvents: MutableList<ILoggingEvent> = listAppender.list
-    protected val restTemplate = TestRestTemplate()
-    protected val headers = HttpHeaders()
 
     @Autowired
     private lateinit var jdbcAggregateOperations: JdbcAggregateOperations
@@ -100,7 +99,18 @@ abstract class OppslagSpringRunnerTest {
         resetWiremockServers()
     }
 
-    protected fun lokalTestToken(): String = mockOAuth2Server.issueToken("issuer1", audience = "aud-localhost").serialize()
+    fun authorizationHeaders(
+        ident: String = SAKSBEHANDLER_IDENT,
+        grupper: List<String> = listOf(E2E_TILGANG_GRUPPE),
+    ): HttpHeaders {
+        return HttpHeaders().apply {
+            val claims = buildMap {
+                put("NAVident", ident)
+                if (grupper.isNotEmpty()) put("groups", grupper)
+            }
+            setBearerAuth(mockOAuth2Server.issueToken("issuer1", audience = "aud-localhost", claims = claims).serialize())
+        }
+    }
 
     protected fun localhost(uri: String): String = LOCALHOST + getPort() + uri
 

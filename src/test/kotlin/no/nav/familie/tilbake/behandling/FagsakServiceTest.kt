@@ -31,6 +31,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.resttestclient.TestRestTemplate
 import org.springframework.boot.resttestclient.exchange
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
@@ -58,7 +59,8 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun test() {
-        headers.setBearerAuth(lokalTestToken())
+        val restTemplate = TestRestTemplate()
+        val headers = authorizationHeaders()
         val uriHentSaksnummer = UriComponentsBuilder.fromUriString(localhost("/api/fagsystem/EF/fagsak/123456/v1")).toUriString()
 
         val response: ResponseEntity<Ressurs<Map<String, String>>> =

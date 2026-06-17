@@ -2,10 +2,8 @@ package no.nav.familie.tilbake.behandling.batch
 
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.matchers.booleans.shouldBeFalse
-import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
 import io.mockk.verify
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
@@ -14,7 +12,6 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.Fagsystem
-import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
@@ -27,7 +24,6 @@ import no.nav.familie.tilbake.oppgave.OppgavePrioritetService
 import no.nav.familie.tilbake.oppgave.OppgaveService
 import no.nav.familie.tilbake.person.PersonService
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -70,7 +66,6 @@ internal class RyddBehandlingUtenKravgrunnlagTaskTest : OppslagSpringRunnerTest(
 
     @BeforeEach
     fun init() {
-        mockkObject(ContextService)
         every { personService.hentAktørId(any(), any(), any()) } returns listOf("123456789")
         ryddBehandlingUtenKravgrunnlagTask =
             RyddBehandlingUtenKravgrunnlagTask(
@@ -80,11 +75,6 @@ internal class RyddBehandlingUtenKravgrunnlagTaskTest : OppslagSpringRunnerTest(
                 logService,
                 mockOppgaveService,
             )
-    }
-
-    @AfterEach
-    fun tearDown() {
-        clearMocks(ContextService)
     }
 
     @Test

@@ -4,7 +4,6 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import io.mockk.slot
 import no.nav.familie.tilbake.http.RessursException
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.kontrakter.Ressurs
@@ -37,9 +36,8 @@ class IntegrasjonerClientConfig {
     fun integrasjonerClient(): IntegrasjonerClient {
         val integrasjonerClient: IntegrasjonerClient = mockk(relaxed = true)
 
-        val arkiverRequest = slot<ArkiverDokumentRequest>()
-        every { integrasjonerClient.arkiver(capture(arkiverRequest)) } answers {
-            when (arkiverRequest.captured.fnr) {
+        every { integrasjonerClient.arkiver(any()) } answers {
+            when (firstArg<ArkiverDokumentRequest>().fnr) {
                 "12345678901" ->
                     ArkiverDokumentResponse(
                         "jpUkjentDødsbo",
@@ -70,11 +68,8 @@ class IntegrasjonerClientConfig {
             }
         }
 
-        val journalpostId = slot<String>()
-        every { integrasjonerClient.distribuerJournalpost(capture(journalpostId), any(), any(), any()) } answers {
-            when (
-                journalpostId.captured
-            ) {
+        every { integrasjonerClient.distribuerJournalpost(any(), any(), any(), any()) } answers {
+            when (firstArg<String>()) {
                 "jpUkjentDødsbo" ->
                     throw RessursException(
                         httpStatus = HttpStatus.GONE,
@@ -245,9 +240,8 @@ class IntegrasjonerClientConfig {
                 ),
             )
 
-        val organisasjonsnummer = slot<String>()
-        every { integrasjonerClient.hentOrganisasjon(capture(organisasjonsnummer)) } answers {
-            when (organisasjonsnummer.captured) {
+        every { integrasjonerClient.hentOrganisasjon(any()) } answers {
+            when (firstArg<String>()) {
                 "998765432" ->
                     Organisasjon(
                         "998765432",

@@ -14,10 +14,8 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
 import io.mockk.verify
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
@@ -28,7 +26,6 @@ import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
-import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.Sporbar
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -54,15 +51,13 @@ import no.nav.familie.tilbake.oppgave.FerdigstillOppgaveTask
 import no.nav.familie.tilbake.oppgave.LagOppgaveTask
 import no.nav.familie.tilbake.oppgave.OppdaterOppgaveTask
 import no.nav.familie.tilbake.oppgave.OppgaveService
-import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.InnloggetBrukertilgang
-import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
 import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingPåVentDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegsinfoDto
 import no.nav.tilbakekreving.api.v1.dto.ByttEnhetDto
 import no.nav.tilbakekreving.api.v1.dto.HenleggelsesbrevFritekstDto
 import no.nav.tilbakekreving.api.v1.dto.OpprettRevurderingDto
+import no.nav.tilbakekreving.e2e.ContextServiceHelpers
 import no.nav.tilbakekreving.kontrakter.Faktainfo
 import no.nav.tilbakekreving.kontrakter.Institusjon
 import no.nav.tilbakekreving.kontrakter.OpprettManueltTilbakekrevingRequest
@@ -86,15 +81,23 @@ import no.nav.tilbakekreving.kontrakter.verge.Verge
 import no.nav.tilbakekreving.kontrakter.verge.Vergetype
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
+import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.context.TestPropertySource
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
+@TestPropertySource(
+    properties = [
+        "rolle.barnetrygd.beslutter=bb123",
+        "rolle.barnetrygd.saksbehandler=bs123",
+        "rolle.barnetrygd.veileder=bv123",
+        "rolle.teamfamilie.forvalter=familie123",
+    ],
+)
 internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     override val tømDBEtterHverTest = false
 
@@ -137,29 +140,16 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     private val fom: LocalDate = LocalDate.now().minusMonths(1)
     private val tom: LocalDate = LocalDate.now()
 
-    @BeforeEach
-    fun init() {
-        mockkObject(ContextService)
-        every { ContextService.hentSaksbehandler(any()) }.returns("Z0000")
-        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }.returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.SYSTEM_TILGANG to Behandlerrolle.SYSTEM)))
-    }
-
-    @AfterEach
-    fun tearDown() {
-        clearMocks(ContextService)
-    }
-
     @Test
     fun `opprettBehandling skal opprette automatisk behandling uten verge`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-                finnesVerge = false,
-                finnesVarsel = true,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            finnesVerge = false,
+            finnesVarsel = true,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
 
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
@@ -183,15 +173,14 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `opprettBehandling skal opprette automatisk behandling med verge`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-                finnesVerge = true,
-                finnesVarsel = true,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            finnesVerge = true,
+            finnesVarsel = true,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
 
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
@@ -215,15 +204,14 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `opprettBehandling skal opprette automatisk behandling uten varsel`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
-                finnesVerge = false,
-                finnesVarsel = false,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
+            finnesVerge = false,
+            finnesVarsel = false,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
 
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
@@ -247,16 +235,15 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `opprettBehandling skal opprette automatisk behandling fagsak med institusjon`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-                finnesVerge = false,
-                finnesVarsel = true,
-                manueltOpprettet = false,
-                finnesInstitusjon = true,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            finnesVerge = false,
+            finnesVarsel = true,
+            manueltOpprettet = false,
+            finnesInstitusjon = true,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
 
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
@@ -280,17 +267,16 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `opprettBehandling skal legge inn manuellBrevmottaker fra request og autoutføre behandlingssteg BREVMOTTAKER`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-                finnesVerge = false,
-                finnesVarsel = true,
-                manueltOpprettet = false,
-                finnesInstitusjon = false,
-                finnesManuelleBrevmottakere = true,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            finnesVerge = false,
+            finnesVarsel = true,
+            manueltOpprettet = false,
+            finnesInstitusjon = false,
+            finnesManuelleBrevmottakere = true,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
 
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
@@ -308,85 +294,77 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `opprettBehandling oppretter ikke behandling når det finnes åpen tilbakekreving for samme eksternFagsakId`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-                finnesVerge = true,
-                finnesVarsel = true,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            finnesVerge = true,
+            finnesVarsel = true,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
         behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
-        val exception =
-            shouldThrow<RuntimeException> {
-                behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
-            }
+        val exception = shouldThrow<RuntimeException> {
+            behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+        }
         exception.message shouldBe "Det finnes allerede en åpen behandling for ytelsestype=" + opprettTilbakekrevingRequest.ytelsestype + " og eksternFagsakId=${opprettTilbakekrevingRequest.eksternFagsakId}, " + "kan ikke opprette en ny."
     }
 
     @Test
     fun `opprettBehandling skal ikke opprette automatisk behandling når siste tilbakekreving er ikke henlagt`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-                finnesVerge = true,
-                finnesVarsel = true,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            finnesVerge = true,
+            finnesVarsel = true,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
 
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(lagretBehandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
-        val exception =
-            shouldThrow<RuntimeException> {
-                behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
-            }
+        val exception = shouldThrow<RuntimeException> {
+            behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+        }
         exception.message shouldBe "Det finnes allerede en avsluttet behandling for ytelsestype=" + opprettTilbakekrevingRequest.ytelsestype + " og eksternFagsakId=${opprettTilbakekrevingRequest.eksternFagsakId} " + "som ikke er henlagt, kan ikke opprette en ny."
     }
 
     @Test
     fun `opprettBehandling skal ta hensyn til fagsystem ved sjekk om siste tilbakekrevingsbehandling er henlagt eller ikke`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-                finnesVerge = true,
-                finnesVarsel = true,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            finnesVerge = true,
+            finnesVarsel = true,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
 
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(lagretBehandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
-        val kontantstøtteOpprettTilbakekrevingRequest =
-            opprettTilbakekrevingRequest.copy(fagsystem = FagsystemDTO.KONT, ytelsestype = YtelsestypeDTO.KONTANTSTØTTE)
+        val kontantstøtteOpprettTilbakekrevingRequest = opprettTilbakekrevingRequest.copy(fagsystem = FagsystemDTO.KONT, ytelsestype = YtelsestypeDTO.KONTANTSTØTTE)
 
-        val opprettetBehandling =
-            behandlingService.opprettBehandling(
-                kontantstøtteOpprettTilbakekrevingRequest,
-            )
+        val opprettetBehandling = behandlingService.opprettBehandling(
+            kontantstøtteOpprettTilbakekrevingRequest,
+        )
 
         assertBehandling(opprettetBehandling, kontantstøtteOpprettTilbakekrevingRequest, false)
     }
 
     @Test
     fun `opprettBehandling skal opprette automatisk behandling når siste tilbakekreving er ikke henlagt og toggelen er på`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-                finnesVerge = true,
-                finnesVarsel = true,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            finnesVerge = true,
+            finnesVarsel = true,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
         val behandlingRepository = mockk<BehandlingRepository>()
         val featureToggleService = mockk<FeatureToggleService>()
         val validerBehandlingService = ValiderBehandlingService(behandlingRepository, featureToggleService, økonomiXmlMottattRepository)
@@ -402,15 +380,14 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `opprettBehandling skal ikke automatisk behandles når siste tilbakekreving er ikke henlagt og toggelen er av`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-                finnesVerge = true,
-                finnesVarsel = true,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            finnesVerge = true,
+            finnesVarsel = true,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
         val behandlingRepository = mockk<BehandlingRepository>()
         val featureToggleService = mockk<FeatureToggleService>()
         val validerBehandlingService = ValiderBehandlingService(behandlingRepository, featureToggleService, økonomiXmlMottattRepository)
@@ -427,15 +404,14 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `opprettBehandling skal opprette behandling når siste tilbakekreving er henlagt og toggelen er av`() {
         val fagsak = fagsakRepository.insert(Testdata.fagsak())
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-                finnesVerge = true,
-                finnesVarsel = true,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            finnesVerge = true,
+            finnesVarsel = true,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
         val behandlingRepository = mockk<BehandlingRepository>()
         val featureToggleService = mockk<FeatureToggleService>()
         val validerBehandlingService = ValiderBehandlingService(behandlingRepository, featureToggleService, økonomiXmlMottattRepository)
@@ -452,30 +428,28 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `opprettBehandling skal opprette automatisk når det allerede finnes avsluttet behandling for samme fagsak`() {
-        val forrigeOpprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-                finnesVerge = false,
-                finnesVarsel = true,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
+        val forrigeOpprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            finnesVerge = false,
+            finnesVarsel = true,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
         val forrigeBehandling = behandlingService.opprettBehandling(forrigeOpprettTilbakekrevingRequest)
 
         val lagretBehandling = behandlingRepository.findByIdOrThrow(forrigeBehandling.id)
         behandlingRepository.update(lagretBehandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
         // oppretter ny behandling for en annen eksternId
-        val nyOpprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-                finnesVerge = false,
-                finnesVarsel = true,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
+        val nyOpprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            finnesVerge = false,
+            finnesVarsel = true,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
         val behandling = behandlingService.opprettBehandling(nyOpprettTilbakekrevingRequest)
         assertBehandling(behandling, nyOpprettTilbakekrevingRequest)
         assertFagsak(behandling, nyOpprettTilbakekrevingRequest)
@@ -497,15 +471,14 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `opprettBehandling skal ikke opprette manuelt når det ikke finnes kravgrunnlag for samme fagsak,ytelsestype,eksternId`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
-                finnesVerge = false,
-                finnesVarsel = false,
-                manueltOpprettet = true,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
+            finnesVerge = false,
+            finnesVarsel = false,
+            manueltOpprettet = true,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
 
         val exception = shouldThrow<RuntimeException> { behandlingService.opprettBehandling(opprettTilbakekrevingRequest) }
         exception.message shouldBe "Det finnes intet kravgrunnlag for ytelsestype=${opprettTilbakekrevingRequest.ytelsestype}," + "eksternFagsakId=${opprettTilbakekrevingRequest.eksternFagsakId} " + "og eksternId=${opprettTilbakekrevingRequest.eksternId}. " + "Tilbakekrevingsbehandling kan ikke opprettes manuelt."
@@ -513,15 +486,14 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `opprettBehandling skal opprette manuelt når det finnes kravgrunnlag for samme fagsak,ytelsestype,eksternId`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
-                finnesVerge = false,
-                finnesVarsel = false,
-                manueltOpprettet = true,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
+            finnesVerge = false,
+            finnesVarsel = false,
+            manueltOpprettet = true,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
         val økonomiXmlMottatt = Testdata.getøkonomiXmlMottatt()
         økonomiXmlMottattRepository.insert(
             økonomiXmlMottatt.copy(
@@ -575,13 +547,15 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
             ),
         )
 
-        behandlingService.opprettBehandlingManuellTask(
-            OpprettManueltTilbakekrevingRequest(
-                eksternFagsakId = "testverdi",
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-                eksternId = "testverdi",
-            ),
-        )
+        ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            behandlingService.opprettBehandlingManuellTask(
+                OpprettManueltTilbakekrevingRequest(
+                    eksternFagsakId = "testverdi",
+                    ytelsestype = YtelsestypeDTO.BARNETRYGD,
+                    eksternId = "testverdi",
+                ),
+            )
+        }
 
         taskService
             .finnTasksMedStatus(listOf(Status.UBEHANDLET))
@@ -590,7 +564,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 it.metadata["eksternFagsakId"] shouldBe "testverdi"
                 it.metadata["ytelsestype"] shouldBe YtelsestypeDTO.BARNETRYGD.name
                 it.metadata["eksternId"] shouldBe "testverdi"
-                it.metadata["ansvarligSaksbehandler"] shouldBe "Z0000"
+                it.metadata["ansvarligSaksbehandler"] shouldBe SAKSBEHANDLER_IDENT
             }
     }
 
@@ -602,7 +576,9 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
-        var revurdering = behandlingService.opprettRevurdering(lagOpprettRevurderingDto(behandling.id))
+        var revurdering = ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            behandlingService.opprettRevurdering(lagOpprettRevurderingDto(behandling.id))
+        }
         revurdering = behandlingRepository.findByIdOrThrow(revurdering.id)
         revurdering.type shouldBe Behandlingstype.REVURDERING_TILBAKEKREVING
         revurdering.sisteÅrsak?.type shouldBe Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR
@@ -617,7 +593,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         aktivFagsystemsbehandling.eksternId shouldBe behandling.aktivFagsystemsbehandling.eksternId
         aktivFagsystemsbehandling.årsak shouldBe behandling.aktivFagsystemsbehandling.årsak
         aktivFagsystemsbehandling.resultat shouldBe behandling.aktivFagsystemsbehandling.resultat
-        assertHistorikkinnslag(revurdering.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET, Aktør.Saksbehandler("Z0000"))
+        assertHistorikkinnslag(revurdering.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET, Aktør.Saksbehandler(SAKSBEHANDLER_IDENT))
         assertHistorikkinnslag(
             revurdering.id,
             TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
@@ -640,24 +616,22 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
-        val exception =
-            shouldThrow<RuntimeException> {
-                behandlingService.opprettRevurdering(lagOpprettRevurderingDto(behandling.id))
-            }
+        val exception = shouldThrow<RuntimeException> {
+            behandlingService.opprettRevurdering(lagOpprettRevurderingDto(behandling.id))
+        }
         exception.message shouldBe "Revurdering kan ikke opprettes for behandling ${behandling.id}. " + "Enten behandlingen er ikke avsluttet med kravgrunnlag eller " + "det finnes allerede en åpen revurdering"
     }
 
     @Test
     fun `hentBehandling skal hente behandling som opprettet uten varsel`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
-                finnesVerge = true,
-                finnesVarsel = true,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
+            finnesVerge = true,
+            finnesVarsel = true,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         val behandlingDto = behandlingService.hentBehandling(behandling.id)
 
@@ -678,15 +652,14 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentBehandling skal hente behandling som ikke kan henlegges med verge`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-                finnesVerge = true,
-                finnesVarsel = true,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            finnesVerge = true,
+            finnesVarsel = true,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         val behandlingDto = behandlingService.hentBehandling(behandling.id)
 
@@ -706,15 +679,14 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentBehandling skal hente behandling som kan henlegges uten verge`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-                finnesVerge = false,
-                finnesVarsel = true,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            finnesVerge = false,
+            finnesVarsel = true,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
         val sporbar = behandling.sporbar.copy(opprettetTid = LocalDate.now().minusDays(10).atStartOfDay())
@@ -739,15 +711,14 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentBehandling skal hente behandling når behandling er avsluttet`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-                finnesVerge = false,
-                finnesVarsel = true,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            finnesVerge = false,
+            finnesVarsel = true,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(lagretBehandling.copy(status = Behandlingsstatus.AVSLUTTET))
@@ -760,104 +731,94 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentBehandling skal ikke endre behandling av veileder`() {
-        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }.returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.BARNETRYGD to Behandlerrolle.VEILEDER)))
-
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-                finnesVerge = false,
-                finnesVarsel = true,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
-        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
-
-        val behandlingDto = behandlingService.hentBehandling(behandling.id)
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            finnesVerge = false,
+            finnesVarsel = true,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
+        val behandlingDto = ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_VEILEDER_ROLLE)) {
+            val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+            behandlingService.hentBehandling(behandling.id)
+        }
 
         behandlingDto.kanEndres.shouldBeFalse()
     }
 
     @Test
     fun `hentBehandling skal ikke endre behandling av forvalter`() {
-        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }.returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.BARNETRYGD to Behandlerrolle.FORVALTER)))
-
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-                finnesVerge = false,
-                finnesVarsel = true,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
-        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
-
-        val behandlingDto = behandlingService.hentBehandling(behandling.id)
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            finnesVerge = false,
+            finnesVarsel = true,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
+        val behandlingDto = ContextServiceHelpers.somSaksbehandler(grupper = listOf(TEAMFAMILIE_FORVALTER_ROLLE)) {
+            val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+            behandlingService.hentBehandling(behandling.id)
+        }
 
         behandlingDto.kanEndres.shouldBeFalse()
     }
 
     @Test
     fun `hentBehandling skal endre behandling av saksbehandler`() {
-        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }.returns(
-            InnloggetBrukertilgang(
-                mapOf(Tilgangskontrollsfagsystem.BARNETRYGD to Behandlerrolle.SAKSBEHANDLER),
-            ),
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            finnesVerge = false,
+            finnesVarsel = true,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
         )
-
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-                finnesVerge = false,
-                finnesVarsel = true,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
-        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
-
-        val behandlingDto = behandlingService.hentBehandling(behandling.id)
+        val behandlingDto = ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+            behandlingService.hentBehandling(behandling.id)
+        }
 
         behandlingDto.kanEndres.shouldBeTrue()
     }
 
     @Test
     fun `hentBehandling skal ikke endre behandling av saksbehandler når behandling er på fattevedtak steg`() {
-        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }.returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.BARNETRYGD to Behandlerrolle.SAKSBEHANDLER)))
-
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-                finnesVerge = false,
-                finnesVarsel = true,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
-        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            finnesVerge = false,
+            finnesVarsel = true,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
+        val behandling = ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+        }
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(lagretBehandling.copy(status = Behandlingsstatus.FATTER_VEDTAK))
 
-        val behandlingDto = behandlingService.hentBehandling(behandling.id)
+        val behandlingDto = ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            behandlingService.hentBehandling(behandling.id)
+        }
 
         behandlingDto.kanEndres.shouldBeFalse()
     }
 
     @Test
     fun `hentBehandling skal endre behandling av beslutter når behandling er på fattevedtak steg`() {
-        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }.returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.BARNETRYGD to Behandlerrolle.BESLUTTER)))
-
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-                finnesVerge = false,
-                finnesVarsel = true,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
-        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            finnesVerge = false,
+            finnesVarsel = true,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
+        val behandling = ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_BESLUTTER_ROLLE)) {
+            behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+        }
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(
             lagretBehandling.copy(
@@ -866,34 +827,37 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
             ),
         )
 
-        val behandlingDto = behandlingService.hentBehandling(behandling.id)
+        val behandlingDto = ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_BESLUTTER_ROLLE)) {
+            behandlingService.hentBehandling(behandling.id)
+        }
 
         behandlingDto.kanEndres.shouldBeTrue()
     }
 
     @Test
     fun `hentBehandling skal ikke endre behandling med fattevedtak steg og beslutter er samme som saksbehandler`() {
-        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }.returns(InnloggetBrukertilgang(mapOf(Tilgangskontrollsfagsystem.BARNETRYGD to Behandlerrolle.BESLUTTER)))
-
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-                finnesVerge = false,
-                finnesVarsel = true,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
-        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            finnesVerge = false,
+            finnesVarsel = true,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
+        val behandling = ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_BESLUTTER_ROLLE)) {
+            behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+        }
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(
             lagretBehandling.copy(
                 status = Behandlingsstatus.FATTER_VEDTAK,
-                ansvarligSaksbehandler = "Z0000",
+                ansvarligSaksbehandler = SAKSBEHANDLER_IDENT,
             ),
         )
 
-        val behandlingDto = behandlingService.hentBehandling(behandling.id)
+        val behandlingDto = ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_BESLUTTER_ROLLE)) {
+            behandlingService.hentBehandling(behandling.id)
+        }
 
         behandlingDto.kanEndres.shouldBeFalse()
     }
@@ -956,42 +920,39 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `settBehandlingPåVent skal ikke sett behandling på vent hvis fristdato er mindre enn i dag`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-                finnesVerge = true,
-                finnesVarsel = true,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            finnesVerge = true,
+            finnesVarsel = true,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
-        val exception =
-            shouldThrow<RuntimeException> {
-                behandlingService.settBehandlingPåVent(
-                    behandling.id,
-                    BehandlingPåVentDto(
-                        venteårsak = Venteårsak.ENDRE_TILKJENT_YTELSE,
-                        tidsfrist = LocalDate.now().minusDays(4),
-                        begrunnelse = null,
-                    ),
-                )
-            }
+        val exception = shouldThrow<RuntimeException> {
+            behandlingService.settBehandlingPåVent(
+                behandling.id,
+                BehandlingPåVentDto(
+                    venteårsak = Venteårsak.ENDRE_TILKJENT_YTELSE,
+                    tidsfrist = LocalDate.now().minusDays(4),
+                    begrunnelse = null,
+                ),
+            )
+        }
         exception.message shouldBe "Fristen må være større enn dagens dato for behandling ${behandling.id}"
     }
 
     @Test
     fun `settBehandlingPåVent skal ikke sett behandling på vent hvis fristdato er i dag`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-                finnesVerge = true,
-                finnesVarsel = true,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            finnesVerge = true,
+            finnesVarsel = true,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
         val exception = shouldThrow<RuntimeException> {
@@ -1009,16 +970,17 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `settBehandlingPåVent skal sette behandling på vent hvis fristdato er større enn i dag`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-                finnesVerge = true,
-                finnesVarsel = true,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
-        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            finnesVerge = true,
+            finnesVarsel = true,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
+        val behandling = ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+        }
 
         val behandlingPåVentDto = BehandlingPåVentDto(
             venteårsak = Venteårsak.ENDRE_TILKJENT_YTELSE,
@@ -1026,20 +988,22 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
             begrunnelse = null,
         )
 
-        behandlingService.settBehandlingPåVent(behandling.id, behandlingPåVentDto)
+        ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            behandlingService.settBehandlingPåVent(behandling.id, behandlingPåVentDto)
+        }
 
         behandlingskontrollService.erBehandlingPåVent(behandling.id).shouldBeTrue()
         assertAnsvarligSaksbehandler(behandling)
         assertHistorikkinnslag(
             behandling.id,
             TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
-            Aktør.Saksbehandler("Z0000"),
+            Aktør.Saksbehandler(SAKSBEHANDLER_IDENT),
             "Årsak: Mulig endring i tilkjent ytelse",
         )
         assertOppgaveTask(
             behandling.id,
             OppdaterOppgaveTask.TYPE,
-            "Frist er oppdatert av saksbehandler Z0000",
+            "Frist er oppdatert av saksbehandler ${SAKSBEHANDLER_IDENT}",
             behandlingPåVentDto.tidsfrist,
         )
     }
@@ -1066,34 +1030,39 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `taBehandlingAvvent skal gjenoppta når behandling er på vent`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
-                finnesVerge = true,
-                finnesVarsel = false,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
-        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
+            finnesVerge = true,
+            finnesVarsel = false,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
+        val behandling = ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+        }
         kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id).copy(behandlingId = behandling.id))
 
-        behandlingService.settBehandlingPåVent(
-            behandlingId = behandling.id,
-            behandlingPåVentDto = BehandlingPåVentDto(
-                venteårsak = Venteårsak.AVVENTER_DOKUMENTASJON,
-                tidsfrist = LocalDate.now().plusDays(2),
-                begrunnelse = null,
-            ),
-        )
+        ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            behandlingService.settBehandlingPåVent(
+                behandlingId = behandling.id,
+                behandlingPåVentDto = BehandlingPåVentDto(
+                    venteårsak = Venteårsak.AVVENTER_DOKUMENTASJON,
+                    tidsfrist = LocalDate.now().plusDays(2),
+                    begrunnelse = null,
+                ),
+            )
+        }
 
         behandlingskontrollService.erBehandlingPåVent(behandling.id).shouldBeTrue()
 
-        behandlingService.taBehandlingAvvent(behandling.id)
+        ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            behandlingService.taBehandlingAvvent(behandling.id)
+        }
 
         behandlingskontrollService.erBehandlingPåVent(behandling.id).shouldBeFalse()
         assertAnsvarligSaksbehandler(behandling)
-        assertHistorikkinnslag(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT, Aktør.Saksbehandler("Z0000"))
+        assertHistorikkinnslag(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT, Aktør.Saksbehandler(SAKSBEHANDLER_IDENT))
         assertOppgaveTask(
             behandling.id,
             OppdaterOppgaveTask.TYPE,
@@ -1104,16 +1073,17 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `taBehandlingAvvent skal gjenoppta behandling og hoppe til FAKTA steg når behandling venter på bruker med grunnlag`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-                finnesVerge = true,
-                finnesVarsel = true,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
-        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            finnesVerge = true,
+            finnesVarsel = true,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
+        val behandling = ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+        }
 
         var behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         behandlingsstegstilstand.shouldHaveSingleElement {
@@ -1122,7 +1092,9 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
         kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id).copy(behandlingId = behandling.id))
 
-        behandlingService.taBehandlingAvvent(behandling.id)
+        ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            behandlingService.taBehandlingAvvent(behandling.id)
+        }
 
         behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         behandlingsstegstilstand.shouldHaveSingleElement {
@@ -1135,7 +1107,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
         behandlingskontrollService.erBehandlingPåVent(behandling.id).shouldBeFalse()
         assertAnsvarligSaksbehandler(behandling)
-        assertHistorikkinnslag(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT, Aktør.Saksbehandler("Z0000"))
+        assertHistorikkinnslag(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT, Aktør.Saksbehandler(SAKSBEHANDLER_IDENT))
         assertOppgaveTask(
             behandling.id,
             OppdaterOppgaveTask.TYPE,
@@ -1146,23 +1118,26 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `taBehandlingAvvent skal gjenoppta behandling og venter på GRUNNLAG steg når behandling venter på bruker`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-                finnesVerge = true,
-                finnesVarsel = true,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
-        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            finnesVerge = true,
+            finnesVarsel = true,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
+        val behandling = ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+        }
 
         var behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         behandlingsstegstilstand.shouldHaveSingleElement {
             it.behandlingssteg == Behandlingssteg.VARSEL && it.behandlingsstegsstatus == Behandlingsstegstatus.VENTER && it.venteårsak == Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING
         }
 
-        behandlingService.taBehandlingAvvent(behandling.id)
+        ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            behandlingService.taBehandlingAvvent(behandling.id)
+        }
 
         behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         behandlingsstegstilstand.shouldHaveSingleElement {
@@ -1174,7 +1149,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
         behandlingskontrollService.erBehandlingPåVent(behandling.id).shouldBeTrue()
         assertAnsvarligSaksbehandler(behandling)
-        assertHistorikkinnslag(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT, Aktør.Saksbehandler("Z0000"))
+        assertHistorikkinnslag(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT, Aktør.Saksbehandler(SAKSBEHANDLER_IDENT))
         assertOppgaveTask(
             behandling.id,
             OppdaterOppgaveTask.TYPE,
@@ -1191,25 +1166,25 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `henleggBehandling skal henlegge behandling og sende henleggelsesbrev`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-                finnesVerge = false,
-                finnesVarsel = true,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
-        var behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            finnesVerge = false,
+            finnesVarsel = true,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
+        var behandling = ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+        }
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         // oppdaterer opprettettidspunkt slik at behandlingen kan henlegges
         behandlingRepository.update(
             behandling.copy(
-                sporbar =
-                    Sporbar(
-                        opprettetAv = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
-                        opprettetTid = LocalDateTime.now().minusDays(10),
-                    ),
+                sporbar = Sporbar(
+                    opprettetAv = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
+                    opprettetTid = LocalDateTime.now().minusDays(10),
+                ),
             ),
         )
         // sender varselsbrev
@@ -1221,15 +1196,19 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 brevtype = Brevtype.VARSEL,
             ),
         )
-        behandlingService.taBehandlingAvvent(behandlingId = behandling.id)
+        ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            behandlingService.taBehandlingAvvent(behandlingId = behandling.id)
+        }
 
-        behandlingService.henleggBehandling(
-            behandling.id,
-            HenleggelsesbrevFritekstDto(
-                Behandlingsresultatstype.HENLAGT_FEILOPPRETTET,
-                "testverdi",
-            ),
-        )
+        ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            behandlingService.henleggBehandling(
+                behandling.id,
+                HenleggelsesbrevFritekstDto(
+                    Behandlingsresultatstype.HENLAGT_FEILOPPRETTET,
+                    "testverdi",
+                ),
+            )
+        }
 
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandling.status shouldBe Behandlingsstatus.AVSLUTTET
@@ -1250,7 +1229,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertHistorikkinnslag(
             behandling.id,
             TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
-            Aktør.Saksbehandler("Z0000"),
+            Aktør.Saksbehandler(SAKSBEHANDLER_IDENT),
             "Årsak: Henlagt, søknaden er feilopprettet, Begrunnelse: testverdi",
         )
         assertOppgaveTask(behandling.id, FerdigstillOppgaveTask.TYPE)
@@ -1258,25 +1237,23 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `henleggBehandling skal henlegge behandling uten henleggelsesbrev`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
-                finnesVerge = false,
-                finnesVarsel = false,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
+            finnesVerge = false,
+            finnesVarsel = false,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
         var behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         // oppdaterer opprettettidspunkt slik at behandlingen kan henlegges
         behandlingRepository.update(
             behandling.copy(
-                sporbar =
-                    Sporbar(
-                        opprettetAv = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
-                        opprettetTid = LocalDateTime.now().minusDays(10),
-                    ),
+                sporbar = Sporbar(
+                    opprettetAv = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
+                    opprettetTid = LocalDateTime.now().minusDays(10),
+                ),
             ),
         )
 
@@ -1318,107 +1295,104 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `henleggBehandling skal ikke henlegge behandling som opprettet nå`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
-                finnesVerge = false,
-                finnesVarsel = false,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
+            finnesVerge = false,
+            finnesVarsel = false,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
-        val exception =
-            shouldThrow<RuntimeException> {
-                behandlingService.henleggBehandling(
-                    behandling.id,
-                    HenleggelsesbrevFritekstDto(
-                        Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
-                        "testverdi",
-                    ),
-                )
-            }
+        val exception = shouldThrow<RuntimeException> {
+            behandlingService.henleggBehandling(
+                behandling.id,
+                HenleggelsesbrevFritekstDto(
+                    Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
+                    "testverdi",
+                ),
+            )
+        }
         exception.message shouldBe "Behandling med behandlingId=${behandling.id} kan ikke henlegges."
     }
 
     @Test
     fun `henleggBehandling skal ikke henlegge behandling som har aktivt kravgrunnlag`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
-                finnesVerge = false,
-                finnesVarsel = false,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
+            finnesVerge = false,
+            finnesVarsel = false,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         val kravgrunnlag = Testdata.lagKravgrunnlag(behandling.id)
         kravgrunnlagRepository.insert(kravgrunnlag.copy(behandlingId = behandling.id))
 
-        val exception =
-            shouldThrow<RuntimeException> {
-                behandlingService.henleggBehandling(
-                    behandling.id,
-                    HenleggelsesbrevFritekstDto(
-                        Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
-                        "testverdi",
-                    ),
-                )
-            }
+        val exception = shouldThrow<RuntimeException> {
+            behandlingService.henleggBehandling(
+                behandling.id,
+                HenleggelsesbrevFritekstDto(
+                    Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
+                    "testverdi",
+                ),
+            )
+        }
         exception.message shouldBe "Behandling med behandlingId=${behandling.id} kan ikke henlegges."
     }
 
     @Test
     fun `henleggBehandling skal ikke henlegge behandling som er allerede avsluttet`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
-                finnesVerge = false,
-                finnesVarsel = false,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
+            finnesVerge = false,
+            finnesVarsel = false,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
         var behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
-        val exception =
-            shouldThrow<RuntimeException> {
-                behandlingService.henleggBehandling(
-                    behandling.id,
-                    HenleggelsesbrevFritekstDto(
-                        Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
-                        "testverdi",
-                    ),
-                )
-            }
+        val exception = shouldThrow<RuntimeException> {
+            behandlingService.henleggBehandling(
+                behandling.id,
+                HenleggelsesbrevFritekstDto(
+                    Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
+                    "testverdi",
+                ),
+            )
+        }
         exception.message shouldBe "Behandling med id=${behandling.id} er allerede ferdig behandlet."
     }
 
     @Test
     fun `byttBehandlendeEnhet skal bytte og oppdatere oppgave`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
-                finnesVerge = false,
-                finnesVarsel = false,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
-        var behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
+            finnesVerge = false,
+            finnesVarsel = false,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
+        var behandling = ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+        }
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
 
-        behandlingService.byttBehandlendeEnhet(
-            behandling.id,
-            ByttEnhetDto(
-                "4806",
-                "bytter i unittest" + "\n\nmed linjeskift" + "\n\nto til og med",
-            ),
-        )
+        ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            behandlingService.byttBehandlendeEnhet(
+                behandling.id,
+                ByttEnhetDto(
+                    "4806",
+                    "bytter i unittest" + "\n\nmed linjeskift" + "\n\nto til og med",
+                ),
+            )
+        }
 
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandling.behandlendeEnhet shouldBe "4806"
@@ -1427,7 +1401,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         verify(exactly = 1) {
             oppgaveService.patchOppgave(
                 match {
-                    it.id == 1L && it.tilordnetRessurs == "Z0000" && it.endretAvEnhetsnr == "0425"
+                    it.id == 1L && it.tilordnetRessurs == SAKSBEHANDLER_IDENT && it.endretAvEnhetsnr == "0425"
                 },
             )
         }
@@ -1438,72 +1412,67 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertHistorikkinnslag(
             behandling.id,
             TilbakekrevingHistorikkinnslagstype.ENDRET_ENHET,
-            Aktør.Saksbehandler("Z0000"),
+            Aktør.Saksbehandler(SAKSBEHANDLER_IDENT),
             "Ny enhet: 4806, Begrunnelse: bytter i unittest  med linjeskift  to til og med",
         )
     }
 
     @Test
     fun `byttBehandlendeEnhet skal ikke kunne bytte på behandling med fagsystem EF`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
-                finnesVerge = false,
-                finnesVarsel = false,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            ).copy(
-                fagsystem = FagsystemDTO.EF,
-                ytelsestype = YtelsestypeDTO.BARNETILSYN,
-            )
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
+            finnesVerge = false,
+            finnesVarsel = false,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        ).copy(
+            fagsystem = FagsystemDTO.EF,
+            ytelsestype = YtelsestypeDTO.BARNETILSYN,
+        )
         var behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
 
-        val exception =
-            shouldThrow<RuntimeException> {
-                behandlingService.byttBehandlendeEnhet(
-                    behandling.id,
-                    ByttEnhetDto("4806", "bytter i unittest"),
-                )
-            }
+        val exception = shouldThrow<RuntimeException> {
+            behandlingService.byttBehandlendeEnhet(
+                behandling.id,
+                ByttEnhetDto("4806", "bytter i unittest"),
+            )
+        }
         exception.message shouldBe "Ikke implementert for fagsystem EF"
     }
 
     @Test
     fun `byttBehandlendeEnhet skal ikke kunne bytte på avsluttet behandling`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
-                finnesVerge = false,
-                finnesVarsel = false,
-                manueltOpprettet = false,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
+            finnesVerge = false,
+            finnesVarsel = false,
+            manueltOpprettet = false,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
         var behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
-        val exception =
-            shouldThrow<RuntimeException> {
-                behandlingService.byttBehandlendeEnhet(
-                    behandling.id,
-                    ByttEnhetDto("4806", "bytter i unittest"),
-                )
-            }
+        val exception = shouldThrow<RuntimeException> {
+            behandlingService.byttBehandlendeEnhet(
+                behandling.id,
+                ByttEnhetDto("4806", "bytter i unittest"),
+            )
+        }
         exception.message shouldBe "Behandling med id=${behandling.id} er allerede ferdig behandlet."
     }
 
     @Test
     fun `Behandling på fagsak av type institusjon skal ikke støtte manuelle brevmottakere`() {
-        val opprettTilbakekrevingRequest =
-            lagOpprettTilbakekrevingRequest(
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
-                finnesInstitusjon = true,
-                fagsystem = FagsystemDTO.BA,
-                ytelsestype = YtelsestypeDTO.BARNETRYGD,
-            )
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
+            finnesInstitusjon = true,
+            fagsystem = FagsystemDTO.BA,
+            ytelsestype = YtelsestypeDTO.BARNETRYGD,
+        )
 
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         val behandlingDto = behandlingService.hentBehandling(behandling.id)
@@ -1652,53 +1621,48 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         fagsystem: FagsystemDTO,
         ytelsestype: YtelsestypeDTO,
     ): OpprettTilbakekrevingRequest {
-        val varsel =
-            if (finnesVarsel) {
-                Varsel(
-                    varseltekst = "testverdi",
-                    sumFeilutbetaling = BigDecimal.valueOf(1500L),
-                    perioder = listOf(Periode(fom, tom)),
-                )
-            } else {
-                null
-            }
-        val verge =
-            if (finnesVerge) {
-                Verge(
-                    vergetype = Vergetype.VERGE_FOR_BARN,
-                    navn = "Andy",
-                    personIdent = "321321321",
-                )
-            } else {
-                null
-            }
-
-        val faktainfo =
-            Faktainfo(
-                revurderingsårsak = "testverdi",
-                revurderingsresultat = "testresultat",
-                tilbakekrevingsvalg = tilbakekrevingsvalg,
+        val varsel = if (finnesVarsel) {
+            Varsel(
+                varseltekst = "testverdi",
+                sumFeilutbetaling = BigDecimal.valueOf(1500L),
+                perioder = listOf(Periode(fom, tom)),
             )
+        } else {
+            null
+        }
+        val verge = if (finnesVerge) {
+            Verge(
+                vergetype = Vergetype.VERGE_FOR_BARN,
+                navn = "Andy",
+                personIdent = "321321321",
+            )
+        } else {
+            null
+        }
+
+        val faktainfo = Faktainfo(
+            revurderingsårsak = "testverdi",
+            revurderingsresultat = "testresultat",
+            tilbakekrevingsvalg = tilbakekrevingsvalg,
+        )
         val institusjon = if (finnesInstitusjon) Institusjon(organisasjonsnummer = "987654321") else null
 
-        val manuelleBrevmottakere =
-            if (finnesManuelleBrevmottakere) {
-                setOf(
-                    Brevmottaker(
-                        type = MottakerType.DØDSBO,
-                        navn = "Kari Nordmann",
-                        manuellAdresseInfo =
-                            ManuellAdresseInfo(
-                                "testadresse",
-                                postnummer = "0000",
-                                poststed = "OSLO",
-                                landkode = "NO",
-                            ),
+        val manuelleBrevmottakere = if (finnesManuelleBrevmottakere) {
+            setOf(
+                Brevmottaker(
+                    type = MottakerType.DØDSBO,
+                    navn = "Kari Nordmann",
+                    manuellAdresseInfo = ManuellAdresseInfo(
+                        "testadresse",
+                        postnummer = "0000",
+                        poststed = "OSLO",
+                        landkode = "NO",
                     ),
-                )
-            } else {
-                emptySet()
-            }
+                ),
+            )
+        } else {
+            emptySet()
+        }
 
         return OpprettTilbakekrevingRequest(
             ytelsestype = ytelsestype,
@@ -1714,7 +1678,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
             revurderingsvedtaksdato = fom,
             verge = verge,
             faktainfo = faktainfo,
-            saksbehandlerIdent = "Z0000",
+            saksbehandlerIdent = SAKSBEHANDLER_IDENT,
             institusjon = institusjon,
             manuelleBrevmottakere = manuelleBrevmottakere,
             begrunnelseForTilbakekreving = null,
@@ -1725,7 +1689,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     private fun assertAnsvarligSaksbehandler(behandling: Behandling) {
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        lagretBehandling.ansvarligSaksbehandler shouldBe "Z0000"
+        lagretBehandling.ansvarligSaksbehandler shouldBe SAKSBEHANDLER_IDENT
         lagretBehandling.ansvarligBeslutter.shouldBeNull()
     }
 
@@ -1757,12 +1721,18 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         beskrivelse: String? = null,
         frist: LocalDate? = null,
     ): Task {
-        val oppgaveTask =
-            taskService.findAll().find {
-                it.type == taskType && behandlingId.toString() == it.payload && Oppgavetype.BehandleSak.value == it.metadata["oppgavetype"]
-                beskrivelse == it.metadata["beskrivelse"] && frist == it.metadata["frist"]?.let { dato -> LocalDate.parse(dato as CharSequence) }
-            }
+        val oppgaveTask = taskService.findAll().find {
+            it.type == taskType && behandlingId.toString() == it.payload && Oppgavetype.BehandleSak.value == it.metadata["oppgavetype"]
+            beskrivelse == it.metadata["beskrivelse"] && frist == it.metadata["frist"]?.let { dato -> LocalDate.parse(dato as CharSequence) }
+        }
         (oppgaveTask != null).shouldBeTrue()
         return oppgaveTask!!
+    }
+
+    private companion object {
+        const val BARNETRYGD_BESLUTTER_ROLLE = "bb123"
+        const val BARNETRYGD_SAKSBEHANDLER_ROLLE = "bs123"
+        const val BARNETRYGD_VEILEDER_ROLLE = "bv123"
+        const val TEAMFAMILIE_FORVALTER_ROLLE = "familie123"
     }
 }

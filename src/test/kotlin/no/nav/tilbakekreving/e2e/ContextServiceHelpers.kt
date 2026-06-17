@@ -4,6 +4,7 @@ import io.jsonwebtoken.Jwts
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
+import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.web.context.request.RequestAttributes
 import org.springframework.web.context.request.RequestContextHolder
@@ -16,7 +17,7 @@ object ContextServiceHelpers {
     const val E2E_TILGANG_GRUPPE = "e2e-tilgang"
 
     fun <T> somSaksbehandler(
-        ident: String,
+        ident: String = SAKSBEHANDLER_IDENT,
         grupper: List<String> = listOf(E2E_TILGANG_GRUPPE),
         block: () -> T,
     ): T {
