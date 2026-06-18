@@ -491,19 +491,32 @@ class Behandling internal constructor(
 
     private fun oppdaterAutomatiskeBehandlinger(sideeffektContext: SideeffektContext) {
         if (!foreslåVedtakSteg.erFullstendig(sideeffektContext.klokke)) {
+            førsteUfullstendigeSteg(sideeffektContext.klokke)?.automatiskVurder(
+                kravgrunnlag = kravgrunnlag.entry,
+                klokke = sideeffektContext.klokke,
+                behandlingslogg = sideeffektContext.behandlingslogg,
+                behandlingId = id,
+            )
+        }
+    }
+
+    private fun oppdaterAutomatiskeBehandlingerEtterPåminnelse(sideeffektContext: SideeffektContext) {
+        if (!foreslåVedtakSteg.erFullstendig(sideeffektContext.klokke)) {
             steg().forEach {
-                it.automatiskVurder(
-                    kravgrunnlag = kravgrunnlag.entry,
-                    klokke = sideeffektContext.klokke,
-                    behandlingslogg = sideeffektContext.behandlingslogg,
-                    behandlingId = id,
-                )
+                if (it.erKlar(sideeffektContext.klokke)) {
+                    it.automatiskVurder(
+                        kravgrunnlag = kravgrunnlag.entry,
+                        klokke = sideeffektContext.klokke,
+                        behandlingslogg = sideeffektContext.behandlingslogg,
+                        behandlingId = id,
+                    )
+                }
             }
         }
     }
 
     internal fun håndterPåminnelse(tilstand: Tilstand, sideeffektContext: SideeffektContext, observatør: BehandlingObservatør) {
-        oppdaterAutomatiskeBehandlinger(sideeffektContext)
+        oppdaterAutomatiskeBehandlingerEtterPåminnelse(sideeffektContext)
         sendBehandlingsstatus(tilstand, sideeffektContext, observatør)
     }
 
