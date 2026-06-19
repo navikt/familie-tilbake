@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.hendelse
 
 import no.nav.tilbakekreving.UtenforScope
 import no.nav.tilbakekreving.aktør.Aktør
+import no.nav.tilbakekreving.behov.KravgrunnlagInfo
 import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagAdapter
 import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagPeriodeAdapter
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
@@ -79,6 +80,9 @@ class KravgrunnlagHendelse(
             perioder = perioder.map { it.tilEntity(id) },
         )
     }
+
+    fun hentKravgrunnlaginfoForIverksettelse(): KravgrunnlagInfo =
+        KravgrunnlagInfo(kontrollfelt = kontrollfelt)
 
     class Periode(
         private val id: UUID,

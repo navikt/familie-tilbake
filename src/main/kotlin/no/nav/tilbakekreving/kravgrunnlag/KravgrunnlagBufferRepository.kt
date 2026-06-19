@@ -54,9 +54,8 @@ class KravgrunnlagBufferRepository(
         }
     }
 
-    fun hentKravgrunnlag(kravgrunnlagId: String): Entity? {
+    fun hentKravgrunnlag(kravgrunnlagId: String): List<Entity> {
         return jdbcTemplate.query("SELECT * FROM kravgrunnlag_buffer WHERE kravgrunnlag_id=?;", Mapper, kravgrunnlagId)
-            .singleOrNull()
     }
 
     object Mapper : RowMapper<Entity> {
