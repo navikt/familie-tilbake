@@ -13,11 +13,9 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
-    private val fagsak = Testdata.fagsak
-
     @Test
     fun `insert med gyldige verdier skal persistere en forekomst av Fagsak til basen`() {
-        fagsakRepository.insert(fagsak)
+        val fagsak = fagsakRepository.insert(Testdata.fagsak())
 
         val lagretFagsak = fagsakRepository.findByIdOrThrow(fagsak.id)
         lagretFagsak.shouldBeEqualToIgnoringFields(fagsak, Fagsak::sporbar, Fagsak::versjon)
@@ -26,7 +24,8 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `update med gyldige verdier skal oppdatere en forekomst av Fagsak i basen`() {
-        fagsakRepository.insert(fagsak)
+        val fagsak = fagsakRepository.insert(Testdata.fagsak())
+
         var lagretFagsak = fagsakRepository.findByIdOrThrow(fagsak.id)
         val oppdatertFagsak = lagretFagsak.copy(eksternFagsakId = "1")
 

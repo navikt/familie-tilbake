@@ -56,8 +56,6 @@ import java.util.UUID
     ],
 )
 internal class NyTilgangskontrollServiceTest : OppslagSpringRunnerTest() {
-    override val tømDBEtterHverTest = false
-
     companion object {
         const val BARNETRYGD_BESLUTTER_ROLLE = "bb123"
         const val BARNETRYGD_SAKSBEHANDLER_ROLLE = "bs123"

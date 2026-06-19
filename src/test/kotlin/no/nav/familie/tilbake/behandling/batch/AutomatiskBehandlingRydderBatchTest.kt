@@ -13,8 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 internal class AutomatiskBehandlingRydderBatchTest : OppslagSpringRunnerTest() {
-    override val tømDBEtterHverTest = false
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 

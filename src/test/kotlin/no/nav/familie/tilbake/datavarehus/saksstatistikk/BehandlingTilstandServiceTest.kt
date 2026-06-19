@@ -45,8 +45,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
-    override val tømDBEtterHverTest = false
-
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
@@ -175,7 +173,7 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
                 resultater = setOf(behandlingsresultat),
             )
         behandlingRepository.update(fattetBehandling)
-        behandlingsstegstilstandRepository.insert(Testdata.lagBehandlingsstegstilstand(behandling.id).copy(behandlingssteg = Behandlingssteg.FATTE_VEDTAK))
+        behandlingsstegstilstandRepository.insert(Testdata.lagBehandlingsstegstilstand(behandling.id, Behandlingssteg.FATTE_VEDTAK))
         kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
 
         val tilstand = service.hentBehandlingensTilstand(behandling.id)
@@ -206,7 +204,7 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentBehandlingensTilstand skal utlede behandlingstilstand for behandling på vent`() {
-        behandlingsstegstilstandRepository.insert(Testdata.lagBehandlingsstegstilstand(behandling.id))
+        behandlingsstegstilstandRepository.insert(Testdata.lagBehandlingsstegstilstand(behandling.id, Behandlingssteg.FAKTA))
         kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
         behandlingService.settBehandlingPåVent(
             behandling.id,

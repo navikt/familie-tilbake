@@ -13,13 +13,6 @@ import org.testcontainers.activemq.ActiveMQContainer
 
 @TestConfiguration
 class ActiveMQConfig {
-    val activeMq = ActiveMQContainer("apache/activemq-classic:6.1.6")
-        .withUser("srvtilbake")
-        .withPassword("hunter2")
-        .apply {
-            start()
-        }
-
     @Primary
     @Bean
     fun connectionFactory(): ConnectionFactory = ActiveMQConnectionFactory("srvtilbake", "hunter2", activeMq.brokerUrl)
@@ -38,5 +31,16 @@ class ActiveMQConfig {
         factory.setTransactionManager(transactionManager)
         factory.setSessionTransacted(true)
         return factory
+    }
+
+    companion object {
+        val activeMq: ActiveMQContainer by lazy {
+            ActiveMQContainer("apache/activemq-classic:6.2.0")
+                .withUser("srvtilbake")
+                .withPassword("hunter2")
+                .apply {
+                    start()
+                }
+        }
     }
 }

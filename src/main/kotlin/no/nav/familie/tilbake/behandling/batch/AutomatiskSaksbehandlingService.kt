@@ -46,6 +46,7 @@ class AutomatiskSaksbehandlingService(
         return behandlinger.filter {
             val fagsak = fagsakRepository.findByIdOrThrow(it.fagsakId)
             val bestemtDato = LocalDate.now().minusWeeks(aldersgrenseIUker.getValue(fagsak.ytelsestype))
+
             val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(it.id)
             val kontrollFelt =
                 LocalDate.parse(

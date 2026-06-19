@@ -40,8 +40,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
-    override val tømDBEtterHverTest = false
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -274,6 +272,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `fortsettBehandling skal ikke oppdatere til foreldelsessteg når fakta steg ikke er utført`() {
+        kravgrunnlagRepository.insert(lagKravgrunnlag(behandling.id))
         lagBehandlingsstegstilstand(
             setOf(
                 Behandlingsstegsinfo(VARSEL, UTFØRT),

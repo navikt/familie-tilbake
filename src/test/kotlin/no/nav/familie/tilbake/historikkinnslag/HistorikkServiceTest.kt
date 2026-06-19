@@ -27,8 +27,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
-    override val tømDBEtterHverTest = false
-
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 

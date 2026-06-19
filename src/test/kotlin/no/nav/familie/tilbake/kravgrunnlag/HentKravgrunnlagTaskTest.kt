@@ -42,8 +42,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
-    override val tømDBEtterHverTest = false
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 

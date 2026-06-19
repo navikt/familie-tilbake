@@ -66,8 +66,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
-    override val tømDBEtterHverTest = false
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -256,7 +254,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
                 ansvarligEnhet = "testverdi",
                 bostedsenhet = "testverdi",
                 behandlingsenhet = "testverdi",
-                kontrollfelt = "testverdi",
+                kontrollfelt = "2025-12-24-11.12.13.123456",
                 referanse = behandling.aktivFagsystemsbehandling.eksternId,
                 eksternKravgrunnlagId = BigInteger.ZERO,
                 saksbehandlerId = "testverdi",

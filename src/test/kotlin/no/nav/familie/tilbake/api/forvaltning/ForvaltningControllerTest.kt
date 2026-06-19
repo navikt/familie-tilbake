@@ -10,6 +10,7 @@ import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
@@ -48,6 +49,9 @@ class ForvaltningControllerTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
+
+    @Autowired
+    private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
 
     @Test
     fun `Forvalter kan sette behandling på vent tilbake til fakta`() {
@@ -107,6 +111,7 @@ class ForvaltningControllerTest : OppslagSpringRunnerTest() {
         val behandling = Testdata.lagBehandling(fagsakId = fagsak.id, ansvarligSaksbehandler = SAKSBEHANDLER_IDENT, behandlingStatus = behandlingStatus)
         fagsakRepository.insert(fagsak)
         behandlingRepository.insert(behandling)
+        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
         behandlingsstegstilstandRepository.insert(
             Behandlingsstegstilstand(
                 behandlingId = behandling.id,

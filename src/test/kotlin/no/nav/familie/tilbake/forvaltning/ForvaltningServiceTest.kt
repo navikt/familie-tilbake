@@ -39,6 +39,7 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.oppgave.FerdigstillOppgaveTask
 import no.nav.familie.tilbake.totrinn.TotrinnsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
+import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
@@ -326,9 +327,9 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `annulerKravgrunnlag skal ikke annulere kravgrunnlag når behandling venter på kravgrunnlag`() {
-        val eksternKravgrunnlagId = BigInteger.ZERO
-        val exception = shouldThrow<RuntimeException> { forvaltningService.annulerKravgrunnlag(eksternKravgrunnlagId) }
-        exception.message shouldBe "Finnes ikke eksternKravgrunnlagId=$eksternKravgrunnlagId"
+        val kravgrunnlagId = BigInteger(KravgrunnlagGenerator.nextId(6))
+        val exception = shouldThrow<RuntimeException> { forvaltningService.annulerKravgrunnlag(kravgrunnlagId) }
+        exception.message shouldBe "Finnes ikke eksternKravgrunnlagId=$kravgrunnlagId"
     }
 
     @Test

@@ -50,8 +50,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class OppdragClientTest : OppslagSpringRunnerTest() {
-    override val tømDBEtterHverTest = false
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 

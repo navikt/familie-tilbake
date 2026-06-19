@@ -33,8 +33,6 @@ import java.util.Properties
 import java.util.UUID
 
 internal class RyddBehandlingUtenKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
-    override val tømDBEtterHverTest = false
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 

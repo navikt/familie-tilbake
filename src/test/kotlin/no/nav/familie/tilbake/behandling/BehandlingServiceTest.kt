@@ -58,6 +58,7 @@ import no.nav.tilbakekreving.api.v1.dto.ByttEnhetDto
 import no.nav.tilbakekreving.api.v1.dto.HenleggelsesbrevFritekstDto
 import no.nav.tilbakekreving.api.v1.dto.OpprettRevurderingDto
 import no.nav.tilbakekreving.e2e.ContextServiceHelpers
+import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.kontrakter.Faktainfo
 import no.nav.tilbakekreving.kontrakter.Institusjon
 import no.nav.tilbakekreving.kontrakter.OpprettManueltTilbakekrevingRequest
@@ -99,8 +100,6 @@ import java.util.UUID
     ],
 )
 internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
-    override val tømDBEtterHverTest = false
-
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
@@ -528,7 +527,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         shouldThrow<Feil> {
             behandlingService.opprettBehandlingManuellTask(
                 OpprettManueltTilbakekrevingRequest(
-                    eksternFagsakId = "testverdi",
+                    eksternFagsakId = UUID.randomUUID().toString(),
                     ytelsestype = YtelsestypeDTO.BARNETRYGD,
                     eksternId = "testverdi",
                 ),
@@ -539,18 +538,18 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `opprettBehandlingManuellTask skal opprette OpprettBehandlingManueltTask`() {
         val økonomiXmlMottatt = Testdata.getøkonomiXmlMottatt()
+        val eksternFagsakId = KravgrunnlagGenerator.nextPaddedId(6)
         økonomiXmlMottattRepository.insert(
             økonomiXmlMottatt.copy(
-                eksternFagsakId = "testverdi",
+                eksternFagsakId = eksternFagsakId,
                 ytelsestype = Ytelsestype.BARNETRYGD,
-                referanse = "testverdi",
             ),
         )
 
         ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
             behandlingService.opprettBehandlingManuellTask(
                 OpprettManueltTilbakekrevingRequest(
-                    eksternFagsakId = "testverdi",
+                    eksternFagsakId = eksternFagsakId,
                     ytelsestype = YtelsestypeDTO.BARNETRYGD,
                     eksternId = "testverdi",
                 ),
@@ -561,7 +560,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
             .finnTasksMedStatus(listOf(Status.UBEHANDLET))
             .forOne {
                 it.type shouldBe OpprettBehandlingManueltTask.TYPE
-                it.metadata["eksternFagsakId"] shouldBe "testverdi"
+                it.metadata["eksternFagsakId"] shouldBe eksternFagsakId
                 it.metadata["ytelsestype"] shouldBe YtelsestypeDTO.BARNETRYGD.name
                 it.metadata["eksternId"] shouldBe "testverdi"
                 it.metadata["ansvarligSaksbehandler"] shouldBe SAKSBEHANDLER_IDENT

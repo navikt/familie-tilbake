@@ -1,9 +1,12 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
+import io.kotest.inspectors.forExactly
+import io.kotest.inspectors.forNone
+import io.kotest.matchers.collections.shouldBeIn
+import io.kotest.matchers.shouldBe
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
-import no.nav.familie.tilbake.avstemming.task.AvstemmingTask
 import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.common.repository.Sporbar
@@ -31,13 +34,13 @@ internal class HåndterGamleKravgrunnlagBatchTest : OppslagSpringRunnerTest() {
     @Test
     fun `utfør skal ikke opprette tasker når det ikke finnes noen kravgrunnlag som er gamle enn bestemte uker`() {
         // Arrange
-        mottattXmlRepository.insert(Testdata.getøkonomiXmlMottatt())
+        val mottattXml = mottattXmlRepository.insert(Testdata.getøkonomiXmlMottatt())
 
         // Act
         håndterGamleKravgrunnlagBatch.utfør()
 
         // Assert
-        assertThat(taskService.findAll().filter { it.type != AvstemmingTask.TYPE }).isEmpty()
+        taskService.findAll().forNone { it.payload shouldBe mottattXml.id.toString() }
     }
 
     @Test
@@ -51,7 +54,10 @@ internal class HåndterGamleKravgrunnlagBatchTest : OppslagSpringRunnerTest() {
         håndterGamleKravgrunnlagBatch.utfør()
 
         // Assert
-        assertThat(taskService.findAll().any { it.type == HentFagsystemsbehandlingTask.TYPE }).isFalse()
+        taskService.findAll().forNone {
+            it.type shouldBe HentFagsystemsbehandlingTask.TYPE
+            it.payload shouldBe mottattXml.id.toString()
+        }
     }
 
     @Test
@@ -60,6 +66,7 @@ internal class HåndterGamleKravgrunnlagBatchTest : OppslagSpringRunnerTest() {
         val førsteXml =
             Testdata.getøkonomiXmlMottatt().copy(
                 id = UUID.randomUUID(),
+                eksternFagsakId = UUID.randomUUID().toString(),
                 sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusWeeks(9)),
             )
         mottattXmlRepository.insert(førsteXml)
@@ -67,6 +74,7 @@ internal class HåndterGamleKravgrunnlagBatchTest : OppslagSpringRunnerTest() {
         val andreXml =
             Testdata.getøkonomiXmlMottatt().copy(
                 id = UUID.randomUUID(),
+                eksternFagsakId = UUID.randomUUID().toString(),
                 sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusWeeks(9)),
                 ytelsestype = Ytelsestype.SKOLEPENGER,
             )
@@ -79,18 +87,20 @@ internal class HåndterGamleKravgrunnlagBatchTest : OppslagSpringRunnerTest() {
         håndterGamleKravgrunnlagBatch.utfør()
 
         // Assert
-        val alleTasks = taskService.findAll()
-        assertThat(alleTasks).hasSizeGreaterThanOrEqualTo(2)
-        assertThat(alleTasks.filter { it.type == HentFagsystemsbehandlingTask.TYPE }).hasSize(2)
+        taskService.findAll().forExactly(2) {
+            it.type shouldBe HentFagsystemsbehandlingTask.TYPE
+            it.payload shouldBeIn setOf(førsteXml.id.toString(), andreXml.id.toString())
+        }
     }
 
     @Test
     fun `utfør skal opprette tasker av type HentFagsystemsbehandlingTask med spredt TriggerTid når flere kravgrunnlagene tilhører samme ekstern fagsak id`() {
         // Arrange
+        val uniqueEksternFagsakId = UUID.randomUUID().toString()
         val førsteXml =
             Testdata.getøkonomiXmlMottatt().copy(
                 id = UUID.randomUUID(),
-                eksternFagsakId = "1",
+                eksternFagsakId = uniqueEksternFagsakId,
                 sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusWeeks(9)),
             )
         mottattXmlRepository.insert(førsteXml)
@@ -98,7 +108,7 @@ internal class HåndterGamleKravgrunnlagBatchTest : OppslagSpringRunnerTest() {
         val andreXml =
             Testdata.getøkonomiXmlMottatt().copy(
                 id = UUID.randomUUID(),
-                eksternFagsakId = "1",
+                eksternFagsakId = uniqueEksternFagsakId,
                 sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusWeeks(9)),
             )
         mottattXmlRepository.insert(andreXml)
@@ -107,9 +117,10 @@ internal class HåndterGamleKravgrunnlagBatchTest : OppslagSpringRunnerTest() {
         håndterGamleKravgrunnlagBatch.utfør()
 
         // Assert
-        val alleTasks = taskService.findAll()
-        assertThat(alleTasks).hasSizeGreaterThanOrEqualTo(2)
-        val hentFagsystemsbehandlingTasksSortertPåTriggerTid = alleTasks.filter { it.type == HentFagsystemsbehandlingTask.TYPE }.sortedBy { it.triggerTid }
+        val hentFagsystemsbehandlingTasksSortertPåTriggerTid =
+            taskService.findAll()
+                .filter { it.type == HentFagsystemsbehandlingTask.TYPE && it.payload in setOf(førsteXml.id.toString(), andreXml.id.toString()) }
+                .sortedBy { it.triggerTid }
         assertThat(hentFagsystemsbehandlingTasksSortertPåTriggerTid).hasSize(2)
         val hentFagsystemsbehandlingTask1 = hentFagsystemsbehandlingTasksSortertPåTriggerTid[0]
         val hentFagsystemsbehandlingTask2 = hentFagsystemsbehandlingTasksSortertPåTriggerTid[1]

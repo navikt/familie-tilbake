@@ -39,6 +39,7 @@ import no.nav.tilbakekreving.kontrakter.Institusjon
 import no.nav.tilbakekreving.kontrakter.Tilbakekrevingsvalg
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
+import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.junit.jupiter.api.AfterEach
@@ -80,10 +81,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
     private val requestIdSlot = slot<UUID>()
     private val hentFagsystemsbehandlingRequestSlot = slot<HentFagsystemsbehandlingRequest>()
 
-    private val eksternFagsakId = "testverdi"
     private val ytelsestype = Ytelsestype.BARNETRYGD
-    private val eksternId = "testverdi"
-    private val ansvarligSaksbehandler = "Z0000"
 
     @BeforeEach
     fun init() {
@@ -109,7 +107,9 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `preCondition skal sende hentFagsystemsbehandling request`() {
-        opprettBehandlingManueltTask.preCondition(lagTask())
+        val eksternFagsakId = UUID.randomUUID().toString()
+        val eksternId = UUID.randomUUID().toString()
+        opprettBehandlingManueltTask.preCondition(lagTask(eksternFagsakId, eksternId))
 
         verify {
             spyKafkaProducer.sendHentFagsystemsbehandlingRequest(
@@ -136,9 +136,11 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `doTask skal ikke opprette behandling når responsen ikke har mottatt fra fagsystem`() {
-        opprettBehandlingManueltTask.preCondition(lagTask())
+        val eksternFagsakId = UUID.randomUUID().toString()
+        val eksternId = UUID.randomUUID().toString()
+        opprettBehandlingManueltTask.preCondition(lagTask(eksternFagsakId, eksternId))
 
-        val exception = shouldThrow<RuntimeException> { opprettBehandlingManueltTask.doTask(lagTask()) }
+        val exception = shouldThrow<RuntimeException> { opprettBehandlingManueltTask.doTask(lagTask(eksternFagsakId, eksternId)) }
         exception.message shouldBe "HentFagsystemsbehandling respons-en har ikke mottatt fra fagsystem for " +
             "eksternFagsakId=$eksternFagsakId,ytelsestype=$ytelsestype," +
             "eksternId=$eksternId." +
@@ -156,7 +158,9 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `doTask skal ikke opprette behandling når responsen har mottatt fra fagsystem men finnes ikke kravgrunnlag`() {
-        opprettBehandlingManueltTask.preCondition(lagTask())
+        val eksternFagsakId = UUID.randomUUID().toString()
+        val eksternId = UUID.randomUUID().toString()
+        opprettBehandlingManueltTask.preCondition(lagTask(eksternFagsakId, eksternId))
 
         val requestSendt =
             requestSendtRepository
@@ -165,32 +169,32 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
                     ytelsestype,
                     eksternId,
                 )
-        val respons = lagHentFagsystemsbehandlingRespons()
+        val respons = lagHentFagsystemsbehandlingRespons(eksternFagsakId, eksternId)
         requestSendt?.let { requestSendtRepository.update(it.copy(respons = objectMapper.writeValueAsString(respons))) }
 
-        val exception = shouldThrow<RuntimeException> { opprettBehandlingManueltTask.doTask(lagTask()) }
+        val exception = shouldThrow<RuntimeException> { opprettBehandlingManueltTask.doTask(lagTask(eksternFagsakId, eksternId)) }
         exception.message shouldBe "Det finnes intet kravgrunnlag for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
             "og eksternId=$eksternId. Tilbakekrevingsbehandling kan ikke opprettes manuelt."
     }
 
     @Test
     fun `doTask skal opprette behandling når responsen har mottatt fra fagsystem og finnes kravgrunnlag`() {
-        opprettBehandlingManueltTask.preCondition(lagTask())
+        val eksternFagsakId = UUID.randomUUID().toString()
+        val eksternId = UUID.randomUUID().toString()
+        opprettBehandlingManueltTask.preCondition(lagTask(eksternFagsakId, eksternId))
 
-        val requestSendt =
-            requestSendtRepository
-                .findByEksternFagsakIdAndYtelsestypeAndEksternId(
-                    eksternFagsakId,
-                    ytelsestype,
-                    eksternId,
-                )
-        val respons = lagHentFagsystemsbehandlingRespons()
+        val requestSendt = requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(
+            eksternFagsakId,
+            ytelsestype,
+            eksternId,
+        )
+        val respons = lagHentFagsystemsbehandlingRespons(eksternFagsakId, eksternId)
         requestSendt?.let { requestSendtRepository.update(it.copy(respons = objectMapper.writeValueAsString(respons))) }
 
         val økonomiXmlMottatt = Testdata.getøkonomiXmlMottatt()
         økonomiXmlMottattRepository.insert(økonomiXmlMottatt.copy(eksternFagsakId = eksternFagsakId, referanse = eksternId))
 
-        opprettBehandlingManueltTask.doTask(lagTask())
+        opprettBehandlingManueltTask.doTask(lagTask(eksternFagsakId, eksternId))
 
         taskService.findAll().any { FinnKravgrunnlagTask.TYPE == it.type }.shouldBeTrue()
 
@@ -219,7 +223,9 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `doTask skal opprette behandling for institusjon når responsen har mottatt fra fagsystem og finnes kravgrunnlag`() {
-        opprettBehandlingManueltTask.preCondition(lagTask())
+        val eksternFagsakId = UUID.randomUUID().toString()
+        val eksternId = UUID.randomUUID().toString()
+        opprettBehandlingManueltTask.preCondition(lagTask(eksternFagsakId, eksternId))
 
         val requestSendt =
             requestSendtRepository
@@ -228,13 +234,13 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
                     ytelsestype,
                     eksternId,
                 )
-        val respons = lagHentFagsystemsbehandlingRespons(erInstitusjon = true)
+        val respons = lagHentFagsystemsbehandlingRespons(eksternFagsakId, eksternId, erInstitusjon = true)
         requestSendt?.let { requestSendtRepository.update(it.copy(respons = objectMapper.writeValueAsString(respons))) }
 
         val økonomiXmlMottatt = Testdata.getøkonomiXmlMottatt()
         økonomiXmlMottattRepository.insert(økonomiXmlMottatt.copy(eksternFagsakId = eksternFagsakId, referanse = eksternId))
 
-        opprettBehandlingManueltTask.doTask(lagTask())
+        opprettBehandlingManueltTask.doTask(lagTask(eksternFagsakId, eksternId))
 
         taskService.findAll().any { FinnKravgrunnlagTask.TYPE == it.type }.shouldBeTrue()
 
@@ -262,7 +268,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
         fagsak.institusjon!!.organisasjonsnummer shouldBe "987654321"
     }
 
-    private fun lagTask(): Task =
+    private fun lagTask(eksternFagsakId: String, eksternId: String): Task =
         Task(
             type = OpprettBehandlingManueltTask.TYPE,
             payload = "",
@@ -271,15 +277,17 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
                     setProperty("eksternFagsakId", eksternFagsakId)
                     setProperty("ytelsestype", ytelsestype.name)
                     setProperty("eksternId", eksternId)
-                    setProperty("ansvarligSaksbehandler", ansvarligSaksbehandler)
+                    setProperty("ansvarligSaksbehandler", SAKSBEHANDLER_IDENT)
                 },
         )
 
     private fun lagHentFagsystemsbehandlingRespons(
+        eksternFagsakId: String,
+        eksternId: String,
         erInstitusjon: Boolean = false,
         feilmelding: String? = null,
     ): HentFagsystemsbehandlingRespons {
-        var institusjon = if (erInstitusjon) Institusjon(organisasjonsnummer = "987654321") else null
+        val institusjon = if (erInstitusjon) Institusjon(organisasjonsnummer = "987654321") else null
         val fagsystemsbehandling =
             HentFagsystemsbehandling(
                 eksternFagsakId = eksternFagsakId,

@@ -7,6 +7,7 @@ import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
@@ -17,8 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 internal class AutomatiskGjenopptaBehandlingBatchTest : OppslagSpringRunnerTest() {
-    override val tømDBEtterHverTest = false
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -39,7 +38,8 @@ internal class AutomatiskGjenopptaBehandlingBatchTest : OppslagSpringRunnerTest(
         val fagsak = fagsakRepository.insert(Testdata.fagsak())
         val behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId = fagsak.id).copy(status = Behandlingsstatus.UTREDES))
         behandlingsstegstilstandRepository.insert(
-            Testdata.lagBehandlingsstegstilstand(behandling.id).copy(
+            Behandlingsstegstilstand(
+                behandlingId = behandling.id,
                 behandlingssteg = Behandlingssteg.VARSEL,
                 behandlingsstegsstatus = Behandlingsstegstatus.VENTER,
                 venteårsak = Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
@@ -62,7 +62,8 @@ internal class AutomatiskGjenopptaBehandlingBatchTest : OppslagSpringRunnerTest(
         val behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId = fagsak.id).copy(status = Behandlingsstatus.UTREDES))
         val tidsfrist = LocalDate.now().minusWeeks(1)
         behandlingsstegstilstandRepository.insert(
-            Testdata.lagBehandlingsstegstilstand(behandling.id).copy(
+            Behandlingsstegstilstand(
+                behandlingId = behandling.id,
                 behandlingssteg = Behandlingssteg.VILKÅRSVURDERING,
                 behandlingsstegsstatus = Behandlingsstegstatus.VENTER,
                 venteårsak = Venteårsak.AVVENTER_DOKUMENTASJON,

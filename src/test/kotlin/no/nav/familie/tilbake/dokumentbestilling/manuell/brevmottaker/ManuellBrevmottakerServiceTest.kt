@@ -19,7 +19,6 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
-import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
 import no.nav.familie.tilbake.historikkinnslag.Aktør
@@ -53,8 +52,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
-    override val tømDBEtterHverTest = false
-
     @Autowired
     private lateinit var manuellBrevmottakerRepository: ManuellBrevmottakerRepository
     private val mockHistorikkService: HistorikkService = mockk(relaxed = true)
@@ -380,7 +377,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `opprettBrevmottakerSteg skal ikke opprette steg når behandling er på vent`() {
-        val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
         lagBehandlingsstegstilstand(behandling.id, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
 
         behandlingskontrollService.settBehandlingPåVent(

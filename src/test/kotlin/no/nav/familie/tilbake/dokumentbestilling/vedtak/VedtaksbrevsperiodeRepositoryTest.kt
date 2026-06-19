@@ -26,8 +26,8 @@ internal class VedtaksbrevsperiodeRepositoryTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        fagsakRepository.insert(Testdata.fagsak)
-        val behandling = behandlingRepository.insert(Testdata.lagBehandling())
+        val fagsak = fagsakRepository.insert(Testdata.fagsak())
+        val behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id))
         vedtaksbrevsperiode = Testdata.lagVedtaksbrevsperiode(behandling.id)
     }
 

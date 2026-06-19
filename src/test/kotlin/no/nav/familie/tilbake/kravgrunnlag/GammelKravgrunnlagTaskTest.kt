@@ -109,8 +109,14 @@ internal class GammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        mottattXMl = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
-        xmlMottatt = xmlMottattRepository.insert(Testdata.getøkonomiXmlMottatt().copy(melding = mottattXMl))
+        val fagsakId = UUID.randomUUID().toString()
+        mottattXMl = readKravgrunnlagXmlMedIkkeForeldetDato(
+            "/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml",
+            fagsakId,
+        )
+        xmlMottatt = xmlMottattRepository.insert(
+            Testdata.getøkonomiXmlMottatt(eksternFagsakId = fagsakId).copy(melding = mottattXMl),
+        )
         mottattXmlId = xmlMottatt.id
 
         val kafkaProducer: KafkaProducer = mockk()
@@ -208,8 +214,8 @@ internal class GammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any(), any()) } returns hentetKravgrunnlag
 
-        fagsakRepository.insert(Testdata.fagsak.copy(eksternFagsakId = xmlMottatt.eksternFagsakId))
-        val lagretBehandling = behandlingRepository.insert(Testdata.lagBehandling())
+        val fagsak = fagsakRepository.insert(Testdata.fagsak(xmlMottatt.eksternFagsakId))
+        val lagretBehandling = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id))
         behandlingskontrollService.fortsettBehandling(lagretBehandling.id, SecureLog.Context.tom())
         stegService.håndterSteg(lagretBehandling.id, SecureLog.Context.tom())
 

@@ -35,8 +35,6 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
-    override val tømDBEtterHverTest = false
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -66,7 +64,7 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        val fagsak = fagsakRepository.insert(Testdata.fagsak())
+        fagsak = fagsakRepository.insert(Testdata.fagsak())
         behandling = Testdata.lagBehandling(fagsak.id)
         val fagsystemsbehandling =
             behandling.aktivFagsystemsbehandling.copy(
@@ -148,12 +146,9 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
     @Test
     fun `behandleAutomatisk skal ikke opprette tasker når behandlingen allerede sendte varselsbrev`() {
         val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        val fagsystemsbehandling =
-            behandling.aktivFagsystemsbehandling.copy(
-                tilbakekrevingsvalg =
-                    Tilbakekrevingsvalg
-                        .OPPRETT_TILBAKEKREVING_MED_VARSEL,
-            )
+        val fagsystemsbehandling = behandling.aktivFagsystemsbehandling.copy(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+        )
         behandlingRepository.update(behandling.copy(fagsystemsbehandling = setOf(fagsystemsbehandling)))
         brevsporingRepository.insert(Testdata.lagBrevsporing(behandling.id))
 
@@ -190,10 +185,9 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
             kravgrunnlagRepository
                 .findByBehandlingIdAndAktivIsTrue(behandling.id)
                 .copy(
-                    kontrollfelt =
-                        LocalDateTime
-                            .now()
-                            .format(DateTimeFormatter.ofPattern("YYYY-MM-dd-HH.mm.ss.SSSSSS")),
+                    kontrollfelt = LocalDateTime
+                        .now()
+                        .format(DateTimeFormatter.ofPattern("YYYY-MM-dd-HH.mm.ss.SSSSSS")),
                 ),
         )
 

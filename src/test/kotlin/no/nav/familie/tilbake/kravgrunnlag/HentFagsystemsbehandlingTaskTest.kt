@@ -89,8 +89,14 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        mottattXMl = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
-        xmlMottatt = xmlMottattRepository.insert(Testdata.getøkonomiXmlMottatt().copy(melding = mottattXMl))
+        val fagsakId = UUID.randomUUID().toString()
+        mottattXMl = readKravgrunnlagXmlMedIkkeForeldetDato(
+            "/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml",
+            fagsakId,
+        )
+        xmlMottatt = xmlMottattRepository.insert(
+            Testdata.getøkonomiXmlMottatt(eksternFagsakId = fagsakId).copy(melding = mottattXMl),
+        )
         mottattXmlId = xmlMottatt.id
 
         gammelKravgrunnlagService =

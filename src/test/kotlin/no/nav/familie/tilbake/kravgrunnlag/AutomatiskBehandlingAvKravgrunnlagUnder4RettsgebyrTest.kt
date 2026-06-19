@@ -75,23 +75,34 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
     private lateinit var vilkårsvurderingService: VilkårsvurderingService
 
     private lateinit var behandlingId: UUID
+    private lateinit var fagsakEksternId: String
 
     @BeforeEach
     fun init() {
-        val fagsak = Testdata.fagsak
-        val behandling = Testdata.lagBehandling().copy(regelverk = Regelverk.EØS)
-        val copyFagsystemsbehandling = behandling.fagsystemsbehandling.first().copy(tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK, eksternId = "1")
-        val automatiskBehandling = behandling.copy(saksbehandlingstype = Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR, fagsystemsbehandling = setOf(copyFagsystemsbehandling))
-        val fagsakOvergangsstønad = fagsak.copy(ytelsestype = Ytelsestype.OVERGANGSSTØNAD)
-        fagsakRepository.insert(fagsakOvergangsstønad)
-        behandlingId = behandlingRepository.insert(automatiskBehandling).id
+        val fagsak = fagsakRepository.insert(Testdata.fagsak().copy(ytelsestype = Ytelsestype.OVERGANGSSTØNAD))
+        fagsakEksternId = fagsak.eksternFagsakId
+        val behandling = Testdata.lagBehandling(fagsak.id).copy(regelverk = Regelverk.EØS)
+        val fagsystemBehandling = behandling.fagsystemsbehandling.first().copy(tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK, eksternId = "1")
+        behandlingId = behandlingRepository.insert(
+            behandling.copy(
+                saksbehandlingstype = Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR,
+                fagsystemsbehandling = setOf(fagsystemBehandling),
+            ),
+        ).id
     }
+
+    private fun readEfKravgrunnlagXml(fileName: String): String =
+        readKravgrunnlagXmlMedIkkeForeldetDato(fileName, fagsakEksternId)
+
+    private fun readEfKravgrunnlagXmlUtenDatoErstatning(fileName: String): String =
+        readXml(fileName)
+            .replace("<urn:fagsystemId>testverdi</urn:fagsystemId>", "<urn:fagsystemId>$fagsakEksternId</urn:fagsystemId>")
 
     @Test
     fun `Skal knytte kravgrunnlag til åpen behandling under 4 rettsgebyr og behandles automatisk`() {
         lagGrunnlagssteg()
 
-        val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_EF_under_4x_rettsgebyr.xml")
+        val kravgrunnlagXml = readEfKravgrunnlagXml("/kravgrunnlagxml/kravgrunnlag_EF_under_4x_rettsgebyr.xml")
 
         val task = opprettTask(kravgrunnlagXml)
         behandleKravgrunnlagTask.doTask(task)
@@ -112,7 +123,7 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
     fun `Skal ikke behandle feilutbetalinger over 4x rettsgebyr automatisk`() {
         lagGrunnlagssteg()
 
-        val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_EF_over_4x_rettsgebyr.xml")
+        val kravgrunnlagXml = readEfKravgrunnlagXml("/kravgrunnlagxml/kravgrunnlag_EF_over_4x_rettsgebyr.xml")
 
         val task = opprettTask(kravgrunnlagXml)
         behandleKravgrunnlagTask.doTask(task)
@@ -127,7 +138,7 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
     fun `Skal ikke behandle feilutbetalinger hvis kravgrunnlag refererer til annen fagsystembehandling`() {
         lagGrunnlagssteg()
 
-        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_EF_feil_referanse.xml")
+        val kravgrunnlagXml = readEfKravgrunnlagXmlUtenDatoErstatning("/kravgrunnlagxml/kravgrunnlag_EF_feil_referanse.xml")
 
         val task = opprettTask(kravgrunnlagXml)
         behandleKravgrunnlagTask.doTask(task)
@@ -144,7 +155,7 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
     fun `Skal ikke behandle automatisk nyeste periode er før vi har registrert rettsgebyr`() {
         lagGrunnlagssteg()
 
-        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_EF_under_4x_rettsgebyr_foreldet.xml")
+        val kravgrunnlagXml = readEfKravgrunnlagXmlUtenDatoErstatning("/kravgrunnlagxml/kravgrunnlag_EF_under_4x_rettsgebyr_foreldet.xml")
         val task = opprettTask(kravgrunnlagXml)
 
         behandleKravgrunnlagTask.doTask(task)

@@ -34,7 +34,6 @@ import java.time.LocalDate
 import java.util.Optional
 
 class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
-    override val tømDBEtterHverTest = false
     private val eksterneDataForBrevService: EksterneDataForBrevService = mockk()
 
     private lateinit var henleggelsesbrevService: HenleggelsesbrevService

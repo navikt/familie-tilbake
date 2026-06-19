@@ -30,8 +30,6 @@ import java.time.LocalDate
 import java.util.Properties
 
 internal class OppdaterFaktainfoTaskTest : OppslagSpringRunnerTest() {
-    override val tømDBEtterHverTest = false
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 

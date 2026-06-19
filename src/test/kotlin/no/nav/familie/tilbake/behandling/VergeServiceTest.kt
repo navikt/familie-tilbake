@@ -11,6 +11,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.event.EndretPersonIdentEventPublisher
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
@@ -19,7 +20,6 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstan
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.data.Testdata.lagKravgrunnlag
 import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
@@ -50,8 +50,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class VergeServiceTest : OppslagSpringRunnerTest() {
-    override val tømDBEtterHverTest = false
-
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
@@ -82,6 +80,8 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
 
     private lateinit var fagsak: Fagsak
 
+    private lateinit var behandling: Behandling
+
     private lateinit var featureService: FeatureService
     private val vergeDto =
         VergeDto(
@@ -97,6 +97,8 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
     @BeforeEach
     fun setUp() {
         fagsak = fagsakRepository.insert(Testdata.fagsak())
+        behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id))
+        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
         featureService = FeatureService(applicationProperties = applicationProps())
         eregClient = mockk<EregClient> {
             every { hentOrganisasjon(any()) } returns HentOrganisasjonResponse(Navn(""), null)
@@ -120,10 +122,9 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `lagreVerge skal lagre verge i basen`() {
-        val behandlingId = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id)).id
-        vergeService.lagreVerge(behandlingId, vergeDto)
+        vergeService.lagreVerge(behandling.id, vergeDto)
 
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         val verge = behandling.aktivVerge!!
         verge.aktiv shouldBe true
         verge.orgNr shouldBe "987654321"
@@ -135,23 +136,21 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `lagreVerge skal deaktivere eksisterende verger i basen`() {
-        val behandlingId = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id)).id
-        val behandlingFørOppdatering = behandlingRepository.findByIdOrThrow(behandlingId)
+        val behandlingFørOppdatering = behandlingRepository.findByIdOrThrow(behandling.id)
         val gammelVerge = behandlingFørOppdatering.aktivVerge!!
 
-        vergeService.lagreVerge(behandlingId, vergeDto)
+        vergeService.lagreVerge(behandling.id, vergeDto)
 
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         val deaktivertVerge = behandling.verger.first { !it.aktiv }
         deaktivertVerge.id shouldBe gammelVerge.id
     }
 
     @Test
     fun `lagreVerge skal kalle historikkTaskService for å opprette historikkTask`() {
-        val behandlingId = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id)).id
-        vergeService.lagreVerge(behandlingId, vergeDto)
+        vergeService.lagreVerge(behandling.id, vergeDto)
 
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
 
         verify {
             historikkService.lagHistorikkinnslag(
@@ -165,9 +164,8 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `lagreVerge skal ikke lagre verge når organisasjonen er tom`() {
-        val behandlingId = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id)).id
         val vergeDto = vergeDto.copy(orgNr = null, ident = "123")
-        val exception = shouldThrow<RuntimeException> { vergeService.lagreVerge(behandlingId, vergeDto) }
+        val exception = shouldThrow<RuntimeException> { vergeService.lagreVerge(behandling.id, vergeDto) }
         exception.message shouldBe "orgNr kan ikke være null for ${Vergetype.ADVOKAT}"
     }
 
@@ -192,16 +190,14 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
         every { eregClient.hentOrganisasjon(any()) } throws
             NotFoundException("not found", HttpStatusCode.NotFound, "")
 
-        val behandlingId = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id)).id
-        val exception = shouldThrow<RuntimeException> { vergeService.lagreVerge(behandlingId, vergeDto) }
+        val exception = shouldThrow<RuntimeException> { vergeService.lagreVerge(behandling.id, vergeDto) }
         exception.message shouldBe "Organisasjon ${vergeDto.orgNr} er ikke gyldig"
     }
 
     @Test
     fun `lagreVerge skal ikke lagre verge når ident er tom`() {
-        val behandlingId = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id)).id
         val vergeDto = vergeDto.copy(type = Vergetype.VERGE_FOR_BARN)
-        val exception = shouldThrow<RuntimeException> { vergeService.lagreVerge(behandlingId, vergeDto) }
+        val exception = shouldThrow<RuntimeException> { vergeService.lagreVerge(behandling.id, vergeDto) }
         exception.message shouldBe "ident kan ikke være null for ${vergeDto.type}"
     }
 
@@ -226,27 +222,23 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
         every { mockPdlClient.hentPersoninfo(any(), any(), any()) } throws Feil(message = "Feil ved oppslag på person", logContext = SecureLog.Context.tom())
 
         val vergeDto = VergeDto(ident = "123", type = Vergetype.VERGE_FOR_BARN, navn = "testverdi", begrunnelse = "testverdi")
-        val behandlingId = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id)).id
-        val exception = shouldThrow<RuntimeException> { vergeService.lagreVerge(behandlingId, vergeDto) }
+        val exception = shouldThrow<RuntimeException> { vergeService.lagreVerge(behandling.id, vergeDto) }
         exception.message shouldBe "Feil ved oppslag på person"
     }
 
     @Test
     fun `fjernVerge skal deaktivere verge i basen hvis det finnes aktiv verge`() {
-        val behandlingId = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id)).id
-        val behandlingFørOppdatering = behandlingRepository.findByIdOrThrow(behandlingId)
+        val behandlingFørOppdatering = behandlingRepository.findByIdOrThrow(behandling.id)
         val gammelVerge = behandlingFørOppdatering.aktivVerge!!
-
-        kravgrunnlagRepository.insert(lagKravgrunnlag(behandlingId))
 
         lagBehandlingsstegstilstand(behandlingFørOppdatering.id, Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(behandlingFørOppdatering.id, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(behandlingFørOppdatering.id, Behandlingssteg.VERGE, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(behandlingFørOppdatering.id, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
 
-        vergeService.fjernVerge(behandlingId)
+        vergeService.fjernVerge(behandling.id)
 
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         val deaktivertVerge = behandling.verger.first()
         deaktivertVerge.id shouldBe gammelVerge.id
         deaktivertVerge.aktiv shouldBe false
@@ -260,19 +252,16 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `fjernVerge skal tilbakeføre verge steg når behandling er på vilkårsvurdering steg og verge fjernet`() {
-        val behandlingId = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id)).id
-        val behandlingFørOppdatering = behandlingRepository.findByIdOrThrow(behandlingId)
+        val behandlingFørOppdatering = behandlingRepository.findByIdOrThrow(behandling.id)
         val gammelVerge = behandlingFørOppdatering.aktivVerge
         gammelVerge.shouldNotBeNull()
-
-        kravgrunnlagRepository.insert(lagKravgrunnlag(behandlingId))
 
         lagBehandlingsstegstilstand(behandlingFørOppdatering.id, Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(behandlingFørOppdatering.id, Behandlingssteg.VERGE, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(behandlingFørOppdatering.id, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(behandlingFørOppdatering.id, Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)
 
-        vergeService.fjernVerge(behandlingId)
+        vergeService.fjernVerge(behandling.id)
 
         behandlingRepository.findByIdOrThrow(behandlingFørOppdatering.id).harVerge.shouldBeFalse()
         verify {
@@ -292,11 +281,8 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `fjernVerge skal tilbakeføre verge steg og fortsette til fakta når behandling er på verge steg og verge fjernet`() {
-        val behandlingId = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id)).id
-        val behandlingFørOppdatering = behandlingRepository.findByIdOrThrow(behandlingId)
+        val behandlingFørOppdatering = behandlingRepository.findByIdOrThrow(behandling.id)
         val behandlingUtenVerge = behandlingRepository.update(behandlingFørOppdatering.copy(verger = emptySet()))
-
-        kravgrunnlagRepository.insert(lagKravgrunnlag(behandlingId))
 
         lagBehandlingsstegstilstand(behandlingUtenVerge.id, Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(behandlingUtenVerge.id, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
@@ -316,9 +302,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `opprettVergeSteg skal opprette verge steg når behandling er på vilkårsvurdering steg`() {
-        val behandlingId = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id)).id
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        kravgrunnlagRepository.insert(lagKravgrunnlag(behandlingId))
+        val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
 
         lagBehandlingsstegstilstand(behandling.id, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(behandling.id, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
@@ -334,8 +318,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `opprettVergeSteg skal ikke opprette verge steg når behandling er avsluttet`() {
-        val behandlingId = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id)).id
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
         val exception = shouldThrow<RuntimeException> { vergeService.opprettVergeSteg(behandling.id) }
@@ -344,8 +327,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `opprettVergeSteg skal ikke opprette verge steg når behandling er på vent`() {
-        val behandlingId = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id)).id
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         lagBehandlingsstegstilstand(behandling.id, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
         behandlingskontrollService.settBehandlingPåVent(
             behandling.id,
@@ -360,10 +342,6 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentVerge skal returnere lagret verge data`() {
-        val behandling =
-            Testdata.lagBehandling(fagsak.id).apply {
-                behandlingRepository.insert(this)
-            }
         val aktivVerge = behandling.aktivVerge
         aktivVerge.shouldNotBeNull()
 

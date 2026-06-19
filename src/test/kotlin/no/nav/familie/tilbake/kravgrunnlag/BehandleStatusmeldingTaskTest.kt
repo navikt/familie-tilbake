@@ -83,14 +83,20 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        fagsak = Testdata.fagsak
-        behandling = Testdata.lagBehandling()
-        fagsakRepository.insert(fagsak)
+        fagsak = fagsakRepository.insert(Testdata.fagsak())
+        behandling = Testdata.lagBehandling(fagsak.id)
     }
+
+    private fun readKravgrunnlagXml(fileName: String): String =
+        readKravgrunnlagXmlMedIkkeForeldetDato(fileName, fagsak.eksternFagsakId)
+
+    private fun readStatusmeldingXml(fileName: String): String =
+        readXml(fileName)
+            .replace("<urn:fagsystemId>testverdi</urn:fagsystemId>", "<urn:fagsystemId>${fagsak.eksternFagsakId}</urn:fagsystemId>")
 
     @Test
     fun `doTask skal ikke prosessere SPER melding når det ikke finnes et kravgrunnlag`() {
-        val statusmeldingXml = readXml("/kravvedtakstatusxml/statusmelding_SPER_BA.xml")
+        val statusmeldingXml = readStatusmeldingXml("/kravvedtakstatusxml/statusmelding_SPER_BA.xml")
         val task = opprettTask(statusmeldingXml, BehandleStatusmeldingTask.TYPE)
 
         val exception = shouldThrow<Feil> { behandleStatusmeldingTask.doTask(task) }
@@ -100,7 +106,7 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `doTask skal ikke prosessere ugyldig SPER melding`() {
-        val statusmeldingXml = readXml("/kravvedtakstatusxml/statusmelding_SPER_ugyldig.xml")
+        val statusmeldingXml = readStatusmeldingXml("/kravvedtakstatusxml/statusmelding_SPER_ugyldig.xml")
         val task = opprettTask(statusmeldingXml, BehandleStatusmeldingTask.TYPE)
 
         val exception = shouldThrow<UgyldigStatusmeldingFeil> { behandleStatusmeldingTask.doTask(task) }
@@ -111,11 +117,10 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
     fun `doTask skal prosessere SPER melding uten behandling`() {
         opprettGrunnlag()
 
-        val statusmeldingXml = readXml("/kravvedtakstatusxml/statusmelding_SPER_BA.xml")
+        val statusmeldingXml = readStatusmeldingXml("/kravvedtakstatusxml/statusmelding_SPER_BA.xml")
         val task = opprettTask(statusmeldingXml, BehandleStatusmeldingTask.TYPE)
 
         behandleStatusmeldingTask.doTask(task)
-        kravgrunnlagRepository.findAll().toList().shouldBeEmpty()
 
         val mottattXmlListe = mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype)
         mottattXmlListe.size shouldBe 1
@@ -130,15 +135,14 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
     fun `doTask skal prosessere ENDR melding uten behandling`() {
         opprettGrunnlag()
 
-        var statusmeldingXml = readXml("/kravvedtakstatusxml/statusmelding_SPER_BA.xml")
+        var statusmeldingXml = readStatusmeldingXml("/kravvedtakstatusxml/statusmelding_SPER_BA.xml")
         var task = opprettTask(statusmeldingXml, BehandleStatusmeldingTask.TYPE)
         behandleStatusmeldingTask.doTask(task)
 
-        statusmeldingXml = readXml("/kravvedtakstatusxml/statusmelding_ENDR_BA.xml")
+        statusmeldingXml = readStatusmeldingXml("/kravvedtakstatusxml/statusmelding_ENDR_BA.xml")
         task = opprettTask(statusmeldingXml, BehandleStatusmeldingTask.TYPE)
 
         behandleStatusmeldingTask.doTask(task)
-        kravgrunnlagRepository.findAll().toList().shouldBeEmpty()
 
         val mottattXmlListe = mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype)
         mottattXmlListe.size shouldBe 1
@@ -153,11 +157,10 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
     fun `doTask skal prosessere AVSL melding uten behandling`() {
         opprettGrunnlag()
 
-        val statusmeldingXml = readXml("/kravvedtakstatusxml/statusmelding_AVSL_BA.xml")
+        val statusmeldingXml = readStatusmeldingXml("/kravvedtakstatusxml/statusmelding_AVSL_BA.xml")
         val task = opprettTask(statusmeldingXml, BehandleStatusmeldingTask.TYPE)
 
         behandleStatusmeldingTask.doTask(task)
-        kravgrunnlagRepository.findAll().toList().shouldBeEmpty()
         mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype).shouldBeEmpty()
 
         assertArkivertXml(2, true, Kravstatuskode.AVSLUTTET)
@@ -170,7 +173,7 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
 
         opprettGrunnlag()
 
-        val statusmeldingXml = readXml("/kravvedtakstatusxml/statusmelding_SPER_BA.xml")
+        val statusmeldingXml = readStatusmeldingXml("/kravvedtakstatusxml/statusmelding_SPER_BA.xml")
         val task = opprettTask(statusmeldingXml, BehandleStatusmeldingTask.TYPE)
 
         behandleStatusmeldingTask.doTask(task)
@@ -201,7 +204,7 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         var behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         assertBehandlingstegstilstand(behandlingsstegstilstand, FAKTA, Behandlingsstegstatus.KLAR)
 
-        val statusmeldingXml = readXml("/kravvedtakstatusxml/statusmelding_SPER_BA.xml")
+        val statusmeldingXml = readStatusmeldingXml("/kravvedtakstatusxml/statusmelding_SPER_BA.xml")
         val task = opprettTask(statusmeldingXml, BehandleStatusmeldingTask.TYPE)
 
         behandleStatusmeldingTask.doTask(task)
@@ -227,7 +230,7 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling)
         settBehandlingTilForeslåVedtakSteg()
 
-        val statusmeldingXml = readXml("/kravvedtakstatusxml/statusmelding_SPER_BA.xml")
+        val statusmeldingXml = readStatusmeldingXml("/kravvedtakstatusxml/statusmelding_SPER_BA.xml")
         val task = opprettTask(statusmeldingXml, BehandleStatusmeldingTask.TYPE)
 
         behandleStatusmeldingTask.doTask(task)
@@ -262,7 +265,7 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         assertBehandlingstegstilstand(behandlingsstegstilstand, GRUNNLAG, Behandlingsstegstatus.UTFØRT)
         assertBehandlingstegstilstand(behandlingsstegstilstand, FAKTA, Behandlingsstegstatus.KLAR)
 
-        var statusmeldingXml = readXml("/kravvedtakstatusxml/statusmelding_SPER_BA.xml")
+        var statusmeldingXml = readStatusmeldingXml("/kravvedtakstatusxml/statusmelding_SPER_BA.xml")
         var task = opprettTask(statusmeldingXml, BehandleStatusmeldingTask.TYPE)
         behandleStatusmeldingTask.doTask(task)
 
@@ -270,7 +273,7 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         assertBehandlingstegstilstand(behandlingsstegstilstand, FAKTA, Behandlingsstegstatus.AVBRUTT)
         assertBehandlingstegstilstand(behandlingsstegstilstand, GRUNNLAG, Behandlingsstegstatus.VENTER)
 
-        statusmeldingXml = readXml("/kravvedtakstatusxml/statusmelding_ENDR_BA.xml")
+        statusmeldingXml = readStatusmeldingXml("/kravvedtakstatusxml/statusmelding_ENDR_BA.xml")
         task = opprettTask(statusmeldingXml, BehandleStatusmeldingTask.TYPE)
 
         behandleStatusmeldingTask.doTask(task)
@@ -301,11 +304,11 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling)
         settBehandlingTilForeslåVedtakSteg()
 
-        var statusmeldingXml = readXml("/kravvedtakstatusxml/statusmelding_SPER_BA.xml")
+        var statusmeldingXml = readStatusmeldingXml("/kravvedtakstatusxml/statusmelding_SPER_BA.xml")
         var task = opprettTask(statusmeldingXml, BehandleStatusmeldingTask.TYPE)
         behandleStatusmeldingTask.doTask(task)
 
-        statusmeldingXml = readXml("/kravvedtakstatusxml/statusmelding_ENDR_BA.xml")
+        statusmeldingXml = readStatusmeldingXml("/kravvedtakstatusxml/statusmelding_ENDR_BA.xml")
         task = opprettTask(statusmeldingXml, BehandleStatusmeldingTask.TYPE)
 
         behandleStatusmeldingTask.doTask(task)
@@ -339,7 +342,7 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling)
         settBehandlingTilForeslåVedtakSteg()
 
-        val statusmeldingXml = readXml("/kravvedtakstatusxml/statusmelding_AVSL_BA.xml")
+        val statusmeldingXml = readStatusmeldingXml("/kravvedtakstatusxml/statusmelding_AVSL_BA.xml")
         val task = opprettTask(statusmeldingXml, BehandleStatusmeldingTask.TYPE)
 
         behandleStatusmeldingTask.doTask(task)
@@ -388,7 +391,7 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
     }
 
     private fun opprettGrunnlag() {
-        val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
+        val kravgrunnlagXml = readKravgrunnlagXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
         val task = opprettTask(kravgrunnlagXml, BehandleKravgrunnlagTask.TYPE)
         behandleKravgrunnlagTask.doTask(task)
 

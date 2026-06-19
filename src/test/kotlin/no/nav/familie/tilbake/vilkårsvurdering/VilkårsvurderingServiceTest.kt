@@ -67,7 +67,6 @@ import java.util.UUID
 internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var foreldelseService: ForeldelseService
-    override val tømDBEtterHverTest = false
 
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository

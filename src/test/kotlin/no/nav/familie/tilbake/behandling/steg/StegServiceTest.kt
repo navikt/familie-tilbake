@@ -79,8 +79,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class StegServiceTest : OppslagSpringRunnerTest() {
-    override val tømDBEtterHverTest = false
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -463,8 +461,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
             val fom = LocalDate.of(2010, 1, 1)
             val tom = LocalDate.of(2010, 1, 31)
 
-            lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
             kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id, setOf(Testdata.lagKravgrunnlagsperiode(januar(2010) til januar(2010)))))
+            lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
             stegService.håndterSteg(behandling.id, lagBehandlingsstegFaktaDto(fom, tom), SecureLog.Context.tom())
 
             // foreldelsesteg vurderte som IKKE_FORELDET med første omgang
@@ -541,8 +539,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     fun `håndterSteg skal utføre foreslå vedtak og forsette til fatte vedtak`() {
         ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
             // behandle fakta steg
-            lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
             kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
+            lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
             val behandlingsstegFaktaDto = lagBehandlingsstegFaktaDto()
             stegService.håndterSteg(behandling.id, lagBehandlingsstegFaktaDto(), SecureLog.Context.tom())
 
@@ -594,8 +592,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     fun `håndterSteg skal utføre foreslå vedtak på nytt når beslutter underkjente steg og forsette til fatte vedtak`() {
         ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
             // behandle fakta steg
-            lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
             kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
+            lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
             stegService.håndterSteg(behandling.id, lagBehandlingsstegFaktaDto(), SecureLog.Context.tom())
 
             // behandle vilkårsvurderingssteg

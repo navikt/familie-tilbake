@@ -17,8 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 internal class ØkonomiXmlSendtRepositoryTest : OppslagSpringRunnerTest() {
-    override val tømDBEtterHverTest = false
-
     @Autowired
     private lateinit var økonomiXmlSendtRepository: ØkonomiXmlSendtRepository
 

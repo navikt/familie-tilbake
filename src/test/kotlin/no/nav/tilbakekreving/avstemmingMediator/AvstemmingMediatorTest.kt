@@ -122,7 +122,7 @@ class AvstemmingMediatorTest : E2EBase() {
             kodeHjemmel = "Hjemmel123"
             renterBeregnes = "JA"
             enhetAnsvarlig = "8020"
-            kontrollfelt = "ABC123"
+            kontrollfelt = "2025-12-24-11.12.13.123456"
             saksbehId = "Z123456"
 
             tilbakekrevingsperiode.addAll(

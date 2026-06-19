@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 internal class VarselbrevServiceTest : OppslagSpringRunnerTest() {
-    override val tømDBEtterHverTest = false
     private val fagsakRepository: FagsakRepository = mockk()
     private val eksterneDataForBrevService: EksterneDataForBrevService = mockk(relaxed = true)
     private val distribusjonshåndteringService: DistribusjonshåndteringService = mockk()

@@ -26,8 +26,8 @@ internal class VedtaksbrevsoppsummeringRepositoryTest : OppslagSpringRunnerTest(
 
     @BeforeEach
     fun init() {
-        fagsakRepository.insert(Testdata.fagsak)
-        Testdata.lagBehandling().apply {
+        val fagsak = fagsakRepository.insert(Testdata.fagsak())
+        Testdata.lagBehandling(fagsak.id).apply {
             behandlingRepository.insert(this)
             vedtaksbrevsoppsummering = Testdata.lagVedtaksbrevsoppsummering(this.id)
         }

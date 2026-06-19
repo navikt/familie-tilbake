@@ -15,7 +15,6 @@ import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
-import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
@@ -51,8 +50,6 @@ import java.time.LocalDate
 import java.util.Properties
 
 internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
-    override val tømDBEtterHverTest = false
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -94,19 +91,15 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var automatiskSaksbehandlingTask: AutomatiskSaksbehandlingTask
 
-    private lateinit var fagsak: Fagsak
     private lateinit var behandling: Behandling
 
     @BeforeEach
     fun init() {
         val fagsak = fagsakRepository.insert(Testdata.fagsak())
         behandling = Testdata.lagBehandling(fagsakId = fagsak.id)
-        val fagsystemsbehandling =
-            behandling.aktivFagsystemsbehandling.copy(
-                tilbakekrevingsvalg =
-                    Tilbakekrevingsvalg
-                        .OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
-            )
+        val fagsystemsbehandling = behandling.aktivFagsystemsbehandling.copy(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
+        )
         behandlingRepository.insert(
             behandling.copy(
                 fagsystemsbehandling = setOf(fagsystemsbehandling),

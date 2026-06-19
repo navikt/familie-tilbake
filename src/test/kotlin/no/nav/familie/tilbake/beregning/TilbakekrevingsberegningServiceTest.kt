@@ -44,8 +44,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
-    override val tømDBEtterHverTest = false
-
     @Autowired
     private lateinit var tilbakekrevingsberegningService: TilbakekrevingsberegningService
 

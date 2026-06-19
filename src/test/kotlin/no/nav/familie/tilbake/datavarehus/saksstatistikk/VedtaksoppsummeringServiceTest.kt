@@ -58,8 +58,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
-    override val tømDBEtterHverTest = false
-
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
@@ -330,7 +328,7 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
                 utbetIdType = GjelderType.PERSON,
                 gjelderVedtakId = "1234567890",
                 gjelderType = GjelderType.PERSON,
-                kontrollfelt = "2020",
+                kontrollfelt = "2025-12-24-11.12.13.123456",
                 saksbehandlerId = ANSVARLIG_SAKSBEHANDLER,
                 fagsystemId = saksnummer + "100",
                 referanse = "1",

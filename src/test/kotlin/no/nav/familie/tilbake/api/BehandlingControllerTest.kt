@@ -12,6 +12,7 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandReposi
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.kontrakter.Ressurs
+import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFatteVedtaksstegDtoTest
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
@@ -41,7 +42,7 @@ import java.util.UUID
         "rolle.teamfamilie.forvalter=forvalter",
     ],
 )
-class BehandlingControllerTest : OppslagSpringRunnerTest() {
+class BehandlingControllerTest() : OppslagSpringRunnerTest() {
     private val restTemplate = TestRestTemplate()
 
     @Autowired
@@ -52,6 +53,9 @@ class BehandlingControllerTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
+
+    @Autowired
+    private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
 
     @Test
     fun `Man må ha minimumsrolle SAKSBEHANDLER for å bruke endepunkt`() {
@@ -197,6 +201,7 @@ class BehandlingControllerTest : OppslagSpringRunnerTest() {
         val behandling = Testdata.lagBehandling(fagsakId = fagsak.id, ansvarligSaksbehandler = saksbehandler, behandlingStatus = behandlingStatus)
         fagsakRepository.insert(fagsak)
         behandlingRepository.insert(behandling)
+        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
         behandlingsstegstilstandRepository.insert(
             Behandlingsstegstilstand(
                 behandlingId = behandling.id,

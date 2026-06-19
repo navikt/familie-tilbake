@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.dokumentbestilling
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.inspectors.forOne
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -19,6 +20,7 @@ import no.nav.familie.tilbake.dokumentbestilling.innhentdokumentasjon.InnhentDok
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
 import no.nav.familie.tilbake.dokumentbestilling.varsel.manuelt.ManueltVarselbrevService
 import no.nav.familie.tilbake.dokumentbestilling.varsel.manuelt.SendManueltVarselbrevTask
+import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.GjelderType
@@ -29,6 +31,7 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.log.LogService
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.brev.Dokumentmalstype
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import org.junit.jupiter.api.BeforeEach
@@ -38,7 +41,6 @@ import org.springframework.data.domain.Pageable
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
-import java.util.UUID
 
 class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
     @Autowired
@@ -76,7 +78,7 @@ class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
     fun init() {
         fagsak = fagsakRepository.insert(Testdata.fagsak())
         behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId = fagsak.id))
-        behandlingsstegstilstandRepository.insert(Testdata.lagBehandlingsstegstilstand(behandling.id))
+        behandlingsstegstilstandRepository.insert(Testdata.lagBehandlingsstegstilstand(behandling.id, Behandlingssteg.GRUNNLAG))
         dokumentBehandlingService =
             DokumentbehandlingService(
                 behandlingRepository,
@@ -95,12 +97,15 @@ class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `bestillBrev skal kunne bestille varselbrev når grunnlag finnes`() {
-        val behandlingId = opprettOgLagreKravgrunnlagPåBehandling()
+        opprettOgLagreKravgrunnlagPåBehandling()
 
-        dokumentBehandlingService.bestillBrev(behandlingId, Dokumentmalstype.VARSEL, "Bestilt varselbrev")
+        dokumentBehandlingService.bestillBrev(behandling.id, Dokumentmalstype.VARSEL, "Bestilt varselbrev")
 
         val tasks = taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET), Pageable.unpaged())
-        tasks.first().type shouldBe SendManueltVarselbrevTask.TYPE
+        tasks.forOne {
+            objectMapper.readTree(it.payload)["behandlingId"].textValue() shouldBe behandling.id.toString()
+            it.type shouldBe SendManueltVarselbrevTask.TYPE
+        }
     }
 
     @Test
@@ -112,16 +117,19 @@ class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `bestillBrev skal kunne bestille innhent dokumentasjon brev når grunnlag finnes`() {
-        val behandlingId = opprettOgLagreKravgrunnlagPåBehandling()
+        opprettOgLagreKravgrunnlagPåBehandling()
 
         dokumentBehandlingService.bestillBrev(
-            behandlingId,
+            behandling.id,
             Dokumentmalstype.INNHENT_DOKUMENTASJON,
             "Bestilt innhent dokumentasjon",
         )
 
         val tasks = taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET), Pageable.unpaged())
-        tasks.first().type shouldBe InnhentDokumentasjonbrevTask.TYPE
+        tasks.forOne {
+            objectMapper.readTree(it.payload)["behandlingId"].textValue() shouldBe behandling.id.toString()
+            it.type shouldBe InnhentDokumentasjonbrevTask.TYPE
+        }
     }
 
     @Test
@@ -136,7 +144,7 @@ class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
             "${behandling.id}"
     }
 
-    private fun opprettOgLagreKravgrunnlagPåBehandling(): UUID {
+    private fun opprettOgLagreKravgrunnlagPåBehandling() {
         val ytelBeløp =
             Kravgrunnlagsbeløp433(
                 klassetype = Klassetype.YTEL,
@@ -176,12 +184,11 @@ class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
                 ansvarligEnhet = "enhet",
                 bostedsenhet = "enhet",
                 behandlingsenhet = "enhet",
-                kontrollfelt = "132323",
+                kontrollfelt = "2025-12-24-11.12.13.123456",
                 saksbehandlerId = "23454334",
-                referanse = "testverdi",
+                referanse = "2026-04-20-11.22.33.123456",
                 perioder = setOf(periode),
             )
         kravgrunnlagRepository.insert(kravgrunnlag431)
-        return kravgrunnlag431.behandlingId
     }
 }

@@ -13,8 +13,10 @@ import java.math.BigDecimal
 object KravgrunnlagGenerator {
     private val idIndexes = Array(48) { 0 }
 
-    fun nextPaddedId(width: Int) = (idIndexes[width - 1]++)
+    fun nextId(width: Int) = (idIndexes[width - 1]++)
         .toString()
+
+    fun nextPaddedId(width: Int) = nextId(width)
         .padStart(width, '0')
 
     fun standardPeriode(

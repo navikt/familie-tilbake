@@ -44,6 +44,7 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhe
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingGodTro
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingSærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
+import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.kontrakter.Tilbakekrevingsvalg
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
@@ -173,12 +174,14 @@ object Testdata {
         begrunnelseForTilbakekreving = null,
     )
 
-    fun lagBehandlingsstegstilstand(behandlingId: UUID) =
-        Behandlingsstegstilstand(
-            behandlingId = behandlingId,
-            behandlingssteg = Behandlingssteg.FAKTA,
-            behandlingsstegsstatus = Behandlingsstegstatus.KLAR,
-        )
+    fun lagBehandlingsstegstilstand(
+        behandlingId: UUID,
+        behandlingssteg: Behandlingssteg,
+    ) = Behandlingsstegstilstand(
+        behandlingId = behandlingId,
+        behandlingssteg = behandlingssteg,
+        behandlingsstegsstatus = Behandlingsstegstatus.KLAR,
+    )
 
     fun lagTotrinnsvurdering(behandlingId: UUID) =
         Totrinnsvurdering(
@@ -281,12 +284,14 @@ object Testdata {
         behandlingId: UUID,
         perioder: Set<Kravgrunnlagsperiode432> = setOf(lagKravgrunnlagsperiode()),
         fagområdekode: Fagområdekode = Fagområdekode.EFOG,
+        fagsystemId: String = KravgrunnlagGenerator.nextPaddedId(6),
+        kravgrunnlagId: BigInteger = BigInteger(KravgrunnlagGenerator.nextPaddedId(6)),
     ) = Kravgrunnlag431(
         behandlingId = behandlingId,
         vedtakId = BigInteger.ZERO,
         kravstatuskode = Kravstatuskode.NYTT,
         fagområdekode = fagområdekode,
-        fagsystemId = "testverdi",
+        fagsystemId = fagsystemId,
         fagsystemVedtaksdato = LocalDate.now(),
         omgjortVedtakId = BigInteger.ZERO,
         gjelderVedtakId = "testverdi",
@@ -298,48 +303,45 @@ object Testdata {
         ansvarligEnhet = "testverdi",
         bostedsenhet = "testverdi",
         behandlingsenhet = "testverdi",
-        kontrollfelt = "testverdi",
+        kontrollfelt = "2025-12-24-11.12.13.123456",
         saksbehandlerId = "testverdi",
-        referanse = "testverdi",
-        eksternKravgrunnlagId = BigInteger.ZERO,
+        referanse = "2026-04-20-11.22.33.123456",
+        eksternKravgrunnlagId = kravgrunnlagId,
         perioder = perioder,
         aktiv = true,
         sperret = false,
     )
 
-    private val vilkårsvurderingSærligGrunn =
-        VilkårsvurderingSærligGrunn(
-            særligGrunn = SærligGrunnType.GRAD_AV_UAKTSOMHET,
-            begrunnelse = "testverdi",
-        )
+    private fun vilkårsvurderingSærligGrunn() = VilkårsvurderingSærligGrunn(
+        særligGrunn = SærligGrunnType.GRAD_AV_UAKTSOMHET,
+        begrunnelse = "testverdi",
+    )
 
-    private val vilkårsvurderingGodTro =
-        VilkårsvurderingGodTro(
-            beløpErIBehold = true,
-            beløpTilbakekreves = BigDecimal("32165"),
-            begrunnelse = "testverdi",
-        )
+    private fun vilkårsvurderingGodTro() = VilkårsvurderingGodTro(
+        beløpErIBehold = true,
+        beløpTilbakekreves = BigDecimal("32165"),
+        begrunnelse = "testverdi",
+    )
 
-    private val vilkårsvurderingAktsomhet =
-        VilkårsvurderingAktsomhet(
-            aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
-            ileggRenter = true,
-            andelTilbakekreves = BigDecimal("123.11"),
-            manueltSattBeløp = null,
-            begrunnelse = "testverdi",
-            særligeGrunnerTilReduksjon = true,
-            særligeGrunnerBegrunnelse = "testverdi",
-            vilkårsvurderingSærligeGrunner = setOf(vilkårsvurderingSærligGrunn),
-        )
+    private fun vilkårsvurderingAktsomhet() = VilkårsvurderingAktsomhet(
+        aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
+        ileggRenter = true,
+        andelTilbakekreves = BigDecimal("123.11"),
+        manueltSattBeløp = null,
+        begrunnelse = "testverdi",
+        særligeGrunnerTilReduksjon = true,
+        særligeGrunnerBegrunnelse = "testverdi",
+        vilkårsvurderingSærligeGrunner = setOf(vilkårsvurderingSærligGrunn()),
+    )
 
     fun vilkårsperiode(
         periode: Månedsperiode = januar() til januar(),
-        godTro: VilkårsvurderingGodTro? = vilkårsvurderingGodTro,
+        godTro: VilkårsvurderingGodTro? = vilkårsvurderingGodTro(),
     ) = Vilkårsvurderingsperiode(
         periode = periode,
         vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
         begrunnelse = "testverdi",
-        aktsomhet = vilkårsvurderingAktsomhet,
+        aktsomhet = vilkårsvurderingAktsomhet(),
         godTro = godTro,
     )
 
@@ -366,25 +368,26 @@ object Testdata {
                 }.toSet(),
     )
 
-    fun getøkonomiXmlMottatt() =
-        ØkonomiXmlMottatt(
-            melding = "testverdi",
-            kravstatuskode = Kravstatuskode.NYTT,
-            eksternFagsakId = "testverdi",
-            ytelsestype = Ytelsestype.BARNETRYGD,
-            referanse = "testverdi",
-            eksternKravgrunnlagId = BigInteger.ZERO,
-            vedtakId = BigInteger.ZERO,
-            kontrollfelt = "2023-07-12-22.53.47.806186",
-        )
+    fun getøkonomiXmlMottatt(
+        eksternFagsakId: String = KravgrunnlagGenerator.nextPaddedId(6),
+        kravgrunnlagId: BigInteger = BigInteger(KravgrunnlagGenerator.nextId(6)),
+    ) = ØkonomiXmlMottatt(
+        melding = "testverdi",
+        kravstatuskode = Kravstatuskode.NYTT,
+        eksternFagsakId = eksternFagsakId,
+        ytelsestype = Ytelsestype.BARNETRYGD,
+        referanse = "2026-04-20-11.22.33.123456",
+        eksternKravgrunnlagId = kravgrunnlagId,
+        vedtakId = BigInteger.ZERO,
+        kontrollfelt = "2023-07-12-22.53.47.806186",
+    )
 
-    val økonomiXmlMottattArkiv =
-        ØkonomiXmlMottattArkiv(
-            gammel_okonomi_xml_mottatt_id = null,
-            melding = "testverdi",
-            eksternFagsakId = "testverdi",
-            ytelsestype = Ytelsestype.BARNETRYGD,
-        )
+    fun lagØkonomiXmlMottattArkiv(eksternFagsakId: String = KravgrunnlagGenerator.nextPaddedId(6)) = ØkonomiXmlMottattArkiv(
+        gammel_okonomi_xml_mottatt_id = null,
+        melding = "testverdi",
+        eksternFagsakId = eksternFagsakId,
+        ytelsestype = Ytelsestype.BARNETRYGD,
+    )
 
     fun lagVedtaksbrevsoppsummering(behandlingId: UUID) =
         Vedtaksbrevsoppsummering(
@@ -432,11 +435,11 @@ object Testdata {
             saksbehandlingstype = behandling.saksbehandlingstype,
         )
 
-    fun lagVedtaksbrevgrunnlag(behandling: Behandling) =
+    fun lagVedtaksbrevgrunnlag(behandling: Behandling, eksternFagsakId: String = KravgrunnlagGenerator.nextPaddedId(6)) =
         Vedtaksbrevgrunnlag(
             id = behandling.id,
             bruker = Bruker(STANDARD_BRUKERIDENT),
-            eksternFagsakId = "testverdi",
+            eksternFagsakId = eksternFagsakId,
             fagsystem = Fagsystem.BA,
             ytelsestype = Ytelsestype.BARNETRYGD,
             behandlinger = setOf(lagVedtaksbrevbehandling(behandling)),

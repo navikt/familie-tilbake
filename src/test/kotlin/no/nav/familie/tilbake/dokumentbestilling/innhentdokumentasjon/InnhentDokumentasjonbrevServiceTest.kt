@@ -26,7 +26,6 @@ import java.time.LocalDate
 import java.util.Optional
 
 class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
-    override val tømDBEtterHverTest = false
     private val flereOpplysninger = "Vi trenger flere opplysninger"
     private val mockEksterneDataForBrevService: EksterneDataForBrevService = mockk()
 

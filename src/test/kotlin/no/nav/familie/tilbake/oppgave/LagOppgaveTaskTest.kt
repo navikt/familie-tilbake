@@ -17,6 +17,7 @@ import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.kontrakter.oppgave.OppgavePrioritet
 import no.nav.familie.tilbake.kontrakter.oppgave.Oppgavetype
+import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
@@ -27,8 +28,6 @@ import java.time.LocalDate
 import java.util.Properties
 
 internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
-    override val tømDBEtterHverTest = false
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -40,6 +39,9 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var behandlingskontrollService: BehandlingskontrollService
+
+    @Autowired
+    private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
 
     private val mockOppgaveService: OppgaveService = mockk(relaxed = true)
     private val mockIntegrasjonerClient = mockk<IntegrasjonerClient>(relaxed = true)
@@ -56,6 +58,7 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
     fun init() {
         fagsak = fagsakRepository.insert(Testdata.fagsak())
         behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId = fagsak.id))
+        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
 
         every { oppgavePrioritetService.utledOppgaveprioritet(any(), any()) } returns OppgavePrioritet.NORM
 

@@ -13,11 +13,9 @@ internal class ØkonomiXmlMottattArkivRepositoryTest : OppslagSpringRunnerTest()
     @Autowired
     private lateinit var økonomiXmlMottattArkivRepository: ØkonomiXmlMottattArkivRepository
 
-    private val økonomiXmlMottattArkiv = Testdata.økonomiXmlMottattArkiv
-
     @Test
     fun `insert med gyldige verdier skal persistere en forekomst av ØkonomiXmlMottattArkiv til basen`() {
-        økonomiXmlMottattArkivRepository.insert(økonomiXmlMottattArkiv)
+        val økonomiXmlMottattArkiv = økonomiXmlMottattArkivRepository.insert(Testdata.lagØkonomiXmlMottattArkiv())
 
         val lagretØkonomiXmlMottattArkiv = økonomiXmlMottattArkivRepository.findByIdOrThrow(økonomiXmlMottattArkiv.id)
 
@@ -31,7 +29,7 @@ internal class ØkonomiXmlMottattArkivRepositoryTest : OppslagSpringRunnerTest()
 
     @Test
     fun `update med gyldige verdier skal oppdatere en forekomst av ØkonomiXmlMottattArkiv i basen`() {
-        økonomiXmlMottattArkivRepository.insert(økonomiXmlMottattArkiv)
+        val økonomiXmlMottattArkiv = økonomiXmlMottattArkivRepository.insert(Testdata.lagØkonomiXmlMottattArkiv())
         var lagretØkonomiXmlMottattArkiv = økonomiXmlMottattArkivRepository.findByIdOrThrow(økonomiXmlMottattArkiv.id)
         val oppdatertØkonomiXmlMottattArkiv = lagretØkonomiXmlMottattArkiv.copy(melding = "bob")
 

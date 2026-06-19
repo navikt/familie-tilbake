@@ -9,9 +9,9 @@ import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.behandling.domain.Verge
-import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmetadataUtil
@@ -64,13 +64,13 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
     private lateinit var spyPdfBrevService: PdfBrevService
     private lateinit var manueltVarselbrevService: ManueltVarselbrevService
     private lateinit var behandling: Behandling
-    private var fagsak = Testdata.fagsak
+    private lateinit var fagsak: Fagsak
     private lateinit var brevmetadataUtil: BrevmetadataUtil
-    private val featureToggleService = mockk<FeatureToggleService>(relaxed = true)
 
     @BeforeEach
     fun setup() {
-        behandling = Testdata.lagBehandling()
+        fagsak = fagsakRepository.insert(Testdata.fagsak())
+        behandling = Testdata.lagBehandling(fagsakId = fagsak.id)
         spyPdfBrevService = spyk(pdfBrevService)
 
         brevmetadataUtil =
@@ -96,15 +96,13 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
         every { mockFeilutbetalingService.hentFaktaomfeilutbetaling(any()) }
             .returns(lagFeilutbetaling())
         val personinfo = Personinfo("DUMMY_FØDSELSNUMMER", LocalDate.now(), "Fiona")
-        val ident: String = Testdata.fagsak.bruker.ident
-        every { mockEksterneDataForBrevService.hentPerson(ident, any(), any()) }.returns(personinfo)
+        every { mockEksterneDataForBrevService.hentPerson(fagsak.bruker.ident, any(), any()) }.returns(personinfo)
         every {
             mockEksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any(), any())
         }.returns(Adresseinfo("12345678901", "Test"))
         every { mockEksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(any(), any()) } returns
             eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(behandling.ansvarligSaksbehandler, SecureLog.Context.tom())
 
-        fagsak = fagsakRepository.insert(fagsak)
         behandling = behandlingRepository.insert(behandling)
     }
 

@@ -51,17 +51,15 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
     private lateinit var faktaFeilutbetalingService: FaktaFeilutbetalingService
 
     private lateinit var behandling: Behandling
-    private val periode =
-        Månedsperiode(
-            fom = YearMonth.now().minusMonths(2),
-            tom = YearMonth.now(),
-        )
+    private val periode = Månedsperiode(
+        fom = YearMonth.now().minusMonths(2),
+        tom = YearMonth.now(),
+    )
 
     @BeforeEach
     fun init() {
-        behandling = Testdata.lagBehandling()
-        fagsakRepository.insert(Testdata.fagsak)
-        behandlingRepository.insert(behandling)
+        val fagsak = fagsakRepository.insert(Testdata.fagsak())
+        behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId = fagsak.id))
         val kravgrunnlag =
             Testdata
                 .lagKravgrunnlag(behandling.id)
@@ -72,8 +70,8 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
                                 periode = periode,
                                 beløp =
                                     setOf(
-                                        Testdata.feilKravgrunnlagsbeløp433,
-                                        Testdata.ytelKravgrunnlagsbeløp433,
+                                        Testdata.lagFeilKravgrunnlagsbeløp(),
+                                        Testdata.lagYtelKravgrunnlagsbeløp(),
                                     ),
                                 månedligSkattebeløp = BigDecimal("123.11"),
                             ),

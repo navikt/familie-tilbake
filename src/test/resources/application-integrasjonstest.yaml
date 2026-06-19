@@ -1,5 +1,6 @@
 server:
   port: 9093
+  shutdown: immediate
 
 spring:
   datasource:

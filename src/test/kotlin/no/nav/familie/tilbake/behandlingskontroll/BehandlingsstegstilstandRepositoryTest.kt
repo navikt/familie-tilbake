@@ -8,14 +8,13 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 internal class BehandlingsstegstilstandRepositoryTest : OppslagSpringRunnerTest() {
-    override val tømDBEtterHverTest = false
-
     @Autowired
     private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
 
@@ -31,7 +30,7 @@ internal class BehandlingsstegstilstandRepositoryTest : OppslagSpringRunnerTest(
     fun init() {
         val fagsak = fagsakRepository.insert(Testdata.fagsak())
         val behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId = fagsak.id))
-        behandlingsstegstilstand = Testdata.lagBehandlingsstegstilstand(behandling.id)
+        behandlingsstegstilstand = Testdata.lagBehandlingsstegstilstand(behandling.id, Behandlingssteg.GRUNNLAG)
     }
 
     @Test

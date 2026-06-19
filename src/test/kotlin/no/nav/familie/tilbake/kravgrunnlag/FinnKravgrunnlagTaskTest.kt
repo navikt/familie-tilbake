@@ -107,10 +107,11 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     private lateinit var behandling: Behandling
     private lateinit var behandlingId: UUID
 
-    private val eksternFagsakId = "testverdi"
+    private lateinit var eksternFagsakId: String
 
     @BeforeEach
     fun init() {
+        eksternFagsakId = UUID.randomUUID().toString()
         hentFagsystemsbehandlingService = HentFagsystemsbehandlingService(requestSendtRepository, kafkaProducer)
         kravgrunnlagService =
             KravgrunnlagService(
@@ -141,9 +142,12 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         every { kafkaProducer.sendHentFagsystemsbehandlingRequest(any(), any(), any()) } returns Unit
     }
 
+    private fun readKravgrunnlagXml(fileName: String): String =
+        readKravgrunnlagXmlMedIkkeForeldetDato(fileName, eksternFagsakId)
+
     @Test
     fun `doTask skal finne og koble grunnlag med behandling`() {
-        val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
+        val kravgrunnlagXml = readKravgrunnlagXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
         lagreMottattKravgrunnlag(kravgrunnlagXml)
 
         behandling = opprettBehandling(finnesVerge = true)
@@ -158,7 +162,7 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             )
         arkivXmlene.shouldNotBeEmpty()
 
-        (økonomiXmlMottattRepository.findAll() as List<*>).shouldBeEmpty()
+        økonomiXmlMottattRepository.findByEksternFagsakIdAndYtelsestype(eksternFagsakId, Ytelsestype.BARNETRYGD).shouldBeEmpty()
 
         kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandlingId).shouldBeTrue()
 
@@ -170,7 +174,7 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `doTask skal finne og koble grunnlag med behandling når grunnlag er sperret`() {
-        val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
+        val kravgrunnlagXml = readKravgrunnlagXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
         lagreMottattKravgrunnlag(kravgrunnlagXml, true)
 
         behandling = opprettBehandling(finnesVerge = true)
@@ -185,7 +189,7 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             )
         arkivXmlene.shouldNotBeEmpty()
 
-        (økonomiXmlMottattRepository.findAll() as List<*>).shouldBeEmpty()
+        økonomiXmlMottattRepository.findByEksternFagsakIdAndYtelsestype(eksternFagsakId, Ytelsestype.BARNETRYGD).shouldBeEmpty()
 
         kravgrunnlagRepository.existsByBehandlingIdAndAktivTrueAndSperretTrue(behandlingId).shouldBeTrue()
 
@@ -197,13 +201,13 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `doTask skal finne og koble grunnlag med behandling når det finnes et NY og et ENDR grunnlag`() {
-        val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
+        val kravgrunnlagXml = readKravgrunnlagXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
         lagreMottattKravgrunnlag(kravgrunnlagXml, true)
 
         behandling = opprettBehandling(finnesVerge = false)
         behandlingId = behandling.id
 
-        val endretKravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_BA_ENDR.xml")
+        val endretKravgrunnlagXml = readKravgrunnlagXml("/kravgrunnlagxml/kravgrunnlag_BA_ENDR.xml")
         lagreMottattKravgrunnlag(endretKravgrunnlagXml)
 
         finnKravgrunnlagTask.doTask(Task(type = FinnKravgrunnlagTask.TYPE, payload = behandlingId.toString()))
@@ -216,7 +220,7 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         arkivXmlene.shouldNotBeEmpty()
         arkivXmlene.size shouldBe 2
 
-        (økonomiXmlMottattRepository.findAll() as List<*>).shouldBeEmpty()
+        økonomiXmlMottattRepository.findByEksternFagsakIdAndYtelsestype(eksternFagsakId, Ytelsestype.BARNETRYGD).shouldBeEmpty()
 
         kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandlingId).shouldBeTrue()
         val kravgrunnlagene = kravgrunnlagRepository.findByBehandlingId(behandlingId)

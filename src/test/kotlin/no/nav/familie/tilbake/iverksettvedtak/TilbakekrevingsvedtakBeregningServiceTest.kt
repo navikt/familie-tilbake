@@ -53,8 +53,6 @@ import java.math.BigInteger
 import java.time.YearMonth
 
 internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTest() {
-    override val tømDBEtterHverTest = false
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -1957,7 +1955,7 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         ansvarligEnhet = "testverdi",
         bostedsenhet = "testverdi",
         behandlingsenhet = "testverdi",
-        kontrollfelt = "testverdi",
+        kontrollfelt = "2025-12-24-11.12.13.123456",
         referanse = behandling.aktivFagsystemsbehandling.eksternId,
         eksternKravgrunnlagId = BigInteger.ZERO,
         saksbehandlerId = "testverdi",

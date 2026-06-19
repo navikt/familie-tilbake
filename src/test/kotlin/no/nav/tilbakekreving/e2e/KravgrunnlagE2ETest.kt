@@ -190,7 +190,7 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
                         utbetalesTil = Aktør.Person(brukerIdent),
                         skalBeregneRenter = true,
                         ansvarligEnhet = "1337",
-                        kontrollfelt = "kontrollfelt",
+                        kontrollfelt = "2025-12-24-11.12.13.123456",
                         kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6),
                         referanse = "referanse",
                         perioder = listOf(kravgrunnlagPeriode()),
