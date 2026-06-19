@@ -19,12 +19,9 @@ import java.time.LocalDate
 @Service
 @Profile("mock-pdl")
 class PdlClientMock : PdlClient {
-    private var hentPersoninfoHitsInternal = mutableListOf<PersoninfoHit>()
-    val hentPersoninfoHits: List<PersoninfoHit> get() = hentPersoninfoHitsInternal
+    private val hentPersoninfoHitsInternal = mutableListOf<PersoninfoHit>()
 
-    fun reset() {
-        hentPersoninfoHitsInternal.clear()
-    }
+    fun hentPersoninfoHits(ident: String): List<PersoninfoHit> = hentPersoninfoHitsInternal.filter { it.ident == ident }
 
     override fun hentPersoninfo(
         ident: String,

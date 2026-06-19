@@ -9,11 +9,12 @@ import no.nav.tilbakekreving.util.kroner
 import no.nav.tilbakekreving.util.prosent
 import org.intellij.lang.annotations.Language
 import java.math.BigDecimal
+import java.util.concurrent.atomic.AtomicIntegerArray
 
 object KravgrunnlagGenerator {
-    private val idIndexes = Array(48) { 0 }
+    private val idIndexes = AtomicIntegerArray(48)
 
-    fun nextId(width: Int) = (idIndexes[width - 1]++)
+    fun nextId(width: Int) = idIndexes.getAndIncrement(width - 1)
         .toString()
 
     fun nextPaddedId(width: Int) = nextId(width)

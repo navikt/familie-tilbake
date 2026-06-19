@@ -32,7 +32,6 @@ import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import no.nav.tilbakekreving.test.FellesTestdata
 import no.nav.tilbakekreving.test.FellesTestdata.ANSVARLIG_SAKSBEHANDLER
 import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
-import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.query
@@ -75,11 +74,6 @@ open class TilbakekrevingE2EBase : E2EBase() {
 
     @Autowired
     protected lateinit var vilkårsvurderingController: VilkårsvurderingController
-
-    @AfterEach
-    fun reset() {
-        pdlClient.reset()
-    }
 
     fun sendMessage(
         queueName: String,

@@ -70,7 +70,7 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
 
-        pdlClient.hentPersoninfoHits shouldBe listOf(
+        pdlClient.hentPersoninfoHits(fnr) shouldBe listOf(
             PdlClientMock.PersoninfoHit(
                 ident = fnr,
                 fagsystem = FagsystemDTO.TS,

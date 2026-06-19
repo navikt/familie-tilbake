@@ -56,14 +56,14 @@ class PåminnelseE2ETest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         val tilbakekrevingId = tilbakekreving(behandlingId).id
 
-        pdlClient.hentPersoninfoHits.forExactly(1) {
+        pdlClient.hentPersoninfoHits(fødselsnummer).forExactly(1) {
             it.fagsystem shouldBe FagsystemDTO.TS
             it.ident shouldBe fødselsnummer
         }
 
         påminnelseMediator.påminnSaker()
 
-        pdlClient.hentPersoninfoHits.forExactly(1) {
+        pdlClient.hentPersoninfoHits(fødselsnummer).forExactly(1) {
             it.fagsystem shouldBe FagsystemDTO.TS
             it.ident shouldBe fødselsnummer
         }
@@ -81,14 +81,14 @@ class PåminnelseE2ETest : TilbakekrevingE2EBase() {
 
         påminnelseMediator.påminnSaker()
 
-        pdlClient.hentPersoninfoHits.forExactly(2) {
+        pdlClient.hentPersoninfoHits(fødselsnummer).forExactly(2) {
             it.fagsystem shouldBe FagsystemDTO.TS
             it.ident shouldBe fødselsnummer
         }
 
         påminnelseMediator.påminnSaker()
 
-        pdlClient.hentPersoninfoHits.forExactly(2) {
+        pdlClient.hentPersoninfoHits(fødselsnummer).forExactly(2) {
             it.fagsystem shouldBe FagsystemDTO.TS
             it.ident shouldBe fødselsnummer
         }
