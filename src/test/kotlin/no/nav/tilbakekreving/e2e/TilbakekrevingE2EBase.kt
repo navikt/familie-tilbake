@@ -11,6 +11,7 @@ import no.nav.familie.tilbake.api.VilkårsvurderingController
 import no.nav.familie.tilbake.config.OppdragClientMock
 import no.nav.familie.tilbake.config.PdlClientMock
 import no.nav.familie.tilbake.kontrakter.Ressurs
+import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
 import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.TilbakekrevingService
@@ -34,6 +35,7 @@ import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.jdbc.core.query
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 import java.util.UUID
@@ -106,19 +108,21 @@ open class TilbakekrevingE2EBase : E2EBase() {
         queueName: String,
         kravgrunnlag: String,
     ) {
+        val dto = KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlag)
         sendMessage(queueName, kravgrunnlag)
 
-        avventAntallUlesteKravgrunnlag(1)
+        avventAntallUlesteKravgrunnlag(1, dto.kravgrunnlagId.toString())
     }
 
     fun sendKravgrunnlagOgAvventLesing(
         queueName: String,
         kravgrunnlag: String,
     ) {
+        val dto = KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlag)
         sendKravgrunnlag(queueName, kravgrunnlag)
         kravgrunnlagMediator.lesKravgrunnlag()
 
-        avventAntallUlesteKravgrunnlag(0)
+        avventAntallUlesteKravgrunnlag(0, dto.kravgrunnlagId.toString())
     }
 
     fun behandlingIdFor(
@@ -217,7 +221,7 @@ open class TilbakekrevingE2EBase : E2EBase() {
         )
     }
 
-    fun avventAntallUlesteKravgrunnlag(antall: Int) {
+    fun avventAntallUlesteKravgrunnlag(antall: Int, kravgrunnlagId: String) {
         runBlocking {
             eventually(
                 eventuallyConfig {
@@ -225,13 +229,13 @@ open class TilbakekrevingE2EBase : E2EBase() {
                     interval = 10.milliseconds
                 },
             ) {
-                tellUlesteKravgrunnlag() shouldBe antall
+                tellUlesteKravgrunnlag(kravgrunnlagId) shouldBe antall
             }
         }
     }
 
-    private fun tellUlesteKravgrunnlag(): Int {
-        return jdbcTemplate.query("SELECT count(1) AS antall FROM kravgrunnlag_buffer WHERE lest=false AND utenfor_scope=false;") { rs, _ ->
+    private fun tellUlesteKravgrunnlag(kravgrunnlagId: String): Int {
+        return jdbcTemplate.query("SELECT count(1) AS antall FROM kravgrunnlag_buffer WHERE lest=false AND utenfor_scope=false AND kravgrunnlag_id=?;", kravgrunnlagId) { rs, _ ->
             rs.getInt("antall")
         }.single()
     }
