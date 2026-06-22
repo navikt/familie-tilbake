@@ -14,4 +14,9 @@ class IverksettelseBehov(
     val ytelse: Ytelse,
     val aktør: Aktør,
     val behandlingstype: Behandlingstype,
+    val kravgrunnlagInfo: KravgrunnlagInfo,
 ) : Behov
+
+data class KravgrunnlagInfo(
+    val kontrollfelt: String,
+)

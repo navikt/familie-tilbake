@@ -257,6 +257,7 @@ class Behandling internal constructor(
                 ytelse = ytelse,
                 aktør = aktør,
                 behandlingstype = type,
+                kravgrunnlagInfo = kravgrunnlag.entry.hentKravgrunnlaginfoForIverksettelse(),
             ),
         )
     }

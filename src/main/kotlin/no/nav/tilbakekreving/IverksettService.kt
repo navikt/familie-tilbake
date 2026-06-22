@@ -39,9 +39,12 @@ class IverksettService(
         logContext: SecureLog.Context,
     ): IverksattVedtak {
         val behandlingId = iverksettelseBehov.behandlingId
-        val entity = kravgrunnlagBufferRepository.hentKravgrunnlag(iverksettelseBehov.kravgrunnlagId)
-            ?: error("Fant ikke kravgrunnlag for $${iverksettelseBehov.kravgrunnlagId}")
-        val kravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(entity.kravgrunnlag)
+        val kravgrunnlagListe = kravgrunnlagBufferRepository.hentKravgrunnlag(iverksettelseBehov.kravgrunnlagId)
+            .ifEmpty { error("Fant ikke kravgrunnlag for ${iverksettelseBehov.kravgrunnlagId}") }
+            .map { KravgrunnlagUtil.unmarshalKravgrunnlag(it.kravgrunnlag) }
+
+        val kravgrunnlag = kravgrunnlagListe.singleOrNull { it.kontrollfelt == iverksettelseBehov.kravgrunnlagInfo.kontrollfelt }
+            ?: error("Kunne ikke finne kravgrunnlag med riktig kontrollfelt")
 
         val request = lagIverksettelseRequest(
             ansvarligSaksbehandler = iverksettelseBehov.ansvarligSaksbehandler,
