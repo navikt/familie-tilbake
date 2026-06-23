@@ -6,6 +6,7 @@ import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg.Vilkårsvurderingsperiode.Companion.tilFrontendDto
 import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurderingAdapter
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurdertPeriodeAdapter
@@ -24,6 +25,7 @@ import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SammenslaaingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering
@@ -122,6 +124,8 @@ class Vilkårsvurderingsteg(
             opprettetTid = klokke.nå(),
         )
     }
+
+    fun tilFrontendDto() = vurderinger.tilFrontendDto()
 
     private fun slåSammenPerioder(
         kravgrunnlag: KravgrunnlagHendelse,
@@ -270,6 +274,21 @@ class Vilkårsvurderingsteg(
                     },
                 )
             }
+
+            fun Iterable<Vilkårsvurderingsperiode>.tilFrontendDto(): List<VilkaarsvurderingDto> = groupBy { it.vurdering.underliggendeVurdering() }
+                .map { (underliggendeVurdering, perioder) ->
+                    VilkaarsvurderingDto(
+                        id = perioder.first().id,
+                        periode = PeriodeDto(perioder.minOf { it.periode.fom }, perioder.maxOf { it.periode.tom }),
+                        delbarePerioder = perioder.map {
+                            PeriodeInfoDto(
+                                periodeId = it.id,
+                                periode = PeriodeDto(it.periode.fom, it.periode.tom),
+                            )
+                        },
+                        valg = underliggendeVurdering.tilNyFrontendDto(),
+                    )
+                }
         }
     }
 

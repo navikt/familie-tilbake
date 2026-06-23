@@ -6,6 +6,9 @@ import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.endring.VurdertUtbetaling
 import no.nav.tilbakekreving.entities.KanUnnlates
+import no.nav.tilbakekreving.kontrakter.frontend.models.SkalIkkeUnnlatesDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.SkalUnnlatesDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UnnlatelseDto
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -25,6 +28,8 @@ sealed interface KanUnnlates4xRettsgebyr {
 
     fun særligeGrunner(): ReduksjonSærligeGrunner? = null
 
+    fun tilFrontendDto(): UnnlatelseDto
+
     data object Unnlates : KanUnnlates4xRettsgebyr {
         override fun reduksjon(): Reduksjon = Reduksjon.IngenTilbakekreving()
 
@@ -39,6 +44,12 @@ sealed interface KanUnnlates4xRettsgebyr {
         override fun skalTilbakekreves(): Boolean = false
 
         override fun tilFrontendDTO(): SkalUnnlates = SkalUnnlates.UNNLATES
+
+        override fun tilFrontendDto(): UnnlatelseDto {
+            return SkalUnnlatesDto(
+                begrunnelse = "TODO",
+            )
+        }
     }
 
     class SkalIkkeUnnlates(
@@ -59,6 +70,13 @@ sealed interface KanUnnlates4xRettsgebyr {
         override fun skalTilbakekreves(): Boolean = true
 
         override fun tilFrontendDTO(): SkalUnnlates = SkalUnnlates.TILBAKEKREVES
+
+        override fun tilFrontendDto(): UnnlatelseDto {
+            return SkalIkkeUnnlatesDto(
+                begrunnelse = "TODO",
+                erDetSærligeGrunner = reduksjonSærligeGrunner.tilFrontendDto(),
+            )
+        }
 
         override fun særligeGrunner(): ReduksjonSærligeGrunner {
             return reduksjonSærligeGrunner
@@ -83,6 +101,13 @@ sealed interface KanUnnlates4xRettsgebyr {
         override fun skalTilbakekreves(): Boolean = true
 
         override fun tilFrontendDTO(): SkalUnnlates = SkalUnnlates.OVER_4_RETTSGEBYR
+
+        override fun tilFrontendDto(): UnnlatelseDto {
+            return SkalIkkeUnnlatesDto(
+                begrunnelse = "TODO",
+                erDetSærligeGrunner = reduksjonSærligeGrunner.tilFrontendDto(),
+            )
+        }
 
         override fun særligeGrunner(): ReduksjonSærligeGrunner {
             return reduksjonSærligeGrunner

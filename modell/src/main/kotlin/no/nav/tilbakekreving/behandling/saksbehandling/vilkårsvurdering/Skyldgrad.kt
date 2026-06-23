@@ -11,6 +11,11 @@ import no.nav.tilbakekreving.entities.AktsomhetsvurderingEntity
 import no.nav.tilbakekreving.entities.FeilaktigEllerMangelfullType
 import no.nav.tilbakekreving.entities.VurderingType
 import no.nav.tilbakekreving.entities.VurdertAktsomhetEntity
+import no.nav.tilbakekreving.kontrakter.frontend.models.ForaarsaketAvMottakerDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.ForsettligDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.GrovtUaktsomtDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UaktsomtDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingValgDto
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import java.util.UUID
@@ -44,6 +49,16 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                 },
                 særligeGrunner = kanUnnlates4XRettsgebyr.særligeGrunner()?.oppsummerVurdering(),
                 beløpUnnlatesUnder4Rettsgebyr = kanUnnlates4XRettsgebyr.oppsummering(),
+            )
+        }
+
+        override fun tilNyFrontendDto(): VilkaarsvurderingValgDto {
+            return ForaarsaketAvMottakerDto(
+                begrunnelse = begrunnelse,
+                aktsomhet = UaktsomtDto(
+                    begrunnelse = begrunnelseAktsomhet,
+                    unnlatelse = kanUnnlates4XRettsgebyr.tilFrontendDto(),
+                ),
             )
         }
 
@@ -112,6 +127,16 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
             )
         }
 
+        override fun tilNyFrontendDto(): VilkaarsvurderingValgDto {
+            return ForaarsaketAvMottakerDto(
+                begrunnelse = begrunnelse,
+                aktsomhet = GrovtUaktsomtDto(
+                    begrunnelse = begrunnelseAktsomhet,
+                    erDetSærligeGrunner = reduksjonSærligeGrunner.tilFrontendDto(),
+                ),
+            )
+        }
+
         override fun tilFrontendDto(): VurdertVilkårsvurderingsresultatDto? {
             return VurdertVilkårsvurderingsresultatDto(
                 vilkårsvurderingsresultat = feilaktigeEllerMangelfulleOpplysninger.vilkårsvurderingsresultat,
@@ -173,6 +198,15 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                 },
                 særligeGrunner = null,
                 beløpUnnlatesUnder4Rettsgebyr = VurdertUtbetaling.JaNeiVurdering.Nei,
+            )
+        }
+
+        override fun tilNyFrontendDto(): VilkaarsvurderingValgDto {
+            return ForaarsaketAvMottakerDto(
+                begrunnelse = begrunnelse,
+                aktsomhet = ForsettligDto(
+                    begrunnelse = begrunnelseAktsomhet,
+                ),
             )
         }
 

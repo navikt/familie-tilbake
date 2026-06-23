@@ -1,10 +1,16 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
 import no.nav.tilbakekreving.entities.SærligGrunnEntity
+import no.nav.tilbakekreving.kontrakter.frontend.models.MomentDto
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 
 sealed interface SærligGrunn {
     val type: SærligGrunnType
+
+    fun tilFrontendDto() = MomentDto(
+        moment = type.name,
+        beskrivelse = type.navn,
+    )
 
     fun tilEntity(): SærligGrunnEntity
 

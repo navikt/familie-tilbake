@@ -8,6 +8,9 @@ import no.nav.tilbakekreving.endring.VurdertUtbetaling
 import no.nav.tilbakekreving.entities.SkalReduseresEntity
 import no.nav.tilbakekreving.entities.SkalReduseresType
 import no.nav.tilbakekreving.entities.SærligeGrunnerEntity
+import no.nav.tilbakekreving.kontrakter.frontend.models.JaSaerligeGrunnerDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.NeiSaerligeGrunnerDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.SaerligeGrunnerDto
 import java.util.UUID
 
 // §22-15 4. ledd
@@ -41,6 +44,10 @@ class ReduksjonSærligeGrunner(
         }
     }
 
+    fun tilFrontendDto(): SaerligeGrunnerDto {
+        return skalReduseres.tilFrontendDto(grunner, begrunnelse)
+    }
+
     sealed interface SkalReduseres {
         fun reduksjon(): Reduksjon
 
@@ -49,6 +56,8 @@ class ReduksjonSærligeGrunner(
         fun lagStatistikk(): VurdertUtbetaling.JaNeiVurdering
 
         fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse>
+
+        fun tilFrontendDto(grunner: Set<SærligGrunn>, begrunnelse: String): SaerligeGrunnerDto
 
         class Ja(val prosentdel: Int) : SkalReduseres {
             override fun reduksjon(): Reduksjon {
@@ -61,6 +70,14 @@ class ReduksjonSærligeGrunner(
 
             override fun tilEntity(): SkalReduseresEntity {
                 return SkalReduseresEntity(SkalReduseresType.Ja, prosentdel)
+            }
+
+            override fun tilFrontendDto(grunner: Set<SærligGrunn>, begrunnelse: String): SaerligeGrunnerDto {
+                return JaSaerligeGrunnerDto(
+                    særligeGrunnerFor = grunner.map { it.tilFrontendDto() },
+                    prosentReduksjon = prosentdel,
+                    begrunnelse = begrunnelse,
+                )
             }
         }
 
@@ -75,6 +92,13 @@ class ReduksjonSærligeGrunner(
 
             override fun tilEntity(): SkalReduseresEntity {
                 return SkalReduseresEntity(SkalReduseresType.Nei, null)
+            }
+
+            override fun tilFrontendDto(grunner: Set<SærligGrunn>, begrunnelse: String): SaerligeGrunnerDto {
+                return NeiSaerligeGrunnerDto(
+                    særligeGrunnerMot = grunner.map { it.tilFrontendDto() },
+                    begrunnelse = begrunnelse,
+                )
             }
         }
     }

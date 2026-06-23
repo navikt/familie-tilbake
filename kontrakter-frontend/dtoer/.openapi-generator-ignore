@@ -2,3 +2,9 @@
 /src/main/generated/no/nav/tilbakekreving/kontrakter/frontend/models/RotElementDto.kt
 /src/main/generated/no/nav/tilbakekreving/kontrakter/frontend/models/RotElementUpdateItemDto.kt
 /src/main/generated/no/nav/tilbakekreving/kontrakter/frontend/models/ForhaandsvarselStegDto.kt
+/src/main/generated/no/nav/tilbakekreving/kontrakter/frontend/models/AktsomhetDto.kt
+/src/main/generated/no/nav/tilbakekreving/kontrakter/frontend/models/BelopIBeholdDto.kt
+/src/main/generated/no/nav/tilbakekreving/kontrakter/frontend/models/ReduksjonDto.kt
+/src/main/generated/no/nav/tilbakekreving/kontrakter/frontend/models/SaerligeGrunnerDto.kt
+/src/main/generated/no/nav/tilbakekreving/kontrakter/frontend/models/UnnlatelseDto.kt
+/src/main/generated/no/nav/tilbakekreving/kontrakter/frontend/models/VilkaarsvurderingValgDto.kt

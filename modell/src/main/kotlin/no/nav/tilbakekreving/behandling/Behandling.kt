@@ -68,15 +68,20 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
+import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.MomentDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SammenslaaingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsperiodeDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.tekst.slåSammen
@@ -87,6 +92,7 @@ import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.UUID
+import kotlin.collections.emptyList
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatDto as FrontendBeregningsresultatDto
 
 class Behandling internal constructor(
@@ -819,6 +825,32 @@ class Behandling internal constructor(
 
     internal fun nyForhåndsvarselTilFrontend(varselbrev: Varselbrev?): ForhaandsvarselResponseDto {
         return forhåndsvarsel.nyForhåndsvarselTilFrontend(varselbrev)
+    }
+
+    fun vilkårsvurderingDto(lesecontext: LesContext): VilkaarDto {
+        val beregning = lagBeregning().beregn()
+        return VilkaarDto(
+            vilkårsperioder = vilkårsvurderingsteg.tilFrontendDto().map { vurdering ->
+                val sammenslåttPeriode = vurdering.periode.fom til vurdering.periode.tom
+                VilkaarsperiodeDto(
+                    feilutbetaltBeløp = kravgrunnlag.entry.totaltBeløpFor(sammenslåttPeriode).toInt(),
+                    delresultat = VilkaarsperiodeDto.Delresultat.DELVIS_TILBAKEKREVING,
+                    fakta = FaktaDto(
+                        rettsligGrunnlag = emptyList(),
+                    ),
+                    simulertBeløp = beregning.filter { it.periode in sammenslåttPeriode }.sumOf { it.tilbakekrevesBruttoMedRenter() }.toInt(),
+                    vilkårsvurdering = vurdering,
+                )
+            },
+            ferdigvurdert = vilkårsvurderingsteg.erFullstendig(lesecontext.klokke),
+            momenterSærligeGrunner = SærligGrunnType.entries.map {
+                MomentDto(
+                    moment = it.name,
+                    beskrivelse = it.navn,
+                )
+            },
+            momenterReduksjonGodTro = emptyList(),
+        )
     }
 
     companion object {

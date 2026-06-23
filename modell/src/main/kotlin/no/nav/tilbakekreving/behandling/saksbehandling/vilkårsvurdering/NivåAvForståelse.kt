@@ -13,6 +13,13 @@ import no.nav.tilbakekreving.entities.Forståelsesgrad
 import no.nav.tilbakekreving.entities.GodTroEntity
 import no.nav.tilbakekreving.entities.MottakersForståelseEntity
 import no.nav.tilbakekreving.entities.VurderingType
+import no.nav.tilbakekreving.kontrakter.frontend.models.BelopIBeholdDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.DelerDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.ForstoEllerBurdeForstaattDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.GodTroDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.IngentingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.SkalIkkeReduseresDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingValgDto
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering
@@ -30,6 +37,10 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
         override fun reduksjon(): Reduksjon = Reduksjon.FullstendigTilbakekreving()
 
         override fun renter(): Boolean = false
+
+        override fun tilNyFrontendDto(): VilkaarsvurderingValgDto {
+            return ForstoEllerBurdeForstaattDto()
+        }
 
         override fun tilFrontendDto(): VurdertVilkårsvurderingsresultatDto {
             return VurdertVilkårsvurderingsresultatDto(
@@ -115,6 +126,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             )
         }
 
+        override fun tilNyFrontendDto(): VilkaarsvurderingValgDto = ForstoEllerBurdeForstaattDto()
+
         override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
             return VurdertUtbetaling.Vilkårsvurdering(
                 aktsomhetFørUtbetaling = null,
@@ -172,6 +185,11 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             )
         }
 
+        override fun tilNyFrontendDto(): VilkaarsvurderingValgDto = GodTroDto(
+            begrunnelse = begrunnelseForGodTro,
+            beløpIBehold = beløpIBehold.tilFrontendDto(),
+        )
+
         override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
             return VurdertUtbetaling.Vilkårsvurdering(
                 aktsomhetFørUtbetaling = null,
@@ -205,12 +223,20 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
 
             fun tilEntity(periodeRef: UUID, begrunnelse: String): GodTroEntity
 
+            fun tilFrontendDto(): BelopIBeholdDto
+
             class Ja(val beløp: BigDecimal) : BeløpIBehold {
                 override fun reduksjon(): Reduksjon {
                     return Reduksjon.ManueltBeløp(beløp)
                 }
 
                 override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.GOD_TRO_BELØP_I_BEHOLD)
+
+                override fun tilFrontendDto(): BelopIBeholdDto = DelerDto(
+                    beløp = beløp.toInt(),
+                    begrunnelse = "TODO",
+                    reduksjon = SkalIkkeReduseresDto(emptyList(), "TODO"),
+                )
 
                 override fun tilEntity(periodeRef: UUID, begrunnelse: String): GodTroEntity {
                     return GodTroEntity(
@@ -228,6 +254,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 }
 
                 override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.GOD_TRO_BELØP_IKKE_I_BEHOLD)
+
+                override fun tilFrontendDto(): BelopIBeholdDto = IngentingDto("TODO")
 
                 override fun tilEntity(periodeRef: UUID, begrunnelse: String): GodTroEntity {
                     return GodTroEntity(

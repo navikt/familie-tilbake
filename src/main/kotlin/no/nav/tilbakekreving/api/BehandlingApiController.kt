@@ -31,6 +31,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.VarslingsunntakDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevDataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDataUpdateDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarDto
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.core.io.Resource
@@ -258,5 +259,14 @@ class BehandlingApiController(
                 ),
             ),
         )
+    }
+
+    override fun behandlingVilkaarsvurdering(behandlingId: UUID): ResponseEntity<VilkaarDto> {
+        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(
+            filter = TilbakekrevingFilter.behandling(behandlingId),
+            valideringContext = ValideringContext.HentVilkårsvurdering,
+        ) ?: return ResponseEntity.notFound().build()
+
+        return ResponseEntity.ok(tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingDto(tilbakekrevingService.lesecontext()))
     }
 }

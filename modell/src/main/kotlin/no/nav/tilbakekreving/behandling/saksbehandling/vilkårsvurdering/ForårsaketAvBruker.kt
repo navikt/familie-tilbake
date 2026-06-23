@@ -7,6 +7,8 @@ import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.endring.VurdertUtbetaling
 import no.nav.tilbakekreving.entities.AktsomhetsvurderingEntity
 import no.nav.tilbakekreving.entities.VurderingType
+import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingIkkeVurdertDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingValgDto
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering
 import java.util.UUID
 
@@ -22,6 +24,8 @@ interface ForårsaketAvBruker {
     fun vurderingstype(): Vurdering
 
     fun tilFrontendDto(): VurdertVilkårsvurderingsresultatDto?
+
+    fun tilNyFrontendDto(): VilkaarsvurderingValgDto
 
     fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity
 
@@ -43,6 +47,8 @@ interface ForårsaketAvBruker {
         override fun reduksjon(): Reduksjon = Reduksjon.FullstendigTilbakekreving()
 
         override fun tilFrontendDto(): VurdertVilkårsvurderingsresultatDto? = null
+
+        override fun tilNyFrontendDto(): VilkaarsvurderingValgDto = VilkaarsvurderingIkkeVurdertDto()
 
         override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
             throw NotImplementedError("Kan ikke lage statistikk for en uvurdert utbetaling")

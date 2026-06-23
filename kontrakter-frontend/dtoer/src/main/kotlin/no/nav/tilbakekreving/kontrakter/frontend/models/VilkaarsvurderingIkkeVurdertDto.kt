@@ -1,0 +1,5 @@
+package no.nav.tilbakekreving.kontrakter.frontend.models
+
+typealias ForstoEllerBurdeForstaattDto = VilkaarsvurderingIkkeVurdertDto
+
+class VilkaarsvurderingIkkeVurdertDto : VilkaarsvurderingValgDto
