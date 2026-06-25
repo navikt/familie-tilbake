@@ -32,11 +32,11 @@ tilbakekreving:
     grupper:
       ts:
         veileder:
-          - ${rolle.enslig.veileder}
+          - "3611981f-eda7-46ab-b8f2-50c3159e101c"
         saksbehandler:
-          - ${rolle.enslig.saksbehandler}
+          - "31a99292-9461-40bf-b2d0-a815697dfbb4"
         beslutter:
-          - ${rolle.enslig.beslutter}
+          - "dab3f549-f5f0-4a9c-9f5b-1f6a15ae8424"
       aap:
         veileder:
           - "33e00155-169b-41e5-8a3f-5582ed975a15" # 0000-GA-AAP_SAKSBEHANDLER_OPPFOLGING

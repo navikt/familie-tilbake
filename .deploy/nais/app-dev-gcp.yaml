@@ -60,6 +60,9 @@ spec:
           - id: 71f503a2-c28f-4394-a05a-8da263ceca4a  # 0000-GA-Kontantstøtte-Veilder
           - id: c7e0b108-7ae6-432c-9ab4-946174c240c0  # 0000-GA-Kontantstøtte
           - id: 52fe1bef-224f-49df-a40a-29f92d4520f8  # 0000-GA-Kontantstøtte-Beslutter
+          - id: 3611981f-eda7-46ab-b8f2-50c3159e101c # 0000-GA-Tilleggsstonader-Veileder
+          - id: 31a99292-9461-40bf-b2d0-a815697dfbb4 # 0000-GA-Tilleggsstonader-Saksbehandler
+          - id: dab3f549-f5f0-4a9c-9f5b-1f6a15ae8424 # 0000-GA-Tilleggsstonader-Beslutter
           - id: 66573c1a-eabb-4bcd-95c3-5b5a140eacfe # teamfamilie-forvaltning
           - id: 928636f4-fd0d-4149-978e-a6fb68bb19de # 0000-GA-STDAPPS - tilgang til prosessering
           - id: 1b3a2c4d-d620-4fcf-a29b-a6cdadf29680 # 0000-GA-Tiltakspenger-Saksbehandler
