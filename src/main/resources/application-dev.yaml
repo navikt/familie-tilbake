@@ -23,6 +23,7 @@ tilbakekreving:
       SendAutomatiskVarselbrev: false
       Arkivering: false
       FjernUttalelsesfrist: true
+      OppdragRestClient: true
     fagsystem:
       TP:
         ForhaandsvarselBehandlingsstatuser: true
@@ -86,6 +87,9 @@ tilbakekreving:
   entraProxy:
     base-url: http://entra-proxy.sikkerhetstjenesten.svc.cluster.local
     scope: api://dev-gcp.sikkerhetstjenesten.entra-proxy/.default
+  sokosOs:
+    base-url: http://sokos-os-ekstern-api.okonomi.svc.cluster.local
+    scope: api://dev-gcp.okonomi.sokos-os-ekstern-api/.default
   tilbakekrevingPdf:
     base-url: http://tilbakekreving-pdf
 rolle:

@@ -20,14 +20,22 @@ import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
+import no.nav.tilbakekreving.Toggle
+import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.entities.AktørEntity
 import no.nav.tilbakekreving.entities.AktørType
+import no.nav.tilbakekreving.integrasjoner.oppdrag.KodeAksjonDto
+import no.nav.tilbakekreving.integrasjoner.oppdrag.OppdragRestClient
+import no.nav.tilbakekreving.integrasjoner.oppdrag.PosteringDto
+import no.nav.tilbakekreving.integrasjoner.oppdrag.TilbakekrevingsvedtakRequestDto
+import no.nav.tilbakekreving.integrasjoner.oppdrag.VedtakPeriodeDto
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsbelopDto
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsperiodeDto
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsvedtakDto
 import no.nav.tilbakekreving.typer.v1.MmelDto
 import no.nav.tilbakekreving.typer.v1.PeriodeDto
 import no.nav.tilbakekreving.vedtak.IverksattVedtak
+import no.nav.tilbakekreving.vedtak.IverksettRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -42,8 +50,11 @@ class IverksettelseService(
     private val tilbakekrevingsvedtakBeregningService: TilbakekrevingsvedtakBeregningService,
     private val behandlingVedtakService: BehandlingsvedtakService,
     private val oppdragClient: OppdragClient,
+    private val oppdragRestClient: OppdragRestClient,
     private val logService: LogService,
     private val fagsakRepository: FagsakRepository,
+    private val featureService: FeatureService,
+    private val iverksettRepository: IverksettRepository,
 ) {
     private val log = TracedLogger.getLogger<IverksettelseService>()
 
@@ -59,20 +70,49 @@ class IverksettelseService(
         } else {
             val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
             val beregnetPerioder = tilbakekrevingsvedtakBeregningService.beregnVedtaksperioder(behandlingId, kravgrunnlag)
-            val request = lagIveksettelseRequest(
-                ansvarligSaksbehandler = behandling.ansvarligSaksbehandler,
-                kravgrunnlag = kravgrunnlag,
-                beregnetPerioder = beregnetPerioder,
-                logContext = logContext,
-            )
-            val requestXml = TilbakekrevingsvedtakMarshaller.marshall(behandlingId, request, logContext)
-            SecureLog.medContext(logContext) {
-                info("Sender tilbakekrevingsvedtak til økonomi for behandlingId={} request={}", behandlingId.toString(), requestXml)
-            }
 
             // Send request til økonomi
-            val kvittering = objectMapper.writeValueAsString(oppdragClient.iverksettVedtak(behandlingId, request, logContext).mmel)
-            lagreIverksettelsesvedtakRequest(behandlingId, requestXml, kvittering)
+            if (featureService.modellFeatures[Toggle.OppdragRestClient]) {
+                val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+                val request = lagNyIveksettelseRequest(
+                    ansvarligSaksbehandler = behandling.ansvarligSaksbehandler,
+                    kravgrunnlag = kravgrunnlag,
+                    beregnetPerioder = beregnetPerioder,
+                    logContext = logContext,
+                )
+                val kvittering = oppdragRestClient.iverksettVedtak(request)
+                iverksettRepository.lagreIverksattVedtak(
+                    IverksattVedtak(
+                        id = UUID.randomUUID(),
+                        behandlingId = behandlingId,
+                        nyModell = false,
+                        vedtakId = kravgrunnlag.vedtakId,
+                        aktør = when (val institusjon = fagsak.institusjon) {
+                            null -> AktørEntity(AktørType.Person, fagsak.bruker.ident)
+                            else -> AktørEntity(AktørType.Organisasjon, institusjon.organisasjonsnummer)
+                        },
+                        ytelsestypeKode = fagsak.ytelsestype.kode,
+                        kvittering = String.format("%02d", kvittering.status),
+                        perioder = IverksattVedtak.IverksattPeriode.fra(request),
+                        vedtaksdato = LocalDate.now(),
+                        behandlingstype = behandling.type,
+                    ),
+                )
+            } else {
+                val request = lagIveksettelseRequest(
+                    ansvarligSaksbehandler = behandling.ansvarligSaksbehandler,
+                    kravgrunnlag = kravgrunnlag,
+                    beregnetPerioder = beregnetPerioder,
+                    logContext = logContext,
+                )
+                val requestXml = TilbakekrevingsvedtakMarshaller.marshall(behandlingId, request, logContext)
+                SecureLog.medContext(logContext) {
+                    info("Sender tilbakekrevingsvedtak til økonomi for behandlingId={} request={}", behandlingId.toString(), requestXml)
+                }
+
+                val kvittering = objectMapper.writeValueAsString(oppdragClient.iverksettVedtak(behandlingId, request, logContext).mmel)
+                lagreIverksettelsesvedtakRequest(behandlingId, requestXml, kvittering)
+            }
             behandlingVedtakService.oppdaterBehandlingsvedtak(behandlingId, Iverksettingsstatus.IVERKSATT)
         }
     }
@@ -104,6 +144,26 @@ class IverksettelseService(
         return request.apply { tilbakekrevingsvedtak = vedtak }
     }
 
+    private fun lagNyIveksettelseRequest(
+        ansvarligSaksbehandler: String,
+        kravgrunnlag: Kravgrunnlag431,
+        beregnetPerioder: List<Tilbakekrevingsperiode>,
+        logContext: SecureLog.Context,
+    ): TilbakekrevingsvedtakRequestDto {
+        return TilbakekrevingsvedtakRequestDto(
+            kodeAksjon = KodeAksjonDto.FATTE_VEDTAK,
+            vedtakId = kravgrunnlag.vedtakId,
+            vedtaksDato = kravgrunnlag.fagsystemVedtaksdato ?: LocalDate.now(),
+            kodeHjemmel = "22-15", // fast verdi
+            renterBeregnes = beregnetPerioder.any { it.renter > BigDecimal.ZERO },
+            enhetAnsvarlig = kravgrunnlag.ansvarligEnhet,
+            kontrollfelt = kravgrunnlag.kontrollfelt,
+            saksbehandlerId = ansvarligSaksbehandler,
+            perioder = lagNyVedtaksperiode(beregnetPerioder, logContext),
+            datoTilleggsfrist = null,
+        )
+    }
+
     private fun lagVedtaksperiode(
         beregnetPerioder: List<Tilbakekrevingsperiode>,
         logContext: SecureLog.Context,
@@ -119,6 +179,19 @@ class IverksettelseService(
                 tilbakekrevingsbelop.addAll(lagVedtaksbeløp(it.beløp, logContext))
             }
         }
+
+    private fun lagNyVedtaksperiode(
+        beregnetPerioder: List<Tilbakekrevingsperiode>,
+        logContext: SecureLog.Context,
+    ) = beregnetPerioder.map { periode ->
+        VedtakPeriodeDto(
+            periodeFom = periode.periode.fom.atDay(1),
+            periodeTom = periode.periode.tom.atEndOfMonth(),
+            renterPeriodeBeregnes = beregnetPerioder.any { it.renter > BigDecimal.ZERO },
+            belopRenter = periode.renter,
+            posteringer = lagPosteringer(periode.beløp, logContext),
+        )
+    }
 
     private fun lagVedtaksbeløp(
         beregnetBeløper: List<Tilbakekrevingsbeløp>,
@@ -140,6 +213,38 @@ class IverksettelseService(
                 }
             }
         }
+
+    private fun lagPosteringer(
+        beregnetBeløper: List<Tilbakekrevingsbeløp>,
+        logContext: SecureLog.Context,
+    ) = beregnetBeløper.map {
+        when (it.klassetype) {
+            Klassetype.YTEL -> PosteringDto(
+                kodeKlasse = it.klassekode.tilKlassekodeNavn(),
+                belopOpprinneligUtbetalt = it.utbetaltBeløp,
+                belopNy = it.nyttBeløp,
+                belopTilbakekreves = it.tilbakekrevesBeløp,
+                belopUinnkrevd = it.uinnkrevdBeløp,
+                belopSkatt = it.skattBeløp,
+                kodeResultat = utledKodeResultat(it, logContext),
+                kodeAarsak = "ANNET", // fast verdi
+                kodeSkyld = "IKKE_FORDELT", // fast verdi
+            )
+
+            else ->
+                PosteringDto(
+                    kodeKlasse = it.klassekode.tilKlassekodeNavn(),
+                    belopOpprinneligUtbetalt = it.utbetaltBeløp,
+                    belopNy = it.nyttBeløp,
+                    belopTilbakekreves = it.tilbakekrevesBeløp,
+                    belopUinnkrevd = it.uinnkrevdBeløp,
+                    belopSkatt = it.skattBeløp,
+                    kodeResultat = "",
+                    kodeAarsak = "", // fast verdi
+                    kodeSkyld = "", // fast verdi
+                )
+        }
+    }
 
     private fun utledKodeResultat(
         tilbakekrevingsbeløp: Tilbakekrevingsbeløp,
@@ -182,14 +287,16 @@ class IverksettelseService(
             }
 
             IverksattVedtak(
+                id = UUID.randomUUID(),
                 behandlingId = gammeltVedtak.behandlingId,
+                nyModell = false,
                 vedtakId = request.tilbakekrevingsvedtak.vedtakId,
                 aktør = aktør,
                 ytelsestypeKode = fagsak.ytelsestype.kode,
                 kvittering = mmel?.alvorlighetsgrad,
-                tilbakekrevingsvedtak = request.tilbakekrevingsvedtak,
+                perioder = IverksattVedtak.IverksattPeriode.fra(request),
                 behandlingstype = behandling.type,
-                sporbar = gammeltVedtak.sporbar,
+                vedtaksdato = gammeltVedtak.sporbar.opprettetTid.toLocalDate(),
             )
         }
     }

@@ -17,9 +17,9 @@ import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.tilbakekreving.applicationProps
 import no.nav.tilbakekreving.config.FeatureService
+import no.nav.tilbakekreving.integrasjoner.norg2.Norg2Client
+import no.nav.tilbakekreving.integrasjoner.norg2.kontrakter.NavKontorEnhet
 import no.nav.tilbakekreving.norg2.Norg2Service
-import no.tilbakekreving.integrasjoner.norg2.Norg2Client
-import no.tilbakekreving.integrasjoner.norg2.kontrakter.NavKontorEnhet
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

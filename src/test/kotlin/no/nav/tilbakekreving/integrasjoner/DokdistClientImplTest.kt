@@ -25,8 +25,8 @@ import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.tilbakekreving.applicationProps
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClientImpl
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.domain.DistribuerJournalpostResponse
+import no.nav.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
-import no.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
 import org.junit.jupiter.api.Test
 import java.util.UUID
 

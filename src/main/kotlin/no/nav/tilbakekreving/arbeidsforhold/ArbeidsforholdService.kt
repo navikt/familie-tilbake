@@ -1,8 +1,8 @@
 package no.nav.tilbakekreving.arbeidsforhold
 
 import no.nav.familie.tilbake.kontrakter.organisasjon.Organisasjon
-import no.tilbakekreving.integrasjoner.arbeidsforhold.EregClient
-import no.tilbakekreving.integrasjoner.feil.NotFoundException
+import no.nav.tilbakekreving.integrasjoner.arbeidsforhold.EregClient
+import no.nav.tilbakekreving.integrasjoner.feil.NotFoundException
 import org.springframework.stereotype.Service
 
 @Service

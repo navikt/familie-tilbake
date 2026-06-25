@@ -75,11 +75,13 @@ class Vilkårsvurdert(
 
         private fun beregnRentebeløp(
             beløp: BigDecimal,
-        ): BigDecimal = if (beregnRenter && vurdering.renter()) {
+        ): BigDecimal = if (harRenter()) {
             beløp.multiply(RENTEFAKTOR)
         } else {
             BigDecimal.ZERO
         }
+
+        override fun harRenter(): Boolean = beregnRenter && vurdering.renter()
 
         companion object {
             fun <T : Iterable<Utbetalingsperiode>> T.fordelTilbakekrevingsbeløp(): T = apply {

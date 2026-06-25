@@ -1,7 +1,7 @@
 package no.nav.tilbakekreving.norg2
 
-import no.tilbakekreving.integrasjoner.norg2.Norg2Client
-import no.tilbakekreving.integrasjoner.norg2.kontrakter.NavKontorEnhet
+import no.nav.tilbakekreving.integrasjoner.norg2.Norg2Client
+import no.nav.tilbakekreving.integrasjoner.norg2.kontrakter.NavKontorEnhet
 import org.springframework.stereotype.Service
 
 @Service

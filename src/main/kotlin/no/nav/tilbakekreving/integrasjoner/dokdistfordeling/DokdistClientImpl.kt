@@ -23,8 +23,8 @@ import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.domain.AdresseTo
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.domain.DistribuerJournalpostRequest
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.domain.DistribuerJournalpostResponse
+import no.nav.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
-import no.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
 import java.util.UUID
 
 class DokdistClientImpl(

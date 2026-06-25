@@ -34,6 +34,8 @@ class Foreldet(
     ) : Delperiode<ForeldetBeløp>(kravgrunnlagPeriode, beløp) {
         override fun renter(): BigDecimal = BigDecimal.ZERO
 
+        override fun harRenter(): Boolean = false
+
         override fun tilbakekrevesBruttoMedRenter(): BigDecimal = BigDecimal.ZERO
     }
 

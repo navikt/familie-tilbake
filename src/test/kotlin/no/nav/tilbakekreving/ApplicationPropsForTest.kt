@@ -4,16 +4,17 @@ import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.config.BigQueryProperties
 import no.nav.tilbakekreving.config.Tilgangsstyring
+import no.nav.tilbakekreving.integrasjoner.arbeidsforhold.EregClient
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.config.DokarkivConfig
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.config.DokdistConfig
+import no.nav.tilbakekreving.integrasjoner.dokument.saf.SafClient
+import no.nav.tilbakekreving.integrasjoner.entraProxy.EntraProxyClient
+import no.nav.tilbakekreving.integrasjoner.norg2.Norg2Client
+import no.nav.tilbakekreving.integrasjoner.oppdrag.OppdragRestClient
+import no.nav.tilbakekreving.integrasjoner.pdfGen.PdfGenClient
+import no.nav.tilbakekreving.integrasjoner.persontilgang.PersontilgangService
+import no.nav.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
-import no.tilbakekreving.integrasjoner.arbeidsforhold.EregClient
-import no.tilbakekreving.integrasjoner.dokument.saf.SafClient
-import no.tilbakekreving.integrasjoner.entraProxy.EntraProxyClient
-import no.tilbakekreving.integrasjoner.norg2.Norg2Client
-import no.tilbakekreving.integrasjoner.pdfGen.PdfGenClient
-import no.tilbakekreving.integrasjoner.persontilgang.PersontilgangService
-import no.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
 
 fun applicationProps(): ApplicationProperties {
     return ApplicationProperties(
@@ -65,6 +66,10 @@ fun applicationProps(): ApplicationProperties {
         ),
         tilbakekrevingPdf = PdfGenClient.Companion.Config(
             baseUrl = "http://pdfGen",
+        ),
+        sokosOs = OppdragRestClient.Companion.Config(
+            baseUrl = "http://sokos-os-ekstern-api",
+            scope = "api://sokos-os-ekstern-api/.default",
         ),
     )
 }

@@ -4,7 +4,7 @@ import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClientImpl
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClientStub
-import no.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
+import no.nav.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile

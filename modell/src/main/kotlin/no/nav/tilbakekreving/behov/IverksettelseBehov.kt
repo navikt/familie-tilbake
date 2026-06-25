@@ -4,6 +4,7 @@ import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.beregning.delperiode.Delperiode
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
+import java.time.LocalDate
 import java.util.UUID
 
 class IverksettelseBehov(
@@ -15,6 +16,7 @@ class IverksettelseBehov(
     val aktør: Aktør,
     val behandlingstype: Behandlingstype,
     val kravgrunnlagInfo: KravgrunnlagInfo,
+    val vedtaksdato: LocalDate,
 ) : Behov
 
 data class KravgrunnlagInfo(

@@ -44,7 +44,8 @@ tilbakekreving:
   kravgrunnlag:
     - LOCAL_TILLEGGSSTONADER.KRAVGRUNNLAG
   toggles:
-    varselbrev-enabled: true
+    nyModell:
+      OppdragRestClient: true
   tilgangsstyring:
     grupper:
       aap:
@@ -76,6 +77,9 @@ tilbakekreving:
     base-url: dummy
     scope: dummy
   entraProxy:
+    base-url: dummy
+    scope: dummy
+  sokosOs:
     base-url: dummy
     scope: dummy
   tilbakekrevingPdf:

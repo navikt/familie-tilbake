@@ -1,6 +1,6 @@
 package no.nav.tilbakekreving.saksbehandler
 
-import no.tilbakekreving.integrasjoner.entraProxy.EntraProxyClient
+import no.nav.tilbakekreving.integrasjoner.entraProxy.EntraProxyClient
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary

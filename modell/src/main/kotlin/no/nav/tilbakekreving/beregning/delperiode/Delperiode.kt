@@ -14,6 +14,8 @@ sealed class Delperiode<B : Delperiode.Beløp>(
 
     abstract fun renter(): BigDecimal
 
+    abstract fun harRenter(): Boolean
+
     abstract fun tilbakekrevesBruttoMedRenter(): BigDecimal
 
     fun beløp(): List<B> = beløp

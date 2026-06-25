@@ -35,6 +35,9 @@ import no.nav.tilbakekreving.api.v1.dto.ManuellBrevmottakerRequestDto
 import no.nav.tilbakekreving.applicationProps
 import no.nav.tilbakekreving.arbeidsforhold.ArbeidsforholdService
 import no.nav.tilbakekreving.config.FeatureService
+import no.nav.tilbakekreving.integrasjoner.arbeidsforhold.EregClient
+import no.nav.tilbakekreving.integrasjoner.arbeidsforhold.kontrakter.HentOrganisasjonResponse
+import no.nav.tilbakekreving.integrasjoner.arbeidsforhold.kontrakter.Navn
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
@@ -42,9 +45,6 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.brev.ManuellAdresseInfo
 import no.nav.tilbakekreving.kontrakter.brev.MottakerType.DØDSBO
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
-import no.tilbakekreving.integrasjoner.arbeidsforhold.EregClient
-import no.tilbakekreving.integrasjoner.arbeidsforhold.kontrakter.HentOrganisasjonResponse
-import no.tilbakekreving.integrasjoner.arbeidsforhold.kontrakter.Navn
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

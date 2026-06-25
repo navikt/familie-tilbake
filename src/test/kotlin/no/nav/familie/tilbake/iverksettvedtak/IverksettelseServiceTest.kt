@@ -14,6 +14,7 @@ import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.FagsakService
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
@@ -44,6 +45,9 @@ import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.SkalUnnlates
 import no.nav.tilbakekreving.api.v1.dto.SærligGrunnDto
 import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
+import no.nav.tilbakekreving.applicationProps
+import no.nav.tilbakekreving.config.FeatureService
+import no.nav.tilbakekreving.integrasjoner.oppdrag.OppdragRestClient
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
@@ -68,9 +72,6 @@ import java.util.UUID
 internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
-
-    @Autowired
-    private lateinit var iverksettRepository: IverksettRepository
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
@@ -98,6 +99,15 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
 
     private lateinit var iverksettelseService: IverksettelseService
     private lateinit var oppdragClient: OppdragClient
+
+    @Autowired
+    private lateinit var oppdragRestClient: OppdragRestClient
+
+    @Autowired
+    private lateinit var fagsakService: FagsakService
+
+    @Autowired
+    private lateinit var iverksettRepository: IverksettRepository
 
     private val restOperations: RestOperations = RestTemplateBuilder().build()
     private val wireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
@@ -136,8 +146,11 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
                 tilbakekrevingsvedtakBeregningService,
                 behandlingVedtakService,
                 oppdragClient,
+                oppdragRestClient,
                 logService,
                 fagsakRepository,
+                FeatureService(applicationProps()),
+                iverksettRepository,
             )
     }
 

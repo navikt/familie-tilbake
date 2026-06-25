@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.config
 
-import no.tilbakekreving.integrasjoner.norg2.Norg2Client
-import no.tilbakekreving.integrasjoner.norg2.kontrakter.NavKontorEnhet
+import no.nav.tilbakekreving.integrasjoner.norg2.Norg2Client
+import no.nav.tilbakekreving.integrasjoner.norg2.kontrakter.NavKontorEnhet
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Service
 

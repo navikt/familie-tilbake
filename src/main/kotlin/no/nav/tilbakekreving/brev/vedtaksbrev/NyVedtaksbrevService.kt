@@ -26,6 +26,7 @@ import no.nav.tilbakekreving.brev.vedtaksbrev.BrevFormatterer.tilVisningstekst
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostResponse
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
+import no.nav.tilbakekreving.integrasjoner.pdfGen.PdfGenClient
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.AvsnittDto
@@ -47,7 +48,6 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDa
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.DokumentKlasse
 import no.nav.tilbakekreving.saksbehandler.Behandler
-import no.tilbakekreving.integrasjoner.pdfGen.PdfGenClient
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.OffsetDateTime

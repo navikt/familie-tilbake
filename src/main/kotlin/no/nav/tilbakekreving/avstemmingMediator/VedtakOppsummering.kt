@@ -17,12 +17,10 @@ class VedtakOppsummering(
             var bruttoUtenRenter = BigDecimal.ZERO
             var renter = BigDecimal.ZERO
             var skatt = BigDecimal.ZERO
-            for (periode in iverksattVedtak.tilbakekrevingsvedtak.tilbakekrevingsperiode) {
-                renter = renter.add(periode.belopRenter)
-                for (beløp in periode.tilbakekrevingsbelop) {
-                    bruttoUtenRenter = bruttoUtenRenter.add(beløp.belopTilbakekreves)
-                    skatt = skatt.add(beløp.belopSkatt)
-                }
+            for (periode in iverksattVedtak.perioder) {
+                renter = renter.add(periode.rentebeløp)
+                bruttoUtenRenter = bruttoUtenRenter.add(periode.beløpTilbakekreves)
+                skatt = skatt.add(periode.skattebeløp)
             }
             return VedtakOppsummering(
                 økonomivedtakId = iverksattVedtak.vedtakId.toString(),

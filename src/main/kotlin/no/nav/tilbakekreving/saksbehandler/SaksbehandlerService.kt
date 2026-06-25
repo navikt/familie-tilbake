@@ -2,7 +2,7 @@ package no.nav.tilbakekreving.saksbehandler
 
 import no.nav.familie.tilbake.config.Constants.BRUKER_ID_VEDTAKSLØSNINGEN
 import no.nav.familie.tilbake.kontrakter.saksbehandler.Saksbehandler
-import no.tilbakekreving.integrasjoner.entraProxy.EntraProxyClient
+import no.nav.tilbakekreving.integrasjoner.entraProxy.EntraProxyClient
 import org.springframework.stereotype.Service
 
 @Service

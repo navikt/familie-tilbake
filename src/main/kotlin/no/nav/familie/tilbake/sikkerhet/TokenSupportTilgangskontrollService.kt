@@ -22,12 +22,12 @@ import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.auth.Authentication
 import no.nav.tilbakekreving.config.ApplicationProperties
+import no.nav.tilbakekreving.integrasjoner.CallContext
+import no.nav.tilbakekreving.integrasjoner.feil.UnexpectedResponseException
+import no.nav.tilbakekreving.integrasjoner.persontilgang.Persontilgang
+import no.nav.tilbakekreving.integrasjoner.persontilgang.PersontilgangService
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.saksbehandler.Behandler
-import no.tilbakekreving.integrasjoner.CallContext
-import no.tilbakekreving.integrasjoner.feil.UnexpectedResponseException
-import no.tilbakekreving.integrasjoner.persontilgang.Persontilgang
-import no.tilbakekreving.integrasjoner.persontilgang.PersontilgangService
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.math.BigInteger

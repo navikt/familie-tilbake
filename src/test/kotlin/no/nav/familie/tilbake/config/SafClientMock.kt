@@ -1,10 +1,10 @@
 package no.nav.familie.tilbake.config
 
-import no.tilbakekreving.integrasjoner.CallContext
-import no.tilbakekreving.integrasjoner.dokument.kontrakter.Bruker
-import no.tilbakekreving.integrasjoner.dokument.kontrakter.IntegrasjonTema
-import no.tilbakekreving.integrasjoner.dokument.kontrakter.JournalpostResponse
-import no.tilbakekreving.integrasjoner.dokument.saf.SafClient
+import no.nav.tilbakekreving.integrasjoner.CallContext
+import no.nav.tilbakekreving.integrasjoner.dokument.kontrakter.Bruker
+import no.nav.tilbakekreving.integrasjoner.dokument.kontrakter.IntegrasjonTema
+import no.nav.tilbakekreving.integrasjoner.dokument.kontrakter.JournalpostResponse
+import no.nav.tilbakekreving.integrasjoner.dokument.saf.SafClient
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Service
 import java.util.UUID

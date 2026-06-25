@@ -264,6 +264,7 @@ class Behandling internal constructor(
                 aktør = aktør,
                 behandlingstype = type,
                 kravgrunnlagInfo = kravgrunnlag.entry.hentKravgrunnlaginfoForIverksettelse(),
+                vedtaksdato = sistEndret.toLocalDate(),
             ),
         )
     }

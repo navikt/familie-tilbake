@@ -86,7 +86,7 @@ class AvstemmingMediator(
                 AktørType.Organisasjon -> padOrganisasjonsnummer(iverksattVedtak.aktør.ident)
                 else -> iverksattVedtak.aktør.ident
             },
-            vedtaksdato = iverksattVedtak.sporbar.opprettetTid.toLocalDate(),
+            vedtaksdato = iverksattVedtak.vedtaksdato,
             fagsakYtelseType = iverksattVedtak.ytelsestypeKode,
             tilbakekrevesBruttoUtenRenter = oppsummering.tilbakekrevesBruttoUtenRenter,
             tilbakekrevesNettoUtenRenter = oppsummering.tilbakekrevesNettoUtenRenter,

@@ -11,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import no.nav.familie.tilbake.config.OppdragClientRestMock
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
@@ -48,6 +49,7 @@ import no.nav.tilbakekreving.util.kroner
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
+import java.math.BigInteger
 import java.time.LocalDate
 import java.util.UUID
 
@@ -63,6 +65,9 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
 
     @Autowired
     private lateinit var kafkaProducerStub: KafkaProducerStub
+
+    @Autowired
+    private lateinit var oppdragRestClient: OppdragClientRestMock
 
     @Test
     fun `kan lese kravgrunnlag for tilleggsstønader`() {
@@ -229,10 +234,12 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
     @Test
     fun `iverksettelse av vedtak med utvidet periode`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
             QUEUE_NAME,
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
+                vedtakId = vedtakId,
                 perioder = listOf(
                     KravgrunnlagGenerator.standardPeriode(1.januar(2021) til 1.januar(2021)),
                 ),
@@ -266,11 +273,11 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
         utførSteg(behandlingId, BehandlingsstegGenerator.lagForeslåVedtakVurdering())
         utførSteg(behandlingId, BehandlingsstegGenerator.lagGodkjennVedtakVurdering(), BESLUTTER_IDENT)
 
-        oppdragClient.shouldHaveIverksettelse(behandlingId) { vedtak ->
-            vedtak.tilbakekrevingsperiode shouldHaveSize 1
-            val tilbakekrevingsperiode = vedtak.tilbakekrevingsperiode.single()
-            tilbakekrevingsperiode.tilbakekrevingsbelop shouldHaveSize 2
-            tilbakekrevingsperiode.tilbakekrevingsbelop.forOne { beløp ->
+        oppdragRestClient.shouldHaveIverksettelse(BigInteger(vedtakId)) { vedtak ->
+            vedtak.perioder shouldHaveSize 1
+            val tilbakekrevingsperiode = vedtak.perioder.single()
+            tilbakekrevingsperiode.posteringer shouldHaveSize 2
+            tilbakekrevingsperiode.posteringer.forOne { beløp ->
                 beløp.kodeResultat shouldBe "FULL_TILBAKEKREV"
             }
         }
@@ -332,11 +339,13 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
     @Test
     fun `det opprettes en korrekt iverksettelse for begge behandlinger for samme fagsystemid`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        val vedtakId1 = KravgrunnlagGenerator.nextPaddedId(6)
 
         sendKravgrunnlagOgAvventLesing(
             queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
+                vedtakId = vedtakId1,
                 perioder = listOf(KravgrunnlagGenerator.standardPeriode(1.januar(2021) til 1.januar(2021), feilutbetaltBeløp = 2000.kroner)),
             ),
         )
@@ -350,18 +359,20 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
             .frontendDtoForBehandling(førsteBehandlingId, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER)
             .status shouldBe Behandlingsstatus.AVSLUTTET
 
-        oppdragClient.shouldHaveIverksettelse(førsteBehandlingId) { vedtak ->
-            vedtak.tilbakekrevingsperiode shouldHaveSize 1
-            vedtak.tilbakekrevingsperiode.single().tilbakekrevingsbelop.forOne { beløp ->
+        oppdragRestClient.shouldHaveIverksettelse(BigInteger(vedtakId1)) { vedtak ->
+            vedtak.perioder shouldHaveSize 1
+            vedtak.perioder.single().posteringer.forOne { beløp ->
                 beløp.kodeResultat shouldBe "FULL_TILBAKEKREV"
                 beløp.belopTilbakekreves shouldBe 2000.kroner
             }
         }
 
+        val vedtakId2 = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
             queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
+                vedtakId = vedtakId2,
                 perioder = listOf(KravgrunnlagGenerator.standardPeriode(1.januar(2021) til 1.januar(2021), feilutbetaltBeløp = 1000.kroner)),
             ),
         )
@@ -376,9 +387,9 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
             .frontendDtoForBehandling(nyBehandlingId, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER)
             .status shouldBe Behandlingsstatus.AVSLUTTET
 
-        oppdragClient.shouldHaveIverksettelse(nyBehandlingId) { vedtak ->
-            vedtak.tilbakekrevingsperiode shouldHaveSize 1
-            vedtak.tilbakekrevingsperiode.single().tilbakekrevingsbelop.forOne { beløp ->
+        oppdragRestClient.shouldHaveIverksettelse(BigInteger(vedtakId2)) { vedtak ->
+            vedtak.perioder shouldHaveSize 1
+            vedtak.perioder.single().posteringer.forOne { beløp ->
                 beløp.kodeResultat shouldBe "FULL_TILBAKEKREV"
                 beløp.belopTilbakekreves shouldBe 1000.kroner
             }

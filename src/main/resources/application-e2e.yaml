@@ -84,6 +84,9 @@ tilbakekreving:
   entraProxy:
     base-url: http://entra-proxy.sikkerhetstjenesten.svc.cluster.local
     scope: api://dev-gcp.sikkerhetstjenesten.entra-proxy/.default
+  sokosOs:
+    base-url: dummy
+    scope: dummy
   tilbakekrevingPdf:
     base-url: http://tilbakekreving-pdf
 

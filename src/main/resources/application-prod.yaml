@@ -116,6 +116,9 @@ tilbakekreving:
     scope: api://prod-gcp.sikkerhetstjenesten.entra-proxy/.default
   tilbakekrevingPdf:
     base-url: http://tilbakekreving-pdf
+  sokosOs:
+    base-url: http://sokos-os-ekstern-api.okonomi.svc.cluster.local
+    scope: api://prod-gcp.okonomi.sokos-os-ekstern-api/.default
 
 bigquery:
   flyway:

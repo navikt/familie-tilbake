@@ -146,6 +146,8 @@ spec:
           cluster: dev-gcp
         - application: logging
           namespace: nais-system
+        - application: sokos-os-ekstern-api
+          namespace: okonomi
         - application: tilbakekreving-pdf
       external:
         - host: tilbake-unleash-api.nav.cloud.nais.io

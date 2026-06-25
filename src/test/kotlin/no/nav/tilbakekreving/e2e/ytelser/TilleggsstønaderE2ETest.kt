@@ -5,8 +5,8 @@ import io.kotest.inspectors.forSingle
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import no.nav.familie.tilbake.config.OppdragClientRestMock
 import no.nav.familie.tilbake.config.PdlClientMock
-import no.nav.familie.tilbake.kravgrunnlag.domain.KodeAksjon
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.UtenforScope
 import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
@@ -20,6 +20,7 @@ import no.nav.tilbakekreving.e2e.kanBehandle
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.feil.ModellFeil
+import no.nav.tilbakekreving.integrasjoner.oppdrag.KodeAksjonDto
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
@@ -40,6 +41,9 @@ import kotlin.random.Random
 class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
     @Autowired
     private lateinit var fagsystemIntegrasjonService: FagsystemIntegrasjonService
+
+    @Autowired
+    private lateinit var oppdragRestClient: OppdragClientRestMock
 
     @Test
     fun `kravgrunnlag fører til sak klar til behandling`() {
@@ -129,40 +133,40 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagGodkjennVedtakVurdering(),
         )
-        oppdragClient.shouldHaveIverksettelse(behandlingId) { vedtak ->
+        oppdragRestClient.shouldHaveIverksettelse(BigInteger(vedtakId)) { vedtak ->
             vedtak.vedtakId shouldBe BigInteger(vedtakId)
-            vedtak.kodeAksjon shouldBe KodeAksjon.FATTE_VEDTAK.kode
+            vedtak.kodeAksjon shouldBe KodeAksjonDto.FATTE_VEDTAK
             vedtak.kodeHjemmel shouldBe "22-15"
-            vedtak.datoVedtakFagsystem shouldBe LocalDate.now()
-            vedtak.enhetAnsvarlig = ansvarligEnhet
-            vedtak.kontrollfelt = "2025-12-24-11.12.13.123456"
-            vedtak.saksbehId = SAKSBEHANDLER_IDENT
-            vedtak.tilbakekrevingsperiode.forSingle { periode ->
-                periode.periode.fom shouldBe 1.januar(2021)
-                periode.periode.tom shouldBe 1.januar(2021)
+            vedtak.vedtaksDato shouldBe LocalDate.now()
+            vedtak.enhetAnsvarlig shouldBe ansvarligEnhet
+            vedtak.kontrollfelt shouldBe "2025-12-24-11.12.13.123456"
+            vedtak.saksbehandlerId shouldBe SAKSBEHANDLER_IDENT
+            vedtak.perioder.forSingle { periode ->
+                periode.periodeFom shouldBe 1.januar(2021)
+                periode.periodeTom shouldBe 1.januar(2021)
                 periode.belopRenter shouldBe 0.kroner
-                periode.tilbakekrevingsbelop shouldHaveSize 2
-                periode.tilbakekrevingsbelop.forOne { beløp ->
+                periode.posteringer shouldHaveSize 2
+                periode.posteringer.forOne { beløp ->
                     beløp.kodeKlasse shouldBe "TSTBASISP4-OP"
-                    beløp.belopNy = 18000.kroner
-                    beløp.belopOpprUtbet = 20000.kroner
-                    beløp.belopTilbakekreves = 2000.kroner
-                    beløp.belopUinnkrevd = 0.kroner
-                    beløp.belopSkatt = 0.kroner
+                    beløp.belopNy shouldBe 18000.kroner
+                    beløp.belopOpprinneligUtbetalt shouldBe 20000.0.kroner
+                    beløp.belopTilbakekreves shouldBe 2000.kroner
+                    beløp.belopUinnkrevd shouldBe 0.kroner
+                    beløp.belopSkatt shouldBe 0.kroner
                     beløp.kodeResultat shouldBe "FULL_TILBAKEKREV"
-                    beløp.kodeAarsak = "ANNET"
-                    beløp.kodeSkyld = "IKKE_FORDELT"
+                    beløp.kodeAarsak shouldBe "ANNET"
+                    beløp.kodeSkyld shouldBe "IKKE_FORDELT"
                 }
-                periode.tilbakekrevingsbelop.forOne { beløp ->
+                periode.posteringer.forOne { beløp ->
                     beløp.kodeKlasse shouldBe "KL_KODE_FEIL_ARBYT"
-                    beløp.belopNy = 2000.kroner
-                    beløp.belopOpprUtbet = 0.kroner
-                    beløp.belopTilbakekreves = 0.kroner
-                    beløp.belopUinnkrevd = 0.kroner
-                    beløp.belopSkatt = 0.kroner
-                    beløp.kodeResultat shouldBe null
-                    beløp.kodeAarsak = "ANNET"
-                    beløp.kodeSkyld = "IKKE_FORDELT"
+                    beløp.belopNy shouldBe 2000.0.kroner
+                    beløp.belopOpprinneligUtbetalt shouldBe 0.kroner
+                    beløp.belopTilbakekreves shouldBe 0.kroner
+                    beløp.belopUinnkrevd shouldBe 0.kroner
+                    beløp.belopSkatt shouldBe 0.kroner
+                    beløp.kodeResultat shouldBe ""
+                    beløp.kodeAarsak shouldBe ""
+                    beløp.kodeSkyld shouldBe ""
                 }
             }
         }
@@ -171,10 +175,12 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
     @Test
     fun `revurdering av vedtak med full utbetaling fører til ingen tilbakekreving`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
             queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
+                vedtakId = vedtakId,
             ),
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
@@ -197,11 +203,11 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
             stegData = BehandlingsstegGenerator.lagGodkjennVedtakVurdering(),
         )
 
-        oppdragClient.shouldHaveIverksettelse(behandlingId) { vedtak ->
-            vedtak.tilbakekrevingsperiode shouldHaveSize 1
-            val tilbakekrevingsperiode = vedtak.tilbakekrevingsperiode.single()
-            tilbakekrevingsperiode.tilbakekrevingsbelop shouldHaveSize 2
-            tilbakekrevingsperiode.tilbakekrevingsbelop.forOne { beløp ->
+        oppdragRestClient.shouldHaveIverksettelse(BigInteger(vedtakId)) { vedtak ->
+            vedtak.perioder shouldHaveSize 1
+            val tilbakekrevingsperiode = vedtak.perioder.single()
+            tilbakekrevingsperiode.posteringer shouldHaveSize 2
+            tilbakekrevingsperiode.posteringer.forOne { beløp ->
                 beløp.kodeResultat shouldBe "FULL_TILBAKEKREV"
             }
         }

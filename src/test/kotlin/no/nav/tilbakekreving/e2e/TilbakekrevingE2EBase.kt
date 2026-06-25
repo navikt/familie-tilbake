@@ -8,7 +8,6 @@ import jakarta.jms.JMSException
 import kotlinx.coroutines.runBlocking
 import no.nav.familie.tilbake.api.BehandlingController
 import no.nav.familie.tilbake.api.VilkårsvurderingController
-import no.nav.familie.tilbake.config.OppdragClientMock
 import no.nav.familie.tilbake.config.PdlClientMock
 import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
@@ -59,9 +58,6 @@ open class TilbakekrevingE2EBase : E2EBase() {
 
     @Autowired
     protected lateinit var pdlClient: PdlClientMock
-
-    @Autowired
-    protected lateinit var oppdragClient: OppdragClientMock
 
     @Autowired
     protected lateinit var behandlingController: BehandlingController
