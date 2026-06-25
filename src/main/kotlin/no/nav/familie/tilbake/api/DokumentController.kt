@@ -161,6 +161,9 @@ class DokumentController(
     ): Ressurs<Varselbrevtekst> {
         val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.HentForhåndsvarselTekster)
         if (tilbakekreving != null) {
+            val tekster = forhåndsvarselService.hentForhåndsvarselTekster(tilbakekreving, tilbakekrevingService.lesecontext(), behandlingId)
+
+            tekster
             return Ressurs.success(forhåndsvarselService.hentVarselbrevTekster(tilbakekrevingService.lesecontext(), behandlingId, tilbakekreving))
         }
         return Ressurs.failure("Fant ingen tilbakekreving til behandlingId $behandlingId")

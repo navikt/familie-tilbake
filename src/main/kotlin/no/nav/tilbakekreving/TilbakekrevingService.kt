@@ -228,6 +228,7 @@ class TilbakekrevingService(
                 val journalpostResponse = forhåndsvarselService.journalførVarselbrev(
                     varselbrevBehov = behov,
                     logContext = logContext,
+                    features = featureService.modellFeatures,
                 )
                 if (journalpostResponse.journalpostId == null) {
                     throw Feil(

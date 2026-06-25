@@ -13,9 +13,11 @@ import no.nav.familie.tilbake.kontrakter.journalpost.AvsenderMottakerIdType
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.log.callId
+import no.nav.tilbakekreving.FeatureToggles
 import no.nav.tilbakekreving.LesContext
 import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.Tilbakekreving
+import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.api.v1.dto.BestillBrevDto
 import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
 import no.nav.tilbakekreving.api.v1.dto.HarBrukerUttaltSeg
@@ -27,8 +29,12 @@ import no.nav.tilbakekreving.brev.vedtaksbrev.BrevFormatterer
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostResponse
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
+import no.nav.tilbakekreving.kontrakter.frontend.models.BrevmottakerDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.SignaturDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseVurderingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VarselbrevDataDto
 import no.nav.tilbakekreving.pdf.Dokumentvariant
 import no.nav.tilbakekreving.pdf.PdfGenerator
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
@@ -40,9 +46,13 @@ import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.DokprodTilHtml
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.DokumentKlasse
 import no.nav.tilbakekreving.pdf.dokumentbestilling.varsel.TekstformatererVarselbrev
 import no.nav.tilbakekreving.pdf.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
+import no.tilbakekreving.integrasjoner.pdfGen.PdfGenClient
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.tilbakekreving.breeeev.standardtekster.forhåndsvarsel.Bunntekst
+import no.nav.tilbakekreving.kontrakter.frontend.models.UnderAvsnittDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VarselbrevTeksterDto
 
 @Service
 class ForhåndsvarselService(
@@ -50,6 +60,7 @@ class ForhåndsvarselService(
     private val varselbrevUtil: VarselbrevUtil,
     private val dokarkivClient: DokarkivClient,
     private val eksterneDataForBrevService: EksterneDataForBrevService,
+    private val pdfGenClient: PdfGenClient,
     private val pdfFactory: () -> PdfGenerator = { PdfGenerator() },
 ) {
     private val logger = TracedLogger.getLogger<ForhåndsvarselService>()
@@ -204,11 +215,38 @@ class ForhåndsvarselService(
     fun journalførVarselbrev(
         varselbrevBehov: VarselbrevJournalføringBehov,
         logContext: SecureLog.Context,
+        features: FeatureToggles,
     ): OpprettJournalpostResponse {
         val fristForUttalelse = varselbrevBehov.info.opprinneligUttalelsesfrist
         val brevdata = hentBrevdata(varselbrevBehov, fristForUttalelse, logContext)
         val dokument = Dokument(
-            dokument = hentPdf(brevdata, logContext),
+            dokument = if (features[Toggle.ForhåndsvarselTypst]) {
+                pdfGenClient.hentPdfForForhåndsvarsel(
+                    VarselbrevDataDto(
+                        brevGjelder = BrevmottakerDto(
+                            navn = varselbrevBehov.brukerinfo.navn,
+                            personIdent = varselbrevBehov.brukerinfo.ident,
+                        ),
+                        ytelse = varselbrevBehov.ytelse.brevmeta(),
+                        fullstendigBeløp = varselbrevBehov.info.forhåndsvarselinfo.beløp.toString(),
+                        fullstendigPeriode = PeriodeDto(
+                            fom = varselbrevBehov.info.forhåndsvarselinfo.feilutbetaltePerioder.first().fom,
+                            tom = varselbrevBehov.info.forhåndsvarselinfo.feilutbetaltePerioder.last().tom,
+                        ),
+                        uttalelsesfrist = varselbrevBehov.info.opprinneligUttalelsesfrist,
+                        sendtDato = varselbrevBehov.info.varsletDato,
+                        årsakTilFeilutbetaling = varselbrevBehov.info.tekstFraSaksbehandler,
+                        foreløpigVurdering = null,
+                        signatur = SignaturDto(
+                            enhetNavn = varselbrevBehov.info.forhåndsvarselinfo.behandlendeEnhet!!.navn,
+                            ansvarligSaksbehandler = eksterneDataForBrevService.hentSaksbehandlernavn(varselbrevBehov.info.forhåndsvarselinfo.ansvarligSaksbehandler.ident),
+                            besluttendeSaksbehandler = null,
+                        ),
+                    ),
+                )
+            } else {
+                hentPdf(brevdata, logContext)
+            },
             filtype = Filtype.PDFA,
             filnavn = "brev.pdf",
             tittel = brevdata.tittel,
@@ -338,5 +376,26 @@ class ForhåndsvarselService(
 
     private fun hentVarselbrevTittel(varselbrevBehov: VarselbrevJournalføringBehov): String {
         return "$TITTEL_VARSEL_TILBAKEBETALING ${varselbrevBehov.ytelse.hentYtelsesnavn(Språkkode.NB)}"
+    }
+
+    fun hentForhåndsvarselTekster(
+        tilbakekreving: Tilbakekreving,
+        lesContext: LesContext,
+        behandlingId: UUID,
+    ) : VarselbrevTeksterDto {
+        val varselbrevInfo = tilbakekreving.hentVarselbrevInfo(behandlingId, lesContext)
+        val ytelse = tilbakekreving.eksternFagsak.hentYtelse()
+        return VarselbrevTeksterDto(
+            overskrift = BrevFormatterer.lagForhåndsvarselOverskrift(ytelse),
+            innledning = BrevFormatterer.forhåndsvarselInneldning(
+                beløp = varselbrevInfo.forhåndsvarselinfo.beløp.toString(),
+                periode = varselbrevInfo.forhåndsvarselinfo.feilutbetaltePerioder.first(),
+                frist = varselbrevInfo.opprinneligUttalelsesfrist,
+                ytelse = ytelse
+            ),
+            underAvsnitt = Bunntekst.STANDARD_BUNNTEKSTER.map {
+                UnderAvsnittDto(it.tittel, it.avsnitt(ytelse).toList())
+            }
+        )
     }
 }

@@ -20,6 +20,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
+import no.nav.tilbakekreving.fagsystem.Ytelse
 
 object BrevFormatterer {
     val dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)
@@ -92,4 +93,18 @@ object BrevFormatterer {
             BeregningsresultatVurderingDto.BurdeForstått -> "Burde forstått"
             BeregningsresultatVurderingDto.Forstod -> "Forstod"
         }
+
+    fun lagForhåndsvarselOverskrift(ytelse: Ytelse): String {
+        return "Nav vurderer om du må betale tilbake ${ytelse.brevmeta().ubestemtEntall} utbetalt"
+    }
+
+    fun forhåndsvarselInneldning(
+        beløp: String,
+        periode: Datoperiode,
+        frist: LocalDate,
+        ytelse: Ytelse,
+    ): String {
+        return "Du har fått $beløp kroner for mye utbetalt i ${ytelse.brevmeta().ubestemtEntall} fra og med ${periode.fom} til og med ${periode.tom}.\n" +
+                "Dette er et varsel om at vi vurderer om du må betale tilbake beløpet. Før vi avgjør dette, kan du uttale i saken innen $frist."
+    }
 }
