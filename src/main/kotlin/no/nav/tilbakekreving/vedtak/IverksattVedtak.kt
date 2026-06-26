@@ -2,7 +2,7 @@ package no.nav.tilbakekreving.vedtak
 
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
 import no.nav.tilbakekreving.entities.AktørEntity
-import no.nav.tilbakekreving.integrasjoner.oppdrag.TilbakekrevingsvedtakRequestDto
+import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.TilbakekrevingsvedtakRequestDto
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import java.math.BigDecimal
 import java.math.BigInteger

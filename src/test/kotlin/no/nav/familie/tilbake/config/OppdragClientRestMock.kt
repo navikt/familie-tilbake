@@ -3,8 +3,8 @@ package no.nav.familie.tilbake.config
 import io.kotest.inspectors.forOne
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.integrasjoner.oppdrag.OppdragRestClient
-import no.nav.tilbakekreving.integrasjoner.oppdrag.TilbakekrevingsvedtakRequestDto
-import no.nav.tilbakekreving.integrasjoner.oppdrag.TilbakekrevingsvedtakResponseDto
+import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.TilbakekrevingsvedtakRequestDto
+import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.TilbakekrevingsvedtakResponseDto
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Service
 import java.math.BigInteger

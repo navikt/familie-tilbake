@@ -24,11 +24,11 @@ import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.entities.AktørEntity
 import no.nav.tilbakekreving.entities.AktørType
-import no.nav.tilbakekreving.integrasjoner.oppdrag.KodeAksjonDto
 import no.nav.tilbakekreving.integrasjoner.oppdrag.OppdragRestClient
-import no.nav.tilbakekreving.integrasjoner.oppdrag.PosteringDto
-import no.nav.tilbakekreving.integrasjoner.oppdrag.TilbakekrevingsvedtakRequestDto
-import no.nav.tilbakekreving.integrasjoner.oppdrag.VedtakPeriodeDto
+import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.KodeAksjonDto
+import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.PosteringDto
+import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.TilbakekrevingsvedtakRequestDto
+import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.VedtakPeriodeDto
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsbelopDto
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsperiodeDto
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsvedtakDto
@@ -187,7 +187,7 @@ class IverksettelseService(
         VedtakPeriodeDto(
             periodeFom = periode.periode.fom.atDay(1),
             periodeTom = periode.periode.tom.atEndOfMonth(),
-            renterPeriodeBeregnes = beregnetPerioder.any { it.renter > BigDecimal.ZERO },
+            renterPeriodeBeregnes = periode.renter > BigDecimal.ZERO,
             belopRenter = periode.renter,
             posteringer = lagPosteringer(periode.beløp, logContext),
         )

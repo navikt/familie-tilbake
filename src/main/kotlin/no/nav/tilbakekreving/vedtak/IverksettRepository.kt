@@ -58,9 +58,9 @@ class IverksettRepository(
                     ps.setObject(2, iverksattPeriodeId)
                     ps.setObject(3, periode.fom)
                     ps.setObject(4, periode.tom)
-                    ps.setBigDecimal(5, periode.beløpTilbakekreves)
-                    ps.setBigDecimal(6, periode.skattebeløp)
-                    ps.setBigDecimal(7, periode.rentebeløp)
+                    ps.setString(5, FieldConverter.BigDecimalConverter.convert(periode.beløpTilbakekreves))
+                    ps.setString(6, FieldConverter.BigDecimalConverter.convert(periode.skattebeløp))
+                    ps.setString(7, FieldConverter.BigDecimalConverter.convert(periode.rentebeløp))
                 }
 
                 override fun getBatchSize() = perioder.size
@@ -68,10 +68,10 @@ class IverksettRepository(
         )
     }
 
-    fun hentIverksattVedtakMedOpprettetTid(opprettetTid: LocalDate): List<IverksattVedtak> {
+    fun hentIverksattVedtakMedVedtaksdato(vedtaksdato: LocalDate): List<IverksattVedtak> {
         return jdbcTemplate.query(
             "SELECT * FROM iverksatt_vedtak WHERE vedtaksdato = ?",
-            opprettetTid,
+            vedtaksdato,
         ) { rs, _ ->
             val iverksattVedtakId = UUID.fromString(rs.getString("id"))
             IverksattVedtak(

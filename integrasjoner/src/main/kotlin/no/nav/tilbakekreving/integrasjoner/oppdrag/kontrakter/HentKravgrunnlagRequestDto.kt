@@ -1,4 +1,4 @@
-package no.nav.tilbakekreving.integrasjoner.oppdrag
+package no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter
 
 data class HentKravgrunnlagRequestDto(
     val kodeAksjon: KodeAksjonDto,

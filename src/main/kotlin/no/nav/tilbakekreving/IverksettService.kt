@@ -12,12 +12,12 @@ import no.nav.tilbakekreving.beregning.delperiode.Delperiode
 import no.nav.tilbakekreving.beregning.delperiode.Foreldet
 import no.nav.tilbakekreving.beregning.isZero
 import no.nav.tilbakekreving.config.FeatureService
-import no.nav.tilbakekreving.integrasjoner.oppdrag.KodeAksjonDto
 import no.nav.tilbakekreving.integrasjoner.oppdrag.OppdragRestClient
-import no.nav.tilbakekreving.integrasjoner.oppdrag.PosteringDto
-import no.nav.tilbakekreving.integrasjoner.oppdrag.TilbakekrevingsvedtakRequestDto
-import no.nav.tilbakekreving.integrasjoner.oppdrag.TilbakekrevingsvedtakResponseDto
-import no.nav.tilbakekreving.integrasjoner.oppdrag.VedtakPeriodeDto
+import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.KodeAksjonDto
+import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.PosteringDto
+import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.TilbakekrevingsvedtakRequestDto
+import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.TilbakekrevingsvedtakResponseDto
+import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.VedtakPeriodeDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagBelopDto

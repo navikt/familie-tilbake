@@ -13,6 +13,8 @@ import io.ktor.http.buildUrl
 import io.ktor.http.contentType
 import io.ktor.http.takeFrom
 import kotlinx.coroutines.runBlocking
+import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.TilbakekrevingsvedtakRequestDto
+import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.TilbakekrevingsvedtakResponseDto
 import no.nav.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
 
 internal class OppdragRestClientImpl(
@@ -26,7 +28,7 @@ internal class OppdragRestClientImpl(
             httpClient.post(
                 buildUrl {
                     takeFrom(config.baseUrl)
-                    appendPathSegments("/api/v1/tilbakekreving/vedtak")
+                    appendPathSegments("api", "v1", "tilbakekreving", "vedtak")
                 },
             ) {
                 contentType(ContentType.Application.Json)

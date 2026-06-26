@@ -21,7 +21,7 @@ class AvstemmingMediator(
     private final val kvitteringerOkKoder = setOf("00", "04")
 
     fun avstem(dato: LocalDate): ByteArray? {
-        val iverksattVedtakListe = iverksettRepository.hentIverksattVedtakMedOpprettetTid(dato) +
+        val iverksattVedtakListe = iverksettRepository.hentIverksattVedtakMedVedtaksdato(dato) +
             iverksettelseService.hentGamleVedtak(dato)
 
         var antallFeilet = 0
