@@ -16,6 +16,7 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandReposi
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
+import no.nav.familie.tilbake.config.OppdragClientRestMock
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.historikkinnslag.Aktør
@@ -29,6 +30,7 @@ import no.nav.familie.tilbake.integration.økonomi.MockOppdragClient
 import no.nav.familie.tilbake.integration.økonomi.OppdragClient
 import no.nav.familie.tilbake.kravgrunnlag.task.HentKravgrunnlagTask
 import no.nav.familie.tilbake.log.LogService
+import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
@@ -69,9 +71,13 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var logService: LogService
 
+    @Autowired
+    private lateinit var featureService: FeatureService
+
     private lateinit var kafkaProducer: KafkaProducer
     private lateinit var historikkService: HistorikkService
     private lateinit var oppdragClient: OppdragClient
+    private val oppdragRestClient = OppdragClientRestMock()
     private lateinit var hentKravgrunnlagService: HentKravgrunnlagService
     private lateinit var hentKravgrunnlagTask: HentKravgrunnlagTask
 
@@ -91,7 +97,7 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         kafkaProducer = spyk(DefaultKafkaProducer(kafkaTemplate, KafkaProperties(KafkaProperties.HentFagsystem("request", "response"))))
         historikkService = HistorikkService(behandlingRepository, brevsporingRepository, historikkinnslagRepository)
         oppdragClient = MockOppdragClient(kravgrunnlagRepository, mottattXmlRepository)
-        hentKravgrunnlagService = HentKravgrunnlagService(kravgrunnlagRepository, oppdragClient, historikkService)
+        hentKravgrunnlagService = HentKravgrunnlagService(kravgrunnlagRepository, oppdragClient, historikkService, featureService, oppdragRestClient)
         hentKravgrunnlagTask = HentKravgrunnlagTask(behandlingRepository, hentKravgrunnlagService, stegService, logService)
     }
 
@@ -134,9 +140,11 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             }.shouldBeTrue()
     }
 
-    private fun lagTask(behandlingId: UUID): Task =
-        Task(
-            type = HentKravgrunnlagTask.TYPE,
-            payload = behandlingId.toString(),
-        )
+    companion object {
+        fun lagTask(behandlingId: UUID): Task =
+            Task(
+                type = HentKravgrunnlagTask.TYPE,
+                payload = behandlingId.toString(),
+            )
+    }
 }

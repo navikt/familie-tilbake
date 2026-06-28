@@ -6,12 +6,19 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache5.Apache5
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.jackson.jackson
+import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.KravgrunnlagDetaljerDto
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.TilbakekrevingsvedtakRequestDto
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.TilbakekrevingsvedtakResponseDto
 import no.nav.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
+import java.math.BigInteger
 
 interface OppdragRestClient {
     fun iverksettVedtak(request: TilbakekrevingsvedtakRequestDto): TilbakekrevingsvedtakResponseDto
+
+    fun hentKravgrunnlag(
+        kravgrunnlagId: BigInteger,
+        kodeAksjon: String,
+    ): KravgrunnlagDetaljerDto
 
     companion object {
         fun opprett(

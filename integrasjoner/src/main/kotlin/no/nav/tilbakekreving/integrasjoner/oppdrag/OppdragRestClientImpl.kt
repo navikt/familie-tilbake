@@ -13,9 +13,12 @@ import io.ktor.http.buildUrl
 import io.ktor.http.contentType
 import io.ktor.http.takeFrom
 import kotlinx.coroutines.runBlocking
+import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.HentKravgrunnlagDetaljerRequestDto
+import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.KravgrunnlagDetaljerDto
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.TilbakekrevingsvedtakRequestDto
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.TilbakekrevingsvedtakResponseDto
 import no.nav.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
+import java.math.BigInteger
 
 internal class OppdragRestClientImpl(
     private val config: OppdragRestClient.Companion.Config,
@@ -35,6 +38,30 @@ internal class OppdragRestClientImpl(
                 accept(ContentType.Application.Json)
                 header(HttpHeaders.Authorization, "Bearer $token")
                 setBody(request)
+            }.body()
+        }
+    }
+
+    override fun hentKravgrunnlag(kravgrunnlagId: BigInteger, kodeAksjon: String): KravgrunnlagDetaljerDto {
+        return runBlocking {
+            val token = tokenExchangeService.clientCredentialsToken(config.scope)
+            httpClient.post(
+                buildUrl {
+                    takeFrom(config.baseUrl)
+                    appendPathSegments("api", "v1", "tilbakekreving", "kravgrunnlag", "detaljer")
+                },
+            ) {
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+                header(HttpHeaders.Authorization, "Bearer $token")
+                setBody(
+                    HentKravgrunnlagDetaljerRequestDto(
+                        kodeAksjon = kodeAksjon,
+                        kravgrunnlagId = kravgrunnlagId.toInt(),
+                        enhetAnsvarlig = "8020", // fast verdi
+                        saksbehandlerId = "K231B433", // fast verdi
+                    ),
+                )
             }.body()
         }
     }

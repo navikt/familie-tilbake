@@ -4,11 +4,15 @@ import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.integration.økonomi.OppdragClient
+import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagMapper.tilDetaljertKravgrunnlagDto
 import no.nav.familie.tilbake.kravgrunnlag.domain.KodeAksjon
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagHentDetaljRequest
+import no.nav.tilbakekreving.Toggle
+import no.nav.tilbakekreving.config.FeatureService
+import no.nav.tilbakekreving.integrasjoner.oppdrag.OppdragRestClient
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.HentKravgrunnlagDetaljDto
 import org.springframework.stereotype.Service
@@ -22,6 +26,8 @@ class HentKravgrunnlagService(
     private val kravgrunnlagRepository: KravgrunnlagRepository,
     private val oppdragClient: OppdragClient,
     private val historikkService: HistorikkService,
+    private val featureService: FeatureService,
+    private val oppdragRestClient: OppdragRestClient,
 ) {
     private val log = TracedLogger.getLogger<HentKravgrunnlagService>()
 
@@ -31,9 +37,18 @@ class HentKravgrunnlagService(
         logContext: SecureLog.Context,
     ): DetaljertKravgrunnlagDto {
         log.medContext(logContext) {
-            info("Henter kravgrunnlag for kravgrunnlagId=$kravgrunnlagId for kodeAksjon=$kodeAksjon")
+            info(
+                "Henter kravgrunnlag for kravgrunnlagId={} for kodeAksjon={}, rest={}",
+                kravgrunnlagId,
+                kodeAksjon,
+                featureService.modellFeatures[Toggle.OppdragRestClient],
+            )
         }
-        return oppdragClient.hentKravgrunnlag(kravgrunnlagId, lagRequest(kravgrunnlagId, kodeAksjon), logContext)
+        return if (featureService.modellFeatures[Toggle.OppdragRestClient]) {
+            oppdragRestClient.hentKravgrunnlag(kravgrunnlagId, kodeAksjon.kode).tilDetaljertKravgrunnlagDto()
+        } else {
+            oppdragClient.hentKravgrunnlag(kravgrunnlagId, lagRequest(kravgrunnlagId, kodeAksjon), logContext)
+        }
     }
 
     fun hentTilbakekrevingskravgrunnlag(behandlingId: UUID): Kravgrunnlag431 = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)

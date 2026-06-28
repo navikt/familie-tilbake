@@ -39,6 +39,7 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.oppgave.FerdigstillOppgaveTask
 import no.nav.familie.tilbake.totrinn.TotrinnsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
+import no.nav.tilbakekreving.avstemmingMediator.AvstemmingMediatorTest.Companion.readXml
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
@@ -149,7 +150,7 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `korrigerKravgrunnlag skal hente korrigert kravgrunnlag når behandling ikke har et kravgrunnlag`() {
-        lagMottattXml()
+        lagMottattXml(økonomiXmlMottattRepository)
         forvaltningService.korrigerKravgrunnlag(behandling.id, BigInteger.ZERO)
 
         val kravgrunnlagene = kravgrunnlagRepository.findByBehandlingId(behandling.id)
@@ -163,7 +164,7 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `arkiverMottattKravgrunnlag skal arkivere mottatt xml`() {
-        val økonomiXmlMottatt = lagMottattXml()
+        val økonomiXmlMottatt = lagMottattXml(økonomiXmlMottattRepository)
         forvaltningService.arkiverMottattKravgrunnlag(økonomiXmlMottatt.id)
 
         økonomiXmlMottattRepository.existsById(økonomiXmlMottatt.id).shouldBeFalse()
@@ -381,35 +382,6 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
             "og eksternFagsakId=${fagsak.eksternFagsakId}"
     }
 
-    private fun lagMottattXml(): ØkonomiXmlMottatt {
-        val mottattXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
-        return økonomiXmlMottattRepository.insert(
-            ØkonomiXmlMottatt(
-                melding = mottattXml,
-                kravstatuskode = Kravstatuskode.NYTT,
-                eksternFagsakId = "0",
-                ytelsestype = Ytelsestype.BARNETRYGD,
-                referanse = "0",
-                eksternKravgrunnlagId = BigInteger.ZERO,
-                vedtakId = BigInteger.ZERO,
-                kontrollfelt = "2021-03-02-18.50.15.236315",
-                sperret = false,
-            ),
-        )
-    }
-
-    private fun assertBehandlingssteg(
-        behandlingsstegstilstand: List<Behandlingsstegstilstand>,
-        behandlingssteg: Behandlingssteg,
-        behandlingsstegstatus: Behandlingsstegstatus,
-    ) {
-        behandlingsstegstilstand
-            .any {
-                behandlingssteg == it.behandlingssteg &&
-                    behandlingsstegstatus == it.behandlingsstegsstatus
-            }.shouldBeTrue()
-    }
-
     private fun lagBehandlingssteg(
         behandlingssteg: Behandlingssteg,
         behandlingsstegstatus: Behandlingsstegstatus,
@@ -421,5 +393,36 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
                 behandlingsstegsstatus = behandlingsstegstatus,
             ),
         )
+    }
+
+    companion object {
+        fun assertBehandlingssteg(
+            behandlingsstegstilstand: List<Behandlingsstegstilstand>,
+            behandlingssteg: Behandlingssteg,
+            behandlingsstegstatus: Behandlingsstegstatus,
+        ) {
+            behandlingsstegstilstand
+                .any {
+                    behandlingssteg == it.behandlingssteg &&
+                        behandlingsstegstatus == it.behandlingsstegsstatus
+                }.shouldBeTrue()
+        }
+
+        fun lagMottattXml(økonomiXmlMottattRepository: ØkonomiXmlMottattRepository): ØkonomiXmlMottatt {
+            val mottattXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
+            return økonomiXmlMottattRepository.insert(
+                ØkonomiXmlMottatt(
+                    melding = mottattXml,
+                    kravstatuskode = Kravstatuskode.NYTT,
+                    eksternFagsakId = "0",
+                    ytelsestype = Ytelsestype.BARNETRYGD,
+                    referanse = "0",
+                    eksternKravgrunnlagId = BigInteger.ZERO,
+                    vedtakId = BigInteger.ZERO,
+                    kontrollfelt = "2021-03-02-18.50.15.236315",
+                    sperret = false,
+                ),
+            )
+        }
     }
 }
