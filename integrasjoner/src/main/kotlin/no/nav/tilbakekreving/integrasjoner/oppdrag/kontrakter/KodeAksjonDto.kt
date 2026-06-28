@@ -17,4 +17,7 @@ enum class KodeAksjonDto {
 
     @JsonProperty("8")
     FATTE_VEDTAK,
+
+    @JsonProperty("A")
+    ANNULLERT_KRAVGRUNNLAG,
 }

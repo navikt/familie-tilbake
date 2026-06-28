@@ -45,7 +45,7 @@ class HentKravgrunnlagService(
             )
         }
         return if (featureService.modellFeatures[Toggle.OppdragRestClient]) {
-            oppdragRestClient.hentKravgrunnlag(kravgrunnlagId, kodeAksjon.kode).tilDetaljertKravgrunnlagDto()
+            oppdragRestClient.hentKravgrunnlag(kravgrunnlagId, kodeAksjon.kode).kravgrunnlag.tilDetaljertKravgrunnlagDto()
         } else {
             oppdragClient.hentKravgrunnlag(kravgrunnlagId, lagRequest(kravgrunnlagId, kodeAksjon), logContext)
         }

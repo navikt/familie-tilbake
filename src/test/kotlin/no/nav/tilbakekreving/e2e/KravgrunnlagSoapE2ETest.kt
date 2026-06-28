@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.e2e
 
+import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.inspectors.forAny
 import io.kotest.inspectors.forOne
@@ -641,6 +642,20 @@ class KravgrunnlagSoapE2ETest : TilbakekrevingE2EBase() {
                 Behandlingssteg.FAKTA == it.behandlingssteg &&
                     Behandlingsstegstatus.KLAR == it.behandlingsstegsstatus
             }.shouldBeTrue()
+    }
+
+    @Test
+    fun `annulerKravgrunnlag skal annulere kravgrunnlag som er koblet med en behandling`() {
+        val fagsak = fagsakRepository.insert(GammelTestdata.fagsak())
+        val behandling = gammelBehandlingRepository.insert(GammelTestdata.lagBehandling(fagsak.id))
+        val kravgrunnlag = kravgrunnlagRepository.insert(GammelTestdata.lagKravgrunnlag(behandling.id))
+        shouldNotThrowAny { forvaltningService.annulerKravgrunnlag(kravgrunnlag.eksternKravgrunnlagId) }
+    }
+
+    @Test
+    fun `annulerKravgrunnlag skal annulere kravgrunnlag som er mottatt i økonomiXmlMottatt`() {
+        val økonomiXmlMottatt = økonomiXmlMottattRepository.insert(GammelTestdata.getøkonomiXmlMottatt())
+        shouldNotThrowAny { forvaltningService.annulerKravgrunnlag(økonomiXmlMottatt.eksternKravgrunnlagId!!) }
     }
 
     companion object {

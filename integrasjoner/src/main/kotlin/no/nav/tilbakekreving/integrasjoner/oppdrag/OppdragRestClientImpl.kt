@@ -14,7 +14,10 @@ import io.ktor.http.contentType
 import io.ktor.http.takeFrom
 import kotlinx.coroutines.runBlocking
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.HentKravgrunnlagDetaljerRequestDto
-import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.KravgrunnlagDetaljerDto
+import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.HentKravgrunnlagDetaljerResponseDto
+import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.KodeAksjonDto
+import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.KravgrunnlagAnnulerRequestDto
+import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.KravgrunnlagAnnulerResponseDto
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.TilbakekrevingsvedtakRequestDto
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.TilbakekrevingsvedtakResponseDto
 import no.nav.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
@@ -42,7 +45,7 @@ internal class OppdragRestClientImpl(
         }
     }
 
-    override fun hentKravgrunnlag(kravgrunnlagId: BigInteger, kodeAksjon: String): KravgrunnlagDetaljerDto {
+    override fun hentKravgrunnlag(kravgrunnlagId: BigInteger, kodeAksjon: String): HentKravgrunnlagDetaljerResponseDto {
         return runBlocking {
             val token = tokenExchangeService.clientCredentialsToken(config.scope)
             httpClient.post(
@@ -58,6 +61,30 @@ internal class OppdragRestClientImpl(
                     HentKravgrunnlagDetaljerRequestDto(
                         kodeAksjon = kodeAksjon,
                         kravgrunnlagId = kravgrunnlagId.toInt(),
+                        enhetAnsvarlig = "8020", // fast verdi
+                        saksbehandlerId = "K231B433", // fast verdi
+                    ),
+                )
+            }.body()
+        }
+    }
+
+    override fun annullerKravgrunnlag(vedtakId: BigInteger): KravgrunnlagAnnulerResponseDto {
+        return runBlocking {
+            val token = tokenExchangeService.clientCredentialsToken(config.scope)
+            httpClient.post(
+                buildUrl {
+                    takeFrom(config.baseUrl)
+                    appendPathSegments("api", "v1", "tilbakekreving", "kravgrunnlag", "annuller")
+                },
+            ) {
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+                header(HttpHeaders.Authorization, "Bearer $token")
+                setBody(
+                    KravgrunnlagAnnulerRequestDto(
+                        kodeAksjon = KodeAksjonDto.ANNULLERT_KRAVGRUNNLAG,
+                        vedtakId = vedtakId.toInt(),
                         enhetAnsvarlig = "8020", // fast verdi
                         saksbehandlerId = "K231B433", // fast verdi
                     ),

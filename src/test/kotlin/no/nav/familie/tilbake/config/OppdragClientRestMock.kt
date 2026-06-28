@@ -8,6 +8,8 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.tilbakekreving.integrasjoner.oppdrag.OppdragRestClient
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.DetaljerPeriodeDto
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.DetaljerPosteringDto
+import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.HentKravgrunnlagDetaljerResponseDto
+import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.KravgrunnlagAnnulerResponseDto
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.KravgrunnlagDetaljerDto
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.TilbakekrevingsvedtakRequestDto
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.TilbakekrevingsvedtakResponseDto
@@ -37,62 +39,73 @@ class OppdragClientRestMock : OppdragRestClient {
         )
     }
 
-    override fun hentKravgrunnlag(kravgrunnlagId: BigInteger, kodeAksjon: String): KravgrunnlagDetaljerDto {
-        return KravgrunnlagDetaljerDto(
-            kodeHjemmel = "22-15",
-            renterBeregnes = true,
-            kravgrunnlagId = kravgrunnlagId.toLong(),
-            enhetAnsvarlig = "",
-            enhetBehandl = "",
-            enhetBosted = "",
-            saksbehandlerId = "",
-            kodeFagomraade = Fagområdekode.BA.name,
-            vedtakId = 0,
-            kodeStatusKrav = Kravstatuskode.NYTT.kode,
-            fagsystemId = "0",
-            datoVedtakFagsystem = LocalDate.now(),
-            vedtakIdOmgjort = 0,
-            gjelderId = "1234",
-            typeGjelder = "PERSON",
-            utbetalesTilId = "1234",
-            typeUtbetalesTilId = "PERSON",
-            kontrollfelt = LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd-HH.mm.ss.SSSSSS")),
-            referanse = "0",
-            perioder = listOf(
-                DetaljerPeriodeDto(
-                    periodeFom = 1.januar(2021),
-                    periodeTom = 31.januar(2021),
-                    belopSkattMnd = BigDecimal.ZERO,
-                    posteringer = listOf(
-                        DetaljerPosteringDto(
-                            kodeKlasse = Klassekode.KL_KODE_FEIL_BA.tilKlassekodeNavn(),
-                            typeKlasse = "FEIL",
-                            belopTilbakekreves = 1000.kroner,
-                            belopNy = 1000.kroner,
-                            belopOpprinneligUtbetalt = BigDecimal.ZERO,
-                            belopUinnkrevd = BigDecimal.ZERO,
-                            skattProsent = BigDecimal.ZERO,
-                            kodeResultat = "",
-                            kodeAarsak = "",
-                            kodeSkyld = "",
-                        ),
-                        DetaljerPosteringDto(
-                            kodeKlasse = Klassekode.KL_KODE_JUST_BA.tilKlassekodeNavn(),
-                            typeKlasse = "YTEL",
-                            belopTilbakekreves = 1000.kroner,
-                            belopNy = 19000.kroner,
-                            belopOpprinneligUtbetalt = 20000.kroner,
-                            belopUinnkrevd = BigDecimal.ZERO,
-                            skattProsent = BigDecimal.ZERO,
-                            kodeResultat = "",
-                            kodeAarsak = "",
-                            kodeSkyld = "",
+    override fun hentKravgrunnlag(kravgrunnlagId: BigInteger, kodeAksjon: String): HentKravgrunnlagDetaljerResponseDto {
+        return HentKravgrunnlagDetaljerResponseDto(
+            status = 0,
+            melding = "OK",
+            kravgrunnlag = KravgrunnlagDetaljerDto(
+                kodeHjemmel = "22-15",
+                renterBeregnes = true,
+                kravgrunnlagId = kravgrunnlagId.toLong(),
+                enhetAnsvarlig = "",
+                enhetBehandl = "",
+                enhetBosted = "",
+                saksbehandlerId = "",
+                kodeFagomraade = Fagområdekode.BA.name,
+                vedtakId = 0,
+                kodeStatusKrav = Kravstatuskode.NYTT.kode,
+                fagsystemId = "0",
+                datoVedtakFagsystem = LocalDate.now(),
+                vedtakIdOmgjort = 0,
+                gjelderId = "1234",
+                typeGjelder = "PERSON",
+                utbetalesTilId = "1234",
+                typeUtbetalesTilId = "PERSON",
+                kontrollfelt = LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd-HH.mm.ss.SSSSSS")),
+                referanse = "0",
+                perioder = listOf(
+                    DetaljerPeriodeDto(
+                        periodeFom = 1.januar(2021),
+                        periodeTom = 31.januar(2021),
+                        belopSkattMnd = BigDecimal.ZERO,
+                        posteringer = listOf(
+                            DetaljerPosteringDto(
+                                kodeKlasse = Klassekode.KL_KODE_FEIL_BA.tilKlassekodeNavn(),
+                                typeKlasse = "FEIL",
+                                belopTilbakekreves = 1000.kroner,
+                                belopNy = 1000.kroner,
+                                belopOpprinneligUtbetalt = BigDecimal.ZERO,
+                                belopUinnkrevd = BigDecimal.ZERO,
+                                skattProsent = BigDecimal.ZERO,
+                                kodeResultat = "",
+                                kodeAarsak = "",
+                                kodeSkyld = "",
+                            ),
+                            DetaljerPosteringDto(
+                                kodeKlasse = Klassekode.KL_KODE_JUST_BA.tilKlassekodeNavn(),
+                                typeKlasse = "YTEL",
+                                belopTilbakekreves = 1000.kroner,
+                                belopNy = 19000.kroner,
+                                belopOpprinneligUtbetalt = 20000.kroner,
+                                belopUinnkrevd = BigDecimal.ZERO,
+                                skattProsent = BigDecimal.ZERO,
+                                kodeResultat = "",
+                                kodeAarsak = "",
+                                kodeSkyld = "",
+                            ),
                         ),
                     ),
                 ),
             ),
         )
     }
+
+    override fun annullerKravgrunnlag(vedtakId: BigInteger): KravgrunnlagAnnulerResponseDto = KravgrunnlagAnnulerResponseDto(
+        status = 0,
+        melding = "OK",
+        vedtakId = vedtakId.toInt(),
+        saksbehandlerId = "8020",
+    )
 
     fun shouldHaveIverksettelse(
         vedtakId: BigInteger,
