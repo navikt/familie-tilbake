@@ -5,5 +5,5 @@ dependencies {
     testImplementation(project(":testdata"))
     api(project(":felles"))
     api("com.fasterxml.jackson.core:jackson-databind:2.22.0")
-    implementation("io.ktor:ktor-http:3.5.0")
+    implementation("io.ktor:ktor-http:3.5.1")
 }
