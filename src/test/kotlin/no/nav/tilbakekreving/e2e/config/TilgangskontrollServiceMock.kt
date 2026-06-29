@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.e2e.config
 
 import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
@@ -20,6 +21,10 @@ import java.util.UUID
 @Service
 class TilgangskontrollServiceMock : TilgangskontrollService {
     override fun validerTilgangTilbakekreving(tilbakekreving: Tilbakekreving, valideringContext: ValideringContext, behandler: Behandler): Behandlerrolle {
+        return Behandlerrolle.SYSTEM
+    }
+
+    override fun validerTilgangTilbakekreving(fagsystem: FagsystemDTO, fagsystemId: String, valideringContext: ValideringContext, brukerIdent: String?, behandler: Behandler, logContext: SecureLog.Context): Behandlerrolle {
         return Behandlerrolle.SYSTEM
     }
 

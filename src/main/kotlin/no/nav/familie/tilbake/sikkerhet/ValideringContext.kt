@@ -130,6 +130,11 @@ enum class ValideringContext(
         auditLoggerEvent = AuditLoggerEvent.ACCESS,
         handling = "Dumper en sak som JSON objekt",
     ),
+    ForvaltningHentKravgrunnlag(
+        minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+        auditLoggerEvent = AuditLoggerEvent.ACCESS,
+        handling = "Henter kravgrunnlag som er markert som utenfor scope",
+    ),
     HentVedtaksbrevData(
         minimumBehandlerrolle = Behandlerrolle.VEILEDER,
         auditLoggerEvent = AuditLoggerEvent.ACCESS,

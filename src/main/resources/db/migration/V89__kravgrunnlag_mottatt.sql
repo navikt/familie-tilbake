@@ -1,0 +1,1 @@
+ALTER TABLE kravgrunnlag_buffer ADD COLUMN mottatt TIMESTAMP NOT NULL DEFAULT NOW();

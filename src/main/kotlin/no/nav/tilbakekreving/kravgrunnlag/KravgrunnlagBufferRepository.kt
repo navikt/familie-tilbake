@@ -58,6 +58,10 @@ class KravgrunnlagBufferRepository(
         return jdbcTemplate.query("SELECT * FROM kravgrunnlag_buffer WHERE kravgrunnlag_id=?;", Mapper, kravgrunnlagId)
     }
 
+    fun hentKravgrunnlagUtenforScope(fagsystemId: String): List<Entity> {
+        return jdbcTemplate.query("SELECT * FROM kravgrunnlag_buffer WHERE utenfor_scope=true AND fagsystem_id=?", Mapper, fagsystemId)
+    }
+
     object Mapper : RowMapper<Entity> {
         override fun mapRow(
             rs: ResultSet,

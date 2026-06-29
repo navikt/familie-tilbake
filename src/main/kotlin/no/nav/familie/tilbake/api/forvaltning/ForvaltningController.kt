@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.api.forvaltning
 import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.familie.tilbake.behandling.Ytelsestype
+import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
 import no.nav.familie.tilbake.kontrakter.Ressurs
@@ -23,8 +24,8 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
-import no.nav.tilbakekreving.repository.TilbakekrevingFilter.Companion.tilbakekreving
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -57,6 +58,7 @@ class ForvaltningController(
     private val tilbakekrevingService: TilbakekrevingService,
     private val applicationProperties: ApplicationProperties,
     private val tilbakekrevingRepository: TilbakekrevingRepository,
+    private val kravgrunnlagBufferRepository: KravgrunnlagBufferRepository,
 ) {
     private val logger = TracedLogger.getLogger<ForvaltningController>()
 
@@ -365,6 +367,24 @@ class ForvaltningController(
     ): ResponseEntity<TilbakekrevingEntity> {
         val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.ForvaltningDumpFagsak)
         return ResponseEntity.ofNullable(tilbakekreving?.tilEntity())
+    }
+
+    @Operation(summary = "Henter alle kravgrunnlag markert som utenfor scope for sak")
+    @GetMapping("/kravgrunnlag/{fagsystem}/{fagsystemId}")
+    fun hentAlleKravgrunnlagUtenforScope(
+        @PathVariable fagsystem: FagsystemDTO,
+        @PathVariable fagsystemId: String,
+    ): ResponseEntity<String> {
+        tilgangskontrollService.validerTilgangTilbakekreving(
+            fagsystem = fagsystem,
+            fagsystemId = fagsystemId,
+            valideringContext = ValideringContext.ForvaltningHentKravgrunnlag,
+            brukerIdent = null,
+            behandler = ContextService.hentBehandler(SecureLog.Context.utenBehandling(fagsystemId)),
+        )
+        val kravgrunnlag = kravgrunnlagBufferRepository.hentKravgrunnlagUtenforScope(fagsystemId)
+            .joinToString("\n====\n") { it.kravgrunnlag }
+        return ResponseEntity.ofNullable(kravgrunnlag)
     }
 }
 

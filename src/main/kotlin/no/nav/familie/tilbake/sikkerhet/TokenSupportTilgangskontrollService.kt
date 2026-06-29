@@ -51,14 +51,30 @@ class TokenSupportTilgangskontrollService(
         valideringContext: ValideringContext,
         behandler: Behandler,
     ): Behandlerrolle {
-        val logContext = SecureLog.Context.fra(tilbakekreving)
-        val fagsystem = tilbakekreving.tilFrontendDto(SystemKlokke).fagsystem
         val dto = tilbakekreving.tilFrontendDto(SystemKlokke)
+        return validerTilgangTilbakekreving(
+            fagsystem = dto.fagsystem,
+            fagsystemId = dto.eksternFagsakId,
+            valideringContext = valideringContext,
+            brukerIdent = dto.bruker.personIdent,
+            behandler = behandler,
+            logContext = SecureLog.Context.fra(tilbakekreving),
+        )
+    }
+
+    override fun validerTilgangTilbakekreving(
+        fagsystem: FagsystemDTO,
+        fagsystemId: String,
+        valideringContext: ValideringContext,
+        brukerIdent: String?,
+        behandler: Behandler,
+        logContext: SecureLog.Context,
+    ): Behandlerrolle {
         return validate(
             fagsystem = fagsystem,
             minimumBehandlerrolle = valideringContext.minimumBehandlerrolle,
-            ident = dto.bruker.personIdent,
-            eksternFagsakId = dto.eksternFagsakId,
+            ident = brukerIdent,
+            eksternFagsakId = fagsystemId,
             handling = valideringContext.handling,
             saksbehandler = behandler.ident,
             auditLoggerEvent = valideringContext.auditLoggerEvent,
