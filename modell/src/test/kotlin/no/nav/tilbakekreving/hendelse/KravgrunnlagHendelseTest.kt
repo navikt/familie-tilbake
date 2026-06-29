@@ -2,11 +2,17 @@ package no.nav.tilbakekreving.hendelse
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import no.nav.tilbakekreving.UtenforScope
 import no.nav.tilbakekreving.aktør.Aktør
+import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.feil.ModellFeil
+import no.nav.tilbakekreving.feilutbetalteBeløp
 import no.nav.tilbakekreving.kravgrunnlag
+import no.nav.tilbakekreving.kravgrunnlagPeriode
+import no.nav.tilbakekreving.ytelsesbeløp
 import org.junit.jupiter.api.Test
+import java.math.BigInteger
 
 class KravgrunnlagHendelseTest {
     @Test
@@ -30,5 +36,47 @@ class KravgrunnlagHendelseTest {
         }
 
         exception.utenforScope shouldBe UtenforScope.KravgrunnlagIkkePerson
+    }
+
+    @Test
+    fun `to like kravgrunnlag`() {
+        val kravgrunnlag1 = kravgrunnlag(
+            vedtakId = BigInteger("123"),
+            referanse = "abc",
+            kontrollfelt = "def",
+            kravgrunnlagId = "ghi",
+        )
+        val kravgrunnlag2 = kravgrunnlag(
+            vedtakId = BigInteger("123"),
+            referanse = "abc",
+            kontrollfelt = "def",
+            kravgrunnlagId = "ghi",
+        )
+        kravgrunnlag1 shouldBe kravgrunnlag2
+    }
+
+    @Test
+    fun `ulikt beløp`() {
+        val ytelsesbeløp1 = ytelsesbeløp(tilbakekrevesBeløp = 2000.kroner)
+        val kravgrunnlag1 = kravgrunnlag(
+            vedtakId = BigInteger("123"),
+            referanse = "abc",
+            kontrollfelt = "def",
+            kravgrunnlagId = "ghi",
+            perioder = listOf(
+                kravgrunnlagPeriode(ytelsesbeløp = ytelsesbeløp1 + feilutbetalteBeløp(ytelsesbeløp1)),
+            ),
+        )
+        val ytelsesbeløp2 = ytelsesbeløp(tilbakekrevesBeløp = 3000.kroner)
+        val kravgrunnlag2 = kravgrunnlag(
+            vedtakId = BigInteger("123"),
+            referanse = "abc",
+            kontrollfelt = "def",
+            kravgrunnlagId = "ghi",
+            perioder = listOf(
+                kravgrunnlagPeriode(ytelsesbeløp = ytelsesbeløp2 + feilutbetalteBeløp(ytelsesbeløp2)),
+            ),
+        )
+        kravgrunnlag1 shouldNotBe kravgrunnlag2
     }
 }

@@ -396,6 +396,61 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
         }
     }
 
+    @Test
+    fun `endret kravgrunnlag uten praktisk betydning`() {
+        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        val kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6)
+        sendKravgrunnlagOgAvventLesing(
+            QUEUE_NAME,
+            KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+                vedtakId = vedtakId,
+                kravgrunnlagId = kravgrunnlagId,
+            ),
+        )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingOppdaterFakta(
+                behandlingId.toString(),
+                BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
+            )
+        }
+        lagreUttalelse(behandlingId, "Bruker har uttalt seg :)")
+
+        val kontrollfelt = "2025-12-24-11.12.13.234567"
+        sendKravgrunnlagOgAvventLesing(
+            QUEUE_NAME,
+            KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+                vedtakId = vedtakId,
+                kravgrunnlagId = kravgrunnlagId,
+                kontrollfelt = kontrollfelt,
+                kravStatusKode = "ENDR",
+            ),
+        )
+
+        utførSteg(
+            behandlingId,
+            BehandlingsstegGenerator.lagIkkeForeldetVurdering(1.januar(2021) til 31.januar(2021)),
+        )
+        utførSteg(
+            behandlingId,
+            BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving(1.januar(2021) til 31.januar(2021)),
+        )
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagForeslåVedtakVurdering())
+        utførSteg(
+            ident = BESLUTTER_IDENT,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagGodkjennVedtakVurdering(),
+        )
+        oppdragRestClient.shouldHaveIverksettelse(BigInteger(vedtakId)) {
+            it.kontrollfelt shouldBe kontrollfelt
+        }
+    }
+
     fun kravgrunnlagPeriode(
         periode: Datoperiode = 1.januar(2021) til 31.januar(2021),
         ytelsesbeløp: List<KravgrunnlagHendelse.Periode.Beløp> = ytelsesbeløp(),

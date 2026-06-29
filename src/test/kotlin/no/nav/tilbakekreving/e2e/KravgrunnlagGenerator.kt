@@ -42,6 +42,7 @@ object KravgrunnlagGenerator {
         ansvarligEnhet: String = nextPaddedId(4),
         fødselsnummer: String = "40026912345",
         kravStatusKode: String = "NY",
+        kontrollfelt: String = "2025-12-24-11.12.13.123456",
         perioder: List<Tilbakekrevingsperiode> = listOf(standardPeriode(1.januar(2021) til 1.januar(2021))),
     ): String {
         return forFagområde(
@@ -52,6 +53,7 @@ object KravgrunnlagGenerator {
             ansvarligEnhet = ansvarligEnhet,
             fødselsnummer = fødselsnummer,
             kravStatusKode = kravStatusKode,
+            kontrollfelt = kontrollfelt,
             perioder = perioder,
             fagområde = "TILLST",
         )
@@ -65,6 +67,7 @@ object KravgrunnlagGenerator {
         ansvarligEnhet: String = nextPaddedId(4),
         fødselsnummer: String = "40026912345",
         kravStatusKode: String = "NY",
+        kontrollfelt: String = "2025-12-24-11.12.13.123456",
         perioder: List<Tilbakekrevingsperiode> = listOf(standardPeriode(1.januar(2021) til 14.januar(2021))),
     ): String {
         return forFagområde(
@@ -75,6 +78,7 @@ object KravgrunnlagGenerator {
             ansvarligEnhet = ansvarligEnhet,
             fødselsnummer = fødselsnummer,
             kravStatusKode = kravStatusKode,
+            kontrollfelt = kontrollfelt,
             perioder = perioder,
             fagområde = "AAP",
         )
@@ -88,6 +92,7 @@ object KravgrunnlagGenerator {
         ansvarligEnhet: String,
         fødselsnummer: String,
         kravStatusKode: String,
+        kontrollfelt: String,
         perioder: List<Tilbakekrevingsperiode>,
         fagområde: String,
     ): String {
@@ -110,7 +115,7 @@ object KravgrunnlagGenerator {
                 <urn:enhetAnsvarlig>$ansvarligEnhet</urn:enhetAnsvarlig>
                 <urn:enhetBosted>8020</urn:enhetBosted>
                 <urn:enhetBehandl>8020</urn:enhetBehandl>
-                <urn:kontrollfelt>2025-12-24-11.12.13.123456</urn:kontrollfelt>
+                <urn:kontrollfelt>$kontrollfelt</urn:kontrollfelt>
                 <urn:saksbehId>Z999999</urn:saksbehId>
                 <urn:referanse>$referanse</urn:referanse>
                 $perioderXML

@@ -17,6 +17,7 @@ import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
+import java.util.Objects
 import java.util.UUID
 
 class KravgrunnlagHendelse(
@@ -84,6 +85,21 @@ class KravgrunnlagHendelse(
     fun hentKravgrunnlaginfoForIverksettelse(): KravgrunnlagInfo =
         KravgrunnlagInfo(kontrollfelt = kontrollfelt)
 
+    override fun equals(other: Any?): Boolean {
+        return this === other ||
+            other is KravgrunnlagHendelse &&
+            this.vedtakId == other.vedtakId &&
+            this.vedtakGjelder == other.vedtakGjelder &&
+            this.utbetalesTil == other.utbetalesTil &&
+            this.skalBeregneRenter == other.skalBeregneRenter &&
+            this.kravgrunnlagId == other.kravgrunnlagId &&
+            this.perioder.zip(other.perioder).all { (a, b) -> a == b }
+    }
+
+    override fun hashCode(): Int {
+        return Objects.hash(vedtakId, vedtakGjelder, utbetalesTil, skalBeregneRenter, ansvarligEnhet, kravgrunnlagId, perioder)
+    }
+
     class Periode(
         private val id: UUID,
         val periode: Datoperiode,
@@ -112,6 +128,18 @@ class KravgrunnlagHendelse(
                 månedligSkattebeløp = månedligSkattebeløp,
                 beløp = beløp.map { it.tilEntity(id) },
             )
+        }
+
+        override fun equals(other: Any?): Boolean {
+            return this === other ||
+                other is Periode &&
+                periode == other.periode &&
+                månedligSkattebeløp == other.månedligSkattebeløp &&
+                beløp.zip(other.beløp).all { (a, b) -> a == b }
+        }
+
+        override fun hashCode(): Int {
+            return Objects.hash(periode, månedligSkattebeløp, beløp)
         }
 
         data class Beløp(
@@ -146,6 +174,21 @@ class KravgrunnlagHendelse(
                     tilbakekrevesBeløp = tilbakekrevesBeløp,
                     skatteprosent = skatteprosent,
                 )
+            }
+
+            override fun equals(other: Any?): Boolean {
+                return this === other ||
+                    other is Beløp &&
+                    this.klassekode == other.klassekode &&
+                    this.klassetype == other.klassetype &&
+                    this.opprinneligUtbetalingsbeløp == other.opprinneligUtbetalingsbeløp &&
+                    this.nyttBeløp == other.nyttBeløp &&
+                    this.tilbakekrevesBeløp == other.tilbakekrevesBeløp &&
+                    this.skatteprosent == other.skatteprosent
+            }
+
+            override fun hashCode(): Int {
+                return Objects.hash(klassekode, klassetype, opprinneligUtbetalingsbeløp, nyttBeløp, tilbakekrevesBeløp, skatteprosent)
             }
         }
     }

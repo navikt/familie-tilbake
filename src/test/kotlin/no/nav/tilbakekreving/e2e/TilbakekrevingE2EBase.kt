@@ -186,7 +186,7 @@ open class TilbakekrevingE2EBase : E2EBase() {
         behandlingId: UUID,
         perioder: List<Datoperiode>,
     ) {
-        somSaksbehandler(FellesTestdata.SAKSBEHANDLER_IDENT) {
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId.toString(),
                 BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),

@@ -134,7 +134,7 @@ class Behandling internal constructor(
     override fun nullstillForhåndsvarselUnntakOgUttalelse() = forhåndsvarsel.nullstillUnntakOgUttalelse()
 
     internal fun oppdaterKravgrunnlag(oppdatertKravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>, klokke: Klokke) {
-        if (!faktasteg.erKlar(klokke)) {
+        if (!faktasteg.erKlar(klokke) || oppdatertKravgrunnlag.entry == kravgrunnlag.entry) {
             kravgrunnlag = oppdatertKravgrunnlag
         } else {
             throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagStatusIkkeStøttetEtterBehandlingenErPåbegynt, sporingsinformasjon())

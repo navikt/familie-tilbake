@@ -28,7 +28,7 @@ class KravgrunnlagBufferRepository(
 
     @Transactional
     fun konsumerKravgrunnlag(callback: (Entity) -> Unit) {
-        val kravgrunnlag = jdbcTemplate.query("SELECT * FROM kravgrunnlag_buffer WHERE lest=false AND utenfor_scope=false FOR UPDATE LIMIT 5;", Mapper)
+        val kravgrunnlag = jdbcTemplate.query("SELECT * FROM kravgrunnlag_buffer WHERE lest=false AND utenfor_scope=false ORDER BY mottatt FOR UPDATE LIMIT 5;", Mapper)
         kravgrunnlag.forEach {
             try {
                 callback(it)
