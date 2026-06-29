@@ -9,6 +9,7 @@ import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler.Compani
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving
 import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving.Companion.formatter
+import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.AvsnittDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatVurderingDto
@@ -20,7 +21,6 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
-import no.nav.tilbakekreving.fagsystem.Ytelse
 
 object BrevFormatterer {
     val dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)
@@ -95,16 +95,18 @@ object BrevFormatterer {
         }
 
     fun lagForhåndsvarselOverskrift(ytelse: Ytelse): String {
-        return "Nav vurderer om du må betale tilbake ${ytelse.brevmeta().ubestemtEntall} utbetalt"
+        return "Nav vurderer om du må betale tilbake ${ytelse.brevmeta().ubestemtEntall}"
     }
 
-    fun forhåndsvarselInneldning(
+    fun forhåndsvarselInnledning(
         beløp: String,
         periode: Datoperiode,
         frist: LocalDate,
         ytelse: Ytelse,
-    ): String {
-        return "Du har fått $beløp kroner for mye utbetalt i ${ytelse.brevmeta().ubestemtEntall} fra og med ${periode.fom} til og med ${periode.tom}.\n" +
-                "Dette er et varsel om at vi vurderer om du må betale tilbake beløpet. Før vi avgjør dette, kan du uttale i saken innen $frist."
+    ): List<String> {
+        return listOf(
+            "Du har fått $beløp kroner for mye utbetalt i ${ytelse.brevmeta().ubestemtEntall} fra og med ${periode.fom} til og med ${periode.tom}.",
+            "Dette er et varsel om at vi vurderer om du må betale tilbake beløpet. Før vi avgjør dette, kan du uttale i saken innen $frist.",
+        )
     }
 }

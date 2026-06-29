@@ -1,29 +1,30 @@
 package no.nav.tilbakekreving.breeeev.standardtekster.forhåndsvarsel
 
-import no.nav.tilbakekreving.beregning.modell.Beregningsresultat
 import no.nav.tilbakekreving.fagsystem.Ytelse
 
-enum class Bunntekst(
+enum class ForhåndsvarselTekster(
     val tittel: String,
     private val avsnittBuilder: (Ytelse) -> Array<String>,
 ) {
     ÅRSAK_TIL_FEILUTBETALING(
-        tittel =  "Årsak til feilutbetaling" ,
-        avsnittBuilder = { arrayOf("") }
+        tittel = "Årsak til feilutbetaling",
+        avsnittBuilder = { arrayOf("") },
     ),
     DETTE_LEGGES_VEKT_PÅ(
-        tittel =  "Dette legger vi vekt på i vurderingen vår",
+        tittel = "Dette legger vi vekt på i vurderingen vår",
         avsnittBuilder = {
-            arrayOf("For å avgjøre om vi kan kreve tilbake, tar vi først stilling til\n" +
-                    "   - om du forstod eller burde forstått at beløpet du fikk utbetalt var feil\n" +
-                    "   - om du har gitt riktig informasjon til Nav\n" +
-                    "   - om du har gitt all informasjon til Nav i rett tid",
+            arrayOf(
+                "For å avgjøre om vi kan kreve tilbake, tar vi først stilling til\n" +
+                    "   •  om du forstod eller burde forstått at beløpet du fikk utbetalt var feil\n" +
+                    "   •  om du har gitt riktig informasjon til Nav\n" +
+                    "   •  om du har gitt all informasjon til Nav i rett tid",
                 "Hvis resultatet blir at vi kan kreve tilbake, vurderer vi om du skal betale tilbake hele eller deler av beløpet. Da legger vi blant annet vekt på\n" +
-                        "   - hvor uaktsom du har vært\n" +
-                        "   - hvor lang tid det har gått siden #inputs.ytelsesnavn ble feilutbetalt\n" +
-                        "   - hvor stort det feilutbetalte beløpet er\n" +
-                        "   - om Nav har skyld i feilutbetalingen",
-                "Dette går fram av folketrygdloven §§ 22-15 og 22-17a."
+                    "   •  hvor uaktsom du har vært\n" +
+                    "   •  hvor lang tid det har gått siden #inputs.ytelsesnavn ble feilutbetalt\n" +
+                    "   •  hvor stort det feilutbetalte beløpet er\n" +
+                    "   •  om Nav har skyld i feilutbetalingen",
+                "Hvis du må betale tilbake, og du har gitt oss feil eller mangelfull informasjon, kan vi kreve at du betaler et rentetillegg på ti prosent av beløpet",
+                "Dette går fram av folketrygdloven §§ 22-15 og 22-17a.",
             )
         },
     ),
@@ -34,10 +35,10 @@ enum class Bunntekst(
         },
     ),
     HVORDAN_UTTALE_SEG(
-        tittel =  "Slik Uttaler du deg",
+        tittel = "Slik uttaler du deg",
         avsnittBuilder = {
             arrayOf(
-                "Du kan sende uttalelsen din ved å logge deg inn på nav.no/skriv-til-oss og velge «Send beskjed til Nav». Du kan også sende uttalelsen din til oss i posten. Adressen finner du på nav.no/ettersendelser"
+                "Du kan sende uttalelsen din ved å logge deg inn på nav.no/skriv-til-oss og velge «Send beskjed til Nav». Du kan også sende uttalelsen din til oss i posten. Adressen finner du på nav.no/ettersendelser",
             )
         },
     ),
@@ -57,7 +58,7 @@ enum class Bunntekst(
         tittel = "Har du spørsmål?",
         avsnittBuilder = { ytelse ->
             arrayOf(
-                "Du finner mer informasjon på ${ytelse.brevmeta().url}. På nav.no/kontakt kan du chatte eller skrive til oss. Hvis du ikke finner svar på nav.no kan du ringe oss på telefon 55 55 33 33, hverdager 09.00-15.00.",
+                "Du finner mer informasjon på ${ytelse.brevmeta().url}. På nav.no/kontakt kan du chatte eller skrive til oss. Hvis du ikke finner svar på nav.no kan du ringe oss på telefon 55 55 33 33, hverdager 09.00–15.00.",
             )
         },
     ),
@@ -68,13 +69,6 @@ enum class Bunntekst(
     }
 
     companion object {
-        fun finnTekster(
-        ): Set<Bunntekst> {
-            return buildSet {
-                addAll(STANDARD_BUNNTEKSTER)
-            }
-        }
-
         val STANDARD_BUNNTEKSTER = arrayOf(
             ÅRSAK_TIL_FEILUTBETALING,
             DETTE_LEGGES_VEKT_PÅ,

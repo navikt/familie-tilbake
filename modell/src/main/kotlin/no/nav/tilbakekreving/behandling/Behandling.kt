@@ -242,6 +242,7 @@ class Behandling internal constructor(
         eksternFagsak: EksternFagsak,
         brukerinfo: Brukerinfo,
         varselbrevInfo: VarselbrevInfo,
+        tilbakekrevingId: String,
     ) {
         sideeffektContext.behovObservatør.håndter(
             VarselbrevJournalføringBehov(
@@ -250,6 +251,7 @@ class Behandling internal constructor(
                 info = varselbrevInfo,
                 ytelse = eksternFagsak.ytelse,
                 gjelderDødsfall = brukerinfo.dødsdato != null,
+                tilbakekrevingId = tilbakekrevingId,
             ),
         )
     }

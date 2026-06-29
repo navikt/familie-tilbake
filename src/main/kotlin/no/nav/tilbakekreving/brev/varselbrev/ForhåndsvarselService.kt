@@ -16,6 +16,7 @@ import no.nav.familie.tilbake.log.callId
 import no.nav.tilbakekreving.FeatureToggles
 import no.nav.tilbakekreving.LesContext
 import no.nav.tilbakekreving.SideeffektContext
+import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.api.v1.dto.BestillBrevDto
@@ -24,17 +25,23 @@ import no.nav.tilbakekreving.api.v1.dto.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.behandling.UttalelseInfo
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
+import no.nav.tilbakekreving.breeeev.standardtekster.forhåndsvarsel.ForhåndsvarselTekster
 import no.nav.tilbakekreving.brev.VarselbrevInfo
 import no.nav.tilbakekreving.brev.vedtaksbrev.BrevFormatterer
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostResponse
+import no.nav.tilbakekreving.integrasjoner.pdfGen.PdfGenClient
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.BrevmottakerDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.HovedavsnittVarselbrevDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.RentekstElementDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.SectionDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SignaturDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UnderavsnittElementDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseVurderingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VarselbrevDataDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VarselbrevTekstDto
 import no.nav.tilbakekreving.pdf.Dokumentvariant
 import no.nav.tilbakekreving.pdf.PdfGenerator
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
@@ -46,13 +53,9 @@ import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.DokprodTilHtml
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.DokumentKlasse
 import no.nav.tilbakekreving.pdf.dokumentbestilling.varsel.TekstformatererVarselbrev
 import no.nav.tilbakekreving.pdf.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
-import no.tilbakekreving.integrasjoner.pdfGen.PdfGenClient
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.tilbakekreving.breeeev.standardtekster.forhåndsvarsel.Bunntekst
-import no.nav.tilbakekreving.kontrakter.frontend.models.UnderAvsnittDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.VarselbrevTeksterDto
 
 @Service
 class ForhåndsvarselService(
@@ -223,25 +226,29 @@ class ForhåndsvarselService(
             dokument = if (features[Toggle.ForhåndsvarselTypst]) {
                 pdfGenClient.hentPdfForForhåndsvarsel(
                     VarselbrevDataDto(
+                        hovedavsnitt = HovedavsnittVarselbrevDto(
+                            tittel = BrevFormatterer.lagForhåndsvarselOverskrift(varselbrevBehov.ytelse),
+                            innhold = BrevFormatterer.forhåndsvarselInnledning(
+                                beløp = varselbrevBehov.info.forhåndsvarselinfo.beløp.toString(),
+                                periode = varselbrevBehov.info.forhåndsvarselinfo.feilutbetaltePerioder.first(),
+                                frist = varselbrevBehov.info.opprinneligUttalelsesfrist,
+                                ytelse = varselbrevBehov.ytelse,
+                            ),
+                        ),
+                        underavsnitt = ForhåndsvarselTekster.STANDARD_BUNNTEKSTER.map {
+                            UnderavsnittElementDto(it.tittel, it.avsnitt(varselbrevBehov.ytelse).map { underavsnitt -> RentekstElementDto(underavsnitt) })
+                        },
                         brevGjelder = BrevmottakerDto(
                             navn = varselbrevBehov.brukerinfo.navn,
                             personIdent = varselbrevBehov.brukerinfo.ident,
                         ),
-                        ytelse = varselbrevBehov.ytelse.brevmeta(),
-                        fullstendigBeløp = varselbrevBehov.info.forhåndsvarselinfo.beløp.toString(),
-                        fullstendigPeriode = PeriodeDto(
-                            fom = varselbrevBehov.info.forhåndsvarselinfo.feilutbetaltePerioder.first().fom,
-                            tom = varselbrevBehov.info.forhåndsvarselinfo.feilutbetaltePerioder.last().tom,
-                        ),
-                        uttalelsesfrist = varselbrevBehov.info.opprinneligUttalelsesfrist,
-                        sendtDato = varselbrevBehov.info.varsletDato,
-                        årsakTilFeilutbetaling = varselbrevBehov.info.tekstFraSaksbehandler,
-                        foreløpigVurdering = null,
                         signatur = SignaturDto(
-                            enhetNavn = varselbrevBehov.info.forhåndsvarselinfo.behandlendeEnhet!!.navn,
+                            enhetNavn = requireNotNull(varselbrevBehov.info.forhåndsvarselinfo.behandlendeEnhet) { "Enhetsnavn kreves for journalføring" }.navn,
                             ansvarligSaksbehandler = eksterneDataForBrevService.hentSaksbehandlernavn(varselbrevBehov.info.forhåndsvarselinfo.ansvarligSaksbehandler.ident),
                             besluttendeSaksbehandler = null,
                         ),
+                        sendtDato = SystemKlokke.dagensDato(),
+                        saksnummer = varselbrevBehov.tilbakekrevingId,
                     ),
                 )
             } else {
@@ -382,20 +389,21 @@ class ForhåndsvarselService(
         tilbakekreving: Tilbakekreving,
         lesContext: LesContext,
         behandlingId: UUID,
-    ) : VarselbrevTeksterDto {
+    ): VarselbrevTekstDto {
         val varselbrevInfo = tilbakekreving.hentVarselbrevInfo(behandlingId, lesContext)
         val ytelse = tilbakekreving.eksternFagsak.hentYtelse()
-        return VarselbrevTeksterDto(
+        val innledning = BrevFormatterer.forhåndsvarselInnledning(
+            beløp = varselbrevInfo.forhåndsvarselinfo.beløp.toString(),
+            periode = varselbrevInfo.forhåndsvarselinfo.feilutbetaltePerioder.first(),
+            frist = varselbrevInfo.opprinneligUttalelsesfrist,
+            ytelse = ytelse,
+        )
+        return VarselbrevTekstDto(
             overskrift = BrevFormatterer.lagForhåndsvarselOverskrift(ytelse),
-            innledning = BrevFormatterer.forhåndsvarselInneldning(
-                beløp = varselbrevInfo.forhåndsvarselinfo.beløp.toString(),
-                periode = varselbrevInfo.forhåndsvarselinfo.feilutbetaltePerioder.first(),
-                frist = varselbrevInfo.opprinneligUttalelsesfrist,
-                ytelse = ytelse
-            ),
-            underAvsnitt = Bunntekst.STANDARD_BUNNTEKSTER.map {
-                UnderAvsnittDto(it.tittel, it.avsnitt(ytelse).toList())
-            }
+            avsnitter = listOf(SectionDto("", innledning)) +
+                ForhåndsvarselTekster.STANDARD_BUNNTEKSTER.map {
+                    SectionDto(it.tittel, it.avsnitt(ytelse).toList())
+                },
         )
     }
 }

@@ -27,6 +27,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.UnntakDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UpdateUttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VarselbrevTekstDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VarslingsunntakDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevDataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDataDto
@@ -268,5 +269,19 @@ class BehandlingApiController(
         ) ?: return ResponseEntity.notFound().build()
 
         return ResponseEntity.ok(tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingDto(tilbakekrevingService.lesecontext()))
+    }
+
+    override fun behandlingHentVarselbrevTekster(behandlingId: UUID): ResponseEntity<VarselbrevTekstDto> {
+        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(
+            filter = TilbakekrevingFilter.behandling(behandlingId),
+            valideringContext = ValideringContext.HentBehandlingslogg,
+        ) ?: return ResponseEntity.notFound().build()
+        return ResponseEntity.ok(
+            forhåndsvarselService.hentForhåndsvarselTekster(
+                tilbakekreving,
+                tilbakekrevingService.lesecontext(),
+                behandlingId,
+            ),
+        )
     }
 }

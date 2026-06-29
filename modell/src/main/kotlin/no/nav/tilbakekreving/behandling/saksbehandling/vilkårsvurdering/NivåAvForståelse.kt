@@ -235,7 +235,11 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 override fun tilFrontendDto(): BelopIBeholdDto = DelerDto(
                     beløp = beløp.toInt(),
                     begrunnelse = "TODO",
-                    reduksjon = SkalIkkeReduseresDto(emptyList(), "TODO"),
+                    reduksjon = SkalIkkeReduseresDto(
+                        relevans = emptyList(),
+                        annetBegrunnelse = null,
+                        begrunnelse = "TODO",
+                    ),
                 )
 
                 override fun tilEntity(periodeRef: UUID, begrunnelse: String): GodTroEntity {
