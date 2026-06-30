@@ -83,6 +83,7 @@ import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.tekst.slåSammen
 import no.nav.tilbakekreving.tilstand.Tilstand
@@ -139,6 +140,12 @@ class Behandling internal constructor(
         } else {
             throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagStatusIkkeStøttetEtterBehandlingenErPåbegynt, sporingsinformasjon())
         }
+    }
+
+    internal fun oppdaterKravgrunnlagMedUliktBeløp(oppdatertKravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>): List<KravgrunnlagSammenligning.Forskjell> {
+        val resultat = kravgrunnlag.entry.sammenlign(oppdatertKravgrunnlag.entry, sporingsinformasjon()).resultat()
+        kravgrunnlag = oppdatertKravgrunnlag
+        return resultat
     }
 
     override fun faktastegFrontendDto(

@@ -46,6 +46,11 @@ class KravgrunnlagBufferRepository(
         }
     }
 
+    @Transactional
+    fun oppdaterUtenforScope(fagsystemId: String) {
+        jdbcTemplate.update("UPDATE kravgrunnlag_buffer SET utenfor_scope=false WHERE fagsystem_id=?;", fagsystemId)
+    }
+
     fun validerKravgrunnlagInnenforScope(fagsystemId: String, behandlingId: String?) {
         jdbcTemplate.query("SELECT COUNT(1) AS antall FROM kravgrunnlag_buffer WHERE fagsystem_id=? AND utenfor_scope=true;", fagsystemId) { resultSet, _ ->
             if (resultSet.getInt("antall") > 0) {

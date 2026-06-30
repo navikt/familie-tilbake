@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.log
 
 import no.nav.familie.prosessering.domene.Task
 import no.nav.tilbakekreving.Tilbakekreving
+import no.nav.tilbakekreving.feil.Sporing
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -52,6 +53,8 @@ object SecureLog {
             fun tom() = utenBehandling(null)
 
             fun utenBehandling(fagsystemId: String?) = medBehandling(fagsystemId = fagsystemId, behandlingId = null)
+
+            fun fra(sporing: Sporing) = medBehandling(sporing.fagsakId, sporing.behandlingId)
 
             fun medBehandling(
                 fagsystemId: String?,

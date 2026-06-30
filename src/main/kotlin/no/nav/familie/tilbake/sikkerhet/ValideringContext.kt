@@ -135,6 +135,11 @@ enum class ValideringContext(
         auditLoggerEvent = AuditLoggerEvent.ACCESS,
         handling = "Henter kravgrunnlag som er markert som utenfor scope",
     ),
+    ForvaltningOppdaterKravgrunnlag(
+        minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+        auditLoggerEvent = AuditLoggerEvent.ACCESS,
+        handling = "Oppdaterer kravgrunnlag på behandling som er påbegynt",
+    ),
     HentVedtaksbrevData(
         minimumBehandlerrolle = Behandlerrolle.VEILEDER,
         auditLoggerEvent = AuditLoggerEvent.ACCESS,

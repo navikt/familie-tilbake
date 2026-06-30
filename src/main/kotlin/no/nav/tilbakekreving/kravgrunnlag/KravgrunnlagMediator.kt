@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.kravgrunnlag
 
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
+import no.nav.familie.tilbake.sikkerhet.ValideringContext
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
@@ -30,5 +31,21 @@ class KravgrunnlagMediator(
                 }
             }
         }
+    }
+
+    fun konsumerKravgrunnlagUtenforScope(fagsystemId: String, valideringContext: ValideringContext): List<List<KravgrunnlagSammenligning.Forskjell>> {
+        val resultater = mutableListOf<List<KravgrunnlagSammenligning.Forskjell>>()
+        kravgrunnlagBufferRepository.oppdaterUtenforScope(fagsystemId)
+        kravgrunnlagBufferRepository.konsumerKravgrunnlag { entity ->
+            val kravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(entity.kravgrunnlag)
+            val kravgrunnlagHendelse = KravgrunnlagMapper.tilKravgrunnlagHendelse(kravgrunnlag, applicationProperties.kravgrunnlagMapping)
+            require(kravgrunnlagHendelse.skalOppretteNySak()) { "Kan ikke overskrive kravgrunnlag for saker uten behandling" }
+
+            val fagsystem = KravgrunnlagMapper.ytelseFor(kravgrunnlag).tilFagsystemDTO()
+            tilbakekrevingService.endreTilbakekreving(TilbakekrevingFilter.fagsak(kravgrunnlag.fagsystemId, fagsystem), valideringContext) { tilbakekreving, context ->
+                resultater.add(tilbakekreving.oppdaterKravgrunnlagMedUliktBeløp(kravgrunnlagHendelse, context))
+            }
+        }
+        return resultater
     }
 }

@@ -25,6 +25,8 @@ import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagMediator
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
 import org.springframework.http.MediaType
@@ -59,6 +61,7 @@ class ForvaltningController(
     private val applicationProperties: ApplicationProperties,
     private val tilbakekrevingRepository: TilbakekrevingRepository,
     private val kravgrunnlagBufferRepository: KravgrunnlagBufferRepository,
+    private val kravgrunnlagMediator: KravgrunnlagMediator,
 ) {
     private val logger = TracedLogger.getLogger<ForvaltningController>()
 
@@ -383,6 +386,15 @@ class ForvaltningController(
             behandler = ContextService.hentBehandler(SecureLog.Context.utenBehandling(fagsystemId)),
         )
         return ResponseEntity.ofNullable(kravgrunnlagBufferRepository.hentKravgrunnlagUtenforScope(fagsystemId))
+    }
+
+    @Operation(summary = "Oppdaterer beløp for eksisterende fagsak med pågående behandling")
+    @PostMapping("/kravgrunnlag/{fagsystem}/{fagsystemId}/oppdater-beløp")
+    fun oppdaterKravgrunnlagBeløp(
+        @PathVariable fagsystem: FagsystemDTO,
+        @PathVariable fagsystemId: String,
+    ): ResponseEntity<List<List<KravgrunnlagSammenligning.Forskjell>>> {
+        return ResponseEntity.ok(kravgrunnlagMediator.konsumerKravgrunnlagUtenforScope(fagsystemId, ValideringContext.ForvaltningOppdaterKravgrunnlag))
     }
 }
 

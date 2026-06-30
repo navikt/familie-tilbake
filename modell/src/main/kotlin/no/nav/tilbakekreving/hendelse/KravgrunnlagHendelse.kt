@@ -14,6 +14,7 @@ import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
@@ -88,17 +89,24 @@ class KravgrunnlagHendelse(
     override fun equals(other: Any?): Boolean {
         return this === other ||
             other is KravgrunnlagHendelse &&
-            this.vedtakId == other.vedtakId &&
-            this.vedtakGjelder == other.vedtakGjelder &&
-            this.utbetalesTil == other.utbetalesTil &&
+            this.harNokOverlapp(other) &&
             this.skalBeregneRenter == other.skalBeregneRenter &&
-            this.kravgrunnlagId == other.kravgrunnlagId &&
             this.perioder.zip(other.perioder).all { (a, b) -> a == b }
     }
+
+    fun sammenlign(
+        nyttKravgrunnlag: KravgrunnlagHendelse,
+        sporing: Sporing,
+    ): KravgrunnlagSammenligning = KravgrunnlagSammenligning(this, nyttKravgrunnlag, sporing)
 
     override fun hashCode(): Int {
         return Objects.hash(vedtakId, vedtakGjelder, utbetalesTil, skalBeregneRenter, kravgrunnlagId, perioder)
     }
+
+    fun harNokOverlapp(other: KravgrunnlagHendelse): Boolean = this.vedtakId == other.vedtakId ||
+        this.vedtakGjelder == other.vedtakGjelder ||
+        this.utbetalesTil == other.utbetalesTil ||
+        this.kravgrunnlagId == other.kravgrunnlagId
 
     class Periode(
         private val id: UUID,

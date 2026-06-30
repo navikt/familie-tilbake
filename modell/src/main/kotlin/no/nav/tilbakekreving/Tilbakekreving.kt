@@ -51,6 +51,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.tilstand.AvventerBrukerinfo
 import no.nav.tilbakekreving.tilstand.SendVarselbrev
@@ -97,6 +98,18 @@ class Tilbakekreving internal constructor(
             behandlingsloggstype = Behandlingsloggstype.KRAVGRUNNLAG_MOTTATT,
             behandlingId = null,
         )
+    }
+
+    fun oppdaterKravgrunnlagMedUliktBeløp(kravgrunnlagHendelse: KravgrunnlagHendelse, sideeffektContext: SideeffektContext): List<KravgrunnlagSammenligning.Forskjell> {
+        val resultat = behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
+            val kravgrunnlagHistorikkEntry = kravgrunnlagHistorikk.lagre(kravgrunnlagHendelse)
+            oppdaterKravgrunnlagMedUliktBeløp(kravgrunnlagHistorikkEntry)
+        }
+        sideeffektContext.logg(
+            behandlingsloggstype = Behandlingsloggstype.KRAVGRUNNLAG_MOTTATT,
+            behandlingId = null,
+        )
+        return resultat
     }
 
     fun håndter(fagsysteminfo: FagsysteminfoHendelse, sideeffektContext: SideeffektContext) {
