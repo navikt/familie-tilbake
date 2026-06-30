@@ -97,7 +97,7 @@ class KravgrunnlagHendelse(
     }
 
     override fun hashCode(): Int {
-        return Objects.hash(vedtakId, vedtakGjelder, utbetalesTil, skalBeregneRenter, ansvarligEnhet, kravgrunnlagId, perioder)
+        return Objects.hash(vedtakId, vedtakGjelder, utbetalesTil, skalBeregneRenter, kravgrunnlagId, perioder)
     }
 
     class Periode(

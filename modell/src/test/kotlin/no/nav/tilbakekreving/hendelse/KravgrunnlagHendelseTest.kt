@@ -42,15 +42,13 @@ class KravgrunnlagHendelseTest {
     fun `to like kravgrunnlag`() {
         val kravgrunnlag1 = kravgrunnlag(
             vedtakId = BigInteger("123"),
-            referanse = "abc",
-            kontrollfelt = "def",
-            kravgrunnlagId = "ghi",
+            kontrollfelt = "abc",
+            kravgrunnlagId = "def",
         )
         val kravgrunnlag2 = kravgrunnlag(
             vedtakId = BigInteger("123"),
-            referanse = "abc",
-            kontrollfelt = "def",
-            kravgrunnlagId = "ghi",
+            kontrollfelt = "abc",
+            kravgrunnlagId = "def",
         )
         kravgrunnlag1 shouldBe kravgrunnlag2
     }

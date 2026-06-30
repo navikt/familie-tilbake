@@ -115,18 +115,21 @@ class TilbakekrevingService(
     fun lesTilbakekreving(
         filter: TilbakekrevingFilter,
         valideringContext: ValideringContext,
+        validerScope: Boolean = true,
     ): Tilbakekreving? {
-        val tilbakekreving = hentTilbakekreving(filter) ?: return null
+        val tilbakekreving = hentTilbakekreving(filter, validerScope) ?: return null
         val behandler = ContextService.hentBehandler(filter.logContext())
         tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving, valideringContext, behandler)
         return tilbakekreving
     }
 
-    fun hentTilbakekreving(filter: TilbakekrevingFilter): Tilbakekreving? {
+    fun hentTilbakekreving(filter: TilbakekrevingFilter, validerScope: Boolean = true): Tilbakekreving? {
         val tilbakekreving = tilbakekrevingRepository.hentTilbakekreving(filter)?.fraEntity() ?: return null
 
         val logContext = SecureLog.Context.fra(tilbakekreving)
-        kravgrunnlagBufferRepository.validerKravgrunnlagInnenforScope(tilbakekreving.eksternFagsak.eksternId, logContext.behandlingId)
+        if (validerScope) {
+            kravgrunnlagBufferRepository.validerKravgrunnlagInnenforScope(tilbakekreving.eksternFagsak.eksternId, logContext.behandlingId)
+        }
         return tilbakekreving
     }
 

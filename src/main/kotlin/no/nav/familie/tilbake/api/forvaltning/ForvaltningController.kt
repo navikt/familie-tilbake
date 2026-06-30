@@ -365,7 +365,7 @@ class ForvaltningController(
     fun dumpFagsak(
         @PathVariable behandlingId: UUID,
     ): ResponseEntity<TilbakekrevingEntity> {
-        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.ForvaltningDumpFagsak)
+        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.ForvaltningDumpFagsak, validerScope = false)
         return ResponseEntity.ofNullable(tilbakekreving?.tilEntity())
     }
 
@@ -374,7 +374,7 @@ class ForvaltningController(
     fun hentAlleKravgrunnlagUtenforScope(
         @PathVariable fagsystem: FagsystemDTO,
         @PathVariable fagsystemId: String,
-    ): ResponseEntity<String> {
+    ): ResponseEntity<List<KravgrunnlagBufferRepository.Entity>> {
         tilgangskontrollService.validerTilgangTilbakekreving(
             fagsystem = fagsystem,
             fagsystemId = fagsystemId,
@@ -382,9 +382,7 @@ class ForvaltningController(
             brukerIdent = null,
             behandler = ContextService.hentBehandler(SecureLog.Context.utenBehandling(fagsystemId)),
         )
-        val kravgrunnlag = kravgrunnlagBufferRepository.hentKravgrunnlagUtenforScope(fagsystemId)
-            .joinToString("\n====\n") { it.kravgrunnlag }
-        return ResponseEntity.ofNullable(kravgrunnlag)
+        return ResponseEntity.ofNullable(kravgrunnlagBufferRepository.hentKravgrunnlagUtenforScope(fagsystemId))
     }
 }
 
