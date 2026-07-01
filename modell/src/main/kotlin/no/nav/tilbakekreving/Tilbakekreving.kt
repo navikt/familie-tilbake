@@ -279,6 +279,7 @@ class Tilbakekreving internal constructor(
             eksternFagsak = eksternFagsak,
             brukerinfo = bruker!!.hentBrukerinfo(),
             varselbrevInfo = brevHistorikk.sisteVarselbrev()!!.tilVarselbrevInfo(bruker!!, behandling.hentForhåndsvarselinfo(), eksternFagsak),
+            tilbakekrevingId = id,
         )
     }
 

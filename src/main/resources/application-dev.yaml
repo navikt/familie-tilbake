@@ -24,6 +24,7 @@ tilbakekreving:
       Arkivering: false
       FjernUttalelsesfrist: true
       OppdragRestClient: true
+      ForhåndsvarselTypst: true
     fagsystem:
       TP:
         ForhaandsvarselBehandlingsstatuser: true

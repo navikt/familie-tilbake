@@ -11,6 +11,7 @@ data class VarselbrevJournalføringBehov(
     val ytelse: Ytelse,
     val info: VarselbrevInfo,
     val gjelderDødsfall: Boolean,
+    val tilbakekrevingId: String,
 ) : Behov
 
 data class VarselbrevDistribusjonBehov(

@@ -92,6 +92,63 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
     }
 
     @Test
+    fun `henter ny varselbrev tekster`() {
+        val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
+        val tekster = somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingHentVarselbrevTekster(tilbakekreving.nåværendeBehandlingId())
+        }
+
+        tekster.body.shouldNotBeNull {
+            avsnitter.shouldNotBeEmpty()
+            overskrift shouldContain "Nav vurderer om du må betale tilbake"
+            avsnitter.forOne {
+                it.tittel shouldBe ""
+                it.body.size shouldBe 2
+                it.body[0] shouldContain "Du har fått 2000 kroner for mye utbetalt i tilleggsstønad"
+                it.body[1] shouldContain "Dette er et varsel om at vi vurderer om du må betale tilbake beløpet."
+            }
+            avsnitter.forOne {
+                it.tittel shouldBe "Årsak til feilutbetaling"
+                it.body.size shouldBe 1
+                it.body[0] shouldBe ""
+            }
+            avsnitter.forOne {
+                it.tittel shouldBe "Dette legger vi vekt på i vurderingen vår"
+                it.body.size shouldBe 4
+                it.body[0] shouldContain "For å avgjøre om vi kan kreve tilbake, tar vi først stilling til"
+                it.body[1] shouldContain "Hvis resultatet blir at vi kan kreve tilbake, vurderer vi om du skal betale tilbake hele eller deler av beløpet."
+                it.body[2] shouldContain "Hvis du må betale tilbake, og du har gitt oss feil eller mangelfull informasjon,"
+                it.body[3] shouldContain "Dette går fram av folketrygdloven §§ 22-15 og 22-17a."
+            }
+            avsnitter.forOne {
+                it.tittel shouldBe "Vår foreløpige vurdering av saken din"
+                it.body.size shouldBe 1
+                it.body[0] shouldContain "Vi understreker at denne vurderingen ikke er endelig."
+            }
+            avsnitter.forOne {
+                it.tittel shouldBe "Slik uttaler du deg"
+                it.body.size shouldBe 1
+                it.body[0] shouldContain "Du kan sende uttalelsen din ved å logge deg inn på nav.no/skriv-til-oss og velge «Send beskjed til Nav»."
+            }
+            avsnitter.forOne {
+                it.tittel shouldBe "Du har rett til innsyn"
+                it.body.size shouldBe 1
+                it.body[0] shouldContain "Du har rett til å se dokumentene i saken din. Dette følger av forvaltningsloven § 18."
+            }
+            avsnitter.forOne {
+                it.tittel shouldBe "Du har rettigheter knyttet til personopplysningene dine"
+                it.body.size shouldBe 1
+                it.body[0] shouldContain "Du finner informasjon om hvordan Nav behandler personopplysningene dine,"
+            }
+            avsnitter.forOne {
+                it.tittel shouldBe "Har du spørsmål?"
+                it.body.size shouldBe 1
+                it.body[0] shouldContain "Du finner mer informasjon på nav.no/tilleggsstonader."
+            }
+        }
+    }
+
+    @Test
     fun `forhåndsvarsel detaljene er null når varselbrev ikke er sendt`() {
         val tilbakekreving = opprettTilbakekrevingOgHentFagsystemId()
         val antall = jdbcTemplate.queryForObject(

@@ -9,6 +9,7 @@ import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler.Compani
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving
 import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving.Companion.formatter
+import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.AvsnittDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatVurderingDto
@@ -92,4 +93,20 @@ object BrevFormatterer {
             BeregningsresultatVurderingDto.BurdeForstått -> "Burde forstått"
             BeregningsresultatVurderingDto.Forstod -> "Forstod"
         }
+
+    fun lagForhåndsvarselOverskrift(ytelse: Ytelse): String {
+        return "Nav vurderer om du må betale tilbake ${ytelse.brevmeta().ubestemtEntall}"
+    }
+
+    fun forhåndsvarselInnledning(
+        beløp: String,
+        periode: Datoperiode,
+        frist: LocalDate,
+        ytelse: Ytelse,
+    ): List<String> {
+        return listOf(
+            "Du har fått $beløp kroner for mye utbetalt i ${ytelse.brevmeta().ubestemtEntall} fra og med ${periode.fom} til og med ${periode.tom}.",
+            "Dette er et varsel om at vi vurderer om du må betale tilbake beløpet. Før vi avgjør dette, kan du uttale i saken innen $frist.",
+        )
+    }
 }
