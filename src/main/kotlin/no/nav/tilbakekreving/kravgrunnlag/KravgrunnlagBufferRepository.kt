@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.sql.ResultSet
 
@@ -46,7 +47,7 @@ class KravgrunnlagBufferRepository(
         }
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun oppdaterUtenforScope(fagsystemId: String) {
         jdbcTemplate.update("UPDATE kravgrunnlag_buffer SET utenfor_scope=false WHERE fagsystem_id=?;", fagsystemId)
     }

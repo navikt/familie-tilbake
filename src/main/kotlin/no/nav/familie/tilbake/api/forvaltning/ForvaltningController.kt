@@ -389,7 +389,7 @@ class ForvaltningController(
     }
 
     @Operation(summary = "Oppdaterer beløp for eksisterende fagsak med pågående behandling")
-    @PostMapping("/kravgrunnlag/{fagsystem}/{fagsystemId}/oppdater-beløp")
+    @PostMapping("/kravgrunnlag/{fagsystem}/{fagsystemId}/oppdater-belop")
     fun oppdaterKravgrunnlagBeløp(
         @PathVariable fagsystem: FagsystemDTO,
         @PathVariable fagsystemId: String,
