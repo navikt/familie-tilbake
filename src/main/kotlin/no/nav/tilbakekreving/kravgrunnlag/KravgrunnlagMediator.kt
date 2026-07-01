@@ -39,7 +39,7 @@ class KravgrunnlagMediator(
         kravgrunnlagBufferRepository.konsumerKravgrunnlag { entity ->
             val kravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(entity.kravgrunnlag)
             val kravgrunnlagHendelse = KravgrunnlagMapper.tilKravgrunnlagHendelse(kravgrunnlag, applicationProperties.kravgrunnlagMapping)
-            require(kravgrunnlagHendelse.skalOppretteNySak()) { "Kan ikke overskrive kravgrunnlag for saker uten behandling" }
+            require(!kravgrunnlagHendelse.skalOppretteNySak()) { "Kan ikke overskrive kravgrunnlag for saker uten behandling" }
 
             val fagsystem = KravgrunnlagMapper.ytelseFor(kravgrunnlag).tilFagsystemDTO()
             tilbakekrevingService.endreTilbakekreving(TilbakekrevingFilter.fagsak(kravgrunnlag.fagsystemId, fagsystem), valideringContext) { tilbakekreving, context ->
