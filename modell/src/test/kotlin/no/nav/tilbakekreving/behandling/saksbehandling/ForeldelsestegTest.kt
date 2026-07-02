@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.KlokkeStub
 import no.nav.tilbakekreving.SystemKlokke
+import no.nav.tilbakekreving.behandling
 import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
 import no.nav.tilbakekreving.eksternFagsakBehandling
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -146,12 +147,13 @@ class ForeldelsestegTest {
         val kravgrunnlag = kravgrunnlag(
             perioder = listOf(kravgrunnlagPeriode(fom til 31.januar(2024))),
         )
+        val revurdering = eksternFagsakBehandling()
         val foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakBehandling(), kravgrunnlag)
         val vurderingsdato = 11.november(2024)
 
         foreldelsesteg.automatiskVurder(kravgrunnlag, klokke = KlokkeStub(vurderingsdato), Behandlingslogg(mutableListOf()), UUID.randomUUID())
 
-        val begrunnelse = foreldelsesteg.tilFrontendDto(kravgrunnlag).foreldetPerioder.single().begrunnelse
+        val begrunnelse = foreldelsesteg.tilFrontendDto(kravgrunnlag, revurdering).foreldetPerioder.single().begrunnelse
         begrunnelse shouldBe """
             Ingen perioder er foreldet fordi det er mindre enn tre år siden første feilutbetaling fant sted. Dette følger av foreldelsesloven §§ 2 og 3.
 

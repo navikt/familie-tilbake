@@ -87,6 +87,7 @@ class Faktasteg(
             perioder = vurdering.perioder.map {
                 it.tilFrontendDto(
                     kravgrunnlag = kravgrunnlag,
+                    eksternFagsakRevurdering = revurdering,
                 )
             },
             feilutbetaling = FeilutbetalingDto(
@@ -120,7 +121,7 @@ class Faktasteg(
             feilutbetaltePerioder = vurdering.perioder.map {
                 FeilutbetalingsperiodeDto(
                     periode = it.periode,
-                    feilutbetaltBeløp = kravgrunnlag.totaltBeløpFor(it.periode),
+                    feilutbetaltBeløp = kravgrunnlag.totaltBeløpFor(it.periode, eksternFagsakRevurdering),
                     hendelsestype = it.rettsligGrunnlag,
                     hendelsesundertype = it.rettsligGrunnlagUnderkategori,
                 )
@@ -330,12 +331,12 @@ class Faktasteg(
             )
         }
 
-        fun tilFrontendDto(kravgrunnlag: KravgrunnlagHendelse): FaktaPeriodeDto {
+        internal fun tilFrontendDto(kravgrunnlag: KravgrunnlagHendelse, eksternFagsakRevurdering: EksternFagsakRevurdering): FaktaPeriodeDto {
             return FaktaPeriodeDto(
                 id = id.toString(),
                 fom = periode.fom,
                 tom = periode.tom,
-                feilutbetaltBeløp = kravgrunnlag.totaltBeløpFor(periode).toInt(),
+                feilutbetaltBeløp = kravgrunnlag.totaltBeløpFor(periode, eksternFagsakRevurdering).toInt(),
                 splittbarePerioder = emptyList(),
                 rettsligGrunnlag = listOf(
                     RettsligGrunnlagDto(

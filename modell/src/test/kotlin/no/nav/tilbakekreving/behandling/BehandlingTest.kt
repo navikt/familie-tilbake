@@ -13,6 +13,7 @@ import no.nav.tilbakekreving.behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.beslutterContext
+import no.nav.tilbakekreving.eksternFagsakBehandling
 import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.fatteVedtakVurdering
 import no.nav.tilbakekreving.feil.ModellFeil
@@ -59,16 +60,17 @@ class BehandlingTest {
     @Test
     fun `flytt behandling tilbake til fakta - nullstiller foreldelse`() {
         val kravgrunnlag = kravgrunnlag()
-        val behandling = behandling(kravgrunnlag)
+        val revurdering = eksternFagsakBehandling()
+        val behandling = behandling(kravgrunnlag, revurdering)
         behandling.medSaksbehandling(saksbehandlerContext()) {
             lagreUttalelse(UttalelseVurdering.JA, null, null)
             vurderFakta(faktastegVurdering(periode))
             vurderForeldelse(periode, Foreldelsesteg.Vurdering.Foreldet("Begrunnelse"))
-            behandling.foreldelsesteg.tilFrontendDto(kravgrunnlag).foreldetPerioder.first().begrunnelse shouldBe "Begrunnelse"
+            behandling.foreldelsesteg.tilFrontendDto(kravgrunnlag, revurdering).foreldetPerioder.first().begrunnelse shouldBe "Begrunnelse"
             flyttTilbakeTilFakta()
         }
 
-        behandling.foreldelsesteg.tilFrontendDto(kravgrunnlag).foreldetPerioder.first().begrunnelse shouldBe null
+        behandling.foreldelsesteg.tilFrontendDto(kravgrunnlag, revurdering).foreldetPerioder.first().begrunnelse shouldBe null
     }
 
     @Test

@@ -4,6 +4,7 @@ import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.FeilutbetalingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelsesperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsperiodeDto
+import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
@@ -24,6 +25,7 @@ import no.nav.tilbakekreving.systemContext
 import no.nav.tilbakekreving.test.februar
 import no.nav.tilbakekreving.test.januar
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 import java.util.UUID
 
 class TilleggsstønaderE2ETest {
@@ -172,5 +174,46 @@ class TilleggsstønaderE2ETest {
             ),
         )
         faktastegDto.totalFeilutbetaltPeriode shouldBe (1.januar(2021) til 14.februar(2021))
+    }
+
+    @Test
+    fun `utvidet periode overlapper ikke med kravgrunnlag`() {
+        val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
+
+        val tilbakekreving = Tilbakekreving.opprett(
+            id = UUID.randomUUID().toString(),
+            opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse,
+            sideeffektContext = systemContext(),
+        )
+
+        tilbakekreving.håndter(
+            kravgrunnlag(
+                perioder = listOf(
+                    kravgrunnlagPeriode(3.januar(2021) til 3.januar(2021)),
+                ),
+            ),
+            systemContext(),
+        )
+        tilbakekreving.håndter(
+            fagsysteminfoHendelse(
+                utvidPerioder = listOf(
+                    FagsysteminfoHendelse.UtvidetPeriode(
+                        kravgrunnlagPeriode = 3.januar(2021) til 3.januar(2021),
+                        vedtaksperiode = 14.januar(2021) til 31.januar(2021),
+                    ),
+                ),
+            ),
+            systemContext(),
+        )
+        tilbakekreving.håndter(brukerinfoHendelse(), systemContext())
+        val faktastegDto = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId()).faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now())
+        faktastegDto.feilutbetaltePerioder shouldBe listOf(
+            FeilutbetalingsperiodeDto(
+                periode = 14.januar(2021) til 31.januar(2021),
+                feilutbetaltBeløp = 2000.kroner,
+                hendelsestype = Hendelsestype.ANNET,
+                hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
+            ),
+        )
     }
 }

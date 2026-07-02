@@ -116,7 +116,7 @@ class Vilkårsvurderingsteg(
         klokke: Klokke,
     ): VurdertVilkårsvurderingDto {
         return VurdertVilkårsvurderingDto(
-            perioder = slåSammenPerioder(kravgrunnlag, foreldelsesteg),
+            perioder = slåSammenPerioder(kravgrunnlag, revurdering, foreldelsesteg),
             // Datoen revurdering ble vedtatt er ikke riktig her, men fører til det høyeste rettsgebyret som kan være relevant.
             // Vi gir heller saksbehandler mulighet til å si at beløpet er under/over 4x rettsgebyr til vi klarer å finne datoen vi skal velge rettsgebyr for
             kanUnnlates4xRettsgebyr = KanUnnlates4xRettsgebyr.kanUnnlates(revurdering.vedtaksdato, kravgrunnlag.feilutbetaltBeløpForAllePerioder()),
@@ -129,6 +129,7 @@ class Vilkårsvurderingsteg(
 
     private fun slåSammenPerioder(
         kravgrunnlag: KravgrunnlagHendelse,
+        revurdering: EksternFagsakRevurdering,
         foreldelsesteg: Foreldelsesteg,
     ): List<VurdertVilkårsvurderingsperiodeDto> {
         val sammenslåttePerioder = vurderinger
@@ -142,7 +143,7 @@ class Vilkårsvurderingsteg(
         return sammenslåttePerioder.map { periode ->
             VurdertVilkårsvurderingsperiodeDto(
                 periode = periode.periode,
-                feilutbetaltBeløp = kravgrunnlag.totaltBeløpFor(periode.periode),
+                feilutbetaltBeløp = kravgrunnlag.totaltBeløpFor(periode.periode, revurdering),
                 hendelsestype = Hendelsestype.ANNET,
                 reduserteBeløper = listOf(),
                 aktiviteter = listOf(),

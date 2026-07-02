@@ -163,7 +163,7 @@ class Behandling internal constructor(
         )
     }
 
-    override val foreldelsestegDto: FrontendDto<VurdertForeldelseDto> = FrontendDto { foreldelsesteg.tilFrontendDto(kravgrunnlag.entry) }
+    override val foreldelsestegDto: FrontendDto<VurdertForeldelseDto> = FrontendDto { foreldelsesteg.tilFrontendDto(kravgrunnlag.entry, eksternFagsakRevurdering.entry) }
 
     override val vilkårsvurderingsstegDto: FrontendDto<VurdertVilkårsvurderingDto> = FrontendDto { lesContext ->
         vilkårsvurderingsteg.tilFrontendDto(kravgrunnlag.entry, eksternFagsakRevurdering.entry, foreldelsesteg, lesContext.klokke)
@@ -846,7 +846,7 @@ class Behandling internal constructor(
             vilkårsperioder = vilkårsvurderingsteg.tilFrontendDto().map { vurdering ->
                 val sammenslåttPeriode = vurdering.periode.fom til vurdering.periode.tom
                 VilkaarsperiodeDto(
-                    feilutbetaltBeløp = kravgrunnlag.entry.totaltBeløpFor(sammenslåttPeriode).toInt(),
+                    feilutbetaltBeløp = kravgrunnlag.entry.totaltBeløpFor(sammenslåttPeriode, eksternFagsakRevurdering.entry).toInt(),
                     delresultat = VilkaarsperiodeDto.Delresultat.DELVIS_TILBAKEKREVING,
                     fakta = FaktaDto(
                         rettsligGrunnlag = emptyList(),

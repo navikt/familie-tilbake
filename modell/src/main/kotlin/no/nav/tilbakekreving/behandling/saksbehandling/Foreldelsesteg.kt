@@ -128,12 +128,13 @@ class Foreldelsesteg(
 
     fun tilFrontendDto(
         kravgrunnlag: KravgrunnlagHendelse,
+        revurdering: EksternFagsakRevurdering,
     ): VurdertForeldelseDto {
         return VurdertForeldelseDto(
             foreldetPerioder = vurdertePerioder.map {
                 VurdertForeldelsesperiodeDto(
                     periode = it.periode,
-                    feilutbetaltBeløp = kravgrunnlag.totaltBeløpFor(it.periode),
+                    feilutbetaltBeløp = kravgrunnlag.totaltBeløpFor(it.periode, revurdering),
                     begrunnelse = it.vurdering.begrunnelse,
                     foreldelsesvurderingstype =
                         when (it.vurdering) {

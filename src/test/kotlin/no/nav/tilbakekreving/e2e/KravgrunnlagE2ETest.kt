@@ -472,7 +472,7 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
                 ),
             ),
         )
-        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
         val kontrollfelt = "2025-12-24-11.12.13.234567"
@@ -524,7 +524,7 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
                 ),
             ),
         )
-        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
         somSaksbehandler(SAKSBEHANDLER_IDENT) {
