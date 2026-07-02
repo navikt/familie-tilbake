@@ -91,7 +91,7 @@ class KravgrunnlagHendelse(
             other is KravgrunnlagHendelse &&
             this.harNokOverlapp(other) &&
             this.skalBeregneRenter == other.skalBeregneRenter &&
-            this.perioder.zip(other.perioder).all { (a, b) -> a == b }
+            this.perioder == other.perioder
     }
 
     fun sammenlign(

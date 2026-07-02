@@ -15,6 +15,7 @@ import no.nav.familie.tilbake.config.OppdragClientRestMock
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
+import no.nav.tilbakekreving.api.v1.dto.FeilutbetalingsperiodeDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.api.v2.PeriodeDto
 import no.nav.tilbakekreving.api.v2.fagsystem.behov.FagsysteminfoBehovHendelse
@@ -32,6 +33,8 @@ import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub
 import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub.Companion.finnKafkamelding
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
+import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
@@ -42,6 +45,7 @@ import no.nav.tilbakekreving.systemContext
 import no.nav.tilbakekreving.test.FellesTestdata.BESLUTTER_IDENT
 import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import no.nav.tilbakekreving.test.april
+import no.nav.tilbakekreving.test.februar
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.test.mai
 import no.nav.tilbakekreving.test.mars
@@ -51,6 +55,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
@@ -448,6 +453,105 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
         )
         oppdragRestClient.shouldHaveIverksettelse(BigInteger(vedtakId)) {
             it.kontrollfelt shouldBe kontrollfelt
+        }
+    }
+
+    @Test
+    fun `kravgrunnlag med nye perioder`() {
+        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        val kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6)
+        sendKravgrunnlagOgAvventLesing(
+            QUEUE_NAME,
+            KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+                vedtakId = vedtakId,
+                kravgrunnlagId = kravgrunnlagId,
+                perioder = listOf(
+                    KravgrunnlagGenerator.standardPeriode(1.januar(2021) til 31.januar(2021)),
+                ),
+            ),
+        )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+
+        val kontrollfelt = "2025-12-24-11.12.13.234567"
+        sendKravgrunnlagOgAvventLesing(
+            QUEUE_NAME,
+            KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+                vedtakId = vedtakId,
+                kravgrunnlagId = kravgrunnlagId,
+                kontrollfelt = kontrollfelt,
+                kravStatusKode = "ENDR",
+                perioder = listOf(
+                    KravgrunnlagGenerator.standardPeriode(1.januar(2021) til 31.januar(2021)),
+                    KravgrunnlagGenerator.standardPeriode(1.februar(2021) til 28.februar(2021)),
+                ),
+            ),
+        )
+
+        val faktastegDto = behandling(behandlingId).faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now())
+        faktastegDto.feilutbetaltePerioder shouldBe listOf(
+            FeilutbetalingsperiodeDto(
+                periode = 1.januar(2021) til 31.januar(2021),
+                feilutbetaltBeløp = 2000.0.kroner,
+                hendelsestype = Hendelsestype.ANNET,
+                hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
+            ),
+            FeilutbetalingsperiodeDto(
+                periode = 1.februar(2021) til 28.februar(2021),
+                feilutbetaltBeløp = 2000.0.kroner,
+                hendelsestype = Hendelsestype.ANNET,
+                hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
+            ),
+        )
+    }
+
+    @Test
+    fun `kravgrunnlag med nye perioder - behandling påbegynt`() {
+        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        val kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6)
+        sendKravgrunnlagOgAvventLesing(
+            QUEUE_NAME,
+            KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+                vedtakId = vedtakId,
+                kravgrunnlagId = kravgrunnlagId,
+                perioder = listOf(
+                    KravgrunnlagGenerator.standardPeriode(1.januar(2021) til 31.januar(2021)),
+                ),
+            ),
+        )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingOppdaterFakta(
+                behandlingId.toString(),
+                BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
+            )
+        }
+
+        val kontrollfelt = "2025-12-24-11.12.13.234567"
+        sendKravgrunnlagOgAvventLesing(
+            QUEUE_NAME,
+            KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+                vedtakId = vedtakId,
+                kravgrunnlagId = kravgrunnlagId,
+                kontrollfelt = kontrollfelt,
+                kravStatusKode = "ENDR",
+                perioder = listOf(
+                    KravgrunnlagGenerator.standardPeriode(1.januar(2021) til 31.januar(2021)),
+                    KravgrunnlagGenerator.standardPeriode(1.februar(2021) til 28.februar(2021)),
+                ),
+            ),
+        )
+
+        shouldThrow<ModellFeil.UtenforScopeException> {
+            behandling(behandlingId).faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now())
         }
     }
 

@@ -191,7 +191,7 @@ class Tilbakekreving internal constructor(
     internal fun hånterEndretKravgrunnlag(kravgrunnlagHendelse: KravgrunnlagHendelse, sideeffektContext: SideeffektContext) {
         behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
             kravgrunnlagHistorikk.lagre(kravgrunnlagHendelse)
-            oppdaterKravgrunnlag(kravgrunnlagHistorikk.nåværende(), sideeffektContext.klokke)
+            oppdaterKravgrunnlag(kravgrunnlagHistorikk.nåværende(), sideeffektContext)
         }
     }
 

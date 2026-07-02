@@ -8,8 +8,11 @@ import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feilutbetalteBeløp
+import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
+import no.nav.tilbakekreving.test.februar
+import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.ytelsesbeløp
 import org.junit.jupiter.api.Test
 import java.math.BigInteger
@@ -73,6 +76,30 @@ class KravgrunnlagHendelseTest {
             kravgrunnlagId = "ghi",
             perioder = listOf(
                 kravgrunnlagPeriode(ytelsesbeløp = ytelsesbeløp2 + feilutbetalteBeløp(ytelsesbeløp2)),
+            ),
+        )
+        kravgrunnlag1 shouldNotBe kravgrunnlag2
+    }
+
+    @Test
+    fun `flere perioder i nytt kravgrunnlag`() {
+        val kravgrunnlag1 = kravgrunnlag(
+            vedtakId = BigInteger("123"),
+            referanse = "abc",
+            kontrollfelt = "def",
+            kravgrunnlagId = "ghi",
+            perioder = listOf(
+                kravgrunnlagPeriode(periode = 1.januar(2021) til 31.januar(2021)),
+            ),
+        )
+        val kravgrunnlag2 = kravgrunnlag(
+            vedtakId = BigInteger("123"),
+            referanse = "abc",
+            kontrollfelt = "def",
+            kravgrunnlagId = "ghi",
+            perioder = listOf(
+                kravgrunnlagPeriode(periode = 1.januar(2021) til 31.januar(2021)),
+                kravgrunnlagPeriode(periode = 1.februar(2021) til 28.februar(2021)),
             ),
         )
         kravgrunnlag1 shouldNotBe kravgrunnlag2
