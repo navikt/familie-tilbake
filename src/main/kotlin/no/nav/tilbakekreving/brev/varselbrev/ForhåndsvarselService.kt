@@ -223,7 +223,7 @@ class ForhåndsvarselService(
         val fristForUttalelse = varselbrevBehov.info.opprinneligUttalelsesfrist
         val brevdata = hentBrevdata(varselbrevBehov, fristForUttalelse, logContext)
         val dokument = Dokument(
-            dokument = if (features[Toggle.ForhåndsvarselTypst]) {
+            dokument = if (features[Toggle.ForhandsvarselTypst]) {
                 pdfGenClient.hentPdfForForhåndsvarsel(
                     VarselbrevDataDto(
                         hovedavsnitt = HovedavsnittVarselbrevDto(

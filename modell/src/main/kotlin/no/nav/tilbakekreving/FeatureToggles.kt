@@ -24,7 +24,7 @@ enum class Toggle(val default: Boolean) {
     EntraProxy(default = true),
     FjernUttalelsesfrist(default = false),
     OppdragRestClient(default = false),
-    ForhåndsvarselTypst(default = false),
+    ForhandsvarselTypst(default = false),
 }
 
 enum class FagsystemToggle(val default: Boolean) {
