@@ -59,12 +59,6 @@ tilbakekreving:
     - QA.P_TILLEGGSSTONADER.KRAVGRUNNLAG
     - QA.P_TILBAKEKREVING.KRAVGRUNNLAG
     - QA.P_TILTAKSPENGER.KRAVGRUNNLAG
-  toggles:
-    fagsystem:
-      TP:
-        ForhaandsvarselBehandlingsstatuser: true
-      AAP:
-        ForhaandsvarselBehandlingsstatuser: true
   tilgangsmaskinen:
     scope: api://prod-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
   tilgangsstyring:
