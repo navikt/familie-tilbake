@@ -2,7 +2,6 @@ package no.nav.tilbakekreving.e2e
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
-import no.nav.tilbakekreving.FagsystemToggle
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
@@ -14,7 +13,6 @@ import no.nav.tilbakekreving.behov.VedtaksbrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.VedtaksbrevJournalføringBehov
 import no.nav.tilbakekreving.beslutterContext
 import no.nav.tilbakekreving.brukerinfoHendelse
-import no.nav.tilbakekreving.defaultFeatures
 import no.nav.tilbakekreving.distribusjon
 import no.nav.tilbakekreving.eksternFagsak
 import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
@@ -149,8 +147,8 @@ class EndringObservatørTest {
         }
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.behandlingsstatus } shouldBe listOf(
             ForenkletBehandlingsstatus.OPPRETTET,
-            ForenkletBehandlingsstatus.TIL_BEHANDLING,
-            ForenkletBehandlingsstatus.TIL_BEHANDLING,
+            ForenkletBehandlingsstatus.TIL_FORHÅNDSVARSEL,
+            ForenkletBehandlingsstatus.TIL_FORHÅNDSVARSEL,
         )
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør)) {
             vurderFakta(faktastegVurdering())
@@ -176,8 +174,8 @@ class EndringObservatørTest {
         tilbakekreving.håndter(distribusjon((behovOppsamler.behovListe.last() as VedtaksbrevDistribusjonBehov).brevId, tilbakekreving.eksternFagsak.eksternId), systemContext(endringObservatør, behovObservatør = behovOppsamler))
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.behandlingsstatus } shouldBe listOf(
             ForenkletBehandlingsstatus.OPPRETTET,
-            ForenkletBehandlingsstatus.TIL_BEHANDLING,
-            ForenkletBehandlingsstatus.TIL_BEHANDLING,
+            ForenkletBehandlingsstatus.TIL_FORHÅNDSVARSEL,
+            ForenkletBehandlingsstatus.TIL_FORHÅNDSVARSEL,
             ForenkletBehandlingsstatus.TIL_BEHANDLING,
             ForenkletBehandlingsstatus.TIL_BEHANDLING,
             ForenkletBehandlingsstatus.TIL_BEHANDLING,
@@ -213,12 +211,15 @@ class EndringObservatørTest {
         }
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.behandlingsstatus } shouldBe listOf(
             ForenkletBehandlingsstatus.OPPRETTET,
-            ForenkletBehandlingsstatus.TIL_BEHANDLING,
-            ForenkletBehandlingsstatus.TIL_BEHANDLING,
+            ForenkletBehandlingsstatus.TIL_FORHÅNDSVARSEL,
+            ForenkletBehandlingsstatus.TIL_FORHÅNDSVARSEL,
         )
 
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør)) {
             vurderFakta(faktastegVurdering())
+        }
+
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør)) {
             lagreUttalelse(UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, null, "")
             vurderForeldelse(1.januar(2021) til 31.januar(2021), foreldelseVurdering())
             vurderVilkår(1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
@@ -261,16 +262,18 @@ class EndringObservatørTest {
         )
         tilbakekreving.håndter(brukerinfoHendelse(), systemContext(endringObservatør))
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør)) {
+            vurderFakta(faktastegVurdering())
+        }
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør)) {
             lagreUttalelse(UttalelseVurdering.JA, null, "")
         }
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.behandlingsstatus } shouldBe listOf(
             ForenkletBehandlingsstatus.OPPRETTET,
-            ForenkletBehandlingsstatus.TIL_BEHANDLING,
+            ForenkletBehandlingsstatus.TIL_FORHÅNDSVARSEL,
+            ForenkletBehandlingsstatus.TIL_FORHÅNDSVARSEL,
             ForenkletBehandlingsstatus.TIL_BEHANDLING,
         )
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør)) {
-            vurderFakta(faktastegVurdering())
-            lagreUttalelse(UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, null, "")
             vurderForeldelse(1.januar(2021) til 31.januar(2021), foreldelseVurdering())
             vurderVilkår(1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
             foreslåVedtak()
@@ -282,8 +285,8 @@ class EndringObservatørTest {
         ) {
             fatteVedtak(
                 listOf(
-                    Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Underkjent("Ikke godkjent"),
-                    Behandlingssteg.FORHÅNDSVARSEL to FatteVedtakSteg.Vurdering.Underkjent("Ikke godkjent"),
+                    Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
+                    Behandlingssteg.FORHÅNDSVARSEL to FatteVedtakSteg.Vurdering.Godkjent,
                     Behandlingssteg.FORELDELSE to FatteVedtakSteg.Vurdering.Underkjent("Ikke godkjent"),
                     Behandlingssteg.VILKÅRSVURDERING to FatteVedtakSteg.Vurdering.Underkjent("Ikke godkjent"),
                     Behandlingssteg.FORESLÅ_VEDTAK to FatteVedtakSteg.Vurdering.Underkjent("Ikke godkjent"),
@@ -298,11 +301,6 @@ class EndringObservatørTest {
     @Test
     fun `sender endringer gjennom saksbehandlingsløp med info om varselbrev`() {
         val behovOppsamler = BehovObservatørOppsamler()
-        val features = defaultFeatures(
-            fagsystemToggleOverrides = arrayOf(
-                FagsystemToggle.ForhaandsvarselBehandlingsstatuser to true,
-            ),
-        )
         val fagsakId = "123456"
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse(
             eksternFagsak = eksternFagsak(
@@ -313,18 +311,14 @@ class EndringObservatørTest {
         val tilbakekreving = Tilbakekreving.opprett(
             id = UUID.randomUUID().toString(),
             opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse,
-            sideeffektContext = systemContext(
-                endringObservatør,
-                behovObservatør = behovOppsamler,
-                features = features,
-            ),
+            sideeffektContext = systemContext(endringObservatør, behovObservatør = behovOppsamler),
         )
         tilbakekreving.håndter(kravgrunnlag(), systemContext())
         tilbakekreving.håndter(fagsysteminfoHendelse(), systemContext(endringObservatør))
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.behandlingsstatus } shouldBe listOf(
             ForenkletBehandlingsstatus.OPPRETTET,
         )
-        tilbakekreving.håndter(brukerinfoHendelse(), systemContext(endringObservatør, features = features))
+        tilbakekreving.håndter(brukerinfoHendelse(), systemContext(endringObservatør))
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.behandlingsstatus } shouldBe listOf(
             ForenkletBehandlingsstatus.OPPRETTET,
             ForenkletBehandlingsstatus.TIL_FORHÅNDSVARSEL,
@@ -335,7 +329,7 @@ class EndringObservatørTest {
 
         tilbakekreving.gjørSaksbehandling(
             tilbakekreving.nåværendeBehandlingId(),
-            saksbehandlerContext(endringObservatør, features = features),
+            saksbehandlerContext(endringObservatør),
         ) {
             vurderFakta(faktastegVurdering())
         }
@@ -352,15 +346,15 @@ class EndringObservatørTest {
         tilbakekreving.sendVarselbrev(
             tilbakekreving.nåværendeBehandlingId(),
             "Sample text",
-            saksbehandlerContext(endringObservatør, behovObservatør = behovOppsamler, features = features),
+            saksbehandlerContext(endringObservatør, behovObservatør = behovOppsamler),
         )
         tilbakekreving.håndter(
             behovOppsamler.journalføringEventFor(),
-            systemContext(endringObservatør, behovObservatør = behovOppsamler, features = features),
+            systemContext(endringObservatør, behovObservatør = behovOppsamler),
         )
         tilbakekreving.håndter(
             behovOppsamler.distribuerHendelseFor(),
-            systemContext(endringObservatør, behovObservatør = behovOppsamler, features = features),
+            systemContext(endringObservatør, behovObservatør = behovOppsamler),
         )
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.behandlingsstatus } shouldBe listOf(
             ForenkletBehandlingsstatus.OPPRETTET,

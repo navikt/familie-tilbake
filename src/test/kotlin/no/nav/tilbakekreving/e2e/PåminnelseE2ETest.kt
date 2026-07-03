@@ -155,7 +155,7 @@ class PåminnelseE2ETest : TilbakekrevingE2EBase() {
 
         kafkaProducer.finnHendelse<BehandlingEndretEventDto>(fagsystemId)
             .forExactly(1) {
-                it.tilbakekreving.behandlingsstatus shouldBe BehandlingsstatusEventDto.TIL_BEHANDLING
+                it.tilbakekreving.behandlingsstatus shouldBe BehandlingsstatusEventDto.TIL_FORHÅNDSVARSEL
             }
 
         jdbcTemplate.update(
@@ -169,7 +169,7 @@ class PåminnelseE2ETest : TilbakekrevingE2EBase() {
 
         kafkaProducer.finnHendelse<BehandlingEndretEventDto>(fagsystemId)
             .forExactly(2) {
-                it.tilbakekreving.behandlingsstatus shouldBe BehandlingsstatusEventDto.TIL_BEHANDLING
+                it.tilbakekreving.behandlingsstatus shouldBe BehandlingsstatusEventDto.TIL_FORHÅNDSVARSEL
             }
     }
 
@@ -192,11 +192,11 @@ class PåminnelseE2ETest : TilbakekrevingE2EBase() {
 
         kafkaProducer
             .finnHendelse<BehandlingEndretEventDto>(fagsystemId1)
-            .filter { it.tilbakekreving.behandlingsstatus == BehandlingsstatusEventDto.TIL_BEHANDLING }
+            .filter { it.tilbakekreving.behandlingsstatus == BehandlingsstatusEventDto.TIL_FORHÅNDSVARSEL }
             .shouldHaveSize(1)
         kafkaProducer
             .finnHendelse<BehandlingEndretEventDto>(fagsystemId2)
-            .filter { it.tilbakekreving.behandlingsstatus == BehandlingsstatusEventDto.TIL_BEHANDLING }
+            .filter { it.tilbakekreving.behandlingsstatus == BehandlingsstatusEventDto.TIL_FORHÅNDSVARSEL }
             .shouldHaveSize(1)
 
         jdbcTemplate.update(
@@ -211,11 +211,11 @@ class PåminnelseE2ETest : TilbakekrevingE2EBase() {
 
         kafkaProducer
             .finnHendelse<BehandlingEndretEventDto>(fagsystemId1)
-            .filter { it.tilbakekreving.behandlingsstatus == BehandlingsstatusEventDto.TIL_BEHANDLING }
+            .filter { it.tilbakekreving.behandlingsstatus == BehandlingsstatusEventDto.TIL_FORHÅNDSVARSEL }
             .shouldHaveSize(1)
         kafkaProducer
             .finnHendelse<BehandlingEndretEventDto>(fagsystemId2)
-            .filter { it.tilbakekreving.behandlingsstatus == BehandlingsstatusEventDto.TIL_BEHANDLING }
+            .filter { it.tilbakekreving.behandlingsstatus == BehandlingsstatusEventDto.TIL_FORHÅNDSVARSEL }
             .shouldHaveSize(2)
     }
 }

@@ -27,6 +27,4 @@ enum class Toggle(val default: Boolean) {
     ForhandsvarselTypst(default = false),
 }
 
-enum class FagsystemToggle(val default: Boolean) {
-    ForhaandsvarselBehandlingsstatuser(default = false),
-}
+enum class FagsystemToggle(val default: Boolean)

@@ -1,6 +1,5 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
-import no.nav.tilbakekreving.FagsystemToggle
 import no.nav.tilbakekreving.FeatureToggles
 import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
 import no.nav.tilbakekreving.fagsystem.Ytelse
@@ -20,12 +19,7 @@ enum class BehandlingsstatusModell(
     TIL_FORHÅNDSVARSEL(
         gammelFrontendDTO = Behandlingsstatus.UTREDES,
     ) {
-        override fun forenkletStatus(ytelse: Ytelse, features: FeatureToggles): ForenkletBehandlingsstatus {
-            return when (features[ytelse, FagsystemToggle.ForhaandsvarselBehandlingsstatuser]) {
-                true -> ForenkletBehandlingsstatus.TIL_FORHÅNDSVARSEL
-                false -> ForenkletBehandlingsstatus.TIL_BEHANDLING
-            }
-        }
+        override fun forenkletStatus(ytelse: Ytelse, features: FeatureToggles): ForenkletBehandlingsstatus = ForenkletBehandlingsstatus.TIL_FORHÅNDSVARSEL
     },
     TIL_BEHANDLING(
         gammelFrontendDTO = Behandlingsstatus.UTREDES,
