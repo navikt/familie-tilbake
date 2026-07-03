@@ -186,7 +186,7 @@ enum class ValideringContext(
         handling = "Flytter behandling tilbake til Fakta",
     ),
     HentForhåndsvarselinformasjon(
-        minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+        minimumBehandlerrolle = Behandlerrolle.VEILEDER,
         auditLoggerEvent = AuditLoggerEvent.ACCESS,
         handling = "Henter forhåndsvarselinformasjon",
     ),
