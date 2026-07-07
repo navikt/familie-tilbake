@@ -17,7 +17,7 @@ object Rettsgebyr {
 
     val rettsgebyr = rettsgebyrForDato.filter { it.gyldigFra <= LocalDate.now() }.maxByOrNull { it.gyldigFra }!!.beløp
 
-    fun fireRettsgebyrForÅr(dato: LocalDate) = rettsgebyrForÅr(dato.year)?.times(4)
+    fun fireRettsgebyrForÅr(år: Int) = rettsgebyrForÅr(år)?.times(4)
 
     private class Datobeløp(
         val gyldigFra: LocalDate,

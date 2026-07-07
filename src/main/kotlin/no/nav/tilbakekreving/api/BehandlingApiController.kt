@@ -72,6 +72,7 @@ class BehandlingApiController(
                     oppdaget = oppdaterFaktaOmFeilutbetalingDto.vurdering?.oppdaget,
                     årsak = oppdaterFaktaOmFeilutbetalingDto.vurdering?.årsak,
                     perioder = oppdaterFaktaOmFeilutbetalingDto.perioder,
+                    rettsgebyrÅrFraSaksbehandler = oppdaterFaktaOmFeilutbetalingDto.rettsgebyrÅrFraSaksbehandler,
                 )
             }
             ResponseEntity.ok(tilbakekreving.tilFeilutbetalingFrontendDto(UUID.fromString(behandlingId), SystemKlokke))

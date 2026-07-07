@@ -11,6 +11,8 @@ import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.FaktastegEntity
+import no.nav.tilbakekreving.feil.ModellFeil
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.Faktainfo
 import no.nav.tilbakekreving.kontrakter.Tilbakekrevingsvalg
@@ -38,7 +40,11 @@ class Faktasteg(
     private val brevHistorikk: BrevHistorikk,
     private var vurdering: Vurdering,
     private var underkjent: Boolean,
+    private var _rettsgebyrÅrFraSaksbehandler: Int?,
 ) : Saksbehandlingsteg {
+    val rettsgebyrÅrFraSaksbehandler: Int?
+        get() = _rettsgebyrÅrFraSaksbehandler
+
     override val type: Behandlingssteg = Behandlingssteg.FAKTA
 
     override val behandlingsstatus: BehandlingsstatusModell get() = BehandlingsstatusModell.TIL_FORHÅNDSVARSEL
@@ -82,6 +88,10 @@ class Faktasteg(
         underkjent = false
     }
 
+    internal fun vurder(rettsgebyrÅr: Int) {
+        _rettsgebyrÅrFraSaksbehandler = rettsgebyrÅr
+    }
+
     fun nyTilFrontendDto(kravgrunnlag: KravgrunnlagHendelse, revurdering: EksternFagsakRevurdering, varselbrev: Varselbrev?, klokke: Klokke): FaktaOmFeilutbetalingDto {
         val beløpTilbakekreves = kravgrunnlag.feilutbetaltBeløpForAllePerioder().toInt()
         return FaktaOmFeilutbetalingDto(
@@ -110,26 +120,37 @@ class Faktasteg(
                 sisteKravgrunnlagDato = kravgrunnlag.perioder().maxOf { it.periode().tom },
                 beløpTilbakekreves = beløpTilbakekreves,
             ),
+            rettsgebyrÅrFraSaksbehandler = rettsgebyrÅrFraSaksbehandler,
         )
     }
 
-    fun usikker4xRettsgebyr(sisteKravgrunnlagDato: LocalDate, beløpTilbakekreves: Int): Boolean {
-        return !(
-            erUnder4xRettsgebyr(beløpTilbakekreves) ||
-                erOver4xRettsgebyr(sisteKravgrunnlagDato, beløpTilbakekreves)
-        )
+    private fun usikker4xRettsgebyr(sisteKravgrunnlagDato: LocalDate, beløpTilbakekreves: Int): Boolean {
+        return !erUnder4xRettsgebyrBasertPåFaktaPerioder(beløpTilbakekreves) &&
+            !erOver4xRettsgebyrBasertPåKravgrunnlagPerioder(sisteKravgrunnlagDato, beløpTilbakekreves)
     }
 
-    private fun erUnder4xRettsgebyr(beløpTilbakekreves: Int): Boolean {
-        val førsteFomFakta = vurdering.perioder.minOf { it.periode.fom }
-        val fireRettsgebyr = Rettsgebyr.fireRettsgebyrForÅr(førsteFomFakta) ?: throw IllegalStateException("Rettsgebyr for år ${førsteFomFakta.year} er ikke definert")
+    fun erUnder4xRettsgebyr(sisteKravgrunnlagDato: LocalDate, beløpTilbakekreves: Int, sporing: Sporing): Boolean {
+        if (erUnder4xRettsgebyrBasertPåFaktaPerioder(beløpTilbakekreves)) return true
+        if (erOver4xRettsgebyrBasertPåKravgrunnlagPerioder(sisteKravgrunnlagDato, beløpTilbakekreves)) return false
+
+        val år = rettsgebyrÅrFraSaksbehandler ?: throw ModellFeil.UgyldigOperasjonException("Rettsgebyr året kreves", sporing)
+        val fireRettsgebyr = hentFireRettsgebyr(år)
+
         return beløpTilbakekreves < fireRettsgebyr
     }
 
-    private fun erOver4xRettsgebyr(sisteKravgrunnlagDato: LocalDate, beløpTilbakekreves: Int): Boolean {
-        val fireRettsgebyr = Rettsgebyr.fireRettsgebyrForÅr(sisteKravgrunnlagDato) ?: throw IllegalStateException("Rettsgebyr for år ${sisteKravgrunnlagDato.year} er ikke definert")
-        return beløpTilbakekreves > fireRettsgebyr
+    private fun erUnder4xRettsgebyrBasertPåFaktaPerioder(beløpTilbakekreves: Int): Boolean {
+        val førsteFomFakta = vurdering.perioder.minOf { it.periode.fom }
+        return beløpTilbakekreves < hentFireRettsgebyr(førsteFomFakta.year)
     }
+
+    private fun erOver4xRettsgebyrBasertPåKravgrunnlagPerioder(sisteKravgrunnlagDato: LocalDate, beløpTilbakekreves: Int): Boolean {
+        return beløpTilbakekreves > hentFireRettsgebyr(sisteKravgrunnlagDato.year)
+    }
+
+    private fun hentFireRettsgebyr(år: Int): Long =
+        Rettsgebyr.fireRettsgebyrForÅr(år)
+            ?: throw IllegalStateException("Rettsgebyr for år $år er ikke definert")
 
     fun tilFrontendDto(
         kravgrunnlag: KravgrunnlagHendelse,
@@ -178,7 +199,7 @@ class Faktasteg(
     }
 
     fun tilEntity(behandlingRef: UUID): FaktastegEntity {
-        return vurdering.tilEntity(id, behandlingRef, underkjent)
+        return vurdering.tilEntity(id, behandlingRef, underkjent, rettsgebyrÅrFraSaksbehandler)
     }
 
     companion object {
@@ -192,6 +213,7 @@ class Faktasteg(
                 brevHistorikk = brevHistorikk,
                 vurdering = tomVurdering(kravgrunnlag, eksternFagsakRevurdering),
                 underkjent = false,
+                _rettsgebyrÅrFraSaksbehandler = null,
             )
         }
 
@@ -257,6 +279,7 @@ class Faktasteg(
             id: UUID,
             behandlingRef: UUID,
             underkjent: Boolean,
+            rettsgebyrÅrFraSaksbehandler: Int?,
         ): FaktastegEntity {
             return FaktastegEntity(
                 id = id,
@@ -272,6 +295,7 @@ class Faktasteg(
                 vurderingAvBrukersUttalelse = (uttalelse as? Uttalelse.Ja)?.begrunnelse,
                 oppdaget = oppdaget.tilEntity(id),
                 trengerNyVurdering = underkjent,
+                rettsgebyrÅrFraSaksbehandler = rettsgebyrÅrFraSaksbehandler,
             )
         }
 
