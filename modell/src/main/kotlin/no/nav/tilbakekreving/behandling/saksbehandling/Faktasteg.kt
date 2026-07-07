@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
 import no.nav.tilbakekreving.Klokke
+import no.nav.tilbakekreving.Rettsgebyr
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
 import no.nav.tilbakekreving.api.v1.dto.FeilutbetalingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurderingAvBrukersUttalelseDto
@@ -105,7 +106,29 @@ class Faktasteg(
             vurdering = vurdering.tilFrontendDto(),
             tidligereVarsletBeløp = varselbrev?.hentVarsletBeløp()?.toInt()?.takeIf { it != beløpTilbakekreves },
             ferdigvurdert = erKlar(klokke),
+            usikker4xRettsgebyr = usikker4xRettsgebyr(
+                sisteKravgrunnlagDato = kravgrunnlag.perioder().maxOf { it.periode().tom },
+                beløpTilbakekreves = beløpTilbakekreves,
+            ),
         )
+    }
+
+    fun usikker4xRettsgebyr(sisteKravgrunnlagDato: LocalDate, beløpTilbakekreves: Int): Boolean {
+        return !(
+            erUnder4xRettsgebyr(beløpTilbakekreves) ||
+                erOver4xRettsgebyr(sisteKravgrunnlagDato, beløpTilbakekreves)
+        )
+    }
+
+    private fun erUnder4xRettsgebyr(beløpTilbakekreves: Int): Boolean {
+        val førsteFomFakta = vurdering.perioder.minOf { it.periode.fom }
+        val fireRettsgebyr = Rettsgebyr.fireRettsgebyrForÅr(førsteFomFakta) ?: throw IllegalStateException("Rettsgebyr for år ${førsteFomFakta.year} er ikke definert")
+        return beløpTilbakekreves < fireRettsgebyr
+    }
+
+    private fun erOver4xRettsgebyr(sisteKravgrunnlagDato: LocalDate, beløpTilbakekreves: Int): Boolean {
+        val fireRettsgebyr = Rettsgebyr.fireRettsgebyrForÅr(sisteKravgrunnlagDato) ?: throw IllegalStateException("Rettsgebyr for år ${sisteKravgrunnlagDato.year} er ikke definert")
+        return beløpTilbakekreves > fireRettsgebyr
     }
 
     fun tilFrontendDto(

@@ -17,7 +17,9 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.RettsligGrunnlagDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
+import no.nav.tilbakekreving.test.desember
 import no.nav.tilbakekreving.test.januar
+import no.nav.tilbakekreving.test.mars
 import no.nav.tilbakekreving.ytelsesbeløp
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -232,5 +234,92 @@ class FaktaStegTest {
         faktasteg.underkjennSteget()
 
         faktasteg.tilEntity(UUID.randomUUID()).trengerNyVurdering shouldBe true
+    }
+
+    @Test
+    fun `usikker om det er under 4x rettsgebyr`() {
+        val revurdering = eksternFagsakBehandling()
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(
+                    1.desember(2025) til 1.desember(2025),
+                    ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = 3350.kroner),
+                ),
+                kravgrunnlagPeriode(
+                    1.januar(2026) til 1.januar(2026),
+                    ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = 2000.kroner),
+                ),
+            ),
+        )
+
+        val faktasteg = Faktasteg.opprett(
+            eksternFagsakRevurdering = revurdering,
+            kravgrunnlag = kravgrunnlag,
+            brevHistorikk = BrevHistorikk(historikk = mutableListOf()),
+        )
+        faktasteg.nyTilFrontendDto(
+            kravgrunnlag = kravgrunnlag,
+            revurdering = revurdering,
+            varselbrev = null,
+            klokke = SystemKlokke,
+        ).usikker4xRettsgebyr shouldBe true
+    }
+
+    @Test
+    fun `over 4x rettsgebyr`() {
+        val revurdering = eksternFagsakBehandling()
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(
+                    1.januar(2025) til 1.januar(2025),
+                    ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = 3257.kroner),
+                ),
+                kravgrunnlagPeriode(
+                    1.mars(2025) til 1.mars(2025),
+                    ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = 2000.kroner),
+                ),
+            ),
+        )
+
+        val faktasteg = Faktasteg.opprett(
+            eksternFagsakRevurdering = revurdering,
+            kravgrunnlag = kravgrunnlag,
+            brevHistorikk = BrevHistorikk(historikk = mutableListOf()),
+        )
+        faktasteg.nyTilFrontendDto(
+            kravgrunnlag = kravgrunnlag,
+            revurdering = revurdering,
+            varselbrev = null,
+            klokke = SystemKlokke,
+        ).usikker4xRettsgebyr shouldBe false
+    }
+
+    @Test
+    fun `under 4x rettsgebyr`() {
+        val revurdering = eksternFagsakBehandling()
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(
+                    1.januar(2025) til 1.januar(2025),
+                    ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = 3255.kroner),
+                ),
+                kravgrunnlagPeriode(
+                    1.mars(2025) til 1.mars(2025),
+                    ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = 2000.kroner),
+                ),
+            ),
+        )
+
+        val faktasteg = Faktasteg.opprett(
+            eksternFagsakRevurdering = revurdering,
+            kravgrunnlag = kravgrunnlag,
+            brevHistorikk = BrevHistorikk(historikk = mutableListOf()),
+        )
+        faktasteg.nyTilFrontendDto(
+            kravgrunnlag = kravgrunnlag,
+            revurdering = revurdering,
+            varselbrev = null,
+            klokke = SystemKlokke,
+        ).usikker4xRettsgebyr shouldBe false
     }
 }
