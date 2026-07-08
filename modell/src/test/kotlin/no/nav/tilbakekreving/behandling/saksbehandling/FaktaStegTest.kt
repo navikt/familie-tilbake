@@ -274,7 +274,7 @@ class FaktaStegTest {
     }
 
     @Test
-    fun `vurdering av rettsgebyr året gjør sånn at det blir over 4x rettsgebyr`() {
+    fun `vurdering av rettsgebyr-året gir beløp over 4x rettsgebyr`() {
         val revurdering = eksternFagsakBehandling()
         val kravgrunnlag = kravgrunnlag(
             perioder = listOf(
