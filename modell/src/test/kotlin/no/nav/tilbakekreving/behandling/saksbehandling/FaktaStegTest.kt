@@ -1,5 +1,7 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.api.v1.dto.FeilutbetalingsperiodeDto
@@ -8,6 +10,8 @@ import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternFagsakBehandling
+import no.nav.tilbakekreving.feil.ModellFeil
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
@@ -257,16 +261,118 @@ class FaktaStegTest {
             kravgrunnlag = kravgrunnlag,
             brevHistorikk = BrevHistorikk(historikk = mutableListOf()),
         )
+
         faktasteg.nyTilFrontendDto(
             kravgrunnlag = kravgrunnlag,
             revurdering = revurdering,
             varselbrev = null,
             klokke = SystemKlokke,
-        ).usikker4xRettsgebyr shouldBe true
+        ).shouldNotBeNull {
+            usikker4xRettsgebyr shouldBe true
+            rettsgebyrÅrFraSaksbehandler shouldBe null
+        }
     }
 
     @Test
-    fun `over 4x rettsgebyr`() {
+    fun `vurdering av rettsgebyr-året gir beløp over 4x rettsgebyr`() {
+        val revurdering = eksternFagsakBehandling()
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(
+                    1.desember(2025) til 1.desember(2025),
+                    ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = 3350.kroner),
+                ),
+                kravgrunnlagPeriode(
+                    1.januar(2026) til 1.januar(2026),
+                    ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = 2000.kroner),
+                ),
+            ),
+        )
+
+        val faktasteg = Faktasteg.opprett(
+            eksternFagsakRevurdering = revurdering,
+            kravgrunnlag = kravgrunnlag,
+            brevHistorikk = BrevHistorikk(historikk = mutableListOf()),
+        )
+        faktasteg.nyTilFrontendDto(
+            kravgrunnlag = kravgrunnlag,
+            revurdering = revurdering,
+            varselbrev = null,
+            klokke = SystemKlokke,
+        ).shouldNotBeNull {
+            usikker4xRettsgebyr shouldBe true
+            rettsgebyrÅrFraSaksbehandler shouldBe null
+        }
+
+        faktasteg.vurder(rettsgebyrÅr = 2025)
+        faktasteg.erUnder4xRettsgebyr(
+            sisteKravgrunnlagDato = kravgrunnlag.perioder().maxOf { it.periode().tom },
+            beløpTilbakekreves = kravgrunnlag.feilutbetaltBeløpForAllePerioder().toInt(),
+            sporing = Sporing("", ""),
+        ) shouldBe false
+
+        faktasteg.nyTilFrontendDto(
+            kravgrunnlag = kravgrunnlag,
+            revurdering = revurdering,
+            varselbrev = null,
+            klokke = SystemKlokke,
+        ).shouldNotBeNull {
+            usikker4xRettsgebyr shouldBe true
+            rettsgebyrÅrFraSaksbehandler shouldBe 2025
+        }
+    }
+
+    @Test
+    fun `vurdering av rettsgebyr-året gir beløp under 4x rettsgebyr`() {
+        val revurdering = eksternFagsakBehandling()
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(
+                    1.desember(2025) til 1.desember(2025),
+                    ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = 3350.kroner),
+                ),
+                kravgrunnlagPeriode(
+                    1.januar(2026) til 1.januar(2026),
+                    ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = 2000.kroner),
+                ),
+            ),
+        )
+
+        val faktasteg = Faktasteg.opprett(
+            eksternFagsakRevurdering = revurdering,
+            kravgrunnlag = kravgrunnlag,
+            brevHistorikk = BrevHistorikk(historikk = mutableListOf()),
+        )
+        faktasteg.nyTilFrontendDto(
+            kravgrunnlag = kravgrunnlag,
+            revurdering = revurdering,
+            varselbrev = null,
+            klokke = SystemKlokke,
+        ).shouldNotBeNull {
+            usikker4xRettsgebyr shouldBe true
+            rettsgebyrÅrFraSaksbehandler shouldBe null
+        }
+
+        faktasteg.vurder(rettsgebyrÅr = 2026)
+        faktasteg.erUnder4xRettsgebyr(
+            sisteKravgrunnlagDato = kravgrunnlag.perioder().maxOf { it.periode().tom },
+            beløpTilbakekreves = kravgrunnlag.feilutbetaltBeløpForAllePerioder().toInt(),
+            sporing = Sporing("", ""),
+        ) shouldBe true
+
+        faktasteg.nyTilFrontendDto(
+            kravgrunnlag = kravgrunnlag,
+            revurdering = revurdering,
+            varselbrev = null,
+            klokke = SystemKlokke,
+        ).shouldNotBeNull {
+            usikker4xRettsgebyr shouldBe true
+            rettsgebyrÅrFraSaksbehandler shouldBe 2026
+        }
+    }
+
+    @Test
+    fun `garantert over 4x rettsgebyr`() {
         val revurdering = eksternFagsakBehandling()
         val kravgrunnlag = kravgrunnlag(
             perioder = listOf(
@@ -286,16 +392,26 @@ class FaktaStegTest {
             kravgrunnlag = kravgrunnlag,
             brevHistorikk = BrevHistorikk(historikk = mutableListOf()),
         )
+
+        faktasteg.erUnder4xRettsgebyr(
+            sisteKravgrunnlagDato = kravgrunnlag.perioder().maxOf { it.periode().tom },
+            beløpTilbakekreves = kravgrunnlag.feilutbetaltBeløpForAllePerioder().toInt(),
+            sporing = Sporing("", ""),
+        ) shouldBe false
+
         faktasteg.nyTilFrontendDto(
             kravgrunnlag = kravgrunnlag,
             revurdering = revurdering,
             varselbrev = null,
             klokke = SystemKlokke,
-        ).usikker4xRettsgebyr shouldBe false
+        ).shouldNotBeNull {
+            usikker4xRettsgebyr shouldBe false
+            rettsgebyrÅrFraSaksbehandler shouldBe null
+        }
     }
 
     @Test
-    fun `under 4x rettsgebyr`() {
+    fun `garantert under 4x rettsgebyr`() {
         val revurdering = eksternFagsakBehandling()
         val kravgrunnlag = kravgrunnlag(
             perioder = listOf(
@@ -315,11 +431,64 @@ class FaktaStegTest {
             kravgrunnlag = kravgrunnlag,
             brevHistorikk = BrevHistorikk(historikk = mutableListOf()),
         )
+
+        faktasteg.erUnder4xRettsgebyr(
+            sisteKravgrunnlagDato = kravgrunnlag.perioder().maxOf { it.periode().tom },
+            beløpTilbakekreves = kravgrunnlag.feilutbetaltBeløpForAllePerioder().toInt(),
+            sporing = Sporing("", ""),
+        ) shouldBe true
+
         faktasteg.nyTilFrontendDto(
             kravgrunnlag = kravgrunnlag,
             revurdering = revurdering,
             varselbrev = null,
             klokke = SystemKlokke,
-        ).usikker4xRettsgebyr shouldBe false
+        ).shouldNotBeNull {
+            usikker4xRettsgebyr shouldBe false
+            rettsgebyrÅrFraSaksbehandler shouldBe null
+        }
+    }
+
+    @Test
+    fun `kaster exception når det er usikker 4x rettsgebyr og saksbehandler har ikke vurdert rettsgebyr-året`() {
+        val revurdering = eksternFagsakBehandling()
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(
+                    1.desember(2025) til 1.desember(2025),
+                    ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = 3350.kroner),
+                ),
+                kravgrunnlagPeriode(
+                    1.januar(2026) til 1.januar(2026),
+                    ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = 2000.kroner),
+                ),
+            ),
+        )
+
+        val faktasteg = Faktasteg.opprett(
+            eksternFagsakRevurdering = revurdering,
+            kravgrunnlag = kravgrunnlag,
+            brevHistorikk = BrevHistorikk(historikk = mutableListOf()),
+        )
+
+        faktasteg.nyTilFrontendDto(
+            kravgrunnlag = kravgrunnlag,
+            revurdering = revurdering,
+            varselbrev = null,
+            klokke = SystemKlokke,
+        ).shouldNotBeNull {
+            usikker4xRettsgebyr shouldBe true
+            rettsgebyrÅrFraSaksbehandler shouldBe null
+        }
+
+        val exception = shouldThrow<ModellFeil.UgyldigOperasjonException> {
+            faktasteg.erUnder4xRettsgebyr(
+                sisteKravgrunnlagDato = kravgrunnlag.perioder().maxOf { it.periode().tom },
+                beløpTilbakekreves = kravgrunnlag.feilutbetaltBeløpForAllePerioder().toInt(),
+                sporing = Sporing("", ""),
+            )
+        }
+
+        exception.melding shouldBe "Rettsgebyr året kreves"
     }
 }

@@ -41,6 +41,12 @@ object FaktavurderingEntityMapper : Entity<FaktastegEntity, UUID, UUID>(
         FieldConverter.BooleanConverter.required(),
     )
 
+    val rettsgebyrÅrFraSaksbehandler = field(
+        "rettsgebyr_år_fra_saksbehandler",
+        FaktastegEntity::rettsgebyrÅrFraSaksbehandler,
+        FieldConverter.IntConverter,
+    )
+
     fun map(
         resultSet: ResultSet,
         perioder: List<FaktaPeriodeEntity>,
@@ -55,6 +61,7 @@ object FaktavurderingEntityMapper : Entity<FaktastegEntity, UUID, UUID>(
             vurderingAvBrukersUttalelse = resultSet[vurderingAvBrukersUttalelse],
             oppdaget = oppdaget,
             trengerNyVurdering = resultSet[trengerNyVurdering],
+            rettsgebyrÅrFraSaksbehandler = resultSet[rettsgebyrÅrFraSaksbehandler],
         )
     }
 

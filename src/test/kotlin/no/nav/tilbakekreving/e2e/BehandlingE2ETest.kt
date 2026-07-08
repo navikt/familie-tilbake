@@ -625,6 +625,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
                             beskrivelse = "Beskrivelse av oppdagelse",
                         ),
                     ),
+                    rettsgebyrÅrFraSaksbehandler = null,
                 ),
             ).statusCode shouldBe HttpStatus.OK
         }
@@ -659,6 +660,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
                     vurdering = VurderingDto(
                         årsak = "årsak",
                     ),
+                    rettsgebyrÅrFraSaksbehandler = null,
                 ),
             ).statusCode shouldBe HttpStatus.OK
         }
@@ -710,6 +712,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
                 behandlingId = behandlingId.toString(),
                 oppdaterFaktaOmFeilutbetalingDto = OppdaterFaktaOmFeilutbetalingDto(
                     perioder = faktaPerioder,
+                    rettsgebyrÅrFraSaksbehandler = null,
                 ),
             ).statusCode shouldBe HttpStatus.OK
         }
@@ -765,6 +768,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
                             beskrivelse = "Beskrivelse av oppdagelse",
                         ),
                     ),
+                    rettsgebyrÅrFraSaksbehandler = null,
                 ),
             ).statusCode shouldBe HttpStatus.OK
         }

@@ -49,6 +49,7 @@ object BehandlingsstegGenerator {
                     beskrivelse = "Beskrivelse",
                 ),
             ),
+            rettsgebyrÅrFraSaksbehandler = null,
         )
     }
 

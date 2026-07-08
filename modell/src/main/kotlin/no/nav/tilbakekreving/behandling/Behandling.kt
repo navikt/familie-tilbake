@@ -592,6 +592,7 @@ class Behandling internal constructor(
             oppdaget: OppdagetDto?,
             årsak: String?,
             perioder: List<OppdaterFaktaPeriodeDto>?,
+            rettsgebyrÅrFraSaksbehandler: Int?,
         ) {
             validerBehandlingstatus(faktasteg, context.klokke)
             if (oppdaget != null) {
@@ -603,6 +604,10 @@ class Behandling internal constructor(
             if (perioder != null) {
                 faktasteg.vurder(perioder)
             }
+            if (rettsgebyrÅrFraSaksbehandler != null) {
+                faktasteg.vurder(rettsgebyrÅrFraSaksbehandler)
+            }
+
             oppdaterBehandler(context)
 
             context.logg(Behandlingsloggstype.FAKTA_VURDERT)
@@ -863,6 +868,11 @@ class Behandling internal constructor(
                 )
             },
             momenterReduksjonGodTro = emptyList(),
+            erUnder4xRettsgebyr = faktasteg.erUnder4xRettsgebyr(
+                sisteKravgrunnlagDato = kravgrunnlag.entry.perioder().maxOf { it.periode().tom },
+                beløpTilbakekreves = kravgrunnlag.entry.feilutbetaltBeløpForAllePerioder().toInt(),
+                sporingsinformasjon(),
+            ),
         )
     }
 

@@ -16,6 +16,7 @@ data class FaktastegEntity(
     val vurderingAvBrukersUttalelse: String?,
     val oppdaget: OppdagetEntity?,
     val trengerNyVurdering: Boolean,
+    val rettsgebyrÅrFraSaksbehandler: Int?,
 ) {
     fun fraEntity(
         brevHistorikk: BrevHistorikk,
@@ -41,6 +42,7 @@ data class FaktastegEntity(
             },
             oppdaget = oppdaget?.fraEntity() ?: Faktasteg.Vurdering.Oppdaget.IkkeVurdert,
         ),
+        _rettsgebyrÅrFraSaksbehandler = rettsgebyrÅrFraSaksbehandler,
     )
 
     enum class Uttalelse {
