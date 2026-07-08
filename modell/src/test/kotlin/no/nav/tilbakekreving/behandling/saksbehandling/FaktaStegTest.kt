@@ -450,7 +450,7 @@ class FaktaStegTest {
     }
 
     @Test
-    fun `kaste exception når det er usikker 4x rettsgebyr og saksbehandler ikke vurdert rettsgebyr året`() {
+    fun `kaster exception når det er usikker 4x rettsgebyr og saksbehandler har ikke vurdert rettsgebyr-året`() {
         val revurdering = eksternFagsakBehandling()
         val kravgrunnlag = kravgrunnlag(
             perioder = listOf(
