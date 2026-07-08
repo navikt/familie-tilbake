@@ -24,7 +24,7 @@ tilbakekreving:
       Arkivering: false
       FjernUttalelsesfrist: true
       OppdragRestClient: true
-      ForhandsvarselTypst: true
+      ForhandsvarselTypst: false
   tilgangsstyring:
     grupper:
       ts:

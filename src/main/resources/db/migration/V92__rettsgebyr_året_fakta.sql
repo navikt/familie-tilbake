@@ -1,1 +1,1 @@
-ALTER TABLE tilbakekreving_faktavurdering ADD COLUMN rettsgebyr_år_fra_saksbehandler VARCHAR;
+ALTER TABLE tilbakekreving_faktavurdering ADD COLUMN rettsgebyr_år_fra_saksbehandler INTEGER DEFAULT NULL;
