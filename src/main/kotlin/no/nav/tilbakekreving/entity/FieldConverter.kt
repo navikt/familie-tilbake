@@ -207,7 +207,8 @@ interface FieldConverter<T, DbPrimitive> {
         override fun convert(value: Int?): Int? = value
 
         override fun convert(resultSet: ResultSet, column: String): Int? {
-            return resultSet.getInt(column)
+            val value = resultSet.getInt(column)
+            return if (resultSet.wasNull()) null else value
         }
 
         override fun setColumn(index: Int, preparedStatement: PreparedStatement, value: Int?) {
