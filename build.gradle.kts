@@ -58,7 +58,7 @@ subprojects {
     dependencies {
         testImplementation("org.junit.jupiter:junit-jupiter:6.1.1")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-        testImplementation("io.kotest:kotest-assertions-core:6.2.1")
+        testImplementation("io.kotest:kotest-assertions-core:6.2.2")
     }
 
     tasks.test {
@@ -181,7 +181,7 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson-jvm:$ktorVersion")
-    implementation("com.google.cloud:google-cloud-bigquery:2.67.0")
+    implementation("com.google.cloud:google-cloud-bigquery:2.68.0")
     implementation("org.apache.httpcomponents.client5:httpclient5")
     implementation("org.apache.httpcomponents.core5:httpcore5")
     implementation("org.apache.httpcomponents.core5:httpcore5-h2")
@@ -247,7 +247,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     testImplementation("io.mockk:mockk-jvm:1.14.11")
-    testImplementation("io.kotest:kotest-assertions-core-jvm:6.2.1")
+    testImplementation("io.kotest:kotest-assertions-core-jvm:6.2.2")
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
