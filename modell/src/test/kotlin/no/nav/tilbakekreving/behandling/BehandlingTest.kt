@@ -3,6 +3,8 @@ package no.nav.tilbakekreving.behandling
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
+import no.nav.tilbakekreving.LesContext
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvNav
 import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
 import no.nav.tilbakekreving.api.v1.dto.Totrinnsstegsinfo
@@ -21,6 +23,7 @@ import no.nav.tilbakekreving.foreldelseVurdering
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
+import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingIkkeVurdertDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.saksbehandler.Behandler
@@ -264,5 +267,36 @@ class BehandlingTest {
             behandling.medSaksbehandling(saksbehandlerContext()) { foreslåVedtak() }
         }
         exception.message shouldBe "Du må gjøre en ny vurdering av fakta, foreldelse og vilkår før du kan sende vedtaket til godkjenning hos beslutter"
+    }
+
+    @Test
+    fun `henter riktig vilkårsvurdering når det ikke er vurdert enda gjennom ny DTO`() {
+        val behandling = behandling()
+        val saksbehandlerContext = saksbehandlerContext()
+        behandling.medSaksbehandling(saksbehandlerContext) {
+            vurderFakta(faktastegVurdering())
+            lagreForhåndsvarselUnntak(
+                BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
+                "Trenger ikke forhåndsvarsel i test lol",
+            )
+            vurderForeldelse(periode, foreldelseVurdering())
+        }
+
+        behandling.vilkårsvurderingDto(
+            LesContext(
+                behandler = saksbehandlerContext.behandler,
+                features = saksbehandlerContext.features,
+                klokke = saksbehandlerContext.klokke,
+            ),
+        ).shouldNotBeNull {
+            ferdigvurdert shouldBe false
+            erUnder4xRettsgebyr shouldBe true
+            vilkårsperioder.size shouldBe 1
+            vilkårsperioder.first().feilutbetaltBeløp shouldBe 2000
+            vilkårsperioder.first().delresultat shouldBe null
+            vilkårsperioder.first().fakta.rettsligGrunnlag.size shouldBe 0
+            vilkårsperioder.first().simulertBeløp shouldBe null
+            vilkårsperioder.first().vilkårsvurdering.valg.shouldBeInstanceOf<VilkaarsvurderingIkkeVurdertDto>()
+        }
     }
 }
