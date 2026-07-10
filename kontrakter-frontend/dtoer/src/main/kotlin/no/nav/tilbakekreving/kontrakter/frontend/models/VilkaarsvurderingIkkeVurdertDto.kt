@@ -1,5 +1,5 @@
 package no.nav.tilbakekreving.kontrakter.frontend.models
 
-typealias ForstoEllerBurdeForstaattDto = VilkaarsvurderingIkkeVurdertDto
+class ForstoEllerBurdeForstaattDto : VilkaarsvurderingValgDto
 
 class VilkaarsvurderingIkkeVurdertDto : VilkaarsvurderingValgDto

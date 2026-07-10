@@ -41,6 +41,8 @@ import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
 import no.nav.tilbakekreving.behov.VedtaksbrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.VedtaksbrevJournalføringBehov
 import no.nav.tilbakekreving.beregning.Beregning
+import no.nav.tilbakekreving.beregning.delperiode.Delperiode
+import no.nav.tilbakekreving.beregning.isZero
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
 import no.nav.tilbakekreving.breeeev.Signatur
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
@@ -70,7 +72,10 @@ import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.ForaarsaketAvMottakerDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.ForstoEllerBurdeForstaattDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.GodTroDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.MomentDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
@@ -79,8 +84,11 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.SammenslaaingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsperiodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingIkkeVurdertDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.GodTroReduksjonType
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
@@ -849,25 +857,11 @@ class Behandling internal constructor(
         val beregning = lagBeregning().beregn()
         return VilkaarDto(
             vilkårsperioder = vilkårsvurderingsteg.tilFrontendDto().map { vurdering ->
-                val sammenslåttPeriode = vurdering.periode.fom til vurdering.periode.tom
-                VilkaarsperiodeDto(
-                    feilutbetaltBeløp = kravgrunnlag.entry.totaltBeløpFor(sammenslåttPeriode, eksternFagsakRevurdering.entry).toInt(),
-                    delresultat = VilkaarsperiodeDto.Delresultat.DELVIS_TILBAKEKREVING,
-                    fakta = FaktaDto(
-                        rettsligGrunnlag = emptyList(),
-                    ),
-                    simulertBeløp = beregning.filter { it.periode in sammenslåttPeriode }.sumOf { it.tilbakekrevesBruttoMedRenter() }.toInt(),
-                    vilkårsvurdering = vurdering,
-                )
+                tilVilkaarsperiodeDto(vurdering, beregning)
             },
             ferdigvurdert = vilkårsvurderingsteg.erFullstendig(lesecontext.klokke),
-            momenterSærligeGrunner = SærligGrunnType.entries.map {
-                MomentDto(
-                    moment = it.name,
-                    beskrivelse = it.navn,
-                )
-            },
-            momenterReduksjonGodTro = emptyList(),
+            momenterSærligeGrunner = SærligGrunnType.entries.map { MomentDto(moment = it.name, beskrivelse = it.navn) },
+            momenterReduksjonGodTro = GodTroReduksjonType.entries.map { MomentDto(moment = it.name, beskrivelse = it.navn) },
             erUnder4xRettsgebyr = faktasteg.erUnder4xRettsgebyr(
                 sisteKravgrunnlagDato = kravgrunnlag.entry.perioder().maxOf { it.periode().tom },
                 beløpTilbakekreves = kravgrunnlag.entry.feilutbetaltBeløpForAllePerioder().toInt(),
@@ -875,6 +869,47 @@ class Behandling internal constructor(
             ),
         )
     }
+
+    private fun tilVilkaarsperiodeDto(
+        vurdering: VilkaarsvurderingDto,
+        beregning: List<Delperiode<out Delperiode.Beløp>>,
+    ): VilkaarsperiodeDto {
+        val sammenslåttPeriode = vurdering.periode.fom til vurdering.periode.tom
+        val simulertBeløp = beregning.filter { it.periode in sammenslåttPeriode }.sumOf { it.tilbakekrevesBruttoMedRenter() }
+        val totaltBeløpForPerioden = kravgrunnlag.entry.totaltBeløpFor(sammenslåttPeriode, eksternFagsakRevurdering.entry)
+        val fakta = FaktaDto(rettsligGrunnlag = emptyList())
+        return when (vurdering.valg) {
+            is VilkaarsvurderingIkkeVurdertDto -> VilkaarsperiodeDto(
+                feilutbetaltBeløp = totaltBeløpForPerioden.toInt(),
+                delresultat = null,
+                fakta = fakta,
+                simulertBeløp = null,
+                vilkårsvurdering = VilkaarsvurderingDto(
+                    id = vurdering.id,
+                    periode = vurdering.periode,
+                    delbarePerioder = vurdering.delbarePerioder,
+                    valg = VilkaarsvurderingIkkeVurdertDto(),
+                ),
+            )
+            is ForaarsaketAvMottakerDto,
+            is ForstoEllerBurdeForstaattDto,
+            is GodTroDto,
+            -> VilkaarsperiodeDto(
+                feilutbetaltBeløp = totaltBeløpForPerioden.toInt(),
+                delresultat = utledDelresultat(simulertBeløp, totaltBeløpForPerioden),
+                fakta = fakta,
+                simulertBeløp = simulertBeløp.toInt(),
+                vilkårsvurdering = vurdering,
+            )
+        }
+    }
+
+    private fun utledDelresultat(simulertBeløp: BigDecimal, totaltBeløp: BigDecimal): VilkaarsperiodeDto.Delresultat =
+        when {
+            simulertBeløp.isZero() -> VilkaarsperiodeDto.Delresultat.INGEN_TILBAKEKREVING
+            simulertBeløp == totaltBeløp -> VilkaarsperiodeDto.Delresultat.FULL_TILBAKEKREVING
+            else -> VilkaarsperiodeDto.Delresultat.DELVIS_TILBAKEKREVING
+        }
 
     companion object {
         internal fun nyBehandling(
