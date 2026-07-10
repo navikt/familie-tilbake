@@ -41,6 +41,7 @@ import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
 import no.nav.tilbakekreving.behov.VedtaksbrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.VedtaksbrevJournalføringBehov
 import no.nav.tilbakekreving.beregning.Beregning
+import no.nav.tilbakekreving.beregning.delperiode.Delperiode
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
 import no.nav.tilbakekreving.breeeev.Signatur
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
@@ -79,6 +80,8 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.SammenslaaingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsperiodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingIkkeVurdertDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingValgDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
@@ -856,7 +859,7 @@ class Behandling internal constructor(
                     fakta = FaktaDto(
                         rettsligGrunnlag = emptyList(),
                     ),
-                    simulertBeløp = beregning.filter { it.periode in sammenslåttPeriode }.sumOf { it.tilbakekrevesBruttoMedRenter() }.toInt(),
+                    simulertBeløp = simulertBeløp(vurdering.valg, sammenslåttPeriode, beregning),
                     vilkårsvurdering = vurdering,
                 )
             },
@@ -874,6 +877,18 @@ class Behandling internal constructor(
                 sporingsinformasjon(),
             ),
         )
+    }
+
+    private fun simulertBeløp(
+        valg: VilkaarsvurderingValgDto,
+        periode: Datoperiode,
+        beregning: List<Delperiode<out Delperiode.Beløp>>,
+    ): Int? {
+        if (valg is VilkaarsvurderingIkkeVurdertDto) return null
+        return beregning
+            .filter { it.periode in periode }
+            .sumOf { it.tilbakekrevesBruttoMedRenter() }
+            .toInt()
     }
 
     companion object {

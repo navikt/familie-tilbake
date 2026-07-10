@@ -89,6 +89,24 @@ class BehandlingTest {
     }
 
     @Test
+    fun `vilkårsvurderingDto - simulertBeløp er null før vurdering og satt etter vurdering`() {
+        val behandling = behandling()
+        behandling.medSaksbehandling(saksbehandlerContext()) {
+            lagreUttalelse(UttalelseVurdering.JA, null, null)
+            vurderFakta(faktastegVurdering(periode))
+            vurderForeldelse(periode, foreldelseVurdering())
+
+            behandling.vilkårsvurderingDto(saksbehandlerContext()).vilkårsperioder
+                .forEach { it.simulertBeløp shouldBe null }
+
+            vurderVilkår(periode, forårsaketAvNav().burdeForstått(aktsomhet = forsettelig()))
+
+            behandling.vilkårsvurderingDto(saksbehandlerContext()).vilkårsperioder
+                .forEach { it.simulertBeløp.shouldNotBeNull() }
+        }
+    }
+
+    @Test
     fun `vedtak kan endres etter alle tilbakeførte vurderinger er gjennomgått`() {
         val behandling = behandling()
         behandling.medSaksbehandling(saksbehandlerContext()) {
