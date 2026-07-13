@@ -46,6 +46,7 @@ data class AktsomhetsvurderingEntity(
                 NivåAvForståelse.Forstod(
                     begrunnelseMottakersForståelse = requireNotNull(mottakersForståelse) { "mottakersForståelse kreves i FORSTOD" }.begrunnelse,
                     begrunnelse = requireNotNull(begrunnelse) { "begrunnesle kreves i FORSTOD_ELLER_BURDE_FORSTÅTT " },
+                    kanUnnlates4XRettsgebyr = requireNotNull(kanUnnlates) { "forårsaket av bruker trenger vurdering om beløp kan unnlates" }.fraEntity(særligGrunner),
                 )
             }
 

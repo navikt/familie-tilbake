@@ -69,6 +69,7 @@ object VilkårsvurderingMapperV2 {
                     Aktsomhet.FORSETT -> NivåAvForståelse.Forstod(
                         begrunnelseMottakersForståelse = aktsomhet.begrunnelse,
                         begrunnelse = periode.begrunnelse,
+                        KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(periode.særligeGrunner()),
                     )
 
                     Aktsomhet.GROV_UAKTSOMHET -> NivåAvForståelse.BurdeForstått(

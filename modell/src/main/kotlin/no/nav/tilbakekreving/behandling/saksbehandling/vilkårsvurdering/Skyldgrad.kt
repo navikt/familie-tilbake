@@ -54,7 +54,6 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
 
         override fun tilNyFrontendDto(): VilkaarsvurderingValgDto {
             return ForaarsaketAvMottakerDto(
-                begrunnelse = begrunnelse,
                 aktsomhet = UaktsomtDto(
                     begrunnelse = begrunnelseAktsomhet,
                     unnlatelse = kanUnnlates4XRettsgebyr.tilFrontendDto(),
@@ -129,7 +128,6 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
 
         override fun tilNyFrontendDto(): VilkaarsvurderingValgDto {
             return ForaarsaketAvMottakerDto(
-                begrunnelse = begrunnelse,
                 aktsomhet = GrovtUaktsomtDto(
                     begrunnelse = begrunnelseAktsomhet,
                     erDetSærligeGrunner = reduksjonSærligeGrunner.tilFrontendDto(),
@@ -203,7 +201,6 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
 
         override fun tilNyFrontendDto(): VilkaarsvurderingValgDto {
             return ForaarsaketAvMottakerDto(
-                begrunnelse = begrunnelse,
                 aktsomhet = ForsettligDto(
                     begrunnelse = begrunnelseAktsomhet,
                 ),

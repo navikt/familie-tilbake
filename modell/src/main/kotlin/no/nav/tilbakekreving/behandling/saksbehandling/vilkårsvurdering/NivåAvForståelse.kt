@@ -14,7 +14,9 @@ import no.nav.tilbakekreving.entities.GodTroEntity
 import no.nav.tilbakekreving.entities.MottakersForståelseEntity
 import no.nav.tilbakekreving.entities.VurderingType
 import no.nav.tilbakekreving.kontrakter.frontend.models.BelopIBeholdDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.BurdeForstaattDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.DelerDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.ForstoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForstoEllerBurdeForstaattDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.GodTroDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.IngentingDto
@@ -31,15 +33,21 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
     class Forstod(
         val begrunnelseMottakersForståelse: String,
         override val begrunnelse: String,
+        private val kanUnnlates4XRettsgebyr: KanUnnlates4xRettsgebyr,
     ) : NivåAvForståelse {
         override fun vurderingstype(): Vurdering = Type.Forstod
 
-        override fun reduksjon(): Reduksjon = Reduksjon.FullstendigTilbakekreving()
+        override fun reduksjon(): Reduksjon = kanUnnlates4XRettsgebyr.reduksjon()
 
         override fun renter(): Boolean = false
 
         override fun tilNyFrontendDto(): VilkaarsvurderingValgDto {
-            return ForstoEllerBurdeForstaattDto()
+            return ForstoEllerBurdeForstaattDto(
+                forståelse = ForstoDto(
+                    begrunnelse = begrunnelseMottakersForståelse,
+                    erDetSærligeGrunner = kanUnnlates4XRettsgebyr.særligeGrunner()!!.tilFrontendDto(),
+                ),
+            )
         }
 
         override fun tilFrontendDto(): VurdertVilkårsvurderingsresultatDto {
@@ -84,8 +92,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 beløpIBehold = null,
                 begrunnelse = begrunnelse,
                 aktsomhet = null,
-                kanUnnlates = null,
-                særligGrunner = null,
+                kanUnnlates = kanUnnlates4XRettsgebyr.tilEntity(),
+                særligGrunner = kanUnnlates4XRettsgebyr.særligeGrunner()?.tilEntity(periodeRef),
                 feilaktigEllerMangelfull = null,
                 forrigePeriodeId = null,
             )
@@ -126,7 +134,13 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             )
         }
 
-        override fun tilNyFrontendDto(): VilkaarsvurderingValgDto = ForstoEllerBurdeForstaattDto()
+        override fun tilNyFrontendDto(): VilkaarsvurderingValgDto =
+            ForstoEllerBurdeForstaattDto(
+                forståelse = BurdeForstaattDto(
+                    begrunnelse = begrunnelseMottakersForståelse,
+                    erDetSærligeGrunner = kanUnnlates4XRettsgebyr.særligeGrunner()!!.tilFrontendDto(),
+                ),
+            )
 
         override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
             return VurdertUtbetaling.Vilkårsvurdering(

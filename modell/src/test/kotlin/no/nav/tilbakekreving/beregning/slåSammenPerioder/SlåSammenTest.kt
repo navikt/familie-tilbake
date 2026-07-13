@@ -5,7 +5,9 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonSærligeGrunner
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.eksternFagsakBehandling
@@ -114,6 +116,13 @@ class SlåSammenTest {
             vurdering = NivåAvForståelse.Forstod(
                 begrunnelse = "Begrunnelse",
                 begrunnelseMottakersForståelse = "Begrunnelse",
+                kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(
+                    ReduksjonSærligeGrunner(
+                        begrunnelse = "",
+                        grunner = emptySet(),
+                        skalReduseres = ReduksjonSærligeGrunner.SkalReduseres.Nei,
+                    ),
+                ),
             ),
         )
 
