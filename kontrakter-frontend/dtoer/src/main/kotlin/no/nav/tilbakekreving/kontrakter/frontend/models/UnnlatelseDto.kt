@@ -12,5 +12,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 @JsonSubTypes(
     JsonSubTypes.Type(value = SkalIkkeUnnlatesDto::class, name = "skalIkkeUnnlates"),
     JsonSubTypes.Type(value = SkalUnnlatesDto::class, name = "skalUnnlates"),
+    JsonSubTypes.Type(value = IkkeAktueltDto::class, name = "ikkeAktuelt"),
 )
 sealed interface UnnlatelseDto

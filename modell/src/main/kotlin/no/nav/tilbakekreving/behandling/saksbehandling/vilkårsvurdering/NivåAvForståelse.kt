@@ -19,6 +19,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.DelerDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForstoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForstoEllerBurdeForstaattDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.GodTroDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.IkkeAktueltDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.IngentingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SkalIkkeReduseresDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingValgDto
@@ -45,7 +46,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             return ForstoEllerBurdeForstaattDto(
                 forståelse = ForstoDto(
                     begrunnelse = begrunnelseMottakersForståelse,
-                    erDetSærligeGrunner = kanUnnlates4XRettsgebyr.særligeGrunner()!!.tilFrontendDto(),
+                    unnlatelse = IkkeAktueltDto(kanUnnlates4XRettsgebyr.særligeGrunner()!!.tilFrontendDto()),
                 ),
             )
         }
@@ -138,7 +139,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             ForstoEllerBurdeForstaattDto(
                 forståelse = BurdeForstaattDto(
                     begrunnelse = begrunnelseMottakersForståelse,
-                    erDetSærligeGrunner = kanUnnlates4XRettsgebyr.særligeGrunner()!!.tilFrontendDto(),
+                    unnlatelse = kanUnnlates4XRettsgebyr.tilFrontendDto(),
                 ),
             )
 
