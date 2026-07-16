@@ -69,13 +69,21 @@ object VilkårsvurderingMapperV2 {
                     Aktsomhet.FORSETT -> NivåAvForståelse.Forstod(
                         begrunnelseMottakersForståelse = aktsomhet.begrunnelse,
                         begrunnelse = periode.begrunnelse,
-                        KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(periode.særligeGrunner()),
+                        kanUnnlates4XRettsgebyr = when (aktsomhet.unnlates4Rettsgebyr) {
+                            SkalUnnlates.UNNLATES -> KanUnnlates4xRettsgebyr.Unnlates
+                            SkalUnnlates.TILBAKEKREVES -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(periode.særligeGrunner())
+                            SkalUnnlates.OVER_4_RETTSGEBYR, null -> KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(periode.særligeGrunner())
+                        },
                     )
 
                     Aktsomhet.GROV_UAKTSOMHET -> NivåAvForståelse.BurdeForstått(
                         grad = NivåAvForståelse.Grad.MÅTTE_FORSTÅ,
                         begrunnelseMottakersForståelse = aktsomhet.begrunnelse,
-                        kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(periode.særligeGrunner()),
+                        kanUnnlates4XRettsgebyr = when (aktsomhet.unnlates4Rettsgebyr) {
+                            SkalUnnlates.UNNLATES -> KanUnnlates4xRettsgebyr.Unnlates
+                            SkalUnnlates.TILBAKEKREVES -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(periode.særligeGrunner())
+                            SkalUnnlates.OVER_4_RETTSGEBYR, null -> KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(periode.særligeGrunner())
+                        },
                         begrunnelse = periode.begrunnelse,
                     )
 
