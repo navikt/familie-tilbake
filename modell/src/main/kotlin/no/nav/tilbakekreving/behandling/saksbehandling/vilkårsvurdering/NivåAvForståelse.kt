@@ -46,7 +46,10 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             return ForstoEllerBurdeForstaattDto(
                 forståelse = ForstoDto(
                     begrunnelse = begrunnelseMottakersForståelse,
-                    unnlatelse = IkkeAktueltDto(kanUnnlates4XRettsgebyr.særligeGrunner()!!.tilFrontendDto()),
+                    unnlatelse = when (kanUnnlates4XRettsgebyr) {
+                        is KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr -> IkkeAktueltDto(kanUnnlates4XRettsgebyr.særligeGrunner().tilFrontendDto())
+                        else -> kanUnnlates4XRettsgebyr.tilFrontendDto()
+                    },
                 ),
             )
         }
