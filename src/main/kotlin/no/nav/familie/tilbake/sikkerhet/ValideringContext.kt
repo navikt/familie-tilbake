@@ -245,4 +245,9 @@ enum class ValideringContext(
         auditLoggerEvent = AuditLoggerEvent.UPDATE,
         handling = "Slår sammen vilkårsvurderingsperioder",
     ),
+    LagreVilkårsvurdering(
+        minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+        auditLoggerEvent = AuditLoggerEvent.UPDATE,
+        handling = "Lagrer vilkårsvurdering",
+    ),
 }
