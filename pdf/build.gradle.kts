@@ -1,4 +1,4 @@
-val openHtmlToPdfVersion = "1.1.37"
+val openHtmlToPdfVersion = "1.1.41"
 val veraPdfVersion = "1.30.2"
 
 dependencies {
@@ -6,7 +6,7 @@ dependencies {
     api(project(":kontrakter-intern"))
     api(project(":felles"))
 
-    api("com.github.jknack:handlebars:4.5.2")
+    api("com.github.jknack:handlebars:4.5.3")
     api("com.github.jknack:handlebars-jackson2:4.3.1")
 
     api("io.github.openhtmltopdf:openhtmltopdf-core:$openHtmlToPdfVersion")
