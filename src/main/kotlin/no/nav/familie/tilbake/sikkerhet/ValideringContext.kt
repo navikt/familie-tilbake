@@ -140,6 +140,11 @@ enum class ValideringContext(
         auditLoggerEvent = AuditLoggerEvent.ACCESS,
         handling = "Oppdaterer kravgrunnlag på behandling som er påbegynt",
     ),
+    ForvaltningHentKravgrunnlagTilBurdeForstått(
+        minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+        auditLoggerEvent = AuditLoggerEvent.ACCESS,
+        handling = "Henter kravgrunnlag til Burde-Forstått",
+    ),
     HentVedtaksbrevData(
         minimumBehandlerrolle = Behandlerrolle.VEILEDER,
         auditLoggerEvent = AuditLoggerEvent.ACCESS,

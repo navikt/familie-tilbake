@@ -4,6 +4,7 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
 import no.nav.familie.tilbake.sikkerhet.ValideringContext
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.config.ApplicationProperties
+import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.springframework.scheduling.annotation.Scheduled
@@ -47,5 +48,14 @@ class KravgrunnlagMediator(
             }
         }
         return resultater
+    }
+
+    fun hentKravgrunnlagTilBurdeForstått(fagsystemId: String): DetaljertKravgrunnlagDto {
+        val entity = kravgrunnlagBufferRepository.hentKravgrunnlagTilBurdeForstått(fagsystemId).firstOrNull()
+        return KravgrunnlagUtil.unmarshalKravgrunnlag(
+            requireNotNull(entity) {
+                "Det var enten mer enn 1 eller NULL kravgrunnlag"
+            }.kravgrunnlag,
+        )
     }
 }

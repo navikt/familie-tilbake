@@ -1,16 +1,25 @@
 package no.nav.familie.tilbake.api.forvaltning
 
 import io.swagger.v3.oas.annotations.Operation
+import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.forvaltning.ForvaltningPreprodService
 import no.nav.familie.tilbake.kontrakter.Ressurs
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
+import no.nav.familie.tilbake.sikkerhet.ValideringContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.tilbakekreving.FagsystemUtil
+import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagMediator
+import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import org.springframework.context.annotation.Profile
 import org.springframework.core.env.Environment
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -29,6 +38,7 @@ class ForvaltningPreprodController(
     private val environment: Environment,
     private val forvaltningPreprodService: ForvaltningPreprodService,
     private val tilgangskontrollService: TilgangskontrollService,
+    private val kravgrunnlagMediator: KravgrunnlagMediator,
 ) {
     @Operation(
         description =
@@ -65,5 +75,21 @@ class ForvaltningPreprodController(
         forvaltningPreprodService.validerKravgrunnlagOgBehandling(behandlingId, kravgrunnlag)
         forvaltningPreprodService.leggInnTestKravgrunnlag(kravgrunnlag)
         return Ressurs.success("OK")
+    }
+
+    @Operation(summary = "Henter kravgrunnlag til Burde-Forstått")
+    @GetMapping("/kravgrunnlag/{ytelsestype}/{fagsystemId}/burde-forstått")
+    fun hentKravgrunnlagTilBurdeForstått(
+        @PathVariable ytelsestype: YtelsestypeDTO,
+        @PathVariable fagsystemId: String,
+    ): ResponseEntity<DetaljertKravgrunnlagDto> {
+        tilgangskontrollService.validerTilgangTilbakekreving(
+            fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype),
+            fagsystemId = fagsystemId,
+            valideringContext = ValideringContext.ForvaltningHentKravgrunnlagTilBurdeForstått,
+            brukerIdent = null,
+            behandler = ContextService.hentBehandler(SecureLog.Context.utenBehandling(fagsystemId)),
+        )
+        return ResponseEntity.ok(kravgrunnlagMediator.hentKravgrunnlagTilBurdeForstått(fagsystemId))
     }
 }
