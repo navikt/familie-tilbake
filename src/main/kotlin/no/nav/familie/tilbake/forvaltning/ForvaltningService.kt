@@ -192,7 +192,7 @@ class ForvaltningService(
                 avsluttetDato = LocalDate.now(),
             ),
         )
-        bigQueryAdapterService.oppdaterBigQuery(oppdatertBehandling)
+        bigQueryAdapterService.oppdaterBigQuery(oppdatertBehandling, false)
         behandlingTilstandService.opprettSendingAvBehandlingenHenlagt(behandlingId, logContext)
 
         historikkService.lagHistorikkinnslag(

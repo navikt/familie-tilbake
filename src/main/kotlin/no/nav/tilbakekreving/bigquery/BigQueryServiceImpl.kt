@@ -41,6 +41,7 @@ class BigQueryServiceImpl(
             "behandlende_enhet_kode" to bigqueryData.enhetKode,
             "status" to bigqueryData.status,
             "resultat" to bigqueryData.resultat,
+            "har_tilleggsfrist" to bigqueryData.harTilleggsfrist,
         )
 
         val tableId = TableId.of(prosjektId, dataset, "bq_behandling")

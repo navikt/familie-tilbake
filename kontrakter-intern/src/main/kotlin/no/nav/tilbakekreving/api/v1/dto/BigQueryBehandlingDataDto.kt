@@ -14,4 +14,5 @@ data class BigQueryBehandlingDataDto(
     val enhetKode: String?,
     val status: String?,
     val resultat: String?,
+    val harTilleggsfrist: Boolean,
 )

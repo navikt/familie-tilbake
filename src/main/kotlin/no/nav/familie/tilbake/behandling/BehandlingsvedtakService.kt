@@ -40,7 +40,7 @@ class BehandlingsvedtakService(
                 behandlingsvedtak = behandlingsvedtak,
             )
         val oppdatertBehandling = behandlingRepository.update(behandling.copy(resultater = setOf(behandlingsresultat)))
-        bigQueryAdapterService.oppdaterBigQuery(oppdatertBehandling)
+        bigQueryAdapterService.oppdaterBigQuery(oppdatertBehandling, false)
 
         tellerService.tellVedtak(behandlingsresultatstype, behandling)
     }
@@ -58,7 +58,7 @@ class BehandlingsvedtakService(
             aktivBehandlingsresultat
                 .copy(behandlingsvedtak = behandlingsvedtak.copy(iverksettingsstatus = iverksettingsstatus))
         val oppdatertBehandling = behandlingRepository.update(behandling.copy(resultater = setOf(oppdatertBehandlingsresultat)))
-        bigQueryAdapterService.oppdaterBigQuery(oppdatertBehandling)
+        bigQueryAdapterService.oppdaterBigQuery(oppdatertBehandling, false)
         return oppdatertBehandling
     }
 

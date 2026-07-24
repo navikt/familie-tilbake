@@ -65,7 +65,7 @@ class BAKSPorteføljejusteringControllerTest {
             status = "Eksisterer",
         )
 
-        every { bigQueryAdapterService.oppdaterBigQuery(any()) } just runs
+        every { bigQueryAdapterService.oppdaterBigQuery(any(), any()) } just runs
     }
 
     @Test

@@ -117,6 +117,8 @@ class Foreldelsesteg(
 
     fun hjemlerForTilbakekreving() = vurdertePerioder.flatMap { it.vurdering.hjemlerForTilbakekreving() }.distinct()
 
+    fun harTilleggsfrist(): Boolean = vurdertePerioder.any { it.vurdering is Vurdering.Tilleggsfrist }
+
     private fun finnIdFor(periode: Datoperiode): UUID {
         // TODO: Ordentlig feilhåndtering i stedet for NoSuchElementException ved ugyldig periode
         return vurdertePerioder.single { it.periode == periode }.id
