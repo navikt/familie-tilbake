@@ -482,7 +482,7 @@ class BehandlingskontrollService(
         // Oppdaterer tilsvarende behandlingsstatus bortsett fra Avsluttet steg. Det håndteres separat av AvsluttBehandlingTask
         if (Behandlingssteg.AVSLUTTET != behandlingssteg) {
             val oppdatertBehandling = behandlingRepository.update(behandling.copy(status = behandlingssteg.behandlingsstatus))
-            bigQueryAdapterService.oppdaterBigQuery(oppdatertBehandling)
+            bigQueryAdapterService.oppdaterBigQuery(oppdatertBehandling, false)
         }
     }
 

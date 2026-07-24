@@ -15,7 +15,7 @@ class BigQueryAdapterService(
 ) {
     fun oppdaterBigQuery(
         behandling: Behandling,
-        harTilleggsfrist: Boolean = false,
+        harTilleggsfrist: Boolean,
     ) {
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingId(behandling.id).lastOrNull()
         val ytelsestype = fagsakService.finnFagsystemForBehandlingId(behandling.id).navn
