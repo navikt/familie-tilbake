@@ -4,6 +4,7 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.bigQuery.BigQueryAdapterService
+import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
@@ -18,6 +19,7 @@ import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeldelseDto
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
+import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
@@ -74,7 +76,9 @@ class Foreldelsessteg(
             info("Behandling $behandlingId er på ${Behandlingssteg.FORELDELSE} steg")
         }
         foreldelseService.lagreVurdertForeldelse(behandlingId, (behandlingsstegDto as BehandlingsstegForeldelseDto), logContext)
-        bigQueryAdapterService.loggTilleggsfrist(behandlingId.toString(), behandlingsstegDto)
+        val harTilleggsfrist = behandlingsstegDto.foreldetPerioder
+            .any { it.foreldelsesvurderingstype == Foreldelsesvurderingstype.TILLEGGSFRIST }
+        bigQueryAdapterService.oppdaterBigQuery(behandlingRepository.findByIdOrThrow(behandlingId), harTilleggsfrist)
 
         oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId, logContext)
 
