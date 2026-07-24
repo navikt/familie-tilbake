@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.behandling.steg
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
+import no.nav.familie.tilbake.bigQuery.BigQueryAdapterService
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
@@ -36,6 +37,7 @@ class Foreldelsessteg(
     private val oppgaveTaskService: OppgaveTaskService,
     private val behandlingRepository: BehandlingRepository,
     private val logService: LogService,
+    private val bigQueryAdapterService: BigQueryAdapterService,
 ) : IBehandlingssteg {
     private val log = TracedLogger.getLogger<Foreldelsessteg>()
 
@@ -72,6 +74,7 @@ class Foreldelsessteg(
             info("Behandling $behandlingId er på ${Behandlingssteg.FORELDELSE} steg")
         }
         foreldelseService.lagreVurdertForeldelse(behandlingId, (behandlingsstegDto as BehandlingsstegForeldelseDto), logContext)
+        bigQueryAdapterService.loggTilleggsfrist(behandlingId.toString(), behandlingsstegDto)
 
         oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId, logContext)
 

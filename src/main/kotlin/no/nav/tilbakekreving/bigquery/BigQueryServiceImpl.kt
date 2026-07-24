@@ -6,6 +6,7 @@ import com.google.cloud.bigquery.TableId
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.tilbakekreving.api.v1.dto.BigQueryBehandlingDataDto
+import no.nav.tilbakekreving.api.v1.dto.BigQueryTilleggsfristDto
 import no.nav.tilbakekreving.config.ApplicationProperties
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
@@ -58,6 +59,33 @@ class BigQueryServiceImpl(
         } catch (e: Exception) {
             logger.medContext(logContext) {
                 error("Kunne ikke utføre BigQuery INSERT", e)
+            }
+        }
+    }
+
+    override fun loggTilleggsfrist(data: BigQueryTilleggsfristDto) {
+        val radInnhold = mapOf(
+            "tid" to Instant.now().toString(),
+            "behandling_id" to data.behandlingId,
+            "antall_perioder_med_tilleggsfrist" to data.antallPerioderMedTilleggsfrist,
+            "perioder" to data.perioder.joinToString { "${it.fom}/${it.tom}" },
+        )
+
+        val tableId = TableId.of(prosjektId, dataset, "bq_tilleggsfrist")
+        val request = InsertAllRequest.newBuilder(tableId)
+            .addRow(radInnhold)
+            .build()
+
+        try {
+            val response = bigQuery.insertAll(request)
+            if (response.hasErrors()) {
+                logger.medContext(logContext) {
+                    error("Insert til BigQuery (tilleggsfrist) feilet: {}", response.insertErrors)
+                }
+            }
+        } catch (e: Exception) {
+            logger.medContext(logContext) {
+                error("Kunne ikke utføre BigQuery INSERT for tilleggsfrist", e)
             }
         }
     }
