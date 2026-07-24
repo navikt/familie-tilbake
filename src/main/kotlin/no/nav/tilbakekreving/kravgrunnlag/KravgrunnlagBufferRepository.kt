@@ -68,7 +68,7 @@ class KravgrunnlagBufferRepository(
         return jdbcTemplate.query("SELECT * FROM kravgrunnlag_buffer WHERE utenfor_scope=true AND fagsystem_id=?", Mapper, fagsystemId)
     }
 
-    fun hentKravgrunnlagTilBurdeForstått(fagsystemId: String): List<Entity> {
+    fun hentKravgrunnlagForBurdeForstått(fagsystemId: String): List<Entity> {
         return jdbcTemplate.query("SELECT * FROM kravgrunnlag_buffer WHERE fagsystem_id=? ORDER BY mottatt DESC LIMIT 1;", Mapper, fagsystemId)
     }
 

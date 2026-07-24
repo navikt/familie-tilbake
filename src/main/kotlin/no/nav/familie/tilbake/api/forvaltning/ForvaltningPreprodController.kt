@@ -79,17 +79,17 @@ class ForvaltningPreprodController(
 
     @Operation(summary = "Henter kravgrunnlag til Burde-Forstått")
     @GetMapping("/kravgrunnlag/{ytelsestype}/{fagsystemId}/burde-forstått")
-    fun hentKravgrunnlagTilBurdeForstått(
+    fun hentKravgrunnlagForBurdeForstått(
         @PathVariable ytelsestype: YtelsestypeDTO,
         @PathVariable fagsystemId: String,
     ): ResponseEntity<DetaljertKravgrunnlagDto> {
         tilgangskontrollService.validerTilgangTilbakekreving(
             fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype),
             fagsystemId = fagsystemId,
-            valideringContext = ValideringContext.ForvaltningHentKravgrunnlagTilBurdeForstått,
+            valideringContext = ValideringContext.ForvaltningHentKravgrunnlagForBurdeForstått,
             brukerIdent = null,
             behandler = ContextService.hentBehandler(SecureLog.Context.utenBehandling(fagsystemId)),
         )
-        return ResponseEntity.ok(kravgrunnlagMediator.hentKravgrunnlagTilBurdeForstått(fagsystemId))
+        return ResponseEntity.ok(kravgrunnlagMediator.hentKravgrunnlagForBurdeForstått(fagsystemId))
     }
 }

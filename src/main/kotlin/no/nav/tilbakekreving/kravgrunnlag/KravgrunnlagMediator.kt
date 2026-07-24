@@ -50,8 +50,8 @@ class KravgrunnlagMediator(
         return resultater
     }
 
-    fun hentKravgrunnlagTilBurdeForstått(fagsystemId: String): DetaljertKravgrunnlagDto {
-        val entity = kravgrunnlagBufferRepository.hentKravgrunnlagTilBurdeForstått(fagsystemId).firstOrNull()
+    fun hentKravgrunnlagForBurdeForstått(fagsystemId: String): DetaljertKravgrunnlagDto {
+        val entity = kravgrunnlagBufferRepository.hentKravgrunnlagForBurdeForstått(fagsystemId).firstOrNull()
         return KravgrunnlagUtil.unmarshalKravgrunnlag(
             requireNotNull(entity) {
                 "Det var enten mer enn 1 eller NULL kravgrunnlag"
