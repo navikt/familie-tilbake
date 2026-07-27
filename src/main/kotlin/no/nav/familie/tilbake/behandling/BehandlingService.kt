@@ -186,7 +186,7 @@ class BehandlingService(
         val revurdering =
             BehandlingMapper.tilDomeneBehandlingRevurdering(originalBehandling, opprettRevurderingDto.årsakstype, logContext)
         behandlingRepository.insert(revurdering)
-        bigQueryAdapterService.oppdaterBigQuery(revurdering)
+        bigQueryAdapterService.oppdaterBigQuery(revurdering, null)
 
         val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(opprettRevurderingDto.ytelsestype)
         historikkService.lagHistorikkinnslag(
@@ -383,7 +383,7 @@ class BehandlingService(
                 avsluttetDato = LocalDate.now(),
             ),
         )
-        bigQueryAdapterService.oppdaterBigQuery(oppdatertBehandling)
+        bigQueryAdapterService.oppdaterBigQuery(oppdatertBehandling, null)
 
         oppdaterAnsvarligSaksbehandler(behandlingId)
         behandlingTilstandService.opprettSendingAvBehandlingenHenlagt(behandlingId, logContext)
@@ -520,7 +520,7 @@ class BehandlingService(
                 behandlendeEnhetsNavn = enhet.navn,
             ),
         )
-        bigQueryAdapterService.oppdaterBigQuery(oppdatertBehandling)
+        bigQueryAdapterService.oppdaterBigQuery(oppdatertBehandling, null)
         oppdaterAnsvarligSaksbehandler(behandlingId)
 
         historikkService.lagHistorikkinnslag(
@@ -565,7 +565,7 @@ class BehandlingService(
                 avsluttetDato = LocalDate.now(),
             ),
         )
-        bigQueryAdapterService.oppdaterBigQuery(oppdatertBehandling)
+        bigQueryAdapterService.oppdaterBigQuery(oppdatertBehandling, null)
 
         behandlingskontrollService
             .oppdaterBehandlingsstegStatus(
@@ -676,7 +676,7 @@ class BehandlingService(
                 erAutomatiskOgFeatureTogglePå,
             )
         behandlingRepository.insert(behandling)
-        bigQueryAdapterService.oppdaterBigQuery(behandling)
+        bigQueryAdapterService.oppdaterBigQuery(behandling, null)
         return behandling
     }
 

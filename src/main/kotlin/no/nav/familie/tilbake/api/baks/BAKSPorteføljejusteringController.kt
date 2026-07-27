@@ -63,7 +63,7 @@ class BAKSPorteføljejusteringController(
                 behandlendeEnhetsNavn = nyEnhet.navn,
             ),
         )
-        bigQueryAdapterService.oppdaterBigQuery(oppdatertBehandling)
+        bigQueryAdapterService.oppdaterBigQuery(oppdatertBehandling, null)
 
         historikkService.lagHistorikkinnslag(
             behandlingId = behandling.id,

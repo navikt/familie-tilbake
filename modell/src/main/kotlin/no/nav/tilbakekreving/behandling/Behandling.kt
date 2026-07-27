@@ -137,6 +137,7 @@ class Behandling internal constructor(
             enhetKode = enhet?.kode,
             status = behandlingsstatus.gammelFrontendDTO.name,
             resultat = hentVedtaksresultat(klokke)?.name,
+            harTilleggsfrist = foreldelsesteg.harTilleggsfrist(),
         )
     }
 
