@@ -77,7 +77,7 @@ class ReduksjonSærligeGrunner(
                     særligeGrunnerFor = grunner.map { it.tilFrontendDto() },
                     prosentReduksjon = prosentdel,
                     begrunnelse = begrunnelse,
-                    annetBegrunnelse = null,
+                    annetBegrunnelse = (grunner.firstOrNull { it is SærligGrunn.Annet } as? SærligGrunn.Annet)?.begrunnelse,
                 )
             }
         }
@@ -99,7 +99,7 @@ class ReduksjonSærligeGrunner(
                 return NeiSaerligeGrunnerDto(
                     særligeGrunnerMot = grunner.map { it.tilFrontendDto() },
                     begrunnelse = begrunnelse,
-                    annetBegrunnelse = null,
+                    annetBegrunnelse = (grunner.firstOrNull { it is SærligGrunn.Annet } as? SærligGrunn.Annet)?.begrunnelse,
                 )
             }
         }
