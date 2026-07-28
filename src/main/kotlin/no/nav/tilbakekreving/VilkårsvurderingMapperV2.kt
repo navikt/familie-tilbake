@@ -107,7 +107,7 @@ object VilkårsvurderingMapperV2 {
             Vilkårsvurderingsresultat.GOD_TRO ->
                 NivåAvForståelse.GodTro(
                     beløpIBehold = when (periode.godTroDto!!.beløpErIBehold) {
-                        true -> NivåAvForståelse.GodTro.BeløpIBehold.Ja(periode.godTroDto!!.beløpTilbakekreves!!)
+                        true -> NivåAvForståelse.GodTro.BeløpIBehold.JaDelerIBehold(periode.godTroDto!!.beløpTilbakekreves!!)
                         false -> NivåAvForståelse.GodTro.BeløpIBehold.Nei
                     },
                     begrunnelse = periode.begrunnelse,

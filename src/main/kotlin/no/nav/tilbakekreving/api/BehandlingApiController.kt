@@ -34,6 +34,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDa
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDataUpdateDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingDto
+import no.nav.tilbakekreving.mapper.ForårsaketAvBrukerMapper
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.core.io.Resource
@@ -298,7 +299,7 @@ class BehandlingApiController(
         ) { tilbakekreving, context ->
             ResponseEntity.ok(
                 tilbakekreving.gjørSaksbehandling(behandlingId, context) {
-                    val vurdering = tilbakekrevingService.mapTilForårsaketAvBruker(vilkaarsvurderingDto, tilbakekreving)
+                    val vurdering = ForårsaketAvBrukerMapper.mapTilForårsaketAvBruker(vilkaarsvurderingDto, tilbakekreving)
                     lagreVilkårsvurdering(periodeId, vurdering)
                 },
             )
