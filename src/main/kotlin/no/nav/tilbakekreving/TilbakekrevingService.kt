@@ -62,8 +62,8 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.IkkeAktueltDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.IngentingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.JaSaerligeGrunnerDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.LogginnslagDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.MomentDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.NeiSaerligeGrunnerDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.SaerligeGrunnerDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SkalIkkeUnnlatesDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SkalUnnlatesDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UaktsomtDto
@@ -422,76 +422,49 @@ class TilbakekrevingService(
         return tilbakekrevingRepository.hentBehandlingslogg(tilbakekrevingId).tilFrontend()
     }
 
-    fun mapTilForårsaketAvBruker(vilkaarsvurderingDto: VilkaarsvurderingDto, tilbakekreving: Tilbakekreving): ForårsaketAvBruker {
+    fun mapTilForårsaketAvBruker(
+        vilkaarsvurderingDto: VilkaarsvurderingDto,
+        tilbakekreving: Tilbakekreving,
+    ): ForårsaketAvBruker {
         val logContext = SecureLog.Context.fra(tilbakekreving)
-        val valg = vilkaarsvurderingDto.valg
-        val vurdering: ForårsaketAvBruker = when (valg) {
-            is ForstoEllerBurdeForstaattDto -> {
-                val forståelse = valg.forståelse
-                when (forståelse) {
-                    is ForstoDto -> NivåAvForståelse.Forstod(
-                        begrunnelseMottakersForståelse = forståelse.begrunnelse,
-                        begrunnelse = vilkaarsvurderingDto.begrunnelse,
-                        kanUnnlates4XRettsgebyr = when (forståelse.unnlatelse) {
-                            is IkkeAktueltDto, is SkalIkkeUnnlatesDto -> mapTilSkalIkkeUnnlatesEllerOver4xxRettsgebyr(forståelse.unnlatelse, logContext = logContext)
-                            is SkalUnnlatesDto -> KanUnnlates4xRettsgebyr.Unnlates
-                        },
-                    )
+        val begrunnelse = vilkaarsvurderingDto.begrunnelse
 
-                    is BurdeForstaattDto -> NivåAvForståelse.BurdeForstått(
-                        grad = NivåAvForståelse.Grad.BURDE_FORSTÅTT,
-                        begrunnelseMottakersForståelse = forståelse.begrunnelse,
-                        kanUnnlates4XRettsgebyr = when (forståelse.unnlatelse) {
-                            is IkkeAktueltDto, is SkalIkkeUnnlatesDto -> mapTilSkalIkkeUnnlatesEllerOver4xxRettsgebyr(forståelse.unnlatelse, logContext = logContext)
-                            is SkalUnnlatesDto -> KanUnnlates4xRettsgebyr.Unnlates
-                        },
-                        begrunnelse = vilkaarsvurderingDto.begrunnelse,
-                    )
-                }
+        return when (val valg = vilkaarsvurderingDto.valg) {
+            is ForstoEllerBurdeForstaattDto -> when (val forståelse = valg.forståelse) {
+                is ForstoDto -> NivåAvForståelse.Forstod(
+                    begrunnelseMottakersForståelse = forståelse.begrunnelse,
+                    begrunnelse = begrunnelse,
+                    kanUnnlates4XRettsgebyr = mapUnnlatelse(forståelse.unnlatelse, logContext),
+                )
+
+                is BurdeForstaattDto -> NivåAvForståelse.BurdeForstått(
+                    grad = NivåAvForståelse.Grad.BURDE_FORSTÅTT,
+                    begrunnelseMottakersForståelse = forståelse.begrunnelse,
+                    kanUnnlates4XRettsgebyr = mapUnnlatelse(forståelse.unnlatelse, logContext),
+                    begrunnelse = begrunnelse,
+                )
             }
 
-            is ForaarsaketAvMottakerDto -> {
-                val aktsomhet = valg.aktsomhet
-                when (aktsomhet) {
-                    is ForsettligDto -> Skyldgrad.Forsett(
-                        begrunnelse = vilkaarsvurderingDto.begrunnelse,
-                        begrunnelseAktsomhet = aktsomhet.begrunnelse,
-                        feilaktigeEllerMangelfulleOpplysninger = TODO(),
-                    )
+            is ForaarsaketAvMottakerDto -> when (val aktsomhet = valg.aktsomhet) {
+                is ForsettligDto -> Skyldgrad.Forsett(
+                    begrunnelse = begrunnelse,
+                    begrunnelseAktsomhet = aktsomhet.begrunnelse,
+                    feilaktigeEllerMangelfulleOpplysninger = TODO(),
+                )
 
-                    is GrovtUaktsomtDto -> Skyldgrad.GrovUaktsomhet(
-                        begrunnelse = vilkaarsvurderingDto.begrunnelse,
-                        begrunnelseAktsomhet = aktsomhet.begrunnelse,
-                        reduksjonSærligeGrunner = when (aktsomhet.erDetSærligeGrunner) {
-                            is JaSaerligeGrunnerDto -> mapTilSkalReduseres(
-                                begrunnelse = (aktsomhet.erDetSærligeGrunner as JaSaerligeGrunnerDto).begrunnelse,
-                                momenter = (aktsomhet.erDetSærligeGrunner as JaSaerligeGrunnerDto).særligeGrunnerFor,
-                                annetBegrunnelse = (aktsomhet.erDetSærligeGrunner as JaSaerligeGrunnerDto).annetBegrunnelse,
-                                skalReduseres = ReduksjonSærligeGrunner.SkalReduseres.Ja((aktsomhet.erDetSærligeGrunner as JaSaerligeGrunnerDto).prosentReduksjon),
-                                logContext = logContext,
-                            )
+                is GrovtUaktsomtDto -> Skyldgrad.GrovUaktsomhet(
+                    begrunnelse = begrunnelse,
+                    begrunnelseAktsomhet = aktsomhet.begrunnelse,
+                    reduksjonSærligeGrunner = mapReduksjonSærligeGrunner(aktsomhet.erDetSærligeGrunner, logContext),
+                    feilaktigeEllerMangelfulleOpplysninger = TODO(),
+                )
 
-                            is NeiSaerligeGrunnerDto -> mapTilSkalReduseres(
-                                begrunnelse = (aktsomhet.erDetSærligeGrunner as NeiSaerligeGrunnerDto).begrunnelse,
-                                momenter = (aktsomhet.erDetSærligeGrunner as NeiSaerligeGrunnerDto).særligeGrunnerMot,
-                                annetBegrunnelse = (aktsomhet.erDetSærligeGrunner as NeiSaerligeGrunnerDto).annetBegrunnelse,
-                                skalReduseres = ReduksjonSærligeGrunner.SkalReduseres.Nei,
-                                logContext = logContext,
-                            )
-                        },
-                        feilaktigeEllerMangelfulleOpplysninger = TODO(),
-                    )
-
-                    is UaktsomtDto -> Skyldgrad.Uaktsomt(
-                        begrunnelse = vilkaarsvurderingDto.begrunnelse,
-                        begrunnelseAktsomhet = aktsomhet.begrunnelse,
-                        kanUnnlates4XRettsgebyr = when (aktsomhet.unnlatelse) {
-                            is IkkeAktueltDto, is SkalIkkeUnnlatesDto -> mapTilSkalIkkeUnnlatesEllerOver4xxRettsgebyr(aktsomhet.unnlatelse, logContext = logContext)
-                            is SkalUnnlatesDto -> KanUnnlates4xRettsgebyr.Unnlates
-                        },
-                        feilaktigeEllerMangelfulleOpplysninger = TODO(),
-                    )
-                }
+                is UaktsomtDto -> Skyldgrad.Uaktsomt(
+                    begrunnelse = begrunnelse,
+                    begrunnelseAktsomhet = aktsomhet.begrunnelse,
+                    kanUnnlates4XRettsgebyr = mapUnnlatelse(aktsomhet.unnlatelse, logContext),
+                    feilaktigeEllerMangelfulleOpplysninger = TODO(),
+                )
             }
 
             is GodTroDto -> NivåAvForståelse.GodTro(
@@ -501,62 +474,51 @@ class TilbakekrevingService(
                     is IngentingDto -> NivåAvForståelse.GodTro.BeløpIBehold.Nei
                 },
                 begrunnelseForGodTro = valg.begrunnelse,
-                begrunnelse = vilkaarsvurderingDto.begrunnelse,
+                begrunnelse = begrunnelse,
             )
 
-            is VilkaarsvurderingIkkeVurdertDto -> {
+            is VilkaarsvurderingIkkeVurdertDto ->
                 throw Feil("Feil vilkaarsvurderingDto: $vilkaarsvurderingDto!", logContext = logContext)
-            }
-        }
-        return vurdering
-    }
-
-    private fun mapTilSkalIkkeUnnlatesEllerOver4xxRettsgebyr(unnlatelseDto: UnnlatelseDto, logContext: SecureLog.Context): KanUnnlates4xRettsgebyr {
-        val særligeGrunnerDto = when (unnlatelseDto) {
-            is IkkeAktueltDto -> unnlatelseDto.erDetSærligeGrunner
-            is SkalIkkeUnnlatesDto -> unnlatelseDto.erDetSærligeGrunner
-            is SkalUnnlatesDto -> throw Feil("Feil unnlatelseDto: $unnlatelseDto!", logContext = logContext)
-        }
-
-        val reduksjon = when (særligeGrunnerDto) {
-            is JaSaerligeGrunnerDto -> mapTilSkalReduseres(
-                begrunnelse = særligeGrunnerDto.begrunnelse,
-                momenter = særligeGrunnerDto.særligeGrunnerFor,
-                annetBegrunnelse = særligeGrunnerDto.annetBegrunnelse,
-                skalReduseres = ReduksjonSærligeGrunner.SkalReduseres.Ja(særligeGrunnerDto.prosentReduksjon),
-                logContext = logContext,
-            )
-
-            is NeiSaerligeGrunnerDto -> mapTilSkalReduseres(
-                begrunnelse = særligeGrunnerDto.begrunnelse,
-                momenter = særligeGrunnerDto.særligeGrunnerMot,
-                annetBegrunnelse = særligeGrunnerDto.annetBegrunnelse,
-                skalReduseres = ReduksjonSærligeGrunner.SkalReduseres.Nei,
-                logContext = logContext,
-            )
-        }
-
-        return when (unnlatelseDto) {
-            is IkkeAktueltDto -> KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(reduksjon)
-            is SkalIkkeUnnlatesDto -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(reduksjon)
-            is SkalUnnlatesDto -> throw Feil("Feil unnlatelseDto: $unnlatelseDto!", logContext = logContext)
         }
     }
 
-    private fun mapTilSkalReduseres(
-        begrunnelse: String,
-        momenter: List<MomentDto>,
-        annetBegrunnelse: String?,
-        skalReduseres: ReduksjonSærligeGrunner.SkalReduseres,
+    private fun mapUnnlatelse(
+        unnlatelse: UnnlatelseDto,
+        logContext: SecureLog.Context,
+    ): KanUnnlates4xRettsgebyr =
+        when (unnlatelse) {
+            is SkalUnnlatesDto -> KanUnnlates4xRettsgebyr.Unnlates
+            is IkkeAktueltDto -> KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(
+                mapReduksjonSærligeGrunner(unnlatelse.erDetSærligeGrunner, logContext),
+            )
+            is SkalIkkeUnnlatesDto -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
+                mapReduksjonSærligeGrunner(unnlatelse.erDetSærligeGrunner, logContext),
+            )
+        }
+
+    private fun mapReduksjonSærligeGrunner(
+        dto: SaerligeGrunnerDto,
         logContext: SecureLog.Context,
     ): ReduksjonSærligeGrunner =
-        ReduksjonSærligeGrunner(
-            begrunnelse = begrunnelse,
-            grunner = momenter.map { mapSærligGrunn(it.moment, annetBegrunnelse, logContext) }.toSet(),
-            skalReduseres = skalReduseres,
-        )
+        when (dto) {
+            is JaSaerligeGrunnerDto -> ReduksjonSærligeGrunner(
+                begrunnelse = dto.begrunnelse,
+                grunner = dto.særligeGrunnerFor.map { mapSærligGrunn(it.moment, dto.annetBegrunnelse, logContext) }.toSet(),
+                skalReduseres = ReduksjonSærligeGrunner.SkalReduseres.Ja(dto.prosentReduksjon),
+            )
 
-    private fun mapSærligGrunn(moment: String, annetBegrunnelse: String?, logContext: SecureLog.Context): SærligGrunn =
+            is NeiSaerligeGrunnerDto -> ReduksjonSærligeGrunner(
+                begrunnelse = dto.begrunnelse,
+                grunner = dto.særligeGrunnerMot.map { mapSærligGrunn(it.moment, dto.annetBegrunnelse, logContext) }.toSet(),
+                skalReduseres = ReduksjonSærligeGrunner.SkalReduseres.Nei,
+            )
+        }
+
+    private fun mapSærligGrunn(
+        moment: String,
+        annetBegrunnelse: String?,
+        logContext: SecureLog.Context,
+    ): SærligGrunn =
         when (moment) {
             SærligGrunnType.GRAD_AV_UAKTSOMHET.name -> SærligGrunn.GradAvUaktsomhet
             SærligGrunnType.HELT_ELLER_DELVIS_NAVS_FEIL.name -> SærligGrunn.HeltEllerDelvisNavsFeil
