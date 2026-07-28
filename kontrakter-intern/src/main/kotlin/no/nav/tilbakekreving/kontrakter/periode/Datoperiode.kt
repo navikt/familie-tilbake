@@ -40,6 +40,10 @@ data class Datoperiode(
     }
 
     fun toMånedsperiode() = Månedsperiode(fomMåned, tomMåned)
+
+    companion object {
+        fun Iterable<Datoperiode>.overordnet() = minOf { it.fom } til maxOf { it.tom }
+    }
 }
 
 infix fun LocalDate.til(tom: LocalDate) = Datoperiode(this, tom)

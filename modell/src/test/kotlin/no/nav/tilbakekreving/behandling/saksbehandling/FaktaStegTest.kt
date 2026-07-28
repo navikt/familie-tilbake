@@ -1,17 +1,15 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.api.v1.dto.FeilutbetalingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurderingAvBrukersUttalelseDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternFagsakBehandling
-import no.nav.tilbakekreving.feil.ModellFeil
-import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
@@ -305,11 +303,7 @@ class FaktaStegTest {
         }
 
         faktasteg.vurder(rettsgebyrÅr = 2025)
-        faktasteg.erUnder4xRettsgebyr(
-            sisteKravgrunnlagDato = kravgrunnlag.perioder().maxOf { it.periode().tom },
-            beløpTilbakekreves = kravgrunnlag.feilutbetaltBeløpForAllePerioder().toInt(),
-            sporing = Sporing("", ""),
-        ) shouldBe false
+        faktasteg.erUnder4xRettsgebyr(kravgrunnlag) shouldBe KanUnnlates4xRettsgebyr.KanUnnlates.Nei
 
         faktasteg.nyTilFrontendDto(
             kravgrunnlag = kravgrunnlag,
@@ -354,11 +348,7 @@ class FaktaStegTest {
         }
 
         faktasteg.vurder(rettsgebyrÅr = 2026)
-        faktasteg.erUnder4xRettsgebyr(
-            sisteKravgrunnlagDato = kravgrunnlag.perioder().maxOf { it.periode().tom },
-            beløpTilbakekreves = kravgrunnlag.feilutbetaltBeløpForAllePerioder().toInt(),
-            sporing = Sporing("", ""),
-        ) shouldBe true
+        faktasteg.erUnder4xRettsgebyr(kravgrunnlag) shouldBe KanUnnlates4xRettsgebyr.KanUnnlates.Ja
 
         faktasteg.nyTilFrontendDto(
             kravgrunnlag = kravgrunnlag,
@@ -393,11 +383,7 @@ class FaktaStegTest {
             brevHistorikk = BrevHistorikk(historikk = mutableListOf()),
         )
 
-        faktasteg.erUnder4xRettsgebyr(
-            sisteKravgrunnlagDato = kravgrunnlag.perioder().maxOf { it.periode().tom },
-            beløpTilbakekreves = kravgrunnlag.feilutbetaltBeløpForAllePerioder().toInt(),
-            sporing = Sporing("", ""),
-        ) shouldBe false
+        faktasteg.erUnder4xRettsgebyr(kravgrunnlag) shouldBe KanUnnlates4xRettsgebyr.KanUnnlates.Nei
 
         faktasteg.nyTilFrontendDto(
             kravgrunnlag = kravgrunnlag,
@@ -432,11 +418,7 @@ class FaktaStegTest {
             brevHistorikk = BrevHistorikk(historikk = mutableListOf()),
         )
 
-        faktasteg.erUnder4xRettsgebyr(
-            sisteKravgrunnlagDato = kravgrunnlag.perioder().maxOf { it.periode().tom },
-            beløpTilbakekreves = kravgrunnlag.feilutbetaltBeløpForAllePerioder().toInt(),
-            sporing = Sporing("", ""),
-        ) shouldBe true
+        faktasteg.erUnder4xRettsgebyr(kravgrunnlag) shouldBe KanUnnlates4xRettsgebyr.KanUnnlates.Ja
 
         faktasteg.nyTilFrontendDto(
             kravgrunnlag = kravgrunnlag,
@@ -481,14 +463,6 @@ class FaktaStegTest {
             rettsgebyrÅrFraSaksbehandler shouldBe null
         }
 
-        val exception = shouldThrow<ModellFeil.UgyldigOperasjonException> {
-            faktasteg.erUnder4xRettsgebyr(
-                sisteKravgrunnlagDato = kravgrunnlag.perioder().maxOf { it.periode().tom },
-                beløpTilbakekreves = kravgrunnlag.feilutbetaltBeløpForAllePerioder().toInt(),
-                sporing = Sporing("", ""),
-            )
-        }
-
-        exception.melding shouldBe "Rettsgebyr året kreves"
+        faktasteg.erUnder4xRettsgebyr(kravgrunnlag) shouldBe KanUnnlates4xRettsgebyr.KanUnnlates.Usikkert
     }
 }

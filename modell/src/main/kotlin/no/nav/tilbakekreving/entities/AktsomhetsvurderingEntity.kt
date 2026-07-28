@@ -13,7 +13,7 @@ data class AktsomhetsvurderingEntity(
     val begrunnelse: String?,
     val beløpIBehold: GodTroEntity?,
     val aktsomhet: VurdertAktsomhetEntity?,
-    val kanUnnlates: KanUnnlates?,
+    val kanUnnlates: KanUnnlatesEntity?,
     val særligGrunner: SærligeGrunnerEntity?,
     val feilaktigEllerMangelfull: FeilaktigEllerMangelfullType?,
     val forrigePeriodeId: UUID?,

@@ -7,7 +7,7 @@ import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.FeilaktigEllerMangelfullType
 import no.nav.tilbakekreving.entities.Forståelsesgrad
 import no.nav.tilbakekreving.entities.GodTroEntity
-import no.nav.tilbakekreving.entities.KanUnnlates
+import no.nav.tilbakekreving.entities.KanUnnlatesEntity
 import no.nav.tilbakekreving.entities.MottakersForståelseEntity
 import no.nav.tilbakekreving.entities.SkalReduseresEntity
 import no.nav.tilbakekreving.entities.SkalReduseresType
@@ -94,7 +94,7 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
         val unnlates = field(
             "unnlates",
             { it.vurdering.kanUnnlates },
-            FieldConverter.EnumConverter.of<KanUnnlates>(),
+            FieldConverter.EnumConverter.of<KanUnnlatesEntity>(),
         )
 
         fun map(

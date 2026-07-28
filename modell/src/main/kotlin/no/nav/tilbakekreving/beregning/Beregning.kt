@@ -76,16 +76,17 @@ class Beregning(
 
     fun vedtaksresultat(): Vedtaksresultat = bestemVedtaksresultat(beregn())
 
-    private fun bestemVedtaksresultat(delperioder: List<Delperiode<out Delperiode.Beløp>>): Vedtaksresultat {
-        val tilbakekrevingsbeløp = delperioder
-            .sumOf { it.tilbakekrevesBruttoMedRenter() }
-            .setScale(0, RoundingMode.HALF_UP)
-        val feilutbetaltBeløp = delperioder.sumOf { it.feilutbetaltBeløp() }.setScale(0, RoundingMode.HALF_UP)
-        return when {
-            !tilbakekrevLavtBeløp -> Vedtaksresultat.INGEN_TILBAKEBETALING
-            tilbakekrevingsbeløp.isZero() -> Vedtaksresultat.INGEN_TILBAKEBETALING
-            tilbakekrevingsbeløp < feilutbetaltBeløp -> Vedtaksresultat.DELVIS_TILBAKEBETALING
-            else -> return Vedtaksresultat.FULL_TILBAKEBETALING
+    companion object {
+        fun bestemVedtaksresultat(delperioder: List<Delperiode<out Delperiode.Beløp>>): Vedtaksresultat {
+            val tilbakekrevingsbeløp = delperioder
+                .sumOf { it.tilbakekrevesBruttoMedRenter() }
+                .setScale(0, RoundingMode.HALF_UP)
+            val feilutbetaltBeløp = delperioder.sumOf { it.feilutbetaltBeløp() }.setScale(0, RoundingMode.HALF_UP)
+            return when {
+                tilbakekrevingsbeløp.isZero() -> Vedtaksresultat.INGEN_TILBAKEBETALING
+                tilbakekrevingsbeløp < feilutbetaltBeløp -> Vedtaksresultat.DELVIS_TILBAKEBETALING
+                else -> Vedtaksresultat.FULL_TILBAKEBETALING
+            }
         }
     }
 }

@@ -1,18 +1,16 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
 import no.nav.tilbakekreving.Klokke
-import no.nav.tilbakekreving.Rettsgebyr
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
 import no.nav.tilbakekreving.api.v1.dto.FeilutbetalingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurderingAvBrukersUttalelseDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.FaktastegEntity
-import no.nav.tilbakekreving.feil.ModellFeil
-import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.Faktainfo
 import no.nav.tilbakekreving.kontrakter.Tilbakekrevingsvalg
@@ -30,6 +28,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.RettsligGrunnlagDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VurderingDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
+import no.nav.tilbakekreving.kontrakter.periode.Datoperiode.Companion.overordnet
 import no.nav.tilbakekreving.kontrakter.periode.til
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -42,7 +41,7 @@ class Faktasteg(
     private var underkjent: Boolean,
     private var _rettsgebyrÅrFraSaksbehandler: Int?,
 ) : Saksbehandlingsteg {
-    val rettsgebyrÅrFraSaksbehandler: Int?
+    private val rettsgebyrÅrFraSaksbehandler: Int?
         get() = _rettsgebyrÅrFraSaksbehandler
 
     override val type: Behandlingssteg = Behandlingssteg.FAKTA
@@ -116,41 +115,21 @@ class Faktasteg(
             vurdering = vurdering.tilFrontendDto(),
             tidligereVarsletBeløp = varselbrev?.hentVarsletBeløp()?.toInt()?.takeIf { it != beløpTilbakekreves },
             ferdigvurdert = erKlar(klokke),
-            usikker4xRettsgebyr = usikker4xRettsgebyr(
-                sisteKravgrunnlagDato = kravgrunnlag.perioder().maxOf { it.periode().tom },
-                beløpTilbakekreves = beløpTilbakekreves,
-            ),
+            usikker4xRettsgebyr = KanUnnlates4xRettsgebyr.kanUnnlates(
+                fullstendigVedtaksperiode = kravgrunnlag.perioder().map { it.periode() }.overordnet(),
+                // Siden dette bestemmer om valget skal vises eller ikke sender vi ikke med saksbehandlers valg av år her.
+                årForRettsgebyr = null,
+                beløp = kravgrunnlag.feilutbetaltBeløpForAllePerioder(),
+            ) == KanUnnlates4xRettsgebyr.KanUnnlates.Usikkert,
             rettsgebyrÅrFraSaksbehandler = rettsgebyrÅrFraSaksbehandler,
         )
     }
 
-    private fun usikker4xRettsgebyr(sisteKravgrunnlagDato: LocalDate, beløpTilbakekreves: Int): Boolean {
-        return !erUnder4xRettsgebyrBasertPåFaktaPerioder(beløpTilbakekreves) &&
-            !erOver4xRettsgebyrBasertPåKravgrunnlagPerioder(sisteKravgrunnlagDato, beløpTilbakekreves)
-    }
-
-    fun erUnder4xRettsgebyr(sisteKravgrunnlagDato: LocalDate, beløpTilbakekreves: Int, sporing: Sporing): Boolean {
-        if (erUnder4xRettsgebyrBasertPåFaktaPerioder(beløpTilbakekreves)) return true
-        if (erOver4xRettsgebyrBasertPåKravgrunnlagPerioder(sisteKravgrunnlagDato, beløpTilbakekreves)) return false
-
-        val år = rettsgebyrÅrFraSaksbehandler ?: throw ModellFeil.UgyldigOperasjonException("Rettsgebyr året kreves", sporing)
-        val fireRettsgebyr = hentFireRettsgebyr(år)
-
-        return beløpTilbakekreves < fireRettsgebyr
-    }
-
-    private fun erUnder4xRettsgebyrBasertPåFaktaPerioder(beløpTilbakekreves: Int): Boolean {
-        val førsteFomFakta = vurdering.perioder.minOf { it.periode.fom }
-        return beløpTilbakekreves < hentFireRettsgebyr(førsteFomFakta.year)
-    }
-
-    private fun erOver4xRettsgebyrBasertPåKravgrunnlagPerioder(sisteKravgrunnlagDato: LocalDate, beløpTilbakekreves: Int): Boolean {
-        return beløpTilbakekreves > hentFireRettsgebyr(sisteKravgrunnlagDato.year)
-    }
-
-    private fun hentFireRettsgebyr(år: Int): Long =
-        Rettsgebyr.fireRettsgebyrForÅr(år)
-            ?: throw IllegalStateException("Rettsgebyr for år $år er ikke definert")
+    fun erUnder4xRettsgebyr(kravgrunnlag: KravgrunnlagHendelse) = KanUnnlates4xRettsgebyr.kanUnnlates(
+        fullstendigVedtaksperiode = kravgrunnlag.perioder().map { it.periode() }.overordnet(),
+        årForRettsgebyr = rettsgebyrÅrFraSaksbehandler,
+        beløp = kravgrunnlag.feilutbetaltBeløpForAllePerioder(),
+    )
 
     fun tilFrontendDto(
         kravgrunnlag: KravgrunnlagHendelse,

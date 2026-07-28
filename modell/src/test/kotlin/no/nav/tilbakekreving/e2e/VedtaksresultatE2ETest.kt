@@ -52,7 +52,7 @@ class VedtaksresultatE2ETest {
         periode.vurdering shouldBe BeregningsresultatVurderingDto.Uaktsomhet
         periode.feilutbetaltBeløp shouldBe 2000
         periode.andelAvBeløp shouldBe 100
-        periode.tilbakekrevingsbeløp shouldBe 4000
+        periode.tilbakekrevingsbeløp shouldBe 2000
     }
 
     @Test
@@ -108,7 +108,7 @@ class VedtaksresultatE2ETest {
         periode.vurdering shouldBe BeregningsresultatVurderingDto.BurdeForstått
         periode.feilutbetaltBeløp shouldBe 2000
         periode.andelAvBeløp shouldBe 100
-        periode.tilbakekrevingsbeløp shouldBe 4000
+        periode.tilbakekrevingsbeløp shouldBe 2000
     }
 
     @Test
@@ -139,6 +139,6 @@ class VedtaksresultatE2ETest {
         periode.vurdering shouldBe BeregningsresultatVurderingDto.Forstod
         periode.feilutbetaltBeløp shouldBe 2000
         periode.andelAvBeløp shouldBe 100
-        periode.tilbakekrevingsbeløp shouldBe 4000
+        periode.tilbakekrevingsbeløp shouldBe 2000
     }
 }

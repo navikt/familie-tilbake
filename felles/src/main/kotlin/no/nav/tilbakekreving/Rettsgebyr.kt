@@ -5,6 +5,7 @@ import java.time.LocalDate
 object Rettsgebyr {
     private val rettsgebyrForDato =
         listOf(
+            Datobeløp(LocalDate.of(2020, 1, 1), 1172),
             Datobeløp(LocalDate.of(2021, 1, 1), 1199),
             Datobeløp(LocalDate.of(2022, 1, 1), 1223),
             Datobeløp(LocalDate.of(2023, 1, 1), 1243),
@@ -18,6 +19,7 @@ object Rettsgebyr {
     val rettsgebyr = rettsgebyrForDato.filter { it.gyldigFra <= LocalDate.now() }.maxByOrNull { it.gyldigFra }!!.beløp
 
     fun fireRettsgebyrForÅr(år: Int) = rettsgebyrForÅr(år)?.times(4)
+        ?: throw IllegalStateException("Rettsgebyr for år $år er ikke definert")
 
     private class Datobeløp(
         val gyldigFra: LocalDate,

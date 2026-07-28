@@ -41,7 +41,7 @@ data class SærligGrunnEntity(
     }
 }
 
-enum class KanUnnlates {
+enum class KanUnnlatesEntity {
     UNNLATES,
     SKAL_IKKE_UNNLATES,
     OVER_4_RETTSGEBYR,

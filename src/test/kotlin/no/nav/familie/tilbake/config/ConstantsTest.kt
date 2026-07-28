@@ -19,7 +19,7 @@ class ConstantsTest {
     }
 
     @Test
-    fun `Henter ikke ut rettsgebyr for 2020 - ikke registrert`() {
-        assertNull(Rettsgebyr.rettsgebyrForÅr(2020))
+    fun `Henter ikke ut rettsgebyr for 2019 - ikke registrert`() {
+        assertNull(Rettsgebyr.rettsgebyrForÅr(2019))
     }
 }

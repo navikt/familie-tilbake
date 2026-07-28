@@ -293,8 +293,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                                 grunnlagsperiode.copy(
                                     periode =
                                         Månedsperiode(
-                                            fom = LocalDate.of(2010, 1, 1),
-                                            tom = LocalDate.of(2010, 1, 31),
+                                            fom = LocalDate.of(2020, 1, 1),
+                                            tom = LocalDate.of(2020, 1, 31),
                                         ),
                                 ),
                             ),
@@ -305,8 +305,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                 FaktaFeilutbetalingsperiodeDto(
                     periode =
                         Datoperiode(
-                            LocalDate.of(2010, 1, 1),
-                            LocalDate.of(2010, 1, 31),
+                            LocalDate.of(2020, 1, 1),
+                            LocalDate.of(2020, 1, 31),
                         ),
                     hendelsestype = Hendelsestype.ANNET,
                     hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
@@ -358,8 +358,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                                 grunnlagsperiode.copy(
                                     periode =
                                         Månedsperiode(
-                                            fom = LocalDate.of(2010, 1, 1),
-                                            tom = LocalDate.of(2010, 1, 31),
+                                            fom = LocalDate.of(2020, 1, 1),
+                                            tom = LocalDate.of(2020, 1, 31),
                                         ),
                                 ),
                             ),
@@ -371,8 +371,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                     listOf(
                         ForeldelsesperiodeDto(
                             Datoperiode(
-                                LocalDate.of(2010, 1, 1),
-                                LocalDate.of(2010, 1, 31),
+                                LocalDate.of(2020, 1, 1),
+                                LocalDate.of(2020, 1, 31),
                             ),
                             "foreldelses begrunnelse",
                             Foreldelsesvurderingstype.FORELDET,
@@ -458,10 +458,10 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `håndterSteg skal utføre foreldelse og fortsette til foreslå vedtak når alle perioder endret til foreldet`() {
         ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
-            val fom = LocalDate.of(2010, 1, 1)
-            val tom = LocalDate.of(2010, 1, 31)
+            val fom = LocalDate.of(2020, 1, 1)
+            val tom = LocalDate.of(2020, 1, 31)
 
-            kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id, setOf(Testdata.lagKravgrunnlagsperiode(januar(2010) til januar(2010)))))
+            kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id, setOf(Testdata.lagKravgrunnlagsperiode(januar(2020) til januar(2020)))))
             lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
             stegService.håndterSteg(behandling.id, lagBehandlingsstegFaktaDto(fom, tom), SecureLog.Context.tom())
 
@@ -471,8 +471,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                     listOf(
                         ForeldelsesperiodeDto(
                             Datoperiode(
-                                LocalDate.of(2010, 1, 1),
-                                LocalDate.of(2010, 1, 31),
+                                LocalDate.of(2020, 1, 1),
+                                LocalDate.of(2020, 1, 31),
                             ),
                             "foreldelses begrunnelse",
                             Foreldelsesvurderingstype.IKKE_FORELDET,
@@ -487,8 +487,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
             val behandlingsstegVilkårsvurderingDto =
                 lagBehandlingsstegVilkårsvurderingDto(
                     Datoperiode(
-                        LocalDate.of(2010, 1, 1),
-                        LocalDate.of(2010, 1, 31),
+                        LocalDate.of(2020, 1, 1),
+                        LocalDate.of(2020, 1, 31),
                     ),
                 )
             stegService.håndterSteg(behandling.id, behandlingsstegVilkårsvurderingDto, SecureLog.Context.tom())
@@ -507,8 +507,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                     listOf(
                         ForeldelsesperiodeDto(
                             Datoperiode(
-                                LocalDate.of(2010, 1, 1),
-                                LocalDate.of(2010, 1, 31),
+                                LocalDate.of(2020, 1, 1),
+                                LocalDate.of(2020, 1, 31),
                             ),
                             "foreldelses begrunnelse",
                             Foreldelsesvurderingstype.FORELDET,

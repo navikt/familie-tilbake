@@ -27,6 +27,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SammenslaaingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
+import no.nav.tilbakekreving.kontrakter.periode.Datoperiode.Companion.overordnet
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering
 import org.slf4j.LoggerFactory
@@ -119,7 +120,11 @@ class Vilkårsvurderingsteg(
             perioder = slåSammenPerioder(kravgrunnlag, revurdering, foreldelsesteg),
             // Datoen revurdering ble vedtatt er ikke riktig her, men fører til det høyeste rettsgebyret som kan være relevant.
             // Vi gir heller saksbehandler mulighet til å si at beløpet er under/over 4x rettsgebyr til vi klarer å finne datoen vi skal velge rettsgebyr for
-            kanUnnlates4xRettsgebyr = KanUnnlates4xRettsgebyr.kanUnnlates(revurdering.vedtaksdato, kravgrunnlag.feilutbetaltBeløpForAllePerioder()),
+            kanUnnlates4xRettsgebyr = KanUnnlates4xRettsgebyr.kanUnnlates(
+                fullstendigVedtaksperiode = kravgrunnlag.perioder().map { it.periode() }.overordnet(),
+                årForRettsgebyr = null,
+                beløp = kravgrunnlag.feilutbetaltBeløpForAllePerioder(),
+            ) != KanUnnlates4xRettsgebyr.KanUnnlates.Nei,
             rettsgebyr = Rettsgebyr.rettsgebyr, // Todo burde bruke rettsgebyret som var gjeldene ved utbetalingen. Oppdateres etter avklaring med jurist.
             opprettetTid = klokke.nå(),
         )

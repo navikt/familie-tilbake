@@ -5,12 +5,13 @@ import no.nav.tilbakekreving.api.v1.dto.SkalUnnlates
 import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.endring.VurdertUtbetaling
-import no.nav.tilbakekreving.entities.KanUnnlates
+import no.nav.tilbakekreving.entities.KanUnnlatesEntity
+import no.nav.tilbakekreving.kontrakter.frontend.models.IkkeAktueltDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SkalIkkeUnnlatesDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SkalUnnlatesDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UnnlatelseDto
+import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import java.math.BigDecimal
-import java.time.LocalDate
 
 // §22-15 6. ledd
 sealed interface KanUnnlates4xRettsgebyr {
@@ -18,7 +19,7 @@ sealed interface KanUnnlates4xRettsgebyr {
 
     fun oppsummering(): VurdertUtbetaling.JaNeiVurdering
 
-    fun tilEntity(): KanUnnlates
+    fun tilEntity(): KanUnnlatesEntity
 
     fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse>
 
@@ -39,7 +40,7 @@ sealed interface KanUnnlates4xRettsgebyr {
 
         override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.UNNLATES_4_RETTSGEBYR)
 
-        override fun tilEntity(): KanUnnlates = KanUnnlates.UNNLATES
+        override fun tilEntity(): KanUnnlatesEntity = KanUnnlatesEntity.UNNLATES
 
         override fun skalTilbakekreves(): Boolean = false
 
@@ -65,7 +66,7 @@ sealed interface KanUnnlates4xRettsgebyr {
             return setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES, VilkårsvurderingBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR) + reduksjonSærligeGrunner.skalReduseres.påkrevdeVurderinger()
         }
 
-        override fun tilEntity(): KanUnnlates = KanUnnlates.SKAL_IKKE_UNNLATES
+        override fun tilEntity(): KanUnnlatesEntity = KanUnnlatesEntity.SKAL_IKKE_UNNLATES
 
         override fun skalTilbakekreves(): Boolean = true
 
@@ -96,17 +97,14 @@ sealed interface KanUnnlates4xRettsgebyr {
 
         override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES) + reduksjonSærligeGrunner.skalReduseres.påkrevdeVurderinger()
 
-        override fun tilEntity(): KanUnnlates = KanUnnlates.OVER_4_RETTSGEBYR
+        override fun tilEntity(): KanUnnlatesEntity = KanUnnlatesEntity.OVER_4_RETTSGEBYR
 
         override fun skalTilbakekreves(): Boolean = true
 
         override fun tilFrontendDTO(): SkalUnnlates = SkalUnnlates.OVER_4_RETTSGEBYR
 
         override fun tilFrontendDto(): UnnlatelseDto {
-            return SkalIkkeUnnlatesDto(
-                begrunnelse = "TODO",
-                erDetSærligeGrunner = reduksjonSærligeGrunner.tilFrontendDto(),
-            )
+            return IkkeAktueltDto(reduksjonSærligeGrunner.tilFrontendDto())
         }
 
         override fun særligeGrunner(): ReduksjonSærligeGrunner {
@@ -115,8 +113,18 @@ sealed interface KanUnnlates4xRettsgebyr {
     }
 
     companion object {
-        fun kanUnnlates(datoForRettsgebyr: LocalDate, beløp: BigDecimal): Boolean {
-            return beløp < Rettsgebyr.rettsgebyrForÅr(datoForRettsgebyr.year)!!.toBigDecimal() * 4.toBigDecimal()
+        fun kanUnnlates(fullstendigVedtaksperiode: Datoperiode, årForRettsgebyr: Int?, beløp: BigDecimal) = when {
+            beløp < Rettsgebyr.fireRettsgebyrForÅr(fullstendigVedtaksperiode.fom.year).toBigDecimal() -> KanUnnlates.Ja
+            beløp >= Rettsgebyr.fireRettsgebyrForÅr(fullstendigVedtaksperiode.tom.year).toBigDecimal() -> KanUnnlates.Nei
+            årForRettsgebyr == null -> KanUnnlates.Usikkert
+            beløp < Rettsgebyr.fireRettsgebyrForÅr(årForRettsgebyr).toBigDecimal() -> KanUnnlates.Ja
+            else -> KanUnnlates.Nei
         }
+    }
+
+    enum class KanUnnlates {
+        Ja,
+        Nei,
+        Usikkert,
     }
 }

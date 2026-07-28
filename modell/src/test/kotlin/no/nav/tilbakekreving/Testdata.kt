@@ -119,7 +119,7 @@ fun feilutbetalteBeløp(ytelsesbeløp: List<KravgrunnlagHendelse.Periode.Beløp>
         klassetype = "FEIL",
         opprinneligUtbetalingsbeløp = 0.kroner,
         nyttBeløp = it.tilbakekrevesBeløp,
-        tilbakekrevesBeløp = it.tilbakekrevesBeløp,
+        tilbakekrevesBeløp = 0.0.kroner,
         skatteprosent = BigDecimal("0.0"),
     )
 }

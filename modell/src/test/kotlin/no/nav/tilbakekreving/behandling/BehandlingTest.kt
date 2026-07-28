@@ -23,6 +23,7 @@ import no.nav.tilbakekreving.foreldelseVurdering
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
+import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsperiodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingIkkeVurdertDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
@@ -293,9 +294,9 @@ class BehandlingTest {
             erUnder4xRettsgebyr shouldBe true
             vilkårsperioder.size shouldBe 1
             vilkårsperioder.first().feilutbetaltBeløp shouldBe 2000
-            vilkårsperioder.first().delresultat shouldBe null
+            vilkårsperioder.first().delresultat shouldBe VilkaarsperiodeDto.Delresultat.FULL_TILBAKEKREVING
             vilkårsperioder.first().fakta.rettsligGrunnlag.size shouldBe 0
-            vilkårsperioder.first().simulertBeløp shouldBe null
+            vilkårsperioder.first().simulertBeløp shouldBe 2000
             vilkårsperioder.first().vilkårsvurdering.valg.shouldBeInstanceOf<VilkaarsvurderingIkkeVurdertDto>()
         }
     }

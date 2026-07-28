@@ -184,21 +184,21 @@ class VilkårsvurderingstegTest {
     fun `beløp under 4x rettsgebyr`() {
         val kravgrunnlag = kravgrunnlag(
             perioder = listOf(
-                kravgrunnlagPeriode(1.januar(2021) til 31.januar(2021), ytelsesbeløp(2554.kroner)),
-                kravgrunnlagPeriode(1.februar(2021) til 28.februar(2021), ytelsesbeløp(2553.kroner)),
+                kravgrunnlagPeriode(1.januar(2024) til 31.januar(2024), ytelsesbeløp(2554.kroner)),
+                kravgrunnlagPeriode(1.februar(2024) til 28.februar(2024), ytelsesbeløp(2553.kroner)),
             ),
         )
-        val revurdering = eksternFagsakBehandling(vedtaksdato = 1.januar(2024))
+        val revurdering = eksternFagsakBehandling()
 
         val foreldelsesteg = Foreldelsesteg.opprett(revurdering, kravgrunnlag)
         foreldelsesteg.vurderForeldelse(
-            1.januar(2021) til 31.januar(2021),
+            1.januar(2024) til 31.januar(2024),
             Foreldelsesteg.Vurdering.IkkeForeldet(
                 begrunnelse = "Ikke forelget",
             ),
         )
         foreldelsesteg.vurderForeldelse(
-            1.februar(2021) til 28.februar(2021),
+            1.februar(2024) til 28.februar(2024),
             Foreldelsesteg.Vurdering.IkkeForeldet(
                 begrunnelse = "Ikke forelget",
             ),
@@ -215,21 +215,21 @@ class VilkårsvurderingstegTest {
     fun `beløp over 4x rettsgebyr`() {
         val kravgrunnlag = kravgrunnlag(
             perioder = listOf(
-                kravgrunnlagPeriode(1.januar(2021) til 31.januar(2021), ytelsesbeløp(2554.kroner)),
-                kravgrunnlagPeriode(1.februar(2021) til 28.februar(2021), ytelsesbeløp(2554.kroner)),
+                kravgrunnlagPeriode(1.januar(2024) til 31.januar(2024), ytelsesbeløp(2554.kroner)),
+                kravgrunnlagPeriode(1.februar(2024) til 28.februar(2024), ytelsesbeløp(2554.kroner)),
             ),
         )
-        val revurdering = eksternFagsakBehandling(vedtaksdato = 1.januar(2024))
+        val revurdering = eksternFagsakBehandling()
 
         val foreldelsesteg = Foreldelsesteg.opprett(revurdering, kravgrunnlag)
         foreldelsesteg.vurderForeldelse(
-            1.januar(2021) til 31.januar(2021),
+            1.januar(2024) til 31.januar(2024),
             Foreldelsesteg.Vurdering.IkkeForeldet(
                 begrunnelse = "Ikke forelget",
             ),
         )
         foreldelsesteg.vurderForeldelse(
-            1.februar(2021) til 28.februar(2021),
+            1.februar(2024) til 28.februar(2024),
             Foreldelsesteg.Vurdering.IkkeForeldet(
                 begrunnelse = "Ikke forelget",
             ),

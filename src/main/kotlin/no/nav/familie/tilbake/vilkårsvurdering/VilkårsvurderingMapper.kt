@@ -27,6 +27,7 @@ import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsresultatDto
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
+import no.nav.tilbakekreving.kontrakter.periode.Datoperiode.Companion.overordnet
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -92,9 +93,10 @@ object VilkårsvurderingMapper {
             perioder = allePerioder.sortedBy { it.periode.fom },
             rettsgebyr = Rettsgebyr.rettsgebyr,
             kanUnnlates4xRettsgebyr = KanUnnlates4xRettsgebyr.kanUnnlates(
-                datoForRettsgebyr = LocalDate.now(),
+                fullstendigVedtaksperiode = allePerioder.map { it.periode }.overordnet(),
+                årForRettsgebyr = LocalDate.now().year,
                 beløp = allePerioder.sumOf { it.feilutbetaltBeløp },
-            ),
+            ) != KanUnnlates4xRettsgebyr.KanUnnlates.Nei,
             opprettetTid = opprettetTid,
         )
     }
