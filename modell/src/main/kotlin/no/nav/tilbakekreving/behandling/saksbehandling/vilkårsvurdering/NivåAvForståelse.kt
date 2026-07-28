@@ -192,8 +192,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             return VurdertVilkårsvurderingsresultatDto(
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
                 godTro = VurdertGodTroDto(
-                    beløpErIBehold = beløpIBehold is BeløpIBehold.JaDelerIBehold,
-                    beløpTilbakekreves = (beløpIBehold as? BeløpIBehold.JaDelerIBehold)?.beløp ?: BigDecimal.ZERO,
+                    beløpErIBehold = beløpIBehold is BeløpIBehold.DelerIBehold,
+                    beløpTilbakekreves = (beløpIBehold as? BeløpIBehold.DelerIBehold)?.beløp ?: BigDecimal.ZERO,
                     begrunnelse = begrunnelseForGodTro,
                 ),
                 aktsomhet = null,
@@ -240,7 +240,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
 
             fun tilFrontendDto(): BelopIBeholdDto
 
-            class JaHeleIBehold() : BeløpIBehold {
+            class HeleIBehold() : BeløpIBehold {
                 override fun reduksjon(): Reduksjon {
                     return Reduksjon.FullstendigTilbakekreving()
                 }
@@ -266,7 +266,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 }
             }
 
-            class JaDelerIBehold(val beløp: BigDecimal) : BeløpIBehold {
+            class DelerIBehold(val beløp: BigDecimal) : BeløpIBehold {
                 override fun reduksjon(): Reduksjon {
                     return Reduksjon.ManueltBeløp(beløp)
                 }

@@ -94,10 +94,10 @@ data class GodTroEntity(
     fun fraEntity(): NivåAvForståelse.GodTro.BeløpIBehold {
         return when (beholdType) {
             BeholdType.JA_HELE_BELØPET -> {
-                NivåAvForståelse.GodTro.BeløpIBehold.JaHeleIBehold()
+                NivåAvForståelse.GodTro.BeløpIBehold.HeleIBehold()
             }
             BeholdType.JA, BeholdType.JA_DELER_AV_BELØPET -> {
-                NivåAvForståelse.GodTro.BeløpIBehold.JaDelerIBehold(requireNotNull(beløp) { "Beløp kreves i BeløpIBehold" })
+                NivåAvForståelse.GodTro.BeløpIBehold.DelerIBehold(requireNotNull(beløp) { "Beløp kreves i BeløpIBehold" })
             }
 
             BeholdType.NEI -> {

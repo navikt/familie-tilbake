@@ -82,10 +82,10 @@ object ForårsaketAvBrukerMapper {
 
             is GodTroDto -> NivåAvForståelse.GodTro(
                 beløpIBehold = when (valg.beløpIBehold) {
-                    is DelerDto -> NivåAvForståelse.GodTro.BeløpIBehold.JaDelerIBehold((valg.beløpIBehold as DelerDto).beløp.toBigDecimal())
+                    is DelerDto -> NivåAvForståelse.GodTro.BeløpIBehold.DelerIBehold((valg.beløpIBehold as DelerDto).beløp.toBigDecimal())
                     is HeleDto -> when ((valg.beløpIBehold as HeleDto).reduksjon) {
-                        is SkalIkkeReduseresDto -> NivåAvForståelse.GodTro.BeløpIBehold.JaHeleIBehold()
-                        is SkalReduseresDto -> NivåAvForståelse.GodTro.BeløpIBehold.JaDelerIBehold(((valg.beløpIBehold as HeleDto).reduksjon as SkalReduseresDto).beløp.toBigDecimal())
+                        is SkalIkkeReduseresDto -> NivåAvForståelse.GodTro.BeløpIBehold.HeleIBehold()
+                        is SkalReduseresDto -> NivåAvForståelse.GodTro.BeløpIBehold.DelerIBehold(((valg.beløpIBehold as HeleDto).reduksjon as SkalReduseresDto).beløp.toBigDecimal())
                     }
                     is IngentingDto -> NivåAvForståelse.GodTro.BeløpIBehold.Nei
                 },
