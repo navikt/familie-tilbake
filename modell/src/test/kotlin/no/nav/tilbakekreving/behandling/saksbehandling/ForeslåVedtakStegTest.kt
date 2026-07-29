@@ -23,4 +23,13 @@ class ForeslåVedtakStegTest {
 
         foreslåVedtakSteg.tilEntity(UUID.randomUUID()).trengerNyVurdering shouldBe true
     }
+
+    @Test
+    fun `steg er påbegynt`() {
+        val foreslåVedtakSteg = ForeslåVedtakSteg.opprett()
+        foreslåVedtakSteg.erPåbegynt() shouldBe false
+
+        foreslåVedtakSteg.håndter()
+        foreslåVedtakSteg.erPåbegynt() shouldBe true
+    }
 }

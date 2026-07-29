@@ -16,6 +16,8 @@ class ForeslåVedtakSteg(
 
     override fun erFullstendig(klokke: Klokke): Boolean = vurdert
 
+    override fun erPåbegynt(): Boolean = vurdert
+
     override fun erUnderkjent(): Boolean {
         return underkjent
     }

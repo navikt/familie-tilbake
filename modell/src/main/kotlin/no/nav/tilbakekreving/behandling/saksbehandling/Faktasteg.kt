@@ -52,6 +52,10 @@ class Faktasteg(
         return vurdering.erFullstendig()
     }
 
+    override fun erPåbegynt(): Boolean {
+        return vurdering.erPåbegynt()
+    }
+
     override fun erUnderkjent(): Boolean {
         return underkjent
     }
@@ -222,6 +226,8 @@ class Faktasteg(
         fun erFullstendig(): Boolean {
             return oppdaget.erFullstendig()
         }
+
+        fun erPåbegynt(): Boolean = uttalelse !is Uttalelse.IkkeVurdert || oppdaget !is Oppdaget.IkkeVurdert
 
         fun tilFrontendDto(): VurderingDto {
             return VurderingDto(

@@ -186,4 +186,39 @@ class FatteVedtakStegTest {
         fatteVedtakSteg.erFullstendig(SystemKlokke) shouldBe true
         fatteVedtakSteg.erVedtakUnderkjent() shouldBe true
     }
+
+    @Test
+    fun `deler av steget er godkjent`() {
+        val fatteVedtakSteg = FatteVedtakSteg.opprett()
+        fatteVedtakSteg.håndter(
+            beslutter = ANSVARLIG_BESLUTTER,
+            ansvarligSaksbehandler = ANSVARLIG_SAKSBEHANDLER,
+            behandlingssteg = Behandlingssteg.FAKTA,
+            vurdering = FatteVedtakSteg.Vurdering.Godkjent,
+            sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+        )
+
+        fatteVedtakSteg.erPåbegynt() shouldBe true
+    }
+
+    @Test
+    fun `deler av steget er ikke godkjent`() {
+        val fatteVedtakSteg = FatteVedtakSteg.opprett()
+        fatteVedtakSteg.håndter(
+            beslutter = ANSVARLIG_BESLUTTER,
+            ansvarligSaksbehandler = ANSVARLIG_SAKSBEHANDLER,
+            behandlingssteg = Behandlingssteg.FAKTA,
+            vurdering = FatteVedtakSteg.Vurdering.Underkjent("begrunnelse"),
+            sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+        )
+
+        fatteVedtakSteg.erPåbegynt() shouldBe true
+    }
+
+    @Test
+    fun `ikke vurdert`() {
+        val fatteVedtakSteg = FatteVedtakSteg.opprett()
+
+        fatteVedtakSteg.erPåbegynt() shouldBe false
+    }
 }

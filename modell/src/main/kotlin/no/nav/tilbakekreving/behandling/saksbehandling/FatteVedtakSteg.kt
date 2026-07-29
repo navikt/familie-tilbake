@@ -26,6 +26,8 @@ class FatteVedtakSteg internal constructor(
 
     override fun erFullstendig(klokke: Klokke): Boolean = vurderteSteg.all { it.erFerdigvurdert() }
 
+    override fun erPåbegynt(): Boolean = vurderteSteg.any { it.erFerdigvurdert() }
+
     override fun erUnderkjent(): Boolean {
         return false
     }

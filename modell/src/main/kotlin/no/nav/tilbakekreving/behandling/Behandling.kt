@@ -142,7 +142,7 @@ class Behandling internal constructor(
     internal fun oppdaterKravgrunnlag(oppdatertKravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>, context: SideeffektContext) {
         if (oppdatertKravgrunnlag.entry == kravgrunnlag.entry) {
             kravgrunnlag = oppdatertKravgrunnlag
-        } else if (!faktasteg.erFullstendig(context.klokke)) {
+        } else if (steg().none { it.erPåbegynt() }) {
             kravgrunnlag = oppdatertKravgrunnlag
             medSaksbehandling(context, Saksbehandling::flyttTilbakeTilFakta)
         } else {

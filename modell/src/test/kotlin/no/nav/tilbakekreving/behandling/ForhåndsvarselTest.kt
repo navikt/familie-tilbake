@@ -70,4 +70,19 @@ class ForhåndsvarselTest {
             frist = uttalelsesfrist,
         )
     }
+
+    @Test
+    fun `ikke påbegynt`() {
+        val forhåndsvarsel = Forhåndsvarsel.opprett()
+
+        forhåndsvarsel.erPåbegynt() shouldBe false
+    }
+
+    @Test
+    fun `deler av behandling påbegynt`() {
+        val forhåndsvarsel = Forhåndsvarsel.opprett()
+
+        forhåndsvarsel.lagreOpprinneligFrist(LocalDate.now())
+        forhåndsvarsel.erPåbegynt() shouldBe true
+    }
 }

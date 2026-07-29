@@ -17,6 +17,8 @@ internal interface Saksbehandlingsteg {
 
     fun erFullstendig(klokke: Klokke): Boolean
 
+    fun erPåbegynt(): Boolean
+
     fun erUnderkjent(): Boolean
 
     fun underkjennSteget()

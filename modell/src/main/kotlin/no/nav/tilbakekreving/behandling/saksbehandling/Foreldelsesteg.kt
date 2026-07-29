@@ -32,6 +32,10 @@ class Foreldelsesteg(
 
     override fun erFullstendig(klokke: Klokke): Boolean = vurdertePerioder.all { it.vurdering != Vurdering.IkkeVurdert }
 
+    override fun erPåbegynt(): Boolean = vurdertePerioder.any {
+        it.vurdering !is Vurdering.IkkeVurdert && it.vurdering !is Vurdering.AutomatiskIkkeForeldet
+    }
+
     private fun erAutomatiskVurdert(): Boolean = vurdertePerioder.any { it.vurdering is Vurdering.AutomatiskIkkeForeldet }
 
     override fun erUnderkjent(): Boolean {

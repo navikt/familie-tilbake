@@ -11,6 +11,7 @@ import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
 import no.nav.tilbakekreving.test.februar
 import no.nav.tilbakekreving.test.januar
+import no.nav.tilbakekreving.test.mars
 import no.nav.tilbakekreving.test.november
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -182,5 +183,53 @@ class ForeldelsestegTest {
         foreldelsesteg.automatiskVurder(kravgrunnlag, klokke = klokke, Behandlingslogg(mutableListOf()), UUID.randomUUID())
 
         foreldelsesteg.erFullstendig(klokke) shouldBe false
+    }
+
+    @Test
+    fun `ikke påbegynt`() {
+        val foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakBehandling(), kravgrunnlag())
+        foreldelsesteg.erPåbegynt() shouldBe false
+    }
+
+    @Test
+    fun `ikke vurdert og vurdert`() {
+        val foreldelsesteg = Foreldelsesteg.opprett(
+            eksternFagsakBehandling(),
+            kravgrunnlag(
+                perioder = listOf(
+                    kravgrunnlagPeriode(periode = 1.januar(2021) til 31.januar(2021)),
+                    kravgrunnlagPeriode(periode = 1.februar(2021) til 28.februar(2021)),
+                ),
+            ),
+        )
+        foreldelsesteg.vurderForeldelse(1.januar(2021) til 31.januar(2021), Foreldelsesteg.Vurdering.IkkeForeldet("Yep"))
+        foreldelsesteg.erPåbegynt() shouldBe true
+    }
+
+    @Test
+    fun `automatisk vurdert og vurdert`() {
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(periode = 1.januar(2021) til 31.januar(2021)),
+                kravgrunnlagPeriode(periode = 1.februar(2021) til 28.februar(2021)),
+            ),
+        )
+        val foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakBehandling(), kravgrunnlag)
+        foreldelsesteg.automatiskVurder(kravgrunnlag, klokke = KlokkeStub(1.mars(2021)), Behandlingslogg(mutableListOf()), UUID.randomUUID())
+        foreldelsesteg.vurderForeldelse(1.januar(2021) til 31.januar(2021), Foreldelsesteg.Vurdering.IkkeForeldet("Yep"))
+        foreldelsesteg.erPåbegynt() shouldBe true
+    }
+
+    @Test
+    fun `automatisk vurdert`() {
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(periode = 1.januar(2021) til 31.januar(2021)),
+                kravgrunnlagPeriode(periode = 1.februar(2021) til 28.februar(2021)),
+            ),
+        )
+        val foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakBehandling(), kravgrunnlag)
+        foreldelsesteg.automatiskVurder(kravgrunnlag, klokke = KlokkeStub(1.mars(2021)), Behandlingslogg(mutableListOf()), UUID.randomUUID())
+        foreldelsesteg.erPåbegynt() shouldBe false
     }
 }

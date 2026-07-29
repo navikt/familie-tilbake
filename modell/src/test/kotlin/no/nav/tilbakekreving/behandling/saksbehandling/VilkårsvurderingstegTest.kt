@@ -16,6 +16,7 @@ import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Com
 import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.eksternFagsakBehandling
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
+import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
@@ -257,8 +258,29 @@ class VilkårsvurderingstegTest {
 
         vilkårsvurderingsteg.hentVilkårsvurderingsperioder() shouldNotBeNull {
             size shouldBe 2
-            this[0].periode shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(1.januar(2021), 31.januar(2021))
-            this[1].periode shouldBe no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto(1.februar(2021), 28.februar(2021))
+            this[0].periode shouldBe PeriodeDto(1.januar(2021), 31.januar(2021))
+            this[1].periode shouldBe PeriodeDto(1.februar(2021), 28.februar(2021))
         }
+    }
+
+    @Test
+    fun `ikke påbegynt`() {
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(eksternFagsakBehandling(), kravgrunnlag())
+        vilkårsvurderingsteg.erPåbegynt() shouldBe false
+    }
+
+    @Test
+    fun `en vurdert periode`() {
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakBehandling(),
+            kravgrunnlag(
+                perioder = listOf(
+                    kravgrunnlagPeriode(1.januar(2021) til 31.januar(2021)),
+                    kravgrunnlagPeriode(1.februar(2021) til 28.februar(2021)),
+                ),
+            ),
+        )
+        vilkårsvurderingsteg.vurder(1.januar(2021) til 31.januar(2021), forårsaketAvNav().burdeForstått())
+        vilkårsvurderingsteg.erPåbegynt() shouldBe true
     }
 }

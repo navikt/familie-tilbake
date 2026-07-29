@@ -40,6 +40,10 @@ class Forhåndsvarsel(
             gjeldendeFrist?.isBefore(klokke.dagensDato()) == true
     }
 
+    override fun erPåbegynt(): Boolean {
+        return brukeruttalelse != null || forhåndsvarselUnntak != null || uttalelsesfrist != null
+    }
+
     override fun erUnderkjent(): Boolean {
         return brukeruttalelse?.trengerNyVurdering() == true || forhåndsvarselUnntak?.trengerNyVurdering() == true
     }

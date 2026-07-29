@@ -465,4 +465,47 @@ class FaktaStegTest {
 
         faktasteg.erUnder4xRettsgebyr(kravgrunnlag) shouldBe KanUnnlates4xRettsgebyr.KanUnnlates.Usikkert
     }
+
+    @Test
+    fun `steg ikke påbegynt`() {
+        val faktasteg = Faktasteg.opprett(
+            eksternFagsakRevurdering = eksternFagsakBehandling(),
+            kravgrunnlag = kravgrunnlag(),
+            brevHistorikk = BrevHistorikk(historikk = mutableListOf()),
+        )
+
+        faktasteg.erPåbegynt() shouldBe false
+    }
+
+    @Test
+    fun `steg er påbegynt`() {
+        val faktasteg = Faktasteg.opprett(
+            eksternFagsakRevurdering = eksternFagsakBehandling(),
+            kravgrunnlag = kravgrunnlag(),
+            brevHistorikk = BrevHistorikk(historikk = mutableListOf()),
+        )
+
+        faktasteg.vurder(
+            OppdagetDto(
+                dato = LocalDate.now(),
+                beskrivelse = "beskrivelse",
+                av = OppdagetDto.Av.NAV,
+            ),
+        )
+
+        faktasteg.erPåbegynt() shouldBe true
+    }
+
+    @Test
+    fun `steg er påbegynt, ikke fullstendig`() {
+        val faktasteg = Faktasteg.opprett(
+            eksternFagsakRevurdering = eksternFagsakBehandling(),
+            kravgrunnlag = kravgrunnlag(),
+            brevHistorikk = BrevHistorikk(historikk = mutableListOf()),
+        )
+
+        faktasteg.vurder(OppdagetDto(1.januar(2021), OppdagetDto.Av.NAV, "tekst"))
+
+        faktasteg.erPåbegynt() shouldBe true
+    }
 }

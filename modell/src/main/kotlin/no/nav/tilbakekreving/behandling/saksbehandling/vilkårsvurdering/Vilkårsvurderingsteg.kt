@@ -43,6 +43,8 @@ class Vilkårsvurderingsteg(
 
     override fun erFullstendig(klokke: Klokke): Boolean = vurderinger.none { it.vurdering is ForårsaketAvBruker.IkkeVurdert }
 
+    override fun erPåbegynt(): Boolean = vurderinger.any { it.vurdering.underliggendeVurdering() !is ForårsaketAvBruker.IkkeVurdert }
+
     override fun erUnderkjent(): Boolean {
         return underkjent
     }
