@@ -1,7 +1,5 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-import org.gradle.kotlin.dsl.register
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
-import java.net.URI
 
 val springDocVersion = "3.0.3"
 val testcontainersVersion = "1.21.4"
@@ -82,98 +80,6 @@ repositories {
     }
 }
 
-abstract class DownloadFileTask : DefaultTask() {
-    @get:Input
-    abstract val url: Property<String>
-
-    @get:OutputFile
-    abstract val outputFile: RegularFileProperty
-
-    @TaskAction
-    fun run() {
-        val out = outputFile.get().asFile
-        out.parentFile.mkdirs()
-
-        URI.create(url.get()).toURL().openStream().use { input ->
-            out.outputStream().use { output ->
-                input.copyTo(output)
-            }
-        }
-    }
-}
-
-val bigqueryDriverUrl =
-    "https://storage.googleapis.com/simba-bq-release/jdbc/SimbaJDBCDriverforGoogleBigQuery42_1.6.5.1002.zip"
-
-val bigQueryDriverDir = layout.buildDirectory.dir("libs/bigquery-jdbc")
-val bigQueryZip = layout.buildDirectory.file("downloads/bigquery-jdbc.zip")
-
-val downloadBigQueryDriver = tasks.register<DownloadFileTask>("downloadBigQueryJdbc") {
-    url.set(bigqueryDriverUrl)
-    outputFile.set(bigQueryZip)
-}
-
-val unzipBigQueryDriver = tasks.register<Copy>("unzipBigQueryDriver") {
-    dependsOn(downloadBigQueryDriver)
-    from(zipTree(bigQueryZip))
-    into(bigQueryDriverDir)
-}
-
-val cleanupBigQueryDownloads = tasks.register<Delete>("cleanupBigQueryDownloads") {
-    delete(layout.buildDirectory.dir("downloads"))
-}
-
-unzipBigQueryDriver.configure {
-    finalizedBy(cleanupBigQueryDownloads)
-}
-
-val bigQueryDriver by configurations.creating
-
-val bigQueryDriverJarsTree = fileTree(bigQueryDriverDir) {
-    include("**/*.jar")
-
-    exclude("**/auto-value-annotations-*.jar")
-    exclude("**/failureaccess-*.jar")
-    exclude("**/guava-*.jar")
-    exclude("**/httpclient5-*.jar")
-    exclude("**/httpcore5-*.jar")
-    exclude("**/httpcore5-h2-*.jar")
-    exclude("**/httpclient-*.jar")
-    exclude("**/httpcore-*.jar")
-
-    exclude("**/j2objc-annotations-*.jar")
-    exclude("**/jspecify-*.jar")
-    exclude("**/opentelemetry-*.jar")
-    exclude("**/commons-codec-*.jar")
-    exclude("**/json-*.jar")
-    exclude("**/protobuf-java-util-*.jar")
-    exclude("**/threetenbp-*.jar")
-    exclude("**/google-api-client-*.jar")
-    exclude("**/google-oauth-client-*.jar")
-    exclude("**/opencensus-api-*.jar")
-    exclude("**/opencensus-contrib-http-util-*.jar")
-    exclude("**/checker-compat-qual-*.jar")
-    exclude("**/jsr305-*.jar")
-    exclude("**/javax.annotation-api-*.jar")
-    exclude("**/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar")
-    exclude("**/threeten-extra-*.jar")
-    exclude("**/protobuf-java-*.jar")
-    exclude("**/animal-sniffer-annotations-*.jar")
-    exclude("**/annotations-*.jar")
-    exclude("**/arrow-*.jar")
-    exclude("**/conscrypt-openjdk-uber-*.jar")
-    exclude("**/flatbuffers-java-*.jar")
-    exclude("**/perfmark-api-*.jar")
-    exclude("**/jackson-annotations-*.jar")
-    exclude("**/jackson-core-*.jar")
-    exclude("**/jackson-databind-*.jar")
-    exclude("**/jackson-module-*.jar")
-    exclude("**/jackson-datatype-*.jar")
-}
-
-val bigQueryDriverJars: FileCollection =
-    files(bigQueryDriverJarsTree).builtBy(unzipBigQueryDriver)
-
 dependencies {
     implementation(platform(SpringBootPlugin.BOM_COORDINATES))
 
@@ -239,7 +145,7 @@ dependencies {
     api("org.flywaydb:flyway-core")
     api("org.flywaydb:flyway-gcp-bigquery")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
-    runtimeOnly(bigQueryDriverJars)
+    runtimeOnly("com.google.cloud:google-cloud-bigquery-jdbc:1.1.0")
 
     testImplementation(project(":testdata"))
 
@@ -250,7 +156,9 @@ dependencies {
     testImplementation("io.kotest:kotest-assertions-core-jvm:6.2.3")
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-test") {
+        exclude(group = "com.vaadin.external.google", module = "android-json")
+    }
     testImplementation("org.springframework.boot:spring-boot-resttestclient")
 
     testImplementation("io.jsonwebtoken:jjwt:0.13.0")
