@@ -21,8 +21,6 @@ jobs:
           java-version: 25
           distribution: 'temurin'
           cache: 'gradle'
-      - name: last ned og pakk ut bigquery driver
-        run: ./gradlew unzipBigQueryDriver
       - name: Bygg med gradle
         env:
           GITHUB_USERNAME: x-access-token
