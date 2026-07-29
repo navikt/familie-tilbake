@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.config
 
+import com.google.cloud.bigquery.jdbc.DataSource
 import org.flywaydb.core.Flyway
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.event.ApplicationReadyEvent
@@ -31,8 +32,7 @@ class BigQueryMigrering(
         logger.info("BigQuery Flyway: starter (instansId=$instansId, dataset=${props.dataset})")
 
         val resultat = Flyway.configure()
-            .driver("com.simba.googlebigquery.jdbc42.Driver")
-            .dataSource(props.jdbcUrl, "", "")
+            .dataSource(DataSource.fromUrl(props.jdbcUrl))
             .schemas(props.dataset)
             .locations("classpath:db/migration-bigquery")
             .lockRetryCount(-1)
