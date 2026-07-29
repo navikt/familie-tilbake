@@ -260,7 +260,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     return GodTroEntity(
                         periodeRef = periodeRef,
                         begrunnelse = begrunnelse,
-                        beholdType = BeholdType.JA,
+                        beholdType = BeholdType.HELE_BELØPET,
                         beløp = null,
                     )
                 }
@@ -287,7 +287,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     return GodTroEntity(
                         periodeRef = periodeRef,
                         begrunnelse = begrunnelse,
-                        beholdType = BeholdType.JA,
+                        beholdType = BeholdType.DELER_AV_BELØPET,
                         beløp = beløp,
                     )
                 }

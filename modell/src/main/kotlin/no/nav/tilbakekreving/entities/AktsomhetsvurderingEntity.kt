@@ -93,10 +93,10 @@ data class GodTroEntity(
 ) {
     fun fraEntity(): NivåAvForståelse.GodTro.BeløpIBehold {
         return when (beholdType) {
-            BeholdType.JA_HELE_BELØPET -> {
+            BeholdType.HELE_BELØPET -> {
                 NivåAvForståelse.GodTro.BeløpIBehold.HeleIBehold()
             }
-            BeholdType.JA, BeholdType.JA_DELER_AV_BELØPET -> {
+            BeholdType.JA, BeholdType.DELER_AV_BELØPET -> {
                 NivåAvForståelse.GodTro.BeløpIBehold.DelerIBehold(requireNotNull(beløp) { "Beløp kreves i BeløpIBehold" })
             }
 
@@ -134,10 +134,10 @@ enum class FeilaktigEllerMangelfullType(val fraEntity: Skyldgrad.FeilaktigEllerM
 }
 
 enum class BeholdType {
-    JA_HELE_BELØPET,
-    JA_DELER_AV_BELØPET,
+    HELE_BELØPET,
+    DELER_AV_BELØPET,
 
-    @Deprecated("Use JA_DELER_AV_BELØPET instead")
+    @Deprecated("Brukt HELE_BELØPET eller DELER_AV_BELØPET istedenfor")
     JA,
     NEI,
 }
