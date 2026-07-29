@@ -46,6 +46,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                 forårsaketAvBruker = when (feilaktigeEllerMangelfulleOpplysninger) {
                     FeilaktigEllerMangelfull.FEILAKTIG -> VurdertUtbetaling.ForårsaketAvBruker.FEILAKTIGE_OPPLYSNINGER
                     FeilaktigEllerMangelfull.MANGELFULL -> VurdertUtbetaling.ForårsaketAvBruker.MANGELFULLE_OPPLYSNINGER
+                    FeilaktigEllerMangelfull.IKKE_VURDERT -> throw IllegalArgumentException("Ikke_Vurdert er kun til ny vilkårsvurdering")
                 },
                 særligeGrunner = kanUnnlates4XRettsgebyr.særligeGrunner()?.oppsummerVurdering(),
                 beløpUnnlatesUnder4Rettsgebyr = kanUnnlates4XRettsgebyr.oppsummering(),
@@ -120,6 +121,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                 forårsaketAvBruker = when (feilaktigeEllerMangelfulleOpplysninger) {
                     FeilaktigEllerMangelfull.FEILAKTIG -> VurdertUtbetaling.ForårsaketAvBruker.FEILAKTIGE_OPPLYSNINGER
                     FeilaktigEllerMangelfull.MANGELFULL -> VurdertUtbetaling.ForårsaketAvBruker.MANGELFULLE_OPPLYSNINGER
+                    FeilaktigEllerMangelfull.IKKE_VURDERT -> throw IllegalArgumentException("Ikke_Vurdert er kun til ny vilkårsvurdering")
                 },
                 særligeGrunner = reduksjonSærligeGrunner.oppsummerVurdering(),
                 beløpUnnlatesUnder4Rettsgebyr = VurdertUtbetaling.JaNeiVurdering.Nei,
@@ -193,6 +195,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                 forårsaketAvBruker = when (feilaktigeEllerMangelfulleOpplysninger) {
                     FeilaktigEllerMangelfull.FEILAKTIG -> VurdertUtbetaling.ForårsaketAvBruker.FEILAKTIGE_OPPLYSNINGER
                     FeilaktigEllerMangelfull.MANGELFULL -> VurdertUtbetaling.ForårsaketAvBruker.MANGELFULLE_OPPLYSNINGER
+                    FeilaktigEllerMangelfull.IKKE_VURDERT -> throw IllegalArgumentException("Ikke_Vurdert er kun til ny vilkårsvurdering")
                 },
                 særligeGrunner = null,
                 beløpUnnlatesUnder4Rettsgebyr = VurdertUtbetaling.JaNeiVurdering.Nei,
@@ -248,6 +251,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
     enum class FeilaktigEllerMangelfull(val vilkårsvurderingsresultat: Vilkårsvurderingsresultat) {
         FEILAKTIG(Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER),
         MANGELFULL(Vilkårsvurderingsresultat.MANGELFULLE_OPPLYSNINGER_FRA_BRUKER),
+        IKKE_VURDERT(Vilkårsvurderingsresultat.UDEFINERT),
         ;
 
         fun tilEntity() = FeilaktigEllerMangelfullType.entries.single { it.fraEntity == this }

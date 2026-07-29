@@ -752,6 +752,11 @@ class Behandling internal constructor(
 
             context.logg(Behandlingsloggstype.TREKK_TILBAKE_FRA_GODKJENNING)
         }
+
+        fun lagreVilkårsvurdering(periodeId: UUID, vurdering: ForårsaketAvBruker): VilkaarsvurderingDto {
+            vilkårsvurderingsteg.vurder(id, vurdering)
+            return vilkårsvurderingsteg.tilFrontendDto().first { it.id == periodeId }
+        }
     }
 
     internal fun <T> medSaksbehandling(context: SideeffektContext, block: Saksbehandling.() -> T): T =

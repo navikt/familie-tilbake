@@ -19,6 +19,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.DelerDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForstoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForstoEllerBurdeForstaattDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.GodTroDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.HeleDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.IngentingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SkalIkkeReduseresDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingValgDto
@@ -191,8 +192,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             return VurdertVilkårsvurderingsresultatDto(
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
                 godTro = VurdertGodTroDto(
-                    beløpErIBehold = beløpIBehold is BeløpIBehold.Ja,
-                    beløpTilbakekreves = (beløpIBehold as? BeløpIBehold.Ja)?.beløp ?: BigDecimal.ZERO,
+                    beløpErIBehold = beløpIBehold is BeløpIBehold.DelerIBehold,
+                    beløpTilbakekreves = (beløpIBehold as? BeløpIBehold.DelerIBehold)?.beløp ?: BigDecimal.ZERO,
                     begrunnelse = begrunnelseForGodTro,
                 ),
                 aktsomhet = null,
@@ -239,7 +240,33 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
 
             fun tilFrontendDto(): BelopIBeholdDto
 
-            class Ja(val beløp: BigDecimal) : BeløpIBehold {
+            class HeleIBehold() : BeløpIBehold {
+                override fun reduksjon(): Reduksjon {
+                    return Reduksjon.FullstendigTilbakekreving()
+                }
+
+                override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.GOD_TRO_BELØP_I_BEHOLD)
+
+                override fun tilFrontendDto(): BelopIBeholdDto = HeleDto(
+                    begrunnelse = "TODO",
+                    reduksjon = SkalIkkeReduseresDto(
+                        relevans = emptyList(),
+                        annetBegrunnelse = null,
+                        begrunnelse = "TODO",
+                    ),
+                )
+
+                override fun tilEntity(periodeRef: UUID, begrunnelse: String): GodTroEntity {
+                    return GodTroEntity(
+                        periodeRef = periodeRef,
+                        begrunnelse = begrunnelse,
+                        beholdType = BeholdType.HELE_BELØPET,
+                        beløp = null,
+                    )
+                }
+            }
+
+            class DelerIBehold(val beløp: BigDecimal) : BeløpIBehold {
                 override fun reduksjon(): Reduksjon {
                     return Reduksjon.ManueltBeløp(beløp)
                 }
@@ -260,7 +287,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     return GodTroEntity(
                         periodeRef = periodeRef,
                         begrunnelse = begrunnelse,
-                        beholdType = BeholdType.JA,
+                        beholdType = BeholdType.DELER_AV_BELØPET,
                         beløp = beløp,
                     )
                 }

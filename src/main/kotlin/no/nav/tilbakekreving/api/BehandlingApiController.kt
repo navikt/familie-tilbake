@@ -33,6 +33,8 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevDataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDataUpdateDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingDto
+import no.nav.tilbakekreving.mapper.ForårsaketAvBrukerMapper
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.core.io.Resource
@@ -284,5 +286,23 @@ class BehandlingApiController(
                 behandlingId,
             ),
         )
+    }
+
+    override fun behandlingLagreVilkaarsvurdering(
+        behandlingId: UUID,
+        periodeId: UUID,
+        vilkaarsvurderingDto: VilkaarsvurderingDto,
+    ): ResponseEntity<VilkaarsvurderingDto> {
+        return tilbakekrevingService.endreTilbakekreving(
+            filter = TilbakekrevingFilter.behandling(behandlingId),
+            valideringContext = ValideringContext.LagreVilkårsvurdering,
+        ) { tilbakekreving, context ->
+            ResponseEntity.ok(
+                tilbakekreving.gjørSaksbehandling(behandlingId, context) {
+                    val vurdering = ForårsaketAvBrukerMapper.mapTilForårsaketAvBruker(vilkaarsvurderingDto, tilbakekreving)
+                    lagreVilkårsvurdering(periodeId, vurdering)
+                },
+            )
+        } ?: ResponseEntity.notFound().build()
     }
 }
