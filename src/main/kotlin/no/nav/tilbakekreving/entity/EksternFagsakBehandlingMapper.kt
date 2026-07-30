@@ -48,6 +48,11 @@ object EksternFagsakBehandlingMapper : Entity<EksternFagsakBehandlingEntity, UUI
         EksternFagsakBehandlingEntity::url,
         FieldConverter.StringConverter,
     )
+    val opprettet = field(
+        "opprettet",
+        EksternFagsakBehandlingEntity::opprettet,
+        FieldConverter.LocalDateTimeConverter.required(),
+    )
 
     fun map(resultSet: ResultSet, utvidetPerioder: List<UtvidetPeriodeEntity>): EksternFagsakBehandlingEntity {
         return EksternFagsakBehandlingEntity(
@@ -60,6 +65,7 @@ object EksternFagsakBehandlingMapper : Entity<EksternFagsakBehandlingEntity, UUI
             vedtaksdato = resultSet[vedtaksdato],
             utvidedePerioder = utvidetPerioder,
             url = resultSet[url],
+            opprettet = resultSet[opprettet],
         )
     }
 

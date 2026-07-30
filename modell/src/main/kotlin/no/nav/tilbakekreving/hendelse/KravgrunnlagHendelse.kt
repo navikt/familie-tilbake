@@ -36,7 +36,7 @@ class KravgrunnlagHendelse(
     // Brukes som eksternId i henting av fagsysteminfo, hva betyr det egentlig?
     val referanse: String,
     private val perioder: List<Periode>,
-    private val opprettet: LocalDateTime,
+    override val opprettet: LocalDateTime,
 ) : Historikk.HistorikkInnslag<UUID>, KravgrunnlagAdapter {
     fun valider(sporing: Sporing) {
         if (vedtakGjelder !is Aktør.Person || utbetalesTil !is Aktør.Person) {

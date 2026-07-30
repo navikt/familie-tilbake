@@ -4,6 +4,7 @@ import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.Period
 import java.util.UUID
 
@@ -17,7 +18,7 @@ data class VarselbrevEntity(
     val fristForUttalelse: LocalDate?,
     val tekstFraSaksbehandler: String,
 ) {
-    fun fraEntity(id: UUID, kravgrunnlagHistorikk: KravgrunnlagHistorikk): Varselbrev {
+    fun fraEntity(id: UUID, kravgrunnlagHistorikk: KravgrunnlagHistorikk, opprettet: LocalDateTime): Varselbrev {
         val sporing = Sporing("Ukjent", id.toString())
         return Varselbrev(
             id = id,
@@ -28,6 +29,7 @@ data class VarselbrevEntity(
             kravgrunnlag = kravgrunnlagHistorikk.finn(kravgrunnlagRef.id, sporing),
             fristForUttalelse = fristForUttalelse ?: sendtTid.plus(Period.ofWeeks(3)),
             tekstFraSaksbehandler = tekstFraSaksbehandler,
+            opprettet = opprettet,
         )
     }
 }

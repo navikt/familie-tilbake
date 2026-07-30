@@ -15,6 +15,8 @@ data class LoggInnslag(
     val behandlerIdent: String,
     val ekstraInfo: Map<EkstraInfo, Any>,
 ) : Historikk.HistorikkInnslag<UUID> {
+    override val opprettet: LocalDateTime get() = opprettetTid
+
     fun tilEntity(tilbakekrevingId: String): LoggInnlagEntity = LoggInnlagEntity(
         id = id,
         tilbakekrevingRef = tilbakekrevingId,

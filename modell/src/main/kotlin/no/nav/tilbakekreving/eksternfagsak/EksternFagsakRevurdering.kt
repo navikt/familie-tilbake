@@ -9,10 +9,12 @@ import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.kontrakter.frontend.models.RevurderingDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 sealed class EksternFagsakRevurdering(
     override val id: UUID,
+    override val opprettet: LocalDateTime,
 ) : Historikk.HistorikkInnslag<UUID> {
     internal abstract val eksternId: String
     internal abstract val url: String?
@@ -37,7 +39,8 @@ sealed class EksternFagsakRevurdering(
         override val vedtaksdato: LocalDate,
         private val utvidedePerioder: List<UtvidetPeriode>,
         override val url: String?,
-    ) : EksternFagsakRevurdering(id) {
+        opprettet: LocalDateTime,
+    ) : EksternFagsakRevurdering(id, opprettet) {
         override fun utvidPeriode(periode: Datoperiode): Datoperiode {
             return utvidedePerioder.singleOrNull { it.gjelderFor(periode) }?.utvid() ?: periode
         }
@@ -55,6 +58,7 @@ sealed class EksternFagsakRevurdering(
                 utvidedePerioder = utvidedePerioder.map { it.tilEntity(id) },
                 vedtaksdato = vedtaksdato,
                 url = url,
+                opprettet = opprettet,
             )
         }
 
@@ -90,7 +94,8 @@ sealed class EksternFagsakRevurdering(
         id: UUID,
         override val eksternId: String,
         val revurderingsdatoFraKravgrunnlag: LocalDate?,
-    ) : EksternFagsakRevurdering(id) {
+        opprettet: LocalDateTime,
+    ) : EksternFagsakRevurdering(id, opprettet) {
         override val revurderingsårsak: Revurderingsårsak = Revurderingsårsak.UKJENT
         override val årsakTilFeilutbetaling: String = "Ukjent - finn i fagsystem"
         override val vedtaksdato: LocalDate = revurderingsdatoFraKravgrunnlag ?: LocalDate.MIN
@@ -111,6 +116,7 @@ sealed class EksternFagsakRevurdering(
                 vedtaksdato = null,
                 utvidedePerioder = null,
                 url = null,
+                opprettet = opprettet,
             )
         }
 

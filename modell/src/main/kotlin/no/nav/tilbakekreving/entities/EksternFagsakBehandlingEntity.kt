@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.entities
 
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 data class EksternFagsakBehandlingEntity(
@@ -14,6 +15,7 @@ data class EksternFagsakBehandlingEntity(
     val vedtaksdato: LocalDate?,
     val utvidedePerioder: List<UtvidetPeriodeEntity>?,
     val url: String?,
+    val opprettet: LocalDateTime,
 ) {
     fun fraEntity(): EksternFagsakRevurdering {
         return when (type) {
@@ -25,8 +27,9 @@ data class EksternFagsakBehandlingEntity(
                 vedtaksdato = requireNotNull(vedtaksdato) { "vedtaksdato kreves for EksternFagsakBehandling" },
                 utvidedePerioder = requireNotNull(utvidedePerioder) { "utvidetPerioder kreves for EksternFagsakBehandling" }.map { it.fraEntity() },
                 url = url,
+                opprettet = opprettet,
             )
-            EksternFagsakBehandlingType.UKJENT -> EksternFagsakRevurdering.Ukjent(id = id, eksternId = eksternId, null)
+            EksternFagsakBehandlingType.UKJENT -> EksternFagsakRevurdering.Ukjent(id = id, eksternId = eksternId, null, opprettet = opprettet)
         }
     }
 }

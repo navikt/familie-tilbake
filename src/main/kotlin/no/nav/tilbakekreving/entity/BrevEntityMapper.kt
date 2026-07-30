@@ -25,6 +25,12 @@ object BrevEntityMapper : Entity<BrevEntity, UUID, UUID>(
         FieldConverter.EnumConverter.of<Brevtype>().required(),
     )
 
+    val opprettet = field(
+        "opprettet",
+        BrevEntity::opprettet,
+        FieldConverter.LocalDateTimeConverter.required(),
+    )
+
     fun map(
         resultSet: ResultSet,
         varselbrevEntity: VarselbrevEntity?,
@@ -36,6 +42,7 @@ object BrevEntityMapper : Entity<BrevEntity, UUID, UUID>(
             brevtype = resultSet[brevType],
             varselbrevEntity = varselbrevEntity,
             vedtaksbrevEntity = vedtaksbrevEntity,
+            opprettet = resultSet[opprettet],
         )
     }
 

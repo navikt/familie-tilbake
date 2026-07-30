@@ -14,6 +14,7 @@ import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselInfoDto
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.Period
 import java.util.UUID
 
@@ -26,6 +27,7 @@ data class Varselbrev(
     private val kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
     val fristForUttalelse: LocalDate,
     private var tekstFraSaksbehandler: String,
+    override val opprettet: LocalDateTime,
 ) : Brev {
     fun hentVarsletBeløp(): Long {
         return kravgrunnlag.entry.feilutbetaltBeløpForAllePerioder().toLong()
@@ -59,6 +61,7 @@ data class Varselbrev(
                 kravgrunnlag = kravgrunnlag,
                 fristForUttalelse = sendtTid.plus(frist),
                 tekstFraSaksbehandler = varseltekstFraSaksbehandler,
+                opprettet = klokke.nå(),
             )
         }
     }
@@ -79,6 +82,7 @@ data class Varselbrev(
                 tekstFraSaksbehandler = tekstFraSaksbehandler,
             ),
             vedtaksbrevEntity = null,
+            opprettet = opprettet,
         )
     }
 

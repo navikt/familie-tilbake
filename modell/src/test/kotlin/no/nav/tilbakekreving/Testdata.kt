@@ -156,6 +156,7 @@ fun brukerinfoHendelse() = BrukerinfoHendelse(
 fun eksternFagsakBehandling(
     utvidPerioder: List<EksternFagsakRevurdering.UtvidetPeriode> = emptyList(),
     vedtaksdato: LocalDate = LocalDate.now(),
+    opprettet: LocalDateTime = LocalDateTime.now(),
 ): EksternFagsakRevurdering {
     return EksternFagsakRevurdering.Revurdering(
         id = UUID.randomUUID(),
@@ -165,6 +166,7 @@ fun eksternFagsakBehandling(
         vedtaksdato = vedtaksdato,
         utvidedePerioder = utvidPerioder,
         url = "http://localhost:8080",
+        opprettet = opprettet,
     )
 }
 

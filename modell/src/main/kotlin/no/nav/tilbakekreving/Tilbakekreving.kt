@@ -196,7 +196,7 @@ class Tilbakekreving internal constructor(
     }
 
     fun oppdaterFagsysteminfo(fagsysteminfo: FagsysteminfoHendelse, sideeffektContext: SideeffektContext) {
-        val eksternFagsak = eksternFagsak.lagre(fagsysteminfo)
+        val eksternFagsak = eksternFagsak.lagre(fagsysteminfo, sideeffektContext.klokke)
         val behandling = behandlingHistorikk.nåværende().entry
         behandling.oppdaterEksternFagsak(eksternFagsak, sideeffektContext)
         if (fagsysteminfo.behandlendeEnhet != null) {
@@ -256,7 +256,7 @@ class Tilbakekreving internal constructor(
     fun opprettBehandlingUtenIntegrasjon(sideeffektContext: SideeffektContext) {
         val kravgrunnlag = kravgrunnlagHistorikk.nåværende().entry
         // Å bruke kravgrunnlagreferanse er nok ikke alltid riktig her, men de fleste fagsystem bruker behandlingsid som referanse i kravgrunnlaget.
-        val eksternBehandling = eksternFagsak.lagreTomBehandling(kravgrunnlag.fagsystemVedtaksdato, kravgrunnlag.referanse)
+        val eksternBehandling = eksternFagsak.lagreTomBehandling(kravgrunnlag.fagsystemVedtaksdato, kravgrunnlag.referanse, sideeffektContext.klokke)
         opprettBehandling(eksternBehandling, sideeffektContext, null)
         opprettBruker(kravgrunnlag.vedtakGjelder)
         byttTilstand(AvventerBrukerinfo, sideeffektContext)

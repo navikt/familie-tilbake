@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.eksternfagsak
 
+import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.api.v2.EksternFagsakDto
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
 import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving
@@ -24,7 +25,7 @@ class EksternFagsak(
         )
     }
 
-    fun lagre(fagsysteminfo: FagsysteminfoHendelse): HistorikkReferanse<UUID, EksternFagsakRevurdering> {
+    fun lagre(fagsysteminfo: FagsysteminfoHendelse, klokke: Klokke): HistorikkReferanse<UUID, EksternFagsakRevurdering> {
         return behandlinger.lagre(
             EksternFagsakRevurdering.Revurdering(
                 id = UUID.randomUUID(),
@@ -40,6 +41,7 @@ class EksternFagsak(
                     )
                 } ?: emptyList(),
                 url = fagsysteminfo.revurdering.url,
+                opprettet = klokke.nå(),
             ),
         )
     }
@@ -47,12 +49,14 @@ class EksternFagsak(
     fun lagreTomBehandling(
         revurderingsdatoFraKravgrunnlag: LocalDate?,
         kravgrunnlagReferanse: String,
+        klokke: Klokke,
     ): HistorikkReferanse<UUID, EksternFagsakRevurdering> {
         return behandlinger.lagre(
             EksternFagsakRevurdering.Ukjent(
                 id = UUID.randomUUID(),
                 eksternId = kravgrunnlagReferanse,
                 revurderingsdatoFraKravgrunnlag = revurderingsdatoFraKravgrunnlag,
+                opprettet = klokke.nå(),
             ),
         )
     }

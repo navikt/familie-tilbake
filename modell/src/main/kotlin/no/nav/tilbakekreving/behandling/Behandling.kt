@@ -103,7 +103,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatDto as
 class Behandling internal constructor(
     override val id: UUID,
     private val type: Behandlingstype,
-    private val opprettet: LocalDateTime,
+    override val opprettet: LocalDateTime,
     private var sistEndret: LocalDateTime,
     private var enhet: Enhet?,
     private val revurderingsårsak: Behandlingsårsakstype?,

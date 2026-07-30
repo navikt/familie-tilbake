@@ -5,6 +5,7 @@ import no.nav.tilbakekreving.entities.BrevEntity
 import no.nav.tilbakekreving.entities.Brevtype
 import no.nav.tilbakekreving.entities.VedtaksbrevEntity
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 data class Vedtaksbrev(
@@ -12,6 +13,7 @@ data class Vedtaksbrev(
     override var journalpostId: String?,
     override var dokumentInfoId: String?,
     override var sendtTid: LocalDate,
+    override val opprettet: LocalDateTime,
 ) : Brev {
     override fun brevSendt(journalpostId: String, dokumentInfoId: String) {
         this.journalpostId = journalpostId
@@ -30,6 +32,7 @@ data class Vedtaksbrev(
                 dokumentInfoId = dokumentInfoId,
                 sendtTid = sendtTid,
             ),
+            opprettet = opprettet,
         )
     }
 
@@ -40,6 +43,7 @@ data class Vedtaksbrev(
                 journalpostId = null,
                 dokumentInfoId = null,
                 sendtTid = klokke.dagensDato(),
+                opprettet = klokke.nå(),
             )
         }
     }

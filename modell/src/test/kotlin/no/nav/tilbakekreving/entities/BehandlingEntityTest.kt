@@ -23,6 +23,7 @@ import no.nav.tilbakekreving.test.FellesTestdata.ANSVARLIG_SAKSBEHANDLER
 import no.nav.tilbakekreving.tilstand.TilBehandling
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 class BehandlingEntityTest {
@@ -42,10 +43,11 @@ class BehandlingEntityTest {
                 vedtaksdato = LocalDate.now(),
                 utvidedePerioder = emptyList(),
                 url = "http://localhost:8080",
+                opprettet = LocalDateTime.now(),
             ),
         )
         // Lagre et nytt innslag så vi er sikker på at det riktige plukkes opp, ikke det nyeste
-        fagsakBehandlingHistorikk.lagre(EksternFagsakRevurdering.Ukjent(UUID.randomUUID(), UUID.randomUUID().toString(), null))
+        fagsakBehandlingHistorikk.lagre(EksternFagsakRevurdering.Ukjent(UUID.randomUUID(), UUID.randomUUID().toString(), null, opprettet = LocalDateTime.now()))
 
         val kravgrunnlag = kravgrunnlagHistorikk.lagre(kravgrunnlag())
         kravgrunnlagHistorikk.lagre(kravgrunnlag())

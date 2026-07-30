@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.historikk
 
 import no.nav.tilbakekreving.feil.Sporing
+import java.time.LocalDateTime
 
 interface Historikk<IdType, Innslag : Historikk.HistorikkInnslag<IdType>> {
     fun lagre(innslag: Innslag): HistorikkReferanse<IdType, Innslag>
@@ -13,5 +14,6 @@ interface Historikk<IdType, Innslag : Historikk.HistorikkInnslag<IdType>> {
 
     interface HistorikkInnslag<IdType> {
         val id: IdType
+        val opprettet: LocalDateTime
     }
 }
