@@ -78,6 +78,11 @@ object KravgrunnlagHendelseMapper : Entity<KravgrunnlagHendelseEntity, UUID, UUI
         KravgrunnlagHendelseEntity::referanse,
         FieldConverter.StringConverter.required(),
     )
+    val opprettet = field(
+        "opprettet",
+        KravgrunnlagHendelseEntity::opprettet,
+        FieldConverter.LocalDateTimeConverter.required(),
+    )
 
     fun map(
         resultSet: ResultSet,
@@ -103,6 +108,7 @@ object KravgrunnlagHendelseMapper : Entity<KravgrunnlagHendelseEntity, UUID, UUI
             kravgrunnlagId = resultSet[kravgrunnlagId],
             referanse = resultSet[referanse],
             perioder = perioder,
+            opprettet = resultSet[opprettet],
         )
     }
 }

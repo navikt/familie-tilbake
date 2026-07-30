@@ -33,6 +33,7 @@ import no.nav.tilbakekreving.test.januar
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.Random
 import java.util.UUID
 
@@ -66,6 +67,7 @@ fun kravgrunnlag(
     kontrollfelt: String = UUID.randomUUID().toString(),
     referanse: String = UUID.randomUUID().toString(),
     kravgrunnlagId: String = UUID.randomUUID().toString(),
+    opprettet: LocalDateTime = LocalDateTime.now(),
 ): KravgrunnlagHendelse {
     val kravgrunnlagHendelse = KravgrunnlagHendelse(
         id = UUID.randomUUID(),
@@ -80,6 +82,7 @@ fun kravgrunnlag(
         referanse = referanse,
         kravgrunnlagId = kravgrunnlagId,
         perioder = perioder,
+        opprettet = opprettet,
     )
     kravgrunnlagHendelse.valider(Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()))
     return kravgrunnlagHendelse

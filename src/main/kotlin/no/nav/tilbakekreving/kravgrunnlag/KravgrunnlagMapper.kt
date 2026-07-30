@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.kravgrunnlag
 
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.fagsystem.Ytelse
@@ -27,7 +28,7 @@ object KravgrunnlagMapper {
         )
     }
 
-    fun tilKravgrunnlagHendelse(kravgrunnlag: DetaljertKravgrunnlagDto, kravgrunnlagReferanseMapping: Map<String, String>): KravgrunnlagHendelse {
+    fun tilKravgrunnlagHendelse(kravgrunnlag: DetaljertKravgrunnlagDto, kravgrunnlagReferanseMapping: Map<String, String>, klokke: Klokke): KravgrunnlagHendelse {
         val kravgrunnlagHendelse = KravgrunnlagHendelse(
             id = UUID.randomUUID(),
             vedtakId = kravgrunnlag.vedtakId,
@@ -53,6 +54,7 @@ object KravgrunnlagMapper {
                     beløp = periode.tilbakekrevingsBelop.tilBeløp(),
                 )
             },
+            opprettet = klokke.nå(),
         )
         kravgrunnlagHendelse.valider(Sporing(kravgrunnlag.fagsystemId, "Ukjent"))
         return kravgrunnlagHendelse

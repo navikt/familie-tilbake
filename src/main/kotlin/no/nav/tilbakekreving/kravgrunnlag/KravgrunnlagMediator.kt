@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.kravgrunnlag
 
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
 import no.nav.familie.tilbake.sikkerhet.ValideringContext
+import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
@@ -19,7 +20,7 @@ class KravgrunnlagMediator(
     fun lesKravgrunnlag() {
         kravgrunnlagBufferRepository.konsumerKravgrunnlag { entity ->
             val kravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(entity.kravgrunnlag)
-            val kravgrunnlagHendelse = KravgrunnlagMapper.tilKravgrunnlagHendelse(kravgrunnlag, applicationProperties.kravgrunnlagMapping)
+            val kravgrunnlagHendelse = KravgrunnlagMapper.tilKravgrunnlagHendelse(kravgrunnlag, applicationProperties.kravgrunnlagMapping, SystemKlokke)
             if (kravgrunnlagHendelse.skalOppretteNySak()) {
                 tilbakekrevingService.opprettTilbakekreving(KravgrunnlagMapper.tilOpprettTilbakekrevingHendelse(kravgrunnlag)) { tilbakekreving, sideeffektContext ->
                     tilbakekreving.håndter(kravgrunnlagHendelse, sideeffektContext)
@@ -38,7 +39,7 @@ class KravgrunnlagMediator(
         kravgrunnlagBufferRepository.oppdaterUtenforScope(fagsystemId)
         kravgrunnlagBufferRepository.konsumerKravgrunnlag { entity ->
             val kravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(entity.kravgrunnlag)
-            val kravgrunnlagHendelse = KravgrunnlagMapper.tilKravgrunnlagHendelse(kravgrunnlag, applicationProperties.kravgrunnlagMapping)
+            val kravgrunnlagHendelse = KravgrunnlagMapper.tilKravgrunnlagHendelse(kravgrunnlag, applicationProperties.kravgrunnlagMapping, SystemKlokke)
             require(!kravgrunnlagHendelse.skalOppretteNySak()) { "Kan ikke overskrive kravgrunnlag for saker uten behandling" }
 
             val fagsystem = KravgrunnlagMapper.ytelseFor(kravgrunnlag).tilFagsystemDTO()

@@ -18,6 +18,7 @@ import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.Objects
 import java.util.UUID
 
@@ -35,6 +36,7 @@ class KravgrunnlagHendelse(
     // Brukes som eksternId i henting av fagsysteminfo, hva betyr det egentlig?
     val referanse: String,
     private val perioder: List<Periode>,
+    private val opprettet: LocalDateTime,
 ) : Historikk.HistorikkInnslag<UUID>, KravgrunnlagAdapter {
     fun valider(sporing: Sporing) {
         if (vedtakGjelder !is Aktør.Person || utbetalesTil !is Aktør.Person) {
@@ -80,6 +82,7 @@ class KravgrunnlagHendelse(
             kravgrunnlagId = kravgrunnlagId,
             referanse = referanse,
             perioder = perioder.map { it.tilEntity(id) },
+            opprettet = opprettet,
         )
     }
 
