@@ -10,5 +10,5 @@ interface HistorikkInnslagEntity<IdType> {
 data class HistorikkEntity<IdType, InnslagEntity : HistorikkInnslagEntity<IdType>, InnslagType>(
     val innslag: List<InnslagEntity>,
 ) {
-    fun fraEntity(map: (InnslagEntity) -> InnslagType) = innslag.map(map)
+    fun fraEntity(map: (InnslagEntity) -> InnslagType) = innslag.sortedBy { it.opprettet }.map(map)
 }

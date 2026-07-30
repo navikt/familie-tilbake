@@ -18,7 +18,6 @@ data class LoggInnlagEntity(
     val behandlingsloggstype: Behandlingsloggstype,
     val ekstraInfo: Map<String, Any>?,
 ) : HistorikkInnslagEntity<UUID> {
-
     fun fraEntity(): LoggInnslag =
         LoggInnslag(
             id = id,
