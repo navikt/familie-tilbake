@@ -32,8 +32,12 @@ enum class Bunntekst(
     RETT_TIL_Å_KLAGE(
         tittel = "Du har rett til å klage",
         avsnitt = arrayOf(
-            "Du kan klage innen 6 uker fra den datoen du mottok vedtaket. Du finner skjema og informasjon på nav.no/klage.",
-            "Du må som hovedregel begynne å betale tilbake beløpet når du får fakturaen, selv om du klager på dette vedtaket. Dette følger av forvaltningsloven § 42. Hvis du får vedtak om at du ikke trengte å betale tilbake hele eller deler av beløpet du skyldte, betaler vi pengene tilbake til deg.",
+            "Hvis du mener vedtaket er feil, kan du klage innen 6 uker fra den datoen vedtaket har kommet fram til deg. Du finner skjema og informasjon på nav.no/klage.",
+            "Nav kan veilede deg på telefon om hvordan du sender en klage. Nav-kontoret ditt kan også hjelpe deg med å skrive en klage. Kontakt oss på telefon 55 55 33 33 hvis du trenger hjelp.",
+            "Hvis du får medhold i klagen, kan du få dekket vesentlige utgifter som har vært nødvendige for å få endret vedtaket, for eksempel hjelp fra advokat. Du kan ha krav på fri rettshjelp etter rettshjelploven. Du kan få mer informasjon om denne ordningen hos advokater, statsforvalteren eller Nav.",
+            "Du kan lese om saksomkostninger i forvaltningsloven § 36.",
+            "Hvis du sender klage i posten, må du signere klagen.",
+            "Mer informasjon om klagerettigheter finner du på http://nav.no/klagerettigheter.",
         ),
     ),
     RETT_TIL_INNSYN(
