@@ -66,4 +66,42 @@ class FaktastegEntityTest {
 
         dtoEtter shouldBe dtoFør
     }
+
+    @Test
+    fun `faktasteg med feil rekkefølge på perioder i db blir gjenopprettet i riktig rekkefølge`() {
+        val behandlingRef = UUID.randomUUID()
+        val periode1 = DatoperiodeEntity(1.januar(2021), 10.januar(2021))
+        val periode2 = DatoperiodeEntity(15.januar(2021), 20.januar(2021))
+        val entity = FaktastegEntity(
+            id = UUID.randomUUID(),
+            behandlingRef = behandlingRef,
+            perioder = listOf(
+                FaktastegEntity.FaktaPeriodeEntity(
+                    id = UUID.randomUUID(),
+                    faktavurderingRef = UUID.randomUUID(),
+                    periode = periode2,
+                    rettsligGrunnlag = Hendelsestype.ANNET,
+                    rettsligGrunnlagUnderkategori = Hendelsesundertype.ANNET_FRITEKST,
+                ),
+                FaktastegEntity.FaktaPeriodeEntity(
+                    id = UUID.randomUUID(),
+                    faktavurderingRef = UUID.randomUUID(),
+                    periode = periode1,
+                    rettsligGrunnlag = Hendelsestype.ANNET,
+                    rettsligGrunnlagUnderkategori = Hendelsesundertype.ANNET_FRITEKST,
+                ),
+            ),
+            årsakTilFeilutbetaling = "Årsak",
+            uttalelse = FaktastegEntity.Uttalelse.Nei,
+            vurderingAvBrukersUttalelse = null,
+            oppdaget = null,
+            trengerNyVurdering = false,
+            rettsgebyrÅrFraSaksbehandler = null,
+        )
+
+        val gjenopprettetEntity = entity.fraEntity(BrevHistorikk(mutableListOf())).tilEntity(behandlingRef)
+
+        gjenopprettetEntity.perioder[0].periode shouldBe periode1
+        gjenopprettetEntity.perioder[1].periode shouldBe periode2
+    }
 }
