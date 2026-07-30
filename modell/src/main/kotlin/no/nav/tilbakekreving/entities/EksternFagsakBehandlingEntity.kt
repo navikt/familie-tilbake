@@ -25,7 +25,9 @@ data class EksternFagsakBehandlingEntity(
                 revurderingsårsak = requireNotNull(revurderingsårsak) { "årsak kreves for EksternFagsakBehandling" }.fraEntity(),
                 årsakTilFeilutbetaling = requireNotNull(årsakTilFeilutbetaling) { "årsakTilFeilutbetaling kreves for EksternFagsakBehandling" },
                 vedtaksdato = requireNotNull(vedtaksdato) { "vedtaksdato kreves for EksternFagsakBehandling" },
-                utvidedePerioder = requireNotNull(utvidedePerioder) { "utvidetPerioder kreves for EksternFagsakBehandling" }.map { it.fraEntity() },
+                utvidedePerioder = requireNotNull(utvidedePerioder) { "utvidetPerioder kreves for EksternFagsakBehandling" }
+                    .sortedBy { it.kravgrunnlagPeriode }
+                    .map { it.fraEntity() },
                 url = url,
                 opprettet = opprettet,
             )

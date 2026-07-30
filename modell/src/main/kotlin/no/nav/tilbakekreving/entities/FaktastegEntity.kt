@@ -25,7 +25,7 @@ data class FaktastegEntity(
         brevHistorikk = brevHistorikk,
         underkjent = trengerNyVurdering,
         vurdering = Faktasteg.Vurdering(
-            perioder = perioder.map {
+            perioder = perioder.sortedBy { it.periode }.map {
                 Faktasteg.FaktaPeriode(
                     id = it.id,
                     periode = it.periode.fraEntity(),

@@ -36,7 +36,7 @@ data class KravgrunnlagHendelseEntity(
             kontrollfelt = kontrollfelt,
             kravgrunnlagId = kravgrunnlagId,
             referanse = referanse,
-            perioder = perioder.map { it.fraEntity() },
+            perioder = perioder.sortedBy { it.periode }.map { it.fraEntity() },
             opprettet = opprettet,
         )
     }

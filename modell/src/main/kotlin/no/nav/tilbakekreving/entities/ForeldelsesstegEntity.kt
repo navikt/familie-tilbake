@@ -11,7 +11,7 @@ data class ForeldelsesstegEntity(
 ) {
     fun fraEntity(): Foreldelsesteg = Foreldelsesteg(
         id = id,
-        vurdertePerioder = vurdertePerioder.map { it.fraEntity() },
+        vurdertePerioder = vurdertePerioder.sortedBy { it.periode }.map { it.fraEntity() },
         underkjent = trengerNyVurdering,
     )
 }
